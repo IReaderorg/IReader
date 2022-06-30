@@ -1,6 +1,9 @@
 package org.ireader.core_ui.theme
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.CoroutineScope
 import org.ireader.core_api.prefs.Preference
@@ -20,9 +23,9 @@ class CustomizableAppColorsPreferenceState(
     val secondaryState: PreferenceMutableState<Color>,
     val barsState: PreferenceMutableState<Color>,
 ) {
-    val primary by primaryState
-    val secondary by secondaryState
-    val bars by barsState
+    var primary by mutableStateOf(primaryState, structuralEqualityPolicy())
+    var secondary by mutableStateOf(secondaryState, structuralEqualityPolicy())
+    var bars by mutableStateOf(barsState, structuralEqualityPolicy())
 }
 
 fun UiPreferences.getLightColors(): CustomizableAppColorsPreference {

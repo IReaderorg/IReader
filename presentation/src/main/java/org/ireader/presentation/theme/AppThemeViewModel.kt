@@ -41,8 +41,6 @@ class AppThemeViewModel @Inject constructor(
     private val themeMode by uiPreferences.themeMode().asState()
     private val colorTheme by uiPreferences.colorTheme().asState()
     private val customTheme = uiPreferences.customTheme()
-//    private val lightTheme by uiPreferences.lightTheme().asState()
-//    private val darkTheme by uiPreferences.darkTheme().asState()
 
     private val baseThemeJob = SupervisorJob()
     private val baseThemeScope = CoroutineScope(baseThemeJob)
@@ -75,8 +73,8 @@ class AppThemeViewModel @Inject constructor(
             }
         }
 
-        val material = getMaterialColors(baseTheme.materialColors, colors.primary, colors.secondary)
-        val custom = getExtraColors(baseTheme.extraColors, colors.bars)
+        val material = getMaterialColors(baseTheme.materialColors, colors.primary.value, colors.secondary.value)
+        val custom = getExtraColors(baseTheme.extraColors, colors.bars.value)
         return material to custom
     }
 

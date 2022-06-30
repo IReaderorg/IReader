@@ -40,7 +40,6 @@ import org.ireader.core_ui.theme.Theme
 import org.ireader.core_ui.theme.dark
 import org.ireader.core_ui.theme.isLight
 import org.ireader.core_ui.theme.light
-import org.ireader.core_ui.theme.themes
 import org.ireader.ui_appearance.R
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
@@ -54,13 +53,13 @@ fun AppearanceSettingScreen(
 ) {
     val context = LocalContext.current
     val customizedColors = vm.getCustomizedColors().value
-    val isLight = MaterialTheme.colorScheme.isLight()
+    val isLight = vm.themeMode.value == PreferenceValues.ThemeMode.Light
 
-    val themesForCurrentMode = remember(isLight) {
+    val themesForCurrentMode = remember(isLight,vm.vmThemes.size) {
         if (isLight)
-            themes.filter { it.light().materialColors.isLight() == isLight }.map { it.light() }
+            vm.vmThemes.map { it.light() }
         else
-            themes.filter { it.light().materialColors.isLight() != isLight }.map { it.dark() }
+            vm.vmThemes.map { it.dark() }
     }
 
 
@@ -140,27 +139,9 @@ fun AppearanceSettingScreen(
                     subtitle = null,
                 )
             },
-//            Components.Dynamic {
-//                ChoicePreference(
-//                    preference = vm.dateFormat,
-//                    choices = vm.dateFormats.associateWith { value ->
-//                        val now = Date().time
-//                        val formattedDate = vm.uiPreferences.getDateFormat(value).format(now)
-//                        if (value == "") {
-//                            "${context.getString(R.string.system_default)} ($formattedDate)"
-//                        } else {
-//                            "$value ($formattedDate)"
-//                        }
-//                    },
-//                    title = stringResource(id = R.string.date_format),
-//                    subtitle = null,
-//                )
-//            },
-
-
-
         )
     }
+
 
     SetupSettingComponents(scaffoldPadding = scaffoldPaddingValues, items = items)
 }
