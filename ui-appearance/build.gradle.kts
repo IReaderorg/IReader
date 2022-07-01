@@ -8,7 +8,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = compose.versions.compose.get()
+        kotlinCompilerExtensionVersion = compose.versions.extension.get()
     }
 }
 
@@ -19,6 +19,7 @@ dependencies {
     implementation(project(Modules.coreApi))
     implementation(project(Modules.uiComponents))
     implementation(project(Modules.commonResources))
+    implementation(project(Modules.commonData))
     implementation(compose.compose.icons)
     implementation(compose.compose.navigation)
     implementation(compose.compose.foundation)

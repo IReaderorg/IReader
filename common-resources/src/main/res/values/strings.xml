@@ -117,6 +117,7 @@
     <string name="fetch">Fetch</string>
     <string name="delete">Delete</string>
     <string name="theme_was_saved">Theme was saved</string>
+    <string name="theme_was_not_valid">Theme is Not Part of Base Themes</string>
     <string name="there_is_no_chapter">There is no chapter.</string>
     <string name="reverse_chapter_in_db">Reverse Chapters in DB</string>
     <string name="reverse">Reverse</string>

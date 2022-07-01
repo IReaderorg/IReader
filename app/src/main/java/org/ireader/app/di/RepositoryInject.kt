@@ -7,6 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import org.ireader.common_data.repository.BookCategoryRepository
 import org.ireader.common_data.repository.CategoryRepository
 import org.ireader.common_data.repository.LibraryRepository
+import org.ireader.common_data.repository.ThemeRepository
 import org.ireader.core_catalogs.service.CatalogRemoteRepository
 import org.ireader.data.local.dao.BookCategoryDao
 import org.ireader.data.local.dao.CatalogDao
@@ -17,6 +18,7 @@ import org.ireader.data.local.dao.HistoryDao
 import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.LibraryDao
 import org.ireader.data.local.dao.RemoteKeysDao
+import org.ireader.data.local.dao.ThemeDao
 import org.ireader.data.local.dao.UpdatesDao
 import org.ireader.data.repository.BookCategoryRepositoryImpl
 import org.ireader.data.repository.BookRepositoryImpl
@@ -27,6 +29,7 @@ import org.ireader.data.repository.DownloadRepositoryImpl
 import org.ireader.data.repository.HistoryRepositoryImpl
 import org.ireader.data.repository.LibraryRepositoryImpl
 import org.ireader.data.repository.RemoteKeyRepositoryImpl
+import org.ireader.data.repository.ThemeRepositoryImpl
 import org.ireader.data.repository.UpdatesRepositoryImpl
 import javax.inject.Singleton
 
@@ -116,6 +119,12 @@ class RepositoryInject {
     }
 
 
-
+    @Provides
+    @Singleton
+    fun providesThemeRepository(
+        dao: ThemeDao,
+    ): ThemeRepository {
+        return ThemeRepositoryImpl(dao)
+    }
 
 }

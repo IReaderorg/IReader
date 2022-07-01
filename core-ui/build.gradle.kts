@@ -10,7 +10,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = compose.versions.compose.get()
+        kotlinCompilerExtensionVersion = compose.versions.extension.get()
     }
 }
 
@@ -39,6 +39,12 @@ implementation(compose.compose.material3)
     implementation(compose.compose.hiltNavigation)
     implementation(compose.compose.lifecycle)
     implementation(compose.compose.coil)
+
+
+    implementation(common.room.runtime)
+    implementation(common.room.ktx)
+    kapt(common.room.compiler)
+
     implementation(common.jsoup)
     androidTestImplementation(compose.compose.uiTestManifest)
     androidTestImplementation(compose.compose.testing)

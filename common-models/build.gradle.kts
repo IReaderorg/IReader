@@ -5,6 +5,7 @@ plugins {
     id("kotlinx-serialization")
 }
 android {
+
 }
 
 dependencies {
@@ -13,6 +14,7 @@ dependencies {
     compileOnly(project(Modules.commonResources))
 
     implementation(kotlinx.datetime)
+    implementation(compose.compose.material3)
 
 
     implementation(common.room.runtime)

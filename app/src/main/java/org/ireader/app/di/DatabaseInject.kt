@@ -18,6 +18,7 @@ import org.ireader.data.local.dao.HistoryDao
 import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.LibraryDao
 import org.ireader.data.local.dao.RemoteKeysDao
+import org.ireader.data.local.dao.ThemeDao
 import org.ireader.data.local.dao.UpdatesDao
 import org.ireader.data.repository.DatabaseTransactions
 import javax.inject.Singleton
@@ -62,6 +63,10 @@ object DatabaseInject {
     @Singleton
     @Provides
     fun provideBookCategoryDao(db: AppDatabase): BookCategoryDao = db.bookCategoryDao
+
+    @Singleton
+    @Provides
+    fun provideThemeDao(db: AppDatabase): ThemeDao = db.themeDao
 
     @Singleton
     @Provides

@@ -1,4 +1,4 @@
-//package org.ireader.components.components
+package org.ireader.components.components
 //
 //import androidx.compose.foundation.layout.Arrangement
 //import androidx.compose.foundation.layout.PaddingValues

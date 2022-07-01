@@ -1,4 +1,5 @@
 [versions]
+kotlin = "1.7.0"
 ktor = "2.0.2"
 room = "2.4.2"
 okhttp = "4.9.3"
@@ -17,9 +18,9 @@ markdown = "4.6.2"
 [libraries]
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
 gradle-tools = "com.android.tools.build:gradle:7.2.1"
-gradle-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version = "1.6.21" }
-gradle-kotlinSerialization = { module =  "org.jetbrains.kotlin:kotlin-serialization", version = "1.6.21" }
-gradle-hilt = "com.google.dagger:hilt-android-gradle-plugin:2.41"
+gradle-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+gradle-kotlinSerialization = { module =  "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
+gradle-hilt = "com.google.dagger:hilt-android-gradle-plugin:2.42"
 gradle-google = "com.google.gms:google-services:4.3.10"
 gradle-firebaseCrashlytic = "com.google.firebase:firebase-crashlytics-gradle:2.8.1"
 gradle-benmanes = "com.github.ben-manes:gradle-versions-plugin:0.42.0"

@@ -34,7 +34,6 @@ import org.ireader.ui_reader.R
 fun ReaderScreenTopBar(
     modifier :Modifier,
     isReaderModeEnable: Boolean,
-    isLoaded: Boolean,
     vm: ReaderScreenViewModel,
     state: ReaderScreenState,
     modalBottomSheetValue: ModalBottomSheetValue,
@@ -46,7 +45,7 @@ fun ReaderScreenTopBar(
 ) {
 
     AnimatedVisibility(
-        visible = !isReaderModeEnable && isLoaded,
+        visible = !isReaderModeEnable,
         enter = slideInVertically(initialOffsetY = { -it }, animationSpec = tween(250)),
         exit = slideOutVertically(targetOffsetY = { -it }, animationSpec = tween(250))
     ) {
@@ -109,36 +108,36 @@ fun ReaderScreenTopBar(
             }
         )
 
-        if (!isLoaded) {
-            Toolbar(
-                title = {},
-                elevation = 0.dp,
-                backgroundColor = vm.backgroundColor.value,
-                actions = {
-                    if (chapter != null) {
-                        AppIconButton(
-                            imageVector = Icons.Default.Autorenew,
-                            contentDescription = stringResource(R.string.refresh),
-                            onClick = {
-                                onRefresh()
-                            },
-                            tint = vm.textColor.value
-                        )
-                        AppIconButton(
-                            imageVector = Icons.Default.Public,
-                            contentDescription = stringResource(R.string.webView),
-                            onClick = {
-                                onWebView()
-                            },
-                            tint = vm.textColor.value
-                        )
-                    }
-                },
-                navigationIcon = {
-                    TopAppBarBackButton(onClick = {
-                        onPopBackStack()
-                    }, tint = vm.textColor.value)
-                })
-        }
+//        if (!isLoaded) {
+//            Toolbar(
+//                title = {},
+//                elevation = 0.dp,
+//                backgroundColor = vm.backgroundColor.value,
+//                actions = {
+//                    if (chapter != null) {
+//                        AppIconButton(
+//                            imageVector = Icons.Default.Autorenew,
+//                            contentDescription = stringResource(R.string.refresh),
+//                            onClick = {
+//                                onRefresh()
+//                            },
+//                            tint = vm.textColor.value
+//                        )
+//                        AppIconButton(
+//                            imageVector = Icons.Default.Public,
+//                            contentDescription = stringResource(R.string.webView),
+//                            onClick = {
+//                                onWebView()
+//                            },
+//                            tint = vm.textColor.value
+//                        )
+//                    }
+//                },
+//                navigationIcon = {
+//                    TopAppBarBackButton(onClick = {
+//                        onPopBackStack()
+//                    }, tint = vm.textColor.value)
+//                })
+//        }
     }
 }

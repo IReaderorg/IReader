@@ -68,6 +68,7 @@ fun DownloaderScreen(
                         event.uiText.asString(context = context)
                     )
                 }
+                else -> {}
             }
         }
     }

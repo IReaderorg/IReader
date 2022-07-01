@@ -126,6 +126,7 @@ fun FilterGroupItem(
                         isExpandable = true,
                     )
                 }
+                else -> {}
             }
         }
     }

@@ -15,6 +15,7 @@ import org.ireader.common_data.repository.HistoryRepository
 import org.ireader.common_data.repository.RemoteKeyRepository
 import org.ireader.common_data.repository.UpdatesRepository
 import org.ireader.core_api.db.Transactions
+import org.ireader.core_api.http.WebViewCookieJar
 import org.ireader.core_ui.preferences.AppPreferences
 import org.ireader.core_ui.preferences.LibraryPreferences
 import org.ireader.core_ui.preferences.ReaderPreferences
@@ -123,6 +124,7 @@ class UseCasesInject {
     @Provides
     @Singleton
     fun provideRemoteUseCase(
+        webViewCookieJar: WebViewCookieJar
     ): RemoteUseCases {
         return RemoteUseCases(
             getBookDetail = GetBookDetail(),

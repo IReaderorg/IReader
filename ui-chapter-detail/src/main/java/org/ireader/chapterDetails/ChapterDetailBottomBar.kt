@@ -207,6 +207,7 @@ private fun LazyListScope.DispalyPage(
                     ChapterDisplayMode.ChapterNumber -> {
                         MidSizeTextComposable(text = stringResource(id = R.string.chapter_number))
                     }
+                    else -> {}
                 }
 
             }

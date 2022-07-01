@@ -58,6 +58,7 @@ object AdvanceSettingSpec : ScreenSpec {
                             event.uiText.asString(context)
                         )
                     }
+                    else -> {}
                 }
             }
         }

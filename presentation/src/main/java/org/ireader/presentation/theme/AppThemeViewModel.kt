@@ -9,26 +9,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.takeOrElse
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import org.ireader.common_data.repository.ThemeRepository
+import org.ireader.common_models.theme.ExtraColors
+import org.ireader.common_models.theme.Theme
 import org.ireader.core_ui.preferences.PreferenceValues
 import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.theme.AppRippleTheme
-import org.ireader.core_ui.theme.ExtraColors
-import org.ireader.core_ui.theme.Theme
 import org.ireader.core_ui.theme.asState
 import org.ireader.core_ui.theme.dark
 import org.ireader.core_ui.theme.getDarkColors
 import org.ireader.core_ui.theme.getLightColors
 import org.ireader.core_ui.theme.isLight
 import org.ireader.core_ui.theme.light
-import org.ireader.core_ui.theme.prefs.toBaseTheme
 import org.ireader.core_ui.theme.themes
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import javax.inject.Inject
@@ -36,21 +33,19 @@ import javax.inject.Inject
 @HiltViewModel
 class AppThemeViewModel @Inject constructor(
     private val uiPreferences: UiPreferences,
+    private val themeRepository:ThemeRepository,
     coilLoaderFactory: org.ireader.image_loader.coil.CoilLoaderFactory,
 ) : BaseViewModel() {
     private val themeMode by uiPreferences.themeMode().asState()
     private val colorTheme by uiPreferences.colorTheme().asState()
-    private val customTheme = uiPreferences.customTheme()
+
 
     private val baseThemeJob = SupervisorJob()
     private val baseThemeScope = CoroutineScope(baseThemeJob)
 
-    init {
-        customTheme.get().themes.let {customs ->  themes.addAll(customs.map { it.toBaseTheme() }) }
-        customTheme.changes().onEach { custom ->
-            themes.addAll(custom.themes.map { it.toBaseTheme() })
-        }.launchIn(viewModelScope)
-    }
+  //  val themes by themeRepository.subscribe().asState(emptyList())
+
+
     @Composable
     fun getRippleTheme(): RippleTheme {
         return when (themeMode) {
@@ -81,7 +76,7 @@ class AppThemeViewModel @Inject constructor(
     @Composable
     private fun getBaseTheme(
         themeMode: PreferenceValues.ThemeMode,
-        colorTheme: Int,
+        colorTheme: Long,
     ): Theme {
         @Composable
         fun getTheme(fallbackIsLight: Boolean): Theme {

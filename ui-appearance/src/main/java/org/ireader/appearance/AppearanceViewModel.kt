@@ -6,32 +6,32 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import dagger.hilt.android.lifecycle.HiltViewModel
+import org.ireader.common_data.repository.ThemeRepository
+import org.ireader.common_models.theme.BaseTheme
+import org.ireader.common_models.theme.ExtraColors
 import org.ireader.core_ui.preferences.PreferenceValues
 import org.ireader.core_ui.preferences.UiPreferences
-import org.ireader.core_ui.theme.BaseTheme
 import org.ireader.core_ui.theme.CustomizableAppColorsPreferenceState
-import org.ireader.core_ui.theme.ExtraColors
 import org.ireader.core_ui.theme.asState
 import org.ireader.core_ui.theme.getDarkColors
 import org.ireader.core_ui.theme.getLightColors
-import org.ireader.core_ui.theme.themes
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class AppearanceViewModel @Inject constructor(
     val uiPreferences: UiPreferences,
+    val themeRepository: ThemeRepository
 ) : BaseViewModel() {
 
     private val _state = mutableStateOf(MainScreenState())
     val state = _state
 
-    var vmThemes by mutableStateOf<List<BaseTheme>>(themes)
+    val vmThemes = themeRepository.subscribe().asState(emptyList())
 
-    val savable = mutableStateOf(false)
-    val customThemes = uiPreferences.customTheme()
+
+
 
     val themeMode = uiPreferences.themeMode().asState()
     val colorTheme = uiPreferences.colorTheme().asState()
@@ -62,7 +62,7 @@ class AppearanceViewModel @Inject constructor(
     @Composable
     fun getIsNotSavable(): Boolean {
         val theme = remember(colorTheme.value) {
-            vmThemes.find { it.id == colorTheme.value }
+            vmThemes.value.find { it.id == colorTheme.value }
         }
         val currentPallet by derivedStateOf { if (themeMode.value == PreferenceValues.ThemeMode.Dark) theme?.darkColor else theme?.lightColor }
         val customizedColor = getCustomizedColors()
@@ -79,8 +79,8 @@ class AppearanceViewModel @Inject constructor(
         }
     }
 
-    fun getThemes(id: Int): BaseTheme? {
-        val themes = vmThemes.getOrNull(colorTheme.value)
+    fun getThemes(id: Long): BaseTheme? {
+        val themes = vmThemes.value.getOrNull(colorTheme.value.toInt())
         val primary = if (themeMode.value == PreferenceValues.ThemeMode.Dark) {
             darkColors.primary
         } else {
@@ -97,7 +97,7 @@ class AppearanceViewModel @Inject constructor(
             lightColors.bars
         }
         return themes?.copy(
-            id = id,
+            id = 0,
             lightColor = themes.lightColor.copy(
                 primary = primary.value,
                 secondary = secondary.value

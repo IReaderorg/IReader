@@ -66,6 +66,7 @@ fun GeneralSettingScreen(
         )
     }
 
+
     SetupSettingComponents(
         scaffoldPadding = scaffoldPadding,
         items = items

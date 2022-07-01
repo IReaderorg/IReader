@@ -29,10 +29,10 @@ import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Catalog
+import org.ireader.core_ui.theme.AppColors
 import org.ireader.common_resources.UiEvent
 import org.ireader.components.components.component.pagerTabIndicatorOffset
 import org.ireader.components.reusable_composable.MidSizeTextComposable
-import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.utils.horizontalPadding
 import org.ireader.sources.extension.composables.RemoteSourcesScreen
 import org.ireader.sources.extension.composables.UserSourcesScreen

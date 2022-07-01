@@ -40,6 +40,7 @@ fun AdvanceSettings(
                         event.uiText.asString(context)
                     )
                 }
+                else -> {}
             }
         }
     }

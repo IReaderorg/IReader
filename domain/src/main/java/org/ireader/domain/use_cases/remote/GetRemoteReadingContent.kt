@@ -12,7 +12,8 @@ import org.ireader.core_ui.exceptionHandler
 import org.ireader.domain.R
 import javax.inject.Inject
 
-class GetRemoteReadingContent @Inject constructor() {
+class GetRemoteReadingContent @Inject constructor(
+) {
     suspend operator fun invoke(
         chapter: Chapter,
         catalog: CatalogLocal?,

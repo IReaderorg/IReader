@@ -14,9 +14,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -29,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.ireader.common_models.theme.Theme
 import org.ireader.components.components.Components
 import org.ireader.components.components.SetupSettingComponents
 import org.ireader.components.components.Toolbar
@@ -36,7 +40,6 @@ import org.ireader.components.components.component.ChoicePreference
 import org.ireader.components.components.component.ColorPreference
 import org.ireader.core_ui.preferences.PreferenceValues
 import org.ireader.core_ui.theme.AppColors
-import org.ireader.core_ui.theme.Theme
 import org.ireader.core_ui.theme.dark
 import org.ireader.core_ui.theme.isLight
 import org.ireader.core_ui.theme.light
@@ -55,15 +58,14 @@ fun AppearanceSettingScreen(
     val customizedColors = vm.getCustomizedColors().value
     val isLight = vm.themeMode.value == PreferenceValues.ThemeMode.Light
 
-    val themesForCurrentMode = remember(isLight,vm.vmThemes.size) {
+    val themesForCurrentMode = remember(isLight, vm.vmThemes.value.size) {
         if (isLight)
-            vm.vmThemes.map { it.light() }
+            vm.vmThemes.value.map { it.light() }
         else
-            vm.vmThemes.map { it.dark() }
+            vm.vmThemes.value.map { it.dark() }
     }
 
-
-    val items : List<Components> = remember {
+    val items: List<Components> = remember(vm.vmThemes.value.size, vm.themeMode.value) {
         listOf<Components>(
             Components.Header(
                 text = "Theme",
@@ -72,9 +74,9 @@ fun AppearanceSettingScreen(
                 ChoicePreference(
                     preference = vm.themeMode,
                     choices = mapOf(
-                        PreferenceValues.ThemeMode.System to stringResource(id =  R.string.follow_system_settings),
-                        PreferenceValues.ThemeMode.Light to stringResource(id =R.string.light),
-                        PreferenceValues.ThemeMode.Dark to stringResource(id =R.string.dark)
+                        PreferenceValues.ThemeMode.System to stringResource(id = R.string.follow_system_settings),
+                        PreferenceValues.ThemeMode.Light to stringResource(id = R.string.light),
+                        PreferenceValues.ThemeMode.Dark to stringResource(id = R.string.dark)
                     ),
                     title = stringResource(id = R.string.theme),
                     subtitle = null,
@@ -94,7 +96,7 @@ fun AppearanceSettingScreen(
                             customizedColors.primaryState.value = it.materialColors.primary
                             customizedColors.secondaryState.value = it.materialColors.secondary
                             customizedColors.barsState.value = it.extraColors.bars
-                        })
+                        }, isSelected = vm.colorTheme.value == theme.id)
                     }
                 }
             },
@@ -142,20 +144,22 @@ fun AppearanceSettingScreen(
         )
     }
 
-
     SetupSettingComponents(scaffoldPadding = scaffoldPaddingValues, items = items)
 }
 
 @Composable
 private fun ThemeItem(
     theme: Theme,
-    onClick: (Theme) -> Unit
+    onClick: (Theme) -> Unit,
+    isSelected:Boolean = false
 ) {
     val borders = MaterialTheme.shapes.small
-    val borderColor = if (theme.materialColors.isLight()) {
-        Color.Black.copy(alpha = 0.25f)
-    } else {
-        Color.White.copy(alpha = 0.15f)
+    val borderColor = remember {
+        if (theme.materialColors.isLight()) {
+            Color.Black.copy(alpha = 0.25f)
+        } else {
+            Color.White.copy(alpha = 0.15f)
+        }
     }
     Surface(
         tonalElevation = 4.dp, color = theme.materialColors.background, shape = borders,
@@ -165,43 +169,56 @@ private fun ThemeItem(
             .border(1.dp, borderColor, borders)
             .clickable(onClick = { onClick(theme) })
     ) {
-        Column(
-            modifier = Modifier.border(1.dp, borderColor, borders)
-        ) {
-            Toolbar(
-                modifier = Modifier.requiredHeight(24.dp), title = {},
-                backgroundColor = theme.extraColors.bars
-            )
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(6.dp)
+        Box {
+            Column(
+                modifier = Modifier.border(1.dp, borderColor, borders)
             ) {
-                Text("Text", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface)
-                Button(
-                    onClick = {},
-                    enabled = false,
-                    contentPadding = PaddingValues(),
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .size(40.dp, 20.dp),
-                    content = {},
-                    colors = ButtonDefaults.buttonColors(
-                        disabledContainerColor = theme.materialColors.primary
+                Toolbar(
+                    modifier = Modifier.requiredHeight(24.dp), title = {},
+                    backgroundColor = theme.extraColors.bars
+                )
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(6.dp)
+                ) {
+                    Text("Text", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface)
+                    Button(
+                        onClick = {},
+                        enabled = false,
+                        contentPadding = PaddingValues(),
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .size(40.dp, 20.dp),
+                        content = {},
+                        colors = ButtonDefaults.buttonColors(
+                            disabledContainerColor = theme.materialColors.primary
+                        )
                     )
-                )
-                Surface(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .align(Alignment.BottomEnd),
-                    shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
-                    color = theme.materialColors.secondary,
-                    tonalElevation = 6.dp,
-                    content = { }
-                )
+                    Surface(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .align(Alignment.BottomEnd),
+                        shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
+                        color = theme.materialColors.secondary,
+                        tonalElevation = 6.dp,
+                        content = { }
+                    )
+                }
+                BottomAppBar(
+                    Modifier.requiredHeight(24.dp),
+                    backgroundColor = theme.extraColors.bars
+                ) {
+                }
             }
-            BottomAppBar(Modifier.requiredHeight(24.dp), backgroundColor = theme.extraColors.bars) {
+            if (isSelected) {
+                Icon(
+                    modifier = Modifier.align(Alignment.TopEnd).size(30.dp).padding(2.dp),
+                    imageVector = Icons.Filled.CheckCircle,
+                    contentDescription = "theme is selected",
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }

@@ -10,7 +10,7 @@ import com.google.common.truth.Truth.assertThat
 import org.ireader.data.local.AppDatabase
 import org.ireader.data.local.AppDatabase_Migrations
 import org.ireader.data.local.MIGRATION_21_22
-import org.ireader.data.local.MIGRATION_22_23
+import org.ireader.data.local.MIGRATION_23_24
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -35,8 +35,8 @@ class MigrationTest {
     )
 
     @Test
-    fun migrate21to22() {
-        database = helper.createDatabase(TEST_DB, 22).apply {
+    fun migrateTest() {
+        database = helper.createDatabase(TEST_DB, 23).apply {
 
             // (id,sourceId,link,title,author,description,genres,status,cover,customCover,favorite,lastUpdated,lastRead,dataAdded,viewer,flags)
             execSQL(
@@ -49,7 +49,7 @@ class MigrationTest {
         }
 
         // ADDED a tableId
-        database = helper.runMigrationsAndValidate(TEST_DB, 23, true, MIGRATION_22_23())
+        database = helper.runMigrationsAndValidate(TEST_DB, 24, true, MIGRATION_23_24())
         val resultCursor = database.query("SELECT * FROM library")
         assertTrue(resultCursor.moveToFirst())
 

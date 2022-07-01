@@ -1,9 +1,11 @@
 package org.ireader.core_ui.theme
 
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
+import org.ireader.common_models.theme.BaseTheme
+import org.ireader.common_models.theme.ExtraColors
+import org.ireader.common_models.theme.Theme
 import org.ireader.core_ui.theme.themes.DarkThemeColorsStrawberries
 import org.ireader.core_ui.theme.themes.DarkThemeColorsTachiyomi
 import org.ireader.core_ui.theme.themes.DarkThemeColorsTako
@@ -16,19 +18,7 @@ import org.ireader.core_ui.theme.themes.MidNightDarkColorScheme
 import org.ireader.core_ui.theme.themes.MidNightLightColorScheme
 import org.ireader.core_ui.ui.Colour
 
-data class Theme(
-    val id: Int,
-    val materialColors: ColorScheme,
-    val extraColors: ExtraColors,
-)
 
-data class BaseTheme(
-    val id: Int,
-    val lightColor: ColorScheme,
-    val darkColor: ColorScheme,
-    val lightExtraColors: ExtraColors,
-    val darkExtraColors: ExtraColors,
-)
 
 fun BaseTheme.light(): Theme {
     return Theme(
@@ -58,7 +48,7 @@ val themes = mutableListOf<BaseTheme>(
             lightExtraColors = ExtraColors(
                 bars = LightThemeColorsTachiyomi.surface,
                 onBars = LightThemeColorsTachiyomi.onSurface
-            )
+            ),
         ),
         BaseTheme(
             id = 1,

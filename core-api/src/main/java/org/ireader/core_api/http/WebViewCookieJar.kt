@@ -12,28 +12,25 @@ import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
 import java.util.Calendar
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class WebViewCookieJar(private val cookiesStorage: CookiesStorage) : CookieJar {
+@Singleton
+class WebViewCookieJar @Inject constructor(private val cookiesStorage: CookiesStorage) : CookieJar {
 
     private val manager = CookieManager.getInstance()
 
     override fun loadForRequest(url: HttpUrl): List<Cookie> {
         return get(url)
     }
-    private fun convertGoogleTranslationUrlToDecoded(url:String) :String {
-        return if (url.contains(".translate.goog",true)) {
-            url.substringBefore(".translate.goog").replace("-",".")
-        } else {
-            url
-        }
-    }
+
+
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
 
-        val urlString = convertGoogleTranslationUrlToDecoded(url.host).replace("http://","https://")
-        cookies.forEach { manager.setCookie(urlString, it.toString()) }
+        cookies.forEach { manager.setCookie(url.toString(), it.toString()) }
         scope.launch {
-            cookies.forEach {  cookiesStorage.addCookie(Url(urlString),it.toCookies()) }
+            cookies.forEach {  cookiesStorage.addCookie(Url(url.toString()),it.toCookies()) }
         }
     }
 

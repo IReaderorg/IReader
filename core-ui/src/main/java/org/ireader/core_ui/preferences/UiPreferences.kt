@@ -3,13 +3,9 @@ package org.ireader.core_ui.preferences
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.ireader.core_api.prefs.Preference
 import org.ireader.core_api.prefs.PreferenceStore
 import org.ireader.core_api.prefs.getEnum
-import org.ireader.core_ui.theme.prefs.CustomThemes
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -20,18 +16,10 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
         return preferenceStore.getEnum("theme_mode", PreferenceValues.ThemeMode.System)
     }
 
-    fun colorTheme(): Preference<Int> {
-        return preferenceStore.getInt("color_theme", 0)
+    fun colorTheme(): Preference<Long> {
+        return preferenceStore.getLong("color_theme", 0L)
     }
 
-    fun customTheme(): Preference<CustomThemes> {
-        return preferenceStore.getObject<CustomThemes>("custom_themes",
-            CustomThemes(), serializer = {
-                Json.encodeToString(it)
-            }, deserializer = {
-                Json.decodeFromString<CustomThemes>(it)
-            })
-    }
 
     fun colorPrimaryLight(): Preference<Int> {
         return preferenceStore.getInt("color_primary_light", 0)

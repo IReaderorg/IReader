@@ -15,7 +15,7 @@ plugins {
     id("com.google.firebase.crashlytics")
 }
 hilt {
-    enableExperimentalClasspathAggregation = true
+    enableAggregatingTask = true
 }
 android {
     compileSdk = ProjectConfig.compileSdk
@@ -48,7 +48,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = compose.versions.compose.get()
+        kotlinCompilerExtensionVersion = compose.versions.extension.get()
     }
     defaultConfig {
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
@@ -74,15 +74,15 @@ android {
             isMinifyEnabled = true
             proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
         }
-        create("preview") {
-            initWith(getByName("release"))
-            buildConfigField("boolean", "PREVIEW", "true")
-
-            val debugType = getByName("debug")
-            signingConfig = debugType.signingConfig
-            versionNameSuffix = debugType.versionNameSuffix
-            applicationIdSuffix = debugType.applicationIdSuffix
-        }
+//        create("preview") {
+//            initWith(getByName("release"))
+//            buildConfigField("boolean", "PREVIEW", "true")
+//
+//            val debugType = getByName("debug")
+//            signingConfig = debugType.signingConfig
+//            versionNameSuffix = debugType.versionNameSuffix
+//            applicationIdSuffix = debugType.applicationIdSuffix
+//        }
     }
 }
 

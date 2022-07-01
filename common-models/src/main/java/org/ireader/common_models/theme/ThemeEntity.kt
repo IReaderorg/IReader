@@ -1,133 +1,31 @@
-package org.ireader.core_ui.theme.prefs
+package org.ireader.common_models.theme
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.serialization.ExperimentalSerializationApi
+import androidx.room.Embedded
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromHexString
-import kotlinx.serialization.encodeToHexString
-import kotlinx.serialization.protobuf.ProtoBuf
-import org.ireader.core_api.log.Log
-import org.ireader.core_api.prefs.Preference
-import org.ireader.core_ui.theme.BaseTheme
-import org.ireader.core_ui.theme.ExtraColors
 
-@OptIn(ExperimentalSerializationApi::class)
-class CustomThemePreferences(
-    private val preference: Preference<String>
-) : Preference<List<BaseTheme>> {
 
-    override fun key(): String {
-        return preference.key()
-    }
 
-    override fun get(): List<BaseTheme> {
-        return if (isSet()) {
-            ProtoBuf.decodeFromHexString<CustomThemes>(preference.get()).themes.map { it.toBaseTheme() }
-        } else {
-            emptyList()
-        }
-    }
-
-    override suspend fun read(): List<BaseTheme> {
-        return if (isSet()) {
-            ProtoBuf.decodeFromHexString<CustomThemes>(preference.get()).themes.map { it.toBaseTheme() }
-        } else {
-            emptyList()
-        }
-    }
-
-    @OptIn(ExperimentalSerializationApi::class)
-    fun setTheme(value: BaseTheme) {
-        kotlin.runCatching {
-            val themes =  ProtoBuf.decodeFromHexString<CustomThemes>(preference.get()).themes.map { it.toBaseTheme() }.toMutableList()
-            themes.add(0,value)
-            themes.removeLast()
-            val json = ProtoBuf.encodeToHexString(themes.map { it.toCustomTheme() })
-                preference.set(json)
-        }.getOrElse {
-            Log.error(it,"Custom Theme was corrupted")
-//            val json = Json.encodeToString(emptyList<CustomThemes>())
-//            preference.set(json)
-            preference.delete()
-        }
-    }
-
-    override fun set(value: List<BaseTheme>) {
-        kotlin.runCatching {
-            preference.set(ProtoBuf.encodeToHexString(value))
-        }.getOrElse {
-            it
-            preference.delete()
-        }
-    }
-
-    override fun isSet(): Boolean {
-        return preference.isSet()
-    }
-
-    override fun delete() {
-        preference.delete()
-    }
-
-    override fun defaultValue(): List<BaseTheme> {
-        return emptyList()
-    }
-
-    override fun changes(): Flow<List<BaseTheme>> {
-        return preference.changes()
-            .map { get() }
-    }
-
-    override fun stateIn(scope: CoroutineScope): StateFlow<List<BaseTheme>> {
-        return preference.changes().map { get() }.stateIn(scope, SharingStarted.Eagerly, get())
-    }
-}
-
-fun Preference<String>.asCustomTheme(): CustomThemePreferences {
-    return CustomThemePreferences(this)
-}
-
-fun CustomTheme.toBaseTheme(): BaseTheme {
-    return BaseTheme(
-        id = this.id,
-        lightColor = this.lightColor.toColorScheme(),
-        darkColor = this.darkColor.toColorScheme(),
-        darkExtraColors = this.darkExtraColors.toExtraColor(),
-        lightExtraColors = this.lightExtraColors.toExtraColor()
-    )
-}
-
-fun BaseTheme.toCustomTheme(): CustomTheme {
-    return CustomTheme(
-        id = this.id,
-        lightColor = this.lightColor.toCustomColorScheme(),
-        darkColor = this.darkColor.toCustomColorScheme(),
-        lightExtraColors = this.lightExtraColors.toCustomExtraColors(),
-        darkExtraColors = this.darkExtraColors.toCustomExtraColors()
-    )
-}
 
 @Serializable
-data class CustomThemes(
-    val themes: List<CustomTheme> = emptyList()
-)
-
-@Serializable
+@Entity(tableName = "theme_table")
 data class CustomTheme(
-    val id: Int,
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    @Embedded(prefix = "light-")
     val lightColor: CustomColorScheme,
+    @Embedded(prefix = "dark-")
     val darkColor: CustomColorScheme,
+    @Embedded(prefix = "light-extra-")
     val lightExtraColors: CustomExtraColors,
+    @Embedded(prefix = "dark-extra-")
     val darkExtraColors: CustomExtraColors,
+    val isDefault:Boolean = false
 )
 
 @Serializable
