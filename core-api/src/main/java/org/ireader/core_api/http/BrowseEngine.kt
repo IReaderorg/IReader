@@ -142,7 +142,7 @@ class BrowseEngine @Inject constructor(@ApplicationContext private val context: 
 }
 
 @SuppressLint("SetJavaScriptEnabled")
-private fun WebView.setDefaultSettings() {
+fun WebView.setDefaultSettings() {
     with(settings) {
         javaScriptEnabled = true
         domStorageEnabled = true

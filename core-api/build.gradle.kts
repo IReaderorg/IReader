@@ -6,6 +6,7 @@ plugins {
     `maven-publish`
     signing
 }
+
 dependencies {
     implementation(project(Modules.commonResources))
     api(kotlinx.coroutines.core)
@@ -36,7 +37,6 @@ configure<com.vanniktech.maven.publish.MavenPublishBaseExtension> {
     group = requireNotNull(project.findProperty("GROUP"))
     version = requireNotNull(project.findProperty("VERSION_NAME"))
     mavenPublishing {
-        //publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.S01)
         signAllPublications()
         configure(com.vanniktech.maven.publish.AndroidSingleVariantLibrary())
     }

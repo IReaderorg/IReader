@@ -9,9 +9,9 @@ import android.webkit.WebView
 import org.ireader.core_api.log.Log
 
 object WebViewUtil {
-    const val REQUESTED_WITH = "com.android.browser"
+    const val SPOOF_PACKAGE_NAME = "org.chromium.chrome"
 
-    const val MINIMUM_WEBVIEW_VERSION = 88
+    const val MINIMUM_WEBVIEW_VERSION = 99
 
     fun supportsWebView(context: Context): Boolean {
         try {

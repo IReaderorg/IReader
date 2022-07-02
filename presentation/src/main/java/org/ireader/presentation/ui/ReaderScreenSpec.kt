@@ -436,7 +436,7 @@ object ReaderScreenSpec : ScreenSpec {
                 //modifier = Modifier.padding(controller.scaffoldPadding),
                 modifier = Modifier,
                 isReaderModeEnable = vm.isReaderModeEnable,
-              //  isLoaded = vm.isChapterLoaded.value,
+                isLoaded = vm.isChapterLoaded.value,
                 modalBottomSheetValue = controller.sheetState.targetValue,
                 onRefresh = {
                     scope.launch {

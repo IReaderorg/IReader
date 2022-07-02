@@ -1,5 +1,3 @@
-
-
 package org.ireader.core_api.http
 
 import android.app.Application
@@ -27,27 +25,39 @@ class HttpClients(
         Cache(dir, size)
     }
 
-
-
     private val cookieJar = WebViewCookieJar(cookiesStorage)
 
-    private val okhttpClient = OkHttpClient.Builder()
-        .cache(cache)
+    private val basicClient = OkHttpClient.Builder()
         .cookieJar(cookieJar)
-        .readTimeout(30L, TimeUnit.SECONDS)
-        .writeTimeout(30L, TimeUnit.SECONDS)
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
         .callTimeout(2, TimeUnit.MINUTES)
-        .build()
+        .addInterceptor(UserAgentInterceptor())
 
     val browser = browseEngine
 
     val default = HttpClient(OkHttp) {
         BrowserUserAgent()
         engine {
-            preconfigured = okhttpClient
+            preconfigured = this@HttpClients.basicClient.cache(cache).build()
         }
         install(ContentNegotiation) {
             gson()
+        }
+        install(HttpCookies) {
+            storage = cookiesStorage
+        }
+
+    }
+    val cloudflareClient = HttpClient(OkHttp) {
+        BrowserUserAgent()
+        engine {
+            preconfigured = this@HttpClients.basicClient.addInterceptor(
+                CloudflareInterceptor(
+                    context,
+                    cookieJar
+                )
+            ).build()
         }
         install(HttpCookies) {
             storage = cookiesStorage

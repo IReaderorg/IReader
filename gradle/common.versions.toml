@@ -1,6 +1,6 @@
 [versions]
 kotlin = "1.7.0"
-ktor = "2.0.2"
+ktor = "2.0.3"
 room = "2.4.2"
 okhttp = "4.9.3"
 moshi = "1.13.0"

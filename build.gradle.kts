@@ -1,3 +1,5 @@
+
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
@@ -30,18 +32,17 @@ plugins {
     id("com.github.ben-manes.versions") version "0.42.0"
     id("com.diffplug.spotless") version "6.6.1"
     id("com.android.library") version "7.2.1" apply false
-    id("org.jetbrains.kotlin.android") version "1.7.0" apply false
+    id("org.jetbrains.kotlin.android") version "1.6.21" apply false
 }
 
 
 allprojects {
     tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile> {
         kotlinOptions {
-            jvmTarget = "11"
             freeCompilerArgs = freeCompilerArgs + listOf(
                 "-opt-in=kotlin.RequiresOptIn",
-                "-Xcontext-receivers"
             )
+            kotlinOptions.jvmTarget = "11"
         }
     }
 
@@ -93,9 +94,9 @@ subprojects {
 }
 
 
-//tasks.register("clean", Delete::class) {
-//    delete(rootProject.buildDir)
-//}
+tasks.register("delete", Delete::class) {
+    delete(rootProject.buildDir)
+}
 
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround
