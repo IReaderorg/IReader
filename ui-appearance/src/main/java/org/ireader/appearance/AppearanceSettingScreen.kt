@@ -1,7 +1,8 @@
 package org.ireader.appearance
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,18 +14,20 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.BottomAppBar
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,20 +35,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import org.ireader.common_models.theme.Theme
 import org.ireader.components.components.Components
 import org.ireader.components.components.SetupSettingComponents
 import org.ireader.components.components.Toolbar
 import org.ireader.components.components.component.ChoicePreference
 import org.ireader.components.components.component.ColorPreference
+import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.core_ui.preferences.PreferenceValues
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.theme.dark
 import org.ireader.core_ui.theme.isLight
 import org.ireader.core_ui.theme.light
+import org.ireader.domain.use_cases.theme.toCustomTheme
 import org.ireader.ui_appearance.R
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AppearanceSettingScreen(
     modifier: Modifier = Modifier,
@@ -58,14 +63,41 @@ fun AppearanceSettingScreen(
     val customizedColors = vm.getCustomizedColors().value
     val isLight = vm.themeMode.value == PreferenceValues.ThemeMode.Light
 
+    val scope = rememberCoroutineScope()
     val themesForCurrentMode = remember(isLight, vm.vmThemes.value.size) {
         if (isLight)
             vm.vmThemes.value.map { it.light() }
         else
             vm.vmThemes.value.map { it.dark() }
     }
+    val themeItem: Components =
+        remember(vm.vmThemes.value.size, vm.themeMode.value, vm.themeEditMode) {
+            Components.Dynamic {
+                LazyRow(modifier = Modifier.padding(horizontal = 8.dp)) {
+                    items(items = themesForCurrentMode) { theme ->
+                        ThemeItem(
+                            theme,
+                            onClick = {
+                                vm.colorTheme.value = it.id
+                                customizedColors.primaryState.value = it.materialColors.primary
+                                customizedColors.secondaryState.value = it.materialColors.secondary
+                                customizedColors.barsState.value = it.extraColors.bars
+                            },
+                            isSelected = vm.colorTheme.value == theme.id,
+                            onLongClick = { vm.themeEditMode = true }, editMode = vm.themeEditMode,
+                            onDelete = {
+                                scope.launch {
+                                    vm.vmThemes.value.find { it.id == theme.id }?.toCustomTheme()
+                                        ?.let { vm.themeRepository.delete(it) }
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
 
-    val items: List<Components> = remember(vm.vmThemes.value.size, vm.themeMode.value) {
+    val items: State<List<Components>> = derivedStateOf {
         listOf<Components>(
             Components.Header(
                 text = "Theme",
@@ -88,18 +120,7 @@ fun AppearanceSettingScreen(
             Components.Header(
                 text = "Preset themes",
             ),
-            Components.Dynamic {
-                LazyRow(modifier = Modifier.padding(horizontal = 8.dp)) {
-                    items(items = themesForCurrentMode) { theme ->
-                        ThemeItem(theme, onClick = {
-                            vm.colorTheme.value = it.id
-                            customizedColors.primaryState.value = it.materialColors.primary
-                            customizedColors.secondaryState.value = it.materialColors.secondary
-                            customizedColors.barsState.value = it.extraColors.bars
-                        }, isSelected = vm.colorTheme.value == theme.id)
-                    }
-                }
-            },
+            themeItem,
             Components.Dynamic {
                 ColorPreference(
                     preference = customizedColors.primaryState,
@@ -144,14 +165,18 @@ fun AppearanceSettingScreen(
         )
     }
 
-    SetupSettingComponents(scaffoldPadding = scaffoldPaddingValues, items = items)
+    SetupSettingComponents(scaffoldPadding = scaffoldPaddingValues, items = items.value)
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ThemeItem(
     theme: Theme,
     onClick: (Theme) -> Unit,
-    isSelected:Boolean = false
+    onLongClick: (Theme) -> Unit,
+    isSelected: Boolean = false,
+    editMode: Boolean = false,
+    onDelete: (Theme) -> Unit = {},
 ) {
     val borders = MaterialTheme.shapes.small
     val borderColor = remember {
@@ -167,7 +192,7 @@ private fun ThemeItem(
             .size(100.dp, 160.dp)
             .padding(8.dp)
             .border(1.dp, borderColor, borders)
-            .clickable(onClick = { onClick(theme) })
+            .combinedClickable(onClick = { onClick(theme) }, onLongClick = { onLongClick(theme) })
     ) {
         Box {
             Column(
@@ -214,10 +239,23 @@ private fun ThemeItem(
             }
             if (isSelected) {
                 Icon(
-                    modifier = Modifier.align(Alignment.TopEnd).size(30.dp).padding(2.dp),
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .size(30.dp)
+                        .padding(2.dp),
                     imageVector = Icons.Filled.CheckCircle,
                     contentDescription = "theme is selected",
                     tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            if (!theme.default && editMode) {
+                AppIconButton(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(30.dp),
+                    imageVector = Icons.Default.DeleteForever,
+                    contentDescription = "delete theme",
+                    onClick = { onDelete(theme) }
                 )
             }
         }

@@ -102,7 +102,7 @@ abstract class AppDatabase : RoomDatabase() {
                         }
 
                         Executors.newSingleThreadExecutor().execute {
-                            INSTANCE?.themeDao?.insertThemes(themes.map { it.toCustomTheme(true) })
+                            INSTANCE?.themeDao?.insertThemes(themes.map { it.toCustomTheme() })
                             db.execSQL("""
                                 CREATE TRIGGER IF NOT EXISTS system_themes_deletion_trigger BEFORE DELETE ON theme_table
                                 BEGIN SELECT CASE

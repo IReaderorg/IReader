@@ -10,4 +10,6 @@ interface ThemeRepository {
 
     suspend fun insert(theme: CustomTheme): Long
 
+    suspend fun delete(theme: CustomTheme)
+
 }

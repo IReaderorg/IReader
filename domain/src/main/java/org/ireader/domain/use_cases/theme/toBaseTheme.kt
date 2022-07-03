@@ -13,17 +13,18 @@ fun CustomTheme.toBaseTheme(): BaseTheme {
         lightColor = this.lightColor.toColorScheme(),
         darkColor = this.darkColor.toColorScheme(),
         darkExtraColors = this.darkExtraColors.toExtraColor(),
-        lightExtraColors = this.lightExtraColors.toExtraColor()
+        lightExtraColors = this.lightExtraColors.toExtraColor(),
+        default = this.isDefault
     )
 }
 
-fun BaseTheme.toCustomTheme(isDefault: Boolean = false): CustomTheme {
+fun BaseTheme.toCustomTheme(): CustomTheme {
     return CustomTheme(
         id = this.id,
         lightColor = this.lightColor.toCustomColorScheme(),
         darkColor = this.darkColor.toCustomColorScheme(),
         lightExtraColors = this.lightExtraColors.toCustomExtraColors(),
         darkExtraColors = this.darkExtraColors.toCustomExtraColors(),
-        isDefault = isDefault
+        isDefault = this.default
     )
 }

@@ -6,6 +6,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import org.ireader.common_data.repository.ThemeRepository
 import org.ireader.common_models.theme.BaseTheme
@@ -29,6 +30,7 @@ class AppearanceViewModel @Inject constructor(
     val state = _state
 
     val vmThemes = themeRepository.subscribe().asState(emptyList())
+    var themeEditMode by mutableStateOf(false)
 
 
 
@@ -105,6 +107,7 @@ class AppearanceViewModel @Inject constructor(
             darkColor = themes.darkColor.copy(primary = primary.value, secondary = secondary.value),
             lightExtraColors = ExtraColors(bars = bars.value),
             darkExtraColors = ExtraColors(bars = bars.value),
+            default = false
         )
     }
 }

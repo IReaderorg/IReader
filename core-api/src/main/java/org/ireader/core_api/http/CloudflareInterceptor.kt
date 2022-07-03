@@ -93,7 +93,7 @@ class CloudflareInterceptor(private val context: Context,private val webViewCook
     private fun resolveWithWebView(request: Request, oldCookie: Cookie?) {
         // We need to lock this thread until the WebView finds the challenge solution url, because
         // OkHttp doesn't support asynchronous interceptors.
-        val latch = CountDownLatch(1)
+        val latch = CountDownLatch(5)
 
         var webView: WebView? = null
 

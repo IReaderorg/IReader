@@ -6,6 +6,7 @@ data class Theme(
     val id: Long,
     val materialColors: ColorScheme,
     val extraColors: ExtraColors,
+    val default:Boolean = false,
 )
 
 data class BaseTheme(
@@ -14,4 +15,5 @@ data class BaseTheme(
     val darkColor: ColorScheme,
     val lightExtraColors: ExtraColors,
     val darkExtraColors: ExtraColors,
+    val default: Boolean =false,
 )

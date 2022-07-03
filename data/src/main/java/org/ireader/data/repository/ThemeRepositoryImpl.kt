@@ -19,4 +19,7 @@ class ThemeRepositoryImpl(
         return themeDao.insertTheme(theme)
     }
 
+    override suspend fun delete(theme: CustomTheme) {
+        return themeDao.delete(theme)
+    }
 }

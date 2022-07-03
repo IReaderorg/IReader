@@ -24,7 +24,8 @@ fun BaseTheme.light(): Theme {
     return Theme(
         id,
         lightColor,
-        lightExtraColors
+        lightExtraColors,
+        default = this.default
     )
 }
 
@@ -32,13 +33,14 @@ fun BaseTheme.dark(): Theme {
     return Theme(
         id,
         darkColor,
-        darkExtraColors
+        darkExtraColors,
+        default = this.default
     )
 }
 
 val themes = mutableListOf<BaseTheme>(
         BaseTheme(
-            id = 0,
+            id = 1,
             lightColor = LightThemeColorsTachiyomi,
             darkColor = DarkThemeColorsTachiyomi,
             darkExtraColors = ExtraColors(
@@ -49,9 +51,10 @@ val themes = mutableListOf<BaseTheme>(
                 bars = LightThemeColorsTachiyomi.surface,
                 onBars = LightThemeColorsTachiyomi.onSurface
             ),
+            default = true
         ),
         BaseTheme(
-            id = 1,
+            id = 2,
             lightColor = lightColorScheme(
                 primary = Colour.blue_accent,
                 primaryContainer = Colour.blue_700,
@@ -86,10 +89,11 @@ val themes = mutableListOf<BaseTheme>(
                 bars = Color(0xFF181818),
                 onBars = Color.White
             ),
+            default = true
 
             ),
         BaseTheme(
-            id = 2,
+            id = 3,
             lightColor = MidNightLightColorScheme,
             darkColor = MidNightDarkColorScheme,
             darkExtraColors = ExtraColors(
@@ -99,10 +103,11 @@ val themes = mutableListOf<BaseTheme>(
             lightExtraColors = ExtraColors(
                 bars = MidNightLightColorScheme.surface,
                 onBars = MidNightLightColorScheme.onSurface
-            )
+            ),
+            default = true
         ),
         BaseTheme(
-            id = 3,
+            id = 4,
             lightColor = GreenAppleLightThemeColors,
             darkColor = GreenAppleDarkThemeColors,
             darkExtraColors = ExtraColors(
@@ -112,10 +117,11 @@ val themes = mutableListOf<BaseTheme>(
             lightExtraColors = ExtraColors(
                 bars = GreenAppleLightThemeColors.surface,
                 onBars = GreenAppleLightThemeColors.onSurface
-            )
+            ),
+            default = true
         ),
         BaseTheme(
-            id = 4,
+            id = 5,
             lightColor = LightThemeColorsStrawberries,
             darkColor = DarkThemeColorsStrawberries,
             darkExtraColors = ExtraColors(
@@ -125,10 +131,11 @@ val themes = mutableListOf<BaseTheme>(
             lightExtraColors = ExtraColors(
                 bars = LightThemeColorsStrawberries.surface,
                 onBars = LightThemeColorsStrawberries.onSurface
-            )
+            ),
+            default = true
         ),
         BaseTheme(
-            id = 5,
+            id = 6,
             lightColor = LightThemeColorsTako,
             darkColor = DarkThemeColorsTako,
             darkExtraColors = ExtraColors(
@@ -138,6 +145,7 @@ val themes = mutableListOf<BaseTheme>(
             lightExtraColors = ExtraColors(
                 bars = LightThemeColorsTako.surface,
                 onBars = LightThemeColorsTako.onSurface
-            )
+            ),
+            default = true
         ),
 )
