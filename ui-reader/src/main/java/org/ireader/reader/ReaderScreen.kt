@@ -95,7 +95,7 @@ fun ReadingScreen(
             .background(vm.backgroundColor.value),
         contentAlignment = Alignment.Center,
     ) {
-        if (vm.webViewManger.isInit && vm.webViewIntegration.value) {
+        if (vm.webViewManger.inProgress && vm.webViewIntegration.value) {
             org.ireader.reader.custom.WebView(preconfigureWebView = vm.webViewManger.webView)
         }
         Crossfade(

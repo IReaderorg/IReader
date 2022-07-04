@@ -55,6 +55,10 @@ class HistoryRepositoryImpl constructor(private val historyDao: HistoryDao) :
         return historyDao.deleteHistory(chapterId)
     }
 
+    override suspend fun deleteHistoryByBookId(bookId: Long) {
+        return historyDao.deleteHistoryByBooKId(bookId)
+    }
+
     override suspend fun deleteAllHistories() {
         return historyDao.deleteAllHistory()
     }

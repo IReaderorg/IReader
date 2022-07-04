@@ -20,7 +20,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.ireader.components.components.component.PreferenceRow
 import org.ireader.components.reusable_composable.CaptionTextComposable
-import org.ireader.core_ui.theme.fonts
 import org.ireader.core_ui.ui.string
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.ui_reader.R
@@ -35,7 +34,7 @@ fun FontChip(
         title = string(id = R.string.font),
         action = {
             LazyRow {
-                items(count = fonts.size) { index ->
+                items(count = vm.fonts.size) { index ->
                     Spacer(modifier = modifier.width(10.dp))
                     Box(
                         modifier = modifier
@@ -44,7 +43,7 @@ fun FontChip(
                             .background(MaterialTheme.colorScheme.background)
                             .border(
                                 2.dp,
-                                if (fonts[index] == vm.font.value) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(
+                                if (vm.fonts[index] == vm.font.value.name) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(
                                     .4f
                                 ),
                                 CircleShape
@@ -55,7 +54,7 @@ fun FontChip(
                         contentAlignment = Alignment.Center
                     ) {
                         CaptionTextComposable(
-                            text = fonts.getOrNull(index)?.fontName?:"Unknown",
+                            text = vm.fonts.getOrNull(index)?:"Unknown",
                             maxLine = 1,
                             align = TextAlign.Center,
                             modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)

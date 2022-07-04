@@ -3,6 +3,7 @@
 package org.ireader.core_ui.theme.prefs
 
 import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import kotlinx.coroutines.CoroutineScope
@@ -13,8 +14,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.ireader.core_api.prefs.Preference
 import org.ireader.core_ui.theme.FontType
-import org.ireader.core_ui.theme.Roboto
-import org.ireader.core_ui.theme.fonts
+import org.ireader.core_ui.theme.getDefaultFont
 
 class FontPreferences @OptIn(ExperimentalTextApi::class) constructor(
     private val preference: Preference<String>,
@@ -24,22 +24,17 @@ class FontPreferences @OptIn(ExperimentalTextApi::class) constructor(
     override fun key(): String {
         return preference.key()
     }
-
-    @OptIn(ExperimentalTextApi::class)
     override fun get(): FontType {
         return if (isSet()) {
             getFont()
         } else {
-            Roboto
+            getDefaultFont()
         }
     }
 
     @OptIn(ExperimentalTextApi::class)
     fun getFont(): FontType {
         val fontName = preference.get()
-        val localFont = fonts.firstOrNull { it.fontName == fontName }
-        if (localFont != null) return localFont
-
         return kotlin.runCatching {
             val fontFamily = androidx.compose.ui.text.font.FontFamily(
                 Font(
@@ -52,7 +47,7 @@ class FontPreferences @OptIn(ExperimentalTextApi::class) constructor(
                 fontFamily
             )
         }.getOrElse {
-            Roboto
+            FontType("Roboto",FontFamily.Default)
         }
     }
 
@@ -60,13 +55,13 @@ class FontPreferences @OptIn(ExperimentalTextApi::class) constructor(
         return if (isSet()) {
             getFont()
         } else {
-            Roboto
+            FontType("Roboto",FontFamily.Default)
         }
     }
 
     override fun set(value: FontType) {
-        if (value != Roboto) {
-            preference.set(value.fontName)
+        if (value != getDefaultFont()) {
+            preference.set(value.name)
         } else {
             preference.delete()
         }
@@ -81,7 +76,7 @@ class FontPreferences @OptIn(ExperimentalTextApi::class) constructor(
     }
 
     override fun defaultValue(): FontType {
-        return Roboto
+        return  getDefaultFont()
     }
 
     override fun changes(): Flow<FontType> {
@@ -93,6 +88,8 @@ class FontPreferences @OptIn(ExperimentalTextApi::class) constructor(
         return preference.changes().map { get() }.stateIn(scope, SharingStarted.Eagerly, get())
     }
 }
+
+
 
 fun Preference<String>.asFont(provider: GoogleFont.Provider): FontPreferences {
     return FontPreferences(this,provider)

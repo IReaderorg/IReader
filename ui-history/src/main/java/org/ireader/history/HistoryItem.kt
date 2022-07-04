@@ -1,16 +1,17 @@
 package org.ireader.history
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -23,14 +24,17 @@ import org.ireader.components.BookListItemColumn
 import org.ireader.components.BookListItemImage
 import org.ireader.components.BookListItemSubtitle
 import org.ireader.components.BookListItemTitle
+import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.core_ui.coil.rememberBookCover
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HistoryItem(
     history: HistoryWithRelations,
     onBookCover: (HistoryWithRelations) -> Unit,
     onClickItem: (HistoryWithRelations) -> Unit,
     onClickDelete: (HistoryWithRelations) -> Unit,
+    onLongClickDelete: (HistoryWithRelations) -> Unit,
     onClickPlay: (HistoryWithRelations) -> Unit,
 ) {
     BookListItem(
@@ -68,11 +72,37 @@ fun HistoryItem(
                 }
             )
         }
-        IconButton(onClick = { onClickDelete(history) }) {
-            Icon(imageVector = Icons.Outlined.Delete, contentDescription = "",tint = MaterialTheme.colorScheme.onSurface)
+        AppIconButton(
+            onClick = {
+                onClickDelete(history)
+            },
+            onLongClick = {
+                onLongClickDelete(history)
+            }
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Delete,
+                contentDescription = "",
+                tint = MaterialTheme.colorScheme.onSurface
+            )
         }
+//        AppIconButton(
+//                modifier = Modifier.combinedClickable(
+//                    onClick = { onClickDelete(history) },
+//                onLongClick = { onLongClickDelete(history) },
+//                    role = Role.Button,
+//                ),
+//            onLongClick = ,
+//                imageVector = Icons.Outlined.Delete,
+//                contentDescription = "",
+//                tint = MaterialTheme.colorScheme.onSurface
+//            )
         IconButton(onClick = { onClickPlay(history) }) {
-            Icon(imageVector = Icons.Filled.PlayArrow, contentDescription = "",tint = MaterialTheme.colorScheme.onSurface)
+            Icon(
+                imageVector = Icons.Filled.PlayArrow,
+                contentDescription = "",
+                tint = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }

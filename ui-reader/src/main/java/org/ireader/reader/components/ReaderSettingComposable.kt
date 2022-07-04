@@ -24,6 +24,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -42,7 +43,7 @@ import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.preferences.PreferenceValues
 import org.ireader.core_ui.preferences.ReadingMode
-import org.ireader.core_ui.theme.fonts
+import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.ui.Colour.contentColor
 import org.ireader.core_ui.ui.PreferenceAlignment
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
@@ -209,13 +210,14 @@ fun ReaderSettingMainLayout(
                             0
                         }
                         ChipChoicePreference(
+
                             preference = vm.font,
-                            choices = fonts.associate { fontType ->
+                            choices = vm.fonts.map { FontType(it, FontFamily.Default) }.associate { fontType ->
                                 postion++
-                                return@associate fontType to fontType.fontName
+                                return@associate fontType to fontType.name
                             },
                             title = stringResource(id = R.string.font),
-                            onFailToFindElement = vm.font.value.fontName
+                            onFailToFindElement = vm.font.value.name
                         )
                     }
                     item {

@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import org.ireader.common_extensions.launchIO
 import org.ireader.core_ui.preferences.ReaderPreferences
-import org.ireader.core_ui.theme.Roboto
+import org.ireader.core_ui.theme.getDefaultFont
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.epub.importer.ImportEpub
 import org.ireader.domain.use_cases.local.DeleteUseCase
@@ -44,7 +44,7 @@ class AdvanceSettingViewModel @Inject constructor(
 
     fun deleteDefaultSettings() {
         viewModelScope.launchIO {
-            prefUseCases.selectedFontStateUseCase.saveFont(Roboto)
+            prefUseCases.selectedFontStateUseCase.saveFont(getDefaultFont())
             prefUseCases.fontHeightUseCase.save(25)
             prefUseCases.fontSizeStateUseCase.save(18)
             prefUseCases.paragraphDistanceUseCase.save(2)

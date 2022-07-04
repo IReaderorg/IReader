@@ -44,6 +44,9 @@ class HistoryUseCase(private val historyRepository: org.ireader.common_data.repo
     suspend fun deleteHistory(id: Long) {
         return historyRepository.deleteHistory(id)
     }
+    suspend fun deleteHistoryByBookId(bookId: Long) {
+        return historyRepository.deleteHistoryByBookId(bookId)
+    }
 
     suspend fun deleteAllHistories() {
         return historyRepository.deleteAllHistories()

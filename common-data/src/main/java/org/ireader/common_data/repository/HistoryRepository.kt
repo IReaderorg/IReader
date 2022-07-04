@@ -20,5 +20,6 @@ interface HistoryRepository {
 
     suspend fun deleteHistories(histories: List<History>)
     suspend fun deleteHistory(chapterId: Long)
+    suspend fun deleteHistoryByBookId(bookId: Long)
     suspend fun deleteAllHistories()
 }

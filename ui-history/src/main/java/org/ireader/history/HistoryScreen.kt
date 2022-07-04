@@ -22,6 +22,7 @@ fun HistoryScreen(
     onHistoryDelete: (HistoryWithRelations) -> Unit,
     onHistoryPlay: (HistoryWithRelations) -> Unit,
     onBookCover: (HistoryWithRelations) -> Unit,
+    onLongClickDelete: (HistoryWithRelations) -> Unit,
 ) {
 
     Box(modifier = modifier) {
@@ -34,7 +35,8 @@ fun HistoryScreen(
                     onClickItem = onHistory,
                     onClickDelete = onHistoryDelete,
                     onClickPlay = onHistoryPlay,
-                    onBookCover = onBookCover
+                    onBookCover = onBookCover,
+                    onLongClickDelete = onLongClickDelete
                 )
             }
         }

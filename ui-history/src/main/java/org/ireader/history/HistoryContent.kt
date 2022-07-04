@@ -17,6 +17,7 @@ fun HistoryContent(
     onBookCover: (HistoryWithRelations) -> Unit,
     onClickItem: (HistoryWithRelations) -> Unit,
     onClickDelete: (HistoryWithRelations) -> Unit,
+    onLongClickDelete: (HistoryWithRelations) -> Unit,
     onClickPlay: (HistoryWithRelations) -> Unit,
 ) {
     LazyColumn(
@@ -39,7 +40,8 @@ fun HistoryContent(
                     onClickItem = onClickItem,
                     onClickDelete = onClickDelete,
                     onClickPlay = onClickPlay,
-                    onBookCover = onBookCover
+                    onBookCover = onBookCover,
+                    onLongClickDelete = onLongClickDelete
                 )
             }
         }

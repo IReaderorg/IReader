@@ -14,7 +14,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import org.ireader.components.components.SearchToolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.core_ui.theme.FontType
-import org.ireader.core_ui.theme.Roboto
+import org.ireader.core_ui.theme.getDefaultFont
 import org.ireader.settings.setting.font_screens.FontScreen
 import org.ireader.settings.setting.font_screens.FontScreenViewModel
 import org.ireader.ui_settings.R
@@ -64,7 +64,7 @@ object FontScreenSpec : ScreenSpec {
                 vm,
                 onFont = { font ->
                     vm.readerPreferences.font()
-                        .set(FontType(font, Roboto.fontFamily))
+                        .set(FontType(font, getDefaultFont().fontFamily))
                 }
             )
         }

@@ -42,7 +42,7 @@ fun FontScreen(
                         onFont(vm.uiFonts[index])
                     },
                     action = {
-                        if (vm.uiFonts[index] == vm.font.value.fontName) {
+                        if (vm.uiFonts[index] == vm.font.value.name) {
                             AppIcon(
                                 modifier = Modifier.padding(16.dp),
                                 imageVector = Icons.Default.Check,

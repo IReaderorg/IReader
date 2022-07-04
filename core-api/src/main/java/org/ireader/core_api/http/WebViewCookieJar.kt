@@ -18,7 +18,7 @@ import javax.inject.Singleton
 @Singleton
 class WebViewCookieJar @Inject constructor(private val cookiesStorage: CookiesStorage) : CookieJar {
 
-    val manager = CookieManager.getInstance()
+    private val manager: CookieManager = CookieManager.getInstance()
 
     override fun loadForRequest(url: HttpUrl): List<Cookie> {
         return get(url)

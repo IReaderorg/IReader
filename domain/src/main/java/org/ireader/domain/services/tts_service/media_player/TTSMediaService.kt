@@ -49,7 +49,6 @@ import org.ireader.domain.use_cases.preferences.reader_preferences.TextReaderPre
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
-import kotlin.time.ExperimentalTime
 
 @AndroidEntryPoint
 class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener {
@@ -907,7 +906,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         }
     }
 
-    @OptIn(ExperimentalTime::class)
+
     fun checkSleepTime() {
         val lastCheckPref = state.startTime
         val currentSleepTime = state.sleepTime.minutes

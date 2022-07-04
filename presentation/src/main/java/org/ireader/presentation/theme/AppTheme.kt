@@ -6,6 +6,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import org.ireader.core_ui.theme.AppColors
@@ -13,8 +15,10 @@ import org.ireader.core_ui.theme.LocalCustomSystemCOlor
 import org.ireader.core_ui.theme.LocalTransparentStatusBar
 import org.ireader.core_ui.theme.Shapes
 import org.ireader.core_ui.theme.isLight
-import org.ireader.core_ui.theme.themes.AppTypography
+import org.ireader.core_ui.theme.themes.createSingleGoogleFontFamily
+import org.ireader.core_ui.theme.themes.createTypography
 
+@OptIn(ExperimentalTextApi::class)
 @Composable
 fun AppTheme(
     content: @Composable() () -> Unit,
@@ -71,7 +75,22 @@ fun AppTheme(
     AppColors(
         materialColors = materialColors,
         extraColors = customColors,
-        typography = AppTypography,
+        typography = createTypography(createSingleGoogleFontFamily("Poppins", weights = listOf(
+            FontWeight.Normal,
+            FontWeight.Light,
+            FontWeight.Black,
+            FontWeight.Bold,
+            FontWeight.SemiBold,
+            FontWeight.W100,
+            FontWeight.W200,
+            FontWeight.W300,
+            FontWeight.W400,
+            FontWeight.W500,
+            FontWeight.W600,
+            FontWeight.W700,
+            FontWeight.W800,
+            FontWeight.W900,
+        ))),
         shape = Shapes
     ) {
         CompositionLocalProvider(

@@ -9,21 +9,21 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.annotation.RequiresApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import okhttp3.Cookie
+import okhttp3.Headers
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.ireader.core_api.log.Log
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.util.concurrent.TimeoutException
 import javax.inject.Inject
-import kotlin.collections.set
 
-class BrowseEngine @Inject constructor(private val webViewManger: WebViewManger) {
+class BrowseEngine @Inject constructor(private val webViewManger: WebViewManger,private val webViewCookieJar: WebViewCookieJar) {
     /**
      * this function
      * @param url  the url of page
@@ -36,78 +36,51 @@ class BrowseEngine @Inject constructor(private val webViewManger: WebViewManger)
     suspend fun fetch(
         url: String,
         selector: String? = null,
-        headers: Map<String, String> = emptyMap(),
+        headers: Headers? = null,
         timeout: Long = 50000L,
         userAgent: String = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36",
     ): Result {
         var currentTime = 0L
         var html: Document = Document("No Data was Found")
-        val cookies: String? = null
-        val responseHeader: WebResourceResponse? = null
-        var isLoadUp: Boolean = false
-
         withContext(Dispatchers.Main) {
-            val webUrl = url
             webViewManger.init()
-            val scope = this
             val client = webViewManger.webView!!
             if (userAgent != webViewManger.userAgent) {
+                webViewManger.userAgent = userAgent
                 try {
                     client.settings.userAgentString = userAgent
                 } catch (e: Throwable) {
                     Log.error(exception = e, "failed to set user agent")
                 }
             }
-
-            val webChromeClient = object : WebViewClientCompat() {
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    super.onPageFinished(view, url)
-                    scope.launch {
-                        while (!isLoadUp) {
-                            if (view?.title?.contains(
-                                    "Cloudflare",
-                                    true
-                                ) == false
-                            ) {
-                                if (selector != null) {
-                                    if (!html.select(selector).hasText() && webUrl == url) {
-                                        delay(1500L)
-                                        html = Jsoup.parse(client.getHtml())
-                                        isLoadUp = true
-                                    }
-                                } else {
-                                    isLoadUp = true
-                                }
-                            }
-                            delay(1000L)
-                        }
-                    }
-                }
-
+            if (headers != null) {
+                client.loadUrl(
+                    url,
+                    headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }.toMutableMap()
+                )
+            } else {
+                client.loadUrl(url)
             }
-            client.webViewClient = webChromeClient
-            client.loadUrl(url)
 
+            webViewManger.selector = selector
+            webViewManger.inProgress = true
+            webViewManger.webUrl = url
 
-            while (!isLoadUp && currentTime < timeout) {
-
+            while (currentTime < timeout && webViewManger.inProgress) {
                 delay(1000)
                 currentTime += 1000
             }
             if (currentTime >= timeout) {
-                client.webViewClient = WebViewClient()
                 throw TimeoutException()
             }
-            client.webViewClient = WebViewClient()
+
             html = Jsoup.parse(client.getHtml())
         }
+        val cookies = webViewCookieJar.get(url.toHttpUrl())
+        webViewManger.webView
         return Result(
             responseBody = html.html(),
-            responseHeader = responseHeader?.responseHeaders,
-            baseUri = url,
-            cookies = getCookieMap(cookies),
-            responseCode = responseHeader?.statusCode,
-            mimeType = responseHeader?.mimeType
+            cookies = cookies,
         )
     }
 }
@@ -123,6 +96,29 @@ fun WebView.setDefaultSettings() {
         useWideViewPort = true
         loadWithOverviewMode = true
         cacheMode = WebSettings.LOAD_DEFAULT
+    }
+}
+
+
+
+@SuppressLint("SetJavaScriptEnabled")
+@OptIn(ExperimentalCoroutinesApi::class)
+suspend fun WebView.getHtml(): String = suspendCancellableCoroutine { continuation ->
+    settings.javaScriptEnabled = true
+    if (!settings.javaScriptEnabled)
+        throw IllegalStateException("Javascript is disabled")
+
+    evaluateJavascript(
+        "(function() { return ('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>'); })();"
+    ) {
+        continuation.resume(
+            it!!.replace("\\u003C", "<")
+                .replace("\\n", "")
+                .replace("\\t", "")
+                .replace("\\\"", "\"")
+                .replace("<hr />", "")
+        ) {
+        }
     }
 }
 
@@ -154,7 +150,7 @@ abstract class WebViewClientCompat : WebViewClient() {
         return shouldOverrideUrlCompat(view, request.url.toString())
     }
 
-    @Deprecated("Deprecated in Java", ReplaceWith("shouldOverrideUrlCompat(view, url)"))
+    @Deprecated("Deprecated in Java")
     final override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
         return shouldOverrideUrlCompat(view, url)
     }
@@ -166,6 +162,8 @@ abstract class WebViewClientCompat : WebViewClient() {
         return shouldInterceptRequestCompat(view, request.url.toString())
     }
 
+
+
     @Deprecated("Deprecated in Java", ReplaceWith("shouldInterceptRequestCompat(view, url)"))
     final override fun shouldInterceptRequest(
         view: WebView,
@@ -174,23 +172,23 @@ abstract class WebViewClientCompat : WebViewClient() {
         return shouldInterceptRequestCompat(view, url)
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     final override fun onReceivedError(
         view: WebView,
         request: WebResourceRequest,
         error: WebResourceError,
     ) {
-        onReceivedErrorCompat(
-            view,
-            error.errorCode,
-            error.description?.toString(),
-            request.url.toString(),
-            request.isForMainFrame,
-        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            onReceivedErrorCompat(
+                view,
+                error.errorCode,
+                error.description?.toString(),
+                request.url.toString(),
+                request.isForMainFrame,
+            )
+        }
     }
 
-    @Deprecated(
-        "Deprecated in Java",
+    @Deprecated("Deprecated in Java",
         ReplaceWith("onReceivedErrorCompat(view, errorCode, description, failingUrl, failingUrl == view.url)")
     )
     final override fun onReceivedError(
@@ -213,49 +211,13 @@ abstract class WebViewClientCompat : WebViewClient() {
             error.reasonPhrase,
             request.url
                 .toString(),
-            request.isForMainFrame
+            request.isForMainFrame,
         )
     }
 }
 
-@SuppressLint("SetJavaScriptEnabled")
-@OptIn(ExperimentalCoroutinesApi::class)
-private suspend fun WebView.getHtml(): String = suspendCancellableCoroutine { continuation ->
-    settings.javaScriptEnabled = true
-    if (!settings.javaScriptEnabled)
-        throw IllegalStateException("Javascript is disabled")
 
-    evaluateJavascript(
-        "(function() { return ('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>'); })();"
-    ) {
-        continuation.resume(
-            it!!.replace("\\u003C", "<")
-                .replace("\\n", "")
-                .replace("\\t", "")
-                .replace("\\\"", "\"")
-                .replace("<hr />", "")
-        ) {
-        }
-    }
-}
 
-fun getCookieMap(cookies: String?): Map<String, String>? {
-    val map = mutableMapOf<String, String>()
-    if (cookies == null) return null
-
-    val typedArray = cookies.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-    for (element in typedArray) {
-        val split = element.split("=".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-
-        if (split.size >= 2) {
-            map[split[0]] = split[1]
-        } else if (split.size == 1) {
-            map[split[0]] = ""
-        }
-    }
-
-    return map
-}
 
 /**
  * This object is representing the result of an request
@@ -268,9 +230,5 @@ fun getCookieMap(cookies: String?): Map<String, String>? {
 @Suppress("LongParameterList")
 class Result(
     val responseBody: String,
-    val responseCode: Int? = null,
-    val mimeType: String? = null,
-    val responseHeader: Map<String, String>? = emptyMap(),
-    val baseUri: String = "",
-    val cookies: Map<String, String>? = emptyMap(),
+    val cookies: List<Cookie> = emptyList(),
 )

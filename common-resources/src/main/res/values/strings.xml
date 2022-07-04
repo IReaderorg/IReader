@@ -138,7 +138,10 @@
 
 
 
-
+    <string name="remove">Remove</string>
+    <string name="dialog_remove_chapter_history_description">This will remove the read date of this chapter. Are you sure?</string>
+    <string name="dialog_remove_chapter_book_description">This will remove the read date of this book. Are you sure?</string>
+    <string name="dialog_remove_chapter_books_description">This will remove the read date of all books. Are you sure?</string>
 
 
     <string name="create_backup">Create Backup</string>

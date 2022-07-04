@@ -25,6 +25,7 @@ dependencies {
 implementation(compose.compose.material3)
 
 
+
     implementation(compose.compose.ui)
     implementation(compose.compose.compiler)
     implementation(accompanist.pager)

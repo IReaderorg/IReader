@@ -13,7 +13,7 @@ import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core_api.source.Source
 import org.ireader.core_ui.theme.FontType
-import org.ireader.core_ui.theme.Roboto
+import org.ireader.core_ui.theme.getDefaultFont
 import org.ireader.core_ui.theme.prefs.IReaderVoice
 import org.ireader.domain.services.tts_service.media_player.TTSService
 import java.util.Locale
@@ -63,7 +63,7 @@ interface TTSState {
 }
 
 class TTSStateImpl @Inject constructor() : TTSState {
-    override var font by mutableStateOf<FontType>(Roboto)
+    override var font by mutableStateOf<FontType>(getDefaultFont())
     override var lineHeight by mutableStateOf<Int>(25)
     override var isServiceConnected by mutableStateOf<Boolean>(false)
 

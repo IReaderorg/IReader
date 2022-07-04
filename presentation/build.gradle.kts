@@ -55,6 +55,7 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.0-beta02")
     implementation(compose.compose.foundation)
     implementation(compose.compose.animations)
+    implementation(compose.compose.googlFonts)
     implementation(compose.compose.ui)
     implementation(compose.compose.compiler)
     implementation(compose.compose.activity)

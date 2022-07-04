@@ -1,6 +1,5 @@
 package org.ireader.presentation.ui
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
@@ -9,9 +8,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import org.ireader.common_extensions.async.viewModelIOCoroutine
+import org.ireader.components.reusable_composable.WarningAlert
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.history.HistoryScreen
 import org.ireader.history.HistoryTopAppBar
@@ -33,28 +34,40 @@ object HistoryScreenSpec : BottomNavScreenSpec {
         controller:ScreenSpec.Controller
     ) {
         val vm: HistoryViewModel = hiltViewModel(controller.navBackStackEntry)
+        val context = LocalContext.current
         HistoryTopAppBar(
             vm = vm,
             getHistories = {
                 vm.getHistoryBooks()
             },
             onDeleteAll = {
-                vm.viewModelIOCoroutine {
-                    vm.historyUseCase.deleteAllHistories()
+                vm.warningAlert.value.apply {
+                    enable.value = true
+                    this.title.value = context.getString(R.string.remove)
+                    this.title.value = context.getString(R.string.dialog_remove_chapter_books_description)
+                    this.onDismiss.value = {
+                        this.enable.value = false
+                    }
+                    this.onConfirm.value = {
+                        this.enable.value = false
+                        vm.viewModelIOCoroutine {
+                            vm.historyUseCase.deleteAllHistories()
+                        }
+                    }
                 }
+
             },
         )
     }
 
-    @OptIn(
-        ExperimentalAnimationApi::class,
-        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
-    )
+
     @Composable
     override fun Content(
         controller: ScreenSpec.Controller
     ) {
         val vm: HistoryViewModel = hiltViewModel(controller.navBackStackEntry)
+val context = LocalContext.current
+        WarningAlert(data = vm.warningAlert.value)
         HistoryScreen(
             modifier = Modifier.padding(controller.scaffoldPadding),
             onHistory = { history ->
@@ -75,11 +88,6 @@ object HistoryScreenSpec : BottomNavScreenSpec {
                     )
                 )
             },
-            onHistoryDelete = { history ->
-                vm.viewModelIOCoroutine {
-                    vm.historyUseCase.deleteHistory(history.chapterId)
-                }
-            },
             state = vm,
             onBookCover = { history ->
                 controller.navController.navigate(
@@ -88,6 +96,40 @@ object HistoryScreenSpec : BottomNavScreenSpec {
                         history.bookId
                     )
                 )
+            },
+            onHistoryDelete = { history ->
+                vm.warningAlert.value.apply {
+                    enable.value = true
+                    this.title.value = context.getString(R.string.remove)
+                    this.title.value = context.getString(R.string.dialog_remove_chapter_history_description)
+                    this.onDismiss.value = {
+                        this.enable.value = false
+                    }
+                    this.onConfirm.value = {
+                        this.enable.value = false
+                        vm.viewModelIOCoroutine {
+                            vm.historyUseCase.deleteHistory(history.chapterId)
+                        }
+                    }
+                }
+
+            },
+            onLongClickDelete = { history ->
+                vm.warningAlert.value.apply {
+                    enable.value = true
+                    this.title.value = context.getString(R.string.remove)
+                    this.title.value = context.getString(R.string.dialog_remove_chapter_book_description)
+                    this.onDismiss.value = {
+                        this.enable.value = false
+                    }
+                    this.onConfirm.value = {
+                        this.enable.value = false
+                        vm.viewModelIOCoroutine {
+                            vm.historyUseCase.deleteHistoryByBookId(history.bookId)
+                        }
+                    }
+                }
+
             }
         )
     }

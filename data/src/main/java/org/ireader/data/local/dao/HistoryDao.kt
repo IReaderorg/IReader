@@ -38,6 +38,8 @@ interface HistoryDao : BaseDao<org.ireader.common_models.entities.History> {
 
     @Query("DELETE FROM history WHERE chapterId = :id")
     suspend fun deleteHistory(id: Long)
+    @Query("DELETE FROM history WHERE bookId = :bookId")
+    suspend fun deleteHistoryByBooKId(bookId: Long)
 
     @Query("DELETE FROM history")
     suspend fun deleteAllHistory()

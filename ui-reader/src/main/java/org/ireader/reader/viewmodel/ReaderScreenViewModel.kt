@@ -102,7 +102,13 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     val distanceBetweenParagraphs = readerPreferences.paragraphDistance().asState()
     val verticalScrolling = readerPreferences.scrollMode().asState()
     val readingMode = readerPreferences.readingMode().asState()
-
+    val fonts = listOf<String>(
+        "Poppins",
+        "PT Serif",
+        "Noto",
+        "Open Sans",
+        "Roboto Serif",
+    )
     init {
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
         val chapterId = savedStateHandle.get<Long>(NavigationArgs.chapterId.name)

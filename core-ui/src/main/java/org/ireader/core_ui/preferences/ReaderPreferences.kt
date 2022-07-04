@@ -9,7 +9,7 @@ import org.ireader.core_api.prefs.Preference
 import org.ireader.core_api.prefs.PreferenceStore
 import org.ireader.core_api.prefs.getEnum
 import org.ireader.core_ui.theme.FontType
-import org.ireader.core_ui.theme.Roboto
+import org.ireader.core_ui.theme.getDefaultFont
 import org.ireader.core_ui.theme.prefs.IReaderVoice
 import org.ireader.core_ui.theme.prefs.asColor
 import org.ireader.core_ui.theme.prefs.asFont
@@ -75,7 +75,7 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
 
     @OptIn(ExperimentalTextApi::class)
     fun font(): Preference<FontType> {
-        return preferenceStore.getString(SAVED_FONT_PREFERENCES, Roboto.fontName).asFont(provider)
+        return preferenceStore.getString(SAVED_FONT_PREFERENCES, getDefaultFont().name).asFont(provider)
     }
 
     fun backgroundColorReader(): Preference<Color> {

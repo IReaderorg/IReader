@@ -26,6 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
@@ -42,8 +43,8 @@ import org.ireader.core_api.log.Log
 import org.ireader.core_ui.preferences.ReadingMode
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.theme.CustomSystemColor
-import org.ireader.core_ui.theme.Roboto
-import org.ireader.core_ui.theme.fonts
+import org.ireader.core_ui.theme.FontType
+import org.ireader.core_ui.theme.getDefaultFont
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.reader.ReaderScreenDrawer
 import org.ireader.reader.ReaderScreenTopBar
@@ -504,7 +505,7 @@ object ReaderScreenSpec : ScreenSpec {
             Spacer(modifier = Modifier.height(5.dp))
             ReaderSettingMainLayout(
                 onFontSelected = { index ->
-                    vm.font.value = fonts.getOrNull(index) ?: Roboto
+                    vm.font.value = FontType(vm.fonts.getOrNull(index)?: getDefaultFont().name, FontFamily.Default)
                 },
                 onChangeBrightness = {
                     vm.apply {
