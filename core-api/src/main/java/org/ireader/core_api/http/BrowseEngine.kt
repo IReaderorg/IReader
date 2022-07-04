@@ -2,9 +2,7 @@ package org.ireader.core_api.http
 
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
-import android.content.Context
 import android.os.Build
-import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -12,7 +10,6 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -26,7 +23,7 @@ import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 import kotlin.collections.set
 
-class BrowseEngine @Inject constructor(@ApplicationContext private val context: Context) {
+class BrowseEngine @Inject constructor(private val webViewManger: WebViewManger) {
     /**
      * this function
      * @param url  the url of page
@@ -40,95 +37,69 @@ class BrowseEngine @Inject constructor(@ApplicationContext private val context: 
         url: String,
         selector: String? = null,
         headers: Map<String, String> = emptyMap(),
-        timeout: Long = 5000L,
+        timeout: Long = 50000L,
         userAgent: String = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36",
     ): Result {
+        var currentTime = 0L
         var html: Document = Document("No Data was Found")
-        var cookies: String? = null
-        var responseHeader: WebResourceResponse? = null
+        val cookies: String? = null
+        val responseHeader: WebResourceResponse? = null
         var isLoadUp: Boolean = false
+
         withContext(Dispatchers.Main) {
+            val webUrl = url
+            webViewManger.init()
             val scope = this
-            val client = WebView(context.applicationContext)
-            try {
-                client.settings.userAgentString = userAgent
-            } catch (e: Throwable) {
-                Log.error(exception = e, "failed to set user agent")
+            val client = webViewManger.webView!!
+            if (userAgent != webViewManger.userAgent) {
+                try {
+                    client.settings.userAgentString = userAgent
+                } catch (e: Throwable) {
+                    Log.error(exception = e, "failed to set user agent")
+                }
             }
-            try {
 
-                client.webChromeClient = object : WebChromeClient() {
-                    override fun onProgressChanged(view: WebView?, newProgress: Int) {
-
-                        scope.launch {
-                            if (newProgress == 100) {
-                                html = Jsoup.parse(view?.getHtml() ?: "")
+            val webChromeClient = object : WebViewClientCompat() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    scope.launch {
+                        while (!isLoadUp) {
+                            if (view?.title?.contains(
+                                    "Cloudflare",
+                                    true
+                                ) == false
+                            ) {
                                 if (selector != null) {
-                                    while (html.select(selector).text().isEmpty()) {
-                                        html = Jsoup.parse(view?.getHtml() ?: "")
-                                        delay(300L)
+                                    if (!html.select(selector).hasText() && webUrl == url) {
+                                        delay(1500L)
+                                        html = Jsoup.parse(client.getHtml())
+                                        isLoadUp = true
                                     }
-                                    isLoadUp = true
                                 } else {
                                     isLoadUp = true
                                 }
                             }
+                            delay(1000L)
                         }
-                        super.onProgressChanged(view, newProgress)
                     }
                 }
-            } catch (e: Exception) {
-                client.webViewClient = object : WebViewClientCompat() {
-                    override fun onPageFinished(view: WebView, url: String) {
-                        scope.launch {
-                            html = Jsoup.parse(client.getHtml())
-                            if (selector != null) {
-                                while (html.select(selector).text().isEmpty()) {
-                                    html = Jsoup.parse(client.getHtml())
-                                    delay(300L)
-                                }
-                                isLoadUp = true
-                            } else {
-                                isLoadUp = true
-                            }
-                        }
-                    }
 
-                    override fun shouldInterceptRequestCompat(
-                        view: WebView,
-                        url: String,
-                    ): WebResourceResponse? {
-                        val req = super.shouldInterceptRequestCompat(view, url)
-                        responseHeader = req
-                        return req
-                    }
-                }
             }
-            client.setDefaultSettings()
-            client.loadUrl(url, headers)
+            client.webViewClient = webChromeClient
+            client.loadUrl(url)
 
-            var currentTime = 0
+
             while (!isLoadUp && currentTime < timeout) {
 
-                delay(200)
-                currentTime += 200
+                delay(1000)
+                currentTime += 1000
             }
             if (currentTime >= timeout) {
-//                client.clearHistory()
-//                client.clearCache(true)
-//                client.destroy()
-//                client.clearSslPreferences()
-//                WebStorage.getInstance().deleteAllData()
-//                context.applicationInfo?.dataDir?.let { File("$it/app_webview/").deleteRecursively() }
+                client.webViewClient = WebViewClient()
                 throw TimeoutException()
             }
+            client.webViewClient = WebViewClient()
             html = Jsoup.parse(client.getHtml())
-//            client.clearHistory()
-//            client.clearCache(true)
-//            client.destroy()
-//            client.clearSslPreferences()
-//            WebStorage.getInstance().deleteAllData()
-//            context.applicationInfo?.dataDir?.let { File("$it/app_webview/").deleteRecursively() }
         }
         return Result(
             responseBody = html.html(),

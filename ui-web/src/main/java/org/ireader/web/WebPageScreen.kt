@@ -11,7 +11,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -20,14 +19,15 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.accompanist.web.AccompanistWebChromeClient
+import com.google.accompanist.web.AccompanistWebViewClient
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewState
 import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.ireader.core_api.http.setDefaultSettings
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.HttpSource
 import org.ireader.core_ui.ui.SnackBarListener
-import org.ireader.domain.utils.setDefaultSettings
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @ExperimentalCoroutinesApi
@@ -47,20 +47,20 @@ fun WebPageScreen(
     }
     val webViewState = rememberWebViewState(url = viewModel.url)
 
+
     LaunchedEffect(key1 = webViewState.hashCode()) {
         viewModel.webViewState = webViewState
     }
 
+
     LaunchedEffect(key1 = webViewState.content.getCurrentUrl()) {
         webViewState.content.getCurrentUrl()?.let { viewModel.webUrl = it }
     }
-    val accompanistState = AccompanistWebChromeClient()
+    val chromeClient = AccompanistWebChromeClient()
+    val webclient = AccompanistWebViewClient()
 
-    DisposableEffect(key1 = true) {
-        onDispose {
-            viewModel.webView?.destroy()
-        }
-    }
+    webViewState.content.getCurrentUrl()
+
     SnackBarListener(vm = viewModel, host = snackBarHostState)
     val refreshState = rememberSwipeRefreshState(isRefreshing = viewModel.isLoading)
     Box(modifier = Modifier.padding(scaffoldPadding)) {
@@ -90,11 +90,12 @@ fun WebPageScreen(
             WebView(
                 state = webViewState,
                 onCreated = {
-                    viewModel.webView = it
-                    it.setDefaultSettings()
                     userAgent?.let { ua -> it.setUserAgent(ua) }
+                    it.setDefaultSettings()
+                    viewModel.webView = it
                 },
-                chromeClient = accompanistState
+                chromeClient = chromeClient,
+                client = webclient
             )
         }
     }

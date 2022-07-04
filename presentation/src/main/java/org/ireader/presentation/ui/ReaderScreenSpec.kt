@@ -457,7 +457,8 @@ object ReaderScreenSpec : ScreenSpec {
                                     url = chapter?.key,
                                     sourceId = catalog.sourceId,
                                     chapterId = chapter?.id,
-                                    bookId = book?.id
+                                    bookId = book?.id,
+                                    enableChapterFetch = true
                                 )
                             )
                         }
@@ -522,9 +523,6 @@ object ReaderScreenSpec : ScreenSpec {
                 },
                 onToggleAutoBrightness = {
                     vm.autoBrightnessMode.value = !vm.autoBrightnessMode.value
-//                    vm.prefFunc.apply {
-//                        vm.toggleAutoBrightness()
-//                    }
                 }
             )
         }

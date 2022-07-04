@@ -29,8 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.pager.ExperimentalPagerApi
-import dev.chrisbanes.snapper.ExperimentalSnapperApi
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core_ui.preferences.ReadingMode
@@ -40,8 +38,8 @@ import org.ireader.reader.viewmodel.ReaderScreenViewModel
 
 @ExperimentalAnimationApi
 @OptIn(
-    ExperimentalMaterialApi::class, ExperimentalPagerApi::class,
-    ExperimentalSnapperApi::class, ExperimentalMaterial3Api::class
+    ExperimentalMaterialApi::class,
+    ExperimentalMaterial3Api::class
 )
 @Composable
 fun ReadingScreen(
@@ -70,7 +68,6 @@ fun ReadingScreen(
     val scope = rememberCoroutineScope()
     val chapter = vm.stateChapter
 
-
     LaunchedEffect(key1 = modalBottomSheetState.targetValue) {
         when (modalBottomSheetState.targetValue) {
             ModalBottomSheetValue.Expanded -> vm.isReaderModeEnable = false
@@ -98,6 +95,9 @@ fun ReadingScreen(
             .background(vm.backgroundColor.value),
         contentAlignment = Alignment.Center,
     ) {
+        if (vm.webViewManger.isInit && vm.webViewIntegration.value) {
+            org.ireader.reader.custom.WebView(preconfigureWebView = vm.webViewManger.webView)
+        }
         Crossfade(
             modifier = Modifier.fillMaxSize(),
             targetState = vm.isLoading && if (vm.readingMode.value == ReadingMode.Continues)  vm.chapterShell.isEmpty() else true
@@ -149,21 +149,23 @@ fun ReadingScreen(
                             }
                         },
                     ) {
-                        ReaderText(
-                            vm = readerScreenPreferencesState,
-                            onNext = {
-                                onNext(false)
-                            },
-                            swipeState = swipeState,
-                            onPrev = { onPrev(false) },
-                            scrollState = scrollState,
-                            modalState = modalBottomSheetState,
-                            toggleReaderMode = toggleReaderMode,
-                            uiState = vm,
-                            lazyListState = lazyListState,
-                            onChapterShown = onChapterShown
 
-                        )
+                            ReaderText(
+                                vm = readerScreenPreferencesState,
+                                onNext = {
+                                    onNext(false)
+                                },
+                                swipeState = swipeState,
+                                onPrev = { onPrev(false) },
+                                scrollState = scrollState,
+                                modalState = modalBottomSheetState,
+                                toggleReaderMode = toggleReaderMode,
+                                uiState = vm,
+                                lazyListState = lazyListState,
+                                onChapterShown = onChapterShown
+
+                            )
+
                     }
                 }
             }

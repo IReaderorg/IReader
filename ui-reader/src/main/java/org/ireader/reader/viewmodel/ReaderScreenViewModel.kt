@@ -24,6 +24,7 @@ import org.ireader.common_models.entities.Chapter
 import org.ireader.common_resources.LAST_CHAPTER
 import org.ireader.common_resources.NO_VALUE
 import org.ireader.common_resources.UiText
+import org.ireader.core_api.http.WebViewManger
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.core_ui.preferences.ReadingMode
@@ -56,6 +57,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     val uiPreferences: UiPreferences,
     val googleFontProvider: GoogleFont.Provider,
     val screenAlwaysOnUseCase: ScreenAlwaysOn,
+    val webViewManger: WebViewManger
 ) : BaseViewModel(),
     ReaderScreenPreferencesState by prefState,
     ReaderScreenState by state,
@@ -93,6 +95,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     var chapterNumberMode by readerPreferences.showChapterNumberPreferences().asState()
     val isScrollIndicatorDraggable = readerPreferences.scrollbarMode().asState()
     val font = readerPreferences.font().asState()
+    val webViewIntegration = readerPreferences.webViewIntegration().asState()
 
     val selectableMode = readerPreferences.selectableText().asState()
     val fontSize = readerPreferences.fontSize().asState()
@@ -101,7 +104,6 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     val readingMode = readerPreferences.readingMode().asState()
 
     init {
-
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
         val chapterId = savedStateHandle.get<Long>(NavigationArgs.chapterId.name)
         val bookId = savedStateHandle.get<Long>(NavigationArgs.bookId.name)
@@ -330,6 +332,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     override fun onDestroy() {
         getChapterJob?.cancel()
         getContentJob?.cancel()
+        webViewManger.destroy()
         super.onDestroy()
     }
 }

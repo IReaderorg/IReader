@@ -9,8 +9,9 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 @ExperimentalCoroutinesApi
 suspend fun WebView.getHtml(): String = suspendCancellableCoroutine { continuation ->
     settings.javaScriptEnabled = true
-    if (!settings.javaScriptEnabled)
+    if (!settings.javaScriptEnabled) {
         throw IllegalStateException("Javascript is disabled")
+    }
 
     evaluateJavascript(
         "(function() { return ('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>'); })();"

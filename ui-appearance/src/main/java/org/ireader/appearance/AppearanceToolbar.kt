@@ -32,7 +32,7 @@ fun AppearanceToolbar(vm: AppearanceViewModel,onPopBackStack: () -> Unit) {
 }
 
 @Composable
-fun MainAppearanceToolbar(
+private fun MainAppearanceToolbar(
     vm: AppearanceViewModel,
     onPopBackStack:() -> Unit
 ) {
@@ -73,7 +73,7 @@ fun MainAppearanceToolbar(
 }
 
 @Composable
-fun EditToolbar(
+private fun EditToolbar(
     vm: AppearanceViewModel
 ) {
     Toolbar(

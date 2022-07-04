@@ -96,6 +96,8 @@ object ExploreScreenSpec : ScreenSpec {
                         WebViewScreenSpec.buildRoute(
                             url = it,
                             sourceId = source.id,
+                            enableBookFetch = true,
+                            enableChaptersFetch = true
                         )
                     )
                 },
@@ -198,7 +200,9 @@ object ExploreScreenSpec : ScreenSpec {
                             url = (source).baseUrl,
                             sourceId = source.id,
                             chapterId = null,
-                            bookId = null
+                            bookId = null,
+                            enableChaptersFetch = true,
+                            enableBookFetch = true
                         )
                     )
                 }

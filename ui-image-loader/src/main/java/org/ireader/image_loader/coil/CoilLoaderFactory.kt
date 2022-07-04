@@ -28,8 +28,8 @@ class CoilLoaderFactory(
                     BookCoverFetcher.Factory(
                         callFactoryLazy = lazy(callFactoryInit),
                         diskCacheLazy = lazy(diskCacheInit),
+                        coverCache,
                         catalogStore,
-                        coverCache
                     )
                 )
                 add(CatalogRemoteMapper())

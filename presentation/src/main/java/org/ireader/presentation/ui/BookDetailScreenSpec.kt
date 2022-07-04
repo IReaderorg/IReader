@@ -105,7 +105,9 @@ object BookDetailScreenSpec : ScreenSpec {
                             url = book.key,
                             sourceId = book.sourceId,
                             bookId = book.id,
-                            chapterId = null
+                            chapterId = null,
+                            enableChaptersFetch = true,
+                            enableBookFetch = true
                         )
                     )
             },

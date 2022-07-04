@@ -51,6 +51,9 @@ class WebViewPageModel @Inject constructor(
         val bookId = savedStateHandle.get<Long>("bookId")
         val sourceId = savedStateHandle.get<Long>("sourceId")
         val chapterId = savedStateHandle.get<Long>(NavigationArgs.chapterId.name)
+        enableChapterFetch = savedStateHandle.get<Boolean>("enableChapterFetch") == true
+        enableChaptersFetch = savedStateHandle.get<Boolean>("enableChaptersFetch") == true
+        enableBookFetch = savedStateHandle.get<Boolean>("enableBookFetch") == true
         bookId?.let {
             viewModelScope.launch {
                 stateBook = getBookUseCases.findBookById(bookId)
@@ -233,6 +236,10 @@ interface WebViewPageState {
     var webChapter: Chapter?
     var webBook: Book?
     var webChapters: List<Chapter>
+
+    var enableChapterFetch:Boolean
+    var enableChaptersFetch:Boolean
+    var enableBookFetch:Boolean
 }
 
 open class WebViewPageStateImpl @Inject constructor() : WebViewPageState {
@@ -262,4 +269,7 @@ open class WebViewPageStateImpl @Inject constructor() : WebViewPageState {
     override var webChapter: Chapter? by mutableStateOf(null)
     override var webBook: Book? by mutableStateOf(null)
     override var webChapters: List<Chapter> by mutableStateOf(emptyList())
+    override var enableChapterFetch: Boolean by mutableStateOf(false)
+    override var enableChaptersFetch: Boolean by mutableStateOf(false)
+    override var enableBookFetch: Boolean by mutableStateOf(false)
 }

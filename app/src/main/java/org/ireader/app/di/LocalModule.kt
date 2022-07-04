@@ -24,6 +24,7 @@ import org.ireader.common_extensions.async.MainDispatcher
 import org.ireader.common_extensions.async.MainImmediateDispatcher
 import org.ireader.common_resources.ProjectConfig
 import org.ireader.core_api.http.AcceptAllCookiesStorage
+import org.ireader.core_api.http.WebViewManger
 import org.ireader.core_api.prefs.AndroidPreferenceStore
 import org.ireader.core_api.prefs.PreferenceStore
 import org.ireader.image_loader.LibraryCovers
@@ -68,6 +69,11 @@ class LocalModule {
     @Singleton
     fun provideCookieJar(): CookiesStorage {
         return AcceptAllCookiesStorage()
+    }
+    @Provides
+    @Singleton
+    fun provideWebViewManager(@ApplicationContext context: Context): WebViewManger {
+        return WebViewManger(context)
     }
 
 

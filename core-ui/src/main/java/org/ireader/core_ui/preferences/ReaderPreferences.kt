@@ -86,6 +86,10 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
         return preferenceStore.getInt(SAVED_TEXT_COLOR, Color(0xFFE9E9E9).toArgb()).asColor()
     }
 
+    fun webViewIntegration(): Preference<Boolean> {
+        return preferenceStore.getBoolean("webView_integration", false)
+    }
+
     fun unselectedScrollBarColor(): Preference<Color> {
         return preferenceStore.getInt(SCROLL_INDICATOR_SELECTED_COLOR, Color(0xFF2A59B6).toArgb())
             .asColor()
@@ -113,7 +117,10 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     }
 
     fun orientation(): Preference<Int> {
-        return preferenceStore.getInt(SAVED_ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
+        return preferenceStore.getInt(
+            SAVED_ORIENTATION,
+            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        )
     }
 
     fun sleepTime(): Preference<Long> {
@@ -134,15 +141,19 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     fun paragraphIndent(): Preference<Int> {
         return preferenceStore.getInt(SAVED_PARAGRAPH_INDENT, 8)
     }
+
     fun topMargin(): Preference<Int> {
         return preferenceStore.getInt("reader_top_margin", 0)
     }
+
     fun leftMargin(): Preference<Int> {
         return preferenceStore.getInt("reader_left_margin", 0)
     }
+
     fun rightMargin(): Preference<Int> {
         return preferenceStore.getInt("reader_right_margin", 0)
     }
+
     fun bottomMargin(): Preference<Int> {
         return preferenceStore.getInt("reader_bottom_margin", 0)
     }
@@ -150,15 +161,19 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     fun topContentPadding(): Preference<Int> {
         return preferenceStore.getInt("reader_top_padding", 2)
     }
+
     fun bottomContentPadding(): Preference<Int> {
         return preferenceStore.getInt("reader_bottom_padding", 2)
     }
+
     fun betweenLetterSpaces(): Preference<Int> {
         return preferenceStore.getInt("reader_text_space", 0)
     }
+
     fun textWeight(): Preference<Int> {
         return preferenceStore.getInt("reader_text_weight", 400)
     }
+
     fun screenAlwaysOn(): Preference<Boolean> {
         return preferenceStore.getBoolean("reader_always_on", false)
     }
@@ -172,7 +187,10 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     }
 
     fun scrollbarMode(): Preference<PreferenceValues.ScrollbarSelectionMode> {
-        return preferenceStore.getEnum(SCROLL_INDICATOR_IS_DRAGGABLE, PreferenceValues.ScrollbarSelectionMode.Full)
+        return preferenceStore.getEnum(
+            SCROLL_INDICATOR_IS_DRAGGABLE,
+            PreferenceValues.ScrollbarSelectionMode.Full
+        )
     }
 
     fun selectableText(): Preference<Boolean> {
@@ -214,6 +232,7 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     fun speechLanguage(): Preference<String> {
         return preferenceStore.getString(TEXT_READER_SPEECH_LANGUAGE, "")
     }
+
     fun showChapterNumberPreferences(): Preference<ChapterDisplayMode> {
         return preferenceStore.getEnum("chapter_layout_mode", ChapterDisplayMode.Default)
     }

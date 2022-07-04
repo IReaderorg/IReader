@@ -342,6 +342,12 @@ fun ReaderSettingMainLayout(
                     }
                     item {
                         SwitchPreference(
+                            preference = vm.webViewIntegration,
+                            title = stringResource(id = R.string.show_webView_during_fetching),
+                        )
+                    }
+                    item {
+                        SwitchPreference(
                             preference = vm.screenAlwaysOn,
                             title = stringResource(id = R.string.screen_always_on),
                         )

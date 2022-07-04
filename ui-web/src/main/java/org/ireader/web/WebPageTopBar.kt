@@ -99,7 +99,7 @@ fun WebPageTopBar(
                         goForward()
                     },
                 )
-            if (source != null && source.getCommands().findInstance<Command.Detail.Fetch>()!= null ) {
+            if (source != null && source.getCommands().findInstance<Command.Detail.Fetch>()!= null && state.enableBookFetch ) {
                 list.add(
                     DropDownMenuItem(
                         stringResource(org.ireader.core.R.string.fetch_book)
@@ -108,7 +108,7 @@ fun WebPageTopBar(
                     }
                 )
             }
-            if (source != null && source.getCommands().findInstance<Command.Content.Fetch>() != null && state.stateChapter != null) {
+            if (source != null && source.getCommands().findInstance<Command.Content.Fetch>() != null && state.stateChapter != null && state.enableChapterFetch) {
                 list.add(
                     DropDownMenuItem(
                         stringResource(org.ireader.core.R.string.fetch_chapter)
@@ -117,7 +117,7 @@ fun WebPageTopBar(
                     }
                 )
             }
-            if (source != null && source.getCommands().findInstance<Command.Chapter.Fetch>() != null&& state.stateBook != null) {
+            if (source != null && source.getCommands().findInstance<Command.Chapter.Fetch>() != null&& state.stateBook != null && state.enableChaptersFetch) {
                 list.add(
                     DropDownMenuItem(
                         stringResource(org.ireader.core.R.string.fetch_chapters)

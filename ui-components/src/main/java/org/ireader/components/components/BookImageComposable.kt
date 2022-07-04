@@ -24,7 +24,7 @@ fun BookImageComposable(
     AsyncImage(
         modifier = modifier.fillMaxSize(),
         contentScale = contentScale,
-        model = headers?.let { it(image.cover) }
+        model = if (image.favorite) image else headers?.let { it(image.cover) }
             ?.let { ImageRequest.Builder(context).headers(it).data(image.cover).build() }?:  image.cover,
         contentDescription = "an image",
         alignment = alignment,

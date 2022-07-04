@@ -27,12 +27,24 @@ import java.nio.charset.StandardCharsets
 object WebViewScreenSpec : ScreenSpec {
 
     override val navHostRoute: String =
-        "web_page_route/{url}/{sourceId}/{bookId}/{chapterId}"
+        "web_page_route/{url}/{sourceId}/{bookId}/{chapterId}/{enableChapterFetch}/{enableChaptersFetch}/{enableBookFetch}"
 
     override val arguments: List<NamedNavArgument> = listOf(
         navArgument("url") {
             type = NavType.StringType
             defaultValue = "No_Url"
+        },
+        navArgument("enableChapterFetch") {
+            type = NavType.BoolType
+            defaultValue = false
+        },
+        navArgument("enableChaptersFetch") {
+            type = NavType.BoolType
+            defaultValue = false
+        },
+        navArgument("enableBookFetch") {
+            type = NavType.BoolType
+            defaultValue = false
         },
         NavigationArgs.sourceId,
         NavigationArgs.chapterId,
@@ -45,20 +57,30 @@ object WebViewScreenSpec : ScreenSpec {
         sourceId: Long? = null,
         bookId: Long? = null,
         chapterId: Long? = null,
+        enableChapterFetch: Boolean = false,
+        enableChaptersFetch: Boolean = false,
+        enableBookFetch: Boolean = false,
     ): String {
         return "web_page_route/${
             URLEncoder.encode(
                 url,
                 StandardCharsets.UTF_8.name()
             )
-        }/${sourceId ?: 0}/${bookId ?: 0}/${chapterId ?: 0}".trim()
+        }/${sourceId ?: 0}/${bookId ?: 0}/${chapterId ?: 0}/${enableChapterFetch}/${enableChaptersFetch}/${enableBookFetch}".trim()
+    }
+
+    private fun Boolean.encodeBoolean(): String {
+        return if (this) "true" else "false"
+    }
+    private fun String.decodeBoolean(): Boolean {
+        return this == "true"
     }
 
     @Composable
     override fun Content(
         controller: ScreenSpec.Controller
     ) {
-        val vm: WebViewPageModel = hiltViewModel   (controller.navBackStackEntry)
+        val vm: WebViewPageModel = hiltViewModel(controller.navBackStackEntry)
         val scope = rememberCoroutineScope()
         WebPageScreen(
             viewModel = vm,
@@ -85,13 +107,13 @@ object WebViewScreenSpec : ScreenSpec {
     override fun TopBar(
         controller: ScreenSpec.Controller
     ) {
-        val vm: WebViewPageModel = hiltViewModel   (controller.navBackStackEntry)
+        val vm: WebViewPageModel = hiltViewModel(controller.navBackStackEntry)
         val webView = vm.webView
-        val url by derivedStateOf { vm.webUrl}
+        val url by derivedStateOf { vm.webUrl }
         val source = vm.source
 
         WebPageTopBar(
-            urlToRender = url ?:vm.url,
+            urlToRender = url ?: vm.url,
             onGo = {
                 vm.webViewState?.content = WebContent.Url(vm.webUrl)
                 vm.updateWebUrl(vm.url)

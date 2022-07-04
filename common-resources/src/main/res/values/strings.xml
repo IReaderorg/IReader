@@ -357,6 +357,7 @@
     <string name="autoScroll">AutoScroll</string>
     <string name="reading_mode">Reading Mode</string>
     <string name="immersive_mode">Immersive mode</string>
+    <string name="show_webView_during_fetching">WebView Integration</string>
     <string name="screen_always_on">Screen Always On</string>
     <string name="general">General</string>
     <string name="use_default_image_loader">Use the Default Image Loader</string>
