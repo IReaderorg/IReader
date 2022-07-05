@@ -17,9 +17,9 @@ dependencies {
     implementation(compose.compose.material3)
 
 
-    implementation(common.room.runtime)
-    implementation(common.room.ktx)
-    kapt(common.room.compiler)
+    implementation(commonLib.room.runtime)
+    implementation(commonLib.room.ktx)
+    kapt(commonLib.room.compiler)
 
 //    implementation(kotlinx.reflect)
 //    implementation(kotlinx.stdlib)

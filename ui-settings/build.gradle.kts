@@ -33,7 +33,11 @@ implementation(compose.compose.material3)
     implementation(accompanist.pagerIndicator)
     implementation(accompanist.pager)
     implementation(accompanist.swipeRefresh)
-    implementation(common.hilt.android)
+    implementation(commonLib.hilt.android)
+    
+    implementation(commonLib.modernstorage.permissions)
+    implementation(commonLib.modernstorage.storage)
+
     implementation(project(mapOf("path" to ":domain")))
-    kapt(common.hilt.androidcompiler)
+    kapt(commonLib.hilt.androidcompiler)
 }

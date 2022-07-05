@@ -1,7 +1,6 @@
 package org.ireader.components.reusable_composable
 
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -37,7 +36,7 @@ fun WarningAlert(
                 data.onDismiss.value?.invoke()
             },
             confirmButton = {
-                OutlinedButton(onClick = { data.onConfirm.value?.invoke() }) {
+                TextButton(onClick = { data.onConfirm.value?.invoke() }) {
                     Text(text = data.confirmText.value)
                 }
             },
@@ -47,37 +46,5 @@ fun WarningAlert(
                 }
             },
         )
-
-//        AlertDialog(
-//
-//            modifier = Modifier.heightIn(max = 350.dp, min = 200.dp),
-//            onDismissRequest = {
-//                if (data.onDismiss.value != null) {
-//                    data.onDismiss.value?.invoke()
-//                }
-//            },
-//            title = { data.title.value?.let { MidSizeTextComposable(text = it) } },
-//            text = {
-//                data.text.value?.let { MidSizeTextComposable(text = it) }
-//            },
-//            confirmButton = {
-//                TextButton(onClick = {
-//                    if (data.onConfirm.value != null) {
-//                        data.onConfirm.value?.invoke()
-//                    }
-//                }) {
-//                    Text(text = stringResource(R.string.confirm))
-//                }
-//            },
-//            dismissButton = {
-//                TextButton(onClick = {
-//                    if (data.onDismiss.value != null) {
-//                        data.onDismiss.value?.invoke()
-//                    }
-//                }) {
-//                    Text(text = stringResource(R.string.dismiss))
-//                }
-//            }
-//        )
     }
 }

@@ -71,9 +71,10 @@ class BrowseEngine @Inject constructor(private val webViewManger: WebViewManger,
                 currentTime += 1000
             }
             if (currentTime >= timeout) {
+                webViewManger.inProgress = false
                 throw TimeoutException()
             }
-
+            webViewManger.inProgress = false
             html = Jsoup.parse(client.getHtml())
         }
         val cookies = webViewCookieJar.get(url.toHttpUrl())

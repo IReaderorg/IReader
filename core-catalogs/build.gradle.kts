@@ -31,6 +31,6 @@ implementation(compose.compose.material3)
     implementation(accompanist.pagerIndicator)
     implementation(accompanist.pager)
     implementation(accompanist.swipeRefresh)
-    implementation(common.hilt.android)
-    kapt(common.hilt.androidcompiler)
+    implementation(commonLib.hilt.android)
+    kapt(commonLib.hilt.androidcompiler)
 }

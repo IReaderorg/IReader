@@ -42,11 +42,11 @@ implementation(compose.compose.material3)
     implementation(compose.compose.coil)
 
 
-    implementation(common.room.runtime)
-    implementation(common.room.ktx)
-    kapt(common.room.compiler)
+    implementation(commonLib.room.runtime)
+    implementation(commonLib.room.ktx)
+    kapt(commonLib.room.compiler)
 
-    implementation(common.jsoup)
+    implementation(commonLib.jsoup)
     androidTestImplementation(compose.compose.uiTestManifest)
     androidTestImplementation(compose.compose.testing)
     androidTestImplementation(compose.compose.composeTooling)
@@ -59,5 +59,5 @@ implementation(compose.compose.material3)
     testImplementation(test.junit4)
     testImplementation(test.extJunit)
     testImplementation(test.espresso)
-    androidTestImplementation(common.hilt.androidtest)
+    androidTestImplementation(commonLib.hilt.androidtest)
 }

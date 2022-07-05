@@ -47,31 +47,31 @@ implementation(compose.compose.material3)
 
     implementation(compose.compose.coil)
     implementation(compose.compose.paging)
-    implementation(common.gson)
+    implementation(commonLib.gson)
     implementation(project(mapOf("path" to ":common-models")))
     debugImplementation(compose.compose.uiTestManifest)
 
     implementation(androidx.work.runtime)
-    implementation(common.hilt.worker)
+    implementation(commonLib.hilt.worker)
 
     /** Room **/
-    implementation(common.room.runtime)
-    implementation(common.room.ktx)
-    // implementation(common.room.paging)
-    kapt(common.room.compiler)
+    implementation(commonLib.room.runtime)
+    implementation(commonLib.room.ktx)
+    // implementation(commonLib.room.paging)
+    kapt(commonLib.room.compiler)
 
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.coroutines.android)
 
-    implementation(common.okhttp.okhttp3)
-    implementation(common.okhttp.interceptor)
-    implementation(common.okhttp.doh)
+    implementation(commonLib.okhttp.okhttp3)
+    implementation(commonLib.okhttp.interceptor)
+    implementation(commonLib.okhttp.doh)
 
-    implementation(common.okhttp.doh)
+    implementation(commonLib.okhttp.doh)
 
-    implementation(common.okio)
-    implementation(common.jsoup)
+    implementation(commonLib.okio)
+    implementation(commonLib.jsoup)
 
     implementation(androidx.dataStore)
 
@@ -83,19 +83,19 @@ implementation(compose.compose.material3)
     implementation(kotlinx.serialization.json)
     implementation(kotlinx.reflect)
 
-    kapt(common.hilt.androidcompiler)
-    kapt(common.hilt.compiler)
-    implementation(common.hilt.android)
+    kapt(commonLib.hilt.androidcompiler)
+    kapt(commonLib.hilt.compiler)
+    implementation(commonLib.hilt.android)
 
     /** LifeCycle **/
     //  implementation(kotlinx.lifecycle.viewModel)
     implementation(androidx.lifecycle.runtime)
 
     implementation(kotlinx.stdlib)
-    implementation(common.ktor.core)
-    implementation(common.ktor.contentNegotiation)
-    implementation(common.ktor.okhttp)
-    implementation(common.bundles.ireader)
+    implementation(commonLib.ktor.core)
+    implementation(commonLib.ktor.contentNegotiation)
+    implementation(commonLib.ktor.okhttp)
+    implementation(commonLib.bundles.ireader)
 
 
     testImplementation(test.junit4)
@@ -110,7 +110,7 @@ implementation(compose.compose.material3)
     androidTestImplementation(test.coroutines)
     androidTestImplementation(test.coroutines)
     androidTestImplementation(compose.compose.j4Unit)
-    androidTestImplementation(common.hilt.androidtest)
+    androidTestImplementation(commonLib.hilt.androidtest)
 
     // Instrumented Unit Tests
     androidTestImplementation("androidx.arch.core:core-testing:2.1.0")

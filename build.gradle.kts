@@ -14,13 +14,13 @@ buildscript {
         maven(url ="https://github.com/psiegman/mvn-repo/raw/master/releases")
     }
     dependencies {
-        classpath(common.gradle.tools)
-        classpath(common.gradle.kotlin)
-        classpath(common.gradle.kotlinSerialization)
-        classpath(common.gradle.hilt)
-        classpath(common.gradle.google)
-        classpath(common.gradle.firebaseCrashlytic)
-        classpath(common.gradle.idea.ext)
+        classpath(commonLib.gradle.tools)
+        classpath(commonLib.gradle.kotlin)
+        classpath(commonLib.gradle.kotlinSerialization)
+        classpath(commonLib.gradle.hilt)
+        classpath(commonLib.gradle.google)
+        classpath(commonLib.gradle.firebaseCrashlytic)
+        classpath(commonLib.gradle.idea.ext)
         classpath("com.vanniktech:gradle-maven-publish-plugin:0.20.0")
     }
 }
@@ -53,7 +53,7 @@ subprojects {
 
     spotless {
         kotlin {
-            ktlint(common.versions.ktlint.get())
+            ktlint(commonLib.versions.ktlint.get())
                 .userData(mapOf("indent_size" to "2", "continuation_indent_size" to "2"))
             target("**/*.kt")
             targetExclude("$buildDir/**/*.kt")
@@ -85,7 +85,7 @@ subprojects {
             }
 
             dependencies {
-                add("coreLibraryDesugaring", common.desugarJdkLibs)
+                add("coreLibraryDesugaring", commonLib.desugarJdkLibs)
             }
 
         }

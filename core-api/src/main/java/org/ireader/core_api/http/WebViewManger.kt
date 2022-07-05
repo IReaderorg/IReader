@@ -43,10 +43,10 @@ class WebViewManger(private val context: Context) {
                                         true
                                     ) == false
                                 ) {
-                                    if (selector != null) {
-                                        if (!html.select(selector).hasText() && webUrl == url) {
-                                            delay(1500L)
-                                            html = Jsoup.parse(view.getHtml())
+                                    if (!selector.isNullOrBlank()) {
+                                        html = Jsoup.parse(view.getHtml())
+                                        val hasText = html.select(selector.toString()).first() != null
+                                        if (hasText && webUrl == url) {
                                             webUrl = null
                                             selector = null
                                             html = Document("")

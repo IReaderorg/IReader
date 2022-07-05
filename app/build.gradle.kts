@@ -17,6 +17,8 @@ plugins {
 hilt {
     enableAggregatingTask = true
 }
+val SUPPORTED_ABIS = setOf("armeabi-v7a", "arm64-v8a", "x86")
+
 android {
     compileSdk = ProjectConfig.compileSdk
     defaultConfig {
@@ -29,24 +31,40 @@ android {
     packagingOptions {
         resources.excludes.addAll(
             listOf(
+                "META-INF/DEPENDENCIES",
                 "LICENSE.txt",
                 "META-INF/LICENSE",
                 "META-INF/LICENSE.txt",
                 "META-INF/README.md",
-                "META-INF/AL2.0",
-                "META-INF/LGPL2.1",
-                "**/attach_hotspot_windows.dll",
-                "META-INF/licenses/ASM",
-                "META-INF/gradle/incremental.annotation.processors",
-                "META-INF/DEPENDENCIES",
-                "mozilla/public-suffix-list.txt",
+                "META-INF/NOTICE",
+                "META-INF/*.kotlin_module",
+                "META-INF/*.version",
             )
         )
     }
 
     buildFeatures {
         compose = true
+
+        // Disable some unused things
+        aidl = false
+        renderScript = false
+        shaders = false
     }
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include(*SUPPORTED_ABIS.toTypedArray())
+            isUniversalApk = true
+        }
+    }
+    lint {
+        disable.addAll(listOf("MissingTranslation", "ExtraTranslation"))
+        abortOnError = false
+        checkReleaseBuilds = false
+    }
+
     composeOptions {
         kotlinCompilerExtensionVersion = compose.versions.extension.get()
     }
@@ -59,7 +77,9 @@ android {
         buildConfigField("String", "VERSION_NAME", "\"${ProjectConfig.versionName}\"")
         buildConfigField("int", "VERSION_CODE",  "${ProjectConfig.versionCode}")
     }
-
+    dependenciesInfo {
+        includeInApk = false
+    }
 
     buildTypes {
         named("debug") {
@@ -117,10 +137,10 @@ implementation(compose.compose.material3)
     implementation(project(Modules.uiSources))
 
     /** Firebase **/
-    implementation(platform(common.firebase.bom))
-    implementation(common.firebase.analyticKtx)
-    implementation(common.firebase.analytic)
-    implementation(common.firebase.crashlytics)
+    implementation(platform(commonLib.firebase.bom))
+    implementation(commonLib.firebase.analyticKtx)
+    implementation(commonLib.firebase.analytic)
+    implementation(commonLib.firebase.crashlytics)
 
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)
@@ -128,24 +148,24 @@ implementation(compose.compose.material3)
     implementation("com.google.firebase:firebase-analytics:21.0.0")
 
     /** Hilt **/
-    kapt(common.hilt.androidcompiler)
+    kapt(commonLib.hilt.androidcompiler)
 
-    implementation(common.hilt.android)
+    implementation(commonLib.hilt.android)
     implementation(androidx.work.runtime)
-    implementation(common.hilt.worker)
+    implementation(commonLib.hilt.worker)
 
     implementation(compose.compose.runtime)
 
     /** Room **/
-    implementation(common.room.runtime)
-    implementation(common.room.ktx)
-    kapt(common.room.compiler)
+    implementation(commonLib.room.runtime)
+    implementation(commonLib.room.ktx)
+    kapt(commonLib.room.compiler)
 
     testImplementation(test.bundles.common)
-    testImplementation(common.hilt.androidtest)
-    testImplementation(common.room.testing)
-    androidTestImplementation(common.hilt.androidtest)
-    androidTestImplementation(common.room.testing)
+    testImplementation(commonLib.hilt.androidtest)
+    testImplementation(commonLib.room.testing)
+    androidTestImplementation(commonLib.hilt.androidtest)
+    androidTestImplementation(commonLib.room.testing)
     androidTestImplementation(test.bundles.common)
 }
 

@@ -17,5 +17,5 @@ dependencies {
     implementation(androidx.biometric)
     implementation(androidx.lifecycle.viewmodelktx)
     implementation(androidx.appCompat)
-    implementation(common.jsoup)
+    implementation(commonLib.jsoup)
 }

@@ -68,12 +68,12 @@ dependencies {
     implementation(project(mapOf("path" to ":core-ui")))
 
 
-    kapt(common.hilt.androidcompiler)
-    implementation(common.hilt.android)
+    kapt(commonLib.hilt.androidcompiler)
+    implementation(commonLib.hilt.android)
 
 
 
-    implementation(common.jsoup)
+    implementation(commonLib.jsoup)
 
     /** LifeCycle **/
     implementation(androidx.lifecycle.runtime)
@@ -81,22 +81,22 @@ dependencies {
 
     implementation(kotlinx.stdlib)
 
-    implementation(common.room.runtime)
-    implementation(common.room.ktx)
-    kapt(common.room.compiler)
-    implementation(common.room.roomigrant.lib)
-    kapt(common.room.roomigrant.compiler)
+    implementation(commonLib.room.runtime)
+    implementation(commonLib.room.ktx)
+    kapt(commonLib.room.compiler)
+    implementation(commonLib.room.roomigrant.lib)
+    kapt(commonLib.room.roomigrant.compiler)
 
-    implementation(common.okhttp.interceptor)
+    implementation(commonLib.okhttp.interceptor)
 
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.coroutines.android)
 
     testImplementation(test.bundles.common)
-    testImplementation(common.hilt.androidtest)
-    testImplementation(common.room.testing)
-    androidTestImplementation(common.hilt.androidtest)
-    androidTestImplementation(common.room.testing)
+    testImplementation(commonLib.hilt.androidtest)
+    testImplementation(commonLib.room.testing)
+    androidTestImplementation(commonLib.hilt.androidtest)
+    androidTestImplementation(commonLib.room.testing)
     androidTestImplementation(test.bundles.common)
 }

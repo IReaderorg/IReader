@@ -300,6 +300,7 @@
     <string name="backup">Backup</string>
     <string name="backup_and_restore">Backup and restore</string>
     <string name="restore">Restore</string>
+    <string name="auto_backup">Auto backup</string>
     <string name="import_epub">Import Epub</string>
     <string name="data">Data</string>
     <string name="chapters_was_cleared">Chapters was cleared</string>

@@ -12,7 +12,7 @@ tinylog = "2.4.1"
 spotless = "6.6.1"
 ktlint = "0.45.1"
 roomigrant = "0.3.4"
-markdown = "4.6.2"
+modernstorage = "1.0.0-alpha06"
 
 
 [libraries]
@@ -30,6 +30,8 @@ gradle-idea-ext = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-ide
 gson = "com.google.code.gson:gson:2.9.0"
 htmlUnit-android = "net.sourceforge.htmlunit:htmlunit-android:2.63.0-SNAPSHOT"
 
+modernstorage-permissions = { module = "com.google.modernstorage:modernstorage-permissions", version.ref = "modernstorage" }
+modernstorage-storage = { module = "com.google.modernstorage:modernstorage-storage", version.ref = "modernstorage" }
 
 ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 ksp-gradle = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
@@ -42,6 +44,9 @@ ktor-core-android = { module = "io.ktor:ktor-client-android", version.ref = "kto
 ktor-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-contentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-contentNegotiation-gson = { module = "io.ktor:ktor-serialization-gson", version.ref = "ktor" }
+ktor-contentNegotiation-kotlinx = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-contentNegotiation-jackson = { module = "io.ktor:ktor-serialization-jackson", version.ref = "ktor" }
+
 
 
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
