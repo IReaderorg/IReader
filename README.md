@@ -26,6 +26,14 @@ IReader is a free and open source applicaiton for Android.
 | Book     | ![book_view_dark](screenshots/detail-dark.png)               | ![book_view_light](screenshots/detail-light.png)               |
 | Reader     | ![book_view_dark](screenshots/reader-dark.png)               | ![book_view_light](screenshots/reader-light.png)               |
 
+
+## Sources
+| -------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
+
+Boxnovelcom, Comrademao, Daonovel, Freewebnovel, Kissnovellove, Koreanonline, Lightnovelpub, Lightnovelreader, Lightnovels, Mtlnation, Mtlnovelcom, Mylovenovel, Novelfull, Novelhall, Novelowlcom, Novelupdates, Pandanovel, Qidianundergrond, Ranobes, Realwebnovel, Reaperscans, Riwyat, Skynovel, Webnovelcom, Wnmtl, Wuxiaworld, Wuxiaworldsite, Wuxiaworldsiteco and more coming!
+| -------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
+
+
 ## License
 
     Copyright 2015 Javier Tomás
