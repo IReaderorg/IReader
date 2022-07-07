@@ -19,6 +19,7 @@ import org.ireader.web.WebPageTopBar
 import org.ireader.web.WebViewPageModel
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import org.ireader.Controller
 
 @OptIn(
     ExperimentalMaterialApi::class,
@@ -78,7 +79,7 @@ object WebViewScreenSpec : ScreenSpec {
 
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: WebViewPageModel = hiltViewModel(controller.navBackStackEntry)
         val scope = rememberCoroutineScope()
@@ -105,7 +106,7 @@ object WebViewScreenSpec : ScreenSpec {
 
     @Composable
     override fun TopBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: WebViewPageModel = hiltViewModel(controller.navBackStackEntry)
         val webView = vm.webView

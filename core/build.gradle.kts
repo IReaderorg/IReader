@@ -4,6 +4,9 @@ plugins {
     id("kotlinx-serialization")
     id("kotlin-kapt")
 }
+android {
+    namespace = "org.ireader.core"
+}
 
 dependencies {
     implementation(project(Modules.coreApi))

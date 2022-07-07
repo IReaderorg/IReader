@@ -20,6 +20,7 @@ import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.settings.setting.SettingsSection
 import org.ireader.settings.setting.SetupLayout
 import org.ireader.ui_settings.R
+import org.ireader.Controller
 
 object SettingScreenSpec : ScreenSpec {
     override val navHostRoute: String = "settings"
@@ -28,7 +29,7 @@ object SettingScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-                controller: ScreenSpec.Controller
+                controller: Controller
     ) {
         Toolbar(
             title = {
@@ -44,7 +45,7 @@ object SettingScreenSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val settingItems = remember {
             listOf(

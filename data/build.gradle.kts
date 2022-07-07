@@ -8,6 +8,7 @@ plugins {
 }
 
 android {
+    namespace = "org.ireader.data"
     compileSdk = ProjectConfig.compileSdk
 
     defaultConfig {

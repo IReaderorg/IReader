@@ -41,6 +41,7 @@ import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.HttpSource
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
+import org.ireader.Controller
 
 object BookDetailScreenSpec : ScreenSpec {
 
@@ -71,7 +72,7 @@ object BookDetailScreenSpec : ScreenSpec {
     @ExperimentalMaterial3Api
     @Composable
     override fun TopBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: BookDetailViewModel = hiltViewModel(controller.navBackStackEntry)
         val scope = rememberCoroutineScope()
@@ -141,7 +142,7 @@ object BookDetailScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
     @Composable
     override fun BottomAppBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: BookDetailViewModel = hiltViewModel(controller.navBackStackEntry)
         val detailState = vm.state
@@ -205,7 +206,7 @@ object BookDetailScreenSpec : ScreenSpec {
     @ExperimentalMaterial3Api
     @Composable
     override fun BottomModalSheet(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: BookDetailViewModel = hiltViewModel(controller.navBackStackEntry)
         val detailState = vm.state
@@ -249,7 +250,7 @@ object BookDetailScreenSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: BookDetailViewModel = hiltViewModel(controller.navBackStackEntry)
         val context = LocalContext.current

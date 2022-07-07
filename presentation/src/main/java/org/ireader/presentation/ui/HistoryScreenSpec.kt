@@ -18,6 +18,7 @@ import org.ireader.history.HistoryScreen
 import org.ireader.history.HistoryTopAppBar
 import org.ireader.history.viewmodel.HistoryViewModel
 import org.ireader.presentation.R
+import org.ireader.Controller
 
 object HistoryScreenSpec : BottomNavScreenSpec {
     override val icon: ImageVector = Icons.Filled.History
@@ -31,7 +32,7 @@ object HistoryScreenSpec : BottomNavScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-        controller:ScreenSpec.Controller
+        controller:Controller
     ) {
         val vm: HistoryViewModel = hiltViewModel(controller.navBackStackEntry)
         val context = LocalContext.current
@@ -63,7 +64,7 @@ object HistoryScreenSpec : BottomNavScreenSpec {
 
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: HistoryViewModel = hiltViewModel(controller.navBackStackEntry)
 val context = LocalContext.current

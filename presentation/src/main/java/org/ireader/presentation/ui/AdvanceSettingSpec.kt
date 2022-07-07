@@ -15,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.collectLatest
 import org.ireader.common_extensions.findComponentActivity
+import org.ireader.Controller
 import org.ireader.common_extensions.getCacheSize
 import org.ireader.common_extensions.launchIO
 import org.ireader.common_resources.UiEvent
@@ -33,7 +34,7 @@ object AdvanceSettingSpec : ScreenSpec {
     @ExperimentalMaterial3Api
     @Composable
     override fun TopBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         TitleToolbar(
             title = stringResource(R.string.advance_setting),
@@ -43,7 +44,7 @@ object AdvanceSettingSpec : ScreenSpec {
 
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: AdvanceSettingViewModel = hiltViewModel(controller.navBackStackEntry)
         val context = LocalContext.current

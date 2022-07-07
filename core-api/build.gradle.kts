@@ -6,6 +6,9 @@ plugins {
     `maven-publish`
     signing
 }
+android {
+    namespace = "org.ireader.core_api"
+}
 
 dependencies {
     implementation(project(Modules.commonResources))

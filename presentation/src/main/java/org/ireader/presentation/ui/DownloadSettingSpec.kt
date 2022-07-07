@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import org.ireader.common_resources.R
 import org.ireader.components.components.TitleToolbar
+import org.ireader.Controller
 
 object DownloadSettingSpec : ScreenSpec {
 
@@ -11,7 +12,7 @@ object DownloadSettingSpec : ScreenSpec {
 
     @Composable
     override fun TopBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         TitleToolbar(
             title = stringResource(R.string.download),
@@ -22,7 +23,7 @@ object DownloadSettingSpec : ScreenSpec {
 
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
 
     }

@@ -35,7 +35,7 @@ import org.ireader.ui_library.R
 fun LibraryScreenTopBar(
     state: LibraryState,
     bottomSheetState: ModalBottomSheetState,
-    onSearch: () -> Unit,
+    onSearch: (() -> Unit)?= null,
     refreshUpdate: () -> Unit,
     onClickSelectAll: () -> Unit,
     onClickInvertSelection: () -> Unit,
@@ -56,7 +56,9 @@ fun LibraryScreenTopBar(
                     state,
                     bottomSheetState,
                     refreshUpdate = refreshUpdate,
-                    onSearch = onSearch
+                    onSearch = {
+                        onSearch?.invoke()
+                    }
                 )
             }
         }

@@ -20,6 +20,7 @@ hilt {
 val SUPPORTED_ABIS = setOf("armeabi-v7a", "arm64-v8a", "x86")
 
 android {
+    namespace = "org.ireader.app"
     compileSdk = ProjectConfig.compileSdk
     defaultConfig {
         applicationId = ProjectConfig.applicationId

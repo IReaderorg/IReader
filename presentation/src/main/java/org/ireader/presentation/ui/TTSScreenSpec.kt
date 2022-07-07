@@ -37,6 +37,7 @@ import org.ireader.reader.ReaderScreenDrawer
 import org.ireader.tts.TTSScreen
 import org.ireader.tts.TTSViewModel
 import java.math.RoundingMode
+import org.ireader.Controller
 
 object TTSScreenSpec : ScreenSpec {
     override val navHostRoute: String = "tts_screen_route/{bookId}/{chapterId}/{sourceId}"
@@ -84,7 +85,7 @@ object TTSScreenSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: TTSViewModel = hiltViewModel   (controller.navBackStackEntry)
         val scope = rememberCoroutineScope()
@@ -177,7 +178,7 @@ object TTSScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
     @Composable
     override fun ModalDrawer(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: TTSViewModel = hiltViewModel   (controller.navBackStackEntry)
         val scope = rememberCoroutineScope()
@@ -226,7 +227,7 @@ object TTSScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
     @Composable
     override fun BottomModalSheet(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: TTSViewModel = hiltViewModel   (controller.navBackStackEntry)
 

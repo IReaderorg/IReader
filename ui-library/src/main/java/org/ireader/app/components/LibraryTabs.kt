@@ -1,7 +1,6 @@
 package org.ireader.app.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.material.Tab
@@ -15,7 +14,7 @@ import org.ireader.common_models.entities.CategoryWithCount
 import org.ireader.components.components.component.pagerTabIndicatorOffset
 import org.ireader.core_ui.theme.AppColors
 
-@OptIn(ExperimentalAnimationApi::class, ExperimentalPagerApi::class)
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun LibraryTabs(
     state: PagerState,

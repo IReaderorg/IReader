@@ -10,6 +10,7 @@ import org.ireader.components.components.TitleToolbar
 import org.ireader.presentation.R
 import org.ireader.settings.setting.general.GeneralSettingScreen
 import org.ireader.settings.setting.general.GeneralSettingScreenViewModel
+import org.ireader.Controller
 
 @ExperimentalMaterial3Api
 @OptIn(ExperimentalMaterialApi::class)
@@ -18,14 +19,14 @@ object GeneralScreenSpec : ScreenSpec {
 
     @Composable
     override fun TopBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         TitleToolbar(title = stringResource(id = R.string.general), navController = controller.navController )
     }
 
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm : GeneralSettingScreenViewModel = hiltViewModel(controller.navBackStackEntry)
 

@@ -4,6 +4,7 @@ plugins {
     id("kotlin-kapt")
 }
 android {
+    namespace = "org.ireader.ui_downloader"
     buildFeatures {
         compose = true
     }

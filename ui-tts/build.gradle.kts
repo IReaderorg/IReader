@@ -5,6 +5,7 @@ plugins {
     kotlin("plugin.serialization")
 }
 android {
+    namespace = "org.ireader.ui_tts"
     buildFeatures {
         compose = true
     }

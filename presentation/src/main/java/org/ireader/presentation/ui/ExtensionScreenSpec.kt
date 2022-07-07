@@ -21,6 +21,7 @@ import org.ireader.presentation.R
 import org.ireader.sources.extension.ExtensionScreen
 import org.ireader.sources.extension.ExtensionScreenTopAppBar
 import org.ireader.sources.extension.ExtensionViewModel
+import org.ireader.Controller
 
 object ExtensionScreenSpec : BottomNavScreenSpec {
     override val icon: ImageVector = Icons.Filled.Explore
@@ -35,7 +36,7 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: ExtensionViewModel = hiltViewModel(controller.navBackStackEntry)
         var searchMode by remember {
@@ -80,7 +81,7 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
     )
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: ExtensionViewModel = hiltViewModel(controller.navBackStackEntry)
 

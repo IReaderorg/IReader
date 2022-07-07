@@ -1,6 +1,5 @@
 package org.ireader.presentation.ui
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
@@ -9,13 +8,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NamedNavArgument
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import org.ireader.app.LibraryScreen
+import org.ireader.Controller
+import org.ireader.app.LibraryController
 import org.ireader.app.LibraryScreenTopBar
 import org.ireader.app.components.BottomTabComposable
 import org.ireader.app.viewmodel.LibraryViewModel
@@ -39,7 +36,7 @@ object LibraryScreenSpec : BottomNavScreenSpec {
     @OptIn(ExperimentalPagerApi::class)
     @Composable
     override fun BottomModalSheet(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: LibraryViewModel = hiltViewModel(controller.navBackStackEntry)
 
@@ -63,20 +60,15 @@ object LibraryScreenSpec : BottomNavScreenSpec {
         )
     }
 
-    private const val route = "library"
 
-    @OptIn(ExperimentalPagerApi::class)
     @Composable
     override fun TopBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: LibraryViewModel = hiltViewModel(controller.navBackStackEntry)
         LibraryScreenTopBar(
             state = vm,
             bottomSheetState = controller.sheetState,
-            onSearch = {
-                //   vm.getBooks()
-            },
             refreshUpdate = {
                 vm.refreshUpdate()
             },
@@ -91,90 +83,36 @@ object LibraryScreenSpec : BottomNavScreenSpec {
             }
         )
     }
-
-    @OptIn(
-        ExperimentalAnimationApi::class,
-        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class, ExperimentalPagerApi::class
-    )
     @Composable
     override fun Content(
-        controller:ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: LibraryViewModel = hiltViewModel(controller.navBackStackEntry)
 
-        LaunchedEffect(key1 = vm.selectionMode ) {
-         controller.requestHideNavigator(vm.selectionMode)
+        LaunchedEffect(key1 = vm.selectionMode) {
+            controller.requestHideNavigator(vm.selectionMode)
         }
 
-
-        LibraryScreen(
-            onMarkAsRead = {
-                vm.markAsRead()
-            },
-            onDownload = {
-                vm.downloadChapters()
-            },
-            onMarkAsNotRead = {
-                vm.markAsNotRead()
-            },
-            onDelete = {
-                vm.deleteBooks()
-            },
-            goToLatestChapter = { book ->
-                controller.navController.navigate(
-                    ReaderScreenSpec.buildRoute(
-                        bookId = book.id,
-                        sourceId = book.sourceId,
-                        chapterId = LAST_CHAPTER
-                    )
-                )
-            },
-            onBook = { book ->
-                if (vm.selectionMode) {
-                    if (book.id in vm.selectedBooks) {
-                        vm.selectedBooks.remove(book.id)
-                    } else {
-                        vm.selectedBooks.add(book.id)
-                    }
-                } else {
-                    controller.navController.navigate(
-                        route = BookDetailScreenSpec.buildRoute(
-                            sourceId = book.sourceId,
-                            bookId = book.id
-                        )
-                    )
-                }
-            },
-            onLongBook = {
-                if (it.id in vm.selectedBooks) return@LibraryScreen
-                vm.selectedBooks.add(it.id)
-            },
+        LibraryController(
             vm = vm,
-            refreshUpdate = {
-                vm.refreshUpdate()
-            },
-            bottomSheetState = controller.sheetState,
-            onClickChangeCategory = {
-                vm.showDialog = true
-            },
-            scaffoldPadding = controller.scaffoldPadding,
-            onAddToCategoryConfirm = {
-                vm.viewModelScope.launch(Dispatchers.IO) {
-                    vm.getCategory.insertBookCategory(vm.addQueues)
-                    vm.getCategory.deleteBookCategory(vm.deleteQueues)
-                    vm.deleteQueues.clear()
-                    vm.addQueues.clear()
-                    vm.selectedBooks.clear()
-                    vm.addQueues.clear()
-                    vm.deleteQueues.clear()
-                }
-                vm.showDialog = false
-            },
-            requestHideBottomNav = controller.requestHideNavigator,
-            getColumnsForOrientation = { isLandscape ->
-              vm.getColumnsForOrientation(isLandscape,this)
-            }
-        )
+            controller = controller,
+            goToReader = { book ->
+            controller.navController.navigate(
+                ReaderScreenSpec.buildRoute(
+                    bookId = book.id,
+                    sourceId = book.sourceId,
+                    chapterId = LAST_CHAPTER
+                )
+            )
+        },
+            goToDetail = { book ->
+            controller.navController.navigate(
+                route = BookDetailScreenSpec.buildRoute(
+                    sourceId = book.sourceId,
+                    bookId = book.id
+                )
+            )
+        })
     }
 }
 

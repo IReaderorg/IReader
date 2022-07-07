@@ -4,6 +4,7 @@ plugins {
     id("kotlin-kapt")
 }
 android {
+    namespace = "org.ireader.core_catalogs"
     buildFeatures {
         compose = true
     }

@@ -7,6 +7,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import org.ireader.Controller
 import org.ireader.about.AboutSettingScreen
 import org.ireader.common_extensions.toDateTimestampString
 import org.ireader.common_resources.BuildConfig
@@ -24,7 +25,7 @@ object AboutSettingSpec : ScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         TitleToolbar(
             title = stringResource(R.string.about),
@@ -40,7 +41,7 @@ object AboutSettingSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         AboutSettingScreen(
             modifier = Modifier.padding(controller.scaffoldPadding),

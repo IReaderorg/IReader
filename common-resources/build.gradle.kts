@@ -10,6 +10,7 @@ plugins {
 }
 
 android {
+    namespace = "org.ireader.common_resources"
     defaultConfig {
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
         buildConfigField("String", "COMMIT_SHA", "\"${getGitSha()}\"")

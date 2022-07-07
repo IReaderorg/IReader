@@ -17,6 +17,7 @@ import org.ireader.components.components.setupUiComponent
 import org.ireader.components.components.TitleToolbar
 import org.ireader.settings.setting.reader.ReaderSettingScreenViewModel
 import org.ireader.ui_settings.R
+import org.ireader.Controller
 
 object ReaderSettingSpec : ScreenSpec {
 
@@ -25,7 +26,7 @@ object ReaderSettingSpec : ScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         TitleToolbar(
             title = stringResource(R.string.reader),
@@ -41,7 +42,7 @@ object ReaderSettingSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val context = LocalContext.current
         val vm : ReaderSettingScreenViewModel = hiltViewModel()

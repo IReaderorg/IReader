@@ -12,6 +12,7 @@ import org.ireader.core_ui.ui.SnackBarListener
 import org.ireader.settings.setting.backups.BackUpAndRestoreScreen
 import org.ireader.settings.setting.backups.BackupScreenViewModel
 import org.ireader.ui_settings.R
+import org.ireader.Controller
 
 object BackupAndRestoreScreenSpec : ScreenSpec {
 
@@ -21,7 +22,7 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         TitleToolbar(
             title = stringResource(R.string.backup_and_restore),
@@ -31,7 +32,7 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
 
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: BackupScreenViewModel = hiltViewModel(controller.navBackStackEntry)
         SnackBarListener(vm = vm, host = controller.snackBarHostState)

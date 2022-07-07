@@ -52,6 +52,7 @@ import org.ireader.reader.ReadingScreen
 import org.ireader.reader.components.ReaderSettingMainLayout
 import org.ireader.reader.reverse_swip_refresh.rememberSwipeRefreshState
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
+import org.ireader.Controller
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 object ReaderScreenSpec : ScreenSpec {
@@ -101,7 +102,7 @@ object ReaderScreenSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
@@ -355,7 +356,7 @@ object ReaderScreenSpec : ScreenSpec {
 
     @Composable
     override fun ModalDrawer(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: ReaderScreenViewModel = hiltViewModel(controller.navBackStackEntry)
         val drawerScrollState = rememberLazyListState()
@@ -423,7 +424,7 @@ object ReaderScreenSpec : ScreenSpec {
 
     @Composable
     override fun TopBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
 
         val vm: ReaderScreenViewModel = hiltViewModel(controller.navBackStackEntry)
@@ -487,7 +488,7 @@ object ReaderScreenSpec : ScreenSpec {
 
     @Composable
     override fun BottomModalSheet(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: ReaderScreenViewModel = hiltViewModel(controller.navBackStackEntry)
         val context = LocalContext.current

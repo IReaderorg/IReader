@@ -18,6 +18,7 @@ import org.ireader.core_ui.theme.getDefaultFont
 import org.ireader.settings.setting.font_screens.FontScreen
 import org.ireader.settings.setting.font_screens.FontScreenViewModel
 import org.ireader.ui_settings.R
+import org.ireader.Controller
 
 @ExperimentalMaterial3Api
 @OptIn(ExperimentalMaterialApi::class)
@@ -26,7 +27,7 @@ object FontScreenSpec : ScreenSpec {
 
     @Composable
     override fun TopBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: FontScreenViewModel = hiltViewModel(   controller.navBackStackEntry)
         SearchToolbar(
@@ -55,7 +56,7 @@ object FontScreenSpec : ScreenSpec {
 
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: FontScreenViewModel = hiltViewModel(   controller.navBackStackEntry)
 

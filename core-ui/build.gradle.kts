@@ -5,7 +5,7 @@ plugins {
     kotlin("plugin.serialization")
 }
 android {
-
+    namespace = "org.ireader.core_ui"
     buildFeatures {
         compose = true
     }

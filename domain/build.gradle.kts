@@ -8,6 +8,7 @@ plugins {
 }
 
 android {
+    namespace = "org.ireader.domain"
     buildFeatures {
         compose = true
     }

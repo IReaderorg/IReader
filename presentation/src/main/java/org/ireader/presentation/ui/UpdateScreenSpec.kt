@@ -18,6 +18,7 @@ import org.ireader.presentation.R
 import org.ireader.updates.UpdateScreen
 import org.ireader.updates.component.UpdatesToolbar
 import org.ireader.updates.viewmodel.UpdatesViewModel
+import org.ireader.Controller
 
 object UpdateScreenSpec : BottomNavScreenSpec {
     override val icon: ImageVector = Icons.Filled.NewReleases
@@ -33,7 +34,7 @@ object UpdateScreenSpec : BottomNavScreenSpec {
     @ExperimentalMaterialApi
     @Composable
     override fun TopBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: UpdatesViewModel = hiltViewModel(controller.navBackStackEntry)
         UpdatesToolbar(
@@ -73,7 +74,7 @@ object UpdateScreenSpec : BottomNavScreenSpec {
     )
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: UpdatesViewModel = hiltViewModel(controller.navBackStackEntry)
         UpdateScreen(

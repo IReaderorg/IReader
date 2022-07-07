@@ -11,6 +11,7 @@ import androidx.navigation.navArgument
 import org.ireader.core_api.log.Log
 import org.ireader.sources.global_search.GlobalSearchScreen
 import org.ireader.sources.global_search.viewmodel.GlobalSearchViewModel
+import org.ireader.Controller
 
 object GlobalSearchScreenSpec : ScreenSpec {
 
@@ -33,7 +34,7 @@ object GlobalSearchScreenSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: GlobalSearchViewModel = hiltViewModel(   controller.navBackStackEntry)
         GlobalSearchScreen(

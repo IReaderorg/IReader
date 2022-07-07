@@ -7,6 +7,7 @@ plugins {
 }
 
 android {
+    namespace = "org.ireader.presentation"
     buildFeatures {
         compose = true
     }

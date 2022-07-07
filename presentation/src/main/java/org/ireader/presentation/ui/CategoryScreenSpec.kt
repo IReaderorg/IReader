@@ -13,6 +13,7 @@ import org.ireader.common_resources.R
 import org.ireader.components.components.TitleToolbar
 import org.ireader.settings.setting.category.CategoryScreen
 import org.ireader.settings.setting.category.CategoryScreenViewModel
+import org.ireader.Controller
 
 object CategoryScreenSpec : ScreenSpec {
 
@@ -21,7 +22,7 @@ object CategoryScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         TitleToolbar(
             title = stringResource(R.string.edit_category),
@@ -37,7 +38,7 @@ object CategoryScreenSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm : CategoryScreenViewModel = hiltViewModel(   controller.navBackStackEntry)
         Box(modifier = Modifier.padding(controller.scaffoldPadding)) {

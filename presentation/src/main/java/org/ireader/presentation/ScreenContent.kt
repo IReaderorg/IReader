@@ -52,6 +52,7 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import kotlinx.coroutines.launch
+import org.ireader.Controller
 import org.ireader.common_resources.ARG_HAVE_DRAWER
 import org.ireader.common_resources.ARG_HAVE_MODAL_SHEET
 import org.ireader.common_resources.ARG_HAVE_VARIANT_BOTTOM_BAR
@@ -137,7 +138,7 @@ fun ScreenContent() {
         sheetContent = {
             if (navStackEntry != null) {
                 screenSpec?.BottomModalSheet(
-                    ScreenSpec.Controller(
+                    Controller(
                         navController = navController,
                         navBackStackEntry = navStackEntry,
                         snackBarHostState = snackBarHostState,
@@ -158,7 +159,7 @@ fun ScreenContent() {
             sheetContent = {
                 if (navStackEntry != null) {
                     screenSpec?.ModalDrawer(
-                        ScreenSpec.Controller(
+                        Controller(
                             navController = navController,
                             navBackStackEntry = navStackEntry,
                             snackBarHostState = snackBarHostState,
@@ -187,7 +188,7 @@ fun ScreenContent() {
                                     exit = slideOutVertically(targetOffsetY = { it })
                                 ) {
                                     screenSpec?.TopBar(
-                                        ScreenSpec.Controller(
+                                        Controller(
                                             navController = navController,
                                             navBackStackEntry = navStackEntry,
                                             snackBarHostState = snackBarHostState,
@@ -209,7 +210,7 @@ fun ScreenContent() {
                                     isEnable = haveVariantBottomAppBar,
                                     sheetContent = {
                                         screenSpec?.BottomAppBar(
-                                            ScreenSpec.Controller(
+                                            Controller(
                                                 navController = navController,
                                                 navBackStackEntry = navStackEntry,
                                                 snackBarHostState = snackBarHostState,
@@ -306,7 +307,7 @@ fun ScreenContent() {
                                 ) { navBackStackEntry ->
 
                                     screen.Content(
-                                        ScreenSpec.Controller(
+                                        Controller(
                                             navController = navController,
                                             navBackStackEntry = navBackStackEntry,
                                             snackBarHostState = snackBarHostState,

@@ -27,7 +27,7 @@ fun ChapterDetailTopAppBar(
     onClickCancelSelection: () -> Unit,
     onClickSelectAll: () -> Unit,
     onClickFlipSelection: () -> Unit,
-    onSelectBetween:() -> Unit,
+    onSelectBetween: () -> Unit,
     onReverseClick: () -> Unit,
     onPopBackStack: () -> Unit,
     onMap: () -> Unit,
@@ -60,45 +60,29 @@ fun RegularChapterDetailTopAppBar(
     onPopBackStack: () -> Unit,
     onMap: () -> Unit,
 ) {
-//    CenterAlignedTopAppBar(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .height(86.dp),
-//        title = {
-//            BigSizeTextComposable(text = stringResource(R.string.content))
-//        },
-//        actions = {
-//            AppIconButton(imageVector = Icons.Filled.Place, text =  UiText.StringResource(R.string.find_current_chapter), onClick = onMap)
-//            IconButton(onClick = onReverseClick) {
-//                Icon(
-//                    imageVector = Icons.Default.Sort,
-//                   contentDescription = stringResource(R.string.sort).asString()
-//                )
-//            }
-//        },
-//        navigationIcon = {
-//            IconButton(onClick = onPopBackStack) {
-//                Icon(
-//                    imageVector = Icons.Default.ArrowBack,
-//                    contentDescription =  UiText.StringResource(R.string.return_to_previous_screen).asString()
-//                )
-//            }
-//        },
-//        colors =  TopAppBarDefaults.centerAlignedTopAppBarColors(
-//
-//        ),
-//    )
     CenterAlignedTopAppBar(
         modifier = Modifier.statusBarsPadding(),
         title = {
             BigSizeTextComposable(text = stringResource(R.string.content))
         },
         actions = {
-            AppIconButton(imageVector = Icons.Filled.Place, contentDescription = stringResource(R.string.find_current_chapter), onClick = onMap)
-            AppIconButton(imageVector =Icons.Default.Sort ,contentDescription = stringResource(R.string.sort), onClick = onReverseClick)
+            AppIconButton(
+                imageVector = Icons.Filled.Place,
+                contentDescription = stringResource(R.string.find_current_chapter),
+                onClick = onMap
+            )
+            AppIconButton(
+                imageVector = Icons.Default.Sort,
+                contentDescription = stringResource(R.string.sort),
+                onClick = onReverseClick
+            )
         },
         navigationIcon = {
-            AppIconButton(imageVector =Icons.Default.ArrowBack , contentDescription = stringResource(R.string.return_to_previous_screen), onClick = onPopBackStack)
+            AppIconButton(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = stringResource(R.string.return_to_previous_screen),
+                onClick = onPopBackStack
+            )
         },
     )
 }
@@ -114,12 +98,28 @@ private fun EditModeChapterDetailTopAppBar(
     Toolbar(
         title = { BigSizeTextComposable(text = "$selectionSize") },
         navigationIcon = {
-            AppIconButton(imageVector =Icons.Default.Close ,contentDescription = stringResource(R.string.close), onClick = onClickCancelSelection)
+            AppIconButton(
+                imageVector = Icons.Default.Close,
+                contentDescription = stringResource(R.string.close),
+                onClick = onClickCancelSelection
+            )
         },
         actions = {
-            AppIconButton(imageVector =Icons.Default.SelectAll ,contentDescription = stringResource(R.string.select_all), onClick = onClickSelectAll)
-            AppIconButton(imageVector =Icons.Default.FlipToBack ,contentDescription = stringResource(R.string.select_inverted), onClick = onClickInvertSelection)
-            AppIconButton(imageVector =Icons.Default.SyncAlt ,contentDescription = stringResource(R.string.select_between), onClick = onSelectBetween)
+            AppIconButton(
+                imageVector = Icons.Default.SelectAll,
+                contentDescription = stringResource(R.string.select_all),
+                onClick = onClickSelectAll
+            )
+            AppIconButton(
+                imageVector = Icons.Default.FlipToBack,
+                contentDescription = stringResource(R.string.select_inverted),
+                onClick = onClickInvertSelection
+            )
+            AppIconButton(
+                imageVector = Icons.Default.SyncAlt,
+                contentDescription = stringResource(R.string.select_between),
+                onClick = onSelectBetween
+            )
         }
     )
 }

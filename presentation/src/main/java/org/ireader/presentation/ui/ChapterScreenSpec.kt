@@ -23,6 +23,7 @@ import androidx.navigation.NamedNavArgument
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
+import org.ireader.Controller
 import org.ireader.chapterDetails.ChapterDetailScreen
 import org.ireader.chapterDetails.ChapterDetailTopAppBar
 import org.ireader.chapterDetails.ChapterScreenBottomTabComposable
@@ -53,7 +54,7 @@ object ChapterScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: ChapterDetailViewModel = hiltViewModel(controller.navBackStackEntry)
         val scrollState = vm.scrollState
@@ -74,7 +75,6 @@ object ChapterScreenSpec : ScreenSpec {
                 vm.selection.addAll(ids)
             },
             onReverseClick = {
-                //vm.onEvent(ChapterDetailEvent.ToggleOrder)
                 scope.launch {
                     controller.sheetState.show()
 
@@ -111,11 +111,10 @@ object ChapterScreenSpec : ScreenSpec {
             }
         )
     }
-
-    @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+    
     @Composable
     override fun ModalDrawer(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: ChapterDetailViewModel = hiltViewModel(controller.navBackStackEntry)
         Column(
@@ -151,7 +150,7 @@ object ChapterScreenSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: ChapterDetailViewModel = hiltViewModel(controller.navBackStackEntry)
         val book = vm.book
@@ -196,7 +195,7 @@ object ChapterScreenSpec : ScreenSpec {
     @OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
     @Composable
     override fun BottomModalSheet(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: ChapterDetailViewModel = hiltViewModel(controller.navBackStackEntry)
 

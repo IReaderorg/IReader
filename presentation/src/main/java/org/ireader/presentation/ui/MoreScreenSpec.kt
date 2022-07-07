@@ -18,6 +18,7 @@ import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
 import org.ireader.settings.setting.MainSettingScreenViewModel
 import org.ireader.settings.setting.MoreScreen
+import org.ireader.Controller
 
 object MoreScreenSpec : BottomNavScreenSpec {
     override val icon: ImageVector = Icons.Filled.MoreHoriz
@@ -31,7 +32,7 @@ object MoreScreenSpec : BottomNavScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-                controller: ScreenSpec.Controller
+                controller: Controller
     ) {
         TitleToolbar(
             title = stringResource(org.ireader.ui_settings.R.string.more),
@@ -45,7 +46,7 @@ object MoreScreenSpec : BottomNavScreenSpec {
     )
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val uriHandler = LocalUriHandler.current
         val vm: MainSettingScreenViewModel = hiltViewModel   (controller.navBackStackEntry)

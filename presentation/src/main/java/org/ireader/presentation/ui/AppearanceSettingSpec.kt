@@ -10,6 +10,8 @@ import org.ireader.appearance.AppearanceSettingScreen
 import org.ireader.appearance.AppearanceToolbar
 import org.ireader.appearance.AppearanceViewModel
 import org.ireader.core_ui.ui.SnackBarListener
+import org.ireader.Controller
+
 
 object AppearanceScreenSpec : ScreenSpec {
 
@@ -18,7 +20,7 @@ object AppearanceScreenSpec : ScreenSpec {
     @ExperimentalMaterial3Api
     @Composable
     override fun TopBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: AppearanceViewModel = hiltViewModel(controller.navBackStackEntry)
         AppearanceToolbar(
@@ -31,7 +33,7 @@ object AppearanceScreenSpec : ScreenSpec {
 
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val viewModel: AppearanceViewModel = hiltViewModel(controller.navBackStackEntry)
         SnackBarListener(viewModel, controller.snackBarHostState)

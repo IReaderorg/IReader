@@ -28,6 +28,7 @@ import org.ireader.explore.ExploreScreen
 import org.ireader.explore.FilterBottomSheet
 import org.ireader.explore.viewmodel.ExploreViewModel
 import org.ireader.image_loader.coil.image_loaders.convertToOkHttpRequest
+import org.ireader.Controller
 
 @OptIn(
     ExperimentalAnimationApi::class,
@@ -57,7 +58,7 @@ object ExploreScreenSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: ExploreViewModel = hiltViewModel(controller.navBackStackEntry)
         val focusManager = LocalFocusManager.current
@@ -132,7 +133,7 @@ object ExploreScreenSpec : ScreenSpec {
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     override fun BottomModalSheet(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: ExploreViewModel = hiltViewModel(controller.navBackStackEntry)
         val source = vm.source
@@ -159,7 +160,7 @@ object ExploreScreenSpec : ScreenSpec {
 
     @Composable
     override fun TopBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: ExploreViewModel = hiltViewModel(controller.navBackStackEntry)
         val focusManager = LocalFocusManager.current

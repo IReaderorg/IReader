@@ -27,6 +27,7 @@ import org.ireader.core_ui.preferences.PreferenceValues
 import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import javax.inject.Inject
+import org.ireader.Controller
 
 object SecuritySettingSpec : ScreenSpec {
 
@@ -34,7 +35,7 @@ object SecuritySettingSpec : ScreenSpec {
 
     @Composable
     override fun TopBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         TitleToolbar(
             title = stringResource(R.string.security),
@@ -44,7 +45,7 @@ object SecuritySettingSpec : ScreenSpec {
 
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: SecuritySettingViewModel = hiltViewModel()
         val context = LocalContext.current

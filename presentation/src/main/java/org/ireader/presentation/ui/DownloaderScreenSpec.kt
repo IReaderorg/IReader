@@ -11,6 +11,7 @@ import org.ireader.common_models.entities.toSavedDownload
 import org.ireader.downloader.DownloaderScreen
 import org.ireader.downloader.DownloaderTopAppBar
 import org.ireader.downloader.DownloaderViewModel
+import org.ireader.Controller
 
 object DownloaderScreenSpec : ScreenSpec {
 
@@ -28,7 +29,7 @@ object DownloaderScreenSpec : ScreenSpec {
     )
     @Composable
     override fun Content(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: DownloaderViewModel = hiltViewModel(   controller.navBackStackEntry)
         DownloaderScreen(
@@ -48,7 +49,7 @@ object DownloaderScreenSpec : ScreenSpec {
     @ExperimentalMaterial3Api
     @Composable
     override fun TopBar(
-        controller: ScreenSpec.Controller
+        controller: Controller
     ) {
         val vm: DownloaderViewModel = hiltViewModel(   controller.navBackStackEntry)
         DownloaderTopAppBar(

@@ -5,7 +5,7 @@ plugins {
     id("kotlinx-serialization")
 }
 android {
-
+    namespace = "org.ireader.common_models"
 }
 
 dependencies {
