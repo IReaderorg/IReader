@@ -4,13 +4,14 @@ compiler = "1.2.0"
 extension = "1.2.0"
 activity = "1.4.0"
 lifecycle = "2.4.1"
+material3 = "1.0.0-alpha14"
 
 [libraries]
 compose-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "compose" }
 compose-compiler = { module = "androidx.compose.compiler:compiler", version.ref = "compiler" }
 compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
 compose-material = { module = "androidx.compose.material:material", version.ref = "compose" }
-compose-material3 = { module = "androidx.compose.material3:material3", version = "1.0.0-alpha14" }
+
 compose-icons = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose" }
 compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
 compose-uiUtil = { module = "androidx.compose.ui:ui-util", version.ref = "compose" }
@@ -19,6 +20,7 @@ compose-uiToolingPreview = { module = "androidx.compose.ui:ui-tooling-preview", 
 compose-uiTooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
 compose-paging = { module = "androidx.paging:paging-compose", version = "1.0.0-alpha14" }
 compose-animations = { module = "androidx.compose.animation:animation", version.ref = "compose" }
+compose-animations-graphics = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose" }
 compose-testing = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose" }
 compose-composeTooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
 compose-uiTestManifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "compose" }
@@ -38,7 +40,10 @@ compose-destinations-animation = "io.github.raamcosta.compose-destinations:anima
 compose-destinations-ksp = "io.github.raamcosta.compose-destinations:ksp:1.5.1-beta"
 
 
-
+material3-core = { module = "androidx.compose.material3:material3", version.ref = "material3" }
+material3-windowsizeclass = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "material3" }
+material3-adapter = "com.google.android.material:compose-theme-adapter-3:1.0.14"
+material-icons = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose" }
 
 [bundles]
 

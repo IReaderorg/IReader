@@ -61,7 +61,7 @@ dependencies {
     implementation(compose.compose.compiler)
     implementation(compose.compose.activity)
 
-implementation(compose.compose.material3)
+implementation(compose.material3.core)
 
 
     implementation(compose.compose.uiToolingPreview)

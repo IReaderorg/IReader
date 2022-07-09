@@ -21,7 +21,7 @@ buildscript {
         classpath(commonLib.gradle.google)
         classpath(commonLib.gradle.firebaseCrashlytic)
         classpath(commonLib.gradle.idea.ext)
-        classpath("com.vanniktech:gradle-maven-publish-plugin:0.20.0")
+        classpath("com.vanniktech:gradle-maven-publish-plugin:0.19.0")
     }
 }
 

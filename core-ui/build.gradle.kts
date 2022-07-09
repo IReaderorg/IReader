@@ -22,7 +22,7 @@ dependencies {
     implementation(project(Modules.uiImageLoader))
 
     implementation(compose.compose.foundation)
-implementation(compose.compose.material3)
+implementation(compose.material3.core)
 
 
 

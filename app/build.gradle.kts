@@ -115,7 +115,7 @@ dependencies {
     implementation(androidx.media)
     implementation(compose.compose.activity)
     implementation("androidx.core:core-splashscreen:1.0.0-beta02")
-implementation(compose.compose.material3)
+implementation(compose.material3.core)
 
 
     implementation(compose.compose.coil)

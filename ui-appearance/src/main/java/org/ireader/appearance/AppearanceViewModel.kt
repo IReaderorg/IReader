@@ -2,7 +2,6 @@ package org.ireader.appearance
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +31,9 @@ class AppearanceViewModel @Inject constructor(
     val vmThemes = themeRepository.subscribe().asState(emptyList())
     var themeEditMode by mutableStateOf(false)
 
+    init {
+
+    }
 
 
 
@@ -61,28 +63,9 @@ class AppearanceViewModel @Inject constructor(
         }
     }
 
-    @Composable
-    fun getIsNotSavable(): Boolean {
-        val theme = remember(colorTheme.value) {
-            vmThemes.value.find { it.id == colorTheme.value }
-        }
-        val currentPallet by derivedStateOf { if (themeMode.value == PreferenceValues.ThemeMode.Dark) theme?.darkColor else theme?.lightColor }
-        val customizedColor = getCustomizedColors()
-
-        val isPrimarySame = derivedStateOf {
-            currentPallet?.primary == customizedColor.value.primary.value
-        }
-        val isSecondarySame = derivedStateOf {
-            currentPallet?.primary == customizedColor.value.primary.value
-        }
-        return remember(isPrimarySame.value, isSecondarySame.value) {
-            isPrimarySame.value &&
-                isSecondarySame.value
-        }
-    }
 
     fun getThemes(id: Long): BaseTheme? {
-        val themes = vmThemes.value.getOrNull(colorTheme.value.toInt())
+        val themes = vmThemes.value.firstOrNull{ it.id == id}
         val primary = if (themeMode.value == PreferenceValues.ThemeMode.Dark) {
             darkColors.primary
         } else {
@@ -114,4 +97,5 @@ class AppearanceViewModel @Inject constructor(
 
 data class MainScreenState(
     val darkMode: Boolean = true,
+    var isSavable:Boolean = false
 )

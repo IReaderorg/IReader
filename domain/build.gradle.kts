@@ -43,7 +43,7 @@ dependencies {
     implementation(compose.compose.ui)
     implementation(compose.compose.runtime)
     implementation(compose.compose.navigation)
-implementation(compose.compose.material3)
+implementation(compose.material3.core)
 
 
     implementation(compose.compose.coil)

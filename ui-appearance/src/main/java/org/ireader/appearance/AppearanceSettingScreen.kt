@@ -114,6 +114,7 @@ fun AppearanceSettingScreen(
                     subtitle = null,
                     onValue = {
                         vm.saveNightModePreferences(it)
+                        vm.state.value.isSavable = false
                     }
                 )
             },
@@ -126,7 +127,14 @@ fun AppearanceSettingScreen(
                     preference = customizedColors.primaryState,
                     title = "Color primary",
                     subtitle = "Displayed most frequently across your app",
-                    unsetColor = MaterialTheme.colorScheme.primary
+                    unsetColor = MaterialTheme.colorScheme.primary,
+                    onChangeColor = {
+                        vm.state.value.isSavable = true
+                    },
+                    onRestToDefault = {
+                        vm.state.value.isSavable = false
+
+                    }
                 )
             },
             Components.Dynamic {
@@ -134,14 +142,28 @@ fun AppearanceSettingScreen(
                     preference = customizedColors.secondaryState,
                     title = "Color secondary",
                     subtitle = "Accents select parts of the UI",
-                    unsetColor = MaterialTheme.colorScheme.secondary
+                    unsetColor = MaterialTheme.colorScheme.secondary,
+                    onChangeColor = {
+                        vm.state.value.isSavable = true
+                    },
+                    onRestToDefault = {
+                        vm.state.value.isSavable = false
+
+                    }
                 )
             },
             Components.Dynamic {
                 ColorPreference(
                     preference = customizedColors.barsState,
                     title = "Toolbar color",
-                    unsetColor = AppColors.current.bars
+                    unsetColor = AppColors.current.bars,
+                    onChangeColor = {
+                        vm.state.value.isSavable = true
+                    },
+                    onRestToDefault = {
+                        vm.state.value.isSavable = false
+
+                    }
                 )
             },
             Components.Header(

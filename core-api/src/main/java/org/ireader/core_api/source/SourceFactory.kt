@@ -36,14 +36,17 @@ abstract class SourceFactory(
      * devs need to fill this if they wanted parse detail functionality
      */
     open val detailFetcher: SourceFactory.Detail = SourceFactory.Detail()
+
     /**
      * devs need to fill this if they wanted parse chapters functionality
      */
     open val chapterFetcher: SourceFactory.Chapters = SourceFactory.Chapters()
+
     /**
      * devs need to fill this if they wanted parse content functionality
      */
     open val contentFetcher: SourceFactory.Content = SourceFactory.Content()
+
     /**
      * devs need to fill this if they wanted parse explore functionality
      */
@@ -73,17 +76,31 @@ abstract class SourceFactory(
         document: Document,
         elementSelector: String,
         baseExploreFetcher: BaseExploreFetcher,
-        parser: (element: Element) -> MangaInfo
+        parser: (element: Element) -> MangaInfo,
+        page: Int,
     ): MangasPageInfo {
         val books = document.select(elementSelector).map { element ->
             parser(element)
         }
-        val hasNextPage : Boolean = selectorReturnerStringType(document,baseExploreFetcher.nextPageSelector,baseExploreFetcher.nextPageAtt).let { string ->
-            if (baseExploreFetcher.nextPageValue != null) {
-                string == baseExploreFetcher.nextPageValue
+        val hasNextPage: Boolean = if(baseExploreFetcher.infinitePage) {
+            true
+        } else {
+            if (baseExploreFetcher.maxPage != -1) {
+                baseExploreFetcher.maxPage >= page
             } else {
-                string.isNotBlank()
+                selectorReturnerStringType(
+                    document,
+                    baseExploreFetcher.nextPageSelector,
+                    baseExploreFetcher.nextPageAtt
+                ).let { string ->
+                    if (baseExploreFetcher.nextPageValue != null) {
+                        string == baseExploreFetcher.nextPageValue
+                    } else {
+                        string.isNotBlank()
+                    }
+                }
             }
+
         }
 
         return MangasPageInfo(books, hasNextPage)
@@ -136,9 +153,9 @@ abstract class SourceFactory(
     ): Document {
         val res = requestBuilder(
             "${getCustomBaseUrl()}${
-                (baseExploreFetcher.endpoint)?.replace(this.page, page.toString())?.replace(
+                (baseExploreFetcher.endpoint)?.replace(this.page, baseExploreFetcher.onPage(page.toString()) )?.replace(
                     this
-                        .query, query
+                        .query, query.let { baseExploreFetcher.onQuery(query) }
                 )
             }"
         )
@@ -158,38 +175,41 @@ abstract class SourceFactory(
         return bookListParse(
             getListRequest(baseExploreFetcher, page, query),
             baseExploreFetcher.selector,
-            baseExploreFetcher
-        ) { element ->
+            page= page,
+            baseExploreFetcher = baseExploreFetcher,
+            parser = { element ->
 
-            val title = selectorReturnerStringType(
-                element,
-                baseExploreFetcher.nameSelector,
-                baseExploreFetcher.nameAtt
-            ).let { baseExploreFetcher.onName(it,baseExploreFetcher.key) }
-            val url = selectorReturnerStringType(
-                element,
-                baseExploreFetcher.linkSelector,
-                baseExploreFetcher.linkAtt
-            ).let { url ->
-                baseExploreFetcher.onLink(url,baseExploreFetcher.key)
-            }.let { mainUrl ->
-                if (baseExploreFetcher.addBaseUrlToLink) baseUrl + mainUrl else mainUrl
-            }
-            val thumbnailUrl = selectorReturnerStringType(
-                element,
-                baseExploreFetcher.coverSelector,
-                baseExploreFetcher.coverAtt
-            ).let {
-                baseExploreFetcher.onCover(it,baseExploreFetcher.key)
-            }
+                val title = selectorReturnerStringType(
+                    element,
+                    baseExploreFetcher.nameSelector,
+                    baseExploreFetcher.nameAtt
+                ).let { baseExploreFetcher.onName(it, baseExploreFetcher.key) }
+                val url = selectorReturnerStringType(
+                    element,
+                    baseExploreFetcher.linkSelector,
+                    baseExploreFetcher.linkAtt
+                ).let { url ->
+                    baseExploreFetcher.onLink(url, baseExploreFetcher.key)
+                }.let { mainUrl ->
+                    if (baseExploreFetcher.addBaseUrlToLink) baseUrl + mainUrl else mainUrl
+                }
+                val thumbnailUrl = selectorReturnerStringType(
+                    element,
+                    baseExploreFetcher.coverSelector,
+                    baseExploreFetcher.coverAtt
+                ).let {
+                    baseExploreFetcher.onCover(it, baseExploreFetcher.key)
+                }
 
-            MangaInfo(
-                key = url,
-                title = title,
-                cover = if (baseExploreFetcher.addBaseurlToCoverLink) baseUrl + thumbnailUrl else thumbnailUrl
-            )
-        }
+                MangaInfo(
+                    key = url,
+                    title = title,
+                    cover = if (baseExploreFetcher.addBaseurlToCoverLink) baseUrl + thumbnailUrl else thumbnailUrl
+                )
+            }
+        )
     }
+
     /**
      * this function is the first funciton that app request,
      * @param sort the sorts which users takes comes from [getListings] currently it does nothing in the main app
@@ -204,7 +224,7 @@ abstract class SourceFactory(
 
     /**
      * @param filters filters that users passed over to the source
-                        this filters comes from the [getFilters]
+    this filters comes from the [getFilters]
      * @param page current page
      * @return [MangasPageInfo]
      */
@@ -234,9 +254,17 @@ abstract class SourceFactory(
      */
     open fun chapterFromElement(element: Element): ChapterInfo {
         val link =
-            selectorReturnerStringType(element, chapterFetcher.linkSelector, chapterFetcher.linkAtt).let { chapterFetcher.onLink(it)}
+            selectorReturnerStringType(
+                element,
+                chapterFetcher.linkSelector,
+                chapterFetcher.linkAtt
+            ).let { chapterFetcher.onLink(it) }
         val name =
-            selectorReturnerStringType(element, chapterFetcher.nameSelector, chapterFetcher.nameAtt).let { chapterFetcher.onName(it) }
+            selectorReturnerStringType(
+                element,
+                chapterFetcher.nameSelector,
+                chapterFetcher.nameAtt
+            ).let { chapterFetcher.onName(it) }
         val translator =
             selectorReturnerStringType(
                 element,
@@ -278,6 +306,7 @@ abstract class SourceFactory(
     open fun chaptersParse(document: Document): List<ChapterInfo> {
         return document.select(chapterFetcher.selector ?: "").map { chapterFromElement(it) }
     }
+
     /**
      * a request that take a [book](MangaInfo)  and return a document
      */
@@ -320,19 +349,19 @@ abstract class SourceFactory(
      * @return a status
      *          which should be one of
      *
-                        const val UNKNOWN = 0
+    const val UNKNOWN = 0
 
-                        const val ONGOING = 1
+    const val ONGOING = 1
 
-                        const val COMPLETED = 2
+    const val COMPLETED = 2
 
-                        const val LICENSED = 3
+    const val LICENSED = 3
 
-                        const val PUBLISHING_FINISHED = 4
+    const val PUBLISHING_FINISHED = 4
 
-                        const val CANCELLED = 5
+    const val CANCELLED = 5
 
-                        const val ON_HIATUS = 6
+    const val ON_HIATUS = 6
      *
      *
      *
@@ -347,7 +376,11 @@ abstract class SourceFactory(
      */
     open fun detailParse(document: Document): MangaInfo {
         val title =
-            selectorReturnerStringType(document, detailFetcher.nameSelector, detailFetcher.nameAtt).let { detailFetcher.onName(it) }
+            selectorReturnerStringType(
+                document,
+                detailFetcher.nameSelector,
+                detailFetcher.nameAtt
+            ).let { detailFetcher.onName(it) }
         val cover = selectorReturnerStringType(
             document,
             detailFetcher.coverSelector,
@@ -379,7 +412,7 @@ abstract class SourceFactory(
         ).let { detailFetcher.onCategory(it) }
         return MangaInfo(
             title = title,
-            cover = if(detailFetcher.addBaseurlToCoverLink) baseUrl + cover else cover,
+            cover = if (detailFetcher.addBaseurlToCoverLink) baseUrl + cover else cover,
             description = description,
             author = authorBookSelector,
             genres = category,
@@ -387,6 +420,7 @@ abstract class SourceFactory(
             key = "",
         )
     }
+
     /**
      * the request handler for book detail request which return a documents that is passed to [getMangaDetails]
      */
@@ -396,6 +430,7 @@ abstract class SourceFactory(
     ): Document {
         return client.get(requestBuilder(manga.key)).asJsoup()
     }
+
     /**
      * @param manga the book that is passed from main app app, which is get from [getMangaList] or [getMangaList]
      * @param commands commands that is passes over from main app
@@ -477,9 +512,9 @@ abstract class SourceFactory(
      * @param nextPageSelector the selector for the element that indicated that next page exists
      * @param nextPageAtt the attribute for the element that indicated that next page exists
      * @param nextPageValue the expected value that next page,
-                            this value can be left empty
+    this value can be left empty
      * @param onLink  this value pass a string and after applying the required changed
-                                it should return the changed link
+    it should return the changed link
      * @param addBaseurlToCoverLink "true" if you want to add baseUrl to link
      * @param linkSelector selector for link of book
      * @param linkAtt attribute for the link of book
@@ -502,13 +537,17 @@ abstract class SourceFactory(
         val addBaseurlToCoverLink: Boolean = false,
         val linkSelector: String? = null,
         val linkAtt: String? = null,
-        val onLink:(url:String,key:String) -> String = {url,_ ->  url },
+        val onLink: (url: String, key: String) -> String = { url, _ -> url },
         val nameSelector: String? = null,
         val nameAtt: String? = null,
-        val onName:(String,key:String) -> String ={url,_ ->  url },
+        val onName: (String, key: String) -> String = { url, _ -> url },
         val coverSelector: String? = null,
         val coverAtt: String? = null,
-        val onCover:(String,key:String) -> String = {url,_ ->  url },
+        val onCover: (String, key: String) -> String = { url, _ -> url },
+        val onQuery: (query: String) -> String = { query -> query },
+        val onPage: (page: String) -> String = { page -> page },
+        val infinitePage:Boolean = false,
+        val maxPage:Int = -1,
         val type: Type = Type.Others,
     )
 
@@ -584,22 +623,22 @@ abstract class SourceFactory(
     data class Chapters(
         val selector: String? = null,
         val addBaseUrlToLink: Boolean = false,
-        val reverseChapterList: Boolean = true,
+        val reverseChapterList: Boolean = false,
         val linkSelector: String? = null,
-        val onLink:((String) -> String)= { it },
+        val onLink: ((String) -> String) = { it },
         val linkAtt: String? = null,
         val nameSelector: String? = null,
         val nameAtt: String? = null,
-        val onName:((String) -> String)= { it },
+        val onName: ((String) -> String) = { it },
         val numberSelector: String? = null,
         val numberAtt: String? = null,
-        val onNumber:((String) -> String) = { it },
+        val onNumber: ((String) -> String) = { it },
         val uploadDateSelector: String? = null,
         val uploadDateAtt: String? = null,
         val uploadDateParser: (String) -> Long = { 0L },
         val translatorSelector: String? = null,
         val translatorAtt: String? = null,
-        val onTranslator:((String) -> String)={ it },
+        val onTranslator: ((String) -> String) = { it },
         val type: Type = Type.Chapters,
     )
 

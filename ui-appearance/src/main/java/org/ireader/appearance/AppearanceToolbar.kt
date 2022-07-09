@@ -37,7 +37,6 @@ private fun MainAppearanceToolbar(
     onPopBackStack:() -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    val isNotSavable = vm.getIsNotSavable()
     Toolbar(
         title = {
             BigSizeTextComposable(text = stringResource(R.string.appearance))
@@ -49,7 +48,7 @@ private fun MainAppearanceToolbar(
         },
         actions = {
             AnimatedVisibility(
-                visible = !isNotSavable,
+                visible = vm.state.value.isSavable,
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.Save,

@@ -25,7 +25,7 @@ dependencies {
     implementation(compose.compose.coil)
     implementation(compose.compose.foundation)
     implementation(accompanist.pager)
-implementation(compose.compose.material3)
+implementation(compose.material3.core)
 implementation(compose.compose.uiUtil)
 implementation(compose.compose.material)
 implementation(compose.compose.constraintlayout)

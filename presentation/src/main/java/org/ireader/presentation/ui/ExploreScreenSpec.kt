@@ -16,6 +16,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import kotlinx.coroutines.launch
 import okhttp3.Headers
+import org.ireader.Controller
 import org.ireader.common_extensions.launchIO
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.EmptyScreenComposable
@@ -28,7 +29,6 @@ import org.ireader.explore.ExploreScreen
 import org.ireader.explore.FilterBottomSheet
 import org.ireader.explore.viewmodel.ExploreViewModel
 import org.ireader.image_loader.coil.image_loaders.convertToOkHttpRequest
-import org.ireader.Controller
 
 @OptIn(
     ExperimentalAnimationApi::class,
@@ -61,7 +61,6 @@ object ExploreScreenSpec : ScreenSpec {
         controller: Controller
     ) {
         val vm: ExploreViewModel = hiltViewModel(controller.navBackStackEntry)
-        val focusManager = LocalFocusManager.current
         val source = vm.source
         val scope = rememberCoroutineScope()
         val headers = remember {

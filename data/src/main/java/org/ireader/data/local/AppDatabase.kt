@@ -79,38 +79,52 @@ abstract class AppDatabase : RoomDatabase() {
                 AppDatabase::class.java,
                 DATABASE_NAME
             )
-                .addMigrations(MIGRATION_20_21(), MIGRATION_21_22(), MIGRATION_22_23(),MIGRATION_23_24())
+                .addMigrations(
+                    MIGRATION_20_21(),
+                    MIGRATION_21_22(),
+                    MIGRATION_22_23(),
+                    MIGRATION_23_24()
+                )
                 // prepopulate the database after onCreate was called
                 .addCallback(object : Callback() {
+
                     override fun onCreate(db: SupportSQLiteDatabase) {
                         super.onCreate(db)
                         Executors.newSingleThreadExecutor().execute {
-                            db.execSQL("""
+                            db.execSQL(
+                                """
                                 INSERT OR IGNORE INTO category VALUES (-1, "", 0, 0, 0);
-                            """.trimIndent())
-                            db.execSQL("""
+                            """.trimIndent()
+                            )
+                            db.execSQL(
+                                """
                                 INSERT OR IGNORE INTO category VALUES (-2, "", 0, 0, 0);
-                            """.trimIndent())
-                            db.execSQL("""
+                            """.trimIndent()
+                            )
+                            db.execSQL(
+                                """
                                 CREATE TRIGGER IF NOT EXISTS system_categories_deletion_trigger BEFORE DELETE ON category
                                 BEGIN SELECT CASE
                                   WHEN old.id <= 0 THEN
                                     RAISE(ABORT, 'System category cant be deleted')
                                   END;
                                 END
-                            """.trimIndent())
+                            """.trimIndent()
+                            )
                         }
 
                         Executors.newSingleThreadExecutor().execute {
                             INSTANCE?.themeDao?.insertThemes(themes.map { it.toCustomTheme() })
-                            db.execSQL("""
+                            db.execSQL(
+                                """
                                 CREATE TRIGGER IF NOT EXISTS system_themes_deletion_trigger BEFORE DELETE ON theme_table
                                 BEGIN SELECT CASE
                                   WHEN old.isDefault == 1 THEN
                                     RAISE(ABORT, 'System theme cant be deleted')
                                   END;
                                 END
-                            """.trimIndent())
+                            """.trimIndent()
+                            )
                         }
                     }
                 })
@@ -118,19 +132,30 @@ abstract class AppDatabase : RoomDatabase() {
                 .build()
     }
 }
+
 internal fun MIGRATION_23_24() = object : Migration(23, 24) {
     override fun migrate(database: SupportSQLiteDatabase) {
-        database.execSQL("""CREATE TABLE IF NOT EXISTS `theme_table` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `isDefault` INTEGER NOT NULL, `light-primary` INTEGER NOT NULL, `light-onPrimary` INTEGER NOT NULL, `light-primaryContainer` INTEGER NOT NULL, `light-onPrimaryContainer` INTEGER NOT NULL, `light-inversePrimary` INTEGER NOT NULL, `light-secondary` INTEGER NOT NULL, `light-onSecondary` INTEGER NOT NULL, `light-secondaryContainer` INTEGER NOT NULL, `light-onSecondaryContainer` INTEGER NOT NULL, `light-tertiary` INTEGER NOT NULL, `light-onTertiary` INTEGER NOT NULL, `light-tertiaryContainer` INTEGER NOT NULL, `light-onTertiaryContainer` INTEGER NOT NULL, `light-background` INTEGER NOT NULL, `light-onBackground` INTEGER NOT NULL, `light-surface` INTEGER NOT NULL, `light-onSurface` INTEGER NOT NULL, `light-surfaceVariant` INTEGER NOT NULL, `light-onSurfaceVariant` INTEGER NOT NULL, `light-surfaceTint` INTEGER NOT NULL, `light-inverseSurface` INTEGER NOT NULL, `light-inverseOnSurface` INTEGER NOT NULL, `light-error` INTEGER NOT NULL, `light-onError` INTEGER NOT NULL, `light-errorContainer` INTEGER NOT NULL, `light-onErrorContainer` INTEGER NOT NULL, `light-outline` INTEGER NOT NULL, `dark-primary` INTEGER NOT NULL, `dark-onPrimary` INTEGER NOT NULL, `dark-primaryContainer` INTEGER NOT NULL, `dark-onPrimaryContainer` INTEGER NOT NULL, `dark-inversePrimary` INTEGER NOT NULL, `dark-secondary` INTEGER NOT NULL, `dark-onSecondary` INTEGER NOT NULL, `dark-secondaryContainer` INTEGER NOT NULL, `dark-onSecondaryContainer` INTEGER NOT NULL, `dark-tertiary` INTEGER NOT NULL, `dark-onTertiary` INTEGER NOT NULL, `dark-tertiaryContainer` INTEGER NOT NULL, `dark-onTertiaryContainer` INTEGER NOT NULL, `dark-background` INTEGER NOT NULL, `dark-onBackground` INTEGER NOT NULL, `dark-surface` INTEGER NOT NULL, `dark-onSurface` INTEGER NOT NULL, `dark-surfaceVariant` INTEGER NOT NULL, `dark-onSurfaceVariant` INTEGER NOT NULL, `dark-surfaceTint` INTEGER NOT NULL, `dark-inverseSurface` INTEGER NOT NULL, `dark-inverseOnSurface` INTEGER NOT NULL, `dark-error` INTEGER NOT NULL, `dark-onError` INTEGER NOT NULL, `dark-errorContainer` INTEGER NOT NULL, `dark-onErrorContainer` INTEGER NOT NULL, `dark-outline` INTEGER NOT NULL, `light-extra-bars` INTEGER NOT NULL, `light-extra-onBars` INTEGER NOT NULL, `light-extra-isBarLight` INTEGER NOT NULL, `dark-extra-bars` INTEGER NOT NULL, `dark-extra-onBars` INTEGER NOT NULL, `dark-extra-isBarLight` INTEGER NOT NULL)""")
+        database.execSQL(
+            """CREATE TABLE IF NOT EXISTS `theme_table` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `isDefault` INTEGER NOT NULL, `light-primary` INTEGER NOT NULL, `light-onPrimary` INTEGER NOT NULL, `light-primaryContainer` INTEGER NOT NULL, `light-onPrimaryContainer` INTEGER NOT NULL, `light-inversePrimary` INTEGER NOT NULL, `light-secondary` INTEGER NOT NULL, `light-onSecondary` INTEGER NOT NULL, `light-secondaryContainer` INTEGER NOT NULL, `light-onSecondaryContainer` INTEGER NOT NULL, `light-tertiary` INTEGER NOT NULL, `light-onTertiary` INTEGER NOT NULL, `light-tertiaryContainer` INTEGER NOT NULL, `light-onTertiaryContainer` INTEGER NOT NULL, `light-background` INTEGER NOT NULL, `light-onBackground` INTEGER NOT NULL, `light-surface` INTEGER NOT NULL, `light-onSurface` INTEGER NOT NULL, `light-surfaceVariant` INTEGER NOT NULL, `light-onSurfaceVariant` INTEGER NOT NULL, `light-surfaceTint` INTEGER NOT NULL, `light-inverseSurface` INTEGER NOT NULL, `light-inverseOnSurface` INTEGER NOT NULL, `light-error` INTEGER NOT NULL, `light-onError` INTEGER NOT NULL, `light-errorContainer` INTEGER NOT NULL, `light-onErrorContainer` INTEGER NOT NULL, `light-outline` INTEGER NOT NULL, `dark-primary` INTEGER NOT NULL, `dark-onPrimary` INTEGER NOT NULL, `dark-primaryContainer` INTEGER NOT NULL, `dark-onPrimaryContainer` INTEGER NOT NULL, `dark-inversePrimary` INTEGER NOT NULL, `dark-secondary` INTEGER NOT NULL, `dark-onSecondary` INTEGER NOT NULL, `dark-secondaryContainer` INTEGER NOT NULL, `dark-onSecondaryContainer` INTEGER NOT NULL, `dark-tertiary` INTEGER NOT NULL, `dark-onTertiary` INTEGER NOT NULL, `dark-tertiaryContainer` INTEGER NOT NULL, `dark-onTertiaryContainer` INTEGER NOT NULL, `dark-background` INTEGER NOT NULL, `dark-onBackground` INTEGER NOT NULL, `dark-surface` INTEGER NOT NULL, `dark-onSurface` INTEGER NOT NULL, `dark-surfaceVariant` INTEGER NOT NULL, `dark-onSurfaceVariant` INTEGER NOT NULL, `dark-surfaceTint` INTEGER NOT NULL, `dark-inverseSurface` INTEGER NOT NULL, `dark-inverseOnSurface` INTEGER NOT NULL, `dark-error` INTEGER NOT NULL, `dark-onError` INTEGER NOT NULL, `dark-errorContainer` INTEGER NOT NULL, `dark-onErrorContainer` INTEGER NOT NULL, `dark-outline` INTEGER NOT NULL, `light-extra-bars` INTEGER NOT NULL, `light-extra-onBars` INTEGER NOT NULL, `light-extra-isBarLight` INTEGER NOT NULL, `dark-extra-bars` INTEGER NOT NULL, `dark-extra-onBars` INTEGER NOT NULL, `dark-extra-isBarLight` INTEGER NOT NULL)"""
+        )
+        database.execSQL(
+            """
+                                CREATE TRIGGER IF NOT EXISTS system_themes_deletion_trigger BEFORE DELETE ON theme_table
+                                BEGIN SELECT CASE
+                                  WHEN old.isDefault == 1 THEN
+                                    RAISE(ABORT, 'System theme cant be deleted')
+                                  END;
+                                END
+                            """.trimIndent()
+        )
     }
 }
-
 
 internal fun MIGRATION_22_23() = object : Migration(22, 23) {
     override fun migrate(database: SupportSQLiteDatabase) {
         database.execSQL("""DROP TABLE IF EXISTS `fonts`""")
     }
 }
-
 
 internal fun MIGRATION_21_22() = object : Migration(21, 22) {
     override fun migrate(database: SupportSQLiteDatabase) {
@@ -142,11 +167,8 @@ internal fun MIGRATION_21_22() = object : Migration(21, 22) {
         database.execSQL("""INSERT INTO `category_MERGE_TABLE` (`id`,`name`,`updateInterval`,`flags`,`order`) SELECT `category`.`id`,`category`.`name`,`category`.`updateInterval`,`category`.`flags`,`category`.`sort` FROM `category`""")
         database.execSQL("""DROP TABLE IF EXISTS `category`""")
         database.execSQL("""ALTER TABLE `category_MERGE_TABLE` RENAME TO `category`""")
-
     }
 }
-
-
 
 internal fun MIGRATION_20_21() = object : Migration(20, 21) {
     override fun migrate(database: SupportSQLiteDatabase) {

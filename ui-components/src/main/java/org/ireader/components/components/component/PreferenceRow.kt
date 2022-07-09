@@ -640,8 +640,8 @@ fun <Key> ChoicePreference(
     title: String,
     subtitle: String? = null,
     onValue: ((Key) -> Unit)? = null,
-    confirmText:String = "",
-    onConfirm:(() -> Unit)?=null
+    confirmText: String = "",
+    onConfirm: (() -> Unit)? = null
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
@@ -699,7 +699,9 @@ fun ColorPreference(
     preference: PreferenceMutableState<Color>,
     title: String,
     subtitle: String? = null,
-    unsetColor: Color = Color.Unspecified
+    unsetColor: Color = Color.Unspecified,
+    onChangeColor: () -> Unit = {},
+    onRestToDefault: () -> Unit = {}
 ) {
     var showDialog by remember { mutableStateOf(false) }
     val initialColor = preference.value.takeOrElse { unsetColor }
@@ -708,7 +710,10 @@ fun ColorPreference(
         title = title,
         subtitle = subtitle,
         onClick = { showDialog = true },
-        onLongClick = { preference.value = Color.Unspecified },
+        onLongClick = {
+            preference.value = Color.Unspecified
+            onRestToDefault()
+        },
         action = {
             if (preference.value != Color.Unspecified || unsetColor != Color.Unspecified) {
                 val borderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.54f)
@@ -731,6 +736,7 @@ fun ColorPreference(
             onSelected = {
                 preference.value = it
                 showDialog = false
+                onChangeColor()
             },
             initialColor = initialColor
         )

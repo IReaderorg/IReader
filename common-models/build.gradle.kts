@@ -14,7 +14,7 @@ dependencies {
     compileOnly(project(Modules.commonResources))
 
     implementation(kotlinx.datetime)
-    implementation(compose.compose.material3)
+    implementation(compose.material3.core)
 
 
     implementation(commonLib.room.runtime)

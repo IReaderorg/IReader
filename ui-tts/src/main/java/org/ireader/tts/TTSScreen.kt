@@ -45,7 +45,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -58,7 +57,7 @@ import com.google.accompanist.pager.PagerState
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_resources.UiText
-import org.ireader.components.components.BookImageComposable
+import org.ireader.components.components.BookImageCover
 import org.ireader.components.components.ShowLoading
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
@@ -129,8 +128,8 @@ fun TTSScreen(
                             verticalArrangement = Arrangement.Top,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            BookImageComposable(
-                                image = BookCover.from(book),
+                            BookImageCover.Book(
+                                data = BookCover.from(book),
                                 modifier = Modifier
                                     .padding(8.dp)
                                     .height((maxHeight / 15).dp)
@@ -139,11 +138,8 @@ fun TTSScreen(
                                     .border(
                                         2.dp,
                                         MaterialTheme.colorScheme.onBackground.copy(alpha = .2f)
-                                    ),
-                                contentScale = ContentScale.Crop,
-                                useSavedCoverImage = true
+                                    )
                             )
-
                             BigSizeTextComposable(
                                 text = chapter.name,
                                 align = TextAlign.Center,

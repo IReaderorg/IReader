@@ -7,8 +7,8 @@ import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
-import com.google.common.truth.Truth.assertThat
 import org.ireader.data.local.AppDatabase
+import org.ireader.data.local.AppDatabase_Migrations
 import org.ireader.data.local.MIGRATION_21_22
 import org.ireader.data.local.MIGRATION_23_24
 import org.junit.Assert.assertTrue

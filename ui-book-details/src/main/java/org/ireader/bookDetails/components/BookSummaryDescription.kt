@@ -1,104 +1,101 @@
 package org.ireader.bookDetails.components
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
+import androidx.compose.animation.graphics.res.animatedVectorResource
+import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
+import androidx.compose.animation.graphics.vector.AnimatedImageVector
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ExpandLess
-import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.layoutId
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.sp
+import org.ireader.core_ui.modifier.secondaryItemAlpha
+import org.ireader.ui_book_details.R
+import kotlin.math.roundToInt
 
-private const val COLLAPSED_MAX_LINES = 3
 
+@OptIn(ExperimentalAnimationGraphicsApi::class)
 @Composable
 fun BookSummaryDescription(
-    description: String,
-    isExpandable: Boolean?,
-    setIsExpandable: (Boolean) -> Unit,
-    isExpanded: Boolean,
-    onClickToggle: () -> Unit,
+    expandedDescription: String,
+    shrunkDescription: String,
+    expanded: Boolean,
+    modifier: Modifier = Modifier,
 ) {
-    Layout(
-        modifier = Modifier.clickable(enabled = isExpandable == true, onClick = onClickToggle),
-        measurePolicy = { measurables, constraints ->
-            val textPlaceable = measurables.first { it.layoutId == "text" }.measure(constraints)
+    var expandedHeight by remember { mutableStateOf(0) }
+    var shrunkHeight by remember { mutableStateOf(0) }
+    val heightDelta = remember(expandedHeight, shrunkHeight) { expandedHeight - shrunkHeight }
+    val animProgress by animateFloatAsState(if (expanded) 1f else 0f)
+    val scrimHeight = with(LocalDensity.current) { remember { 24.sp.roundToPx() } }
 
-            if (isExpandable != true) {
-                layout(constraints.maxWidth, textPlaceable.height) {
-                    textPlaceable.placeRelative(0, 0)
-                }
-            } else {
-                val iconPlaceable = measurables.first { it.layoutId == "icon" }.measure(constraints)
-
-                val layoutHeight = textPlaceable.height +
-                    if (isExpanded) iconPlaceable.height else iconPlaceable.height / 2
-
-                val scrimPlaceable = measurables.find { it.layoutId == "scrim" }
-                    ?.measure(constraints.copy(maxHeight = layoutHeight / 2))
-
-                layout(constraints.maxWidth, layoutHeight) {
-                    textPlaceable.placeRelative(0, 0)
-                    scrimPlaceable?.placeRelative(0, layoutHeight - scrimPlaceable.height)
-                    iconPlaceable.placeRelative(
-                        x = constraints.maxWidth / 2 - iconPlaceable.width / 2,
-                        y = layoutHeight - iconPlaceable.height
-                    )
-                }
-            }
-        },
-        content = {
-            androidx.compose.material3.Text(
-                text = description,
-                modifier = Modifier
-                    .padding(horizontal = 0.dp, vertical = 4.dp)
-                    .layoutId("text"),
-                maxLines = if (!isExpanded) COLLAPSED_MAX_LINES else Int.MAX_VALUE,
-                onTextLayout = { result ->
-                    if (isExpandable == null || isExpandable == false) {
-                        setIsExpandable(result.didOverflowHeight)
-                    }
-                },
-                color = MaterialTheme.colorScheme.onSurface,
+    SubcomposeLayout(modifier = modifier.clipToBounds()) { constraints ->
+        val shrunkPlaceable = subcompose("description-s") {
+            Text(
+                text = "\n\n", // Shows at least 3 lines
                 style = MaterialTheme.typography.bodyMedium,
-                lineHeight = 22.sp
             )
-            if (isExpandable == true) {
-                if (!isExpanded) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.verticalGradient(
-                                    0f to Color.Transparent,
-                                    0.4f to MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
-                                    0.5f to MaterialTheme.colorScheme.background
-                                )
-                            )
-                            .layoutId("scrim")
-                    )
-                }
-                IconButton(
-                    onClick = onClickToggle,
-                    modifier = Modifier.layoutId("icon")
-                ) {
-                    Icon(
-                        if (!isExpanded) Icons.Outlined.ExpandMore else Icons.Outlined.ExpandLess,
-                        null
-                    )
-                }
+        }.map { it.measure(constraints) }
+        shrunkHeight = shrunkPlaceable.maxByOrNull { it.height }?.height ?: 0
+
+        val expandedPlaceable = subcompose("description-l") {
+            Text(
+                text = expandedDescription,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }.map { it.measure(constraints) }
+        expandedHeight = expandedPlaceable.maxByOrNull { it.height }?.height?.coerceAtLeast(shrunkHeight) ?: 0
+
+        val actualPlaceable = subcompose("description") {
+            Text(
+                text = if (expanded) expandedDescription else shrunkDescription,
+                maxLines = Int.MAX_VALUE,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.secondaryItemAlpha(),
+            )
+        }.map { it.measure(constraints) }
+
+        val scrimPlaceable = subcompose("scrim") {
+            val colors = listOf(Color.Transparent, MaterialTheme.colorScheme.background)
+            Box(
+                modifier = Modifier.background(Brush.verticalGradient(colors = colors)),
+                contentAlignment = Alignment.Center,
+            ) {
+                val image = AnimatedImageVector.animatedVectorResource(R.drawable.anim_caret_down)
+                Icon(
+                    painter = rememberAnimatedVectorPainter(image, !expanded),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.background(Brush.radialGradient(colors = colors.asReversed())),
+                )
+            }
+        }.map { it.measure(Constraints.fixed(width = constraints.maxWidth, height = scrimHeight)) }
+
+        val currentHeight = shrunkHeight + ((heightDelta + scrimHeight) * animProgress).roundToInt()
+        layout(constraints.maxWidth, currentHeight) {
+            actualPlaceable.forEach {
+                it.place(0, 0)
+            }
+
+            val scrimY = currentHeight - scrimHeight
+            scrimPlaceable.forEach {
+                it.place(0, scrimY)
             }
         }
-    )
+    }
 }

@@ -23,7 +23,7 @@ dependencies {
     implementation(compose.compose.coil)
     implementation(compose.compose.foundation)
     implementation(compose.compose.animations)
-implementation(compose.compose.material3)
+implementation(compose.material3.core)
 
 
 

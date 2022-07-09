@@ -36,7 +36,7 @@ class CoverCache(private val context: Context) {
      * @param manga the manga.
      * @return cover image.
      */
-    fun getCoverFile(cover: BookCover): File? {
+    fun getCoverFile(cover: BookCover): File {
         return File(cacheDir, DiskUtil.hashKeyForDisk(cover.cover))
     }
 

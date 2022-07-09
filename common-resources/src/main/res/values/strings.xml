@@ -43,6 +43,7 @@
     <string name="error">Error</string>
     <string name="refresh">Refresh</string>
     <string name="share">Share</string>
+    <string name="description_placeholder">No description</string>
     <string name="toggle_search_mode_off">Toggle search mode off</string>
     <string name="recently">Recently</string>
     <string name="relative_time_today">Today</string>
