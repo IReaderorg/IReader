@@ -67,7 +67,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = compose.versions.extension.get()
+        kotlinCompilerExtensionVersion = composeLib.versions.extension.get()
     }
     defaultConfig {
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
@@ -113,13 +113,13 @@ dependencies {
     implementation(androidx.core)
     implementation(androidx.material)
     implementation(androidx.media)
-    implementation(compose.compose.activity)
+    implementation(composeLib.compose.activity)
     implementation("androidx.core:core-splashscreen:1.0.0-beta02")
-implementation(compose.material3.core)
+implementation(composeLib.material3.core)
 
 
-    implementation(compose.compose.coil)
-    implementation(compose.compose.googlFonts)
+    implementation(composeLib.compose.coil)
+    implementation(composeLib.compose.googlFonts)
 
     implementation(project(Modules.coreApi))
     implementation(project(Modules.coreUi))
@@ -155,7 +155,7 @@ implementation(compose.material3.core)
     implementation(androidx.work.runtime)
     implementation(commonLib.hilt.worker)
 
-    implementation(compose.compose.runtime)
+    implementation(composeLib.compose.runtime)
 
     /** Room **/
     implementation(commonLib.room.runtime)

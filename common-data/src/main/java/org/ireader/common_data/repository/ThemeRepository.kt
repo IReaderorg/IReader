@@ -9,7 +9,9 @@ interface ThemeRepository {
     fun subscribe() : Flow<List<BaseTheme>>
 
     suspend fun insert(theme: CustomTheme): Long
+    suspend fun insert(theme: List<CustomTheme>)
 
     suspend fun delete(theme: CustomTheme)
+    suspend fun deleteAll()
 
 }

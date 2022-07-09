@@ -13,7 +13,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = compose.versions.extension.get()
+        kotlinCompilerExtensionVersion = composeLib.versions.extension.get()
     }
 }
 
@@ -39,18 +39,18 @@ dependencies {
     implementation(androidx.media)
     implementation(kotlinx.serialization.protobuf)
     implementation(kotlinx.datetime)
-    implementation(compose.compose.activity)
-    implementation(compose.compose.ui)
-    implementation(compose.compose.runtime)
-    implementation(compose.compose.navigation)
-implementation(compose.material3.core)
+    implementation(composeLib.compose.activity)
+    implementation(composeLib.compose.ui)
+    implementation(composeLib.compose.runtime)
+    implementation(composeLib.compose.navigation)
+implementation(composeLib.material3.core)
 
 
-    implementation(compose.compose.coil)
-    implementation(compose.compose.paging)
+    implementation(composeLib.compose.coil)
+    implementation(composeLib.compose.paging)
     implementation(commonLib.gson)
     implementation(project(mapOf("path" to ":common-models")))
-    debugImplementation(compose.compose.uiTestManifest)
+    debugImplementation(composeLib.compose.uiTestManifest)
 
     implementation(androidx.work.runtime)
     implementation(commonLib.hilt.worker)
@@ -103,14 +103,14 @@ implementation(compose.material3.core)
     testImplementation(test.junitAndroidExt)
     testImplementation(test.truth)
     testImplementation(test.coroutines)
-    testImplementation(compose.compose.j4Unit)
+    testImplementation(composeLib.compose.j4Unit)
 
     androidTestImplementation(test.junit4)
     androidTestImplementation(test.junitAndroidExt)
     androidTestImplementation(test.truth)
     androidTestImplementation(test.coroutines)
     androidTestImplementation(test.coroutines)
-    androidTestImplementation(compose.compose.j4Unit)
+    androidTestImplementation(composeLib.compose.j4Unit)
     androidTestImplementation(commonLib.hilt.androidtest)
 
     // Instrumented Unit Tests

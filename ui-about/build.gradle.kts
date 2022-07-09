@@ -9,7 +9,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = compose.versions.extension.get()
+        kotlinCompilerExtensionVersion = composeLib.versions.extension.get()
     }
 }
 
@@ -21,14 +21,14 @@ dependencies {
     implementation(project(Modules.uiComponents))
     implementation(project(Modules.commonResources))
     implementation(project(Modules.commonExtensions))
-    implementation(compose.compose.icons)
-    implementation(compose.compose.navigation)
-    implementation(compose.compose.foundation)
-    implementation(compose.compose.animations)
-implementation(compose.material3.core)
+    implementation(composeLib.compose.icons)
+    implementation(composeLib.compose.navigation)
+    implementation(composeLib.compose.foundation)
+    implementation(composeLib.compose.animations)
+    implementation(composeLib.material3.core)
 
 
-    implementation(compose.compose.uiToolingPreview)
+    implementation(composeLib.compose.uiToolingPreview)
     implementation(accompanist.pagerIndicator)
     implementation(accompanist.pager)
     implementation(accompanist.swipeRefresh)

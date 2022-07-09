@@ -1,10 +1,9 @@
 package org.ireader.appearance
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import org.ireader.common_data.repository.ThemeRepository
@@ -16,6 +15,7 @@ import org.ireader.core_ui.theme.CustomizableAppColorsPreferenceState
 import org.ireader.core_ui.theme.asState
 import org.ireader.core_ui.theme.getDarkColors
 import org.ireader.core_ui.theme.getLightColors
+import org.ireader.core_ui.theme.isLight
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import javax.inject.Inject
 
@@ -30,11 +30,6 @@ class AppearanceViewModel @Inject constructor(
 
     val vmThemes = themeRepository.subscribe().asState(emptyList())
     var themeEditMode by mutableStateOf(false)
-
-    init {
-
-    }
-
 
 
     val themeMode = uiPreferences.themeMode().asState()
@@ -57,10 +52,8 @@ class AppearanceViewModel @Inject constructor(
     }
 
     @Composable
-    fun getCustomizedColors(): State<CustomizableAppColorsPreferenceState> {
-        return remember(themeMode.value) {
-            mutableStateOf(if (themeMode.value == PreferenceValues.ThemeMode.Light) lightColors else darkColors)
-        }
+    fun getCustomizedColors(): CustomizableAppColorsPreferenceState {
+        return if (MaterialTheme.colorScheme.isLight()) lightColors else darkColors
     }
 
 

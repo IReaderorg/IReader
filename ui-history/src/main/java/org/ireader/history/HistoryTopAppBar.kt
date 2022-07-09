@@ -5,8 +5,11 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -17,12 +20,13 @@ import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.history.viewmodel.HistoryState
 import org.ireader.ui_history.R
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryTopAppBar(
     vm: HistoryState,
     onDeleteAll: () -> Unit,
-    getHistories: () -> Unit
+    getHistories: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -85,7 +89,8 @@ fun HistoryTopAppBar(
                     )
 
             } else null
-        }
+        },
+        scrollBehavior = scrollBehavior
 
     )
 }

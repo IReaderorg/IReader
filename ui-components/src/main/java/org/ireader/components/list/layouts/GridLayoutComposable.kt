@@ -36,8 +36,9 @@ fun GridLayoutComposable(
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
     showInLibraryBadge: Boolean = false,
-    headers: ((url:String) -> okhttp3.Headers?)? = null,
+    headers: ((url: String) -> okhttp3.Headers?)? = null,
     columns: Int = 3,
+
 ) {
     val cells = if (columns > 1) {
         GridCells.Fixed(columns)
@@ -58,11 +59,11 @@ fun GridLayoutComposable(
                     contentType = { "books" },
                 ) { book ->
                     val height = remember {
-                        mutableStateOf(IntSize(0,0))
+                        mutableStateOf(IntSize(0, 0))
                     }
                     BookImage(
                         modifier.onGloballyPositioned {
-                          height.value = it.size
+                            height.value = it.size
                         },
                         onClick = { onClick(book) },
                         book = book,

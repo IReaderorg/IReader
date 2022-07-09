@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,6 +32,7 @@ fun ChapterDetailTopAppBar(
     onReverseClick: () -> Unit,
     onPopBackStack: () -> Unit,
     onMap: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
         when {
@@ -40,14 +42,16 @@ fun ChapterDetailTopAppBar(
                     onClickCancelSelection = onClickCancelSelection,
                     onClickSelectAll = onClickSelectAll,
                     onClickInvertSelection = onClickFlipSelection,
-                    onSelectBetween = onSelectBetween
+                    onSelectBetween = onSelectBetween,
+                    scrollBehavior=scrollBehavior
                 )
             }
             else -> {
                 RegularChapterDetailTopAppBar(
                     onReverseClick = onReverseClick,
                     onPopBackStack = onPopBackStack,
-                    onMap = onMap
+                    onMap = onMap,
+                    scrollBehavior=scrollBehavior
                 )
             }
         }
@@ -59,6 +63,7 @@ fun RegularChapterDetailTopAppBar(
     onReverseClick: () -> Unit,
     onPopBackStack: () -> Unit,
     onMap: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     CenterAlignedTopAppBar(
         modifier = Modifier.statusBarsPadding(),
@@ -84,6 +89,7 @@ fun RegularChapterDetailTopAppBar(
                 onClick = onPopBackStack
             )
         },
+        scrollBehavior = scrollBehavior
     )
 }
 
@@ -94,8 +100,10 @@ private fun EditModeChapterDetailTopAppBar(
     onClickSelectAll: () -> Unit,
     onClickInvertSelection: () -> Unit,
     onSelectBetween: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Toolbar(
+        scrollBehavior=scrollBehavior,
         title = { BigSizeTextComposable(text = "$selectionSize") },
         navigationIcon = {
             AppIconButton(

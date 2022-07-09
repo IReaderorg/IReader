@@ -60,8 +60,8 @@ fun AppearanceSettingScreen(
     scaffoldPaddingValues: PaddingValues
 ) {
     val context = LocalContext.current
-    val customizedColors = vm.getCustomizedColors().value
-    val isLight = vm.themeMode.value == PreferenceValues.ThemeMode.Light
+    val customizedColors = vm.getCustomizedColors()
+    val isLight = MaterialTheme.colorScheme.isLight()
 
     val scope = rememberCoroutineScope()
     val themesForCurrentMode = remember(isLight, vm.vmThemes.value.size) {

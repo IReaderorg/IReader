@@ -314,6 +314,8 @@
     <string name="unlock_app">Unlock</string>
     <string name="reset_setting">Reset Setting</string>
     <string name="reset_reader_screen_settings">Reset Reader Screen Settings</string>
+    <string name="reset_categories">Reset categories</string>
+    <string name="reset_themes">Reset themes</string>
     <string name="pin">Pin</string>
     <string name="unpin">Unpin</string>
     <string name="text_align">Text Align</string>

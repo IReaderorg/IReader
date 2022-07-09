@@ -21,4 +21,7 @@ interface ThemeDao :BaseDao<CustomTheme> {
     @Query("SELECT * FROM theme_table WHERE id == :themeId")
     fun find(themeId:Int) : kotlinx.coroutines.flow.Flow<CustomTheme>
 
+    @Query("DELETE FROM theme_table WHERE isDefault = 0")
+    fun deleteAll()
+
 }

@@ -21,8 +21,8 @@ dependencies {
     implementation(androidx.lifecycle.viewmodelktx)
     implementation(androidx.lifecycle.runtime)
 
-    implementation(compose.compose.ui)
-    implementation(compose.compose.coil)
+    implementation(composeLib.compose.ui)
+    implementation(composeLib.compose.coil)
     implementation(androidx.browser)
 
     implementation(commonLib.okhttp.doh)

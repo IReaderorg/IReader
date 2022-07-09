@@ -65,7 +65,7 @@ dependencies {
     implementation(kotlinx.reflect)
     implementation(kotlinx.datetime)
     implementation(kotlinx.serialization.json)
-    implementation(compose.compose.activity)
+    implementation(composeLib.compose.activity)
     implementation(project(mapOf("path" to ":core-ui")))
 
 

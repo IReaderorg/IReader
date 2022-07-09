@@ -6,6 +6,7 @@ import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
@@ -23,4 +24,6 @@ data class Controller @OptIn(ExperimentalMaterial3Api::class, ExperimentalMateri
         val requestHideSystemNavbar:(Boolean) -> Unit = {},
         val requestedHideSystemStatusBar:(Boolean) -> Unit = {},
         val requestedCustomSystemColor:(CustomSystemColor?) -> Unit = {},
+        val scrollOffset:(offset:Float,max:Float) -> Unit = {_,_->},
+        val scrollBehavior: TopAppBarScrollBehavior
     )

@@ -101,6 +101,13 @@ interface CategoryDao : BaseDao<Category> {
 
     @Query(
         """
+       DELETE FROM category WHERE id >= 0
+    """
+    )
+    suspend fun deleteAll()
+
+    @Query(
+        """
        UPDATE category SET flags = coalesce(:flags,0)
     """
     )
@@ -157,4 +164,6 @@ interface CategoryDao : BaseDao<Category> {
         if (!updateList.isEmpty()) update(updateList)
         return idList.firstOrNull() ?: -1
     }
+
+
 }

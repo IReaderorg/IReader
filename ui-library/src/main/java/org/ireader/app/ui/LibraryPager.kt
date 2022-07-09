@@ -40,6 +40,7 @@ internal fun LibraryPager(
     showReadBadge: Boolean = false,
     showInLibraryBadge:Boolean = false,
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
+
 ) {
     HorizontalPager(
         count = pageCount,
@@ -75,7 +76,7 @@ internal fun LibraryPager(
                 showGoToLastChapterBadge = showGoToLastChapterBadge,
                 showReadBadge = showReadBadge,
                 showUnreadBadge = showUnreadBadge,
-                columns = columns
+                columns = columns,
             )
         }
 

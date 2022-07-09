@@ -12,7 +12,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = compose.versions.extension.get()
+        kotlinCompilerExtensionVersion = composeLib.versions.extension.get()
     }
     lint {
         baseline = file("lint-baseline.xml")
@@ -53,24 +53,24 @@ dependencies {
     implementation(project(Modules.commonExtensions))
     implementation(project(Modules.uiComponents))
 
-    implementation("androidx.core:core-splashscreen:1.0.0-beta02")
-    implementation(compose.compose.foundation)
-    implementation(compose.compose.animations)
-    implementation(compose.compose.googlFonts)
-    implementation(compose.compose.ui)
-    implementation(compose.compose.compiler)
-    implementation(compose.compose.activity)
+    implementation("androidx.core:core-splashscreen:1.0.0-rc01")
+    implementation(composeLib.compose.foundation)
+    implementation(composeLib.compose.animations)
+    implementation(composeLib.compose.googlFonts)
+    implementation(composeLib.compose.ui)
+    implementation(composeLib.compose.compiler)
+    implementation(composeLib.compose.activity)
 
-implementation(compose.material3.core)
+    implementation(composeLib.material3.core)
 
 
-    implementation(compose.compose.uiToolingPreview)
+    implementation(composeLib.compose.uiToolingPreview)
 
-    implementation(compose.compose.icons)
-    implementation(compose.compose.navigation)
-    implementation(compose.compose.coil)
-    implementation(compose.compose.hiltNavigation)
-    implementation(compose.compose.lifecycle)
+    implementation(composeLib.compose.icons)
+    implementation(composeLib.compose.navigation)
+    implementation(composeLib.compose.coil)
+    implementation(composeLib.compose.hiltNavigation)
+    implementation(composeLib.compose.lifecycle)
 
     implementation(accompanist.flowlayout)
     implementation(accompanist.navAnimation)
@@ -99,7 +99,7 @@ implementation(compose.material3.core)
 
     testImplementation(test.bundles.common)
     androidTestImplementation(test.bundles.common)
-    androidTestImplementation(compose.compose.uiTestManifest)
-    androidTestImplementation(compose.compose.testing)
-    androidTestImplementation(compose.compose.composeTooling)
+    androidTestImplementation(composeLib.compose.uiTestManifest)
+    androidTestImplementation(composeLib.compose.testing)
+    androidTestImplementation(composeLib.compose.composeTooling)
 }

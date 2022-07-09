@@ -34,12 +34,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.ireader.chapterDetails.viewmodel.ChapterDetailViewModel
 import org.ireader.common_models.entities.Chapter
@@ -61,7 +61,8 @@ fun ChapterDetailScreen(
     vm: ChapterDetailViewModel,
     onItemClick: (Chapter) -> Unit,
     onLongItemClick: (Chapter) -> Unit,
-    scaffoldPadding: PaddingValues
+    scaffoldPadding: PaddingValues,
+    searchBarHeight:Dp
 ) {
     val context = LocalContext.current
     val scrollState = rememberLazyListState()
@@ -69,9 +70,7 @@ fun ChapterDetailScreen(
         vm.scrollState = scrollState
     }
     val focusManager = LocalFocusManager.current
-
-    val scope = rememberCoroutineScope()
-    Box(
+    Surface(
         modifier = Modifier
             .padding(scaffoldPadding)
             .fillMaxSize()
@@ -80,17 +79,16 @@ fun ChapterDetailScreen(
             CustomTextField(
                 modifier = Modifier
                     .padding(horizontal = 8.dp, vertical = 8.dp)
-                    .height(35.dp)
+                    .height(searchBarHeight)
                     .fillMaxWidth()
                     .background(
                         color = MaterialTheme.colorScheme.onBackground.copy(.1f),
                         shape = CircleShape
                     ),
                 hint = stringResource(R.string.search_hint),
-                value = vm.query?:"",
+                value = vm.query ?: "",
                 onValueChange = {
                     vm.query = it
-                   // vm.getLocalChaptersByPaging(vm.isAsc)
                 },
                 onValueConfirm = {
                     focusManager.clearFocus()
@@ -104,13 +102,13 @@ fun ChapterDetailScreen(
                             contentDescription = stringResource(R.string.exit_search_mode),
                             onClick = {
                                 vm.query = ""
-                                //vm.getLocalChaptersByPaging(vm.isAsc)
+                                focusManager.clearFocus()
                             }
                         )
                     }
                 }
             )
-            Box(modifier.fillMaxSize()) {
+            Box(Modifier.fillMaxSize()) {
                 Crossfade(
                     targetState = Pair(
                         vm.isLoading,
@@ -123,6 +121,7 @@ fun ChapterDetailScreen(
                     }
                 }
                 ChaptersContent(
+                    modifier = modifier,
                     scrollState = scrollState,
                     onLongClick = {
                         onLongItemClick(it)
@@ -158,6 +157,7 @@ fun ChapterDetailScreen(
 
 @Composable
 private fun ChaptersContent(
+    modifier: Modifier,
     vm: ChapterDetailViewModel,
     scrollState: LazyListState,
     isLastRead: (Chapter) -> Boolean,
@@ -169,7 +169,7 @@ private fun ChaptersContent(
     val chapters = vm.getChapters(book)
     LazyColumnScrollbar(listState = scrollState) {
         LazyColumn(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize(),
             state = scrollState
         ) {

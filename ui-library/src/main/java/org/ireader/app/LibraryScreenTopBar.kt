@@ -1,7 +1,5 @@
 package org.ireader.app
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
@@ -14,15 +12,16 @@ import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import org.ireader.app.viewmodel.LibraryState
+import org.ireader.app.viewmodel.LibraryViewModel
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.AppTextField
@@ -33,22 +32,23 @@ import org.ireader.ui_library.R
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun LibraryScreenTopBar(
-    state: LibraryState,
+    state: LibraryViewModel,
     bottomSheetState: ModalBottomSheetState,
     onSearch: (() -> Unit)?= null,
     refreshUpdate: () -> Unit,
     onClickSelectAll: () -> Unit,
     onClickInvertSelection: () -> Unit,
-    onClearSelection:() -> Unit
+    onClearSelection:() -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
-    Box(modifier = Modifier.fillMaxWidth()) {
         when {
             state.selectionMode -> {
                 EditModeTopAppBar(
                     selectionSize = state.selectedBooks.size,
                     onClickCancelSelection = onClearSelection,
                     onClickSelectAll = onClickSelectAll,
-                    onClickInvertSelection = onClickInvertSelection
+                    onClickInvertSelection = onClickInvertSelection,
+                    scrollBehavior = scrollBehavior
                 )
             }
             else -> {
@@ -58,10 +58,10 @@ fun LibraryScreenTopBar(
                     refreshUpdate = refreshUpdate,
                     onSearch = {
                         onSearch?.invoke()
-                    }
+                    },
+                    scrollBehavior = scrollBehavior
                 )
             }
-        }
     }
 }
 
@@ -71,7 +71,8 @@ private fun RegularTopBar(
     vm: LibraryState,
     bottomSheetState: ModalBottomSheetState,
     onSearch: () -> Unit,
-    refreshUpdate: () -> Unit
+    refreshUpdate: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
@@ -149,8 +150,8 @@ private fun RegularTopBar(
                         }
                     )
             } else null
-        }
-
+        },
+        scrollBehavior = scrollBehavior
     )
 }
 
@@ -160,6 +161,7 @@ private fun EditModeTopAppBar(
     onClickCancelSelection: () -> Unit,
     onClickSelectAll: () -> Unit,
     onClickInvertSelection: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Toolbar(
         title = { BigSizeTextComposable(text ="$selectionSize") },
@@ -176,6 +178,7 @@ private fun EditModeTopAppBar(
             IconButton(onClick = onClickInvertSelection) {
                 Icon(Icons.Default.FlipToBack, contentDescription = null)
             }
-        }
+        },
+        scrollBehavior = scrollBehavior
     )
 }

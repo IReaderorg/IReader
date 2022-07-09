@@ -59,6 +59,9 @@ class LibraryViewModel @Inject constructor(
     val getCategory: CategoriesUseCases
 ) : BaseViewModel(), LibraryState by state {
 
+
+
+
     var lastUsedCategory = libraryPreferences.lastUsedCategory().asState()
     var filters = libraryPreferences.filters(true).asState()
 
@@ -146,7 +149,7 @@ class LibraryViewModel @Inject constructor(
 //
 //            }
             //insertUseCases.updateBook.update(it, false)
-        selectedBooks.clear()
+            selectedBooks.clear()
         }
     }
 

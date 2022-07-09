@@ -52,7 +52,7 @@ dependencyResolutionManagement {
         maven(url ="https://github.com/psiegman/mvn-repo/raw/master/releases")
     }
     versionCatalogs {
-        create("compose") {
+        create("composeLib") {
             from(files("gradle/compose.versions.toml"))
         }
         create("kotlinx") {

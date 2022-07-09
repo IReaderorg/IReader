@@ -11,11 +11,12 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.TextButton
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -51,7 +52,7 @@ object ChapterScreenSpec : ScreenSpec {
         return "chapter_detail_route/$bookId/$sourceId"
     }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
         controller: Controller
@@ -80,6 +81,7 @@ object ChapterScreenSpec : ScreenSpec {
 
                 }
             },
+            scrollBehavior =  controller.scrollBehavior,
             onPopBackStack = {
                 controller.navController.popBackStack()
             },
@@ -144,17 +146,19 @@ object ChapterScreenSpec : ScreenSpec {
         }
     }
 
-    @OptIn(
-        ExperimentalAnimationApi::class,
-        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
-    )
+    @OptIn(ExperimentalAnimationApi::class,)
     @Composable
     override fun Content(
         controller: Controller
     ) {
         val vm: ChapterDetailViewModel = hiltViewModel(controller.navBackStackEntry)
+
+        val scrollableTabsHeight = LocalDensity.current.run {
+            46.dp + (controller.scrollBehavior.state.offset ?:0f).toDp()
+        }
         val book = vm.book
         ChapterDetailScreen(
+            modifier = Modifier.nestedScroll(controller.scrollBehavior.nestedScrollConnection),
             onItemClick = { chapter ->
                 if (vm.selection.isEmpty()) {
                     if (book != null) {
@@ -188,7 +192,8 @@ object ChapterScreenSpec : ScreenSpec {
                 }
             },
             vm = vm,
-            scaffoldPadding = controller.scaffoldPadding
+            scaffoldPadding = controller.scaffoldPadding,
+            searchBarHeight = scrollableTabsHeight
         )
     }
 

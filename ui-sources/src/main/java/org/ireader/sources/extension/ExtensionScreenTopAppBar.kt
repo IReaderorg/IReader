@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TravelExplore
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -27,9 +28,11 @@ fun ExtensionScreenTopAppBar(
     onSearchDisable:() -> Unit,
     onSearchEnable:() -> Unit,
     onRefresh:() -> Unit,
-    onSearchNavigate: () -> Unit
+    onSearchNavigate: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Toolbar(
+        scrollBehavior = scrollBehavior,
         title = {
             if (!searchMode) {
                 BigSizeTextComposable(text = stringResource(R.string.extensions))
@@ -91,6 +94,7 @@ fun ExtensionScreenTopAppBar(
                         onClick = onSearchDisable
                     )
             } else null
-        }
+        },
+
     )
 }

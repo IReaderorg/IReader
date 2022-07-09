@@ -15,6 +15,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -61,7 +62,7 @@ fun LibraryScreen(
     editCategoryOnRemoteInInsertQueue:(Category)-> Unit,
     editCategoryOnRemoteInDeleteQueue:(Category)-> Unit,
     editCategoryOnAddDeleteQueue:(Category)-> Unit,
-
+    tabHeight : Dp
 ) {
 
     LaunchedEffect(vm.selectionMode) {
@@ -70,7 +71,7 @@ fun LibraryScreen(
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = false)
 
     BoxWithConstraints(
-        modifier = Modifier
+        modifier = modifier
             .padding(scaffoldPadding)
             .fillMaxSize(),
     ) {
@@ -95,7 +96,9 @@ fun LibraryScreen(
                     onLongBook = onLongBook,
                     goToLatestChapter = goToLatestChapter,
                     onPageChanged = onPagerPageChange,
-                    getColumnsForOrientation= getColumnsForOrientation
+                    getColumnsForOrientation= getColumnsForOrientation,
+                    tabHeight = tabHeight
+
                 )
 
             }

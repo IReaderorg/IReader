@@ -8,9 +8,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
+import org.ireader.Controller
 import org.ireader.common_extensions.async.viewModelIOCoroutine
 import org.ireader.components.reusable_composable.WarningAlert
 import org.ireader.domain.ui.NavigationArgs
@@ -18,7 +20,6 @@ import org.ireader.history.HistoryScreen
 import org.ireader.history.HistoryTopAppBar
 import org.ireader.history.viewmodel.HistoryViewModel
 import org.ireader.presentation.R
-import org.ireader.Controller
 
 object HistoryScreenSpec : BottomNavScreenSpec {
     override val icon: ImageVector = Icons.Filled.History
@@ -28,14 +29,16 @@ object HistoryScreenSpec : BottomNavScreenSpec {
     override val arguments: List<NamedNavArgument> = listOf(
         NavigationArgs.showBottomNav
     )
+
     @ExperimentalMaterial3Api
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-        controller:Controller
+        controller: Controller
     ) {
         val vm: HistoryViewModel = hiltViewModel(controller.navBackStackEntry)
         val context = LocalContext.current
+
         HistoryTopAppBar(
             vm = vm,
             getHistories = {
@@ -45,7 +48,8 @@ object HistoryScreenSpec : BottomNavScreenSpec {
                 vm.warningAlert.value.apply {
                     enable.value = true
                     this.title.value = context.getString(R.string.remove)
-                    this.title.value = context.getString(R.string.dialog_remove_chapter_books_description)
+                    this.title.value =
+                        context.getString(R.string.dialog_remove_chapter_books_description)
                     this.onDismiss.value = {
                         this.enable.value = false
                     }
@@ -58,19 +62,24 @@ object HistoryScreenSpec : BottomNavScreenSpec {
                 }
 
             },
+            scrollBehavior = controller.scrollBehavior
+
         )
     }
 
-
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content(
         controller: Controller
     ) {
         val vm: HistoryViewModel = hiltViewModel(controller.navBackStackEntry)
-val context = LocalContext.current
+        val context = LocalContext.current
+
         WarningAlert(data = vm.warningAlert.value)
         HistoryScreen(
-            modifier = Modifier.padding(controller.scaffoldPadding),
+            modifier = Modifier
+                .padding(controller.scaffoldPadding)
+                .nestedScroll(controller.scrollBehavior.nestedScrollConnection),
             onHistory = { history ->
                 controller.navController.navigate(
                     ReaderScreenSpec.buildRoute(
@@ -102,7 +111,8 @@ val context = LocalContext.current
                 vm.warningAlert.value.apply {
                     enable.value = true
                     this.title.value = context.getString(R.string.remove)
-                    this.title.value = context.getString(R.string.dialog_remove_chapter_history_description)
+                    this.title.value =
+                        context.getString(R.string.dialog_remove_chapter_history_description)
                     this.onDismiss.value = {
                         this.enable.value = false
                     }
@@ -119,7 +129,8 @@ val context = LocalContext.current
                 vm.warningAlert.value.apply {
                     enable.value = true
                     this.title.value = context.getString(R.string.remove)
-                    this.title.value = context.getString(R.string.dialog_remove_chapter_book_description)
+                    this.title.value =
+                        context.getString(R.string.dialog_remove_chapter_book_description)
                     this.onDismiss.value = {
                         this.enable.value = false
                     }

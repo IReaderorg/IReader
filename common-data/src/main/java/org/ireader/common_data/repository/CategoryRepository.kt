@@ -16,7 +16,8 @@ interface CategoryRepository {
     suspend fun insertOrUpdate(category: Category): Long
     suspend fun insertOrUpdate(category: List<Category>): List<Long>
     suspend fun delete(category: Category)
-    suspend fun deleteAll(category: List<Category>)
+    suspend fun delete(category: List<Category>)
+    suspend fun deleteAll()
 
 
 }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.TabRowDefaults
@@ -21,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -29,10 +31,10 @@ import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Catalog
-import org.ireader.core_ui.theme.AppColors
 import org.ireader.common_resources.UiEvent
 import org.ireader.components.components.component.pagerTabIndicatorOffset
 import org.ireader.components.reusable_composable.MidSizeTextComposable
+import org.ireader.core_ui.theme.AppColors
 import org.ireader.core_ui.utils.horizontalPadding
 import org.ireader.sources.extension.composables.RemoteSourcesScreen
 import org.ireader.sources.extension.composables.UserSourcesScreen
@@ -50,7 +52,8 @@ fun ExtensionScreen(
     onClickUninstall: (Catalog) -> Unit,
     onClickTogglePinned: (Catalog) -> Unit,
     onCancelInstaller:((Catalog) -> Unit)? = null,
-    snackBarHostState: androidx.compose.material3.SnackbarHostState
+    snackBarHostState: androidx.compose.material3.SnackbarHostState,
+    scrollBarHeight:Dp,
 ) {
 
     val context = LocalContext.current
@@ -88,7 +91,8 @@ fun ExtensionScreen(
             onClickUninstall = onClickUninstall,
             onRefreshCatalogs = onRefreshCatalogs,
             pages = pages,
-            onCancelInstaller = onCancelInstaller
+            onCancelInstaller = onCancelInstaller,
+            scrollBarHeight =scrollBarHeight
         )
     }
 }
@@ -126,6 +130,7 @@ private fun ExtensionContent(
     onClickInstall: (Catalog) -> Unit,
     onClickUninstall: (Catalog) -> Unit,
     onCancelInstaller:((Catalog) -> Unit)? = null,
+    scrollBarHeight:Dp,
 ) {
     val pagerState = rememberPagerState()
     LaunchedEffect(pagerState) {
@@ -133,7 +138,7 @@ private fun ExtensionContent(
             vm.currentPagerPage = pagerState.targetPage
         }
     }
-    ExtensionTabs(pagerState,pages)
+    ExtensionTabs(pagerState = pagerState, pages = pages, scrollBarHeight = scrollBarHeight)
     ExtensionPager(
         pagerState = pagerState,
         vm = vm,
@@ -196,11 +201,14 @@ private fun ExtensionPager(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun ExtensionTabs(
+    modifier:Modifier = Modifier,
     pagerState: PagerState,
-    pages: List<String>
+    pages: List<String>,
+    scrollBarHeight:Dp,
 ) {
     val scope = rememberCoroutineScope()
     TabRow(
+        modifier = Modifier.height(scrollBarHeight),
         selectedTabIndex = pagerState.currentPage,
         containerColor = AppColors.current.bars,
         contentColor = AppColors.current.onBars,

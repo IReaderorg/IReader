@@ -234,6 +234,7 @@ private fun RowScope.BookInfo(
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.secondaryItemAlpha(),
+                color = MaterialTheme.colorScheme.onBackground,
                 overflow = TextOverflow.Ellipsis
             )
         }

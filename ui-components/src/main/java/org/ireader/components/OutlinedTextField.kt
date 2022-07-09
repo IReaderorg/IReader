@@ -2,6 +2,7 @@ package org.ireader.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
@@ -41,7 +42,7 @@ fun CustomTextField(
                 .padding(start = paddingLeadingIconEnd, end = paddingTrailingIconStart)
         ) {
             BasicTextField(
-                modifier = Modifier,
+                modifier = Modifier.fillMaxWidth(),
                 value = value,
                 onValueChange = onValueChange,
                 maxLines = 1,

@@ -6,10 +6,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +33,7 @@ import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.core_ui.theme.AppColors
 import org.ireader.ui_components.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Toolbar(
     title: @Composable () -> Unit,
@@ -41,8 +44,9 @@ fun Toolbar(
     contentColor: Color = AppColors.current.onBars,
     elevation: Dp = 0.dp,
     applyInsets: Boolean = false,
-) {
+    scrollBehavior: TopAppBarScrollBehavior? = null
 
+) {
     Surface(
         modifier = modifier,
         color = backgroundColor,
@@ -57,7 +61,9 @@ fun Toolbar(
             colors = TopAppBarDefaults.mediumTopAppBarColors(
                 containerColor = backgroundColor,
                 titleContentColor = contentColor,
+                scrolledContainerColor = backgroundColor
             ),
+            scrollBehavior = scrollBehavior,
         )
     }
 }

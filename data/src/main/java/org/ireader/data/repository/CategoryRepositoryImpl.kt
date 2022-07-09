@@ -44,7 +44,11 @@ class CategoryRepositoryImpl(
         return dao.delete(category)
     }
 
-    override suspend fun deleteAll(category: List<Category>) {
+    override suspend fun delete(category: List<Category>) {
         return dao.delete(category)
+    }
+
+    override suspend fun deleteAll() {
+        dao.deleteAll()
     }
 }

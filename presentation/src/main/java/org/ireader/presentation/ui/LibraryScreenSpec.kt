@@ -6,7 +6,10 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -80,7 +83,9 @@ object LibraryScreenSpec : BottomNavScreenSpec {
             },
             onClickSelectAll = {
                 vm.selectAllInCurrentCategory()
-            }
+            },
+            scrollBehavior = controller.scrollBehavior
+
         )
     }
     @Composable
@@ -93,7 +98,11 @@ object LibraryScreenSpec : BottomNavScreenSpec {
             controller.requestHideNavigator(vm.selectionMode)
         }
 
+        val scrollableTabsHeight = LocalDensity.current.run {
+            org.ireader.components.TopAppBarSmallTokens.ContainerHeight + (controller.scrollBehavior.state.offset ?:0f).toDp()
+        }
         LibraryController(
+            modifier = Modifier.nestedScroll(controller.scrollBehavior.nestedScrollConnection),
             vm = vm,
             controller = controller,
             goToReader = { book ->
@@ -112,7 +121,8 @@ object LibraryScreenSpec : BottomNavScreenSpec {
                     bookId = book.id
                 )
             )
-        })
+        },
+        tabHeight = scrollableTabsHeight)
     }
 }
 

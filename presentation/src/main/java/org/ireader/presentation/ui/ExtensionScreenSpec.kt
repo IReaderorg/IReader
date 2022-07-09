@@ -13,15 +13,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
+import org.ireader.Controller
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
 import org.ireader.sources.extension.ExtensionScreen
 import org.ireader.sources.extension.ExtensionScreenTopAppBar
 import org.ireader.sources.extension.ExtensionViewModel
-import org.ireader.Controller
 
 object ExtensionScreenSpec : BottomNavScreenSpec {
     override val icon: ImageVector = Icons.Filled.Explore
@@ -71,7 +73,8 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
                 controller.navController.navigate(
                     GlobalSearchScreenSpec.navHostRoute
                 )
-            }
+            },
+            scrollBehavior =  controller.scrollBehavior,
         )
     }
 
@@ -85,8 +88,11 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
     ) {
         val vm: ExtensionViewModel = hiltViewModel(controller.navBackStackEntry)
 
+        val scrollableTabsHeight = LocalDensity.current.run {
+            org.ireader.components.TopAppBarSmallTokens.ContainerHeight + (controller.scrollBehavior.state.offset ?:0f).toDp()
+        }
         ExtensionScreen(
-            modifier = Modifier.padding(controller.scaffoldPadding),
+            modifier = Modifier.padding(controller.scaffoldPadding).nestedScroll(controller.scrollBehavior.nestedScrollConnection),
             vm = vm,
             onClickCatalog = {
                 if (!vm.incognito.value) {
@@ -103,7 +109,8 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
             onClickTogglePinned = { vm.togglePinnedCatalog(it) },
             onClickUninstall = { vm.uninstallCatalog(it) },
             snackBarHostState = controller.snackBarHostState,
-            onCancelInstaller = { vm.cancelCatalogJob(it) }
+            onCancelInstaller = { vm.cancelCatalogJob(it) },
+            scrollBarHeight = scrollableTabsHeight
         )
     }
 }

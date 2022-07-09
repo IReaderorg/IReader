@@ -22,7 +22,23 @@ data class Category(
     companion object {
         const val ALL_ID = -2L
         const val UNCATEGORIZED_ID = -1L
+        val baseCategories = listOf<Category>(
+            Category(
+                id = ALL_ID,
+                name ="",
+                order =0,
+                updateInterval =0,
+                flags = 0
+            ),Category(
+                id = UNCATEGORIZED_ID,
+                name ="",
+                order =0,
+                updateInterval =0,
+                flags = 0
+            ),
+        )
     }
+
 
 }
 

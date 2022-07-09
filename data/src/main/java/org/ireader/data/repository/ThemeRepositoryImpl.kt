@@ -19,7 +19,15 @@ class ThemeRepositoryImpl(
         return themeDao.insertTheme(theme)
     }
 
+    override suspend fun insert(theme: List<CustomTheme>) {
+        themeDao.insert(theme)
+    }
+
     override suspend fun delete(theme: CustomTheme) {
         return themeDao.delete(theme)
+    }
+
+    override suspend fun deleteAll() {
+        themeDao.deleteAll()
     }
 }
