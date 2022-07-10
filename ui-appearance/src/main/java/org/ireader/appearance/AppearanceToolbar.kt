@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.stringResource
@@ -17,27 +18,34 @@ import org.ireader.domain.use_cases.theme.toCustomTheme
 import org.ireader.ui_appearance.R
 
 @Composable
-fun AppearanceToolbar(vm: AppearanceViewModel,onPopBackStack: () -> Unit) {
+fun AppearanceToolbar(
+    vm: AppearanceViewModel,
+    onPopBackStack: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null
+) {
 
-        when(vm.themeEditMode) {
-            false-> MainAppearanceToolbar(
-                vm = vm,
-                onPopBackStack = onPopBackStack
-            )
-            true -> EditToolbar(
-                vm
-            )
-        }
-
+    when (vm.themeEditMode) {
+        false -> MainAppearanceToolbar(
+            vm = vm,
+            onPopBackStack = onPopBackStack,
+            scrollBehavior=scrollBehavior
+        )
+        true -> EditToolbar(
+            vm,
+            scrollBehavior=scrollBehavior
+        )
+    }
 }
 
 @Composable
 private fun MainAppearanceToolbar(
     vm: AppearanceViewModel,
-    onPopBackStack:() -> Unit
+    onPopBackStack: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     val scope = rememberCoroutineScope()
     Toolbar(
+        scrollBehavior = scrollBehavior,
         title = {
             BigSizeTextComposable(text = stringResource(R.string.appearance))
         },
@@ -53,7 +61,7 @@ private fun MainAppearanceToolbar(
                 AppIconButton(
                     imageVector = Icons.Default.Save,
                     onClick = {
-                        val theme =  vm.getThemes(vm.colorTheme.value)
+                        val theme = vm.getThemes(vm.colorTheme.value)
                         if (theme != null) {
                             scope.launchIO {
                                 val themeId = vm.themeRepository.insert(theme.toCustomTheme())
@@ -73,9 +81,11 @@ private fun MainAppearanceToolbar(
 
 @Composable
 private fun EditToolbar(
-    vm: AppearanceViewModel
+    vm: AppearanceViewModel,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Toolbar(
+        scrollBehavior =scrollBehavior,
         title = {},
         navigationIcon = {
             AppIconButton(

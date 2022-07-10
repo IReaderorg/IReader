@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +44,7 @@ fun BrowseTopAppBar(
     onPop: () -> Unit,
     onLayoutTypeSelect: (DisplayMode) -> Unit,
     currentLayout: DisplayMode,
+    scrollBehavior: TopAppBarScrollBehavior?
 ) {
     var topMenu by remember {
         mutableStateOf(false)
@@ -52,6 +54,7 @@ fun BrowseTopAppBar(
     }
     val context = LocalContext.current
     Toolbar(
+        scrollBehavior=scrollBehavior,
         title = {
             if (!state.isSearchModeEnable) {
                 BigSizeTextComposable(text = source?.name ?: "")

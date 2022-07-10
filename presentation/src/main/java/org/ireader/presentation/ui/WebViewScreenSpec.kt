@@ -114,6 +114,7 @@ object WebViewScreenSpec : ScreenSpec {
         val source = vm.source
 
         WebPageTopBar(
+            scrollBehavior = controller.scrollBehavior,
             urlToRender = url ?: vm.url,
             onGo = {
                 vm.webViewState?.content = WebContent.Url(vm.webUrl)

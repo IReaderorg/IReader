@@ -14,13 +14,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import org.ireader.Controller
 import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.settings.setting.SettingsSection
 import org.ireader.settings.setting.SetupLayout
 import org.ireader.ui_settings.R
-import org.ireader.Controller
 
 object SettingScreenSpec : ScreenSpec {
     override val navHostRoute: String = "settings"
@@ -32,6 +32,7 @@ object SettingScreenSpec : ScreenSpec {
                 controller: Controller
     ) {
         Toolbar(
+            scrollBehavior = controller.scrollBehavior,
             title = {
                 BigSizeTextComposable(text = stringResource(org.ireader.ui_settings.R.string.settings))
             },

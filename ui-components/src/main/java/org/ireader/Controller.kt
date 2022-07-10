@@ -24,6 +24,5 @@ data class Controller @OptIn(ExperimentalMaterial3Api::class, ExperimentalMateri
         val requestHideSystemNavbar:(Boolean) -> Unit = {},
         val requestedHideSystemStatusBar:(Boolean) -> Unit = {},
         val requestedCustomSystemColor:(CustomSystemColor?) -> Unit = {},
-        val scrollOffset:(offset:Float,max:Float) -> Unit = {_,_->},
         val scrollBehavior: TopAppBarScrollBehavior
     )

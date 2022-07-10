@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +42,7 @@ fun GlobalSearchScreen(
     onSearch: (query: String) -> Unit,
     onBook: (BaseBook) -> Unit,
     onGoToExplore: (Int) -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior?
 
 ) {
 
@@ -53,7 +55,8 @@ fun GlobalSearchScreen(
             GlobalScreenTopBar(
                 onPop = onPopBackStack,
                 onSearch = onSearch,
-                state = vm
+                state = vm,
+                scrollBehavior = scrollBehavior
             )
         }
     ) { padding ->

@@ -8,7 +8,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
@@ -78,8 +77,7 @@ object HistoryScreenSpec : BottomNavScreenSpec {
         WarningAlert(data = vm.warningAlert.value)
         HistoryScreen(
             modifier = Modifier
-                .padding(controller.scaffoldPadding)
-                .nestedScroll(controller.scrollBehavior.nestedScrollConnection),
+                .padding(controller.scaffoldPadding),
             onHistory = { history ->
                 controller.navController.navigate(
                     ReaderScreenSpec.buildRoute(

@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,9 +31,11 @@ fun BookDetailTopAppBar(
     onRefresh: () -> Unit,
     onPopBackStack: () -> Unit,
     onCommand: () -> Unit,
-    onShare:() -> Unit
+    onShare:() -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior?
 ) {
     Toolbar(
+        scrollBehavior=scrollBehavior,
         title = {},
         applyInsets = true,
         backgroundColor = Color.Transparent,

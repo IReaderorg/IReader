@@ -12,12 +12,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import org.ireader.Controller
 import org.ireader.components.components.Components
-import org.ireader.components.components.setupUiComponent
 import org.ireader.components.components.TitleToolbar
+import org.ireader.components.components.setupUiComponent
 import org.ireader.settings.setting.reader.ReaderSettingScreenViewModel
 import org.ireader.ui_settings.R
-import org.ireader.Controller
 
 object ReaderSettingSpec : ScreenSpec {
 
@@ -30,7 +30,8 @@ object ReaderSettingSpec : ScreenSpec {
     ) {
         TitleToolbar(
             title = stringResource(R.string.reader),
-            navController = controller.navController
+            navController = controller.navController,
+            scrollBehavior = controller.scrollBehavior
         )
     }
 

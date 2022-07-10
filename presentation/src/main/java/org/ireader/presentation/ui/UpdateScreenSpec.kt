@@ -8,7 +8,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import org.ireader.Controller
@@ -75,7 +74,7 @@ object UpdateScreenSpec : BottomNavScreenSpec {
         val vm: UpdatesViewModel = hiltViewModel(controller.navBackStackEntry)
 
         UpdateScreen(
-            modifier = Modifier.padding(controller.scaffoldPadding).nestedScroll(controller.scrollBehavior.nestedScrollConnection),
+            modifier = Modifier.padding(controller.scaffoldPadding),
             state = vm,
             onUpdate = { update ->
                 if (vm.hasSelection) {

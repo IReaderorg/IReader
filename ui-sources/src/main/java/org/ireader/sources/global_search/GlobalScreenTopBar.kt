@@ -4,6 +4,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalFocusManager
@@ -21,11 +22,13 @@ fun GlobalScreenTopBar(
     onSearch: (String) -> Unit,
     onPop: () -> Unit,
     state: GlobalSearchState,
+    scrollBehavior: TopAppBarScrollBehavior?
 ) {
 
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     Toolbar(
+        scrollBehavior = scrollBehavior,
         title = {
             AppTextField(
                 query = state.query,

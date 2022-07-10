@@ -9,11 +9,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import org.ireader.Controller
 import org.ireader.common_resources.R
 import org.ireader.components.components.TitleToolbar
 import org.ireader.settings.setting.category.CategoryScreen
 import org.ireader.settings.setting.category.CategoryScreenViewModel
-import org.ireader.Controller
 
 object CategoryScreenSpec : ScreenSpec {
 
@@ -26,7 +26,8 @@ object CategoryScreenSpec : ScreenSpec {
     ) {
         TitleToolbar(
             title = stringResource(R.string.edit_category),
-            navController = controller.navController
+            navController = controller.navController,
+            scrollBehavior = controller.scrollBehavior
         )
     }
 

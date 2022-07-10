@@ -2,9 +2,9 @@ package org.ireader.presentation.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import org.ireader.Controller
 import org.ireader.common_resources.R
 import org.ireader.components.components.TitleToolbar
-import org.ireader.Controller
 
 
 object TrackingSettingSpec : ScreenSpec {
@@ -17,7 +17,8 @@ object TrackingSettingSpec : ScreenSpec {
     ) {
         TitleToolbar(
             title = stringResource(R.string.tracking),
-            navController = controller.navController
+            navController = controller.navController,
+            scrollBehavior = controller.scrollBehavior
         )
     }
 

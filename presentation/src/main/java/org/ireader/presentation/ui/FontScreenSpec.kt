@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import org.ireader.Controller
 import org.ireader.components.components.SearchToolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.core_ui.theme.FontType
@@ -18,7 +19,6 @@ import org.ireader.core_ui.theme.getDefaultFont
 import org.ireader.settings.setting.font_screens.FontScreen
 import org.ireader.settings.setting.font_screens.FontScreenViewModel
 import org.ireader.ui_settings.R
-import org.ireader.Controller
 
 @ExperimentalMaterial3Api
 @OptIn(ExperimentalMaterialApi::class)
@@ -51,6 +51,7 @@ object FontScreenSpec : ScreenSpec {
             onSearch = {
                 vm.searchQuery = it
             },
+            scrollBehavior = controller.scrollBehavior
         )
     }
 

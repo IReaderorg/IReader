@@ -99,6 +99,7 @@ object BookDetailScreenSpec : ScreenSpec {
                 }
             }
         BookDetailTopAppBar(
+            scrollBehavior = controller.scrollBehavior,
             onWebView = {
                 if (source != null && source is HttpSource && book != null)
                     controller.navController.navigate(

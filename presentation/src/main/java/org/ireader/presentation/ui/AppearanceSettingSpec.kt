@@ -6,11 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import org.ireader.Controller
 import org.ireader.appearance.AppearanceSettingScreen
 import org.ireader.appearance.AppearanceToolbar
 import org.ireader.appearance.AppearanceViewModel
 import org.ireader.core_ui.ui.SnackBarListener
-import org.ireader.Controller
 
 
 object AppearanceScreenSpec : ScreenSpec {
@@ -27,7 +27,8 @@ object AppearanceScreenSpec : ScreenSpec {
             vm = vm,
             onPopBackStack = {
                 popBackStack(controller.navController)
-            }
+            },
+            scrollBehavior = controller.scrollBehavior
         )
     }
 

@@ -26,7 +26,8 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
     ) {
         TitleToolbar(
             title = stringResource(R.string.backup_and_restore),
-            navController = controller.navController
+            navController = controller.navController,
+            scrollBehavior = controller.scrollBehavior
         )
     }
 

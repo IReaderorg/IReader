@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
@@ -102,7 +101,7 @@ object LibraryScreenSpec : BottomNavScreenSpec {
             org.ireader.components.TopAppBarSmallTokens.ContainerHeight + (controller.scrollBehavior.state.offset ?:0f).toDp()
         }
         LibraryController(
-            modifier = Modifier.nestedScroll(controller.scrollBehavior.nestedScrollConnection),
+            modifier = Modifier,
             vm = vm,
             controller = controller,
             goToReader = { book ->

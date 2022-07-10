@@ -29,7 +29,8 @@ object AboutSettingSpec : ScreenSpec {
     ) {
         TitleToolbar(
             title = stringResource(R.string.about),
-            navController =controller. navController
+            navController =controller. navController,
+            scrollBehavior = controller.scrollBehavior
         )
     }
 

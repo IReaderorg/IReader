@@ -39,7 +39,8 @@ object SecuritySettingSpec : ScreenSpec {
     ) {
         TitleToolbar(
             title = stringResource(R.string.security),
-            navController = controller.navController
+            navController = controller.navController,
+            scrollBehavior = controller.scrollBehavior
         )
     }
 

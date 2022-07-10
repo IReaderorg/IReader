@@ -14,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +41,7 @@ fun DownloaderTopAppBar(
     onMenuIcon: () -> Unit,
     onDeleteAllDownload: () -> Unit,
     onDelete: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior?
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
         when {
@@ -59,13 +61,15 @@ fun DownloaderTopAppBar(
                         state.selection.clear()
                         state.selection.addAll(ids)
                     },
-                    onDelete = onDelete
+                    onDelete = onDelete,
+                        scrollBehavior = scrollBehavior,
                 )
             }
             else -> {
                 RegularTopBar(
                     onPopBackStack = onPopBackStack,
                     onCancelAll = onCancelAll,
+                    scrollBehavior = scrollBehavior,
 
                 )
             }
@@ -78,11 +82,13 @@ fun DownloaderTopAppBar(
 private fun RegularTopBar(
     onPopBackStack: () -> Unit,
     onCancelAll: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior?
 ) {
     var isMenuExpanded by remember {
         mutableStateOf(false)
     }
     Toolbar(
+        scrollBehavior = scrollBehavior,
         title = {
             Text(
                 text = UiText.StringResource(R.string.downloads_queue).asString(),
@@ -128,9 +134,11 @@ private fun EditModeTopAppBar(
     onClickCancelSelection: () -> Unit,
     onClickSelectAll: () -> Unit,
     onClickInvertSelection: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior?
 ) {
     Toolbar(
+        scrollBehavior = scrollBehavior,
         title = { BigSizeTextComposable(text = stringResource(selectionSize)) },
         navigationIcon = {
             IconButton(onClick = onClickCancelSelection) {

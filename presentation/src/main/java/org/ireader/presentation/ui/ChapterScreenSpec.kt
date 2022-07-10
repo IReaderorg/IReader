@@ -15,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -158,7 +157,7 @@ object ChapterScreenSpec : ScreenSpec {
         }
         val book = vm.book
         ChapterDetailScreen(
-            modifier = Modifier.nestedScroll(controller.scrollBehavior.nestedScrollConnection),
+            modifier = Modifier,
             onItemClick = { chapter ->
                 if (vm.selection.isEmpty()) {
                     if (book != null) {

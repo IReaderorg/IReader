@@ -166,6 +166,7 @@ object ExploreScreenSpec : ScreenSpec {
         val source = vm.source
         val scope = rememberCoroutineScope()
         BrowseTopAppBar(
+            scrollBehavior= controller.scrollBehavior,
             state = vm,
             source = source,
             onValueChange = {

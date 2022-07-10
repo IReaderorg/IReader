@@ -22,7 +22,8 @@ object AdvanceSettingSpec : ScreenSpec {
     ) {
         TitleToolbar(
             title = stringResource(R.string.advance_setting),
-            navController = controller.navController
+            navController = controller.navController,
+            scrollBehavior = controller.scrollBehavior
         )
     }
 

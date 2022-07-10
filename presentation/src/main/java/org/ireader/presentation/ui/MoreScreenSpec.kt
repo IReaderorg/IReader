@@ -12,13 +12,13 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
+import org.ireader.Controller
 import org.ireader.common_resources.discord
 import org.ireader.components.components.TitleToolbar
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
 import org.ireader.settings.setting.MainSettingScreenViewModel
 import org.ireader.settings.setting.MoreScreen
-import org.ireader.Controller
 
 object MoreScreenSpec : BottomNavScreenSpec {
     override val icon: ImageVector = Icons.Filled.MoreHoriz
@@ -36,7 +36,8 @@ object MoreScreenSpec : BottomNavScreenSpec {
     ) {
         TitleToolbar(
             title = stringResource(org.ireader.ui_settings.R.string.more),
-            navController = null
+            navController = null,
+            scrollBehavior = controller.scrollBehavior
         )
     }
 

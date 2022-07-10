@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,12 +42,14 @@ fun WebPageTopBar(
     onFetchBook:() -> Unit,
     onFetchChapter:() -> Unit,
     onFetchChapters:() -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
 
     var isMenuExpanded by remember {
         mutableStateOf(false)
     }
     Toolbar(
+        scrollBehavior=scrollBehavior,
         title = {
             CustomTextField(
                 modifier = Modifier

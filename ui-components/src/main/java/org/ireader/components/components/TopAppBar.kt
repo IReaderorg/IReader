@@ -45,7 +45,6 @@ fun Toolbar(
     elevation: Dp = 0.dp,
     applyInsets: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior? = null
-
 ) {
     Surface(
         modifier = modifier,
@@ -71,7 +70,8 @@ fun Toolbar(
 @Composable
 fun TitleToolbar(
     title: String,
-    navController: NavController?
+    navController: NavController?,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Toolbar(
         title = {
@@ -83,6 +83,7 @@ fun TitleToolbar(
             } else {
             }
         },
+        scrollBehavior=scrollBehavior
     )
 }
 
@@ -96,6 +97,7 @@ fun MidSizeToolbar(
     contentColor: Color = AppColors.current.onBars,
     elevation: Dp = 0.dp,
     applyInsets: Boolean = false,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
 
     Surface(
@@ -105,6 +107,7 @@ fun MidSizeToolbar(
         shadowElevation = elevation,
     ) {
         MediumTopAppBar(
+            scrollBehavior =scrollBehavior,
             modifier = if (applyInsets) Modifier.statusBarsPadding() else Modifier,
             title = title,
             navigationIcon = navigationIcon,
@@ -124,7 +127,8 @@ fun SearchToolbar(
     onSearch: ((String) -> Unit)?= null,
     onValueChange:((String) -> Unit)? = null,
     actions: ( @Composable RowScope.() -> Unit?)? = null,
-    onPopBackStack: (() -> Unit)? = null
+    onPopBackStack: (() -> Unit)? = null,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -135,6 +139,7 @@ fun SearchToolbar(
        mutableStateOf( "")
     }
     Toolbar(
+        scrollBehavior =scrollBehavior,
         title = {
             if (!isSearchModeEnable) {
                 BigSizeTextComposable(text = title)

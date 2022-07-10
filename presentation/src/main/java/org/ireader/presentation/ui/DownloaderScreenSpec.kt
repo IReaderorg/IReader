@@ -7,11 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
+import org.ireader.Controller
 import org.ireader.common_models.entities.toSavedDownload
 import org.ireader.downloader.DownloaderScreen
 import org.ireader.downloader.DownloaderTopAppBar
 import org.ireader.downloader.DownloaderViewModel
-import org.ireader.Controller
 
 object DownloaderScreenSpec : ScreenSpec {
 
@@ -70,7 +70,8 @@ object DownloaderScreenSpec : ScreenSpec {
                 vm.deleteSelectedDownloads(vm.downloads.filter { it.chapterId in vm.selection }
                     .map { it.toSavedDownload() })
                 vm.selection.clear()
-            }
+            },
+            scrollBehavior = controller.scrollBehavior
         )
     }
 
