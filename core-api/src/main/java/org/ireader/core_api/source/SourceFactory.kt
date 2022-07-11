@@ -82,7 +82,7 @@ abstract class SourceFactory(
         val books = document.select(elementSelector).map { element ->
             parser(element)
         }
-        val hasNextPage: Boolean = if(baseExploreFetcher.infinitePage) {
+        val hasNextPage: Boolean = if (baseExploreFetcher.infinitePage) {
             true
         } else {
             if (baseExploreFetcher.maxPage != -1) {
@@ -100,7 +100,6 @@ abstract class SourceFactory(
                     }
                 }
             }
-
         }
 
         return MangasPageInfo(books, hasNextPage)
@@ -153,10 +152,11 @@ abstract class SourceFactory(
     ): Document {
         val res = requestBuilder(
             "${getCustomBaseUrl()}${
-                (baseExploreFetcher.endpoint)?.replace(this.page, baseExploreFetcher.onPage(page.toString()) )?.replace(
-                    this
-                        .query, query.let { baseExploreFetcher.onQuery(query) }
-                )
+            (baseExploreFetcher.endpoint)?.replace(this.page, baseExploreFetcher.onPage(page.toString()))?.replace(
+                this
+                    .query,
+                query.let { baseExploreFetcher.onQuery(query) }
+            )
             }"
         )
         return client.get(res).asJsoup()
@@ -175,7 +175,7 @@ abstract class SourceFactory(
         return bookListParse(
             getListRequest(baseExploreFetcher, page, query),
             baseExploreFetcher.selector,
-            page= page,
+            page = page,
             baseExploreFetcher = baseExploreFetcher,
             parser = { element ->
 
@@ -224,7 +224,7 @@ abstract class SourceFactory(
 
     /**
      * @param filters filters that users passed over to the source
-    this filters comes from the [getFilters]
+     this filters comes from the [getFilters]
      * @param page current page
      * @return [MangasPageInfo]
      */
@@ -238,13 +238,11 @@ abstract class SourceFactory(
             } ?: MangasPageInfo(emptyList(), false)
         }
 
-
         if (sorts != null) {
             return exploreFetchers.filter { it.type != Type.Search }.getOrNull(sorts)?.let {
                 return getLists(it, page, "", filters)
             } ?: MangasPageInfo(emptyList(), false)
         }
-
 
         return MangasPageInfo(emptyList(), false)
     }
@@ -349,19 +347,19 @@ abstract class SourceFactory(
      * @return a status
      *          which should be one of
      *
-    const val UNKNOWN = 0
+     const val UNKNOWN = 0
 
-    const val ONGOING = 1
+     const val ONGOING = 1
 
-    const val COMPLETED = 2
+     const val COMPLETED = 2
 
-    const val LICENSED = 3
+     const val LICENSED = 3
 
-    const val PUBLISHING_FINISHED = 4
+     const val PUBLISHING_FINISHED = 4
 
-    const val CANCELLED = 5
+     const val CANCELLED = 5
 
-    const val ON_HIATUS = 6
+     const val ON_HIATUS = 6
      *
      *
      *
@@ -512,9 +510,9 @@ abstract class SourceFactory(
      * @param nextPageSelector the selector for the element that indicated that next page exists
      * @param nextPageAtt the attribute for the element that indicated that next page exists
      * @param nextPageValue the expected value that next page,
-    this value can be left empty
+     this value can be left empty
      * @param onLink  this value pass a string and after applying the required changed
-    it should return the changed link
+     it should return the changed link
      * @param addBaseurlToCoverLink "true" if you want to add baseUrl to link
      * @param linkSelector selector for link of book
      * @param linkAtt attribute for the link of book
@@ -546,8 +544,8 @@ abstract class SourceFactory(
         val onCover: (String, key: String) -> String = { url, _ -> url },
         val onQuery: (query: String) -> String = { query -> query },
         val onPage: (page: String) -> String = { page -> page },
-        val infinitePage:Boolean = false,
-        val maxPage:Int = -1,
+        val infinitePage: Boolean = false,
+        val maxPage: Int = -1,
         val type: Type = Type.Others,
     )
 

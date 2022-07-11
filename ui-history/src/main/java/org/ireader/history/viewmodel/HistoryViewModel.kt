@@ -20,7 +20,7 @@ class HistoryViewModel @Inject constructor(
 
     val dateFormat by uiPreferences.dateFormat().asState()
     val relativeFormat by uiPreferences.relativeTime().asState()
-    val warningAlert= mutableStateOf(WarningAlertData())
+    val warningAlert = mutableStateOf(WarningAlertData())
 
     fun getHistoryBooks() {
         viewModelScope.launch {

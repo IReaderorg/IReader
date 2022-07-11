@@ -73,9 +73,9 @@ fun DropDownMenu(
                     DropdownMenuItem(onClick = {
                         opened = false
                         onSelected(index)
-                    },text = {
-                        MidSizeTextComposable(text = s)
-                    })
+                    }, text = {
+                            MidSizeTextComposable(text = s)
+                        })
                 }
             }
         }
@@ -90,13 +90,13 @@ fun SortedByScreen() {
 @Composable
 fun FilterItemPrev() {
     DropDownMenu(
-      "Sort By:",
+        "Sort By:",
         { s ->
         },
-      "Latest",
-        arrayOf(
         "Latest",
-           "Popular"
+        arrayOf(
+            "Latest",
+            "Popular"
         )
     )
 }

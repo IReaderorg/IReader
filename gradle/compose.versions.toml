@@ -5,6 +5,10 @@ extension = "1.2.0"
 activity = "1.4.0"
 lifecycle = "2.4.1"
 material3 = "1.0.0-alpha14"
+paging = "1.0.0-alpha15"
+navigation = "2.5.0"
+hiltNavigation = "1.0.0"
+coil = "2.1.0"
 
 [libraries]
 compose-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "compose" }
@@ -18,7 +22,7 @@ compose-uiUtil = { module = "androidx.compose.ui:ui-util", version.ref = "compos
 compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version = "1.0.1" }
 compose-uiToolingPreview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
 compose-uiTooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
-compose-paging = { module = "androidx.paging:paging-compose", version = "1.0.0-alpha14" }
+compose-paging = { module = "androidx.paging:paging-compose", version.ref = "paging" }
 compose-animations = { module = "androidx.compose.animation:animation", version.ref = "compose" }
 compose-animations-graphics = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose" }
 compose-testing = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose" }
@@ -28,21 +32,15 @@ compose-j4Unit = { module = "androidx.compose.ui:ui-test-junit4", version.ref = 
 compose-googlFonts =  { module ="androidx.compose.ui:ui-text-google-fonts", version.ref = "compose" }
 
 
-compose-navigation = { module = "androidx.navigation:navigation-compose", version = "2.5.0-rc01" }
-compose-hiltNavigation = { module = "androidx.hilt:hilt-navigation-compose", version = "1.0.0" }
+compose-navigation = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
+compose-hiltNavigation = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigation" }
 compose-activity = { module = "androidx.activity:activity-compose", version.ref = "activity" }
 compose-lifecycle = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
-compose-coil = "io.coil-kt:coil-compose:2.1.0"
-
-
-compose-destinations-core = "io.github.raamcosta.compose-destinations:core:1.5.1-beta"
-compose-destinations-animation = "io.github.raamcosta.compose-destinations:animations-core:1.5.1-beta"
-compose-destinations-ksp = "io.github.raamcosta.compose-destinations:ksp:1.5.1-beta"
-
+compose-coil = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 
 material3-core = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 material3-windowsizeclass = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "material3" }
-material3-adapter = "com.google.android.material:compose-theme-adapter-3:1.0.14"
+material3-adapter = { module = "com.google.android.material:compose-theme-adapter-3", version.ref = "material3" }
 material-icons = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose" }
 
 [bundles]

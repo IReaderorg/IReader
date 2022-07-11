@@ -69,14 +69,14 @@ class RepositoryInject {
     @Singleton
     @Provides
     fun provideLibraryRepository(
-        dao:LibraryDao,
+        dao: LibraryDao,
     ): LibraryRepository {
         return LibraryRepositoryImpl(dao)
     }
     @Singleton
     @Provides
     fun provideCategoryRepository(
-        dao:CategoryDao,
+        dao: CategoryDao,
     ): CategoryRepository {
         return CategoryRepositoryImpl(dao)
     }
@@ -120,7 +120,6 @@ class RepositoryInject {
     ): BookCategoryRepository {
         return BookCategoryRepositoryImpl(dao)
     }
-
 
     @Provides
     @Singleton

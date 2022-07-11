@@ -21,12 +21,9 @@ object DownloadSettingSpec : ScreenSpec {
         )
     }
 
-
     @Composable
     override fun Content(
         controller: Controller
     ) {
-
     }
-
 }

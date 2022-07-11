@@ -62,7 +62,6 @@ fun WebView(
     val scope = rememberCoroutineScope()
     var webView by remember { mutableStateOf<WebView?>(null) }
 
-
     BackHandler(captureBackPresses && navigator.canGoBack) {
         webView?.goBack()
     }
@@ -71,13 +70,14 @@ fun WebView(
         with(navigator) { webView?.handleNavigationEvents() }
     }
 
-
     val runningInPreview = LocalInspectionMode.current
 
     AndroidView(
         factory = { context ->
-            (preconfigureWebView
-                ?: WebView(context))
+            (
+                preconfigureWebView
+                    ?: WebView(context)
+                )
                 .apply {
 //                onCreated(this)
 //                    this.setDefaultSettings()
@@ -90,7 +90,7 @@ fun WebView(
 
 //                webChromeClient = chromeClient
 //                webViewClient = client
-            }
+                }
                 .also { webView = it }
         },
         modifier = modifier

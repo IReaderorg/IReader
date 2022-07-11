@@ -72,7 +72,7 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
                     GlobalSearchScreenSpec.navHostRoute
                 )
             },
-            scrollBehavior =  controller.scrollBehavior,
+            scrollBehavior = controller.scrollBehavior,
         )
     }
 

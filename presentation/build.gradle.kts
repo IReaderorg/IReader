@@ -63,7 +63,6 @@ dependencies {
 
     implementation(composeLib.material3.core)
 
-
     implementation(composeLib.compose.uiToolingPreview)
 
     implementation(composeLib.compose.icons)
@@ -83,7 +82,7 @@ dependencies {
     implementation(androidx.appCompat)
     implementation(androidx.media)
     implementation(androidx.core)
-    //implementation(androidx.material)
+    // implementation(androidx.material)
     implementation(androidx.emoji)
 
     implementation(androidx.work.runtime)

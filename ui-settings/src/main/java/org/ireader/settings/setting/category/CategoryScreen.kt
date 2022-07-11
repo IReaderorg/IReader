@@ -65,7 +65,7 @@ fun CategoryScreen(
 //            }
             scope.launchIO {
                 vm.reorderCategory.await(data[from.index].id, newPosition = to.index)
-                //vm.categoriesUseCase.insertCategory(data[from].category.copy(sort = to))
+                // vm.categoriesUseCase.insertCategory(data[from].category.copy(sort = to))
             }
         },
     )
@@ -78,7 +78,6 @@ fun CategoryScreen(
             }
         }
     )
-
 
     CategoryFloatingActionButton(vm)
 
@@ -179,7 +178,7 @@ private fun ShowEditScreen(
                         id = R.string.category_hint
                     ),
                     mode = 1,
-                    keyboardAction =KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardAction = KeyboardOptions(imeAction = ImeAction.Done),
                 )
             },
             confirmButton = {

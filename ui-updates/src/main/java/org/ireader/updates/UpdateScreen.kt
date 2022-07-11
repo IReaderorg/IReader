@@ -47,7 +47,7 @@ fun UpdateScreen(
     onBottomBookMark: () -> Unit,
 ) {
     Box(
-       modifier =  modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize()
 
     ) {
         Crossfade(targetState = Pair(state.isLoading, state.isEmpty)) { (isLoading, isEmpty) ->
@@ -105,9 +105,9 @@ private fun BoxScope.UpdateEditBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (state.selection.any { selectionId ->
-                    selectionId in state.updates.values.flatten().filter { !it.downloaded }
-                        .map { it.id }
-                }
+                selectionId in state.updates.values.flatten().filter { !it.downloaded }
+                    .map { it.id }
+            }
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.GetApp,

@@ -41,8 +41,6 @@ import org.ireader.core_ui.preferences.ChapterDisplayMode
 import org.ireader.core_ui.ui.Colour.contentColor
 import org.ireader.ui_chapter_detail.R
 
-
-
 @ExperimentalPagerApi
 @ExperimentalMaterialApi
 @Composable
@@ -58,7 +56,7 @@ fun Tabs(libraryTabs: List<String>, pagerState: PagerState) {
                 Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
                 color = MaterialTheme.colorScheme.primary,
 
-                )
+            )
         }
     ) {
         libraryTabs.forEachIndexed { index, tab ->
@@ -73,12 +71,10 @@ fun Tabs(libraryTabs: List<String>, pagerState: PagerState) {
     }
 }
 
-
-
 @ExperimentalPagerApi
 @Composable
 fun TabsContent(
-    tabs:List<String>,
+    tabs: List<String>,
     pagerState: PagerState,
     filters: List<ChaptersFilters>,
     toggleFilter: (ChaptersFilters) -> Unit,
@@ -151,7 +147,6 @@ private fun ClickableRow(onClick: () -> Unit, content: @Composable () -> Unit) {
     )
 }
 
-
 private fun LazyListScope.SortPage(
     sorting: ChapterSort,
     onClick: (ChapterSort.Type) -> Unit
@@ -185,7 +180,7 @@ private fun LazyListScope.SortPage(
 private fun LazyListScope.DispalyPage(
     layouts: List<ChapterDisplayMode>,
     onLayoutSelected: (ChapterDisplayMode) -> Unit,
-    selectedLayout:ChapterDisplayMode
+    selectedLayout: ChapterDisplayMode
 ) {
     items(layouts) { layout ->
         Column(
@@ -209,7 +204,6 @@ private fun LazyListScope.DispalyPage(
                     }
                     else -> {}
                 }
-
             }
         }
     }

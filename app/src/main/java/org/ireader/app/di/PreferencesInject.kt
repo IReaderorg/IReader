@@ -17,7 +17,6 @@ import javax.inject.Singleton
 @Module
 class PreferencesInject {
 
-
     @Provides
     @Singleton
     fun provideAppPreferences(
@@ -56,5 +55,4 @@ class PreferencesInject {
     ): LibraryPreferences {
         return LibraryPreferences(preferenceStore)
     }
-
 }

@@ -31,7 +31,7 @@ class AdvanceSettingViewModel @Inject constructor(
     private val themeRepository: ThemeRepository,
     private val categoryRepository: CategoryRepository,
 
-    ) : BaseViewModel() {
+) : BaseViewModel() {
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
 

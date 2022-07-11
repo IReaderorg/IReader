@@ -7,24 +7,22 @@ import org.ireader.common_models.theme.ReaderTheme
 
 interface ThemeRepository {
 
-    fun subscribe() : Flow<List<BaseTheme>>
+    fun subscribe(): Flow<List<BaseTheme>>
 
     suspend fun insert(theme: CustomTheme): Long
     suspend fun insert(theme: List<CustomTheme>)
 
     suspend fun delete(theme: CustomTheme)
     suspend fun deleteAll()
-
 }
 
 interface ReaderThemeRepository {
 
-    fun subscribe() : Flow<List<ReaderTheme>>
+    fun subscribe(): Flow<List<ReaderTheme>>
 
     suspend fun insert(theme: ReaderTheme): Long
     suspend fun insert(theme: List<ReaderTheme>)
 
     suspend fun delete(theme: ReaderTheme)
     suspend fun deleteAll()
-
 }

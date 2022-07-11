@@ -26,9 +26,7 @@ dependencies {
     implementation(commonLib.coil.compose)
     implementation(composeLib.compose.foundation)
     implementation(composeLib.compose.animations)
-implementation(composeLib.material3.core)
-
-
+    implementation(composeLib.material3.core)
 
     implementation(commonLib.hilt.android)
     kapt(commonLib.hilt.androidcompiler)

@@ -10,7 +10,6 @@ import org.ireader.domain.use_cases.download.get.SubscribeDownloadsUseCase
 import org.ireader.domain.use_cases.download.insert.InsertDownload
 import org.ireader.domain.use_cases.download.insert.InsertDownloads
 
-
 data class DownloadUseCases(
     val subscribeDownloadsUseCase: SubscribeDownloadsUseCase,
     val findAllDownloadsUseCase: FindAllDownloadsUseCase,

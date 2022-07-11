@@ -6,7 +6,6 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,11 +17,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.DoneOutline
@@ -41,7 +38,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.ireader.chapterDetails.viewmodel.ChapterDetailViewModel
 import org.ireader.common_models.entities.Chapter
-import org.ireader.components.CustomTextField
 import org.ireader.components.components.ChapterRow
 import org.ireader.components.list.scrollbars.LazyColumnScrollbar
 import org.ireader.components.reusable_composable.AppIconButton
@@ -74,37 +70,6 @@ fun ChapterDetailScreen(
             .fillMaxSize()
     ) {
         Column {
-            CustomTextField(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 8.dp)
-                    .fillMaxWidth()
-                    .background(
-                        color = MaterialTheme.colorScheme.onBackground.copy(.1f),
-                        shape = CircleShape
-                    ),
-                hint = stringResource(R.string.search_hint),
-                value = vm.query ?: "",
-                onValueChange = {
-                    vm.query = it
-                },
-                onValueConfirm = {
-                    focusManager.clearFocus()
-                },
-                paddingTrailingIconStart = 8.dp,
-                paddingLeadingIconEnd = 8.dp,
-                trailingIcon = {
-                    if (vm.query.isNullOrBlank()) {
-                        AppIconButton(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(R.string.exit_search_mode),
-                            onClick = {
-                                vm.query = ""
-                                focusManager.clearFocus()
-                            }
-                        )
-                    }
-                }
-            )
             Box(Modifier.fillMaxSize()) {
                 Crossfade(
                     targetState = Pair(
@@ -147,7 +112,6 @@ fun ChapterDetailScreen(
                     modifier = Modifier.align(Alignment.BottomCenter)
                 )
             }
-
         }
     }
 }
@@ -242,8 +206,8 @@ private fun ChapterDetailBottomBar(
 
                 AppIconButton(
                     imageVector = if (vm.chapters.filter { it.read }
-                            .map { it.id }
-                            .containsAll(vm.selection)
+                        .map { it.id }
+                        .containsAll(vm.selection)
                     ) Icons.Default.DoneOutline else Icons.Default.Done,
                     contentDescription = stringResource(R.string.mark_as_read),
                     onClick = {

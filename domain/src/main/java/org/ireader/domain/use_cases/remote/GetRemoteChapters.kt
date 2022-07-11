@@ -19,9 +19,9 @@ class GetRemoteChapters @Inject constructor() {
         book: Book,
         catalog: CatalogLocal?,
         commands: CommandList = emptyList(),
-        oldChapters:List<Chapter>,
+        oldChapters: List<Chapter>,
         onSuccess: suspend (List<Chapter>) -> Unit,
-        onRemoteSuccess:suspend (List<Chapter>) -> Unit = {},
+        onRemoteSuccess: suspend (List<Chapter>) -> Unit = {},
         onError: suspend (UiText?) -> Unit,
     ) {
         val source = catalog?.source ?: throw SourceNotFoundException()
@@ -30,7 +30,7 @@ class GetRemoteChapters @Inject constructor() {
                 try {
                     Log.debug { "Timber: GetRemoteChaptersUseCase was Called" }
 
-                    val newChapters = source.getChapterList(manga = book.toBookInfo(catalog.sourceId),commands).map { it.toChapter(book.id) }
+                    val newChapters = source.getChapterList(manga = book.toBookInfo(catalog.sourceId), commands).map { it.toChapter(book.id) }
                     onRemoteSuccess(newChapters)
                     onSuccess((oldChapters + newChapters).distinctBy { it.key })
                     Log.debug { "Timber: GetRemoteChaptersUseCase was Finished Successfully" }

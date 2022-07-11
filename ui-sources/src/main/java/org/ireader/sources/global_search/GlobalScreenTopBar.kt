@@ -54,7 +54,7 @@ fun GlobalScreenTopBar(
         navigationIcon = {
             AppIconButton(
                 imageVector = Icons.Default.ArrowBack,
-               contentDescription = stringResource(R.string.toggle_search_mode_off),
+                contentDescription = stringResource(R.string.toggle_search_mode_off),
                 onClick = {
                     onPop()
                 }

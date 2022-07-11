@@ -37,7 +37,7 @@ fun BookImage(
     book: BaseBook,
     ratio: Float = 3f / 4f,
     selected: Boolean = false,
-    header: ((url:String) -> okhttp3.Headers?)? = null,
+    header: ((url: String) -> okhttp3.Headers?)? = null,
     badge: @Composable BoxScope.() -> Unit,
 ) {
     Box(

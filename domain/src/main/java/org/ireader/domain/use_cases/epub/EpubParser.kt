@@ -1,51 +1,51 @@
-//package org.ireader.domain.use_cases.epub
+// package org.ireader.domain.use_cases.epub
 //
-//import android.graphics.BitmapFactory
-//import org.jsoup.Jsoup
-//import org.jsoup.nodes.TextNode
-//import org.w3c.dom.Document
-//import org.w3c.dom.Element
-//import org.w3c.dom.Node
-//import org.w3c.dom.NodeList
-//import org.xml.sax.InputSource
-//import java.io.File
-//import java.io.InputStream
-//import java.net.URLDecoder
-//import java.util.zip.ZipEntry
-//import java.util.zip.ZipInputStream
-//import javax.xml.parsers.DocumentBuilderFactory
+// import android.graphics.BitmapFactory
+// import org.jsoup.Jsoup
+// import org.jsoup.nodes.TextNode
+// import org.w3c.dom.Document
+// import org.w3c.dom.Element
+// import org.w3c.dom.Node
+// import org.w3c.dom.NodeList
+// import org.xml.sax.InputSource
+// import java.io.File
+// import java.io.InputStream
+// import java.net.URLDecoder
+// import java.util.zip.ZipEntry
+// import java.util.zip.ZipInputStream
+// import javax.xml.parsers.DocumentBuilderFactory
 //
-//private val NodeList.elements get() = (0..length).asSequence().mapNotNull { item(it) as? Element }
-//private val Node.childElements get() = childNodes.elements
-//private fun Document.selectFirstTag(tag: String): Node? = getElementsByTagName(tag).item(0)
-//private fun Node.selectFirstChildTag(tag: String) = childElements.find { it.tagName == tag }
-//private fun Node.selectChildTag(tag: String) = childElements.filter { it.tagName == tag }
-//private fun Node.getAttributeValue(attribute: String): String? =
+// private val NodeList.elements get() = (0..length).asSequence().mapNotNull { item(it) as? Element }
+// private val Node.childElements get() = childNodes.elements
+// private fun Document.selectFirstTag(tag: String): Node? = getElementsByTagName(tag).item(0)
+// private fun Node.selectFirstChildTag(tag: String) = childElements.find { it.tagName == tag }
+// private fun Node.selectChildTag(tag: String) = childElements.filter { it.tagName == tag }
+// private fun Node.getAttributeValue(attribute: String): String? =
 //    attributes?.getNamedItem(attribute)?.textContent
 //
-//internal fun parseXMLFile(inputSteam: InputStream): Document? =
+// internal fun parseXMLFile(inputSteam: InputStream): Document? =
 //    DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputSteam)
 //
-//internal  fun parseXMLFile(byteArray: ByteArray): Document? = parseXMLFile(byteArray.inputStream())
-//private fun parseXMLText(text: String): Document? = text.reader().runCatching {
+// internal  fun parseXMLFile(byteArray: ByteArray): Document? = parseXMLFile(byteArray.inputStream())
+// private fun parseXMLText(text: String): Document? = text.reader().runCatching {
 //    DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(InputSource(this))
-//}.getOrNull()
+// }.getOrNull()
 //
-//private val String.decodedURL: String get() = URLDecoder.decode(this, "UTF-8")
-//private fun String.asFileName(): String = this.replace("/", "_")
+// private val String.decodedURL: String get() = URLDecoder.decode(this, "UTF-8")
+// private fun String.asFileName(): String = this.replace("/", "_")
 //
-//internal fun ZipInputStream.entries() = generateSequence { nextEntry }
+// internal fun ZipInputStream.entries() = generateSequence { nextEntry }
 //
-//data class EpubChapter(val url: String, val title: String, val body: List<String>)
-//data class EpubImage(val path: String, val image: ByteArray)
-//data class EpubBook(
+// data class EpubChapter(val url: String, val title: String, val body: List<String>)
+// data class EpubImage(val path: String, val image: ByteArray)
+// data class EpubBook(
 //    val fileName: String,
 //    val title: String,
 //    val chapters: List<EpubChapter>,
 //    val images: List<EpubImage>
-//)
+// )
 //
-//fun createEpubBook(inputStream: InputStream): EpubBook {
+// fun createEpubBook(inputStream: InputStream): EpubBook {
 //    val zipFile = ZipInputStream(inputStream).use { zipInputStream ->
 //        zipInputStream
 //            .entries()
@@ -141,13 +141,13 @@
 //        chapters = chapters.toList(),
 //        images = images.toList()
 //    )
-//}
+// }
 //
-//private class EpubXMLFileParser(
+// private class EpubXMLFileParser(
 //    val fileAbsolutePath: String,
 //    val data: ByteArray,
 //    val zipFile: Map<String, Pair<ZipEntry, ByteArray>>
-//) {
+// ) {
 //    data class Output(val title: String?, val body: String)
 //
 //    val fileParentFolder: File = File(fileAbsolutePath).parentFile ?: File("")
@@ -231,9 +231,9 @@
 //            }
 //        }
 //    }
-//}
+// }
 //
-//object BookTextUtils {
+// object BookTextUtils {
 //    // <img yrel="{float}"> {uri} </img>
 //    data class ImgEntry(val path: String, val yrel: Float) {
 //        companion object {
@@ -257,4 +257,4 @@
 //            return """<img yrel="${"%.2f".format(yrel)}">$path</img>"""
 //        }
 //    }
-//}
+// }

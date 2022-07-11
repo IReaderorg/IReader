@@ -304,7 +304,7 @@ fun DotsPreview() = MaterialTheme {
 
         Text(
             text = "Dots pulsing",
-            style =MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium
         )
         DotsPulsing()
 
@@ -312,7 +312,7 @@ fun DotsPreview() = MaterialTheme {
 
         Text(
             text = "Dots elastic",
-            style =MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium
         )
         DotsElastic()
 
@@ -320,7 +320,7 @@ fun DotsPreview() = MaterialTheme {
 
         Text(
             text = "Dots flashing",
-            style =MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium
         )
         DotsFlashing(true)
 
@@ -328,7 +328,7 @@ fun DotsPreview() = MaterialTheme {
 
         Text(
             text = "Dots typing",
-            style =MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium
         )
         DotsTyping()
 
@@ -336,7 +336,7 @@ fun DotsPreview() = MaterialTheme {
 
         Text(
             text = "Dots collision",
-            style =MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium
         )
         DotsCollision()
     }

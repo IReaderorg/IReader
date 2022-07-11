@@ -31,7 +31,7 @@ object DownloaderScreenSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: DownloaderViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val vm: DownloaderViewModel = hiltViewModel(controller.navBackStackEntry)
         DownloaderScreen(
             onDownloadItem = { item ->
                 controller.navController.navigate(
@@ -51,7 +51,7 @@ object DownloaderScreenSpec : ScreenSpec {
     override fun TopBar(
         controller: Controller
     ) {
-        val vm: DownloaderViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val vm: DownloaderViewModel = hiltViewModel(controller.navBackStackEntry)
         DownloaderTopAppBar(
             onPopBackStack = {
                 controller.navController.popBackStack()
@@ -67,12 +67,13 @@ object DownloaderScreenSpec : ScreenSpec {
             },
             state = vm,
             onDelete = {
-                vm.deleteSelectedDownloads(vm.downloads.filter { it.chapterId in vm.selection }
-                    .map { it.toSavedDownload() })
+                vm.deleteSelectedDownloads(
+                    vm.downloads.filter { it.chapterId in vm.selection }
+                        .map { it.toSavedDownload() }
+                )
                 vm.selection.clear()
             },
             scrollBehavior = controller.scrollBehavior
         )
     }
-
 }

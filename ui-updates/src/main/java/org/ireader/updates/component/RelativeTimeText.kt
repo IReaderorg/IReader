@@ -16,7 +16,7 @@ fun RelativeTimeText(modifier: Modifier = Modifier, date: LocalDate) {
     )
 }
 
-//fun LocalDate.asRelativeTimeString(): String {
+// fun LocalDate.asRelativeTimeString(): String {
 //    return DateUtils
 //        .getRelativeTimeSpanString(
 //            atStartOfDayIn(TimeZone.currentSystemDefault()).toEpochMilliseconds(),
@@ -24,4 +24,4 @@ fun RelativeTimeText(modifier: Modifier = Modifier, date: LocalDate) {
 //            DateUtils.DAY_IN_MILLIS
 //        )
 //        .toString()
-//}
+// }

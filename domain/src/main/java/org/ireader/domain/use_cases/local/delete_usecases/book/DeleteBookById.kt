@@ -33,6 +33,3 @@ class DeleteNotInLibraryBooks @Inject constructor(
         bookRepository.deleteNotInLibraryBooks()
     }
 }
-
-
-

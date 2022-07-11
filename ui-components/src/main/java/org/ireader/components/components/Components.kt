@@ -24,7 +24,7 @@ sealed class Components {
         val padding: PaddingValues = PaddingValues(16.dp),
         val visible: Boolean = true,
 
-        ) : Components()
+    ) : Components()
 
     data class Slider(
         val preferenceAsFloat: PreferenceMutableState<Float>? = null,
@@ -64,8 +64,8 @@ sealed class Components {
     ) : Components()
 
     data class Dynamic(
-      val component:  @Composable () -> Unit,
-    ):Components()
+        val component: @Composable () -> Unit,
+    ) : Components()
 
     data class Chip(
         val preference: List<String>,
@@ -170,4 +170,3 @@ fun LazyListScope.setupUiComponent(
         }
     }
 }
-

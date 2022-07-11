@@ -33,7 +33,6 @@ class AppearanceViewModel @Inject constructor(
     var themeEditMode by mutableStateOf(false)
     var isSavable by mutableStateOf(false)
 
-
     val themeMode = uiPreferences.themeMode().asState()
     val colorTheme = uiPreferences.colorTheme().asState()
     val dateFormat = uiPreferences.dateFormat().asState()
@@ -58,9 +57,8 @@ class AppearanceViewModel @Inject constructor(
         return if (MaterialTheme.colorScheme.isLight()) lightColors else darkColors
     }
 
-
     fun getThemes(id: Long): BaseTheme? {
-        val themes = vmThemes.firstOrNull{ it.id == id}
+        val themes = vmThemes.firstOrNull { it.id == id }
         val primary = if (themeMode.value == PreferenceValues.ThemeMode.Dark) {
             darkColors.primary
         } else {

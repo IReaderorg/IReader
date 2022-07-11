@@ -19,8 +19,7 @@ class EpubCreator @Inject constructor(
     private val chapterRepository: ChapterRepository
 ) {
 
-
-    suspend operator fun invoke(book: Book,uri:Uri, context: Context) {
+    suspend operator fun invoke(book: Book, uri: Uri, context: Context) {
         val epubBook = nl.siegmann.epublib.domain.Book()
         val chapters = chapterRepository.findChaptersByBookId(book.id)
         val metadata = epubBook.metadata
@@ -33,18 +32,16 @@ class EpubCreator @Inject constructor(
         }
 
         chapters.forEachIndexed { index, chapter ->
-            val resource : Resource = Resource("$index",chapter.content.map { "<p>$it</p>" }.joinToString("\n").toByteArray(),"${chapter.name}-$index.html", MediatypeService.XHTML)
-            epubBook.addSection(chapter.name,resource)
+            val resource: Resource = Resource("$index", chapter.content.map { "<p>$it</p>" }.joinToString("\n").toByteArray(), "${chapter.name}-$index.html", MediatypeService.XHTML)
+            epubBook.addSection(chapter.name, resource)
         }
-        writeToUri(uri,context,epubBook)
-
-
+        writeToUri(uri, context, epubBook)
     }
-    private fun writeToUri(uri: Uri,context: Context,book: nl.siegmann.epublib.domain.Book) {
+    private fun writeToUri(uri: Uri, context: Context, book: nl.siegmann.epublib.domain.Book) {
         val contentResolver = context.contentResolver
         val pfd = contentResolver.openFileDescriptor(uri, "w") ?: return
         FileOutputStream(pfd.fileDescriptor).use {
-            EpubWriter().write(book,it)
+            EpubWriter().write(book, it)
         }
     }
 }

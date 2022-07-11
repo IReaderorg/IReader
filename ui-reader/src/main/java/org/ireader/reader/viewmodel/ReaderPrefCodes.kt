@@ -26,13 +26,12 @@ interface ReaderPrefFunctions {
     suspend fun ReaderScreenViewModel.readBrightness(context: Context)
     suspend fun ReaderScreenViewModel.readOrientation(context: Context)
     fun ReaderScreenViewModel.setReaderTextColor(color: Color)
-    suspend fun ReaderScreenViewModel.readImmersiveMode(context: Context,onHideNav:(Boolean) -> Unit,onHideStatus:(Boolean) -> Unit)
+    suspend fun ReaderScreenViewModel.readImmersiveMode(context: Context, onHideNav: (Boolean) -> Unit, onHideStatus: (Boolean) -> Unit)
     fun ReaderScreenViewModel.showSystemBars(context: Context)
     fun ReaderScreenViewModel.hideSystemBars(context: Context)
 }
 
 class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
-
 
     override fun ReaderScreenViewModel.toggleReaderMode(enable: Boolean?) {
         isReaderModeEnable = enable ?: !state.isReaderModeEnable
@@ -48,7 +47,6 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
             readerUseCases.brightnessStateUseCase.saveBrightness(brightness)
         }
     }
-
 
     override suspend fun ReaderScreenViewModel.readImmersiveMode(
         context: Context,
@@ -69,11 +67,9 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         }
     }
 
-
     override fun ReaderScreenViewModel.toggleAutoScrollMode() {
         autoScrollMode = !autoScrollMode
     }
-
 
     override suspend fun ReaderScreenViewModel.readBrightness(context: Context) {
         val activity = context.findComponentActivity()
@@ -83,7 +79,7 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
                 val layoutParams: WindowManager.LayoutParams = window.attributes
                 layoutParams.screenBrightness = brightness.value
                 window.attributes = layoutParams
-                //this.brightness = brightness
+                // this.brightness = brightness
             } else {
                 val layoutParams: WindowManager.LayoutParams = window.attributes
                 showSystemBars(context = context)
@@ -122,9 +118,6 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     override fun ReaderScreenViewModel.setReaderTextColor(color: Color) {
         readerUseCases.textColorUseCase.save(color)
     }
-
-
-
 
     override fun ReaderScreenViewModel.showSystemBars(context: Context) {
         context.findComponentActivity()?.showSystemUI()

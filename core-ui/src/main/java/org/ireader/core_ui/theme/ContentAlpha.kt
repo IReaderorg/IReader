@@ -29,9 +29,9 @@ object ContentAlpha {
      */
     @Composable
     fun medium(): Float = contentAlpha(
-            highContrastAlpha = HighContrastContentAlpha.medium,
-            lowContrastAlpha = LowContrastContentAlpha.medium
-        )
+        highContrastAlpha = HighContrastContentAlpha.medium,
+        lowContrastAlpha = LowContrastContentAlpha.medium
+    )
 
     /**
      * A low level of content alpha used to represent disabled components, such as text in a
@@ -39,9 +39,9 @@ object ContentAlpha {
      */
     @Composable
     fun disabled(): Float = contentAlpha(
-            highContrastAlpha = HighContrastContentAlpha.disabled,
-            lowContrastAlpha = LowContrastContentAlpha.disabled
-        )
+        highContrastAlpha = HighContrastContentAlpha.disabled,
+        lowContrastAlpha = LowContrastContentAlpha.disabled
+    )
 
     /**
      * This default implementation uses separate alpha levels depending on the luminance of the
@@ -65,7 +65,6 @@ object ContentAlpha {
         }
     }
 }
-
 
 /**
  * Alpha levels for high luminance content in light theme, or low luminance content in dark theme.

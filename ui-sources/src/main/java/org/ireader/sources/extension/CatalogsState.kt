@@ -24,7 +24,7 @@ interface CatalogsState {
     var selectedLanguage: LanguageChoice
     val installSteps: Map<String, InstallStep>
     val isRefreshing: Boolean
-  //  val userSources: List<SourceUiModel>
+    //  val userSources: List<SourceUiModel>
     val remoteSources: List<SourceUiModel>
     var searchQuery: String?
     var currentPagerPage: Int
@@ -94,7 +94,7 @@ class CatalogsStateImpl @Inject constructor() : CatalogsState {
                 listOf<SourceUiModel>(
                     SourceUiModel.Header(INSTALLED_KEY),
                     *allCatalogs.map { source ->
-                        SourceUiModel.Item(source,SourceState.Installed)
+                        SourceUiModel.Item(source, SourceState.Installed)
                     }.toTypedArray()
                 )
             )
@@ -104,7 +104,7 @@ class CatalogsStateImpl @Inject constructor() : CatalogsState {
                 listOf<SourceUiModel>(
                     SourceUiModel.Header(AVAILABLE),
                     *remoteCatalogs.map { source ->
-                        SourceUiModel.Item(source,SourceState.Remote)
+                        SourceUiModel.Item(source, SourceState.Remote)
                     }.toTypedArray()
                 )
             )

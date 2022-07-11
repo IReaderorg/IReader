@@ -145,9 +145,9 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     }
 
     private fun subscribeReaderThemes() {
-        readerThemeRepository.subscribe().onEach {  list ->
+        readerThemeRepository.subscribe().onEach { list ->
             readerThemes.removeIf { !it.isDefault }
-            readerThemes.addAll(0,list.map { it.ReaderColors() })
+            readerThemes.addAll(0, list.map { it.ReaderColors() }.reversed())
         }.launchIn(viewModelScope)
     }
 
@@ -165,7 +165,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
         }
     }
 
-    suspend fun getLocalChapter(chapterId: Long?, next: Boolean = true,force: Boolean=false): Chapter? {
+    suspend fun getLocalChapter(chapterId: Long?, next: Boolean = true, force: Boolean = false): Chapter? {
         if (chapterId == null) return null
 
         isLoading = true
@@ -191,7 +191,6 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
             } else {
                 chapterShell.add(0, it)
             }
-
         }
         return stateChapter
     }
@@ -254,9 +253,9 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
         throw IllegalAccessException("List doesn't contains ${chapter?.name}")
     }
 
-    fun prepareReaderSetting(context: Context,scrollState: ScrollState,onHideNav:(Boolean) -> Unit,onHideStatus:(Boolean) -> Unit) {
+    fun prepareReaderSetting(context: Context, scrollState: ScrollState, onHideNav: (Boolean) -> Unit, onHideStatus: (Boolean) -> Unit) {
         viewModelScope.launch {
-            readImmersiveMode(context, onHideNav = onHideNav,onHideStatus = onHideStatus)
+            readImmersiveMode(context, onHideNav = onHideNav, onHideStatus = onHideStatus)
         }
         viewModelScope.launch {
             readOrientation(context)
@@ -268,10 +267,8 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
                         scrollState.scrollTo(it.progress ?: 1)
                     }
                 }
-
             }
         }
-
     }
 
     fun restoreSetting(
@@ -287,7 +284,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
             layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             window.attributes = layoutParams
-            screenAlwaysOnUseCase(context,false)
+            screenAlwaysOnUseCase(context, false)
             when (readingMode.value) {
                 ReadingMode.Page -> {
                     stateChapter?.let { chapter ->
@@ -299,7 +296,6 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
                                     )
                                 )
                             }
-
                         }
                     }
                 }

@@ -124,7 +124,7 @@ fun SuperSmallTextComposable(
     maxLine: Int = Int.MAX_VALUE,
     align: TextAlign? = null,
 
-    ) {
+) {
     Text(
         modifier = modifier,
         text = text,
@@ -168,12 +168,12 @@ fun AppIcon(
     contentDescription: String? = null,
     tint: Color? = null,
 ) {
-        Icon(
-            modifier = modifier,
-            imageVector = imageVector,
-            contentDescription = contentDescription,
-            tint = tint ?: MaterialTheme.colorScheme.onSurface
-        )
+    Icon(
+        modifier = modifier,
+        imageVector = imageVector,
+        contentDescription = contentDescription,
+        tint = tint ?: MaterialTheme.colorScheme.onSurface
+    )
 }
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -193,7 +193,7 @@ fun AppIconButton(
             .background(color = colors.containerColor(enabled).value)
             .combinedClickable(
                 onClick = onClick,
-                onLongClick=onLongClick,
+                onLongClick = onLongClick,
                 enabled = enabled,
                 role = Role.Button,
                 interactionSource = interactionSource,
@@ -209,15 +209,12 @@ fun AppIconButton(
     }
 }
 
-
-
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AppIconButton(
     modifier: Modifier = Modifier,
-    imageVector: ImageVector?=null,
-    painter: Painter?=null,
+    imageVector: ImageVector? = null,
+    painter: Painter? = null,
     contentDescription: String? = null,
     onClick: () -> Unit = {},
     tint: Color = MaterialTheme.colorScheme.onSurface,
@@ -237,7 +234,7 @@ fun AppIconButton(
                     tint = tint
                 )
             }
-            imageVector !=null -> {
+            imageVector != null -> {
                 Icon(
                     modifier = modifier,
                     imageVector = imageVector,
@@ -246,7 +243,6 @@ fun AppIconButton(
                 )
             }
         }
-
     }
 }
 
@@ -257,7 +253,7 @@ fun TopAppBarBackButton(tint: Color = MaterialTheme.colorScheme.onSurface, onCli
     }) {
         Icon(
             imageVector = Icons.Default.ArrowBack,
-           contentDescription = stringResource( R.string.return_to_previous_screen),
+            contentDescription = stringResource(R.string.return_to_previous_screen),
             tint = tint,
         )
     }
@@ -268,7 +264,7 @@ fun AppTextField(
     query: String,
     onValueChange: (value: String) -> Unit,
     onConfirm: () -> Unit,
-    hint: String = stringResource( R.string.search_hint),
+    hint: String = stringResource(R.string.search_hint),
     mode: Int = 0,
     keyboardAction: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
     keyboardActions: KeyboardActions = KeyboardActions(onSearch = {
@@ -298,7 +294,6 @@ fun AppTextField(
                 keyboardActions = keyboardActions,
                 singleLine = true,
                 textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-
 
             )
         } else if (mode == 1) {

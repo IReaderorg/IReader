@@ -13,19 +13,19 @@ import androidx.compose.ui.text.input.ImeAction
 
 @Composable
 fun SearchField(
-  modifier: Modifier = Modifier,
-  query: String,
-  onChangeQuery: (String) -> Unit,
-  onDone: KeyboardActionScope.() -> Unit
+    modifier: Modifier = Modifier,
+    query: String,
+    onChangeQuery: (String) -> Unit,
+    onDone: KeyboardActionScope.() -> Unit
 ) {
-  BasicTextField(
-    query,
-    onChangeQuery,
-    modifier = modifier,
-    textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
-    cursorBrush = SolidColor(LocalContentColor.current),
-    singleLine = true,
-    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-    keyboardActions = KeyboardActions(onDone = onDone)
-  )
+    BasicTextField(
+        query,
+        onChangeQuery,
+        modifier = modifier,
+        textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
+        cursorBrush = SolidColor(LocalContentColor.current),
+        singleLine = true,
+        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+        keyboardActions = KeyboardActions(onDone = onDone)
+    )
 }

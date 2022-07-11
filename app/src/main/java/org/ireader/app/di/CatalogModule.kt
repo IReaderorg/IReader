@@ -63,7 +63,7 @@ class CatalogModule {
 
     @Provides
     @Singleton
-    fun provideCoverCache( context: Application):CoverCache {
+    fun provideCoverCache(context: Application): CoverCache {
         return CoverCache(context)
     }
 
@@ -82,8 +82,6 @@ class CatalogModule {
             catalogStore = catalogStore,
         )
     }
-
-
 
     @Provides
     @Singleton

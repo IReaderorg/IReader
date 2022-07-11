@@ -79,7 +79,7 @@ class AndroidCatalogLoader(
      * contains the required feature flag before trying to load it.
      */
     override fun loadLocalCatalog(pkgName: String): org.ireader.common_models.entities.CatalogInstalled.Locally? {
-        val file = File(context.filesDir, "catalogs/${pkgName}/${pkgName}.apk")
+        val file = File(context.filesDir, "catalogs/$pkgName/$pkgName.apk")
         val pkgInfo = if (file.exists()) {
             pkgManager.getPackageArchiveInfo(file.absolutePath, PACKAGE_FLAGS)
         } else {
@@ -151,7 +151,7 @@ class AndroidCatalogLoader(
         val source = loadSource(pkgName, loader, data)
 
         return org.ireader.common_models.entities.CatalogInstalled.SystemWide(
-            name = source?.name?:context.resources.getString(R.string.unknown),
+            name = source?.name ?: context.resources.getString(R.string.unknown),
             description = data.description,
             source = source,
             pkgName = pkgName,

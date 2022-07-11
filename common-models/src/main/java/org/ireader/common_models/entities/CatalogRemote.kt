@@ -32,7 +32,7 @@ sealed class Catalog {
 
 sealed class CatalogLocal : Catalog() {
     abstract val source: Source?
-    override val sourceId get() = source?.id?:-1L
+    override val sourceId get() = source?.id ?: -1L
     abstract val nsfw: Boolean
     abstract val isPinned: Boolean
     open val hasUpdate: Boolean = false
@@ -41,7 +41,7 @@ sealed class CatalogLocal : Catalog() {
 data class CatalogBundled(
     override val source: Source?,
     override val description: String = "",
-    override val name: String = source?.name?:"UNKNOWN",
+    override val name: String = source?.name ?: "UNKNOWN",
     override val nsfw: Boolean = false,
     override val isPinned: Boolean = false,
 ) : CatalogLocal()
@@ -77,7 +77,7 @@ sealed class CatalogInstalled : CatalogLocal() {
     ) : CatalogInstalled()
 }
 
-enum class  SourceState {
+enum class SourceState {
     Pinned,
     UnPinned,
     LastUsed,
@@ -86,9 +86,9 @@ enum class  SourceState {
     Nothing
 }
 
-fun Catalog.key(state:SourceState) : String {
+fun Catalog.key(state: SourceState): String {
     if (sourceId == -1L) return Random.nextLong().toString()
-    return when(state) {
+    return when (state) {
         SourceState.LastUsed -> "$sourceId-lastused"
         SourceState.Pinned -> "$sourceId-pinned"
         SourceState.UnPinned -> "$sourceId-unpinned"

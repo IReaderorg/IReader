@@ -18,23 +18,23 @@ import org.ireader.common_resources.R
 
 @Composable
 fun ConfirmExitBackHandler(confirmExit: Boolean) {
-  val scope = rememberCoroutineScope()
-  val context = LocalContext.current
-  val message = stringResource(R.string.confirm_exit_message)
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val message = stringResource(R.string.confirm_exit_message)
 
-  var isConfirmingExit by remember { mutableStateOf(false) }
+    var isConfirmingExit by remember { mutableStateOf(false) }
 
-  // Always install the back handler even if the preference is not active because the order of
-  // installation matters and when the setting is enabled it'd be placed at the top, overriding
-  // the navigation back handler.
-  BackHandler(enabled = confirmExit && !isConfirmingExit) {
-    isConfirmingExit = true
-    context.toast(message, Toast.LENGTH_LONG)
-    scope.launch {
-      delay(2000)
-      isConfirmingExit = false
+    // Always install the back handler even if the preference is not active because the order of
+    // installation matters and when the setting is enabled it'd be placed at the top, overriding
+    // the navigation back handler.
+    BackHandler(enabled = confirmExit && !isConfirmingExit) {
+        isConfirmingExit = true
+        context.toast(message, Toast.LENGTH_LONG)
+        scope.launch {
+            delay(2000)
+            isConfirmingExit = false
+        }
     }
-  }
 }
 
 /**
@@ -44,7 +44,7 @@ fun ConfirmExitBackHandler(confirmExit: Boolean) {
  * @param duration the duration of the toast. Defaults to short.
  */
 fun Context.toast(text: String?, duration: Int = Toast.LENGTH_SHORT) {
-  Toast.makeText(this, text.orEmpty(), duration).show()
+    Toast.makeText(this, text.orEmpty(), duration).show()
 }
 
 /**
@@ -54,5 +54,5 @@ fun Context.toast(text: String?, duration: Int = Toast.LENGTH_SHORT) {
  * @param duration the duration of the toast. Defaults to short.
  */
 fun Context.toast(@StringRes textRes: Int, duration: Int = Toast.LENGTH_SHORT) {
-  Toast.makeText(this, textRes, duration).show()
+    Toast.makeText(this, textRes, duration).show()
 }

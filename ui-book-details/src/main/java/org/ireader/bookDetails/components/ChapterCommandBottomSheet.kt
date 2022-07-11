@@ -58,7 +58,7 @@ fun ChapterCommandBottomSheet(
             Button(onClick = {
                 onFetch()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
-                MidSizeTextComposable(text =stringResource(R.string.fetch), color = MaterialTheme.colorScheme.onPrimary)
+                MidSizeTextComposable(text = stringResource(R.string.fetch), color = MaterialTheme.colorScheme.onPrimary)
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -101,7 +101,7 @@ fun ChapterCommandBottomSheet(
                             state = value
                         },
                         currentValue = command.options[state],
-                        items = command.options.map {it }.toTypedArray()
+                        items = command.options.map { it }.toTypedArray()
                     )
                 }
                 is Command.Chapter.Note -> {
@@ -116,6 +116,5 @@ fun ChapterCommandBottomSheet(
                 else -> {}
             }
         }
-
     }
 }

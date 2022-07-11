@@ -76,7 +76,7 @@ android {
         buildConfigField("boolean", "INCLUDE_UPDATER", "false")
         buildConfigField("boolean", "PREVIEW", "false")
         buildConfigField("String", "VERSION_NAME", "\"${ProjectConfig.versionName}\"")
-        buildConfigField("int", "VERSION_CODE",  "${ProjectConfig.versionCode}")
+        buildConfigField("int", "VERSION_CODE", "${ProjectConfig.versionCode}")
     }
     dependenciesInfo {
         includeInApk = false
@@ -114,9 +114,8 @@ dependencies {
     implementation(androidx.material)
     implementation(androidx.media)
     implementation(composeLib.compose.activity)
-    implementation("androidx.core:core-splashscreen:1.0.0-beta02")
-implementation(composeLib.material3.core)
-
+    implementation("androidx.core:core-splashscreen:1.0.0-rc01")
+    implementation(composeLib.material3.core)
 
     implementation(composeLib.compose.coil)
     implementation(composeLib.compose.googlFonts)

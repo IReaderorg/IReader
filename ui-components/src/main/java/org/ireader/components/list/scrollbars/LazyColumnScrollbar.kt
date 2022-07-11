@@ -76,7 +76,6 @@ fun LazyColumnScrollbar(
                 selectionMode = selectionMode
             )
         }
-
     }
 }
 
@@ -102,7 +101,7 @@ private fun LazyColumnScrollbar(
     indicatorContent: (@Composable (index: Int, isThumbSelected: Boolean) -> Unit)? = null,
     selectionMode: PreferenceValues.ScrollbarSelectionMode = PreferenceValues.ScrollbarSelectionMode.Thumb,
 ) {
-    val fistIndex= remember {
+    val fistIndex = remember {
         derivedStateOf { listState.firstVisibleItemIndex }
     }
     val coroutineScope = rememberCoroutineScope()
@@ -313,6 +312,5 @@ private fun LazyColumnScrollbar(
                     .fillMaxHeight(normalizedThumbSize)
             )
         }
-
     }
 }

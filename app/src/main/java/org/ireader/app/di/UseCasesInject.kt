@@ -120,7 +120,6 @@ import javax.inject.Singleton
 @Module
 class UseCasesInject {
 
-
     @Provides
     @Singleton
     fun provideRemoteUseCase(
@@ -136,8 +135,8 @@ class UseCasesInject {
     @Provides
     @Singleton
     fun provideLocalInsertUseCases(
-       chapterRepository: org.ireader.common_data.repository.ChapterRepository,
-    bookRepository: BookRepository
+        chapterRepository: org.ireader.common_data.repository.ChapterRepository,
+        bookRepository: BookRepository
     ): LocalInsertUseCases {
         return LocalInsertUseCases(
             insertBook = InsertBook(bookRepository),
@@ -149,14 +148,13 @@ class UseCasesInject {
         )
     }
 
-
     @Provides
     @Singleton
     fun provideLocalGetBookUseCases(
         bookRepository: BookRepository
     ): LocalGetBookUseCases {
         return LocalGetBookUseCases(
-          findAllInLibraryBooks = FindAllInLibraryBooks(bookRepository),
+            findAllInLibraryBooks = FindAllInLibraryBooks(bookRepository),
             findBookById = FindBookById(bookRepository),
             findBookByKey = FindBookByKey(bookRepository),
             findBooksByKey = FindBooksByKey(bookRepository),
@@ -207,7 +205,7 @@ class UseCasesInject {
             deleteChapterByChapter = DeleteChapterByChapter(chapterRepository),
             deleteChapters = DeleteChapters(chapterRepository),
             deleteChaptersByBookId = DeleteChaptersByBookId(chapterRepository),
-            unFavoriteBook = UnFavoriteBook(bookRepository, bookCategoryRepository = bookCategoryRepository,transactions),
+            unFavoriteBook = UnFavoriteBook(bookRepository, bookCategoryRepository = bookCategoryRepository, transactions),
             deleteNotInLibraryBooks = DeleteNotInLibraryBooks(bookRepository)
         )
     }
@@ -232,7 +230,7 @@ class UseCasesInject {
     @Provides
     @Singleton
     fun providesServiceUseCases(
-      @ApplicationContext context: Context
+        @ApplicationContext context: Context
     ): ServiceUseCases {
         return ServiceUseCases(
             startDownloadServicesUseCase = StartDownloadServicesUseCase(context),
@@ -249,7 +247,7 @@ class UseCasesInject {
         categoryRepository: CategoryRepository
     ): LibraryScreenPrefUseCases {
         return LibraryScreenPrefUseCases(
-          libraryLayoutTypeUseCase = LibraryLayoutTypeUseCase(libraryPreferences,categoryRepository),
+            libraryLayoutTypeUseCase = LibraryLayoutTypeUseCase(libraryPreferences, categoryRepository),
             sortersDescUseCase = SortersDescUseCase(appPreferences),
             sortersUseCase = SortersUseCase(appPreferences)
         )
@@ -307,12 +305,9 @@ class UseCasesInject {
         )
     }
 
-
-
-
     @Provides
     fun providesEpubCreator(
-      coverCache: CoverCache,
+        coverCache: CoverCache,
         chapterRepository: ChapterRepository
     ): EpubCreator {
         return EpubCreator(coverCache, chapterRepository)
@@ -321,10 +316,10 @@ class UseCasesInject {
     @Provides
     @Singleton
     fun providesDownloadUseCases(
-       downloadRepository: DownloadRepository
+        downloadRepository: DownloadRepository
     ): DownloadUseCases {
         return DownloadUseCases(
-           deleteAllSavedDownload = DeleteAllSavedDownload(downloadRepository),
+            deleteAllSavedDownload = DeleteAllSavedDownload(downloadRepository),
             deleteSavedDownload = DeleteSavedDownload(downloadRepository),
             deleteSavedDownloadByBookId = DeleteSavedDownloadByBookId(downloadRepository),
             deleteSavedDownloads = DeleteSavedDownloads(downloadRepository),
@@ -335,8 +330,4 @@ class UseCasesInject {
             subscribeDownloadsUseCase = SubscribeDownloadsUseCase(downloadRepository),
         )
     }
-
-
-
-
 }

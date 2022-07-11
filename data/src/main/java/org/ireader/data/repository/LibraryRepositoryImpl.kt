@@ -12,15 +12,14 @@ class LibraryRepositoryImpl(
     private val bookDao: LibraryDao,
 ) : org.ireader.common_data.repository.LibraryRepository {
     override fun subscribeAll(sort: LibrarySort): Flow<List<LibraryBook>> {
-        return when(sort.type) {
+        return when (sort.type) {
             LibrarySort.Type.TotalChapters -> {
                 bookDao.subscribeAllWithTotalChapters(sort.parameter)
             }
             else -> {
-                 bookDao.subscribeAll(sort.parameter)
+                bookDao.subscribeAll(sort.parameter)
             }
         }
-
     }
 
     override fun subscribeUncategorized(sort: LibrarySort): Flow<List<LibraryBook>> {

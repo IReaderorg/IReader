@@ -16,19 +16,19 @@ fun LinkIcon(
     modifier: Modifier = Modifier,
     label: String,
     painter: Painter? = null,
-    icon:ImageVector? =null,
+    icon: ImageVector? = null,
     url: String,
 ) {
     val uriHandler = LocalUriHandler.current
-    LinkIcon(modifier, label, painter,icon) { uriHandler.openUri(url) }
+    LinkIcon(modifier, label, painter, icon) { uriHandler.openUri(url) }
 }
 
 @Composable
 fun LinkIcon(
     modifier: Modifier = Modifier,
     label: String,
-    painter: Painter?=null,
-    icon:ImageVector?=null,
+    painter: Painter? = null,
+    icon: ImageVector? = null,
     onClick: () -> Unit,
 ) {
     IconButton(
@@ -41,13 +41,12 @@ fun LinkIcon(
                 tint = AppColors.current.primary,
                 contentDescription = label,
             )
-        }else if (icon != null) {
+        } else if (icon != null) {
             Icon(
                 imageVector = icon,
                 tint = AppColors.current.primary,
                 contentDescription = label,
             )
         }
-
     }
 }

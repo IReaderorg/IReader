@@ -12,4 +12,3 @@ class DeleteChaptersByBookId @Inject constructor(private val chapterRepository: 
         }
     }
 }
-

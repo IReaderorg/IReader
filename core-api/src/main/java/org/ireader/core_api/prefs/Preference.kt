@@ -55,5 +55,4 @@ interface Preference<T> {
      * current value and receive preference updates.
      */
     fun stateIn(scope: CoroutineScope): StateFlow<T>
-
 }

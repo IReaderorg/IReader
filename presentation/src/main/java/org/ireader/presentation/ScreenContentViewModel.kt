@@ -10,12 +10,9 @@ import javax.inject.Inject
 class ScreenContentViewModel @Inject constructor(
     private val uiPreferences: UiPreferences,
     private val preferences: AppPreferences,
-) : BaseViewModel(){
+) : BaseViewModel() {
 
     var showUpdate = uiPreferences.showUpdatesInButtonBar().asState()
     var showHistory = uiPreferences.showHistoryInButtonBar().asState()
     var confirmExit = uiPreferences.confirmExit().asState()
-
-
-
 }

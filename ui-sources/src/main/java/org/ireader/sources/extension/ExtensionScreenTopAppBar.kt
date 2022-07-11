@@ -19,15 +19,15 @@ import org.ireader.ui_sources.R
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun ExtensionScreenTopAppBar(
-    currentPage:Int,
-    searchMode:Boolean,
-    query:String,
-    onValueChange:(query:String) -> Unit,
-    onConfirm:() -> Unit,
-    onClose:() -> Unit,
-    onSearchDisable:() -> Unit,
-    onSearchEnable:() -> Unit,
-    onRefresh:() -> Unit,
+    currentPage: Int,
+    searchMode: Boolean,
+    query: String,
+    onValueChange: (query: String) -> Unit,
+    onConfirm: () -> Unit,
+    onClose: () -> Unit,
+    onSearchDisable: () -> Unit,
+    onSearchEnable: () -> Unit,
+    onRefresh: () -> Unit,
     onSearchNavigate: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
@@ -39,7 +39,7 @@ fun ExtensionScreenTopAppBar(
             } else {
                 AppTextField(
                     query = query,
-                    onValueChange =onValueChange,
+                    onValueChange = onValueChange,
                     onConfirm = onConfirm,
                 )
             }
@@ -49,37 +49,37 @@ fun ExtensionScreenTopAppBar(
                 if (searchMode) {
                     AppIconButton(
                         imageVector = Icons.Default.Close,
-                       contentDescription = stringResource(R.string.close),
+                        contentDescription = stringResource(R.string.close),
                         onClick = onClose,
                     )
                 } else {
                     AppIconButton(
                         imageVector = Icons.Default.Search,
-                       contentDescription = stringResource(R.string.search),
+                        contentDescription = stringResource(R.string.search),
                         onClick = onSearchEnable,
                     )
                 }
                 AppIconButton(
                     imageVector = Icons.Default.Refresh,
-                   contentDescription = stringResource(R.string.refresh),
+                    contentDescription = stringResource(R.string.refresh),
                     onClick = onRefresh,
                 )
             } else {
                 if (searchMode) {
                     AppIconButton(
                         imageVector = Icons.Default.Close,
-                       contentDescription = stringResource(R.string.close),
+                        contentDescription = stringResource(R.string.close),
                         onClick = onSearchDisable,
                     )
                 } else {
                     AppIconButton(
                         imageVector = Icons.Default.Search,
-                       contentDescription = stringResource(R.string.search),
+                        contentDescription = stringResource(R.string.search),
                         onClick = onSearchEnable,
                     )
                     AppIconButton(
                         imageVector = Icons.Default.TravelExplore,
-                       contentDescription = stringResource(R.string.search),
+                        contentDescription = stringResource(R.string.search),
                         onClick = onSearchNavigate,
                     )
                 }
@@ -88,11 +88,11 @@ fun ExtensionScreenTopAppBar(
         navigationIcon = {
             if (searchMode) {
 
-                    AppIconButton(
-                        imageVector = Icons.Default.ArrowBack,
-                       contentDescription = stringResource(R.string.toggle_search_mode_off),
-                        onClick = onSearchDisable
-                    )
+                AppIconButton(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = stringResource(R.string.toggle_search_mode_off),
+                    onClick = onSearchDisable
+                )
             } else null
         },
 

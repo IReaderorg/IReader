@@ -9,7 +9,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -52,7 +51,7 @@ fun HistoryTopAppBar(
             if (vm.searchMode) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
-                   contentDescription = stringResource(R.string.close),
+                    contentDescription = stringResource(R.string.close),
                     onClick = {
                         vm.searchMode = false
                         vm.searchQuery = ""
@@ -63,14 +62,14 @@ fun HistoryTopAppBar(
             }
             AppIconButton(
                 imageVector = Icons.Default.Search,
-               contentDescription = stringResource(R.string.search),
+                contentDescription = stringResource(R.string.search),
                 onClick = {
                     vm.searchMode = true
                 },
             )
             AppIconButton(
                 imageVector = Icons.Default.Delete,
-               contentDescription = stringResource(R.string.delete_all_histories),
+                contentDescription = stringResource(R.string.delete_all_histories),
                 onClick = {
                     onDeleteAll()
                 },
@@ -78,16 +77,15 @@ fun HistoryTopAppBar(
         },
         navigationIcon = {
             if (vm.searchMode) {
-                    AppIconButton(
-                        imageVector = Icons.Default.ArrowBack,
-                       contentDescription = stringResource(R.string.toggle_search_mode_off),
-                        onClick = {
-                            vm.searchMode = false
-                            vm.searchQuery = ""
-                            keyboardController?.hide()
-                        }
-                    )
-
+                AppIconButton(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = stringResource(R.string.toggle_search_mode_off),
+                    onClick = {
+                        vm.searchMode = false
+                        vm.searchQuery = ""
+                        keyboardController?.hide()
+                    }
+                )
             } else null
         },
         scrollBehavior = scrollBehavior

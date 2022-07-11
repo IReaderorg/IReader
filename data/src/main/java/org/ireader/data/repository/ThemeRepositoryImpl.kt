@@ -14,9 +14,9 @@ import org.ireader.domain.use_cases.theme.toBaseTheme
 
 class ThemeRepositoryImpl(
     private val themeDao: ThemeDao
-) : ThemeRepository  {
-    override fun subscribe() : Flow<List<BaseTheme>> {
-        return themeDao.subscribe().map {flow -> flow.map { it.toBaseTheme() } }
+) : ThemeRepository {
+    override fun subscribe(): Flow<List<BaseTheme>> {
+        return themeDao.subscribe().map { flow -> flow.map { it.toBaseTheme() } }
     }
 
     override suspend fun insert(theme: CustomTheme): Long {
@@ -38,8 +38,8 @@ class ThemeRepositoryImpl(
 
 class ReaderThemeRepositoryImpl(
     private val readerThemeDao: ReaderThemeDao
-) : ReaderThemeRepository  {
-    override fun subscribe() : Flow<List<ReaderTheme>> {
+) : ReaderThemeRepository {
+    override fun subscribe(): Flow<List<ReaderTheme>> {
         return readerThemeDao.subscribe()
     }
 

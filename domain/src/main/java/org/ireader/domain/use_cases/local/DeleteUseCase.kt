@@ -12,7 +12,6 @@ import org.ireader.domain.use_cases.local.delete_usecases.chapter.DeleteChapters
 import org.ireader.domain.use_cases.local.delete_usecases.chapter.DeleteChaptersByBookId
 import org.ireader.domain.use_cases.remote.key.DeleteAllRemoteKeys
 
-
 data class DeleteUseCase(
     val deleteAllExploreBook: DeleteAllExploreBook,
     val deleteBooks: DeleteBooks,

@@ -28,7 +28,6 @@ import org.ireader.core_ui.modifier.secondaryItemAlpha
 import org.ireader.ui_book_details.R
 import kotlin.math.roundToInt
 
-
 @OptIn(ExperimentalAnimationGraphicsApi::class)
 @Composable
 fun BookSummaryDescription(

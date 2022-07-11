@@ -219,7 +219,6 @@ fun TTSScreen(
                         }
                     }
                 }
-
             }
         }
     }

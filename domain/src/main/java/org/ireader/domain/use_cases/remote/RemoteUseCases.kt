@@ -6,4 +6,3 @@ data class RemoteUseCases(
     val getRemoteChapters: GetRemoteChapters,
     val getRemoteBooks: GetRemoteBooksUseCase,
 )
-

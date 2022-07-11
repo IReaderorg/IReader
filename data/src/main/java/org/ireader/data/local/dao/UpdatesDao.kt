@@ -72,7 +72,6 @@ interface UpdatesDao : BaseDao<org.ireader.common_models.entities.Update> {
         }
 
         if (!updateList.isEmpty()) update(updateList)
-        return idList.firstOrNull()?:-1
+        return idList.firstOrNull() ?: -1
     }
-
 }

@@ -83,7 +83,7 @@ fun TitleToolbar(
             } else {
             }
         },
-        scrollBehavior=scrollBehavior
+        scrollBehavior = scrollBehavior
     )
 }
 
@@ -107,7 +107,7 @@ fun MidSizeToolbar(
         shadowElevation = elevation,
     ) {
         MediumTopAppBar(
-            scrollBehavior =scrollBehavior,
+            scrollBehavior = scrollBehavior,
             modifier = if (applyInsets) Modifier.statusBarsPadding() else Modifier,
             title = title,
             navigationIcon = navigationIcon,
@@ -124,9 +124,9 @@ fun MidSizeToolbar(
 @Composable
 fun SearchToolbar(
     title: String,
-    onSearch: ((String) -> Unit)?= null,
-    onValueChange:((String) -> Unit)? = null,
-    actions: ( @Composable RowScope.() -> Unit?)? = null,
+    onSearch: ((String) -> Unit)? = null,
+    onValueChange: ((String) -> Unit)? = null,
+    actions: (@Composable RowScope.() -> Unit?)? = null,
     onPopBackStack: (() -> Unit)? = null,
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
@@ -136,10 +136,10 @@ fun SearchToolbar(
         mutableStateOf(false)
     }
     var query by remember {
-       mutableStateOf( "")
+        mutableStateOf("")
     }
     Toolbar(
-        scrollBehavior =scrollBehavior,
+        scrollBehavior = scrollBehavior,
         title = {
             if (!isSearchModeEnable) {
                 BigSizeTextComposable(text = title)
@@ -217,5 +217,6 @@ fun SearchToolbar(
                     )
                 }
             }
-        })
+        }
+    )
 }

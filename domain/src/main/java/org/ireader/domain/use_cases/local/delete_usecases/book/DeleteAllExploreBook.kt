@@ -17,4 +17,3 @@ class DeleteBooks @Inject constructor(private val bookRepository: org.ireader.co
         bookRepository.deleteBooks(books)
     }
 }
-

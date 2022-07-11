@@ -40,7 +40,6 @@ interface DownloadDao : BaseDao<org.ireader.common_models.entities.Download> {
     @Query("DELETE FROM download")
     suspend fun deleteAllSavedDownload()
 
-
     @Transaction
     suspend fun insertOrUpdate(objList: List<Download>) {
         val insertResult = insert(objList)
@@ -54,7 +53,6 @@ interface DownloadDao : BaseDao<org.ireader.common_models.entities.Download> {
         }
 
         if (!updateList.isEmpty()) update(updateList)
-
     }
     @Transaction
     suspend fun insertOrUpdate(objList: Download) {
@@ -70,7 +68,5 @@ interface DownloadDao : BaseDao<org.ireader.common_models.entities.Download> {
 
             if (updateList.isNotEmpty()) update(updateList)
         }
-
     }
-
 }

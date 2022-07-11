@@ -25,6 +25,7 @@ import androidx.navigation.navDeepLink
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
+import org.ireader.Controller
 import org.ireader.components.components.component.ChipChoicePreference
 import org.ireader.components.components.component.SliderPreference
 import org.ireader.components.components.component.SwitchPreference
@@ -37,7 +38,6 @@ import org.ireader.reader.ReaderScreenDrawer
 import org.ireader.tts.TTSScreen
 import org.ireader.tts.TTSViewModel
 import java.math.RoundingMode
-import org.ireader.Controller
 
 object TTSScreenSpec : ScreenSpec {
     override val navHostRoute: String = "tts_screen_route/{bookId}/{chapterId}/{sourceId}"
@@ -77,7 +77,7 @@ object TTSScreenSpec : ScreenSpec {
         NavigationArgs.showModalSheet,
         NavigationArgs.haveDrawer,
 
-        )
+    )
 
     @OptIn(
         ExperimentalMaterialApi::class, ExperimentalPagerApi::class,
@@ -87,14 +87,13 @@ object TTSScreenSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: TTSViewModel = hiltViewModel   (controller.navBackStackEntry)
+        val vm: TTSViewModel = hiltViewModel(controller.navBackStackEntry)
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
         val sliderInteractionSource = MutableInteractionSource()
         val isSliderDragging = sliderInteractionSource.collectIsDraggedAsState()
 
         val pagerState = rememberPagerState()
-
 
         val chapter = vm.ttsChapter
 
@@ -151,7 +150,6 @@ object TTSScreenSpec : ScreenSpec {
             drawerState = controller.drawerState
         )
 
-
         LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph) {
             try {
                 if (vm.currentReadingParagraph != pagerState.targetPage && vm.currentReadingParagraph != vm.prevPar && vm.ttsState.currentReadingParagraph < pagerState.pageCount) {
@@ -180,7 +178,7 @@ object TTSScreenSpec : ScreenSpec {
     override fun ModalDrawer(
         controller: Controller
     ) {
-        val vm: TTSViewModel = hiltViewModel   (controller.navBackStackEntry)
+        val vm: TTSViewModel = hiltViewModel(controller.navBackStackEntry)
         val scope = rememberCoroutineScope()
         val drawerScrollState = rememberLazyListState()
         val chapter = vm.ttsChapter
@@ -229,12 +227,11 @@ object TTSScreenSpec : ScreenSpec {
     override fun BottomModalSheet(
         controller: Controller
     ) {
-        val vm: TTSViewModel = hiltViewModel   (controller.navBackStackEntry)
+        val vm: TTSViewModel = hiltViewModel(controller.navBackStackEntry)
 
         LaunchedEffect(key1 = controller.sheetState.hashCode()) {
             controller.sheetState.hide()
         }
-
 
         Column(
             modifier = Modifier
@@ -276,7 +273,6 @@ object TTSScreenSpec : ScreenSpec {
                 trailing = "${vm.sleepTimeUi.value.toInt()} M",
                 isEnable = vm.sleepModeUi.value
             )
-
         }
     }
 }

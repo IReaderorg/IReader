@@ -36,7 +36,7 @@ fun LinearBookItem(
     title: String,
     selected: Boolean = false,
     book: BookItem,
-    headers: ((url:String) -> okhttp3.Headers?)? = null,
+    headers: ((url: String) -> okhttp3.Headers?)? = null,
 
 ) {
 
@@ -88,14 +88,15 @@ fun LinearListDisplay(
     showGoToLastChapterBadge: Boolean = false,
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
-    showInLibraryBadge:Boolean = false,
-    headers: ((url:String) -> okhttp3.Headers?)? = null,
+    showInLibraryBadge: Boolean = false,
+    headers: ((url: String) -> okhttp3.Headers?)? = null,
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), state = scrollState) {
-        items(count = books.size, key = { index ->
-            books[index].id
-        },
-            contentType = { "books"  }
+        items(
+            count = books.size, key = { index ->
+                books[index].id
+            },
+            contentType = { "books" }
         ) { index ->
             LinearBookItem(
                 title = books[index].title,

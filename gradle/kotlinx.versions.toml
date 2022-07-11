@@ -1,12 +1,14 @@
 [versions]
-kotlin = "1.7.0"
-coroutines = "1.6.2"
+kotlin = "1.7.10"
+gradle = "1.7.0"
+coroutines = "1.6.3"
 serialization = "1.3.3"
 lifecycle = "2.4.0"
-datetime = "0.3.2"
+datetime = "0.4.0"
 
 
 [libraries]
+gradle-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "gradle" }
 stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-common", version.ref = "kotlin" }
 reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 dokka = { module = "org.jetbrains.dokka:kotlin-as-java-plugin", version.ref = "kotlin" }

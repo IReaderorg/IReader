@@ -35,6 +35,7 @@ import androidx.navigation.navDeepLink
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.ireader.Controller
 import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
 import org.ireader.components.findComponentActivity
@@ -52,7 +53,6 @@ import org.ireader.reader.ReadingScreen
 import org.ireader.reader.components.ReaderSettingMainLayout
 import org.ireader.reader.reverse_swip_refresh.rememberSwipeRefreshState
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
-import org.ireader.Controller
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 object ReaderScreenSpec : ScreenSpec {
@@ -153,7 +153,6 @@ object ReaderScreenSpec : ScreenSpec {
                 controller.requestedCustomSystemColor(CustomSystemColor(Color.LightGray, bars.bars))
             } else {
                 controller.requestedCustomSystemColor(CustomSystemColor(bars.bars, bars.bars))
-
             }
         }
 
@@ -216,7 +215,6 @@ object ReaderScreenSpec : ScreenSpec {
                                     }
                                 }
                             }
-
                         }
                     } catch (e: Throwable) {
                         Log.error(e, "Reader Spec failed to go next chapter")
@@ -246,14 +244,12 @@ object ReaderScreenSpec : ScreenSpec {
                                 false
                             )
 
-
                             if (vm.readingMode.value == ReadingMode.Page && !reset) {
                                 scrollState.scrollTo(scrollState.maxValue)
                             }
                             if (vm.readingMode.value == ReadingMode.Continues) {
                                 lazyListState.scrollToItem(1)
                             }
-
                         }
                     } else {
                         scope.launch {
@@ -328,10 +324,8 @@ object ReaderScreenSpec : ScreenSpec {
                                 chapterId = chapter.id
                             )
                         )
-
                     }
                 }
-
             },
             onReaderBottomOnSetting = {
                 scope.launch {
@@ -383,7 +377,7 @@ object ReaderScreenSpec : ScreenSpec {
             exit = slideOutVertically(targetOffsetY = { -it })
         ) {
             ReaderScreenDrawer(
-                modifier = if(vm.immersiveMode.value) Modifier else Modifier.systemBarsPadding(),
+                modifier = if (vm.immersiveMode.value) Modifier else Modifier.systemBarsPadding(),
                 onReverseIcon = {
                     vm.isDrawerAsc = !vm.isDrawerAsc
                 },
@@ -435,7 +429,7 @@ object ReaderScreenSpec : ScreenSpec {
         val scope = rememberCoroutineScope()
         if (readerScrollState != null) {
             ReaderScreenTopBar(
-                //modifier = Modifier.padding(controller.scaffoldPadding),
+                // modifier = Modifier.padding(controller.scaffoldPadding),
                 modifier = Modifier,
                 isReaderModeEnable = vm.isReaderModeEnable,
                 isLoaded = vm.isChapterLoaded.value,
@@ -448,7 +442,6 @@ object ReaderScreenSpec : ScreenSpec {
                             force = true
                         )
                     }
-
                 },
                 chapter = chapter,
                 onWebView = {
@@ -493,7 +486,6 @@ object ReaderScreenSpec : ScreenSpec {
         val vm: ReaderScreenViewModel = hiltViewModel(controller.navBackStackEntry)
         val context = LocalContext.current
 
-
         Column(
             Modifier
                 .fillMaxSize()
@@ -506,7 +498,7 @@ object ReaderScreenSpec : ScreenSpec {
             Spacer(modifier = Modifier.height(5.dp))
             ReaderSettingMainLayout(
                 onFontSelected = { index ->
-                    vm.font.value = FontType(vm.fonts.getOrNull(index)?: getDefaultFont().name, FontFamily.Default)
+                    vm.font.value = FontType(vm.fonts.getOrNull(index) ?: getDefaultFont().name, FontFamily.Default)
                 },
                 onChangeBrightness = {
                     vm.apply {

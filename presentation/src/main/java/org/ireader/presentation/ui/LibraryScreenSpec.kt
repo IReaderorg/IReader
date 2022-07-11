@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalDensity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -62,7 +61,6 @@ object LibraryScreenSpec : BottomNavScreenSpec {
         )
     }
 
-
     @Composable
     override fun TopBar(
         controller: Controller
@@ -102,23 +100,22 @@ object LibraryScreenSpec : BottomNavScreenSpec {
             vm = vm,
             controller = controller,
             goToReader = { book ->
-            controller.navController.navigate(
-                ReaderScreenSpec.buildRoute(
-                    bookId = book.id,
-                    sourceId = book.sourceId,
-                    chapterId = LAST_CHAPTER
+                controller.navController.navigate(
+                    ReaderScreenSpec.buildRoute(
+                        bookId = book.id,
+                        sourceId = book.sourceId,
+                        chapterId = LAST_CHAPTER
+                    )
                 )
-            )
-        },
+            },
             goToDetail = { book ->
-            controller.navController.navigate(
-                route = BookDetailScreenSpec.buildRoute(
-                    sourceId = book.sourceId,
-                    bookId = book.id
+                controller.navController.navigate(
+                    route = BookDetailScreenSpec.buildRoute(
+                        sourceId = book.sourceId,
+                        bookId = book.id
+                    )
                 )
-            )
-        })
+            }
+        )
     }
 }
-
-

@@ -36,7 +36,7 @@ object GlobalSearchScreenSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: GlobalSearchViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val vm: GlobalSearchViewModel = hiltViewModel(controller.navBackStackEntry)
         GlobalSearchScreen(
             scrollBehavior = controller.scrollBehavior,
             onPopBackStack = {

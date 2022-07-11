@@ -15,15 +15,13 @@ interface BookRepository {
     fun subscribeBookById(id: Long): Flow<Book?>
     suspend fun findBookById(id: Long): Book?
 
-    suspend fun find(key:String,sourceId:Long): Book?
+    suspend fun find(key: String, sourceId: Long): Book?
 
     suspend fun findAllInLibraryBooks(
         sortType: LibrarySort,
         isAsc: Boolean = false,
         unreadFilter: Boolean = false,
     ): List<Book>
-
-
 
     suspend fun findBookByKey(key: String): Book?
 
@@ -46,9 +44,8 @@ interface BookRepository {
 
     /****************************************************/
 
-
     suspend fun updateBook(book: Book)
-    suspend fun updateBook(book: LibraryBook,favorite:Boolean)
+    suspend fun updateBook(book: LibraryBook, favorite: Boolean)
     suspend fun updateBook(book: List<Book>)
     suspend fun insertBook(book: Book): Long
     suspend fun insertBooks(book: List<Book>): List<Long>

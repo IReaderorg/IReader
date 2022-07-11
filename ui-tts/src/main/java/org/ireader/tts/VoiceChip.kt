@@ -38,7 +38,7 @@ import java.util.Locale
 fun VoiceChip(
     modifier: Modifier = Modifier,
     viewModel: TTSState,
-    onVoice:(Voice) -> Unit
+    onVoice: (Voice) -> Unit
 ) {
 
     Row(
@@ -103,7 +103,7 @@ fun VoiceChip(
 fun LanguageChip(
     modifier: Modifier = Modifier,
     viewModel: TTSState,
-    onLanguage:(Locale) -> Unit
+    onLanguage: (Locale) -> Unit
 ) {
     val context = LocalContext.current
     Row(

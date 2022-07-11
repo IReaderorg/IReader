@@ -30,7 +30,7 @@ fun NotImplementedText() {
         Spacer(modifier = Modifier.height(25.dp))
         Text(
             text = "Not Implemented yet.",
-            style =MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium
             // fontSize = 200.dp
         )
     }
@@ -54,7 +54,7 @@ fun ErrorTextWithEmojis(modifier: Modifier = Modifier, error: String, textColor:
         Spacer(modifier = Modifier.height(25.dp))
         Text(
             text = error,
-            style =MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = textColor ?: MaterialTheme.colorScheme.onBackground,
             overflow = TextOverflow.Ellipsis,

@@ -43,7 +43,7 @@ class HistoryRepositoryImpl constructor(private val historyDao: HistoryDao) :
         return historyDao.insertOrUpdate(history)
     }
 
-    override suspend fun insertHistories(histories: List<org.ireader.common_models.entities.History>){
+    override suspend fun insertHistories(histories: List<org.ireader.common_models.entities.History>) {
         return historyDao.insertOrUpdate(histories)
     }
 

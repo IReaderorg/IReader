@@ -35,7 +35,6 @@ dependencies {
     api(commonLib.ktor.okhttp)
 }
 
-
 val packageVersion = "1.2-SNAPSHOT"
 
 configure<com.vanniktech.maven.publish.MavenPublishBaseExtension> {

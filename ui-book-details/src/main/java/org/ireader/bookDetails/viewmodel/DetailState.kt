@@ -20,13 +20,11 @@ open class DetailStateImpl @Inject constructor() : DetailState {
     override var detailIsLoading by mutableStateOf<Boolean>(false)
     override var expandedSummary by mutableStateOf(false)
     override var modifiedCommands: List<Command<*>> by mutableStateOf(emptyList<Command<*>>())
-    override var commands: State<List<Command<*>>> = derivedStateOf { catalogSource?.source.let {source -> if (source is HttpSource) source.getCommands() else emptyList() }}
-
-
+    override var commands: State<List<Command<*>>> = derivedStateOf { catalogSource?.source.let { source -> if (source is HttpSource) source.getCommands() else emptyList() } }
 }
 
 interface DetailState {
-    var catalogSource : CatalogLocal?
+    var catalogSource: CatalogLocal?
     val source: Source?
     var book: Book?
     var inLibraryLoading: Boolean

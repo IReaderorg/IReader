@@ -71,5 +71,4 @@ class DownloaderViewModel @Inject constructor(
             downloadUseCases.deleteSavedDownloads(list.map { it.toDownload() })
         }
     }
-
 }

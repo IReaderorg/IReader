@@ -50,11 +50,11 @@ fun BrowseTopAppBar(
         mutableStateOf(false)
     }
     val layouts = remember {
-        listOf(DisplayMode.ComfortableGrid,DisplayMode.CompactGrid,DisplayMode.List)
+        listOf(DisplayMode.ComfortableGrid, DisplayMode.CompactGrid, DisplayMode.List)
     }
     val context = LocalContext.current
     Toolbar(
-        scrollBehavior=scrollBehavior,
+        scrollBehavior = scrollBehavior,
         title = {
             if (!state.isSearchModeEnable) {
                 BigSizeTextComposable(text = source?.name ?: "")
@@ -80,7 +80,7 @@ fun BrowseTopAppBar(
                     },
                 )
             } else if (source?.getFilters()
-                    ?.find { it is Filter.Title } != null
+                ?.find { it is Filter.Title } != null
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.Search,
@@ -119,7 +119,7 @@ fun BrowseTopAppBar(
                         topMenu = false
                     }) {
                         RadioButton(
-                            text = layout.getLayoutName(context =context ),
+                            text = layout.getLayoutName(context = context),
                             selected = currentLayout == layout,
                             onClick = {
                                 onLayoutTypeSelect(layout)

@@ -11,8 +11,8 @@ import org.ireader.common_models.entities.CategoryWithCount
 import javax.inject.Inject
 
 class CategoriesUseCases @Inject internal constructor(
-    private val repo : CategoryRepository,
-    private val bookCategoryRepository : BookCategoryRepository,
+    private val repo: CategoryRepository,
+    private val bookCategoryRepository: BookCategoryRepository,
 ) {
 
     suspend fun await(): List<CategoryWithCount> {
@@ -25,28 +25,28 @@ class CategoriesUseCases @Inject internal constructor(
 
     fun subscribe(withAllCategory: Boolean): Flow<List<CategoryWithCount>> {
         return repo.subscribeAll().map { categories ->
-                categories.mapNotNull { categoryAndCount ->
-                    val (category, count) = categoryAndCount
-                    when (category.id) {
-                        // All category only shown when requested
-                        Category.ALL_ID -> if (withAllCategory) categoryAndCount else null
+            categories.mapNotNull { categoryAndCount ->
+                val (category, count) = categoryAndCount
+                when (category.id) {
+                    // All category only shown when requested
+                    Category.ALL_ID -> if (withAllCategory) categoryAndCount else null
 
-                        // Uncategorized category only shown if there are entries and user categories exist
-                        Category.UNCATEGORIZED_ID -> {
-                            if (count > 0 &&
-                                (!withAllCategory || categories.any { !it.category.isSystemCategory })
-                            ) {
-                                categoryAndCount
-                            } else {
-                                null
-                            }
+                    // Uncategorized category only shown if there are entries and user categories exist
+                    Category.UNCATEGORIZED_ID -> {
+                        if (count > 0 &&
+                            (!withAllCategory || categories.any { !it.category.isSystemCategory })
+                        ) {
+                            categoryAndCount
+                        } else {
+                            null
                         }
-
-                        // User created category, always show
-                        else -> categoryAndCount
                     }
+
+                    // User created category, always show
+                    else -> categoryAndCount
                 }
             }
+        }
             .distinctUntilChanged()
     }
 
@@ -64,9 +64,7 @@ class CategoriesUseCases @Inject internal constructor(
         bookCategoryRepository.delete(categories)
     }
 
-
     fun subscribeBookCategories(): Flow<List<BookCategory>> {
-      return  bookCategoryRepository.subscribeAll()
+        return bookCategoryRepository.subscribeAll()
     }
-
 }

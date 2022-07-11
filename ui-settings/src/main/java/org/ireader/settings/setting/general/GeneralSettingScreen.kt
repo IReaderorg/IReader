@@ -66,7 +66,6 @@ fun GeneralSettingScreen(
         )
     }
 
-
     SetupSettingComponents(
         scaffoldPadding = scaffoldPadding,
         items = items
@@ -94,5 +93,3 @@ class GeneralSettingScreenViewModel @Inject constructor(
         )
     }
 }
-
-

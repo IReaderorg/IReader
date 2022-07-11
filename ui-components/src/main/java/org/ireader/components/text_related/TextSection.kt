@@ -20,7 +20,7 @@ fun TextSection(
     toUpper: Boolean = true,
     padding: PaddingValues = PaddingValues(16.dp),
     style: TextStyle = MaterialTheme.typography.labelMedium,
-    color: Color =  MaterialTheme.colorScheme.primary
+    color: Color = MaterialTheme.colorScheme.primary
 ) {
     Row(
         modifier = modifier

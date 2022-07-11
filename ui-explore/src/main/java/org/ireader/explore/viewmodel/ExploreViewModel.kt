@@ -38,9 +38,6 @@ class ExploreViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : BaseViewModel(), ExploreState by state {
 
-
-
-
     init {
         val sourceId = savedStateHandle.get<Long>("sourceId")
         val query = savedStateHandle.get<String>("query")
@@ -48,7 +45,7 @@ class ExploreViewModel @Inject constructor(
             catalogStore.catalogs.find { it.source?.id == sourceId }
         loadBooks()
 
-            state.catalog = catalog
+        state.catalog = catalog
         val source = state.source
         if (sourceId != null && source != null) {
             if (!query.isNullOrBlank()) {
@@ -174,12 +171,11 @@ class ExploreViewModel @Inject constructor(
     private var getBooksJob: Job? = null
 
     suspend fun addToFavorite(bookItem: BookItem) {
-       getBookUseCases.findBookById(bookItem.id)?.let {  book ->
+        getBookUseCases.findBookById(bookItem.id)?.let { book ->
 
-        insertUseCases.insertBook(book.copy(favorite = !book.favorite))
+            insertUseCases.insertBook(book.copy(favorite = !book.favorite))
         }
     }
-
 
     fun toggleSearchMode(inSearchMode: Boolean) {
         state.isSearchModeEnable = inSearchMode
@@ -210,8 +206,6 @@ class ExploreViewModel @Inject constructor(
     private suspend fun readLayoutType() {
         state.layout = browseScreenPrefUseCase.browseLayoutTypeUseCase.read()
     }
-
-
 
     fun toggleFilterMode(enable: Boolean? = null) {
         state.isFilterEnable = enable ?: !state.isFilterEnable

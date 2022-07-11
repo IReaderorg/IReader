@@ -27,14 +27,14 @@ fun BookImageComposable(
     contentScale: ContentScale = ContentScale.FillHeight,
     iconBadge: (@Composable () -> Unit)? = null,
     useSavedCoverImage: Boolean = false,
-    headers: ((url:String) -> okhttp3.Headers?)? = null
+    headers: ((url: String) -> okhttp3.Headers?)? = null
 ) {
     val context = LocalContext.current
     AsyncImage(
         modifier = modifier.fillMaxSize(),
         contentScale = contentScale,
         model = headers?.let { it(image.cover) }
-            ?.let { ImageRequest.Builder(context).headers(it).data(image.cover).build() }?:  image.cover,
+            ?.let { ImageRequest.Builder(context).headers(it).data(image.cover).build() } ?: image.cover,
         contentDescription = "an image",
         alignment = alignment,
     )

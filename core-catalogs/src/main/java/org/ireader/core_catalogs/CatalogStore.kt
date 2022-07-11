@@ -87,7 +87,6 @@ class CatalogStore(
                         )
                     }
                 }
-
         }
         scope.launch {
             catalogRemoteRepository.getRemoteCatalogsFlow()

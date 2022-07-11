@@ -36,7 +36,7 @@ fun MoreScreen(
     onDownloadScreen: () -> Unit,
     onAppearanceScreen: () -> Unit,
     onBackupScreen: () -> Unit,
-    onCategory:() -> Unit,
+    onCategory: () -> Unit,
     onSettings: () -> Unit,
     onAbout: () -> Unit,
     onHelp: () -> Unit,
@@ -63,7 +63,7 @@ fun MoreScreen(
 
         item {
             PreferenceRow(
-                title =  stringResource(id =R.string.download ),
+                title = stringResource(id = R.string.download),
                 icon = Icons.Default.Download,
                 onClick = onDownloadScreen
             )
@@ -121,10 +121,10 @@ data class SettingsSection(
 fun SetupLayout(
     modifier: Modifier = Modifier,
     items: List<SettingsSection>,
-    padding: PaddingValues?=null,
+    padding: PaddingValues? = null,
 ) {
     LazyColumn(
-        modifier = if (padding != null )modifier.padding(padding) else modifier,
+        modifier = if (padding != null)modifier.padding(padding) else modifier,
     ) {
         items.map {
             item {
@@ -144,5 +144,3 @@ class MainSettingScreenViewModel @Inject constructor(
 ) : BaseViewModel() {
     val incognitoMode = uiPreferences.incognitoMode().asState()
 }
-
-

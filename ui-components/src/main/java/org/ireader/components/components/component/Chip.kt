@@ -18,43 +18,43 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun Chip(
-  modifier: Modifier = Modifier,
-  backgroundColor: Color = MaterialTheme.colors.onSurface.copy(alpha = 0.15f),
-  contentColor: Color = MaterialTheme.colors.onSurface,
-  onClick: () -> Unit = {},
-  content: @Composable () -> Unit
+    modifier: Modifier = Modifier,
+    backgroundColor: Color = MaterialTheme.colors.onSurface.copy(alpha = 0.15f),
+    contentColor: Color = MaterialTheme.colors.onSurface,
+    onClick: () -> Unit = {},
+    content: @Composable () -> Unit
 ) {
-  Surface(
-    modifier = Modifier,
-    shape = CircleShape,
-    color = backgroundColor,
-    contentColor = contentColor,
-  ) {
-    Row(
-      modifier = modifier.clickable(onClick = onClick)
-        .widthIn(min = 56.dp)
-        .requiredHeight(32.dp)
-        .padding(horizontal = 12.dp),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.Center
+    Surface(
+        modifier = Modifier,
+        shape = CircleShape,
+        color = backgroundColor,
+        contentColor = contentColor,
     ) {
-      ProvideTextStyle(MaterialTheme.typography.body2, content)
+        Row(
+            modifier = modifier.clickable(onClick = onClick)
+                .widthIn(min = 56.dp)
+                .requiredHeight(32.dp)
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            ProvideTextStyle(MaterialTheme.typography.body2, content)
+        }
     }
-  }
 }
 
 @Composable
 fun ChoiceChip(
-  modifier: Modifier = Modifier,
-  isSelected: Boolean,
-  onClick: () -> Unit = {},
-  selectedBackgroundColor: Color = MaterialTheme.colors.primary,
-  selectedContentColor: Color = MaterialTheme.colors.onPrimary,
-  content: @Composable () -> Unit
+    modifier: Modifier = Modifier,
+    isSelected: Boolean,
+    onClick: () -> Unit = {},
+    selectedBackgroundColor: Color = MaterialTheme.colors.primary,
+    selectedContentColor: Color = MaterialTheme.colors.onPrimary,
+    content: @Composable () -> Unit
 ) {
-  if (isSelected) {
-    Chip(modifier, selectedBackgroundColor, selectedContentColor, onClick, content)
-  } else {
-    Chip(modifier, onClick = onClick, content = content)
-  }
+    if (isSelected) {
+        Chip(modifier, selectedBackgroundColor, selectedContentColor, onClick, content)
+    } else {
+        Chip(modifier, onClick = onClick, content = content)
+    }
 }

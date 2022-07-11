@@ -164,6 +164,4 @@ interface CategoryDao : BaseDao<Category> {
         if (!updateList.isEmpty()) update(updateList)
         return idList.firstOrNull() ?: -1
     }
-
-
 }

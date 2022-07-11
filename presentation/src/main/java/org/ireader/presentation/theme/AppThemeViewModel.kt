@@ -51,7 +51,6 @@ class AppThemeViewModel @Inject constructor(
             themes.removeIf { baseTheme -> !baseTheme.default }
             themes.addAll(it)
         }.launchIn(viewModelScope)
-
     }
 
     @Composable

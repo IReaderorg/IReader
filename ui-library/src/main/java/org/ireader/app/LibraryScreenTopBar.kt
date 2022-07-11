@@ -34,34 +34,34 @@ import org.ireader.ui_library.R
 fun LibraryScreenTopBar(
     state: LibraryViewModel,
     bottomSheetState: ModalBottomSheetState,
-    onSearch: (() -> Unit)?= null,
+    onSearch: (() -> Unit)? = null,
     refreshUpdate: () -> Unit,
     onClickSelectAll: () -> Unit,
     onClickInvertSelection: () -> Unit,
-    onClearSelection:() -> Unit,
+    onClearSelection: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
-        when {
-            state.selectionMode -> {
-                EditModeTopAppBar(
-                    selectionSize = state.selectedBooks.size,
-                    onClickCancelSelection = onClearSelection,
-                    onClickSelectAll = onClickSelectAll,
-                    onClickInvertSelection = onClickInvertSelection,
-                    scrollBehavior = scrollBehavior
-                )
-            }
-            else -> {
-                RegularTopBar(
-                    state,
-                    bottomSheetState,
-                    refreshUpdate = refreshUpdate,
-                    onSearch = {
-                        onSearch?.invoke()
-                    },
-                    scrollBehavior = scrollBehavior
-                )
-            }
+    when {
+        state.selectionMode -> {
+            EditModeTopAppBar(
+                selectionSize = state.selectedBooks.size,
+                onClickCancelSelection = onClearSelection,
+                onClickSelectAll = onClickSelectAll,
+                onClickInvertSelection = onClickInvertSelection,
+                scrollBehavior = scrollBehavior
+            )
+        }
+        else -> {
+            RegularTopBar(
+                state,
+                bottomSheetState,
+                refreshUpdate = refreshUpdate,
+                onSearch = {
+                    onSearch?.invoke()
+                },
+                scrollBehavior = scrollBehavior
+            )
+        }
     }
 }
 
@@ -83,7 +83,7 @@ private fun RegularTopBar(
                 BigSizeTextComposable(text = stringResource(R.string.library))
             } else {
                 AppTextField(
-                    query = vm.searchQuery?:"",
+                    query = vm.searchQuery ?: "",
                     onValueChange = { query ->
                         vm.searchQuery = query
                         onSearch()
@@ -102,7 +102,7 @@ private fun RegularTopBar(
             if (vm.inSearchMode) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
-                   contentDescription = stringResource( R.string.close),
+                    contentDescription = stringResource(R.string.close),
                     onClick = {
                         vm.inSearchMode = false
                         vm.searchQuery = null
@@ -112,7 +112,7 @@ private fun RegularTopBar(
             } else {
                 AppIconButton(
                     imageVector = Icons.Default.Sort,
-                    contentDescription = stringResource( R.string.filter),
+                    contentDescription = stringResource(R.string.filter),
                     onClick = {
                         scope.launch {
                             if (bottomSheetState.isVisible) {
@@ -125,14 +125,14 @@ private fun RegularTopBar(
                 )
                 AppIconButton(
                     imageVector = Icons.Default.Search,
-                    contentDescription = stringResource( R.string.search),
+                    contentDescription = stringResource(R.string.search),
                     onClick = {
                         vm.inSearchMode = true
                     },
                 )
                 AppIconButton(
                     imageVector = Icons.Default.Refresh,
-                   contentDescription = stringResource( R.string.refresh),
+                    contentDescription = stringResource(R.string.refresh),
                     onClick = {
                         refreshUpdate()
                     },
@@ -141,14 +141,14 @@ private fun RegularTopBar(
         },
         navigationIcon = {
             if (vm.inSearchMode) {
-                    AppIconButton(
-                        imageVector = Icons.Default.ArrowBack,
-                       contentDescription = stringResource( R.string.toggle_search_mode_off),
-                        onClick = {
-                            vm.inSearchMode = false
-                            vm.searchQuery = null
-                        }
-                    )
+                AppIconButton(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = stringResource(R.string.toggle_search_mode_off),
+                    onClick = {
+                        vm.inSearchMode = false
+                        vm.searchQuery = null
+                    }
+                )
             } else null
         },
         scrollBehavior = scrollBehavior
@@ -164,7 +164,7 @@ private fun EditModeTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Toolbar(
-        title = { BigSizeTextComposable(text ="$selectionSize") },
+        title = { BigSizeTextComposable(text = "$selectionSize") },
         navigationIcon = {
             IconButton(onClick = onClickCancelSelection) {
                 Icon(Icons.Default.Close, contentDescription = null)

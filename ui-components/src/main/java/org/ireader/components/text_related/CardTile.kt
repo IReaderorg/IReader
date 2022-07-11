@@ -35,7 +35,7 @@ fun CardTile(
         Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
                 text = subtitle, color = MaterialTheme.colorScheme.onBackground,
-                style =MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium
             )
             trailing()
         }

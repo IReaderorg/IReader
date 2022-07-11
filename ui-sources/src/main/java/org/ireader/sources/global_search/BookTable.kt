@@ -20,7 +20,7 @@ fun BookTable() {
             MidSizeTextComposable(text = stringResource(R.string.book_name),)
             AppIconButton(
                 imageVector = Icons.Default.ArrowForward,
-               contentDescription = stringResource(R.string.open_explore),
+                contentDescription = stringResource(R.string.open_explore),
             )
         }
     }

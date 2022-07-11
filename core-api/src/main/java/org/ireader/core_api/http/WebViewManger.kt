@@ -20,14 +20,12 @@ class WebViewManger(private val context: Context) {
 
     var userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36"
 
+    var selector: String? = null
+    var html: org.jsoup.nodes.Document = org.jsoup.nodes.Document("")
+    var webUrl: String? = null
+    var inProgress: Boolean = false
 
-    var selector :String? = null
-    var html :org.jsoup.nodes.Document = org.jsoup.nodes.Document("")
-    var webUrl:String? = null
-    var inProgress : Boolean = false
-
-
-    val scope = CoroutineScope(Dispatchers.Main +  SupervisorJob())
+    val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     fun init() {
         if (webView == null) {
             webView = WebView(context)
@@ -62,7 +60,6 @@ class WebViewManger(private val context: Context) {
                     }
                 }
             }
-
 
             webView?.webViewClient = webViewClient
             webView?.webChromeClient = WebChromeClient()

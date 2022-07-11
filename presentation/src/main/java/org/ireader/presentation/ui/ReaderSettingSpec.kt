@@ -35,8 +35,6 @@ object ReaderSettingSpec : ScreenSpec {
         )
     }
 
-
-
     @OptIn(
         ExperimentalAnimationApi::class,
         ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
@@ -46,11 +44,11 @@ object ReaderSettingSpec : ScreenSpec {
         controller: Controller
     ) {
         val context = LocalContext.current
-        val vm : ReaderSettingScreenViewModel = hiltViewModel()
+        val vm: ReaderSettingScreenViewModel = hiltViewModel()
         val items = remember {
             listOf<Components>(
                 Components.Header(
-                  context.getString(R.string.font)
+                    context.getString(R.string.font)
                 ),
                 Components.Row(
                     title = context.getString(R.string.font),
@@ -65,56 +63,56 @@ object ReaderSettingSpec : ScreenSpec {
                     valueRange = 8.0F..32.0F,
                 ),
                 Components.Header(
-                   context.getString(org.ireader.ui_reader.R.string.paragraph)
+                    context.getString(org.ireader.ui_reader.R.string.paragraph)
                 ),
                 Components.Slider(
                     preferenceAsInt = vm.paragraphsIndent,
-                    title =context.getString(org.ireader.ui_reader.R.string.paragraph_indent),
+                    title = context.getString(org.ireader.ui_reader.R.string.paragraph_indent),
                     trailing = vm.paragraphsIndent.value.toInt().toString(),
                     valueRange = 0.0F..32.0F,
                 ),
                 Components.Slider(
                     preferenceAsInt = vm.distanceBetweenParagraphs,
-                    title =context.getString(org.ireader.ui_reader.R.string.paragraph_distance),
+                    title = context.getString(org.ireader.ui_reader.R.string.paragraph_distance),
                     trailing = vm.distanceBetweenParagraphs.value.toInt().toString(),
                     valueRange = 0.0F..8.0F,
                 ),
                 Components.Header(
-                   context.getString(org.ireader.ui_reader.R.string.line)
+                    context.getString(org.ireader.ui_reader.R.string.line)
                 ),
                 Components.Slider(
                     preferenceAsInt = vm.lineHeight,
-                    title =context.getString(org.ireader.ui_reader.R.string.line_height),
+                    title = context.getString(org.ireader.ui_reader.R.string.line_height),
                     trailing = vm.lineHeight.value.toInt().toString(),
                     valueRange = 22.0F..48.0F,
                 ),
                 Components.Header(
-                   context.getString(org.ireader.ui_reader.R.string.autoscroll)
+                    context.getString(org.ireader.ui_reader.R.string.autoscroll)
                 ),
                 Components.Slider(
                     preferenceAsLong = vm.autoScrollInterval,
-                    title =context.getString(org.ireader.ui_reader.R.string.interval),
+                    title = context.getString(org.ireader.ui_reader.R.string.interval),
                     trailing = (vm.autoScrollInterval.value / 1000).toInt().toString(),
                     valueRange = 500.0F..10000.0F,
                 ),
                 Components.Slider(
                     preferenceAsInt = vm.autoScrollOffset,
-                    title =context.getString(org.ireader.ui_reader.R.string.offset),
+                    title = context.getString(org.ireader.ui_reader.R.string.offset),
                     trailing = (vm.autoScrollOffset.value / 1000).toInt().toString(),
                     valueRange = 500.0F..10000F,
                 ),
                 Components.Header(
-                   context.getString(org.ireader.ui_reader.R.string.scrollIndicator)
+                    context.getString(org.ireader.ui_reader.R.string.scrollIndicator)
                 ),
                 Components.Slider(
                     preferenceAsInt = vm.scrollIndicatorPadding,
-                    title =context.getString(org.ireader.ui_reader.R.string.padding),
+                    title = context.getString(org.ireader.ui_reader.R.string.padding),
                     trailing = vm.scrollIndicatorPadding.value.toString(),
                     valueRange = 0F..32F,
                 ),
                 Components.Slider(
                     preferenceAsInt = vm.scrollIndicatorWith,
-                    title =context.getString(org.ireader.ui_reader.R.string.width),
+                    title = context.getString(org.ireader.ui_reader.R.string.width),
                     trailing = vm.scrollIndicatorWith.value.toString(),
                     valueRange = 0F..32F,
                 ),
@@ -128,7 +126,5 @@ object ReaderSettingSpec : ScreenSpec {
         ) {
             setupUiComponent(items)
         }
-
     }
-
 }

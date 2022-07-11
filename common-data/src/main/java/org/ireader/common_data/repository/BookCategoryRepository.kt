@@ -13,5 +13,4 @@ interface BookCategoryRepository {
     suspend fun delete(category: BookCategory)
     suspend fun delete(bookId: Long)
     suspend fun deleteAll(category: List<BookCategory>)
-
 }

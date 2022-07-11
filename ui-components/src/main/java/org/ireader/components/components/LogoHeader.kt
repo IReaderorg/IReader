@@ -27,7 +27,7 @@ fun LogoHeader() {
             Icon(
                 painter = painterResource(R.drawable.ic_eternity_full),
                 contentDescription = null,
-                tint =AppColors.current.onBars,
+                tint = AppColors.current.onBars,
                 modifier = Modifier
                     .padding(32.dp)
                     .size(100.dp),

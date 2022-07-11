@@ -4,13 +4,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.IconButton
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,14 +32,14 @@ fun ChaptersSliderComposable(
 ) {
     Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = if (chapters.isNotEmpty() && currentChapterIndex != -1) chapters[currentChapterIndex].name else currentChapter?.name?:"",
+            text = if (chapters.isNotEmpty() && currentChapterIndex != -1) chapters[currentChapterIndex].name else currentChapter?.name ?: "",
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.bodyMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
         Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            
+
             IconButton(
                 modifier = modifier.weight(1f),
                 onClick = {

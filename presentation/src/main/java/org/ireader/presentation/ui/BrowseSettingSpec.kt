@@ -21,12 +21,9 @@ object BrowseSettingSpec : ScreenSpec {
         )
     }
 
-
     @Composable
     override fun Content(
         controller: Controller
     ) {
-
     }
-
 }

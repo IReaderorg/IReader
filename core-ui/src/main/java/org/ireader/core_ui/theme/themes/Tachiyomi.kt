@@ -4,11 +4,11 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-private  val md_theme_light_primary = Color(0xFF0057ce)
-private  val md_theme_light_onPrimary = Color(0xFFffffff)
-private  val md_theme_light_primaryContainer = Color(0xFFd8e2ff)
-private  val md_theme_light_onPrimaryContainer = Color(0xFF001947)
-private  val md_theme_light_secondary = Color(0xFF0057ce)
+private val md_theme_light_primary = Color(0xFF0057ce)
+private val md_theme_light_onPrimary = Color(0xFFffffff)
+private val md_theme_light_primaryContainer = Color(0xFFd8e2ff)
+private val md_theme_light_onPrimaryContainer = Color(0xFF001947)
+private val md_theme_light_secondary = Color(0xFF0057ce)
 private val md_theme_light_onSecondary = Color(0xFFffffff)
 private val md_theme_light_secondaryContainer = Color(0xFFd8e2ff)
 private val md_theme_light_onSecondaryContainer = Color(0xFF001947)
@@ -60,8 +60,6 @@ private val md_theme_dark_inverseSurface = Color(0xFFe4e2e6)
 private val md_theme_dark_inversePrimary = Color(0xFF0057ce)
 private val md_theme_dark_shadow = Color(0xFF000000)
 
-
-
 private val seed = Color(0xFF6750A4)
 private val error = Color(0xFFB3261E)
 
@@ -95,7 +93,7 @@ val LightThemeColorsTachiyomi = lightColorScheme(
     inversePrimary = md_theme_light_inversePrimary,
 )
 
- val DarkThemeColorsTachiyomi = darkColorScheme(
+val DarkThemeColorsTachiyomi = darkColorScheme(
 
     primary = md_theme_dark_primary,
     onPrimary = md_theme_dark_onPrimary,

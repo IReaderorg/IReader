@@ -16,5 +16,5 @@ open class ChapterStateImpl @Inject constructor() : ChapterState {
 interface ChapterState {
     var chapterIsLoading: Boolean
     var chapters: List<Chapter>
-    val haveBeenRead : Boolean
+    val haveBeenRead: Boolean
 }

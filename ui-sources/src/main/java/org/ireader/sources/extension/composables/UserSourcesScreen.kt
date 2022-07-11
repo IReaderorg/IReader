@@ -45,7 +45,7 @@ fun UserSourcesScreen(
             key = {
                 when (it) {
                     is SourceUiModel.Header -> it.hashCode()
-                    is SourceUiModel.Item ->  it.source.key(it.state)
+                    is SourceUiModel.Item -> it.source.key(it.state)
                 }
             },
         ) { catalog ->
@@ -61,16 +61,14 @@ fun UserSourcesScreen(
                     catalog = catalog.source,
                     installStep = if (catalog.source is CatalogInstalled) state.installSteps[catalog.source.pkgName] else null,
                     onClick = { onClickCatalog(catalog.source) },
-                    onPinToggle = {  onClickTogglePinned(catalog.source) },
+                    onPinToggle = { onClickTogglePinned(catalog.source) },
                 )
-
             }
         }
     }
 }
 
 sealed class SourceUiModel {
-    data class Item(val source: Catalog, val state:SourceState) : SourceUiModel()
+    data class Item(val source: Catalog, val state: SourceState) : SourceUiModel()
     data class Header(val language: String) : SourceUiModel()
 }
-

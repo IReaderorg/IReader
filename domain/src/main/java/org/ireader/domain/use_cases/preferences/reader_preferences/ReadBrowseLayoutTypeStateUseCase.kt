@@ -23,8 +23,6 @@ class LibraryLayoutTypeUseCase(
             categoryRepository.updateAllFlags(flags)
         }
     }
-
-
 }
 
 class BrowseLayoutTypeUseCase(

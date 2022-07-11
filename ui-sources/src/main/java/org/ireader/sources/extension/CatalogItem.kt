@@ -53,7 +53,7 @@ fun CatalogItem(
     onInstall: (() -> Unit)? = null,
     onUninstall: (() -> Unit)? = null,
     onPinToggle: (() -> Unit)? = null,
-    onCancelInstaller:((Catalog) -> Unit)? = null,
+    onCancelInstaller: ((Catalog) -> Unit)? = null,
 ) {
     val title = buildAnnotatedString {
         append("${catalog.name} ")
@@ -175,7 +175,7 @@ private fun CatalogButtons(
     onInstall: (() -> Unit)?,
     onUninstall: (() -> Unit)?,
     onPinToggle: (() -> Unit)?,
-    onCancelInstaller:((Catalog) -> Unit)?,
+    onCancelInstaller: ((Catalog) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier) {
@@ -194,7 +194,6 @@ private fun CatalogButtons(
                         }
                     })
                 }
-
             } else if (onInstall != null) {
                 if (catalog is CatalogLocal) {
                     MidSizeTextComposable(
@@ -251,7 +250,7 @@ internal fun CatalogMenuButton(
             Spacer(modifier = Modifier.padding(horizontal = 4.dp))
             if (onUninstall != null && catalog is CatalogLocal) {
                 MidSizeTextComposable(
-                    text =stringResource(R.string.uninstall),
+                    text = stringResource(R.string.uninstall),
                     color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable { onUninstall() }
                 )

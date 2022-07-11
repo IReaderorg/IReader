@@ -77,7 +77,7 @@ fun ExploreScreen(
     snackBarHostState: SnackbarHostState,
     modalState: ModalBottomSheetState,
     onLongClick: (BookItem) -> Unit = {},
-    headers: ((url:String) -> okhttp3.Headers?)? = null,
+    headers: ((url: String) -> okhttp3.Headers?)? = null,
     scaffoldPadding: PaddingValues
 ) {
     val scrollState = rememberLazyListState()
@@ -122,12 +122,12 @@ fun ExploreScreen(
             setSnackBarText(errors.asString(context))
         }
     }
-    LaunchedEffect(key1 = scrollState.layoutInfo.totalItemsCount > 0 ,key2 =  scrollState.isScrolledToTheEnd() , key3 =  !vm.endReached && !vm.isLoading) {
+    LaunchedEffect(key1 = scrollState.layoutInfo.totalItemsCount > 0, key2 = scrollState.isScrolledToTheEnd(), key3 = !vm.endReached && !vm.isLoading) {
         if (scrollState.layoutInfo.totalItemsCount > 0 && scrollState.isScrolledToTheEnd() && !vm.endReached && !vm.isLoading) {
             loadItems(false)
         }
     }
-    LaunchedEffect(key1 = gridState.layoutInfo.totalItemsCount > 0 ,key2 =  gridState.isScrolledToTheEnd() , key3 =  !vm.endReached && !vm.isLoading) {
+    LaunchedEffect(key1 = gridState.layoutInfo.totalItemsCount > 0, key2 = gridState.isScrolledToTheEnd(), key3 = !vm.endReached && !vm.isLoading) {
         if (gridState.layoutInfo.totalItemsCount > 0 && gridState.isScrolledToTheEnd() && !vm.endReached && !vm.isLoading) {
             loadItems(false)
         }
@@ -190,7 +190,7 @@ fun ExploreScreen(
                         isLoading = vm.isLoading,
                         showInLibraryBadge = true,
                         onLongClick = onLongClick,
-                        headers= headers,
+                        headers = headers,
                     )
                 }
             }

@@ -38,7 +38,7 @@ internal fun LibraryPager(
     showGoToLastChapterBadge: Boolean = false,
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
-    showInLibraryBadge:Boolean = false,
+    showInLibraryBadge: Boolean = false,
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
 
 ) {
@@ -49,7 +49,7 @@ internal fun LibraryPager(
         val books by onPageChange(page)
         val gridState = rememberLazyGridState()
         val lazyListState = rememberLazyListState()
-        val displayMode =  categories[page].category.displayMode
+        val displayMode = categories[page].category.displayMode
         val columns by if (displayMode != DisplayMode.List) {
             val window = LocalConfiguration.current
             val isLandscape = window.screenWidthDp > window.screenHeightDp
@@ -79,6 +79,5 @@ internal fun LibraryPager(
                 columns = columns,
             )
         }
-
     }
 }

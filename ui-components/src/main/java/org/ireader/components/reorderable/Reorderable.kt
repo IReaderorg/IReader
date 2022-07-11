@@ -1,6 +1,5 @@
 package org.ireader.components.reorderable
 
-
 import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.gestures.forEachGesture
 import androidx.compose.runtime.LaunchedEffect
@@ -116,7 +115,8 @@ fun Modifier.reorderable(
                     onDrag = { change, dragAmount ->
                         change.consumeAllChanges()
                         interactions.tryEmit(ReorderAction.Drag(dragAmount.x, dragAmount.y))
-                    })
+                    }
+                )
             }
         }
     }

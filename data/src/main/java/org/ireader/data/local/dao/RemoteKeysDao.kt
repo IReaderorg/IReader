@@ -122,9 +122,6 @@ FROM library
     )
     suspend fun deleteUnusedBooks()
 
-
-
-
     @Transaction
     suspend fun insertOrUpdate(objList: List<org.ireader.common_models.entities.Book>): List<Long> {
         val insertResult = insert(objList)
@@ -160,6 +157,6 @@ FROM library
         }
 
         if (!updateList.isEmpty()) update(updateList)
-        return idList.firstOrNull()?:-1
+        return idList.firstOrNull() ?: -1
     }
 }

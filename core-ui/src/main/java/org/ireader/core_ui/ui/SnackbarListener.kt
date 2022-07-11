@@ -9,7 +9,7 @@ import org.ireader.common_resources.UiEvent
 import org.ireader.core_ui.viewmodel.BaseViewModel
 
 @Composable
-fun SnackBarListener(vm:BaseViewModel, host: SnackbarHostState) {
+fun SnackBarListener(vm: BaseViewModel, host: SnackbarHostState) {
     val context = LocalContext.current
     LaunchedEffect(key1 = true) {
         vm.eventFlow.collectLatest { event ->

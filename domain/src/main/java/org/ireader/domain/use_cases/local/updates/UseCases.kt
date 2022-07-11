@@ -13,7 +13,7 @@ class SubscribeUpdates @Inject constructor(private val updatesRepository: org.ir
 }
 
 class InsertUpdatesUseCase @Inject constructor(private val updatesRepository: org.ireader.common_data.repository.UpdatesRepository) {
-    suspend operator fun invoke(updates: List<Update>):List<Long> {
+    suspend operator fun invoke(updates: List<Update>): List<Long> {
         return org.ireader.common_extensions.withIOContext {
             return@withIOContext updatesRepository.insertUpdates(updates)
         }
@@ -21,7 +21,7 @@ class InsertUpdatesUseCase @Inject constructor(private val updatesRepository: or
 }
 
 class InsertUpdateUseCase @Inject constructor(private val updatesRepository: org.ireader.common_data.repository.UpdatesRepository) {
-    suspend operator fun invoke(updates: Update):Long {
+    suspend operator fun invoke(updates: Update): Long {
         return org.ireader.common_extensions.withIOContext {
             return@withIOContext updatesRepository.insertUpdate(updates)
         }

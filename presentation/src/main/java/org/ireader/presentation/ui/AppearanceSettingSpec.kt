@@ -12,7 +12,6 @@ import org.ireader.appearance.AppearanceToolbar
 import org.ireader.appearance.AppearanceViewModel
 import org.ireader.core_ui.ui.SnackBarListener
 
-
 object AppearanceScreenSpec : ScreenSpec {
 
     override val navHostRoute: String = "appearance_setting_route"
@@ -56,4 +55,3 @@ object AppearanceScreenSpec : ScreenSpec {
 fun popBackStack(navController: NavController) {
     navController.popBackStack()
 }
-

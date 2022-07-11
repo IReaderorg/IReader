@@ -12,15 +12,11 @@ import org.ireader.common_models.entities.Chapter
 @Dao
 interface LibraryBookDao : BaseDao<Book> {
 
-
     @Query("SELECT * FROM library")
     suspend fun findAllBooks(): List<org.ireader.common_models.entities.Book>
 
     @Query("""SELECT  * FROM library WHERE favorite = 1 """)
     fun subscribeAllLocalBooks(): Flow<List<org.ireader.common_models.entities.Book>>
-
-
-
 
     @Query("SELECT * FROM library WHERE favorite = 1")
     suspend fun findAllInLibraryBooks(): List<org.ireader.common_models.entities.Book>
@@ -35,8 +31,7 @@ interface LibraryBookDao : BaseDao<Book> {
     suspend fun findBookById(bookId: Long): org.ireader.common_models.entities.Book?
 
     @Query("SELECT * FROM library WHERE `key` = :key AND sourceId = :sourceId")
-    suspend fun find(key:String,sourceId:Long):Book?
-
+    suspend fun find(key: String, sourceId: Long): Book?
 
     @Query("SELECT * FROM library WHERE `key` = :key Limit 1")
     suspend fun findBookByKey(key: String): org.ireader.common_models.entities.Book?
@@ -53,7 +48,6 @@ interface LibraryBookDao : BaseDao<Book> {
     @Query("SELECT * FROM library WHERE title LIKE '%' || :query || '%' AND favorite = 1")
     fun searchBook(query: String): Flow<org.ireader.common_models.entities.Book>
 
-
     @Query("DELETE FROM library WHERE id = :bookId ")
     suspend fun deleteBook(bookId: Long)
 
@@ -63,7 +57,7 @@ interface LibraryBookDao : BaseDao<Book> {
         WHERE `key` = :key
     """
     )
-    suspend fun delete(key:String)
+    suspend fun delete(key: String)
 
     @Query("DELETE FROM library")
     suspend fun deleteAllBook()
@@ -73,7 +67,6 @@ interface LibraryBookDao : BaseDao<Book> {
 
     @Query("SELECT sourceId FROM library GROUP BY sourceId ORDER BY COUNT(sourceId) DESC")
     suspend fun findFavoriteSourceIds(): List<Long>
-
 
     @Transaction
     suspend fun insertBooksAndChapters(
@@ -125,10 +118,9 @@ interface LibraryBookDao : BaseDao<Book> {
         }
 
         if (!updateList.isEmpty()) update(updateList)
-        return idList.firstOrNull()?:-1
+        return idList.firstOrNull() ?: -1
     }
 
-
     @Query("UPDATE library SET favorite  = :favorite WHERE `id` = :id")
-    suspend fun updateLibraryBook(id:Long,favorite:Boolean)
+    suspend fun updateLibraryBook(id: Long, favorite: Boolean)
 }

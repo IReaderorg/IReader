@@ -191,7 +191,6 @@ class TTSNotificationBuilder constructor(
                     sourceId = sourceId,
                     readingParagraph = currentReadingParagraph.toLong(),
                 ).toUri()
-
             },
         flags
     )
@@ -232,8 +231,8 @@ class TTSNotificationBuilder constructor(
             setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             setLargeIcon(context, cover)
             priority = NotificationCompat.PRIORITY_LOW
-          //  setProgress(lastPar.toInt(), progress.toInt(), false)
-           // setTicker(contentText)
+            //  setProgress(lastPar.toInt(), progress.toInt(), false)
+            // setTicker(contentText)
 
 //            setContentIntent(
 //                openReaderScreenIntent(
@@ -261,7 +260,7 @@ class TTSNotificationBuilder constructor(
                     .setMediaSession(mediaSessionCompat.sessionToken)
                     .setShowCancelButton(true)
                     .setCancelButtonIntent(cancelMediaPlayer())
-                    .setShowActionsInCompactView(0,1,2)
+                    .setShowActionsInCompactView(0, 1, 2)
 
             )
 

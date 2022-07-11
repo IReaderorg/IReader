@@ -65,7 +65,8 @@ fun LibraryFilter.Companion.deserializeList(
         savedFilters
     } else {
         types.map { type ->
-            savedFilters.find { it.type == type } ?: LibraryFilter(type,
+            savedFilters.find { it.type == type } ?: LibraryFilter(
+                type,
                 LibraryFilter.Value.Missing
             )
         }

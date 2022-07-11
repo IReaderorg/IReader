@@ -55,9 +55,9 @@ fun DownloaderScreen(
     vm: DownloaderViewModel,
     onDownloadItem: (
         item:
-        SavedDownloadWithInfo
+            SavedDownloadWithInfo
     ) -> Unit,
-    snackBarHostState:SnackbarHostState
+    snackBarHostState: SnackbarHostState
 ) {
     val context = LocalContext.current
     LaunchedEffect(key1 = true) {
@@ -143,8 +143,10 @@ fun DownloaderScreen(
                     inProgress = downloads[index].chapterId in vm.downloadServiceStateImpl.downloads.map { it.chapterId },
                     isDownloaded = downloads[index].isDownloaded,
                     onCancelAllFromThisSeries = { item ->
-                        vm.deleteSelectedDownloads(vm.downloads.filter { it.bookId == item.bookId }
-                            .map { it.toSavedDownload() })
+                        vm.deleteSelectedDownloads(
+                            vm.downloads.filter { it.bookId == item.bookId }
+                                .map { it.toSavedDownload() }
+                        )
                     },
                     onCancelDownload = { item ->
                         vm.deleteSelectedDownloads(list = listOf(item))

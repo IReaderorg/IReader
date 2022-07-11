@@ -71,7 +71,6 @@ class DownloaderService @AssistedInject constructor(
                 val inputtedBooksIds = inputData.getLongArray(DOWNLOADER_BOOKS_IDS)?.distinct()
                 val inputtedDownloaderMode = inputData.getBoolean(DOWNLOADER_MODE, false)
 
-
                 val chapters: List<Chapter> = when {
                     inputtedBooksIds != null -> {
                         inputtedBooksIds.flatMap {

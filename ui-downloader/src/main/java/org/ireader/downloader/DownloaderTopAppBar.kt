@@ -62,7 +62,7 @@ fun DownloaderTopAppBar(
                         state.selection.addAll(ids)
                     },
                     onDelete = onDelete,
-                        scrollBehavior = scrollBehavior,
+                    scrollBehavior = scrollBehavior,
                 )
             }
             else -> {
@@ -93,7 +93,7 @@ private fun RegularTopBar(
             Text(
                 text = UiText.StringResource(R.string.downloads_queue).asString(),
                 color = MaterialTheme.colorScheme.onBackground,
-                style =MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
                 overflow = TextOverflow.Ellipsis
             )
@@ -101,7 +101,7 @@ private fun RegularTopBar(
         actions = {
             AppIconButton(
                 imageVector = Icons.Default.MoreVert,
-               contentDescription = stringResource(R.string.menu),
+                contentDescription = stringResource(R.string.menu),
                 onClick = {
                     isMenuExpanded = true
                 },
@@ -120,7 +120,7 @@ private fun RegularTopBar(
             IconButton(onClick = onPopBackStack) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                   contentDescription = stringResource(R.string.return_to_previous_screen),
+                    contentDescription = stringResource(R.string.return_to_previous_screen),
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }

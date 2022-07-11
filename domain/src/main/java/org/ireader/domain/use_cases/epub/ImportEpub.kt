@@ -1,22 +1,22 @@
-//package org.ireader.domain.use_cases.epub
+// package org.ireader.domain.use_cases.epub
 //
-//import android.content.Context
-//import kotlinx.coroutines.Dispatchers
-//import kotlinx.coroutines.async
-//import kotlinx.coroutines.withContext
-//import org.ireader.common_data.repository.BookRepository
-//import org.ireader.common_data.repository.ChapterRepository
-//import org.ireader.common_models.entities.Book
-//import org.ireader.common_models.entities.Chapter
-//import org.ireader.core_api.source.LocalSource
-//import ir.kazemcodes.epub.model.EpubBook
-//import java.io.File
-//import javax.inject.Inject
+// import android.content.Context
+// import kotlinx.coroutines.Dispatchers
+// import kotlinx.coroutines.async
+// import kotlinx.coroutines.withContext
+// import org.ireader.common_data.repository.BookRepository
+// import org.ireader.common_data.repository.ChapterRepository
+// import org.ireader.common_models.entities.Book
+// import org.ireader.common_models.entities.Chapter
+// import org.ireader.core_api.source.LocalSource
+// import ir.kazemcodes.epub.model.EpubBook
+// import java.io.File
+// import javax.inject.Inject
 //
-//class ImportEpub @Inject constructor(
+// class ImportEpub @Inject constructor(
 //    private val bookRepository: BookRepository,
 //    private val chapterRepository: ChapterRepository,
-//) {
+// ) {
 //    suspend operator fun invoke(epub: EpubBook, context: Context) {
 //        // First clean any previous entries from the book
 //        fun String.withLocalPrefix() = "local://${this}"
@@ -48,4 +48,4 @@
 //            }
 //        }
 //    }
-//}
+// }

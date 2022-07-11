@@ -66,9 +66,3 @@ fun Context.findComponentActivity(): ComponentActivity? = when (this) {
     is ContextWrapper -> baseContext.findComponentActivity()
     else -> null
 }
-
-
-
-
-
-

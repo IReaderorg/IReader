@@ -70,7 +70,7 @@ import org.ireader.image_loader.BookCover
 @OptIn(
     ExperimentalMaterialApi::class,
 
-    )
+)
 @Composable
 fun BookDetailScreen(
     modifier: Modifier = Modifier,
@@ -90,7 +90,6 @@ fun BookDetailScreen(
 
     val swipeRefreshState =
         rememberSwipeRefreshState(isRefreshing = detailState.detailIsLoading)
-
 
     SwipeRefresh(
         state = swipeRefreshState,
@@ -184,7 +183,7 @@ private fun BookHeader(
                 .align(Alignment.Top)
                 .border(2.dp, MaterialTheme.colorScheme.onBackground.copy(alpha = .1f)),
 
-            )
+        )
         Spacer(modifier = modifier.width(8.dp))
         /** Book Info **/
         BookInfo(

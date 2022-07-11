@@ -61,7 +61,7 @@ fun Activity.hideBottomBar() {
         val v = this.window.decorView
         v.systemUiVisibility = GONE
     } else {
-        //for new api versions.
+        // for new api versions.
         val decorView = window.decorView
         val uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
         decorView.systemUiVisibility = uiOptions
@@ -75,7 +75,7 @@ fun Activity.showBottomBar() {
         val v = this.window.decorView
         v.systemUiVisibility = View.VISIBLE
     } else {
-        //for new api versions.
+        // for new api versions.
         val decorView = window.decorView
         val uiOptions = View.SYSTEM_UI_FLAG_VISIBLE
         decorView.systemUiVisibility = uiOptions
@@ -98,11 +98,11 @@ fun Activity.enableImmersiveMode() {
 
         window.decorView.systemUiVisibility = (
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            or View.SYSTEM_UI_FLAG_FULLSCREEN
-            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
             )
     }
 }
@@ -113,15 +113,16 @@ fun Activity.enableImmersiveMode() {
  */
 @Suppress("DEPRECATION")
 fun Activity.showSystemUI() {
-        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+    window.decorView.systemUiVisibility = (
+        View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        )
     window.decorView.fitsSystemWindows = false
     val windowInsetsController = WindowInsetsControllerCompat(window, window.decorView)
     windowInsetsController.systemBarsBehavior =
         WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
     windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
-
 }
 
 /**
@@ -129,13 +130,13 @@ fun Activity.showSystemUI() {
  */
 @Suppress("DEPRECATION")
 fun Activity.hideSystemUI() {
-        window.decorView.systemUiVisibility = (
-            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_FULLSCREEN
-                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+    window.decorView.systemUiVisibility = (
+        View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            or View.SYSTEM_UI_FLAG_FULLSCREEN
+            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
         )
     window.decorView.fitsSystemWindows = false
     val windowInsetsController = WindowInsetsControllerCompat(window, window.decorView)
@@ -149,6 +150,6 @@ var Activity.brightness: Float?
     set(value) {
         val window = this.window
         val layoutParams = window.attributes
-        layoutParams?.screenBrightness = value //0 is turned off, 1 is full brightness
+        layoutParams?.screenBrightness = value // 0 is turned off, 1 is full brightness
         window?.attributes = layoutParams
     }

@@ -33,8 +33,6 @@ dependencies {
     implementation(composeLib.compose.animations)
     implementation(composeLib.compose.animations.graphics)
 
-
-
     implementation(composeLib.compose.uiToolingPreview)
     implementation(accompanist.pagerIndicator)
     implementation(accompanist.swipeRefresh)

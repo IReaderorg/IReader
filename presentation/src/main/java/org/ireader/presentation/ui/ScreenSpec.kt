@@ -48,15 +48,11 @@ sealed interface ScreenSpec {
 
     val deepLinks: List<NavDeepLink> get() = emptyList()
 
-
-
-
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun BottomModalSheet(
         controller: Controller
     ) {
-
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -64,16 +60,13 @@ sealed interface ScreenSpec {
     fun BottomAppBar(
         controller: Controller
     ) {
-
     }
-
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun ModalDrawer(
         controller: Controller
     ) {
-
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -81,12 +74,10 @@ sealed interface ScreenSpec {
     fun TopBar(
         controller: Controller
     ) {
-
     }
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun  Content(
+    fun Content(
         controller: Controller
     )
 }
-

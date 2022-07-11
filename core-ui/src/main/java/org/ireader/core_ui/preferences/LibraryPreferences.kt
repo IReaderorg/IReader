@@ -76,5 +76,4 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     fun columnsInLandscape(): Preference<Int> {
         return preferenceStore.getInt("columns_landscape", 0)
     }
-
 }

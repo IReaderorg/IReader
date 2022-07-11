@@ -48,7 +48,6 @@ class AppColors(
     }
 }
 
-
 /**
  * Composable that provides the [LocalAppColors] composition to children composables with the
  * [materialColors] and [extraColors] provided.

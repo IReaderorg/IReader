@@ -54,7 +54,7 @@ interface ChapterDao : BaseDao<Chapter> {
     END DESC
         """
     )
-    fun subscribe(bookId: Long, sort: String) : Flow<List<Chapter>>
+    fun subscribe(bookId: Long, sort: String): Flow<List<Chapter>>
 
     @Query(
         """

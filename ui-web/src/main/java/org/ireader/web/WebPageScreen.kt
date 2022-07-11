@@ -43,15 +43,13 @@ fun WebPageScreen(
     scaffoldPadding: PaddingValues
 ) {
     val userAgent = remember {
-        (source as? HttpSource )?.getCoverRequest("")?.second?.headers?.get(HttpHeaders.UserAgent)
+        (source as? HttpSource)?.getCoverRequest("")?.second?.headers?.get(HttpHeaders.UserAgent)
     }
     val webViewState = rememberWebViewState(url = viewModel.url)
-
 
     LaunchedEffect(key1 = webViewState.hashCode()) {
         viewModel.webViewState = webViewState
     }
-
 
     LaunchedEffect(key1 = webViewState.content.getCurrentUrl()) {
         webViewState.content.getCurrentUrl()?.let { viewModel.webUrl = it }

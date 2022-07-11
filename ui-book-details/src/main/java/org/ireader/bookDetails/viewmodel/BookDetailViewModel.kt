@@ -138,7 +138,7 @@ class BookDetailViewModel @Inject constructor(
                         toggleBookLoading(false)
                         if (message != null) {
                             Log.error { message.toString() }
-                            //showSnackBar(message)
+                            // showSnackBar(message)
                         }
                     }
                 },
@@ -167,10 +167,9 @@ class BookDetailViewModel @Inject constructor(
                 catalog = source,
                 onError = { message ->
                     Log.error { message.toString() }
-                    //showSnackBar(message)
+                    // showSnackBar(message)
                     withUIContext {
                         chapterIsLoading = false
-
                     }
                 },
                 onSuccess = { result ->

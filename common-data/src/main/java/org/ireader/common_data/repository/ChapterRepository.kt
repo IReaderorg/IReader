@@ -13,7 +13,6 @@ interface ChapterRepository {
         chapterId: Long,
     ): Chapter?
 
-
     suspend fun findAllChapters(): List<Chapter>
 
     suspend fun findAllInLibraryChapter(): List<Chapter>
@@ -32,8 +31,6 @@ interface ChapterRepository {
         bookId: Long,
         isAsc: Boolean = true,
     ): List<Chapter>
-
-
 
     suspend fun findChaptersByKey(key: String): List<Chapter>
 
@@ -62,5 +59,4 @@ interface ChapterRepository {
     )
 
     suspend fun deleteAllChapters()
-
 }

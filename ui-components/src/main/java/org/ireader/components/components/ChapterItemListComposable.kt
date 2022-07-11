@@ -97,7 +97,6 @@ fun ChapterRow(
                     )
                 )
             }
-
         }
         Row(modifier = Modifier.padding(horizontal = 16.dp)) {
             if (isLoading) {
@@ -111,6 +110,5 @@ fun ChapterRow(
                 )
             }
         }
-
     }
 }

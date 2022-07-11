@@ -12,8 +12,8 @@ class BackUpUseCases @Inject constructor(private val downloadRepository: org.ire
     fun makeBackup(
         context: Context,
         resultIntent: ActivityResult,
-        text:String,
-        onError:(Throwable) -> Unit
+        text: String,
+        onError: (Throwable) -> Unit
     ) {
         try {
             val contentResolver = context.findComponentActivity()!!.contentResolver
@@ -30,10 +30,10 @@ class BackUpUseCases @Inject constructor(private val downloadRepository: org.ire
     }
 
     fun restoreBackup(
-        context:Context,
+        context: Context,
         resultIntent: Intent,
-        onSuccess:(String) -> Unit,
-        onError:(Throwable) -> Unit
+        onSuccess: (String) -> Unit,
+        onError: (Throwable) -> Unit
     ) {
         try {
             val contentResolver = context.findComponentActivity()!!.contentResolver
@@ -54,10 +54,8 @@ class BackUpUseCases @Inject constructor(private val downloadRepository: org.ire
                     }
                 }
             }
-
         } catch (e: Throwable) {
             onError(e)
         }
     }
-
 }

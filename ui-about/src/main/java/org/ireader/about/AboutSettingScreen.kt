@@ -23,68 +23,67 @@ import org.ireader.ui_about.R
 @Composable
 fun AboutSettingScreen(
     modifier: Modifier = Modifier,
-    getFormattedBuildTime:() -> String,
+    getFormattedBuildTime: () -> String,
     onPopBackStack: () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
-        LazyColumn(
-            modifier = modifier,
-        ) {
-            item {
-                LogoHeader()
-            }
-            item {
-                PreferenceRow(
-                    title = stringResource(R.string.version),
-                    subtitle = when {
-                        BuildConfig.DEBUG -> {
-                            "Debug ${BuildConfig.COMMIT_SHA} (${getFormattedBuildTime()})"
-                        }
-                        BuildConfig.PREVIEW -> {
-                            "Preview r${BuildConfig.COMMIT_COUNT} (${BuildConfig.COMMIT_SHA}, ${getFormattedBuildTime()})"
-                        }
-                        else -> {
-                            "Stable ${BuildConfig.VERSION_NAME} (${getFormattedBuildTime()})"
-                        }
-                    },
+    LazyColumn(
+        modifier = modifier,
+    ) {
+        item {
+            LogoHeader()
+        }
+        item {
+            PreferenceRow(
+                title = stringResource(R.string.version),
+                subtitle = when {
+                    BuildConfig.DEBUG -> {
+                        "Debug ${BuildConfig.COMMIT_SHA} (${getFormattedBuildTime()})"
+                    }
+                    BuildConfig.PREVIEW -> {
+                        "Preview r${BuildConfig.COMMIT_COUNT} (${BuildConfig.COMMIT_SHA}, ${getFormattedBuildTime()})"
+                    }
+                    else -> {
+                        "Stable ${BuildConfig.VERSION_NAME} (${getFormattedBuildTime()})"
+                    }
+                },
+            )
+        }
+        item {
+            PreferenceRow(
+                title = stringResource(R.string.check_the_update),
+                onClick = {
+                    uriHandler.openUri("https://github.com/kazemcodes/Infinity/releases")
+                },
+            )
+        }
+        item {
+            PreferenceRow(
+                title = stringResource(R.string.whats_new),
+                onClick = { uriHandler.openUri("https://github.com/kazemcodes/IReader/releases/latest") },
+            )
+        }
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                LinkIcon(
+                    label = stringResource(R.string.website),
+                    painter = rememberVectorPainter(Icons.Outlined.Public),
+                    url = "https://github.com/kazemcodes/IReader",
                 )
-            }
-            item {
-                PreferenceRow(
-                    title = stringResource(R.string.check_the_update),
-                    onClick = {
-                        uriHandler.openUri("https://github.com/kazemcodes/Infinity/releases")
-                    },
+                LinkIcon(
+                    label = "Discord",
+                    painter = painterResource(R.drawable.ic_discord_24dp),
+                    url = "https://discord.gg/HBU6zD8c5v",
                 )
-            }
-            item {
-                PreferenceRow(
-                    title = stringResource(R.string.whats_new),
-                    onClick = { uriHandler.openUri("https://github.com/kazemcodes/IReader/releases/latest") },
+                LinkIcon(
+                    label = "GitHub",
+                    painter = painterResource(R.drawable.ic_github_24dp),
+                    url = "https://github.com/kazemcodes/IReader",
                 )
-            }
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                ) {
-                    LinkIcon(
-                        label = stringResource(R.string.website),
-                        painter = rememberVectorPainter(Icons.Outlined.Public),
-                        url = "https://github.com/kazemcodes/IReader",
-                    )
-                    LinkIcon(
-                        label = "Discord",
-                        painter = painterResource(R.drawable.ic_discord_24dp),
-                        url = "https://discord.gg/HBU6zD8c5v",
-                    )
-                    LinkIcon(
-                        label = "GitHub",
-                        painter = painterResource(R.drawable.ic_github_24dp),
-                        url = "https://github.com/kazemcodes/IReader",
-                    )
-                }
             }
         }
+    }
 }
-

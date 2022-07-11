@@ -21,7 +21,7 @@ fun Date.toTimestampString(): String {
 }
 fun LocalDate.asRelativeTimeString(
     range: PreferenceValues.RelativeTime = PreferenceValues.RelativeTime.Day,
-    dateFormat:String = "",
+    dateFormat: String = "",
 ): String {
     val rangeFormat = when (range) {
         PreferenceValues.RelativeTime.Seconds, -> DateUtils.SECOND_IN_MILLIS
@@ -35,7 +35,7 @@ fun LocalDate.asRelativeTimeString(
         .getRelativeTimeSpanString(
             atStartOfDayIn(TimeZone.currentSystemDefault()).toEpochMilliseconds(),
             System.currentTimeMillis(),
-            rangeFormat?:DateUtils.DAY_IN_MILLIS
+            rangeFormat ?: DateUtils.DAY_IN_MILLIS
         )
         .toString()
 }

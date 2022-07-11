@@ -4,10 +4,10 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-private  val md_theme_light_primary = Color(0xFFae3200)
-private  val md_theme_light_onPrimary = Color(0xFFffffff)
-private  val md_theme_light_primaryContainer = Color(0xFFffdbcf)
-private  val md_theme_light_onPrimaryContainer = Color(0xFF3b0a00)
+private val md_theme_light_primary = Color(0xFFae3200)
+private val md_theme_light_onPrimary = Color(0xFFffffff)
+private val md_theme_light_primaryContainer = Color(0xFFffdbcf)
+private val md_theme_light_onPrimaryContainer = Color(0xFF3b0a00)
 private val md_theme_light_secondary = Color(0xFFae3200)
 private val md_theme_light_onSecondary = Color(0xFFffffff)
 private val md_theme_light_secondaryContainer = Color(0xFFffdbcf)
@@ -60,8 +60,6 @@ private val md_theme_dark_inverseSurface = Color(0xFFede0dd)
 private val md_theme_dark_inversePrimary = Color(0xFFae3200)
 private val md_theme_dark_shadow = Color(0xFF000000)
 
-
-
 private val seed = Color(0xFF6750A4)
 private val error = Color(0xFFB3261E)
 
@@ -94,7 +92,6 @@ private val LightThemeColorsYotsuba = lightColorScheme(
     inverseSurface = md_theme_light_inverseSurface,
     inversePrimary = md_theme_light_inversePrimary,
 )
-
 
 private val DarkThemeColorsYotsuba = darkColorScheme(
 

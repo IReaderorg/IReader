@@ -98,14 +98,14 @@ class ChapterDetailViewModel @Inject constructor(
     @Composable
     fun getChapters(book: Book): State<List<Chapter>> {
         val scope = rememberCoroutineScope()
-        val unfiltered = remember(book.id, sorting.value,filters.value) {
+        val unfiltered = remember(book.id, sorting.value, filters.value) {
             getChapterUseCase.subscribeChaptersByBookId(
                 bookId = book.id,
                 sort = sorting.value.parameter,
             ).shareIn(scope, SharingStarted.WhileSubscribed(1000), 1)
         }
 
-        return remember(state.query, book.id, sorting.value,filters.value) {
+        return remember(state.query, book.id, sorting.value, filters.value) {
             val query = state.query
             if (query.isNullOrBlank()) {
                 unfiltered
@@ -188,7 +188,7 @@ class ChapterDetailViewModel @Inject constructor(
             if (book != null) {
                 this@ChapterDetailViewModel.book = book
                 getLastReadChapter(book)
-                //getLocalChaptersByPaging(isAsc = isAsc)
+                // getLocalChaptersByPaging(isAsc = isAsc)
             }
         }
     }
@@ -233,7 +233,8 @@ class ChapterDetailViewModel @Inject constructor(
             .map { filterState ->
                 if (type == filterState.type) {
                     ChaptersFilters(
-                        type, when (filterState.value) {
+                        type,
+                        when (filterState.value) {
                             ChaptersFilters.Value.Included -> ChaptersFilters.Value.Excluded
                             ChaptersFilters.Value.Excluded -> ChaptersFilters.Value.Missing
                             ChaptersFilters.Value.Missing -> ChaptersFilters.Value.Included

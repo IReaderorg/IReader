@@ -8,7 +8,6 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
-
 fun convertLongToTime(time: Long): String {
     val date = Date(time)
     val format = SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.US)
@@ -29,9 +28,6 @@ fun convertDateToLong(date: String): Long? {
     val df = SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.US)
     return df.parse(date)?.time
 }
-
-
-
 
 /**
  * Get date as time key

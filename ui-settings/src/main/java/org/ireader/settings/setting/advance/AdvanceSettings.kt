@@ -68,7 +68,6 @@ fun AdvanceSettings(
                         UiText.StringResource(R.string.success)
                     )
                 }
-
             }
         ),
         Components.Row(
@@ -101,12 +100,14 @@ fun AdvanceSettings(
             onClick = {
                 vm.deleteDefaultSettings()
             }
-        ), Components.Row(
+        ),
+        Components.Row(
             title = context.getString(R.string.reset_themes),
             onClick = {
                 vm.resetThemes()
             }
-        ), Components.Row(
+        ),
+        Components.Row(
             title = context.getString(R.string.reset_categories),
             onClick = {
                 vm.resetCategories()

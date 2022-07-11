@@ -12,8 +12,9 @@ class CategoryRepositoryImpl(
     override fun subscribeAll(): Flow<List<CategoryWithCount>> {
         return dao.subscribeAll().map { list ->
             list.map {
-            it.toCategoryWithCount()
-        } }
+                it.toCategoryWithCount()
+            }
+        }
     }
 
     override suspend fun findAll(): List<CategoryWithCount> {
@@ -25,7 +26,7 @@ class CategoryRepositoryImpl(
     }
 
     override suspend fun findCategoriesOfBook(bookId: Long): List<Category> {
-        return  dao.findCategoriesOfBook(bookId)
+        return dao.findCategoriesOfBook(bookId)
     }
 
     override suspend fun updateAllFlags(flags: Long) {

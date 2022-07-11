@@ -33,9 +33,8 @@ class UpdateService @AssistedInject constructor(
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
-        val lastCheck =  Instant.fromEpochMilliseconds(appPreferences.lastUpdateCheck().get())
+        val lastCheck = Instant.fromEpochMilliseconds(appPreferences.lastUpdateCheck().get())
         val now = Clock.System.now()
-
 
         if ((!org.ireader.common_resources.BuildConfig.DEBUG || !org.ireader.common_resources.BuildConfig.PREVIEW) && now - lastCheck < minTimeUpdateCheck) {
             return Result.success()

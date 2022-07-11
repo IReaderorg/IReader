@@ -17,8 +17,8 @@ android {
         buildConfigField("String", "BUILD_TIME", "\"${getBuildTime()}\"")
         buildConfigField("boolean", "INCLUDE_UPDATER", "false")
         buildConfigField("boolean", "PREVIEW", "false")
-        buildConfigField("String", "VERSION_NAME",  "\"${ProjectConfig.versionName}\"")
-        buildConfigField("int", "VERSION_CODE",  "${ProjectConfig.versionCode}")
+        buildConfigField("String", "VERSION_NAME", "\"${ProjectConfig.versionName}\"")
+        buildConfigField("int", "VERSION_CODE", "${ProjectConfig.versionCode}")
     }
 }
 ext {

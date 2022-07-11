@@ -20,7 +20,7 @@ interface LibraryRepository {
 
     suspend fun findForCategory(categoryId: Long, sort: LibrarySort): List<LibraryBook>
 
-    suspend fun findDownloadedBooks() : List<DownloadedBook>
+    suspend fun findDownloadedBooks(): List<DownloadedBook>
 
-    suspend fun findFavorites() : List<Book>
+    suspend fun findFavorites(): List<Book>
 }

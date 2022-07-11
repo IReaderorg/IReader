@@ -23,7 +23,7 @@ import org.jsoup.nodes.Document
 import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 
-class BrowseEngine @Inject constructor(private val webViewManger: WebViewManger,private val webViewCookieJar: WebViewCookieJar) {
+class BrowseEngine @Inject constructor(private val webViewManger: WebViewManger, private val webViewCookieJar: WebViewCookieJar) {
     /**
      * this function
      * @param url  the url of page
@@ -100,8 +100,6 @@ fun WebView.setDefaultSettings() {
     }
 }
 
-
-
 @SuppressLint("SetJavaScriptEnabled")
 @OptIn(ExperimentalCoroutinesApi::class)
 suspend fun WebView.getHtml(): String = suspendCancellableCoroutine { continuation ->
@@ -163,8 +161,6 @@ abstract class WebViewClientCompat : WebViewClient() {
         return shouldInterceptRequestCompat(view, request.url.toString())
     }
 
-
-
     @Deprecated("Deprecated in Java", ReplaceWith("shouldInterceptRequestCompat(view, url)"))
     final override fun shouldInterceptRequest(
         view: WebView,
@@ -189,7 +185,8 @@ abstract class WebViewClientCompat : WebViewClient() {
         }
     }
 
-    @Deprecated("Deprecated in Java",
+    @Deprecated(
+        "Deprecated in Java",
         ReplaceWith("onReceivedErrorCompat(view, errorCode, description, failingUrl, failingUrl == view.url)")
     )
     final override fun onReceivedError(
@@ -216,9 +213,6 @@ abstract class WebViewClientCompat : WebViewClient() {
         )
     }
 }
-
-
-
 
 /**
  * This object is representing the result of an request

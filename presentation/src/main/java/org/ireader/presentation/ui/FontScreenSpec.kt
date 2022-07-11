@@ -29,18 +29,17 @@ object FontScreenSpec : ScreenSpec {
     override fun TopBar(
         controller: Controller
     ) {
-        val vm: FontScreenViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val vm: FontScreenViewModel = hiltViewModel(controller.navBackStackEntry)
         SearchToolbar(
             title = stringResource(R.string.font),
             actions = {
-                      AppIconButton(
-                          imageVector = Icons.Default.Preview,
-                          tint = if (vm.previewMode.value) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                          onClick = {
-                              vm.previewMode.value = !vm.previewMode.value
-
-                          }
-                      )
+                AppIconButton(
+                    imageVector = Icons.Default.Preview,
+                    tint = if (vm.previewMode.value) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                    onClick = {
+                        vm.previewMode.value = !vm.previewMode.value
+                    }
+                )
             },
             onPopBackStack = {
                 controller.navController.popBackStack()
@@ -59,7 +58,7 @@ object FontScreenSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: FontScreenViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val vm: FontScreenViewModel = hiltViewModel(controller.navBackStackEntry)
 
         Box(modifier = Modifier.padding(controller.scaffoldPadding)) {
             FontScreen(
@@ -70,8 +69,5 @@ object FontScreenSpec : ScreenSpec {
                 }
             )
         }
-
     }
 }
-
-

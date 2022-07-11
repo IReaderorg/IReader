@@ -48,7 +48,6 @@ class PackageInstaller(
                     }
                     session.commit(sender)
                 }
-
             }
         }
     }
@@ -71,7 +70,7 @@ class PackageInstaller(
             Intent(action),
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE else 0
         )
-        val packageInstallerCallBack = object:PackageInstaller.SessionCallback() {
+        val packageInstallerCallBack = object : PackageInstaller.SessionCallback() {
             override fun onCreated(p0: Int) {}
 
             override fun onBadgingChanged(p0: Int) {}
@@ -81,10 +80,10 @@ class PackageInstaller(
             override fun onProgressChanged(p0: Int, p1: Float) {}
 
             override fun onFinished(p0: Int, result: Boolean) {
-              when(result) {
-                  true -> deferred.complete(InstallStep.Success)
-                  else -> deferred.complete(InstallStep.Idle)
-              }
+                when (result) {
+                    true -> deferred.complete(InstallStep.Success)
+                    else -> deferred.complete(InstallStep.Idle)
+                }
             }
         }
         packageInstaller.registerSessionCallback(packageInstallerCallBack)
@@ -122,7 +121,7 @@ class PackageInstaller(
 
                         // Mark installation as completed even if it's not finished because we don't always
                         // receive the result callback
-                      //  deferred.complete(InstallStep.Idle)
+                        //  deferred.complete(InstallStep.Idle)
                     } catch (e: Throwable) {
                         Log.warn("Error while (un)installing package", e)
                         deferred.complete(InstallStep.Error(UiText.StringResource(R.string.installation_error)))
@@ -159,10 +158,7 @@ class PackageInstaller(
             }
         }
     }
-
-
 }
-
 
 private const val INSTALL_ACTION = "PackageInstallerInstaller.INSTALL_ACTION"
 

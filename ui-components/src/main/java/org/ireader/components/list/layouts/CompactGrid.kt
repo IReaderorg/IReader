@@ -40,9 +40,9 @@ fun CompactGridLayoutComposable(
     showGoToLastChapterBadge: Boolean = false,
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
-    showInLibraryBadge:Boolean = false,
-    columns:Int = 2,
-    header: ((url:String) -> okhttp3.Headers?)? = null,
+    showInLibraryBadge: Boolean = false,
+    columns: Int = 2,
+    header: ((url: String) -> okhttp3.Headers?)? = null,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         val cells = if (columns > 1) {
@@ -60,12 +60,13 @@ fun CompactGridLayoutComposable(
                 items(
                     count = books.size,
                     key = { index ->
-                    books[index].id
-                },
+                        books[index].id
+                    },
 
-                    contentType = { "books"  }) { index ->
+                    contentType = { "books" }
+                ) { index ->
                     val height = remember {
-                        mutableStateOf(IntSize(0,0))
+                        mutableStateOf(IntSize(0, 0))
                     }
 
                     BookImage(
@@ -92,7 +93,6 @@ fun CompactGridLayoutComposable(
                         if (showInLibraryBadge && books[index].favorite) {
                             TextBadge(text = UiText.StringResource(R.string.in_library))
                         }
-
                     }
                 }
             }

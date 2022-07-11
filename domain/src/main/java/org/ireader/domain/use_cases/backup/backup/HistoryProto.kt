@@ -14,7 +14,7 @@ internal data class HistoryProto(
     @ProtoNumber(3) val readAt: Long,
     @ProtoNumber(4) val progress: Int = 0,
 
-    ) {
+) {
 
     fun toDomain(bookId: Long): History {
         return History(

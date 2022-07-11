@@ -10,7 +10,6 @@ import javax.inject.Inject
 
 class UpdateServiceInitializer @Inject constructor(app: Application, appPreferences: AppPreferences) {
 
-
     init {
         if (appPreferences.appUpdater().get() && !BuildConfig.DEBUG && !BuildConfig.PREVIEW) {
             val updateRequest = OneTimeWorkRequestBuilder<UpdateService>().build()

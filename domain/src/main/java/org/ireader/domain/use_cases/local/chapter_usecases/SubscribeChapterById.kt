@@ -32,8 +32,6 @@ class FindChapterById @Inject constructor(private val chapterRepository: org.ire
     }
 }
 
-
-
 class FindAllInLibraryChapters @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
     suspend operator fun invoke(): List<Chapter> {
         return chapterRepository.findAllInLibraryChapter()

@@ -21,20 +21,20 @@ class UpdatesRepositoryImpl @Inject constructor(private val updatesDao: UpdatesD
         }.distinctUntilChanged()
     }
 
-    override suspend fun insertUpdates(update: List<org.ireader.common_models.entities.Update>):List<Long> {
-       return updatesDao.insertOrUpdate(update)
+    override suspend fun insertUpdates(update: List<org.ireader.common_models.entities.Update>): List<Long> {
+        return updatesDao.insertOrUpdate(update)
     }
 
-    override suspend fun insertUpdate(update: org.ireader.common_models.entities.Update):Long {
-        return  updatesDao.insertOrUpdate(update)
+    override suspend fun insertUpdate(update: org.ireader.common_models.entities.Update): Long {
+        return updatesDao.insertOrUpdate(update)
     }
 
     override suspend fun deleteUpdate(update: Update) {
-        return  updatesDao.delete(update)
+        return updatesDao.delete(update)
     }
 
     override suspend fun deleteUpdates(update: List<Update>) {
-        return  updatesDao.delete(update)
+        return updatesDao.delete(update)
     }
 
     override suspend fun deleteAllUpdates() {

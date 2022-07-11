@@ -13,7 +13,6 @@ import org.ireader.chapterDetails.viewmodel.ChapterDetailViewModel
 import org.ireader.core_ui.preferences.ChapterDisplayMode
 import org.ireader.ui_chapter_detail.R
 
-
 @ExperimentalMaterialApi
 @ExperimentalPagerApi
 @Composable
@@ -27,14 +26,14 @@ fun ChapterScreenBottomTabComposable(
     onSortSelected: (ChapterSort) -> Unit,
     layoutType: ChapterDisplayMode,
     onLayoutSelected: (ChapterDisplayMode) -> Unit,
-    vm:ChapterDetailViewModel
+    vm: ChapterDetailViewModel
 ) {
     val context = LocalContext.current
     val tabs = remember {
         listOf(
-            context.getString( R.string.filter),
-            context.getString( R.string.sort),
-            context.getString( R.string.display),
+            context.getString(R.string.filter),
+            context.getString(R.string.sort),
+            context.getString(R.string.display),
         )
     }
 

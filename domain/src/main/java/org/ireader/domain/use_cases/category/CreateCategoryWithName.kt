@@ -7,39 +7,38 @@ import org.ireader.common_models.entities.Category
 import javax.inject.Inject
 
 class CreateCategoryWithName @Inject internal constructor(
-  private val categoryRepository: CategoryRepository
+    private val categoryRepository: CategoryRepository
 ) {
 
-  suspend fun await(name: String): Result = withContext(NonCancellable) f@{
-    if (name.isBlank()) {
-      return@f Result.EmptyCategoryNameError
+    suspend fun await(name: String): Result = withContext(NonCancellable) f@{
+        if (name.isBlank()) {
+            return@f Result.EmptyCategoryNameError
+        }
+
+        val categories = categoryRepository.findAll()
+        if (categories.any { name.equals(it.name, ignoreCase = true) }) {
+            return@f Result.CategoryAlreadyExistsError(name)
+        }
+
+        val nextOrder = categories.maxByOrNull { it.category.order }?.category?.order?.plus(1) ?: 0
+        val newCategory = Category(
+            name = name,
+            order = nextOrder
+        )
+
+        try {
+            categoryRepository.insertOrUpdate(newCategory)
+        } catch (e: Exception) {
+            return@f Result.InternalError(e)
+        }
+
+        Result.Success
     }
 
-    val categories = categoryRepository.findAll()
-    if (categories.any { name.equals(it.name, ignoreCase = true) }) {
-      return@f Result.CategoryAlreadyExistsError(name)
+    sealed class Result {
+        object Success : Result()
+        object EmptyCategoryNameError : Result()
+        data class CategoryAlreadyExistsError(val name: String) : Result()
+        data class InternalError(val error: Throwable) : Result()
     }
-
-    val nextOrder = categories.maxByOrNull { it.category.order }?.category?.order?.plus(1) ?: 0
-    val newCategory = Category(
-      name = name,
-      order = nextOrder
-    )
-
-    try {
-      categoryRepository.insertOrUpdate(newCategory)
-    } catch (e: Exception) {
-      return@f Result.InternalError(e)
-    }
-
-    Result.Success
-  }
-
-  sealed class Result {
-    object Success : Result()
-    object EmptyCategoryNameError : Result()
-    data class CategoryAlreadyExistsError(val name: String) : Result()
-    data class InternalError(val error: Throwable) : Result()
-  }
-
 }

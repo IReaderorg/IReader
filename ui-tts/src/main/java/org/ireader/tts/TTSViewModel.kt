@@ -67,12 +67,13 @@ class TTSViewModel @Inject constructor(
         kotlin.runCatching {
             val readingParagraph =
                 savedStateHandle.get<String>(NavigationArgs.readingParagraph.name)
-            if (readingParagraph != null && readingParagraph.toInt() < (ttsState.ttsContent?.value?.lastIndex
-                    ?: 0)
+            if (readingParagraph != null && readingParagraph.toInt() < (
+                ttsState.ttsContent?.value?.lastIndex
+                    ?: 0
+                )
             ) {
                 ttsState.currentReadingParagraph = readingParagraph.toInt()
             }
-
         }
 
         if (sourceId != null && chapterId != null && bookId != null) {
@@ -131,9 +132,7 @@ class TTSViewModel @Inject constructor(
                         ttsState.languages = textReader?.availableLanguages?.toList() ?: emptyList()
                         ttsState.voices = textReader?.voices?.toList() ?: emptyList()
                     }
-
                 }
-
             }
         }
     }
@@ -274,9 +273,7 @@ class TTSViewModel @Inject constructor(
                 insertUseCases.insertChapter(result)
             },
             onError = {
-
             }
         )
     }
 }
-

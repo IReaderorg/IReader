@@ -258,7 +258,6 @@ class RestoreBackup @Inject internal constructor(
         }
     }
 
-
     sealed class Result {
         object Success : Result()
         data class Error(val error: Exception) : Result()

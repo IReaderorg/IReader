@@ -4,7 +4,7 @@ object BackupConst {
 
     private const val NAME = "BackupRestoreServices"
     const val APPLICATION_ID = "\"ir.kazemcodes.infinityreader\""
-    const val EXTRA_URI = "${APPLICATION_ID}.$NAME.EXTRA_URI"
+    const val EXTRA_URI = "$APPLICATION_ID.$NAME.EXTRA_URI"
     const val EXTRA_FLAGS = "$APPLICATION_ID.$NAME.EXTRA_FLAGS"
     const val EXTRA_MODE = "$APPLICATION_ID.$NAME.EXTRA_MODE"
 

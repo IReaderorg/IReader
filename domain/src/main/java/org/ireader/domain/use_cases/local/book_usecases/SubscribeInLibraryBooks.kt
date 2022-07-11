@@ -65,5 +65,5 @@ class SubscribeInLibraryBooks @Inject constructor(private val bookRepository: or
 //                    }
 //                    else -> {}
 //                }
-        }
     }
+}

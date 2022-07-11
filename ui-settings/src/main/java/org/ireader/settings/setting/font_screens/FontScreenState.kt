@@ -16,7 +16,6 @@ interface FontScreenState {
     var error: UiText
     var inSearchMode: Boolean
     var searchQuery: String
-
 }
 
 open class FontScreenStateImpl @Inject constructor() : FontScreenState {

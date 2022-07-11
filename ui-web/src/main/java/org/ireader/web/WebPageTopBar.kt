@@ -30,7 +30,7 @@ import org.ireader.core_api.source.model.Command
 
 @Composable
 fun WebPageTopBar(
-    state:WebViewPageState,
+    state: WebViewPageState,
     urlToRender: String,
     onValueChange: (text: String) -> Unit,
     onGo: () -> Unit,
@@ -39,9 +39,9 @@ fun WebPageTopBar(
     goForward: () -> Unit,
     onPopBackStack: () -> Unit,
     source: CatalogSource?,
-    onFetchBook:() -> Unit,
-    onFetchChapter:() -> Unit,
-    onFetchChapters:() -> Unit,
+    onFetchBook: () -> Unit,
+    onFetchChapter: () -> Unit,
+    onFetchChapters: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
 
@@ -49,7 +49,7 @@ fun WebPageTopBar(
         mutableStateOf(false)
     }
     Toolbar(
-        scrollBehavior=scrollBehavior,
+        scrollBehavior = scrollBehavior,
         title = {
             CustomTextField(
                 modifier = Modifier
@@ -74,7 +74,7 @@ fun WebPageTopBar(
         actions = {
             AppIconButton(
                 imageVector = Icons.Default.Menu,
-                contentDescription =   stringResource(R.string.menu),
+                contentDescription = stringResource(R.string.menu),
                 onClick = {
                     isMenuExpanded = true
                 },
@@ -102,7 +102,7 @@ fun WebPageTopBar(
                         goForward()
                     },
                 )
-            if (source != null && source.getCommands().findInstance<Command.Detail.Fetch>()!= null && state.enableBookFetch ) {
+            if (source != null && source.getCommands().findInstance<Command.Detail.Fetch>() != null && state.enableBookFetch) {
                 list.add(
                     DropDownMenuItem(
                         stringResource(org.ireader.core.R.string.fetch_book)
@@ -120,7 +120,7 @@ fun WebPageTopBar(
                     }
                 )
             }
-            if (source != null && source.getCommands().findInstance<Command.Chapter.Fetch>() != null&& state.stateBook != null && state.enableChaptersFetch) {
+            if (source != null && source.getCommands().findInstance<Command.Chapter.Fetch>() != null && state.stateBook != null && state.enableChaptersFetch) {
                 list.add(
                     DropDownMenuItem(
                         stringResource(org.ireader.core.R.string.fetch_chapters)

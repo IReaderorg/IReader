@@ -22,11 +22,11 @@ sealed class Command<V>(val name: String, val initialValue: V) {
     }
 
     object Content {
-        open class Fetch(override val url: String = "", override val  html: String = "") : Fetchers(url, html)
+        open class Fetch(override val url: String = "", override val html: String = "") : Fetchers(url, html)
     }
 
     object Explore {
-        open class Fetch(override val url: String = "", override val  html: String = "") : Fetchers(url, html)
+        open class Fetch(override val url: String = "", override val html: String = "") : Fetchers(url, html)
     }
 
     object Chapter {

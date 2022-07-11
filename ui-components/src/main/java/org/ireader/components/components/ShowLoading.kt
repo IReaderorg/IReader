@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ShowLoading(modifier: Modifier = Modifier,size:Dp = 44.dp) {
+fun ShowLoading(modifier: Modifier = Modifier, size: Dp = 44.dp) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         CircularProgressIndicator(Modifier.align(Alignment.Center).size(size))
     }

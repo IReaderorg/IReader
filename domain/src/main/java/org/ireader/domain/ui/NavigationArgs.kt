@@ -58,5 +58,4 @@ object NavigationArgs {
     val systemBarPadding = navArgument(ARG_SYSTEM_BAR_PADDING) {
         defaultValue = true
     }
-
 }

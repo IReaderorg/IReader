@@ -15,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -77,10 +76,9 @@ object ChapterScreenSpec : ScreenSpec {
             onReverseClick = {
                 scope.launch {
                     controller.sheetState.show()
-
                 }
             },
-            scrollBehavior =  controller.scrollBehavior,
+            scrollBehavior = controller.scrollBehavior,
             onPopBackStack = {
                 controller.navController.popBackStack()
             },
@@ -102,7 +100,7 @@ object ChapterScreenSpec : ScreenSpec {
                             val list = mutableListOf<Long>()
                             val min = it.minOrNull() ?: 0
                             val max = it.maxOrNull() ?: 0
-                            for(id in min..max) {
+                            for (id in min..max) {
                                 list.add(id)
                             }
                             list
@@ -112,7 +110,7 @@ object ChapterScreenSpec : ScreenSpec {
             }
         )
     }
-    
+
     @Composable
     override fun ModalDrawer(
         controller: Controller

@@ -268,12 +268,10 @@ class BookCoverFetcher(
             else -> null
         }
     }
-    
 
     private enum class Type {
         File, URL
     }
-
 
     class Factory(
         private val callFactoryLazy: Lazy<Call.Factory>,
@@ -281,7 +279,6 @@ class BookCoverFetcher(
         private val coverCache: CoverCache,
         private val catalogStore: CatalogStore,
     ) : Fetcher.Factory<BookCover> {
-
 
         override fun create(data: BookCover, options: Options, imageLoader: ImageLoader): Fetcher {
             return BookCoverFetcher(
@@ -297,7 +294,6 @@ class BookCoverFetcher(
             )
         }
     }
-
 
     companion object {
         const val USE_CUSTOM_COVER = "use_custom_cover"

@@ -18,7 +18,6 @@ interface HistoryDao : BaseDao<org.ireader.common_models.entities.History> {
     @Query("SELECT history.* FROM history GROUP  By history.chapterId HAVING bookId = :bookId  ORDER BY history.readAt DESC LIMIT 1")
     suspend fun findHistoryByBookId(bookId: Long): org.ireader.common_models.entities.History?
 
-
     @Query("SELECT history.* FROM history GROUP  By history.chapterId HAVING bookId = :bookId  ORDER BY history.readAt DESC LIMIT 1")
     fun subscribeHistoryByBookId(bookId: Long): kotlinx.coroutines.flow.Flow<History?>
 
@@ -44,13 +43,10 @@ interface HistoryDao : BaseDao<org.ireader.common_models.entities.History> {
     @Query("DELETE FROM history")
     suspend fun deleteAllHistory()
 
-
-
     @Transaction
     suspend fun insertOrUpdate(objList: List<org.ireader.common_models.entities.History>) {
         val insertResult = insert(objList)
         val updateList = mutableListOf<org.ireader.common_models.entities.History>()
-
 
         for (i in insertResult.indices) {
             if (insertResult[i] == -1L) {
@@ -66,7 +62,6 @@ interface HistoryDao : BaseDao<org.ireader.common_models.entities.History> {
         val insertResult = insert(objectToInsert)
         val updateList = mutableListOf<org.ireader.common_models.entities.History>()
 
-
         for (i in insertResult.indices) {
             if (insertResult[i] == -1L) {
                 updateList.add(objectToInsert[i])
@@ -75,5 +70,4 @@ interface HistoryDao : BaseDao<org.ireader.common_models.entities.History> {
 
         if (!updateList.isEmpty()) update(updateList)
     }
-
 }

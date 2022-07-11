@@ -206,7 +206,7 @@ fun PreferenceRow(
                 imageVector = icon,
                 tint = MaterialTheme.colorScheme.primary,
 
-                )
+            )
         }
         Column(
             Modifier
@@ -237,8 +237,8 @@ fun PreferenceRow(
     }
 }
 
-//@Composable
-//fun SliderPreference(
+// @Composable
+// fun SliderPreference(
 //    preference: MutableState<Float>,
 //    title: String,
 //    subtitle: String? = null,
@@ -248,7 +248,7 @@ fun PreferenceRow(
 //    valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
 //    onValueChangeFinished: ((Float) -> Unit)? = null,
 //    steps : Int = 0
-//) {
+// ) {
 //
 //    val height = if (subtitle != null) 72.dp else 56.dp
 //
@@ -326,7 +326,7 @@ fun PreferenceRow(
 //            )
 //        }
 //    }
-//}
+// }
 
 @Composable
 fun SliderPreference(
@@ -395,7 +395,7 @@ fun SliderPreference(
             modifier = Modifier
                 .widthIn(max = 200.dp),
             value = preferenceAsFloat?.lazyValue ?: preferenceAsInt?.lazyValue?.toFloat()
-            ?: preferenceAsLong?.lazyValue?.toFloat() ?: mutablePreferences?.value ?: 0F,
+                ?: preferenceAsLong?.lazyValue?.toFloat() ?: mutablePreferences?.value ?: 0F,
             onValueChange = {
                 preferenceAsFloat?.lazyValue = it
                 preferenceAsInt?.lazyValue = it.toInt()
@@ -408,7 +408,7 @@ fun SliderPreference(
                 if (onValueChangeFinished != null) {
                     onValueChangeFinished(
                         preferenceAsFloat?.value?.toFloat() ?: preferenceAsInt?.value?.toFloat()
-                        ?: preferenceAsLong?.value?.toFloat() ?: mutablePreferences?.value ?: 0F
+                            ?: preferenceAsLong?.value?.toFloat() ?: mutablePreferences?.value ?: 0F
                     )
                 }
             },
@@ -615,14 +615,14 @@ fun SwitchPreference(
     )
 }
 
-//@Composable
-//fun <Key> ChoicePreference(
+// @Composable
+// fun <Key> ChoicePreference(
 //    preference: PreferenceMutableState<Key>,
 //    choices: Map<Key, String>,
 //    title: String,
 //    subtitle: String? = null,
 //    onValue: ((Key) -> Unit)? = null
-//) {
+// ) {
 //    ChoicePreference(
 //        preference,
 //        choices.mapValues { map -> stringResource(map.value) },
@@ -630,7 +630,7 @@ fun SwitchPreference(
 //        subtitle,
 //        onValue
 //    )
-//}
+// }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -688,7 +688,6 @@ fun <Key> ChoicePreference(
                         MidSizeTextComposable(text = confirmText)
                     }
                 }
-
             }
         )
     }
@@ -742,4 +741,3 @@ fun ColorPreference(
         )
     }
 }
-

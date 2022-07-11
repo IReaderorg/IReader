@@ -6,7 +6,6 @@ import org.ireader.Controller
 import org.ireader.common_resources.R
 import org.ireader.components.components.TitleToolbar
 
-
 object LibrarySettingSpec : ScreenSpec {
 
     override val navHostRoute: String = "library_settings_screen_route"
@@ -22,12 +21,9 @@ object LibrarySettingSpec : ScreenSpec {
         )
     }
 
-
     @Composable
     override fun Content(
         controller: Controller
     ) {
-
     }
-
 }

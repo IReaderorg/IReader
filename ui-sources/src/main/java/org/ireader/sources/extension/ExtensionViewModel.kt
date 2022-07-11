@@ -62,7 +62,6 @@ class ExtensionViewModel @Inject constructor(
                     )
                 )
             }
-
         }
 
         if (pinnedCatalogs.isNotEmpty()) {
@@ -76,16 +75,18 @@ class ExtensionViewModel @Inject constructor(
             )
         }
         if (unpinnedCatalogs.isNotEmpty()) {
-            list.addAll(unpinnedCatalogs.groupBy {
-                it.source?.lang ?: "others"
-            }.flatMap {
-                listOf<SourceUiModel>(
-                    SourceUiModel.Header(it.key),
-                    *it.value.map { source ->
-                        SourceUiModel.Item(source, SourceState.UnPinned)
-                    }.toTypedArray()
-                )
-            })
+            list.addAll(
+                unpinnedCatalogs.groupBy {
+                    it.source?.lang ?: "others"
+                }.flatMap {
+                    listOf<SourceUiModel>(
+                        SourceUiModel.Header(it.key),
+                        *it.value.map { source ->
+                            SourceUiModel.Item(source, SourceState.UnPinned)
+                        }.toTypedArray()
+                    )
+                }
+            )
         }
         list
     }
@@ -98,7 +99,6 @@ class ExtensionViewModel @Inject constructor(
         viewModelScope.launch {
             message?.let {
                 _eventFlow.showSnackBar(it)
-
             }
         }
     }
@@ -113,7 +113,6 @@ class ExtensionViewModel @Inject constructor(
 
                     state.languageChoices = getLanguageChoices(remote, pinned + unpinned)
                 }.launchIn(scope)
-
         }
 
         // Update catalogs whenever the query changes or there's a new update from the backend
@@ -121,10 +120,8 @@ class ExtensionViewModel @Inject constructor(
         snapshotFlow { state.allPinnedCatalogs.filteredByQuery(searchQuery) }
             .onEach { state.pinnedCatalogs = it }.launchIn(viewModelScope)
 
-
         snapshotFlow { state.allUnpinnedCatalogs.filteredByQuery(searchQuery) }
             .onEach { state.unpinnedCatalogs = it }.launchIn(viewModelScope)
-
 
         snapshotFlow {
             state.allRemoteCatalogs.filteredByQuery(searchQuery)

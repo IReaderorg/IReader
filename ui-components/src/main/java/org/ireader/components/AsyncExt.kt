@@ -9,7 +9,7 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
 
 @Composable
-fun activityScope() : LifecycleCoroutineScope{
+fun activityScope(): LifecycleCoroutineScope {
     return LocalContext.current.findComponentActivity()!!.lifecycleScope
 }
 fun Context.findComponentActivity(): ComponentActivity? = when (this) {

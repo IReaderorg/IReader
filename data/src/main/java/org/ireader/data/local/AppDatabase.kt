@@ -96,12 +96,12 @@ abstract class AppDatabase : RoomDatabase() {
                             db.execSQL(
                                 """
                                 INSERT OR IGNORE INTO category VALUES (-1, "", 0, 0, 0);
-                            """.trimIndent()
+                                """.trimIndent()
                             )
                             db.execSQL(
                                 """
                                 INSERT OR IGNORE INTO category VALUES (-2, "", 0, 0, 0);
-                            """.trimIndent()
+                                """.trimIndent()
                             )
                             db.execSQL(
                                 """
@@ -111,7 +111,7 @@ abstract class AppDatabase : RoomDatabase() {
                                     RAISE(ABORT, 'System category cant be deleted')
                                   END;
                                 END
-                            """.trimIndent()
+                                """.trimIndent()
                             )
                         }
                     }
@@ -148,7 +148,7 @@ internal fun MIGRATION_23_24() = object : Migration(23, 24) {
                 RAISE(ABORT, 'System theme cant be deleted')
               END;
             END
-        """.trimIndent()
+            """.trimIndent()
         )
     }
 }

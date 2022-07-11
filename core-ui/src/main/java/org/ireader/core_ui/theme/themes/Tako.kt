@@ -60,11 +60,8 @@ private val md_theme_dark_inverseSurface = Color(0xFFe4e1e6)
 private val md_theme_dark_inversePrimary = Color(0xFF6d4ea1)
 private val md_theme_dark_shadow = Color(0xFF000000)
 
-
-
 private val seed = Color(0xFF6750A4)
 private val error = Color(0xFFB3261E)
-
 
 val LightThemeColorsTako = lightColorScheme(
 
@@ -96,8 +93,7 @@ val LightThemeColorsTako = lightColorScheme(
     inversePrimary = md_theme_light_inversePrimary,
 )
 
-
- val DarkThemeColorsTako = darkColorScheme(
+val DarkThemeColorsTako = darkColorScheme(
 
     primary = md_theme_dark_primary,
     onPrimary = md_theme_dark_onPrimary,

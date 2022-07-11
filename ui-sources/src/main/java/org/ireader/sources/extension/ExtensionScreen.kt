@@ -49,7 +49,7 @@ fun ExtensionScreen(
     onClickInstall: (Catalog) -> Unit,
     onClickUninstall: (Catalog) -> Unit,
     onClickTogglePinned: (Catalog) -> Unit,
-    onCancelInstaller:((Catalog) -> Unit)? = null,
+    onCancelInstaller: ((Catalog) -> Unit)? = null,
     snackBarHostState: androidx.compose.material3.SnackbarHostState,
 ) {
 
@@ -121,11 +121,11 @@ private fun ExtensionContent(
     state: CatalogsState,
     onClickCatalog: (Catalog) -> Unit,
     onClickTogglePinned: (Catalog) -> Unit,
-    vm:ExtensionViewModel,
+    vm: ExtensionViewModel,
     onRefreshCatalogs: () -> Unit,
     onClickInstall: (Catalog) -> Unit,
     onClickUninstall: (Catalog) -> Unit,
-    onCancelInstaller:((Catalog) -> Unit)? = null,
+    onCancelInstaller: ((Catalog) -> Unit)? = null,
 
 ) {
     val pagerState = rememberPagerState()
@@ -149,8 +149,6 @@ private fun ExtensionContent(
     )
 }
 
-
-
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun ExtensionPager(
@@ -160,16 +158,16 @@ private fun ExtensionPager(
     state: CatalogsState,
     onClickCatalog: (Catalog) -> Unit,
     onClickTogglePinned: (Catalog) -> Unit,
-    vm:ExtensionViewModel,
+    vm: ExtensionViewModel,
     onRefreshCatalogs: () -> Unit,
     onClickInstall: (Catalog) -> Unit,
     onClickUninstall: (Catalog) -> Unit,
-    onCancelInstaller:((Catalog) -> Unit)? = null,
+    onCancelInstaller: ((Catalog) -> Unit)? = null,
 ) {
     HorizontalPager(
         count = pages.size,
         state = pagerState,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) { page ->
         when (page) {
             0 -> {
@@ -192,12 +190,10 @@ private fun ExtensionPager(
     }
 }
 
-
-
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun ExtensionTabs(
-    modifier:Modifier = Modifier,
+    modifier: Modifier = Modifier,
     pagerState: PagerState,
     pages: List<String>,
 
@@ -229,4 +225,3 @@ private fun ExtensionTabs(
         }
     }
 }
-

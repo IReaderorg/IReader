@@ -68,7 +68,7 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
                 Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
                 color = MaterialTheme.colorScheme.primary,
 
-                )
+            )
         }
     ) {
         libraryTabs.forEachIndexed { index, tab ->
@@ -112,7 +112,7 @@ fun ScrollableTabs(
                         .pagerTabIndicatorOffset(pagerState, tabPositions),
                     color = MaterialTheme.colorScheme.primary,
 
-                    )
+                )
             }
         ) {
             libraryTabs.forEachIndexed { index, tab ->
@@ -277,7 +277,6 @@ private fun LazyListScope.DispalyPage(
                         MidSizeTextComposable(text = stringResource(id = R.string.list_layout))
                     }
                 }
-
             }
         }
     }
@@ -290,7 +289,7 @@ private fun LazyListScope.DispalyPage(
         )
     }
     item {
-        Slider(modifier =  Modifier.padding(horizontal = 20.dp), value = vm.columnInPortrait.lazyValue.toFloat(), onValueChange = {
+        Slider(modifier = Modifier.padding(horizontal = 20.dp), value = vm.columnInPortrait.lazyValue.toFloat(), onValueChange = {
             vm.columnInPortrait.lazyValue = it.toInt()
         }, valueRange = 0f..10f)
     }

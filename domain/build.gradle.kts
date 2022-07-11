@@ -20,11 +20,10 @@ android {
 dependencies {
 
     implementation("nl.siegmann.epublib:epublib-core:3.1") {
-        exclude(group="org.slf4j")
-        exclude(group="xmlpull")
+        exclude(group = "org.slf4j")
+        exclude(group = "xmlpull")
     }
     implementation("org.slf4j:slf4j-android:1.7.25")
-
 
     implementation(project(Modules.core))
     implementation(project(Modules.coreUi))
@@ -43,8 +42,7 @@ dependencies {
     implementation(composeLib.compose.ui)
     implementation(composeLib.compose.runtime)
     implementation(composeLib.compose.navigation)
-implementation(composeLib.material3.core)
-
+    implementation(composeLib.material3.core)
 
     implementation(composeLib.compose.coil)
     implementation(composeLib.compose.paging)
@@ -97,7 +95,6 @@ implementation(composeLib.material3.core)
     implementation(commonLib.ktor.contentNegotiation)
     implementation(commonLib.ktor.okhttp)
     implementation(commonLib.bundles.ireader)
-
 
     testImplementation(test.junit4)
     testImplementation(test.junitAndroidExt)

@@ -12,14 +12,13 @@ import org.ireader.core_ui.exceptionHandler
 import org.ireader.domain.R
 import javax.inject.Inject
 
-class GetRemoteReadingContent @Inject constructor(
-) {
+class GetRemoteReadingContent @Inject constructor() {
     suspend operator fun invoke(
         chapter: Chapter,
         catalog: CatalogLocal?,
         onError: suspend (message: UiText?) -> Unit,
         onSuccess: suspend (chapter: Chapter) -> Unit,
-        commands:CommandList = emptyList()
+        commands: CommandList = emptyList()
     ) {
         val source = catalog?.source ?: throw SourceNotFoundException()
         withIOContext {
@@ -28,7 +27,7 @@ class GetRemoteReadingContent @Inject constructor(
                     org.ireader.core_api.log.Log.debug("Timber: GetRemoteReadingContentUseCase was Called")
                     // val page = source.getPageList(chapter.toChapterInfo())
                     val content = mutableListOf<String>()
-                    val page = source.getPageList(chapter.toChapterInfo(),commands)
+                    val page = source.getPageList(chapter.toChapterInfo(), commands)
 
                     page.forEach {
                         when (it) {

@@ -40,14 +40,14 @@ fun UpdatesToolbar(
                     onClickCancelSelection = onClickCancelSelection,
                     onClickSelectAll = onClickSelectAll,
                     onClickInvertSelection = onClickFlipSelection,
-                    scrollBehavior=scrollBehavior
+                    scrollBehavior = scrollBehavior
                 )
             }
             else -> {
                 UpdatesRegularToolbar(
                     onClickRefresh = onClickRefresh,
                     onClickDelete = onClickDelete,
-                    scrollBehavior=scrollBehavior
+                    scrollBehavior = scrollBehavior
                 )
             }
         }
@@ -77,7 +77,7 @@ private fun UpdatesSelectionToolbar(
                 AppIcon(imageVector = Icons.Default.FlipToBack, contentDescription = null)
             }
         },
-        scrollBehavior= scrollBehavior
+        scrollBehavior = scrollBehavior
     )
 }
 
@@ -88,7 +88,7 @@ fun UpdatesRegularToolbar(
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Toolbar(
-        title = { BigSizeTextComposable(text = stringResource( R.string.updates_screen_label)) },
+        title = { BigSizeTextComposable(text = stringResource(R.string.updates_screen_label)) },
         actions = {
             IconButton(onClick = onClickRefresh) {
                 AppIcon(imageVector = Icons.Default.Refresh, contentDescription = null)
@@ -97,6 +97,6 @@ fun UpdatesRegularToolbar(
                 AppIcon(imageVector = Icons.Default.DeleteForever, contentDescription = null)
             }
         },
-        scrollBehavior= scrollBehavior
+        scrollBehavior = scrollBehavior
     )
 }

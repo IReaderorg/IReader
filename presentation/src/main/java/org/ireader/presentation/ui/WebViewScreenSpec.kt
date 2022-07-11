@@ -13,13 +13,13 @@ import androidx.navigation.navArgument
 import com.google.accompanist.web.WebContent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
+import org.ireader.Controller
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.web.WebPageScreen
 import org.ireader.web.WebPageTopBar
 import org.ireader.web.WebViewPageModel
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import org.ireader.Controller
 
 @OptIn(
     ExperimentalMaterialApi::class,
@@ -63,11 +63,11 @@ object WebViewScreenSpec : ScreenSpec {
         enableBookFetch: Boolean = false,
     ): String {
         return "web_page_route/${
-            URLEncoder.encode(
-                url,
-                StandardCharsets.UTF_8.name()
-            )
-        }/${sourceId ?: 0}/${bookId ?: 0}/${chapterId ?: 0}/${enableChapterFetch}/${enableChaptersFetch}/${enableBookFetch}".trim()
+        URLEncoder.encode(
+            url,
+            StandardCharsets.UTF_8.name()
+        )
+        }/${sourceId ?: 0}/${bookId ?: 0}/${chapterId ?: 0}/$enableChapterFetch/$enableChaptersFetch/$enableBookFetch".trim()
     }
 
     private fun Boolean.encodeBoolean(): String {

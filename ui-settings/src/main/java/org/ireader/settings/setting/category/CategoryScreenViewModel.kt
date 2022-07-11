@@ -28,12 +28,7 @@ class CategoryScreenViewModel @Inject constructor(
         categoriesUseCase.subscribe(false).onEach { list ->
             categories.clear()
             categories.addAll(list)
-
         }.launchIn(viewModelScope)
     }
     //  val categories by categoriesUseCase.subscribe(false).asState(emptyList())
-
-
 }
-
-

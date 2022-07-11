@@ -47,7 +47,7 @@ fun ReadingScreen(
     scrollState: ScrollState,
     lazyListState: LazyListState,
     swipeState: SwipeRefreshState,
-    onNext: (reset:Boolean) -> Unit,
+    onNext: (reset: Boolean) -> Unit,
     onPrev: (reset: Boolean) -> Unit,
     readerScreenPreferencesState: ReaderScreenViewModel,
     toggleReaderMode: () -> Unit,
@@ -58,7 +58,7 @@ fun ReadingScreen(
     onSliderFinished: () -> Unit,
     onSliderChange: (index: Float) -> Unit,
     onReaderPlay: () -> Unit,
-    onChapterShown:(chapter:Chapter) -> Unit,
+    onChapterShown: (chapter: Chapter) -> Unit,
 ) {
 
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -100,7 +100,7 @@ fun ReadingScreen(
         }
         Crossfade(
             modifier = Modifier.fillMaxSize(),
-            targetState = vm.isLoading && if (vm.readingMode.value == ReadingMode.Continues)  vm.chapterShell.isEmpty() else true
+            targetState = vm.isLoading && if (vm.readingMode.value == ReadingMode.Continues) vm.chapterShell.isEmpty() else true
         ) { isLoading ->
 
             when (isLoading) {
@@ -150,27 +150,24 @@ fun ReadingScreen(
                         },
                     ) {
 
-                            ReaderText(
-                                vm = readerScreenPreferencesState,
-                                onNext = {
-                                    onNext(false)
-                                },
-                                swipeState = swipeState,
-                                onPrev = { onPrev(false) },
-                                scrollState = scrollState,
-                                modalState = modalBottomSheetState,
-                                toggleReaderMode = toggleReaderMode,
-                                uiState = vm,
-                                lazyListState = lazyListState,
-                                onChapterShown = onChapterShown
+                        ReaderText(
+                            vm = readerScreenPreferencesState,
+                            onNext = {
+                                onNext(false)
+                            },
+                            swipeState = swipeState,
+                            onPrev = { onPrev(false) },
+                            scrollState = scrollState,
+                            modalState = modalBottomSheetState,
+                            toggleReaderMode = toggleReaderMode,
+                            uiState = vm,
+                            lazyListState = lazyListState,
+                            onChapterShown = onChapterShown
 
-                            )
-
+                        )
                     }
                 }
             }
         }
-
     }
 }
-

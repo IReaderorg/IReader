@@ -6,7 +6,7 @@ import org.ireader.common_models.entities.BookCategory
 import org.ireader.data.local.dao.BookCategoryDao
 
 class BookCategoryRepositoryImpl(
-    private val dao:BookCategoryDao
+    private val dao: BookCategoryDao
 ) : BookCategoryRepository {
     override fun subscribeAll(): Flow<List<BookCategory>> {
         return dao.subscribeAll()

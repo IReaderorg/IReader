@@ -28,21 +28,20 @@ fun BottomTabComposable(
     onSortSelected: (LibrarySort) -> Unit,
     layoutType: DisplayMode,
     onLayoutSelected: (DisplayMode) -> Unit,
-    vm:LibraryViewModel
+    vm: LibraryViewModel
 ) {
     val tabs = listOf(
         TabItem(
             stringResource(id = R.string.filter)
         ) {
-
         },
         TabItem(
-            stringResource(id =  R.string.sort)
+            stringResource(id = R.string.sort)
         ) {
-        },TabItem(
-                stringResource(id =   R.string.display)
+        },
+        TabItem(
+            stringResource(id = R.string.display)
         ) {
-
         },
     )
 
@@ -65,6 +64,5 @@ fun BottomTabComposable(
 }
 data class TabItem(
     val title: String,
-    val screen: (@Composable BoxScope.() -> Unit)?=null
+    val screen: (@Composable BoxScope.() -> Unit)? = null
 )
-

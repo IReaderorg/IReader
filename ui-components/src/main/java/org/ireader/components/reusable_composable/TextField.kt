@@ -72,7 +72,7 @@ fun TextField(
         )
         if (command.value.isBlank()) {
             MidSizeTextComposable(
-                text =   command.name,
+                text = command.name,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = .4f),
                 modifier = Modifier.padding(horizontal = 16.dp)
             )

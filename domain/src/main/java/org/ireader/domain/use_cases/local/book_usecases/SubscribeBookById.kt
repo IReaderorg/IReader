@@ -18,4 +18,3 @@ class FindBookById @Inject constructor(private val bookRepository: org.ireader.c
         return bookRepository.findBookById(id = id)
     }
 }
-

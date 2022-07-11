@@ -2,30 +2,30 @@
 kotlin = "1.7.0"
 ktor = "2.0.3"
 room = "2.4.2"
-okhttp = "4.9.3"
+okhttp = "5.0.0-alpha.10"
 moshi = "1.13.0"
 hilt = "2.42"
 retrofit = "2.9.0"
 aboutLibraries = "10.0.0-b03"
 ksp = "1.6.10-1.0.2"
-tinylog = "2.4.1"
-spotless = "6.6.1"
+tinylog = "2.5.0-M2.1"
+spotless = "6.8.0"
 ktlint = "0.45.1"
 roomigrant = "0.3.4"
 modernstorage = "1.0.0-alpha06"
 coil_version = "2.1.0"
+jsoup = "1.15.2"
 
 
 [libraries]
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
 gradle-tools = "com.android.tools.build:gradle:7.2.1"
-gradle-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 gradle-kotlinSerialization = { module =  "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
 gradle-hilt = "com.google.dagger:hilt-android-gradle-plugin:2.42"
 gradle-google = "com.google.gms:google-services:4.3.10"
-gradle-firebaseCrashlytic = "com.google.firebase:firebase-crashlytics-gradle:2.8.1"
+gradle-firebaseCrashlytic = "com.google.firebase:firebase-crashlytics-gradle:2.9.1"
 gradle-benmanes = "com.github.ben-manes:gradle-versions-plugin:0.42.0"
-gradle-idea-ext = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.4"
+gradle-idea-ext = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.5"
 
 coil-core = { module = "io.coil-kt:coil", version.ref = "coil_version" }
 coil-gif = { module = "io.coil-kt:coil-gif", version.ref = "coil_version" }
@@ -84,7 +84,7 @@ multidex = "androidx.multidex:multidex:2.0.1"
 okio = "com.squareup.okio:okio:3.1.0"
 quickjsAndroid = "app.cash.quickjs:quickjs-android:0.9.2"
 quickjsJvm = "app.cash.quickjs:quickjs-jvm:0.9.2"
-jsoup = "org.jsoup:jsoup:1.15.1"
+jsoup = { module =  "org.jsoup:jsoup", version.ref = "jsoup" }
 
 tinylog-impl = { module = "org.tinylog:tinylog-impl", version.ref = "tinylog" }
 tinylog-api = { module = "org.tinylog:tinylog-api", version.ref = "tinylog" }
@@ -104,5 +104,5 @@ ireader = ["ireader-ktorCore", "ireader-ktorContentNegotiation","ireader-ktorSer
 
 [plugins]
 benmens = { id = "com.github.ben-manes.versions", version = "0.42.0" }
-dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version = "1.1.0" }
+dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version = "1.10.0" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

@@ -30,7 +30,6 @@ interface BaseDao<T> {
     @Update
     suspend fun update(obj: T)
 
-
     /**
      * Update an object from the database.
      *
@@ -38,7 +37,6 @@ interface BaseDao<T> {
      */
     @Update
     suspend fun update(obj: List<T>)
-
 
     /**
      * Delete an object from the database
@@ -50,7 +48,4 @@ interface BaseDao<T> {
 
     @Delete
     suspend fun delete(items: List<T>)
-
-
-
 }

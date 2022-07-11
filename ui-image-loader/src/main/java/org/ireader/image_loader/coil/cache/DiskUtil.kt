@@ -26,7 +26,6 @@ object DiskUtil {
         return size
     }
 
-
     /**
      * Returns the root folders of all the available external storages.
      */
@@ -46,8 +45,6 @@ object DiskUtil {
 
         return directories
     }
-
-
 
     /**
      * Scans the given file so that it can be shown in gallery apps, for example.

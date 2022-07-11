@@ -24,13 +24,12 @@ class WebViewCookieJar @Inject constructor(private val cookiesStorage: CookiesSt
         return get(url)
     }
 
-
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
 
         cookies.forEach { manager.setCookie(url.toString(), it.toString()) }
         scope.launch {
-            cookies.forEach {  cookiesStorage.addCookie(Url(url.toString()),it.toCookies()) }
+            cookies.forEach { cookiesStorage.addCookie(Url(url.toString()), it.toCookies()) }
         }
     }
 
@@ -76,7 +75,7 @@ class AndroidCookieJar(private val cookiesStorage: CookiesStorage) : CookieJar {
         val urlString = url.toString()
         cookies.forEach { manager.setCookie(urlString, it.toString()) }
         scope.launch {
-            cookies.forEach {  cookiesStorage.addCookie(Url(urlString),it.toCookies()) }
+            cookies.forEach { cookiesStorage.addCookie(Url(urlString), it.toCookies()) }
         }
     }
 
@@ -183,8 +182,7 @@ class WrappedCookie private constructor(val cookie: Cookie) {
     }
 }
 
-
-fun Cookie.toCookies() : io.ktor.http.Cookie {
+fun Cookie.toCookies(): io.ktor.http.Cookie {
     return io.ktor.http.Cookie(
         this.name,
         this.value,

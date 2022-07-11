@@ -29,68 +29,68 @@ fun LayoutComposable(
     showGoToLastChapterBadge: Boolean = false,
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
-    showInLibraryBadge:Boolean = false,
-    columns:Int?=null,
-    headers: ((url:String) -> okhttp3.Headers?)? = null,
+    showInLibraryBadge: Boolean = false,
+    columns: Int? = null,
+    headers: ((url: String) -> okhttp3.Headers?)? = null,
 
 ) {
-        when (layout) {
-             DisplayMode.ComfortableGrid -> {
-                GridLayoutComposable(
-                    books = books,
-                    onClick = { book ->
-                        onClick(book)
-                    },
-                    selection = selection,
-                    onLongClick = { onLongClick(it) },
-                    scrollState = gridState,
-                    goToLatestChapter = { goToLatestChapter(it) },
-                    isLoading = isLoading,
-                    showGoToLastChapterBadge = showGoToLastChapterBadge,
-                    modifier = Modifier,
-                    showInLibraryBadge = showInLibraryBadge,
-                    showReadBadge = showReadBadge,
-                    showUnreadBadge = showUnreadBadge,
-                    headers = headers,
-                    columns = columns?:3,
-                )
-            }
-            DisplayMode.List -> {
-                LinearListDisplay(
-                    books = books, onClick = { book ->
-                        onClick(book)
-                    }, scrollState = scrollState,
-                    isLocal = isLocal,
-                    selection = selection,
-                    onLongClick = { onLongClick(it) },
-                    goToLatestChapter = { goToLatestChapter(it) },
-                    isLoading = isLoading,
-
-                    showGoToLastChapterBadge = showGoToLastChapterBadge,
-                    showInLibraryBadge = showInLibraryBadge,
-                    showReadBadge = showReadBadge,
-                    showUnreadBadge = showUnreadBadge,
-                    headers = headers
-                )
-            }
-            DisplayMode.CompactGrid -> {
-                CompactGridLayoutComposable(
-                    books = books,
-                    onClick = { book ->
-                        onClick(book)
-                    }, scrollState = gridState,
-                    isLocal = isLocal,
-                    selection = selection,
-                    onLongClick = { onLongClick(it) },
-                    goToLatestChapter = { goToLatestChapter(it) },
-                    isLoading = isLoading,
-                    showGoToLastChapterBadge = showGoToLastChapterBadge,
-                    modifier = Modifier,
-                    showInLibraryBadge = showInLibraryBadge,
-                    showReadBadge = showReadBadge,
-                    showUnreadBadge = showUnreadBadge,
-                    columns = columns?:2
-                )
-            }
+    when (layout) {
+        DisplayMode.ComfortableGrid -> {
+            GridLayoutComposable(
+                books = books,
+                onClick = { book ->
+                    onClick(book)
+                },
+                selection = selection,
+                onLongClick = { onLongClick(it) },
+                scrollState = gridState,
+                goToLatestChapter = { goToLatestChapter(it) },
+                isLoading = isLoading,
+                showGoToLastChapterBadge = showGoToLastChapterBadge,
+                modifier = Modifier,
+                showInLibraryBadge = showInLibraryBadge,
+                showReadBadge = showReadBadge,
+                showUnreadBadge = showUnreadBadge,
+                headers = headers,
+                columns = columns ?: 3,
+            )
         }
+        DisplayMode.List -> {
+            LinearListDisplay(
+                books = books, onClick = { book ->
+                    onClick(book)
+                }, scrollState = scrollState,
+                isLocal = isLocal,
+                selection = selection,
+                onLongClick = { onLongClick(it) },
+                goToLatestChapter = { goToLatestChapter(it) },
+                isLoading = isLoading,
+
+                showGoToLastChapterBadge = showGoToLastChapterBadge,
+                showInLibraryBadge = showInLibraryBadge,
+                showReadBadge = showReadBadge,
+                showUnreadBadge = showUnreadBadge,
+                headers = headers
+            )
+        }
+        DisplayMode.CompactGrid -> {
+            CompactGridLayoutComposable(
+                books = books,
+                onClick = { book ->
+                    onClick(book)
+                }, scrollState = gridState,
+                isLocal = isLocal,
+                selection = selection,
+                onLongClick = { onLongClick(it) },
+                goToLatestChapter = { goToLatestChapter(it) },
+                isLoading = isLoading,
+                showGoToLastChapterBadge = showGoToLastChapterBadge,
+                modifier = Modifier,
+                showInLibraryBadge = showInLibraryBadge,
+                showReadBadge = showReadBadge,
+                showUnreadBadge = showUnreadBadge,
+                columns = columns ?: 2
+            )
+        }
+    }
 }

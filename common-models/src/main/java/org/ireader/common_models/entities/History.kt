@@ -15,7 +15,8 @@ import androidx.room.ForeignKey
             parentColumns = arrayOf("id"),
             childColumns = arrayOf("bookId"),
             onDelete = ForeignKey.CASCADE,
-        )],
+        )
+    ],
 )
 data class History(
     val bookId: Long,

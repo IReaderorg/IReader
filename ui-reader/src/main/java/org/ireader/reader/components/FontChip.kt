@@ -54,7 +54,7 @@ fun FontChip(
                         contentAlignment = Alignment.Center
                     ) {
                         CaptionTextComposable(
-                            text = vm.fonts.getOrNull(index)?:"Unknown",
+                            text = vm.fonts.getOrNull(index) ?: "Unknown",
                             maxLine = 1,
                             align = TextAlign.Center,
                             modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)

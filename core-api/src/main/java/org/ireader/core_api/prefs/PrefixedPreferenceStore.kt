@@ -71,5 +71,4 @@ class PrefixedPreferenceStore(
     ): Preference<T> {
         return commonStore.getObject(prefix + key, defaultValue, serializer, deserializer)
     }
-
 }

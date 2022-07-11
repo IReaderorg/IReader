@@ -29,7 +29,6 @@ class BackupScreenViewModel @Inject constructor(
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
 
-
     fun onLocalBackupRequested(onStart: (Intent) -> Unit) {
         val mimeTypes = arrayOf("application/gzip")
         val fn = "IReader_${convertLongToTime(Calendar.getInstance().timeInMillis)}.gz"
@@ -81,5 +80,3 @@ class BackupScreenViewModel @Inject constructor(
         insertUseCases.insertBookAndChapters(books, chapters)
     }
 }
-
-

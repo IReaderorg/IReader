@@ -14,22 +14,21 @@ import org.ireader.core_api.source.model.CommandList
 import org.ireader.core_ui.exceptionHandler
 import javax.inject.Inject
 
-class GetBookDetail @Inject constructor(
-) {
+class GetBookDetail @Inject constructor() {
     suspend operator fun invoke(
         book: Book,
         catalog: CatalogLocal?,
         onError: suspend (UiText?) -> Unit,
         onSuccess: suspend (Book) -> Unit,
-        commands:CommandList = emptyList()
+        commands: CommandList = emptyList()
     ) {
-        val source = catalog?.source ?:throw SourceNotFoundException()
+        val source = catalog?.source ?: throw SourceNotFoundException()
         withIOContext {
             kotlin.runCatching {
                 try {
                     Log.debug { "Timber: Remote Book Detail for ${book.title} Was called" }
 
-                    val bookDetail = source.getMangaDetails(book.toBookInfo(catalog.sourceId),commands)
+                    val bookDetail = source.getMangaDetails(book.toBookInfo(catalog.sourceId), commands)
 
                     onSuccess(
                         updateBook(

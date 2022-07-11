@@ -541,7 +541,6 @@ interface LibraryDao : BaseDao<org.ireader.common_models.entities.Book> {
     )
     fun findAllInCategoryWithTotalChapters(categoryId: Long): Flow<List<LibraryBook>>
 
-
     @Query(
         """
         SELECT library.id,COUNT(chapter.id) as totalChapters,SUM(chapter.content > 0) as totalDownloadedChapter

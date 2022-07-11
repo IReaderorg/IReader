@@ -13,11 +13,12 @@ import org.ireader.core_api.source.model.ChapterInfo
     tableName = CHAPTER_TABLE,
     foreignKeys = [
         ForeignKey(
-        entity = Book::class,
-        parentColumns = arrayOf("id"),
-        childColumns = arrayOf("bookId"),
-        onDelete =  ForeignKey.CASCADE
-    )]
+            entity = Book::class,
+            parentColumns = arrayOf("id"),
+            childColumns = arrayOf("bookId"),
+            onDelete = ForeignKey.CASCADE
+        )
+    ]
 )
 data class Chapter(
     @PrimaryKey(autoGenerate = true)

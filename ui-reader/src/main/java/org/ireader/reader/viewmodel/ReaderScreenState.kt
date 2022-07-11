@@ -37,9 +37,8 @@ open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
 
     override var book: Book? by mutableStateOf<Book?>(null)
 
-    override val chapterShell : SnapshotStateList<Chapter> = mutableStateListOf()
-    override val stateContent: List<String> by derivedStateOf { stateChapter?.content?.filter { it.isNotBlank() }?.map { it.trim() }?: emptyList() }
-
+    override val chapterShell: SnapshotStateList<Chapter> = mutableStateListOf()
+    override val stateContent: List<String> by derivedStateOf { stateChapter?.content?.filter { it.isNotBlank() }?.map { it.trim() } ?: emptyList() }
 }
 
 interface ReaderScreenState {
@@ -61,10 +60,9 @@ interface ReaderScreenState {
     var isChapterLoaded: State<Boolean>
     var book: Book?
     val stateContent: List<String>
-    val chapterShell : SnapshotStateList<Chapter>
+    val chapterShell: SnapshotStateList<Chapter>
 
-
-    var readerScrollState:ScrollState?
+    var readerScrollState: ScrollState?
     @OptIn(ExperimentalMaterialApi::class) var modalBottomSheetState: ModalBottomSheetState?
 }
 
@@ -83,31 +81,22 @@ open class ReaderScreenPreferencesStateImpl @Inject constructor() : ReaderScreen
     override var currentViewingSearchResultIndex by mutableStateOf<Int>(0)
     override var expandTopMenu by mutableStateOf<Boolean>(false)
 
-
     override var scrollMode by mutableStateOf<Boolean>(false)
-
 }
 
 interface ReaderScreenPreferencesState {
     var isAsc: Boolean
 
-
-
-
     var isChaptersReversed: Boolean
     var isChapterReversingInProgress: Boolean
 
-
-
-
-
-    var autoScrollMode:Boolean
+    var autoScrollMode: Boolean
 
     var initialized: Boolean
     var expandTopMenu: Boolean
     var searchQuery: String
     var currentViewingSearchResultIndex: Int
 
-    var scrollMode : Boolean
-  //  val isVerticalScrolling : Boolean
+    var scrollMode: Boolean
+    //  val isVerticalScrolling : Boolean
 }

@@ -59,17 +59,17 @@ fun MainBottomSettingComposable(
     ) {
         AppIconButton(
             imageVector = Icons.Default.Menu,
-           contentDescription = stringResource(R.string.drawer),
+            contentDescription = stringResource(R.string.drawer),
             onClick = { scope.launch { drawerState.open() } }
         )
         AppIconButton(
             imageVector = Icons.Default.Headphones,
-           contentDescription = stringResource(R.string.play),
+            contentDescription = stringResource(R.string.play),
             onClick = { onPlay() }
         )
         AppIconButton(
             imageVector = Icons.Default.Settings,
-           contentDescription = stringResource(R.string.settings),
+            contentDescription = stringResource(R.string.settings),
             onClick = { onSetting() }
         )
     }

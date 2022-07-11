@@ -25,7 +25,6 @@ object UpdateScreenSpec : BottomNavScreenSpec {
     override val label: Int = R.string.updates_screen_label
     override val navHostRoute: String = "updates"
 
-
     override val arguments: List<NamedNavArgument> = listOf(
         NavigationArgs.showBottomNav
     )
@@ -64,7 +63,7 @@ object UpdateScreenSpec : BottomNavScreenSpec {
                     vm.updateUseCases.deleteAllUpdates()
                 }
             },
-            scrollBehavior =  controller.scrollBehavior,
+            scrollBehavior = controller.scrollBehavior,
         )
     }
     @Composable

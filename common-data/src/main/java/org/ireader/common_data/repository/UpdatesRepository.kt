@@ -9,8 +9,8 @@ interface UpdatesRepository {
 
     fun subscribeAllUpdates(): Flow<Map<LocalDate, List<UpdateWithInfo>>>
 
-    suspend fun insertUpdate(update: Update):Long
-    suspend fun insertUpdates(update: List<Update>) : List<Long>
+    suspend fun insertUpdate(update: Update): Long
+    suspend fun insertUpdates(update: List<Update>): List<Long>
     suspend fun deleteUpdate(update: Update)
     suspend fun deleteUpdates(update: List<Update>)
     suspend fun deleteAllUpdates()

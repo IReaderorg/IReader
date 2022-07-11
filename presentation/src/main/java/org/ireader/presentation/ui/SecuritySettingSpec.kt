@@ -14,6 +14,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.datetime.Clock
+import org.ireader.Controller
 import org.ireader.common_extensions.AuthenticatorUtil
 import org.ireader.common_extensions.AuthenticatorUtil.isAuthenticationSupported
 import org.ireader.common_extensions.AuthenticatorUtil.startAuthentication
@@ -27,7 +28,6 @@ import org.ireader.core_ui.preferences.PreferenceValues
 import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import javax.inject.Inject
-import org.ireader.Controller
 
 object SecuritySettingSpec : ScreenSpec {
 
@@ -60,7 +60,6 @@ object SecuritySettingSpec : ScreenSpec {
                         }
                     }
                 }
-
             }
         val onEnableAuthResult =
             rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
@@ -73,7 +72,6 @@ object SecuritySettingSpec : ScreenSpec {
                         }
                     }
                 }
-
             }
         val items = remember {
             listOf<Components>(
@@ -153,7 +151,7 @@ object SecuritySettingSpec : ScreenSpec {
                     )
                 },
 
-                )
+            )
         }
         SetupSettingComponents(
             scaffoldPadding = controller.scaffoldPadding,

@@ -12,7 +12,6 @@ object PreferenceValues {
         Light,
     }
 
-
     enum class SecureScreenMode(val titleResId: Int) {
         ALWAYS(R.string.lock_always),
         INCOGNITO(R.string.pref_incognito_mode),
@@ -45,15 +44,13 @@ object PreferenceValues {
          */
         Disabled;
         companion object {
-            fun valueOf(ordinal:Int) : ScrollbarSelectionMode {
-                return when(ordinal) {
+            fun valueOf(ordinal: Int): ScrollbarSelectionMode {
+                return when (ordinal) {
                     Full.ordinal -> Full
                     Thumb.ordinal -> Thumb
                     else -> Disabled
                 }
             }
         }
-
     }
-
 }

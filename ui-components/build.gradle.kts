@@ -25,14 +25,11 @@ dependencies {
     implementation(composeLib.compose.coil)
     implementation(composeLib.compose.foundation)
     implementation(accompanist.pager)
-implementation(composeLib.material3.core)
-implementation(composeLib.compose.uiUtil)
-implementation(composeLib.compose.material)
-implementation(composeLib.compose.constraintlayout)
-
+    implementation(composeLib.material3.core)
+    implementation(composeLib.compose.uiUtil)
+    implementation(composeLib.compose.material)
+    implementation(composeLib.compose.constraintlayout)
 
     implementation(composeLib.compose.uiToolingPreview)
     implementation(composeLib.compose.navigation)
-
-
 }

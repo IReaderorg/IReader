@@ -7,44 +7,43 @@ import org.ireader.common_models.entities.Category
 import javax.inject.Inject
 
 class ReorderCategory @Inject internal constructor(
-  private val categoryRepository: CategoryRepository
+    private val categoryRepository: CategoryRepository
 ) {
 
-  suspend fun await(categoryId: Long, newPosition: Int) = withContext(NonCancellable) f@{
-    if (categoryId == Category.ALL_ID || categoryId == Category.UNCATEGORIZED_ID) return@f Result.InternalError(IllegalArgumentException())
-    val categories = categoryRepository.findAll().filter { !it.category.isSystemCategory }
+    suspend fun await(categoryId: Long, newPosition: Int) = withContext(NonCancellable) f@{
+        if (categoryId == Category.ALL_ID || categoryId == Category.UNCATEGORIZED_ID) return@f Result.InternalError(IllegalArgumentException())
+        val categories = categoryRepository.findAll().filter { !it.category.isSystemCategory }
 
-    // If nothing changed, return
-    val currPosition = categories.indexOfFirst { it.id == categoryId }
+        // If nothing changed, return
+        val currPosition = categories.indexOfFirst { it.id == categoryId }
 
-    if (currPosition == newPosition || currPosition == -1) {
-      return@f Result.Unchanged
+        if (currPosition == newPosition || currPosition == -1) {
+            return@f Result.Unchanged
+        }
+
+        val reorderedCategories = categories.toMutableList()
+        val movedCategory = reorderedCategories.removeAt(currPosition)
+        reorderedCategories.add(newPosition, movedCategory)
+
+        val updates = reorderedCategories.mapIndexed { index, category ->
+            category.category.copy(order = index)
+        }
+
+        try {
+            categoryRepository.insertOrUpdate(updates)
+        } catch (e: Exception) {
+            return@f Result.InternalError(e)
+        }
+        Result.Success
     }
 
-    val reorderedCategories = categories.toMutableList()
-    val movedCategory = reorderedCategories.removeAt(currPosition)
-    reorderedCategories.add(newPosition, movedCategory)
-
-    val updates = reorderedCategories.mapIndexed { index, category ->
-      category.category.copy(order = index)
+    suspend fun await(category: Category, newPosition: Int): Result {
+        return await(category.id, newPosition)
     }
 
-    try {
-      categoryRepository.insertOrUpdate(updates)
-    } catch (e: Exception) {
-      return@f Result.InternalError(e)
+    sealed class Result {
+        object Success : Result()
+        object Unchanged : Result()
+        data class InternalError(val error: Throwable) : Result()
     }
-    Result.Success
-  }
-
-  suspend fun await(category: Category, newPosition: Int): Result {
-    return await(category.id, newPosition)
-  }
-
-  sealed class Result {
-    object Success : Result()
-    object Unchanged : Result()
-    data class InternalError(val error: Throwable) : Result()
-  }
-
 }

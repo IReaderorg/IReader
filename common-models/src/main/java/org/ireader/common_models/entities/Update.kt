@@ -40,7 +40,8 @@ data class UpdateWithInfo(
             parentColumns = arrayOf("id"),
             childColumns = arrayOf("bookId"),
             onDelete = ForeignKey.CASCADE,
-        )],
+        )
+    ],
 )
 data class Update(
     @PrimaryKey(autoGenerate = true)

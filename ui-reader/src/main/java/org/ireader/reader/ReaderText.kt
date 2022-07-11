@@ -76,9 +76,7 @@ fun ReaderText(
             }
             .fillMaxSize()
             .background(vm.backgroundColor.value),
-    )
-
-    {
+    ) {
 
         val maxHeight = remember {
             constraints.maxHeight.toFloat()
@@ -157,7 +155,6 @@ fun ReaderText(
                     onPrev = onPrev,
                     toggleReaderMode = toggleReaderMode
                 )
-
             }
         }
     }
@@ -218,14 +215,12 @@ private fun PagedReaderText(
                             modifier = modifier,
                             index = index,
                             text = text,
-                            vm= vm
+                            vm = vm
                         )
                     }
                 }
-
             }
         }
-
     }
 }
 
@@ -290,7 +285,6 @@ private fun ContinuesReaderPage(
                     }
                 }
         }
-
     }
     val items by remember {
         derivedStateOf {
@@ -325,12 +319,10 @@ private fun ContinuesReaderPage(
                     modifier = modifier,
                     index = index,
                     text = items[index].second,
-                    vm= vm
+                    vm = vm
                 )
             }
-
         }
-
     }
 }
 

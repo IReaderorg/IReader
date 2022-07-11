@@ -122,10 +122,12 @@ object ExploreScreenSpec : ScreenSpec {
                 }
             )
         } else {
-            EmptyScreenComposable(R.string.source_not_available,
+            EmptyScreenComposable(
+                R.string.source_not_available,
                 onPopBackStack = {
                     controller.navController.popBackStack()
-                })
+                }
+            )
         }
     }
 
@@ -166,7 +168,7 @@ object ExploreScreenSpec : ScreenSpec {
         val source = vm.source
         val scope = rememberCoroutineScope()
         BrowseTopAppBar(
-            scrollBehavior= controller.scrollBehavior,
+            scrollBehavior = controller.scrollBehavior,
             state = vm,
             source = source,
             onValueChange = {

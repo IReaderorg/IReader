@@ -15,7 +15,7 @@ data class ReaderTheme(
     val id: Long = 0,
     val backgroundColor: Int,
     val onTextColor: Int,
-    val isDefault: Boolean =false
+    val isDefault: Boolean = false
 )
 
 @kotlinx.serialization.Serializable
@@ -31,11 +31,8 @@ data class CustomTheme(
     val lightExtraColors: CustomExtraColors,
     @Embedded(prefix = "dark-extra-")
     val darkExtraColors: CustomExtraColors,
-    val isDefault:Boolean = false
+    val isDefault: Boolean = false
 )
-
-
-
 
 @kotlinx.serialization.Serializable
 data class CustomColorScheme(

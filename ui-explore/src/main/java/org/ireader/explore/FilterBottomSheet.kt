@@ -52,7 +52,7 @@ fun FilterBottomSheet(
         }
         Spacer(modifier = Modifier.height(16.dp))
         FilterGroupItem(
-            name ="",
+            name = "",
             filters = filters,
             onUpdate = {
                 onUpdate(it)

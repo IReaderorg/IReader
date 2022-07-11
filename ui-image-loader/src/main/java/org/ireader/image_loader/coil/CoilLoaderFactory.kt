@@ -48,7 +48,7 @@ class CoilLoaderFactory(
             }
             crossfade(300)
             diskCache(diskCacheInit)
-            allowRgb565(getSystemService<ActivityManager>(context,ActivityManager::class.java)!!.isLowRamDevice)
+            allowRgb565(getSystemService<ActivityManager>(context, ActivityManager::class.java)!!.isLowRamDevice)
             callFactory(callFactoryInit)
         }.build()
     }

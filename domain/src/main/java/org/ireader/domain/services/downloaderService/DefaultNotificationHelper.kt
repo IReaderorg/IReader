@@ -298,7 +298,7 @@ class DefaultNotificationHelper @Inject constructor(
             if (playing) {
                 addAction(R.drawable.ic_baseline_pause, context.string(R.string.pause), pause)
             } else {
-                addAction(R.drawable.ic_baseline_play_arrow, context.string(R.string.play),  play)
+                addAction(R.drawable.ic_baseline_play_arrow, context.string(R.string.play), play)
             }
             addAction(
                 R.drawable.ic_baseline_fast_forward,

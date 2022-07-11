@@ -10,9 +10,9 @@ class FontUseCase @Inject constructor(
     private val clients: HttpClients,
 ) {
 
-    suspend fun getRemoteFonts() : List<String> {
+    suspend fun getRemoteFonts(): List<String> {
 
-        val response : String = clients.default.get("https://fonts.gstatic.com/s/a/directory.xml", block = {}).body()
-       return Jsoup.parse(response).select("family").eachAttr("name")
+        val response: String = clients.default.get("https://fonts.gstatic.com/s/a/directory.xml", block = {}).body()
+        return Jsoup.parse(response).select("family").eachAttr("name")
     }
 }

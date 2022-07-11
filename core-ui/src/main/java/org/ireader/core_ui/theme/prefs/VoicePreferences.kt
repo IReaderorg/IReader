@@ -72,7 +72,7 @@ class IReaderVoicePreferences @OptIn(ExperimentalTextApi::class) constructor(
     }
 
     override fun defaultValue(): IReaderVoice {
-        return IReaderVoice("", "", "","")
+        return IReaderVoice("", "", "", "")
     }
 
     override fun changes(): Flow<IReaderVoice> {
@@ -94,7 +94,5 @@ data class IReaderVoice(
     val name: String,
     val language: String,
     val country: String,
-    val localDisplayName:String
+    val localDisplayName: String
 )
-
-

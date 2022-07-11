@@ -29,7 +29,7 @@ object SettingScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-                controller: Controller
+        controller: Controller
     ) {
         Toolbar(
             scrollBehavior = controller.scrollBehavior,
@@ -64,15 +64,13 @@ object SettingScreenSpec : ScreenSpec {
                 },
                 SettingsSection(
                     R.string.reader,
-                    Icons.Default.ChromeReaderMode
-                    ,
+                    Icons.Default.ChromeReaderMode,
                 ) {
                     controller.navController.navigate(ReaderSettingSpec.navHostRoute)
                 },
                 SettingsSection(
                     R.string.security,
-                    Icons.Default.Security
-                    ,
+                    Icons.Default.Security,
                 ) {
                     controller.navController.navigate(SecuritySettingSpec.navHostRoute)
                 },
@@ -84,7 +82,6 @@ object SettingScreenSpec : ScreenSpec {
                 },
             )
         }
-        SetupLayout(modifier = Modifier.padding(controller.scaffoldPadding),items = settingItems)
-
+        SetupLayout(modifier = Modifier.padding(controller.scaffoldPadding), items = settingItems)
     }
 }

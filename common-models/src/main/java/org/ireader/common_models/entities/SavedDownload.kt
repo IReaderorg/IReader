@@ -13,8 +13,9 @@ import androidx.room.PrimaryKey
             entity = Chapter::class,
             parentColumns = arrayOf("id"),
             childColumns = arrayOf("chapterId"),
-            onDelete =  ForeignKey.CASCADE,
-        )],
+            onDelete = ForeignKey.CASCADE,
+        )
+    ],
 
 )
 data class Download(
@@ -23,11 +24,6 @@ data class Download(
     val bookId: Long,
     val priority: Int,
 )
-
-
-
-
-
 
 data class SavedDownload(
     val chapterId: Long,
@@ -38,11 +34,11 @@ data class SavedDownload(
     val chapterName: String,
     val translator: String
 ) {
-    fun toDownload():Download {
+    fun toDownload(): Download {
         return Download(
             chapterId = this.chapterId,
-            bookId =this.bookId ,
-            priority =this.priority
+            bookId = this.bookId,
+            priority = this.priority
         )
     }
 }
@@ -59,14 +55,13 @@ data class SavedDownloadWithInfo(
     val translator: String,
     val isDownloaded: Boolean
 ) {
-    fun toDownload():Download {
+    fun toDownload(): Download {
         return Download(
             chapterId = this.chapterId,
-            bookId =this.bookId ,
-            priority =this.priority
+            bookId = this.bookId,
+            priority = this.priority
         )
     }
-
 }
 
 fun SavedDownloadWithInfo.toSavedDownload(): SavedDownload {

@@ -65,11 +65,10 @@ fun ChaptersFilters.Companion.deserializeList(
         savedFilters
     } else {
         types.map { type ->
-            savedFilters.find { it.type == type } ?: ChaptersFilters(type,
+            savedFilters.find { it.type == type } ?: ChaptersFilters(
+                type,
                 ChaptersFilters.Value.Missing
             )
         }
     }
 }
-
-

@@ -31,8 +31,6 @@ object CategoryScreenSpec : ScreenSpec {
         )
     }
 
-
-
     @OptIn(
         ExperimentalAnimationApi::class,
         ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
@@ -41,13 +39,11 @@ object CategoryScreenSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm : CategoryScreenViewModel = hiltViewModel(   controller.navBackStackEntry)
+        val vm: CategoryScreenViewModel = hiltViewModel(controller.navBackStackEntry)
         Box(modifier = Modifier.padding(controller.scaffoldPadding)) {
             CategoryScreen(
                 vm = vm
             )
         }
     }
-
 }
-

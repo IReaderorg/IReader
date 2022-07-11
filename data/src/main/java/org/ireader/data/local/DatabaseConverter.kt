@@ -6,7 +6,6 @@ import androidx.room.TypeConverter
 
 class DatabaseConverter {
 
-
     @TypeConverter
     fun fromString(stringListString: String): List<String> {
         return stringListString.split("$%&$").map { it }
@@ -21,6 +20,5 @@ class DatabaseConverter {
     fun fromColorType(value: Color): Int = value.toArgb()
 
     @TypeConverter
-    fun toColorType(value: Int): Color =  Color(value)
-
+    fun toColorType(value: Int): Color = Color(value)
 }

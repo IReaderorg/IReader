@@ -17,22 +17,20 @@ data class ChapterSort(val type: Type, val isAscending: Boolean) {
         ;
 
         companion object {
-            fun name(type: Type) : UiText {
-                return when(type) {
+            fun name(type: Type): UiText {
+                return when (type) {
                     Type.Default -> UiText.StringResource(R.string.system_default)
                     Type.ByName -> UiText.StringResource(R.string.by_name)
                     Type.BySource -> UiText.StringResource(R.string.by_source)
                     Type.ByChapterNumber -> UiText.StringResource(R.string.by_chapter_number)
-                    Type.Bookmark ->  UiText.StringResource(R.string.by_bookmark)
-                    Type.DateFetched ->  UiText.StringResource(R.string.date_fetched)
-                    Type.DateUpload ->  UiText.StringResource(R.string.by_date_uploaded)
-                    Type.Read ->  UiText.StringResource(R.string.by_date_read)
+                    Type.Bookmark -> UiText.StringResource(R.string.by_bookmark)
+                    Type.DateFetched -> UiText.StringResource(R.string.date_fetched)
+                    Type.DateUpload -> UiText.StringResource(R.string.by_date_uploaded)
+                    Type.Read -> UiText.StringResource(R.string.by_date_read)
                 }
             }
         }
-
     }
-
 
     companion object {
         val types = Type.values()

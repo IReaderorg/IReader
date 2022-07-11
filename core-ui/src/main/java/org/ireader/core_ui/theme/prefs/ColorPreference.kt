@@ -62,14 +62,11 @@ class ThemeColorPreference(
     override fun stateIn(scope: CoroutineScope): StateFlow<Color> {
         return preference.changes().map { get() }.stateIn(scope, SharingStarted.Eagerly, get())
     }
-
 }
 
 fun Preference<Int>.asColor(): ColorPreference {
     return ColorPreference(this)
 }
-
-
 
 class ColorPreference(
     private val preference: Preference<Int>

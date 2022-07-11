@@ -11,7 +11,7 @@ import org.ireader.core_ui.ui.EmptyScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EmptyScreenComposable(errorResId: Int,onPopBackStack :() -> Unit) {
+fun EmptyScreenComposable(errorResId: Int, onPopBackStack: () -> Unit) {
     Scaffold(
         topBar = {
             Toolbar(

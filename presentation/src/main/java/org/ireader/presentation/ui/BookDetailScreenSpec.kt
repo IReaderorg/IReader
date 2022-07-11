@@ -94,7 +94,6 @@ object BookDetailScreenSpec : ScreenSpec {
                         } catch (e: Throwable) {
                             vm.showSnackBar(UiText.ExceptionString(e))
                         }
-
                     }
                 }
             }
@@ -214,7 +213,6 @@ object BookDetailScreenSpec : ScreenSpec {
         val book = vm.book
         val catalog = vm.catalogSource
 
-
         detailState.source.let { source ->
             if (source is CatalogSource) {
                 ChapterCommandBottomSheet(
@@ -273,16 +271,14 @@ object BookDetailScreenSpec : ScreenSpec {
         val catalog = state.catalogSource
         val scope = rememberCoroutineScope()
 
-        DisposableEffect(key1 = true ) {
+        DisposableEffect(key1 = true) {
             onDispose {
                 controller.requestedHideSystemStatusBar(false)
-
             }
         }
         LaunchedEffect(true) {
             controller.requestedHideSystemStatusBar(true)
         }
-
 
         BookDetailScreen(
             modifier = Modifier.padding(bottom = controller.scaffoldPadding.calculateBottomPadding()),

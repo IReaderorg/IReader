@@ -54,13 +54,13 @@ fun LibraryScreen(
     scaffoldPadding: PaddingValues,
     requestHideBottomNav: (Boolean) -> Unit,
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
-    onPagerPageChange:(page:Int) -> Unit,
+    onPagerPageChange: (page: Int) -> Unit,
     editCategoryOnConfirm: () -> Unit,
-    editCategoryDismissDialog:() -> Unit,
-    editCategoryOnAddToInsertQueue:(Category)-> Unit,
-    editCategoryOnRemoteInInsertQueue:(Category)-> Unit,
-    editCategoryOnRemoteInDeleteQueue:(Category)-> Unit,
-    editCategoryOnAddDeleteQueue:(Category)-> Unit,
+    editCategoryDismissDialog: () -> Unit,
+    editCategoryOnAddToInsertQueue: (Category) -> Unit,
+    editCategoryOnRemoteInInsertQueue: (Category) -> Unit,
+    editCategoryOnRemoteInDeleteQueue: (Category) -> Unit,
+    editCategoryOnAddDeleteQueue: (Category) -> Unit,
 
 ) {
 
@@ -95,10 +95,9 @@ fun LibraryScreen(
                     onLongBook = onLongBook,
                     goToLatestChapter = goToLatestChapter,
                     onPageChanged = onPagerPageChange,
-                    getColumnsForOrientation= getColumnsForOrientation,
+                    getColumnsForOrientation = getColumnsForOrientation,
 
                 )
-
             }
             EditCategoriesDialog(
                 vm = vm,
@@ -133,8 +132,6 @@ fun LibraryScreen(
                 onClickMarkAsRead = onMarkAsRead,
                 onClickMarkAsUnread = onMarkAsNotRead
             )
-
         }
     }
 }
-

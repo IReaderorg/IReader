@@ -12,7 +12,7 @@ class InsertBook @Inject constructor(private val bookRepository: org.ireader.com
     }
 }
 class UpdateBook @Inject constructor(private val bookRepository: org.ireader.common_data.repository.BookRepository) {
-    suspend fun update(book: LibraryBook,favorite:Boolean) {
+    suspend fun update(book: LibraryBook, favorite: Boolean) {
         return org.ireader.common_extensions.withIOContext {
             return@withIOContext bookRepository.updateBook(book, favorite = favorite)
         }
@@ -28,4 +28,3 @@ class UpdateBook @Inject constructor(private val bookRepository: org.ireader.com
         }
     }
 }
-

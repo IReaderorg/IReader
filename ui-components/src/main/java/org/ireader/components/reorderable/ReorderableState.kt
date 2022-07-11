@@ -142,11 +142,11 @@ abstract class ReorderableState<T>(
         val centerY = (top + bottom) / 2
         visibleItemsInfo.fastForEach { item ->
             if (
-                item.itemIndex == draggedIndex
-                || item.bottom < top
-                || item.top > bottom
-                || item.right < left
-                || item.left > right
+                item.itemIndex == draggedIndex ||
+                item.bottom < top ||
+                item.top > bottom ||
+                item.right < left ||
+                item.left > right
             ) {
                 return@fastForEach
             }

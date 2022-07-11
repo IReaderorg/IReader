@@ -16,26 +16,26 @@ class SubscribeLastReadChapter @Inject constructor(private val chapterRepository
     }
 }
 
-    class FindLastReadChapter @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
-        suspend operator fun invoke(
-            bookId: Long,
-        ): Chapter? {
-            return chapterRepository.findLastReadChapter(bookId)
-        }
+class FindLastReadChapter @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
+    suspend operator fun invoke(
+        bookId: Long,
+    ): Chapter? {
+        return chapterRepository.findLastReadChapter(bookId)
     }
+}
 
-    class SubscribeFirstChapter @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
-        operator fun invoke(
-            bookId: Long,
-        ): Flow<Chapter?> {
-            return chapterRepository.subscribeFirstChapter(bookId)
-        }
+class SubscribeFirstChapter @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
+    operator fun invoke(
+        bookId: Long,
+    ): Flow<Chapter?> {
+        return chapterRepository.subscribeFirstChapter(bookId)
     }
+}
 
-    class FindFirstChapter @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
-        suspend operator fun invoke(
-            bookId: Long,
-        ): Chapter? {
-            return chapterRepository.findFirstChapter(bookId)
-        }
+class FindFirstChapter @Inject constructor(private val chapterRepository: org.ireader.common_data.repository.ChapterRepository) {
+    suspend operator fun invoke(
+        bookId: Long,
+    ): Chapter? {
+        return chapterRepository.findFirstChapter(bookId)
     }
+}

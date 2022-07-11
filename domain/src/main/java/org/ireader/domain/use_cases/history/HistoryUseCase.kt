@@ -6,7 +6,6 @@ import kotlinx.datetime.LocalDate
 import org.ireader.common_models.entities.History
 import org.ireader.common_models.entities.HistoryWithRelations
 
-
 class HistoryUseCase(private val historyRepository: org.ireader.common_data.repository.HistoryRepository) {
 
     suspend fun findHistory(chapterId: Long): History? {
@@ -33,7 +32,7 @@ class HistoryUseCase(private val historyRepository: org.ireader.common_data.repo
         return historyRepository.insertHistory(history)
     }
 
-    suspend fun insertHistories(histories: List<History>){
+    suspend fun insertHistories(histories: List<History>) {
         return historyRepository.insertHistories(histories)
     }
 

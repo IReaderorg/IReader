@@ -38,13 +38,12 @@ class UpdateLastReadTime @Inject constructor(
                 )
             )
 
-
             historyUseCase.insertHistory(
                 History(
                     bookId = chapter.bookId,
                     chapterId = chapter.id,
                     readAt = currentTimeToLong(),
-                    progress = history?.progress?:0
+                    progress = history?.progress ?: 0
                 )
             )
         }

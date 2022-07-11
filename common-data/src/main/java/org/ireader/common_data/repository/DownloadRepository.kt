@@ -9,8 +9,6 @@ interface DownloadRepository {
     fun subscribeAllDownloads(): Flow<List<SavedDownloadWithInfo>>
     suspend fun findAllDownloads(): List<SavedDownloadWithInfo>
 
-
-
     suspend fun insertDownload(savedDownload: Download)
 
     suspend fun insertDownloads(savedDownloads: List<Download>)

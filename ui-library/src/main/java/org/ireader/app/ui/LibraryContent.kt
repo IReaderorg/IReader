@@ -53,10 +53,9 @@ internal fun LibraryContent(
         selection = vm.selectedBooks,
         currentPage = vm.selectedCategoryIndex,
         showUnreadBadge = vm.unreadBadge.value,
-        showReadBadge  = vm.readBadge.value,
+        showReadBadge = vm.readBadge.value,
         showGoToLastChapterBadge = vm.goToLastChapterBadge.value,
         getColumnsForOrientation = getColumnsForOrientation,
-
 
     )
 }

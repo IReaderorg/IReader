@@ -21,9 +21,11 @@ val readerThemes = mutableListOf<ReaderColors>(
         true
     ),
     ReaderColors(
-        2, Color(0xff262626), Color(
+        2, Color(0xff262626),
+        Color(
             0xFFE9E9E9,
-        ), true
+        ),
+        true
     ),
     ReaderColors(
         3, Color(0xFF405A61), Color(0xFFFFFFFF),
@@ -85,7 +87,6 @@ fun ReaderColors.ReaderTheme(): ReaderTheme {
         isDefault = this.isDefault
     )
 }
-
 
 fun ReaderTheme.ReaderColors(): ReaderColors {
     return org.ireader.core_ui.theme.ReaderColors(

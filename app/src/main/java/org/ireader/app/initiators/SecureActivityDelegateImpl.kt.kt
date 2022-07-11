@@ -16,14 +16,12 @@ import org.ireader.core_ui.preferences.PreferenceValues
 import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.presentation.ui.UnlockActivity
 
-
 class SecureActivityDelegateImpl : SecureActivityDelegate, DefaultLifecycleObserver {
 
     private lateinit var activity: ComponentActivity
     private lateinit var preferences: UiPreferences
 
-
-    override fun registerSecureActivity(activity: ComponentActivity,preferences: UiPreferences) {
+    override fun registerSecureActivity(activity: ComponentActivity, preferences: UiPreferences) {
         this.activity = activity
         this.preferences = preferences
         activity.lifecycle.addObserver(this)

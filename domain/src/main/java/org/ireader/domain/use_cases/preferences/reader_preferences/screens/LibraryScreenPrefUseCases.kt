@@ -8,5 +8,5 @@ data class LibraryScreenPrefUseCases(
     val libraryLayoutTypeUseCase: LibraryLayoutTypeUseCase,
     val sortersDescUseCase: SortersDescUseCase,
     val sortersUseCase: SortersUseCase,
-    
+
 )

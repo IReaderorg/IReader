@@ -96,7 +96,7 @@ fun FilterGroupItem(
                             state = value
                         },
                         currentValue = if (state != null) {
-                          filter.options[state!!]
+                            filter.options[state!!]
                         } else filter.options[0],
                         items = filter.options.map { it }.toTypedArray()
                     )

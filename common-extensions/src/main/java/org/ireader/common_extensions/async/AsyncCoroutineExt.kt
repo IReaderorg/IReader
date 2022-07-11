@@ -12,7 +12,6 @@ import kotlinx.coroutines.supervisorScope
  * Created by hristijan on 8/26/19 to long live and prosper !
  */
 
-
 inline fun <T> AndroidViewModel.makeIOCall(
     crossinline onCallExecuted: () -> Unit = {},
     crossinline onErrorAction: (throwable: Throwable) -> Unit = { _ -> },

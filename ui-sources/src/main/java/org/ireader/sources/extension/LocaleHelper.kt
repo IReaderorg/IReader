@@ -17,8 +17,8 @@ object LocaleHelper {
         return when (lang) {
             SourceKeys.LAST_USED_KEY -> context.getString(R.string.last_used_source)
             SourceKeys.PINNED_KEY -> context.getString(R.string.pinned_sources)
-            SourceKeys.INSTALLED_KEY -> context.getString( R.string.installed)
-            SourceKeys.AVAILABLE -> context.getString( R.string.available)
+            SourceKeys.INSTALLED_KEY -> context.getString(R.string.installed)
+            SourceKeys.AVAILABLE -> context.getString(R.string.available)
             "other" -> context.getString(R.string.other_source)
             "all" -> context.getString(R.string.all_lang)
             else -> getDisplayName(lang)

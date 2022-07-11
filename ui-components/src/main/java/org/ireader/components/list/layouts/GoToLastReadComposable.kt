@@ -27,13 +27,13 @@ import org.ireader.components.reusable_composable.SuperSmallTextComposable
 import org.ireader.ui_components.R
 
 @Composable
-fun GoToLastReadComposable(modifier: Modifier = Modifier,size: Dp = 40.dp,onClick: () -> Unit) {
+fun GoToLastReadComposable(modifier: Modifier = Modifier, size: Dp = 40.dp, onClick: () -> Unit) {
     Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
         OutlinedButton(
             onClick = {},
             modifier = Modifier
                 .padding(5.dp)
-                .size( size),
+                .size(size),
             shape = CircleShape,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.background.copy(alpha = .3f)),
             contentPadding = PaddingValues(0.dp), // avoid the little icon
@@ -46,7 +46,7 @@ fun GoToLastReadComposable(modifier: Modifier = Modifier,size: Dp = 40.dp,onClic
         ) {
             AppIconButton(
                 imageVector = Icons.Default.ImportContacts,
-               contentDescription = stringResource(R.string.open_last_chapter),
+                contentDescription = stringResource(R.string.open_last_chapter),
                 onClick = {
                     onClick()
                 },

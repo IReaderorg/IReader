@@ -9,6 +9,5 @@ import dagger.hilt.android.AndroidEntryPoint
 class AppBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-
     }
 }

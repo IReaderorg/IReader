@@ -32,7 +32,7 @@ object MoreScreenSpec : BottomNavScreenSpec {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun TopBar(
-                controller: Controller
+        controller: Controller
     ) {
         TitleToolbar(
             title = stringResource(org.ireader.ui_settings.R.string.more),
@@ -50,8 +50,7 @@ object MoreScreenSpec : BottomNavScreenSpec {
         controller: Controller
     ) {
         val uriHandler = LocalUriHandler.current
-        val vm: MainSettingScreenViewModel = hiltViewModel   (controller.navBackStackEntry)
-
+        val vm: MainSettingScreenViewModel = hiltViewModel(controller.navBackStackEntry)
 
         MoreScreen(
             modifier = Modifier.padding(controller.scaffoldPadding),

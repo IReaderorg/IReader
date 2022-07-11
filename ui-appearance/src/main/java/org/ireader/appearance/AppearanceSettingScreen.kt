@@ -133,7 +133,6 @@ fun AppearanceSettingScreen(
                     },
                     onRestToDefault = {
                         vm.isSavable = false
-
                     }
                 )
             },
@@ -148,7 +147,6 @@ fun AppearanceSettingScreen(
                     },
                     onRestToDefault = {
                         vm.isSavable = false
-
                     }
                 )
             },
@@ -162,7 +160,6 @@ fun AppearanceSettingScreen(
                     },
                     onRestToDefault = {
                         vm.isSavable = false
-
                     }
                 )
             },

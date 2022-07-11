@@ -47,7 +47,6 @@ class HttpClients(
         install(HttpCookies) {
             storage = cookiesStorage
         }
-
     }
     val cloudflareClient = HttpClient(OkHttp) {
         BrowserUserAgent()

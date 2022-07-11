@@ -37,8 +37,8 @@ fun BackUpAndRestoreScreen(
                     vm.restoreBackup.restoreFrom(uri, context, onError = {
                         vm.showSnackBar(it)
                     }, onSuccess = {
-                        vm.showSnackBar((UiText.StringResource(R.string.restoredSuccessfully)))
-                    })
+                            vm.showSnackBar((UiText.StringResource(R.string.restoredSuccessfully)))
+                        })
                 }
             }
         }
@@ -51,8 +51,8 @@ fun BackUpAndRestoreScreen(
                     val result = vm.createBackup.saveTo(uri, context, onError = {
                         vm.showSnackBar(it)
                     }, onSuccess = {
-                        vm.showSnackBar((UiText.StringResource(R.string.backup_created_successfully)))
-                    })
+                            vm.showSnackBar((UiText.StringResource(R.string.backup_created_successfully)))
+                        })
                 }
             }
         }
@@ -78,6 +78,6 @@ fun BackUpAndRestoreScreen(
                     }
                 }
         },
-        )
+    )
     SetupLayout(items = settingItems, modifier = modifier)
 }

@@ -37,7 +37,7 @@ fun LanguageChip(choice: LanguageChoice, isSelected: Boolean, onClick: () -> Uni
             is LanguageChoice.Others -> "Others"
         }
         MidSizeTextComposable(
-            text =text.uppercase(),
+            text = text.uppercase(),
             modifier = Modifier.wrapContentSize(Alignment.Center),
             color = if (isSelected) {
                 MaterialTheme.colorScheme.onBackground

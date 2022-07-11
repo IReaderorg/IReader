@@ -25,21 +25,20 @@ data class Category(
         val baseCategories = listOf<Category>(
             Category(
                 id = ALL_ID,
-                name ="",
-                order =0,
-                updateInterval =0,
+                name = "",
+                order = 0,
+                updateInterval = 0,
                 flags = 0
-            ),Category(
+            ),
+            Category(
                 id = UNCATEGORIZED_ID,
-                name ="",
-                order =0,
-                updateInterval =0,
+                name = "",
+                order = 0,
+                updateInterval = 0,
                 flags = 0
             ),
         )
     }
-
-
 }
 
 @Entity(

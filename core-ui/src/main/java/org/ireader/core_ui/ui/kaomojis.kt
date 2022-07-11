@@ -41,7 +41,7 @@ fun EmptyScreen(
         Text(
             text = kaomoji,
             style = MaterialTheme.typography.bodyMedium.copy(
-                color = LocalContentColor.current.copy(alpha =  ContentAlpha.medium()),
+                color = LocalContentColor.current.copy(alpha = ContentAlpha.medium()),
                 fontSize = 48.sp
             ),
         )

@@ -28,11 +28,11 @@ fun AppearanceToolbar(
         false -> MainAppearanceToolbar(
             vm = vm,
             onPopBackStack = onPopBackStack,
-            scrollBehavior=scrollBehavior
+            scrollBehavior = scrollBehavior
         )
         true -> EditToolbar(
             vm,
-            scrollBehavior=scrollBehavior
+            scrollBehavior = scrollBehavior
         )
     }
 }
@@ -56,7 +56,7 @@ private fun MainAppearanceToolbar(
         },
         actions = {
             AnimatedVisibility(
-                visible =   vm.isSavable,
+                visible = vm.isSavable,
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.Save,
@@ -75,7 +75,6 @@ private fun MainAppearanceToolbar(
                     }
                 )
             }
-
         }
     )
 }
@@ -86,7 +85,7 @@ private fun EditToolbar(
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Toolbar(
-        scrollBehavior =scrollBehavior,
+        scrollBehavior = scrollBehavior,
         title = {},
         navigationIcon = {
             AppIconButton(

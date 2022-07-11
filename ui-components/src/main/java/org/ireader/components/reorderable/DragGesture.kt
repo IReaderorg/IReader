@@ -90,7 +90,6 @@ internal suspend fun PointerInputScope.awaitLongPressOrCancellation(
                         finished = true
                     }
 
-
                     if (event.changes.fastAny { it.consumed.downChange || it.isOutOfBounds(size) }) {
                         finished = true // Canceled
                     }

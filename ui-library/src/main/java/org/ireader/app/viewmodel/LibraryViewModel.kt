@@ -59,9 +59,6 @@ class LibraryViewModel @Inject constructor(
     val getCategory: CategoriesUseCases
 ) : BaseViewModel(), LibraryState by state {
 
-
-
-
     var lastUsedCategory = libraryPreferences.lastUsedCategory().asState()
     var filters = libraryPreferences.filters(true).asState()
 
@@ -111,7 +108,6 @@ class LibraryViewModel @Inject constructor(
                     displayMode = layoutType
                 )
             }
-
         }
     }
 
@@ -148,7 +144,7 @@ class LibraryViewModel @Inject constructor(
 //            books.filter { it.id in selectedBooks }.let {
 //
 //            }
-            //insertUseCases.updateBook.update(it, false)
+            // insertUseCases.updateBook.update(it, false)
             selectedBooks.clear()
         }
     }
@@ -167,7 +163,8 @@ class LibraryViewModel @Inject constructor(
             .map { filterState ->
                 if (type == filterState.type) {
                     LibraryFilter(
-                        type, when (filterState.value) {
+                        type,
+                        when (filterState.value) {
                             LibraryFilter.Value.Included -> LibraryFilter.Value.Excluded
                             LibraryFilter.Value.Excluded -> LibraryFilter.Value.Missing
                             LibraryFilter.Value.Missing -> LibraryFilter.Value.Included
@@ -228,7 +225,7 @@ class LibraryViewModel @Inject constructor(
             id in bookCategories.value.filter { it.categoryId == categories.id }.map { it.bookId }
         }
 
-        //categories.id in bookCategories.map { it.categoryId } &&
+        // categories.id in bookCategories.map { it.categoryId } &&
 
         return if (defaultValue) ToggleableState.On else ToggleableState.Off
     }

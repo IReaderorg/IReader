@@ -28,7 +28,6 @@ open class ChapterDetailStateImpl @Inject constructor() : ChapterDetailState {
     override val isEmpty: Boolean by derivedStateOf { chapters.isEmpty() }
     override var selection: SnapshotStateList<Long> = mutableStateListOf()
     override val hasSelection: Boolean by derivedStateOf { selection.isNotEmpty() }
-
 }
 
 interface ChapterDetailState {

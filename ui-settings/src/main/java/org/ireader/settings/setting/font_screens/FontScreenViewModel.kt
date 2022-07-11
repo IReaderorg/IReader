@@ -19,7 +19,7 @@ class FontScreenViewModel @OptIn(ExperimentalTextApi::class)
     private val fontUseCase: FontUseCase,
     val readerPreferences: ReaderPreferences,
     val googleFontProvider: GoogleFont.Provider
-) : BaseViewModel(),FontScreenState by fontScreenState  {
+) : BaseViewModel(), FontScreenState by fontScreenState {
 
     val font = readerPreferences.font().asState()
     val previewMode = mutableStateOf(false)
@@ -28,11 +28,9 @@ class FontScreenViewModel @OptIn(ExperimentalTextApi::class)
         setup()
     }
 
-
-
     private fun setup() {
         viewModelScope.launch {
-            fontScreenState.fonts =  fontUseCase.getRemoteFonts()
+            fontScreenState.fonts = fontUseCase.getRemoteFonts()
             snapshotFlow {
                 fonts.filteredByQuery(searchQuery)
             }
@@ -40,12 +38,7 @@ class FontScreenViewModel @OptIn(ExperimentalTextApi::class)
                     uiFonts = it
                 }
         }
-
     }
-
-
-
-
 
     private fun List<String>.filteredByQuery(query: String?): List<String> {
         return if (query == null || query.isBlank()) {
@@ -54,7 +47,4 @@ class FontScreenViewModel @OptIn(ExperimentalTextApi::class)
             filter { it.contains(query, true) }
         }
     }
-
 }
-
-

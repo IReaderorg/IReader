@@ -8,8 +8,6 @@ import org.ireader.core_ui.theme.prefs.IReaderVoice
 import org.ireader.core_ui.ui.PreferenceAlignment
 import javax.inject.Inject
 
-
-
 class TextAlignmentUseCase(
     private val prefs: ReaderPreferences,
 ) {

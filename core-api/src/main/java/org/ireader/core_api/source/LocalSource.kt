@@ -5,7 +5,7 @@ import org.ireader.core_api.source.model.Command
 import org.ireader.core_api.source.model.MangaInfo
 import org.ireader.core_api.source.model.Page
 
-class LocalSource: Source {
+class LocalSource : Source {
     override val id: Long
         get() = -200
     override val name: String

@@ -22,9 +22,7 @@ dependencies {
     implementation(project(Modules.uiImageLoader))
 
     implementation(composeLib.compose.foundation)
-implementation(composeLib.material3.core)
-
-
+    implementation(composeLib.material3.core)
 
     implementation(composeLib.compose.ui)
     implementation(composeLib.compose.compiler)
@@ -41,7 +39,6 @@ implementation(composeLib.material3.core)
     implementation(composeLib.compose.lifecycle)
     implementation(composeLib.compose.coil)
 
-
     implementation(commonLib.room.runtime)
     implementation(commonLib.room.ktx)
     kapt(commonLib.room.compiler)
@@ -53,7 +50,6 @@ implementation(composeLib.material3.core)
     debugImplementation(composeLib.compose.composeTooling)
 
     implementation(accompanist.systemUiController)
-
 
     implementation(kotlinx.serialization.protobuf)
     testImplementation(test.junit4)

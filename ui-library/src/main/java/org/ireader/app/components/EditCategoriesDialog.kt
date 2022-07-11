@@ -34,11 +34,11 @@ fun EditCategoriesDialog(
     vm: LibraryViewModel,
     modifier: Modifier = Modifier,
     onConfirm: () -> Unit,
-    dismissDialog:() -> Unit,
-    onAddToInsertQueue:(Category)-> Unit,
-    onRemoteInInsertQueue:(Category)-> Unit,
-    onRemoteInDeleteQueue:(Category)-> Unit,
-    onAddDeleteQueue:(Category)-> Unit,
+    dismissDialog: () -> Unit,
+    onAddToInsertQueue: (Category) -> Unit,
+    onRemoteInInsertQueue: (Category) -> Unit,
+    onRemoteInDeleteQueue: (Category) -> Unit,
+    onAddDeleteQueue: (Category) -> Unit,
     categories: List<CategoryWithCount>
 ) {
 
@@ -68,7 +68,7 @@ fun EditCategoriesDialog(
                                     state -> {
                                         when (state) {
                                             ToggleableState.On -> {
-                                              onAddDeleteQueue(category.category)
+                                                onAddDeleteQueue(category.category)
                                                 ToggleableState.Indeterminate
                                             }
                                             ToggleableState.Indeterminate -> {
@@ -87,7 +87,6 @@ fun EditCategoriesDialog(
                                             }
                                             ToggleableState.Indeterminate -> {
                                                 onRemoteInDeleteQueue(category.category)
-
                                             }
                                             else -> {}
                                         }

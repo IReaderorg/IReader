@@ -33,7 +33,7 @@ class ImportEpub @Inject constructor(
         val epub = getEpubReader(context, uri) ?: throw Exception()
 
         val key = epub.metadata?.titles?.firstOrNull() ?: throw Exception("Unknown novel")
-        val imgFile = File(context.filesDir, "library_covers/${key}")
+        val imgFile = File(context.filesDir, "library_covers/$key")
         bookRepository.delete(key)
         // Insert new book data
         val bookId = Book(
@@ -53,15 +53,14 @@ class ImportEpub @Inject constructor(
 //        val information =
 //            epub.tableOfContents?.tocReferences?.associate { it?.completeHref to it?.title }
         var index = 0
-        var tableOfContents = mapOf<String,String>()
-
+        var tableOfContents = mapOf<String, String>()
 
         epub.tableOfContents.tocReferences.map { ref ->
             tableOfContents = tableOfContents + (ref.completeHref.substringBefore("#") to ref.title)
             tableOfContents = tableOfContents + (ref.children.map { item -> (item.completeHref.substringBefore("#") to item.title) })
         }
         epub.opfResource.inputStream.let { stream ->
-            Jsoup.parse(stream,"UTF-8","", Parser.xmlParser()).select("item").eachAttr("href")
+            Jsoup.parse(stream, "UTF-8", "", Parser.xmlParser()).select("item").eachAttr("href")
         }.filter { item ->
             chapterExtensions.any {
                 item.endsWith(
@@ -86,11 +85,9 @@ class ImportEpub @Inject constructor(
                     content = content,
                 )
             }
-
         }.mapNotNull { it }.let {
             chapterRepository.insertChapters(it)
         }
-
 
 //        epub.resources.all.sortedBy { it.id }.map { epubResourceModel ->
 //            epubResourceModel.data?.let {
@@ -111,7 +108,6 @@ class ImportEpub @Inject constructor(
 //        }.mapNotNull { it }.let {
 //            chapterRepository.insertChapters(it)
 //        }
-
 
         epub.coverImage?.data?.let {
             imgFile.parentFile?.also { parent ->
@@ -141,16 +137,14 @@ class ImportEpub @Inject constructor(
         }
     }
 
-
-
     private data class Output(val title: String?, val body: String)
-internal fun parseXMLFile(inputSteam: InputStream): org.w3c.dom.Document? =
-    DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputSteam)
+    internal fun parseXMLFile(inputSteam: InputStream): org.w3c.dom.Document? =
+        DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputSteam)
 
-internal  fun parseXMLFile(byteArray: ByteArray): org.w3c.dom.Document? = parseXMLFile(byteArray.inputStream())
-private fun parseXMLText(text: String): org.w3c.dom.Document? = text.reader().runCatching {
-    DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(InputSource(this))
-}.getOrNull()
+    internal fun parseXMLFile(byteArray: ByteArray): org.w3c.dom.Document? = parseXMLFile(byteArray.inputStream())
+    private fun parseXMLText(text: String): org.w3c.dom.Document? = text.reader().runCatching {
+        DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(InputSource(this))
+    }.getOrNull()
 
     private fun getPTraverse(node: org.jsoup.nodes.Node): String {
         fun innerTraverse(node: org.jsoup.nodes.Node): String =
@@ -202,6 +196,3 @@ private fun parseXMLText(text: String): org.w3c.dom.Document? = text.reader().ru
         }
     }
 }
-
-
-

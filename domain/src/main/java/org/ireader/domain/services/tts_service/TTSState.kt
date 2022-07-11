@@ -51,15 +51,13 @@ interface TTSState {
     var lineHeight: Int
     var isServiceConnected: Boolean
 
-
-    var meta : MediaMetadataCompat?
-    val isLoading : State<Boolean>
-    val uiPage : State<Int>
-    val uiChapters : State<List<Chapter>>
-    var isDrawerAsc : Boolean
-    var startTime : Instant?
-    var sleepMode : Boolean
-
+    var meta: MediaMetadataCompat?
+    val isLoading: State<Boolean>
+    val uiPage: State<Int>
+    val uiChapters: State<List<Chapter>>
+    var isDrawerAsc: Boolean
+    var startTime: Instant?
+    var sleepMode: Boolean
 }
 
 class TTSStateImpl @Inject constructor() : TTSState {
@@ -98,11 +96,9 @@ class TTSStateImpl @Inject constructor() : TTSState {
 
     override var utteranceId by mutableStateOf<String>("")
 
-
-    override var meta : MediaMetadataCompat? by mutableStateOf(null)
-    override var isLoading : State<Boolean> = derivedStateOf { meta?.getLong(TTSService.IS_LOADING) == 1L }
-    override var uiPage : State<Int> = derivedStateOf { meta?.getLong(TTSService.PROGRESS)?.toInt()?:0 }
-    override var uiChapters : State<List<Chapter>> = derivedStateOf { if (!isDrawerAsc) ttsChapters else ttsChapters.reversed() }
-    override var isDrawerAsc :Boolean by mutableStateOf(false)
-
+    override var meta: MediaMetadataCompat? by mutableStateOf(null)
+    override var isLoading: State<Boolean> = derivedStateOf { meta?.getLong(TTSService.IS_LOADING) == 1L }
+    override var uiPage: State<Int> = derivedStateOf { meta?.getLong(TTSService.PROGRESS)?.toInt() ?: 0 }
+    override var uiChapters: State<List<Chapter>> = derivedStateOf { if (!isDrawerAsc) ttsChapters else ttsChapters.reversed() }
+    override var isDrawerAsc: Boolean by mutableStateOf(false)
 }

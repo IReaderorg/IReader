@@ -27,7 +27,6 @@ dependencies {
     implementation(composeLib.compose.animations)
     implementation(composeLib.material3.core)
 
-
     implementation(composeLib.compose.uiToolingPreview)
     implementation(accompanist.pagerIndicator)
     implementation(accompanist.pager)

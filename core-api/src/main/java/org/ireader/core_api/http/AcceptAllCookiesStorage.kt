@@ -42,7 +42,6 @@ public class AcceptAllCookiesStorage : CookiesStorage {
         }
     }
 
-
     override fun close() {
     }
 

@@ -33,7 +33,7 @@ import org.ireader.ui_reader.R
 @Composable
 fun ReaderScreenDrawer(
     modifier: Modifier = Modifier,
-    relativeTime:Int = 0,
+    relativeTime: Int = 0,
     dateFormat: String = "",
     chapter: Chapter?,
     onChapter: (chapter: Chapter) -> Unit,
@@ -50,7 +50,7 @@ fun ReaderScreenDrawer(
     ) {
         Spacer(modifier = modifier.height(5.dp))
         Box(modifier = Modifier.fillMaxWidth()) {
-            BigSizeTextComposable(text =stringResource(R.string.content), modifier = Modifier.align(Alignment.Center))
+            BigSizeTextComposable(text = stringResource(R.string.content), modifier = Modifier.align(Alignment.Center))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End,
@@ -58,7 +58,7 @@ fun ReaderScreenDrawer(
             ) {
                 Box {}
 
-                AppIconButton(imageVector = Icons.Filled.Place,contentDescription = stringResource(R.string.find_current_chapter), onClick = {
+                AppIconButton(imageVector = Icons.Filled.Place, contentDescription = stringResource(R.string.find_current_chapter), onClick = {
                     onMap(drawerScrollState)
                 })
                 AppIconButton(
@@ -83,7 +83,7 @@ fun ReaderScreenDrawer(
                         modifier = modifier,
                         chapter = chapters[index],
                         onItemClick = { onChapter(chapters[index]) },
-                        isLastRead = chapter?.id ==chapters[index].id,
+                        isLastRead = chapter?.id == chapters[index].id,
                     )
                 }
             }

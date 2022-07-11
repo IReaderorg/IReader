@@ -34,11 +34,8 @@ class ReaderSettingScreenViewModel @Inject constructor(
     val scrollbarMode = readerPreferences.scrollbarMode().asState()
     val font = readerPreferences.font().asState()
 
-
     val selectableMode = readerPreferences.selectableText().asState()
     val fontSize = readerPreferences.fontSize().asState()
     val distanceBetweenParagraphs = readerPreferences.paragraphDistance().asState()
     val verticalScrolling = readerPreferences.scrollMode().asState()
 }
-
-

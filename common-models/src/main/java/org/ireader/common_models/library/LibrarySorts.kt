@@ -16,8 +16,8 @@ data class LibrarySort(val type: Type, val isAscending: Boolean) {
         Source;
 
         companion object {
-            fun name(type: Type) : UiText {
-               return when(type) {
+            fun name(type: Type): UiText {
+                return when (type) {
                     Type.DateFetched -> UiText.StringResource(R.string.date_fetched)
                     Type.DateAdded -> UiText.StringResource(R.string.date_added)
                     Type.Title -> UiText.StringResource(R.string.title)
@@ -29,9 +29,7 @@ data class LibrarySort(val type: Type, val isAscending: Boolean) {
                 }
             }
         }
-
     }
-
 
     companion object {
         val types = Type.values()

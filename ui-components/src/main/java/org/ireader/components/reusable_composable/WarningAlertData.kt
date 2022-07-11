@@ -26,7 +26,8 @@ fun WarningAlert(
             title = if (data.title.value != null) {
                 {
                     MidSizeTextComposable(text = data.title.value!!)
-                } } else null,
+                }
+            } else null,
             text = if (data.text.value != null) {
                 {
                     MidSizeTextComposable(text = data.text.value!!)

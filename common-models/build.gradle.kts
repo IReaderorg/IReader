@@ -16,7 +16,6 @@ dependencies {
     implementation(kotlinx.datetime)
     implementation(composeLib.material3.core)
 
-
     implementation(commonLib.room.runtime)
     implementation(commonLib.room.ktx)
     kapt(commonLib.room.compiler)

@@ -15,13 +15,13 @@ buildscript {
     }
     dependencies {
         classpath(commonLib.gradle.tools)
-        classpath(commonLib.gradle.kotlin)
+        classpath(kotlinx.gradle.kotlin)
         classpath(commonLib.gradle.kotlinSerialization)
         classpath(commonLib.gradle.hilt)
         classpath(commonLib.gradle.google)
         classpath(commonLib.gradle.firebaseCrashlytic)
         classpath(commonLib.gradle.idea.ext)
-        classpath("com.vanniktech:gradle-maven-publish-plugin:0.19.0")
+        classpath("com.vanniktech:gradle-maven-publish-plugin:0.20.0")
     }
 }
 

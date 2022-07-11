@@ -59,7 +59,6 @@ object HistoryScreenSpec : BottomNavScreenSpec {
                         }
                     }
                 }
-
             },
             scrollBehavior = controller.scrollBehavior
 
@@ -121,7 +120,6 @@ object HistoryScreenSpec : BottomNavScreenSpec {
                         }
                     }
                 }
-
             },
             onLongClickDelete = { history ->
                 vm.warningAlert.value.apply {
@@ -139,7 +137,6 @@ object HistoryScreenSpec : BottomNavScreenSpec {
                         }
                     }
                 }
-
             }
         )
     }

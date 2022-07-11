@@ -57,8 +57,8 @@ class LocalModule {
             buildTime = BuildConfig.BUILD_TIME,
             commitCount = BuildConfig.COMMIT_COUNT,
             commitSHA = BuildConfig.COMMIT_SHA,
-            includeUpdater =BuildConfig.INCLUDE_UPDATER ,
-            preview =BuildConfig.PREVIEW ,
+            includeUpdater = BuildConfig.INCLUDE_UPDATER,
+            preview = BuildConfig.PREVIEW,
             versionCode = BuildConfig.VERSION_CODE,
             versionName = BuildConfig.VERSION_NAME,
             applicationId = BuildConfig.APPLICATION_ID
@@ -76,12 +76,11 @@ class LocalModule {
         return WebViewManger(context)
     }
 
-
     @OptIn(ExperimentalTextApi::class)
     @Provides
     @Singleton
     fun provideGoogleFontProvider(): GoogleFont.Provider {
-        return  GoogleFont.Provider(
+        return GoogleFont.Provider(
             providerAuthority = "com.google.android.gms.fonts",
             providerPackage = "com.google.android.gms",
             certificates = R.array.com_google_android_gms_fonts_certs
@@ -93,7 +92,7 @@ class LocalModule {
     fun provideActivityCoroutineScope(
         @DefaultDispatcher defaultDispatcher: CoroutineDispatcher
     ): CoroutineScope {
-        return CoroutineScope(defaultDispatcher +  SupervisorJob())
+        return CoroutineScope(defaultDispatcher + SupervisorJob())
     }
     @DefaultDispatcher
     @Provides

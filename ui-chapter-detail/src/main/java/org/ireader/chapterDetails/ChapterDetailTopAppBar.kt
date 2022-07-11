@@ -48,7 +48,7 @@ fun ChapterDetailTopAppBar(
                     onClickSelectAll = onClickSelectAll,
                     onClickInvertSelection = onClickFlipSelection,
                     onSelectBetween = onSelectBetween,
-                    scrollBehavior=scrollBehavior
+                    scrollBehavior = scrollBehavior
                 )
             }
             else -> {
@@ -56,7 +56,7 @@ fun ChapterDetailTopAppBar(
                     onReverseClick = onReverseClick,
                     onPopBackStack = onPopBackStack,
                     onMap = onMap,
-                    scrollBehavior=scrollBehavior,
+                    scrollBehavior = scrollBehavior,
                     vm = state
                 )
             }
@@ -67,7 +67,7 @@ fun ChapterDetailTopAppBar(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RegularChapterDetailTopAppBar(
-    vm:ChapterDetailViewModel,
+    vm: ChapterDetailViewModel,
     onReverseClick: () -> Unit,
     onPopBackStack: () -> Unit,
     onMap: () -> Unit,
@@ -82,7 +82,7 @@ fun RegularChapterDetailTopAppBar(
                 BigSizeTextComposable(text = stringResource(R.string.content))
             } else {
                 AppTextField(
-                    query = vm.query?:"",
+                    query = vm.query ?: "",
                     onValueChange = { query ->
                         vm.query = query
                     },
@@ -99,13 +99,20 @@ fun RegularChapterDetailTopAppBar(
             if (vm.searchMode) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
-                    contentDescription = stringResource( R.string.close),
+                    contentDescription = stringResource(R.string.close),
                     onClick = {
                         vm.searchMode = false
                         vm.query = null
                     },
                 )
             } else {
+                AppIconButton(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = stringResource(R.string.search),
+                    onClick = {
+                        vm.searchMode = true
+                    },
+                )
                 AppIconButton(
                     imageVector = Icons.Filled.Place,
                     contentDescription = stringResource(R.string.find_current_chapter),
@@ -116,15 +123,7 @@ fun RegularChapterDetailTopAppBar(
                     contentDescription = stringResource(R.string.sort),
                     onClick = onReverseClick
                 )
-                AppIconButton(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = stringResource( R.string.search),
-                    onClick = {
-                        vm.searchMode = true
-                    },
-                )
             }
-
         },
         navigationIcon = {
             AppIconButton(
@@ -147,7 +146,7 @@ private fun EditModeChapterDetailTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Toolbar(
-        scrollBehavior=scrollBehavior,
+        scrollBehavior = scrollBehavior,
         title = { BigSizeTextComposable(text = "$selectionSize") },
         navigationIcon = {
             AppIconButton(
@@ -175,4 +174,3 @@ private fun EditModeChapterDetailTopAppBar(
         }
     )
 }
-

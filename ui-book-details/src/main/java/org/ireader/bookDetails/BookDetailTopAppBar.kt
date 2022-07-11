@@ -31,11 +31,11 @@ fun BookDetailTopAppBar(
     onRefresh: () -> Unit,
     onPopBackStack: () -> Unit,
     onCommand: () -> Unit,
-    onShare:() -> Unit,
+    onShare: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior?
 ) {
     Toolbar(
-        scrollBehavior=scrollBehavior,
+        scrollBehavior = scrollBehavior,
         title = {},
         applyInsets = true,
         backgroundColor = Color.Transparent,
@@ -83,7 +83,6 @@ fun BookDetailTopAppBar(
                     )
                 }
             }
-
         },
         navigationIcon = {
             TopAppBarBackButton(onClick = onPopBackStack)

@@ -11,7 +11,6 @@ import org.ireader.core_api.http.HttpClients
 import org.ireader.core_catalogs.service.CatalogRemoteApi
 import org.ireader.core_ui.CatalogNotFoundException
 
-
 class CatalogGithubApi(
     private val httpClient: HttpClients,
 ) : CatalogRemoteApi {

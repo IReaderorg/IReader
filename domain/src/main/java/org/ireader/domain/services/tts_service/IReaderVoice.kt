@@ -3,12 +3,12 @@ package org.ireader.domain.services.tts_service
 import android.speech.tts.Voice
 import org.ireader.core_ui.theme.prefs.IReaderVoice
 
-//@Serializable
-//data class IReaderVoice(
+// @Serializable
+// data class IReaderVoice(
 //    val name: String,
 //    val language: String,
 //    val country:String
-//)
+// )
 
 fun Voice.toIReaderVoice(): IReaderVoice {
     return IReaderVoice(
@@ -19,6 +19,6 @@ fun Voice.toIReaderVoice(): IReaderVoice {
     )
 }
 
-fun Voice.isSame(iReaderVoice: IReaderVoice?) : Boolean {
-    return this.name == iReaderVoice?.name && this.locale.country == iReaderVoice?.country &&  this.locale.language == iReaderVoice?.language
+fun Voice.isSame(iReaderVoice: IReaderVoice?): Boolean {
+    return this.name == iReaderVoice?.name && this.locale.country == iReaderVoice?.country && this.locale.language == iReaderVoice?.language
 }

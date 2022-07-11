@@ -9,25 +9,30 @@ import org.ireader.common_models.entities.BookCategory
 @Dao
 interface BookCategoryDao : BaseDao<BookCategory> {
 
-    @Query("""
+    @Query(
+        """
         SELECT bookcategory.* FROM bookcategory
-    """)
+    """
+    )
     fun subscribeAll(): Flow<List<BookCategory>>
-    @Query("""
+    @Query(
+        """
         SELECT bookcategory.* FROM bookcategory
-    """)
+    """
+    )
     suspend fun findAll(): List<BookCategory>
 
-    @Query("""
+    @Query(
+        """
         DELETE FROM bookcategory WHERE bookId = :bookId
-    """)
-    suspend fun delete(bookId:Long)
+    """
+    )
+    suspend fun delete(bookId: Long)
 
     @Transaction
     suspend fun insertOrUpdate(objList: List<org.ireader.common_models.entities.BookCategory>) {
         val insertResult = insert(objList)
         val updateList = mutableListOf<org.ireader.common_models.entities.BookCategory>()
-
 
         for (i in insertResult.indices) {
             if (insertResult[i] == -1L) {
@@ -47,12 +52,9 @@ interface BookCategoryDao : BaseDao<BookCategory> {
         for (i in insertResult.indices) {
             if (insertResult[i] == -1L) {
                 updateList.add(objectToInsert[i])
-
             }
         }
 
         if (updateList.isNotEmpty()) update(updateList)
     }
-
-
 }

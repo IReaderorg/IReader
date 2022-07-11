@@ -47,7 +47,7 @@ class FontPreferences @OptIn(ExperimentalTextApi::class) constructor(
                 fontFamily
             )
         }.getOrElse {
-            FontType("Roboto",FontFamily.Default)
+            FontType("Roboto", FontFamily.Default)
         }
     }
 
@@ -55,7 +55,7 @@ class FontPreferences @OptIn(ExperimentalTextApi::class) constructor(
         return if (isSet()) {
             getFont()
         } else {
-            FontType("Roboto",FontFamily.Default)
+            FontType("Roboto", FontFamily.Default)
         }
     }
 
@@ -76,7 +76,7 @@ class FontPreferences @OptIn(ExperimentalTextApi::class) constructor(
     }
 
     override fun defaultValue(): FontType {
-        return  getDefaultFont()
+        return getDefaultFont()
     }
 
     override fun changes(): Flow<FontType> {
@@ -89,8 +89,6 @@ class FontPreferences @OptIn(ExperimentalTextApi::class) constructor(
     }
 }
 
-
-
 fun Preference<String>.asFont(provider: GoogleFont.Provider): FontPreferences {
-    return FontPreferences(this,provider)
+    return FontPreferences(this, provider)
 }

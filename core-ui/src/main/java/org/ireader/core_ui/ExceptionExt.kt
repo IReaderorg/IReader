@@ -54,4 +54,3 @@ class CatalogNotFoundException : Exception()
 fun UiText.StringResource.asString(): String {
     return LocalContext.current.getString(resId)
 }
-

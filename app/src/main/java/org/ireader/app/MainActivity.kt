@@ -18,21 +18,18 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 @ActivityScoped
-class MainActivity : ComponentActivity(),SecureActivityDelegate by SecureActivityDelegateImpl() {
+class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivityDelegateImpl() {
 
     @Inject
     lateinit var backUpUseCases: BackUpUseCases
     @Inject lateinit var uiPreferences: UiPreferences
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        registerSecureActivity(this,uiPreferences)
+        registerSecureActivity(this, uiPreferences)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         installSplashScreen()
-
 
         setContent {
             AppTheme {
@@ -40,21 +37,13 @@ class MainActivity : ComponentActivity(),SecureActivityDelegate by SecureActivit
                     color = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.onSurface,
 
-                    ) {
+                ) {
                     ScreenContent()
                 }
             }
         }
     }
-
-
 }
 interface SecureActivityDelegate {
-    fun registerSecureActivity(activity: ComponentActivity,preferences:UiPreferences)
-
+    fun registerSecureActivity(activity: ComponentActivity, preferences: UiPreferences)
 }
-
-
-
-
-

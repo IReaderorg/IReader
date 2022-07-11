@@ -44,7 +44,6 @@ android {
     }
 }
 
-
 dependencies {
 
     implementation(project(Modules.coreApi))
@@ -69,11 +68,8 @@ dependencies {
     implementation(composeLib.material3.core)
     implementation(project(mapOf("path" to ":core-ui")))
 
-
     kapt(commonLib.hilt.androidcompiler)
     implementation(commonLib.hilt.android)
-
-
 
     implementation(commonLib.jsoup)
 

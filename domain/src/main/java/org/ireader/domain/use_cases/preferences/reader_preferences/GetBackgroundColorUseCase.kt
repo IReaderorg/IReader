@@ -22,7 +22,7 @@ class TextColorUseCase(
         prefs.textColorReader().set(value)
     }
 
-    suspend  fun read(): Color {
+    suspend fun read(): Color {
         return prefs.textColorReader().get()
     }
 }

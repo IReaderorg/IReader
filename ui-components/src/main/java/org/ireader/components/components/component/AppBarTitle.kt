@@ -77,7 +77,7 @@ fun AppBarActions(
                         it.onClick()
                         showMenu = false
                     },
-                    text =  { Text(it.title) }
+                    text = { Text(it.title) }
                 )
             }
         }

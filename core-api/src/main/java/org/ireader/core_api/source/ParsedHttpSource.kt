@@ -21,30 +21,30 @@ import java.security.MessageDigest
 @Keep
 abstract class ParsedHttpSource(private val dependencies: Dependencies) : HttpSource(dependencies) {
 
-
     override val id: Long by lazy {
         val key = "${name.lowercase()}/$lang/$versionId"
         val bytes = MessageDigest.getInstance("MD5").digest(key.toByteArray())
         (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }
-                .reduce(Long::or) and Long.MAX_VALUE
+            .reduce(Long::or) and Long.MAX_VALUE
     }
 
     open fun getUserAgent() =
         "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36"
-    open fun HttpRequestBuilder.headersBuilder(block: HeadersBuilder.() -> Unit = {
-        append(HttpHeaders.UserAgent, getUserAgent())
-        append(HttpHeaders.CacheControl, "max-age=0")
-    }) {
+    open fun HttpRequestBuilder.headersBuilder(
+        block: HeadersBuilder.() -> Unit = {
+            append(HttpHeaders.UserAgent, getUserAgent())
+            append(HttpHeaders.CacheControl, "max-age=0")
+        }
+    ) {
         headers(block)
     }
 
-
     fun requestBuilder(
-            url: String,
-            block: HeadersBuilder.() -> Unit = {
-                append(HttpHeaders.UserAgent, getUserAgent())
-                append(HttpHeaders.CacheControl, "max-age=0")
-            }
+        url: String,
+        block: HeadersBuilder.() -> Unit = {
+            append(HttpHeaders.UserAgent, getUserAgent())
+            append(HttpHeaders.CacheControl, "max-age=0")
+        }
     ): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
             url(url)
@@ -52,12 +52,10 @@ abstract class ParsedHttpSource(private val dependencies: Dependencies) : HttpSo
         }
     }
 
-
     protected open fun detailRequest(manga: MangaInfo): HttpRequestBuilder {
         return HttpRequestBuilder().apply {
             url(manga.key)
             headersBuilder()
-
         }
     }
 
@@ -89,7 +87,6 @@ abstract class ParsedHttpSource(private val dependencies: Dependencies) : HttpSo
 
     abstract fun chapterFromElement(element: Element): ChapterInfo
 
-
     fun bookListParse(document: Document, elementSelector: String, nextPageSelector: String?, parser: (element: Element) -> MangaInfo): MangasPageInfo {
         val books = document.select(elementSelector).map { element ->
             parser(element)
@@ -108,11 +105,9 @@ abstract class ParsedHttpSource(private val dependencies: Dependencies) : HttpSo
         return document.select(chaptersSelector()).map { chapterFromElement(it) }
     }
 
-
     abstract fun pageContentParse(
-            document: Document,
+        document: Document,
     ): List<String>
-
 
     abstract fun detailParse(document: Document): MangaInfo
 }

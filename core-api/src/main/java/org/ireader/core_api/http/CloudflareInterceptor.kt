@@ -29,11 +29,9 @@ import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-class CloudflareInterceptor(private val context: Context,private val webViewCookieJar: WebViewCookieJar) : Interceptor {
+class CloudflareInterceptor(private val context: Context, private val webViewCookieJar: WebViewCookieJar) : Interceptor {
 
     private val executor = ContextCompat.getMainExecutor(context)
-
-
 
     /**
      * When this is called, it initializes the WebView if it wasn't already. We use this to avoid
@@ -230,7 +228,7 @@ object WebViewUtil {
 
     const val MINIMUM_WEBVIEW_VERSION = 99
 
-        const val DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36 Edg/88.0.705.63"
+    const val DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36 Edg/88.0.705.63"
 
     fun supportsWebView(context: Context): Boolean {
         try {

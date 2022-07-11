@@ -5,7 +5,6 @@ import org.ireader.domain.use_cases.local.book_usecases.FindBookById
 import org.ireader.domain.use_cases.local.book_usecases.SubscribeBookById
 import org.ireader.domain.use_cases.local.book_usecases.SubscribeInLibraryBooks
 
-
 data class LocalGetBookUseCases(
     val subscribeBookById: SubscribeBookById,
     val findBookById: FindBookById,

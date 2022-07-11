@@ -34,7 +34,7 @@ fun UpdatesContent(
             state.updates.forEach { (date, updates) ->
                 item {
                     TextSection(
-                        text =date.asRelativeTimeString(range = state.relativeFormat)
+                        text = date.asRelativeTimeString(range = state.relativeFormat)
                     )
                 }
                 items(

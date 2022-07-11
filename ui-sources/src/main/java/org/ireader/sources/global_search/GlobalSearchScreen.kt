@@ -66,22 +66,22 @@ fun GlobalSearchScreen(
 //                .padding(padding)
 //                .verticalScroll(rememberScrollState()),
 //        ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-             .padding(padding)) {
-                items(count = allSearch.size) { index ->
-                    GlobalSearchBookInfo(
-                        allSearch[index],
-                        onBook = onBook,
-                        goToExplore = { onGoToExplore(index) }
-                    )
-                }
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            items(count = allSearch.size) { index ->
+                GlobalSearchBookInfo(
+                    allSearch[index],
+                    onBook = onBook,
+                    goToExplore = { onGoToExplore(index) }
+                )
             }
         }
+    }
 //    }
 }
-
 
 @Composable
 fun GlobalSearchBookInfo(
@@ -116,13 +116,13 @@ fun GlobalSearchBookInfo(
                 DotsFlashing(book.loading)
                 AppIconButton(
                     imageVector = Icons.Default.ArrowForward,
-                   contentDescription = stringResource(R.string.open_explore),
+                    contentDescription = stringResource(R.string.open_explore),
                     onClick = goToExplore
                 )
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
-        LazyRow(modifier= Modifier) {
+        LazyRow(modifier = Modifier) {
             items(book.items.size) { index ->
                 BookImage(
                     modifier = Modifier

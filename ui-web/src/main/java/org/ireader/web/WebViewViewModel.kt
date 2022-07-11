@@ -31,7 +31,6 @@ import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import javax.inject.Inject
 
-
 @HiltViewModel
 class WebViewPageModel @Inject constructor(
     private val insertUseCases: LocalInsertUseCases,
@@ -62,7 +61,7 @@ class WebViewPageModel @Inject constructor(
         sourceId?.let {
             viewModelScope.launch {
                 extensions.get(sourceId)?.let {
-                        catalog = it
+                    catalog = it
                 }
             }
         }
@@ -75,8 +74,6 @@ class WebViewPageModel @Inject constructor(
         updateWebUrl(url = url)
     }
 
-
-
     fun toggleLoading(loading: Boolean) {
         isLoading = loading
     }
@@ -85,11 +82,9 @@ class WebViewPageModel @Inject constructor(
         this.url = url
     }
 
-
     fun updateWebUrl(url: String) {
         webUrl = url
     }
-
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getContentFromWebView(
@@ -115,11 +110,9 @@ class WebViewPageModel @Inject constructor(
                     } else {
                         showSnackBar(UiText.StringResource(R.string.failed))
                     }
-
                 },
                 commands = listOf(Command.Content.Fetch(url = url, pageSource))
             )
-
         }
     }
 
@@ -151,7 +144,6 @@ class WebViewPageModel @Inject constructor(
                 commands = listOf(Command.Chapter.Fetch(url = url, pageSource)),
                 oldChapters = localChapters
             )
-
         }
     }
 
@@ -164,7 +156,7 @@ class WebViewPageModel @Inject constructor(
             val pageSource = webView.getHtml()
             val url = webView.originalUrl ?: ""
             remoteUseCases.getBookDetail(
-                book ?: Book(key = "", title = "", sourceId = source?.id?:0),
+                book ?: Book(key = "", title = "", sourceId = source?.id ?: 0),
                 catalog,
                 onError = {
                     showSnackBar(UiText.StringResource(R.string.failed))
@@ -177,11 +169,9 @@ class WebViewPageModel @Inject constructor(
                     } else {
                         showSnackBar(UiText.StringResource(R.string.failed))
                     }
-
                 },
                 commands = listOf(Command.Detail.Fetch(url = url, pageSource))
             )
-
         }
     }
 
@@ -217,7 +207,6 @@ interface WebViewPageState {
     var webView: WebView?
     var webViewState: WebViewState?
 
-
     var url: String
     var webUrl: String
     var isLoading: Boolean
@@ -237,9 +226,9 @@ interface WebViewPageState {
     var webBook: Book?
     var webChapters: List<Chapter>
 
-    var enableChapterFetch:Boolean
-    var enableChaptersFetch:Boolean
-    var enableBookFetch:Boolean
+    var enableChapterFetch: Boolean
+    var enableChaptersFetch: Boolean
+    var enableBookFetch: Boolean
 }
 
 open class WebViewPageStateImpl @Inject constructor() : WebViewPageState {

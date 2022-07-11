@@ -9,7 +9,6 @@ import javax.inject.Inject
 class ChapterRepositoryImpl @Inject constructor(private val daoLibrary: ChapterDao) :
     org.ireader.common_data.repository.ChapterRepository {
 
-
     override suspend fun findAllChapters(): List<org.ireader.common_models.entities.Chapter> {
         return daoLibrary.findAllChapters()
     }
@@ -27,7 +26,7 @@ class ChapterRepositoryImpl @Inject constructor(private val daoLibrary: ChapterD
     }
 
     override fun subscribeChaptersByBookId(bookId: Long, sort: String): Flow<List<Chapter>> {
-        return daoLibrary.subscribe(bookId,sort)
+        return daoLibrary.subscribe(bookId, sort)
     }
 
     override fun subscribeChaptersByBookId(bookId: Long, isAsc: Boolean): Flow<List<org.ireader.common_models.entities.Chapter>> {
@@ -38,7 +37,6 @@ class ChapterRepositoryImpl @Inject constructor(private val daoLibrary: ChapterD
     override suspend fun findChaptersByBookId(bookId: Long, isAsc: Boolean): List<org.ireader.common_models.entities.Chapter> {
         return daoLibrary.findChaptersByBookId(bookId, isAsc)
     }
-
 
     override suspend fun findChaptersByKey(key: String): List<org.ireader.common_models.entities.Chapter> {
         return daoLibrary.findChaptersByKey(key = key)
@@ -67,8 +65,8 @@ class ChapterRepositoryImpl @Inject constructor(private val daoLibrary: ChapterD
     /******************************Insert******************************/
     override suspend fun insertChapters(
         chapters: List<org.ireader.common_models.entities.Chapter>,
-    ) :List<Long> {
-     return   daoLibrary.insertOrUpdate(chapters)
+    ): List<Long> {
+        return daoLibrary.insertOrUpdate(chapters)
     }
 
     override suspend fun insertChapter(chapter: org.ireader.common_models.entities.Chapter): Long {
@@ -92,5 +90,4 @@ class ChapterRepositoryImpl @Inject constructor(private val daoLibrary: ChapterD
     override suspend fun deleteAllChapters() {
         return daoLibrary.deleteAllChapters()
     }
-
 }

@@ -9,7 +9,7 @@ class FontHeightUseCase(
         prefs.lineHeight().set(fontHeight)
     }
 
-    suspend  fun read(): Int {
+    suspend fun read(): Int {
         return prefs.lineHeight().get()
     }
 }

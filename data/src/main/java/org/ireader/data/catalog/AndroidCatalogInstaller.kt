@@ -50,7 +50,7 @@ class AndroidCatalogInstaller(
                 }.body()
                 apkResponse.saveTo(tmpApkFile)
                 emit(InstallStep.Idle)
-                val result = packageInstaller.install(tmpApkFile,catalog.pkgName)
+                val result = packageInstaller.install(tmpApkFile, catalog.pkgName)
                 if (result is InstallStep.Success) {
                     installationChanges.notifyAppInstall(catalog.pkgName)
                 }
@@ -60,7 +60,6 @@ class AndroidCatalogInstaller(
                 emit(InstallStep.Error(UiText.ExceptionString(e)))
             } finally {
                 tmpApkFile.delete()
-
             }
         }
 

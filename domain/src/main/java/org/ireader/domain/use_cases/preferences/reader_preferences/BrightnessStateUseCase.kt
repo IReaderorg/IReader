@@ -3,7 +3,7 @@ package org.ireader.domain.use_cases.preferences.reader_preferences
 import org.ireader.core_ui.preferences.ReaderPreferences
 
 class BrightnessStateUseCase(
-    private val prefs:ReaderPreferences,
+    private val prefs: ReaderPreferences,
 ) {
     fun saveBrightness(brightness: Float) {
         return prefs.brightness().set(brightness)
@@ -41,7 +41,7 @@ class ImmersiveModeUseCase(
         return prefs.immersiveMode().set(mode)
     }
 
-    suspend  fun read(): Boolean {
+    suspend fun read(): Boolean {
         return prefs.immersiveMode().get()
     }
 }
@@ -71,7 +71,7 @@ class ScrollIndicatorUseCase(
     suspend fun isShow(): Boolean {
         return prefs.showScrollIndicator().get()
     }
-    fun setIsShown(show:Boolean) {
+    fun setIsShown(show: Boolean) {
         return prefs.showScrollIndicator().set(show)
     }
 }

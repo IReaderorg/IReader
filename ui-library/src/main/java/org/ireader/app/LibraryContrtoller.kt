@@ -19,10 +19,10 @@ import org.ireader.common_models.entities.toBookCategory
 @Composable
 fun LibraryController(
     modifier: Modifier,
-    vm:LibraryViewModel,
-    controller:Controller,
-    goToReader:(BookItem) -> Unit,
-    goToDetail:(BookItem) -> Unit,
+    vm: LibraryViewModel,
+    controller: Controller,
+    goToReader: (BookItem) -> Unit,
+    goToDetail: (BookItem) -> Unit,
 
 ) {
 
@@ -42,7 +42,6 @@ fun LibraryController(
         },
         goToLatestChapter = { book ->
             goToReader(book)
-
         },
         onBook = { book ->
             if (vm.selectionMode) {
@@ -70,7 +69,7 @@ fun LibraryController(
         scaffoldPadding = controller.scaffoldPadding,
         requestHideBottomNav = controller.requestHideNavigator,
         getColumnsForOrientation = { isLandscape ->
-            vm.getColumnsForOrientation(isLandscape,this)
+            vm.getColumnsForOrientation(isLandscape, this)
         },
         editCategoryDismissDialog = {
             vm.showDialog = false
@@ -78,7 +77,7 @@ fun LibraryController(
             vm.addQueues.clear()
             vm.deleteQueues.clear()
         },
-        editCategoryOnAddDeleteQueue = {category ->
+        editCategoryOnAddDeleteQueue = { category ->
             vm.deleteQueues.addAll(category.toBookCategory(vm.selectedBooks))
         },
         editCategoryOnAddToInsertQueue = { category ->
@@ -99,12 +98,11 @@ fun LibraryController(
         editCategoryOnRemoteInDeleteQueue = { category ->
             vm.deleteQueues.removeIf { it.categoryId == category.id }
         },
-        editCategoryOnRemoteInInsertQueue =  { category ->
+        editCategoryOnRemoteInInsertQueue = { category ->
             vm.addQueues.removeIf { it.categoryId == category.id }
         },
         onPagerPageChange = {
             vm.setSelectedPage(it)
         }
     )
-
 }

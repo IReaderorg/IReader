@@ -25,7 +25,7 @@ class BookRepositoryImpl(
         return bookDao.findBookById(id)
     }
 
-    override suspend fun find(key: String, sourceId: Long):Book? {
+    override suspend fun find(key: String, sourceId: Long): Book? {
         return bookDao.find(key, sourceId)
     }
 
@@ -36,7 +36,6 @@ class BookRepositoryImpl(
     ): List<Book> {
         return bookDao.findAllInLibraryBooks()
     }
-
 
     /*******************GET **************************************/
 
@@ -80,7 +79,6 @@ class BookRepositoryImpl(
         remoteKeysDao.delete(book)
     }
 
-
     override suspend fun insertBooksAndChapters(books: List<org.ireader.common_models.entities.Book>, chapters: List<org.ireader.common_models.entities.Chapter>) {
         bookDao.insertBooksAndChapters(books, chapters)
     }
@@ -97,7 +95,7 @@ class BookRepositoryImpl(
         return bookDao.update(book)
     }
 
-    override suspend fun updateBook(book: LibraryBook,favorite:Boolean) {
+    override suspend fun updateBook(book: LibraryBook, favorite: Boolean) {
         return bookDao.updateLibraryBook(id = book.id, favorite = favorite)
     }
 

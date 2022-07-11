@@ -29,12 +29,10 @@ object AboutSettingSpec : ScreenSpec {
     ) {
         TitleToolbar(
             title = stringResource(R.string.about),
-            navController =controller. navController,
+            navController = controller.navController,
             scrollBehavior = controller.scrollBehavior
         )
     }
-
-
 
     @OptIn(
         ExperimentalAnimationApi::class,
@@ -47,7 +45,7 @@ object AboutSettingSpec : ScreenSpec {
         AboutSettingScreen(
             modifier = Modifier.padding(controller.scaffoldPadding),
             onPopBackStack = {
-                controller. navController.popBackStack()
+                controller.navController.popBackStack()
             },
             getFormattedBuildTime = this::getFormattedBuildTime,
         )
@@ -71,5 +69,3 @@ object AboutSettingSpec : ScreenSpec {
         }
     }
 }
-
-

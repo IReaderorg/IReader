@@ -4,17 +4,17 @@ import android.content.Context
 import org.ireader.common_models.entities.Category
 import org.ireader.core_api.prefs.Preference
 
-//sealed class DisplayMode(val title: Int, val layout: LayoutType, val layoutIndex: Int) {
+// sealed class DisplayMode(val title: Int, val layout: LayoutType, val layoutIndex: Int) {
 //    object CompactModel : DisplayMode(R.string.compact_layout, layout = LayoutType.CompactGrid, 0)
 //    object GridLayout : DisplayMode(R.string.grid_layout, layout = LayoutType.GridLayout, 1)
 //    object ListLayout : DisplayMode(R.string.list_layout, layout = LayoutType.ListLayout, 2)
-//}
+// }
 //
-//val layouts = listOf<DisplayMode>(
+// val layouts = listOf<DisplayMode>(
 //    DisplayMode.CompactModel,
 //    DisplayMode.GridLayout,
 //    DisplayMode.ListLayout,
-//)
+// )
 interface Flag {
     val flag: Long
 }
@@ -60,7 +60,7 @@ enum class DisplayMode(override val flag: Long) : Flag {
     }
 }
 
-fun DisplayMode.getLayoutName(context: Context) : String{
+fun DisplayMode.getLayoutName(context: Context): String {
     return when (this) {
         DisplayMode.CompactGrid -> {
             context.getString(R.string.compact_layout)
