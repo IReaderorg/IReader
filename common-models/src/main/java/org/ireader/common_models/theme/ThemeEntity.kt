@@ -9,13 +9,19 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
+@Entity(tableName = "reader_theme_table")
+data class ReaderTheme(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val backgroundColor: Int,
+    val onTextColor: Int,
+    val isDefault: Boolean =false
+)
 
-
-
-@Serializable
+@kotlinx.serialization.Serializable
 @Entity(tableName = "theme_table")
 data class CustomTheme(
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey(autoGenerate = false)
     val id: Long = 0,
     @Embedded(prefix = "light-")
     val lightColor: CustomColorScheme,
@@ -28,7 +34,10 @@ data class CustomTheme(
     val isDefault:Boolean = false
 )
 
-@Serializable
+
+
+
+@kotlinx.serialization.Serializable
 data class CustomColorScheme(
     val primary: Int,
     val onPrimary: Int,

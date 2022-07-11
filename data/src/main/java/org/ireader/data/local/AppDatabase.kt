@@ -18,7 +18,7 @@ import org.ireader.common_models.entities.History
 import org.ireader.common_models.entities.RemoteKeys
 import org.ireader.common_models.entities.Update
 import org.ireader.common_models.theme.CustomTheme
-import org.ireader.core_ui.theme.themes
+import org.ireader.common_models.theme.ReaderTheme
 import org.ireader.data.local.dao.BookCategoryDao
 import org.ireader.data.local.dao.CatalogDao
 import org.ireader.data.local.dao.CategoryDao
@@ -27,10 +27,10 @@ import org.ireader.data.local.dao.DownloadDao
 import org.ireader.data.local.dao.HistoryDao
 import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.LibraryDao
+import org.ireader.data.local.dao.ReaderThemeDao
 import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.data.local.dao.ThemeDao
 import org.ireader.data.local.dao.UpdatesDao
-import org.ireader.domain.use_cases.theme.toCustomTheme
 import java.util.concurrent.Executors
 
 @Database(
@@ -44,9 +44,10 @@ import java.util.concurrent.Executors
         Update::class,
         RemoteKeys::class,
         BookCategory::class,
-        CustomTheme::class
+        CustomTheme::class,
+        ReaderTheme::class
     ],
-    version = 24,
+    version = 25,
     exportSchema = true,
 )
 @TypeConverters(DatabaseConverter::class)
@@ -63,6 +64,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract val categoryDao: CategoryDao
     abstract val bookCategoryDao: BookCategoryDao
     abstract val themeDao: ThemeDao
+    abstract val readerThemeDao: ReaderThemeDao
 
     companion object {
         private const val DATABASE_NAME = "infinity_db"
@@ -112,24 +114,23 @@ abstract class AppDatabase : RoomDatabase() {
                             """.trimIndent()
                             )
                         }
-
-                        Executors.newSingleThreadExecutor().execute {
-                            INSTANCE?.themeDao?.insertThemes(themes.map { it.toCustomTheme() })
-                            db.execSQL(
-                                """
-                                CREATE TRIGGER IF NOT EXISTS system_themes_deletion_trigger BEFORE DELETE ON theme_table
-                                BEGIN SELECT CASE
-                                  WHEN old.isDefault == 1 THEN
-                                    RAISE(ABORT, 'System theme cant be deleted')
-                                  END;
-                                END
-                            """.trimIndent()
-                            )
-                        }
                     }
                 })
                 .fallbackToDestructiveMigration()
                 .build()
+    }
+}
+
+internal fun MIGRATION_24_25() = object : Migration(24, 25) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("DROP TABLE IF EXISTS `theme_table`")
+        database.execSQL("CREATE TABLE IF NOT EXISTS `theme_table` (`id` INTEGER NOT NULL, `isDefault` INTEGER NOT NULL, `light-primary` INTEGER NOT NULL, `light-onPrimary` INTEGER NOT NULL, `light-primaryContainer` INTEGER NOT NULL, `light-onPrimaryContainer` INTEGER NOT NULL, `light-inversePrimary` INTEGER NOT NULL, `light-secondary` INTEGER NOT NULL, `light-onSecondary` INTEGER NOT NULL, `light-secondaryContainer` INTEGER NOT NULL, `light-onSecondaryContainer` INTEGER NOT NULL, `light-tertiary` INTEGER NOT NULL, `light-onTertiary` INTEGER NOT NULL, `light-tertiaryContainer` INTEGER NOT NULL, `light-onTertiaryContainer` INTEGER NOT NULL, `light-background` INTEGER NOT NULL, `light-onBackground` INTEGER NOT NULL, `light-surface` INTEGER NOT NULL, `light-onSurface` INTEGER NOT NULL, `light-surfaceVariant` INTEGER NOT NULL, `light-onSurfaceVariant` INTEGER NOT NULL, `light-surfaceTint` INTEGER NOT NULL, `light-inverseSurface` INTEGER NOT NULL, `light-inverseOnSurface` INTEGER NOT NULL, `light-error` INTEGER NOT NULL, `light-onError` INTEGER NOT NULL, `light-errorContainer` INTEGER NOT NULL, `light-onErrorContainer` INTEGER NOT NULL, `light-outline` INTEGER NOT NULL, `dark-primary` INTEGER NOT NULL, `dark-onPrimary` INTEGER NOT NULL, `dark-primaryContainer` INTEGER NOT NULL, `dark-onPrimaryContainer` INTEGER NOT NULL, `dark-inversePrimary` INTEGER NOT NULL, `dark-secondary` INTEGER NOT NULL, `dark-onSecondary` INTEGER NOT NULL, `dark-secondaryContainer` INTEGER NOT NULL, `dark-onSecondaryContainer` INTEGER NOT NULL, `dark-tertiary` INTEGER NOT NULL, `dark-onTertiary` INTEGER NOT NULL, `dark-tertiaryContainer` INTEGER NOT NULL, `dark-onTertiaryContainer` INTEGER NOT NULL, `dark-background` INTEGER NOT NULL, `dark-onBackground` INTEGER NOT NULL, `dark-surface` INTEGER NOT NULL, `dark-onSurface` INTEGER NOT NULL, `dark-surfaceVariant` INTEGER NOT NULL, `dark-onSurfaceVariant` INTEGER NOT NULL, `dark-surfaceTint` INTEGER NOT NULL, `dark-inverseSurface` INTEGER NOT NULL, `dark-inverseOnSurface` INTEGER NOT NULL, `dark-error` INTEGER NOT NULL, `dark-onError` INTEGER NOT NULL, `dark-errorContainer` INTEGER NOT NULL, `dark-onErrorContainer` INTEGER NOT NULL, `dark-outline` INTEGER NOT NULL, `light-extra-bars` INTEGER NOT NULL, `light-extra-onBars` INTEGER NOT NULL, `light-extra-isBarLight` INTEGER NOT NULL, `dark-extra-bars` INTEGER NOT NULL, `dark-extra-onBars` INTEGER NOT NULL, `dark-extra-isBarLight` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+        database.execSQL(
+            """
+                DROP TRIGGER IF EXISTS system_themes_deletion_trigger
+            """.trimIndent()
+        )
+        database.execSQL("CREATE TABLE IF NOT EXISTS `reader_theme_table` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `backgroundColor` INTEGER NOT NULL, `onTextColor` INTEGER NOT NULL, `isDefault` INTEGER NOT NULL)")
     }
 }
 
@@ -138,15 +139,16 @@ internal fun MIGRATION_23_24() = object : Migration(23, 24) {
         database.execSQL(
             """CREATE TABLE IF NOT EXISTS `theme_table` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `isDefault` INTEGER NOT NULL, `light-primary` INTEGER NOT NULL, `light-onPrimary` INTEGER NOT NULL, `light-primaryContainer` INTEGER NOT NULL, `light-onPrimaryContainer` INTEGER NOT NULL, `light-inversePrimary` INTEGER NOT NULL, `light-secondary` INTEGER NOT NULL, `light-onSecondary` INTEGER NOT NULL, `light-secondaryContainer` INTEGER NOT NULL, `light-onSecondaryContainer` INTEGER NOT NULL, `light-tertiary` INTEGER NOT NULL, `light-onTertiary` INTEGER NOT NULL, `light-tertiaryContainer` INTEGER NOT NULL, `light-onTertiaryContainer` INTEGER NOT NULL, `light-background` INTEGER NOT NULL, `light-onBackground` INTEGER NOT NULL, `light-surface` INTEGER NOT NULL, `light-onSurface` INTEGER NOT NULL, `light-surfaceVariant` INTEGER NOT NULL, `light-onSurfaceVariant` INTEGER NOT NULL, `light-surfaceTint` INTEGER NOT NULL, `light-inverseSurface` INTEGER NOT NULL, `light-inverseOnSurface` INTEGER NOT NULL, `light-error` INTEGER NOT NULL, `light-onError` INTEGER NOT NULL, `light-errorContainer` INTEGER NOT NULL, `light-onErrorContainer` INTEGER NOT NULL, `light-outline` INTEGER NOT NULL, `dark-primary` INTEGER NOT NULL, `dark-onPrimary` INTEGER NOT NULL, `dark-primaryContainer` INTEGER NOT NULL, `dark-onPrimaryContainer` INTEGER NOT NULL, `dark-inversePrimary` INTEGER NOT NULL, `dark-secondary` INTEGER NOT NULL, `dark-onSecondary` INTEGER NOT NULL, `dark-secondaryContainer` INTEGER NOT NULL, `dark-onSecondaryContainer` INTEGER NOT NULL, `dark-tertiary` INTEGER NOT NULL, `dark-onTertiary` INTEGER NOT NULL, `dark-tertiaryContainer` INTEGER NOT NULL, `dark-onTertiaryContainer` INTEGER NOT NULL, `dark-background` INTEGER NOT NULL, `dark-onBackground` INTEGER NOT NULL, `dark-surface` INTEGER NOT NULL, `dark-onSurface` INTEGER NOT NULL, `dark-surfaceVariant` INTEGER NOT NULL, `dark-onSurfaceVariant` INTEGER NOT NULL, `dark-surfaceTint` INTEGER NOT NULL, `dark-inverseSurface` INTEGER NOT NULL, `dark-inverseOnSurface` INTEGER NOT NULL, `dark-error` INTEGER NOT NULL, `dark-onError` INTEGER NOT NULL, `dark-errorContainer` INTEGER NOT NULL, `dark-onErrorContainer` INTEGER NOT NULL, `dark-outline` INTEGER NOT NULL, `light-extra-bars` INTEGER NOT NULL, `light-extra-onBars` INTEGER NOT NULL, `light-extra-isBarLight` INTEGER NOT NULL, `dark-extra-bars` INTEGER NOT NULL, `dark-extra-onBars` INTEGER NOT NULL, `dark-extra-isBarLight` INTEGER NOT NULL)"""
         )
+
         database.execSQL(
             """
-                                CREATE TRIGGER IF NOT EXISTS system_themes_deletion_trigger BEFORE DELETE ON theme_table
-                                BEGIN SELECT CASE
-                                  WHEN old.isDefault == 1 THEN
-                                    RAISE(ABORT, 'System theme cant be deleted')
-                                  END;
-                                END
-                            """.trimIndent()
+            CREATE TRIGGER IF NOT EXISTS system_themes_deletion_trigger BEFORE DELETE ON theme_table
+            BEGIN SELECT CASE
+              WHEN old.isDefault == 1 THEN
+                RAISE(ABORT, 'System theme cant be deleted')
+              END;
+            END
+        """.trimIndent()
         )
     }
 }

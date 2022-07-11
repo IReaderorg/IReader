@@ -118,12 +118,15 @@
     <string name="fetch">Fetch</string>
     <string name="delete">Delete</string>
     <string name="theme_was_saved">Theme was saved</string>
+    <string name="theme_was_deleted">Theme was deleted</string>
     <string name="theme_was_not_valid">Theme is Not Part of Base Themes</string>
     <string name="there_is_no_chapter">There is no chapter.</string>
     <string name="reverse_chapter_in_db">Reverse Chapters in DB</string>
     <string name="reverse">Reverse</string>
     <string name="background_color">Background Color</string>
     <string name="text_color">TextColor</string>
+    <string name="save_custom_theme">Save custom theme</string>
+    <string name="delete_custom_theme">Delete custom theme</string>
     <string name="scrollbar_color">ScrollBar Color</string>
     <string name="selected_scrollbar_color">Selected ScrollBar Color</string>
     <string name="unselected_scrollbar_color">UnSelected ScrollBar Color</string>

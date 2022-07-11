@@ -64,14 +64,14 @@ fun AppearanceSettingScreen(
     val isLight = MaterialTheme.colorScheme.isLight()
 
     val scope = rememberCoroutineScope()
-    val themesForCurrentMode = remember(isLight, vm.vmThemes.value.size) {
+    val themesForCurrentMode = remember(isLight, vm.vmThemes.size) {
         if (isLight)
-            vm.vmThemes.value.map { it.light() }
+            vm.vmThemes.map { it.light() }
         else
-            vm.vmThemes.value.map { it.dark() }
+            vm.vmThemes.map { it.dark() }
     }
     val themeItem: Components =
-        remember(vm.vmThemes.value.size, vm.themeMode.value, vm.themeEditMode) {
+        remember(vm.vmThemes.size, vm.themeMode.value, vm.themeEditMode) {
             Components.Dynamic {
                 LazyRow(modifier = Modifier.padding(horizontal = 8.dp)) {
                     items(items = themesForCurrentMode) { theme ->
@@ -82,12 +82,13 @@ fun AppearanceSettingScreen(
                                 customizedColors.primaryState.value = it.materialColors.primary
                                 customizedColors.secondaryState.value = it.materialColors.secondary
                                 customizedColors.barsState.value = it.extraColors.bars
+                                vm.isSavable = false
                             },
                             isSelected = vm.colorTheme.value == theme.id,
                             onLongClick = { vm.themeEditMode = true }, editMode = vm.themeEditMode,
                             onDelete = {
                                 scope.launch {
-                                    vm.vmThemes.value.find { it.id == theme.id }?.toCustomTheme()
+                                    vm.vmThemes.find { it.id == theme.id }?.toCustomTheme()
                                         ?.let { vm.themeRepository.delete(it) }
                                 }
                             }
@@ -114,7 +115,6 @@ fun AppearanceSettingScreen(
                     subtitle = null,
                     onValue = {
                         vm.saveNightModePreferences(it)
-                        vm.state.value.isSavable = false
                     }
                 )
             },
@@ -129,10 +129,10 @@ fun AppearanceSettingScreen(
                     subtitle = "Displayed most frequently across your app",
                     unsetColor = MaterialTheme.colorScheme.primary,
                     onChangeColor = {
-                        vm.state.value.isSavable = true
+                        vm.isSavable = true
                     },
                     onRestToDefault = {
-                        vm.state.value.isSavable = false
+                        vm.isSavable = false
 
                     }
                 )
@@ -144,10 +144,10 @@ fun AppearanceSettingScreen(
                     subtitle = "Accents select parts of the UI",
                     unsetColor = MaterialTheme.colorScheme.secondary,
                     onChangeColor = {
-                        vm.state.value.isSavable = true
+                        vm.isSavable = true
                     },
                     onRestToDefault = {
-                        vm.state.value.isSavable = false
+                        vm.isSavable = false
 
                     }
                 )
@@ -158,10 +158,10 @@ fun AppearanceSettingScreen(
                     title = "Toolbar color",
                     unsetColor = AppColors.current.bars,
                     onChangeColor = {
-                        vm.state.value.isSavable = true
+                        vm.isSavable = true
                     },
                     onRestToDefault = {
-                        vm.state.value.isSavable = false
+                        vm.isSavable = false
 
                     }
                 )

@@ -152,9 +152,6 @@ object ChapterScreenSpec : ScreenSpec {
     ) {
         val vm: ChapterDetailViewModel = hiltViewModel(controller.navBackStackEntry)
 
-        val scrollableTabsHeight = LocalDensity.current.run {
-            46.dp + (controller.scrollBehavior.state.offset ?:0f).toDp()
-        }
         val book = vm.book
         ChapterDetailScreen(
             modifier = Modifier,
@@ -192,7 +189,6 @@ object ChapterScreenSpec : ScreenSpec {
             },
             vm = vm,
             scaffoldPadding = controller.scaffoldPadding,
-            searchBarHeight = scrollableTabsHeight
         )
     }
 

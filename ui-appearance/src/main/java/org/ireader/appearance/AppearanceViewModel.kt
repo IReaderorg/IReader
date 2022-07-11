@@ -16,6 +16,7 @@ import org.ireader.core_ui.theme.asState
 import org.ireader.core_ui.theme.getDarkColors
 import org.ireader.core_ui.theme.getLightColors
 import org.ireader.core_ui.theme.isLight
+import org.ireader.core_ui.theme.themes
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import javax.inject.Inject
 
@@ -28,8 +29,9 @@ class AppearanceViewModel @Inject constructor(
     private val _state = mutableStateOf(MainScreenState())
     val state = _state
 
-    val vmThemes = themeRepository.subscribe().asState(emptyList())
+    val vmThemes = themes
     var themeEditMode by mutableStateOf(false)
+    var isSavable by mutableStateOf(false)
 
 
     val themeMode = uiPreferences.themeMode().asState()
@@ -58,7 +60,7 @@ class AppearanceViewModel @Inject constructor(
 
 
     fun getThemes(id: Long): BaseTheme? {
-        val themes = vmThemes.value.firstOrNull{ it.id == id}
+        val themes = vmThemes.firstOrNull{ it.id == id}
         val primary = if (themeMode.value == PreferenceValues.ThemeMode.Dark) {
             darkColors.primary
         } else {
@@ -90,5 +92,4 @@ class AppearanceViewModel @Inject constructor(
 
 data class MainScreenState(
     val darkMode: Boolean = true,
-    var isSavable:Boolean = false
 )

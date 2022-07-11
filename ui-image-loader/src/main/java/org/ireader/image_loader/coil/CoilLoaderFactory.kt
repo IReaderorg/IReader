@@ -1,9 +1,14 @@
 package org.ireader.image_loader.coil
 
+import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
+import android.os.Build
+import androidx.core.content.ContextCompat.getSystemService
 import coil.ImageLoader
 import coil.ImageLoaderFactory
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
 import coil.disk.DiskCache
 import org.ireader.core_api.http.HttpClients
 import org.ireader.core_api.http.okhttp
@@ -35,9 +40,15 @@ class CoilLoaderFactory(
                 add(CatalogRemoteMapper())
                 add(CatalogInstalledFetcher.Factory())
                 add(BookCoverKeyer())
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    add(ImageDecoderDecoder.Factory())
+                } else {
+                    add(GifDecoder.Factory())
+                }
             }
             crossfade(300)
             diskCache(diskCacheInit)
+            allowRgb565(getSystemService<ActivityManager>(context,ActivityManager::class.java)!!.isLowRamDevice)
             callFactory(callFactoryInit)
         }.build()
     }

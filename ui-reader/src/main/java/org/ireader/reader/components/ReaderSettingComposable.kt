@@ -3,6 +3,7 @@ package org.ireader.reader.components
 import android.content.pm.ActivityInfo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -18,10 +19,12 @@ import androidx.compose.material.icons.filled.FormatAlignJustify
 import androidx.compose.material.icons.filled.FormatAlignLeft
 import androidx.compose.material.icons.filled.FormatAlignRight
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -32,6 +35,9 @@ import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
+import org.ireader.common_extensions.launchIO
+import org.ireader.common_models.theme.ReaderTheme
+import org.ireader.common_resources.UiText
 import org.ireader.components.components.Components
 import org.ireader.components.components.component.ChipChoicePreference
 import org.ireader.components.components.component.ChipPreference
@@ -44,6 +50,7 @@ import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.preferences.PreferenceValues
 import org.ireader.core_ui.preferences.ReadingMode
 import org.ireader.core_ui.theme.FontType
+import org.ireader.core_ui.theme.ReaderTheme
 import org.ireader.core_ui.ui.Colour.contentColor
 import org.ireader.core_ui.ui.PreferenceAlignment
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
@@ -62,6 +69,7 @@ fun ReaderSettingMainLayout(
 ) {
     val pagerState = rememberPagerState()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val tabs = remember {
         listOf<TabItem>(
             TabItem(
@@ -212,10 +220,11 @@ fun ReaderSettingMainLayout(
                         ChipChoicePreference(
 
                             preference = vm.font,
-                            choices = vm.fonts.map { FontType(it, FontFamily.Default) }.associate { fontType ->
-                                postion++
-                                return@associate fontType to fontType.name
-                            },
+                            choices = vm.fonts.map { FontType(it, FontFamily.Default) }
+                                .associate { fontType ->
+                                    postion++
+                                    return@associate fontType to fontType.name
+                                },
                             title = stringResource(id = R.string.font),
                             onFailToFindElement = vm.font.value.name
                         )
@@ -324,7 +333,8 @@ fun ReaderSettingMainLayout(
                             ),
                             selected = vm.isScrollIndicatorDraggable.value.ordinal,
                             onValueChange = {
-                                vm.isScrollIndicatorDraggable.value =  PreferenceValues.ScrollbarSelectionMode.valueOf(it)
+                                vm.isScrollIndicatorDraggable.value =
+                                    PreferenceValues.ScrollbarSelectionMode.valueOf(it)
                             },
                             title = stringResource(id = R.string.scrollbar_mode)
                         )
@@ -392,24 +402,68 @@ fun ReaderSettingMainLayout(
                         )
                     }
                     item {
-
                         ReaderBackgroundComposable(
                             viewModel = vm,
-                            onBackgroundChange = onBackgroundChange
+                            onBackgroundChange = { id ->
+                                onBackgroundChange(id)
+                                vm.readerThemeSavable = false
+                            }
                         )
                     }
                     item {
-
                         ColorPreference(
                             preference = vm.backgroundColor,
-                            title = stringResource(id = R.string.background_color)
+                            title = stringResource(id = R.string.background_color),
+                            onChangeColor = {
+                                vm.readerThemeSavable = true
+                            }
                         )
                     }
                     item {
                         ColorPreference(
                             preference = vm.textColor,
-                            title = stringResource(id = R.string.text_color)
+                            title = stringResource(id = R.string.text_color),
+                            onChangeColor = {
+                                vm.readerThemeSavable = true
+                            }
                         )
+                    }
+                    item {
+                        Row(
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            if (vm.readerThemeSavable) {
+                                TextButton(onClick = {
+                                    vm.readerThemeSavable = false
+                                    scope.launchIO {
+                                        vm.readerThemeRepository.insert(
+                                            ReaderTheme(
+                                                backgroundColor = vm.backgroundColor.value.toArgb(),
+                                                onTextColor = vm.textColor.value.toArgb(),
+                                            )
+                                        )
+                                        vm.showSnackBar(UiText.StringResource(R.string.theme_was_saved))
+
+                                    }
+                                }) {
+                                    MidSizeTextComposable(text = stringResource(id = R.string.save_custom_theme))
+                                }
+                            } else if(vm.currentReaderTheme.value?.isDefault == false){
+                                TextButton(onClick = {
+                                    scope.launchIO {
+                                        vm.currentReaderTheme.value?.let {
+                                            vm.readerThemeRepository.delete(
+                                                it.ReaderTheme()
+                                            )
+                                            vm.showSnackBar(UiText.StringResource(R.string.theme_was_deleted))
+                                        }
+                                    }
+                                }) {
+                                    MidSizeTextComposable(text = stringResource(id = R.string.delete_custom_theme))
+                                }
+                            }
+
+                        }
 
                     }
                     item {
@@ -417,7 +471,6 @@ fun ReaderSettingMainLayout(
                             preference = vm.selectedScrollBarColor,
                             title = stringResource(id = R.string.selected_scrollbar_color)
                         )
-
                     }
                     item {
                         ColorPreference(

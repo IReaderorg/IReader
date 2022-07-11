@@ -56,7 +56,7 @@ private fun MainAppearanceToolbar(
         },
         actions = {
             AnimatedVisibility(
-                visible = vm.state.value.isSavable,
+                visible =   vm.isSavable,
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.Save,
@@ -71,6 +71,7 @@ private fun MainAppearanceToolbar(
                         } else {
                             vm.showSnackBar(UiText.StringResource(R.string.theme_was_not_valid))
                         }
+                        vm.isSavable = false
                     }
                 )
             }

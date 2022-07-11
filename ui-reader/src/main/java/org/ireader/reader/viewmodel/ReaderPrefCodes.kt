@@ -12,7 +12,7 @@ import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_extensions.hideSystemUI
 import org.ireader.common_extensions.isImmersiveModeEnabled
 import org.ireader.common_extensions.showSystemUI
-import org.ireader.core_ui.theme.readerScreenBackgroundColors
+import org.ireader.core_ui.theme.readerThemes
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
@@ -107,8 +107,8 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
     }
 
     override fun ReaderScreenViewModel.changeBackgroundColor(colorIndex: Int) {
-        val bgColor = readerScreenBackgroundColors[colorIndex].color
-        val textColor = readerScreenBackgroundColors[colorIndex].onTextColor
+        val bgColor = readerThemes[colorIndex].backgroundColor
+        val textColor = readerThemes[colorIndex].onTextColor
         backgroundColor.value = bgColor
         this.textColor.value = textColor
         setReaderBackgroundColor(bgColor)

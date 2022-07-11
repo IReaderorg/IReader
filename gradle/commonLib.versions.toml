@@ -13,6 +13,7 @@ spotless = "6.6.1"
 ktlint = "0.45.1"
 roomigrant = "0.3.4"
 modernstorage = "1.0.0-alpha06"
+coil_version = "2.1.0"
 
 
 [libraries]
@@ -26,6 +27,9 @@ gradle-firebaseCrashlytic = "com.google.firebase:firebase-crashlytics-gradle:2.8
 gradle-benmanes = "com.github.ben-manes:gradle-versions-plugin:0.42.0"
 gradle-idea-ext = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.4"
 
+coil-core = { module = "io.coil-kt:coil", version.ref = "coil_version" }
+coil-gif = { module = "io.coil-kt:coil-gif", version.ref = "coil_version" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil_version" }
 
 gson = "com.google.code.gson:gson:2.9.0"
 htmlUnit-android = "net.sourceforge.htmlunit:htmlunit-android:2.63.0-SNAPSHOT"

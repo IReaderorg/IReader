@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -39,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.ireader.chapterDetails.viewmodel.ChapterDetailViewModel
 import org.ireader.common_models.entities.Chapter
@@ -62,7 +60,7 @@ fun ChapterDetailScreen(
     onItemClick: (Chapter) -> Unit,
     onLongItemClick: (Chapter) -> Unit,
     scaffoldPadding: PaddingValues,
-    searchBarHeight:Dp
+
 ) {
     val context = LocalContext.current
     val scrollState = rememberLazyListState()
@@ -79,7 +77,6 @@ fun ChapterDetailScreen(
             CustomTextField(
                 modifier = Modifier
                     .padding(horizontal = 8.dp, vertical = 8.dp)
-                    .height(searchBarHeight)
                     .fillMaxWidth()
                     .background(
                         color = MaterialTheme.colorScheme.onBackground.copy(.1f),

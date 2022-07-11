@@ -20,6 +20,7 @@ open class ChapterDetailStateImpl @Inject constructor() : ChapterDetailState {
     override var error by mutableStateOf<UiText?>(null)
     override var chapterOrderType by mutableStateOf<OrderType>(OrderType.Ascending)
     override var reverse by mutableStateOf<Boolean>(false)
+    override var searchMode by mutableStateOf<Boolean>(false)
     override var currentScrollPosition by mutableStateOf<Int>(0)
     override var query by mutableStateOf<String?>(null)
     override var lastRead by mutableStateOf<Long?>(null)
@@ -44,5 +45,6 @@ interface ChapterDetailState {
     val isEmpty: Boolean
     var selection: SnapshotStateList<Long>
     val hasSelection: Boolean
+    var searchMode: Boolean
     var scrollState: LazyListState?
 }

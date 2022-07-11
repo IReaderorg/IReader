@@ -5,6 +5,7 @@ import android.content.pm.ActivityInfo
 import android.view.WindowManager
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -16,7 +17,10 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.ireader.common_data.repository.ReaderThemeRepository
 import org.ireader.common_extensions.async.nextAfter
 import org.ireader.common_extensions.async.prevBefore
 import org.ireader.common_extensions.findComponentActivity
@@ -29,6 +33,8 @@ import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.core_ui.preferences.ReadingMode
 import org.ireader.core_ui.preferences.UiPreferences
+import org.ireader.core_ui.theme.ReaderColors
+import org.ireader.core_ui.theme.readerThemes
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.history.HistoryUseCase
@@ -57,7 +63,8 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     val uiPreferences: UiPreferences,
     val googleFontProvider: GoogleFont.Provider,
     val screenAlwaysOnUseCase: ScreenAlwaysOn,
-    val webViewManger: WebViewManger
+    val webViewManger: WebViewManger,
+    val readerThemeRepository: ReaderThemeRepository
 ) : BaseViewModel(),
     ReaderScreenPreferencesState by prefState,
     ReaderScreenState by state,
@@ -66,6 +73,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     val dateFormat by uiPreferences.dateFormat().asState()
     val relativeTime by uiPreferences.relativeTime().asState()
     val backgroundColor = readerPreferences.backgroundColorReader().asState()
+    val currentReaderTheme = derivedStateOf { readerThemes.find { it.backgroundColor == backgroundColor.value } }
     val topContentPadding = readerPreferences.topContentPadding().asState()
     val screenAlwaysOn = readerPreferences.screenAlwaysOn().asState()
     val bottomContentPadding = readerPreferences.bottomContentPadding().asState()
@@ -74,6 +82,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     val rightMargin = readerPreferences.rightMargin().asState()
     val bottomMargin = readerPreferences.bottomMargin().asState()
     val textColor = readerPreferences.textColorReader().asState()
+    var readerThemeSavable by mutableStateOf(false)
     val selectedScrollBarColor = readerPreferences.selectedScrollBarColor().asState()
     val unselectedScrollBarColor = readerPreferences.unselectedScrollBarColor().asState()
     val lineHeight = readerPreferences.lineHeight().asState()
@@ -96,7 +105,6 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     val isScrollIndicatorDraggable = readerPreferences.scrollbarMode().asState()
     val font = readerPreferences.font().asState()
     val webViewIntegration = readerPreferences.webViewIntegration().asState()
-
     val selectableMode = readerPreferences.selectableText().asState()
     val fontSize = readerPreferences.fontSize().asState()
     val distanceBetweenParagraphs = readerPreferences.paragraphDistance().asState()
@@ -118,6 +126,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
             val source = getLocalCatalog.get(sourceId)
             if (source != null) {
                 state.catalog = source
+                subscribeReaderThemes()
                 subscribeChapters(bookId)
                 viewModelScope.launch {
                     state.book = getBookUseCases.findBookById(bookId)
@@ -133,6 +142,13 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
                 showSnackBar(UiText.StringResource(org.ireader.core.R.string.something_is_wrong_with_this_book))
             }
         }
+    }
+
+    private fun subscribeReaderThemes() {
+        readerThemeRepository.subscribe().onEach {  list ->
+            readerThemes.removeIf { !it.isDefault }
+            readerThemes.addAll(0,list.map { it.ReaderColors() })
+        }.launchIn(viewModelScope)
     }
 
     private suspend fun setupChapters(bookId: Long, chapterId: Long) {

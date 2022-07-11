@@ -13,12 +13,10 @@ import org.ireader.common_models.entities.Category
 import org.ireader.common_resources.UiText
 import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.core_ui.theme.getDefaultFont
-import org.ireader.core_ui.theme.themes
 import org.ireader.core_ui.viewmodel.BaseViewModel
 import org.ireader.domain.use_cases.epub.importer.ImportEpub
 import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
-import org.ireader.domain.use_cases.theme.toCustomTheme
 import org.ireader.image_loader.coil.cache.CoverCache
 import org.ireader.ui_settings.R
 import javax.inject.Inject
@@ -89,7 +87,6 @@ class AdvanceSettingViewModel @Inject constructor(
     fun resetThemes() {
         viewModelScope.launchIO {
             themeRepository.deleteAll()
-            themeRepository.insert(themes.map { it.toCustomTheme() })
             showSnackBar(UiText.StringResource(R.string.success))
         }
     }

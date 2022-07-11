@@ -9,11 +9,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.takeOrElse
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import org.ireader.common_data.repository.ThemeRepository
 import org.ireader.common_models.theme.ExtraColors
 import org.ireader.common_models.theme.Theme
@@ -33,18 +36,23 @@ import javax.inject.Inject
 @HiltViewModel
 class AppThemeViewModel @Inject constructor(
     private val uiPreferences: UiPreferences,
-    private val themeRepository:ThemeRepository,
+    private val themeRepository: ThemeRepository,
+
     coilLoaderFactory: org.ireader.image_loader.coil.CoilLoaderFactory,
 ) : BaseViewModel() {
     private val themeMode by uiPreferences.themeMode().asState()
     private val colorTheme by uiPreferences.colorTheme().asState()
 
-
     private val baseThemeJob = SupervisorJob()
     private val baseThemeScope = CoroutineScope(baseThemeJob)
 
-  //  val themes by themeRepository.subscribe().asState(emptyList())
+    init {
+        themeRepository.subscribe().onEach {
+            themes.removeIf { baseTheme -> !baseTheme.default }
+            themes.addAll(it)
+        }.launchIn(viewModelScope)
 
+    }
 
     @Composable
     fun getRippleTheme(): RippleTheme {
@@ -68,7 +76,11 @@ class AppThemeViewModel @Inject constructor(
             }
         }
 
-        val material = getMaterialColors(baseTheme.materialColors, colors.primary.value, colors.secondary.value)
+        val material = getMaterialColors(
+            baseTheme.materialColors,
+            colors.primary.value,
+            colors.secondary.value
+        )
         val custom = getExtraColors(baseTheme.extraColors, colors.bars.value)
         return material to custom
     }

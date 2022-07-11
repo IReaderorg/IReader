@@ -97,9 +97,6 @@ object LibraryScreenSpec : BottomNavScreenSpec {
             controller.requestHideNavigator(vm.selectionMode)
         }
 
-        val scrollableTabsHeight = LocalDensity.current.run {
-            org.ireader.components.TopAppBarSmallTokens.ContainerHeight + (controller.scrollBehavior.state.offset ?:0f).toDp()
-        }
         LibraryController(
             modifier = Modifier,
             vm = vm,
@@ -120,8 +117,7 @@ object LibraryScreenSpec : BottomNavScreenSpec {
                     bookId = book.id
                 )
             )
-        },
-        tabHeight = scrollableTabsHeight)
+        })
     }
 }
 

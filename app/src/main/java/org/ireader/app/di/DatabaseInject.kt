@@ -17,6 +17,7 @@ import org.ireader.data.local.dao.DownloadDao
 import org.ireader.data.local.dao.HistoryDao
 import org.ireader.data.local.dao.LibraryBookDao
 import org.ireader.data.local.dao.LibraryDao
+import org.ireader.data.local.dao.ReaderThemeDao
 import org.ireader.data.local.dao.RemoteKeysDao
 import org.ireader.data.local.dao.ThemeDao
 import org.ireader.data.local.dao.UpdatesDao
@@ -67,6 +68,9 @@ object DatabaseInject {
     @Singleton
     @Provides
     fun provideThemeDao(db: AppDatabase): ThemeDao = db.themeDao
+    @Singleton
+    @Provides
+    fun provideReaderThemeDao(db: AppDatabase): ReaderThemeDao = db.readerThemeDao
 
     @Singleton
     @Provides

@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.TabRowDefaults
@@ -22,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -53,7 +51,6 @@ fun ExtensionScreen(
     onClickTogglePinned: (Catalog) -> Unit,
     onCancelInstaller:((Catalog) -> Unit)? = null,
     snackBarHostState: androidx.compose.material3.SnackbarHostState,
-    scrollBarHeight:Dp,
 ) {
 
     val context = LocalContext.current
@@ -92,7 +89,6 @@ fun ExtensionScreen(
             onRefreshCatalogs = onRefreshCatalogs,
             pages = pages,
             onCancelInstaller = onCancelInstaller,
-            scrollBarHeight =scrollBarHeight
         )
     }
 }
@@ -130,7 +126,7 @@ private fun ExtensionContent(
     onClickInstall: (Catalog) -> Unit,
     onClickUninstall: (Catalog) -> Unit,
     onCancelInstaller:((Catalog) -> Unit)? = null,
-    scrollBarHeight:Dp,
+
 ) {
     val pagerState = rememberPagerState()
     LaunchedEffect(pagerState) {
@@ -138,7 +134,7 @@ private fun ExtensionContent(
             vm.currentPagerPage = pagerState.targetPage
         }
     }
-    ExtensionTabs(pagerState = pagerState, pages = pages, scrollBarHeight = scrollBarHeight)
+    ExtensionTabs(pagerState = pagerState, pages = pages)
     ExtensionPager(
         pagerState = pagerState,
         vm = vm,
@@ -204,11 +200,10 @@ private fun ExtensionTabs(
     modifier:Modifier = Modifier,
     pagerState: PagerState,
     pages: List<String>,
-    scrollBarHeight:Dp,
+
 ) {
     val scope = rememberCoroutineScope()
     TabRow(
-        modifier = Modifier.height(scrollBarHeight),
         selectedTabIndex = pagerState.currentPage,
         containerColor = AppColors.current.bars,
         contentColor = AppColors.current.onBars,

@@ -1,13 +1,11 @@
 package org.ireader.app.ui
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.CoroutineScope
@@ -26,7 +24,6 @@ internal fun LibraryContent(
     goToLatestChapter: (book: BookItem) -> Unit,
     onPageChanged: (Int) -> Unit,
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
-    tabHeight : Dp
 ) {
     if (vm.categories.isEmpty()) return
     val horizontalPager = rememberPagerState(initialPage = vm.selectedCategoryIndex)
@@ -37,7 +34,7 @@ internal fun LibraryContent(
     }
 
     ScrollableTabs(
-        modifier = Modifier.height(tabHeight).fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         libraryTabs = vm.categories.map { it.visibleName.plus(if (vm.showCountInCategory.value) " (${it.bookCount})" else "") },
         pagerState = horizontalPager,
         visible = vm.showCategoryTabs.value && vm.categories.isNotEmpty()

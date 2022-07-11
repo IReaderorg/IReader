@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.RewriteQueriesToDropUnusedColumns
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import org.ireader.common_models.entities.Book
@@ -13,10 +12,10 @@ import org.ireader.common_models.entities.Chapter
 @Dao
 interface LibraryBookDao : BaseDao<Book> {
 
-    @RewriteQueriesToDropUnusedColumns
+
     @Query("SELECT * FROM library")
     suspend fun findAllBooks(): List<org.ireader.common_models.entities.Book>
-    @RewriteQueriesToDropUnusedColumns
+
     @Query("""SELECT  * FROM library WHERE favorite = 1 """)
     fun subscribeAllLocalBooks(): Flow<List<org.ireader.common_models.entities.Book>>
 

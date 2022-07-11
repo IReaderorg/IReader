@@ -6,7 +6,6 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.viewModelScope
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.coroutines.Dispatchers
@@ -24,11 +23,10 @@ fun LibraryController(
     controller:Controller,
     goToReader:(BookItem) -> Unit,
     goToDetail:(BookItem) -> Unit,
-    tabHeight : Dp
+
 ) {
 
     LibraryScreen(
-        tabHeight= tabHeight,
         modifier = modifier,
         onMarkAsRead = {
             vm.markAsRead()
