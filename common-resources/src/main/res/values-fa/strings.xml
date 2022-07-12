@@ -7,4 +7,9 @@
     <string name="cancel_all">لغو کردن همه</string>
     <string name="cancel">لغو</string>
     <string name="apply">اعمال کردن</string>
+    <string name="add_as_new">جدید</string>
+    <string name="add">اضافه کردن</string>
+    <string name="view_book">مشاهده کتاب</string>
+    <string name="search_hint">جستجو…</string>
+    <string name="nothing_read_recently">هیج کتابی اخیرا خوانده نشده است</string>
 </resources>
