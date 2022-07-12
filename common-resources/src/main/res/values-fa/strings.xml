@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <string name="library_screen_label">کتابخانه</string>
+    <string name="explore_screen_label">کاوش</string>
+    <string name="setting_screen_label">تنظیمات</string>
+    <string name="delete_all_downloads">پاک کردن تمام دانلود ها</string>
+    <string name="cancel_all">لغو کردن همه</string>
+    <string name="cancel">لغو</string>
+    <string name="apply">اعمال کردن</string>
 </resources>
