@@ -12,4 +12,15 @@
     <string name="view_book">مشاهده کتاب</string>
     <string name="search_hint">جستجو…</string>
     <string name="nothing_read_recently">هیج کتابی اخیرا خوانده نشده است</string>
+    <string name="confirm">تاييد</string>
+    <string name="page_progress_num">صفحه %d</string>
+    <string name="lock_never">هیچوقت</string>
+    <string name="lock_always">همیشه</string>
+    <string name="edit_category">ویرایش دسته بندی ها</string>
+    <string name="category">دسته بندی ها</string>
+    <string name="help">راهنما</string>
+    <string name="pref_incognito_mode">حالت ناشناس</string>
+    <string name="hint">…</string>
+    <string name="category_hint">نام…</string>
+    <string name="about">درباره</string>
 </resources>
