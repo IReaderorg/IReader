@@ -5,7 +5,6 @@ import android.content.pm.ActivityInfo
 import android.view.WindowManager
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -70,10 +69,13 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     ReaderScreenState by state,
     ReaderPrefFunctions by prefFunc {
 
+    val readerColors = readerThemes
+
     val dateFormat by uiPreferences.dateFormat().asState()
     val relativeTime by uiPreferences.relativeTime().asState()
+    val readerTheme = readerPreferences.readerTheme().asState()
     val backgroundColor = readerPreferences.backgroundColorReader().asState()
-    val currentReaderTheme = derivedStateOf { readerThemes.find { it.backgroundColor == backgroundColor.value } }
+
     val topContentPadding = readerPreferences.topContentPadding().asState()
     val screenAlwaysOn = readerPreferences.screenAlwaysOn().asState()
     val bottomContentPadding = readerPreferences.bottomContentPadding().asState()

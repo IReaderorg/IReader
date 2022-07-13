@@ -22,6 +22,8 @@ import androidx.compose.material.icons.filled.FormatAlignRight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -52,7 +54,6 @@ import org.ireader.core_ui.preferences.PreferenceValues
 import org.ireader.core_ui.preferences.ReadingMode
 import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.theme.ReaderTheme
-import org.ireader.core_ui.theme.readerThemes
 import org.ireader.core_ui.ui.Colour.contentColor
 import org.ireader.core_ui.ui.PreferenceAlignment
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
@@ -66,7 +67,7 @@ fun ReaderSettingMainLayout(
     onFontSelected: (Int) -> Unit,
     onToggleAutoBrightness: () -> Unit,
     onChangeBrightness: (Float) -> Unit,
-    onBackgroundChange: (Int) -> Unit,
+    onBackgroundChange: (themeId: Long) -> Unit,
     onTextAlign: (PreferenceAlignment) -> Unit
 ) {
     val pagerState = rememberPagerState()
@@ -386,111 +387,116 @@ fun ReaderSettingMainLayout(
             }
         }
     }
-    val colorTab: TabItem = remember(readerThemes.size) {
-        TabItem(context.getString(R.string.colors)) {
-
-            LazyColumn(
-                verticalArrangement = Arrangement.Top,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-                item {
-                    SwitchPreference(
-                        preference = vm.autoBrightnessMode,
-                        title = stringResource(id = R.string.custom_brightness),
-                    )
-                }
-                item {
-                    BrightnessSliderComposable(
-                        viewModel = vm,
-                        onChangeBrightness = onChangeBrightness
-                    )
-                }
-                item {
-                    ReaderBackgroundComposable(
-                        viewModel = vm,
-                        onBackgroundChange = { id ->
-                            onBackgroundChange(id)
+    val colorsComponent = remember(vm.readerColors.size) {
+        Components.Dynamic {
+            ReaderBackgroundComposable(
+                viewModel = vm,
+                onBackgroundChange = { id ->
+                    onBackgroundChange(id)
+                    vm.readerThemeSavable = false
+                },
+                themes = vm.readerColors,
+            )
+        }
+    }
+    val colorTabItems : State<List<Components>> = derivedStateOf {
+        listOf<Components>(
+            Components.Dynamic {
+                Spacer(modifier = Modifier.height(16.dp))
+            },
+            Components.Switch(
+                preference = vm.autoBrightnessMode,
+                title = context.getString(R.string.custom_brightness),
+            ),
+            Components.Dynamic {
+                BrightnessSliderComposable(
+                    viewModel = vm,
+                    onChangeBrightness = onChangeBrightness
+                )
+            },
+            colorsComponent,
+            Components.Dynamic {
+                ColorPreference(
+                    preference = vm.backgroundColor,
+                    title = stringResource(id = R.string.background_color),
+                    onChangeColor = {
+                        vm.readerThemeSavable = true
+                    }
+                )
+            },
+            Components.Dynamic {
+                ColorPreference(
+                    preference = vm.textColor,
+                    title = stringResource(id = R.string.text_color),
+                    onChangeColor = {
+                        vm.readerThemeSavable = true
+                    }
+                )
+            },
+            Components.Dynamic {
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (vm.readerThemeSavable) {
+                        TextButton(onClick = {
                             vm.readerThemeSavable = false
-                        }
-                    )
-                }
-                item {
-                    ColorPreference(
-                        preference = vm.backgroundColor,
-                        title = stringResource(id = R.string.background_color),
-                        onChangeColor = {
-                            vm.readerThemeSavable = true
-                        }
-                    )
-                }
-                item {
-                    ColorPreference(
-                        preference = vm.textColor,
-                        title = stringResource(id = R.string.text_color),
-                        onChangeColor = {
-                            vm.readerThemeSavable = true
-                        }
-                    )
-                }
-                item {
-                    Row(
-                        horizontalArrangement = Arrangement.End,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        if (vm.readerThemeSavable) {
-                            TextButton(onClick = {
-                                vm.readerThemeSavable = false
-                                scope.launchIO {
-                                    vm.readerThemeRepository.insert(
-                                        ReaderTheme(
-                                            backgroundColor = vm.backgroundColor.value.toArgb(),
-                                            onTextColor = vm.textColor.value.toArgb(),
-                                        )
+                            scope.launchIO {
+                                vm.readerThemeRepository.insert(
+                                    ReaderTheme(
+                                        backgroundColor = vm.backgroundColor.value.toArgb(),
+                                        onTextColor = vm.textColor.value.toArgb(),
                                     )
-                                    vm.showSnackBar(UiText.StringResource(R.string.theme_was_saved))
-                                }
-                            }) {
-                                MidSizeTextComposable(text = stringResource(id = R.string.save_custom_theme))
+                                )
+                                vm.showSnackBar(UiText.StringResource(R.string.theme_was_saved))
                             }
-                        } else if (vm.currentReaderTheme.value?.isDefault == false) {
-                            TextButton(onClick = {
-                                scope.launchIO {
-                                    vm.currentReaderTheme.value?.let {
-                                        vm.readerThemeRepository.delete(
-                                            it.ReaderTheme()
-                                        )
-                                        vm.showSnackBar(UiText.StringResource(R.string.theme_was_deleted))
-                                    }
-                                }
-                            }) {
-                                MidSizeTextComposable(text = stringResource(id = R.string.delete_custom_theme))
+                        }) {
+                            MidSizeTextComposable(text = stringResource(id = R.string.save_custom_theme))
+                        }
+                    } else if (!vm.readerTheme.value.isDefault) {
+                        TextButton(onClick = {
+                            scope.launchIO {
+                                vm.readerThemeRepository.delete(
+                                    vm.readerTheme.value.ReaderTheme()
+                                )
+                                vm.showSnackBar(UiText.StringResource(R.string.theme_was_deleted))
                             }
+                        }) {
+                            MidSizeTextComposable(text = stringResource(id = R.string.delete_custom_theme))
                         }
                     }
                 }
-                item {
-                    ColorPreference(
-                        preference = vm.selectedScrollBarColor,
-                        title = stringResource(id = R.string.selected_scrollbar_color)
-                    )
-                }
-                item {
-                    ColorPreference(
-                        preference = vm.unselectedScrollBarColor,
-                        title = stringResource(id = R.string.unselected_scrollbar_color)
-                    )
-                }
+            },
+            Components.Dynamic {
+                ColorPreference(
+                    preference = vm.selectedScrollBarColor,
+                    title = stringResource(id = R.string.selected_scrollbar_color)
+                )
+            },
+            Components.Dynamic {
+                ColorPreference(
+                    preference = vm.unselectedScrollBarColor,
+                    title = stringResource(id = R.string.unselected_scrollbar_color)
+                )
+            }
+        )
+    }
+    val colorTabItem = remember {
+        TabItem(context.getString(R.string.colors)) {
+            LazyColumn(
+                modifier = androidx.compose.ui.Modifier
+                    .fillMaxSize()
+            ) {
+                setupUiComponent(colorTabItems.value)
             }
         }
     }
+
     val tabs = remember {
         listOf<TabItem>(
             readerTab,
             generalTab,
-            colorTab
+            colorTabItem
         )
     }
 
@@ -523,7 +529,7 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
                 Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
                 color = MaterialTheme.colorScheme.primary,
 
-            )
+                )
         }
     ) {
         libraryTabs.forEachIndexed { index, tab ->

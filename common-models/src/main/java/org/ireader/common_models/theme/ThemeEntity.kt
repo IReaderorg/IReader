@@ -21,7 +21,7 @@ data class ReaderTheme(
 @kotlinx.serialization.Serializable
 @Entity(tableName = "theme_table")
 data class CustomTheme(
-    @PrimaryKey(autoGenerate = false)
+    @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     @Embedded(prefix = "light-")
     val lightColor: CustomColorScheme,

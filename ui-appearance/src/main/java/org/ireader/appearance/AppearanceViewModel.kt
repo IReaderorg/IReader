@@ -57,19 +57,19 @@ class AppearanceViewModel @Inject constructor(
         return if (MaterialTheme.colorScheme.isLight()) lightColors else darkColors
     }
 
-    fun getThemes(id: Long): BaseTheme? {
+    fun getThemes(id: Long,isLight:Boolean): BaseTheme? {
         val themes = vmThemes.firstOrNull { it.id == id }
-        val primary = if (themeMode.value == PreferenceValues.ThemeMode.Dark) {
+        val primary = if (!isLight) {
             darkColors.primary
         } else {
             lightColors.primary
         }
-        val secondary = if (themeMode.value == PreferenceValues.ThemeMode.Dark) {
+        val secondary = if (!isLight) {
             darkColors.secondary
         } else {
             lightColors.secondary
         }
-        val bars = if (themeMode.value == PreferenceValues.ThemeMode.Dark) {
+        val bars = if (!isLight) {
             darkColors.bars
         } else {
             lightColors.bars

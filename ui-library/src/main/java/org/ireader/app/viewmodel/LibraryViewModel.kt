@@ -141,10 +141,6 @@ class LibraryViewModel @Inject constructor(
             kotlin.runCatching {
                 deleteUseCase.unFavoriteBook(selectedBooks)
             }
-//            books.filter { it.id in selectedBooks }.let {
-//
-//            }
-            // insertUseCases.updateBook.update(it, false)
             selectedBooks.clear()
         }
     }
@@ -224,9 +220,6 @@ class LibraryViewModel @Inject constructor(
         val defaultValue: Boolean = selectedBooks.any { id ->
             id in bookCategories.value.filter { it.categoryId == categories.id }.map { it.bookId }
         }
-
-        // categories.id in bookCategories.map { it.categoryId } &&
-
         return if (defaultValue) ToggleableState.On else ToggleableState.Off
     }
 
@@ -268,10 +261,5 @@ class LibraryViewModel @Inject constructor(
         } else {
             libraryPreferences.columnsInPortrait()
         }.stateIn(scope)
-    }
-
-    override fun onDestroy() {
-
-        super.onDestroy()
     }
 }

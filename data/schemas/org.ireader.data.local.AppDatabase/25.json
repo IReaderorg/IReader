@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 25,
-    "identityHash": "0d6d7c9b1182a4f80c75c4ac7121b1a3",
+    "identityHash": "7f6eef408eb200963255a819fc83dd06",
     "entities": [
       {
         "tableName": "library",
@@ -589,7 +589,7 @@
       },
       {
         "tableName": "theme_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `isDefault` INTEGER NOT NULL, `light-primary` INTEGER NOT NULL, `light-onPrimary` INTEGER NOT NULL, `light-primaryContainer` INTEGER NOT NULL, `light-onPrimaryContainer` INTEGER NOT NULL, `light-inversePrimary` INTEGER NOT NULL, `light-secondary` INTEGER NOT NULL, `light-onSecondary` INTEGER NOT NULL, `light-secondaryContainer` INTEGER NOT NULL, `light-onSecondaryContainer` INTEGER NOT NULL, `light-tertiary` INTEGER NOT NULL, `light-onTertiary` INTEGER NOT NULL, `light-tertiaryContainer` INTEGER NOT NULL, `light-onTertiaryContainer` INTEGER NOT NULL, `light-background` INTEGER NOT NULL, `light-onBackground` INTEGER NOT NULL, `light-surface` INTEGER NOT NULL, `light-onSurface` INTEGER NOT NULL, `light-surfaceVariant` INTEGER NOT NULL, `light-onSurfaceVariant` INTEGER NOT NULL, `light-surfaceTint` INTEGER NOT NULL, `light-inverseSurface` INTEGER NOT NULL, `light-inverseOnSurface` INTEGER NOT NULL, `light-error` INTEGER NOT NULL, `light-onError` INTEGER NOT NULL, `light-errorContainer` INTEGER NOT NULL, `light-onErrorContainer` INTEGER NOT NULL, `light-outline` INTEGER NOT NULL, `dark-primary` INTEGER NOT NULL, `dark-onPrimary` INTEGER NOT NULL, `dark-primaryContainer` INTEGER NOT NULL, `dark-onPrimaryContainer` INTEGER NOT NULL, `dark-inversePrimary` INTEGER NOT NULL, `dark-secondary` INTEGER NOT NULL, `dark-onSecondary` INTEGER NOT NULL, `dark-secondaryContainer` INTEGER NOT NULL, `dark-onSecondaryContainer` INTEGER NOT NULL, `dark-tertiary` INTEGER NOT NULL, `dark-onTertiary` INTEGER NOT NULL, `dark-tertiaryContainer` INTEGER NOT NULL, `dark-onTertiaryContainer` INTEGER NOT NULL, `dark-background` INTEGER NOT NULL, `dark-onBackground` INTEGER NOT NULL, `dark-surface` INTEGER NOT NULL, `dark-onSurface` INTEGER NOT NULL, `dark-surfaceVariant` INTEGER NOT NULL, `dark-onSurfaceVariant` INTEGER NOT NULL, `dark-surfaceTint` INTEGER NOT NULL, `dark-inverseSurface` INTEGER NOT NULL, `dark-inverseOnSurface` INTEGER NOT NULL, `dark-error` INTEGER NOT NULL, `dark-onError` INTEGER NOT NULL, `dark-errorContainer` INTEGER NOT NULL, `dark-onErrorContainer` INTEGER NOT NULL, `dark-outline` INTEGER NOT NULL, `light-extra-bars` INTEGER NOT NULL, `light-extra-onBars` INTEGER NOT NULL, `light-extra-isBarLight` INTEGER NOT NULL, `dark-extra-bars` INTEGER NOT NULL, `dark-extra-onBars` INTEGER NOT NULL, `dark-extra-isBarLight` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `isDefault` INTEGER NOT NULL, `light-primary` INTEGER NOT NULL, `light-onPrimary` INTEGER NOT NULL, `light-primaryContainer` INTEGER NOT NULL, `light-onPrimaryContainer` INTEGER NOT NULL, `light-inversePrimary` INTEGER NOT NULL, `light-secondary` INTEGER NOT NULL, `light-onSecondary` INTEGER NOT NULL, `light-secondaryContainer` INTEGER NOT NULL, `light-onSecondaryContainer` INTEGER NOT NULL, `light-tertiary` INTEGER NOT NULL, `light-onTertiary` INTEGER NOT NULL, `light-tertiaryContainer` INTEGER NOT NULL, `light-onTertiaryContainer` INTEGER NOT NULL, `light-background` INTEGER NOT NULL, `light-onBackground` INTEGER NOT NULL, `light-surface` INTEGER NOT NULL, `light-onSurface` INTEGER NOT NULL, `light-surfaceVariant` INTEGER NOT NULL, `light-onSurfaceVariant` INTEGER NOT NULL, `light-surfaceTint` INTEGER NOT NULL, `light-inverseSurface` INTEGER NOT NULL, `light-inverseOnSurface` INTEGER NOT NULL, `light-error` INTEGER NOT NULL, `light-onError` INTEGER NOT NULL, `light-errorContainer` INTEGER NOT NULL, `light-onErrorContainer` INTEGER NOT NULL, `light-outline` INTEGER NOT NULL, `dark-primary` INTEGER NOT NULL, `dark-onPrimary` INTEGER NOT NULL, `dark-primaryContainer` INTEGER NOT NULL, `dark-onPrimaryContainer` INTEGER NOT NULL, `dark-inversePrimary` INTEGER NOT NULL, `dark-secondary` INTEGER NOT NULL, `dark-onSecondary` INTEGER NOT NULL, `dark-secondaryContainer` INTEGER NOT NULL, `dark-onSecondaryContainer` INTEGER NOT NULL, `dark-tertiary` INTEGER NOT NULL, `dark-onTertiary` INTEGER NOT NULL, `dark-tertiaryContainer` INTEGER NOT NULL, `dark-onTertiaryContainer` INTEGER NOT NULL, `dark-background` INTEGER NOT NULL, `dark-onBackground` INTEGER NOT NULL, `dark-surface` INTEGER NOT NULL, `dark-onSurface` INTEGER NOT NULL, `dark-surfaceVariant` INTEGER NOT NULL, `dark-onSurfaceVariant` INTEGER NOT NULL, `dark-surfaceTint` INTEGER NOT NULL, `dark-inverseSurface` INTEGER NOT NULL, `dark-inverseOnSurface` INTEGER NOT NULL, `dark-error` INTEGER NOT NULL, `dark-onError` INTEGER NOT NULL, `dark-errorContainer` INTEGER NOT NULL, `dark-onErrorContainer` INTEGER NOT NULL, `dark-outline` INTEGER NOT NULL, `light-extra-bars` INTEGER NOT NULL, `light-extra-onBars` INTEGER NOT NULL, `light-extra-isBarLight` INTEGER NOT NULL, `dark-extra-bars` INTEGER NOT NULL, `dark-extra-onBars` INTEGER NOT NULL, `dark-extra-isBarLight` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -968,7 +968,7 @@
           "columnNames": [
             "id"
           ],
-          "autoGenerate": false
+          "autoGenerate": true
         },
         "indices": [],
         "foreignKeys": []
@@ -1015,7 +1015,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0d6d7c9b1182a4f80c75c4ac7121b1a3')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7f6eef408eb200963255a819fc83dd06')"
     ]
   }
 }

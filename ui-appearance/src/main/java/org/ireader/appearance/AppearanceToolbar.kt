@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -14,6 +15,7 @@ import org.ireader.components.components.Toolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.TopAppBarBackButton
+import org.ireader.core_ui.theme.isLight
 import org.ireader.domain.use_cases.theme.toCustomTheme
 import org.ireader.ui_appearance.R
 
@@ -44,6 +46,7 @@ private fun MainAppearanceToolbar(
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     val scope = rememberCoroutineScope()
+    val isLight = MaterialTheme.colorScheme.isLight()
     Toolbar(
         scrollBehavior = scrollBehavior,
         title = {
@@ -61,7 +64,7 @@ private fun MainAppearanceToolbar(
                 AppIconButton(
                     imageVector = Icons.Default.Save,
                     onClick = {
-                        val theme = vm.getThemes(vm.colorTheme.value)
+                        val theme = vm.getThemes(vm.colorTheme.value,isLight)
                         if (theme != null) {
                             scope.launchIO {
                                 val themeId = vm.themeRepository.insert(theme.toCustomTheme())

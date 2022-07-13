@@ -9,10 +9,12 @@ import org.ireader.core_api.prefs.Preference
 import org.ireader.core_api.prefs.PreferenceStore
 import org.ireader.core_api.prefs.getEnum
 import org.ireader.core_ui.theme.FontType
+import org.ireader.core_ui.theme.ReaderColors
 import org.ireader.core_ui.theme.getDefaultFont
 import org.ireader.core_ui.theme.prefs.IReaderVoice
 import org.ireader.core_ui.theme.prefs.asColor
 import org.ireader.core_ui.theme.prefs.asFont
+import org.ireader.core_ui.theme.prefs.asReaderTheme
 import org.ireader.core_ui.theme.prefs.asVoice
 import org.ireader.core_ui.ui.PreferenceAlignment
 
@@ -84,6 +86,9 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
 
     fun textColorReader(): Preference<Color> {
         return preferenceStore.getInt(SAVED_TEXT_COLOR, Color(0xFFE9E9E9).toArgb()).asColor()
+    }
+    fun readerTheme(): Preference<ReaderColors> {
+        return preferenceStore.getLong("readerTheme", 0).asReaderTheme()
     }
 
     fun webViewIntegration(): Preference<Boolean> {

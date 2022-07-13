@@ -68,6 +68,70 @@ fun Divider(
         color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
     )
 }
+//@OptIn(ExperimentalFoundationApi::class)
+//@Composable
+//fun PreferenceRow(
+//    modifier: Modifier = Modifier,
+//    title: String,
+//    icon: ImageVector? = null,
+//    onClick: () -> Unit = {},
+//    onLongClick: () -> Unit = {},
+//    subtitle: String? = null,
+//    action: @Composable (() -> Unit)? = null,
+//    actionAlignment: Alignment = Alignment.CenterEnd,
+//    enableNoIndicator: Boolean = false,
+//) {
+//    val height = if (subtitle != null) 72.dp else 56.dp
+//
+//    Row(
+//        modifier = modifier
+//            .fillMaxWidth()
+//            .requiredHeight(height)
+//            .combinedClickable(
+//                onLongClick = onLongClick,
+//                onClick = onClick
+//            ),
+//        verticalAlignment = Alignment.CenterVertically,
+//    ) {
+//        if (icon != null) {
+//            Icon(
+//                modifier = Modifier
+//                    .padding(horizontal = 16.dp)
+//                    .size(24.dp),
+//                contentDescription = null,
+//                imageVector = icon,
+//                tint = MaterialTheme.colorScheme.primary,
+//
+//                )
+//        }
+//        Column(
+//            Modifier
+//                .padding(horizontal = 16.dp)
+//                .weight(1f)
+//        ) {
+//            Text(
+//                text = title,
+//                overflow = Ellipsis,
+//                maxLines = 1,
+//                style = MaterialTheme.typography.labelMedium,
+//            )
+//            if (subtitle != null) {
+//                Text(
+//                    text = subtitle,
+//                    overflow = Ellipsis,
+//                    maxLines = 1,
+//                    color = LocalContentColor.current.copy(alpha = ContentAlpha.medium),
+//                    style = MaterialTheme.typography.labelMedium
+//                )
+//            }
+//        }
+//        if (action != null) {
+//            Box(Modifier.widthIn(min = 56.dp, max = 250.dp), contentAlignment = actionAlignment) {
+//                action()
+//            }
+//        }
+//    }
+//}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -80,6 +144,7 @@ fun PreferenceRow(
     onLongClick: () -> Unit = {},
     subtitle: String? = null,
     clickable: Boolean = true,
+    actionAlignment: Alignment = Alignment.CenterEnd,
     action: @Composable (() -> Unit)? = null,
 ) {
     val height = if (subtitle != null) 72.dp else 56.dp
@@ -93,14 +158,10 @@ fun PreferenceRow(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = height)
-            .apply {
-                if (clickable) {
-                    this.combinedClickable(
-                        onLongClick = onLongClick,
-                        onClick = onClick,
-                    )
-                }
-            },
+            .combinedClickable(
+                onLongClick = onLongClick,
+                onClick = onClick,
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (painter != null) {
@@ -130,91 +191,6 @@ fun PreferenceRow(
         ) {
             Text(
                 text = title,
-                style = titleTextStyle,
-            )
-            if (subtitle != null) {
-                Text(
-                    modifier = Modifier.padding(top = 4.dp),
-                    text = subtitle,
-                    style = subtitleTextStyle,
-                )
-            }
-        }
-        if (action != null) {
-            Box(Modifier.widthIn(min = 56.dp)) {
-                action()
-            }
-        }
-    }
-}
-
-@Composable
-fun SwitchPreference(
-    modifier: Modifier = Modifier,
-    preference: PreferenceMutableState<Boolean>,
-    title: String,
-    subtitle: String? = null,
-    painter: Painter? = null,
-    icon: ImageVector? = null,
-) {
-    PreferenceRow(
-        modifier = modifier,
-        title = title,
-        subtitle = subtitle,
-        painter = painter,
-        icon = icon,
-        action = {
-            Switch(
-                checked = preference.value,
-                onCheckedChange = { preference.value = !preference.value },
-            )
-        },
-        onClick = { preference.value = !preference.value },
-        clickable = true,
-    )
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun PreferenceRow(
-    title: String,
-    icon: ImageVector? = null,
-    onClick: () -> Unit = {},
-    onLongClick: () -> Unit = {},
-    subtitle: String? = null,
-    action: @Composable (() -> Unit)? = null,
-    actionAlignment: Alignment = Alignment.CenterEnd
-) {
-    val height = if (subtitle != null) 72.dp else 56.dp
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .requiredHeight(height)
-            .combinedClickable(
-                onLongClick = onLongClick,
-                onClick = onClick
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (icon != null) {
-            Icon(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .size(24.dp),
-                contentDescription = null,
-                imageVector = icon,
-                tint = MaterialTheme.colorScheme.primary,
-
-            )
-        }
-        Column(
-            Modifier
-                .padding(horizontal = 16.dp)
-                .weight(1f)
-        ) {
-            Text(
-                text = title,
                 overflow = Ellipsis,
                 maxLines = 1,
                 style = MaterialTheme.typography.labelMedium,
@@ -235,6 +211,31 @@ fun PreferenceRow(
             }
         }
     }
+}
+
+@Composable
+fun SwitchPreference(
+    modifier: Modifier = Modifier,
+    preference: PreferenceMutableState<Boolean>,
+    title: String,
+    subtitle: String? = null,
+    painter: Painter? = null,
+    icon: ImageVector? = null,
+) {
+    PreferenceRow(
+        title = title,
+        subtitle = subtitle,
+        painter = painter,
+        icon = icon,
+        action = {
+            Switch(
+                checked = preference.value,
+                onCheckedChange = { preference.value = !preference.value },
+            )
+        },
+        onClick = { preference.value = !preference.value },
+        clickable = true,
+    )
 }
 
 // @Composable
@@ -395,7 +396,7 @@ fun SliderPreference(
             modifier = Modifier
                 .widthIn(max = 200.dp),
             value = preferenceAsFloat?.lazyValue ?: preferenceAsInt?.lazyValue?.toFloat()
-                ?: preferenceAsLong?.lazyValue?.toFloat() ?: mutablePreferences?.value ?: 0F,
+            ?: preferenceAsLong?.lazyValue?.toFloat() ?: mutablePreferences?.value ?: 0F,
             onValueChange = {
                 preferenceAsFloat?.lazyValue = it
                 preferenceAsInt?.lazyValue = it.toInt()
@@ -408,7 +409,7 @@ fun SliderPreference(
                 if (onValueChangeFinished != null) {
                     onValueChangeFinished(
                         preferenceAsFloat?.value?.toFloat() ?: preferenceAsInt?.value?.toFloat()
-                            ?: preferenceAsLong?.value?.toFloat() ?: mutablePreferences?.value ?: 0F
+                        ?: preferenceAsLong?.value?.toFloat() ?: mutablePreferences?.value ?: 0F
                     )
                 }
             },

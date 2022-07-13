@@ -38,7 +38,7 @@ fun BaseTheme.dark(): Theme {
 
 val themes = mutableListOf<BaseTheme>(
     BaseTheme(
-        id = 1,
+        id = -1,
         lightColor = LightThemeColorsTachiyomi,
         darkColor = DarkThemeColorsTachiyomi,
         darkExtraColors = ExtraColors(
@@ -52,7 +52,7 @@ val themes = mutableListOf<BaseTheme>(
         default = true
     ),
     BaseTheme(
-        id = 2,
+        id = -2,
         lightColor = lightColorScheme(
             primary = Colour.blue_accent,
             primaryContainer = Colour.blue_700,
@@ -91,7 +91,7 @@ val themes = mutableListOf<BaseTheme>(
 
     ),
     BaseTheme(
-        id = 3,
+        id = -3,
         lightColor = MidNightLightColorScheme,
         darkColor = MidNightDarkColorScheme,
         darkExtraColors = ExtraColors(
@@ -105,7 +105,7 @@ val themes = mutableListOf<BaseTheme>(
         default = true
     ),
     BaseTheme(
-        id = 4,
+        id = -4,
         lightColor = GreenAppleLightThemeColors,
         darkColor = GreenAppleDarkThemeColors,
         darkExtraColors = ExtraColors(
@@ -119,7 +119,7 @@ val themes = mutableListOf<BaseTheme>(
         default = true
     ),
     BaseTheme(
-        id = 5,
+        id = -5,
         lightColor = LightThemeColorsStrawberries,
         darkColor = DarkThemeColorsStrawberries,
         darkExtraColors = ExtraColors(
@@ -133,7 +133,7 @@ val themes = mutableListOf<BaseTheme>(
         default = true
     ),
     BaseTheme(
-        id = 6,
+        id = -6,
         lightColor = LightThemeColorsTako,
         darkColor = DarkThemeColorsTako,
         darkExtraColors = ExtraColors(

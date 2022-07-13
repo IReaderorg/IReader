@@ -1,25 +1,26 @@
 package org.ireader.reader.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.ireader.components.components.component.PreferenceRow
-import org.ireader.core_ui.theme.readerThemes
+import org.ireader.core_ui.modifier.clickableNoIndication
+import org.ireader.core_ui.theme.ReaderColors
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.ui_reader.R
 
@@ -27,37 +28,45 @@ import org.ireader.ui_reader.R
 fun ReaderBackgroundComposable(
     modifier: Modifier = Modifier,
     viewModel: ReaderScreenViewModel,
-    onBackgroundChange: (Int) -> Unit
+    onBackgroundChange: (themeId: Long) -> Unit,
+    themes: List<ReaderColors>,
 ) {
 
-    PreferenceRow(title = stringResource(R.string.background_color), action = {
-        LazyRow {
-            items(readerThemes.size) { index ->
-                Box(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(color = readerThemes[index].backgroundColor)
-                        .border(
-                            2.dp,
-                            MaterialTheme.colorScheme.primary,
-                            CircleShape
-                        )
-                        .clickable {
-                            onBackgroundChange(index)
+    PreferenceRow(
+        modifier = Modifier.height(80.dp),
+        title = stringResource(R.string.background_color),
+        action = {
+            LazyRow(
+                contentPadding = PaddingValues(4.dp)
+            ) {
+                items(themes.size) { index ->
+                    Box(
+                        modifier = Modifier.padding(horizontal = 4.dp).clickableNoIndication {
+                            onBackgroundChange(themes[index].id)
                         },
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (viewModel.backgroundColor.value == readerThemes[index].backgroundColor) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "color selected",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
+                        contentAlignment = Alignment.Center
+                    ) {
+                            Icon(
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .border(
+                                        2.dp,
+                                        MaterialTheme.colorScheme.primary,
+                                        CircleShape
+                                    ),
+                                imageVector = Icons.Default.Circle,
+                                contentDescription = "color selected",
+                                tint = themes[index].backgroundColor
+                            )
+                        if (viewModel.readerTheme.value.id == themes[index].id) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "color selected",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
             }
-        }
-    })
+        })
 }

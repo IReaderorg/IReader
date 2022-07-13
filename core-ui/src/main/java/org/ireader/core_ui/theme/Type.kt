@@ -11,64 +11,64 @@ fun getDefaultFont(): FontType {
 
 val readerThemes = mutableListOf<ReaderColors>(
     ReaderColors(
-        id = 0,
+        id = -1,
         Color(0xff000000),
         Color(0xffffffff),
         true
     ),
     ReaderColors(
-        1, Color(0xffffffff), Color(0xff000000),
+        -2, Color(0xffffffff), Color(0xff000000),
         true
     ),
     ReaderColors(
-        2, Color(0xff262626),
+        -3, Color(0xff262626),
         Color(
             0xFFE9E9E9,
         ),
         true
     ),
     ReaderColors(
-        3, Color(0xFF405A61), Color(0xFFFFFFFF),
+        -4, Color(0xFF405A61), Color(0xFFFFFFFF),
         true
     ),
     ReaderColors(
-        4, Color(248, 249, 250), Color(51, 51, 51),
+        -5, Color(248, 249, 250), Color(51, 51, 51),
         true
     ),
     ReaderColors(
-        5, Color(150, 173, 252), Color(0xff000000),
+        -6, Color(150, 173, 252), Color(0xff000000),
         true
     ),
     ReaderColors(
-        6, Color(219, 225, 241), Color(0xff000000),
+        -7, Color(219, 225, 241), Color(0xff000000),
         true
     ),
     ReaderColors(
-        7, Color(237, 221, 110), Color(0xff000000),
+        -8, Color(237, 221, 110), Color(0xff000000),
         true
     ),
     ReaderColors(
-        8, Color(168, 242, 154), Color(0xff000000),
+        -9, Color(168, 242, 154), Color(0xff000000),
         true
     ),
     ReaderColors(
-        9, Color(233, 214, 107), Color(0xff000000),
+        -10, Color(233, 214, 107), Color(0xff000000),
         true
     ),
     ReaderColors(
-        10, Color(237, 209, 176), Color(0xff000000),
+        -11, Color(237, 209, 176), Color(0xff000000),
         true
     ),
     ReaderColors(
-        11, Color(185, 135, 220), Color(0xff000000),
+        -12, Color(185, 135, 220), Color(0xff000000),
         true
     ),
     ReaderColors(
-        12, Color(224, 166, 170), Color(0xff000000),
+        -13, Color(224, 166, 170), Color(0xff000000),
         true
     ),
     ReaderColors(
-        13, Color(248, 253, 137), Color(0xff000000),
+        -14, Color(248, 253, 137), Color(0xff000000),
         true
     ),
 )

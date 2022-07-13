@@ -21,7 +21,7 @@ interface ReaderPrefFunctions {
     fun ReaderScreenViewModel.saveBrightness(brightness: Float, context: Context)
 
     fun ReaderScreenViewModel.toggleAutoScrollMode()
-    fun ReaderScreenViewModel.changeBackgroundColor(colorIndex: Int)
+    fun ReaderScreenViewModel.changeBackgroundColor(themeId: Long)
     fun ReaderScreenViewModel.setReaderBackgroundColor(color: Color)
     suspend fun ReaderScreenViewModel.readBrightness(context: Context)
     suspend fun ReaderScreenViewModel.readOrientation(context: Context)
@@ -102,13 +102,17 @@ class ReaderPrefFunctionsImpl @Inject constructor() : ReaderPrefFunctions {
         }
     }
 
-    override fun ReaderScreenViewModel.changeBackgroundColor(colorIndex: Int) {
-        val bgColor = readerThemes[colorIndex].backgroundColor
-        val textColor = readerThemes[colorIndex].onTextColor
-        backgroundColor.value = bgColor
-        this.textColor.value = textColor
-        setReaderBackgroundColor(bgColor)
-        setReaderTextColor(textColor)
+    override fun ReaderScreenViewModel.changeBackgroundColor(themeId:Long) {
+        readerThemes.firstOrNull { it.id == themeId }?.let { theme ->
+            readerTheme.value = theme
+            val bgColor = theme.backgroundColor
+            val textColor = theme.onTextColor
+            backgroundColor.value = bgColor
+            this.textColor.value = textColor
+            setReaderBackgroundColor(bgColor)
+            setReaderTextColor(textColor)
+        }
+
     }
 
     override fun ReaderScreenViewModel.setReaderBackgroundColor(color: Color) {
