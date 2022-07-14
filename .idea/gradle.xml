@@ -17,7 +17,6 @@
             <option value="$PROJECT_DIR$/common-extensions" />
             <option value="$PROJECT_DIR$/common-models" />
             <option value="$PROJECT_DIR$/common-resources" />
-            <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/core-api" />
             <option value="$PROJECT_DIR$/core-catalogs" />
             <option value="$PROJECT_DIR$/core-ui" />

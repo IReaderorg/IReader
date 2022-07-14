@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.ireader.common_extensions.launchIO
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.UpdateWithInfo
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
@@ -29,7 +28,7 @@ class UpdatesViewModel @Inject constructor(
     private val serviceUseCases: ServiceUseCases,
     private val uiPreferences: UiPreferences
 ) : BaseViewModel(), UpdateState by updateStateImpl {
-    val dateFormat by uiPreferences.dateFormat().asState()
+
     val relativeFormat by uiPreferences.relativeTime().asState()
     init {
         viewModelScope.launch {
@@ -64,41 +63,15 @@ class UpdatesViewModel @Inject constructor(
         }
     }
 
-    fun downloadChapter(update: UpdateWithInfo) {
-        viewModelScope.launchIO {
-            val catalog = getLocalCatalog.get(update.sourceId)
-            if (catalog != null) {
-                remoteUseCases.getRemoteReadingContent(
-                    chapter = Chapter(
-                        id = update.chapterId,
-                        bookId = update.bookId,
-                        key = update.chapterLink,
-                        name = update.chapterTitle,
-                        read = update.read,
-                        number = update.number,
-                    ),
-                    catalog = catalog,
-                    onSuccess = {
-                    },
-                    onError = {
-                    }
-                )
-            }
-        }
-    }
     fun downloadChapters() {
         viewModelScope.launch {
-            val bookIds =
-                updates.values.flatMap { it }.filter { it.id in selection }.map { it.bookId }
             val chapterIds =
                 updates.values.flatMap { it }.filter { it.id in selection }.map { it.chapterId }
-            //  val books = getBookUseCases.findBookByIds(bookIds)
             serviceUseCases.startDownloadServicesUseCase(
                 chapterIds = chapterIds.toLongArray()
             )
         }
     }
-
     fun refreshUpdate() {
         serviceUseCases.startLibraryUpdateServicesUseCase()
     }

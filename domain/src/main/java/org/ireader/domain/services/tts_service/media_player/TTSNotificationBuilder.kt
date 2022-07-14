@@ -39,7 +39,7 @@ class TTSNotificationBuilder constructor(
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
 
     val skipPrevActionButton = NotificationCompat.Action(
-        org.ireader.core.R.drawable.ic_baseline_skip_previous,
+        R.drawable.ic_baseline_skip_previous,
         context.getString(R.string.previous_chapter),
         MediaButtonReceiver.buildMediaButtonPendingIntent(
             context,
@@ -47,7 +47,7 @@ class TTSNotificationBuilder constructor(
         )
     )
     val rewindAction = NotificationCompat.Action(
-        org.ireader.core.R.drawable.ic_baseline_fast_rewind,
+        R.drawable.ic_baseline_fast_rewind,
         context.getString(R.string.previous_paragraph),
         MediaButtonReceiver.buildMediaButtonPendingIntent(
             context,
@@ -56,19 +56,19 @@ class TTSNotificationBuilder constructor(
     )
 
     val pauseAction = NotificationCompat.Action(
-        org.ireader.core.R.drawable.ic_baseline_pause,
+        R.drawable.ic_baseline_pause,
         context.getString(R.string.pause),
         MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_STOP)
     )
 
     val play = NotificationCompat.Action(
-        org.ireader.core.R.drawable.ic_baseline_play_arrow,
+        R.drawable.ic_baseline_play_arrow,
         context.getString(R.string.play),
         MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_PLAY)
     )
 
     val next = NotificationCompat.Action(
-        org.ireader.core.R.drawable.ic_baseline_fast_forward,
+        R.drawable.ic_baseline_fast_forward,
         context.getString(R.string.next_chapter),
         MediaButtonReceiver.buildMediaButtonPendingIntent(
             context,
@@ -78,7 +78,7 @@ class TTSNotificationBuilder constructor(
 
     val skipNext =
         NotificationCompat.Action(
-            org.ireader.core.R.drawable.ic_baseline_skip_next,
+            R.drawable.ic_baseline_skip_next,
             context.getString(R.string.next_chapter),
             MediaButtonReceiver.buildMediaButtonPendingIntent(
                 context,
@@ -93,7 +93,7 @@ class TTSNotificationBuilder constructor(
         progress: Int = 0,
     ) =
         NotificationCompat.Action(
-            org.ireader.core.R.drawable.ic_baseline_open_in_new_24,
+            R.drawable.ic_baseline_open_in_new_24,
             context.getString(R.string.next_chapter),
             openReaderScreenIntent(
                 chapterId = chapterId,
@@ -105,7 +105,7 @@ class TTSNotificationBuilder constructor(
 
     val close =
         NotificationCompat.Action(
-            org.ireader.core.R.drawable.baseline_close_24,
+            R.drawable.baseline_close_24,
             context.getString(R.string.close),
             cancelMediaPlayer()
         )
@@ -226,7 +226,7 @@ class TTSNotificationBuilder constructor(
         ).apply {
             setContentTitle(chapterTitle)
             setContentText(contentText)
-            setSmallIcon(org.ireader.core.R.drawable.ic_infinity)
+            setSmallIcon(R.drawable.ic_infinity)
             setOnlyAlertOnce(true)
             setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             setLargeIcon(context, cover)

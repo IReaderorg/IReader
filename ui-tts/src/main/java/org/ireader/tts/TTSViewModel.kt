@@ -14,7 +14,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_models.entities.Chapter
-import org.ireader.core_api.log.Log
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.core_ui.viewmodel.BaseViewModel
@@ -56,6 +55,18 @@ class TTSViewModel @Inject constructor(
     val voice = readerPreferences.speechVoice().asState()
     val language = readerPreferences.speechLanguage().asState()
 
+    val theme = readerPreferences.backgroundColorTTS().asState()
+    val enableBookCoverInTTS = readerPreferences.enableBookCoverInTTS().asState()
+
+    // val textColor = readerPreferences.textColorReader().asState()
+    val lineHeight = readerPreferences.lineHeight().asState()
+    val betweenLetterSpaces = readerPreferences.betweenLetterSpaces().asState()
+    val textWeight = readerPreferences.textWeight().asState()
+    val paragraphsIndent = readerPreferences.paragraphIndent().asState()
+    val textAlignment = readerPreferences.textAlign().asState()
+    val font = readerPreferences.font().asState()
+    val fontSize = readerPreferences.fontSize().asState()
+
     private var chapterId: Long = -1
     private var initialize: Boolean = false
 
@@ -68,9 +79,9 @@ class TTSViewModel @Inject constructor(
             val readingParagraph =
                 savedStateHandle.get<String>(NavigationArgs.readingParagraph.name)
             if (readingParagraph != null && readingParagraph.toInt() < (
-                ttsState.ttsContent?.value?.lastIndex
-                    ?: 0
-                )
+                    ttsState.ttsContent?.value?.lastIndex
+                        ?: 0
+                    )
             ) {
                 ttsState.currentReadingParagraph = readingParagraph.toInt()
             }
@@ -100,8 +111,6 @@ class TTSViewModel @Inject constructor(
             pitch = speechPrefUseCases.readPitch()
             currentLanguage = speechPrefUseCases.readLanguage()
             autoNextChapter = speechPrefUseCases.readAutoNext()
-            font = readerUseCases.selectedFontStateUseCase.readFont()
-            lineHeight = readerUseCases.fontHeightUseCase.read().toInt()
             currentVoice = speechPrefUseCases.readVoice()
         }
     }
@@ -163,7 +172,6 @@ class TTSViewModel @Inject constructor(
         }
 
         override fun onConnectionSuspended() {
-            Log.debug { "TTS ViewModel: MediaSession: onConnectionSuspended" }
             isServiceConnected = false
             ctrlCallback?.let { controller?.unregisterCallback(it) }
             controller = null
@@ -173,7 +181,6 @@ class TTSViewModel @Inject constructor(
 
         override fun onConnectionFailed() {
             isServiceConnected = false
-            Log.debug { "TTS ViewModel: MediaSession:  onConnectionFailed" }
             super.onConnectionFailed()
         }
     }
@@ -208,7 +215,10 @@ class TTSViewModel @Inject constructor(
             }
             if (chapterId != ttsChapter?.id && chapterId != -1L) {
                 viewModelScope.launch {
-                    ttsChapter = getChapterUseCase.findChapterById(chapterId)
+                    getChapterUseCase.findChapterById(chapterId)?.let {
+                        ttsChapter = it
+
+                    }
                 }
             }
         }
@@ -242,12 +252,14 @@ class TTSViewModel @Inject constructor(
 
     fun getLocalChapter(chapterId: Long) {
         viewModelScope.launch {
-            val chapter = getChapterUseCase.findChapterById(chapterId)
-            ttsChapter = chapter
-            if (chapter?.isEmpty() == true) {
-                ttsSource?.let { source -> getRemoteChapter(chapter) }
+            getChapterUseCase.findChapterById(chapterId)?.let { chapter ->
+                ttsChapter = chapter
+                if (chapter.isEmpty()) {
+                    ttsSource?.let { getRemoteChapter(chapter) }
+                }
+                runTTSService(Player.PAUSE)
             }
-            runTTSService(Player.PAUSE)
+
         }
     }
 

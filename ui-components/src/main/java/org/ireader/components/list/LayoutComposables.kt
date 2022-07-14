@@ -1,6 +1,5 @@
 package org.ireader.components.list
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
@@ -12,7 +11,7 @@ import org.ireader.components.list.layouts.GridLayoutComposable
 import org.ireader.components.list.layouts.LinearListDisplay
 import org.ireader.core_api.source.Source
 
-@OptIn(ExperimentalFoundationApi::class)
+
 @Composable
 fun LayoutComposable(
     books: List<BookItem> = emptyList(),

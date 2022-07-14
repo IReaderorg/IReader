@@ -28,7 +28,9 @@ class FindChapterById @Inject constructor(private val chapterRepository: org.ire
             chapterRepository.findChapterById(chapterId = chapterId)
         } else if (bookId != null) {
             chapterRepository.findLastReadChapter(bookId)
-        } else null
+        } else {
+            chapterRepository.findChapterById(chapterId)
+        }
     }
 }
 

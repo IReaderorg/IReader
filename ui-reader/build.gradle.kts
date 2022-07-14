@@ -17,7 +17,7 @@ dependencies {
     implementation(project(Modules.commonModels))
     implementation(project(Modules.commonResources))
     implementation(project(Modules.coreUi))
-    implementation(project(Modules.core))
+
     implementation(project(Modules.coreApi))
     implementation(project(Modules.commonData))
     implementation(project(Modules.uiComponents))

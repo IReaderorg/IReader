@@ -172,7 +172,7 @@ class UnlockActivity : FragmentActivity() {
         val title = intent.extras?.getString(TITLE)
         val subtitle = intent.extras?.getString(SUBTITLE)
         this.startAuthentication(
-            title = title ?: getString(org.ireader.core.R.string.unlock_app),
+            title = title ?: getString(R.string.unlock_app),
             subtitle = subtitle,
             confirmationRequired = false,
             callback = object : AuthenticatorUtil.AuthenticationCallback() {

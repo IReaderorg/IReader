@@ -39,9 +39,11 @@ import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.history.HistoryUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
+import org.ireader.domain.use_cases.local.book_usecases.BookMarkChapterUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
 import org.ireader.domain.use_cases.reader.ScreenAlwaysOn
 import org.ireader.domain.use_cases.remote.RemoteUseCases
+import org.ireader.ui_reader.R
 import javax.inject.Inject
 
 @HiltViewModel
@@ -63,7 +65,8 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     val googleFontProvider: GoogleFont.Provider,
     val screenAlwaysOnUseCase: ScreenAlwaysOn,
     val webViewManger: WebViewManger,
-    val readerThemeRepository: ReaderThemeRepository
+    val readerThemeRepository: ReaderThemeRepository,
+    val bookMarkChapterUseCase: BookMarkChapterUseCase
 ) : BaseViewModel(),
     ReaderScreenPreferencesState by prefState,
     ReaderScreenState by state,
@@ -94,7 +97,8 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     val showScrollIndicator = readerPreferences.showScrollIndicator().asState()
     val textAlignment = readerPreferences.textAlign().asState()
     val orientation = readerPreferences.orientation().asState()
-    var lastOrientationChangedTime = mutableStateOf(kotlinx.datetime.Clock.System.now().toEpochMilliseconds())
+    var lastOrientationChangedTime =
+        mutableStateOf(kotlinx.datetime.Clock.System.now().toEpochMilliseconds())
     val scrollIndicatorWith = readerPreferences.scrollIndicatorWith().asState()
     val scrollIndicatorPadding = readerPreferences.scrollIndicatorPadding().asState()
     val scrollIndicatorAlignment = readerPreferences.scrollBarAlignment().asState()
@@ -119,6 +123,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
         "Open Sans",
         "Roboto Serif",
     )
+
     init {
         val sourceId = savedStateHandle.get<Long>(NavigationArgs.sourceId.name)
         val chapterId = savedStateHandle.get<Long>(NavigationArgs.chapterId.name)
@@ -136,12 +141,12 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
                 }
             } else {
                 viewModelScope.launch {
-                    showSnackBar(UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
+                    showSnackBar(UiText.StringResource(R.string.the_source_is_not_found))
                 }
             }
         } else {
             viewModelScope.launch {
-                showSnackBar(UiText.StringResource(org.ireader.core.R.string.something_is_wrong_with_this_book))
+                showSnackBar(UiText.StringResource(R.string.something_is_wrong_with_this_book))
             }
         }
     }
@@ -167,7 +172,11 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
         }
     }
 
-    suspend fun getLocalChapter(chapterId: Long?, next: Boolean = true, force: Boolean = false): Chapter? {
+    suspend fun getLocalChapter(
+        chapterId: Long?,
+        next: Boolean = true,
+        force: Boolean = false
+    ): Chapter? {
         if (chapterId == null) return null
 
         isLoading = true
@@ -255,7 +264,12 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
         throw IllegalAccessException("List doesn't contains ${chapter?.name}")
     }
 
-    fun prepareReaderSetting(context: Context, scrollState: ScrollState, onHideNav: (Boolean) -> Unit, onHideStatus: (Boolean) -> Unit) {
+    fun prepareReaderSetting(
+        context: Context,
+        scrollState: ScrollState,
+        onHideNav: (Boolean) -> Unit,
+        onHideStatus: (Boolean) -> Unit
+    ) {
         viewModelScope.launch {
             readImmersiveMode(context, onHideNav = onHideNav, onHideStatus = onHideStatus)
         }
@@ -323,21 +337,10 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
         }
     }
 
-    fun toggleSettingMode(enable: Boolean, returnToMain: Boolean?) {
-        if (returnToMain == null) {
-            isSettingModeEnable = enable
-            isMainBottomModeEnable = false
-        } else {
-            isSettingModeEnable = false
-            isMainBottomModeEnable = true
-        }
-    }
-
     fun bookmarkChapter() {
-        stateChapter?.let { chapter ->
-            viewModelScope.launch(Dispatchers.IO) {
-                stateChapter = chapter.copy(bookmark = !chapter.bookmark)
-                insertUseCases.insertChapter(chapter.copy(bookmark = !chapter.bookmark))
+        viewModelScope.launch(Dispatchers.IO) {
+            bookMarkChapterUseCase.bookMarkChapter(stateChapter)?.let {
+                stateChapter = it
             }
         }
     }

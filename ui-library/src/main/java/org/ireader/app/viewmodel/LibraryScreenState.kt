@@ -11,6 +11,7 @@ import org.ireader.common_models.entities.History
 import org.ireader.common_models.entities.LibraryBook
 import org.ireader.common_models.library.LibrarySort
 import org.ireader.common_resources.UiText
+import org.ireader.ui_library.R
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -42,7 +43,7 @@ open class LibraryStateImpl @Inject constructor() : LibraryState {
     override var books by mutableStateOf<List<LibraryBook>>(emptyList())
     override val isEmpty: Boolean by derivedStateOf { books.isEmpty() }
     override var searchedBook by mutableStateOf<List<LibraryBook>>(emptyList())
-    override var error by mutableStateOf<UiText>(UiText.StringResource(org.ireader.core.R.string.no_error))
+    override var error by mutableStateOf<UiText>(UiText.StringResource(R.string.no_error))
     override var inSearchMode by mutableStateOf<Boolean>(false)
     override var searchQuery by mutableStateOf<String?>(null)
     override var sortType by mutableStateOf<LibrarySort>(

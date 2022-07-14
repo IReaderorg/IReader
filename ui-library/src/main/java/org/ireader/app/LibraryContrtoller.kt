@@ -29,16 +29,33 @@ fun LibraryController(
     LibraryScreen(
         modifier = modifier,
         onMarkAsRead = {
-            vm.markAsRead()
+            with(vm) {
+                viewModelScope.launch(Dispatchers.IO) {
+                    markBookAsReadOrNotUseCase.markAsRead(selectedBooks)
+                    selectedBooks.clear()
+                }
+            }
         },
         onDownload = {
             vm.downloadChapters()
         },
         onMarkAsNotRead = {
-            vm.markAsNotRead()
+            with(vm) {
+                viewModelScope.launch(Dispatchers.IO) {
+                    markBookAsReadOrNotUseCase.markAsNotRead(selectedBooks)
+                    selectedBooks.clear()
+                }
+            }
         },
         onDelete = {
-            vm.deleteBooks()
+            with(vm) {
+                viewModelScope.launch(Dispatchers.IO) {
+                    kotlin.runCatching {
+                        deleteUseCase.unFavoriteBook(selectedBooks)
+                    }
+                    selectedBooks.clear()
+                }
+            }
         },
         goToLatestChapter = { book ->
             goToReader(book)

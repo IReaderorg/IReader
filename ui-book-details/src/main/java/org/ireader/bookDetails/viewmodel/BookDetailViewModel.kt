@@ -1,6 +1,5 @@
 package org.ireader.bookDetails.viewmodel
 
-import android.content.Context
 import android.content.Intent
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -16,7 +15,6 @@ import org.ireader.common_extensions.withUIContext
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_resources.UiText
-import org.ireader.core.R
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.CommandList
@@ -28,6 +26,7 @@ import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.use_cases.services.ServiceUseCases
+import org.ireader.ui_book_details.R
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -92,11 +91,6 @@ class BookDetailViewModel @Inject constructor(
             }.launchIn(scope)
     }
 
-    /**
-     * sometimes the chapters snapshot is empty as if they were deleted,
-     * I wasn't able to find why, so I decide to insert chapters again.
-     *
-     */
     private fun subscribeChapters(bookId: Long) {
         getChapterUseCase.subscribeChaptersByBookId(bookId).onEach { snapshot ->
             chapters = snapshot
@@ -122,7 +116,6 @@ class BookDetailViewModel @Inject constructor(
             .putExtra(
                 Intent.EXTRA_TITLE, fn
             )
-
         onStart(intent)
     }
 
@@ -138,7 +131,6 @@ class BookDetailViewModel @Inject constructor(
                         toggleBookLoading(false)
                         if (message != null) {
                             Log.error { message.toString() }
-                            // showSnackBar(message)
                         }
                     }
                 },
@@ -184,7 +176,7 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
-    fun toggleInLibrary(book: Book, context: Context) {
+    fun toggleInLibrary(book: Book) {
         this.inLibraryLoading = true
         applicationScope.launch {
             if (!book.favorite) {
@@ -200,11 +192,6 @@ class BookDetailViewModel @Inject constructor(
                 withIOContext {
                     deleteUseCase.unFavoriteBook(listOf(book.id))
                 }
-//                localInsertUseCases.updateBook.update(
-//                    book.copy(
-//                        favorite = false,
-//                    )
-//                )
             }
             this@BookDetailViewModel.inLibraryLoading = false
         }

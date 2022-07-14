@@ -11,7 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import org.ireader.common_extensions.withIOContext
-import org.ireader.core.BuildConfig
+import org.ireader.common_resources.BuildConfig
 import org.ireader.core_api.http.HttpClients
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.prefs.AndroidPreferenceStore

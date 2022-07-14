@@ -15,7 +15,6 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.ireader.common_models.update_service_models.Release
 import org.ireader.common_models.update_service_models.Version
-import org.ireader.core.BuildConfig
 import org.ireader.core_ui.preferences.AppPreferences
 import org.ireader.domain.R
 import org.ireader.domain.notification.Notifications.CHANNEL_APP_UPDATE
@@ -44,7 +43,7 @@ class UpdateService @AssistedInject constructor(
 
         val version = Version.create(release.tag_name)
 
-        BuildConfig.LIBRARY_PACKAGE_NAME
+
         val versionCode: String = org.ireader.common_resources.BuildConfig.VERSION_NAME
         val current = Version.create(versionCode)
 

@@ -1,4 +1,4 @@
-package org.ireader.reader.components
+package org.ireader.components
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -21,15 +21,14 @@ import androidx.compose.ui.unit.dp
 import org.ireader.components.components.component.PreferenceRow
 import org.ireader.core_ui.modifier.clickableNoIndication
 import org.ireader.core_ui.theme.ReaderColors
-import org.ireader.reader.viewmodel.ReaderScreenViewModel
-import org.ireader.ui_reader.R
+import org.ireader.ui_components.R
 
 @Composable
-fun ReaderBackgroundComposable(
+fun ThemePreference(
     modifier: Modifier = Modifier,
-    viewModel: ReaderScreenViewModel,
-    onBackgroundChange: (themeId: Long) -> Unit,
+    onBackgroundChange: (color:ReaderColors) -> Unit,
     themes: List<ReaderColors>,
+    selected:(color:ReaderColors) -> Boolean
 ) {
 
     PreferenceRow(
@@ -44,13 +43,13 @@ fun ReaderBackgroundComposable(
                         modifier = Modifier
                             .padding(horizontal = 4.dp)
                             .clickableNoIndication {
-                                onBackgroundChange(themes[index].id)
+                                onBackgroundChange(themes[index])
                             },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             modifier = Modifier
-                                .size(60.dp)
+                                .size(50.dp)
                                 .border(
                                     2.dp,
                                     MaterialTheme.colorScheme.primary,
@@ -60,7 +59,7 @@ fun ReaderBackgroundComposable(
                             contentDescription = "color selected",
                             tint = themes[index].backgroundColor
                         )
-                        if (viewModel.readerTheme.value.id == themes[index].id) {
+                        if (selected(themes[index])) {
                             Icon(
                                 imageVector = Icons.Default.Check,
                                 contentDescription = "color selected",

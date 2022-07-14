@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import org.ireader.common_resources.UiText
+import org.ireader.ui_settings.R
 import javax.inject.Inject
 
 interface FontScreenState {
@@ -24,7 +25,7 @@ open class FontScreenStateImpl @Inject constructor() : FontScreenState {
     override var uiFonts by mutableStateOf<List<String>>(emptyList())
     override val isEmpty: Boolean by derivedStateOf { fonts.isEmpty() }
     override var searchedFonts by mutableStateOf<List<String>>(emptyList())
-    override var error by mutableStateOf<UiText>(UiText.StringResource(org.ireader.core.R.string.no_error))
+    override var error by mutableStateOf<UiText>(UiText.StringResource(R.string.no_error))
     override var inSearchMode by mutableStateOf<Boolean>(false)
     override var searchQuery by mutableStateOf<String>("")
 }

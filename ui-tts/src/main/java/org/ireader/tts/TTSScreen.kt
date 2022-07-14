@@ -1,28 +1,25 @@
 package org.ireader.tts
 
-import androidx.compose.animation.core.TweenSpec
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.FastRewind
 import androidx.compose.material.icons.filled.List
@@ -38,42 +35,43 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.PagerState
-import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.BookImageCover
 import org.ireader.components.components.ShowLoading
 import org.ireader.components.reusable_composable.AppIconButton
-import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.components.reusable_composable.SuperSmallTextComposable
-import org.ireader.core.R
 import org.ireader.core_api.source.Source
+import org.ireader.core_ui.modifier.clickableNoIndication
+import org.ireader.core_ui.ui.mapTextAlign
 import org.ireader.core_ui.ui.string
 import org.ireader.domain.services.tts_service.TTSState
 import org.ireader.image_loader.BookCover
+import org.ireader.ui_tts.R
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TTSScreen(
     modifier: Modifier = Modifier,
-    vm: TTSState,
+    vm: TTSViewModel,
     onPrev: () -> Unit,
     onNextPar: () -> Unit,
     onPrevPar: () -> Unit,
@@ -87,137 +85,96 @@ fun TTSScreen(
     onPopStack: () -> Unit,
     sliderInteractionSource: MutableInteractionSource,
     bottomSheetState: ModalBottomSheetState,
-    pagerState: PagerState,
+    lazyState: LazyListState,
 ) {
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val maxHeight = remember {
-            constraints.maxHeight
-        }
-        val maxWidth = remember {
-            constraints.maxWidth
-        }
-        Column(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-        ) {
-            Spacer(modifier = (Modifier.height(35.dp)))
-            AppIconButton(
-                modifier = Modifier,
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = stringResource(R.string.return_to_previous_screen),
-                onClick = onPopStack
-            )
-        }
-        Column(
-            modifier = Modifier
-                .padding(top = 35.dp)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            vm.ttsBook?.let { book ->
-                vm.ttsChapter?.let { chapter ->
-                    vm.ttsContent?.value?.let { content ->
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 16.dp),
-                            verticalArrangement = Arrangement.Top,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
+    Column(
+        modifier = modifier
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.SpaceBetween,
+    ) {
+        var sizeImage by remember { mutableStateOf(IntSize.Zero) }
+        val gradient = Brush.verticalGradient(
+            colors = listOf(vm.theme.value.backgroundColor.copy(alpha = .8f), vm.theme.value.backgroundColor.copy(alpha = .8f)),
+            startY = sizeImage.height.toFloat(),  // 1/3
+            endY = sizeImage.height.toFloat(),
+        )
+        vm.ttsBook.let { book ->
+            vm.ttsChapter.let { chapter ->
+                (vm.ttsContent?.value ?: emptyList()).let { content ->
+                    Box(
+                        modifier = Modifier
+                            .onGloballyPositioned {
+                                sizeImage = it.size
+                            }
+                            .weight(2f)
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if(vm.enableBookCoverInTTS.value) {
                             BookImageCover.Book(
-                                data = BookCover.from(book),
+                                data = book?.let { BookCover.from(it) },
                                 modifier = Modifier
-                                    .padding(8.dp)
-                                    .height((maxHeight / 15).dp)
-                                    .width((maxWidth / 10).dp)
+                                    .matchParentSize()
                                     .clip(MaterialTheme.shapes.medium)
                                     .border(
                                         2.dp,
                                         MaterialTheme.colorScheme.onBackground.copy(alpha = .2f)
                                     )
                             )
-                            BigSizeTextComposable(
-                                text = chapter.name,
-                                align = TextAlign.Center,
-                                maxLine = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            MidSizeTextComposable(
-                                text = book.title,
-                                align = TextAlign.Center,
-                                maxLine = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            SuperSmallTextComposable(text = "${vm.currentReadingParagraph + 1}/${vm.ttsContent?.value?.size ?: 0L}")
                         }
-                        HorizontalPager(
-                            modifier = Modifier.weight(6f), count = chapter.content.size,
-                            state = pagerState
-                        ) { index ->
-                            Text(
-                                modifier = modifier
-                                    .padding(
-                                        horizontal = 16.dp,
-                                        vertical = 8.dp
-                                    )
-                                    .fillMaxWidth()
-                                    .height((maxHeight / 15).dp)
-                                    .verticalScroll(rememberScrollState())
-                                    .align(Alignment.CenterHorizontally),
-                                text = if (content.isNotEmpty() && vm.currentReadingParagraph <= content.lastIndex && index <= content.lastIndex) content[index] else "",
-                                fontSize = vm.fontSize.sp,
-                                fontFamily = vm.font.fontFamily,
-                                textAlign = TextAlign.Start,
-                                color = MaterialTheme.colorScheme.onBackground,
-                                lineHeight = vm.lineHeight.sp,
-                                maxLines = 12,
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .background(gradient)
+                        )
+                        LazyColumn(modifier = Modifier.matchParentSize(), state = lazyState) {
+                            items(
+                                count = chapter?.content?.size ?: 0
+                            ) { index ->
+                                androidx.compose.material.Text(
+                                    modifier = modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = vm.paragraphsIndent.value.dp)
+                                        .clickableNoIndication {
+                                            vm.currentReadingParagraph = index
+                                        },
+                                    text = if (content.isNotEmpty() && vm.currentReadingParagraph <= content.lastIndex && index <= content.lastIndex) content[index] else "",
+                                    fontSize = vm.fontSize.value.sp,
+                                    fontFamily = vm.font.value.fontFamily,
+                                    textAlign = mapTextAlign(vm.textAlignment.value),
+                                    color = vm.theme.value.onTextColor.copy(alpha = if (index == vm.currentReadingParagraph) 1f else .6f),
+                                    lineHeight = vm.lineHeight.value.sp,
+                                    letterSpacing = vm.betweenLetterSpaces.value.sp,
+                                    fontWeight = FontWeight(vm.textWeight.value),
+                                )
+                            }
+                        }
+
+                        Row(
+                            horizontalArrangement = Arrangement.Center, modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.BottomCenter)
+                        ) {
+                            SuperSmallTextComposable(
+                                text = "${vm.currentReadingParagraph + 1}/${vm.ttsContent?.value?.size ?: 0L}"
                             )
                         }
 
-                        Column(
-                            modifier = Modifier
-                                .height((maxHeight / 10).dp)
-                                .fillMaxWidth(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            TTLScreenSetting(
-                                modifier = Modifier.weight(4f),
-                                onSetting = {
-                                    scope.launch {
-                                        bottomSheetState.show()
-                                    }
-                                },
-                                onContent = {
-                                    scope.launch {
-                                        drawerState.animateTo(
-                                            androidx.compose.material3.DrawerValue.Open,
-                                            TweenSpec()
-                                        )
-                                    }
-                                }
-                            )
-                            //   Spacer(modifier = Modifier.height(32.dp))
-                            TTLScreenPlay(
-                                modifier = Modifier
-                                    .height((maxHeight / 15).dp),
-                                onPlay = onPlay,
-                                onNext = onNext,
-                                onPrev = onPrev,
-                                vm = vm,
-                                onNextPar = onNextPar,
-                                onPrevPar = onPrevPar,
-                                content = content,
-                                onValueChange = onValueChange,
-                                onValueChangeFinished = onValueChangeFinished,
-                                sliderInteractionSource = sliderInteractionSource
-                            )
-                        }
                     }
+                    TTLScreenPlay(
+                        modifier = Modifier,
+                        onPlay = onPlay,
+                        onNext = onNext,
+                        onPrev = onPrev,
+                        vm = vm,
+                        onNextPar = onNextPar,
+                        onPrevPar = onPrevPar,
+                        content = content,
+                        onValueChange = onValueChange,
+                        onValueChangeFinished = onValueChangeFinished,
+                        sliderInteractionSource = sliderInteractionSource
+                    )
                 }
             }
         }
@@ -286,7 +243,7 @@ private fun TTLScreenSetting(
 }
 
 @Composable
-private fun TTLScreenPlay(
+fun TTLScreenPlay(
     modifier: Modifier = Modifier,
     vm: TTSState,
     content: List<String>?,
@@ -299,14 +256,18 @@ private fun TTLScreenPlay(
     onValueChangeFinished: () -> Unit,
     sliderInteractionSource: MutableInteractionSource
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(bottom = 4.dp)
+    ) {
         content?.let { chapter ->
             Slider(
 
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp),
-                value = if (content.isEmpty()) 0F else vm.uiPage.value.toFloat(),
+                value = if (content.isEmpty()) 0F else vm.currentReadingParagraph.toFloat(),
                 onValueChange = {
                     onValueChange(it)
                 },
@@ -324,15 +285,14 @@ private fun TTLScreenPlay(
                 interactionSource = sliderInteractionSource
             )
         }
-
         Row(
-            modifier = modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(
                 modifier = Modifier
-                    .padding(bottom = 16.dp, top = 4.dp)
+                    .padding(top = 4.dp)
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceAround

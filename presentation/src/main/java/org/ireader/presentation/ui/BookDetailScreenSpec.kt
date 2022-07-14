@@ -160,7 +160,7 @@ object BookDetailScreenSpec : ScreenSpec {
             if (book != null) {
                 BookDetailScreenBottomBar(
                     onToggleInLibrary = {
-                        vm.toggleInLibrary(book = book, context = context)
+                        vm.toggleInLibrary(book = book)
                     },
                     isInLibrary = book.favorite,
                     onDownload = {
@@ -187,12 +187,12 @@ object BookDetailScreenSpec : ScreenSpec {
                                 )
                             } else {
                                 scope.launch {
-                                    vm.showSnackBar(UiText.StringResource(org.ireader.core.R.string.no_chapter_is_available))
+                                    vm.showSnackBar(UiText.StringResource(R.string.no_chapter_is_available))
                                 }
                             }
                         } else {
                             scope.launch {
-                                vm.showSnackBar(UiText.StringResource(org.ireader.core.R.string.source_not_available))
+                                vm.showSnackBar(UiText.StringResource(R.string.source_not_available))
                             }
                         }
                     },

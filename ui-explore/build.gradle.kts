@@ -16,11 +16,12 @@ android {
 dependencies {
     implementation(project(Modules.commonModels))
     implementation(project(Modules.coreUi))
-    implementation(project(Modules.core))
+
     implementation(project(Modules.coreApi))
     implementation(project(Modules.uiComponents))
     implementation(project(Modules.coreCatalogs))
     implementation(project(Modules.commonResources))
+    implementation(project(Modules.commonExtensions))
     implementation(composeLib.compose.icons)
     implementation(composeLib.compose.navigation)
     implementation(composeLib.compose.foundation)

@@ -7,7 +7,7 @@ import org.ireader.common_models.entities.Book.Companion.toBookInfo
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.toBook
 import org.ireader.common_resources.UiText
-import org.ireader.core.exceptions.SourceNotFoundException
+import org.ireader.common_extensions.SourceNotFoundException
 import org.ireader.core.utils.updateBook
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.model.CommandList

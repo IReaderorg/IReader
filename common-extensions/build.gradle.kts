@@ -10,7 +10,7 @@ android {
 dependencies {
     implementation(project(Modules.commonModels))
     implementation(project(Modules.coreUi))
-    implementation(project(Modules.core))
+
     implementation(project(Modules.coreApi))
     implementation(project(Modules.commonResources))
 

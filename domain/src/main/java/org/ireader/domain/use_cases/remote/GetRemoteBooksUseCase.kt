@@ -1,9 +1,9 @@
 package org.ireader.domain.use_cases.remote
 
+import org.ireader.common_extensions.EmptyQuery
+import org.ireader.common_extensions.SourceNotFoundException
 import org.ireader.common_extensions.withIOContext
 import org.ireader.common_models.entities.CatalogLocal
-import org.ireader.core.exceptions.EmptyQuery
-import org.ireader.core.exceptions.SourceNotFoundException
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.Listing

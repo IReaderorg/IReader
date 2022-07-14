@@ -15,7 +15,7 @@ android {
 
 dependencies {
     implementation(project(Modules.coreUi))
-    implementation(project(Modules.core))
+
     implementation(project(Modules.commonModels))
     implementation(project(Modules.uiImageLoader))
     implementation(project(Modules.coreApi))

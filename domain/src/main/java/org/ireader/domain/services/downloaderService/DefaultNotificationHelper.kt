@@ -17,7 +17,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_resources.string
-import org.ireader.core.R
+import org.ireader.domain.R
+
 import org.ireader.domain.notification.Notifications
 import org.ireader.domain.notification.flags
 import org.ireader.domain.notification.setLargeIcon
@@ -277,7 +278,7 @@ class DefaultNotificationHelper @Inject constructor(
         ).apply {
             setContentTitle(chapter.name)
             setContentText(contentText)
-            setSmallIcon(org.ireader.core.R.drawable.ic_infinity)
+            setSmallIcon(R.drawable.ic_infinity)
             setOnlyAlertOnce(true)
             setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             setLargeIcon(context, book.cover)

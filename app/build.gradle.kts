@@ -125,7 +125,7 @@ dependencies {
     implementation(project(Modules.data))
 
     implementation(project(Modules.domain))
-    implementation(project(Modules.core))
+
     implementation(project(Modules.presentation))
     implementation(project(Modules.commonResources))
     implementation(project(Modules.commonModels))

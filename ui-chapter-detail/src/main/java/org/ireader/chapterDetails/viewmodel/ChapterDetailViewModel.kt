@@ -24,7 +24,7 @@ import org.ireader.chapterDetails.parameter
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_resources.UiText
-import org.ireader.core.R
+
 import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.core_ui.preferences.UiPreferences
 import org.ireader.core_ui.viewmodel.BaseViewModel
@@ -34,6 +34,7 @@ import org.ireader.domain.use_cases.local.DeleteUseCase
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.services.ServiceUseCases
+import org.ireader.ui_chapter_detail.R
 import javax.inject.Inject
 
 @HiltViewModel

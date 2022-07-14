@@ -9,7 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
-import org.ireader.core.R
+
 import java.io.File
 
 fun Context.copyToClipboard(label: String, content: String) {

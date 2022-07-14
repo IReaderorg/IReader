@@ -39,7 +39,7 @@ import org.ireader.Controller
 import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
 import org.ireader.components.findComponentActivity
-import org.ireader.core.R
+
 import org.ireader.core_api.log.Log
 import org.ireader.core_ui.preferences.ReadingMode
 import org.ireader.core_ui.theme.AppColors
@@ -47,6 +47,7 @@ import org.ireader.core_ui.theme.CustomSystemColor
 import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.theme.getDefaultFont
 import org.ireader.domain.ui.NavigationArgs
+import org.ireader.presentation.R
 import org.ireader.reader.ReaderScreenDrawer
 import org.ireader.reader.ReaderScreenTopBar
 import org.ireader.reader.ReadingScreen

@@ -17,9 +17,10 @@ import org.ireader.common_extensions.launchIO
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.SavedDownload
 import org.ireader.common_models.entities.buildSavedDownload
-import org.ireader.core.R
+
 import org.ireader.core_api.log.Log
 import org.ireader.core_catalogs.CatalogStore
+import org.ireader.domain.R
 import org.ireader.domain.notification.Notifications
 import org.ireader.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE
 import org.ireader.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_ERROR

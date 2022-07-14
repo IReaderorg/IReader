@@ -184,8 +184,6 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     var silence: MediaPlayer? = null
     override fun onCreate() {
         super.onCreate()
-        Log.debug { "TTS SERVICE: OnCreate is Called" }
-
         state = TTSStateImpl()
 
         val pendingIntentFlags: Int =
@@ -371,7 +369,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.error { "Start Command" }
+
         when (intent?.action) {
             Intent.ACTION_MEDIA_BUTTON -> MediaButtonReceiver.handleIntent(mediaSession, intent)
             ACTION_UPDATE -> {
@@ -412,7 +410,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         mediaSession.isActive = false
         mediaSession.release()
         isPlayerDispose = true
-        Log.debug { "TTS SERVICE was Destroyed" }
+
         super.onDestroy()
     }
 
@@ -453,7 +451,6 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     private inner class TTSSessionCallback : MediaSessionCompat.Callback() {
 
         override fun onPlay() {
-            Log.debug { "TTS SERVICE: onPlay" }
             if (isPlayerDispose) {
                 initPlayer()
             }
@@ -462,34 +459,28 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         }
 
         override fun onPause() {
-            Log.debug { "TTS SERVICE: onPause" }
             startService(Player.PAUSE)
             player?.stop()
         }
 
         override fun onStop() {
-            Log.debug { "TTS SERVICE: onStop" }
             startService(Player.PAUSE)
             player?.stop()
         }
 
         override fun onRewind() {
-            Log.debug { "TTS SERVICE: onRewind" }
             startService(Player.PREV_PAR)
         }
 
         override fun onFastForward() {
-            Log.debug { "TTS SERVICE: onFastForward" }
             startService(Player.NEXT_PAR)
         }
 
         override fun onSkipToNext() {
-            Log.debug { "TTS SERVICE: TTS SERVICE: onSkipToNext" }
             startService(Player.SKIP_NEXT)
         }
 
         override fun onSkipToPrevious() {
-            Log.debug { "TTS SERVICE: onSkipToPrevious" }
             startService(Player.SKIP_PREV)
         }
 
@@ -931,7 +922,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             state.currentReadingParagraph = 0
             val localChapter = chapterRepo.findChapterById(chapterId)
 
-            if (localChapter?.isEmpty() == false) {
+            if (localChapter != null && !localChapter.isEmpty()) {
                 state.ttsChapter = localChapter
                 state.currentReadingParagraph = 0
                 setBundle(isLoading = false)

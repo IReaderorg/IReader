@@ -28,26 +28,5 @@ class StartTTSServicesUseCase @Inject constructor(@ApplicationContext private va
         }
 
         context.startService(intent)
-
-//        val work  =
-//            OneTimeWorkRequestBuilder<TTSService>().apply {
-//                setInputData(
-//                    Data.Builder().apply {
-//                        if (chapterId != null) {
-//                            putLong(TTSService.TTS_Chapter_ID, chapterId)
-//                        }
-//                        if (bookId != null) {
-//                            putLong(TTSService.TTS_BOOK_ID, bookId)
-//                        }
-//                        putInt(TTSService.COMMAND, command)
-//                    }.build()
-//                )
-//                addTag(TTSService.TTS_SERVICE_NAME)
-//            }.build()
-//        WorkManager.getInstance(context.applicationContext).enqueueUniqueWork(
-//            TTSService.TTS_SERVICE_NAME,
-//            ExistingWorkPolicy.REPLACE,
-//            work
-//        )
     }
 }

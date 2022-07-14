@@ -17,7 +17,7 @@ android {
 dependencies {
     implementation(project(Modules.commonModels))
     implementation(project(Modules.coreUi))
-    implementation(project(Modules.core))
+
     implementation(project(Modules.coreApi))
     compileOnly(project(Modules.uiReader))
     implementation(project(Modules.uiComponents))

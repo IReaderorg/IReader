@@ -1,6 +1,8 @@
 package org.ireader.presentation.ui
 
+import android.content.pm.ActivityInfo
 import android.support.v4.media.session.PlaybackStateCompat
+import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Column
@@ -23,19 +25,23 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.ireader.Controller
+import org.ireader.components.ThemePreference
 import org.ireader.components.components.component.ChipChoicePreference
 import org.ireader.components.components.component.SliderPreference
 import org.ireader.components.components.component.SwitchPreference
-import org.ireader.core.R
+
 import org.ireader.core_api.log.Log
+import org.ireader.core_ui.theme.readerThemes
 import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.services.tts_service.media_player.isPlaying
 import org.ireader.domain.ui.NavigationArgs
+import org.ireader.presentation.R
 import org.ireader.reader.ReaderScreenDrawer
 import org.ireader.tts.TTSScreen
+import org.ireader.tts.TTSTopBar
 import org.ireader.tts.TTSViewModel
 import java.math.RoundingMode
 
@@ -77,7 +83,34 @@ object TTSScreenSpec : ScreenSpec {
         NavigationArgs.showModalSheet,
         NavigationArgs.haveDrawer,
 
-    )
+        )
+
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+    @Composable
+    override fun TopBar(controller: Controller) {
+        val vm: TTSViewModel = hiltViewModel(controller.navBackStackEntry)
+        val scope = rememberCoroutineScope()
+        TTSTopBar(
+            onPopBackStack = {
+                controller.navController.popBackStack()
+            },
+            scrollBehavior = controller.scrollBehavior,
+            onSetting = {
+                scope.launch {
+                    controller.sheetState.show()
+                }
+            },
+            onContent = {
+                scope.launch {
+                    controller.drawerState.animateTo(
+                        androidx.compose.material3.DrawerValue.Open,
+                        TweenSpec()
+                    )
+                }
+            },
+            vm = vm
+        )
+    }
 
     @OptIn(
         ExperimentalMaterialApi::class, ExperimentalPagerApi::class,
@@ -92,8 +125,8 @@ object TTSScreenSpec : ScreenSpec {
         val context = LocalContext.current
         val sliderInteractionSource = MutableInteractionSource()
         val isSliderDragging = sliderInteractionSource.collectIsDraggedAsState()
-
-        val pagerState = rememberPagerState()
+        LockScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+        val lazyState = rememberLazyListState()
 
         val chapter = vm.ttsChapter
 
@@ -108,7 +141,7 @@ object TTSScreenSpec : ScreenSpec {
         }
 
         TTSScreen(
-            modifier = Modifier,
+            modifier = Modifier.padding(controller.scaffoldPadding),
             vm = vm,
             onPrev = {
                 vm.controller?.transportControls?.skipToPrevious()
@@ -145,30 +178,27 @@ object TTSScreenSpec : ScreenSpec {
                 controller.navController.popBackStack()
             },
             sliderInteractionSource = sliderInteractionSource,
-            pagerState = pagerState,
+            lazyState = lazyState,
             bottomSheetState = controller.sheetState,
             drawerState = controller.drawerState
         )
 
         LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph) {
             try {
-                if (vm.currentReadingParagraph != pagerState.targetPage && vm.currentReadingParagraph != vm.prevPar && vm.ttsState.currentReadingParagraph < pagerState.pageCount) {
-                    pagerState.scrollToPage(vm.ttsState.uiPage.value)
-                    if (!isSliderDragging.value) {
+                if (vm.currentReadingParagraph != vm.prevPar && vm.ttsState.currentReadingParagraph < lazyState.layoutInfo.totalItemsCount) {
+                    lazyState.scrollToItem(
+                        vm.currentReadingParagraph,
+                        -lazyState.layoutInfo.viewportEndOffset / 6
+                    )
+                    if (isSliderDragging.value && vm.isPlaying) {
+                        delay(200)
+                        vm.controller?.transportControls?.seekTo(vm.ttsState.currentReadingParagraph.toLong())
+                    } else {
                         vm.controller?.transportControls?.seekTo(vm.ttsState.currentReadingParagraph.toLong())
                     }
                 }
             } catch (e: Throwable) {
                 Log.error(e, "")
-            }
-        }
-        LaunchedEffect(key1 = pagerState.currentPage) {
-            if (vm.currentReadingParagraph != pagerState.currentPage) {
-                vm.currentReadingParagraph = pagerState.currentPage
-
-                vm.controller?.transportControls?.seekTo(pagerState.currentPage.toLong())
-
-                vm.prevPar = pagerState.currentPage
             }
         }
     }
@@ -222,6 +252,7 @@ object TTSScreenSpec : ScreenSpec {
         )
     }
 
+
     @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
     @Composable
     override fun BottomModalSheet(
@@ -243,29 +274,49 @@ object TTSScreenSpec : ScreenSpec {
                 choices = vm.uiVoices.associate { voice ->
                     return@associate voice to voice.localDisplayName
                 },
-                title = stringResource(id = R.string.voices)
+                title = stringResource(id = R.string.voices),
+                onFailToFindElement = stringResource(id = R.string.system_default)
             )
             ChipChoicePreference(
                 preference = vm.language,
                 choices = vm.languages.associate { language ->
                     return@associate language.displayName to language.displayName
                 },
-                title = stringResource(id = R.string.languages)
+                title = stringResource(id = R.string.languages),
+                onFailToFindElement = stringResource(id = R.string.system_default)
             )
-            SwitchPreference(preference = vm.autoNext, title = stringResource(id = R.string.auto_next_chapter))
+            ThemePreference(onBackgroundChange = {
+                vm.theme.value = it
+            }, themes = readerThemes, selected = {
+                vm.theme.value == it
+            })
+            SwitchPreference(
+                preference = vm.enableBookCoverInTTS,
+                title = stringResource(id = R.string.enable_book_cover)
+            )
+
+            SwitchPreference(
+                preference = vm.autoNext,
+                title = stringResource(id = R.string.auto_next_chapter)
+            )
             SliderPreference(
                 title = stringResource(R.string.speech_rate),
                 preferenceAsFloat = vm.speechRate,
                 valueRange = .5F..3F,
-                trailing = vm.speechRate.value.toBigDecimal().setScale(1, RoundingMode.FLOOR).toString()
+                trailing = vm.speechRate.value.toBigDecimal().setScale(1, RoundingMode.FLOOR)
+                    .toString()
             )
             SliderPreference(
                 title = stringResource(R.string.pitch),
                 preferenceAsFloat = vm.speechPitch,
                 valueRange = .5F..2.1F,
-                trailing = vm.speechPitch.value.toBigDecimal().setScale(1, RoundingMode.FLOOR).toString()
+                trailing = vm.speechPitch.value.toBigDecimal().setScale(1, RoundingMode.FLOOR)
+                    .toString()
             )
-            SwitchPreference(preference = vm.sleepModeUi, title = stringResource(id = R.string.enable_sleep_timer))
+            SwitchPreference(
+                preference = vm.sleepModeUi,
+                title = stringResource(id = R.string.enable_sleep_timer)
+            )
             SliderPreference(
                 title = stringResource(R.string.sleep),
                 preferenceAsLong = vm.sleepTimeUi,

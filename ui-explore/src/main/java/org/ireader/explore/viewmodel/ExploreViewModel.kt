@@ -6,13 +6,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import org.ireader.common_extensions.DefaultPaginator
+import org.ireader.common_extensions.SourceNotFoundException
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.entities.BookItem
 import org.ireader.common_models.entities.RemoteKeys
 import org.ireader.common_models.entities.toBook
 import org.ireader.common_resources.UiText
-import org.ireader.core.DefaultPaginator
-import org.ireader.core.exceptions.SourceNotFoundException
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.MangasPageInfo
@@ -24,6 +24,7 @@ import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.preferences.reader_preferences.BrowseScreenPrefUseCase
 import org.ireader.domain.use_cases.remote.RemoteUseCases
 import org.ireader.domain.use_cases.remote.key.RemoteKeyUseCase
+import org.ireader.ui_explore.R
 import javax.inject.Inject
 
 @HiltViewModel
@@ -63,13 +64,13 @@ class ExploreViewModel @Inject constructor(
                     }
                 } else {
                     viewModelScope.launch {
-                        showSnackBar(UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
+                        showSnackBar(UiText.StringResource(R.string.the_source_is_not_found))
                     }
                 }
             }
         } else {
             viewModelScope.launch {
-                showSnackBar(UiText.StringResource(org.ireader.core.R.string.the_source_is_not_found))
+                showSnackBar(UiText.StringResource(R.string.the_source_is_not_found))
             }
         }
     }

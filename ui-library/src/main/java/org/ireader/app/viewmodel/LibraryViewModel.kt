@@ -15,7 +15,6 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -40,6 +39,7 @@ import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
 import org.ireader.domain.use_cases.local.LocalInsertUseCases
 import org.ireader.domain.use_cases.local.book_usecases.GetLibraryCategory
+import org.ireader.domain.use_cases.local.book_usecases.MarkBookAsReadOrNotUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
 import org.ireader.domain.use_cases.services.ServiceUseCases
 import javax.inject.Inject
@@ -49,13 +49,14 @@ import javax.inject.Inject
 class LibraryViewModel @Inject constructor(
     private val localGetBookUseCases: LocalGetBookUseCases,
     private val insertUseCases: LocalInsertUseCases,
-    private val deleteUseCase: DeleteUseCase,
+    val deleteUseCase: DeleteUseCase,
     private val localGetChapterUseCase: LocalGetChapterUseCase,
     private val libraryScreenPrefUseCases: LibraryScreenPrefUseCases,
     private val state: LibraryStateImpl,
     private val serviceUseCases: ServiceUseCases,
     private val getLibraryCategory: GetLibraryCategory,
     private val libraryPreferences: LibraryPreferences,
+    val markBookAsReadOrNotUseCase: MarkBookAsReadOrNotUseCase,
     val getCategory: CategoriesUseCases
 ) : BaseViewModel(), LibraryState by state {
 
@@ -114,35 +115,6 @@ class LibraryViewModel @Inject constructor(
     fun downloadChapters() {
         serviceUseCases.startDownloadServicesUseCase(bookIds = selectedBooks.toLongArray())
         selectedBooks.clear()
-    }
-
-    fun markAsRead() {
-        viewModelScope.launch(Dispatchers.IO) {
-            selectedBooks.forEach { bookId ->
-                val chapters = localGetChapterUseCase.findChaptersByBookId(bookId)
-                insertUseCases.insertChapters(chapters.map { it.copy(read = true) })
-            }
-            selectedBooks.clear()
-        }
-    }
-
-    fun markAsNotRead() {
-        viewModelScope.launch(Dispatchers.IO) {
-            selectedBooks.forEach { bookId ->
-                val chapters = localGetChapterUseCase.findChaptersByBookId(bookId)
-                insertUseCases.insertChapters(chapters.map { it.copy(read = false) })
-            }
-            selectedBooks.clear()
-        }
-    }
-
-    fun deleteBooks() {
-        viewModelScope.launch(Dispatchers.IO) {
-            kotlin.runCatching {
-                deleteUseCase.unFavoriteBook(selectedBooks)
-            }
-            selectedBooks.clear()
-        }
     }
 
     fun readLayoutTypeAndFilterTypeAndSortType() {

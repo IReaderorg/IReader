@@ -21,7 +21,7 @@ import org.ireader.common_extensions.launchIO
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.EmptyScreenComposable
 import org.ireader.components.hideKeyboard
-import org.ireader.core.R
+
 import org.ireader.core_api.source.HttpSource
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.explore.BrowseTopAppBar
@@ -29,6 +29,7 @@ import org.ireader.explore.ExploreScreen
 import org.ireader.explore.FilterBottomSheet
 import org.ireader.explore.viewmodel.ExploreViewModel
 import org.ireader.image_loader.coil.image_loaders.convertToOkHttpRequest
+import org.ireader.presentation.R
 
 @OptIn(
     ExperimentalAnimationApi::class,

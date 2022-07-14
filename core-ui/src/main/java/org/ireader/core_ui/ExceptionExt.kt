@@ -2,9 +2,9 @@ package org.ireader.core_ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import org.ireader.common_extensions.EmptyQuery
+import org.ireader.common_extensions.SourceNotFoundException
 import org.ireader.common_resources.UiText
-import org.ireader.core.exceptions.EmptyQuery
-import org.ireader.core.exceptions.SourceNotFoundException
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.LocalSourceException
 import java.io.IOException

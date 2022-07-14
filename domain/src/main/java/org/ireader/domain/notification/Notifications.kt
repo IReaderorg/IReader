@@ -13,7 +13,7 @@ import androidx.core.app.NotificationManagerCompat.IMPORTANCE_LOW
 import androidx.core.graphics.drawable.toBitmap
 import coil.ImageLoader
 import coil.request.ImageRequest
-import org.ireader.core.R
+import org.ireader.domain.R
 
 /**
  * Class to manage the basic information of all the notifications used in the app.

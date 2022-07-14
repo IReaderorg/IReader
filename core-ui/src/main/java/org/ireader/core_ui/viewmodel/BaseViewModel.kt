@@ -111,7 +111,7 @@ abstract class BaseViewModel : androidx.lifecycle.ViewModel() {
 suspend fun MutableSharedFlow<UiEvent>.showSnackBar(message: UiText?) {
     this.emit(
         UiEvent.ShowSnackbar(
-            uiText = message ?: UiText.StringResource(org.ireader.core.R.string.error_unknown)
+            uiText = message ?: UiText.StringResource(R.string.error_unknown)
         )
     )
 }

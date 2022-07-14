@@ -83,6 +83,12 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     fun backgroundColorReader(): Preference<Color> {
         return preferenceStore.getInt(SAVED_BACKGROUND_COLOR, Color(0xff262626).toArgb()).asColor()
     }
+    fun backgroundColorTTS(): Preference<ReaderColors> {
+        return preferenceStore.getLong("background_color_tts").asReaderTheme()
+    }
+    fun enableBookCoverInTTS(): Preference<Boolean> {
+        return preferenceStore.getBoolean("enable_book_cover_in_tts",true)
+    }
 
     fun textColorReader(): Preference<Color> {
         return preferenceStore.getInt(SAVED_TEXT_COLOR, Color(0xFFE9E9E9).toArgb()).asColor()

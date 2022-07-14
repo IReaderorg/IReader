@@ -1,6 +1,6 @@
 
 
-package org.ireader.core
+package org.ireader.common_extensions
 
 class DefaultPaginator<Key, Item>(
     private val initialKey: Key,
