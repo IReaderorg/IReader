@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.lifecycle.SavedStateHandle
@@ -72,7 +73,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     ReaderScreenState by state,
     ReaderPrefFunctions by prefFunc {
 
-    val readerColors = readerThemes
+    val readerColors :SnapshotStateList<ReaderColors> = readerThemes
 
     val dateFormat by uiPreferences.dateFormat().asState()
     val relativeTime by uiPreferences.relativeTime().asState()
@@ -153,8 +154,8 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
 
     private fun subscribeReaderThemes() {
         readerThemeRepository.subscribe().onEach { list ->
-            readerThemes.removeIf { !it.isDefault }
-            readerThemes.addAll(0, list.map { it.ReaderColors() }.reversed())
+            readerColors.removeIf { !it.isDefault }
+            readerColors.addAll(0, list.map { it.ReaderColors() }.reversed())
         }.launchIn(viewModelScope)
     }
 

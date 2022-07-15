@@ -1,5 +1,6 @@
 package org.ireader.core_ui.theme
 
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontFamily
@@ -9,7 +10,7 @@ fun getDefaultFont(): FontType {
     return FontType("Roboto", FontFamily.Default)
 }
 
-val readerThemes = mutableListOf<ReaderColors>(
+val readerThemes = listOf<ReaderColors>(
     ReaderColors(
         id = -1,
         Color(0xff000000),
@@ -71,7 +72,7 @@ val readerThemes = mutableListOf<ReaderColors>(
         -14, Color(248, 253, 137), Color(0xff000000),
         true
     ),
-)
+).toMutableStateList()
 
 data class ReaderColors(
     val id: Long,
@@ -79,6 +80,7 @@ data class ReaderColors(
     val onTextColor: Color,
     val isDefault: Boolean = false
 )
+
 fun ReaderColors.ReaderTheme(): ReaderTheme {
     return org.ireader.common_models.theme.ReaderTheme(
         id = this.id,

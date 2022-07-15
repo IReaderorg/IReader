@@ -36,7 +36,7 @@ fun BaseTheme.dark(): Theme {
     )
 }
 
-val themes = mutableListOf<BaseTheme>(
+val themes = listOf<BaseTheme>(
     BaseTheme(
         id = -1,
         lightColor = LightThemeColorsTachiyomi,
@@ -146,4 +146,4 @@ val themes = mutableListOf<BaseTheme>(
         ),
         default = true
     ),
-)
+).toMutableList()
