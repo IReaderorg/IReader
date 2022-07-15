@@ -58,12 +58,13 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import kotlinx.coroutines.launch
-import org.ireader.Controller
+import org.ireader.common_resources.ARG_HAVE_CUSTOMIZED_VARIANT_BOTTOM_BAR
 import org.ireader.common_resources.ARG_HAVE_DRAWER
 import org.ireader.common_resources.ARG_HAVE_MODAL_SHEET
 import org.ireader.common_resources.ARG_HAVE_VARIANT_BOTTOM_BAR
 import org.ireader.common_resources.ARG_HIDE_BOTTOM_BAR
 import org.ireader.common_resources.ARG_TRANSPARENT_STATUS_BAR
+import org.ireader.components.Controller
 import org.ireader.components.components.ConfirmExitBackHandler
 import org.ireader.components.components.ISnackBarHost
 import org.ireader.core_ui.theme.AppColors
@@ -93,6 +94,8 @@ fun ScreenContent() {
     val haveDrawer = navBackStackEntry?.arguments?.getBoolean(ARG_HAVE_DRAWER) ?: false
     val haveVariantBottomAppBar =
         navBackStackEntry?.arguments?.getBoolean(ARG_HAVE_VARIANT_BOTTOM_BAR) ?: false
+    val haveCustomizedVariantBottomAppBar =
+        navBackStackEntry?.arguments?.getBoolean(ARG_HAVE_CUSTOMIZED_VARIANT_BOTTOM_BAR) ?: false
 
     val snackBarHostState = remember { SnackbarHostState() }
     val modalBottomSheetState =
@@ -101,8 +104,7 @@ fun ScreenContent() {
 
     val topAppBarState = rememberTopAppBarScrollState()
     val vm: ScreenContentViewModel = hiltViewModel()
-    val scrollBehavior =
-        TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
+    val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior(topAppBarState) }
 
     val scrollableTabsHeight = LocalDensity.current.run {
         org.ireader.components.NavigationBarTokens.ContainerHeight + (if (scrollBehavior.state.offset == scrollBehavior.state.offsetLimit) scrollBehavior.state.offset * 2 else scrollBehavior.state.offset).toDp()
@@ -250,6 +252,23 @@ fun ScreenContent() {
                                         )
                                     }
                                 )
+                                if(haveCustomizedVariantBottomAppBar) {
+                                    screenSpec?.BottomAppBar(
+                                        Controller(
+                                            navController = navController,
+                                            navBackStackEntry = navStackEntry,
+                                            snackBarHostState = snackBarHostState,
+                                            sheetState = modalBottomSheetState,
+                                            drawerState = drawerState,
+                                            requestHideNavigator = requestHideBottomNav,
+                                            requestHideTopAppbar = requestHideTopBar,
+                                            requestedHideSystemStatusBar = requestHideSystemStatusBar,
+                                            requestHideSystemNavbar = requestHideSystemNavBar,
+                                            requestedCustomSystemColor = requestedCustomColor,
+                                            scrollBehavior = scrollBehavior
+                                        )
+                                    )
+                                }
                             }
 
                             AnimatedVisibility(

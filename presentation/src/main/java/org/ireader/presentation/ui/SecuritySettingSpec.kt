@@ -14,7 +14,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.datetime.Clock
-import org.ireader.Controller
+import org.ireader.components.Controller
 import org.ireader.common_extensions.AuthenticatorUtil
 import org.ireader.common_extensions.AuthenticatorUtil.isAuthenticationSupported
 import org.ireader.common_extensions.AuthenticatorUtil.startAuthentication

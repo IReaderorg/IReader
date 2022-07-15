@@ -1,4 +1,4 @@
-package org.ireader
+package org.ireader.components
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.ExperimentalMaterialApi

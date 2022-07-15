@@ -12,7 +12,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
-import org.ireader.Controller
+import org.ireader.components.Controller
 import org.ireader.app.LibraryController
 import org.ireader.app.LibraryScreenTopBar
 import org.ireader.app.components.BottomTabComposable

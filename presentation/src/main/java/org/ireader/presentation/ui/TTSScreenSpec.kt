@@ -1,23 +1,24 @@
 package org.ireader.presentation.ui
 
-import android.content.pm.ActivityInfo
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.compose.animation.core.TweenSpec
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -27,12 +28,13 @@ import androidx.navigation.navDeepLink
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.ireader.Controller
+import org.ireader.components.Controller
+import org.ireader.components.CustomizeAnimateVisibility
+import org.ireader.components.NavigationBarTokens
 import org.ireader.components.ThemePreference
 import org.ireader.components.components.component.ChipChoicePreference
 import org.ireader.components.components.component.SliderPreference
 import org.ireader.components.components.component.SwitchPreference
-
 import org.ireader.core_api.log.Log
 import org.ireader.core_ui.theme.readerThemes
 import org.ireader.domain.services.tts_service.Player
@@ -40,6 +42,8 @@ import org.ireader.domain.services.tts_service.media_player.isPlaying
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
 import org.ireader.reader.ReaderScreenDrawer
+import org.ireader.tts.MediaControllers
+import org.ireader.tts.TTLScreenPlay
 import org.ireader.tts.TTSScreen
 import org.ireader.tts.TTSTopBar
 import org.ireader.tts.TTSViewModel
@@ -82,34 +86,37 @@ object TTSScreenSpec : ScreenSpec {
         NavigationArgs.sourceId,
         NavigationArgs.showModalSheet,
         NavigationArgs.haveDrawer,
+        NavigationArgs.haveCustomizedBottomBar,
 
         )
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class,)
     @Composable
     override fun TopBar(controller: Controller) {
         val vm: TTSViewModel = hiltViewModel(controller.navBackStackEntry)
         val scope = rememberCoroutineScope()
-        TTSTopBar(
-            onPopBackStack = {
-                controller.navController.popBackStack()
-            },
-            scrollBehavior = controller.scrollBehavior,
-            onSetting = {
-                scope.launch {
-                    controller.sheetState.show()
-                }
-            },
-            onContent = {
-                scope.launch {
-                    controller.drawerState.animateTo(
-                        androidx.compose.material3.DrawerValue.Open,
-                        TweenSpec()
-                    )
-                }
-            },
-            vm = vm
-        )
+        CustomizeAnimateVisibility(visible = !vm.fullScreenMode) {
+            TTSTopBar(
+                onPopBackStack = {
+                    controller.navController.popBackStack()
+                },
+                scrollBehavior = controller.scrollBehavior,
+                onSetting = {
+                    scope.launch {
+                        controller.sheetState.show()
+                    }
+                },
+                onContent = {
+                    scope.launch {
+                        controller.drawerState.animateTo(
+                            androidx.compose.material3.DrawerValue.Open,
+                            TweenSpec()
+                        )
+                    }
+                },
+                vm = vm,
+            )
+        }
     }
 
     @OptIn(
@@ -121,66 +128,28 @@ object TTSScreenSpec : ScreenSpec {
         controller: Controller
     ) {
         val vm: TTSViewModel = hiltViewModel(controller.navBackStackEntry)
-        val scope = rememberCoroutineScope()
         val context = LocalContext.current
-        val sliderInteractionSource = MutableInteractionSource()
-        val isSliderDragging = sliderInteractionSource.collectIsDraggedAsState()
-        LockScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
         val lazyState = rememberLazyListState()
-
-        val chapter = vm.ttsChapter
-
-        LaunchedEffect(key1 = true) {
+        DisposableEffect(key1 = true ) {
             vm.initMedia(context)
-        }
-
-        DisposableEffect(key1 = true) {
             onDispose {
                 vm.browser?.disconnect()
             }
         }
-
         TTSScreen(
-            modifier = Modifier.padding(controller.scaffoldPadding),
+            modifier = Modifier,
             vm = vm,
-            onPrev = {
-                vm.controller?.transportControls?.skipToPrevious()
-            },
-            onPlay = {
-                if (vm.controller?.playbackState?.state == PlaybackStateCompat.STATE_NONE) {
-                    vm.initMedia(context)
-                    vm.initController()
-                    vm.runTTSService(Player.PLAY)
-                } else if (vm.controller?.playbackState?.isPlaying == true) {
-                    vm.controller?.transportControls?.pause()
-                } else {
-                    vm.controller?.transportControls?.play()
-                }
-            },
-            onNext = {
-                vm.controller?.transportControls?.skipToNext()
-            },
             onChapter = { ch ->
                 vm.getLocalChapter(ch.id)
             },
             source = vm.ttsSource,
-            onPrevPar = {
-                vm.controller?.transportControls?.rewind()
-            },
-            onNextPar = {
-                vm.controller?.transportControls?.fastForward()
-            },
-            onValueChange = {
-                vm.controller?.transportControls?.seekTo(it.toLong())
-            },
-            onValueChangeFinished = {},
             onPopStack = {
                 controller.navController.popBackStack()
             },
-            sliderInteractionSource = sliderInteractionSource,
             lazyState = lazyState,
             bottomSheetState = controller.sheetState,
-            drawerState = controller.drawerState
+            drawerState = controller.drawerState,
+            paddingValues = controller.scaffoldPadding
         )
 
         LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph) {
@@ -190,8 +159,8 @@ object TTSScreenSpec : ScreenSpec {
                         vm.currentReadingParagraph,
                         -lazyState.layoutInfo.viewportEndOffset / 6
                     )
-                    if (isSliderDragging.value && vm.isPlaying) {
-                        delay(200)
+                    if (vm.isPlaying) {
+                        delay(100)
                         vm.controller?.transportControls?.seekTo(vm.ttsState.currentReadingParagraph.toLong())
                     } else {
                         vm.controller?.transportControls?.seekTo(vm.ttsState.currentReadingParagraph.toLong())
@@ -203,7 +172,65 @@ object TTSScreenSpec : ScreenSpec {
         }
     }
 
-    @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+    @Composable
+    override fun BottomAppBar(controller: Controller) {
+        val vm: TTSViewModel = hiltViewModel(controller.navBackStackEntry)
+        val context = LocalContext.current
+        val scrollableTabsHeight = LocalDensity.current.run {
+            org.ireader.components.NavigationBarTokens.ContainerHeight + (if (controller.scrollBehavior.state.offset == controller.scrollBehavior.state.offsetLimit) controller.scrollBehavior.state.offset * 2 else controller.scrollBehavior.state.offset).toDp()
+        }
+        CustomizeAnimateVisibility(visible = !vm.fullScreenMode, goUp = false) {
+            androidx.compose.material3.BottomAppBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(NavigationBarTokens.ContainerHeight * 2),
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                content = {
+                    Column() {
+                        TTLScreenPlay(
+                            modifier = Modifier.padding(controller.scaffoldPadding),
+                            vm = vm,
+                            onValueChange = {
+                                vm.controller?.transportControls?.seekTo(it.toLong())
+                            },
+                            onValueChangeFinished = {},
+                            content = vm.ttsContent?.value
+                        )
+                        MediaControllers(
+                            vm = vm,
+                            onPrev = {
+                                vm.controller?.transportControls?.skipToPrevious()
+                            },
+                            onPlay = {
+                                if (vm.controller?.playbackState?.state == PlaybackStateCompat.STATE_NONE) {
+                                    vm.initMedia(context)
+                                    vm.initController()
+                                    vm.runTTSService(Player.PLAY)
+                                } else if (vm.controller?.playbackState?.isPlaying == true) {
+                                    vm.controller?.transportControls?.pause()
+                                } else {
+                                    vm.controller?.transportControls?.play()
+                                }
+                            },
+                            onNext = {
+                                vm.controller?.transportControls?.skipToNext()
+                            },
+                            onPrevPar = {
+                                vm.controller?.transportControls?.rewind()
+                            },
+                            onNextPar = {
+                                vm.controller?.transportControls?.fastForward()
+                            },
+                        )
+                    }
+                }
+            )
+        }
+
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun ModalDrawer(
         controller: Controller

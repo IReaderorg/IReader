@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import org.ireader.Controller
+import org.ireader.components.Controller
 import org.ireader.components.components.SearchToolbar
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.core_ui.theme.FontType

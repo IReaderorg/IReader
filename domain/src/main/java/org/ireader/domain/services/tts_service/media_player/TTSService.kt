@@ -563,17 +563,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                                 state.ttsChapters.let { chapters ->
                                     state.ttsBook?.let { book ->
                                         setBundle(book, chapter)
-//                                        val notification =
-//                                            ttsNotificationBuilder.buildTTSNotification(
-//                                                mediaSession,
-//                                            ).build()
                                         hookNotification()
-//                                        NotificationManagerCompat.from(this@TTSService)
-//                                            .notify(
-//                                                Notifications.ID_TTS,
-//                                                notification
-//                                            )
-
                                         when (command) {
                                             Player.CANCEL -> {
                                                 NotificationManagerCompat.from(this@TTSService)
@@ -806,7 +796,6 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                                     }
 
                                     override fun onStart(p0: String) {
-                                        // showTextReaderNotification(context)
                                         isPlaying = true
                                         utteranceId = p0
                                     }

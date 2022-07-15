@@ -12,7 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import kotlinx.serialization.ExperimentalSerializationApi
-import org.ireader.Controller
+import org.ireader.components.Controller
 import org.ireader.common_extensions.findComponentActivity
 import org.ireader.common_extensions.getCacheSize
 import org.ireader.common_extensions.launchIO

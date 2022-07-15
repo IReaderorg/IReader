@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import org.ireader.Controller
+import org.ireader.components.Controller
 import org.ireader.components.components.TitleToolbar
 import org.ireader.presentation.R
 import org.ireader.settings.setting.general.GeneralSettingScreen

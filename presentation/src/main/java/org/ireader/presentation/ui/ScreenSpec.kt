@@ -5,7 +5,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavDeepLink
-import org.ireader.Controller
+import org.ireader.components.Controller
 
 @OptIn(ExperimentalMaterialApi::class)
 sealed interface ScreenSpec {

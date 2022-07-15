@@ -8,7 +8,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import org.ireader.Controller
+import org.ireader.components.Controller
 import org.ireader.core_api.log.Log
 import org.ireader.sources.global_search.GlobalSearchScreen
 import org.ireader.sources.global_search.viewmodel.GlobalSearchViewModel

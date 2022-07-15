@@ -22,7 +22,7 @@ import androidx.navigation.NamedNavArgument
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
-import org.ireader.Controller
+import org.ireader.components.Controller
 import org.ireader.chapterDetails.ChapterDetailScreen
 import org.ireader.chapterDetails.ChapterDetailTopAppBar
 import org.ireader.chapterDetails.ChapterScreenBottomTabComposable

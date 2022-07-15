@@ -25,7 +25,7 @@ import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.ireader.Controller
+import org.ireader.components.Controller
 import org.ireader.bookDetails.BookDetailScreen
 import org.ireader.bookDetails.BookDetailTopAppBar
 import org.ireader.bookDetails.components.BookDetailScreenBottomBar

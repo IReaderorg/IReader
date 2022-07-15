@@ -16,7 +16,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import kotlinx.coroutines.launch
 import okhttp3.Headers
-import org.ireader.Controller
+import org.ireader.components.Controller
 import org.ireader.common_extensions.launchIO
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.EmptyScreenComposable

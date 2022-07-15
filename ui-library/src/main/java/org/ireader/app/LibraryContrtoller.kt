@@ -10,7 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.accompanist.pager.ExperimentalPagerApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.ireader.Controller
+import org.ireader.components.Controller
 import org.ireader.app.viewmodel.LibraryViewModel
 import org.ireader.common_models.entities.BookItem
 import org.ireader.common_models.entities.toBookCategory

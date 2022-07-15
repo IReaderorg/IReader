@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import org.ireader.Controller
+import org.ireader.components.Controller
 import org.ireader.components.components.Components
 import org.ireader.components.components.TitleToolbar
 import org.ireader.components.components.setupUiComponent

@@ -9,7 +9,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.ireader.components.components.Toolbar
@@ -31,19 +30,9 @@ fun TTSTopBar(
                 PreferenceRow(title = vm.ttsChapter?.name?:"", subtitle = vm.ttsBook?.title?:"")
         },
         applyInsets = true,
-        backgroundColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onBackground,
         elevation = 0.dp,
         actions = {
-            IconButton(onClick = {
-                onSetting()
-            }) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = stringResource(id = R.string.settings),
-                    tint = MaterialTheme.colorScheme.onBackground,
-                )
-            }
             IconButton(onClick = {
                 onContent()
             }) {
@@ -53,10 +42,19 @@ fun TTSTopBar(
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }
-
+            IconButton(onClick = {
+                onSetting()
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = stringResource(id = R.string.settings),
+                    tint = MaterialTheme.colorScheme.onBackground,
+                )
+            }
         },
         navigationIcon = {
             TopAppBarBackButton(onClick = onPopBackStack)
-        }
+        },
+        scrollBehavior = scrollBehavior
     )
 }

@@ -13,7 +13,7 @@ import androidx.navigation.navArgument
 import com.google.accompanist.web.WebContent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import org.ireader.Controller
+import org.ireader.components.Controller
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.web.WebPageScreen
 import org.ireader.web.WebPageTopBar

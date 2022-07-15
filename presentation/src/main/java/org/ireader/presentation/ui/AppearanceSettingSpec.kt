@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import org.ireader.Controller
+import org.ireader.components.Controller
 import org.ireader.appearance.AppearanceSettingScreen
 import org.ireader.appearance.AppearanceToolbar
 import org.ireader.appearance.AppearanceViewModel

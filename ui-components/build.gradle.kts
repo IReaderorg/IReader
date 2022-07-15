@@ -29,6 +29,7 @@ dependencies {
     implementation(composeLib.compose.uiUtil)
     implementation(composeLib.compose.material)
     implementation(composeLib.compose.constraintlayout)
+    implementation(composeLib.material3.windowsizeclass)
 
     implementation(composeLib.compose.uiToolingPreview)
     implementation(composeLib.compose.navigation)

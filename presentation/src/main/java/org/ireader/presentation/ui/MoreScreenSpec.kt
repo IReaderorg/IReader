@@ -12,7 +12,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
-import org.ireader.Controller
+import org.ireader.components.Controller
 import org.ireader.common_resources.discord
 import org.ireader.components.components.TitleToolbar
 import org.ireader.domain.ui.NavigationArgs

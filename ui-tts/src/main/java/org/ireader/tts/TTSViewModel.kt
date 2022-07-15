@@ -8,6 +8,9 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -47,6 +50,8 @@ class TTSViewModel @Inject constructor(
 ) : BaseViewModel(),
     TTSState by ttsState {
 
+    var fullScreenMode by mutableStateOf(false)
+
     val speechRate = readerPreferences.speechRate().asState()
     val speechPitch = readerPreferences.speechPitch().asState()
     val sleepModeUi = readerPreferences.sleepMode().asState()
@@ -63,6 +68,7 @@ class TTSViewModel @Inject constructor(
     val betweenLetterSpaces = readerPreferences.betweenLetterSpaces().asState()
     val textWeight = readerPreferences.textWeight().asState()
     val paragraphsIndent = readerPreferences.paragraphIndent().asState()
+    val paragraphDistance = readerPreferences.paragraphDistance().asState()
     val textAlignment = readerPreferences.textAlign().asState()
     val font = readerPreferences.font().asState()
     val fontSize = readerPreferences.fontSize().asState()

@@ -7,7 +7,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import org.ireader.Controller
+import org.ireader.components.Controller
 import org.ireader.about.AboutSettingScreen
 import org.ireader.common_extensions.toDateTimestampString
 import org.ireader.common_resources.BuildConfig

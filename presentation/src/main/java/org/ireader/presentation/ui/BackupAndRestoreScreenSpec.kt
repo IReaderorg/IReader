@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import org.ireader.Controller
+import org.ireader.components.Controller
 import org.ireader.components.components.TitleToolbar
 import org.ireader.core_ui.ui.SnackBarListener
 import org.ireader.settings.setting.backups.BackUpAndRestoreScreen

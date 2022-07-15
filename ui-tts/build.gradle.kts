@@ -17,7 +17,7 @@ android {
 dependencies {
     implementation(project(Modules.commonModels))
     implementation(project(Modules.coreUi))
-
+    implementation(composeLib.material3.windowsizeclass)
     implementation(project(Modules.coreApi))
     compileOnly(project(Modules.uiReader))
     implementation(project(Modules.uiComponents))

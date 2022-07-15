@@ -62,6 +62,7 @@ dependencies {
     implementation(composeLib.compose.activity)
 
     implementation(composeLib.material3.core)
+    implementation(composeLib.material3.windowsizeclass)
 
     implementation(composeLib.compose.uiToolingPreview)
 
