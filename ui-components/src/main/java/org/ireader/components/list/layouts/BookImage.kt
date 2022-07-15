@@ -4,8 +4,10 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,49 +40,71 @@ fun BookImage(
     ratio: Float = 3f / 4f,
     selected: Boolean = false,
     header: ((url: String) -> okhttp3.Headers?)? = null,
+    onlyCover: Boolean = false,
+    comfortableMode:Boolean =false,
     badge: @Composable BoxScope.() -> Unit,
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(8.dp)
-            .combinedClickable(
-                onClick = { onClick(book) },
-                onLongClick = { onLongClick(book) }
-            )
-            .border(
-                3.dp,
-                if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(
-                    alpha = .1f
-                )
-            ),
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        BookImageComposable(
-            modifier = Modifier
-                .aspectRatio(ratio)
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(4.dp))
-                .align(Alignment.Center),
-            image = BookCover.from(book),
-            headers = header,
-        )
-
         Box(
-            Modifier
-                .height(50.dp)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black),
-                        startY = 3f, // 1/3
-                        endY = 80F
-                    )
+            modifier = modifier
+                .fillMaxSize()
+                .padding(8.dp)
+                .combinedClickable(
+                    onClick = { onClick(book) },
+                    onLongClick = { onLongClick(book) }
                 )
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
+                .border(
+                    3.dp,
+                    if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(
+                        alpha = .1f
+                    )
+                ),
         ) {
+            BookImageComposable(
+                modifier = Modifier
+                    .aspectRatio(ratio)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(4.dp))
+                    .align(Alignment.Center),
+                image = BookCover.from(book),
+                headers = header,
+            )
+            if (!onlyCover) {
+                Box(
+                    Modifier
+                        .height(50.dp)
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, Color.Black),
+                                startY = 3f, // 1/3
+                                endY = 80F
+                            )
+                        )
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 8.dp)
+                            .fillMaxWidth(),
+                        text = book.title,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center,
+                        color = Color.White,
+                    )
+                }
+            }
+            badge()
+        }
+        if (comfortableMode) {
             Text(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
                     .padding(bottom = 8.dp)
                     .fillMaxWidth(),
                 text = book.title,
@@ -89,8 +113,8 @@ fun BookImage(
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
                 color = Color.White,
+                maxLines = 2
             )
         }
-        badge()
     }
 }

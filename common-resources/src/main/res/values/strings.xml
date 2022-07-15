@@ -78,8 +78,9 @@
     <string name="open_last_chapter">Open last chapter</string>
     <string name="in_library">in Library</string>
     <string name="compact_layout">Compact Layout</string>
-    <string name="grid_layout">Grid Layout</string>
+    <string name="comfortable_layout">Comfortable Grid</string>
     <string name="list_layout">List Layout</string>
+    <string name="cover_only_layout">Cover-only grid</string>
     <string name="decrease">Decrease</string>
     <string name="source_title">Source Title</string>
     <string name="chapter_number">Chapter Number</string>

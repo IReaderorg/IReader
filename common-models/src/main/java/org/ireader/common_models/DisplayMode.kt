@@ -37,7 +37,8 @@ interface Mask<T : Flag> {
 enum class DisplayMode(override val flag: Long) : Flag {
     ComfortableGrid(0b0001L),
     List(0b0010L),
-    CompactGrid(0b0011L);
+    CompactGrid(0b0011L),
+    OnlyCover(0b00110L);
 
     companion object : Mask<DisplayMode> {
         override val mask = 0b0111L
@@ -66,10 +67,13 @@ fun DisplayMode.getLayoutName(context: Context): String {
             context.getString(R.string.compact_layout)
         }
         DisplayMode.ComfortableGrid -> {
-            context.getString(R.string.grid_layout)
+            context.getString(R.string.comfortable_layout)
         }
         DisplayMode.List -> {
             context.getString(R.string.list_layout)
+        }
+        DisplayMode.OnlyCover -> {
+            context.getString(R.string.cover_only_layout)
         }
     }
 }

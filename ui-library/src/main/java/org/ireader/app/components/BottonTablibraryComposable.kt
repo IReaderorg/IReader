@@ -147,6 +147,7 @@ fun TabsContent(
             DisplayMode.CompactGrid,
             DisplayMode.ComfortableGrid,
             DisplayMode.List,
+            DisplayMode.OnlyCover
         )
     }
     HorizontalPager(
@@ -271,10 +272,13 @@ private fun LazyListScope.DispalyPage(
                         MidSizeTextComposable(text = stringResource(id = R.string.compact_layout))
                     }
                     DisplayMode.ComfortableGrid -> {
-                        MidSizeTextComposable(text = stringResource(id = R.string.grid_layout))
+                        MidSizeTextComposable(text = stringResource(id = R.string.comfortable_layout))
                     }
                     DisplayMode.List -> {
                         MidSizeTextComposable(text = stringResource(id = R.string.list_layout))
+                    }
+                    DisplayMode.OnlyCover -> {
+                        MidSizeTextComposable(text = stringResource(id = R.string.cover_only_layout))
                     }
                 }
             }

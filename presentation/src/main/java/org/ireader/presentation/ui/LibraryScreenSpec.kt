@@ -12,12 +12,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
-import org.ireader.components.Controller
 import org.ireader.app.LibraryController
 import org.ireader.app.LibraryScreenTopBar
 import org.ireader.app.components.BottomTabComposable
 import org.ireader.app.viewmodel.LibraryViewModel
 import org.ireader.common_resources.LAST_CHAPTER
+import org.ireader.components.Controller
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.ui.NavigationArgs.showModalSheet
 import org.ireader.presentation.R
@@ -82,9 +82,9 @@ object LibraryScreenSpec : BottomNavScreenSpec {
                 vm.selectAllInCurrentCategory()
             },
             scrollBehavior = controller.scrollBehavior
-
         )
     }
+
     @Composable
     override fun Content(
         controller: Controller

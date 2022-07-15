@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.entities.BookItem
 import org.ireader.components.list.layouts.CompactGridLayoutComposable
+import org.ireader.components.list.layouts.CoverOnlyGrid
 import org.ireader.components.list.layouts.GridLayoutComposable
 import org.ireader.components.list.layouts.LinearListDisplay
 import org.ireader.core_api.source.Source
@@ -64,7 +65,6 @@ fun LayoutComposable(
                 onLongClick = { onLongClick(it) },
                 goToLatestChapter = { goToLatestChapter(it) },
                 isLoading = isLoading,
-
                 showGoToLastChapterBadge = showGoToLastChapterBadge,
                 showInLibraryBadge = showInLibraryBadge,
                 showReadBadge = showReadBadge,
@@ -74,6 +74,25 @@ fun LayoutComposable(
         }
         DisplayMode.CompactGrid -> {
             CompactGridLayoutComposable(
+                books = books,
+                onClick = { book ->
+                    onClick(book)
+                }, scrollState = gridState,
+                isLocal = isLocal,
+                selection = selection,
+                onLongClick = { onLongClick(it) },
+                goToLatestChapter = { goToLatestChapter(it) },
+                isLoading = isLoading,
+                showGoToLastChapterBadge = showGoToLastChapterBadge,
+                modifier = Modifier,
+                showInLibraryBadge = showInLibraryBadge,
+                showReadBadge = showReadBadge,
+                showUnreadBadge = showUnreadBadge,
+                columns = columns ?: 2
+            )
+        }
+        else -> {
+            CoverOnlyGrid(
                 books = books,
                 onClick = { book ->
                     onClick(book)
