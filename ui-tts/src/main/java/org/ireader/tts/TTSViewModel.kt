@@ -24,6 +24,7 @@ import org.ireader.domain.services.tts_service.Player
 import org.ireader.domain.services.tts_service.TTSState
 import org.ireader.domain.services.tts_service.TTSStateImpl
 import org.ireader.domain.services.tts_service.media_player.TTSService
+import org.ireader.domain.services.tts_service.media_player.isPlaying
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.domain.use_cases.local.LocalGetBookUseCases
 import org.ireader.domain.use_cases.local.LocalGetChapterUseCase
@@ -61,7 +62,6 @@ class TTSViewModel @Inject constructor(
     val language = readerPreferences.speechLanguage().asState()
 
     val theme = readerPreferences.backgroundColorTTS().asState()
-    val enableBookCoverInTTS = readerPreferences.enableBookCoverInTTS().asState()
 
     // val textColor = readerPreferences.textColorReader().asState()
     val lineHeight = readerPreferences.lineHeight().asState()
@@ -293,5 +293,17 @@ class TTSViewModel @Inject constructor(
             onError = {
             }
         )
+    }
+
+    fun play(context:Context) {
+        if (controller?.playbackState?.state == PlaybackStateCompat.STATE_NONE) {
+            initMedia(context)
+            initController()
+            runTTSService(Player.PLAY)
+        } else if (controller?.playbackState?.isPlaying == true) {
+            controller?.transportControls?.pause()
+        } else {
+            controller?.transportControls?.play()
+        }
     }
 }

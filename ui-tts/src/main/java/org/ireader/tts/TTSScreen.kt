@@ -1,7 +1,6 @@
 package org.ireader.tts
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +19,9 @@ import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.FastRewind
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.FullscreenExit
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PauseCircle
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
@@ -32,7 +33,6 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import org.ireader.common_models.entities.Chapter
-import org.ireader.components.components.BookImageCover
 import org.ireader.components.components.ShowLoading
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.SuperSmallTextComposable
@@ -48,7 +47,6 @@ import org.ireader.core_api.source.Source
 import org.ireader.core_ui.modifier.clickableNoIndication
 import org.ireader.core_ui.ui.mapTextAlign
 import org.ireader.domain.services.tts_service.TTSState
-import org.ireader.image_loader.BookCover
 import org.ireader.ui_tts.R
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
@@ -60,11 +58,11 @@ fun TTSScreen(
     drawerState: DrawerState,
     onChapter: (Chapter) -> Unit,
     onPopStack: () -> Unit,
+    onPlay: () -> Unit,
     bottomSheetState: ModalBottomSheetState,
     lazyState: LazyListState,
     paddingValues: PaddingValues
 ) {
-
     val gradient = Brush.verticalGradient(
         colors = listOf(
             vm.theme.value.backgroundColor.copy(alpha = .8f),
@@ -81,18 +79,6 @@ fun TTSScreen(
                         .fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (vm.enableBookCoverInTTS.value) {
-                        BookImageCover.Book(
-                            data = book?.let { BookCover.from(it) },
-                            modifier = Modifier
-                                .matchParentSize()
-                                .clip(MaterialTheme.shapes.medium)
-                                .border(
-                                    2.dp,
-                                    MaterialTheme.colorScheme.onBackground.copy(alpha = .2f)
-                                )
-                        )
-                    }
                     Box(
                         modifier = Modifier
                             .matchParentSize()
@@ -129,7 +115,9 @@ fun TTSScreen(
                         }
                     }
 
-                    Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+                    Box(modifier = Modifier
+                        .padding(paddingValues)
+                        .fillMaxSize()) {
                         Row(
                             horizontalArrangement = Arrangement.Center, modifier = Modifier
                                 .fillMaxWidth()
@@ -140,18 +128,22 @@ fun TTSScreen(
                                 color = vm.theme.value.onTextColor,
                             )
                         }
-                        AppIconButton(
-                            modifier = Modifier
-                                .align(Alignment.TopEnd),
-                            onClick = { vm.fullScreenMode = !vm.fullScreenMode },
-                            imageVector = if (vm.fullScreenMode) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
-                            tint = vm.theme.value.onTextColor,
-                            contentDescription = null
-                        )
-
+                        Row(modifier = Modifier
+                            .align(Alignment.TopEnd)) {
+                            AppIconButton(
+                                onClick = onPlay,
+                                imageVector = if (vm.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                tint = vm.theme.value.onTextColor,
+                                contentDescription = null
+                            )
+                            AppIconButton(
+                                onClick = { vm.fullScreenMode = !vm.fullScreenMode },
+                                imageVector = if (vm.fullScreenMode) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
+                                tint = vm.theme.value.onTextColor,
+                                contentDescription = null
+                            )
+                        }
                     }
-
-
                 }
             }
         }

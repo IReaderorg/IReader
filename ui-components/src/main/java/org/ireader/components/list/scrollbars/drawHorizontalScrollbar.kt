@@ -1,4 +1,5 @@
-package org.ireader.components.list.scrollbars/*
+package org.ireader.components.list.scrollbars
+/*
  * MIT License
  *
  * Copyright (c) 2022 Albert Chang

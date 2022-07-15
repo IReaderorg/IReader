@@ -1,6 +1,5 @@
 package org.ireader.presentation.ui
 
-import android.support.v4.media.session.PlaybackStateCompat
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,8 +36,6 @@ import org.ireader.components.components.component.SliderPreference
 import org.ireader.components.components.component.SwitchPreference
 import org.ireader.core_api.log.Log
 import org.ireader.core_ui.theme.readerThemes
-import org.ireader.domain.services.tts_service.Player
-import org.ireader.domain.services.tts_service.media_player.isPlaying
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
 import org.ireader.reader.ReaderScreenDrawer
@@ -149,7 +146,10 @@ object TTSScreenSpec : ScreenSpec {
             lazyState = lazyState,
             bottomSheetState = controller.sheetState,
             drawerState = controller.drawerState,
-            paddingValues = controller.scaffoldPadding
+            paddingValues = controller.scaffoldPadding,
+            onPlay = {
+                vm.play(context)
+            }
         )
 
         LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph) {
@@ -203,15 +203,7 @@ object TTSScreenSpec : ScreenSpec {
                                 vm.controller?.transportControls?.skipToPrevious()
                             },
                             onPlay = {
-                                if (vm.controller?.playbackState?.state == PlaybackStateCompat.STATE_NONE) {
-                                    vm.initMedia(context)
-                                    vm.initController()
-                                    vm.runTTSService(Player.PLAY)
-                                } else if (vm.controller?.playbackState?.isPlaying == true) {
-                                    vm.controller?.transportControls?.pause()
-                                } else {
-                                    vm.controller?.transportControls?.play()
-                                }
+                                vm.play(context)
                             },
                             onNext = {
                                 vm.controller?.transportControls?.skipToNext()
@@ -317,11 +309,6 @@ object TTSScreenSpec : ScreenSpec {
             }, themes = readerThemes, selected = {
                 vm.theme.value == it
             })
-            SwitchPreference(
-                preference = vm.enableBookCoverInTTS,
-                title = stringResource(id = R.string.enable_book_cover)
-            )
-
             SwitchPreference(
                 preference = vm.autoNext,
                 title = stringResource(id = R.string.auto_next_chapter)

@@ -49,6 +49,8 @@ class LibraryUpdatesService @AssistedInject constructor(
     @OptIn(ExperimentalTime::class)
     override suspend fun doWork(): Result {
         val libraryBooks = getBookUseCases.findAllInLibraryBooks()
+        var skippedBooks = 0
+
 
         var updatedBookSize = 0
         val cancelIntent = WorkManager.getInstance(applicationContext)
@@ -74,6 +76,10 @@ class LibraryUpdatesService @AssistedInject constructor(
             try {
                 libraryBooks.forEachIndexed { index, book ->
                     val chapters = getChapterUseCase.findChaptersByBookId(bookId = book.id)
+                    if (chapters.any { !it.read } && chapters.isNotEmpty()) {
+                        skippedBooks++
+                        return@forEachIndexed
+                    }
                     val source = getLocalCatalog.get(book.sourceId)
                     if (source != null) {
                         val remoteChapters = mutableListOf<Chapter>()
@@ -162,7 +168,10 @@ class LibraryUpdatesService @AssistedInject constructor(
                     applicationContext,
                     Notifications.CHANNEL_LIBRARY_PROGRESS
                 ).apply {
-                    setContentTitle("$updatedBookSize book was updated.")
+                    val title = "$updatedBookSize book was updated.".plus(
+                        if (skippedBooks != 0) " $skippedBooks books was skipped." else ""
+                    )
+                    setContentTitle(title)
                     setSmallIcon(R.drawable.ic_update)
                     priority = NotificationCompat.PRIORITY_DEFAULT
                     setSubText("It was Updated Successfully")
