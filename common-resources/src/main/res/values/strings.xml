@@ -286,6 +286,9 @@
     <string name="update_notification">Application Updates</string>
     <string name="library_updates_notification">Library Updates</string>
 
+    <string name="origin_language">Origin Language</string>
+    <string name="target_language">Target Language</string>
+
 
     <string name="query_must_not_be_empty">query must not be empty.</string>
     <string name="no_filter_applied">No Filter Applied.</string>

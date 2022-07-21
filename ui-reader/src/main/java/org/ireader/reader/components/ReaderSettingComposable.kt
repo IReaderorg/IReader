@@ -56,6 +56,7 @@ import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.theme.ReaderTheme
 import org.ireader.core_ui.ui.Colour.contentColor
 import org.ireader.core_ui.ui.PreferenceAlignment
+import org.ireader.domain.use_cases.translate.languages
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.ui_reader.R
 
@@ -287,6 +288,23 @@ fun ReaderSettingMainLayout(
                 modifier = Modifier.fillMaxSize()
             ) {
                 item {
+                    ChipChoicePreference(preference = vm.translatorOriginLanguage, choices = languages().associate { it.first to it.second }, title = stringResource(
+                        id = R.string.origin_language
+                    ))
+                }
+                item {
+                    ChipChoicePreference(preference = vm.translatorTargetLanguage, choices = languages().associate { it.first to it.second }, title = stringResource(
+                        id = R.string.target_language
+                    ))
+                }
+                item {
+                    PreferenceRow(title = "translate", onClick = {
+                        scope.launch {
+                            vm.translate()
+                        }
+                    })
+                }
+                item {
                     ChipPreference(
                         preference = listOf(
                             stringResource(id = R.string.page),
@@ -387,18 +405,7 @@ fun ReaderSettingMainLayout(
             }
         }
     }
-    val colorsComponent = remember(vm.readerColors.size) {
-        Components.Dynamic {
-            ReaderBackgroundComposable(
-                viewModel = vm,
-                onBackgroundChange = { id ->
-                    onBackgroundChange(id)
-                    vm.readerThemeSavable = false
-                },
-                themes = vm.readerColors,
-            )
-        }
-    }
+
     val colorTabItems : State<List<Components>> = derivedStateOf {
         listOf<Components>(
             Components.Dynamic {
@@ -414,7 +421,16 @@ fun ReaderSettingMainLayout(
                     onChangeBrightness = onChangeBrightness
                 )
             },
-            colorsComponent,
+            Components.Dynamic {
+                ReaderBackgroundComposable(
+                    viewModel = vm,
+                    onBackgroundChange = { id ->
+                        onBackgroundChange(id)
+                        vm.readerThemeSavable = false
+                    },
+                    themes = vm.readerColors,
+                )
+            },
             Components.Dynamic {
                 ColorPreference(
                     preference = vm.backgroundColor,

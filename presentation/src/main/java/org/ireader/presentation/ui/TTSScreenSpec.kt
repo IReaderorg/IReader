@@ -155,10 +155,13 @@ object TTSScreenSpec : ScreenSpec {
         LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph) {
             try {
                 if (vm.currentReadingParagraph != vm.prevPar && vm.ttsState.currentReadingParagraph < lazyState.layoutInfo.totalItemsCount) {
-                    lazyState.scrollToItem(
-                        vm.currentReadingParagraph,
-                        -lazyState.layoutInfo.viewportEndOffset / 6
-                    )
+                    if(vm.currentReadingParagraph !in lazyState.layoutInfo.visibleItemsInfo.map { it.index }) {
+                        lazyState.scrollToItem(
+                            vm.currentReadingParagraph,
+                            -lazyState.layoutInfo.viewportEndOffset / 6
+                        )
+                    }
+
                     if (vm.isPlaying) {
                         delay(100)
                         vm.controller?.transportControls?.seekTo(vm.ttsState.currentReadingParagraph.toLong())

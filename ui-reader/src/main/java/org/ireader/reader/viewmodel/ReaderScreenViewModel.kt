@@ -44,6 +44,7 @@ import org.ireader.domain.use_cases.local.book_usecases.BookMarkChapterUseCase
 import org.ireader.domain.use_cases.preferences.reader_preferences.ReaderPrefUseCases
 import org.ireader.domain.use_cases.reader.ScreenAlwaysOn
 import org.ireader.domain.use_cases.remote.RemoteUseCases
+import org.ireader.domain.use_cases.translate.TranslationEnginesManager
 import org.ireader.ui_reader.R
 import javax.inject.Inject
 
@@ -67,16 +68,19 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
     val screenAlwaysOnUseCase: ScreenAlwaysOn,
     val webViewManger: WebViewManger,
     val readerThemeRepository: ReaderThemeRepository,
-    val bookMarkChapterUseCase: BookMarkChapterUseCase
+    val bookMarkChapterUseCase: BookMarkChapterUseCase,
+    val translationEnginesManager: TranslationEnginesManager
 ) : BaseViewModel(),
     ReaderScreenPreferencesState by prefState,
     ReaderScreenState by state,
     ReaderPrefFunctions by prefFunc {
 
-    val readerColors :SnapshotStateList<ReaderColors> = readerThemes
+    val readerColors: SnapshotStateList<ReaderColors> = readerThemes
 
     val dateFormat by uiPreferences.dateFormat().asState()
     val relativeTime by uiPreferences.relativeTime().asState()
+    val translatorOriginLanguage = readerPreferences.translatorOriginLanguage().asState()
+    val translatorTargetLanguage = readerPreferences.translatorTargetLanguage().asState()
     val readerTheme = readerPreferences.readerTheme().asState()
     val backgroundColor = readerPreferences.backgroundColorReader().asState()
 
@@ -350,6 +354,14 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
         if (readingMode.value == ReadingMode.Continues || force) {
             scrollState?.scrollTo(0)
             chapterShell.clear()
+        }
+    }
+
+    suspend fun translate() {
+        stateChapter?.let { chapter ->
+          translationEnginesManager.get().translate(chapter.content,translatorOriginLanguage.value,translatorTargetLanguage.value) { result ->
+                stateChapter = stateChapter!!.copy(content = result)
+            }
         }
     }
 

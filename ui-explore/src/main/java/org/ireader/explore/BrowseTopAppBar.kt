@@ -50,7 +50,7 @@ fun BrowseTopAppBar(
         mutableStateOf(false)
     }
     val layouts = remember {
-        listOf(DisplayMode.ComfortableGrid, DisplayMode.CompactGrid, DisplayMode.List)
+        listOf(DisplayMode.ComfortableGrid, DisplayMode.CompactGrid, DisplayMode.List,DisplayMode.OnlyCover)
     }
     val context = LocalContext.current
     Toolbar(

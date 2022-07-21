@@ -32,6 +32,7 @@ coil-gif = { module = "io.coil-kt:coil-gif", version.ref = "coil_version" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil_version" }
 
 gson = "com.google.code.gson:gson:2.9.0"
+googleTranslator = "com.google.mlkit:translate:17.0.0"
 htmlUnit-android = "net.sourceforge.htmlunit:htmlunit-android:2.63.0-SNAPSHOT"
 
 modernstorage-permissions = { module = "com.google.modernstorage:modernstorage-permissions", version.ref = "modernstorage" }

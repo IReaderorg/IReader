@@ -1,4 +1,5 @@
-
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
@@ -37,7 +38,7 @@ plugins {
 
 
 allprojects {
-    tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile> {
+    tasks.withType<KotlinJvmCompile> {
         kotlinOptions {
             freeCompilerArgs = freeCompilerArgs + listOf(
                 "-opt-in=kotlin.RequiresOptIn",
@@ -45,8 +46,20 @@ allprojects {
             kotlinOptions.jvmTarget = "11"
         }
     }
+    tasks.withType<DependencyUpdatesTask> {
+        rejectVersionIf {
+            isNonStable(candidate.version) && !isNonStable(currentVersion)
+        }
+    }
 
 }
+fun isNonStable(version: String): Boolean {
+    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
+    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+    val isStable = stableKeyword || regex.matches(version)
+    return isStable.not()
+}
+
 
 subprojects {
     plugins.apply("com.diffplug.spotless")

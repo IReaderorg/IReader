@@ -140,7 +140,8 @@ fun TabsContent(
     onSortSelected: (LibrarySort) -> Unit,
     layoutType: DisplayMode,
     onLayoutSelected: (DisplayMode) -> Unit,
-    vm: LibraryViewModel
+    vm: LibraryViewModel,
+    scaffoldPadding: PaddingValues
 ) {
     val layouts = remember {
         listOf(
@@ -155,8 +156,7 @@ fun TabsContent(
         state = pagerState,
         modifier = Modifier.fillMaxSize()
     ) { page ->
-        LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top) {
-
+        LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top, contentPadding = scaffoldPadding) {
             when (page) {
                 0 -> FiltersPage(filters, onClick = {
                     vm.toggleFilter(it)

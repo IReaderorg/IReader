@@ -2,6 +2,7 @@ package org.ireader.app.components
 
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
@@ -28,7 +29,8 @@ fun BottomTabComposable(
     onSortSelected: (LibrarySort) -> Unit,
     layoutType: DisplayMode,
     onLayoutSelected: (DisplayMode) -> Unit,
-    vm: LibraryViewModel
+    vm: LibraryViewModel,
+    scaffoldPadding: PaddingValues
 ) {
     val tabs = listOf(
         TabItem(
@@ -58,7 +60,8 @@ fun BottomTabComposable(
             onSortSelected,
             layoutType,
             onLayoutSelected,
-            vm = vm
+            vm = vm,
+            scaffoldPadding = scaffoldPadding
         )
     }
 }

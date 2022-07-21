@@ -57,7 +57,8 @@ object LibraryScreenSpec : BottomNavScreenSpec {
                 vm.onLayoutTypeChange(layout)
             },
             layoutType = vm.layout,
-            vm = vm
+            vm = vm,
+            scaffoldPadding = controller.scaffoldPadding
         )
     }
 

@@ -245,6 +245,16 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     fun showChapterNumberPreferences(): Preference<ChapterDisplayMode> {
         return preferenceStore.getEnum("chapter_layout_mode", ChapterDisplayMode.Default)
     }
+    fun translatorEngine(): Preference<Long> {
+        return preferenceStore.getLong("translatorEngine", -1)
+    }
+
+    fun translatorOriginLanguage(): Preference<String> {
+        return preferenceStore.getString("translator_origin_language", "auto")
+    }
+    fun translatorTargetLanguage(): Preference<String> {
+        return preferenceStore.getString("translator_target_language", "en")
+    }
 }
 
 enum class ReadingMode {

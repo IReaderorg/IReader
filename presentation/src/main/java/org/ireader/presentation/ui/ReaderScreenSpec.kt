@@ -436,7 +436,6 @@ object ReaderScreenSpec : ScreenSpec {
                 modalBottomSheetValue = controller.sheetState.targetValue,
                 onRefresh = {
                     scope.launch {
-
                         vm.getLocalChapter(
                             chapter?.id,
                             force = true

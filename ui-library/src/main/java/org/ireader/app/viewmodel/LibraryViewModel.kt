@@ -202,7 +202,7 @@ class LibraryViewModel @Inject constructor(
             mutableStateOf(emptyList())
         }
 
-        val unfiltered = remember(sorting.value, filters.value, categoryId) {
+        val unfiltered = remember(sorting.value, filters.value, categoryId,categories.size) {
             getLibraryCategory.subscribe(categoryId, sorting.value, filters.value)
                 .map { list ->
                     books = list
@@ -213,7 +213,7 @@ class LibraryViewModel @Inject constructor(
                 .shareIn(scope, SharingStarted.WhileSubscribed(1000), 1)
         }
 
-        return remember(sorting.value, filters.value, searchQuery) {
+        return remember(sorting.value, filters.value, searchQuery, showAllCategoryTab.value,categories.size) {
             val query = searchQuery
             if (query.isNullOrBlank()) {
                 unfiltered

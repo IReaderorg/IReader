@@ -14,7 +14,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.Update
-
 import org.ireader.core_api.log.Log
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.domain.R
@@ -44,10 +43,12 @@ class LibraryUpdatesService @AssistedInject constructor(
 
     companion object {
         const val LibraryUpdateTag = "Library_Update_SERVICE"
+        const val FORCE_UPDATE = "force_update"
     }
 
     @OptIn(ExperimentalTime::class)
     override suspend fun doWork(): Result {
+        val forceUpdate = inputData.getBoolean(FORCE_UPDATE,false)
         val libraryBooks = getBookUseCases.findAllInLibraryBooks()
         var skippedBooks = 0
 
@@ -76,7 +77,7 @@ class LibraryUpdatesService @AssistedInject constructor(
             try {
                 libraryBooks.forEachIndexed { index, book ->
                     val chapters = getChapterUseCase.findChaptersByBookId(bookId = book.id)
-                    if (chapters.any { !it.read } && chapters.isNotEmpty()) {
+                    if (chapters.any { !it.read } && chapters.isNotEmpty() && !forceUpdate) {
                         skippedBooks++
                         return@forEachIndexed
                     }

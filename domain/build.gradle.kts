@@ -43,6 +43,7 @@ dependencies {
     implementation(composeLib.compose.runtime)
     implementation(composeLib.compose.navigation)
     implementation(composeLib.material3.core)
+    implementation(commonLib.googleTranslator)
 
     implementation(composeLib.compose.coil)
     implementation(composeLib.compose.paging)
