@@ -358,4 +358,9 @@
     <string name="all_category">Tout</string>
     <string name="light">Mode clair</string>
     <string name="all_lang">Tout</string>
+    <string name="webView">Vue Web</string>
+    <string name="chapters_was_cleared">Les chapitres ont été supprimés</string>
+    <string name="open_in_webView">Ouvrir dans la vue Web</string>
+    <string name="origin_language">Langue d\'origine</string>
+    <string name="target_language">Langue cible</string>
 </resources>
