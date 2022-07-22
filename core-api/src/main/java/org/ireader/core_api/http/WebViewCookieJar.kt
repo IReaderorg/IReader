@@ -12,11 +12,10 @@ import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
 import java.util.Calendar
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class WebViewCookieJar @Inject constructor(private val cookiesStorage: CookiesStorage) : CookieJar {
+
+
+class WebViewCookieJar(private val cookiesStorage: CookiesStorage) : CookieJar {
 
     private val manager: CookieManager = CookieManager.getInstance()
 

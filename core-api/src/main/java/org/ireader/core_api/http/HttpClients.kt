@@ -16,7 +16,8 @@ import java.util.concurrent.TimeUnit
 class HttpClients(
     context: Application,
     browseEngine: BrowseEngine,
-    cookiesStorage: CookiesStorage
+    cookiesStorage: CookiesStorage,
+    webViewCookieJar: WebViewCookieJar
 ) {
 
     private val cache = run {
@@ -25,7 +26,7 @@ class HttpClients(
         Cache(dir, size)
     }
 
-    private val cookieJar = WebViewCookieJar(cookiesStorage)
+    private val cookieJar = webViewCookieJar
 
     private val basicClient = OkHttpClient.Builder()
         .cookieJar(cookieJar)

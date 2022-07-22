@@ -250,7 +250,7 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     }
 
     fun translatorOriginLanguage(): Preference<String> {
-        return preferenceStore.getString("translator_origin_language", "auto")
+        return preferenceStore.getString("translator_origin_language", "en")
     }
     fun translatorTargetLanguage(): Preference<String> {
         return preferenceStore.getString("translator_target_language", "en")

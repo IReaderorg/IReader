@@ -14,6 +14,7 @@ dependencies {
     implementation(project(Modules.coreApi))
     implementation(project(Modules.commonResources))
 
+    implementation(commonLib.hilt.android)
     implementation(androidx.browser)
     implementation(androidx.biometric)
     implementation(androidx.lifecycle.viewmodelktx)

@@ -21,9 +21,8 @@ import org.ireader.core_api.log.Log
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.util.concurrent.TimeoutException
-import javax.inject.Inject
 
-class BrowseEngine @Inject constructor(private val webViewManger: WebViewManger, private val webViewCookieJar: WebViewCookieJar) {
+class BrowseEngine(private val webViewManger: WebViewManger, private val webViewCookieJar: WebViewCookieJar) {
     /**
      * this function
      * @param url  the url of page

@@ -3,14 +3,12 @@
 package org.ireader.core_api.http
 
 import app.cash.quickjs.QuickJs
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * A factory for creating instances of [JS].
  */
-@Singleton
-class JSFactory @Inject internal constructor() {
+
+class JSFactory() {
 
     /**
      * Returns a new instance of [JS].

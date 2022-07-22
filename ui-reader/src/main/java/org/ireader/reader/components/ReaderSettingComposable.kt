@@ -56,7 +56,6 @@ import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.theme.ReaderTheme
 import org.ireader.core_ui.ui.Colour.contentColor
 import org.ireader.core_ui.ui.PreferenceAlignment
-import org.ireader.domain.use_cases.translate.languages
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.ui_reader.R
 
@@ -288,12 +287,12 @@ fun ReaderSettingMainLayout(
                 modifier = Modifier.fillMaxSize()
             ) {
                 item {
-                    ChipChoicePreference(preference = vm.translatorOriginLanguage, choices = languages().associate { it.first to it.second }, title = stringResource(
+                    ChipChoicePreference(preference = vm.translatorOriginLanguage, choices = vm.translationEnginesManager.get().supportedLanguages.associate { it.first to it.second }, title = stringResource(
                         id = R.string.origin_language
                     ))
                 }
                 item {
-                    ChipChoicePreference(preference = vm.translatorTargetLanguage, choices = languages().associate { it.first to it.second }, title = stringResource(
+                    ChipChoicePreference(preference = vm.translatorTargetLanguage, choices = vm.translationEnginesManager.get().supportedLanguages.associate { it.first to it.second }, title = stringResource(
                         id = R.string.target_language
                     ))
                 }

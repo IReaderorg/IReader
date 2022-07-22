@@ -359,9 +359,11 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
 
     suspend fun translate() {
         stateChapter?.let { chapter ->
-          translationEnginesManager.get().translate(chapter.content,translatorOriginLanguage.value,translatorTargetLanguage.value) { result ->
+          translationEnginesManager.get().translate(chapter.content,translatorOriginLanguage.value,translatorTargetLanguage.value, onSuccess = { result ->
                 stateChapter = stateChapter!!.copy(content = result)
-            }
+            }, onError = {
+                showSnackBar(it)
+          })
         }
     }
 

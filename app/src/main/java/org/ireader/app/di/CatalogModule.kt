@@ -9,6 +9,8 @@ import io.ktor.client.plugins.cookies.CookiesStorage
 import org.ireader.common_data.repository.BookRepository
 import org.ireader.core_api.http.BrowseEngine
 import org.ireader.core_api.http.HttpClients
+import org.ireader.core_api.http.WebViewCookieJar
+import org.ireader.core_api.http.WebViewManger
 import org.ireader.core_api.os.PackageInstaller
 import org.ireader.core_api.prefs.PreferenceStore
 import org.ireader.core_catalogs.CatalogPreferences
@@ -109,18 +111,27 @@ class CatalogModule {
             app
         )
     }
+    @Provides
+    @Singleton
+    fun providesWebViewCookieJar(
+        cookiesStorage: CookiesStorage,
+    ): WebViewCookieJar {
+        return WebViewCookieJar(cookiesStorage)
+    }
 
     @Provides
     @Singleton
     fun providesHttpClients(
         context: Application,
-        browseEngine: BrowseEngine,
-        cookiesStorage: CookiesStorage
+        cookiesStorage: CookiesStorage,
+         webViewManger: WebViewManger,
+        webViewCookieJar: WebViewCookieJar,
     ): HttpClients {
         return HttpClients(
             context,
-            browseEngine,
-            cookiesStorage
+            BrowseEngine(webViewManger,webViewCookieJar),
+            cookiesStorage,
+            webViewCookieJar
         )
     }
 

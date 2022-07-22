@@ -24,7 +24,6 @@ dependencies {
     implementation(commonLib.ktor.contentNegotiation.jackson)
 
     api(commonLib.okio)
-    api(commonLib.hilt.android)
 
     implementation(androidx.core)
     implementation(androidx.lifecycle.runtime)
