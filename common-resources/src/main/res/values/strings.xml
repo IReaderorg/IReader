@@ -169,6 +169,7 @@
     <string name="sleep">Sleep</string>
     <string name="speech_rate">Speech Rate</string>
     <string name="auto_next_chapter">Auto Next Chapter</string>
+    <string name="tracker">Tracker</string>
     <string name="enable_book_cover">Enable Book Cover</string>
     <string name="enable_sleep_timer">Sleep Mode</string>
     <string name="full">Full</string>

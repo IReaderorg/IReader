@@ -86,7 +86,9 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     fun backgroundColorTTS(): Preference<ReaderColors> {
         return preferenceStore.getLong("background_color_tts").asReaderTheme()
     }
-
+    fun followTTSSpeaker(): Preference<Boolean> {
+        return preferenceStore.getBoolean("follow_tts_speaker",false)
+    }
 
     fun textColorReader(): Preference<Color> {
         return preferenceStore.getInt(SAVED_TEXT_COLOR, Color(0xFFE9E9E9).toArgb()).asColor()

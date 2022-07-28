@@ -155,10 +155,9 @@ object TTSScreenSpec : ScreenSpec {
         LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph) {
             try {
                 if (vm.currentReadingParagraph != vm.prevPar && vm.ttsState.currentReadingParagraph < lazyState.layoutInfo.totalItemsCount) {
-                    if(vm.currentReadingParagraph !in lazyState.layoutInfo.visibleItemsInfo.map { it.index }) {
+                    if(vm.currentReadingParagraph !in lazyState.layoutInfo.visibleItemsInfo.map { it.index }.dropLast(2) || vm.isTtsTrackerEnable.value) {
                         lazyState.scrollToItem(
-                            vm.currentReadingParagraph,
-                            -lazyState.layoutInfo.viewportEndOffset / 6
+                            vm.currentReadingParagraph
                         )
                     }
 
@@ -312,6 +311,10 @@ object TTSScreenSpec : ScreenSpec {
             }, themes = readerThemes, selected = {
                 vm.theme.value == it
             })
+            SwitchPreference(
+                preference = vm.isTtsTrackerEnable,
+                title = stringResource(id = R.string.tracker)
+            )
             SwitchPreference(
                 preference = vm.autoNext,
                 title = stringResource(id = R.string.auto_next_chapter)

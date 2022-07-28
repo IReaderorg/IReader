@@ -60,6 +60,7 @@ class TTSViewModel @Inject constructor(
     val autoNext = readerPreferences.readerAutoNext().asState()
     val voice = readerPreferences.speechVoice().asState()
     val language = readerPreferences.speechLanguage().asState()
+    val isTtsTrackerEnable = readerPreferences.followTTSSpeaker().asState()
 
     val theme = readerPreferences.backgroundColorTTS().asState()
 
