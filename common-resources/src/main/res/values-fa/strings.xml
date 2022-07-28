@@ -7,4 +7,47 @@
     <string name="cancel_all">لغو کردن همه</string>
     <string name="cancel">لغو</string>
     <string name="apply">اعمال کردن</string>
+    <string name="add_as_new">جدید</string>
+    <string name="add">اضافه کردن</string>
+    <string name="view_book">مشاهده کتاب</string>
+    <string name="search_hint">جستجو…</string>
+    <string name="nothing_read_recently">هیج کتابی اخیرا خوانده نشده است</string>
+    <string name="confirm">تاييد</string>
+    <string name="page_progress_num">صفحه %d</string>
+    <string name="lock_never">هیچوقت</string>
+    <string name="lock_always">همیشه</string>
+    <string name="edit_category">ویرایش دسته بندی ها</string>
+    <string name="category">دسته بندی ها</string>
+    <string name="help">راهنما</string>
+    <string name="pref_incognito_mode">حالت ناشناس</string>
+    <string name="hint">…</string>
+    <string name="category_hint">نام…</string>
+    <string name="about">درباره</string>
+    <string name="the_downloads_was_cancelled">دانلودها لغو شدند</string>
+    <string name="authentication">احراز هویت</string>
+    <string name="refresh">تازه کردن</string>
+    <string name="share">اشتراک گذاری</string>
+    <string name="download_of">دانلود</string>
+    <string name="loading">در حال بارگذاری</string>
+    <string name="error">خطا</string>
+    <string name="description_placeholder">بدون توضیخ</string>
+    <string name="toggle_search_mode_off">حالت جستجو را خاموش کنید</string>
+    <string name="recently">اخیرا</string>
+    <string name="relative_time_today">امروز</string>
+    <string name="downloads_was_cancelled">عملیات دانلود لغو شدند</string>
+    <string name="authenticate_to_confirm_change">برای تایید تغییر احراز هویت کنید</string>
+    <string name="pref_incognito_mode_summary">متوقف کردن تاریخچه خواندن</string>
+    <string name="no_app_was_found_to_lauch">مشکلی پیش آمد. شما برنامه مورد نیاز را ندارید</string>
+    <string name="the_downloads_was_interrupted">دانلودها قطع شد</string>
+    <string name="failed_to_download">عملیات دانلود ناموفق بود</string>
+    <string name="was_cancelled">کنسل شدند</string>
+    <string name="display_mode">حالت نمایش</string>
+    <plurals name="relative_time">
+        <item quantity="one">دیروز</item>
+        <item quantity="other">%1$ روز پیش</item>
+    </plurals>
+    <plurals name="lock_after_mins">
+        <item quantity="one">بعد از %1$s دقیقه</item>
+        <item quantity="other">بعد از %1$s دقیقه</item>
+    </plurals>
 </resources>
