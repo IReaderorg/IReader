@@ -1,6 +1,6 @@
 package org.ireader.core_api.http
 
-import android.app.Application
+import android.content.Context
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.BrowserUserAgent
@@ -14,7 +14,7 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 class HttpClients(
-    context: Application,
+    context: Context,
     browseEngine: BrowseEngine,
     cookiesStorage: CookiesStorage,
     webViewCookieJar: WebViewCookieJar

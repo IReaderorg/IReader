@@ -1,7 +1,7 @@
 package org.ireader.data.catalog
 
 import android.annotation.SuppressLint
-import android.app.Application
+import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
@@ -27,7 +27,7 @@ import java.io.File
  * Class that handles the loading of the catalogs installed in the system and the app.
  */
 class AndroidCatalogLoader(
-    private val context: Application,
+    private val context: Context,
     private val httpClients: HttpClients,
 ) : CatalogLoader {
 
