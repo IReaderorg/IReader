@@ -3,6 +3,7 @@ package org.ireader.tts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -16,6 +17,7 @@ import org.ireader.components.components.component.PreferenceRow
 import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.ui_tts.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TTSTopBar(
     modifier: Modifier = Modifier,

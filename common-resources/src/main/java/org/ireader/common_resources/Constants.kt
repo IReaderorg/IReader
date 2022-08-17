@@ -37,7 +37,7 @@ const val PARSE_CONTENT = "PARSE_CONTENT"
 const val PARSE_DETAIL = "PARSE_DETAIL"
 const val PARSE_CHAPTERS = "PARSE_CHAPTERS"
 const val PARSE_BOOKS = "PARSE_BOOKS"
-const val REPO_URL = "https://raw.githubusercontent.com/IReaderorg/IReader-Repo/main"
+const val REPO_URL = "https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo"
 
 object DEFAULT {
     const val MAX_BRIGHTNESS = .5F

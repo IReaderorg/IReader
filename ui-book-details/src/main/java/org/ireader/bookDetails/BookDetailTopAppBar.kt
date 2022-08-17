@@ -5,6 +5,7 @@ import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.IosShare
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +24,7 @@ import org.ireader.core_api.source.model.Command
 import org.ireader.core_api.source.model.CommandList
 import org.ireader.ui_book_details.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookDetailTopAppBar(
     modifier: Modifier = Modifier,

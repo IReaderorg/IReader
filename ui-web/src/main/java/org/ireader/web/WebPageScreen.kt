@@ -24,7 +24,7 @@ import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewState
 import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.ireader.core_api.http.setDefaultSettings
+import org.ireader.core_api.http.impl.setDefaultSettings
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.HttpSource
 import org.ireader.core_ui.ui.SnackBarListener

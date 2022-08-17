@@ -75,7 +75,7 @@ fun CompactGridLayoutComposable(
                         },
                         onClick = { onClick(books[index]) },
                         book = books[index],
-                        ratio = 6f / 9f,
+                        ratio = 4f / 6f,
                         selected = books[index].id in selection,
                         header = header,
                         onLongClick = { onLongClick(books[index]) },

@@ -8,7 +8,7 @@ import io.ktor.utils.io.ByteReadChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.ireader.common_resources.UiText
-import org.ireader.core_api.http.HttpClients
+import org.ireader.core_api.http.main.HttpClients
 import org.ireader.core_api.io.saveTo
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.os.InstallStep

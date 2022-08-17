@@ -67,6 +67,7 @@ fun Toolbar(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TitleToolbar(
     title: String,
@@ -87,6 +88,7 @@ fun TitleToolbar(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MidSizeToolbar(
     title: @Composable () -> Unit,
@@ -120,7 +122,7 @@ fun MidSizeToolbar(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun SearchToolbar(
     title: String,

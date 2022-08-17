@@ -51,13 +51,13 @@ fun BookImage(
         Box(
             modifier = modifier
                 .fillMaxSize()
-                .padding(8.dp)
+                .padding(2.dp)
                 .combinedClickable(
                     onClick = { onClick(book) },
                     onLongClick = { onLongClick(book) }
                 )
                 .border(
-                    3.dp,
+                    2.dp,
                     if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(
                         alpha = .1f
                     )

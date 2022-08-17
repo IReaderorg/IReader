@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricPrompt
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -14,11 +15,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.datetime.Clock
-import org.ireader.components.Controller
 import org.ireader.common_extensions.AuthenticatorUtil
 import org.ireader.common_extensions.AuthenticatorUtil.isAuthenticationSupported
 import org.ireader.common_extensions.AuthenticatorUtil.startAuthentication
 import org.ireader.common_resources.R
+import org.ireader.components.Controller
 import org.ireader.components.components.Components
 import org.ireader.components.components.SetupSettingComponents
 import org.ireader.components.components.TitleToolbar
@@ -33,6 +34,7 @@ object SecuritySettingSpec : ScreenSpec {
 
     override val navHostRoute: String = "security_settings_screen_route"
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun TopBar(
         controller: Controller

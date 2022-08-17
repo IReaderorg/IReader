@@ -1,27 +1,31 @@
 
 
-package org.ireader.core_api.http
+package org.ireader.core_api.http.impl
 
 import app.cash.quickjs.QuickJs
+import org.ireader.core_api.http.main.JS
 import java.io.Closeable
+
+
+
 
 /**
  * An implementation of [JS] to execute JavaScript code backed by the quickjs library.
  */
-class JS internal constructor(private val engine: QuickJs) : Closeable {
+class JSImpl internal constructor(private val engine: QuickJs) : Closeable, JS {
 
     /**
      * Evaluates the given JavaScript [script] and returns its result as [String] or throws an
      * exception.
      */
-    fun evaluateAsString(script: String): String {
+    override fun evaluateAsString(script: String): String {
         return engine.evaluate(script) as String
     }
 
     /**
      * Evaluates the given JavaScript [script] and returns its result as [Int] or throws an exception.
      */
-    fun evaluateAsInt(script: String): Int {
+    override fun evaluateAsInt(script: String): Int {
         return engine.evaluate(script) as Int
     }
 
@@ -29,7 +33,7 @@ class JS internal constructor(private val engine: QuickJs) : Closeable {
      * Evaluates the given JavaScript [script] and returns its result as [Double] or throws an
      * exception.
      */
-    fun evaluateAsDouble(script: String): Double {
+    override fun evaluateAsDouble(script: String): Double {
         return engine.evaluate(script) as Double
     }
 
@@ -37,7 +41,7 @@ class JS internal constructor(private val engine: QuickJs) : Closeable {
      * Evaluates the given JavaScript [script] and returns its result as [Boolean] or throws an
      * exception.
      */
-    fun evaluateAsBoolean(script: String): Boolean {
+    override fun evaluateAsBoolean(script: String): Boolean {
         return engine.evaluate(script) as Boolean
     }
 

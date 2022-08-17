@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.ExperimentalMaterialApi
@@ -46,7 +45,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -106,9 +104,6 @@ fun ScreenContent() {
     val vm: ScreenContentViewModel = hiltViewModel()
     val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior(topAppBarState) }
 
-    val scrollableTabsHeight = LocalDensity.current.run {
-        org.ireader.components.NavigationBarTokens.ContainerHeight + (if (scrollBehavior.state.offset == scrollBehavior.state.offsetLimit) scrollBehavior.state.offset * 2 else scrollBehavior.state.offset).toDp()
-    }
     val (requestedHideBottomNav, requestHideBottomNav) = remember { mutableStateOf(false) }
     val (requestedHideSystemNavBar, requestHideSystemNavBar) = remember { mutableStateOf(false) }
     val (requestedHideSystemStatusBar, requestHideSystemStatusBar) = remember { mutableStateOf(false) }
@@ -138,7 +133,7 @@ fun ScreenContent() {
 
     DisposableEffect(navBackStackEntry) {
         onDispose {
-            scrollBehavior.state.offset = 0F
+            scrollBehavior.state.offsetLimit = 0F
             requestHideBottomNav(false)
             requestHideSystemStatusBar(false)
             requestHideSystemNavBar(false)
@@ -277,7 +272,7 @@ fun ScreenContent() {
                                 exit = slideOutVertically(targetOffsetY = { it })
                             ) {
                                 NavigationBar(
-                                    modifier = Modifier.height(scrollableTabsHeight),
+                                    modifier = Modifier,
                                     containerColor = AppColors.current.bars,
                                     contentColor = AppColors.current.onBars,
                                     tonalElevation = 0.dp,
@@ -295,7 +290,7 @@ fun ScreenContent() {
                                                 Icon(
                                                     bottomNavDestination.icon,
                                                     contentDescription = null,
-                                                    tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
+                                                    tint = if (isSelected) androidx.compose.material3.MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
                                                 )
                                             },
                                             label = {
@@ -417,9 +412,10 @@ fun IModalDrawer(
             drawerContent = {
                 sheetContent()
             },
-            drawerContainerColor = MaterialTheme.colorScheme.surface,
-            drawerContentColor = MaterialTheme.colorScheme.onSurface,
-            content = content
+            scrimColor = androidx.compose.material3.MaterialTheme.colorScheme.surface,
+
+            content = content,
+
         )
     } else {
         content()

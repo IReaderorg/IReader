@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.FlipToBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +34,7 @@ import org.ireader.components.reusable_composable.DropDownMenuItem
 import org.ireader.core_ui.asString
 import org.ireader.ui_downloader.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DownloaderTopAppBar(
     state: DownloadState,
@@ -77,7 +79,7 @@ fun DownloaderTopAppBar(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun RegularTopBar(
     onPopBackStack: () -> Unit,
@@ -128,6 +130,7 @@ private fun RegularTopBar(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditModeTopAppBar(
     selectionSize: Int,

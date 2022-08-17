@@ -10,6 +10,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.ireader.core_api.http.impl.getHtml
+import org.ireader.core_api.http.impl.setDefaultSettings
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 

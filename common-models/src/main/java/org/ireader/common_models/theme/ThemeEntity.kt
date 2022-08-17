@@ -63,6 +63,8 @@ data class CustomColorScheme(
     val errorContainer: Int,
     val onErrorContainer: Int,
     val outline: Int,
+    val outlineVariant: Int,
+    val scrim: Int,
 )
 
 private fun Int.toArgColor(): Color {
@@ -129,7 +131,9 @@ fun ColorScheme.toCustomColorScheme(): CustomColorScheme {
         outline = this.outline.toArgb(),
         surfaceVariant = this.surfaceVariant.toArgb(),
         tertiary = this.tertiary.toArgb(),
-        tertiaryContainer = this.tertiaryContainer.toArgb()
+        tertiaryContainer = this.tertiaryContainer.toArgb(),
+        scrim = 0,
+        outlineVariant = 0
     )
 }
 

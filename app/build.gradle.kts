@@ -155,6 +155,9 @@ dependencies {
     implementation(androidx.work.runtime)
     implementation(commonLib.hilt.worker)
 
+    implementation(commonLib.jsoup)
+    testImplementation(commonLib.ktor.core.cio)
+
     implementation(composeLib.compose.runtime)
 
     /** Room **/
@@ -163,6 +166,7 @@ dependencies {
     kapt(commonLib.room.compiler)
 
     testImplementation(test.bundles.common)
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
     testImplementation(commonLib.hilt.androidtest)
     testImplementation(commonLib.room.testing)
     androidTestImplementation(commonLib.hilt.androidtest)

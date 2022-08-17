@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -27,6 +28,7 @@ import org.ireader.components.reusable_composable.AppTextField
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.ui_chapter_detail.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChapterDetailTopAppBar(
     state: ChapterDetailViewModel,
@@ -64,7 +66,7 @@ fun ChapterDetailTopAppBar(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun RegularChapterDetailTopAppBar(
     vm: ChapterDetailViewModel,
@@ -136,6 +138,7 @@ fun RegularChapterDetailTopAppBar(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditModeChapterDetailTopAppBar(
     selectionSize: Int,

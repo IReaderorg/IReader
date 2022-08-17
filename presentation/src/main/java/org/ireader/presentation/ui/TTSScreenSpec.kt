@@ -174,12 +174,13 @@ object TTSScreenSpec : ScreenSpec {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun BottomAppBar(controller: Controller) {
         val vm: TTSViewModel = hiltViewModel(controller.navBackStackEntry)
         val context = LocalContext.current
         val scrollableTabsHeight = LocalDensity.current.run {
-            org.ireader.components.NavigationBarTokens.ContainerHeight + (if (controller.scrollBehavior.state.offset == controller.scrollBehavior.state.offsetLimit) controller.scrollBehavior.state.offset * 2 else controller.scrollBehavior.state.offset).toDp()
+            org.ireader.components.NavigationBarTokens.ContainerHeight + (if (controller.scrollBehavior.state.offset == controller.scrollBehavior.state.offsetLimit) controller.scrollBehavior.state.offset * 2 else controller.scrollBehavior.state.offsetLimit).toDp()
         }
         CustomizeAnimateVisibility(visible = !vm.fullScreenMode, goUp = false) {
             androidx.compose.material3.BottomAppBar(

@@ -1,4 +1,4 @@
-package org.ireader.core_api.http
+package org.ireader.core_api.http.impl
 
 import android.content.Context
 import io.ktor.client.HttpClient
@@ -10,15 +10,22 @@ import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.serialization.gson.gson
 import okhttp3.Cache
 import okhttp3.OkHttpClient
+import org.ireader.core_api.http.CloudflareInterceptor
+import org.ireader.core_api.http.UserAgentInterceptor
+import org.ireader.core_api.http.WebViewCookieJar
+import org.ireader.core_api.http.main.BrowseEngine
+import org.ireader.core_api.http.main.HttpClients
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-class HttpClients(
+
+
+class HttpClientsImpl(
     context: Context,
     browseEngine: BrowseEngine,
     cookiesStorage: CookiesStorage,
     webViewCookieJar: WebViewCookieJar
-) {
+) : HttpClients {
 
     private val cache = run {
         val dir = File(context.cacheDir, "network_cache")
@@ -35,12 +42,12 @@ class HttpClients(
         .callTimeout(2, TimeUnit.MINUTES)
         .addInterceptor(UserAgentInterceptor())
 
-    val browser = browseEngine
+    override val browser = browseEngine
 
-    val default = HttpClient(OkHttp) {
+    override val default = HttpClient(OkHttp) {
         BrowserUserAgent()
         engine {
-            preconfigured = this@HttpClients.basicClient.cache(cache).build()
+            preconfigured = this@HttpClientsImpl.basicClient.cache(cache).build()
         }
         install(ContentNegotiation) {
             gson()
@@ -49,10 +56,10 @@ class HttpClients(
             storage = cookiesStorage
         }
     }
-    val cloudflareClient = HttpClient(OkHttp) {
+    override val cloudflareClient = HttpClient(OkHttp) {
         BrowserUserAgent()
         engine {
-            preconfigured = this@HttpClients.basicClient.addInterceptor(
+            preconfigured = this@HttpClientsImpl.basicClient.addInterceptor(
                 CloudflareInterceptor(
                     context,
                     cookieJar

@@ -5,7 +5,7 @@ import io.ktor.client.request.get
 import org.ireader.common_models.update_service_models.Release
 import org.ireader.common_resources.github_api_url
 import org.ireader.common_resources.repo_url
-import org.ireader.core_api.http.HttpClients
+import org.ireader.core_api.http.main.HttpClients
 import javax.inject.Inject
 
 class UpdateApi @Inject constructor(

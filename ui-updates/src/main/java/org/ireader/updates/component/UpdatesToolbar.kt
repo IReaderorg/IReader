@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.FlipToBack
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -22,6 +23,7 @@ import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.ui_updates.R
 import org.ireader.updates.viewmodel.UpdateState
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpdatesToolbar(
     state: UpdateState,
@@ -54,6 +56,7 @@ fun UpdatesToolbar(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun UpdatesSelectionToolbar(
     selectionSize: Int,
@@ -81,6 +84,7 @@ private fun UpdatesSelectionToolbar(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpdatesRegularToolbar(
     onClickRefresh: () -> Unit,

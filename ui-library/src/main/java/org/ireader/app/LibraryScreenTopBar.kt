@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -29,7 +30,7 @@ import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.core_ui.ui.DEFAULT_ELEVATION
 import org.ireader.ui_library.R
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryScreenTopBar(
     state: LibraryViewModel,
@@ -65,7 +66,9 @@ fun LibraryScreenTopBar(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class,
+    ExperimentalMaterial3Api::class
+)
 @Composable
 private fun RegularTopBar(
     vm: LibraryState,
@@ -155,6 +158,7 @@ private fun RegularTopBar(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditModeTopAppBar(
     selectionSize: Int,

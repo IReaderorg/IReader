@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -32,6 +33,7 @@ import org.ireader.core_api.source.model.Filter
 import org.ireader.explore.viewmodel.ExploreState
 import org.ireader.ui_explore.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BrowseTopAppBar(
     state: ExploreState,

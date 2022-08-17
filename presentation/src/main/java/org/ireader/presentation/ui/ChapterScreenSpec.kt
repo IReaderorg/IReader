@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.TextButton
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -22,11 +23,11 @@ import androidx.navigation.NamedNavArgument
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
-import org.ireader.components.Controller
 import org.ireader.chapterDetails.ChapterDetailScreen
 import org.ireader.chapterDetails.ChapterDetailTopAppBar
 import org.ireader.chapterDetails.ChapterScreenBottomTabComposable
 import org.ireader.chapterDetails.viewmodel.ChapterDetailViewModel
+import org.ireader.components.Controller
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.domain.ui.NavigationArgs
@@ -50,7 +51,7 @@ object ChapterScreenSpec : ScreenSpec {
         return "chapter_detail_route/$bookId/$sourceId"
     }
 
-    @OptIn(ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
     @Composable
     override fun TopBar(
         controller: Controller

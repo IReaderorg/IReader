@@ -2,7 +2,7 @@ package org.ireader.domain.use_cases.fonts
 
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import org.ireader.core_api.http.HttpClients
+import org.ireader.core_api.http.main.HttpClients
 import org.jsoup.Jsoup
 import javax.inject.Inject
 

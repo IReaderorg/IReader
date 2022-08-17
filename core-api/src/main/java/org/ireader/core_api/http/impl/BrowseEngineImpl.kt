@@ -1,4 +1,4 @@
-package org.ireader.core_api.http
+package org.ireader.core_api.http.impl
 
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
@@ -17,12 +17,20 @@ import kotlinx.coroutines.withContext
 import okhttp3.Cookie
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.ireader.core_api.http.WebViewCookieJar
+import org.ireader.core_api.http.WebViewManger
+import org.ireader.core_api.http.main.BrowseEngine
 import org.ireader.core_api.log.Log
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.util.concurrent.TimeoutException
 
-class BrowseEngine(private val webViewManger: WebViewManger, private val webViewCookieJar: WebViewCookieJar) {
+
+
+
+
+class BrowseEngineImpl(private val webViewManger: WebViewManger, private val webViewCookieJar: WebViewCookieJar) :
+    BrowseEngine {
     /**
      * this function
      * @param url  the url of page
@@ -32,12 +40,12 @@ class BrowseEngine(private val webViewManger: WebViewManger, private val webView
      * @param userAgent  the userAgent of request
      * @return [Result]
      */
-    suspend fun fetch(
+    override suspend fun fetch(
         url: String,
-        selector: String? = null,
-        headers: Headers? = null,
-        timeout: Long = 50000L,
-        userAgent: String = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36",
+        selector: String?,
+        headers: Headers?,
+        timeout: Long,
+        userAgent: String,
     ): Result {
         var currentTime = 0L
         var html: Document = Document("No Data was Found")

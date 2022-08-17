@@ -24,6 +24,8 @@ import okhttp3.Request
 import okhttp3.Response
 import org.ireader.core_api.R
 import org.ireader.core_api.http.WebViewUtil.DEFAULT_USER_AGENT
+import org.ireader.core_api.http.impl.WebViewClientCompat
+import org.ireader.core_api.http.impl.setDefaultSettings
 import org.ireader.core_api.log.Log
 import java.io.IOException
 import java.util.concurrent.CountDownLatch

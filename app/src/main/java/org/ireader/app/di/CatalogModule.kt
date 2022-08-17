@@ -7,10 +7,11 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.plugins.cookies.CookiesStorage
 import org.ireader.common_data.repository.BookRepository
-import org.ireader.core_api.http.BrowseEngine
-import org.ireader.core_api.http.HttpClients
+import org.ireader.core_api.http.impl.BrowseEngineImpl
+import org.ireader.core_api.http.impl.HttpClientsImpl
 import org.ireader.core_api.http.WebViewCookieJar
 import org.ireader.core_api.http.WebViewManger
+import org.ireader.core_api.http.main.HttpClients
 import org.ireader.core_api.os.PackageInstaller
 import org.ireader.core_api.prefs.PreferenceStore
 import org.ireader.core_catalogs.CatalogPreferences
@@ -127,9 +128,9 @@ class CatalogModule {
          webViewManger: WebViewManger,
         webViewCookieJar: WebViewCookieJar,
     ): HttpClients {
-        return HttpClients(
+        return HttpClientsImpl(
             context,
-            BrowseEngine(webViewManger,webViewCookieJar),
+            BrowseEngineImpl(webViewManger,webViewCookieJar),
             cookiesStorage,
             webViewCookieJar
         )

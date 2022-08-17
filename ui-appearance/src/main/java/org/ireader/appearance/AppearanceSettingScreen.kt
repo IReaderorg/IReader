@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -98,96 +99,99 @@ fun AppearanceSettingScreen(
             }
         }
 
-    val items: State<List<Components>> = derivedStateOf {
-        listOf<Components>(
-            Components.Header(
-                text = "Theme",
-            ),
-            Components.Dynamic {
-                ChoicePreference(
-                    preference = vm.themeMode,
-                    choices = mapOf(
-                        PreferenceValues.ThemeMode.System to stringResource(id = R.string.follow_system_settings),
-                        PreferenceValues.ThemeMode.Light to stringResource(id = R.string.light),
-                        PreferenceValues.ThemeMode.Dark to stringResource(id = R.string.dark)
-                    ),
-                    title = stringResource(id = R.string.theme),
-                    subtitle = null,
-                    onValue = {
-                        vm.saveNightModePreferences(it)
-                    }
-                )
-            },
-            Components.Header(
-                text = "Preset themes",
-            ),
-            themeItem,
-            Components.Dynamic {
-                ColorPreference(
-                    preference = customizedColors.primaryState,
-                    title = "Color primary",
-                    subtitle = "Displayed most frequently across your app",
-                    unsetColor = MaterialTheme.colorScheme.primary,
-                    onChangeColor = {
-                        vm.isSavable = true
-                    },
-                    onRestToDefault = {
-                        vm.isSavable = false
-                    }
-                )
-            },
-            Components.Dynamic {
-                ColorPreference(
-                    preference = customizedColors.secondaryState,
-                    title = "Color secondary",
-                    subtitle = "Accents select parts of the UI",
-                    unsetColor = MaterialTheme.colorScheme.secondary,
-                    onChangeColor = {
-                        vm.isSavable = true
-                    },
-                    onRestToDefault = {
-                        vm.isSavable = false
-                    }
-                )
-            },
-            Components.Dynamic {
-                ColorPreference(
-                    preference = customizedColors.barsState,
-                    title = "Toolbar color",
-                    unsetColor = AppColors.current.bars,
-                    onChangeColor = {
-                        vm.isSavable = true
-                    },
-                    onRestToDefault = {
-                        vm.isSavable = false
-                    }
-                )
-            },
-            Components.Header(
-                text = "Timestamp",
-            ),
-            Components.Dynamic {
-                ChoicePreference(
-                    preference = vm.relativeTime,
-                    choices = vm.relativeTimes.associateWith { value ->
-                        when (value) {
-                            PreferenceValues.RelativeTime.Off -> context.getString(R.string.off)
-                            PreferenceValues.RelativeTime.Day -> context.getString(R.string.pref_relative_time_short)
-                            PreferenceValues.RelativeTime.Week -> context.getString(R.string.pref_relative_time_long)
-                            else -> context.getString(R.string.off)
+    val items: State<List<Components>> = remember {
+        derivedStateOf {
+            listOf<Components>(
+                Components.Header(
+                    text = "Theme",
+                ),
+                Components.Dynamic {
+                    ChoicePreference(
+                        preference = vm.themeMode,
+                        choices = mapOf(
+                            PreferenceValues.ThemeMode.System to stringResource(id = R.string.follow_system_settings),
+                            PreferenceValues.ThemeMode.Light to stringResource(id = R.string.light),
+                            PreferenceValues.ThemeMode.Dark to stringResource(id = R.string.dark)
+                        ),
+                        title = stringResource(id = R.string.theme),
+                        subtitle = null,
+                        onValue = {
+                            vm.saveNightModePreferences(it)
                         }
-                    },
-                    title = stringResource(id = R.string.pref_relative_format),
-                    subtitle = null,
-                )
-            },
-        )
+                    )
+                },
+                Components.Header(
+                    text = "Preset themes",
+                ),
+                themeItem,
+                Components.Dynamic {
+                    ColorPreference(
+                        preference = customizedColors.primaryState,
+                        title = "Color primary",
+                        subtitle = "Displayed most frequently across your app",
+                        unsetColor = MaterialTheme.colorScheme.primary,
+                        onChangeColor = {
+                            vm.isSavable = true
+                        },
+                        onRestToDefault = {
+                            vm.isSavable = false
+                        }
+                    )
+                },
+                Components.Dynamic {
+                    ColorPreference(
+                        preference = customizedColors.secondaryState,
+                        title = "Color secondary",
+                        subtitle = "Accents select parts of the UI",
+                        unsetColor = MaterialTheme.colorScheme.secondary,
+                        onChangeColor = {
+                            vm.isSavable = true
+                        },
+                        onRestToDefault = {
+                            vm.isSavable = false
+                        }
+                    )
+                },
+                Components.Dynamic {
+                    ColorPreference(
+                        preference = customizedColors.barsState,
+                        title = "Toolbar color",
+                        unsetColor = AppColors.current.bars,
+                        onChangeColor = {
+                            vm.isSavable = true
+                        },
+                        onRestToDefault = {
+                            vm.isSavable = false
+                        }
+                    )
+                },
+                Components.Header(
+                    text = "Timestamp",
+                ),
+                Components.Dynamic {
+                    ChoicePreference(
+                        preference = vm.relativeTime,
+                        choices = vm.relativeTimes.associateWith { value ->
+                            when (value) {
+                                PreferenceValues.RelativeTime.Off -> context.getString(R.string.off)
+                                PreferenceValues.RelativeTime.Day -> context.getString(R.string.pref_relative_time_short)
+                                PreferenceValues.RelativeTime.Week -> context.getString(R.string.pref_relative_time_long)
+                                else -> context.getString(R.string.off)
+                            }
+                        },
+                        title = stringResource(id = R.string.pref_relative_format),
+                        subtitle = null,
+                    )
+                },
+            )
+        }
     }
+
 
     SetupSettingComponents(scaffoldPadding = scaffoldPaddingValues, items = items.value)
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun ThemeItem(
     theme: Theme,
