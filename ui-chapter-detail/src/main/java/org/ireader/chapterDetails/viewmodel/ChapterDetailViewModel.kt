@@ -68,14 +68,6 @@ class ChapterDetailViewModel @Inject constructor(
         }
     }
 
-    fun onEvent(event: ChapterDetailEvent) {
-        when (event) {
-            is ChapterDetailEvent.ToggleOrder -> {
-                this.chapters = this.chapters.reversed()
-                toggleAsc()
-            }
-        }
-    }
 
     fun getLastReadChapter(book: Book) {
         viewModelScope.launch {
@@ -193,23 +185,6 @@ class ChapterDetailViewModel @Inject constructor(
             }
         }
     }
-
-//    private
-//    var getChapterJob: Job? = null
-//    fun getLocalChaptersByPaging(isAsc: Boolean = true) {
-//        val book = state.book
-//        getChapterJob?.cancel()
-//        getChapterJob = viewModelScope.launch {
-//            if (book != null) {
-//                getChapterUseCase.subscribeChaptersByBookId(
-//                    bookId = book.id,
-//                    isAsc = isAsc,
-//                ).collect { chapters ->
-//                    this@ChapterDetailViewModel.chapters = chapters.distinctBy { it.id }
-//                }
-//            }
-//        }
-//    }
 
     fun insertChapters(chapters: List<Chapter>) {
         viewModelScope.launch(Dispatchers.IO) {

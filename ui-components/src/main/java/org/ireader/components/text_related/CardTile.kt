@@ -1,4 +1,4 @@
-package org.ireader.core_ui.ui_components
+package org.ireader.components.text_related
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

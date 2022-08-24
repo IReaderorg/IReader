@@ -3,33 +3,31 @@ package org.ireader.presentation.ui
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.height
+import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.ireader.components.Controller
 import org.ireader.bookDetails.BookDetailScreen
 import org.ireader.bookDetails.BookDetailTopAppBar
-import org.ireader.bookDetails.components.BookDetailScreenBottomBar
 import org.ireader.bookDetails.components.ChapterCommandBottomSheet
+import org.ireader.bookDetails.components.ChapterScreenBottomTabComposable
 import org.ireader.bookDetails.viewmodel.BookDetailViewModel
 import org.ireader.common_extensions.async.viewModelIOCoroutine
 import org.ireader.common_extensions.findComponentActivity
@@ -38,6 +36,7 @@ import org.ireader.common_models.entities.Book
 import org.ireader.common_resources.LAST_CHAPTER
 import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
+import org.ireader.components.Controller
 import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.HttpSource
 import org.ireader.domain.ui.NavigationArgs
@@ -57,7 +56,6 @@ object BookDetailScreenSpec : ScreenSpec {
             NavigationArgs.sourceId,
             NavigationArgs.transparentStatusBar,
             NavigationArgs.showModalSheet,
-            NavigationArgs.haveBottomBar,
         )
 
     override val deepLinks: List<NavDeepLink> = listOf(
@@ -80,6 +78,17 @@ object BookDetailScreenSpec : ScreenSpec {
         val catalog = vm.catalogSource
         val book = vm.book
         val context = LocalContext.current
+        val state = controller.topScrollState
+        val decay = rememberSplineBasedDecay<Float>()
+        val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(decay, state)
+
+        DisposableEffect(key1 = true ) {
+            controller.setScrollBehavior(scrollBehavior)
+            onDispose {
+                val defaultBehavior = controller.scrollBehavior
+                controller.setScrollBehavior(defaultBehavior)
+            }
+        }
         val onShare =
             rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
                 if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
@@ -135,74 +144,106 @@ object BookDetailScreenSpec : ScreenSpec {
                         onShare.launch(it)
                     }
                 }
-            }
+            },
+            state = vm,
+            onSelectBetween = {
+                val ids: List<Long> =
+                    vm.chapters.map { it.id }
+                        .filter { it in vm.selection }.distinct().sortedBy { it }.let {
+                            val list = mutableListOf<Long>()
+                            val min = it.minOrNull() ?: 0
+                            val max = it.maxOrNull() ?: 0
+                            for (id in min..max) {
+                                list.add(id)
+                            }
+                            list
+                        }
+                vm.selection.clear()
+                vm.selection.addAll(ids)
+            },
+            onClickSelectAll = {
+                vm.selection.clear()
+                vm.selection.addAll(vm.chapters.map { it.id })
+                vm.selection.distinct()
+            },
+            onClickInvertSelection = {
+                val ids: List<Long> =
+                    vm.chapters.map { it.id }
+                        .filterNot { it in vm.selection }.distinct()
+                vm.selection.clear()
+                vm.selection.addAll(ids)
+            },
+            onClickCancelSelection = {
+                vm.selection.clear()
+            },
+            paddingValues = controller.scaffoldPadding
         )
     }
 
-    @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
-    @Composable
-    override fun BottomAppBar(
-        controller: Controller
-    ) {
-        val vm: BookDetailViewModel = hiltViewModel(controller.navBackStackEntry)
-        val detailState = vm.state
-        val chapterState = vm.chapterState
-        val book = vm.book
-        val catalog = vm.catalogSource
-        val scope = rememberCoroutineScope()
-        val context = LocalContext.current
+//    @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+//    @Composable
+//    override fun BottomAppBar(
+//        controller: Controller
+//    ) {
+//        val vm: BookDetailViewModel = hiltViewModel(controller.navBackStackEntry)
+//        val detailState = vm.state
+//        val chapterState = vm.chapterState
+//        val book = vm.book
+//        val catalog = vm.catalogSource
+//        val scope = rememberCoroutineScope()
+//        val context = LocalContext.current
+//
+//        AnimatedVisibility(
+//            visible = true,
+//            enter = slideInVertically(initialOffsetY = { it }),
+//            exit = slideOutVertically(targetOffsetY = { it })
+//        ) {
+//            if (book != null) {
+//                BookDetailScreenBottomBar(
+//                    onToggleInLibrary = {
+//                        vm.toggleInLibrary(book = book)
+//                    },
+//                    isInLibrary = book.favorite,
+//                    onDownload = {
+//                        vm.startDownloadService(book = book)
+//                    },
+//                    isRead = chapterState.haveBeenRead,
+//                    onRead = {
+//                        if (catalog != null) {
+//                            if (vm.chapters.any { it.read } && vm.chapters.isNotEmpty()) {
+//                                controller.navController.navigate(
+//                                    ReaderScreenSpec.buildRoute(
+//                                        bookId = book.id,
+//                                        sourceId = catalog.sourceId,
+//                                        chapterId = LAST_CHAPTER,
+//                                    )
+//                                )
+//                            } else if (vm.chapters.isNotEmpty()) {
+//                                controller.navController.navigate(
+//                                    ReaderScreenSpec.buildRoute(
+//                                        bookId = book.id,
+//                                        sourceId = catalog.sourceId,
+//                                        chapterId = vm.chapters.first().id,
+//                                    )
+//                                )
+//                            } else {
+//                                scope.launch {
+//                                    vm.showSnackBar(UiText.StringResource(R.string.no_chapter_is_available))
+//                                }
+//                            }
+//                        } else {
+//                            scope.launch {
+//                                vm.showSnackBar(UiText.StringResource(R.string.source_not_available))
+//                            }
+//                        }
+//                    },
+//                    isInLibraryInProgress = detailState.inLibraryLoading
+//                )
+//            }
+//        }
+//    }
 
-        AnimatedVisibility(
-            visible = true,
-            enter = slideInVertically(initialOffsetY = { it }),
-            exit = slideOutVertically(targetOffsetY = { it })
-        ) {
-            if (book != null) {
-                BookDetailScreenBottomBar(
-                    onToggleInLibrary = {
-                        vm.toggleInLibrary(book = book)
-                    },
-                    isInLibrary = book.favorite,
-                    onDownload = {
-                        vm.startDownloadService(book = book)
-                    },
-                    isRead = chapterState.haveBeenRead,
-                    onRead = {
-                        if (catalog != null) {
-                            if (vm.chapters.any { it.read } && vm.chapters.isNotEmpty()) {
-                                controller.navController.navigate(
-                                    ReaderScreenSpec.buildRoute(
-                                        bookId = book.id,
-                                        sourceId = catalog.sourceId,
-                                        chapterId = LAST_CHAPTER,
-                                    )
-                                )
-                            } else if (vm.chapters.isNotEmpty()) {
-                                controller.navController.navigate(
-                                    ReaderScreenSpec.buildRoute(
-                                        bookId = book.id,
-                                        sourceId = catalog.sourceId,
-                                        chapterId = vm.chapters.first().id,
-                                    )
-                                )
-                            } else {
-                                scope.launch {
-                                    vm.showSnackBar(UiText.StringResource(R.string.no_chapter_is_available))
-                                }
-                            }
-                        } else {
-                            scope.launch {
-                                vm.showSnackBar(UiText.StringResource(R.string.source_not_available))
-                            }
-                        }
-                    },
-                    isInLibraryInProgress = detailState.inLibraryLoading
-                )
-            }
-        }
-    }
-
-    @OptIn(ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
     @ExperimentalMaterial3Api
     @Composable
     override fun BottomModalSheet(
@@ -214,34 +255,56 @@ object BookDetailScreenSpec : ScreenSpec {
         val catalog = vm.catalogSource
 
         detailState.source.let { source ->
-            if (source is CatalogSource) {
-                ChapterCommandBottomSheet(
-                    onFetch = {
-                        source.let { source ->
-                            vm.viewModelIOCoroutine {
-                                if (book != null) {
-                                    vm.getRemoteChapterDetail(
-                                        book,
-                                        catalog,
-                                        vm.modifiedCommands.filter { !it.isDefaultValue() }
-                                    )
+            if (vm.chapterMode) {
+
+                val pagerState = rememberPagerState()
+                ChapterScreenBottomTabComposable(
+                    pagerState = pagerState,
+                    filters = vm.filters.value,
+                    toggleFilter = {
+                        vm.toggleFilter(it.type)
+                    },
+                    onSortSelected = {
+                        vm.toggleSort(it.type)
+                    },
+                    sortType = vm.sorting.value,
+                    isSortDesc = vm.isAsc,
+                    onLayoutSelected = { layout ->
+                        vm.layout = layout
+                    },
+                    layoutType = vm.layout,
+                    vm = vm
+                )
+            } else {
+                if (source is CatalogSource) {
+                    ChapterCommandBottomSheet(
+                        onFetch = {
+                            source.let { source ->
+                                vm.viewModelIOCoroutine {
+                                    if (book != null) {
+                                        vm.getRemoteChapterDetail(
+                                            book,
+                                            catalog,
+                                            vm.modifiedCommands.filter { !it.isDefaultValue() }
+                                        )
+                                    }
                                 }
                             }
-                        }
-                    },
-                    onReset = {
-                        source.let { source ->
-                            vm.modifiedCommands = source.getCommands()
-                        }
-                    },
-                    onUpdate = {
-                        vm.modifiedCommands = it
-                    },
-                    detailState.modifiedCommands
-                )
+                        },
+                        onReset = {
+                            source.let { source ->
+                                vm.modifiedCommands = source.getCommands()
+                            }
+                        },
+                        onUpdate = {
+                            vm.modifiedCommands = it
+                        },
+                        detailState.modifiedCommands
+                    )
+                }
             }
+
         }
-        Box(modifier = Modifier.height(1.dp))
     }
 
     @OptIn(
@@ -270,14 +333,17 @@ object BookDetailScreenSpec : ScreenSpec {
         val source = state.catalogSource?.source
         val catalog = state.catalogSource
         val scope = rememberCoroutineScope()
+        val chapters = vm.getChapters(book?.id)
+        val scrollState = rememberLazyListState();
 
         DisposableEffect(key1 = true) {
+            controller.requestedHideSystemStatusBar(true)
             onDispose {
                 controller.requestedHideSystemStatusBar(false)
             }
         }
-        LaunchedEffect(true) {
-            controller.requestedHideSystemStatusBar(true)
+        LaunchedEffect(vm.hasSelection) {
+            controller.requestedHideSystemStatusBar(!vm.hasSelection)
         }
 
         BookDetailScreen(
@@ -301,7 +367,7 @@ object BookDetailScreenSpec : ScreenSpec {
                 }
             },
             book = book ?: Book(key = "", sourceId = 0, title = ""),
-            detailState = vm,
+            vm = vm,
             onTitle = {
                 try {
                     controller.navController.navigate(GlobalSearchScreenSpec.buildRoute(query = it))
@@ -309,11 +375,92 @@ object BookDetailScreenSpec : ScreenSpec {
                 }
             },
             snackBarHostState = controller.snackBarHostState,
-            chapterState = vm,
             modalBottomSheetState = controller.sheetState,
             isSummaryExpanded = vm.expandedSummary,
             source = vm.source,
-            appbarPadding = controller.scaffoldPadding.calculateTopPadding()
+            appbarPadding = controller.scaffoldPadding.calculateTopPadding(),
+            onItemClick = { chapter ->
+                if (vm.selection.isEmpty()) {
+                    if (book != null) {
+                        controller.navController.navigate(
+                            ReaderScreenSpec.buildRoute(
+                                bookId = book.id,
+                                sourceId = book.sourceId,
+                                chapterId = chapter.id,
+                            )
+                        )
+                    }
+                } else {
+                    when (chapter.id) {
+                        in vm.selection -> {
+                            vm.selection.remove(chapter.id)
+                        }
+                        else -> {
+                            vm.selection.add(chapter.id)
+                        }
+                    }
+                }
+            },
+            onLongItemClick = { chapter ->
+                when (chapter.id) {
+                    in vm.selection -> {
+                        vm.selection.remove(chapter.id)
+                    }
+                    else -> {
+                        vm.selection.add(chapter.id)
+                    }
+                }
+            },
+            onRead = {
+                if (catalog != null && book != null) {
+                    if (vm.chapters.any { it.read } && vm.chapters.isNotEmpty()) {
+                        controller.navController.navigate(
+                            ReaderScreenSpec.buildRoute(
+                                bookId = book.id,
+                                sourceId = catalog.sourceId,
+                                chapterId = LAST_CHAPTER,
+                            )
+                        )
+                    } else if (vm.chapters.isNotEmpty()) {
+                        controller.navController.navigate(
+                            ReaderScreenSpec.buildRoute(
+                                bookId = book.id,
+                                sourceId = catalog.sourceId,
+                                chapterId = vm.chapters.first().id,
+                            )
+                        )
+                    } else {
+                        scope.launch {
+                            vm.showSnackBar(UiText.StringResource(R.string.no_chapter_is_available))
+                        }
+                    }
+                } else {
+                    scope.launch {
+                        vm.showSnackBar(UiText.StringResource(R.string.source_not_available))
+                    }
+                }
+            },
+            onSortClick = {
+                scope.launch {
+                    vm.chapterMode = true
+                    controller.sheetState.show()
+                }
+            },
+            chapters = chapters,
+            scrollState = scrollState,
+            onMap = {
+                scope.launch {
+                    try {
+                        scrollState?.scrollToItem(
+                            vm.getLastChapterIndex(),
+                            -scrollState.layoutInfo.viewportEndOffset / 2
+                        )
+                    } catch (e: Throwable) {
+                    }
+                }
+            }
         )
     }
+
+
 }

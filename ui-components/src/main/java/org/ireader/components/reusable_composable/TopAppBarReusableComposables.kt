@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -263,6 +264,7 @@ fun TopAppBarBackButton(tint: Color = MaterialTheme.colorScheme.onSurface, onCli
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppTextField(
+    modifier: Modifier= Modifier,
     query: String,
     onValueChange: (value: String) -> Unit,
     onConfirm: () -> Unit,
@@ -274,7 +276,7 @@ fun AppTextField(
     }, onDone = { onConfirm() }),
 ) {
     val focusManager = LocalFocusManager.current
-    Box(contentAlignment = Alignment.CenterStart) {
+    Box(contentAlignment = Alignment.CenterStart, modifier = modifier) {
         if (query.isBlank() && mode != 2) {
             Text(
                 modifier = if (mode == 1) Modifier.padding(horizontal = 16.dp) else Modifier.padding(horizontal = 0.dp),
@@ -296,6 +298,8 @@ fun AppTextField(
                 keyboardActions = keyboardActions,
                 singleLine = true,
                 textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
+
 
             )
         } else if (mode == 1) {

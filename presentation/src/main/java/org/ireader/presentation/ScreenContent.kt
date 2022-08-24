@@ -102,7 +102,8 @@ fun ScreenContent() {
 
     val topAppBarState = rememberTopAppBarScrollState()
     val vm: ScreenContentViewModel = hiltViewModel()
-    val scrollBehavior = remember { TopAppBarDefaults.pinnedScrollBehavior(topAppBarState) }
+
+    val (scrollBehavior, setScrollBehavior) = remember { mutableStateOf(TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)) }
 
     val (requestedHideBottomNav, requestHideBottomNav) = remember { mutableStateOf(false) }
     val (requestedHideSystemNavBar, requestHideSystemNavBar) = remember { mutableStateOf(false) }
@@ -162,7 +163,8 @@ fun ScreenContent() {
                         requestedHideSystemStatusBar = requestHideSystemStatusBar,
                         requestHideSystemNavbar = requestHideSystemNavBar,
                         requestedCustomSystemColor = requestedCustomColor,
-                        scrollBehavior = scrollBehavior
+                        scrollBehavior = scrollBehavior,
+                        topScrollState = topAppBarState
                     )
                 )
             }
@@ -184,7 +186,8 @@ fun ScreenContent() {
                             requestedHideSystemStatusBar = requestHideSystemStatusBar,
                             requestHideSystemNavbar = requestHideSystemNavBar,
                             requestedCustomSystemColor = requestedCustomColor,
-                            scrollBehavior = scrollBehavior
+                            scrollBehavior = scrollBehavior,
+                            topScrollState = topAppBarState
                         )
                     )
                 }
@@ -219,7 +222,9 @@ fun ScreenContent() {
                                             requestedHideSystemStatusBar = requestHideSystemStatusBar,
                                             requestHideSystemNavbar = requestHideSystemNavBar,
                                             requestedCustomSystemColor = requestedCustomColor,
-                                            scrollBehavior = scrollBehavior
+                                            scrollBehavior = scrollBehavior,
+                                            setScrollBehavior = setScrollBehavior,
+                                            topScrollState = topAppBarState
                                         )
                                     )
                                 }
@@ -242,7 +247,8 @@ fun ScreenContent() {
                                                 requestedHideSystemStatusBar = requestHideSystemStatusBar,
                                                 requestHideSystemNavbar = requestHideSystemNavBar,
                                                 requestedCustomSystemColor = requestedCustomColor,
-                                                scrollBehavior = scrollBehavior
+                                                scrollBehavior = scrollBehavior,
+                                                topScrollState = topAppBarState
                                             )
                                         )
                                     }
@@ -260,7 +266,8 @@ fun ScreenContent() {
                                             requestedHideSystemStatusBar = requestHideSystemStatusBar,
                                             requestHideSystemNavbar = requestHideSystemNavBar,
                                             requestedCustomSystemColor = requestedCustomColor,
-                                            scrollBehavior = scrollBehavior
+                                            scrollBehavior = scrollBehavior,
+                                            topScrollState = topAppBarState
                                         )
                                     )
                                 }
@@ -356,7 +363,8 @@ fun ScreenContent() {
                                             requestedHideSystemStatusBar = requestHideSystemStatusBar,
                                             requestHideSystemNavbar = requestHideSystemNavBar,
                                             requestedCustomSystemColor = requestedCustomColor,
-                                            scrollBehavior = scrollBehavior
+                                            scrollBehavior = scrollBehavior,
+                                            topScrollState = topAppBarState
                                         )
                                     )
                                 }

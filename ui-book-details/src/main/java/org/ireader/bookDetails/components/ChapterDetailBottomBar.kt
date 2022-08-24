@@ -1,4 +1,4 @@
-package org.ireader.chapterDetails
+package org.ireader.bookDetails.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,8 +20,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -34,12 +37,14 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import kotlinx.coroutines.launch
-import org.ireader.chapterDetails.viewmodel.ChapterDetailViewModel
+import org.ireader.bookDetails.viewmodel.BookDetailViewModel
+import org.ireader.bookDetails.viewmodel.ChapterSort
+import org.ireader.bookDetails.viewmodel.ChaptersFilters
 import org.ireader.components.components.component.pagerTabIndicatorOffset
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.preferences.ChapterDisplayMode
 import org.ireader.core_ui.ui.Colour.contentColor
-import org.ireader.ui_chapter_detail.R
+import org.ireader.ui_book_details.R
 
 @ExperimentalPagerApi
 @ExperimentalMaterialApi
@@ -83,7 +88,7 @@ fun TabsContent(
     onSortSelected: (ChapterSort) -> Unit,
     layoutType: ChapterDisplayMode,
     onLayoutSelected: (ChapterDisplayMode) -> Unit,
-    vm: ChapterDetailViewModel
+    vm: BookDetailViewModel
 ) {
     HorizontalPager(
         count = tabs.size,
@@ -119,7 +124,7 @@ private fun LazyListScope.FiltersPage(
 ) {
     items(filters) { (filter, state) ->
         ClickableRow(onClick = { onClick(filter) }) {
-            androidx.compose.material3.TriStateCheckbox(
+            TriStateCheckbox(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 state = state.asToggleableState(),
                 onClick = { onClick(filter) }
@@ -162,7 +167,7 @@ private fun LazyListScope.SortPage(
                 } else {
                     Icons.Default.KeyboardArrowDown
                 }
-                androidx.compose.material3.Icon(
+                Icon(
                     icon,
                     null,
                     iconModifier,
@@ -189,7 +194,7 @@ private fun LazyListScope.DispalyPage(
                 .background(MaterialTheme.colorScheme.background)
         ) {
             ClickableRow(onClick = { onLayoutSelected(layout) }) {
-                androidx.compose.material3.RadioButton(
+                RadioButton(
                     selected = selectedLayout == layout,
                     onClick = { onLayoutSelected(layout) },
                     modifier = Modifier.padding(horizontal = 15.dp)

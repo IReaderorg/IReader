@@ -48,6 +48,7 @@ dependencies {
     androidTestImplementation(composeLib.compose.testing)
     androidTestImplementation(composeLib.compose.composeTooling)
     debugImplementation(composeLib.compose.composeTooling)
+    debugImplementation(composeLib.compose.uiUtil)
 
     implementation(accompanist.systemUiController)
 

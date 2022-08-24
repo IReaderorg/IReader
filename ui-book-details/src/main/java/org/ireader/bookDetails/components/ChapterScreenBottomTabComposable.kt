@@ -1,4 +1,4 @@
-package org.ireader.chapterDetails
+package org.ireader.bookDetails.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,9 +9,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
-import org.ireader.chapterDetails.viewmodel.ChapterDetailViewModel
+import org.ireader.bookDetails.viewmodel.BookDetailViewModel
+import org.ireader.bookDetails.viewmodel.ChapterSort
+import org.ireader.bookDetails.viewmodel.ChaptersFilters
 import org.ireader.core_ui.preferences.ChapterDisplayMode
-import org.ireader.ui_chapter_detail.R
+import org.ireader.ui_book_details.R
 
 @ExperimentalMaterialApi
 @ExperimentalPagerApi
@@ -26,7 +28,7 @@ fun ChapterScreenBottomTabComposable(
     onSortSelected: (ChapterSort) -> Unit,
     layoutType: ChapterDisplayMode,
     onLayoutSelected: (ChapterDisplayMode) -> Unit,
-    vm: ChapterDetailViewModel
+    vm: BookDetailViewModel
 ) {
     val context = LocalContext.current
     val tabs = remember {
@@ -36,8 +38,6 @@ fun ChapterScreenBottomTabComposable(
             context.getString(R.string.display),
         )
     }
-
-    /** There is Some issue here were sheet content is not need , not sure why**/
     Column(modifier = modifier.fillMaxSize()) {
         Tabs(libraryTabs = tabs, pagerState = pagerState)
         TabsContent(
