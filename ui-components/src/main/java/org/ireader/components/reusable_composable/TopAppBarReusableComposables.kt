@@ -32,7 +32,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -43,7 +42,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.ireader.common_resources.UiText
 import org.ireader.ui_components.R
 
 @Composable
@@ -95,7 +93,7 @@ fun MidSizeTextComposable(
 @Composable
 fun SmallTextComposable(
     modifier: Modifier = Modifier,
-    text: UiText,
+    text: String,
     color: Color = Color.Unspecified,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
@@ -105,7 +103,7 @@ fun SmallTextComposable(
 ) {
     Text(
         modifier = modifier,
-        text = text.asString(LocalContext.current),
+        text = text,
         color = color,
         style = style ?: MaterialTheme.typography.labelSmall,
         fontWeight = fontWeight ?: FontWeight.SemiBold,

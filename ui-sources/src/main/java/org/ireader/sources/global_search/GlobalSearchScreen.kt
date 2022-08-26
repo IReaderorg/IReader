@@ -24,7 +24,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.entities.BaseBook
-import org.ireader.common_resources.UiText
 import org.ireader.components.list.layouts.BookImage
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.MidSizeTextComposable
@@ -110,7 +109,7 @@ fun GlobalSearchBookInfo(
                 horizontalAlignment = Alignment.Start
             ) {
                 MidSizeTextComposable(text = book.source.name, fontWeight = FontWeight.Bold)
-                SmallTextComposable(text = UiText.DynamicString(book.source.lang.uppercase()))
+                SmallTextComposable(text = book.source.lang.uppercase())
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 DotsFlashing(book.loading)

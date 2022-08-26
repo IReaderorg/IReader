@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.BookItem
-import org.ireader.common_resources.UiText
 import org.ireader.components.components.ShowLoading
 import org.ireader.components.list.LayoutComposable
 import org.ireader.components.reusable_composable.AppIconButton
@@ -256,7 +255,7 @@ private fun BoxScope.ExploreScreenErrorComposable(
                         onRefresh()
                     }
                 )
-                SmallTextComposable(text = UiText.StringResource(R.string.retry))
+                SmallTextComposable(text = stringResource(R.string.retry))
             }
             Column(
                 Modifier
@@ -273,7 +272,7 @@ private fun BoxScope.ExploreScreenErrorComposable(
                         }
                     )
                 }
-                SmallTextComposable(text = UiText.StringResource(R.string.open_in_webView))
+                SmallTextComposable(text = stringResource(R.string.open_in_webView))
             }
         }
     }

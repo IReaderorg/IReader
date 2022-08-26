@@ -72,6 +72,8 @@ class DownloaderService @AssistedInject constructor(
                 val inputtedBooksIds = inputData.getLongArray(DOWNLOADER_BOOKS_IDS)?.distinct()
                 val inputtedDownloaderMode = inputData.getBoolean(DOWNLOADER_MODE, false)
 
+                var tries = 0
+
                 val chapters: List<Chapter> = when {
                     inputtedBooksIds != null -> {
                         inputtedBooksIds.flatMap {
@@ -154,7 +156,11 @@ class DownloaderService @AssistedInject constructor(
                                             }
                                         },
                                         onError = { message ->
-                                            throw Exception(message?.asString(context))
+                                            tries++
+                                            if (tries > 3) {
+                                                throw Exception(message?.asString(context))
+                                            }
+
                                         }
                                     )
                                 }

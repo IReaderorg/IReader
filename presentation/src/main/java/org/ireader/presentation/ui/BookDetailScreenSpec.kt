@@ -109,7 +109,7 @@ object BookDetailScreenSpec : ScreenSpec {
         BookDetailTopAppBar(
             scrollBehavior = controller.scrollBehavior,
             onWebView = {
-                if (source != null && source is HttpSource && book != null)
+                if (source != null && source is HttpSource && book != null) {
                     controller.navController.navigate(
                         WebViewScreenSpec.buildRoute(
                             url = book.key,
@@ -120,6 +120,8 @@ object BookDetailScreenSpec : ScreenSpec {
                             enableBookFetch = true
                         )
                     )
+                }
+
             },
             onRefresh = {
                 scope.launch {
@@ -458,7 +460,27 @@ object BookDetailScreenSpec : ScreenSpec {
                     } catch (e: Throwable) {
                     }
                 }
+            },
+            onWebView = {
+                if (source != null && source is HttpSource && book != null) {
+                    controller.navController.navigate(
+                        WebViewScreenSpec.buildRoute(
+                            url = book.key,
+                            sourceId = book.sourceId,
+                            bookId = book.id,
+                            chapterId = null,
+                            enableChaptersFetch = true,
+                            enableBookFetch = true
+                        )
+                    )
+                }
+            },
+            onFavorite = {
+                if (book != null) {
+                    vm.toggleInLibrary(book = book)
+                }
             }
+
         )
     }
 

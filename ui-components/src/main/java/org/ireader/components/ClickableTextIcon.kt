@@ -46,7 +46,6 @@ fun ClickableTextIcon(
                 overflow = TextOverflow.Visible,
                 maxLines = 1,
                 textAlign = TextAlign.Center,
-
             )
         }
     }

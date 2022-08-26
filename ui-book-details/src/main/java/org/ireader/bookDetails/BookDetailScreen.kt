@@ -3,11 +3,9 @@ package org.ireader.bookDetails
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -18,10 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -38,15 +33,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import org.ireader.bookDetails.components.ActionHeader
 import org.ireader.bookDetails.components.BookHeader
 import org.ireader.bookDetails.components.BookHeaderImage
 import org.ireader.bookDetails.components.BookSummaryInfo
+import org.ireader.bookDetails.components.ChapterBar
 import org.ireader.bookDetails.components.ChapterDetailBottomBar
 import org.ireader.bookDetails.viewmodel.BookDetailViewModel
 import org.ireader.common_extensions.isScrolledToEnd
@@ -55,7 +51,6 @@ import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
 import org.ireader.components.components.ChapterRow
 import org.ireader.components.list.scrollbars.LazyColumnScrollbar
-import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.AppTextField
 import org.ireader.core_api.source.Source
 import org.ireader.core_ui.preferences.ChapterDisplayMode
@@ -86,7 +81,9 @@ fun BookDetailScreen(
     onSortClick: () -> Unit,
     chapters: State<List<Chapter>>,
     scrollState: LazyListState,
-    onMap: () -> Unit
+    onMap: () -> Unit,
+    onFavorite: () -> Unit,
+    onWebView: () -> Unit
 ) {
     val context = LocalContext.current
     val swipeRefreshState =
@@ -111,7 +108,7 @@ fun BookDetailScreen(
             )
         },
 
-    ) {
+        ) {
         Scaffold(
             floatingActionButton = {
                 if (!vm.hasSelection) {
@@ -163,6 +160,14 @@ fun BookDetailScreen(
                             }
                         }
                         item {
+                            ActionHeader(
+                                favorite = book.favorite,
+                                source = source,
+                                onFavorite = onFavorite,
+                                onWebView = onWebView
+                            )
+                        }
+                        item {
                             BookSummaryInfo(
                                 book = book,
                                 isSummaryExpanded = isSummaryExpanded,
@@ -170,45 +175,20 @@ fun BookDetailScreen(
                             )
                         }
                         item {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 18.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    modifier = Modifier,
-                                    text = "${chapters.value.size.toString()} Chapters",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onBackground
-                                )
-                                Row {
-                                    AppIconButton(
-                                        imageVector = Icons.Default.Search,
-                                        contentDescription = stringResource(R.string.search),
-                                        onClick = {
-                                            vm.searchMode = !vm.searchMode
-                                        },
-                                    )
-                                    AppIconButton(
-                                        imageVector = Icons.Filled.Place,
-                                        contentDescription = stringResource(R.string.find_current_chapter),
-                                        onClick = onMap
-                                    )
-                                    AppIconButton(
-                                        imageVector = Icons.Default.Sort,
-                                        onClick = onSortClick
-                                    )
-                                }
-
-                            }
+                            ChapterBar(
+                                vm = vm,
+                                chapters = chapters.value,
+                                onMap = onMap,
+                                onSortClick = onSortClick
+                            )
                         }
                         if (vm.searchMode) {
                             item {
                                 AppTextField(
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                    modifier = Modifier.padding(
+                                        horizontal = 16.dp,
+                                        vertical = 8.dp
+                                    ),
                                     query = vm.query ?: "",
                                     onValueChange = { query ->
                                         vm.query = query
@@ -252,7 +232,4 @@ fun BookDetailScreen(
 
     }
 }
-
-
-
 
