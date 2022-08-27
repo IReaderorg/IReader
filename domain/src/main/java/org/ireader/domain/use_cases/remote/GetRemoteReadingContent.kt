@@ -5,7 +5,7 @@ import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.toChapterInfo
 import org.ireader.common_resources.UiText
-import org.ireader.common_extensions.SourceNotFoundException
+import org.ireader.common_resources.SourceNotFoundException
 import org.ireader.core_api.source.model.CommandList
 import org.ireader.core_api.source.model.Text
 import org.ireader.core_ui.exceptionHandler

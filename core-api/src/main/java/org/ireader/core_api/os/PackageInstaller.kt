@@ -13,8 +13,6 @@ import android.os.SystemClock
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.ireader.common_resources.UiText
-import org.ireader.common_resources.string
 import org.ireader.core_api.R
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.util.calculateSizeRecursively
@@ -112,7 +110,7 @@ class PackageInstaller(
                     val confirmationIntent = intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
                     if (confirmationIntent == null) {
                         Log.warn { "Fatal error for $intent" }
-                        deferred.complete(InstallStep.Error(UiText.StringResource(R.string.fatal_error)))
+                        deferred.complete(InstallStep.Error(context.getString(R.string.fatal_error)))
                         return
                     }
                     confirmationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -124,36 +122,36 @@ class PackageInstaller(
                         //  deferred.complete(InstallStep.Idle)
                     } catch (e: Throwable) {
                         Log.warn("Error while (un)installing package", e)
-                        deferred.complete(InstallStep.Error(UiText.StringResource(R.string.installation_error)))
+                        deferred.complete(InstallStep.Error(context.getString(R.string.installation_error)))
                     }
                 }
                 PackageInstaller.STATUS_SUCCESS -> {
                     deferred.complete(InstallStep.Success)
                 }
                 PackageInstaller.STATUS_FAILURE_ABORTED -> {
-                    deferred.complete(InstallStep.Error(UiText.StringResource(R.string.installation_error_aborted)))
+                    deferred.complete(InstallStep.Error(context.getString(R.string.installation_error_aborted)))
                 }
                 PackageInstaller.STATUS_FAILURE_BLOCKED -> {
-                    deferred.complete(InstallStep.Error(UiText.StringResource(R.string.installation_error_blocked)))
+                    deferred.complete(InstallStep.Error(context.getString(R.string.installation_error_blocked)))
                 }
                 PackageInstaller.STATUS_FAILURE_CONFLICT -> {
-                    deferred.complete(InstallStep.Error(UiText.StringResource(R.string.installation_error_conflicted)))
+                    deferred.complete(InstallStep.Error(context.getString(R.string.installation_error_conflicted)))
                 }
                 PackageInstaller.STATUS_FAILURE_INCOMPATIBLE -> {
-                    deferred.complete(InstallStep.Error(UiText.StringResource(R.string.installation_error_incompatible)))
+                    deferred.complete(InstallStep.Error(context.getString(R.string.installation_error_incompatible)))
                 }
                 PackageInstaller.STATUS_FAILURE_STORAGE -> {
-                    deferred.complete(InstallStep.Error(UiText.StringResource(R.string.installation_error_Storage)))
+                    deferred.complete(InstallStep.Error(context.getString(R.string.installation_error_Storage)))
                 }
                 PackageInstaller.STATUS_FAILURE_INVALID -> {
-                    deferred.complete(InstallStep.Error(UiText.StringResource(R.string.installation_error_invalid)))
+                    deferred.complete(InstallStep.Error(context.getString(R.string.installation_error_invalid)))
                 }
                 else -> {
                     org.ireader.core_api.log.Log.error(
                         "Package installer failed to install packages",
                         status.toString()
                     )
-                    deferred.complete(InstallStep.Error(UiText.DynamicString(context.string(R.string.package_installer_failed_to_install_packages) + " $status")))
+                    deferred.complete(InstallStep.Error(context.getString(R.string.package_installer_failed_to_install_packages) + " $status"))
                 }
             }
         }
@@ -162,11 +160,11 @@ class PackageInstaller(
 
 private const val INSTALL_ACTION = "PackageInstallerInstaller.INSTALL_ACTION"
 
-sealed class InstallStep(val name: UiText? = null, error: UiText? = null) {
-    object Success : InstallStep(UiText.StringResource(R.string.success), null)
-    object Downloading : InstallStep(UiText.StringResource(R.string.downloading), null)
+sealed class InstallStep(error: String? = null) {
+    object Success : InstallStep(null)
+    object Downloading : InstallStep(null)
     object Idle : InstallStep()
-    data class Error(val error: UiText) : InstallStep(UiText.StringResource(R.string.failed), error)
+    data class Error(val error: String) : InstallStep( error)
 
     fun isFinished(): Boolean {
         return this is Idle || this is Error || this is Success

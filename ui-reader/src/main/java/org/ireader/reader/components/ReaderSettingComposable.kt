@@ -220,7 +220,6 @@ fun ReaderSettingMainLayout(
                         0
                     }
                     ChipChoicePreference(
-
                         preference = vm.font,
                         choices = vm.fonts.map { FontType(it, FontFamily.Default) }
                             .associate { fontType ->

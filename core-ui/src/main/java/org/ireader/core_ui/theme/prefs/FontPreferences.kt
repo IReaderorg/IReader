@@ -4,6 +4,7 @@ package org.ireader.core_ui.theme.prefs
 
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import kotlinx.coroutines.CoroutineScope
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.ireader.core_api.prefs.Preference
+import org.ireader.core_ui.R
 import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.theme.getDefaultFont
 
@@ -32,9 +34,17 @@ class FontPreferences @OptIn(ExperimentalTextApi::class) constructor(
         }
     }
 
+
+    private val localFontFamily = listOf<FontType>(
+        FontType("Cooper Arabic" ,FontFamily(androidx.compose.ui.text.font.Font(R.font.cooper_arabic, weight = FontWeight.Normal)))
+    )
+
     @OptIn(ExperimentalTextApi::class)
     fun getFont(): FontType {
         val fontName = preference.get()
+        localFontFamily.find { it.name == fontName }?.let { font ->
+            return font
+        }
         return kotlin.runCatching {
             val fontFamily = androidx.compose.ui.text.font.FontFamily(
                 Font(

@@ -57,7 +57,7 @@ class AndroidCatalogInstaller(
                 emit(result)
             } catch (e: Throwable) {
                 Log.warn(e, "Error installing package")
-                emit(InstallStep.Error(UiText.ExceptionString(e)))
+                emit(InstallStep.Error(UiText.ExceptionString(e).asString(context)))
             } finally {
                 tmpApkFile.delete()
             }
@@ -74,7 +74,7 @@ class AndroidCatalogInstaller(
             installationChanges.notifyAppUninstall(pkgName)
             deleted
         } catch (e: Throwable) {
-            InstallStep.Error(UiText.ExceptionString(e))
+            InstallStep.Error(UiText.ExceptionString(e).asString(context))
         }
     }
 }

@@ -7,7 +7,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.ireader.common_extensions.DefaultPaginator
-import org.ireader.common_extensions.SourceNotFoundException
+import org.ireader.common_resources.SourceNotFoundException
 import org.ireader.common_models.DisplayMode
 import org.ireader.common_models.entities.BookItem
 import org.ireader.common_models.entities.RemoteKeys

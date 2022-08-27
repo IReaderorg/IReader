@@ -127,6 +127,7 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
         "Noto",
         "Open Sans",
         "Roboto Serif",
+        "Cooper Arabic"
     )
 
     init {

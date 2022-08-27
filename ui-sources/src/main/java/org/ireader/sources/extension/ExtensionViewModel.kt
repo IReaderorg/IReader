@@ -144,11 +144,11 @@ class ExtensionViewModel @Inject constructor(
                 }
                 flow.collect { step ->
                     if (step is InstallStep.Error) {
-                        showSnackBar(step.error)
+                        showSnackBar(UiText.DynamicString(step.error))
                     }
                     state.installSteps = if (step != InstallStep.Success) {
                         if (step is InstallStep.Error) {
-                            showSnackBar(step.error)
+                            showSnackBar(UiText.DynamicString(step.error))
                         }
                         installSteps + (pkgName to step)
                     } else {
