@@ -29,6 +29,7 @@ dependencies {
     implementation(composeLib.compose.navigation)
     implementation(composeLib.compose.foundation)
     implementation(composeLib.compose.animations)
+    implementation(composeLib.compose.coil)
     implementation(composeLib.material3.core)
 
     implementation(composeLib.compose.uiToolingPreview)

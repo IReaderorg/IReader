@@ -12,6 +12,7 @@ import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core_api.source.Source
+import org.ireader.core_api.source.model.Text
 import org.ireader.core_ui.theme.prefs.IReaderVoice
 import org.ireader.domain.services.tts_service.media_player.TTSService
 import java.util.Locale
@@ -76,7 +77,7 @@ class TTSStateImpl @Inject constructor() : TTSState {
     override var prevLanguage by mutableStateOf<String>("")
     override var isPlaying by mutableStateOf<Boolean>(false)
     override var ttsContent: State<List<String>?>? =
-        derivedStateOf { ttsChapter?.content?.filter { it.isNotBlank() }?.map { it.trim() } }
+        derivedStateOf { ttsChapter?.content?.filter { it is Text }?.map { (it as? Text)?.text }?.filter { it != null && it.isNotBlank() }?.mapNotNull { it?.trim() } }
     override var autoNextChapter by mutableStateOf<Boolean>(false)
     override var pitch by mutableStateOf<Float>(.8f)
     override var prevPitch by mutableStateOf<Float>(.8f)

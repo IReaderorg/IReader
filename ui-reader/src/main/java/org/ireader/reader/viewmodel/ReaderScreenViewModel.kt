@@ -29,6 +29,7 @@ import org.ireader.common_resources.LAST_CHAPTER
 import org.ireader.common_resources.NO_VALUE
 import org.ireader.common_resources.UiText
 import org.ireader.core_api.http.WebViewManger
+import org.ireader.core_api.source.model.Text
 import org.ireader.core_catalogs.interactor.GetLocalCatalog
 import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.core_ui.preferences.ReadingMode
@@ -360,8 +361,8 @@ class ReaderScreenViewModel @OptIn(ExperimentalTextApi::class)
 
     suspend fun translate() {
         stateChapter?.let { chapter ->
-          translationEnginesManager.get().translate(chapter.content,translatorOriginLanguage.value,translatorTargetLanguage.value, onSuccess = { result ->
-                stateChapter = stateChapter!!.copy(content = result)
+          translationEnginesManager.get().translate(chapter.content.filterIsInstance<Text>().map { (it as Text).text },translatorOriginLanguage.value,translatorTargetLanguage.value, onSuccess = { result ->
+                stateChapter = stateChapter!!.copy(content = result.map { Text(it) })
             }, onError = {
                 showSnackBar(it)
           })

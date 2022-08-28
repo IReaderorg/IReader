@@ -7,6 +7,7 @@ import org.ireader.core_api.source.model.Command
 import org.ireader.core_api.source.model.CommandList
 import org.ireader.core_api.source.model.Filter
 import org.ireader.core_api.source.model.FilterList
+import org.ireader.core_api.source.model.ImageUrl
 import org.ireader.core_api.source.model.Listing
 import org.ireader.core_api.source.model.MangaInfo
 import org.ireader.core_api.source.model.MangasPageInfo
@@ -204,9 +205,16 @@ class TestSource : CatalogSource {
     }
 
     private fun getTestPages(): List<Page> {
-        return ipsum.split(",").map {
-            Text(it)
+        val pages = mutableListOf<Page>()
+        for(i in 1..3)  {
+            pages.add(ImageUrl("https://picsum.photos/300/400/?image=1"))
         }
+
+        ipsum.split(",").map {
+            pages.add(Text(it))
+        }
+
+        return pages
     }
     val ipsum = """
   Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eget rutrum nisl, vitae ullamcorper velit. In eu diam justo. Sed placerat, risus at luctus vestibulum, nisl nunc lobortis est, eu viverra sapien nulla at metus. Proin lacinia felis tortor. Nullam quis dignissim lorem. Morbi vel tristique mi. Phasellus eget tellus dui. Maecenas sollicitudin in neque vel porta. Nam vel nulla at lectus fringilla fringilla mollis at metus. Duis elit nulla, viverra gravida ullamcorper sit amet, sagittis vitae eros. Interdum et malesuada fames ac ante ipsum primis in faucibus. Proin sodales vehicula mi, id laoreet elit dapibus in. Morbi tristique velit a velit pellentesque aliquam. Etiam tempus venenatis blandit.

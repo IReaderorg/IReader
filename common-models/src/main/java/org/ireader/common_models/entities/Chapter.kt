@@ -7,6 +7,7 @@ import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import org.ireader.core_api.source.model.ChapterInfo
+import org.ireader.core_api.source.model.Page
 
 @Serializable
 @Entity(
@@ -31,7 +32,7 @@ data class Chapter(
     val dateUpload: Long = 0,
     val dateFetch: Long = 0,
     val sourceOrder: Int = 0,
-    val content: List<String> = emptyList(),
+    val content: List<Page> = emptyList(),
     val number: Float = -1f,
     val translator: String = "",
 ) {

@@ -47,7 +47,7 @@ import java.util.concurrent.Executors
         CustomTheme::class,
         ReaderTheme::class
     ],
-    version = 26,
+    version = 27,
     exportSchema = true,
 )
 @TypeConverters(DatabaseConverter::class)
@@ -87,7 +87,8 @@ abstract class AppDatabase : RoomDatabase() {
                     MIGRATION_22_23(),
                     MIGRATION_23_24(),
                     MIGRATION_24_25(),
-                    MIGRATION_25_26()
+                    MIGRATION_25_26(),
+                    MIGRATION_26_27()
                 )
                 // prepopulate the database after onCreate was called
                 .addCallback(object : Callback() {
@@ -133,6 +134,13 @@ internal fun MIGRATION_24_25() = object : Migration(24, 25) {
             """.trimIndent()
         )
         database.execSQL("CREATE TABLE IF NOT EXISTS `reader_theme_table` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `backgroundColor` INTEGER NOT NULL, `onTextColor` INTEGER NOT NULL, `isDefault` INTEGER NOT NULL)")
+    }
+}
+internal fun MIGRATION_26_27() = object : Migration(26, 27) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+
+        //database.execSQL("CREATE TABLE IF NOT EXISTS `chapter` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookId` INTEGER NOT NULL, `key` TEXT NOT NULL, `name` TEXT NOT NULL, `read` INTEGER NOT NULL, `bookmark` INTEGER NOT NULL, `dateUpload` INTEGER NOT NULL, `dateFetch` INTEGER NOT NULL, `sourceOrder` INTEGER NOT NULL, `content` TEXT NOT NULL, `number` REAL NOT NULL, `translator` TEXT NOT NULL, FOREIGN KEY(`bookId`) REFERENCES `library`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+
     }
 }
 

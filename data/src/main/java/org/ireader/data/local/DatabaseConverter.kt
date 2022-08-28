@@ -3,6 +3,10 @@ package org.ireader.data.local
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.room.TypeConverter
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import org.ireader.core_api.source.model.Page
 
 class DatabaseConverter {
 
@@ -21,4 +25,16 @@ class DatabaseConverter {
 
     @TypeConverter
     fun toColorType(value: Int): Color = Color(value)
+
+
+    @TypeConverter
+    fun fromPage(values: List<Page>): String  {
+        return Json.encodeToString(values)
+    }
+    @TypeConverter
+    fun toPage(values: String): List<Page>  {
+        return Json.decodeFromString(values)
+    }
+
+
 }

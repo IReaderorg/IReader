@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -32,14 +33,22 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Chapter
 import org.ireader.components.list.scrollbars.ColumnScrollbar
 import org.ireader.components.list.scrollbars.LazyColumnScrollbar
 import org.ireader.core_api.log.Log
+import org.ireader.core_api.source.model.ImageUrl
+import org.ireader.core_api.source.model.Page
+import org.ireader.core_api.source.model.Text
 import org.ireader.core_ui.preferences.ReadingMode
 import org.ireader.core_ui.ui.PreferenceAlignment
 import org.ireader.core_ui.ui.mapTextAlign
@@ -81,9 +90,17 @@ fun ReaderText(
         val maxHeight = remember {
             constraints.maxHeight.toFloat()
         }
-        val firstVisibleValue = derivedStateOf { lazyListState.firstVisibleItemScrollOffset }
+        val firstVisibleValue =  remember { derivedStateOf { lazyListState.firstVisibleItemScrollOffset } }
 
-        Box(modifier = Modifier.padding(top = vm.topMargin.value.dp, bottom = vm.bottomMargin.value.dp, start = vm.leftMargin.value.dp, end = vm.rightMargin.value.dp)) {
+
+        Box(
+            modifier = Modifier.padding(
+                top = vm.topMargin.value.dp,
+                bottom = vm.bottomMargin.value.dp,
+                start = vm.leftMargin.value.dp,
+                end = vm.rightMargin.value.dp
+            )
+        ) {
             MultiSwipeRefresh(
                 modifier = Modifier.fillMaxSize(),
                 state = swipeState,
@@ -214,7 +231,7 @@ private fun PagedReaderText(
                         MainText(
                             modifier = modifier,
                             index = index,
-                            text = text,
+                            page = text,
                             vm = vm
                         )
                     }
@@ -228,29 +245,67 @@ private fun PagedReaderText(
 private fun MainText(
     modifier: Modifier,
     index: Int,
-    text: String,
+    page: Page,
     vm: ReaderScreenViewModel
 ) {
-    Text(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = vm.paragraphsIndent.value.dp),
-        text = setText(
-            text = text,
-            index = index,
-            isLast = index == vm.stateContent.lastIndex,
-            topContentPadding = vm.topContentPadding.value,
-            contentPadding = vm.distanceBetweenParagraphs.value,
-            bottomContentPadding = vm.bottomContentPadding.value
-        ),
-        fontSize = vm.fontSize.value.sp,
-        fontFamily = vm.font.value.fontFamily,
-        textAlign = mapTextAlign(vm.textAlignment.value),
-        color = vm.textColor.value,
-        lineHeight = vm.lineHeight.value.sp,
-        letterSpacing = vm.betweenLetterSpaces.value.sp,
-        fontWeight = FontWeight(vm.textWeight.value),
-    )
+    val context = LocalContext.current
+    when (page) {
+        is Text -> {
+            Text(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = vm.paragraphsIndent.value.dp),
+                text = setText(
+                    text = page.text,
+                    index = index,
+                    isLast = index == vm.stateContent.lastIndex,
+                    topContentPadding = vm.topContentPadding.value,
+                    contentPadding = vm.distanceBetweenParagraphs.value,
+                    bottomContentPadding = vm.bottomContentPadding.value
+                ),
+                fontSize = vm.fontSize.value.sp,
+                fontFamily = vm.font.value.fontFamily,
+                textAlign = mapTextAlign(vm.textAlignment.value),
+                color = vm.textColor.value,
+                lineHeight = vm.lineHeight.value.sp,
+                letterSpacing = vm.betweenLetterSpaces.value.sp,
+                fontWeight = FontWeight(vm.textWeight.value),
+            )
+        }
+        is ImageUrl -> {
+            val isLoading = remember {
+                mutableStateOf(false)
+
+            }
+            Box(contentAlignment = Alignment.Center) {
+                AsyncImage(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .requiredHeight(300.dp),
+                    model = ImageRequest.Builder(context)
+                        .data(page.url)
+                        .diskCachePolicy(CachePolicy.DISABLED)
+                        .build(),
+                    contentDescription = "image",
+                    contentScale = ContentScale.FillWidth,
+                    onLoading = {
+                        isLoading.value = true
+                    },
+                    onError = {
+                        isLoading.value = false
+                    },
+                    onSuccess = {
+                        isLoading.value = false
+                    },
+                )
+                if (isLoading.value) {
+                    androidx.compose.material3.CircularProgressIndicator()
+                }
+            }
+        }
+        else -> {
+        }
+    }
 }
 
 @Composable
@@ -271,8 +326,8 @@ private fun ContinuesReaderPage(
     LaunchedEffect(key1 = lastChapterId) {
         lastChapterId?.let { onChapterShown(it) }
     }
-    val visibleItemInfo = derivedStateOf { scrollState.layoutInfo.visibleItemsInfo }
-    LaunchedEffect(key1 = visibleItemInfo.value.firstOrNull()?.key) {
+    val visibleItemInfo =  remember { derivedStateOf { scrollState.layoutInfo } }
+    LaunchedEffect(key1 = visibleItemInfo.value.visibleItemsInfo.firstOrNull()?.key) {
         runCatching {
             vm.chapterShell.firstOrNull {
                 it.id == scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.key.toString()
@@ -318,7 +373,7 @@ private fun ContinuesReaderPage(
                 MainText(
                     modifier = modifier,
                     index = index,
-                    text = items[index].second,
+                    page = items[index].second,
                     vm = vm
                 )
             }

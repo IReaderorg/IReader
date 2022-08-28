@@ -137,14 +137,20 @@ class RestoreBackup @Inject internal constructor(
             for (backupChapter in manga.chapters) {
                 val dbChapter = dbChaptersMap[backupChapter.key]
                 val newChapter = if (dbChapter != null) {
+                    kotlin.runCatching {
                     backupChapter.toDomain(dbManga.id).copy(
                         read = backupChapter.read || dbChapter.read,
                         bookmark = backupChapter.bookmark || dbChapter.bookmark,
                     )
+                    }.getOrNull()
                 } else {
-                    backupChapter.toDomain(dbManga.id)
+                    kotlin.runCatching {
+                        backupChapter.toDomain(dbManga.id)
+                    }.getOrNull()
                 }
-                chaptersToAdd.add(newChapter)
+                if (newChapter != null) {
+                    chaptersToAdd.add(newChapter)
+                }
             }
             chapterRepository.insertChapters(chaptersToAdd)
         }

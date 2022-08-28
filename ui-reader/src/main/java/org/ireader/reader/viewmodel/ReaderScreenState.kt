@@ -14,6 +14,7 @@ import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.Chapter
 import org.ireader.core_api.source.Source
+import org.ireader.core_api.source.model.Page
 import javax.inject.Inject
 
 open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
@@ -38,7 +39,7 @@ open class ReaderScreenStateImpl @Inject constructor() : ReaderScreenState {
     override var book: Book? by mutableStateOf<Book?>(null)
 
     override val chapterShell: SnapshotStateList<Chapter> = mutableStateListOf()
-    override val stateContent: List<String> by derivedStateOf { stateChapter?.content?.filter { it.isNotBlank() }?.map { it.trim() } ?: emptyList() }
+    override val stateContent: List<Page> by derivedStateOf { stateChapter?.content  ?: emptyList() }
 }
 
 interface ReaderScreenState {
@@ -59,7 +60,7 @@ interface ReaderScreenState {
     var stateChapter: Chapter?
     var isChapterLoaded: State<Boolean>
     var book: Book?
-    val stateContent: List<String>
+    val stateContent: List<Page>
     val chapterShell: SnapshotStateList<Chapter>
 
     var readerScrollState: ScrollState?

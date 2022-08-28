@@ -76,7 +76,7 @@ class ImportEpub @Inject constructor(
             }?.let { output ->
                 val title = tableOfContents[epubResourceModel.href] ?: output.title
 
-                val content = output.body.split("\n").filter { it.isNotBlank() }
+                val content = output.body.split("\n").filter { it.isNotBlank() }.map { org.ireader.core_api.source.model.Text(text = it) }
                 index++
                 Chapter(
                     name = title ?: "Unknown",

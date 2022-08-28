@@ -3,6 +3,7 @@ plugins {
     id("kotlin-android")
     id("org.jetbrains.gradle.plugin.idea-ext")
     id("com.vanniktech.maven.publish.base")
+    kotlin("plugin.serialization")
     `maven-publish`
     signing
 }

@@ -6,6 +6,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 import org.ireader.common_models.entities.Chapter
+import org.ireader.core_api.source.model.Page
 
 @Serializable
 internal data class ChapterProto(
@@ -18,7 +19,7 @@ internal data class ChapterProto(
     @ProtoNumber(7) val dateUpload: Long = 0,
     @ProtoNumber(8) val number: Float = 0f,
     @ProtoNumber(9) val sourceOrder: Int = 0,
-    @ProtoNumber(10) val content: List<String> = emptyList(),
+    @ProtoNumber(10) val content: List<Page> = emptyList(),
 
 ) {
 
