@@ -87,7 +87,7 @@ fun BookDetailScreen(
 ) {
     val context = LocalContext.current
     val swipeRefreshState =
-        rememberSwipeRefreshState(isRefreshing = vm.detailIsLoading)
+        rememberSwipeRefreshState(isRefreshing = vm.detailIsLoading || vm.chapterIsLoading)
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
