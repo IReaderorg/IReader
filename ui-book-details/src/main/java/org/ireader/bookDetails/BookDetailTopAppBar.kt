@@ -7,18 +7,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FlipToBack
-import androidx.compose.material.icons.filled.IosShare
-import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -29,7 +34,6 @@ import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.TopAppBarBackButton
 import org.ireader.core_api.source.CatalogSource
-import org.ireader.core_api.source.HttpSource
 import org.ireader.core_api.source.Source
 import org.ireader.core_api.source.model.Command
 import org.ireader.ui_book_details.R
@@ -39,13 +43,13 @@ import org.ireader.ui_book_details.R
 fun BookDetailTopAppBar(
     modifier: Modifier = Modifier,
     source: Source?,
-    onWebView: () -> Unit,
+    onDownload: () -> Unit,
     onRefresh: () -> Unit,
     onPopBackStack: () -> Unit,
     onCommand: () -> Unit,
     onShare: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior?,
-    state:BookDetailViewModel,
+    state: BookDetailViewModel,
     onClickCancelSelection: () -> Unit,
     onClickSelectAll: () -> Unit,
     onClickInvertSelection: () -> Unit,
@@ -73,25 +77,29 @@ fun BookDetailTopAppBar(
                     onShare = onShare,
                     onCommand = onCommand,
                     onRefresh = onRefresh,
-                    onWebView = onWebView,
-                    source = source
+                    source = source,
+                    onDownload = onDownload
                 )
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegularChapterDetailTopAppBar(
     modifier: Modifier = Modifier,
     source: Source?,
-    onWebView: () -> Unit,
+    onDownload: () -> Unit,
     onRefresh: () -> Unit,
     onPopBackStack: () -> Unit,
     onCommand: () -> Unit,
     onShare: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior?
 ) {
+    val (dropDownState, setDropDownState) = remember {
+        mutableStateOf(false)
+    }
     Toolbar(
         scrollBehavior = scrollBehavior,
         title = {},
@@ -109,15 +117,15 @@ fun RegularChapterDetailTopAppBar(
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }
-            IconButton(onClick = {
-                onShare()
-            }) {
-                Icon(
-                    imageVector = Icons.Default.IosShare,
-                    contentDescription = stringResource(id = R.string.share),
-                    tint = MaterialTheme.colorScheme.onBackground,
-                )
-            }
+//            IconButton(onClick = {
+//                onShare()
+//            }) {
+//                Icon(
+//                    imageVector = Icons.Default.IosShare,
+//                    contentDescription = stringResource(id = R.string.share),
+//                    tint = MaterialTheme.colorScheme.onBackground,
+//                )
+//            }
             if (source is CatalogSource && source.getCommands().any { it !is Command.Fetchers }) {
                 IconButton(onClick = {
                     onCommand()
@@ -129,16 +137,31 @@ fun RegularChapterDetailTopAppBar(
                     )
                 }
             }
-
-            if (source is HttpSource) {
-                IconButton(onClick = {
-                    onWebView()
-                }) {
+            IconButton(onClick = {
+                onDownload()
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Download,
+                    contentDescription = "Download",
+                    tint = MaterialTheme.colorScheme.onBackground,
+                )
+            }
+            Box {
+                IconButton(onClick = { setDropDownState(true) }) {
                     Icon(
-                        imageVector = Icons.Default.Public,
-                        contentDescription = "WebView",
-                        tint = MaterialTheme.colorScheme.onBackground,
+                        imageVector = Icons.Outlined.MoreVert,
+                        contentDescription = stringResource(R.string.export_book_as_epub),
                     )
+                }
+                DropdownMenu(
+                    modifier = Modifier,
+                    expanded = dropDownState,
+                    onDismissRequest = {
+                        setDropDownState(false)
+                    },
+                ) {
+                    DropdownMenuItem(text = { Text(text = stringResource(id = R.string.export_book_as_epub)) }, onClick = onShare)
+
                 }
             }
         },
@@ -148,6 +171,7 @@ fun RegularChapterDetailTopAppBar(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditModeChapterDetailTopAppBar(
     modifier: Modifier = Modifier,

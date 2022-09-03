@@ -17,6 +17,7 @@ import org.ireader.core_ui.theme.prefs.asFont
 import org.ireader.core_ui.theme.prefs.asReaderTheme
 import org.ireader.core_ui.theme.prefs.asVoice
 import org.ireader.core_ui.ui.PreferenceAlignment
+import org.ireader.core_ui.ui.PreferenceTextAlignment
 
 class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
     private val preferenceStore: PreferenceStore,
@@ -111,8 +112,11 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
             .asColor()
     }
 
-    fun scrollBarAlignment(): Preference<PreferenceAlignment> {
-        return preferenceStore.getEnum(SCROLL_INDICATOR_ALIGNMENT, PreferenceAlignment.Right)
+    fun scrollBarAlignment(): Preference<PreferenceTextAlignment> {
+        return preferenceStore.getEnum(SCROLL_INDICATOR_ALIGNMENT, PreferenceTextAlignment.Right)
+    }
+    fun ttsIconAlignments(): Preference<PreferenceAlignment> {
+        return preferenceStore.getEnum("tts_icons_alignments", PreferenceAlignment.TopLeft)
     }
 
     fun lineHeight(): Preference<Int> {
@@ -142,10 +146,10 @@ class ReaderPreferences @OptIn(ExperimentalTextApi::class) constructor(
         return preferenceStore.getBoolean(SLEEP_TIMER_MODE, false)
     }
 
-    fun textAlign(): Preference<org.ireader.core_ui.ui.PreferenceAlignment> {
+    fun textAlign(): Preference<org.ireader.core_ui.ui.PreferenceTextAlignment> {
         return preferenceStore.getEnum(
             TEXT_ALIGNMENT,
-            org.ireader.core_ui.ui.PreferenceAlignment.Left
+            org.ireader.core_ui.ui.PreferenceTextAlignment.Left
         )
     }
 

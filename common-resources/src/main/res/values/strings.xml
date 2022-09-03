@@ -43,6 +43,7 @@
     <string name="error">Error</string>
     <string name="refresh">Refresh</string>
     <string name="share">Share</string>
+    <string name="export_book_as_epub">Export Book As Epub</string>
     <string name="description_placeholder">No description</string>
     <string name="toggle_search_mode_off">Toggle search mode off</string>
     <string name="recently">Recently</string>
@@ -339,6 +340,9 @@
     <string name="continues">Continue</string>
     <string name="right">Right</string>
     <string name="left">Left</string>
+    <string name="top_left">Top Left</string>
+    <string name="hide">Hide</string>
+    <string name="bottom_left">Bottom Left</string>
     <string name="alignment">Alignment</string>
     <string name="paragraph_indent">Indent</string>
     <string name="paragraph_distance">Distance</string>

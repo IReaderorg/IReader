@@ -190,7 +190,7 @@ fun AppIconButton(
         modifier =
         modifier
             .size(40.0.dp)
-            .background(color = colors.containerColor(enabled).value)
+            .background(color = MaterialTheme.colorScheme.background)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick,
@@ -204,7 +204,7 @@ fun AppIconButton(
             ),
         contentAlignment = Alignment.Center
     ) {
-        val contentColor = colors.contentColor(enabled).value
+        val contentColor = MaterialTheme.colorScheme.background
         CompositionLocalProvider(LocalContentColor provides contentColor, content = content)
     }
 }

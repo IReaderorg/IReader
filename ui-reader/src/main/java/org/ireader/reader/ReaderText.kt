@@ -50,7 +50,7 @@ import org.ireader.core_api.source.model.ImageUrl
 import org.ireader.core_api.source.model.Page
 import org.ireader.core_api.source.model.Text
 import org.ireader.core_ui.preferences.ReadingMode
-import org.ireader.core_ui.ui.PreferenceAlignment
+import org.ireader.core_ui.ui.PreferenceTextAlignment
 import org.ireader.core_ui.ui.mapTextAlign
 import org.ireader.reader.reverse_swip_refresh.ISwipeRefreshIndicator
 import org.ireader.reader.reverse_swip_refresh.MultiSwipeRefresh
@@ -210,20 +210,16 @@ private fun PagedReaderText(
             state = scrollState,
             padding = if (vm.scrollIndicatorPadding.value < 0) 0.dp else vm.scrollIndicatorPadding.value.dp,
             thickness = if (vm.scrollIndicatorWith.value < 0) 0.dp else vm.scrollIndicatorWith.value.dp,
-            enable = vm.showScrollIndicator.value,
+            enabled = vm.showScrollIndicator.value,
             thumbColor = vm.unselectedScrollBarColor.value,
             thumbSelectedColor = vm.selectedScrollBarColor.value,
             selectionMode = vm.isScrollIndicatorDraggable.value,
-            rightSide = vm.scrollIndicatorAlignment.value == PreferenceAlignment.Right
+            rightSide = vm.scrollIndicatorAlignment.value == PreferenceTextAlignment.Right
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .verticalScroll(scrollState)
                         .padding(top = 32.dp)
 
                 ) {
@@ -236,7 +232,6 @@ private fun PagedReaderText(
                         )
                     }
                 }
-            }
         }
     }
 }
@@ -357,7 +352,7 @@ private fun ContinuesReaderPage(
         thumbColor = vm.unselectedScrollBarColor.value,
         thumbSelectedColor = vm.selectedScrollBarColor.value,
         selectionMode = vm.isScrollIndicatorDraggable.value,
-        rightSide = vm.scrollIndicatorAlignment.value == PreferenceAlignment.Right,
+        rightSide = vm.scrollIndicatorAlignment.value == PreferenceTextAlignment.Right,
     ) {
 
         LazyColumn(

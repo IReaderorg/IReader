@@ -23,6 +23,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -62,8 +63,10 @@ fun ReadingScreen(
 ) {
 
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    LaunchedEffect(key1 = scrollState.hashCode()) {
+    DisposableEffect(key1 = modalBottomSheetState.hashCode()) {
         vm.modalBottomSheetState = modalBottomSheetState
+
+        onDispose {  }
     }
     val scope = rememberCoroutineScope()
     val chapter = vm.stateChapter

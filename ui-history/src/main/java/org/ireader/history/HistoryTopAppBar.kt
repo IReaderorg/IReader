@@ -9,6 +9,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -22,6 +23,7 @@ import org.ireader.ui_history.R
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryTopAppBar(
+    modifier: Modifier = Modifier,
     vm: HistoryState,
     onDeleteAll: () -> Unit,
     getHistories: () -> Unit,
@@ -86,9 +88,10 @@ fun HistoryTopAppBar(
                         keyboardController?.hide()
                     }
                 )
-            } else null
+            }
         },
-        scrollBehavior = scrollBehavior
+        scrollBehavior = scrollBehavior,
+        modifier = modifier
 
     )
 }

@@ -161,7 +161,7 @@ private fun LazyColumnScrollbar(
 
     val normalizedThumbSize by remember {
         derivedStateOf {
-            normalizedThumbSizeReal.coerceAtLeast(thumbMinHeight)
+            normalizedThumbSizeReal.coerceAtLeast(thumbMinHeight).coerceAtMost(.1f)
         }
     }
 

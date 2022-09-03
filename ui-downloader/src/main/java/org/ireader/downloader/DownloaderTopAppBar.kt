@@ -8,7 +8,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.FlipToBack
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -27,7 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import org.ireader.common_resources.UiText
 import org.ireader.components.components.Toolbar
-import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.reusable_composable.BuildDropDownMenu
 import org.ireader.components.reusable_composable.DropDownMenuItem
@@ -101,13 +99,6 @@ private fun RegularTopBar(
             )
         },
         actions = {
-            AppIconButton(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = stringResource(R.string.menu),
-                onClick = {
-                    isMenuExpanded = true
-                },
-            )
             val list =
                 listOf<DropDownMenuItem>(
                     DropDownMenuItem(
@@ -116,7 +107,7 @@ private fun RegularTopBar(
                         onCancelAll()
                     }
                 )
-            BuildDropDownMenu(list, enable = isMenuExpanded, onEnable = { isMenuExpanded = it })
+            BuildDropDownMenu(list)
         },
         navigationIcon = {
             IconButton(onClick = onPopBackStack) {

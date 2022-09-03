@@ -4,7 +4,6 @@ import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.rememberSplineBasedDecay
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -80,13 +79,14 @@ object BookDetailScreenSpec : ScreenSpec {
         val context = LocalContext.current
         val state = controller.topScrollState
         val decay = rememberSplineBasedDecay<Float>()
-        val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(decay, state)
+        val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(state)
 
         DisposableEffect(key1 = true ) {
             controller.setScrollBehavior(scrollBehavior)
             onDispose {
-                val defaultBehavior = controller.scrollBehavior
-                controller.setScrollBehavior(defaultBehavior)
+                val defaultBehavior = controller.topScrollState
+                defaultBehavior.heightOffset = 0F
+                controller.setScrollBehavior(controller.scrollBehavior)
             }
         }
         val onShare =
@@ -108,21 +108,6 @@ object BookDetailScreenSpec : ScreenSpec {
             }
         BookDetailTopAppBar(
             scrollBehavior = controller.scrollBehavior,
-            onWebView = {
-                if (source != null && source is HttpSource && book != null) {
-                    controller.navController.navigate(
-                        WebViewScreenSpec.buildRoute(
-                            url = book.key,
-                            sourceId = book.sourceId,
-                            bookId = book.id,
-                            chapterId = null,
-                            enableChaptersFetch = true,
-                            enableBookFetch = true
-                        )
-                    )
-                }
-
-            },
             onRefresh = {
                 scope.launch {
                     if (book != null) {
@@ -178,72 +163,14 @@ object BookDetailScreenSpec : ScreenSpec {
             onClickCancelSelection = {
                 vm.selection.clear()
             },
-            paddingValues = controller.scaffoldPadding
+            paddingValues = controller.scaffoldPadding,
+            onDownload = {
+                if (book != null) {
+                    vm.startDownloadService(book = book)
+                }
+            }
         )
     }
-
-//    @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
-//    @Composable
-//    override fun BottomAppBar(
-//        controller: Controller
-//    ) {
-//        val vm: BookDetailViewModel = hiltViewModel(controller.navBackStackEntry)
-//        val detailState = vm.state
-//        val chapterState = vm.chapterState
-//        val book = vm.book
-//        val catalog = vm.catalogSource
-//        val scope = rememberCoroutineScope()
-//        val context = LocalContext.current
-//
-//        AnimatedVisibility(
-//            visible = true,
-//            enter = slideInVertically(initialOffsetY = { it }),
-//            exit = slideOutVertically(targetOffsetY = { it })
-//        ) {
-//            if (book != null) {
-//                BookDetailScreenBottomBar(
-//                    onToggleInLibrary = {
-//                        vm.toggleInLibrary(book = book)
-//                    },
-//                    isInLibrary = book.favorite,
-//                    onDownload = {
-//                        vm.startDownloadService(book = book)
-//                    },
-//                    isRead = chapterState.haveBeenRead,
-//                    onRead = {
-//                        if (catalog != null) {
-//                            if (vm.chapters.any { it.read } && vm.chapters.isNotEmpty()) {
-//                                controller.navController.navigate(
-//                                    ReaderScreenSpec.buildRoute(
-//                                        bookId = book.id,
-//                                        sourceId = catalog.sourceId,
-//                                        chapterId = LAST_CHAPTER,
-//                                    )
-//                                )
-//                            } else if (vm.chapters.isNotEmpty()) {
-//                                controller.navController.navigate(
-//                                    ReaderScreenSpec.buildRoute(
-//                                        bookId = book.id,
-//                                        sourceId = catalog.sourceId,
-//                                        chapterId = vm.chapters.first().id,
-//                                    )
-//                                )
-//                            } else {
-//                                scope.launch {
-//                                    vm.showSnackBar(UiText.StringResource(R.string.no_chapter_is_available))
-//                                }
-//                            }
-//                        } else {
-//                            scope.launch {
-//                                vm.showSnackBar(UiText.StringResource(R.string.source_not_available))
-//                            }
-//                        }
-//                    },
-//                    isInLibraryInProgress = detailState.inLibraryLoading
-//                )
-//            }
-//        }
-//    }
 
     @OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
     @ExperimentalMaterial3Api
@@ -258,7 +185,6 @@ object BookDetailScreenSpec : ScreenSpec {
 
         detailState.source.let { source ->
             if (vm.chapterMode) {
-
                 val pagerState = rememberPagerState()
                 ChapterScreenBottomTabComposable(
                     pagerState = pagerState,
@@ -340,6 +266,7 @@ object BookDetailScreenSpec : ScreenSpec {
 
         DisposableEffect(key1 = true) {
             controller.requestedHideSystemStatusBar(true)
+
             onDispose {
                 controller.requestedHideSystemStatusBar(false)
             }
@@ -349,7 +276,7 @@ object BookDetailScreenSpec : ScreenSpec {
         }
 
         BookDetailScreen(
-            modifier = Modifier.padding(bottom = controller.scaffoldPadding.calculateBottomPadding()),
+            modifier = Modifier,
             onSummaryExpand = {
                 vm.expandedSummary = !vm.expandedSummary
             },

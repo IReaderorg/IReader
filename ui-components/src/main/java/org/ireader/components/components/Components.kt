@@ -1,7 +1,10 @@
 package org.ireader.components.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -24,7 +27,7 @@ sealed class Components {
         val padding: PaddingValues = PaddingValues(16.dp),
         val visible: Boolean = true,
 
-    ) : Components()
+        ) : Components()
 
     data class Slider(
         val preferenceAsFloat: PreferenceMutableState<Float>? = null,
@@ -76,6 +79,8 @@ sealed class Components {
         val onValueChange: ((Int) -> Unit)?,
         val visible: Boolean = true
     ) : Components()
+
+    object Space : Components()
 }
 
 @Composable
@@ -89,6 +94,87 @@ fun SetupSettingComponents(
             .fillMaxSize()
     ) {
         setupUiComponent(items)
+    }
+}
+
+@Composable
+fun Components.Build() {
+    when (this) {
+        is Components.Header -> {
+            if (this.visible) {
+                if (this.visible) {
+                    TextSection(
+                        text = this.text,
+                        padding = this.padding,
+                        toUpper = this.toUpper
+                    )
+                }
+            }
+        }
+        is Components.Slider -> {
+            if (this.visible) {
+                SliderPreference(
+                    preferenceAsLong = this.preferenceAsLong,
+                    preferenceAsFloat = this.preferenceAsFloat,
+                    preferenceAsInt = this.preferenceAsInt,
+                    title = this.title,
+                    onValueChange = {
+                        this.onValueChange?.let { it1 -> it1(it) }
+                    },
+                    trailing = this.trailing,
+                    valueRange = this.valueRange,
+                    onValueChangeFinished = {
+                        this.onValueChangeFinished?.let { it1 -> it1(it) }
+                    },
+                    steps = this.steps
+                )
+            }
+        }
+        is Components.Row -> {
+            if (this.visible) {
+                PreferenceRow(
+                    title = this.title,
+                    action = this.action,
+                    subtitle = this.subtitle,
+                    onClick = this.onClick,
+                    icon = this.icon,
+                    onLongClick = this.onLongClick,
+                )
+            }
+        }
+        is Components.Chip -> {
+            if (this.visible) {
+                ChipPreference(
+                    preference = this.preference,
+                    selected = this.selected,
+                    onValueChange = this.onValueChange,
+                    title = this.title,
+                    subtitle = this.subtitle,
+                    icon = this.icon
+                )
+            }
+        }
+        is Components.Switch -> {
+            if (this.visible) {
+                SwitchPreference(
+                    preference = this.preference,
+                    title = this.title,
+                    icon = this.icon,
+                    subtitle = this.subtitle,
+                    onValue = this.onValue
+                )
+            }
+        }
+        is Components.Dynamic -> {
+            this.component()
+        }
+        is Components.Space -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+            )
+        }
     }
 }
 
@@ -165,6 +251,13 @@ fun LazyListScope.setupUiComponent(
                 }
                 is Components.Dynamic -> {
                     component.component()
+                }
+                is Components.Space -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+                    )
                 }
             }
         }

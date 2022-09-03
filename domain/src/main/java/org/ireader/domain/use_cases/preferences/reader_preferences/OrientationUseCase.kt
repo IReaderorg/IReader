@@ -5,17 +5,17 @@ import org.ireader.common_models.library.deserialize
 import org.ireader.core_ui.preferences.AppPreferences
 import org.ireader.core_ui.preferences.ReaderPreferences
 import org.ireader.core_ui.theme.prefs.IReaderVoice
-import org.ireader.core_ui.ui.PreferenceAlignment
+import org.ireader.core_ui.ui.PreferenceTextAlignment
 import javax.inject.Inject
 
 class TextAlignmentUseCase(
     private val prefs: ReaderPreferences,
 ) {
-    fun save(textAlign: PreferenceAlignment) {
+    fun save(textAlign: PreferenceTextAlignment) {
         prefs.textAlign().set(textAlign)
     }
 
-    suspend fun read(): PreferenceAlignment {
+    suspend fun read(): PreferenceTextAlignment {
         return prefs.textAlign().get()
     }
 }

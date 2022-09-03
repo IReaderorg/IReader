@@ -100,6 +100,8 @@ fun CustomColorScheme.toColorScheme(): ColorScheme {
         surfaceVariant = this.surfaceVariant.toArgColor(),
         tertiary = this.tertiary.toArgColor(),
         tertiaryContainer = this.tertiaryContainer.toArgColor(),
+        outlineVariant = this.outlineVariant.toArgColor(),
+        scrim = this.scrim.toArgColor()
     )
 }
 

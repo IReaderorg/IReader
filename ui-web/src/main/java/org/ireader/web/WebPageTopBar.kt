@@ -5,22 +5,15 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.ireader.components.CustomTextField
 import org.ireader.components.components.Toolbar
-import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BuildDropDownMenu
 import org.ireader.components.reusable_composable.DropDownMenuItem
 import org.ireader.components.reusable_composable.TopAppBarBackButton
@@ -47,9 +40,6 @@ fun WebPageTopBar(
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
 
-    var isMenuExpanded by remember {
-        mutableStateOf(false)
-    }
     Toolbar(
         scrollBehavior = scrollBehavior,
         title = {
@@ -74,13 +64,6 @@ fun WebPageTopBar(
             TopAppBarBackButton(onClick = onPopBackStack)
         },
         actions = {
-            AppIconButton(
-                imageVector = Icons.Default.Menu,
-                contentDescription = stringResource(R.string.menu),
-                onClick = {
-                    isMenuExpanded = true
-                },
-            )
             val list =
                 mutableListOf<DropDownMenuItem>(
                     DropDownMenuItem(
@@ -131,7 +114,7 @@ fun WebPageTopBar(
                     }
                 )
             }
-            BuildDropDownMenu(list, enable = isMenuExpanded, onEnable = { isMenuExpanded = it })
+            BuildDropDownMenu(list)
         },
     )
 }

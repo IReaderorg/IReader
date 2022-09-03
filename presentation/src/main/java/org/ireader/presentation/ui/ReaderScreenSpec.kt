@@ -114,8 +114,9 @@ object ReaderScreenSpec : ScreenSpec {
         val scrollState = rememberScrollState()
         val lazyListState = rememberLazyListState()
 
-        LaunchedEffect(key1 = scrollState.hashCode()) {
+        DisposableEffect(key1 = scrollState.hashCode()) {
             vm.readerScrollState = scrollState
+            onDispose {  }
         }
 
         val swipeState = rememberSwipeRefreshState(isRefreshing = false)

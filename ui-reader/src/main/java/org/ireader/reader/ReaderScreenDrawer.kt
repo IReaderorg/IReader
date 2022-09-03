@@ -23,7 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.ireader.common_models.entities.Chapter
 import org.ireader.components.components.ChapterRow
-import org.ireader.components.list.scrollbars.LazyColumnScrollbar
+import org.ireader.components.list.scrollbars.VerticalFastScroller
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.BigSizeTextComposable
 import org.ireader.components.text_related.ErrorTextWithEmojis
@@ -44,7 +44,7 @@ fun ReaderScreenDrawer(
 ) {
 
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxWidth(.9f),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
@@ -73,7 +73,7 @@ fun ReaderScreenDrawer(
 
         Spacer(modifier = modifier.height(5.dp))
         Divider(modifier = modifier.fillMaxWidth(), thickness = 1.dp)
-        LazyColumnScrollbar(listState = drawerScrollState) {
+        VerticalFastScroller(listState = drawerScrollState) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = drawerScrollState

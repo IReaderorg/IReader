@@ -73,6 +73,7 @@ class TTSViewModel @Inject constructor(
     val textAlignment = readerPreferences.textAlign().asState()
     val font = readerPreferences.font().asState()
     val fontSize = readerPreferences.fontSize().asState()
+    val ttsIconAlignments = readerPreferences.ttsIconAlignments().asState()
 
     private var chapterId: Long = -1
     private var initialize: Boolean = false

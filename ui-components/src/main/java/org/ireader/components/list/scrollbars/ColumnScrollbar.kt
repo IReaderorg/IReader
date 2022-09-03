@@ -37,9 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import kotlinx.coroutines.launch
 import org.ireader.core_ui.preferences.PreferenceValues
-
 /**
- * taken from https://github.com/nanihadesuka/LazyColumnScrollbar
  * Scrollbar for Column
  *
  * @param rightSide true -> right,  false -> left
@@ -57,28 +55,27 @@ fun ColumnScrollbar(
     thumbColor: Color = Color(0xFF2A59B6),
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
-    indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
-    enable: Boolean = true,
+    enabled: Boolean = true,
     selectionMode: PreferenceValues.ScrollbarSelectionMode = PreferenceValues.ScrollbarSelectionMode.Thumb,
+    indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    BoxWithConstraints {
+    if (!enabled) content()
+    else BoxWithConstraints {
         content()
-        if (enable) {
-            ColumnScrollbar(
-                state = state,
-                rightSide = rightSide,
-                thickness = thickness,
-                padding = padding,
-                thumbMinHeight = thumbMinHeight,
-                thumbColor = thumbColor,
-                thumbSelectedColor = thumbSelectedColor,
-                thumbShape = thumbShape,
-                visibleHeightDp = with(LocalDensity.current) { constraints.maxHeight.toDp() },
-                selectionMode = selectionMode,
-                indicatorContent = indicatorContent
-            )
-        }
+        ColumnScrollbar(
+            state = state,
+            rightSide = rightSide,
+            thickness = thickness,
+            padding = padding,
+            thumbMinHeight = thumbMinHeight,
+            thumbColor = thumbColor,
+            thumbSelectedColor = thumbSelectedColor,
+            thumbShape = thumbShape,
+            visibleHeightDp = with(LocalDensity.current) { constraints.maxHeight.toDp() },
+            indicatorContent = indicatorContent,
+            selectionMode = selectionMode,
+        )
     }
 }
 
@@ -101,8 +98,8 @@ private fun ColumnScrollbar(
     thumbColor: Color = Color(0xFF2A59B6),
     thumbSelectedColor: Color = Color(0xFF5281CA),
     thumbShape: Shape = CircleShape,
-    indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
     selectionMode: PreferenceValues.ScrollbarSelectionMode = PreferenceValues.ScrollbarSelectionMode.Thumb,
+    indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
     visibleHeightDp: Dp,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -167,15 +164,13 @@ private fun ColumnScrollbar(
     val isInAction = state.isScrollInProgress || isSelected
 
     val alpha by animateFloatAsState(
-        targetValue = if (isInAction) 1f else 0f,
-        animationSpec = tween(
+        targetValue = if (isInAction) 1f else 0f, animationSpec = tween(
             durationMillis = if (isInAction) 75 else 500, delayMillis = if (isInAction) 0 else 500
         )
     )
 
     val displacement by animateFloatAsState(
-        targetValue = if (isInAction) 0f else 14f,
-        animationSpec = tween(
+        targetValue = if (isInAction) 0f else 14f, animationSpec = tween(
             durationMillis = if (isInAction) 75 else 500, delayMillis = if (isInAction) 0 else 500
         )
     )
@@ -192,8 +187,7 @@ private fun ColumnScrollbar(
                 .graphicsLayer {
                     translationX = (if (rightSide) displacement.dp else -displacement.dp).toPx()
                     translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition
-                }
-        ) {
+                }) {
             ConstraintLayout(
                 Modifier.align(Alignment.TopEnd)
             ) {
@@ -209,17 +203,14 @@ private fun ColumnScrollbar(
                         .constrainAs(box) {
                             if (rightSide) end.linkTo(parent.end)
                             else start.linkTo(parent.start)
-                        }
-                ) {}
+                        }) {}
 
-                Box(
-                    Modifier.constrainAs(content) {
-                        top.linkTo(box.top)
-                        bottom.linkTo(box.bottom)
-                        if (rightSide) end.linkTo(box.start)
-                        else start.linkTo(box.end)
-                    }
-                ) {
+                Box(Modifier.constrainAs(content) {
+                    top.linkTo(box.top)
+                    bottom.linkTo(box.bottom)
+                    if (rightSide) end.linkTo(box.start)
+                    else start.linkTo(box.end)
+                }) {
                     indicatorContent(
                         normalizedOffset = offsetCorrectionInverse(normalizedOffsetPosition),
                         isThumbSelected = isSelected
@@ -263,12 +254,10 @@ private fun ColumnScrollbar(
                     },
                     onDragStopped = {
                         isSelected = false
-                    }
-                )
+                    })
                 .graphicsLayer {
                     translationX = (if (rightSide) displacement.dp else -displacement.dp).toPx()
-                }
-        ) {
+                }) {
             Box(
                 Modifier
                     .align(Alignment.TopEnd)
@@ -279,8 +268,7 @@ private fun ColumnScrollbar(
                     .width(thickness)
                     .clip(thumbShape)
                     .background(if (isSelected) thumbSelectedColor else thumbColor)
-                    .fillMaxHeight(normalizedThumbSize)
-            )
+                    .fillMaxHeight(normalizedThumbSize))
         }
     }
 }

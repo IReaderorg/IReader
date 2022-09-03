@@ -8,7 +8,7 @@ import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.toBook
 import org.ireader.common_resources.UiText
 import org.ireader.common_resources.SourceNotFoundException
-import org.ireader.core.utils.updateBook
+import org.ireader.domain.use_cases.local.book_usecases.updateBook
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.source.model.CommandList
 import org.ireader.core_ui.exceptionHandler

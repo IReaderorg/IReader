@@ -33,7 +33,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
-import androidx.compose.material3.rememberTopAppBarScrollState
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
@@ -100,10 +100,15 @@ fun ScreenContent() {
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-    val topAppBarState = rememberTopAppBarScrollState()
-    val vm: ScreenContentViewModel = hiltViewModel()
+    val topAppBarState = rememberTopAppBarState()
 
-    val (scrollBehavior, setScrollBehavior) = remember { mutableStateOf(TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)) }
+    val vm: ScreenContentViewModel = hiltViewModel()
+    val scrollBarBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
+
+    val (scrollBehavior, setScrollBehavior) = remember {
+        mutableStateOf(scrollBarBehavior)
+    }
+
 
     val (requestedHideBottomNav, requestHideBottomNav) = remember { mutableStateOf(false) }
     val (requestedHideSystemNavBar, requestHideSystemNavBar) = remember { mutableStateOf(false) }
@@ -134,7 +139,7 @@ fun ScreenContent() {
 
     DisposableEffect(navBackStackEntry) {
         onDispose {
-            scrollBehavior.state.offsetLimit = 0F
+            scrollBehavior.state.heightOffset = 0F
             requestHideBottomNav(false)
             requestHideSystemStatusBar(false)
             requestHideSystemNavBar(false)
@@ -202,8 +207,13 @@ fun ScreenContent() {
 
                 TransparentStatusBar(enable = transparentStatusBar) {
                     Scaffold(
-                        modifier = scaffoldModifier.value.nestedScroll(scrollBehavior.nestedScrollConnection),
+                        modifier = scaffoldModifier.value
+                            .nestedScroll(scrollBehavior.nestedScrollConnection)
+                            .fillMaxSize(),
                         topBar = {
+                            val height = remember(topAppBarState.heightOffset) {
+                                if (topAppBarState.heightOffset == topAppBarState.heightOffsetLimit) 0 else (-100)
+                            }
                             if (navStackEntry != null) {
                                 AnimatedVisibility(
                                     visible = requestedHideTopBar,
@@ -224,7 +234,7 @@ fun ScreenContent() {
                                             requestedCustomSystemColor = requestedCustomColor,
                                             scrollBehavior = scrollBehavior,
                                             setScrollBehavior = setScrollBehavior,
-                                            topScrollState = topAppBarState
+                                            topScrollState = topAppBarState,
                                         )
                                     )
                                 }
@@ -253,7 +263,7 @@ fun ScreenContent() {
                                         )
                                     }
                                 )
-                                if(haveCustomizedVariantBottomAppBar) {
+                                if (haveCustomizedVariantBottomAppBar) {
                                     screenSpec?.BottomAppBar(
                                         Controller(
                                             navController = navController,
@@ -421,9 +431,7 @@ fun IModalDrawer(
                 sheetContent()
             },
             scrimColor = androidx.compose.material3.MaterialTheme.colorScheme.surface,
-
             content = content,
-
         )
     } else {
         content()

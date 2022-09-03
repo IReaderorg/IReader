@@ -45,6 +45,7 @@ import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.SuperSmallTextComposable
 import org.ireader.core_api.source.Source
 import org.ireader.core_ui.modifier.clickableNoIndication
+import org.ireader.core_ui.ui.mapAlignment
 import org.ireader.core_ui.ui.mapTextAlign
 import org.ireader.domain.services.tts_service.TTSState
 import org.ireader.ui_tts.R
@@ -128,20 +129,22 @@ fun TTSScreen(
                                 color = vm.theme.value.onTextColor,
                             )
                         }
-                        Row(modifier = Modifier
-                            .align(Alignment.TopEnd)) {
-                            AppIconButton(
-                                onClick = onPlay,
-                                imageVector = if (vm.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                tint = vm.theme.value.onTextColor,
-                                contentDescription = null
-                            )
-                            AppIconButton(
-                                onClick = { vm.fullScreenMode = !vm.fullScreenMode },
-                                imageVector = if (vm.fullScreenMode) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
-                                tint = vm.theme.value.onTextColor,
-                                contentDescription = null
-                            )
+                        vm.ttsIconAlignments.value.mapAlignment()?.let { alignment ->
+                            Row(modifier = Modifier
+                                .align(alignment)) {
+                                AppIconButton(
+                                    onClick = onPlay,
+                                    imageVector = if (vm.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                    tint = vm.theme.value.onTextColor,
+                                    contentDescription = null
+                                )
+                                AppIconButton(
+                                    onClick = { vm.fullScreenMode = !vm.fullScreenMode },
+                                    imageVector = if (vm.fullScreenMode) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
+                                    tint = vm.theme.value.onTextColor,
+                                    contentDescription = null
+                                )
+                            }
                         }
                     }
                 }

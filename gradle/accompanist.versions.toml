@@ -1,5 +1,5 @@
 [versions]
-accompanist = "0.24.13-rc"
+accompanist = "0.26.2-beta"
 
 [libraries]
 pager = { module = "com.google.accompanist:accompanist-pager", version.ref ="accompanist" }

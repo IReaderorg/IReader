@@ -1,14 +1,12 @@
 package org.ireader.presentation.ui
 
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
-import org.ireader.components.Controller
 import org.ireader.common_models.entities.toSavedDownload
+import org.ireader.components.Controller
 import org.ireader.downloader.DownloaderScreen
 import org.ireader.downloader.DownloaderTopAppBar
 import org.ireader.downloader.DownloaderViewModel
@@ -23,10 +21,6 @@ object DownloaderScreenSpec : ScreenSpec {
         }
     )
 
-    @OptIn(
-        ExperimentalAnimationApi::class,
-        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
-    )
     @Composable
     override fun Content(
         controller: Controller
@@ -42,10 +36,10 @@ object DownloaderScreenSpec : ScreenSpec {
                 )
             },
             vm = vm,
-            snackBarHostState = controller.snackBarHostState
+            snackBarHostState = controller.snackBarHostState,
+            paddingValues = controller.scaffoldPadding
         )
     }
-    @OptIn(ExperimentalMaterialApi::class)
     @ExperimentalMaterial3Api
     @Composable
     override fun TopBar(

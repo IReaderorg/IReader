@@ -31,11 +31,14 @@ import org.ireader.components.Controller
 import org.ireader.components.CustomizeAnimateVisibility
 import org.ireader.components.NavigationBarTokens
 import org.ireader.components.ThemePreference
+import org.ireader.components.components.Build
+import org.ireader.components.components.Components
 import org.ireader.components.components.component.ChipChoicePreference
 import org.ireader.components.components.component.SliderPreference
 import org.ireader.components.components.component.SwitchPreference
 import org.ireader.core_api.log.Log
 import org.ireader.core_ui.theme.readerThemes
+import org.ireader.core_ui.ui.PreferenceAlignment
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.presentation.R
 import org.ireader.reader.ReaderScreenDrawer
@@ -180,7 +183,7 @@ object TTSScreenSpec : ScreenSpec {
         val vm: TTSViewModel = hiltViewModel(controller.navBackStackEntry)
         val context = LocalContext.current
         val scrollableTabsHeight = LocalDensity.current.run {
-            org.ireader.components.NavigationBarTokens.ContainerHeight + (if (controller.scrollBehavior.state.offset == controller.scrollBehavior.state.offsetLimit) controller.scrollBehavior.state.offset * 2 else controller.scrollBehavior.state.offsetLimit).toDp()
+            org.ireader.components.NavigationBarTokens.ContainerHeight + (if (controller.scrollBehavior.state.heightOffset == controller.scrollBehavior.state.heightOffsetLimit) controller.scrollBehavior.state.heightOffset * 2 else controller.scrollBehavior.state.heightOffsetLimit).toDp()
         }
         CustomizeAnimateVisibility(visible = !vm.fullScreenMode, goUp = false) {
             androidx.compose.material3.BottomAppBar(
@@ -345,6 +348,22 @@ object TTSScreenSpec : ScreenSpec {
                 trailing = "${vm.sleepTimeUi.value.toInt()} M",
                 isEnable = vm.sleepModeUi.value
             )
+            Components.Chip(
+                preference = listOf(
+                    stringResource(id = org.ireader.ui_reader.R.string.top_left),
+                    stringResource(id = org.ireader.ui_reader.R.string.bottom_left),
+                    stringResource(id = R.string.hide),
+                ),
+                title = stringResource(id = org.ireader.ui_reader.R.string.alignment),
+                onValueChange = {
+                    when (it) {
+                        0 -> vm.ttsIconAlignments.value = PreferenceAlignment.TopLeft
+                        1 -> vm.ttsIconAlignments.value = PreferenceAlignment.BottomLeft
+                        2 -> vm.ttsIconAlignments.value = PreferenceAlignment.Hide
+                    }
+                },
+                selected = vm.ttsIconAlignments.value.ordinal
+            ).Build()
         }
     }
 }

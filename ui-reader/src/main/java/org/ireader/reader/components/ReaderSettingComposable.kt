@@ -55,7 +55,7 @@ import org.ireader.core_ui.preferences.ReadingMode
 import org.ireader.core_ui.theme.FontType
 import org.ireader.core_ui.theme.ReaderTheme
 import org.ireader.core_ui.ui.Colour.contentColor
-import org.ireader.core_ui.ui.PreferenceAlignment
+import org.ireader.core_ui.ui.PreferenceTextAlignment
 import org.ireader.reader.viewmodel.ReaderScreenViewModel
 import org.ireader.ui_reader.R
 
@@ -68,7 +68,7 @@ fun ReaderSettingMainLayout(
     onToggleAutoBrightness: () -> Unit,
     onChangeBrightness: (Float) -> Unit,
     onBackgroundChange: (themeId: Long) -> Unit,
-    onTextAlign: (PreferenceAlignment) -> Unit
+    onTextAlign: (PreferenceTextAlignment) -> Unit
 ) {
     val pagerState = rememberPagerState()
     val context = LocalContext.current
@@ -152,8 +152,8 @@ fun ReaderSettingMainLayout(
                     title = stringResource(id = R.string.alignment),
                     onValueChange = {
                         when (it) {
-                            0 -> vm.scrollIndicatorAlignment.value = PreferenceAlignment.Right
-                            1 -> vm.scrollIndicatorAlignment.value = PreferenceAlignment.Left
+                            0 -> vm.scrollIndicatorAlignment.value = PreferenceTextAlignment.Right
+                            1 -> vm.scrollIndicatorAlignment.value = PreferenceTextAlignment.Left
                         }
                     },
                     selected = vm.scrollIndicatorAlignment.value.ordinal
@@ -206,6 +206,7 @@ fun ReaderSettingMainLayout(
                     trailing = vm.betweenLetterSpaces.value.toString(),
                     valueRange = 0F..32F,
                 ),
+                Components.Space
             )
             LazyColumn(
                 verticalArrangement = Arrangement.Top,
@@ -240,33 +241,33 @@ fun ReaderSettingMainLayout(
                                         imageVector = Icons.Default.FormatAlignLeft,
                                         contentDescription = stringResource(R.string.text_align_left),
                                         onClick = {
-                                            onTextAlign(PreferenceAlignment.Left)
+                                            onTextAlign(PreferenceTextAlignment.Left)
                                         },
-                                        tint = if (vm.textAlignment.value == PreferenceAlignment.Left) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                        tint = if (vm.textAlignment.value == PreferenceTextAlignment.Left) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                                     )
                                     AppIconButton(
                                         imageVector = Icons.Default.FormatAlignCenter,
                                         contentDescription = stringResource(R.string.text_align_center),
                                         onClick = {
-                                            onTextAlign(PreferenceAlignment.Center)
+                                            onTextAlign(PreferenceTextAlignment.Center)
                                         },
-                                        tint = if (vm.textAlignment.value == PreferenceAlignment.Center) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                        tint = if (vm.textAlignment.value == PreferenceTextAlignment.Center) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                                     )
                                     AppIconButton(
                                         imageVector = Icons.Default.FormatAlignJustify,
                                         contentDescription = stringResource(R.string.text_align_justify),
                                         onClick = {
-                                            onTextAlign(PreferenceAlignment.Justify)
+                                            onTextAlign(PreferenceTextAlignment.Justify)
                                         },
-                                        tint = if (vm.textAlignment.value == PreferenceAlignment.Justify) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                        tint = if (vm.textAlignment.value == PreferenceTextAlignment.Justify) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                                     )
                                     AppIconButton(
                                         imageVector = Icons.Default.FormatAlignRight,
                                         contentDescription = stringResource(R.string.text_align_right),
                                         onClick = {
-                                            onTextAlign(PreferenceAlignment.Right)
+                                            onTextAlign(PreferenceTextAlignment.Right)
                                         },
-                                        tint = if (vm.textAlignment.value == PreferenceAlignment.Right) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                        tint = if (vm.textAlignment.value == PreferenceTextAlignment.Right) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                                     )
                                 }
                             }

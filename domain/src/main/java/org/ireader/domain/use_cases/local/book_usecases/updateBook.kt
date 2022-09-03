@@ -1,4 +1,4 @@
-package org.ireader.core.utils
+package org.ireader.domain.use_cases.local.book_usecases
 
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.takeIf
@@ -7,12 +7,17 @@ import java.net.URISyntaxException
 import java.util.Calendar
 
 fun updateBook(newBook: Book, oldBook: Book): Book {
+    val newKey = if (newBook.key.isNotBlank() && newBook.key != getBaseUrl(newBook.key)) {
+        newBook.key
+    } else {
+        oldBook.key
+    }
     return Book(
         id = oldBook.id,
         sourceId = oldBook.sourceId,
         customCover = oldBook.customCover,
         flags = oldBook.flags,
-        key = newBook.key.ifBlank { oldBook.key },
+        key = newKey,
         dateAdded = oldBook.dateAdded,
         lastUpdate = Calendar.getInstance().timeInMillis,
         favorite = oldBook.favorite,
@@ -32,7 +37,19 @@ fun updateBook(newBook: Book, oldBook: Book): Book {
         }, oldBook.cover),
         viewer = if (newBook.viewer != 0) newBook.viewer else oldBook.viewer,
         tableId = oldBook.tableId,
+        lastInit = oldBook.lastInit,
+        type = oldBook.type
     )
+}
+
+fun getBaseUrl(url: String): String {
+    return try {
+        URI.create(url).toURL().let { key ->
+            key.protocol + "://" + key.authority
+        }
+    } catch (e: Throwable) {
+        ""
+    }
 }
 
 fun getUrlWithoutDomain(orig: String): String {

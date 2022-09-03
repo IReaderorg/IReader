@@ -11,8 +11,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
-import org.ireader.components.Controller
 import org.ireader.common_extensions.async.viewModelIOCoroutine
+import org.ireader.components.Controller
 import org.ireader.components.reusable_composable.WarningAlert
 import org.ireader.domain.ui.NavigationArgs
 import org.ireader.history.HistoryScreen
@@ -60,7 +60,7 @@ object HistoryScreenSpec : BottomNavScreenSpec {
                     }
                 }
             },
-            scrollBehavior = controller.scrollBehavior
+            scrollBehavior = controller.scrollBehavior,
 
         )
     }

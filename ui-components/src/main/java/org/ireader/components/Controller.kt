@@ -7,13 +7,16 @@ import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.TopAppBarScrollState
+import androidx.compose.material3.TopAppBarState
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import org.ireader.core_ui.theme.CustomSystemColor
 
-data class Controller @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class) constructor(
+data class Controller @OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalMaterialApi::class
+) constructor(
     val navController: NavController,
     val navBackStackEntry: NavBackStackEntry,
     val snackBarHostState: SnackbarHostState,
@@ -26,6 +29,6 @@ data class Controller @OptIn(ExperimentalMaterial3Api::class, ExperimentalMateri
     val requestedHideSystemStatusBar: (Boolean) -> Unit = {},
     val requestedCustomSystemColor: (CustomSystemColor?) -> Unit = {},
     val scrollBehavior: TopAppBarScrollBehavior,
-    val topScrollState: TopAppBarScrollState,
-    val setScrollBehavior: (TopAppBarScrollBehavior) ->  Unit = {}
+    val topScrollState: TopAppBarState,
+    val setScrollBehavior: (TopAppBarScrollBehavior) -> Unit = {}
 )

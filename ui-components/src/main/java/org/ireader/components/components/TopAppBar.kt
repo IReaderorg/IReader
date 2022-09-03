@@ -53,7 +53,7 @@ fun Toolbar(
         shadowElevation = elevation,
     ) {
         SmallTopAppBar(
-            modifier = if (applyInsets) Modifier.statusBarsPadding() else Modifier,
+            modifier = if (applyInsets) modifier.statusBarsPadding() else modifier,
             title = title,
             navigationIcon = navigationIcon,
             actions = actions,

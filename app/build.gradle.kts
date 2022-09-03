@@ -68,7 +68,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = composeLib.versions.extension.get()
+        kotlinCompilerExtensionVersion = composeLib.versions.compiler.get()
     }
     defaultConfig {
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")

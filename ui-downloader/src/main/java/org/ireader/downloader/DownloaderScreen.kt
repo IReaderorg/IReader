@@ -3,12 +3,15 @@ package org.ireader.downloader
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
@@ -42,6 +45,7 @@ import org.ireader.components.BookListItem
 import org.ireader.components.BookListItemColumn
 import org.ireader.components.BookListItemSubtitle
 import org.ireader.components.BookListItemTitle
+import org.ireader.components.list.scrollbars.VerticalFastScroller
 import org.ireader.components.reusable_composable.BuildDropDownMenu
 import org.ireader.components.reusable_composable.DropDownMenuItem
 import org.ireader.components.reusable_composable.MidSizeTextComposable
@@ -57,9 +61,11 @@ fun DownloaderScreen(
         item:
             SavedDownloadWithInfo
     ) -> Unit,
-    snackBarHostState: SnackbarHostState
+    snackBarHostState: SnackbarHostState,
+    paddingValues: PaddingValues
 ) {
     val context = LocalContext.current
+    val scrollState = rememberLazyListState()
     LaunchedEffect(key1 = true) {
         vm.eventFlow.collectLatest { event ->
             when (event) {
@@ -75,6 +81,7 @@ fun DownloaderScreen(
     val downloads = vm.downloads
 
     androidx.compose.material3.Scaffold(
+        modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
         floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
         floatingActionButton = {
             androidx.compose.material.ExtendedFloatingActionButton(
@@ -112,19 +119,14 @@ fun DownloaderScreen(
             )
         },
     ) { padding ->
-        LazyColumn(modifier = Modifier.padding(padding)) {
+        VerticalFastScroller(listState = scrollState) {
+        LazyColumn(modifier = Modifier, state = scrollState) {
             items(count = downloads.size) { index ->
                 DownloadScreenItem(
                     downloads[index].toSavedDownload(),
                     onClickItem = {
                         if (vm.selection.isEmpty()) {
                             onDownloadItem(downloads[index])
-//                            controller.navController.navigate(
-//                                BookDetailScreenSpec.buildRoute(
-//                                    sourceId = downloads[index].sourceId,
-//                                    bookId = downloads[index].bookId
-//                                )
-//                            )
                         } else {
                             when (vm.downloads[index].chapterId) {
                                 in vm.selection -> {
@@ -153,7 +155,7 @@ fun DownloaderScreen(
                     },
                 )
             }
-        }
+        }   }
     }
 }
 
@@ -221,7 +223,7 @@ fun DownloadScreenItem(
                 Icon(imageVector = Icons.Outlined.CheckCircleOutline, contentDescription = "")
             }
         } else {
-            Column {
+            Box {
                 IconButton(onClick = { isMenuExpanded = true }) {
                     Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = "")
                 }
@@ -238,7 +240,9 @@ fun DownloadScreenItem(
                             onCancelAllFromThisSeries(item)
                         }
                     )
-                BuildDropDownMenu(list, enable = isMenuExpanded, onEnable = { isMenuExpanded = it })
+                BuildDropDownMenu(list, onExpand = {
+                    isMenuExpanded
+                })
             }
         }
     }

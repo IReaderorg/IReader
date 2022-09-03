@@ -1,13 +1,10 @@
 package org.ireader.bookDetails
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -50,12 +47,13 @@ import org.ireader.common_extensions.isScrollingUp
 import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.Chapter
 import org.ireader.components.components.ChapterRow
-import org.ireader.components.list.scrollbars.LazyColumnScrollbar
+import org.ireader.components.list.scrollbars.VerticalFastScroller
 import org.ireader.components.reusable_composable.AppTextField
 import org.ireader.core_api.source.Source
 import org.ireader.core_ui.preferences.ChapterDisplayMode
 import org.ireader.ui_book_details.R
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(
     ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class,
     ExperimentalComposeUiApi::class,
@@ -129,22 +127,18 @@ fun BookDetailScreen(
                         },
                         onClick = onRead,
                         expanded = scrollState.isScrollingUp() || scrollState.isScrolledToEnd(),
-                        modifier = Modifier
-                            .padding(
-                                WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
-                                    .asPaddingValues()
-                            ),
+                        modifier = Modifier,
                         shape = CircleShape
 
                     )
                 }
             }
-        ) { paddingValues ->
+        ) {
             Box {
+                VerticalFastScroller(listState = scrollState) {
 
-                LazyColumnScrollbar(listState = scrollState) {
                     LazyColumn(
-                        modifier = Modifier.padding(paddingValues),
+                        modifier = Modifier,
                         verticalArrangement = Arrangement.Top,
                         state = scrollState
                     ) {
@@ -214,18 +208,21 @@ fun BookDetailScreen(
                             )
                         }
                     }
-                    ChapterDetailBottomBar(
-                        vm,
-                        context,
-                        onDownload = {
-                        },
-                        onBookmark = {
-                        },
-                        onMarkAsRead = {
-                        },
-                        visible = vm.hasSelection,
-                        modifier = Modifier.align(Alignment.BottomCenter)
-                    )
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        ChapterDetailBottomBar(
+                            vm,
+                            context,
+                            onDownload = {
+                            },
+                            onBookmark = {
+                            },
+                            onMarkAsRead = {
+                            },
+                            visible = vm.hasSelection,
+                            modifier = Modifier.align(Alignment.BottomCenter)
+                        )
+                    }
+
                 }
             }
         }

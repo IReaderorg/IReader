@@ -3,7 +3,7 @@ package org.ireader.presentation.theme
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.ExperimentalTextApi
@@ -36,7 +36,7 @@ fun AppTheme(
         darkIcons = customColors.isBarLight,
         isNavigationBarContrastEnforced = false
     )
-    LaunchedEffect(customColors.isBarLight, transparentStatusBar, isCustomColorEnable, status, navigation) {
+    DisposableEffect(customColors.isBarLight, transparentStatusBar, isCustomColorEnable, status, navigation) {
         val isLight = materialColors.isLight()
         val darkIcons =
             if (transparentStatusBar) isLight else customColors.isBarLight
@@ -65,6 +65,7 @@ fun AppTheme(
                 darkIcons = customColors.isBarLight,
             )
         }
+        onDispose {  }
     }
 
     AppColors(
