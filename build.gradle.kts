@@ -35,6 +35,7 @@ plugins {
     id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.6" apply false
     id("com.google.dagger.hilt.android") version "2.43.2" apply false
     id("org.jetbrains.dokka") version "1.7.10"  apply false
+    id("com.google.devtools.ksp") version "1.6.21-1.0.5"
 }
 
 

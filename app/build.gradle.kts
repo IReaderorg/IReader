@@ -106,7 +106,9 @@ android {
 //            applicationIdSuffix = debugType.applicationIdSuffix
 //        }
     }
+
 }
+
 
 dependencies {
     implementation(androidx.emoji)
