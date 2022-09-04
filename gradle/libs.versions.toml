@@ -105,6 +105,9 @@ ireader-ktorOkhttp =   { module = "io.ktor:ktor-client-okhttp", version.ref = "k
 ireader-ktorAndroid = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 
 
+
+
+
 [bundles]
 tinylog = ["tinylog-impl", "tinylog-api"]
 ireader = ["ireader-ktorCore", "ireader-ktorContentNegotiation","ireader-ktorSerialization","ireader-ktorGson","ireader-ktorOkhttp","ireader-ktorAndroid"]

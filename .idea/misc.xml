@@ -24,6 +24,18 @@
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/androidMain/res/drawable/anim_caret_down.xml" value="0.1" />
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/androidMain/res/drawable/baseline_close_24.xml" value="0.1145" />
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/androidMain/res/drawable/baseline_refresh_24.xml" value="0.1185" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/androidMain/res/drawable/ic_baseline_fast_forward.xml" value="0.1" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/androidMain/res/drawable/ic_baseline_open_in_new_24.xml" value="0.1" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/androidMain/res/drawable/ic_baseline_pause.xml" value="0.1" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/androidMain/res/drawable/ic_baseline_play_arrow.xml" value="0.1" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/androidMain/res/drawable/ic_baseline_skip_next.xml" value="0.1" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/androidMain/res/drawable/ic_baseline_skip_previous.xml" value="0.1" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/androidMain/res/drawable/ic_decrease_text_size.xml" value="0.1" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/androidMain/res/drawable/ic_discord_24dp.xml" value="0.1" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/androidMain/res/drawable/ic_downloading.xml" value="0.1" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/androidMain/res/drawable/ic_eternity.xml" value="0.1" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/androidMain/res/drawable/ic_eternity_full.xml" value="0.1" />
+        <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/androidMain/res/drawable/ic_infinity.xml" value="0.236" />
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/androidMain/res/drawable/ic_no_image_placeholder.xml" value="0.1185" />
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/androidMain/res/drawable/spash_icon.xml" value="0.236" />
         <entry key="..\:/Programming/Android/d-projects/IReader-main-project/common-resources/src/androidMain/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1185" />
