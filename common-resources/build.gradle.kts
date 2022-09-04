@@ -1,16 +1,56 @@
+import org.jetbrains.compose.compose
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.TimeZone
 
 plugins {
+    kotlin("multiplatform")
     id("com.android.library")
-    id("kotlin-android")
-    id("kotlin-kapt")
+    id("org.jetbrains.gradle.plugin.idea-ext")
 }
+kotlin {
+    android()
+    jvm("desktop")
+    sourceSets {
+        val libsLibrary = versionCatalogs.named("libs")
+        val commonMain by getting {
+            dependencies {
+                api(libsLibrary.findLibrary("moko-core").get())
+                compileOnly(compose.runtime)
+                compileOnly(compose.ui)
+            }
+        }
+        val androidMain by getting {
+            dependencies {
+                compileOnly(composeLib.compose.runtime)
+                compileOnly(composeLib.compose.ui)
+            }
+        }
+        val desktopMain by getting {
+
+        }
+
+    }
+
+}
+
 
 android {
     namespace = "org.ireader.common_resources"
+    sourceSets {
+        named("main") {
+            res.srcDir("src/commonMain/resources")
+        }
+    }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = composeLib.versions.compiler.get()
+    }
+
+
     defaultConfig {
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
         buildConfigField("String", "COMMIT_SHA", "\"${getGitSha()}\"")
@@ -21,16 +61,7 @@ android {
         buildConfigField("int", "VERSION_CODE", "${ProjectConfig.versionCode}")
     }
 }
-ext {
-    val minSdk = ProjectConfig.minSdk
-    val targetSdk = ProjectConfig.targetSdk
-    val versionCode = ProjectConfig.versionCode
-    val versionName = ProjectConfig.versionName
-}
 
-dependencies {
-    implementation(androidx.material)
-}
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround
 fun getCommitCount(): String {
@@ -44,16 +75,31 @@ fun getGitSha(): String {
 }
 
 fun getBuildTime(): String {
-    val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
+    val df : java.text.SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
     df.timeZone = TimeZone.getTimeZone("UTC")
     return df.format(Date())
 }
 
 fun runCommand(command: String): String {
-    val byteOut = ByteArrayOutputStream()
+    val byteOut : java.io.ByteArrayOutputStream = ByteArrayOutputStream()
     project.exec {
         commandLine = command.split(" ")
         standardOutput = byteOut
     }
     return String(byteOut.toByteArray()).trim()
 }
+//idea {
+//    module {
+//        (this as ExtensionAware).configure<org.jetbrains.gradle.ext.ModuleSettings> {
+//            (this as ExtensionAware).configure<org.jetbrains.gradle.ext.PackagePrefixContainer> {
+//                arrayOf(
+//                    "src/commonMain/kotlin",
+//                    "src/androidMain/kotlin",
+//                    "src/desktopMain/kotlin",
+//                    "src/jvmMain/kotlin"
+//                ).forEach { put(it, "org.ireader.common_resources") }
+//            }
+//        }
+//    }
+//}
+

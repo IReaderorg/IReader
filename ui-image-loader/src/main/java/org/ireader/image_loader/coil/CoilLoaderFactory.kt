@@ -10,7 +10,7 @@ import coil.ImageLoaderFactory
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.disk.DiskCache
-import org.ireader.core_api.http.main.HttpClients
+import org.ireader.core_api.http.HttpClients
 import org.ireader.core_api.http.okhttp
 import org.ireader.core_catalogs.CatalogStore
 import org.ireader.image_loader.coil.cache.CoverCache

@@ -21,13 +21,13 @@ dependencies {
     implementation(composeLib.compose.icons)
     implementation(composeLib.compose.navigation)
     implementation(composeLib.compose.coil)
-    implementation(commonLib.coil.core)
-    implementation(commonLib.coil.gif)
-    implementation(commonLib.coil.compose)
+    implementation(libs.coil.core)
+    implementation(libs.coil.gif)
+    implementation(libs.coil.compose)
     implementation(composeLib.compose.foundation)
     implementation(composeLib.compose.animations)
     implementation(composeLib.material3.core)
 
-    implementation(commonLib.hilt.android)
-    kapt(commonLib.hilt.androidcompiler)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.androidcompiler)
 }

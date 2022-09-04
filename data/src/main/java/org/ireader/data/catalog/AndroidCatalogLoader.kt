@@ -12,7 +12,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import org.ireader.common_extensions.withIOContext
 import org.ireader.common_resources.BuildConfig
-import org.ireader.core_api.http.main.HttpClients
+import org.ireader.core_api.http.HttpClients
 import org.ireader.core_api.log.Log
 import org.ireader.core_api.prefs.AndroidPreferenceStore
 import org.ireader.core_api.prefs.PrefixedPreferenceStore
@@ -217,7 +217,7 @@ class AndroidCatalogLoader(
         val nsfw = metadata.getInt(METADATA_NSFW, 0) == 1
 
         val preferenceSource = PrefixedPreferenceStore(catalogPreferences, pkgName)
-        val dependencies = Dependencies(httpClients, preferenceSource)
+        val dependencies = org.ireader.core_api.source.Dependencies(httpClients, preferenceSource)
 
         return ValidatedData(versionCode, versionName, description, nsfw, classToLoad, dependencies)
     }
@@ -225,7 +225,7 @@ class AndroidCatalogLoader(
     private fun loadSource(pkgName: String, loader: ClassLoader, data: ValidatedData): Source? {
         return try {
             val obj = Class.forName(data.classToLoad, false, loader)
-                .getConstructor(Dependencies::class.java)
+                .getConstructor(org.ireader.core_api.source.Dependencies::class.java)
                 .newInstance(data.dependencies)
 
             obj as? Source ?: throw Exception("Unknown source class type! ${obj.javaClass}")
@@ -241,7 +241,7 @@ class AndroidCatalogLoader(
         val description: String,
         val nsfw: Boolean,
         val classToLoad: String,
-        val dependencies: Dependencies,
+        val dependencies: org.ireader.core_api.source.Dependencies,
     )
 
     private companion object {

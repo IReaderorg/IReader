@@ -37,7 +37,7 @@ dependencies {
     implementation(accompanist.pagerIndicator)
     implementation(accompanist.swipeRefresh)
     implementation(accompanist.flowlayout)
-    implementation(commonLib.hilt.android)
+    implementation(libs.hilt.android)
     implementation(project(mapOf("path" to ":domain")))
-    kapt(commonLib.hilt.androidcompiler)
+    kapt(libs.hilt.androidcompiler)
 }

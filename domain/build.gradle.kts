@@ -43,35 +43,35 @@ dependencies {
     implementation(composeLib.compose.runtime)
     implementation(composeLib.compose.navigation)
     implementation(composeLib.material3.core)
-    implementation(commonLib.googleTranslator)
+    implementation(libs.googleTranslator)
 
     implementation(composeLib.compose.coil)
     implementation(composeLib.compose.paging)
-    implementation(commonLib.gson)
+    implementation(libs.gson)
     implementation(project(mapOf("path" to ":common-models")))
     debugImplementation(composeLib.compose.uiTestManifest)
 
     implementation(androidx.work.runtime)
-    implementation(commonLib.hilt.worker)
+    implementation(libs.hilt.worker)
 
     /** Room **/
-    implementation(commonLib.room.runtime)
-    implementation(commonLib.room.ktx)
-    // implementation(commonLib.room.paging)
-    kapt(commonLib.room.compiler)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    // implementation(libs.room.paging)
+    kapt(libs.room.compiler)
 
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.coroutines.android)
 
-    implementation(commonLib.okhttp.okhttp3)
-    implementation(commonLib.okhttp.interceptor)
-    implementation(commonLib.okhttp.doh)
+    implementation(libs.okhttp.okhttp3)
+    implementation(libs.okhttp.interceptor)
+    implementation(libs.okhttp.doh)
 
-    implementation(commonLib.okhttp.doh)
+    implementation(libs.okhttp.doh)
 
-    implementation(commonLib.okio)
-    implementation(commonLib.jsoup)
+    implementation(libs.okio)
+    implementation(libs.jsoup)
 
     implementation(androidx.dataStore)
 
@@ -83,19 +83,19 @@ dependencies {
     implementation(kotlinx.serialization.json)
     implementation(kotlinx.reflect)
 
-    kapt(commonLib.hilt.androidcompiler)
-    kapt(commonLib.hilt.compiler)
-    implementation(commonLib.hilt.android)
+    kapt(libs.hilt.androidcompiler)
+    kapt(libs.hilt.compiler)
+    implementation(libs.hilt.android)
 
     /** LifeCycle **/
     //  implementation(kotlinx.lifecycle.viewModel)
     implementation(androidx.lifecycle.runtime)
 
     implementation(kotlinx.stdlib)
-    implementation(commonLib.ktor.core)
-    implementation(commonLib.ktor.contentNegotiation)
-    implementation(commonLib.ktor.okhttp)
-    implementation(commonLib.bundles.ireader)
+    implementation(libs.ktor.core)
+    implementation(libs.ktor.contentNegotiation)
+    implementation(libs.ktor.okhttp)
+    implementation(libs.bundles.ireader)
 
     testImplementation(test.junit4)
     testImplementation(test.junitAndroidExt)
@@ -109,7 +109,7 @@ dependencies {
     androidTestImplementation(test.coroutines)
     androidTestImplementation(test.coroutines)
     androidTestImplementation(composeLib.compose.j4Unit)
-    androidTestImplementation(commonLib.hilt.androidtest)
+    androidTestImplementation(libs.hilt.androidtest)
 
     // Instrumented Unit Tests
     androidTestImplementation("androidx.arch.core:core-testing:2.1.0")

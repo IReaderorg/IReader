@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.BookItem
+import org.ireader.common_resources.asString
 import org.ireader.components.components.ShowLoading
 import org.ireader.components.list.LayoutComposable
 import org.ireader.components.reusable_composable.AppIconButton
@@ -66,7 +67,7 @@ import org.ireader.ui_explore.R
 fun ExploreScreen(
     modifier: Modifier = Modifier,
     vm: ExploreViewModel,
-    source: CatalogSource,
+    source: org.ireader.core_api.source.CatalogSource,
     onFilterClick: () -> Unit,
     getBooks: (query: String?, listing: Listing?, filters: List<Filter<*>>) -> Unit,
     loadItems: (Boolean) -> Unit,

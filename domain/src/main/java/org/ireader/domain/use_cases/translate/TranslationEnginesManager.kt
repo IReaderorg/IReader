@@ -1,7 +1,7 @@
 package org.ireader.domain.use_cases.translate
 
 import org.ireader.common_data.TranslateEngine
-import org.ireader.core_api.http.main.HttpClients
+import org.ireader.core_api.http.HttpClients
 import org.ireader.core_ui.preferences.ReaderPreferences
 import javax.inject.Inject
 

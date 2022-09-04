@@ -31,6 +31,6 @@ dependencies {
     implementation(accompanist.pagerIndicator)
     implementation(accompanist.pager)
     implementation(accompanist.swipeRefresh)
-    implementation(commonLib.hilt.android)
-    kapt(commonLib.hilt.androidcompiler)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.androidcompiler)
 }

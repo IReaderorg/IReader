@@ -69,6 +69,6 @@ fun FilterBottomSheetPrev() {
         {},
         {},
         { },
-        (TestSource() as CatalogSource).getFilters()
+        (TestSource() as org.ireader.core_api.source.CatalogSource).getFilters()
     )
 }

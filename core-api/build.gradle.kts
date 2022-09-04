@@ -1,8 +1,10 @@
+
+
 plugins {
+    kotlin("multiplatform")
     id("com.android.library")
-    id("kotlin-android")
     id("org.jetbrains.gradle.plugin.idea-ext")
-    id("com.vanniktech.maven.publish.base")
+    id("org.jetbrains.dokka")
     kotlin("plugin.serialization")
     `maven-publish`
     signing
@@ -10,52 +12,125 @@ plugins {
 android {
     namespace = "org.ireader.core_api"
 }
-
-dependencies {
-    api(kotlinx.coroutines.core)
-    api(kotlinx.stdlib)
-    api(kotlinx.datetime)
-    api(kotlinx.serialization.json)
-
-    api(commonLib.ktor.core)
-    implementation(commonLib.ktor.contentNegotiation)
-    implementation(commonLib.ktor.contentNegotiation.gson)
-    implementation(commonLib.ktor.contentNegotiation.kotlinx)
-    implementation(commonLib.ktor.contentNegotiation.jackson)
-
-    api(commonLib.okio)
-
-    implementation(androidx.core)
-    implementation(androidx.lifecycle.runtime)
-    implementation(androidx.dataStore)
-    implementation(commonLib.quickjsAndroid)
-    compileOnly(commonLib.jsoup)
-    implementation(commonLib.bundles.tinylog)
-    api(commonLib.ktor.okhttp)
-}
-
-val packageVersion = "1.2-SNAPSHOT"
-
-configure<com.vanniktech.maven.publish.MavenPublishBaseExtension> {
-    group = requireNotNull(project.findProperty("GROUP"))
-    version = requireNotNull(project.findProperty("VERSION_NAME"))
-    mavenPublishing {
-        signAllPublications()
-        configure(com.vanniktech.maven.publish.AndroidSingleVariantLibrary())
+kotlin {
+    android {
+        publishLibraryVariants("release")
     }
-    pomFromGradleProperties()
+    android()
+    jvm("desktop")
+
+    sourceSets {
+        named("commonMain") {
+            dependencies {
+                api(kotlinx.coroutines.core)
+                api(kotlinx.stdlib)
+                api(kotlinx.datetime)
+                api(kotlinx.serialization.json)
+                implementation(libs.ktor.contentNegotiation.gson)
+                api(libs.ktor.core)
+                api(libs.ktor.contentNegotiation)
+                api(libs.ktor.contentNegotiation.kotlinx)
+                api(libs.okio)
+                compileOnly(libs.jsoup)
+            }
+        }
+        named("androidMain") {
+            kotlin.srcDir("./src/jvmMain/kotlin")
+            dependencies {
+                implementation(androidx.core)
+                implementation(androidx.lifecycle.process)
+                implementation(androidx.dataStore)
+                implementation(libs.quickjs.android)
+                api(libs.ktor.okhttp)
+                implementation(libs.bundles.tinylog)
+                compileOnly(libs.jsoup)
+            }
+        }
+        named("desktopMain") {
+            kotlin.srcDir("./src/jvmMain/kotlin")
+            dependencies {
+                implementation(libs.quickjs.jvm)
+                api(libs.ktor.okhttp)
+                implementation(libs.bundles.tinylog)
+                implementation("javax.inject:javax.inject:1")
+                compileOnly(libs.jsoup)
+            }
+        }
+    }
 }
+dependencies {
+
+    implementation("javax.inject:javax.inject:1")
+
+}
+afterEvaluate {
+    configure<PublishingExtension> {
+        publications.all {
+            val mavenPublication = this as? MavenPublication
+            mavenPublication?.artifactId = "${project.name}-$name"
+        }
+    }
+}
+val packageVersion = "1.2.1"
 
 publishing {
+    publications.withType(MavenPublication::class) {
+        groupId = "io.github.kazemcodes"
+        artifactId = "core-api"
+        version = packageVersion
+        pom {
+            name.set("IReader Core")
+            description.set("Common classes for IReader")
+            url.set("https://github.com/kazemcodes/IReader")
+            licenses {
+                license {
+                    name.set("Mozilla Public License 2.0")
+                    url.set("https://www.mozilla.org/en-US/MPL/2.0/")
+                }
+            }
+            developers {
+                developer {
+                    id.set("kazemcodes")
+                    name.set("kazem.codes")
+                    email.set("https://github.com/kazemcodes")
+                }
+            }
+            scm {
+                connection.set("scm:git:git:github.com:kazemcodes/IReader.git")
+                developerConnection.set("scm:git:github.com:kazemcodes/IReader.git")
+                url.set("https://github.com/kazemcodes/IReader")
+            }
+        }
+    }
+
     repositories {
         maven {
-            val releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2"
+            val releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
             val snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots"
             setUrl(if (packageVersion.endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
 
             credentials {
                 username = System.getenv("MAVEN_USERNAME")
                 password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+    }
+}
+
+signing {
+    sign(publishing.publications)
+}
+
+idea {
+    module {
+        (this as ExtensionAware).configure<org.jetbrains.gradle.ext.ModuleSettings> {
+            (this as ExtensionAware).configure<org.jetbrains.gradle.ext.PackagePrefixContainer> {
+                arrayOf(
+                    "src/commonMain/kotlin",
+                    "src/androidMain/kotlin",
+                    "src/desktopMain/kotlin",
+                    "src/jvmMain/kotlin"
+                ).forEach { put(it, "org.ireader.core_api") }
             }
         }
     }

@@ -40,6 +40,7 @@ import kotlinx.coroutines.launch
 import org.ireader.bookDetails.viewmodel.BookDetailViewModel
 import org.ireader.bookDetails.viewmodel.ChapterSort
 import org.ireader.bookDetails.viewmodel.ChaptersFilters
+import org.ireader.common_resources.asString
 import org.ireader.components.components.component.pagerTabIndicatorOffset
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.preferences.ChapterDisplayMode

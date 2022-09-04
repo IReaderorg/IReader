@@ -138,10 +138,10 @@ dependencies {
     implementation(project(Modules.uiSources))
 
     /** Firebase **/
-    implementation(platform(commonLib.firebase.bom))
-    implementation(commonLib.firebase.analyticKtx)
-    implementation(commonLib.firebase.analytic)
-    implementation(commonLib.firebase.crashlytics)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analyticKtx)
+    implementation(libs.firebase.analytic)
+    implementation(libs.firebase.crashlytics)
 
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)
@@ -149,28 +149,28 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics:21.0.0")
 
     /** Hilt **/
-    kapt(commonLib.hilt.androidcompiler)
+    kapt(libs.hilt.androidcompiler)
 
-    implementation(commonLib.hilt.android)
+    implementation(libs.hilt.android)
     implementation(androidx.work.runtime)
-    implementation(commonLib.hilt.worker)
+    implementation(libs.hilt.worker)
 
-    implementation(commonLib.jsoup)
-    testImplementation(commonLib.ktor.core.cio)
+    implementation(libs.jsoup)
+    testImplementation(libs.ktor.core.cio)
 
     implementation(composeLib.compose.runtime)
 
     /** Room **/
-    implementation(commonLib.room.runtime)
-    implementation(commonLib.room.ktx)
-    kapt(commonLib.room.compiler)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    kapt(libs.room.compiler)
 
     testImplementation(test.bundles.common)
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
-    testImplementation(commonLib.hilt.androidtest)
-    testImplementation(commonLib.room.testing)
-    androidTestImplementation(commonLib.hilt.androidtest)
-    androidTestImplementation(commonLib.room.testing)
+    testImplementation(libs.hilt.androidtest)
+    testImplementation(libs.room.testing)
+    androidTestImplementation(libs.hilt.androidtest)
+    androidTestImplementation(libs.room.testing)
     androidTestImplementation(test.bundles.common)
 }
 

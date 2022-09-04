@@ -35,11 +35,11 @@ dependencies {
     implementation(accompanist.pagerIndicator)
     implementation(accompanist.pager)
     implementation(accompanist.swipeRefresh)
-    implementation(commonLib.hilt.android)
+    implementation(libs.hilt.android)
 
-    implementation(commonLib.modernstorage.permissions)
-    implementation(commonLib.modernstorage.storage)
+    implementation(libs.modernstorage.permissions)
+    implementation(libs.modernstorage.storage)
 
     implementation(project(mapOf("path" to ":domain")))
-    kapt(commonLib.hilt.androidcompiler)
+    kapt(libs.hilt.androidcompiler)
 }

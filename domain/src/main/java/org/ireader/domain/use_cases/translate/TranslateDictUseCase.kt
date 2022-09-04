@@ -5,7 +5,7 @@ import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.delay
 import org.ireader.common_data.TranslateEngine
 import org.ireader.common_resources.UiText
-import org.ireader.core_api.http.main.HttpClients
+import org.ireader.core_api.http.HttpClients
 import java.net.URLEncoder
 
 class TranslateDictUseCase(

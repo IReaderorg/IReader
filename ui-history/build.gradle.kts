@@ -34,8 +34,8 @@ dependencies {
     implementation(accompanist.pagerIndicator)
     implementation(accompanist.pager)
     implementation(accompanist.swipeRefresh)
-    implementation(commonLib.hilt.android)
+    implementation(libs.hilt.android)
     implementation(kotlinx.datetime)
     implementation(project(mapOf("path" to ":domain")))
-    kapt(commonLib.hilt.androidcompiler)
+    kapt(libs.hilt.androidcompiler)
 }

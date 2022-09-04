@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.ireader.common_resources.REPO_URL
-import org.ireader.core_api.http.main.HttpClients
+import org.ireader.core_api.http.HttpClients
 import org.ireader.core_catalogs.service.CatalogRemoteApi
 import org.ireader.core_ui.CatalogNotFoundException
 

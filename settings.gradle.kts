@@ -35,18 +35,20 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         google()
+        mavenCentral()
     }
 }
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        mavenLocal()
         mavenCentral()
         google()
         maven(url = "https://maven.pkg.jetbrains.space/public/p/compose/dev")
-        maven(url = "https://oss.sonatype.org/content/repositories/snapshots/")
         maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/")
-
+        maven("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         maven(url = "https://jitpack.io")
         maven(url ="https://github.com/psiegman/mvn-repo/raw/master/releases")
     }
@@ -65,9 +67,6 @@ dependencyResolutionManagement {
         }
         create("test") {
             from(files("gradle/testing.versions.toml"))
-        }
-        create("commonLib") {
-            from(files("gradle/commonLib.versions.toml"))
         }
 
     }

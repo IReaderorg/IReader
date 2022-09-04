@@ -37,7 +37,7 @@ import org.ireader.ui_explore.R
 @Composable
 fun BrowseTopAppBar(
     state: ExploreState,
-    source: CatalogSource?,
+    source: org.ireader.core_api.source.CatalogSource?,
     onValueChange: (String) -> Unit,
     onSearch: () -> Unit,
     onSearchDisable: () -> Unit,

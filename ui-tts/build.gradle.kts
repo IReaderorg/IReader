@@ -36,9 +36,9 @@ dependencies {
     implementation(accompanist.pagerIndicator)
     implementation(accompanist.pager)
     implementation(accompanist.swipeRefresh)
-    implementation(commonLib.hilt.android)
-    implementation(commonLib.gson)
+    implementation(libs.hilt.android)
+    implementation(libs.gson)
     implementation(project(mapOf("path" to ":domain")))
-    kapt(commonLib.hilt.androidcompiler)
+    kapt(libs.hilt.androidcompiler)
     implementation(androidx.media)
 }

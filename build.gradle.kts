@@ -1,6 +1,8 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+import org.apache.tools.ant.taskdefs.Execute.runCommand
+import org.jetbrains.kotlin.builtins.StandardNames.FqNames.target
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
-
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
@@ -12,49 +14,53 @@ buildscript {
         maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
         gradlePluginPortal()
         maven(url = "https://jitpack.io")
-        maven(url ="https://github.com/psiegman/mvn-repo/raw/master/releases")
+        maven(url = "https://github.com/psiegman/mvn-repo/raw/master/releases")
     }
     dependencies {
-        classpath(commonLib.gradle.tools)
-        classpath(kotlinx.gradle.kotlin)
-        classpath(commonLib.gradle.kotlinSerialization)
-        classpath(commonLib.gradle.hilt)
-        classpath(commonLib.gradle.google)
-        classpath(commonLib.gradle.firebaseCrashlytic)
-        classpath(commonLib.gradle.idea.ext)
-        classpath("com.vanniktech:gradle-maven-publish-plugin:0.21.0")
+        classpath(libs.gradle.tools)
+        classpath(libs.gradle.google)
+        classpath(libs.gradle.firebaseCrashlytic)
     }
 }
-
 
 
 plugins {
-    id("com.autonomousapps.dependency-analysis") version "1.3.0"
-    id("com.github.ben-manes.versions") version "0.42.0"
+    id("org.jetbrains.kotlin.android") version "1.7.10" apply false
     id("com.diffplug.spotless") version "6.6.1"
-    id("com.android.library") version "7.2.1" apply false
-    id("org.jetbrains.kotlin.android") version "1.6.21" apply false
+    id("com.github.ben-manes.versions") version "0.42.0"
+    id("com.autonomousapps.dependency-analysis") version "1.3.0"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.7.10" apply false
+    id("com.vanniktech.maven.publish") version "0.21.0" apply false
+    id("org.jetbrains.compose") version "1.2.0-alpha01-dev774" apply false
+    id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.6" apply false
+    id("com.google.dagger.hilt.android") version "2.43.2" apply false
+    id("org.jetbrains.dokka") version "1.7.10"  apply false
 }
 
 
-allprojects {
-    tasks.withType<KotlinJvmCompile> {
-        kotlinOptions {
-            freeCompilerArgs = freeCompilerArgs + listOf(
-                "-opt-in=kotlin.RequiresOptIn",
-            )
-            kotlinOptions.jvmTarget = "11"
+subprojects {
+    subprojects {
+        tasks.withType<KotlinJvmCompile> {
+            kotlinOptions {
+                freeCompilerArgs = freeCompilerArgs + listOf(
+                    "-opt-in=kotlin.RequiresOptIn",
+                    "-Xjvm-default=compatibility",
+                )
+                kotlinOptions.jvmTarget = "11"
+            }
         }
-    }
-    tasks.withType<DependencyUpdatesTask> {
-        rejectVersionIf {
-            isNonStable(candidate.version) && !isNonStable(currentVersion)
-        }
-    }
 
+        tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
+            rejectVersionIf {
+                isNonStable(candidate.version) && !isNonStable(currentVersion)
+            }
+        }
+
+    }
 }
 fun isNonStable(version: String): Boolean {
-    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
+    val stableKeyword =
+        listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
     val regex = "^[0-9,.v-]+(-r)?$".toRegex()
     val isStable = stableKeyword || regex.matches(version)
     return isStable.not()
@@ -64,9 +70,9 @@ fun isNonStable(version: String): Boolean {
 subprojects {
     plugins.apply("com.diffplug.spotless")
 
-    spotless {
+    spotless() {
         kotlin {
-            ktlint(commonLib.versions.ktlint.get())
+            ktlint(libs.versions.ktlint.get())
                 .userData(mapOf("indent_size" to "2", "continuation_indent_size" to "2"))
             target("**/*.kt")
             targetExclude("$buildDir/**/*.kt")
@@ -89,6 +95,9 @@ subprojects {
                 targetSdk = ProjectConfig.targetSdk
                 versionCode = ProjectConfig.versionCode
                 versionName = ProjectConfig.versionName
+                ndk {
+                    version = ProjectConfig.ndk
+                }
             }
 
             compileOptions {
@@ -96,11 +105,31 @@ subprojects {
                 sourceCompatibility(JavaVersion.VERSION_11)
                 targetCompatibility(JavaVersion.VERSION_11)
             }
-
+            sourceSets {
+                named("main") {
+                    val altManifest = file("src/androidMain/AndroidManifest.xml")
+                    if (altManifest.exists()) {
+                        manifest.srcFile(altManifest.path)
+                    }
+                }
+            }
             dependencies {
-                add("coreLibraryDesugaring", commonLib.desugarJdkLibs)
+                add("coreLibraryDesugaring", libs.desugarJdkLibs)
             }
 
+        }
+    }
+    afterEvaluate {
+        // Remove log pollution until Android support in KMP improves.
+        project.extensions.findByType<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension>()?.let { kmpExt ->
+            kmpExt.sourceSets.removeAll {
+                setOf(
+                    "androidAndroidTestRelease",
+                    "androidTestFixtures",
+                    "androidTestFixturesDebug",
+                    "androidTestFixturesRelease",
+                ).contains(it.name)
+            }
         }
     }
 
@@ -137,3 +166,4 @@ fun runCommand(command: String): String {
     }
     return String(byteOut.toByteArray()).trim()
 }
+

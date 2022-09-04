@@ -18,7 +18,6 @@ import org.ireader.common_models.entities.Book
 import org.ireader.common_models.entities.CatalogLocal
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_resources.UiText
-import org.ireader.core_api.source.CatalogSource
 import org.ireader.core_api.source.model.Command
 import org.ireader.core_catalogs.CatalogStore
 import org.ireader.core_ui.viewmodel.BaseViewModel
@@ -211,7 +210,7 @@ interface WebViewPageState {
     var webUrl: String
     var isLoading: Boolean
 
-    val source: CatalogSource?
+    val source: org.ireader.core_api.source.CatalogSource?
     var catalog: CatalogLocal?
 
     var bookId: Long?
@@ -239,9 +238,9 @@ open class WebViewPageStateImpl @Inject constructor() : WebViewPageState {
 
     override var isLoading: Boolean by mutableStateOf(false)
 
-    override val source: CatalogSource? by derivedStateOf {
+    override val source: org.ireader.core_api.source.CatalogSource? by derivedStateOf {
         val source = catalog?.source
-        if (source is CatalogSource) source else null
+        if (source is org.ireader.core_api.source.CatalogSource) source else null
     }
     override var catalog: CatalogLocal? by mutableStateOf(null)
 

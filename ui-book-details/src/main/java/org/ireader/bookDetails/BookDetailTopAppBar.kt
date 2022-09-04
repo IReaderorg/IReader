@@ -126,7 +126,7 @@ fun RegularChapterDetailTopAppBar(
 //                    tint = MaterialTheme.colorScheme.onBackground,
 //                )
 //            }
-            if (source is CatalogSource && source.getCommands().any { it !is Command.Fetchers }) {
+            if (source is org.ireader.core_api.source.CatalogSource && source.getCommands().any { it !is Command.Fetchers }) {
                 IconButton(onClick = {
                     onCommand()
                 }) {

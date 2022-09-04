@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.ireader.common_resources.UiText
+import org.ireader.common_resources.asString
 import org.ireader.components.reusable_composable.AppIconButton
 import org.ireader.components.reusable_composable.SuperSmallTextComposable
 import org.ireader.ui_components.R

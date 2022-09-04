@@ -21,7 +21,7 @@ class GetRemoteBooksUseCase @Inject constructor() {
         onSuccess: suspend (MangasPageInfo) -> Unit,
     ) {
         val source = catalog?.source ?: throw SourceNotFoundException()
-        if (source !is CatalogSource) throw SourceNotFoundException()
+        if (source !is org.ireader.core_api.source.CatalogSource) throw SourceNotFoundException()
         withIOContext {
             try {
                 var item: MangasPageInfo = MangasPageInfo(emptyList(), false)

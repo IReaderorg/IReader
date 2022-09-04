@@ -17,8 +17,7 @@ import org.ireader.common_extensions.launchIO
 import org.ireader.common_models.entities.Chapter
 import org.ireader.common_models.entities.SavedDownload
 import org.ireader.common_models.entities.buildSavedDownload
-
-import org.ireader.core_api.log.Log
+import org.ireader.common_resources.asString
 import org.ireader.core_catalogs.CatalogStore
 import org.ireader.domain.R
 import org.ireader.domain.notification.Notifications
@@ -166,11 +165,11 @@ class DownloaderService @AssistedInject constructor(
                                 }
                             }
                     }
-                    Log.debug { "getNotifications: Successfully to downloaded ${savedDownload.bookName} chapter ${savedDownload.chapterName}" }
+                    org.ireader.core_api.log.Log.debug { "getNotifications: Successfully to downloaded ${savedDownload.bookName} chapter ${savedDownload.chapterName}" }
                     delay(1000)
                 }
             } catch (e: Throwable) {
-                Log.error { "getNotifications: Failed to download ${savedDownload.chapterName}" }
+                org.ireader.core_api.log.Log.error { "getNotifications: Failed to download ${savedDownload.chapterName}" }
 
                 cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
                 notify(

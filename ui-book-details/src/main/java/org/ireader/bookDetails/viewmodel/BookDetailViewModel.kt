@@ -79,7 +79,7 @@ class BookDetailViewModel @Inject constructor(
             this.catalogSource = catalogSource
 
             val source = catalogSource?.source
-            if (source is CatalogSource) {
+            if (source is org.ireader.core_api.source.CatalogSource) {
                 this.modifiedCommands = source.getCommands()
             }
             toggleBookLoading(true)

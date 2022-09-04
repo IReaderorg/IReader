@@ -43,7 +43,7 @@ class GlobalSearchViewModel @Inject constructor(
             catalogStore.catalogs.map { it.source }.forEachIndexed { index, source ->
                 viewModelScope.launch {
                     try {
-                        if (source is CatalogSource) {
+                        if (source is org.ireader.core_api.source.CatalogSource) {
                             insertSearchItem(SearchItem(source, loading = true))
                             var items = source.getMangaList(
                                 filters = listOf(

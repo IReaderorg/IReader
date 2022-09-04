@@ -88,14 +88,14 @@ dependencies {
 
     implementation(androidx.work.runtime)
 
-    implementation(commonLib.room.runtime)
-    implementation(commonLib.room.ktx)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
     implementation(project(mapOf("path" to ":common-models")))
-    kapt(commonLib.room.compiler)
+    kapt(libs.room.compiler)
 
-    implementation(commonLib.hilt.android)
-    kapt(commonLib.hilt.androidcompiler)
-    // kapt(commonLib.hilt.compiler)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.androidcompiler)
+    // kapt(libs.hilt.compiler)
 
     testImplementation(test.bundles.common)
     androidTestImplementation(test.bundles.common)

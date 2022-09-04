@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.common_resources.UiEvent
 import org.ireader.common_resources.UiText
+import org.ireader.common_resources.asString
 import org.ireader.components.Controller
 import org.ireader.components.findComponentActivity
 import org.ireader.core_api.log.Log

@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.ireader.common_models.entities.Catalog
 import org.ireader.common_resources.UiEvent
+import org.ireader.common_resources.asString
 import org.ireader.components.components.component.pagerTabIndicatorOffset
 import org.ireader.components.reusable_composable.MidSizeTextComposable
 import org.ireader.core_ui.theme.AppColors

@@ -19,7 +19,7 @@ interface ExploreState {
     val layout: DisplayMode
     val isSearchModeEnable: Boolean
     var searchQuery: String?
-    val source: CatalogSource?
+    val source: org.ireader.core_api.source.CatalogSource?
     val catalog: CatalogLocal?
     val isFilterEnable: Boolean
     var topMenuEnable: Boolean
@@ -41,9 +41,9 @@ open class ExploreStateImpl @Inject constructor() : ExploreState {
     override var layout by mutableStateOf<DisplayMode>(DisplayMode.ComfortableGrid)
     override var isSearchModeEnable by mutableStateOf<Boolean>(false)
     override var searchQuery by mutableStateOf<String?>(null)
-    override val source: CatalogSource? by derivedStateOf {
+    override val source: org.ireader.core_api.source.CatalogSource? by derivedStateOf {
         val source = catalog?.source
-        if (source is CatalogSource) source else null
+        if (source is org.ireader.core_api.source.CatalogSource) source else null
     }
     override var catalog by mutableStateOf<CatalogLocal?>(null)
     override var isFilterEnable by mutableStateOf<Boolean>(false)

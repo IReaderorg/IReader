@@ -39,11 +39,11 @@ dependencies {
     implementation(composeLib.compose.lifecycle)
     implementation(composeLib.compose.coil)
 
-    implementation(commonLib.room.runtime)
-    implementation(commonLib.room.ktx)
-    kapt(commonLib.room.compiler)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    kapt(libs.room.compiler)
 
-    implementation(commonLib.jsoup)
+    implementation(libs.jsoup)
     androidTestImplementation(composeLib.compose.uiTestManifest)
     androidTestImplementation(composeLib.compose.testing)
     androidTestImplementation(composeLib.compose.composeTooling)
@@ -56,5 +56,5 @@ dependencies {
     testImplementation(test.junit4)
     testImplementation(test.extJunit)
     testImplementation(test.espresso)
-    androidTestImplementation(commonLib.hilt.androidtest)
+    androidTestImplementation(libs.hilt.androidtest)
 }

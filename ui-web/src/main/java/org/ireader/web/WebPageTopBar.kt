@@ -33,7 +33,7 @@ fun WebPageTopBar(
     goBack: () -> Unit,
     goForward: () -> Unit,
     onPopBackStack: () -> Unit,
-    source: CatalogSource?,
+    source: org.ireader.core_api.source.CatalogSource?,
     onFetchBook: () -> Unit,
     onFetchChapter: () -> Unit,
     onFetchChapters: () -> Unit,
