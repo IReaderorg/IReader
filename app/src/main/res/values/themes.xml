@@ -17,6 +17,7 @@
     </style>
 
     <style name="Theme.Splash" parent="Theme.App">
+        <item name="colorOnSurface">#000000</item>
         <item name="colorBackgroundSplash">#FFF</item>
         <item name="iconSplashTint">#000000</item>
         <item name="android:windowBackground">@drawable/bg_splash</item>
