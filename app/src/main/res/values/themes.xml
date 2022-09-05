@@ -20,7 +20,7 @@
         <item name="colorOnSurface">#000000</item>
         <item name="colorBackgroundSplash">#FFF</item>
         <item name="iconSplashTint">#000000</item>
-        <item name="android:windowBackground">@drawable/bg_splash</item>
+        <item name="android:windowBackground">@drawable/bg_splash_light</item>
         <item name="android:statusBarColor">?attr/colorBackgroundSplash</item>
         <item name="android:navigationBarColor">?attr/colorBackgroundSplash</item>
         <item name="postSplashScreenTheme">@style/Theme.App</item>

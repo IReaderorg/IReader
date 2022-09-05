@@ -2,4 +2,5 @@
 <resources>
     <attr name="colorBackgroundSplash" format="color"/>
     <attr name="iconSplashTint" format="color"/>
+    <attr name="colorOnSurface" format="color"/>
 </resources>

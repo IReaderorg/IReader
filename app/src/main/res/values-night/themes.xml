@@ -5,7 +5,7 @@
         <item name="colorBackgroundSplash">#FF000000</item>
         <item name="colorOnSurface">#FFFFFF</item>
 
-        <item name="android:windowBackground">@drawable/bg_splash</item>
+        <item name="android:windowBackground">@drawable/bg_splash_dark</item>
         <item name="android:statusBarColor">?attr/colorBackgroundSplash</item>
         <item name="android:navigationBarColor">?attr/colorBackgroundSplash</item>
         <item name="postSplashScreenTheme">@style/Theme.App</item>
