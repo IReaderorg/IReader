@@ -1,6 +1,6 @@
 
 
-package org.ireader.common_resources
+package ireader.common.resources
 
 
 abstract class Event

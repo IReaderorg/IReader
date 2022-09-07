@@ -1,24 +1,19 @@
 package org.ireader.app.di
 
 import androidx.compose.ui.text.ExperimentalTextApi
-import androidx.compose.ui.text.googlefonts.GoogleFont
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import org.ireader.core_api.prefs.PreferenceStore
-import org.ireader.core_ui.preferences.AppPreferences
-import org.ireader.core_ui.preferences.LibraryPreferences
-import org.ireader.core_ui.preferences.ReaderPreferences
-import org.ireader.core_ui.preferences.UiPreferences
-import javax.inject.Singleton
+import ireader.core.api.prefs.PreferenceStore
+import ireader.core.ui.preferences.AppPreferences
+import ireader.core.ui.preferences.LibraryPreferences
+import ireader.core.ui.preferences.UiPreferences
+import org.koin.core.annotation.ComponentScan
+import ireader.core.api.di.ISingleton
+import org.koin.core.annotation.Single
 
-@InstallIn(SingletonComponent::class)
-@Module
+@org.koin.core.annotation.Module
+@ComponentScan("org.ireader.app.di.PreferencesInject")
 class PreferencesInject {
 
-    @Provides
-    @Singleton
+    @Single
     fun provideAppPreferences(
         preferenceStore: PreferenceStore,
     ): AppPreferences {
@@ -27,8 +22,7 @@ class PreferencesInject {
         )
     }
 
-    @Provides
-    @Singleton
+    @Single
     fun provideUiPreferences(
         preferenceStore: PreferenceStore,
     ): UiPreferences {
@@ -36,20 +30,21 @@ class PreferencesInject {
             preferenceStore
         )
     }
+
     @OptIn(ExperimentalTextApi::class)
-    @Provides
-    @Singleton
-    fun provideReaderPreferences(
-        preferenceStore: PreferenceStore,
-        provider: GoogleFont.Provider
-    ): ReaderPreferences {
-        return ReaderPreferences(
-            preferenceStore,
-            provider
-        )
-    }
-    @Provides
-    @Singleton
+
+//    @Singleton
+//    fun provideReaderPreferences(
+//        preferenceStore: PreferenceStore,
+//        provider: GoogleFont.Provider
+//    ): ReaderPreferences {
+//        return ReaderPreferences(
+//            preferenceStore,
+//            provider
+//        )
+//    }
+
+    @Single
     fun provideLibraryPreferences(
         preferenceStore: PreferenceStore,
     ): LibraryPreferences {

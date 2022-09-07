@@ -1,8 +1,10 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import org.apache.tools.ant.taskdefs.Execute.runCommand
 import org.jetbrains.kotlin.builtins.StandardNames.FqNames.target
-import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+//import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
@@ -23,19 +25,26 @@ buildscript {
     }
 }
 
-
 plugins {
-    id("org.jetbrains.kotlin.android") version "1.7.10" apply false
-    id("com.diffplug.spotless") version "6.6.1"
-    id("com.github.ben-manes.versions") version "0.42.0"
-    id("com.autonomousapps.dependency-analysis") version "1.3.0"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.7.10" apply false
-    id("com.vanniktech.maven.publish") version "0.21.0" apply false
-    id("org.jetbrains.compose") version "1.2.0-alpha01-dev774" apply false
-    id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.6" apply false
-    id("com.google.dagger.hilt.android") version "2.43.2" apply false
-    id("org.jetbrains.dokka") version "1.7.10"  apply false
-    id("com.google.devtools.ksp") version "1.6.21-1.0.5"
+//    id("org.jetbrains.kotlin.android") version "1.7.10" apply false
+//    id("com.diffplug.spotless") version "6.6.1"
+//    id("com.github.ben-manes.versions") version "0.42.0"
+//    id("com.autonomousapps.dependency-analysis") version "1.3.0"
+//    id("org.jetbrains.kotlin.plugin.serialization") version "1.7.10" apply false
+//    id("org.jetbrains.compose") version "1.2.0-alpha01-dev774" apply false
+//    id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.6" apply false
+//    id("com.google.dagger.hilt.android") version "2.43.2" apply false
+    //id("com.google.devtools.ksp") version "1.6.21-1.0.5"
+    alias(libs.plugins.kotlinAndroid) apply false
+    alias(libs.plugins.spotless)
+    alias(libs.plugins.benGradleVersions)
+    alias(libs.plugins.dependencyAnalysis)
+    alias(libs.plugins.kotlinSerilization) apply false
+    alias(libs.plugins.jetbrainCompose) apply false
+    alias(libs.plugins.ideaExt) apply false
+   // alias(libs.plugins.daggerHilt) apply false
+    alias(libs.plugins.dokka) apply false
+    alias(libs.plugins.ksp) apply false
 }
 
 
@@ -46,6 +55,7 @@ subprojects {
                 freeCompilerArgs = freeCompilerArgs + listOf(
                     "-opt-in=kotlin.RequiresOptIn",
                     "-Xjvm-default=compatibility",
+                    "-opt-in=org.mylibrary.OptInAnnotation",
                 )
                 kotlinOptions.jvmTarget = "11"
             }
@@ -99,6 +109,7 @@ subprojects {
                 ndk {
                     version = ProjectConfig.ndk
                 }
+
             }
 
             compileOptions {
@@ -114,11 +125,12 @@ subprojects {
                     }
                 }
             }
+
             dependencies {
                 add("coreLibraryDesugaring", libs.desugarJdkLibs)
             }
-
         }
+
     }
     afterEvaluate {
         // Remove log pollution until Android support in KMP improves.

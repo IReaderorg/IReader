@@ -1,6 +1,6 @@
 
 
-package org.ireader.common_resources
+package ireader.common.resources
 
 const val SHARED_PREF_NAME = "shared_pref_name"
 

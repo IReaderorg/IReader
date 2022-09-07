@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core_api.util
+package ireader.core.api.util
 
 /**
  * Returns a new list that replaces the item at the given [position] with [newItem].

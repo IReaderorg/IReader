@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core_api.io
+package ireader.core.api.io
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

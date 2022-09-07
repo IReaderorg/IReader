@@ -5,12 +5,18 @@ plugins {
     kotlin("plugin.serialization")
 }
 android {
-    namespace = "org.ireader.core_ui"
+    namespace = "ireader.core.ui"
     buildFeatures {
         compose = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = composeLib.versions.compiler.get()
+    }
+    androidComponents.onVariants { variant ->
+        val name = variant.name
+        sourceSets {
+            getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
+        }
     }
 }
 
@@ -35,7 +41,7 @@ dependencies {
     implementation(composeLib.compose.animations)
     implementation(composeLib.compose.navigation)
     implementation(composeLib.compose.paging)
-    implementation(composeLib.compose.hiltNavigation)
+    //implementation(composeLib.compose.hiltNavigation)
     implementation(composeLib.compose.lifecycle)
     implementation(composeLib.compose.coil)
 
@@ -56,5 +62,5 @@ dependencies {
     testImplementation(test.junit4)
     testImplementation(test.extJunit)
     testImplementation(test.espresso)
-    androidTestImplementation(libs.hilt.androidtest)
+
 }

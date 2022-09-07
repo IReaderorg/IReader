@@ -4,16 +4,22 @@ plugins {
     id("kotlin-kapt")
     id("kotlin-parcelize")
     id("kotlinx-serialization")
-    id("dagger.hilt.android.plugin")
+    id("com.google.devtools.ksp")
 }
 
 android {
-    namespace = "org.ireader.domain"
+    namespace = "ireader.domain"
     buildFeatures {
         compose = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = composeLib.versions.compiler.get()
+    }
+    androidComponents.onVariants { variant ->
+        val name = variant.name
+        sourceSets {
+            getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
+        }
     }
 }
 
@@ -52,7 +58,7 @@ dependencies {
     debugImplementation(composeLib.compose.uiTestManifest)
 
     implementation(androidx.work.runtime)
-    implementation(libs.hilt.worker)
+
 
     /** Room **/
     implementation(libs.room.runtime)
@@ -83,9 +89,6 @@ dependencies {
     implementation(kotlinx.serialization.json)
     implementation(kotlinx.reflect)
 
-    kapt(libs.hilt.androidcompiler)
-    kapt(libs.hilt.compiler)
-    implementation(libs.hilt.android)
 
     /** LifeCycle **/
     //  implementation(kotlinx.lifecycle.viewModel)
@@ -109,7 +112,7 @@ dependencies {
     androidTestImplementation(test.coroutines)
     androidTestImplementation(test.coroutines)
     androidTestImplementation(composeLib.compose.j4Unit)
-    androidTestImplementation(libs.hilt.androidtest)
+    //androidTestImplementation(libs.hilt.androidtest)
 
     // Instrumented Unit Tests
     androidTestImplementation("androidx.arch.core:core-testing:2.1.0")
@@ -118,4 +121,11 @@ dependencies {
 
     testImplementation(test.bundles.common)
     androidTestImplementation(test.bundles.common)
+
+
+    implementation(libs.koin.android)
+    ksp(libs.koin.kspCompiler)
+    implementation(libs.koin.androidCompose)
+    compileOnly(libs.koin.annotations)
+    compileOnly(libs.koin.workManager)
 }

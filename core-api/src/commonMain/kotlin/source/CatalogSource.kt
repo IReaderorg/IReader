@@ -1,14 +1,14 @@
 
 
-package org.ireader.core_api.source
+package ireader.core.api.source
 
 import androidx.annotation.Keep
-import org.ireader.core_api.source.model.CommandList
-import org.ireader.core_api.source.model.FilterList
-import org.ireader.core_api.source.model.Listing
-import org.ireader.core_api.source.model.MangasPageInfo
+import ireader.core.api.source.model.CommandList
+import ireader.core.api.source.model.FilterList
+import ireader.core.api.source.model.Listing
+import ireader.core.api.source.model.MangasPageInfo
 @Keep
-interface CatalogSource : org.ireader.core_api.source.Source {
+interface CatalogSource : ireader.core.api.source.Source {
 
     override val lang: String
 

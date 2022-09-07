@@ -6,13 +6,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core_api.prefs
+package ireader.core.api.prefs
 
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.ireader.core_api.util.decodeBase64
-import org.ireader.core_api.util.encodeBase64
+import ireader.core.api.util.decodeBase64
+import ireader.core.api.util.encodeBase64
 import java.util.prefs.Preferences
 
 internal object StringAdapter : JvmPreference.Adapter<String> {

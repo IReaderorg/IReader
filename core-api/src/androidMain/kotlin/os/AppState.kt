@@ -6,14 +6,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core_api.os
+package ireader.core.api.os
 
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.ireader.core_api.log.Log
+import ireader.core.api.log.Log
 
 @Suppress("ObjectPropertyName")
 actual object AppState : DefaultLifecycleObserver {

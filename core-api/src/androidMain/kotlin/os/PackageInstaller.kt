@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core_api.os
+package ireader.core.api.os
 
 
 import android.app.Application
@@ -22,9 +22,9 @@ import android.os.SystemClock
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.ireader.core_api.R
-import org.ireader.core_api.log.Log
-import org.ireader.core_api.util.calculateSizeRecursively
+import ireader.core.api.R
+import ireader.core.api.log.Log
+import ireader.core.api.util.calculateSizeRecursively
 import java.io.File
 
 class PackageInstaller(
@@ -156,7 +156,7 @@ class PackageInstaller(
           deferred.complete(InstallStep.Error(context.getString(R.string.installation_error_invalid)))
         }
         else -> {
-          org.ireader.core_api.log.Log.error(
+          ireader.core.api.log.Log.error(
             "Package installer failed to install packages",
             status.toString()
           )

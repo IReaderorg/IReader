@@ -1,4 +1,4 @@
-package org.ireader.core_api.http
+package ireader.core.api.http
 
 import io.ktor.client.plugins.cookies.CookiesStorage
 import io.ktor.http.Cookie

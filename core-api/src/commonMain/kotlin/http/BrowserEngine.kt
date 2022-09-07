@@ -1,4 +1,4 @@
-package org.ireader.core_api.http
+package ireader.core.api.http
 
 import okhttp3.Cookie
 import okhttp3.Headers

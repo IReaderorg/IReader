@@ -1,4 +1,4 @@
-package org.ireader.core_api.source
+package ireader.core.api.source
 
 import androidx.annotation.Keep
 import io.ktor.client.request.HttpRequestBuilder
@@ -7,19 +7,19 @@ import io.ktor.client.request.headers
 import io.ktor.client.request.url
 import io.ktor.http.HeadersBuilder
 import io.ktor.http.HttpHeaders
-import org.ireader.core_api.source.model.ChapterInfo
-import org.ireader.core_api.source.model.Command
-import org.ireader.core_api.source.model.MangaInfo
-import org.ireader.core_api.source.model.MangasPageInfo
-import org.ireader.core_api.source.model.Page
-import org.ireader.core_api.source.model.Text
+import ireader.core.api.source.model.ChapterInfo
+import ireader.core.api.source.model.Command
+import ireader.core.api.source.model.MangaInfo
+import ireader.core.api.source.model.MangasPageInfo
+import ireader.core.api.source.model.Page
+import ireader.core.api.source.model.Text
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.security.MessageDigest
 
 /** Taken from https://tachiyomi.org/ **/
 @Keep
-abstract class ParsedHttpSource(private val dependencies: org.ireader.core_api.source.Dependencies) : HttpSource(dependencies) {
+abstract class ParsedHttpSource(private val dependencies: ireader.core.api.source.Dependencies) : HttpSource(dependencies) {
 
     override val id: Long by lazy {
         val key = "${name.lowercase()}/$lang/$versionId"

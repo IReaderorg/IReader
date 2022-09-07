@@ -6,10 +6,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core_api.http
+package ireader.core.api.http
 
-import org.ireader.core_api.prefs.Preference
-import org.ireader.core_api.prefs.PreferenceStore
+import ireader.core.api.prefs.Preference
+import ireader.core.api.prefs.PreferenceStore
 
 fun PreferenceStore.getRateBucket(key: String, capacity: Int, rate: Long): Preference<RateBucket> {
   return getObject(

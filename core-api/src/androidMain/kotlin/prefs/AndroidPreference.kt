@@ -1,4 +1,4 @@
-package org.ireader.core_api.prefs
+package ireader.core.api.prefs
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.MutablePreferences

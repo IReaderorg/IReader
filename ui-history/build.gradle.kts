@@ -2,14 +2,21 @@ plugins {
     id("com.android.library")
     id("kotlin-android")
     id("kotlin-kapt")
+    id("com.google.devtools.ksp")
 }
 android {
-    namespace = "org.ireader.ui_history"
+    namespace = "ireader.ui.history"
     buildFeatures {
         compose = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = composeLib.versions.compiler.get()
+    }
+    androidComponents.onVariants { variant ->
+        val name = variant.name
+        sourceSets {
+            getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
+        }
     }
 }
 
@@ -34,8 +41,11 @@ dependencies {
     implementation(accompanist.pagerIndicator)
     implementation(accompanist.pager)
     implementation(accompanist.swipeRefresh)
-    implementation(libs.hilt.android)
     implementation(kotlinx.datetime)
     implementation(project(mapOf("path" to ":domain")))
-    kapt(libs.hilt.androidcompiler)
+
+
+    ksp(libs.koin.kspCompiler)
+    compileOnly(libs.koin.annotations)
+    implementation(libs.koin.androidCompose)
 }

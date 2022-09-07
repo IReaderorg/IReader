@@ -1,6 +1,6 @@
 
 
-package org.ireader.core_api.source.model
+package ireader.core.api.source.model
 
 sealed class DeepLink {
     abstract val key: String

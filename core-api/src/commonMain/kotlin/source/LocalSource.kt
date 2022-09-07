@@ -1,9 +1,9 @@
-package org.ireader.core_api.source
+package ireader.core.api.source
 
-import org.ireader.core_api.source.model.ChapterInfo
-import org.ireader.core_api.source.model.Command
-import org.ireader.core_api.source.model.MangaInfo
-import org.ireader.core_api.source.model.Page
+import ireader.core.api.source.model.ChapterInfo
+import ireader.core.api.source.model.Command
+import ireader.core.api.source.model.MangaInfo
+import ireader.core.api.source.model.Page
 
 class LocalSource : Source {
     override val id: Long

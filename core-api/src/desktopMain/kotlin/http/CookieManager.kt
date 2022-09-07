@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core_api.http
+package ireader.core.api.http
 
 import okhttp3.Cookie
 import okhttp3.CookieJar

@@ -6,17 +6,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core_api.http
+package ireader.core.api.http
 
 import app.cash.quickjs.QuickJs
-import org.ireader.core_api.di.Inject
-import org.ireader.core_api.di.Singleton
+import ireader.core.api.di.ISingleton
+import org.koin.core.annotation.Single
 
 /**
  * A factory for creating instances of [JS].
  */
-@Singleton
-actual class JSFactory @Inject internal constructor() {
+@Single
+actual class JSFactory  internal constructor() {
 
   /**
    * Returns a new instance of [JS].

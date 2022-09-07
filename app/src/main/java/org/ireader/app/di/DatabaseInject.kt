@@ -1,101 +1,84 @@
 package org.ireader.app.di
 
 import android.content.Context
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
 import okio.FileSystem
-import org.ireader.core_api.db.Transactions
-import org.ireader.data.local.AppDatabase
-import org.ireader.data.local.dao.BookCategoryDao
-import org.ireader.data.local.dao.CatalogDao
-import org.ireader.data.local.dao.CategoryDao
-import org.ireader.data.local.dao.ChapterDao
-import org.ireader.data.local.dao.DownloadDao
-import org.ireader.data.local.dao.HistoryDao
-import org.ireader.data.local.dao.LibraryBookDao
-import org.ireader.data.local.dao.LibraryDao
-import org.ireader.data.local.dao.ReaderThemeDao
-import org.ireader.data.local.dao.RemoteKeysDao
-import org.ireader.data.local.dao.ThemeDao
-import org.ireader.data.local.dao.UpdatesDao
-import org.ireader.data.repository.DatabaseTransactions
-import javax.inject.Singleton
+import ireader.core.api.db.Transactions
+import ireader.data.local.AppDatabase
+import ireader.data.local.dao.BookCategoryDao
+import ireader.data.local.dao.CatalogDao
+import ireader.data.local.dao.CategoryDao
+import ireader.data.local.dao.ChapterDao
+import ireader.data.local.dao.DownloadDao
+import ireader.data.local.dao.HistoryDao
+import ireader.data.local.dao.LibraryBookDao
+import ireader.data.local.dao.LibraryDao
+import ireader.data.local.dao.ReaderThemeDao
+import ireader.data.local.dao.RemoteKeysDao
+import ireader.data.local.dao.ThemeDao
+import ireader.data.local.dao.UpdatesDao
+import ireader.data.repository.DatabaseTransactions
+import org.koin.core.annotation.ComponentScan
+import ireader.core.api.di.ISingleton
+import org.koin.core.annotation.Single
 
-@InstallIn(SingletonComponent::class)
-@Module
-object DatabaseInject {
-    @Provides
-    @Singleton
+@org.koin.core.annotation.Module
+@ComponentScan("org.ireader.app.di.DatabaseInject")
+class DatabaseInject {
+
+        @Single
     fun provideBookDatabase(
-        @ApplicationContext app: Context,
+        app: Context,
     ): AppDatabase {
         return AppDatabase.getInstance(app)
     }
 
-    @Singleton
-    @Provides
+        @Single
     fun providesBookDao(db: AppDatabase): LibraryBookDao {
         return db.libraryBookDao
     }
 
-    @Singleton
-    @Provides
+        @Single
     fun provideChapterDao(db: AppDatabase): ChapterDao = db.chapterDao
 
-    @Singleton
-    @Provides
+        @Single
     fun provideRemoteKeyDao(db: AppDatabase): RemoteKeysDao = db.remoteKeysDao
 
-    @Singleton
-    @Provides
+        @Single
     fun provideHistoryDao(db: AppDatabase): HistoryDao = db.historyDao
 
-    @Singleton
-    @Provides
+        @Single
     fun provideUpdatesDao(db: AppDatabase): UpdatesDao = db.updatesDao
 
-    @Singleton
-    @Provides
+        @Single
     fun provideCategoryDao(db: AppDatabase): CategoryDao = db.categoryDao
 
-    @Singleton
-    @Provides
+        @Single
     fun provideBookCategoryDao(db: AppDatabase): BookCategoryDao = db.bookCategoryDao
 
-    @Singleton
-    @Provides
+        @Single
     fun provideThemeDao(db: AppDatabase): ThemeDao = db.themeDao
-    @Singleton
-    @Provides
+        @Single
     fun provideReaderThemeDao(db: AppDatabase): ReaderThemeDao = db.readerThemeDao
 
-    @Singleton
-    @Provides
+        @Single
     fun provideDownloadDao(
         db: AppDatabase,
     ): DownloadDao = db.downloadDao
 
-    @Singleton
-    @Provides
+        @Single
     fun provideLibraryDao(
         db: AppDatabase,
     ): LibraryDao = db.libraryDao
 
-    @Singleton
-    @Provides
+        @Single
     fun provideFileSystem(): FileSystem {
         return FileSystem.SYSTEM
     }
 
-    @Singleton
-    @Provides
+        @Single
     fun provideCatalogDao(db: AppDatabase): CatalogDao = db.catalogDao
 
-    @Singleton
-    @Provides
+        @Single
     fun provideTransactions(db: AppDatabase): Transactions {
         return DatabaseTransactions(db)
     }

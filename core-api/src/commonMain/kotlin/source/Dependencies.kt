@@ -1,9 +1,9 @@
 
 
-package org.ireader.core_api.source
+package ireader.core.api.source
 
-import org.ireader.core_api.http.HttpClientsInterface
-import org.ireader.core_api.prefs.PreferenceStore
+import ireader.core.api.http.HttpClientsInterface
+import ireader.core.api.prefs.PreferenceStore
 
 class Dependencies(
     val httpClients: HttpClientsInterface,

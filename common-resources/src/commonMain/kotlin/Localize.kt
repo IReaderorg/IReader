@@ -6,7 +6,7 @@
 // * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // */
 //
-//package org.ireader.common_resources
+//package ireader.common.resources
 //
 //import androidx.compose.runtime.Composable
 //import androidx.compose.runtime.ReadOnlyComposable

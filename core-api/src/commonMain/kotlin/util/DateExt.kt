@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core_api.util
+package ireader.core.api.util
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -14,7 +14,7 @@ import kotlinx.datetime.LocalDateTime
 // These should be removed when we have formatters in kotlin-datetime
 
 expect fun LocalDate.asRelativeTimeString(): String
-
+@Suppress("NO_ACTUAL_FOR_EXPECT")
 expect class DateTimeFormatter(pattern: String)
-
+@Suppress("NO_ACTUAL_FOR_EXPECT")
 expect fun LocalDateTime.format(formatter: DateTimeFormatter): String

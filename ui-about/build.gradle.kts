@@ -4,12 +4,18 @@ plugins {
     id("kotlin-kapt")
 }
 android {
-    namespace = "org.ireader.ui_about"
+    namespace = "ireader.ui.about"
     buildFeatures {
         compose = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = composeLib.versions.compiler.get()
+    }
+    androidComponents.onVariants { variant ->
+        val name = variant.name
+        sourceSets {
+            getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
+        }
     }
 }
 
@@ -34,4 +40,5 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(project(mapOf("path" to ":domain")))
     kapt(libs.hilt.androidcompiler)
+    compileOnly(libs.koin.annotations)
 }

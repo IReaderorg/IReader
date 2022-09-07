@@ -1,20 +1,20 @@
-package org.ireader.core_api.source
+package ireader.core.api.source
 
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
-import org.ireader.core_api.source.model.ChapterInfo
-import org.ireader.core_api.source.model.Command
-import org.ireader.core_api.source.model.CommandList
-import org.ireader.core_api.source.model.Filter
-import org.ireader.core_api.source.model.FilterList
-import org.ireader.core_api.source.model.ImageUrl
-import org.ireader.core_api.source.model.Listing
-import org.ireader.core_api.source.model.MangaInfo
-import org.ireader.core_api.source.model.MangasPageInfo
-import org.ireader.core_api.source.model.Page
-import org.ireader.core_api.source.model.Text
+import ireader.core.api.source.model.ChapterInfo
+import ireader.core.api.source.model.Command
+import ireader.core.api.source.model.CommandList
+import ireader.core.api.source.model.Filter
+import ireader.core.api.source.model.FilterList
+import ireader.core.api.source.model.ImageUrl
+import ireader.core.api.source.model.Listing
+import ireader.core.api.source.model.MangaInfo
+import ireader.core.api.source.model.MangasPageInfo
+import ireader.core.api.source.model.Page
+import ireader.core.api.source.model.Text
 
-class TestSource : org.ireader.core_api.source.CatalogSource {
+class TestSource : ireader.core.api.source.CatalogSource {
     override val id = 1L
 
     override val name = "Test source"

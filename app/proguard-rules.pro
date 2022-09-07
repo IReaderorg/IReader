@@ -3,7 +3,7 @@
 -dontobfuscate
 
 # Keep extension's common dependencies
--keep class org.ireader.core_api.source.** { public protected *; }
+-keep class ireader.core.api.source.** { public protected *; }
 -keep,allowoptimization class org.ireader.** { public protected *; }
 -keep,allowoptimization class kotlinx.coroutines.** { public protected *; }
 -keep,allowoptimization class androidx.preference.** { public protected *; }
@@ -130,11 +130,11 @@
 
 #---------
 # Keep trakt-java and tmdb-java entity names (for GSON)
--keep class org.ireader.common_models.*.entities.** {
+-keep class ireader.common.models.*.entities.** {
     <fields>;
     <init>(...);
 }
--keep class org.ireader.common_models.*.entities.** {
+-keep class ireader.common.models.*.entities.** {
     <fields>;
     <init>(...);
 }
@@ -144,7 +144,7 @@
     <fields>;
     <init>(...);
 }
--keep class org.ireader.common_models.** {
+-keep class ireader.common.models.** {
     kotlinx.serialization.KSerializer serializer(...);
     <fields>;
     <init>(...);

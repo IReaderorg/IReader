@@ -1,0 +1,223 @@
+package ireader.ui.explore.viewmodel
+
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
+import ireader.common.extensions.DefaultPaginator
+import ireader.common.resources.SourceNotFoundException
+import ireader.common.models.DisplayMode
+import ireader.common.models.entities.BookItem
+import ireader.common.models.entities.RemoteKeys
+import ireader.common.models.entities.toBook
+import ireader.common.resources.EmptyQuery
+import ireader.common.resources.UiText
+import ireader.core.api.log.Log
+import ireader.core.api.source.model.Filter
+import ireader.core.api.source.model.MangasPageInfo
+import ireader.core.catalogs.CatalogStore
+import ireader.core.ui.exceptionHandler
+import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.domain.use_cases.local.LocalGetBookUseCases
+import ireader.domain.use_cases.local.LocalInsertUseCases
+import ireader.domain.use_cases.preferences.reader_preferences.BrowseScreenPrefUseCase
+import ireader.domain.use_cases.remote.RemoteUseCases
+import ireader.domain.use_cases.remote.key.RemoteKeyUseCase
+import ireader.ui.component.Controller
+import ireader.ui.explore.R
+import okio.`-DeprecatedOkio`.source
+import org.koin.android.annotation.KoinViewModel
+
+@KoinViewModel
+class ExploreViewModel(
+    private val state: ExploreStateImpl,
+    private val remoteUseCases: RemoteUseCases,
+    private val catalogStore: CatalogStore,
+    private val browseScreenPrefUseCase: BrowseScreenPrefUseCase,
+    private val remoteKeyUseCase: RemoteKeyUseCase,
+    private val getBookUseCases: LocalGetBookUseCases,
+    private val insertUseCases: LocalInsertUseCases,
+    private val param: Param,
+) : BaseViewModel(), ExploreState by state {
+    data class Param(val sourceId:Long? , val query: String?)
+    companion object  {
+        fun createParam(controller: Controller) : Param {
+            return Param(controller.navBackStackEntry.arguments?.getLong("sourceId"),controller.navBackStackEntry.arguments?.getString("query"))
+        }
+    }
+
+    init {
+
+        val sourceId = param.sourceId
+        val query = param.query
+        val catalog =
+            catalogStore.catalogs.find { it.source?.id == sourceId }
+        loadBooks()
+
+        state.catalog = catalog
+        val source = state.source
+        if (sourceId != null && source != null) {
+            if (!query.isNullOrBlank()) {
+                toggleSearchMode(true)
+                searchQuery = query
+                loadItems()
+            } else {
+                val listings = source.getListings()
+                if (listings.isNotEmpty()) {
+                    state.stateListing = source.getListings().first()
+                    loadItems()
+                    // getBooks(source = source, listing = source.getListings().first())
+                    viewModelScope.launch {
+                        readLayoutType()
+                    }
+                } else {
+                    viewModelScope.launch {
+                        showSnackBar(UiText.StringResource(R.string.the_source_is_not_found))
+                    }
+                }
+            }
+        } else {
+            viewModelScope.launch {
+                showSnackBar(UiText.StringResource(R.string.the_source_is_not_found))
+            }
+        }
+    }
+
+    var initExploreJob: Job? = null
+
+    fun loadBooks() {
+        initExploreJob?.cancel()
+        initExploreJob = viewModelScope.launch {
+            remoteKeyUseCase.subScribeAllPagedExploreBooks().distinctUntilChanged().collect() {
+                kotlin.runCatching {
+                    stateItems = it
+                }
+            }
+        }
+    }
+
+    fun loadItems(reset: Boolean = false) {
+        getBooksJob?.cancel()
+        if (reset) {
+            page = 1
+        }
+        getBooksJob = viewModelScope.launch {
+            kotlin.runCatching {
+                DefaultPaginator<Int, MangasPageInfo>(
+                    initialKey = state.page,
+                    onLoadUpdated = {
+                        isLoading = it
+                    },
+                    onRequest = { nextPage ->
+                        try {
+                            error = null
+                            Log.debug { "Explore Request was made - current page:$nextPage" }
+
+                            val query = searchQuery
+                            val filters = stateFilters
+                            val listing = stateListing
+                            val source = catalog
+                            if (source != null) {
+                                var result = MangasPageInfo(emptyList(), false)
+                                remoteUseCases.getRemoteBooks(
+                                    searchQuery,
+                                    listing,
+                                    filters,
+                                    source,
+                                    page,
+                                    onError = {
+                                        throw it
+                                    },
+                                    onSuccess = { res ->
+                                        result = res
+                                    }
+                                )
+                                Result.success(result)
+                            } else {
+                                throw SourceNotFoundException()
+                            }
+                        } catch (e: Throwable) {
+                            Result.failure(e)
+                        }
+                    },
+                    getNextKey = {
+                        state.page + 1
+                    },
+                    onError = { e ->
+                        remoteKeyUseCase.prepareExploreMode(page == 1, emptyList(), emptyList())
+                        endReached = true
+                        e?.let {
+                            error = exceptionHandler(it)
+                        }
+                    },
+                    onSuccess = { items, newKey ->
+                        val keys = items.mangas.map { book ->
+                            RemoteKeys(
+                                title = book.title,
+                                prevPage = newKey - 1,
+                                nextPage = newKey + 1,
+                                sourceId = source?.id ?: 0
+                            )
+                        }
+                        val books = items.mangas.map {
+                            it.toBook(
+                                source?.id ?: 0,
+                                tableId = 1
+                            )
+                        }
+
+                        remoteKeyUseCase.prepareExploreMode(page == 1, books, keys)
+
+                        page = newKey
+                        endReached = !items.hasNextPage
+                        Log.debug { "Request was finished" }
+                    },
+                ).loadNextItems()
+            }
+        }
+    }
+
+    private var getBooksJob: Job? = null
+
+    suspend fun addToFavorite(bookItem: BookItem) {
+        getBookUseCases.findBookById(bookItem.id)?.let { book ->
+
+            insertUseCases.insertBook(book.copy(favorite = !book.favorite))
+        }
+    }
+
+    fun toggleSearchMode(inSearchMode: Boolean) {
+        state.isSearchModeEnable = inSearchMode
+
+        if (!inSearchMode && source != null) {
+            exitSearchedMode()
+            searchQuery?.let { query ->
+                stateFilters = listOf(Filter.Title().apply { this.value = query })
+                loadItems()
+            }
+        }
+    }
+
+    private fun exitSearchedMode() {
+        state.searchQuery = ""
+        state.apply {
+            searchQuery = ""
+            isLoading = false
+            error = null
+        }
+    }
+
+    fun saveLayoutType(layoutType: DisplayMode) {
+        state.layout = layoutType
+        browseScreenPrefUseCase.browseLayoutTypeUseCase.save(layoutType)
+    }
+
+    private suspend fun readLayoutType() {
+        state.layout = browseScreenPrefUseCase.browseLayoutTypeUseCase.read()
+    }
+
+    fun toggleFilterMode(enable: Boolean? = null) {
+        state.isFilterEnable = enable ?: !state.isFilterEnable
+    }
+}

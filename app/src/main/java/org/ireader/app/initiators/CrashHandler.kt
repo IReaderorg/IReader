@@ -3,9 +3,10 @@ package org.ireader.app.initiators
 import android.app.Application
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import org.ireader.app.BuildConfig
-import javax.inject.Inject
+import org.koin.core.annotation.Factory
 
-class CrashHandler @Inject constructor(private val context: Application) {
+@Factory
+class CrashHandler(private val context: Application) {
 
     init {
         if (!BuildConfig.DEBUG) {

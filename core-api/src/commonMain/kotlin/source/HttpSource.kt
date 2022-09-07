@@ -1,23 +1,23 @@
-package org.ireader.core_api.source
+package ireader.core.api.source
 
 import androidx.annotation.Keep
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.url
-import org.ireader.core_api.source.model.Command
-import org.ireader.core_api.source.model.CommandList
-import org.ireader.core_api.source.model.ImageUrl
-import org.ireader.core_api.source.model.Listing
-import org.ireader.core_api.source.model.PageComplete
-import org.ireader.core_api.source.model.PageUrl
+import ireader.core.api.source.model.Command
+import ireader.core.api.source.model.CommandList
+import ireader.core.api.source.model.ImageUrl
+import ireader.core.api.source.model.Listing
+import ireader.core.api.source.model.PageComplete
+import ireader.core.api.source.model.PageUrl
 
 /**
  * A simple implementation for sources from a website.
  */
 @Suppress("unused", "unused_parameter")
 @Keep
-abstract class HttpSource(private val dependencies: org.ireader.core_api.source.Dependencies) :
-    org.ireader.core_api.source.CatalogSource {
+abstract class HttpSource(private val dependencies: ireader.core.api.source.Dependencies) :
+    ireader.core.api.source.CatalogSource {
 
     /**
      * Base url of the website without the trailing slash, like: http://mysite.com

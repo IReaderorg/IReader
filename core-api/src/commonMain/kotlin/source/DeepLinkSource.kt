@@ -1,10 +1,10 @@
 
 
-package org.ireader.core_api.source
+package ireader.core.api.source
 
-import org.ireader.core_api.source.model.DeepLink
+import ireader.core.api.source.model.DeepLink
 
-interface DeepLinkSource : org.ireader.core_api.source.Source {
+interface DeepLinkSource : ireader.core.api.source.Source {
 
     fun handleLink(url: String): DeepLink?
 

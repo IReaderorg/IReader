@@ -1,4 +1,4 @@
-package org.ireader.core_api.http
+package ireader.core.api.http
 
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
@@ -16,7 +16,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
-import org.ireader.core_api.log.Log
+import ireader.core.api.log.Log
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.util.concurrent.TimeoutException
@@ -77,7 +77,7 @@ actual class BrowserEngine(private val webViewManger: WebViewManger, private val
         }
         val cookies = webViewCookieJar.get(url.toHttpUrl())
         webViewManger.webView
-        return org.ireader.core_api.http.Result(
+        return ireader.core.api.http.Result(
             responseBody = html.html(),
             cookies = cookies,
         )

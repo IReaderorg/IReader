@@ -1,6 +1,6 @@
 
 
-package org.ireader.core_api.source.model
+package ireader.core.api.source.model
 
 /**
  * Model for a manga given by a source

@@ -1,4 +1,4 @@
-package org.ireader.common_resources
+package ireader.common.resources
 
 import android.content.Context
 

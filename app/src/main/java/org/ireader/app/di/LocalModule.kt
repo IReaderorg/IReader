@@ -1,58 +1,46 @@
 package org.ireader.app.di
 
 import android.content.Context
-import androidx.compose.ui.text.ExperimentalTextApi
-import androidx.compose.ui.text.googlefonts.GoogleFont
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
 import io.ktor.client.plugins.cookies.CookiesStorage
-import kotlinx.coroutines.CoroutineDispatcher
+import ireader.common.resources.ProjectConfig
+import ireader.core.api.http.AcceptAllCookiesStorage
+import ireader.core.api.http.WebViewManger
+import ireader.core.api.prefs.AndroidPreferenceStore
+import ireader.core.api.prefs.PreferenceStore
+import ireader.ui.imageloader.LibraryCovers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import org.ireader.app.BuildConfig
-import org.ireader.app.R
-import org.ireader.common_extensions.async.ApplicationScope
-import org.ireader.common_extensions.async.DefaultDispatcher
-import org.ireader.common_extensions.async.IoDispatcher
-import org.ireader.common_extensions.async.MainDispatcher
-import org.ireader.common_extensions.async.MainImmediateDispatcher
-import org.ireader.common_resources.ProjectConfig
-import org.ireader.core_api.http.AcceptAllCookiesStorage
-import org.ireader.core_api.http.WebViewManger
-import org.ireader.core_api.prefs.AndroidPreferenceStore
-import org.ireader.core_api.prefs.PreferenceStore
-import org.ireader.image_loader.LibraryCovers
+import org.koin.core.annotation.ComponentScan
+import org.koin.core.annotation.Factory
+import org.koin.core.annotation.Single
 import java.io.File
-import javax.inject.Singleton
 
-@InstallIn(SingletonComponent::class)
-@Module
+@org.koin.core.annotation.Module
+@ComponentScan("org.ireader.app.di.LocalModule")
 class LocalModule {
-    @Provides
-    @Singleton
+
+        @Single
     fun provideLibraryCovers(
-        @ApplicationContext context: Context,
+        context: Context,
     ): LibraryCovers {
-        return org.ireader.image_loader.LibraryCovers(
+        return LibraryCovers(
             FileSystem.SYSTEM,
             File(context.filesDir, "library_covers").toOkioPath()
         )
     }
 
-    @Provides
-    @Singleton
-    fun providePreferencesStore(@ApplicationContext context: Context): PreferenceStore {
+
+        @Single
+    fun providePreferencesStore(context: Context): PreferenceStore {
         return AndroidPreferenceStore(context = context, "ui")
     }
-    @Provides
-    @Singleton
-    fun provideProjectConfig(@ApplicationContext context: Context): ProjectConfig {
+
+        @Single
+    fun provideProjectConfig(context: Context): ProjectConfig {
         return ProjectConfig(
             buildTime = BuildConfig.BUILD_TIME,
             commitCount = BuildConfig.COMMIT_COUNT,
@@ -65,48 +53,32 @@ class LocalModule {
         )
     }
 
-    @Provides
-    @Singleton
+
+        @Single
     fun provideCookieJar(): CookiesStorage {
         return AcceptAllCookiesStorage()
     }
-    @Provides
-    @Singleton
-    fun provideWebViewManager(@ApplicationContext context: Context): WebViewManger {
+
+        @Single
+    fun provideWebViewManager(context: Context): WebViewManger {
         return WebViewManger(context)
     }
 
-    @OptIn(ExperimentalTextApi::class)
-    @Provides
-    @Singleton
-    fun provideGoogleFontProvider(): GoogleFont.Provider {
-        return GoogleFont.Provider(
-            providerAuthority = "com.google.android.gms.fonts",
-            providerPackage = "com.google.android.gms",
-            certificates = R.array.com_google_android_gms_fonts_certs
-        )
+//    @OptIn(ExperimentalTextApi::class)
+//    @Singleton
+//    fun provideGoogleFontProvider(): GoogleFont.Provider {
+//        return GoogleFont.Provider(
+//            providerAuthority = "com.google.android.gms.fonts",
+//            providerPackage = "com.google.android.gms",
+//            certificates = R.array.com_google_android_gms_fonts_certs
+//        )
+//    }
+
+        @Factory
+    fun provideActivityCoroutineScope(): CoroutineScope {
+        return CoroutineScope(Dispatchers.IO + SupervisorJob())
     }
-    @Provides
-    @Singleton
-    @ApplicationScope
-    fun provideActivityCoroutineScope(
-        @DefaultDispatcher defaultDispatcher: CoroutineDispatcher
-    ): CoroutineScope {
-        return CoroutineScope(defaultDispatcher + SupervisorJob())
-    }
-    @DefaultDispatcher
-    @Provides
-    fun providesDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
 
-    @IoDispatcher
-    @Provides
-    fun providesIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
-    @MainDispatcher
-    @Provides
-    fun providesMainDispatcher(): CoroutineDispatcher = Dispatchers.Main
 
-    @MainImmediateDispatcher
-    @Provides
-    fun providesMainImmediateDispatcher(): CoroutineDispatcher = Dispatchers.Main.immediate
 }

@@ -1,4 +1,4 @@
-package org.ireader.core_api.http
+package ireader.core.api.http
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -22,9 +22,9 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
-import org.ireader.core_api.R
-import org.ireader.core_api.http.WebViewUtil.DEFAULT_USER_AGENT
-import org.ireader.core_api.log.Log
+import ireader.core.api.R
+import ireader.core.api.http.WebViewUtil.DEFAULT_USER_AGENT
+import ireader.core.api.log.Log
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit

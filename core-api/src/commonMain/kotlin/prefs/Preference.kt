@@ -1,4 +1,4 @@
-package org.ireader.core_api.prefs
+package ireader.core.api.prefs
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow

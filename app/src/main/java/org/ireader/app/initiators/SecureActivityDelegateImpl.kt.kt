@@ -10,12 +10,14 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.Clock
 import org.ireader.app.SecureActivityDelegate
-import org.ireader.common_extensions.AuthenticatorUtil.isAuthenticationSupported
-import org.ireader.common_extensions.setSecureScreen
-import org.ireader.core_ui.preferences.PreferenceValues
-import org.ireader.core_ui.preferences.UiPreferences
-import org.ireader.presentation.ui.UnlockActivity
+import ireader.common.extensions.AuthenticatorUtil.isAuthenticationSupported
+import ireader.common.extensions.setSecureScreen
+import ireader.core.ui.preferences.PreferenceValues
+import ireader.core.ui.preferences.UiPreferences
+import ireader.presentation.ui.UnlockActivity
+import org.koin.core.annotation.Factory
 
+@Factory
 class SecureActivityDelegateImpl : SecureActivityDelegate, DefaultLifecycleObserver {
 
     private lateinit var activity: ComponentActivity

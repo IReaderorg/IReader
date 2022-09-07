@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core_api.di
+package ireader.core.api.di
 
 /**
  * A child scope of [AppScope] which can be injected another modules and is usually short-lived.

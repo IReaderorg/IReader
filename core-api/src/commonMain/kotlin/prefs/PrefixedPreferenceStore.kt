@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core_api.prefs
+package ireader.core.api.prefs
 
 /**
  * An implementation of a [PreferenceStore] that writes to a [prefix]ed key, allowing to share a

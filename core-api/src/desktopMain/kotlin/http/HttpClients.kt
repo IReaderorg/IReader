@@ -6,12 +6,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core_api.http
+package ireader.core.api.http
 
 import io.ktor.client.HttpClient
-import org.ireader.core_api.di.Inject
 
-actual class HttpClients @Inject constructor() : HttpClientsInterface {
+actual class HttpClients() : HttpClientsInterface {
   actual override val default = HttpClient()
   actual override val browser: BrowserEngine
     get() = TODO("Not yet implemented")

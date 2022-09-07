@@ -1,4 +1,4 @@
-package org.ireader.core_api.source
+package ireader.core.api.source
 
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"     package="org.ireader.app">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="org.ireader.app">
 
     <!-- Storage -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -75,42 +76,40 @@
 
 
         </activity>
-        <activity android:name="org.ireader.presentation.ui.UnlockActivity"
-            android:theme="@style/Theme.Splash"
+        <activity
+            android:name="ireader.presentation.ui.UnlockActivity"
             android:exported="false"
-            />
+            android:theme="@style/Theme.Splash" />
+
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
-        android:exported="false"
-        tools:node="merge">
-        <meta-data
-            android:name="androidx.work.WorkManagerInitializer"
-            android:value="androidx.startup"
-            tools:node="remove" />
-        <meta-data
-            android:name="androidx.emoji2.text.EmojiCompatInitializer"
-            tools:node="remove" />
-    </provider>
-    <receiver
-        android:name="org.ireader.domain.services.broadcast_receiver.AppBroadcastReceiver"
-        android:exported="false" />
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+            <meta-data
+                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+                tools:node="remove" />
+        </provider>
 
-    <service
-        android:name="org.ireader.domain.services.tts_service.media_player.TTSService"
-        android:enabled="true"
-        android:exported="false">
-        <intent-filter>
-            <action android:name="android.media.browse.MediaBrowserService" />
-        </intent-filter>
-    </service>
-    <receiver
-        android:name="androidx.media.session.MediaButtonReceiver"
-        android:exported="false">
-        <intent-filter>
-            <action android:name="android.intent.action.MEDIA_BUTTON" />
-        </intent-filter>
-    </receiver>
+        <service
+            android:name="ireader.domain.services.tts_service.media_player.TTSService"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
+        <receiver
+            android:name="androidx.media.session.MediaButtonReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
@@ -120,10 +119,13 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
-        <meta-data android:name="android.webkit.WebView.EnableSafeBrowsing"
-            android:value="false" />
-        <meta-data android:name="android.webkit.WebView.MetricsOptOut"
-            android:value="true" />
-</application>
 
-    </manifest>
+        <meta-data
+            android:name="android.webkit.WebView.EnableSafeBrowsing"
+            android:value="false" />
+        <meta-data
+            android:name="android.webkit.WebView.MetricsOptOut"
+            android:value="true" />
+    </application>
+
+</manifest>

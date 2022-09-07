@@ -5,13 +5,19 @@ import android.app.Application
 import android.content.Intent
 import android.os.Bundle
 import android.os.Process
-import org.ireader.core_api.log.Log
+import ireader.core.api.log.Log
+import org.koin.core.annotation.Factory
+import org.koin.core.annotation.Single
+import java.lang.Thread.UncaughtExceptionHandler
+
+
+
 
 class AppExceptionHandler(
-    private val systemHandler: Thread.UncaughtExceptionHandler,
-    val crashlyticsHandler: Thread.UncaughtExceptionHandler,
+    private val systemHandler: UncaughtExceptionHandler,
+    val crashlyticsHandler: UncaughtExceptionHandler,
     application: Application,
-) : Thread.UncaughtExceptionHandler {
+) : UncaughtExceptionHandler {
 
     private var lastStartedActivity: Activity? = null
 

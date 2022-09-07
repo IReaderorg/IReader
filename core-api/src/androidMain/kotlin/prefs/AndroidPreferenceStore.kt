@@ -1,4 +1,4 @@
-package org.ireader.core_api.prefs
+package ireader.core.api.prefs
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -15,7 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import org.ireader.core_api.prefs.AndroidPreference.Primitive
+import ireader.core.api.prefs.AndroidPreference.Primitive
 
 /**
  * An implementation of a [PreferenceStore] backed by Androidx [DataStore].

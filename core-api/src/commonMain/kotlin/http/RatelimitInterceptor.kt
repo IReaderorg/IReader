@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core_api.http
+package ireader.core.api.http
 
 //// TODO(inorichi): this should be written as a ktor interceptor that works in a suspending way.
 ////   Also decide whether to cancel (current implementation) or delay the request (or do both).

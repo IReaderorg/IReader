@@ -6,11 +6,12 @@ plugins {
     id("org.jetbrains.gradle.plugin.idea-ext")
     id("org.jetbrains.dokka")
     kotlin("plugin.serialization")
+    id("com.google.devtools.ksp")
     `maven-publish`
     signing
 }
 android {
-    namespace = "org.ireader.core_api"
+    namespace = "ireader.core.api"
 }
 kotlin {
     android {
@@ -32,6 +33,7 @@ kotlin {
                 api(libs.ktor.contentNegotiation.kotlinx)
                 api(libs.okio)
                 compileOnly(libs.jsoup)
+                compileOnly(libs.koin.annotations)
             }
         }
         named("androidMain") {
@@ -44,6 +46,7 @@ kotlin {
                 api(libs.ktor.okhttp)
                 implementation(libs.bundles.tinylog)
                 compileOnly(libs.jsoup)
+                compileOnly(libs.koin.annotations)
             }
         }
         named("desktopMain") {
@@ -52,29 +55,35 @@ kotlin {
                 implementation(libs.quickjs.jvm)
                 api(libs.ktor.okhttp)
                 implementation(libs.bundles.tinylog)
-                implementation("javax.inject:javax.inject:1")
                 compileOnly(libs.jsoup)
+                compileOnly(libs.koin.annotations)
             }
         }
     }
 }
-dependencies {
 
-    implementation("javax.inject:javax.inject:1")
-
-}
 afterEvaluate {
     configure<PublishingExtension> {
         publications.all {
+            val publishName = name
+                .replace("release","",true)
+                .replace("debug","",true)
             val mavenPublication = this as? MavenPublication
-            mavenPublication?.artifactId = "${project.name}-$name"
+            mavenPublication?.artifactId = "${project.name}-$publishName"
         }
     }
 }
 val packageVersion = "1.2.1"
-
+//val dokkaHtml by tasks.getting(org.jetbrains.dokka.gradle.DokkaTask::class)
+//
+//val javadocJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
+//    dependsOn(dokkaHtml)
+//    archiveClassifier.set("javadoc")
+//    from(dokkaHtml.outputDirectory)
+//}
 publishing {
     publications.withType(MavenPublication::class) {
+//        artifact(javadocJar)
         groupId = "io.github.kazemcodes"
         artifactId = "core-api"
         version = packageVersion
@@ -130,7 +139,7 @@ idea {
                     "src/androidMain/kotlin",
                     "src/desktopMain/kotlin",
                     "src/jvmMain/kotlin"
-                ).forEach { put(it, "org.ireader.core_api") }
+                ).forEach { put(it, "ireader.core.api") }
             }
         }
     }

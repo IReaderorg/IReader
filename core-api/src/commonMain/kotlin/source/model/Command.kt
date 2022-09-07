@@ -1,4 +1,4 @@
-package org.ireader.core_api.source.model
+package ireader.core.api.source.model
 
 sealed class Command<V>(val name: String, val initialValue: V) {
 

@@ -1,4 +1,4 @@
-package org.ireader.common_resources
+package ireader.common.resources
 
 data class ProjectConfig(
     val commitCount: String,

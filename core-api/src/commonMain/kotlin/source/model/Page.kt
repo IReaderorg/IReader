@@ -1,6 +1,6 @@
 
 
-package org.ireader.core_api.source.model
+package ireader.core.api.source.model
 
 import kotlinx.serialization.Serializable
 @Serializable

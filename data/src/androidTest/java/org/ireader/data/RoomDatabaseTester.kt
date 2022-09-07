@@ -5,9 +5,9 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import ireader.data.local.AppDatabase
+import ireader.data.local.dao.LibraryBookDao
 import kotlinx.coroutines.runBlocking
-import org.ireader.data.local.AppDatabase
-import org.ireader.data.local.dao.LibraryBookDao
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -37,8 +37,8 @@ class RoomDatabaseTester {
     @Test
     @Throws(Exception::class)
     fun writeUserAndReadInList() = runBlocking {
-        val user: org.ireader.common_models.entities.Book =
-            org.ireader.common_models.entities.Book(key = "", sourceId = 1L, title = "")
+        val user: ireader.common.models.entities.Book =
+            ireader.common.models.entities.Book(key = "", sourceId = 1L, title = "")
         bookDao.insert(user)
         val byName = bookDao.findBookById(1L)
         assertThat(byName != null).isTrue()

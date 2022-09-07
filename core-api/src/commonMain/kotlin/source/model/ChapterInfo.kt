@@ -1,6 +1,6 @@
 
 
-package org.ireader.core_api.source.model
+package ireader.core.api.source.model
 
 data class ChapterInfo(
     var key: String,

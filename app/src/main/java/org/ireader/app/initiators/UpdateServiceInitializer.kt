@@ -4,11 +4,12 @@ import android.app.Application
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import org.ireader.app.BuildConfig
-import org.ireader.core_ui.preferences.AppPreferences
-import org.ireader.domain.services.update_service.UpdateService
-import javax.inject.Inject
+import ireader.core.ui.preferences.AppPreferences
+import ireader.domain.services.update_service.UpdateService
+import org.koin.core.annotation.Factory
 
-class UpdateServiceInitializer @Inject constructor(app: Application, appPreferences: AppPreferences) {
+@Factory
+class UpdateServiceInitializer(app: Application, appPreferences: AppPreferences) {
 
     init {
         if (appPreferences.appUpdater().get() && !BuildConfig.DEBUG && !BuildConfig.PREVIEW) {

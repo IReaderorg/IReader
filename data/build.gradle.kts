@@ -4,11 +4,11 @@ plugins {
     id("kotlin-kapt")
     id("kotlin-parcelize")
     kotlin("plugin.serialization")
-    id("dagger.hilt.android.plugin")
+
 }
 
 android {
-    namespace = "org.ireader.data"
+    namespace = "ireader.data"
     compileSdk = ProjectConfig.compileSdk
 
     defaultConfig {
@@ -41,6 +41,12 @@ android {
                 "META-INF/gradle/incremental.annotation.processors"
             )
         )
+    }
+    androidComponents.onVariants { variant ->
+        val name = variant.name
+        sourceSets {
+            getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
+        }
     }
 }
 

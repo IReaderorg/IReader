@@ -3,37 +3,66 @@ package org.ireader.app
 import android.app.Application
 import android.os.Build
 import android.os.Looper
-import androidx.hilt.work.HiltWorkerFactory
-import androidx.work.Configuration
+import androidx.work.WorkerFactory
 import coil.ImageLoader
 import coil.ImageLoaderFactory
-import dagger.hilt.android.HiltAndroidApp
+import ireader.domain.di.DomainModules
+import ireader.domain.di.DomainServices
+import org.ireader.app.di.CatalogModule
+import org.ireader.app.di.DatabaseInject
+import org.ireader.app.di.LocalModule
+import org.ireader.app.di.PreferencesInject
+import org.ireader.app.di.RepositoryInject
+import org.ireader.app.di.UseCasesInject
 import org.ireader.app.initiators.AppInitializers
-import org.ireader.domain.utils.WebViewUtil
-import org.ireader.image_loader.coil.CoilLoaderFactory
-import javax.inject.Inject
+import ireader.domain.utils.WebViewUtil
+import ireader.ui.imageloader.coil.CoilLoaderFactory
+import ireader.presentation.di.PresentationModules
+import ireader.presentation.di.uiModules
+import org.ireader.app.di.AppModule
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.androidx.workmanager.koin.workManagerFactory
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.koin.core.context.GlobalContext.get
+import org.koin.core.context.GlobalContext.startKoin
+import org.koin.ksp.generated.module
 
-@HiltAndroidApp
-class MyApplication : Application(), Configuration.Provider, ImageLoaderFactory {
+class MyApplication : Application(), KoinComponent, ImageLoaderFactory {
 
-    @Inject
-    lateinit var workerFactory: HiltWorkerFactory
 
-    @Inject
-    lateinit var initializers: AppInitializers
+    val coil: CoilLoaderFactory by inject()
 
-    @Inject
-    lateinit var coil: CoilLoaderFactory
 
-    override fun getWorkManagerConfiguration(): Configuration {
-        return Configuration.Builder()
-            .setWorkerFactory(workerFactory)
-            .build()
+    override fun onCreate() {
+        super.onCreate()
+        startKoin {
+            androidContext(this@MyApplication)
+            androidLogger()
+            modules(
+                CatalogModule().module,
+                DatabaseInject().module,
+                LocalModule().module,
+                PreferencesInject().module,
+                RepositoryInject().module,
+                UseCasesInject().module,
+                DomainModules().module,
+                AppModule,
+            )
+            modules(uiModules)
+            modules(DomainServices)
+            workManagerFactory()
+        }
+
     }
+
+
 
     override fun newImageLoader(): ImageLoader {
         return coil.newImageLoader()
     }
+
     override fun getPackageName(): String {
         // This causes freezes in Android 6/7 for some reason
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

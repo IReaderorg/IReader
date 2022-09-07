@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core_api.log
+package ireader.core.api.log
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")
 expect object Log {

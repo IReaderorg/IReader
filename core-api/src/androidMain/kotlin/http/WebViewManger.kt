@@ -1,4 +1,4 @@
-package org.ireader.core_api.http
+package ireader.core.api.http
 
 import android.content.Context
 import android.view.ViewGroup

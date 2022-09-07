@@ -1,4 +1,3 @@
-
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -6,17 +5,15 @@ import java.util.TimeZone
 
 plugins {
     id("com.android.application")
-    kotlin("android")
+    id("kotlin-android")
     id("kotlin-kapt")
-    id("dagger.hilt.android.plugin")
     id("kotlin-parcelize")
     id("com.google.gms.google-services")
     kotlin("plugin.serialization")
     id("com.google.firebase.crashlytics")
+    id("com.google.devtools.ksp")
 }
-hilt {
-    enableAggregatingTask = true
-}
+
 val SUPPORTED_ABIS = setOf("armeabi-v7a", "arm64-v8a", "x86")
 
 android {
@@ -44,7 +41,9 @@ android {
             )
         )
     }
-
+    sourceSets.getByName("main") {
+        java.srcDirs("build/generated/ksp/main/kotlin")
+    }
     buildFeatures {
         compose = true
 
@@ -106,6 +105,12 @@ android {
 //            applicationIdSuffix = debugType.applicationIdSuffix
 //        }
     }
+    androidComponents.onVariants { variant ->
+        val name = variant.name
+        sourceSets {
+            getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
+        }
+    }
 
 }
 
@@ -150,12 +155,7 @@ dependencies {
     implementation(kotlinx.coroutines.android)
     implementation("com.google.firebase:firebase-analytics:21.0.0")
 
-    /** Hilt **/
-    kapt(libs.hilt.androidcompiler)
 
-    implementation(libs.hilt.android)
-    implementation(androidx.work.runtime)
-    implementation(libs.hilt.worker)
 
     implementation(libs.jsoup)
     testImplementation(libs.ktor.core.cio)
@@ -169,11 +169,17 @@ dependencies {
 
     testImplementation(test.bundles.common)
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
-    testImplementation(libs.hilt.androidtest)
+
     testImplementation(libs.room.testing)
-    androidTestImplementation(libs.hilt.androidtest)
     androidTestImplementation(libs.room.testing)
     androidTestImplementation(test.bundles.common)
+
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidCompose)
+    implementation(libs.koin.workManager)
+    implementation(libs.koin.core)
+    implementation(libs.koin.annotations)
+    ksp(libs.koin.kspCompiler)
 }
 
 kapt {

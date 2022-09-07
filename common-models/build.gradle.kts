@@ -5,7 +5,13 @@ plugins {
     id("kotlinx-serialization")
 }
 android {
-    namespace = "org.ireader.common_models"
+    namespace = "ireader.common.models"
+    androidComponents.onVariants { variant ->
+        val name = variant.name
+        sourceSets {
+            getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
+        }
+    }
 }
 
 dependencies {
@@ -20,6 +26,5 @@ dependencies {
     implementation(libs.room.ktx)
     kapt(libs.room.compiler)
 
-//    implementation(kotlinx.reflect)
-//    implementation(kotlinx.stdlib)
+
 }

@@ -3,14 +3,21 @@ plugins {
     id("kotlin-android")
     id("kotlin-kapt")
     kotlin("plugin.serialization")
+    id("com.google.devtools.ksp")
 }
 android {
-    namespace = "org.ireader.ui_tts"
+    namespace = "ireader.ui.tts"
     buildFeatures {
         compose = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = composeLib.versions.compiler.get()
+    }
+    androidComponents.onVariants { variant ->
+        val name = variant.name
+        sourceSets {
+            getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
+        }
     }
 }
 
@@ -36,9 +43,11 @@ dependencies {
     implementation(accompanist.pagerIndicator)
     implementation(accompanist.pager)
     implementation(accompanist.swipeRefresh)
-    implementation(libs.hilt.android)
     implementation(libs.gson)
     implementation(project(mapOf("path" to ":domain")))
-    kapt(libs.hilt.androidcompiler)
     implementation(androidx.media)
+
+    ksp(libs.koin.kspCompiler)
+    implementation(libs.koin.androidCompose)
+    compileOnly(libs.koin.annotations)
 }

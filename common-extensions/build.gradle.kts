@@ -4,7 +4,13 @@ plugins {
     id("kotlin-kapt")
 }
 android {
-    namespace = "org.ireader.common_extensions"
+    namespace = "ireader.common.extensions"
+    androidComponents.onVariants { variant ->
+        val name = variant.name
+        sourceSets {
+            getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
+        }
+    }
 }
 
 dependencies {
@@ -14,7 +20,7 @@ dependencies {
     implementation(project(Modules.coreApi))
     implementation(project(Modules.commonResources))
 
-    implementation(libs.hilt.android)
+
     implementation(androidx.browser)
     implementation(androidx.biometric)
     implementation(androidx.lifecycle.viewmodelktx)

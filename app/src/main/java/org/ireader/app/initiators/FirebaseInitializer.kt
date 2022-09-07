@@ -4,9 +4,10 @@ import android.app.Application
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import org.ireader.app.BuildConfig
-import javax.inject.Inject
+import org.koin.core.annotation.Factory
 
-class FirebaseInitializer @Inject constructor(private val context: Application) {
+@Factory
+class FirebaseInitializer(private val context: Application) {
     init {
         FirebaseAnalytics.getInstance(context).setAnalyticsCollectionEnabled(!BuildConfig.DEBUG)
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)

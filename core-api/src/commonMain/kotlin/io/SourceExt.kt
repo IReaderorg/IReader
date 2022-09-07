@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core_api.io
+package ireader.core.api.io
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -15,7 +15,7 @@ import okio.Path
 import okio.Source
 import okio.buffer
 import okio.use
-import org.ireader.core_api.util.IO
+import ireader.core.api.util.IO
 
 @Suppress("BlockingMethodInNonBlockingContext")
 suspend fun Source.saveTo(path: Path, fileSystem: FileSystem) {

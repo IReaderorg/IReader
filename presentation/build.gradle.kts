@@ -3,11 +3,12 @@ plugins {
     id("kotlin-android")
     id("kotlin-kapt")
     id("kotlinx-serialization")
-    id("dagger.hilt.android.plugin")
+
+    id("com.google.devtools.ksp")
 }
 
 android {
-    namespace = "org.ireader.presentation"
+    namespace = "ireader.presentation"
     buildFeatures {
         compose = true
     }
@@ -69,7 +70,7 @@ dependencies {
     implementation(composeLib.compose.icons)
     implementation(composeLib.compose.navigation)
     implementation(composeLib.compose.coil)
-    implementation(composeLib.compose.hiltNavigation)
+    //implementation(composeLib.compose.hiltNavigation)
     implementation(composeLib.compose.lifecycle)
 
     implementation(accompanist.flowlayout)
@@ -93,8 +94,11 @@ dependencies {
     implementation(project(mapOf("path" to ":common-models")))
     kapt(libs.room.compiler)
 
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.androidcompiler)
+    implementation(libs.koin.android)
+    ksp(libs.koin.kspCompiler)
+    implementation(libs.koin.androidCompose)
+    compileOnly(libs.koin.annotations)
+//    kapt(libs.hilt.androidcompiler)
     // kapt(libs.hilt.compiler)
 
     testImplementation(test.bundles.common)

@@ -4,7 +4,13 @@ plugins {
     id("kotlin-android")
 }
 android {
-    namespace = "org.ireader.common_data"
+    namespace = "ireader.common.data"
+    androidComponents.onVariants { variant ->
+        val name = variant.name
+        sourceSets {
+            getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
+        }
+    }
 }
 
 dependencies {

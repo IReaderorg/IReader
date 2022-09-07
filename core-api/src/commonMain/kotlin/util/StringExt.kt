@@ -6,6 +6,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core_api.util
-
+package ireader.core.api.util
+@Suppress("NO_ACTUAL_FOR_EXPECT")
 expect fun String.Companion.fromCodePoints(vararg codePoints: Int): String

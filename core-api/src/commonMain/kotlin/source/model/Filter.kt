@@ -1,6 +1,6 @@
 
 
-package org.ireader.core_api.source.model
+package ireader.core.api.source.model
 
 /**
  * The list of filters a catalog can implement. New types of filters can be implemented through

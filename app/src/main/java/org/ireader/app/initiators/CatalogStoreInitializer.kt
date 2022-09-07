@@ -1,15 +1,12 @@
 package org.ireader.app.initiators
 
-import android.app.Application
-import kotlinx.coroutines.DelicateCoroutinesApi
-import org.ireader.common_extensions.launchIO
-import org.ireader.core_catalogs.interactor.SyncRemoteCatalogs
-import javax.inject.Inject
+import ireader.common.extensions.launchIO
+import ireader.core.catalogs.interactor.SyncRemoteCatalogs
+import org.koin.core.annotation.Factory
 
-@OptIn(DelicateCoroutinesApi::class)
-class CatalogStoreInitializer @Inject constructor(
+@Factory
+class CatalogStoreInitializer(
     syncRemoteCatalogs: SyncRemoteCatalogs,
-    app: Application
 ) {
 
     init {

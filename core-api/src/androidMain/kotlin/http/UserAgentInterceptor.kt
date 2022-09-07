@@ -1,8 +1,8 @@
-package org.ireader.core_api.http
+package ireader.core.api.http
 
 import okhttp3.Interceptor
 import okhttp3.Response
-import org.ireader.core_api.http.WebViewUtil.DEFAULT_USER_AGENT
+import ireader.core.api.http.WebViewUtil.DEFAULT_USER_AGENT
 
 class UserAgentInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {

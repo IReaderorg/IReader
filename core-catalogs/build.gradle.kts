@@ -4,19 +4,23 @@ plugins {
     id("kotlin-kapt")
 }
 android {
-    namespace = "org.ireader.core_catalogs"
+    namespace = "ireader.core.catalogs"
     buildFeatures {
         compose = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = composeLib.versions.compiler.get()
     }
+    androidComponents.onVariants { variant ->
+        val name = variant.name
+        sourceSets {
+            getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
+        }
+    }
 }
 
 dependencies {
     implementation(project(Modules.commonModels))
-    // implementation(project(Modules.coreUi))
-    //
     implementation(project(Modules.coreApi))
     implementation(project(Modules.commonData))
     implementation(project(Modules.commonResources))
@@ -31,6 +35,4 @@ dependencies {
     implementation(accompanist.pagerIndicator)
     implementation(accompanist.pager)
     implementation(accompanist.swipeRefresh)
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.androidcompiler)
 }

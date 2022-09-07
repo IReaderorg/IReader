@@ -2,14 +2,21 @@ plugins {
     id("com.android.library")
     id("kotlin-android")
     id("kotlin-kapt")
+    id("com.google.devtools.ksp")
 }
 android {
-    namespace = "org.ireader.ui_components"
+    namespace = "ireader.ui.component"
     buildFeatures {
         compose = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = composeLib.versions.compiler.get()
+    }
+    androidComponents.onVariants { variant ->
+        val name = variant.name
+        sourceSets {
+            getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
+        }
     }
 }
 
@@ -33,4 +40,9 @@ dependencies {
 
     implementation(composeLib.compose.uiToolingPreview)
     implementation(composeLib.compose.navigation)
+
+
+    ksp(libs.koin.kspCompiler)
+    implementation(libs.koin.androidCompose)
+    compileOnly(libs.koin.annotations)
 }

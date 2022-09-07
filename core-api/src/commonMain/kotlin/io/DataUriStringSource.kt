@@ -6,12 +6,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core_api.io
+package ireader.core.api.io
 
 import okio.Buffer
 import okio.Source
 import okio.Timeout
-import org.ireader.core_api.util.decodeBase64
+import ireader.core.api.util.decodeBase64
 
 class DataUriStringSource(private val data: String) : Source {
 

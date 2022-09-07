@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core_api.http
+package ireader.core.api.http
 
 import android.webkit.CookieManager
 import io.ktor.client.plugins.cookies.CookiesStorage

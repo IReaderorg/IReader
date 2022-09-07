@@ -1,5 +1,5 @@
 
 
-package org.ireader.core_api.source.model
+package ireader.core.api.source.model
 
 class PageListEmpty : Exception()

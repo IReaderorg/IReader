@@ -1,12 +1,12 @@
 
 
-package org.ireader.core_api.source
+package ireader.core.api.source
 
 import androidx.annotation.Keep
-import org.ireader.core_api.source.model.ChapterInfo
-import org.ireader.core_api.source.model.Command
-import org.ireader.core_api.source.model.MangaInfo
-import org.ireader.core_api.source.model.Page
+import ireader.core.api.source.model.ChapterInfo
+import ireader.core.api.source.model.Command
+import ireader.core.api.source.model.MangaInfo
+import ireader.core.api.source.model.Page
 
 /**
  * A basic interface for creating a source. It could be an online source, a local source, etc...

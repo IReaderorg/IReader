@@ -1,136 +1,135 @@
 package org.ireader.app.di
 
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import org.ireader.common_data.repository.BookCategoryRepository
-import org.ireader.common_data.repository.CategoryRepository
-import org.ireader.common_data.repository.LibraryRepository
-import org.ireader.common_data.repository.ReaderThemeRepository
-import org.ireader.common_data.repository.ThemeRepository
-import org.ireader.core_catalogs.service.CatalogRemoteRepository
-import org.ireader.data.local.dao.BookCategoryDao
-import org.ireader.data.local.dao.CatalogDao
-import org.ireader.data.local.dao.CategoryDao
-import org.ireader.data.local.dao.ChapterDao
-import org.ireader.data.local.dao.DownloadDao
-import org.ireader.data.local.dao.HistoryDao
-import org.ireader.data.local.dao.LibraryBookDao
-import org.ireader.data.local.dao.LibraryDao
-import org.ireader.data.local.dao.ReaderThemeDao
-import org.ireader.data.local.dao.RemoteKeysDao
-import org.ireader.data.local.dao.ThemeDao
-import org.ireader.data.local.dao.UpdatesDao
-import org.ireader.data.repository.BookCategoryRepositoryImpl
-import org.ireader.data.repository.BookRepositoryImpl
-import org.ireader.data.repository.CatalogRemoteRepositoryImpl
-import org.ireader.data.repository.CategoryRepositoryImpl
-import org.ireader.data.repository.ChapterRepositoryImpl
-import org.ireader.data.repository.DownloadRepositoryImpl
-import org.ireader.data.repository.HistoryRepositoryImpl
-import org.ireader.data.repository.LibraryRepositoryImpl
-import org.ireader.data.repository.ReaderThemeRepositoryImpl
-import org.ireader.data.repository.RemoteKeyRepositoryImpl
-import org.ireader.data.repository.ThemeRepositoryImpl
-import org.ireader.data.repository.UpdatesRepositoryImpl
-import javax.inject.Singleton
+import ireader.common.data.repository.BookCategoryRepository
+import ireader.common.data.repository.BookRepository
+import ireader.common.data.repository.CategoryRepository
+import ireader.common.data.repository.ChapterRepository
+import ireader.common.data.repository.DownloadRepository
+import ireader.common.data.repository.HistoryRepository
+import ireader.common.data.repository.LibraryRepository
+import ireader.common.data.repository.ReaderThemeRepository
+import ireader.common.data.repository.RemoteKeyRepository
+import ireader.common.data.repository.ThemeRepository
+import ireader.common.data.repository.UpdatesRepository
+import ireader.core.catalogs.service.CatalogRemoteRepository
+import ireader.data.local.dao.BookCategoryDao
+import ireader.data.local.dao.CatalogDao
+import ireader.data.local.dao.CategoryDao
+import ireader.data.local.dao.ChapterDao
+import ireader.data.local.dao.DownloadDao
+import ireader.data.local.dao.HistoryDao
+import ireader.data.local.dao.LibraryBookDao
+import ireader.data.local.dao.LibraryDao
+import ireader.data.local.dao.ReaderThemeDao
+import ireader.data.local.dao.RemoteKeysDao
+import ireader.data.local.dao.ThemeDao
+import ireader.data.local.dao.UpdatesDao
+import ireader.data.repository.BookCategoryRepositoryImpl
+import ireader.data.repository.BookRepositoryImpl
+import ireader.data.repository.CatalogRemoteRepositoryImpl
+import ireader.data.repository.CategoryRepositoryImpl
+import ireader.data.repository.ChapterRepositoryImpl
+import ireader.data.repository.DownloadRepositoryImpl
+import ireader.data.repository.HistoryRepositoryImpl
+import ireader.data.repository.LibraryRepositoryImpl
+import ireader.data.repository.ReaderThemeRepositoryImpl
+import ireader.data.repository.RemoteKeyRepositoryImpl
+import ireader.data.repository.ThemeRepositoryImpl
+import ireader.data.repository.UpdatesRepositoryImpl
+import org.koin.core.annotation.ComponentScan
+import org.koin.core.annotation.Single
 
-@InstallIn(SingletonComponent::class)
-@Module
+@org.koin.core.annotation.Module
+@ComponentScan("org.ireader.app.di.RepositoryInject")
 class RepositoryInject {
 
-    @Provides
-    @Singleton
+
+    @Single
     fun provideRemoteKeyRepository(
         remoteKeysDao: RemoteKeysDao,
-    ): org.ireader.common_data.repository.RemoteKeyRepository {
+    ): RemoteKeyRepository {
         return RemoteKeyRepositoryImpl(
             dao = remoteKeysDao,
         )
     }
 
-    @Singleton
-    @Provides
+    @Single
     fun provideDownloadRepository(
         downloadDao: DownloadDao,
-    ): org.ireader.common_data.repository.DownloadRepository {
+    ): DownloadRepository {
         return DownloadRepositoryImpl(downloadDao)
     }
 
-    @Singleton
-    @Provides
+    @Single
     fun provideUpdatesRepository(
         updatesDao: UpdatesDao,
-    ): org.ireader.common_data.repository.UpdatesRepository {
+    ): UpdatesRepository {
         return UpdatesRepositoryImpl(updatesDao)
     }
 
-    @Singleton
-    @Provides
+    @Single
     fun provideLibraryRepository(
         dao: LibraryDao,
     ): LibraryRepository {
         return LibraryRepositoryImpl(dao)
     }
-    @Singleton
-    @Provides
+    @Single
     fun provideCategoryRepository(
         dao: CategoryDao,
     ): CategoryRepository {
         return CategoryRepositoryImpl(dao)
     }
 
-    @Provides
-    @Singleton
+
+    @Single
     fun provideCatalogRemoteRepository(catalogDao: CatalogDao): CatalogRemoteRepository {
         return CatalogRemoteRepositoryImpl(dao = catalogDao)
     }
 
-    @Provides
-    @Singleton
-    fun providesLocalChapterRepository(ChapterDao: ChapterDao): org.ireader.common_data.repository.ChapterRepository {
+
+    @Single
+    fun providesLocalChapterRepository(ChapterDao: ChapterDao): ChapterRepository {
         return ChapterRepositoryImpl(ChapterDao)
     }
 
-    @Provides
-    @Singleton
+
+    @Single
     fun providesLibraryRepository(
         libraryBookDao: LibraryBookDao,
         remoteKeysDao: RemoteKeysDao,
-    ): org.ireader.common_data.repository.BookRepository {
+    ): BookRepository {
         return BookRepositoryImpl(
             libraryBookDao,
             remoteKeysDao = remoteKeysDao
         )
     }
 
-    @Provides
-    @Singleton
+
+        @Single
     fun providesHistoryRepository(
         historyDao: HistoryDao,
-    ): org.ireader.common_data.repository.HistoryRepository {
+    ): HistoryRepository {
         return HistoryRepositoryImpl(historyDao)
     }
 
-    @Provides
-    @Singleton
+
+        @Single
     fun providesBookCategoryRepository(
         dao: BookCategoryDao,
     ): BookCategoryRepository {
         return BookCategoryRepositoryImpl(dao)
     }
 
-    @Provides
-    @Singleton
+
+        @Single
     fun providesThemeRepository(
         dao: ThemeDao,
     ): ThemeRepository {
         return ThemeRepositoryImpl(dao)
     }
 
-    @Provides
-    @Singleton
+
+        @Single
     fun providesReaderThemeRepository(
         dao: ReaderThemeDao,
     ): ReaderThemeRepository {

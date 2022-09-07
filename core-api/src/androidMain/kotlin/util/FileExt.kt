@@ -6,13 +6,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.ireader.core_api.util
+package ireader.core.api.util
 
 import android.content.Context
 import android.net.Uri
 import android.os.Build
 import androidx.core.content.FileProvider
-import org.ireader.core_api.BuildConfig
+import ireader.core.api.BuildConfig
+
 import java.io.File
 
 /**
