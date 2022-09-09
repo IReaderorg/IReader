@@ -3,13 +3,8 @@ package ireader.ui.appearance
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
@@ -17,18 +12,8 @@ import androidx.compose.material.BottomAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,21 +21,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
 import ireader.common.models.theme.Theme
+import ireader.core.ui.preferences.PreferenceValues
+import ireader.core.ui.theme.AppColors
+import ireader.core.ui.theme.isLight
+import ireader.domain.use_cases.theme.toCustomTheme
 import ireader.ui.component.components.Components
 import ireader.ui.component.components.SetupSettingComponents
 import ireader.ui.component.components.Toolbar
 import ireader.ui.component.components.component.ChoicePreference
 import ireader.ui.component.components.component.ColorPreference
 import ireader.ui.component.reusable_composable.AppIconButton
-import ireader.core.ui.preferences.PreferenceValues
-import ireader.core.ui.theme.AppColors
-import ireader.core.ui.theme.dark
-import ireader.core.ui.theme.isLight
-import ireader.core.ui.theme.light
-import ireader.domain.use_cases.theme.toCustomTheme
-import ireader.ui.appearance.R
+import kotlinx.coroutines.launch
 
 @Composable
 fun AppearanceSettingScreen(
@@ -62,17 +44,24 @@ fun AppearanceSettingScreen(
 ) {
     val context = LocalContext.current
     val customizedColors = vm.getCustomizedColors()
-    val isLight = MaterialTheme.colorScheme.isLight()
+    val systemTheme = isSystemInDarkTheme()
+    val isLight = remember(vm.themeMode.value) {
+        if(vm.themeMode.value == PreferenceValues.ThemeMode.System) {
+            !systemTheme
+        } else  {
+            vm.themeMode.value == PreferenceValues.ThemeMode.Light
+        }
+    }
 
     val scope = rememberCoroutineScope()
-    val themesForCurrentMode = remember(isLight, vm.vmThemes.size) {
+    val themesForCurrentMode = remember(vm.themeMode.value, vm.vmThemes.size,isLight) {
         if (isLight)
-            vm.vmThemes.map { it.light() }
+            vm.vmThemes.filter { !it.isDark }
         else
-            vm.vmThemes.map { it.dark() }
+            vm.vmThemes.filter { it.isDark }
     }
     val themeItem: Components =
-        remember(vm.vmThemes.size, vm.themeMode.value, vm.themeEditMode) {
+        remember(vm.vmThemes.size, vm.themeMode.value, vm.themeEditMode,themesForCurrentMode) {
             Components.Dynamic {
                 LazyRow(modifier = Modifier.padding(horizontal = 8.dp)) {
                     items(items = themesForCurrentMode) { theme ->
@@ -231,7 +220,7 @@ private fun ThemeItem(
                         .weight(1f)
                         .padding(6.dp)
                 ) {
-                    Text("Text", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface)
+                    Text("Text", fontSize = 11.sp, color = theme.materialColors.onBackground)
                     Button(
                         onClick = {},
                         enabled = false,
@@ -271,7 +260,7 @@ private fun ThemeItem(
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
-            if (!theme.default && editMode) {
+            if ((theme.id > 0) && editMode) {
                 AppIconButton(
                     modifier = Modifier
                         .align(Alignment.Center)

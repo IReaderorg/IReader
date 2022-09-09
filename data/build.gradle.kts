@@ -97,10 +97,14 @@ dependencies {
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.coroutines.android)
 
+
     testImplementation(test.bundles.common)
     testImplementation(libs.hilt.androidtest)
     testImplementation(libs.room.testing)
     androidTestImplementation(libs.hilt.androidtest)
     androidTestImplementation(libs.room.testing)
     androidTestImplementation(test.bundles.common)
+
+
+    implementation(libs.sqldelight.android)
 }

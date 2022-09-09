@@ -42,9 +42,9 @@ plugins {
     alias(libs.plugins.kotlinSerilization) apply false
     alias(libs.plugins.jetbrainCompose) apply false
     alias(libs.plugins.ideaExt) apply false
-   // alias(libs.plugins.daggerHilt) apply false
     alias(libs.plugins.dokka) apply false
     alias(libs.plugins.ksp) apply false
+   // alias(libs.plugins.sqldelight) apply false
 }
 
 

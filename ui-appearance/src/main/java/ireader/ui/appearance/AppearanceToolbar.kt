@@ -18,7 +18,6 @@ import ireader.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.core.ui.theme.isLight
 import ireader.domain.use_cases.theme.toCustomTheme
-import ireader.ui.appearance.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

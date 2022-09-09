@@ -86,7 +86,6 @@ fun ReaderColors.ReaderTheme(): ReaderTheme {
         id = this.id,
         backgroundColor = this.backgroundColor.toArgb(),
         onTextColor = this.onTextColor.toArgb(),
-        isDefault = this.isDefault
     )
 }
 
@@ -95,6 +94,6 @@ fun ReaderTheme.ReaderColors(): ReaderColors {
         id = id,
         backgroundColor = Color(this.backgroundColor),
         onTextColor = Color(this.onTextColor),
-        isDefault = this.isDefault
+        isDefault = id < 0
     )
 }

@@ -1,21 +1,21 @@
 package ireader.data.repository
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import ireader.common.data.repository.ReaderThemeRepository
 import ireader.common.data.repository.ThemeRepository
-import ireader.common.models.theme.BaseTheme
 import ireader.common.models.theme.CustomTheme
 import ireader.common.models.theme.ReaderTheme
+import ireader.common.models.theme.Theme
 import ireader.core.ui.theme.themes
 import ireader.data.local.dao.ReaderThemeDao
 import ireader.data.local.dao.ThemeDao
 import ireader.domain.use_cases.theme.toBaseTheme
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class ThemeRepositoryImpl(
     private val themeDao: ThemeDao
 ) : ThemeRepository {
-    override fun subscribe(): Flow<List<BaseTheme>> {
+    override fun subscribe(): Flow<List<Theme>> {
         return themeDao.subscribe().map { flow -> flow.map { it.toBaseTheme() } }
     }
 

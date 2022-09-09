@@ -10,26 +10,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.lifecycle.viewModelScope
+import ireader.common.data.repository.ThemeRepository
+import ireader.common.models.theme.ExtraColors
+import ireader.common.models.theme.Theme
+import ireader.core.ui.preferences.PreferenceValues
+import ireader.core.ui.preferences.UiPreferences
+import ireader.core.ui.theme.*
+import ireader.core.ui.viewmodel.BaseViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import ireader.common.data.repository.ThemeRepository
-import ireader.common.models.theme.ExtraColors
-import ireader.common.models.theme.Theme
-import ireader.core.ui.preferences.PreferenceValues
-import ireader.core.ui.preferences.UiPreferences
-import ireader.core.ui.theme.AppRippleTheme
-import ireader.core.ui.theme.asState
-import ireader.core.ui.theme.dark
-import ireader.core.ui.theme.getDarkColors
-import ireader.core.ui.theme.getLightColors
-import ireader.core.ui.theme.isLight
-import ireader.core.ui.theme.light
-import ireader.core.ui.theme.themes
-import ireader.core.ui.viewmodel.BaseViewModel
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
@@ -45,7 +38,7 @@ class AppThemeViewModel(
 
     init {
         themeRepository.subscribe().onEach {
-            themes.removeIf { baseTheme -> !baseTheme.default }
+            themes.removeIf { baseTheme -> baseTheme.id > 0L }
             themes.addAll(it)
         }.launchIn(viewModelScope)
     }
@@ -88,14 +81,7 @@ class AppThemeViewModel(
     ): Theme {
         @Composable
         fun getTheme(fallbackIsLight: Boolean): Theme {
-
-            return themes.firstOrNull { it.id == colorTheme }?.let {
-                if (fallbackIsLight) {
-                    it.light()
-                } else {
-                    it.dark()
-                }
-            } ?: if (fallbackIsLight) themes.first().light() else themes.first().dark()
+            return themes.firstOrNull { it.id == colorTheme } ?: themes.first { it.materialColors.isLight() == fallbackIsLight }
         }
 
         return when (themeMode) {

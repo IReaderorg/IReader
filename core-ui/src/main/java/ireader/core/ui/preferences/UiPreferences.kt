@@ -18,7 +18,7 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     }
 
     fun colorTheme(): Preference<Long> {
-        return preferenceStore.getLong("color_theme", 0L)
+        return preferenceStore.getLong("color_theme", -1L)
     }
 
     fun colorPrimaryLight(): Preference<Int> {

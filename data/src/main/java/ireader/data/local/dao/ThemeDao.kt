@@ -22,7 +22,7 @@ interface ThemeDao : BaseDao<CustomTheme> {
     @Query("SELECT * FROM theme_table WHERE id == :themeId")
     fun find(themeId: Int): kotlinx.coroutines.flow.Flow<CustomTheme>
 
-    @Query("DELETE FROM theme_table WHERE isDefault = 0")
+    @Query("DELETE FROM theme_table")
     fun deleteAll()
 }
 
@@ -41,6 +41,6 @@ interface ReaderThemeDao : BaseDao<ReaderTheme> {
     @Query("SELECT * FROM reader_theme_table WHERE id == :themeId")
     fun find(themeId: Int): kotlinx.coroutines.flow.Flow<ReaderTheme>
 
-    @Query("DELETE FROM reader_theme_table WHERE isDefault = 0")
+    @Query("DELETE FROM reader_theme_table")
     fun deleteAll()
 }

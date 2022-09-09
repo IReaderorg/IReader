@@ -1,30 +1,22 @@
 package ireader.domain.use_cases.theme
 
-import ireader.common.models.theme.BaseTheme
-import ireader.common.models.theme.CustomTheme
-import ireader.common.models.theme.toColorScheme
-import ireader.common.models.theme.toCustomColorScheme
-import ireader.common.models.theme.toCustomExtraColors
-import ireader.common.models.theme.toExtraColor
+import ireader.common.models.theme.*
 
-fun CustomTheme.toBaseTheme(): BaseTheme {
-    return BaseTheme(
+fun CustomTheme.toBaseTheme(): Theme {
+    return Theme(
         id = this.id,
-        lightColor = this.lightColor.toColorScheme(),
-        darkColor = this.darkColor.toColorScheme(),
-        darkExtraColors = this.darkExtraColors.toExtraColor(),
-        lightExtraColors = this.lightExtraColors.toExtraColor(),
-        default = this.isDefault
+        materialColors = this.materialColor.toColorScheme(),
+        extraColors = this.extraColors.toExtraColor(),
+        isDark = this.isDark
     )
 }
 
-fun BaseTheme.toCustomTheme(): CustomTheme {
+fun Theme.toCustomTheme(): CustomTheme {
     return CustomTheme(
         id = this.id,
-        lightColor = this.lightColor.toCustomColorScheme(),
-        darkColor = this.darkColor.toCustomColorScheme(),
-        lightExtraColors = this.lightExtraColors.toCustomExtraColors(),
-        darkExtraColors = this.darkExtraColors.toCustomExtraColors(),
-        isDefault = this.default
+        materialColor = this.materialColors.toCustomColorScheme(),
+        extraColors = this.extraColors.toCustomExtraColors(),
+        isDark = this.isDark,
+
     )
 }

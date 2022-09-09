@@ -6,8 +6,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.common.data.repository.ThemeRepository
-import ireader.common.models.theme.BaseTheme
 import ireader.common.models.theme.ExtraColors
+import ireader.common.models.theme.Theme
 import ireader.core.ui.preferences.PreferenceValues
 import ireader.core.ui.preferences.UiPreferences
 import ireader.core.ui.theme.CustomizableAppColorsPreferenceState
@@ -56,7 +56,7 @@ class AppearanceViewModel(
         return if (MaterialTheme.colorScheme.isLight()) lightColors else darkColors
     }
 
-    fun getThemes(id: Long,isLight:Boolean): BaseTheme? {
+    fun getThemes(id: Long,isLight:Boolean): Theme? {
         val themes = vmThemes.firstOrNull { it.id == id }
         val primary = if (!isLight) {
             darkColors.primary
@@ -75,14 +75,12 @@ class AppearanceViewModel(
         }
         return themes?.copy(
             id = 0,
-            lightColor = themes.lightColor.copy(
+            materialColors = themes.materialColors.copy(
                 primary = primary.value,
                 secondary = secondary.value
             ),
-            darkColor = themes.darkColor.copy(primary = primary.value, secondary = secondary.value),
-            lightExtraColors = ExtraColors(bars = bars.value),
-            darkExtraColors = ExtraColors(bars = bars.value),
-            default = false
+            extraColors = ExtraColors(bars = bars.value),
+            isDark = !isLight
         )
     }
 }
