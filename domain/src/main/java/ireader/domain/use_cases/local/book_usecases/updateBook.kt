@@ -36,9 +36,7 @@ fun updateBook(newBook: Book, oldBook: Book): Book {
             newBook.cover.isNotBlank() && newBook.cover != oldBook.cover
         }, oldBook.cover),
         viewer = if (newBook.viewer != 0) newBook.viewer else oldBook.viewer,
-        tableId = oldBook.tableId,
         lastInit = oldBook.lastInit,
-        type = oldBook.type
     )
 }
 

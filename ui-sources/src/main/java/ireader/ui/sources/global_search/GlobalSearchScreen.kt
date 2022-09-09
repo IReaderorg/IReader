@@ -24,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.common.models.entities.BaseBook
+import ireader.common.models.entities.Book
 import ireader.ui.component.list.layouts.BookImage
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
@@ -39,7 +40,7 @@ fun GlobalSearchScreen(
     vm: GlobalSearchState,
     onPopBackStack: () -> Unit,
     onSearch: (query: String) -> Unit,
-    onBook: (BaseBook) -> Unit,
+    onBook: (Book) -> Unit,
     onGoToExplore: (Int) -> Unit,
     scrollBehavior: TopAppBarScrollBehavior?
 
@@ -85,7 +86,7 @@ fun GlobalSearchScreen(
 @Composable
 fun GlobalSearchBookInfo(
     book: SearchItem,
-    onBook: (BaseBook) -> Unit,
+    onBook: (Book) -> Unit,
     goToExplore: () -> Unit,
 ) {
     val modifier = when (book.items.isNotEmpty()) {
@@ -128,7 +129,7 @@ fun GlobalSearchBookInfo(
                         .height(250.dp)
                         .aspectRatio(3f / 4f),
                     onClick = {
-                        onBook(it)
+                        onBook(book.items[index])
                     },
                     book = book.items[index]
                 ) {

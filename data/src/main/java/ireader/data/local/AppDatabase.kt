@@ -15,7 +15,6 @@ import ireader.common.models.entities.Category
 import ireader.common.models.entities.Chapter
 import ireader.common.models.entities.Download
 import ireader.common.models.entities.History
-import ireader.common.models.entities.RemoteKeys
 import ireader.common.models.entities.Update
 import ireader.common.models.theme.CustomTheme
 import ireader.common.models.theme.ReaderTheme
@@ -42,7 +41,6 @@ import java.util.concurrent.Executors
         Download::class,
         History::class,
         Update::class,
-        RemoteKeys::class,
         BookCategory::class,
         CustomTheme::class,
         ReaderTheme::class

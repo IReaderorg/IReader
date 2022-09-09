@@ -23,7 +23,7 @@ ideaExt = "1.1.6"
 
 [libraries]
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
-gradle-tools = "com.android.tools.build:gradle:7.2.1"
+gradle-tools = "com.android.tools.build:gradle:7.2.2"
 gradle-kotlinSerialization = { module =  "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
 gradle-hilt = "com.google.dagger:hilt-android-gradle-plugin:2.42"
 gradle-google = "com.google.gms:google-services:4.3.10"

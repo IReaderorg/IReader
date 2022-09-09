@@ -5,13 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Autorenew
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.FlipToBack
-import androidx.compose.material.icons.filled.SelectAll
-import androidx.compose.material.icons.filled.SyncAlt
-import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -52,7 +46,8 @@ fun BookDetailTopAppBar(
     onClickSelectAll: () -> Unit,
     onClickInvertSelection: () -> Unit,
     onSelectBetween: () -> Unit,
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    onInfo: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
         when {
@@ -76,7 +71,8 @@ fun BookDetailTopAppBar(
                     onCommand = onCommand,
                     onRefresh = onRefresh,
                     source = source,
-                    onDownload = onDownload
+                    onDownload = onDownload,
+                    onInfo = onInfo
                 )
             }
         }
@@ -93,6 +89,7 @@ fun RegularChapterDetailTopAppBar(
     onPopBackStack: () -> Unit,
     onCommand: () -> Unit,
     onShare: () -> Unit,
+    onInfo: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior?
 ) {
     val (dropDownState, setDropDownState) = remember {
@@ -115,15 +112,15 @@ fun RegularChapterDetailTopAppBar(
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }
-//            IconButton(onClick = {
-//                onShare()
-//            }) {
-//                Icon(
-//                    imageVector = Icons.Default.IosShare,
-//                    contentDescription = stringResource(id = R.string.share),
-//                    tint = MaterialTheme.colorScheme.onBackground,
-//                )
-//            }
+            IconButton(onClick = {
+                onInfo()
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = stringResource(id = R.string.share),
+                    tint = MaterialTheme.colorScheme.onBackground,
+                )
+            }
             if (source is ireader.core.api.source.CatalogSource && source.getCommands().any { it !is Command.Fetchers }) {
                 IconButton(onClick = {
                     onCommand()

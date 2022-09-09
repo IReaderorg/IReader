@@ -29,7 +29,7 @@ class GetBookDetail() {
                 try {
                     Log.debug { "Timber: Remote Book Detail for ${book.title} Was called" }
 
-                    val bookDetail = source.getMangaDetails(book.toBookInfo(catalog.sourceId), commands)
+                    val bookDetail = source.getMangaDetails(book.toBookInfo(), commands)
 
                     onSuccess(
                         updateBook(

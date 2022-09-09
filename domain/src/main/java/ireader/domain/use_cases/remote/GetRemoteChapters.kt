@@ -31,7 +31,7 @@ class GetRemoteChapters() {
                 try {
                     Log.debug { "Timber: GetRemoteChaptersUseCase was Called" }
 
-                    val newChapters = source.getChapterList(manga = book.toBookInfo(catalog.sourceId), commands).map { it.toChapter(book.id) }
+                    val newChapters = source.getChapterList(manga = book.toBookInfo(), commands).map { it.toChapter(book.id) }
                     onRemoteSuccess(newChapters)
                     onSuccess((oldChapters + newChapters).distinctBy { it.key })
                     Log.debug { "Timber: GetRemoteChaptersUseCase was Finished Successfully" }

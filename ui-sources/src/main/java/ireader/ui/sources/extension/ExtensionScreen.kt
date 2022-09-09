@@ -67,9 +67,6 @@ fun ExtensionScreen(
             }
         }
     }
-    LaunchedEffect(key1 = true) {
-        vm.clearExploreMode()
-    }
     val pages = remember {
         listOf<String>(
             context.getString(R.string.sources),

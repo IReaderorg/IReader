@@ -31,7 +31,6 @@ interface BookRepository {
 
     /****************************************************/
 
-    suspend fun deleteAllExploreBook()
 
     suspend fun deleteBooks(book: List<Book>)
 

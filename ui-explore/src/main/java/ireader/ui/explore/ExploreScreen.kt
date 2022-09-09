@@ -23,11 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -40,8 +36,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import ireader.common.models.entities.Book
 import kotlinx.coroutines.launch
 import ireader.common.models.entities.BookItem
+import ireader.common.models.entities.toBook
+import ireader.common.models.entities.toBookItem
 import ireader.common.resources.asString
 import ireader.ui.component.components.ShowLoading
 import ireader.ui.component.list.LayoutComposable
@@ -69,12 +69,12 @@ fun ExploreScreen(
     onFilterClick: () -> Unit,
     getBooks: (query: String?, listing: Listing?, filters: List<Filter<*>>) -> Unit,
     loadItems: (Boolean) -> Unit,
-    onBook: (BookItem) -> Unit,
+    onBook: (Book) -> Unit,
     onAppbarWebView: (url: String) -> Unit,
     onPopBackStack: () -> Unit,
     snackBarHostState: SnackbarHostState,
     modalState: ModalBottomSheetState,
-    onLongClick: (BookItem) -> Unit = {},
+    onLongClick: (Book) -> Unit = {},
     headers: ((url: String) -> okhttp3.Headers?)? = null,
     scaffoldPadding: PaddingValues
 ) {
@@ -160,6 +160,7 @@ fun ExploreScreen(
                 .fillMaxSize()
                 .padding(paddingValue)
         ) {
+
             when {
                 vm.isLoading && vm.page == 1 -> {
                     ShowLoading()
@@ -176,18 +177,20 @@ fun ExploreScreen(
                 }
                 else -> {
                     LayoutComposable(
-                        books = vm.stateItems,
+                        books = vm.stateItems.mapIndexed { index, book ->  book.toBookItem().copy(id= index.toLong())},
                         layout = vm.layout,
                         scrollState = scrollState,
                         source = source,
                         isLocal = false,
                         gridState = gridState,
                         onClick = { book ->
-                            onBook(book)
+                            onBook(book.toBook())
                         },
                         isLoading = vm.isLoading,
                         showInLibraryBadge = true,
-                        onLongClick = onLongClick,
+                        onLongClick = {
+                            onLongClick(it.toBook())
+                        },
                         headers = headers,
                     )
                 }

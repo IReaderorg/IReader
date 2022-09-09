@@ -174,6 +174,9 @@ object BookDetailScreenSpec : ScreenSpec {
                 if (book != null) {
                     vm.startDownloadService(book = book)
                 }
+            },
+            onInfo = {
+                vm.showDialog = true
             }
         )
     }

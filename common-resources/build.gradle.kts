@@ -21,15 +21,8 @@ kotlin {
                 compileOnly(compose.ui)
             }
         }
-        val androidMain by getting {
-            dependencies {
-                compileOnly(composeLib.compose.runtime)
-                compileOnly(composeLib.compose.ui)
-            }
-        }
-        val desktopMain by getting {
-
-        }
+        val androidMain by getting
+        val desktopMain by getting
 
     }
 
@@ -43,14 +36,6 @@ android {
             res.srcDir("src/commonMain/resources")
         }
     }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = composeLib.versions.compiler.get()
-    }
-
-
     defaultConfig {
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
         buildConfigField("String", "COMMIT_SHA", "\"${getGitSha()}\"")

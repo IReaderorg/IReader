@@ -8,7 +8,6 @@ import ireader.common.data.repository.DownloadRepository
 import ireader.common.data.repository.HistoryRepository
 import ireader.common.data.repository.LibraryRepository
 import ireader.common.data.repository.ReaderThemeRepository
-import ireader.common.data.repository.RemoteKeyRepository
 import ireader.common.data.repository.ThemeRepository
 import ireader.common.data.repository.UpdatesRepository
 import ireader.core.catalogs.service.CatalogRemoteRepository
@@ -33,7 +32,6 @@ import ireader.data.repository.DownloadRepositoryImpl
 import ireader.data.repository.HistoryRepositoryImpl
 import ireader.data.repository.LibraryRepositoryImpl
 import ireader.data.repository.ReaderThemeRepositoryImpl
-import ireader.data.repository.RemoteKeyRepositoryImpl
 import ireader.data.repository.ThemeRepositoryImpl
 import ireader.data.repository.UpdatesRepositoryImpl
 import org.koin.core.annotation.ComponentScan
@@ -44,14 +42,7 @@ import org.koin.core.annotation.Single
 class RepositoryInject {
 
 
-    @Single
-    fun provideRemoteKeyRepository(
-        remoteKeysDao: RemoteKeysDao,
-    ): RemoteKeyRepository {
-        return RemoteKeyRepositoryImpl(
-            dao = remoteKeysDao,
-        )
-    }
+
 
     @Single
     fun provideDownloadRepository(

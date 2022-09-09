@@ -20,6 +20,7 @@ open class DetailStateImpl : DetailState {
     override var chapterMode by mutableStateOf<Boolean>(true)
     override var inLibraryLoading by mutableStateOf<Boolean>(false)
     override var detailIsLoading by mutableStateOf<Boolean>(false)
+    override var showDialog by mutableStateOf<Boolean>(false)
     override var expandedSummary by mutableStateOf(false)
     override var isAsc by mutableStateOf(false)
     override var modifiedCommands: List<Command<*>> by mutableStateOf(emptyList<Command<*>>())
@@ -38,5 +39,6 @@ interface DetailState {
     var modifiedCommands: List<Command<*>>
     var commands: State<List<Command<*>>>
     var isAsc: Boolean
+    var showDialog : Boolean
 
 }

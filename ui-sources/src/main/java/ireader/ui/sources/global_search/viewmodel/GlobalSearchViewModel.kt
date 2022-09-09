@@ -10,8 +10,7 @@ import ireader.common.models.entities.toBook
 import ireader.core.api.source.model.Filter
 import ireader.core.catalogs.CatalogStore
 import ireader.core.ui.viewmodel.BaseViewModel
-import ireader.domain.use_cases.remote.key.DeleteAllSearchedBook
-import ireader.domain.use_cases.remote.key.RemoteKeyUseCase
+import ireader.domain.use_cases.local.LocalInsertUseCases
 import ireader.ui.component.Controller
 import org.koin.android.annotation.KoinViewModel
 
@@ -19,8 +18,7 @@ import org.koin.android.annotation.KoinViewModel
 class GlobalSearchViewModel (
     private val state: GlobalSearchStateImpl,
     private val catalogStore: CatalogStore,
-    private val insertUseCases: RemoteKeyUseCase,
-    private val deleteAllSearchedBooks: DeleteAllSearchedBook,
+    val insertUseCases: LocalInsertUseCases,
     val param: Param
 ) : BaseViewModel(), GlobalSearchState by state {
     data class Param(val query:String?)
@@ -41,9 +39,6 @@ class GlobalSearchViewModel (
     fun searchBooks(query: String) {
         viewModelScope.launch {
             searchItems = emptyList()
-            withContext(Dispatchers.IO) {
-                deleteAllSearchedBooks()
-            }
 
             catalogStore.catalogs.map { it.source }.forEachIndexed { index, source ->
                 viewModelScope.launch {
@@ -58,10 +53,8 @@ class GlobalSearchViewModel (
                                 1
                             ).mangas.map { it.toBook(source.id) }
                             withContext(Dispatchers.IO) {
-                                val ids =
-                                    insertUseCases.insertAllExploredBook(items.map { it.copy(tableId = 2) })
                                 items.forEachIndexed { index, book ->
-                                    items = items.replace(index, book.copy(id = ids[index]))
+                                    items = items.replace(index,book)
                                 }
                             }
                             insertSearchItem(SearchItem(source, items = items, loading = false))

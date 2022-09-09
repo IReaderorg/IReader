@@ -40,10 +40,6 @@ class BookRepositoryImpl(
 
     /*******************GET **************************************/
 
-    override suspend fun deleteAllExploreBook() {
-        return remoteKeysDao.deleteAllExploredBook()
-    }
-
     override suspend fun deleteBookById(id: Long) {
         return bookDao.deleteBook(bookId = id)
     }

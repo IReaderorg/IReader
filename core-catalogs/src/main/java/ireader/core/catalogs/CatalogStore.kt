@@ -107,7 +107,7 @@ class CatalogStore(
         }
     }
 
-    fun get(sourceId: Long): CatalogLocal? {
+    fun get(sourceId: Long?): CatalogLocal? {
         if (sourceId == -200L) {
             return CatalogBundled(source = LocalSource())
         }

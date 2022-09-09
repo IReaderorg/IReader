@@ -1,17 +1,13 @@
 package ireader.ui.explore.viewmodel
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import ireader.common.extensions.DefaultPaginator
 import ireader.common.resources.SourceNotFoundException
 import ireader.common.models.DisplayMode
 import ireader.common.models.entities.BookItem
-import ireader.common.models.entities.RemoteKeys
 import ireader.common.models.entities.toBook
-import ireader.common.resources.EmptyQuery
 import ireader.common.resources.UiText
 import ireader.core.api.log.Log
 import ireader.core.api.source.model.Filter
@@ -23,10 +19,8 @@ import ireader.domain.use_cases.local.LocalGetBookUseCases
 import ireader.domain.use_cases.local.LocalInsertUseCases
 import ireader.domain.use_cases.preferences.reader_preferences.BrowseScreenPrefUseCase
 import ireader.domain.use_cases.remote.RemoteUseCases
-import ireader.domain.use_cases.remote.key.RemoteKeyUseCase
 import ireader.ui.component.Controller
 import ireader.ui.explore.R
-import okio.`-DeprecatedOkio`.source
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
@@ -35,15 +29,17 @@ class ExploreViewModel(
     private val remoteUseCases: RemoteUseCases,
     private val catalogStore: CatalogStore,
     private val browseScreenPrefUseCase: BrowseScreenPrefUseCase,
-    private val remoteKeyUseCase: RemoteKeyUseCase,
     private val getBookUseCases: LocalGetBookUseCases,
-    private val insertUseCases: LocalInsertUseCases,
+    val insertUseCases: LocalInsertUseCases,
     private val param: Param,
 ) : BaseViewModel(), ExploreState by state {
-    data class Param(val sourceId:Long? , val query: String?)
-    companion object  {
-        fun createParam(controller: Controller) : Param {
-            return Param(controller.navBackStackEntry.arguments?.getLong("sourceId"),controller.navBackStackEntry.arguments?.getString("query"))
+    data class Param(val sourceId: Long?, val query: String?)
+    companion object {
+        fun createParam(controller: Controller): Param {
+            return Param(
+                controller.navBackStackEntry.arguments?.getLong("sourceId"),
+                controller.navBackStackEntry.arguments?.getString("query")
+            )
         }
     }
 
@@ -52,8 +48,7 @@ class ExploreViewModel(
         val sourceId = param.sourceId
         val query = param.query
         val catalog =
-            catalogStore.catalogs.find { it.source?.id == sourceId }
-        loadBooks()
+            catalogStore.get(sourceId)
 
         state.catalog = catalog
         val source = state.source
@@ -67,7 +62,6 @@ class ExploreViewModel(
                 if (listings.isNotEmpty()) {
                     state.stateListing = source.getListings().first()
                     loadItems()
-                    // getBooks(source = source, listing = source.getListings().first())
                     viewModelScope.launch {
                         readLayoutType()
                     }
@@ -84,23 +78,11 @@ class ExploreViewModel(
         }
     }
 
-    var initExploreJob: Job? = null
-
-    fun loadBooks() {
-        initExploreJob?.cancel()
-        initExploreJob = viewModelScope.launch {
-            remoteKeyUseCase.subScribeAllPagedExploreBooks().distinctUntilChanged().collect() {
-                kotlin.runCatching {
-                    stateItems = it
-                }
-            }
-        }
-    }
-
     fun loadItems(reset: Boolean = false) {
         getBooksJob?.cancel()
         if (reset) {
             page = 1
+            stateItems = emptyList()
         }
         getBooksJob = viewModelScope.launch {
             kotlin.runCatching {
@@ -145,33 +127,23 @@ class ExploreViewModel(
                         state.page + 1
                     },
                     onError = { e ->
-                        remoteKeyUseCase.prepareExploreMode(page == 1, emptyList(), emptyList())
                         endReached = true
+                        stateItems = emptyList()
                         e?.let {
                             error = exceptionHandler(it)
                         }
                     },
                     onSuccess = { items, newKey ->
-                        val keys = items.mangas.map { book ->
-                            RemoteKeys(
-                                title = book.title,
-                                prevPage = newKey - 1,
-                                nextPage = newKey + 1,
-                                sourceId = source?.id ?: 0
-                            )
-                        }
                         val books = items.mangas.map {
                             it.toBook(
-                                source?.id ?: 0,
-                                tableId = 1
+                                sourceId = source?.id ?: -1,
                             )
                         }
-
-                        remoteKeyUseCase.prepareExploreMode(page == 1, books, keys)
+                        stateItems = stateItems + books
 
                         page = newKey
                         endReached = !items.hasNextPage
-                        Log.debug { "Request was finished" }
+                        Log.debug { "Request was finished $stateItems" }
                     },
                 ).loadNextItems()
             }

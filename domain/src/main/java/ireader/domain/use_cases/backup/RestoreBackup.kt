@@ -109,9 +109,7 @@ class RestoreBackup  internal constructor(
                 viewer = manga.viewer,
                 flags = manga.flags,
                 key = manga.key,
-                type = dbManga.type,
                 sourceId = manga.sourceId,
-                tableId = dbManga.tableId
             )
             bookRepository.insertBook(update)
         }

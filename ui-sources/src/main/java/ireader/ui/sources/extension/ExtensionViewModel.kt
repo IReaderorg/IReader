@@ -27,7 +27,6 @@ import ireader.core.ui.exceptionHandler
 import ireader.core.ui.preferences.UiPreferences
 import ireader.core.ui.viewmodel.BaseViewModel
 import ireader.core.ui.viewmodel.showSnackBar
-import ireader.domain.use_cases.remote.key.RemoteKeyUseCase
 import ireader.ui.sources.extension.composables.SourceUiModel
 import org.koin.android.annotation.KoinViewModel
 
@@ -40,7 +39,6 @@ class ExtensionViewModel(
     private val uninstallCatalog: UninstallCatalog,
     private val togglePinnedCatalog: TogglePinnedCatalog,
     private val syncRemoteCatalogs: SyncRemoteCatalogs,
-    private val remoteKeyUseCase: RemoteKeyUseCase,
     val uiPreferences: UiPreferences,
 ) : BaseViewModel(), CatalogsState by state {
 
@@ -246,9 +244,4 @@ class ExtensionViewModel(
         }
     }
 
-    fun clearExploreMode() {
-        viewModelScope.launchIO {
-            remoteKeyUseCase.clearExploreMode()
-        }
-    }
 }

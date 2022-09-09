@@ -13,8 +13,6 @@ data class Book(
     override val sourceId: Long,
     override val title: String,
     val key: String,
-    val tableId: Long = 0,
-    val type: Long = 0,
     val author: String = "",
     val description: String = "",
     val genres: List<String> = emptyList(),
@@ -30,7 +28,7 @@ data class Book(
 ) : BaseBook {
 
     companion object {
-        fun Book.toBookInfo(sourceId: Long): MangaInfo {
+        fun Book.toBookInfo(): MangaInfo {
             return MangaInfo(
                 cover = this.cover,
                 key = this.key,
@@ -39,6 +37,7 @@ data class Book(
                 genres = this.genres,
                 description = this.description,
                 author = this.author,
+
             )
         }
 
@@ -67,7 +66,7 @@ fun String.takeIf(statement: () -> Boolean, defaultValue: String): String {
     }
 }
 
-fun MangaInfo.toBook(sourceId: Long, bookId: Long = 0, tableId: Long = 0, lastUpdated: Long = 0): Book {
+fun MangaInfo.toBook(sourceId: Long, bookId: Long = 0, lastUpdated: Long = 0): Book {
     return Book(
         id = bookId,
         sourceId = sourceId,
@@ -83,7 +82,6 @@ fun MangaInfo.toBook(sourceId: Long, bookId: Long = 0, tableId: Long = 0, lastUp
         genres = this.genres,
         description = this.description,
         author = this.author,
-        tableId = tableId
     )
 }
 
@@ -206,6 +204,7 @@ data class BookItem(
     override val favorite: Boolean = false,
     override val cover: String = "",
     override val customCover: String = "",
+    val key: String = "",
     val unread: Int? = null,
     val downloaded: Int? = null,
 ) : BaseBook
@@ -215,3 +214,30 @@ data class DownloadedBook(
     val totalChapters: Int,
     val totalDownloadedChapter: Int
 )
+
+
+fun BookItem.toBook() : Book {
+    return Book(
+        id =  this.id,
+        key = this.key,
+        title = this.title ,
+        favorite = this.favorite,
+        sourceId = this.sourceId,
+        cover = this.cover,
+        customCover = this.customCover,
+
+    )
+}
+
+fun Book.toBookItem() : BookItem {
+    return BookItem(
+        id =  this.id,
+        key = this.key,
+        title = this.title ,
+        favorite = this.favorite,
+        sourceId = this.sourceId,
+        customCover = this.customCover,
+        cover = this.cover,
+    )
+}
+

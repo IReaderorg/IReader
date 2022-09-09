@@ -38,8 +38,6 @@ class AdvanceSettingViewModel(
         viewModelScope.launchIO {
             deleteUseCase.deleteAllBook()
             deleteUseCase.deleteAllChapters()
-            deleteUseCase.deleteAllRemoteKeys()
-            deleteUseCase.deleteAllExploreBook()
         }
     }
 

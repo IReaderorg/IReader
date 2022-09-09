@@ -18,6 +18,8 @@ import kotlinx.coroutines.launch
 import okhttp3.Headers
 import ireader.ui.component.Controller
 import ireader.common.extensions.launchIO
+import ireader.common.models.entities.toBook
+import ireader.common.models.entities.toBookItem
 import ireader.common.resources.UiText
 import ireader.ui.component.components.EmptyScreenComposable
 import ireader.ui.component.hideKeyboard
@@ -30,6 +32,7 @@ import ireader.ui.explore.FilterBottomSheet
 import ireader.ui.explore.viewmodel.ExploreViewModel
 import ireader.ui.imageloader.coil.image_loaders.convertToOkHttpRequest
 import ireader.presentation.R
+import kotlinx.coroutines.runBlocking
 import org.koin.androidx.compose.getViewModel
 
 @OptIn(
@@ -91,12 +94,18 @@ object ExploreScreenSpec : ScreenSpec {
                         vm.loadItems(reset)
                     },
                     onBook = { book ->
-                        controller.navController.navigate(
-                            route = BookDetailScreenSpec.buildRoute(
-                                sourceId = book.sourceId,
-                                bookId = book.id
-                            )
-                        )
+                        runBlocking {
+                            vm.insertUseCases.insertBook(book).let { bookId->
+                                controller.navController.navigate(
+                                    route = BookDetailScreenSpec.buildRoute(
+                                        sourceId = book.sourceId,
+                                        bookId = bookId
+                                    )
+                                )
+                            }
+
+                        }
+
                     },
                     onAppbarWebView = {
                         controller.navController.navigate(
@@ -124,7 +133,7 @@ object ExploreScreenSpec : ScreenSpec {
                     },
                     onLongClick = {
                         scope.launchIO {
-                            vm.addToFavorite(it)
+                            vm.addToFavorite(it.toBookItem())
                         }
                     }
                 )
