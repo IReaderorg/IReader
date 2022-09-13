@@ -33,7 +33,7 @@ class GetBookDetail() {
 
                     onSuccess(
                         updateBook(
-                            newBook = bookDetail.toBook(catalog.sourceId, bookId = book.id),
+                            newBook = bookDetail.toBook(catalog.sourceId, bookId = book.id,),
                             oldBook = book
                         )
                     )

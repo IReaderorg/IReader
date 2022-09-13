@@ -157,8 +157,19 @@ JOIN chapter C
 ON M._id = C.book_id
 JOIN history H
 ON C._id = H.chapter_id
-WHERE M.favorite = 1
 GROUP BY M._id
+HAVING M.favorite = 1
+ORDER BY max ASC;
+
+getLatestByLastRead:
+SELECT M.*, MAX(H.last_read) AS max
+FROM book M
+JOIN chapter C
+ON M._id = C.book_id
+LEFT JOIN history H
+ON H.chapter_id = C._id
+GROUP BY M._id
+HAVING favorite = 1
 ORDER BY max ASC;
 
 getLatestByChapterUploadDate:
@@ -183,9 +194,40 @@ deleteMangasNotInLibraryBySourceIds:
 DELETE FROM book
 WHERE favorite = 0 AND source IN :sourceIds;
 
-insert:
-INSERT INTO book(_id,source,url,artist,author,description,genre,title,status,thumbnail_url,favorite,last_update,next_update,initialized,viewer,chapter_flags,cover_last_modified,date_added)
-VALUES (:id,:source,:url,:artist,:author,:description,:genre,:title,:status,:thumbnailUrl,:favorite,:lastUpdate,:nextUpdate,:initialized,:viewerFlags,:chapterFlags,:coverLastModified,:dateAdded);
+upsert:
+INSERT INTO book(
+_id,source,url,
+artist,author,description,
+genre,title,status,
+thumbnail_url,favorite,
+last_update,next_update,initialized,
+viewer,chapter_flags,cover_last_modified,
+date_added)
+VALUES (:id,:source,:url,
+:artist,:author,:description,
+:genre,:title,:status,:thumbnailUrl,
+:favorite,:lastUpdate,:nextUpdate,:initialized,
+:viewerFlags,:chapterFlags,:coverLastModified,
+:dateAdded)
+ON CONFLICT(_id)
+DO UPDATE
+SET
+    source = coalesce(:source, source),
+    url = coalesce(:url, url),
+    author = coalesce(:author, author),
+    description = coalesce(:description, description),
+    genre = coalesce(:genre, genre),
+    title = coalesce(:title, title),
+    status = coalesce(:status, status),
+    thumbnail_url = coalesce(:thumbnailUrl, thumbnail_url),
+    favorite = coalesce(:favorite, favorite),
+    last_update = coalesce(:lastUpdate, last_update),
+    initialized = coalesce(:initialized, initialized),
+    viewer = coalesce(:viewer, viewer),
+    chapter_flags = coalesce(:chapterFlags, chapter_flags),
+    cover_last_modified = coalesce(:coverLastModified, cover_last_modified),
+    date_added = coalesce(:dateAdded, date_added)
+WHERE _id = :id;
 
 update:
 UPDATE book SET

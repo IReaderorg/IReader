@@ -47,7 +47,13 @@ object AppearanceScreenSpec : ScreenSpec {
                 controller.navController.popBackStack()
             },
             vm = viewModel,
-            scaffoldPaddingValues = controller.scaffoldPadding
+            scaffoldPaddingValues = controller.scaffoldPadding,
+            onColorChange = {
+                viewModel.isSavable = true
+            },
+            onColorReset = {
+                viewModel.isSavable = false
+            }
 
         )
     }

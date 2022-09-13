@@ -26,7 +26,6 @@ fun HistoryTopAppBar(
     modifier: Modifier = Modifier,
     vm: HistoryState,
     onDeleteAll: () -> Unit,
-    getHistories: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     val focusManager = LocalFocusManager.current
@@ -40,7 +39,6 @@ fun HistoryTopAppBar(
                     query = vm.searchQuery,
                     onValueChange = {
                         vm.searchQuery = it
-                        getHistories()
                     },
                     onConfirm = {
                         keyboardController?.hide()
@@ -57,7 +55,6 @@ fun HistoryTopAppBar(
                     onClick = {
                         vm.searchMode = false
                         vm.searchQuery = ""
-                        getHistories()
                         keyboardController?.hide()
                     },
                 )

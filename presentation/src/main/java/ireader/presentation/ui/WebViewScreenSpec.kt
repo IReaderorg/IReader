@@ -89,19 +89,6 @@ object WebViewScreenSpec : ScreenSpec {
         val scope = rememberCoroutineScope()
         WebPageScreen(
             viewModel = vm,
-            onPopBackStack = {
-                controller.navController.popBackStack()
-            },
-            onModalBottomSheetHide = {
-                scope.launch {
-                    controller.sheetState.hide()
-                }
-            },
-            onModalBottomSheetShow = {
-                scope.launch {
-                    controller.sheetState.show()
-                }
-            },
             source = vm.source,
             snackBarHostState = controller.snackBarHostState,
             scaffoldPadding = controller.scaffoldPadding

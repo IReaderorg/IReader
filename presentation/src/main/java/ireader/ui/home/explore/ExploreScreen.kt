@@ -131,7 +131,7 @@ fun ExploreScreen(
         }
     }
     Scaffold(
-        modifier = Modifier,
+        modifier = modifier,
         floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
         floatingActionButton = {
             androidx.compose.material3.ExtendedFloatingActionButton(
@@ -176,7 +176,7 @@ fun ExploreScreen(
                 }
                 else -> {
                     LayoutComposable(
-                        books = vm.stateItems.mapIndexed { index, book ->  book.toBookItem().copy(id= index.toLong())},
+                        books = vm.stateItems.mapIndexed { index, book ->  book.toBookItem().copy(column= index.toLong())},
                         layout = vm.layout,
                         scrollState = scrollState,
                         source = source,
@@ -191,6 +191,9 @@ fun ExploreScreen(
                             onLongClick(it.toBook())
                         },
                         headers = headers,
+                        keys = {
+                            it.column
+                        }
                     )
                 }
             }

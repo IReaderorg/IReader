@@ -78,6 +78,7 @@ class BookDetailViewModel(
         val sourceId = runBlocking {
             bookId?.let { getBookUseCases.findBookById(it)?.sourceId }
         }
+
         if (bookId != null && sourceId != null) {
             val catalogSource = getLocalCatalog.get(sourceId)
             this.catalogSource = catalogSource

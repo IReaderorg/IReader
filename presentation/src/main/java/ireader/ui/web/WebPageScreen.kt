@@ -32,11 +32,7 @@ import ireader.core.ui.ui.SnackBarListener
 @ExperimentalCoroutinesApi
 @Composable
 fun WebPageScreen(
-    modifier: Modifier = Modifier,
     viewModel: WebViewPageModel,
-    onPopBackStack: () -> Unit,
-    onModalBottomSheetShow: () -> Unit,
-    onModalBottomSheetHide: () -> Unit,
     source: ireader.core.api.source.CatalogSource?,
     snackBarHostState: SnackbarHostState,
     scaffoldPadding: PaddingValues

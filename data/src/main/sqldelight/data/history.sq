@@ -23,12 +23,12 @@ SELECT * FROM history;
 searchHistories:
 SELECT history.*,
 book.title,book.source, book.thumbnail_url, book.favorite,chapter.name,
-date(ROUND(time_read / 1000), 'unixepoch', 'localtime') AS date,chapter.chapter_number
+date(ROUND(last_read / 1000), 'unixepoch', 'localtime') AS date,chapter.chapter_number
     FROM history
     JOIN book ON history._id = book._id
     JOIN chapter ON history.chapter_id = chapter._id
     WHERE book.title LIKE '%' || :query || '%'
-    ORDER BY history.time_read DESC;
+    ORDER BY history.last_read DESC;
 
 deleteHistoryByChapterId:
 DELETE FROM history WHERE chapter_id = :id;
@@ -40,24 +40,13 @@ deleteAllHistories:
 DELETE FROM history;
 
 
-insert:
-INSERT INTO history(_id, chapter_id,time_read,last_read)
-VALUES (:bookId, :chapter_id, :readAt,:last_read)
-ON CONFLICT(chapter_id)
-DO UPDATE
-SET
-    time_read = :readAt,
-    last_read = :progress
-WHERE chapter_id = :chapter_id;
-
-
 update:
 UPDATE history SET
     _id = coalesce(:bookId, _id),
     chapter_id = coalesce(:chapter_id, chapter_id),
     time_read = coalesce(:readAt, time_read),
     last_read = coalesce(:progress, last_read)
-WHERE _id = :bookId;
+WHERE chapter_id = :chapter_id;
 
 
 findAllWithRelations:
@@ -65,7 +54,7 @@ SELECT history._id
 FROM history
 JOIN book ON history._id = book._id
 JOIN chapter ON history.chapter_id = chapter._id
-ORDER BY time_read DESC;
+ORDER BY last_read DESC;
 
 --
 CREATE INDEX history_history_chapter_id_index ON history(chapter_id);
@@ -118,9 +107,9 @@ DELETE FROM history
 WHERE last_read = 0;
 
 upsert:
-INSERT INTO history(_id, chapter_id, last_read, time_read)
-VALUES (:id,:chapterId, :readAt, :time_read)
-ON CONFLICT(_id)
+INSERT INTO history(chapter_id, last_read, time_read)
+VALUES (:chapterId, :readAt, :time_read)
+ON CONFLICT(chapter_id)
 DO UPDATE
 SET
     last_read = :readAt,

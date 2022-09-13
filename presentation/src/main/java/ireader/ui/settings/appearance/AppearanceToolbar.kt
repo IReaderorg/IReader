@@ -47,8 +47,6 @@ private fun MainAppearanceToolbar(
     onPopBackStack: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
-    val scope = rememberCoroutineScope()
-    val isLight = MaterialTheme.colorScheme.isLight()
     Toolbar(
         scrollBehavior = scrollBehavior,
         title = {
@@ -59,28 +57,6 @@ private fun MainAppearanceToolbar(
                 onPopBackStack()
             }
         },
-        actions = {
-            AnimatedVisibility(
-                visible = vm.isSavable,
-            ) {
-                AppIconButton(
-                    imageVector = Icons.Default.Save,
-                    onClick = {
-                        val theme = vm.getThemes(vm.colorTheme.value,isLight)
-                        if (theme != null) {
-                            scope.launchIO {
-                                val themeId = vm.themeRepository.insert(theme.toCustomTheme())
-                                vm.colorTheme.value = themeId
-                                vm.showSnackBar(UiText.StringResource(R.string.theme_was_saved))
-                            }
-                        } else {
-                            vm.showSnackBar(UiText.StringResource(R.string.theme_was_not_valid))
-                        }
-                        vm.isSavable = false
-                    }
-                )
-            }
-        }
     )
 }
 

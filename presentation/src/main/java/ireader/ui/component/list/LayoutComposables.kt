@@ -32,6 +32,9 @@ fun LayoutComposable(
     showInLibraryBadge: Boolean = false,
     columns: Int? = null,
     headers: ((url: String) -> okhttp3.Headers?)? = null,
+    keys: ((item: BookItem) -> Any) = {
+        it.id
+    }
 
 ) {
     when (layout) {
@@ -53,6 +56,7 @@ fun LayoutComposable(
                 showUnreadBadge = showUnreadBadge,
                 headers = headers,
                 columns = columns ?: 3,
+                keys = keys
             )
         }
         DisplayMode.List -> {
@@ -69,7 +73,8 @@ fun LayoutComposable(
                 showInLibraryBadge = showInLibraryBadge,
                 showReadBadge = showReadBadge,
                 showUnreadBadge = showUnreadBadge,
-                headers = headers
+                headers = headers,
+                keys = keys
             )
         }
         DisplayMode.CompactGrid -> {
@@ -88,7 +93,8 @@ fun LayoutComposable(
                 showInLibraryBadge = showInLibraryBadge,
                 showReadBadge = showReadBadge,
                 showUnreadBadge = showUnreadBadge,
-                columns = columns ?: 2
+                columns = columns ?: 2,
+                keys = keys
             )
         }
         else -> {
@@ -107,7 +113,8 @@ fun LayoutComposable(
                 showInLibraryBadge = showInLibraryBadge,
                 showReadBadge = showReadBadge,
                 showUnreadBadge = showUnreadBadge,
-                columns = columns ?: 2
+                columns = columns ?: 2,
+                keys = keys
             )
         }
     }

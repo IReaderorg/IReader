@@ -31,6 +31,7 @@ dependencies {
     implementation(project(Modules.coreUi))
     implementation(project(Modules.coreApi))
     implementation(androidx.biometric)
+
     implementation(project(Modules.commonModels))
     implementation(project(Modules.commonResources))
     implementation(project(Modules.commonExtensions))
@@ -46,6 +47,7 @@ dependencies {
     implementation(composeLib.compose.compiler)
     implementation(composeLib.compose.activity)
     implementation(composeLib.compose.animations.graphics)
+    implementation(composeLib.compose.paging)
 
     implementation(composeLib.material3.core)
     implementation(composeLib.material3.windowsizeclass)
@@ -90,4 +92,5 @@ dependencies {
     androidTestImplementation(composeLib.compose.uiTestManifest)
     androidTestImplementation(composeLib.compose.testing)
     androidTestImplementation(composeLib.compose.composeTooling)
+    detektPlugins("com.twitter.compose.rules:detekt:0.0.5")
 }

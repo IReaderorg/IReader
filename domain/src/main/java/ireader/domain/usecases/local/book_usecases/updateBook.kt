@@ -1,5 +1,7 @@
 package ireader.domain.usecases.local.book_usecases
 
+import ireader.common.extensions.convertLongToTime
+import ireader.common.extensions.currentTimeToLong
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.takeIf
 import java.net.URI
@@ -19,7 +21,7 @@ fun updateBook(newBook: Book, oldBook: Book): Book {
         flags = oldBook.flags,
         key = newKey,
         dateAdded = oldBook.dateAdded,
-        lastUpdate = Calendar.getInstance().timeInMillis,
+        lastUpdate = currentTimeToLong(),
         favorite = oldBook.favorite,
         title = newBook.title.takeIf(statement = {
             newBook.title.isNotBlank() && newBook.title != oldBook.title

@@ -156,9 +156,9 @@ class BookRepositoryImpl(
         }
     }
 
-    override suspend fun insertBook(book: Book): Long {
-        return handler.await {
-            bookQueries.insert(
+    override suspend fun upsert(book: Book): Long {
+        return handler.awaitOne  {
+            bookQueries.upsert(
                 id= book.id.toDB(),
                 source = book.sourceId,
                 dateAdded = book.dateAdded,
@@ -177,15 +177,18 @@ class BookRepositoryImpl(
                 nextUpdate = 0,
                 thumbnailUrl = book.cover,
                 viewerFlags = book.viewer,
+                viewer = book.viewer
             )
-            return@await bookQueries.selectLastInsertedRowId().executeAsOne()
+            bookQueries.selectLastInsertedRowId()
         }
+
+
     }
 
     override suspend fun insertBooks(book: List<Book>): List<Long> {
-        return handler.await {
+        return handler.awaitList {
             dbOperation(book) { book ->
-                bookQueries.insert(
+                bookQueries.upsert(
                     id= book.id.toDB(),
                     source = book.sourceId,
                     dateAdded = book.dateAdded,
@@ -204,10 +207,10 @@ class BookRepositoryImpl(
                     nextUpdate = 0,
                     thumbnailUrl = book.cover,
                     viewerFlags = book.viewer,
+                    viewer = book.viewer
                 )
             }
-
-            return@await bookQueries.selectLastInsertedRowId().executeAsList()
+            bookQueries.selectLastInsertedRowId()
         }
     }
 
@@ -225,7 +228,7 @@ class BookRepositoryImpl(
     private suspend fun insertBooksOperation(value: List<Book>) {
         handler.await {
             value.forEach { book ->
-                bookQueries.insert(
+                bookQueries.upsert(
                     id= book.id.toDB(),
                     source = book.sourceId,
                     dateAdded = book.dateAdded,
@@ -243,7 +246,8 @@ class BookRepositoryImpl(
                     favorite = book.favorite,
                     genre = book.genres,
                     nextUpdate = null,
-                    artist = null
+                    artist = null,
+                    viewer = book.viewer
                 )
             }
 
@@ -252,7 +256,7 @@ class BookRepositoryImpl(
     suspend fun insertBookOperation(vararg value: Book) {
         handler.await {
             value.forEach { book ->
-                bookQueries.insert(
+                bookQueries.upsert(
                     id= book.id.toDB(),
                     source = book.sourceId,
                     dateAdded = book.dateAdded,
@@ -270,7 +274,8 @@ class BookRepositoryImpl(
                     favorite = book.favorite,
                     genre = book.genres,
                     nextUpdate = null,
-                    artist = null
+                    artist = null,
+                    viewer = book.viewer
                 )
             }
 

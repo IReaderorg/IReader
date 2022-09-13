@@ -23,17 +23,16 @@ class UpdateLastReadTime(
             insertUseCases.insertChapter(
                 chapter = chapter.copy(
                     read = true,
-                    dateFetch = if (updateDateFetched) Clock.System.now()
-                        .toEpochMilliseconds() else chapter.dateFetch
+                    dateFetch = if (updateDateFetched) currentTimeToLong() else chapter.dateFetch
                 )
             )
 
             historyUseCase.insertHistory(
                 History(
-                    id = chapter.bookId,
+                    id = 0,
                     chapterId = chapter.id,
                     readAt = currentTimeToLong(),
-                    readDuration = history?.readDuration ?: 0
+                    readDuration = history?.readDuration ?: 0,
                 )
             )
         }

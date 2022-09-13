@@ -1,5 +1,6 @@
 package ireader.domain.data.repository
 
+import androidx.paging.PagingSource
 import kotlinx.coroutines.flow.Flow
 import ireader.common.models.entities.History
 import ireader.common.models.entities.HistoryWithRelations
@@ -12,7 +13,7 @@ interface HistoryRepository {
     suspend fun findHistoriesByBookId(bookId: Long): List<History>
     fun subscribeHistoryByBookId(bookId: Long): Flow<History?>
 
-    fun findHistoriesPaging(query: String): Flow<List<HistoryWithRelations>>
+    fun findHistoriesPaging(query: String): PagingSource<Long, HistoryWithRelations>
 
     suspend fun findHistories(): List<History>
 

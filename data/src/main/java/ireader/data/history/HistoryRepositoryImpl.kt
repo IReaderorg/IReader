@@ -1,5 +1,6 @@
 package ireader.data.history
 
+import androidx.paging.PagingSource
 import ir.kazemcodes.infinityreader.Database
 import ireader.domain.data.repository.HistoryRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,12 +32,16 @@ class HistoryRepositoryImpl constructor(
     override fun subscribeHistoryByBookId(bookId: Long): Flow<History?> {
         return handler.subscribeToOneOrNull { historyQueries.findHistoryByBookId(bookId, historyMapper) }
     }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
+    
     override fun findHistoriesPaging(query: String):
-            Flow<List<HistoryWithRelations>> {
+            PagingSource<Long, HistoryWithRelations> {
         return handler
-            .subscribeToList { historyViewQueries.findAll(historyWithRelationsMapper) }
+            .subscribeToPagingSource(
+                countQuery = { historyViewQueries.countHistory(query) },
+                queryProvider = { limit, offset ->
+                    historyViewQueries.history(query,limit,offset,historyWithRelationsMapper)
+                },
+            )
     }
 
     override suspend fun findHistories(): List<ireader.common.models.entities.History> {
@@ -78,7 +83,6 @@ class HistoryRepositoryImpl constructor(
 
     private fun Database.insertBlocking(history: History) {
         historyQueries.upsert(
-            id = history.id.toDB(),
             chapterId = history.chapterId,
             readAt = history.readAt,
             time_read = history.readDuration,

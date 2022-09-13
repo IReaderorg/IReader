@@ -24,7 +24,9 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import ireader.common.extensions.asRelativeTimeString
+import ireader.common.extensions.toLocalDate
 import ireader.common.models.entities.Chapter
+import ireader.core.api.util.asRelativeTimeString
 import ireader.core.ui.modifier.selectedBackground
 import ireader.core.ui.preferences.PreferenceValues
 
@@ -79,9 +81,8 @@ fun ChapterRow(
             )
             val subtitleStr = buildAnnotatedString {
                 if (chapter.dateUpload > 0) {
-                    val instant = Instant.fromEpochMilliseconds(chapter.dateUpload)
-                    val date = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-                    append(date.date.asRelativeTimeString(range = PreferenceValues.RelativeTime.Seconds))
+                    append(chapter.dateUpload.toLocalDate().date
+                        .asRelativeTimeString(PreferenceValues.RelativeTime.Seconds))
                 }
                 if (chapter.translator.isNotBlank()) {
                     if (length > 0) append(" • ")

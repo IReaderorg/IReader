@@ -3,6 +3,7 @@ package ireader.common.models.entities
 
 import kotlinx.serialization.Serializable
 import ireader.core.api.source.model.MangaInfo
+import kotlinx.datetime.Clock
 
 @Serializable
 data class Book(
@@ -71,7 +72,7 @@ fun MangaInfo.toBook(sourceId: Long, bookId: Long = 0, lastUpdated: Long = 0): B
         cover = this.cover,
         flags = 0,
         key = this.key,
-        dateAdded = 0L,
+        dateAdded = Clock.System.now().toEpochMilliseconds(),
         lastUpdate = lastUpdated,
         favorite = false,
         title = this.title,
@@ -202,6 +203,7 @@ interface BaseBook {
 }
 
 data class BookItem(
+    val column: Long = 0,
     override val id: Long = 0,
     override val sourceId: Long,
     override val title: String,
@@ -223,6 +225,7 @@ fun BookItem.toBook() : Book {
         sourceId = this.sourceId,
         cover = this.cover,
         customCover = this.customCover,
+
 
     )
 }

@@ -9,7 +9,7 @@ import org.koin.core.annotation.Factory
 class InsertBook(private val bookRepository: BookRepository) {
     suspend operator fun invoke(book: Book): Long {
         return ireader.common.extensions.withIOContext {
-            return@withIOContext bookRepository.insertBook(book)
+            return@withIOContext bookRepository.upsert(book)
         }
     }
 }

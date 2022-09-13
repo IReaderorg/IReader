@@ -20,15 +20,15 @@ class LibraryRepositoryImpl(
     override suspend fun findAll(sort: LibrarySort): List<LibraryBook> {
         return handler.awaitList {
             getLibrary(sort)
-        }.let {
-            if (sort.isAscending) it else it.reversed()
+        }.sortWith(sort).let { flow ->
+            if (sort.isAscending) flow else flow.reversed()
         }
     }
 
     private fun Database.getLibrary(sort: LibrarySort): Query<LibraryBook> {
-     return   when (sort.type) {
+        return when (sort.type) {
             LibrarySort.Type.Title -> bookQueries.getLatestByChapterUploadDate(libraryManga)
-            LibrarySort.Type.LastRead -> bookQueries.getLastRead(libraryManga)
+            LibrarySort.Type.LastRead -> bookQueries.getLatestByLastRead(libraryManga)
 
             LibrarySort.Type.LastUpdated -> bookQueries.getLatestByChapterUploadDate(libraryManga)
 
@@ -49,8 +49,30 @@ class LibraryRepositoryImpl(
     override fun subscribe(sort: LibrarySort): Flow<List<LibraryBook>> {
         return handler.subscribeToList {
             getLibrary(sort)
+        }.map { flow ->
+            flow.sortWith(sort)
         }.let { flow ->
             if (sort.isAscending) flow else flow.map { it.reversed() }
+        }
+    }
+
+    private fun List<LibraryBook>.sortWith(sort: LibrarySort): List<LibraryBook> {
+        return when (sort.type) {
+            LibrarySort.Type.Title -> this.sortedBy { it.title }
+            LibrarySort.Type.LastRead -> this
+
+            LibrarySort.Type.LastUpdated -> this.sortedBy { it.lastUpdate }
+
+            LibrarySort.Type.Unread -> this.sortedBy { it.unreadCount }
+
+            LibrarySort.Type.TotalChapters -> this.sortedBy { it.totalChapters }
+
+            LibrarySort.Type.Source -> this.sortedBy { it.sourceId }
+
+            LibrarySort.Type.DateAdded
+            -> this
+            LibrarySort.Type.DateFetched
+            -> this
         }
     }
 

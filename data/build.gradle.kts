@@ -43,6 +43,7 @@ android {
         database("Database") {
             packageName = "ir.kazemcodes.infinityreader"
             dialect = "sqlite:3.24"
+            version = 1
         }
     }
 }

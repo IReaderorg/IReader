@@ -3,6 +3,7 @@ SELECT
     history._id AS id,
     book._id AS bookId,
     chapter._id AS chapterId,
+    chapter.name AS chapterName,
     book.title,
     book.thumbnail_url AS thumbnailUrl,
     book.source,
@@ -45,7 +46,8 @@ favorite,
 cover_last_modified,
 chapterNumber,
 readAt,
-readDuration
+readDuration,
+chapterName
 FROM historyView
 WHERE historyView.readAt > 0
 AND maxReadAtChapterId = historyView.chapterId
@@ -66,7 +68,8 @@ favorite,
 cover_last_modified,
 chapterNumber,
 readAt,
-readDuration
+readDuration,
+chapterName
 FROM historyView
 WHERE historyView.readAt > 0
 ORDER BY readAt DESC;
@@ -83,7 +86,8 @@ favorite,
 cover_last_modified,
 chapterNumber,
 readAt,
-readDuration
+readDuration,
+chapterName
 FROM historyView
 WHERE historyView.readAt > 0
 ORDER BY readAt DESC

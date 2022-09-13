@@ -1,6 +1,7 @@
 package ireader.common.extensions
 
 import android.content.Context
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -28,7 +29,7 @@ fun convertLongToTime(time: Long, format: String = "yyyy.MM.dd HH:mm"): String {
 }
 
 fun currentTimeToLong(): Long {
-    return Calendar.getInstance().timeInMillis
+    return Clock.System.now().toEpochMilliseconds()
 }
 
 fun convertDateToLong(date: String): Long? {
@@ -37,7 +38,9 @@ fun convertDateToLong(date: String): Long? {
 }
 
 fun Long.toLocalDate() : LocalDateTime {
-    return kotlinx.datetime.Instant.fromEpochMilliseconds(this).toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+    return kotlinx.datetime.Instant
+        .fromEpochMilliseconds(this)
+        .toLocalDateTime((kotlinx.datetime.TimeZone.currentSystemDefault()))
 
 }
 

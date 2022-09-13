@@ -17,13 +17,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ireader.common.extensions.launchIO
+import ireader.common.models.theme.ReaderTheme
 import ireader.common.models.theme.Theme
+import ireader.common.resources.UiText
 import ireader.core.ui.preferences.PreferenceValues
 import ireader.core.ui.theme.AppColors
+import ireader.core.ui.theme.ReaderTheme
 import ireader.core.ui.theme.isLight
 import ireader.ui.component.components.Components
 import ireader.ui.component.components.SetupSettingComponents
@@ -32,6 +37,7 @@ import ireader.ui.component.components.component.ChoicePreference
 import ireader.ui.component.components.component.ColorPreference
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.R
+import ireader.ui.component.reusable_composable.MidSizeTextComposable
 import kotlinx.coroutines.launch
 
 @Composable
@@ -40,7 +46,9 @@ fun AppearanceSettingScreen(
     onPopBackStack: () -> Unit,
     saveDarkModePreference: (PreferenceValues.ThemeMode) -> Unit,
     vm: AppearanceViewModel,
-    scaffoldPaddingValues: PaddingValues
+    scaffoldPaddingValues: PaddingValues,
+    onColorChange: () -> Unit,
+    onColorReset: () -> Unit
 ) {
     val context = LocalContext.current
     val customizedColors = vm.getCustomizedColors()
@@ -60,29 +68,25 @@ fun AppearanceSettingScreen(
         else
             vm.vmThemes.filter { it.isDark }
     }
-    val themeItem: Components =
-        remember(vm.vmThemes.size, vm.themeMode.value, vm.themeEditMode,themesForCurrentMode) {
-            Components.Dynamic {
-                LazyRow(modifier = Modifier.padding(horizontal = 8.dp)) {
-                    items(items = themesForCurrentMode) { theme ->
-                        ThemeItem(
-                            theme,
-                            onClick = {
-                                vm.colorTheme.value = it.id
-                                customizedColors.primaryState.value = it.materialColors.primary
-                                customizedColors.secondaryState.value = it.materialColors.secondary
-                                customizedColors.barsState.value = it.extraColors.bars
-                                vm.isSavable = false
-                            },
-                            isSelected = vm.colorTheme.value == theme.id,
-                            onLongClick = { vm.themeEditMode = true }, editMode = vm.themeEditMode,
-                            onDelete = {
-                                scope.launch {
-                                    vm.vmThemes.find { it.id == theme.id }?.toCustomTheme()
-                                        ?.let { vm.themeRepository.delete(it) }
-                                }
-                            }
-                        )
+    val themeItem: State<Components.Dynamic> =
+        remember {
+            derivedStateOf {
+                Components.Dynamic {
+                    LazyRow(modifier = Modifier.padding(horizontal = 8.dp)) {
+                        items(items = themesForCurrentMode) { theme ->
+                            ThemeItem(
+                                theme,
+                                onClick = {
+                                    vm.colorTheme.value = it.id
+                                    customizedColors.primaryState.value = it.materialColors.primary
+                                    customizedColors.secondaryState.value =
+                                        it.materialColors.secondary
+                                    customizedColors.barsState.value = it.extraColors.bars
+                                    vm.isSavable = false
+                                },
+                                isSelected = vm.colorTheme.value == theme.id,
+                            )
+                        }
                     }
                 }
             }
@@ -112,19 +116,15 @@ fun AppearanceSettingScreen(
                 Components.Header(
                     text = "Preset themes",
                 ),
-                themeItem,
+                themeItem.value,
                 Components.Dynamic {
                     ColorPreference(
                         preference = customizedColors.primaryState,
                         title = "Color primary",
                         subtitle = "Displayed most frequently across your app",
                         unsetColor = MaterialTheme.colorScheme.primary,
-                        onChangeColor = {
-                            vm.isSavable = true
-                        },
-                        onRestToDefault = {
-                            vm.isSavable = false
-                        }
+                        onChangeColor = onColorChange,
+                        onRestToDefault = onColorReset
                     )
                 },
                 Components.Dynamic {
@@ -133,12 +133,8 @@ fun AppearanceSettingScreen(
                         title = "Color secondary",
                         subtitle = "Accents select parts of the UI",
                         unsetColor = MaterialTheme.colorScheme.secondary,
-                        onChangeColor = {
-                            vm.isSavable = true
-                        },
-                        onRestToDefault = {
-                            vm.isSavable = false
-                        }
+                        onChangeColor = onColorChange,
+                        onRestToDefault = onColorReset
                     )
                 },
                 Components.Dynamic {
@@ -146,13 +142,48 @@ fun AppearanceSettingScreen(
                         preference = customizedColors.barsState,
                         title = "Toolbar color",
                         unsetColor = AppColors.current.bars,
-                        onChangeColor = {
-                            vm.isSavable = true
-                        },
-                        onRestToDefault = {
-                            vm.isSavable = false
-                        }
+                        onChangeColor = onColorChange,
+                        onRestToDefault = onColorReset
                     )
+                },
+                Components.Dynamic {
+                    Row(
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        if (vm.isSavable) {
+                            TextButton(onClick = {
+                                vm.isSavable = false
+                                scope.launchIO {
+                                    val theme = vm.getThemes(vm.colorTheme.value,isLight)
+                                    if (theme != null) {
+                                        scope.launchIO {
+                                            val themeId = vm.themeRepository.insert(theme.toCustomTheme())
+                                            vm.colorTheme.value = themeId
+                                            vm.showSnackBar(UiText.StringResource(R.string.theme_was_saved))
+                                        }
+                                    } else {
+                                        vm.showSnackBar(UiText.StringResource(R.string.theme_was_not_valid))
+                                    }
+                                    vm.isSavable = false
+                                }
+                            }) {
+                                MidSizeTextComposable(text = stringResource(id = R.string.save_custom_theme))
+                            }
+                        } else if (vm.colorTheme.value > 0) {
+                            TextButton(onClick = {
+                                scope.launchIO {
+                                    scope.launch {
+                                        vm.vmThemes.find { it.id == vm.colorTheme.value }?.toCustomTheme()
+                                            ?.let { vm.themeRepository.delete(it) }
+                                    }
+                                    vm.showSnackBar(UiText.StringResource(R.string.theme_was_deleted))
+                                }
+                            }) {
+                                MidSizeTextComposable(text = stringResource(id = R.string.delete_custom_theme))
+                            }
+                        }
+                    }
                 },
                 Components.Header(
                     text = "Timestamp",
@@ -185,10 +216,8 @@ fun AppearanceSettingScreen(
 private fun ThemeItem(
     theme: Theme,
     onClick: (Theme) -> Unit,
-    onLongClick: (Theme) -> Unit,
+    onLongClick: (Theme) -> Unit = {},
     isSelected: Boolean = false,
-    editMode: Boolean = false,
-    onDelete: (Theme) -> Unit = {},
 ) {
     val borders = MaterialTheme.shapes.small
     val borderColor = remember {
@@ -258,16 +287,6 @@ private fun ThemeItem(
                     imageVector = Icons.Filled.CheckCircle,
                     contentDescription = "theme is selected",
                     tint = MaterialTheme.colorScheme.primary
-                )
-            }
-            if ((theme.id > 0) && editMode) {
-                AppIconButton(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(30.dp),
-                    imageVector = Icons.Default.DeleteForever,
-                    contentDescription = "delete theme",
-                    onClick = { onDelete(theme) }
                 )
             }
         }

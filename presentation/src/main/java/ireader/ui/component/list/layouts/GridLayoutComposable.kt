@@ -38,6 +38,7 @@ fun GridLayoutComposable(
     showInLibraryBadge: Boolean = false,
     headers: ((url: String) -> okhttp3.Headers?)? = null,
     columns: Int = 3,
+    keys: ((item: BookItem) -> Any)
 
 ) {
     val cells = if (columns > 1) {
@@ -53,9 +54,7 @@ fun GridLayoutComposable(
             content = {
                 items(
                     items = books,
-                    key = { book ->
-                        book.id
-                    },
+                    key = keys,
                     contentType = { "books" },
                 ) { book ->
                     val height = remember {

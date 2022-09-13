@@ -41,9 +41,6 @@ object HistoryScreenSpec : BottomNavScreenSpec {
 
         HistoryTopAppBar(
             vm = vm,
-            getHistories = {
-                vm.getHistoryBooks()
-            },
             onDeleteAll = {
                 vm.warningAlert.value.apply {
                     enable.value = true
@@ -65,8 +62,6 @@ object HistoryScreenSpec : BottomNavScreenSpec {
 
         )
     }
-
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content(
         controller: Controller
@@ -94,7 +89,7 @@ object HistoryScreenSpec : BottomNavScreenSpec {
                     )
                 )
             },
-            state = vm,
+            vm = vm,
             onBookCover = { history ->
                 controller.navController.navigate(
                     BookDetailScreenSpec.buildRoute(

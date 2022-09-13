@@ -331,10 +331,6 @@ class ReaderScreenViewModel(
                     if (index != -1) {
                         stateChapters.getOrNull(index)?.let { chapter ->
                             activity.lifecycleScope.launch {
-                                historyUseCase.findHistory(chapter.id)?.let {
-
-                                }
-
                                 getChapterUseCase.updateLastReadTime(chapter)
                             }
                         }

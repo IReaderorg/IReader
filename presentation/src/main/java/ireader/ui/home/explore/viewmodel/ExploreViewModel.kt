@@ -153,10 +153,7 @@ class ExploreViewModel(
     private var getBooksJob: Job? = null
 
     suspend fun addToFavorite(bookItem: BookItem) {
-        getBookUseCases.findBookById(bookItem.id)?.let { book ->
-
-            insertUseCases.insertBook(book.copy(favorite = !book.favorite))
-        }
+        insertUseCases.insertBook(bookItem.toBook().copy(favorite = !bookItem.favorite))
     }
 
     fun toggleSearchMode(inSearchMode: Boolean) {

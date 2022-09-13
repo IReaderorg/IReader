@@ -49,7 +49,7 @@ class ImportEpub(
             description = epub.metadata?.descriptions?.firstOrNull()?.let { Jsoup.parse(it).text() }
                 ?: "",
         )
-            .let { bookRepository.insertBook(it) }
+            .let { bookRepository.upsert(it) }
         val chapterExtensions = listOf("xhtml", "xml", "html").map { ".$it" }
 //        val information =
 //            epub.tableOfContents?.tocReferences?.associate { it?.completeHref to it?.title }

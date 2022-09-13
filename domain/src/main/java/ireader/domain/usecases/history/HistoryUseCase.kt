@@ -1,5 +1,8 @@
 package ireader.domain.usecases.history
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import ireader.domain.data.repository.HistoryRepository
 import ireader.common.extensions.toLocalDate
 import kotlinx.coroutines.flow.Flow
@@ -25,10 +28,12 @@ class HistoryUseCase(private val historyRepository: HistoryRepository) {
         return historyRepository.subscribeHistoryByBookId(bookId)
     }
 
-    fun findHistoriesPaging(query: String): Flow<Map<LocalDate, List<HistoryWithRelations>>> {
-        return historyRepository.findHistoriesPaging(query).mapLatest { histories ->
-            histories.distinctBy { it.id }.groupBy { history -> ((history.readAt?:0).toLocalDate().date) }
-        }
+    fun findHistoriesPaging(query: String): Flow<PagingData<HistoryWithRelations>> {
+        return Pager(
+            PagingConfig(pageSize = 25),
+        ) {
+            historyRepository.findHistoriesPaging(query)
+        }.flow
     }
 
     suspend fun findHistories(): List<History> {

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -90,22 +91,21 @@ fun LinearListDisplay(
     showReadBadge: Boolean = false,
     showInLibraryBadge: Boolean = false,
     headers: ((url: String) -> okhttp3.Headers?)? = null,
+    keys: ((item: BookItem) -> Any)
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), state = scrollState) {
         items(
-            count = books.size, key = { index ->
-                books[index].id
-            },
+            items = books, key = keys,
             contentType = { "books" }
-        ) { index ->
+        ) { book ->
             LinearBookItem(
-                title = books[index].title,
-                book = books[index],
+                title = book.title,
+                book = book,
                 modifier = Modifier.combinedClickable(
-                    onClick = { onClick(books[index]) },
-                    onLongClick = { onClick(books[index]) },
+                    onClick = { onClick(book) },
+                    onLongClick = { onClick(book) },
                 ).animateItemPlacement(),
-                selected = books[index].id in selection,
+                selected = book.id in selection,
                 headers = headers
             )
         }

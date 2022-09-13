@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
@@ -43,6 +44,7 @@ fun CoverOnlyGrid(
     showInLibraryBadge: Boolean = false,
     columns: Int = 2,
     header: ((url: String) -> okhttp3.Headers?)? = null,
+    keys: ((item: BookItem) -> Any)
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         val cells = if (columns > 1) {
@@ -58,13 +60,11 @@ fun CoverOnlyGrid(
             contentPadding = PaddingValues(8.dp),
             content = {
                 items(
-                    count = books.size,
-                    key = { index ->
-                        books[index].id
-                    },
+                    items = books,
+                    key = keys,
 
                     contentType = { "books" }
-                ) { index ->
+                ) { book ->
                     val height = remember {
                         mutableStateOf(IntSize(0, 0))
                     }
@@ -72,25 +72,25 @@ fun CoverOnlyGrid(
                         modifier = Modifier.animateItemPlacement().onGloballyPositioned {
                             height.value = it.size
                         },
-                        onClick = { onClick(books[index]) },
-                        book = books[index],
+                        onClick = { onClick(book) },
+                        book = book,
                         ratio = 6f / 9f,
-                        selected = books[index].id in selection,
+                        selected = book.id in selection,
                         header = header,
                         onlyCover = true,
-                        onLongClick = { onLongClick(books[index]) },
+                        onLongClick = { onLongClick(book) },
                     ) {
                         if (showGoToLastChapterBadge) {
-                            GoToLastReadComposable(onClick = { goToLatestChapter(books[index]) }, size = (height.value.height / 20).dp)
+                            GoToLastReadComposable(onClick = { goToLatestChapter(book) }, size = (height.value.height / 20).dp)
                         }
                         if (showUnreadBadge || showUnreadBadge) {
                             LibraryBadges(
-                                unread = if (showUnreadBadge) books[index].unread else null,
-                                downloaded = if (showReadBadge) books[index].downloaded else null
+                                unread = if (showUnreadBadge) book.unread else null,
+                                downloaded = if (showReadBadge) book.downloaded else null
                             )
                         }
 
-                        if (showInLibraryBadge && books[index].favorite) {
+                        if (showInLibraryBadge && book.favorite) {
                             TextBadge(text = UiText.StringResource(R.string.in_library))
                         }
                     }

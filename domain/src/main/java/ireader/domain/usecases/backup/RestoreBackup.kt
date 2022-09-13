@@ -90,7 +90,7 @@ class RestoreBackup  internal constructor(
         val dbManga = bookRepository.find(manga.key, manga.sourceId)
         if (dbManga == null) {
             val newManga = manga.toDomain()
-            return bookRepository.insertBook(newManga)
+            return bookRepository.upsert(newManga)
         }
         if (manga.initialized != dbManga.initialized || !dbManga.favorite) {
             val update = Book(
@@ -111,7 +111,7 @@ class RestoreBackup  internal constructor(
                 key = manga.key,
                 sourceId = manga.sourceId,
             )
-            bookRepository.insertBook(update)
+            bookRepository.upsert(update)
         }
         return dbManga.id
     }

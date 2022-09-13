@@ -20,6 +20,7 @@ import ireader.ui.component.Controller
 import ireader.common.extensions.launchIO
 import ireader.common.models.entities.toBookItem
 import ireader.common.resources.UiText
+import ireader.core.api.log.Log
 import ireader.ui.component.components.EmptyScreenComposable
 import ireader.ui.component.hideKeyboard
 
@@ -31,8 +32,10 @@ import ireader.ui.home.explore.FilterBottomSheet
 import ireader.ui.home.explore.viewmodel.ExploreViewModel
 import ireader.imageloader.coil.image_loaders.convertToOkHttpRequest
 import ireader.presentation.R
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.compose.getViewModel
+import kotlin.coroutines.CoroutineContext
 
 @OptIn(
     ExperimentalAnimationApi::class,
@@ -93,7 +96,7 @@ object ExploreScreenSpec : ScreenSpec {
                         vm.loadItems(reset)
                     },
                     onBook = { book ->
-                        runBlocking {
+                        scope.launch {
                             vm.insertUseCases.insertBook(book).let { bookId->
                                 controller.navController.navigate(
                                     route = BookDetailScreenSpec.buildRoute(

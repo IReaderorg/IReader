@@ -34,17 +34,12 @@ class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
         }
     }
 
-    override fun subscribeChaptersByBookId(bookId: Long, sort: String): Flow<List<Chapter>> {
-        return handler.subscribeToList {
-            chapterQueries.getChaptersByMangaId(bookId, chapterMapper)
-        }
-    }
-
     override fun subscribeChaptersByBookId(bookId: Long): Flow<List<Chapter>> {
         return handler.subscribeToList {
             chapterQueries.getChaptersByMangaId(bookId, chapterMapper)
         }
     }
+
 
     override suspend fun findChaptersByBookId(bookId: Long): List<Chapter> {
         return handler.awaitList {
@@ -65,7 +60,7 @@ class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
 
 
     override suspend fun insertChapter(chapter: Chapter): Long {
-        return handler.await {
+        return handler.awaitOne {
                 chapterQueries.upsert(
                     chapter.id.toDB(),
                     chapter.bookId,
@@ -81,12 +76,12 @@ class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
                     chapter.dateUpload,
                     chapter.content
                 )
-            return@await chapterQueries.selectLastInsertedRowId().executeAsOne()
+             chapterQueries.selectLastInsertedRowId()
         }
     }
 
     override suspend fun insertChapters(chapters: List<Chapter>): List<Long> {
-        return handler.await(true) {
+        return handler.awaitList(true) {
             chapters.forEach { chapter ->
             chapterQueries.upsert(
                 chapter.id.toDB(),
@@ -104,7 +99,7 @@ class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
                 content = chapter.content
             )
             }
-        return@await    chapterQueries.selectLastInsertedRowId().executeAsList()
+     chapterQueries.selectLastInsertedRowId()
         }
     }
 

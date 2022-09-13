@@ -2,11 +2,15 @@ package ireader.ui.home.history
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
@@ -14,10 +18,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ireader.common.models.BookCover
 import ireader.common.models.entities.HistoryWithRelations
 import ireader.ui.component.BookListItem
 import ireader.ui.component.BookListItemColumn
@@ -26,8 +34,12 @@ import ireader.ui.component.BookListItemSubtitle
 import ireader.ui.component.BookListItemTitle
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.core.ui.coil.rememberBookCover
+import ireader.core.ui.utils.horizontalPadding
+import ireader.ui.component.components.BookImageCover
 
-@OptIn(ExperimentalFoundationApi::class)
+
+val HISTORY_ITEM_HEIGHT = 96.dp
+
 @Composable
 fun HistoryItem(
     history: HistoryWithRelations,
@@ -40,7 +52,7 @@ fun HistoryItem(
     BookListItem(
         modifier = Modifier
             .clickable { onClickItem(history) }
-            .height(80.dp)
+            .height(HISTORY_ITEM_HEIGHT)
             .fillMaxWidth()
             .padding(end = 4.dp),
     ) {
@@ -68,7 +80,7 @@ fun HistoryItem(
                 text = if (history.chapterNumber != -1f) {
                     "Ch. ${history.chapterNumber}"
                 } else {
-                    history.title
+                    history.chapterName
                 }
             )
         }
@@ -91,6 +103,49 @@ fun HistoryItem(
                 imageVector = Icons.Filled.PlayArrow,
                 contentDescription = "",
                 tint = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+@Composable
+fun HistoryItemShimmer(brush: Brush) {
+    Row(
+        modifier = Modifier
+            .height(HISTORY_ITEM_HEIGHT)
+            .padding(horizontal = horizontalPadding, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .aspectRatio(BookImageCover.Book.ratio)
+                .clip(RoundedCornerShape(4.dp))
+                .drawBehind {
+                    drawRect(brush = brush)
+                },
+        )
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = horizontalPadding, end = 8.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .drawBehind {
+                        drawRect(brush = brush)
+                    }
+                    .height(14.dp)
+                    .fillMaxWidth(0.70f),
+            )
+            Box(
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .height(14.dp)
+                    .fillMaxWidth(0.45f)
+                    .drawBehind {
+                        drawRect(brush = brush)
+                    },
             )
         }
     }

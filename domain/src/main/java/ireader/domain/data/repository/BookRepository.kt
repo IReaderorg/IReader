@@ -42,7 +42,7 @@ interface BookRepository {
     suspend fun updateBook(book: Book)
     suspend fun updateBook(book: LibraryBook, favorite: Boolean)
     suspend fun updateBook(book: List<Book>)
-    suspend fun insertBook(book: Book): Long
+    suspend fun upsert(book: Book): Long
     suspend fun insertBooks(book: List<Book>): List<Long>
     suspend fun delete(key: String)
 

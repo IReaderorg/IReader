@@ -17,11 +17,6 @@ interface ChapterRepository {
 
     suspend fun findAllInLibraryChapter(): List<Chapter>
 
-    fun subscribeChaptersByBookId(
-        bookId: Long,
-        sort: String,
-    ): Flow<List<Chapter>>
-
     suspend fun findChaptersByBookId(
         bookId: Long,
     ): List<Chapter>

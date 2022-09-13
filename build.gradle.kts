@@ -69,6 +69,7 @@ fun isNonStable(version: String): Boolean {
 }
 
 
+
 subprojects {
     plugins.apply("io.gitlab.arturbosch.detekt")
     detekt {
@@ -76,8 +77,17 @@ subprojects {
         parallel = false
         ignoredBuildTypes = listOf("release")
         basePath = projectDir.absolutePath
+        buildUponDefaultConfig = true
+        allRules = false
+        config = files("$projectDir/config/detekt.yml")
     }
 
+    tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+        jvmTarget = "11"
+    }
+    tasks.withType<io.gitlab.arturbosch.detekt.DetektCreateBaselineTask>().configureEach {
+        jvmTarget = "11"
+    }
     tasks.withType<Test> {
         useJUnitPlatform()
     }

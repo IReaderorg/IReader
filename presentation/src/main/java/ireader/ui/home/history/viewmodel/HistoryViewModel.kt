@@ -1,14 +1,33 @@
 package ireader.ui.home.history.viewmodel
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.insertSeparators
+import androidx.paging.map
+import ireader.common.extensions.asRelativeTimeString
+import ireader.common.extensions.toDateKey
+import ireader.common.extensions.toLocalDate
+import ireader.common.models.entities.HistoryWithRelations
+import ireader.core.ui.preferences.PreferenceValues
 import kotlinx.coroutines.launch
 import ireader.ui.component.reusable_composable.WarningAlertData
 import ireader.core.ui.preferences.UiPreferences
 import ireader.core.ui.viewmodel.BaseViewModel
 import ireader.domain.usecases.history.HistoryUseCase
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.toLocalDate
 import org.koin.android.annotation.KoinViewModel
+import java.util.*
 
 @KoinViewModel
 class HistoryViewModel(
@@ -17,18 +36,47 @@ class HistoryViewModel(
     val uiPreferences: UiPreferences,
 ) : BaseViewModel(), HistoryState by state {
 
-    val dateFormat by uiPreferences.dateFormat().asState()
+    val relative by uiPreferences.relativeTime().asState()
     val relativeFormat by uiPreferences.relativeTime().asState()
     val warningAlert = mutableStateOf(WarningAlertData())
+    @Composable
+    fun getLazyHistory(): LazyPagingItems<HistoryUiModel> {
+        val scope = rememberCoroutineScope()
+        val query = searchQuery ?: ""
+        val flow = remember(query) {
+            historyUseCase.findHistoriesPaging(query)
+                .catch { error ->
+                    ireader.core.api.log.Log.debug(error)
 
-    fun getHistoryBooks() {
-        viewModelScope.launch {
-            historyUseCase.findHistoriesPaging(searchQuery).collect { histories ->
-                history = histories
-            }
+                }
+                .map { pagingData ->
+                    pagingData.toHistoryUiModels()
+                }
+                .cachedIn(scope)
         }
+        return flow.collectAsLazyPagingItems()
     }
-    init {
-        getHistoryBooks()
+
+    private fun PagingData<HistoryWithRelations>.toHistoryUiModels(): PagingData<HistoryUiModel> {
+        return this.map {
+            HistoryUiModel.Item(it)
+        }
+            .insertSeparators { before, after ->
+                val beforeDate = before?.item?.readAt?.toLocalDate()
+                    ?.date?.asRelativeTimeString(PreferenceValues.RelativeTime.Day) ?:""
+                val afterDate = after?.item?.readAt?.toLocalDate()?.date?.asRelativeTimeString(
+                    PreferenceValues.RelativeTime.Day) ?: ""
+                when {
+                    beforeDate != afterDate
+                            && after?.item?.readAt != 0L -> HistoryUiModel.Header(afterDate)
+                    // Return null to avoid adding a separator between two items.
+                    else -> null
+                }
+            }
     }
+}
+
+sealed class HistoryUiModel {
+    data class Header(val date: String) : HistoryUiModel()
+    data class Item(val item: HistoryWithRelations) : HistoryUiModel()
 }
