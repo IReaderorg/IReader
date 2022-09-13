@@ -34,9 +34,9 @@ import ireader.common.models.entities.Book
 import ireader.common.models.entities.CatalogLocal
 import ireader.common.models.entities.Chapter
 import ireader.core.api.log.Log
-import ireader.core.catalogs.CatalogStore
-import ireader.common.data.repository.BookRepository
-import ireader.common.data.repository.ChapterRepository
+import ireader.domain.catalogs.CatalogStore
+import ireader.domain.data.repository.BookRepository
+import ireader.domain.data.repository.ChapterRepository
 import ireader.core.ui.preferences.ReaderPreferences
 import ireader.domain.R
 import ireader.domain.notification.Notifications
@@ -44,10 +44,10 @@ import ireader.domain.services.tts_service.Player
 import ireader.domain.services.tts_service.TTSState
 import ireader.domain.services.tts_service.TTSStateImpl
 import ireader.domain.services.tts_service.isSame
-import ireader.domain.use_cases.local.LocalGetChapterUseCase
-import ireader.domain.use_cases.local.LocalInsertUseCases
-import ireader.domain.use_cases.preferences.reader_preferences.TextReaderPrefUseCase
-import ireader.domain.use_cases.remote.RemoteUseCases
+import ireader.domain.usecases.local.LocalGetChapterUseCase
+import ireader.domain.usecases.local.LocalInsertUseCases
+import ireader.domain.usecases.preferences.reader_preferences.TextReaderPrefUseCase
+import ireader.domain.usecases.remote.RemoteUseCases
 import org.koin.android.ext.android.inject
 
 import kotlin.time.Duration.Companion.minutes

@@ -1,19 +1,19 @@
 package ireader.common.resources
 
 object ModulesMetaData {
-    const val PRESENTATION = "ireader.presentation"
+    const val PRESENTATION = "ireader"
     const val LIBRARY = "ireader.ui.library"
     const val HISTORY = "ireader.ui.history"
     const val UPDATES = "ireader.ui.updates"
     const val SETTINGS = "ireader.ui.settings"
     const val ABOUT = "ireader.ui.about"
     const val SOURCES = "ireader.ui.sources"
-    const val APPEARANCE = "ireader.ui.appearance"
+    const val APPEARANCE = "ireader.ui.ireader.ui.settings.appearance"
     const val WEB = "ireader.ui.web"
     const val TTS = "ireader.ui.tts"
     const val READER = "ireader.ui.reader"
     const val IMAGELOADER = "ireader.ui.imageloader"
-    const val EXPLORE = "ireader.ui.explore"
+    const val HOME = "ireader.ui"
     const val DOWNLOADER = "ireader.ui.downloader"
     const val COMPONENT = "ireader.ui.components"
     const val CHAPTER = "ireader.ui.chapter"

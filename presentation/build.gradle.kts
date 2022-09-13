@@ -1,9 +1,7 @@
 plugins {
     id("com.android.library")
     id("kotlin-android")
-    id("kotlin-kapt")
     id("kotlinx-serialization")
-
     id("com.google.devtools.ksp")
 }
 
@@ -35,32 +33,19 @@ dependencies {
     implementation(androidx.biometric)
     implementation(project(Modules.commonModels))
     implementation(project(Modules.commonResources))
-    implementation(project(Modules.commonData))
-    implementation(project(Modules.uiLibrary))
-    implementation(project(Modules.uiBookDetails))
-    implementation(project(Modules.uiReader))
-    implementation(project(Modules.uiExplore))
-    implementation(project(Modules.uiHistory))
-    implementation(project(Modules.uiUpdates))
-    implementation(project(Modules.uiSettings))
-    implementation(project(Modules.uiSources))
-    implementation(project(Modules.uiChapterDetails))
-    implementation(project(Modules.uiWeb))
-    implementation(project(Modules.uiAppearance))
-    implementation(project(Modules.uiAbout))
-    implementation(project(Modules.uiDownloader))
-    implementation(project(Modules.uiTTS))
-    implementation(project(Modules.uiImageLoader))
     implementation(project(Modules.commonExtensions))
-    implementation(project(Modules.uiComponents))
+    implementation(libs.coil.core)
+    implementation(libs.coil.gif)
 
-    implementation("androidx.core:core-splashscreen:1.0.0-rc01")
+
+    implementation("androidx.core:core-splashscreen:1.0.0")
     implementation(composeLib.compose.foundation)
     implementation(composeLib.compose.animations)
     implementation(composeLib.compose.googlFonts)
     implementation(composeLib.compose.ui)
     implementation(composeLib.compose.compiler)
     implementation(composeLib.compose.activity)
+    implementation(composeLib.compose.animations.graphics)
 
     implementation(composeLib.material3.core)
     implementation(composeLib.material3.windowsizeclass)
@@ -72,6 +57,8 @@ dependencies {
     implementation(composeLib.compose.coil)
     //implementation(composeLib.compose.hiltNavigation)
     implementation(composeLib.compose.lifecycle)
+    implementation(composeLib.compose.uiUtil)
+    implementation(composeLib.compose.constraintlayout)
 
     implementation(accompanist.flowlayout)
     implementation(accompanist.navAnimation)
@@ -89,10 +76,7 @@ dependencies {
 
     implementation(androidx.work.runtime)
 
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    implementation(project(mapOf("path" to ":common-models")))
-    kapt(libs.room.compiler)
+    implementation(project(Modules.commonModels))
 
     implementation(libs.koin.android)
     ksp(libs.koin.kspCompiler)

@@ -6,6 +6,7 @@ import android.os.Looper
 import androidx.work.WorkerFactory
 import coil.ImageLoader
 import coil.ImageLoaderFactory
+import ireader.data.di.DataModule
 import ireader.domain.di.DomainModules
 import ireader.domain.di.DomainServices
 import org.ireader.app.di.CatalogModule
@@ -16,7 +17,7 @@ import org.ireader.app.di.RepositoryInject
 import org.ireader.app.di.UseCasesInject
 import org.ireader.app.initiators.AppInitializers
 import ireader.domain.utils.WebViewUtil
-import ireader.ui.imageloader.coil.CoilLoaderFactory
+import ireader.imageloader.coil.CoilLoaderFactory
 import ireader.presentation.di.PresentationModules
 import ireader.presentation.di.uiModules
 import org.ireader.app.di.AppModule

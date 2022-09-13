@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 27,
-    "identityHash": "83f3b6d2b2ca655bfce886c3e7ece59a",
+    "identityHash": "d4ee5d86e12d43ae16595e4660469b1f",
     "entities": [
       {
-        "tableName": "library",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sourceId` INTEGER NOT NULL, `title` TEXT NOT NULL, `key` TEXT NOT NULL, `author` TEXT NOT NULL, `description` TEXT NOT NULL, `genres` TEXT NOT NULL, `status` INTEGER NOT NULL, `cover` TEXT NOT NULL, `customCover` TEXT NOT NULL, `favorite` INTEGER NOT NULL, `lastUpdate` INTEGER NOT NULL, `lastInit` INTEGER NOT NULL, `dateAdded` INTEGER NOT NULL, `viewer` INTEGER NOT NULL, `flags` INTEGER NOT NULL)",
+        "tableName": "book",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sourceId` INTEGER NOT NULL, `title` TEXT NOT NULL, `key` TEXT NOT NULL, `author` TEXT NOT NULL, `description` TEXT NOT NULL, `genres` TEXT NOT NULL, `status` INTEGER NOT NULL, `cover` TEXT NOT NULL, `customCover` TEXT NOT NULL, `favorite` INTEGER NOT NULL, `lastUpdate` INTEGER NOT NULL, `initialized` INTEGER NOT NULL, `dateAdded` INTEGER NOT NULL, `viewer` INTEGER NOT NULL, `flags` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -81,8 +81,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "lastInit",
-            "columnName": "lastInit",
+            "fieldPath": "initialized",
+            "columnName": "initialized",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -234,7 +234,7 @@
       },
       {
         "tableName": "chapter",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookId` INTEGER NOT NULL, `key` TEXT NOT NULL, `name` TEXT NOT NULL, `read` INTEGER NOT NULL, `bookmark` INTEGER NOT NULL, `dateUpload` INTEGER NOT NULL, `dateFetch` INTEGER NOT NULL, `sourceOrder` INTEGER NOT NULL, `content` TEXT NOT NULL, `number` REAL NOT NULL, `translator` TEXT NOT NULL, FOREIGN KEY(`bookId`) REFERENCES `library`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookId` INTEGER NOT NULL, `key` TEXT NOT NULL, `name` TEXT NOT NULL, `read` INTEGER NOT NULL, `bookmark` INTEGER NOT NULL, `dateUpload` INTEGER NOT NULL, `dateFetch` INTEGER NOT NULL, `sourceOrder` INTEGER NOT NULL, `content` TEXT NOT NULL, `number` REAL NOT NULL, `translator` TEXT NOT NULL, FOREIGN KEY(`bookId`) REFERENCES `book`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -318,7 +318,7 @@
         "indices": [],
         "foreignKeys": [
           {
-            "table": "library",
+            "table": "book",
             "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
@@ -376,7 +376,7 @@
       },
       {
         "tableName": "history",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bookId` INTEGER NOT NULL, `chapterId` INTEGER NOT NULL, `readAt` INTEGER NOT NULL, `progress` INTEGER NOT NULL, PRIMARY KEY(`bookId`, `chapterId`), FOREIGN KEY(`bookId`) REFERENCES `library`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bookId` INTEGER NOT NULL, `chapterId` INTEGER NOT NULL, `readAt` INTEGER NOT NULL, `progress` INTEGER NOT NULL, PRIMARY KEY(`bookId`, `chapterId`), FOREIGN KEY(`bookId`) REFERENCES `book`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "bookId",
@@ -413,7 +413,7 @@
         "indices": [],
         "foreignKeys": [
           {
-            "table": "library",
+            "table": "book",
             "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
@@ -427,7 +427,7 @@
       },
       {
         "tableName": "updates",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `chapterId` INTEGER NOT NULL, `bookId` INTEGER NOT NULL, `date` INTEGER NOT NULL, FOREIGN KEY(`bookId`) REFERENCES `library`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `chapterId` INTEGER NOT NULL, `bookId` INTEGER NOT NULL, `date` INTEGER NOT NULL, FOREIGN KEY(`bookId`) REFERENCES `book`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -463,7 +463,7 @@
         "indices": [],
         "foreignKeys": [
           {
-            "table": "library",
+            "table": "book",
             "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
@@ -477,7 +477,7 @@
       },
       {
         "tableName": "bookcategory",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bookId` INTEGER NOT NULL, `categoryId` INTEGER NOT NULL, PRIMARY KEY(`bookId`, `categoryId`), FOREIGN KEY(`bookId`) REFERENCES `library`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`categoryId`) REFERENCES `category`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bookId` INTEGER NOT NULL, `categoryId` INTEGER NOT NULL, PRIMARY KEY(`bookId`, `categoryId`), FOREIGN KEY(`bookId`) REFERENCES `book`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`categoryId`) REFERENCES `category`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "bookId",
@@ -502,7 +502,7 @@
         "indices": [],
         "foreignKeys": [
           {
-            "table": "library",
+            "table": "book",
             "onDelete": "CASCADE",
             "onUpdate": "NO ACTION",
             "columns": [
@@ -527,7 +527,7 @@
       },
       {
         "tableName": "theme_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `isDark` INTEGER NOT NULL, `primary` INTEGER NOT NULL, `onPrimary` INTEGER NOT NULL, `primaryContainer` INTEGER NOT NULL, `onPrimaryContainer` INTEGER NOT NULL, `inversePrimary` INTEGER NOT NULL, `secondary` INTEGER NOT NULL, `onSecondary` INTEGER NOT NULL, `secondaryContainer` INTEGER NOT NULL, `onSecondaryContainer` INTEGER NOT NULL, `tertiary` INTEGER NOT NULL, `onTertiary` INTEGER NOT NULL, `tertiaryContainer` INTEGER NOT NULL, `onTertiaryContainer` INTEGER NOT NULL, `background` INTEGER NOT NULL, `onBackground` INTEGER NOT NULL, `surface` INTEGER NOT NULL, `onSurface` INTEGER NOT NULL, `surfaceVariant` INTEGER NOT NULL, `onSurfaceVariant` INTEGER NOT NULL, `surfaceTint` INTEGER NOT NULL, `inverseSurface` INTEGER NOT NULL, `inverseOnSurface` INTEGER NOT NULL, `error` INTEGER NOT NULL, `onError` INTEGER NOT NULL, `errorContainer` INTEGER NOT NULL, `onErrorContainer` INTEGER NOT NULL, `outline` INTEGER NOT NULL, `outlineVariant` INTEGER NOT NULL, `scrim` INTEGER NOT NULL, `bars` INTEGER NOT NULL, `onBars` INTEGER NOT NULL, `isBarLight` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `dark` INTEGER NOT NULL, `primary` INTEGER NOT NULL, `onPrimary` INTEGER NOT NULL, `primaryContainer` INTEGER NOT NULL, `onPrimaryContainer` INTEGER NOT NULL, `inversePrimary` INTEGER NOT NULL, `secondary` INTEGER NOT NULL, `onSecondary` INTEGER NOT NULL, `secondaryContainer` INTEGER NOT NULL, `onSecondaryContainer` INTEGER NOT NULL, `tertiary` INTEGER NOT NULL, `onTertiary` INTEGER NOT NULL, `tertiaryContainer` INTEGER NOT NULL, `onTertiaryContainer` INTEGER NOT NULL, `background` INTEGER NOT NULL, `onBackground` INTEGER NOT NULL, `surface` INTEGER NOT NULL, `onSurface` INTEGER NOT NULL, `surfaceVariant` INTEGER NOT NULL, `onSurfaceVariant` INTEGER NOT NULL, `surfaceTint` INTEGER NOT NULL, `inverseSurface` INTEGER NOT NULL, `inverseOnSurface` INTEGER NOT NULL, `error` INTEGER NOT NULL, `onError` INTEGER NOT NULL, `errorContainer` INTEGER NOT NULL, `onErrorContainer` INTEGER NOT NULL, `outline` INTEGER NOT NULL, `outlineVariant` INTEGER NOT NULL, `scrim` INTEGER NOT NULL, `bars` INTEGER NOT NULL, `onBars` INTEGER NOT NULL, `isBarLight` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -536,8 +536,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "isDark",
-            "columnName": "isDark",
+            "fieldPath": "dark",
+            "columnName": "dark",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -779,7 +779,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '83f3b6d2b2ca655bfce886c3e7ece59a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd4ee5d86e12d43ae16595e4660469b1f')"
     ]
   }
 }

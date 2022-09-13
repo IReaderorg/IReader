@@ -8,26 +8,7 @@ include(":presentation")
 include(":core-api")
 include(":common-models")
 include(":common-resources")
-include(":ui-library")
-include(":common-data")
-include(":ui-book-details")
-include(":ui-chapter-detail")
-include(":ui-explore")
-include(":ui-history")
-include(":ui-reader")
-include(":ui-settings")
-include(":ui-sources")
-include(":ui-about")
-include(":ui-updates")
-include(":ui-web")
-include(":ui-about")
-include(":ui-appearance")
-include(":ui-downloader")
-include(":ui-tts")
-include(":ui-components")
 include(":common-extensions")
-include(":core-catalogs")
-include(":ui-image-loader")
 
 
 
@@ -51,6 +32,8 @@ dependencyResolutionManagement {
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         maven(url = "https://jitpack.io")
         maven(url ="https://github.com/psiegman/mvn-repo/raw/master/releases")
+        maven(url ="https://androidx.dev/storage/compose-compiler/repository/")
+
     }
     versionCatalogs {
         create("composeLib") {

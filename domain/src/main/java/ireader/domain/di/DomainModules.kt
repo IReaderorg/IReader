@@ -26,7 +26,7 @@ val DomainServices = module {
         UpdateService(get(), get(),get(),get())
     }
     worker {
-        LibraryUpdatesService(get(), get(),get(),get(),get(),get(),get(),get(),get(),get())
+        LibraryUpdatesService(get(), get(),get(),get(),get(),get(),get(),get(),get())
     }
     single<Service> (createdAtStart=true){
         TTSService()

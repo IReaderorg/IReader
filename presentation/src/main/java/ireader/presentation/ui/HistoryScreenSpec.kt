@@ -14,12 +14,11 @@ import androidx.navigation.NamedNavArgument
 import ireader.common.extensions.async.viewModelIOCoroutine
 import ireader.ui.component.Controller
 import ireader.ui.component.reusable_composable.WarningAlert
-import ireader.domain.ui.NavigationArgs
-import ireader.ui.history.HistoryScreen
-import ireader.ui.history.HistoryTopAppBar
-import ireader.ui.history.viewmodel.HistoryViewModel
+import ireader.presentation.ui.util.NavigationArgs
+import ireader.ui.home.history.HistoryTopAppBar
+import ireader.ui.home.history.viewmodel.HistoryViewModel
 import ireader.presentation.R
-import org.koin.androidx.compose.get
+import ireader.ui.home.history.HistoryScreen
 import org.koin.androidx.compose.getViewModel
 
 object HistoryScreenSpec : BottomNavScreenSpec {
@@ -83,7 +82,6 @@ object HistoryScreenSpec : BottomNavScreenSpec {
                 controller.navController.navigate(
                     ReaderScreenSpec.buildRoute(
                         history.bookId,
-                        history.sourceId,
                         history.chapterId
                     )
                 )
@@ -92,7 +90,6 @@ object HistoryScreenSpec : BottomNavScreenSpec {
                 controller.navController.navigate(
                     ReaderScreenSpec.buildRoute(
                         history.bookId,
-                        history.sourceId,
                         history.chapterId
                     )
                 )
@@ -101,7 +98,6 @@ object HistoryScreenSpec : BottomNavScreenSpec {
             onBookCover = { history ->
                 controller.navController.navigate(
                     BookDetailScreenSpec.buildRoute(
-                        history.sourceId,
                         history.bookId
                     )
                 )

@@ -7,7 +7,7 @@ import ireader.core.api.http.AcceptAllCookiesStorage
 import ireader.core.api.http.WebViewManger
 import ireader.core.api.prefs.AndroidPreferenceStore
 import ireader.core.api.prefs.PreferenceStore
-import ireader.ui.imageloader.LibraryCovers
+import ireader.imageloader.LibraryCovers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

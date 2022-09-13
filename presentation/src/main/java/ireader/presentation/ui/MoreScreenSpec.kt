@@ -15,11 +15,10 @@ import androidx.navigation.NamedNavArgument
 import ireader.ui.component.Controller
 import ireader.common.resources.discord
 import ireader.ui.component.components.TitleToolbar
-import ireader.domain.ui.NavigationArgs
+import ireader.presentation.ui.util.NavigationArgs
 import ireader.presentation.R
 import ireader.ui.settings.MainSettingScreenViewModel
 import ireader.ui.settings.MoreScreen
-import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 object MoreScreenSpec : BottomNavScreenSpec {
@@ -37,7 +36,7 @@ object MoreScreenSpec : BottomNavScreenSpec {
         controller: Controller
     ) {
         TitleToolbar(
-            title = stringResource(ireader.ui.settings.R.string.more),
+            title = stringResource(R.string.more),
             navController = null,
             scrollBehavior = controller.scrollBehavior
         )

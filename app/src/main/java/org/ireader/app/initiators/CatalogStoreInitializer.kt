@@ -1,7 +1,7 @@
 package org.ireader.app.initiators
 
 import ireader.common.extensions.launchIO
-import ireader.core.catalogs.interactor.SyncRemoteCatalogs
+import ireader.domain.catalogs.interactor.SyncRemoteCatalogs
 import org.koin.core.annotation.Factory
 
 @Factory

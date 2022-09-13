@@ -9,13 +9,11 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import org.ireader.app.initiators.SecureActivityDelegateImpl
 import ireader.core.ui.preferences.UiPreferences
-import ireader.domain.use_cases.backup.BackUpUseCases
 import ireader.presentation.ScreenContent
 import ireader.presentation.theme.AppTheme
 import org.ireader.app.initiators.AppInitializers
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
-import org.koin.core.component.inject
 
 class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivityDelegateImpl() {
 

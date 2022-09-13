@@ -7,11 +7,10 @@ import androidx.compose.ui.Modifier
 
 import androidx.navigation.NavController
 import ireader.ui.component.Controller
-import ireader.ui.appearance.AppearanceSettingScreen
-import ireader.ui.appearance.AppearanceToolbar
-import ireader.ui.appearance.AppearanceViewModel
+import ireader.ui.settings.appearance.AppearanceSettingScreen
 import ireader.core.ui.ui.SnackBarListener
-import org.koin.androidx.compose.get
+import ireader.ui.settings.appearance.AppearanceToolbar
+import ireader.ui.settings.appearance.AppearanceViewModel
 import org.koin.androidx.compose.getViewModel
 
 object AppearanceScreenSpec : ScreenSpec {

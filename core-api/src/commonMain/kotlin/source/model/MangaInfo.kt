@@ -13,17 +13,17 @@ data class MangaInfo(
     val author: String = "",
     val description: String = "",
     val genres: List<String> = emptyList(),
-    val status: Int = UNKNOWN,
+    val status: Long = UNKNOWN,
     val cover: String = ""
 ) {
 
     companion object {
-        const val UNKNOWN = 0
-        const val ONGOING = 1
-        const val COMPLETED = 2
-        const val LICENSED = 3
-        const val PUBLISHING_FINISHED = 4
-        const val CANCELLED = 5
-        const val ON_HIATUS = 6
+        const val UNKNOWN = 0L
+        const val ONGOING = 1L
+        const val COMPLETED = 2L
+        const val LICENSED = 3L
+        const val PUBLISHING_FINISHED = 4L
+        const val CANCELLED = 5L
+        const val ON_HIATUS = 6L
     }
 }

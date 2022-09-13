@@ -18,19 +18,18 @@ import kotlinx.coroutines.launch
 import okhttp3.Headers
 import ireader.ui.component.Controller
 import ireader.common.extensions.launchIO
-import ireader.common.models.entities.toBook
 import ireader.common.models.entities.toBookItem
 import ireader.common.resources.UiText
 import ireader.ui.component.components.EmptyScreenComposable
 import ireader.ui.component.hideKeyboard
 
 import ireader.core.api.source.HttpSource
-import ireader.domain.ui.NavigationArgs
-import ireader.ui.explore.BrowseTopAppBar
-import ireader.ui.explore.ExploreScreen
-import ireader.ui.explore.FilterBottomSheet
-import ireader.ui.explore.viewmodel.ExploreViewModel
-import ireader.ui.imageloader.coil.image_loaders.convertToOkHttpRequest
+import ireader.presentation.ui.util.NavigationArgs
+import ireader.ui.home.explore.BrowseTopAppBar
+import ireader.ui.home.explore.ExploreScreen
+import ireader.ui.home.explore.FilterBottomSheet
+import ireader.ui.home.explore.viewmodel.ExploreViewModel
+import ireader.imageloader.coil.image_loaders.convertToOkHttpRequest
 import ireader.presentation.R
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.compose.getViewModel
@@ -98,7 +97,6 @@ object ExploreScreenSpec : ScreenSpec {
                             vm.insertUseCases.insertBook(book).let { bookId->
                                 controller.navController.navigate(
                                     route = BookDetailScreenSpec.buildRoute(
-                                        sourceId = book.sourceId,
                                         bookId = bookId
                                     )
                                 )

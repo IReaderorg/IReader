@@ -1,50 +1,35 @@
 package ireader.common.models.entities
 
-import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.PrimaryKey
+import ireader.common.models.BookCover
 
-data class UpdateWithInfo(
-    val id: Long = 0,
-    val chapterId: Long,
+
+data class UpdatesWithRelations(
     val bookId: Long,
-    val sourceId: Long,
-    val chapterLink: String,
     val bookTitle: String,
-    val cover: String = "",
-    val favorite: Boolean = false,
-    val chapterDateUpload: Long = 0,
-    val chapterTitle: String,
-    val read: Boolean = false,
-    val number: Float = -1f,
-    val date: String,
-    val downloaded: Boolean = false,
+    val chapterId: Long,
+    val chapterName: String,
+    val scanlator: String?,
+    val read: Boolean,
+    val bookmark: Boolean,
+    val sourceId: Long,
+    val dateFetch: Long,
+    val coverData: BookCover,
+    val downloaded: Boolean
 ) {
     companion object {
-        fun UpdateWithInfo.toUpdate(): Update {
+        fun UpdatesWithRelations.toUpdate(): Update {
             return Update(
-                id = this.id,
+                id = this.chapterId,
                 bookId = this.bookId,
-                chapterId = this.id,
+                chapterId = this.chapterId,
                 date = kotlinx.datetime.Clock.System.now().toEpochMilliseconds(),
             )
         }
     }
 }
 
-@Entity(
-    tableName = UPDATE_TABLE,
-    foreignKeys = [
-        ForeignKey(
-            entity = Book::class,
-            parentColumns = arrayOf("id"),
-            childColumns = arrayOf("bookId"),
-            onDelete = ForeignKey.CASCADE,
-        )
-    ],
-)
 data class Update(
-    @PrimaryKey(autoGenerate = true)
+
     val id: Long = 0,
     val chapterId: Long,
     val bookId: Long,

@@ -17,7 +17,7 @@ import ireader.ui.component.components.Components
 import ireader.ui.component.components.TitleToolbar
 import ireader.ui.component.components.setupUiComponent
 import ireader.ui.settings.reader.ReaderSettingScreenViewModel
-import ireader.ui.settings.R
+import ireader.presentation.R
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
@@ -61,61 +61,61 @@ object ReaderSettingSpec : ScreenSpec {
                 ),
                 Components.Slider(
                     preferenceAsInt = vm.fontSize,
-                    title = context.getString(ireader.ui.reader.R.string.font_size),
+                    title = context.getString(R.string.font_size),
                     trailing = vm.fontSize.value.toInt().toString(),
                     valueRange = 8.0F..32.0F,
                 ),
                 Components.Header(
-                    context.getString(ireader.ui.reader.R.string.paragraph)
+                    context.getString(R.string.paragraph)
                 ),
                 Components.Slider(
                     preferenceAsInt = vm.paragraphsIndent,
-                    title = context.getString(ireader.ui.reader.R.string.paragraph_indent),
+                    title = context.getString(R.string.paragraph_indent),
                     trailing = vm.paragraphsIndent.value.toInt().toString(),
                     valueRange = 0.0F..32.0F,
                 ),
                 Components.Slider(
                     preferenceAsInt = vm.distanceBetweenParagraphs,
-                    title = context.getString(ireader.ui.reader.R.string.paragraph_distance),
+                    title = context.getString(R.string.paragraph_distance),
                     trailing = vm.distanceBetweenParagraphs.value.toInt().toString(),
                     valueRange = 0.0F..8.0F,
                 ),
                 Components.Header(
-                    context.getString(ireader.ui.reader.R.string.line)
+                    context.getString(R.string.line)
                 ),
                 Components.Slider(
                     preferenceAsInt = vm.lineHeight,
-                    title = context.getString(ireader.ui.reader.R.string.line_height),
+                    title = context.getString(R.string.line_height),
                     trailing = vm.lineHeight.value.toInt().toString(),
                     valueRange = 22.0F..48.0F,
                 ),
                 Components.Header(
-                    context.getString(ireader.ui.reader.R.string.autoscroll)
+                    context.getString(R.string.autoscroll)
                 ),
                 Components.Slider(
                     preferenceAsLong = vm.autoScrollInterval,
-                    title = context.getString(ireader.ui.reader.R.string.interval),
+                    title = context.getString(R.string.interval),
                     trailing = (vm.autoScrollInterval.value / 1000).toInt().toString(),
                     valueRange = 500.0F..10000.0F,
                 ),
                 Components.Slider(
                     preferenceAsInt = vm.autoScrollOffset,
-                    title = context.getString(ireader.ui.reader.R.string.offset),
+                    title = context.getString(R.string.offset),
                     trailing = (vm.autoScrollOffset.value / 1000).toInt().toString(),
                     valueRange = 500.0F..10000F,
                 ),
                 Components.Header(
-                    context.getString(ireader.ui.reader.R.string.scrollIndicator)
+                    context.getString(R.string.scrollIndicator)
                 ),
                 Components.Slider(
                     preferenceAsInt = vm.scrollIndicatorPadding,
-                    title = context.getString(ireader.ui.reader.R.string.padding),
+                    title = context.getString(R.string.padding),
                     trailing = vm.scrollIndicatorPadding.value.toString(),
                     valueRange = 0F..32F,
                 ),
                 Components.Slider(
                     preferenceAsInt = vm.scrollIndicatorWith,
-                    title = context.getString(ireader.ui.reader.R.string.width),
+                    title = context.getString(R.string.width),
                     trailing = vm.scrollIndicatorWith.value.toString(),
                     valueRange = 0F..32F,
                 ),

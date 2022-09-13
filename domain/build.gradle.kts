@@ -1,20 +1,12 @@
 plugins {
     id("com.android.library")
     id("kotlin-android")
-    id("kotlin-kapt")
-    id("kotlin-parcelize")
     id("kotlinx-serialization")
     id("com.google.devtools.ksp")
 }
 
 android {
     namespace = "ireader.domain"
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = composeLib.versions.compiler.get()
-    }
     androidComponents.onVariants { variant ->
         val name = variant.name
         sourceSets {
@@ -33,22 +25,19 @@ dependencies {
 
 
     implementation(project(Modules.coreUi))
-    implementation(project(Modules.commonData))
+
     implementation(project(Modules.commonResources))
-    implementation(project(Modules.uiImageLoader))
+
     implementation(project(Modules.commonExtensions))
-    implementation(project(Modules.coreCatalogs))
+
 
     implementation(project(Modules.coreApi))
 
     implementation(androidx.media)
     implementation(kotlinx.serialization.protobuf)
     implementation(kotlinx.datetime)
-    implementation(composeLib.compose.activity)
-    implementation(composeLib.compose.ui)
     implementation(composeLib.compose.runtime)
-    implementation(composeLib.compose.navigation)
-    implementation(composeLib.material3.core)
+
     implementation(libs.googleTranslator)
 
     implementation(composeLib.compose.coil)
@@ -58,13 +47,6 @@ dependencies {
     debugImplementation(composeLib.compose.uiTestManifest)
 
     implementation(androidx.work.runtime)
-
-
-    /** Room **/
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    // implementation(libs.room.paging)
-    kapt(libs.room.compiler)
 
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)
@@ -90,8 +72,10 @@ dependencies {
     implementation(kotlinx.reflect)
 
 
+    implementation(libs.coil.core)
+    implementation(libs.coil.gif)
+
     /** LifeCycle **/
-    //  implementation(kotlinx.lifecycle.viewModel)
     implementation(androidx.lifecycle.runtime)
 
     implementation(kotlinx.stdlib)
@@ -99,28 +83,6 @@ dependencies {
     implementation(libs.ktor.contentNegotiation)
     implementation(libs.ktor.okhttp)
     implementation(libs.bundles.ireader)
-
-    testImplementation(test.junit4)
-    testImplementation(test.junitAndroidExt)
-    testImplementation(test.truth)
-    testImplementation(test.coroutines)
-    testImplementation(composeLib.compose.j4Unit)
-
-    androidTestImplementation(test.junit4)
-    androidTestImplementation(test.junitAndroidExt)
-    androidTestImplementation(test.truth)
-    androidTestImplementation(test.coroutines)
-    androidTestImplementation(test.coroutines)
-    androidTestImplementation(composeLib.compose.j4Unit)
-    //androidTestImplementation(libs.hilt.androidtest)
-
-    // Instrumented Unit Tests
-    androidTestImplementation("androidx.arch.core:core-testing:2.1.0")
-    androidTestImplementation("androidx.test.ext:junit:1.1.1")
-    androidTestImplementation("org.mockito:mockito-core:2.21.0")
-
-    testImplementation(test.bundles.common)
-    androidTestImplementation(test.bundles.common)
 
 
     implementation(libs.koin.android)

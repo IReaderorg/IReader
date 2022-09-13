@@ -1,61 +1,159 @@
 package ireader.data.repository
 
-import ireader.common.data.repository.ReaderThemeRepository
-import ireader.common.data.repository.ThemeRepository
+
+import ireader.domain.data.repository.ReaderThemeRepository
+import ireader.domain.data.repository.ThemeRepository
 import ireader.common.models.theme.CustomTheme
 import ireader.common.models.theme.ReaderTheme
 import ireader.common.models.theme.Theme
-import ireader.core.ui.theme.themes
-import ireader.data.local.dao.ReaderThemeDao
-import ireader.data.local.dao.ThemeDao
-import ireader.domain.use_cases.theme.toBaseTheme
+import ireader.data.apptheme.appThemeMapper
+import ireader.data.apptheme.readerMapper
+import ireader.data.local.DatabaseHandler
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+
 
 class ThemeRepositoryImpl(
-    private val themeDao: ThemeDao
+    private val handler: DatabaseHandler,
 ) : ThemeRepository {
     override fun subscribe(): Flow<List<Theme>> {
-        return themeDao.subscribe().map { flow -> flow.map { it.toBaseTheme() } }
+        return handler.subscribeToList { themesQueries.subscribe(appThemeMapper) }
     }
 
     override suspend fun insert(theme: CustomTheme): Long {
-        return themeDao.insertTheme(theme.copy(id = themes.lastIndex.toLong()))
+        return handler.await {
+            theme.let { theme ->
+                themesQueries.upsert(
+                    primary = theme.materialColor.primary,
+                    primaryContainer =theme.materialColor.primaryContainer,
+                    onPrimary =theme.materialColor.onPrimary,
+                    secondary =theme.materialColor.secondary,
+                    onSecondary =theme.materialColor.onSecondary,
+                    background =theme.materialColor.background,
+                    surface =theme.materialColor.surface,
+                    onBackground =theme.materialColor.onBackground,
+                    onSurface =theme.materialColor.onSurface,
+                    error =theme.materialColor.error,
+                    onError =theme.materialColor.onError,
+                    surfaceTint =theme.materialColor.surfaceTint,
+                    secondaryContainer =theme.materialColor.secondaryContainer,
+                    errorContainer =theme.materialColor.errorContainer,
+                    inverseOnSurface =theme.materialColor.inverseOnSurface,
+                    inversePrimary =theme.materialColor.inversePrimary,
+                    inverseSurface =theme.materialColor.inverseSurface,
+                    onErrorContainer =theme.materialColor.onErrorContainer,
+                    onPrimaryContainer =theme.materialColor.onPrimaryContainer,
+                    onSecondaryContainer =theme.materialColor.onSecondaryContainer,
+                    outline =theme.materialColor.outline,
+                    tertiary = theme.materialColor.tertiary,
+                    tertiaryContainer = theme.materialColor.tertiaryContainer,
+                    scrim = theme.materialColor.scrim,
+                    outlineVariant = theme.materialColor.outlineVariant,
+                    isDark = theme.dark,
+                    onBars = theme.extraColors.onBars,
+                    bars = theme.extraColors.bars,
+                    isBarLight = theme.dark,
+                    setOnTertiary = theme.materialColor.onTertiary,
+                    id = null
+
+                )
+            }
+            return@await themesQueries.selectLastInsertedRowId().executeAsOne()
+        }
     }
 
     override suspend fun insert(theme: List<CustomTheme>) {
-        themeDao.insert(theme)
+        handler.await {
+            theme.forEach { theme ->
+                themesQueries.upsert(
+                    primary = theme.materialColor.primary,
+                    primaryContainer =theme.materialColor.primaryContainer,
+                    onPrimary =theme.materialColor.onPrimary,
+                    secondary =theme.materialColor.secondary,
+                    onSecondary =theme.materialColor.onSecondary,
+                    background =theme.materialColor.background,
+                    surface =theme.materialColor.surface,
+                    onBackground =theme.materialColor.onBackground,
+                    onSurface =theme.materialColor.onSurface,
+                    error =theme.materialColor.error,
+                    onError =theme.materialColor.onError,
+                    surfaceTint =theme.materialColor.surfaceTint,
+                    secondaryContainer =theme.materialColor.secondaryContainer,
+                    errorContainer =theme.materialColor.errorContainer,
+                    inverseOnSurface =theme.materialColor.inverseOnSurface,
+                    inversePrimary =theme.materialColor.inversePrimary,
+                    inverseSurface =theme.materialColor.inverseSurface,
+                    onErrorContainer =theme.materialColor.onErrorContainer,
+                    onPrimaryContainer =theme.materialColor.onPrimaryContainer,
+                    onSecondaryContainer =theme.materialColor.onSecondaryContainer,
+                    outline =theme.materialColor.outline,
+                    tertiary = theme.materialColor.tertiary,
+                    tertiaryContainer = theme.materialColor.tertiaryContainer,
+                    scrim = theme.materialColor.scrim,
+                    outlineVariant = theme.materialColor.outlineVariant,
+                    isDark = theme.dark,
+                    onBars = theme.extraColors.onBars,
+                    bars = theme.extraColors.bars,
+                    isBarLight = theme.dark,
+                    setOnTertiary = theme.materialColor.onTertiary,
+                    id = null
+
+                )
+            }
+        }
     }
 
+
     override suspend fun delete(theme: CustomTheme) {
-        return themeDao.delete(theme)
+        handler.await {
+            themesQueries.delete(theme.id)
+        }
     }
 
     override suspend fun deleteAll() {
-        themeDao.deleteAll()
+        handler.await {
+            themesQueries.deleteAll()
+        }
     }
+
 }
 
 class ReaderThemeRepositoryImpl(
-    private val readerThemeDao: ReaderThemeDao
+    private val handler: DatabaseHandler,
 ) : ReaderThemeRepository {
     override fun subscribe(): Flow<List<ReaderTheme>> {
-        return readerThemeDao.subscribe()
+      return  handler.subscribeToList {
+                readerThemesQueries.subscribe(readerMapper)
+        }
     }
 
     override suspend fun insert(theme: ReaderTheme): Long {
-        return readerThemeDao.insertTheme(theme)
+       return handler.await(true) {
+            theme.let {theme->
+                readerThemesQueries.upsert(theme.backgroundColor,theme.onTextColor,theme.id)
+            }
+            return@await readerThemesQueries.selectLastInsertedRowId().executeAsOne()
+        }
     }
 
     override suspend fun insert(theme: List<ReaderTheme>) {
-        readerThemeDao.insertThemes(theme)
+        handler.await(true) {
+            theme.forEach {theme->
+                readerThemesQueries.upsert(theme.backgroundColor,theme.onTextColor,theme.id)
+            }
+
+        }
     }
 
     override suspend fun delete(theme: ReaderTheme) {
-        return readerThemeDao.delete(theme)
+        handler.await {
+            readerThemesQueries.delete(theme.id)
+        }
     }
 
     override suspend fun deleteAll() {
-        readerThemeDao.deleteAll()
+        handler.await {
+            readerThemesQueries.deleteAll()
+        }
     }
+
 }

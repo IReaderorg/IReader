@@ -4,29 +4,26 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
-import androidx.room.Embedded
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+
+
 import kotlinx.serialization.Serializable
 
-@Entity(tableName = "reader_theme_table")
+
 data class ReaderTheme(
-    @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val backgroundColor: Int,
     val onTextColor: Int,
 )
 
 @kotlinx.serialization.Serializable
-@Entity(tableName = "theme_table")
 data class CustomTheme(
-    @PrimaryKey(autoGenerate = true)
+
     val id: Long = 0,
-    @Embedded()
+
     val materialColor: CustomColorScheme,
-    @Embedded()
+
     val extraColors: CustomExtraColors,
-    val isDark: Boolean = false
+    val dark: Boolean = false
 )
 
 @kotlinx.serialization.Serializable

@@ -13,17 +13,17 @@ kotlin {
     android()
     jvm("desktop")
     sourceSets {
-        val libsLibrary = versionCatalogs.named("libs")
-        val commonMain by getting {
+        named("commonMain") {
             dependencies {
-                api(libsLibrary.findLibrary("moko-core").get())
                 compileOnly(compose.runtime)
                 compileOnly(compose.ui)
+                api(libs.moko.core)
             }
         }
-        val androidMain by getting
-        val desktopMain by getting
-
+        named("androidMain") {
+        }
+        named("desktopMain") {
+        }
     }
 
 }
@@ -87,4 +87,3 @@ idea {
         }
     }
 }
-

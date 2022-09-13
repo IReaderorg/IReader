@@ -6,7 +6,7 @@ import java.util.TimeZone
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("kotlin-kapt")
+
     id("kotlin-parcelize")
     id("com.google.gms.google-services")
     kotlin("plugin.serialization")
@@ -137,12 +137,11 @@ dependencies {
     implementation(project(Modules.presentation))
     implementation(project(Modules.commonResources))
     implementation(project(Modules.commonModels))
-    implementation(project(Modules.commonData))
-    implementation(project(Modules.uiLibrary))
-    implementation(project(Modules.coreCatalogs))
+
+
+
     implementation(project(Modules.commonExtensions))
-    implementation(project(Modules.uiImageLoader))
-    implementation(project(Modules.uiSources))
+
 
     /** Firebase **/
     implementation(platform(libs.firebase.bom))
@@ -162,17 +161,9 @@ dependencies {
 
     implementation(composeLib.compose.runtime)
 
-    /** Room **/
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    kapt(libs.room.compiler)
-
     testImplementation(test.bundles.common)
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
-
-    testImplementation(libs.room.testing)
-    androidTestImplementation(libs.room.testing)
-    androidTestImplementation(test.bundles.common)
+   androidTestImplementation(test.bundles.common)
 
     implementation(libs.koin.android)
     implementation(libs.koin.androidCompose)
@@ -180,10 +171,6 @@ dependencies {
     implementation(libs.koin.core)
     implementation(libs.koin.annotations)
     ksp(libs.koin.kspCompiler)
-}
-
-kapt {
-    correctErrorTypes = true
 }
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround

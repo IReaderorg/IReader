@@ -26,17 +26,8 @@ buildscript {
 }
 
 plugins {
-//    id("org.jetbrains.kotlin.android") version "1.7.10" apply false
-//    id("com.diffplug.spotless") version "6.6.1"
-//    id("com.github.ben-manes.versions") version "0.42.0"
-//    id("com.autonomousapps.dependency-analysis") version "1.3.0"
-//    id("org.jetbrains.kotlin.plugin.serialization") version "1.7.10" apply false
-//    id("org.jetbrains.compose") version "1.2.0-alpha01-dev774" apply false
-//    id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.6" apply false
-//    id("com.google.dagger.hilt.android") version "2.43.2" apply false
-    //id("com.google.devtools.ksp") version "1.6.21-1.0.5"
     alias(libs.plugins.kotlinAndroid) apply false
-    alias(libs.plugins.spotless)
+    alias(libs.plugins.detekt)
     alias(libs.plugins.benGradleVersions)
     alias(libs.plugins.dependencyAnalysis)
     alias(libs.plugins.kotlinSerilization) apply false
@@ -44,7 +35,7 @@ plugins {
     alias(libs.plugins.ideaExt) apply false
     alias(libs.plugins.dokka) apply false
     alias(libs.plugins.ksp) apply false
-   // alias(libs.plugins.sqldelight) apply false
+    alias(libs.plugins.sqldelight) apply false
 }
 
 
@@ -79,20 +70,12 @@ fun isNonStable(version: String): Boolean {
 
 
 subprojects {
-    plugins.apply("com.diffplug.spotless")
-
-    spotless() {
-        kotlin {
-            ktlint(libs.versions.ktlint.get())
-                .userData(mapOf("indent_size" to "2", "continuation_indent_size" to "2"))
-            target("**/*.kt")
-            targetExclude("$buildDir/**/*.kt")
-            targetExclude("bin/**/*.kt")
-        }
-        kotlinGradle {
-            target("*.gradle.kts")
-            ktlint()
-        }
+    plugins.apply("io.gitlab.arturbosch.detekt")
+    detekt {
+        source = files("src/main/java", "src/main/kotlin")
+        parallel = false
+        ignoredBuildTypes = listOf("release")
+        basePath = projectDir.absolutePath
     }
 
     tasks.withType<Test> {
@@ -128,6 +111,7 @@ subprojects {
 
             dependencies {
                 add("coreLibraryDesugaring", libs.desugarJdkLibs)
+//                add("detektPlugins ", libs.detekt)
             }
         }
 

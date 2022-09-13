@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.lifecycle.viewModelScope
-import ireader.common.data.repository.ThemeRepository
+import ireader.domain.data.repository.ThemeRepository
 import ireader.common.models.theme.ExtraColors
 import ireader.common.models.theme.Theme
 import ireader.core.ui.preferences.PreferenceValues

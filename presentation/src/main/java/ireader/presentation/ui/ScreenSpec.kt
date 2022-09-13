@@ -23,7 +23,6 @@ sealed interface ScreenSpec {
             AdvanceSettingSpec,
             BookDetailScreenSpec,
             DownloaderScreenSpec,
-            ChapterScreenSpec,
             ReaderScreenSpec,
             WebViewScreenSpec,
             ExploreScreenSpec,

@@ -16,3 +16,5 @@ data class ImageUrl(val url: String) : PageComplete()
 data class ImageBase64(val data: String) : PageComplete()
 @Serializable
 data class Text(val text: String) : PageComplete()
+@Serializable
+data class MovieUrl(val url: String) : PageComplete()

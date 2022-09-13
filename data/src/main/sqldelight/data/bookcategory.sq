@@ -1,0 +1,29 @@
+CREATE TABLE bookcategories(
+    _id INTEGER PRIMARY KEY NOT NULL  ,
+    book_id INTEGER NOT NULL,
+    category_id INTEGER NOT NULL,
+    FOREIGN KEY(category_id) REFERENCES categories (_id)
+    ON DELETE CASCADE,
+    FOREIGN KEY(book_id) REFERENCES book (_id)
+    ON DELETE CASCADE
+);
+
+findAll:
+SELECT * FROM bookcategories;
+
+insert:
+INSERT INTO bookcategories( book_id, category_id)
+VALUES (:mangaId, :categoryId);
+
+deleteMangaCategoryByMangaId:
+DELETE FROM bookcategories
+WHERE book_id = :mangaId;
+
+deleteAll:
+DELETE FROM bookcategories;
+
+delete:
+DELETE FROM bookcategories WHERE category_id= :categoryId;
+
+deleteByBookId:
+DELETE FROM bookcategories WHERE bookcategories.book_id = :categoryId;

@@ -6,8 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.HistoryWithRelations
-import ireader.common.models.entities.UpdateWithInfo
-import ireader.ui.imageloader.BookCover
+import ireader.common.models.BookCover
+import ireader.common.models.entities.UpdatesWithRelations
 
 @Composable
 fun rememberBookCover(manga: Book): BookCover {
@@ -18,13 +18,13 @@ fun rememberBookCover(manga: Book): BookCover {
 
 @Composable
 fun rememberBookCover(history: HistoryWithRelations): BookCover {
-    return remember(history.bookId) {
+    return remember(history.id) {
         BookCover.from(history)
     }
 }
 
 @Composable
-fun rememberBookCover(manga: UpdateWithInfo): BookCover {
+fun rememberBookCover(manga: UpdatesWithRelations): BookCover {
     return remember(manga.bookId) {
         BookCover.from(manga)
     }

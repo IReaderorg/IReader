@@ -2,24 +2,7 @@
 
 package ireader.common.models.entities
 
-import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.PrimaryKey
-
-@Entity(
-    tableName = DOWNLOAD_TABLE,
-    foreignKeys = [
-        ForeignKey(
-            entity = Chapter::class,
-            parentColumns = arrayOf("id"),
-            childColumns = arrayOf("chapterId"),
-            onDelete = ForeignKey.CASCADE,
-        )
-    ],
-
-)
 data class Download(
-    @PrimaryKey(autoGenerate = false)
     val chapterId: Long,
     val bookId: Long,
     val priority: Int,

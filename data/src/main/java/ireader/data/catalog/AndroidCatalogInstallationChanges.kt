@@ -8,8 +8,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import kotlinx.coroutines.flow.MutableSharedFlow
-import ireader.core.catalogs.service.CatalogInstallationChange
-import ireader.core.catalogs.service.CatalogInstallationChanges
+import ireader.domain.catalogs.service.CatalogInstallationChange
+import ireader.domain.catalogs.service.CatalogInstallationChanges
 
 class AndroidCatalogInstallationChanges(
     context: Application,

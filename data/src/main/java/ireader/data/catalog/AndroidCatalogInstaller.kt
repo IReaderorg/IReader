@@ -14,7 +14,7 @@ import ireader.core.api.io.saveTo
 import ireader.core.api.log.Log
 import ireader.core.api.os.InstallStep
 import ireader.core.api.os.PackageInstaller
-import ireader.core.catalogs.service.CatalogInstaller
+import ireader.domain.catalogs.service.CatalogInstaller
 import java.io.File
 
 /**

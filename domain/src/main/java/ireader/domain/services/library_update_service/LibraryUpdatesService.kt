@@ -7,33 +7,30 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import ireader.common.models.entities.Chapter
-import ireader.common.models.entities.Update
 import ireader.core.api.log.Log
-import ireader.core.catalogs.interactor.GetLocalCatalog
+import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.R
 import ireader.domain.notification.Notifications
 import ireader.domain.services.downloaderService.DefaultNotificationHelper
-import ireader.domain.use_cases.local.DeleteUseCase
-import ireader.domain.use_cases.local.LocalGetBookUseCases
-import ireader.domain.use_cases.local.LocalGetChapterUseCase
-import ireader.domain.use_cases.local.LocalInsertUseCases
-import ireader.domain.use_cases.local.updates.InsertUpdatesUseCase
-import ireader.domain.use_cases.remote.RemoteUseCases
+import ireader.domain.usecases.local.DeleteUseCase
+import ireader.domain.usecases.local.LocalGetBookUseCases
+import ireader.domain.usecases.local.LocalGetChapterUseCase
+import ireader.domain.usecases.local.LocalInsertUseCases
+import ireader.domain.usecases.remote.RemoteUseCases
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlin.time.ExperimentalTime
 
 class LibraryUpdatesService  constructor(
-     private val context: Context,
-     params: WorkerParameters,
+    private val context: Context,
+    params: WorkerParameters,
     private val getBookUseCases: LocalGetBookUseCases,
     private val getChapterUseCase: LocalGetChapterUseCase,
     private val remoteUseCases: RemoteUseCases,
     private val getLocalCatalog: GetLocalCatalog,
     private val defaultNotificationHelper: DefaultNotificationHelper,
     private val insertUseCases: LocalInsertUseCases,
-    private val updatesUseCase: InsertUpdatesUseCase,
     private val deleteUseCase: DeleteUseCase,
 ) : CoroutineWorker(context, params) {
 
@@ -102,7 +99,7 @@ class LibraryUpdatesService  constructor(
                         }
                         withContext(Dispatchers.IO) {
 
-                            val chapterIds = insertUseCases.insertChapters(
+                            insertUseCases.insertChapters(
                                 newChapters.map {
                                     it.copy(
                                         bookId = book.id,
@@ -110,20 +107,11 @@ class LibraryUpdatesService  constructor(
                                     )
                                 }
                             )
-                            insertUseCases.insertBook(
+                            insertUseCases.updateBook.update(
                                 book.copy(
                                     lastUpdate = Clock.System.now()
                                         .toEpochMilliseconds()
                                 )
-                            )
-                            updatesUseCase(
-                                newChapters.mapIndexed { index, chapter ->
-                                    Update(
-                                        chapterId = chapterIds[index],
-                                        bookId = chapter.bookId,
-                                        date = Clock.System.now().toEpochMilliseconds()
-                                    )
-                                }
                             )
                         }
                     }

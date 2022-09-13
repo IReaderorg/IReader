@@ -12,7 +12,7 @@ import ireader.ui.component.components.TitleToolbar
 import ireader.core.ui.ui.SnackBarListener
 import ireader.ui.settings.backups.BackUpAndRestoreScreen
 import ireader.ui.settings.backups.BackupScreenViewModel
-import ireader.ui.settings.R
+import ireader.presentation.R
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 

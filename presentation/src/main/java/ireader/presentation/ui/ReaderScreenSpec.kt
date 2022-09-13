@@ -46,37 +46,33 @@ import ireader.core.ui.theme.AppColors
 import ireader.core.ui.theme.CustomSystemColor
 import ireader.core.ui.theme.FontType
 import ireader.core.ui.theme.getDefaultFont
-import ireader.domain.ui.NavigationArgs
+import ireader.presentation.ui.util.NavigationArgs
 import ireader.presentation.R
-import ireader.ui.book.viewmodel.BookDetailViewModel
 import ireader.ui.reader.ReaderScreenDrawer
 import ireader.ui.reader.ReaderScreenTopBar
 import ireader.ui.reader.ReadingScreen
 import ireader.ui.reader.components.ReaderSettingMainLayout
 import ireader.ui.reader.reverse_swip_refresh.rememberSwipeRefreshState
 import ireader.ui.reader.viewmodel.ReaderScreenViewModel
-import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 object ReaderScreenSpec : ScreenSpec {
 
-    override val navHostRoute: String = "reader_screen_route/{bookId}/{chapterId}/{sourceId}"
+    override val navHostRoute: String = "reader_screen_route/{bookId}/{chapterId}/"
 
     override val arguments: List<NamedNavArgument> = listOf(
         NavigationArgs.bookId,
         NavigationArgs.chapterId,
-        NavigationArgs.sourceId,
         NavigationArgs.haveDrawer,
         NavigationArgs.showModalSheet,
     )
 
     fun buildRoute(
         bookId: Long,
-        sourceId: Long,
         chapterId: Long,
     ): String {
-        return "reader_screen_route/$bookId/$chapterId/$sourceId"
+        return "reader_screen_route/$bookId/$chapterId/"
     }
 
     fun buildDeepLink(
@@ -85,17 +81,16 @@ object ReaderScreenSpec : ScreenSpec {
         chapterId: Long,
         readingParagraph: Long,
     ): String {
-        return "https://www.ireader.org/reader_screen_route/$bookId/$chapterId/$sourceId/$readingParagraph"
+        return "https://www.ireader.org/reader_screen_route/$bookId/$chapterId/$readingParagraph"
     }
 
     override val deepLinks: List<NavDeepLink> = listOf(
 
         navDeepLink {
             uriPattern =
-                "https://www.ireader.org/reader_screen_route/{bookId}/{chapterId}/{sourceId}/{readingParagraph}}"
+                "https://www.ireader.org/reader_screen_route/{bookId}/{chapterId}/{readingParagraph}"
             NavigationArgs.bookId
             NavigationArgs.chapterId
-            NavigationArgs.sourceId
             NavigationArgs.readingParagraph
         }
     )

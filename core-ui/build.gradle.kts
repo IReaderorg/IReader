@@ -1,7 +1,7 @@
 plugins {
     id("com.android.library")
     id("kotlin-android")
-    id("kotlin-kapt")
+
     kotlin("plugin.serialization")
 }
 android {
@@ -25,7 +25,7 @@ dependencies {
 
     implementation(project(Modules.commonModels))
     implementation(project(Modules.commonResources))
-    implementation(project(Modules.uiImageLoader))
+
 
     implementation(composeLib.compose.foundation)
     implementation(composeLib.material3.core)
@@ -45,9 +45,6 @@ dependencies {
     implementation(composeLib.compose.lifecycle)
     implementation(composeLib.compose.coil)
 
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    kapt(libs.room.compiler)
 
     implementation(libs.jsoup)
     androidTestImplementation(composeLib.compose.uiTestManifest)

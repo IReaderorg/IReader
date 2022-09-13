@@ -1,26 +1,12 @@
 package ireader.common.models.entities
 
-import androidx.room.Entity
-import androidx.room.ForeignKey
+import java.util.*
 
-@Entity(
-    tableName = HISTORY_TABLE,
-    primaryKeys = [
-        "bookId",
-        "chapterId"
-    ],
-    foreignKeys = [
-        ForeignKey(
-            entity = Book::class,
-            parentColumns = arrayOf("id"),
-            childColumns = arrayOf("bookId"),
-            onDelete = ForeignKey.CASCADE,
-        )
-    ],
-)
+
 data class History(
-    val bookId: Long,
+    val id: Long,
     val chapterId: Long,
-    val readAt: Long,
-    val progress: Int = 0,
+    val readAt: Long?,
+    val readDuration: Long,
 )
+

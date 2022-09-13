@@ -1,8 +1,15 @@
 package ireader.common.extensions
 
 import android.content.Context
+import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone.Companion.currentSystemDefault
+import kotlinx.datetime.toLocalDateTime
 import java.text.DateFormat
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.ZoneId
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -27,6 +34,11 @@ fun currentTimeToLong(): Long {
 fun convertDateToLong(date: String): Long? {
     val df = SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.US)
     return df.parse(date)?.time
+}
+
+fun Long.toLocalDate() : LocalDateTime {
+    return kotlinx.datetime.Instant.fromEpochMilliseconds(this).toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+
 }
 
 /**

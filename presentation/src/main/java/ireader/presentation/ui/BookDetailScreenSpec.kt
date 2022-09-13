@@ -1,5 +1,4 @@
 package ireader.presentation.ui
-import org.koin.androidx.compose.get
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -38,23 +37,21 @@ import ireader.common.resources.UiText
 import ireader.common.resources.asString
 import ireader.ui.component.Controller
 import ireader.core.api.source.HttpSource
-import ireader.domain.ui.NavigationArgs
+import ireader.presentation.ui.util.NavigationArgs
 import ireader.presentation.R
-import ireader.ui.explore.viewmodel.ExploreViewModel
 import org.koin.androidx.compose.getViewModel
 
 object BookDetailScreenSpec : ScreenSpec {
 
-    override val navHostRoute: String = "book_detail_route/{bookId}/{sourceId}"
+    override val navHostRoute: String = "book_detail_route/{bookId}/"
 
-    fun buildRoute(sourceId: Long, bookId: Long): String {
-        return "book_detail_route/$bookId/$sourceId"
+    fun buildRoute( bookId: Long): String {
+        return "book_detail_route/$bookId/"
     }
 
     override val arguments: List<NamedNavArgument> =
         listOf(
             NavigationArgs.bookId,
-            NavigationArgs.sourceId,
             NavigationArgs.transparentStatusBar,
             NavigationArgs.showModalSheet,
         )
@@ -302,16 +299,6 @@ object BookDetailScreenSpec : ScreenSpec {
                     vm.getRemoteChapterDetail(book, catalog)
                 }
             },
-            onChapterContent = {
-                if (catalog != null && book != null) {
-                    controller.navController.navigate(
-                        ChapterScreenSpec.buildRoute(
-                            bookId = book.id,
-                            sourceId = catalog.sourceId
-                        )
-                    )
-                }
-            },
             book = book ?: Book(key = "", sourceId = 0, title = ""),
             vm = vm,
             onTitle = {
@@ -331,7 +318,6 @@ object BookDetailScreenSpec : ScreenSpec {
                         controller.navController.navigate(
                             ReaderScreenSpec.buildRoute(
                                 bookId = book.id,
-                                sourceId = book.sourceId,
                                 chapterId = chapter.id,
                             )
                         )
@@ -363,7 +349,6 @@ object BookDetailScreenSpec : ScreenSpec {
                         controller.navController.navigate(
                             ReaderScreenSpec.buildRoute(
                                 bookId = book.id,
-                                sourceId = catalog.sourceId,
                                 chapterId = LAST_CHAPTER,
                             )
                         )
@@ -371,7 +356,6 @@ object BookDetailScreenSpec : ScreenSpec {
                         controller.navController.navigate(
                             ReaderScreenSpec.buildRoute(
                                 bookId = book.id,
-                                sourceId = catalog.sourceId,
                                 chapterId = vm.chapters.first().id,
                             )
                         )

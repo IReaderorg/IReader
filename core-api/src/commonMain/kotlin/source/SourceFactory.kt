@@ -366,7 +366,7 @@ abstract class SourceFactory(
      *
      *
      */
-    open fun statusParser(text: String): Int {
+    open fun statusParser(text: String): Long {
         return detailFetcher.onStatus(text)
     }
 
@@ -601,7 +601,7 @@ abstract class SourceFactory(
         val onCategory: (List<String>) -> List<String> = { it },
         val statusSelector: String? = null,
         val statusAtt: String? = null,
-        val onStatus: (String) -> Int = { MangaInfo.UNKNOWN },
+        val onStatus: (String) -> Long = { MangaInfo.UNKNOWN },
         val type: Type = Type.Detail,
     )
 

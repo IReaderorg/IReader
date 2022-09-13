@@ -8,7 +8,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import ireader.common.resources.REPO_URL
 import ireader.core.api.http.HttpClients
-import ireader.core.catalogs.service.CatalogRemoteApi
+import ireader.domain.catalogs.service.CatalogRemoteApi
 import ireader.core.ui.CatalogNotFoundException
 
 class CatalogGithubApi(

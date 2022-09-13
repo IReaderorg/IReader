@@ -12,17 +12,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NamedNavArgument
 import ireader.ui.component.Controller
 import ireader.common.extensions.async.viewModelIOCoroutine
-import ireader.common.models.entities.UpdateWithInfo.Companion.toUpdate
-import ireader.domain.ui.NavigationArgs
+import ireader.presentation.ui.util.NavigationArgs
 import ireader.presentation.R
-import ireader.ui.explore.viewmodel.ExploreViewModel
-import ireader.ui.updates.UpdateScreen
-import ireader.ui.updates.component.UpdatesToolbar
-import ireader.ui.updates.viewmodel.UpdatesViewModel
-import org.koin.androidx.compose.get
+import ireader.ui.home.updates.UpdateScreen
+import ireader.ui.home.updates.component.UpdatesToolbar
+import ireader.ui.home.updates.viewmodel.UpdatesViewModel
 import org.koin.androidx.compose.getViewModel
-import org.koin.core.parameter.ParametersDefinition
-import org.koin.core.parameter.parametersOf
 
 object UpdateScreenSpec : BottomNavScreenSpec {
     override val icon: ImageVector = Icons.Filled.NewReleases
@@ -47,14 +42,14 @@ object UpdateScreenSpec : BottomNavScreenSpec {
             },
             onClickSelectAll = {
                 val ids: List<Long> =
-                    (vm.selection + vm.updates.values.flatMap { list -> list.map { it.id } }).distinct()
+                    (vm.selection + vm.updates.values.flatMap { list -> list.map { it.chapterId } }).distinct()
                 vm.selection.clear()
                 vm.selection.addAll(ids)
             },
             onClickFlipSelection = {
                 val ids: List<Long> =
                     (
-                        vm.updates.flatMap { update -> update.value.map { it.id } }
+                        vm.updates.flatMap { update -> update.value.map { it.chapterId } }
                             .filterNot { it in vm.selection }
                         ).distinct()
                 vm.selection.clear()
@@ -87,7 +82,6 @@ object UpdateScreenSpec : BottomNavScreenSpec {
                     controller.navController.navigate(
                         ReaderScreenSpec.buildRoute(
                             update.bookId,
-                            update.sourceId,
                             update.chapterId
                         )
                     )
@@ -99,7 +93,6 @@ object UpdateScreenSpec : BottomNavScreenSpec {
             onCoverUpdate = { update ->
                 controller.navController.navigate(
                     BookDetailScreenSpec.buildRoute(
-                        update.sourceId,
                         update.bookId
                     )
                 )
@@ -107,15 +100,6 @@ object UpdateScreenSpec : BottomNavScreenSpec {
             onDownloadUpdate = {
                 vm.addUpdate(it)
                 vm.downloadChapters()
-                vm.selection.clear()
-            },
-            onBottomBarDelete = {
-                vm.viewModelIOCoroutine {
-                    vm.updateUseCases.deleteUpdates(
-                        vm.updates.values.flatten()
-                            .filter { it.id in vm.selection }.map { it.toUpdate() }
-                    )
-                }
                 vm.selection.clear()
             },
             onBottomBarDownload = {

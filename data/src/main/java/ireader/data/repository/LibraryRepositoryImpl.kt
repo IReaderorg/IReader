@@ -1,53 +1,69 @@
 package ireader.data.repository
 
-import ireader.common.data.repository.LibraryRepository
+import com.squareup.sqldelight.Query
+import ir.kazemcodes.infinityreader.Database
+import ireader.domain.data.repository.LibraryRepository
 import kotlinx.coroutines.flow.Flow
 import ireader.common.models.entities.Book
-import ireader.common.models.entities.DownloadedBook
 import ireader.common.models.entities.LibraryBook
 import ireader.common.models.library.LibrarySort
-import ireader.common.models.library.parameter
-import ireader.data.local.dao.LibraryDao
+import ireader.data.book.booksMapper
+import ireader.data.book.libraryManga
+import ireader.data.local.DatabaseHandler
+import kotlinx.coroutines.flow.map
+
 
 class LibraryRepositoryImpl(
-    private val bookDao: LibraryDao,
+    private val handler: DatabaseHandler,
 ) : LibraryRepository {
-    override fun subscribeAll(sort: LibrarySort): Flow<List<LibraryBook>> {
-        return when (sort.type) {
-            LibrarySort.Type.TotalChapters -> {
-                bookDao.subscribeAllWithTotalChapters(sort.parameter)
-            }
-            else -> {
-                bookDao.subscribeAll(sort.parameter)
-            }
+
+    override suspend fun findAll(sort: LibrarySort): List<LibraryBook> {
+        return handler.awaitList {
+            getLibrary(sort)
+        }.let {
+            if (sort.isAscending) it else it.reversed()
         }
     }
 
-    override fun subscribeUncategorized(sort: LibrarySort): Flow<List<LibraryBook>> {
-        return bookDao.subscribeUncategorized(sort.parameter)
+    private fun Database.getLibrary(sort: LibrarySort): Query<LibraryBook> {
+     return   when (sort.type) {
+            LibrarySort.Type.Title -> bookQueries.getLatestByChapterUploadDate(libraryManga)
+            LibrarySort.Type.LastRead -> bookQueries.getLastRead(libraryManga)
+
+            LibrarySort.Type.LastUpdated -> bookQueries.getLatestByChapterUploadDate(libraryManga)
+
+            LibrarySort.Type.Unread -> bookQueries.getLatestByChapterUploadDate(libraryManga)
+
+            LibrarySort.Type.TotalChapters -> bookQueries.getLatestByChapterUploadDate(libraryManga)
+
+            LibrarySort.Type.Source -> bookQueries.getLatestByChapterUploadDate(libraryManga)
+
+            LibrarySort.Type.DateAdded
+            -> bookQueries.getLatestByChapterUploadDate(libraryManga)
+            LibrarySort.Type.DateFetched
+            -> bookQueries.getLatestByChapterFetchDate(libraryManga)
+        }
     }
 
-    override fun subscribeToCategory(categoryId: Long, sort: LibrarySort): Flow<List<LibraryBook>> {
-        return bookDao.subscribeAllInCategory(sort.parameter, categoryId)
+
+    override fun subscribe(sort: LibrarySort): Flow<List<LibraryBook>> {
+        return handler.subscribeToList {
+            getLibrary(sort)
+        }.let { flow ->
+            if (sort.isAscending) flow else flow.map { it.reversed() }
+        }
     }
 
-    override suspend fun findAll(sort: LibrarySort): List<LibraryBook> {
-        return bookDao.findAll(sort.parameter)
-    }
-
-    override suspend fun findUncategorized(sort: LibrarySort): List<LibraryBook> {
-        return bookDao.findUncategorized(sort.parameter)
-    }
-
-    override suspend fun findForCategory(categoryId: Long, sort: LibrarySort): List<LibraryBook> {
-        return bookDao.findAllInCategory(sort.parameter, categoryId,)
-    }
-
-    override suspend fun findDownloadedBooks(): List<DownloadedBook> {
-        return bookDao.findDownloadedBooks()
+    override suspend fun findDownloadedBooks(): List<Book> {
+        return handler.awaitList {
+            bookQueries.getDownloaded(booksMapper)
+        }
     }
 
     override suspend fun findFavorites(): List<Book> {
-        return bookDao.findFavorites()
+        return handler.awaitList {
+            bookQueries.getFavorites(booksMapper)
+        }
     }
+
 }

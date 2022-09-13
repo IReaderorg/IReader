@@ -77,7 +77,7 @@ object SecuritySettingSpec : ScreenSpec {
             listOf<Components>(
                 Components.Switch(
                     preference = vm.useAuth,
-                    title = context.getString(ireader.ui.settings.R.string.use_auth),
+                    title = context.getString(R.string.use_auth),
                     visible = context.isAuthenticationSupported(),
                     onValue = {
                         onEnableAuthResult.launch(

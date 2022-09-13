@@ -18,7 +18,7 @@ import ireader.core.ui.theme.FontType
 import ireader.core.ui.theme.getDefaultFont
 import ireader.ui.settings.font_screens.FontScreen
 import ireader.ui.settings.font_screens.FontScreenViewModel
-import ireader.ui.settings.R
+import ireader.presentation.R
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 

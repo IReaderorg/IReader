@@ -9,8 +9,6 @@ retrofit = "2.9.0"
 aboutLibraries = "10.0.0-b03"
 ksp = "1.7.10-1.0.6"
 tinylog = "2.5.0-M2.1"
-spotless = "6.8.0"
-ktlint = "0.45.1"
 roomigrant = "0.3.4"
 modernstorage = "1.0.0-alpha06"
 coil_version = "2.1.0"
@@ -20,6 +18,7 @@ koinAnnotation = "1.0.1"
 koin = "3.2.0"
 ideaExt = "1.1.6"
 sqldelight = "1.5.3"
+detekt = "1.21.0"
 
 
 [libraries]
@@ -118,7 +117,16 @@ koin-androidCompose = { module = "io.insert-koin:koin-androidx-compose", version
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 
 
-sqldelight-android = { module = "com.squareup.sqldelight:android-driver", version.ref = "sqldelight" }
+sqldelight-runtime = { module = "com.squareup.sqldelight:runtime", version.ref = "sqldelight" }
+sqldelight-coroutines = { module = "com.squareup.sqldelight:coroutines-extensions", version.ref ="sqldelight" }
+sqldelight-jvm = { module = "com.squareup.sqldelight:sqlite-driver", version.ref = "sqldelight" }
+sqldelight-android = { module = "com.squareup.sqldelight:android-driver", version.ref ="sqldelight" }
+sqldelight-gradle = { module = "com.squareup.sqldelight:gradle-plugin", version.ref = "sqldelight" }
+sqldelight-android-paging = { module = "com.squareup.sqldelight:android-paging3-extensions", version.ref = "sqldelight" }
+detekt = { module = "com.twitter.compose.rules:detekt", version.ref = "detekt" }
+
+requerySqlite = "com.github.requery:sqlite-android:3.36.0"
+androidSqlite = "androidx.sqlite:sqlite-framework:2.3.0-alpha01"
 
 
 [bundles]
@@ -135,6 +143,6 @@ vanniktech = { id = "com.vanniktech.maven.publish", version = "0.21.0" }
 kotlinSerilization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version = "1.3.0" }
 benGradleVersions = { id = "com.github.ben-manes.versions", version = "0.42.0" }
-spotless = { id = "com.diffplug.spotless", version = "6.6.1" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-sqldelight = { id = "com.squareup.sqldelight:gradle-plugin", version.ref = "sqldelight" }
+sqldelight = { id = "com.squareup.sqldelight", version.ref = "sqldelight" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }

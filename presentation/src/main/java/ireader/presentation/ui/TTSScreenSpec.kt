@@ -40,17 +40,11 @@ import ireader.ui.component.components.component.SwitchPreference
 import ireader.core.api.log.Log
 import ireader.core.ui.theme.readerThemes
 import ireader.core.ui.ui.PreferenceAlignment
-import ireader.domain.ui.NavigationArgs
+import ireader.presentation.ui.util.NavigationArgs
 import ireader.presentation.R
-import ireader.ui.explore.viewmodel.ExploreViewModel
+import ireader.ui.home.tts.*
 import ireader.ui.reader.ReaderScreenDrawer
-import ireader.ui.tts.MediaControllers
-import ireader.ui.tts.TTLScreenPlay
-import ireader.ui.tts.TTSScreen
-import ireader.ui.tts.TTSTopBar
-import ireader.ui.tts.TTSViewModel
 import java.math.RoundingMode
-import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 object TTSScreenSpec : ScreenSpec {
@@ -374,11 +368,11 @@ object TTSScreenSpec : ScreenSpec {
             )
             Components.Chip(
                 preference = listOf(
-                    stringResource(id = ireader.ui.reader.R.string.top_left),
-                    stringResource(id = ireader.ui.reader.R.string.bottom_left),
+                    stringResource(id = R.string.top_left),
+                    stringResource(id = R.string.bottom_left),
                     stringResource(id = R.string.hide),
                 ),
-                title = stringResource(id = ireader.ui.reader.R.string.alignment),
+                title = stringResource(id = R.string.alignment),
                 onValueChange = {
                     when (it) {
                         0 -> vm.ttsIconAlignments.value = PreferenceAlignment.TopLeft

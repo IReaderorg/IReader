@@ -11,8 +11,8 @@ import androidx.navigation.navArgument
 import ireader.ui.component.Controller
 import ireader.core.api.log.Log
 import ireader.ui.book.viewmodel.BookDetailViewModel
-import ireader.ui.sources.global_search.GlobalSearchScreen
-import ireader.ui.sources.global_search.viewmodel.GlobalSearchViewModel
+import ireader.ui.home.sources.global_search.GlobalSearchScreen
+import ireader.ui.home.sources.global_search.viewmodel.GlobalSearchViewModel
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
@@ -60,7 +60,6 @@ object GlobalSearchScreenSpec : ScreenSpec {
                         vm.insertUseCases.insertBook(book).let { bookId ->
                             controller.navController.navigate(
                                 BookDetailScreenSpec.buildRoute(
-                                    sourceId = book.sourceId,
                                     bookId = bookId,
                                 )
                             )

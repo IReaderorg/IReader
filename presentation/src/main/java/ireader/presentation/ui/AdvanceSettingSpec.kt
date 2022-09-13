@@ -9,7 +9,7 @@ import ireader.ui.component.components.TitleToolbar
 import ireader.core.ui.ui.SnackBarListener
 import ireader.ui.settings.AdvanceSettingViewModel
 import ireader.ui.settings.advance.AdvanceSettings
-import ireader.ui.settings.R
+import ireader.presentation.R
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 

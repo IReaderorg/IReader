@@ -17,12 +17,11 @@ import androidx.compose.ui.platform.LocalFocusManager
 
 import androidx.navigation.NamedNavArgument
 import ireader.ui.component.Controller
-import ireader.domain.ui.NavigationArgs
+import ireader.presentation.ui.util.NavigationArgs
 import ireader.presentation.R
-import ireader.ui.sources.extension.ExtensionScreen
-import ireader.ui.sources.extension.ExtensionScreenTopAppBar
-import ireader.ui.sources.extension.ExtensionViewModel
-import org.koin.androidx.compose.get
+import ireader.ui.home.sources.extension.ExtensionScreen
+import ireader.ui.home.sources.extension.ExtensionScreenTopAppBar
+import ireader.ui.home.sources.extension.ExtensionViewModel
 import org.koin.androidx.compose.getViewModel
 
 object ExtensionScreenSpec : BottomNavScreenSpec {

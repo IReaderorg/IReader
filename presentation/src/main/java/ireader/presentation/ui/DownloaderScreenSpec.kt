@@ -7,9 +7,9 @@ import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
 import ireader.common.models.entities.toSavedDownload
 import ireader.ui.component.Controller
-import ireader.ui.downloader.DownloaderScreen
-import ireader.ui.downloader.DownloaderTopAppBar
-import ireader.ui.downloader.DownloaderViewModel
+import ireader.ui.settings.downloader.DownloaderScreen
+import ireader.ui.settings.downloader.DownloaderTopAppBar
+import ireader.ui.settings.downloader.DownloaderViewModel
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
@@ -32,7 +32,6 @@ object DownloaderScreenSpec : ScreenSpec {
             onDownloadItem = { item ->
                 controller.navController.navigate(
                     BookDetailScreenSpec.buildRoute(
-                        sourceId = item.sourceId,
                         bookId = item.bookId
                     )
                 )

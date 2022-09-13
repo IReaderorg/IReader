@@ -18,7 +18,7 @@ import ireader.core.api.prefs.AndroidPreferenceStore
 import ireader.core.api.prefs.PrefixedPreferenceStore
 import ireader.core.api.source.Source
 import ireader.core.api.source.TestSource
-import ireader.core.catalogs.service.CatalogLoader
+import ireader.domain.catalogs.service.CatalogLoader
 import ireader.data.R
 import java.io.File
 

@@ -1,49 +1,48 @@
 package org.ireader.app.di
 
 import android.content.Context
-import ireader.common.data.repository.*
 import ireader.core.api.db.Transactions
 import ireader.core.api.http.WebViewCookieJar
 import ireader.core.ui.preferences.AppPreferences
 import ireader.core.ui.preferences.LibraryPreferences
 import ireader.core.ui.preferences.ReaderPreferences
 import ireader.core.ui.preferences.UiPreferences
-import ireader.domain.use_cases.download.DownloadUseCases
-import ireader.domain.use_cases.download.delete.DeleteAllSavedDownload
-import ireader.domain.use_cases.download.delete.DeleteSavedDownload
-import ireader.domain.use_cases.download.delete.DeleteSavedDownloadByBookId
-import ireader.domain.use_cases.download.delete.DeleteSavedDownloads
-import ireader.domain.use_cases.download.get.FindAllDownloadsUseCase
-import ireader.domain.use_cases.download.get.FindDownloadsUseCase
-import ireader.domain.use_cases.download.get.SubscribeDownloadsUseCase
-import ireader.domain.use_cases.download.insert.InsertDownload
-import ireader.domain.use_cases.download.insert.InsertDownloads
-import ireader.domain.use_cases.epub.EpubCreator
-import ireader.domain.use_cases.history.HistoryUseCase
-import ireader.domain.use_cases.local.*
-import ireader.domain.use_cases.local.book_usecases.FindAllInLibraryBooks
-import ireader.domain.use_cases.local.book_usecases.FindBookById
-import ireader.domain.use_cases.local.book_usecases.SubscribeBookById
-import ireader.domain.use_cases.local.book_usecases.SubscribeInLibraryBooks
-import ireader.domain.use_cases.local.chapter_usecases.*
-import ireader.domain.use_cases.local.delete_usecases.book.DeleteAllBooks
-import ireader.domain.use_cases.local.delete_usecases.book.DeleteBookById
-import ireader.domain.use_cases.local.delete_usecases.book.DeleteNotInLibraryBooks
-import ireader.domain.use_cases.local.delete_usecases.book.UnFavoriteBook
-import ireader.domain.use_cases.local.delete_usecases.chapter.DeleteAllChapters
-import ireader.domain.use_cases.local.delete_usecases.chapter.DeleteChapterByChapter
-import ireader.domain.use_cases.local.delete_usecases.chapter.DeleteChapters
-import ireader.domain.use_cases.local.delete_usecases.chapter.DeleteChaptersByBookId
-import ireader.domain.use_cases.local.insert_usecases.*
-import ireader.domain.use_cases.preferences.reader_preferences.*
-import ireader.domain.use_cases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
-import ireader.domain.use_cases.remote.*
-import ireader.domain.use_cases.services.*
-import ireader.domain.use_cases.updates.DeleteAllUpdates
-import ireader.domain.use_cases.updates.DeleteUpdates
-import ireader.domain.use_cases.updates.SubscribeUpdates
-import ireader.domain.use_cases.updates.UpdateUseCases
-import ireader.ui.imageloader.coil.cache.CoverCache
+import ireader.domain.data.repository.*
+import ireader.domain.usecases.download.DownloadUseCases
+import ireader.domain.usecases.download.delete.DeleteAllSavedDownload
+import ireader.domain.usecases.download.delete.DeleteSavedDownload
+import ireader.domain.usecases.download.delete.DeleteSavedDownloadByBookId
+import ireader.domain.usecases.download.delete.DeleteSavedDownloads
+import ireader.domain.usecases.download.get.FindAllDownloadsUseCase
+import ireader.domain.usecases.download.get.FindDownloadsUseCase
+import ireader.domain.usecases.download.get.SubscribeDownloadsUseCase
+import ireader.domain.usecases.download.insert.InsertDownload
+import ireader.domain.usecases.download.insert.InsertDownloads
+import ireader.domain.usecases.epub.EpubCreator
+import ireader.domain.usecases.history.HistoryUseCase
+import ireader.domain.usecases.local.*
+import ireader.domain.usecases.local.book_usecases.FindAllInLibraryBooks
+import ireader.domain.usecases.local.book_usecases.FindBookById
+import ireader.domain.usecases.local.book_usecases.SubscribeBookById
+import ireader.domain.usecases.local.book_usecases.SubscribeInLibraryBooks
+import ireader.domain.usecases.local.chapter_usecases.*
+import ireader.domain.usecases.local.delete_usecases.book.DeleteAllBooks
+import ireader.domain.usecases.local.delete_usecases.book.DeleteBookById
+import ireader.domain.usecases.local.delete_usecases.book.DeleteNotInLibraryBooks
+import ireader.domain.usecases.local.delete_usecases.book.UnFavoriteBook
+import ireader.domain.usecases.local.delete_usecases.chapter.DeleteAllChapters
+import ireader.domain.usecases.local.delete_usecases.chapter.DeleteChapterByChapter
+import ireader.domain.usecases.local.delete_usecases.chapter.DeleteChapters
+import ireader.domain.usecases.local.delete_usecases.chapter.DeleteChaptersByBookId
+import ireader.domain.usecases.local.insert_usecases.*
+import ireader.domain.usecases.preferences.reader_preferences.*
+import ireader.domain.usecases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
+import ireader.domain.usecases.remote.*
+import ireader.domain.usecases.services.*
+import ireader.domain.usecases.updates.DeleteAllUpdates
+import ireader.domain.usecases.updates.SubscribeUpdates
+import ireader.domain.usecases.updates.UpdateUseCases
+import ireader.domain.image.cache.CoverCache
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Single
@@ -67,8 +66,8 @@ class UseCasesInject {
 
         @Single
     fun provideLocalInsertUseCases(
-        chapterRepository: ChapterRepository,
-        bookRepository: BookRepository
+            chapterRepository: ChapterRepository,
+            bookRepository: BookRepository
     ): LocalInsertUseCases {
         return LocalInsertUseCases(
             insertBook = InsertBook(bookRepository),
@@ -99,32 +98,26 @@ class UseCasesInject {
 
         @Single
     fun provideLocalChapterUseCase(
-        chapterRepository: ChapterRepository,
-        historyUseCase: HistoryUseCase,
-        insertUseCases: LocalInsertUseCases,
-        uiPreferences: UiPreferences
+            chapterRepository: ChapterRepository,
+            historyUseCase: HistoryUseCase,
+            insertUseCases: LocalInsertUseCases,
+            uiPreferences: UiPreferences
     ): LocalGetChapterUseCase {
         return LocalGetChapterUseCase(
             findAllInLibraryChapters = FindAllInLibraryChapters(chapterRepository),
             findChapterById = FindChapterById(chapterRepository),
-            findChapterByKey = FindChapterByKey(chapterRepository),
             findChaptersByBookId = FindChaptersByBookId(chapterRepository),
-            findChaptersByKey = FindChaptersByKey(chapterRepository),
-            findFirstChapter = FindFirstChapter(chapterRepository),
-            findLastReadChapter = FindLastReadChapter(chapterRepository),
-            subscribeChapterById = SubscribeChapterById(chapterRepository),
             subscribeChaptersByBookId = SubscribeChaptersByBookId(chapterRepository),
-            subscribeLastReadChapter = SubscribeLastReadChapter(chapterRepository),
             updateLastReadTime = UpdateLastReadTime(insertUseCases = insertUseCases, historyUseCase = historyUseCase, uiPreferences = uiPreferences)
         )
     }
 
         @Single
     fun provideDeleteUseCase(
-        chapterRepository: ChapterRepository,
-        bookRepository: BookRepository,
-        bookCategoryRepository: BookCategoryRepository,
-        transactions: Transactions
+            chapterRepository: ChapterRepository,
+            bookRepository: BookRepository,
+            bookCategoryRepository: BookCategoryRepository,
+            transactions: Transactions
     ): DeleteUseCase {
         return DeleteUseCase(
             deleteAllBook = DeleteAllBooks(bookRepository),
@@ -207,12 +200,12 @@ class UseCasesInject {
 
         @Single
     fun providesUpdateUseCases(
-        updatesRepository: UpdatesRepository,
+            updatesRepository: UpdatesRepository,
+            uiPreferences: UiPreferences
     ): UpdateUseCases {
         return UpdateUseCases(
             subscribeUpdates = SubscribeUpdates(updatesRepository),
-            deleteAllUpdates = DeleteAllUpdates(updatesRepository),
-            deleteUpdates = DeleteUpdates(updatesRepository),
+            deleteAllUpdates = DeleteAllUpdates(uiPreferences),
         )
     }
 

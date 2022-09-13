@@ -1,14 +1,11 @@
 package ireader.common.models.entities
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+
 import kotlinx.serialization.Serializable
 import ireader.core.api.source.model.MangaInfo
 
 @Serializable
-@Entity(tableName = BOOK_TABLE)
 data class Book(
-    @PrimaryKey(autoGenerate = true)
     override val id: Long = 0,
     override val sourceId: Long,
     override val title: String,
@@ -16,15 +13,15 @@ data class Book(
     val author: String = "",
     val description: String = "",
     val genres: List<String> = emptyList(),
-    val status: Int = 0,
+    val status: Long = 0,
     override val cover: String = "",
     override val customCover: String = "",
     override val favorite: Boolean = false,
     val lastUpdate: Long = 0,
-    val lastInit: Long = 0,
+    val initialized: Boolean = false,
     val dateAdded: Long = 0,
-    val viewer: Int = 0,
-    val flags: Int = 0,
+    val viewer: Long = 0,
+    val flags: Long = 0,
 ) : BaseBook {
 
     companion object {
@@ -49,10 +46,10 @@ data class Book(
 
     fun getStatusByName(): String {
         return when (status) {
-            0 -> "UNKNOWN"
-            1 -> "ONGOING"
-            2 -> "COMPLETED"
-            3 -> "LICENSED"
+            0L -> "UNKNOWN"
+            1L -> "ONGOING"
+            2L -> "COMPLETED"
+            3L -> "LICENSED"
             else -> "UNKNOWN"
         }
     }
@@ -118,7 +115,7 @@ data class BookWithInfo(
     val totalDownload: Int,
     val isRead: Int,
     val link: String,
-    val status: Int = 0,
+    val status: Long = 0,
     val cover: String = "",
     val customCover: String = "",
     val favorite: Boolean = false,
@@ -161,19 +158,26 @@ data class LibraryBook(
     override val sourceId: Long,
     override val key: String,
     override val title: String,
-    val status: Int,
+    val status: Long,
     val cover: String,
     val lastUpdate: Long = 0,
-    val unread: Int,
-    val readCount: Int,
 ) : BookBase {
+    var unreadCount: Int = 0
+    var readCount: Int = 0
+    val totalChapters
+        get() = readCount + unreadCount
+
+    val hasStarted
+        get() = readCount > 0
+    var category: Int = 0
+
     fun toBookItem(): BookItem {
         return BookItem(
             id = id,
             sourceId = sourceId,
             title = title,
             cover = cover,
-            unread = unread,
+            unread = unreadCount,
             downloaded = readCount
         )
     }
@@ -208,12 +212,6 @@ data class BookItem(
     val unread: Int? = null,
     val downloaded: Int? = null,
 ) : BaseBook
-
-data class DownloadedBook(
-    val id: Long,
-    val totalChapters: Int,
-    val totalDownloadedChapter: Int
-)
 
 
 fun BookItem.toBook() : Book {

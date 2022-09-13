@@ -13,14 +13,12 @@ import com.google.accompanist.web.WebContent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import ireader.ui.component.Controller
-import ireader.domain.ui.NavigationArgs
-import ireader.ui.explore.viewmodel.ExploreViewModel
+import ireader.presentation.ui.util.NavigationArgs
 import ireader.ui.web.WebPageScreen
 import ireader.ui.web.WebPageTopBar
 import ireader.ui.web.WebViewPageModel
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 @OptIn(

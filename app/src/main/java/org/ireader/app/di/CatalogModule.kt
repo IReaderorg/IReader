@@ -2,31 +2,31 @@ package org.ireader.app.di
 
 import android.app.Application
 import io.ktor.client.plugins.cookies.CookiesStorage
-import ireader.common.data.repository.BookRepository
+import ireader.domain.data.repository.BookRepository
 import ireader.core.api.http.BrowserEngine
 import ireader.core.api.http.HttpClients
 import ireader.core.api.http.WebViewCookieJar
 import ireader.core.api.http.WebViewManger
 import ireader.core.api.os.PackageInstaller
 import ireader.core.api.prefs.PreferenceStore
-import ireader.core.catalogs.CatalogPreferences
-import ireader.core.catalogs.CatalogStore
-import ireader.core.catalogs.interactor.GetCatalogsByType
-import ireader.core.catalogs.interactor.GetLocalCatalog
-import ireader.core.catalogs.interactor.GetLocalCatalogs
-import ireader.core.catalogs.interactor.GetRemoteCatalogs
-import ireader.core.catalogs.interactor.InstallCatalog
-import ireader.core.catalogs.interactor.SyncRemoteCatalogs
-import ireader.core.catalogs.interactor.TogglePinnedCatalog
-import ireader.core.catalogs.interactor.UninstallCatalog
-import ireader.core.catalogs.interactor.UpdateCatalog
-import ireader.core.catalogs.service.CatalogInstaller
-import ireader.core.catalogs.service.CatalogRemoteRepository
+import ireader.domain.catalogs.CatalogPreferences
+import ireader.domain.catalogs.CatalogStore
+import ireader.domain.catalogs.interactor.GetCatalogsByType
+import ireader.domain.catalogs.interactor.GetLocalCatalog
+import ireader.domain.catalogs.interactor.GetLocalCatalogs
+import ireader.domain.catalogs.interactor.GetRemoteCatalogs
+import ireader.domain.catalogs.interactor.InstallCatalog
+import ireader.domain.catalogs.interactor.SyncRemoteCatalogs
+import ireader.domain.catalogs.interactor.TogglePinnedCatalog
+import ireader.domain.catalogs.interactor.UninstallCatalog
+import ireader.domain.catalogs.interactor.UpdateCatalog
+import ireader.domain.catalogs.service.CatalogInstaller
+import ireader.domain.catalogs.service.CatalogRemoteRepository
 import ireader.data.catalog.AndroidCatalogLoader
 import ireader.data.catalog.AndroidCatalogInstaller
 import ireader.data.catalog.CatalogGithubApi
-import ireader.ui.imageloader.coil.CoilLoaderFactory
-import ireader.ui.imageloader.coil.cache.CoverCache
+import ireader.imageloader.coil.CoilLoaderFactory
+import ireader.domain.image.cache.CoverCache
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
@@ -64,10 +64,10 @@ class CatalogModule {
 
         @Single
     fun provideImageLoader(
-        context: Application,
-        coverCache: CoverCache,
-        client: HttpClients,
-        catalogStore: CatalogStore,
+            context: Application,
+            coverCache: CoverCache,
+            client: HttpClients,
+            catalogStore: CatalogStore,
     ): CoilLoaderFactory {
         return CoilLoaderFactory(
             client = client,
@@ -79,11 +79,11 @@ class CatalogModule {
 
         @Single
     fun providesCatalogStore(
-        catalogPreferences: CatalogPreferences,
-        catalogRemoteRepository: CatalogRemoteRepository,
-        installationChanges: ireader.data.catalog.AndroidCatalogInstallationChanges,
-        context: Application,
-        httpClients: HttpClients,
+            catalogPreferences: CatalogPreferences,
+            catalogRemoteRepository: CatalogRemoteRepository,
+            installationChanges: ireader.data.catalog.AndroidCatalogInstallationChanges,
+            context: Application,
+            httpClients: HttpClients,
     ): CatalogStore {
         return CatalogStore(
             AndroidCatalogLoader(context, httpClients),
@@ -141,23 +141,23 @@ class CatalogModule {
 
         @Single
     fun providesGetCatalogsByType(
-        localCatalogs: GetLocalCatalogs,
-        remoteCatalogs: GetRemoteCatalogs,
+            localCatalogs: GetLocalCatalogs,
+            remoteCatalogs: GetRemoteCatalogs,
     ): GetCatalogsByType {
         return GetCatalogsByType(localCatalogs, remoteCatalogs)
     }
 
         @Single
     fun providesGetRemoteCatalogs(
-        catalogRemoteRepository: CatalogRemoteRepository,
+            catalogRemoteRepository: CatalogRemoteRepository,
     ): GetRemoteCatalogs {
         return GetRemoteCatalogs(catalogRemoteRepository)
     }
 
         @Single
     fun providesGetLocalCatalogs(
-        catalogStore: CatalogStore,
-        libraryRepository: BookRepository,
+            catalogStore: CatalogStore,
+            libraryRepository: BookRepository,
     ): GetLocalCatalogs {
         return GetLocalCatalogs(catalogStore, libraryRepository)
     }
@@ -171,38 +171,38 @@ class CatalogModule {
 
         @Single
     fun providesUpdateCatalog(
-        catalogRemoteRepository: CatalogRemoteRepository,
-        installCatalog: InstallCatalog,
+            catalogRemoteRepository: CatalogRemoteRepository,
+            installCatalog: InstallCatalog,
     ): UpdateCatalog {
         return UpdateCatalog(catalogRemoteRepository, installCatalog)
     }
 
         @Single
     fun providesInstallCatalog(
-        catalogInstaller: CatalogInstaller,
+            catalogInstaller: CatalogInstaller,
     ): InstallCatalog {
         return InstallCatalog(catalogInstaller)
     }
 
         @Single
     fun providesUninstallCatalog(
-        catalogInstaller: CatalogInstaller,
+            catalogInstaller: CatalogInstaller,
     ): UninstallCatalog {
         return UninstallCatalog(catalogInstaller)
     }
 
         @Single
     fun providesTogglePinnedCatalog(
-        store: CatalogStore,
+            store: CatalogStore,
     ): TogglePinnedCatalog {
         return TogglePinnedCatalog(store)
     }
 
         @Single
     fun providesSyncRemoteCatalogs(
-        catalogRemoteRepository: CatalogRemoteRepository,
-        catalogPreferences: CatalogPreferences,
-        httpClient: HttpClients,
+            catalogRemoteRepository: CatalogRemoteRepository,
+            catalogPreferences: CatalogPreferences,
+            httpClient: HttpClients,
     ): SyncRemoteCatalogs {
         return SyncRemoteCatalogs(
             catalogRemoteRepository,

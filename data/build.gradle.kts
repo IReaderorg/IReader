@@ -1,10 +1,10 @@
 plugins {
     id("com.android.library")
     id("kotlin-android")
-    id("kotlin-kapt")
     id("kotlin-parcelize")
     kotlin("plugin.serialization")
-
+    id("com.squareup.sqldelight")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -12,15 +12,6 @@ android {
     compileSdk = ProjectConfig.compileSdk
 
     defaultConfig {
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments += mapOf(
-                    "room.schemaLocation" to "$projectDir/schemas",
-                    "room.incremental" to "true",
-                    "room.expandProjection" to "true"
-                )
-            }
-        }
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     sourceSets {
@@ -48,6 +39,12 @@ android {
             getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
         }
     }
+    sqldelight {
+        database("Database") {
+            packageName = "ir.kazemcodes.infinityreader"
+            dialect = "sqlite:3.24"
+        }
+    }
 }
 
 dependencies {
@@ -56,8 +53,7 @@ dependencies {
 
     implementation(project(Modules.domain))
     implementation(project(Modules.commonModels))
-    implementation(project(Modules.commonData))
-    implementation(project(Modules.coreCatalogs))
+
     implementation(project(Modules.commonExtensions))
     implementation(project(Modules.commonResources))
 
@@ -73,9 +69,7 @@ dependencies {
     implementation(composeLib.compose.activity)
     implementation(composeLib.material3.core)
     implementation(project(mapOf("path" to ":core-ui")))
-
-    kapt(libs.hilt.androidcompiler)
-    implementation(libs.hilt.android)
+    
 
     implementation(libs.jsoup)
 
@@ -85,11 +79,6 @@ dependencies {
 
     implementation(kotlinx.stdlib)
 
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    kapt(libs.room.compiler)
-    implementation(libs.room.roomigrant.lib)
-    kapt(libs.room.roomigrant.compiler)
 
     implementation(libs.okhttp.interceptor)
 
@@ -99,12 +88,19 @@ dependencies {
 
 
     testImplementation(test.bundles.common)
-    testImplementation(libs.hilt.androidtest)
-    testImplementation(libs.room.testing)
-    androidTestImplementation(libs.hilt.androidtest)
-    androidTestImplementation(libs.room.testing)
+
+
+
     androidTestImplementation(test.bundles.common)
 
 
     implementation(libs.sqldelight.android)
+    implementation(libs.sqldelight.coroutines)
+    implementation(libs.sqldelight.runtime)
+    implementation(libs.sqldelight.android.paging)
+    implementation(libs.requerySqlite)
+    implementation(libs.koin.annotations)
+    ksp(libs.koin.kspCompiler)
+    compileOnly(libs.androidSqlite)
+    debugImplementation(libs.androidSqlite)
 }

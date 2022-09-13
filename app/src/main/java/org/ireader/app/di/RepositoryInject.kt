@@ -1,35 +1,24 @@
 package org.ireader.app.di
 
-import ireader.common.data.repository.BookCategoryRepository
-import ireader.common.data.repository.BookRepository
-import ireader.common.data.repository.CategoryRepository
-import ireader.common.data.repository.ChapterRepository
-import ireader.common.data.repository.DownloadRepository
-import ireader.common.data.repository.HistoryRepository
-import ireader.common.data.repository.LibraryRepository
-import ireader.common.data.repository.ReaderThemeRepository
-import ireader.common.data.repository.ThemeRepository
-import ireader.common.data.repository.UpdatesRepository
-import ireader.core.catalogs.service.CatalogRemoteRepository
-import ireader.data.local.dao.BookCategoryDao
-import ireader.data.local.dao.CatalogDao
-import ireader.data.local.dao.CategoryDao
-import ireader.data.local.dao.ChapterDao
-import ireader.data.local.dao.DownloadDao
-import ireader.data.local.dao.HistoryDao
-import ireader.data.local.dao.LibraryBookDao
-import ireader.data.local.dao.LibraryDao
-import ireader.data.local.dao.ReaderThemeDao
-import ireader.data.local.dao.RemoteKeysDao
-import ireader.data.local.dao.ThemeDao
-import ireader.data.local.dao.UpdatesDao
-import ireader.data.repository.BookCategoryRepositoryImpl
-import ireader.data.repository.BookRepositoryImpl
-import ireader.data.repository.CatalogRemoteRepositoryImpl
-import ireader.data.repository.CategoryRepositoryImpl
-import ireader.data.repository.ChapterRepositoryImpl
-import ireader.data.repository.DownloadRepositoryImpl
-import ireader.data.repository.HistoryRepositoryImpl
+import ireader.domain.data.repository.BookCategoryRepository
+import ireader.domain.data.repository.BookRepository
+import ireader.domain.data.repository.CategoryRepository
+import ireader.domain.data.repository.ChapterRepository
+import ireader.domain.data.repository.DownloadRepository
+import ireader.domain.data.repository.HistoryRepository
+import ireader.domain.data.repository.LibraryRepository
+import ireader.domain.data.repository.ReaderThemeRepository
+import ireader.domain.data.repository.ThemeRepository
+import ireader.domain.data.repository.UpdatesRepository
+import ireader.domain.catalogs.service.CatalogRemoteRepository
+import ireader.data.local.DatabaseHandler
+import ireader.data.book.BookRepositoryImpl
+import ireader.data.catalog.CatalogRemoteRepositoryImpl
+import ireader.data.category.BookCategoryRepositoryImpl
+import ireader.data.category.CategoryRepositoryImpl
+import ireader.data.chapter.ChapterRepositoryImpl
+import ireader.data.downloads.DownloadRepositoryImpl
+import ireader.data.history.HistoryRepositoryImpl
 import ireader.data.repository.LibraryRepositoryImpl
 import ireader.data.repository.ReaderThemeRepositoryImpl
 import ireader.data.repository.ThemeRepositoryImpl
@@ -46,84 +35,82 @@ class RepositoryInject {
 
     @Single
     fun provideDownloadRepository(
-        downloadDao: DownloadDao,
+        handler: DatabaseHandler
     ): DownloadRepository {
-        return DownloadRepositoryImpl(downloadDao)
+        return DownloadRepositoryImpl(handler)
     }
 
     @Single
     fun provideUpdatesRepository(
-        updatesDao: UpdatesDao,
+        handler: DatabaseHandler
     ): UpdatesRepository {
-        return UpdatesRepositoryImpl(updatesDao)
+        return UpdatesRepositoryImpl(handler)
     }
 
     @Single
     fun provideLibraryRepository(
-        dao: LibraryDao,
+        handler: DatabaseHandler
     ): LibraryRepository {
-        return LibraryRepositoryImpl(dao)
+        return LibraryRepositoryImpl(handler)
     }
     @Single
     fun provideCategoryRepository(
-        dao: CategoryDao,
+        handler: DatabaseHandler
     ): CategoryRepository {
-        return CategoryRepositoryImpl(dao)
+        return CategoryRepositoryImpl(handler)
     }
 
 
     @Single
-    fun provideCatalogRemoteRepository(catalogDao: CatalogDao): CatalogRemoteRepository {
-        return CatalogRemoteRepositoryImpl(dao = catalogDao)
+    fun provideCatalogRemoteRepository(        handler: DatabaseHandler): CatalogRemoteRepository {
+        return CatalogRemoteRepositoryImpl(handler)
     }
 
 
     @Single
-    fun providesLocalChapterRepository(ChapterDao: ChapterDao): ChapterRepository {
-        return ChapterRepositoryImpl(ChapterDao)
+    fun providesLocalChapterRepository(        handler: DatabaseHandler): ChapterRepository {
+        return ChapterRepositoryImpl(handler)
     }
 
 
     @Single
     fun providesLibraryRepository(
-        libraryBookDao: LibraryBookDao,
-        remoteKeysDao: RemoteKeysDao,
+        handler: DatabaseHandler
     ): BookRepository {
         return BookRepositoryImpl(
-            libraryBookDao,
-            remoteKeysDao = remoteKeysDao
+            handler
         )
     }
 
 
         @Single
     fun providesHistoryRepository(
-        historyDao: HistoryDao,
+            handler: DatabaseHandler
     ): HistoryRepository {
-        return HistoryRepositoryImpl(historyDao)
+        return HistoryRepositoryImpl(handler)
     }
 
 
         @Single
     fun providesBookCategoryRepository(
-        dao: BookCategoryDao,
+            handler: DatabaseHandler
     ): BookCategoryRepository {
-        return BookCategoryRepositoryImpl(dao)
+        return BookCategoryRepositoryImpl(handler)
     }
 
 
         @Single
     fun providesThemeRepository(
-        dao: ThemeDao,
+            handler: DatabaseHandler
     ): ThemeRepository {
-        return ThemeRepositoryImpl(dao)
+        return ThemeRepositoryImpl(handler)
     }
 
 
         @Single
     fun providesReaderThemeRepository(
-        dao: ReaderThemeDao,
+            handler: DatabaseHandler
     ): ReaderThemeRepository {
-        return ReaderThemeRepositoryImpl(dao)
+        return ReaderThemeRepositoryImpl(handler)
     }
 }

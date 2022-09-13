@@ -12,16 +12,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NamedNavArgument
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
-import ireader.ui.library.LibraryController
-import ireader.ui.library.LibraryScreenTopBar
-import ireader.ui.library.components.BottomTabComposable
-import ireader.ui.library.viewmodel.LibraryViewModel
+import ireader.ui.home.library.LibraryScreenTopBar
+import ireader.ui.home.library.components.BottomTabComposable
+import ireader.ui.home.library.viewmodel.LibraryViewModel
 import ireader.common.resources.LAST_CHAPTER
 import ireader.ui.component.Controller
-import ireader.domain.ui.NavigationArgs
-import ireader.domain.ui.NavigationArgs.showModalSheet
+import ireader.presentation.ui.util.NavigationArgs
+import ireader.presentation.ui.util.NavigationArgs.showModalSheet
 import ireader.presentation.R
-import org.koin.androidx.compose.get
+import ireader.ui.home.library.LibraryController
 import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -106,7 +105,6 @@ object LibraryScreenSpec : BottomNavScreenSpec {
                 controller.navController.navigate(
                     ReaderScreenSpec.buildRoute(
                         bookId = book.id,
-                        sourceId = book.sourceId,
                         chapterId = LAST_CHAPTER
                     )
                 )
@@ -114,7 +112,6 @@ object LibraryScreenSpec : BottomNavScreenSpec {
             goToDetail = { book ->
                 controller.navController.navigate(
                     route = BookDetailScreenSpec.buildRoute(
-                        sourceId = book.sourceId,
                         bookId = book.id
                     )
                 )

@@ -2,16 +2,13 @@
 package ireader.common.models.entities
 
 import androidx.annotation.Keep
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+
 import ireader.core.api.source.Source
 import java.io.File
 import kotlin.random.Random
 
 @Keep
-@Entity(tableName = CATALOG_REMOTE)
 data class CatalogRemote(
-    @PrimaryKey(autoGenerate = false)
     override val sourceId: Long,
     override val name: String,
     override val description: String,

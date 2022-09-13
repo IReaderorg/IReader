@@ -20,7 +20,7 @@ import ireader.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.ui.settings.SettingsSection
 import ireader.ui.settings.SetupLayout
-import ireader.ui.settings.R
+import ireader.presentation.R
 import org.koin.androidx.compose.get
 object SettingScreenSpec : ScreenSpec {
     override val navHostRoute: String = "settings"
@@ -34,7 +34,7 @@ object SettingScreenSpec : ScreenSpec {
         Toolbar(
             scrollBehavior = controller.scrollBehavior,
             title = {
-                BigSizeTextComposable(text = stringResource(ireader.ui.settings.R.string.settings))
+                BigSizeTextComposable(text = stringResource(R.string.settings))
             },
             navigationIcon = { TopAppBarBackButton(onClick = { controller.navController.popBackStack() }) },
         )

@@ -5,22 +5,22 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import ireader.common.data.repository.BookRepository
-import ireader.common.data.repository.ChapterRepository
+import ireader.domain.data.repository.BookRepository
+import ireader.domain.data.repository.ChapterRepository
 import ireader.common.extensions.launchIO
 import ireader.common.models.entities.Chapter
 import ireader.common.models.entities.SavedDownload
 import ireader.common.models.entities.buildSavedDownload
 import ireader.common.resources.asString
-import ireader.core.catalogs.CatalogStore
+import ireader.domain.catalogs.CatalogStore
 import ireader.domain.R
 import ireader.domain.notification.Notifications
 import ireader.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE
 import ireader.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_ERROR
 import ireader.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS
-import ireader.domain.use_cases.download.DownloadUseCases
-import ireader.domain.use_cases.local.LocalInsertUseCases
-import ireader.domain.use_cases.remote.RemoteUseCases
+import ireader.domain.usecases.download.DownloadUseCases
+import ireader.domain.usecases.local.LocalInsertUseCases
+import ireader.domain.usecases.remote.RemoteUseCases
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -28,8 +28,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 class DownloaderService  constructor(
-     private val context: Context,
-     params: WorkerParameters,
+    private val context: Context,
+    params: WorkerParameters,
     private val bookRepo: BookRepository,
     private val chapterRepo: ChapterRepository,
     private val remoteUseCases: RemoteUseCases,
@@ -168,7 +168,6 @@ class DownloaderService  constructor(
                 }
             } catch (e: Throwable) {
                 ireader.core.api.log.Log.error { "getNotifications: Failed to download ${savedDownload.chapterName}" }
-
                 cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
                 notify(
                     ID_DOWNLOAD_CHAPTER_ERROR,
@@ -177,10 +176,7 @@ class DownloaderService  constructor(
                         e
                     ).build()
                 )
-
-                scope.launchIO {
-                    downloadUseCases.insertDownload(savedDownload.copy(priority = 0).toDownload())
-                }
+                downloadUseCases.insertDownload(savedDownload.copy(priority = 0).toDownload())
                 downloadServiceState.downloads = emptyList()
                 downloadServiceState.isEnable = false
                 return Result.failure()
