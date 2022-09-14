@@ -30,6 +30,7 @@ import ireader.ui.book.viewmodel.BookDetailViewModel
 import ireader.common.extensions.async.viewModelIOCoroutine
 import ireader.common.extensions.findComponentActivity
 import ireader.common.extensions.launchIO
+import ireader.common.extensions.replaceFirst
 import ireader.common.models.entities.Book
 import ireader.common.resources.LAST_CHAPTER
 import ireader.common.resources.UiEvent
@@ -39,6 +40,7 @@ import ireader.ui.component.Controller
 import ireader.core.api.source.HttpSource
 import ireader.presentation.ui.util.NavigationArgs
 import ireader.presentation.R
+import ireader.ui.home.explore.viewmodel.ExploreViewModel
 import org.koin.androidx.compose.getViewModel
 
 object BookDetailScreenSpec : ScreenSpec {
@@ -78,7 +80,7 @@ object BookDetailScreenSpec : ScreenSpec {
         val scope = rememberCoroutineScope()
         val source = vm.source
         val catalog = vm.catalogSource
-        val book = vm.book
+        val book = vm.booksState.book
         val context = LocalContext.current
         val state = controller.topScrollState
         val decay = rememberSplineBasedDecay<Float>()
@@ -98,7 +100,7 @@ object BookDetailScreenSpec : ScreenSpec {
                     val uri = resultIntent.data!!.data!!
                     context.findComponentActivity()?.lifecycleScope?.launchIO {
                         try {
-                            vm.book?.let {
+                            vm.booksState.book?.let {
                                 vm.showSnackBar(UiText.StringResource(R.string.wait))
                                 vm.createEpub(it, uri, context)
                                 vm.showSnackBar(UiText.StringResource(R.string.success))
@@ -190,7 +192,7 @@ object BookDetailScreenSpec : ScreenSpec {
             )
         })
         val detailState = vm.state
-        val book = vm.book
+        val book = vm.booksState.book
         val catalog = vm.catalogSource
 
         detailState.source.let { source ->
@@ -271,7 +273,7 @@ object BookDetailScreenSpec : ScreenSpec {
             }
         }
         val state = vm
-        val book = state.book
+        val book = state.booksState.book
         val source = state.catalogSource?.source
         val catalog = state.catalogSource
         val scope = rememberCoroutineScope()
@@ -411,6 +413,5 @@ object BookDetailScreenSpec : ScreenSpec {
 
         )
     }
-
 
 }

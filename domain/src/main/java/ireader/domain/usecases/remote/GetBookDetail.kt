@@ -1,5 +1,7 @@
 package ireader.domain.usecases.remote
 
+import ireader.common.extensions.convertLongToTime
+import ireader.common.extensions.currentTimeToLong
 import kotlinx.coroutines.CancellationException
 import ireader.common.extensions.withIOContext
 import ireader.common.models.entities.Book
@@ -33,7 +35,11 @@ class GetBookDetail() {
 
                     onSuccess(
                         updateBook(
-                            newBook = bookDetail.toBook(catalog.sourceId, bookId = book.id,),
+                            newBook = bookDetail.toBook(
+                                sourceId = catalog.sourceId,
+                                bookId = book.id,
+                                lastUpdated = currentTimeToLong())
+                                .copy(initialized = true),
                             oldBook = book
                         )
                     )

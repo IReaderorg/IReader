@@ -34,7 +34,6 @@ class GetRemoteChapters() {
                     val newChapters = source.getChapterList(manga = book.toBookInfo(), commands)
                         .map { it.toChapter(book.id) }
                     onRemoteSuccess(newChapters)
-
                     onSuccess(newChapters.filter { it.key !in oldChapters.map {oldChapter -> oldChapter.key } })
                     Log.debug { "Timber: GetRemoteChaptersUseCase was Finished Successfully" }
                 } catch (e: CancellationException) {

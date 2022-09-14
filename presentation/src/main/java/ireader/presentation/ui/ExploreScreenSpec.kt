@@ -12,12 +12,15 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.lifecycle.viewModelScope
 
 import androidx.navigation.NamedNavArgument
 import kotlinx.coroutines.launch
 import okhttp3.Headers
 import ireader.ui.component.Controller
 import ireader.common.extensions.launchIO
+import ireader.common.extensions.replaceFirst
+import ireader.common.models.entities.toBook
 import ireader.common.models.entities.toBookItem
 import ireader.common.resources.UiText
 import ireader.core.api.log.Log
@@ -60,92 +63,99 @@ object ExploreScreenSpec : ScreenSpec {
     }
 
 
-
     @OptIn(
         ExperimentalAnimationApi::class,
         ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
     )
     @Composable
     override fun Content(controller: Controller) {
-            val vm: ExploreViewModel =
-                getViewModel(owner = controller.navBackStackEntry, parameters = {
-                    org.koin.core.parameter.parametersOf(
-                        ExploreViewModel.createParam(controller)
-                    )
-                })
-            val source = vm.source
-            val scope = rememberCoroutineScope()
-            val headers = remember {
-                mutableStateOf<Headers?>(null)
-            }
-            if (source != null) {
-                ExploreScreen(
-                    modifier = Modifier.padding(paddingValues = controller.scaffoldPadding),
-                    vm = vm,
-                    onFilterClick = {
-                        vm.toggleFilterMode()
-                    },
-                    source = source,
-                    getBooks = { query, listing, filters ->
-                        vm.searchQuery = query
-                        vm.stateListing = listing
-                        vm.stateFilters = filters
-                        vm.loadItems()
-                    },
-                    loadItems = { reset ->
-                        vm.loadItems(reset)
-                    },
-                    onBook = { book ->
-                        scope.launch {
-                            vm.insertUseCases.insertBook(book).let { bookId->
-                                controller.navController.navigate(
-                                    route = BookDetailScreenSpec.buildRoute(
-                                        bookId = bookId
-                                    )
+        val vm: ExploreViewModel =
+            getViewModel(owner = controller.navBackStackEntry, parameters = {
+                org.koin.core.parameter.parametersOf(
+                    ExploreViewModel.createParam(controller)
+                )
+            })
+        val source = vm.source
+        val scope = rememberCoroutineScope()
+        val headers = remember {
+            mutableStateOf<Headers?>(null)
+        }
+        if (source != null) {
+            ExploreScreen(
+                modifier = Modifier.padding(top = controller.scaffoldPadding.calculateTopPadding()),
+                vm = vm,
+                onFilterClick = {
+                    vm.toggleFilterMode()
+                },
+                source = source,
+                getBooks = { query, listing, filters ->
+                    vm.searchQuery = query
+                    vm.stateListing = listing
+                    vm.stateFilters = filters
+                    vm.loadItems()
+                },
+                loadItems = { reset ->
+                    vm.loadItems(reset)
+                },
+                onBook = { book ->
+                    Log.error { book.toString() }
+                    vm.viewModelScope.launch {
+                        val newBook = vm.booksState.books.getOrNull(book.column.toInt())
+                        vm.booksState.book = null
+                        val bookId = vm.insertUseCases.insertBook(newBook)
+                        Log.error { bookId.toString()}
+                        if (bookId != 0L) {
+                            vm.booksState.replaceBook(newBook?.copy(id = bookId))
+                            controller.navController.navigate(
+                                route = BookDetailScreenSpec.buildRoute(
+                                    bookId = bookId
                                 )
-                            }
-
-                        }
-
-                    },
-                    onAppbarWebView = {
-                        controller.navController.navigate(
-                            WebViewScreenSpec.buildRoute(
-                                url = it,
-                                sourceId = source.id,
-                                enableBookFetch = true,
-                                enableChaptersFetch = true
                             )
+                        }
+
+                    }
+
+                },
+                onAppbarWebView = {
+                    controller.navController.navigate(
+                        WebViewScreenSpec.buildRoute(
+                            url = it,
+                            sourceId = source.id,
+                            enableBookFetch = true,
+                            enableChaptersFetch = true
                         )
-                    },
-                    onPopBackStack = {
-                        controller.navController.popBackStack()
-                    },
-                    snackBarHostState = controller.snackBarHostState,
-                    modalState = controller.sheetState,
-                    scaffoldPadding = controller.scaffoldPadding,
-                    headers = {
-                        if (headers.value == null) {
-                            headers.value =
-                                (source as? HttpSource)?.getCoverRequest(it)?.second?.build()
-                                    ?.convertToOkHttpRequest()?.headers
-                            headers.value
-                        } else headers.value
-                    },
-                    onLongClick = {
-                        scope.launchIO {
-                            vm.addToFavorite(it.toBookItem())
+                    )
+                },
+                onPopBackStack = {
+                    controller.navController.popBackStack()
+                },
+                snackBarHostState = controller.snackBarHostState,
+                modalState = controller.sheetState,
+                scaffoldPadding = controller.scaffoldPadding,
+                headers = {
+                    if (headers.value == null) {
+                        headers.value =
+                            (source as? HttpSource)?.getCoverRequest(it)?.second?.build()
+                                ?.convertToOkHttpRequest()?.headers
+                        headers.value
+                    } else headers.value
+                },
+                onLongClick = {
+                    vm.viewModelScope.launchIO {
+                        vm.addToFavorite(it.toBookItem()) { book ->
+                            vm.booksState.replaceBook(book)
                         }
                     }
-                )
-            } else {
-                EmptyScreenComposable(
-                    R.string.source_not_available,
-                    onPopBackStack = {
-                        controller.navController.popBackStack()
-                    }
-                )
-            }
+                }
+            )
+        } else {
+            EmptyScreenComposable(
+                R.string.source_not_available,
+                onPopBackStack = {
+                    controller.navController.popBackStack()
+                }
+            )
+        }
     }
 
     @OptIn(ExperimentalComposeUiApi::class)

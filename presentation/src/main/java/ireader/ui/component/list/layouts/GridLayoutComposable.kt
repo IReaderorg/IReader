@@ -2,7 +2,9 @@ package ireader.ui.component.list.layouts
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -96,6 +98,7 @@ fun GridLayoutComposable(
 
         )
         if (isLoading && scrollState.isScrolledToTheEnd()) {
+            Spacer(modifier = Modifier.height(45.dp))
             CircularProgressIndicator(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)

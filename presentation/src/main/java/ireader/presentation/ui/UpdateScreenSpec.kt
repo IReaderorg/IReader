@@ -61,6 +61,7 @@ object UpdateScreenSpec : BottomNavScreenSpec {
             onClickDelete = {
                 vm.viewModelIOCoroutine {
                     vm.updateUseCases.deleteAllUpdates()
+                    vm.updates = emptyMap()
                 }
             },
             scrollBehavior = controller.scrollBehavior,

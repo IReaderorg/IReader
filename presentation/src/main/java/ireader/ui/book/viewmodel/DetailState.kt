@@ -16,7 +16,7 @@ import org.koin.core.annotation.Factory
 open class DetailStateImpl : DetailState {
     override var catalogSource by mutableStateOf<CatalogLocal?>(null)
     override val source by derivedStateOf { catalogSource?.source }
-    override var book by mutableStateOf<Book?>(null)
+
     override var chapterMode by mutableStateOf<Boolean>(true)
     override var inLibraryLoading by mutableStateOf<Boolean>(false)
     override var detailIsLoading by mutableStateOf<Boolean>(false)
@@ -32,7 +32,6 @@ interface DetailState {
     var chapterMode: Boolean
     var catalogSource: CatalogLocal?
     val source: Source?
-    var book: Book?
     var inLibraryLoading: Boolean
     var detailIsLoading: Boolean
     var expandedSummary: Boolean

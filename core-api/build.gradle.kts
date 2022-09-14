@@ -74,16 +74,16 @@ afterEvaluate {
     }
 }
 val packageVersion = "1.2.1"
-//val dokkaHtml by tasks.getting(org.jetbrains.dokka.gradle.DokkaTask::class)
-//
-//val javadocJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
-//    dependsOn(dokkaHtml)
-//    archiveClassifier.set("javadoc")
-//    from(dokkaHtml.outputDirectory)
-//}
+val dokkaHtml by tasks.getting(org.jetbrains.dokka.gradle.DokkaTask::class)
+
+val javadocJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
+    dependsOn(dokkaHtml)
+    archiveClassifier.set("javadoc")
+    from(dokkaHtml.outputDirectory)
+}
 publishing {
     publications.withType(MavenPublication::class) {
-//        artifact(javadocJar)
+        artifact(javadocJar)
         groupId = "io.github.kazemcodes"
         artifactId = "core-api"
         version = packageVersion

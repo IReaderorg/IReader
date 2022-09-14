@@ -33,7 +33,7 @@ class BookRepositoryImpl(
     }
 
     override suspend fun find(key: String, sourceId: Long): Book? {
-       return handler.awaitOneOrNull {
+        return handler.awaitOneOrNull {
             bookQueries.getBookByKey(key, sourceId, booksMapper)
         }
     }
@@ -113,11 +113,13 @@ class BookRepositoryImpl(
                     coverLastModified = 0,
                     thumbnailUrl = book.cover,
                     viewer = book.viewer,
-                    mangaId = book.id,
+                    id = book.id,
                     initialized = book.initialized.toLong(),
                     favorite = book.favorite.toLong(),
                     genre = book.genres.let(bookGenresConverter::encode),
-                )
+
+
+                    )
             }
 
         }
@@ -146,7 +148,7 @@ class BookRepositoryImpl(
                     coverLastModified = 0,
                     thumbnailUrl = book.cover,
                     viewer = book.viewer,
-                    mangaId = book.id,
+                    id = book.id,
                     initialized = book.initialized.toLong(),
                     favorite = book.favorite.toLong(),
                     genre = book.genres.let(bookGenresConverter::encode)
@@ -156,10 +158,10 @@ class BookRepositoryImpl(
         }
     }
 
-    override suspend fun upsert(book: Book): Long {
-        return handler.awaitOne  {
+    suspend fun insert(book: Book): Long? {
+        return handler.awaitOneOrNull {
             bookQueries.upsert(
-                id= book.id.toDB(),
+                id = book.id.toDB(),
                 source = book.sourceId,
                 dateAdded = book.dateAdded,
                 lastUpdate = book.lastUpdate,
@@ -177,10 +179,42 @@ class BookRepositoryImpl(
                 nextUpdate = 0,
                 thumbnailUrl = book.cover,
                 viewerFlags = book.viewer,
-                viewer = book.viewer
             )
             bookQueries.selectLastInsertedRowId()
+        } ?: -1
+    }
+
+
+    override suspend fun upsert(book: Book): Long {
+        return if (book.id == 0L) {
+            insert(book) ?: -1
+        } else {
+            updateBook(book)
+            book.id
         }
+        return handler.awaitOneOrNull {
+            bookQueries.upsert(
+                id = book.id.toDB(),
+                source = book.sourceId,
+                dateAdded = book.dateAdded,
+                lastUpdate = book.lastUpdate,
+                favorite = book.favorite,
+                title = book.title,
+                status = book.status,
+                genre = book.genres,
+                description = book.description,
+                author = book.author,
+                initialized = book.initialized,
+                url = book.key,
+                artist = book.author,
+                chapterFlags = book.flags,
+                coverLastModified = 0,
+                nextUpdate = 0,
+                thumbnailUrl = book.cover,
+                viewerFlags = book.viewer,
+            )
+            bookQueries.selectLastInsertedRowId()
+        } ?: -1
 
 
     }
@@ -189,7 +223,7 @@ class BookRepositoryImpl(
         return handler.awaitList {
             dbOperation(book) { book ->
                 bookQueries.upsert(
-                    id= book.id.toDB(),
+                    id = book.id.toDB(),
                     source = book.sourceId,
                     dateAdded = book.dateAdded,
                     lastUpdate = book.lastUpdate,
@@ -207,7 +241,6 @@ class BookRepositoryImpl(
                     nextUpdate = 0,
                     thumbnailUrl = book.cover,
                     viewerFlags = book.viewer,
-                    viewer = book.viewer
                 )
             }
             bookQueries.selectLastInsertedRowId()
@@ -225,11 +258,12 @@ class BookRepositoryImpl(
             catalogQueries.findFavourites()
         }
     }
+
     private suspend fun insertBooksOperation(value: List<Book>) {
         handler.await {
             value.forEach { book ->
                 bookQueries.upsert(
-                    id= book.id.toDB(),
+                    id = book.id.toDB(),
                     source = book.sourceId,
                     dateAdded = book.dateAdded,
                     lastUpdate = book.lastUpdate,
@@ -247,17 +281,17 @@ class BookRepositoryImpl(
                     genre = book.genres,
                     nextUpdate = null,
                     artist = null,
-                    viewer = book.viewer
                 )
             }
 
         }
     }
+
     suspend fun insertBookOperation(vararg value: Book) {
-        handler.await {
+        handler.await(true) {
             value.forEach { book ->
                 bookQueries.upsert(
-                    id= book.id.toDB(),
+                    id = book.id.toDB(),
                     source = book.sourceId,
                     dateAdded = book.dateAdded,
                     lastUpdate = book.lastUpdate,
@@ -275,14 +309,14 @@ class BookRepositoryImpl(
                     genre = book.genres,
                     nextUpdate = null,
                     artist = null,
-                    viewer = book.viewer
                 )
             }
 
         }
     }
+
     suspend fun updateBooksOperation(vararg value: Book) {
-        handler.await {
+        handler.await(true) {
             value.forEach { book ->
                 bookQueries.update(
                     source = book.sourceId,
@@ -297,7 +331,7 @@ class BookRepositoryImpl(
                     coverLastModified = 0,
                     thumbnailUrl = book.cover,
                     viewer = book.viewer,
-                    mangaId = book.id,
+                    id = book.id,
                     initialized = book.initialized.toLong(),
                     favorite = book.favorite.toLong(),
                     genre = book.genres.let(bookGenresConverter::encode)
@@ -306,7 +340,8 @@ class BookRepositoryImpl(
 
         }
     }
-    suspend fun updateBooksOperation( value: List<Book>) {
+
+    suspend fun updateBooksOperation(value: List<Book>) {
         handler.await {
             value.forEach { book ->
                 bookQueries.update(
@@ -322,7 +357,7 @@ class BookRepositoryImpl(
                     coverLastModified = 0,
                     thumbnailUrl = book.cover,
                     viewer = book.viewer,
-                    mangaId = book.id,
+                    id = book.id,
                     initialized = book.initialized.toLong(),
                     favorite = book.favorite.toLong(),
                     genre = book.genres.let(bookGenresConverter::encode)

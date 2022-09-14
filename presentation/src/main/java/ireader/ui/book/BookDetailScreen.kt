@@ -138,7 +138,7 @@ fun BookDetailScreen(
                                 .verticalScroll(dialogScrollState)
                         ) {
                             Box(modifier = Modifier.fillMaxSize()) {
-                                Text(text = vm.book.toString())
+                                Text(text = vm.booksState.book.toString())
                             }
                         }
                     })

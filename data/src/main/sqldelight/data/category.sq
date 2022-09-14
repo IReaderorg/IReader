@@ -44,7 +44,7 @@ SELECT *, (
   WHERE book.favorite = 1 AND NOT EXISTS (
     SELECT bookcategories.book_id
     FROM bookcategories
-    WHERE book._id = bookcategories.book_id
+    WHERE book._id = bookcategories.book_id AND book.favorite = 1
   )
 ) AS mangaCount
 FROM categories

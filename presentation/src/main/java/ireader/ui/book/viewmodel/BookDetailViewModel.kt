@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import ireader.common.extensions.async.withIOContext
+import ireader.common.extensions.currentTimeToLong
 import ireader.common.extensions.withUIContext
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.CatalogLocal
@@ -35,7 +36,10 @@ import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.services.ServiceUseCases
 import ireader.presentation.R
 import ireader.ui.component.Controller
+import ireader.ui.home.explore.viewmodel.BooksState
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.datetime.Clock
 import java.util.Calendar
 import org.koin.android.annotation.KoinViewModel
 
@@ -57,11 +61,12 @@ class BookDetailViewModel(
     val readerPreferences: ReaderPreferences,
     val insertUseCases: LocalInsertUseCases,
     private val param: Param,
+    val booksState: BooksState
 ) : BaseViewModel(), DetailState by state, ChapterState by chapterState {
-    data class Param(val bookId:Long?)
+    data class Param(val bookId: Long?)
 
-    companion object  {
-        fun createParam(controller: Controller) : Param {
+    companion object {
+        fun createParam(controller: Controller): Param {
             return Param(controller.navBackStackEntry.arguments?.getLong("bookId"))
         }
     }
@@ -74,6 +79,7 @@ class BookDetailViewModel(
     var layout by readerPreferences.showChapterNumberPreferences().asState()
 
     init {
+
         val bookId = param.bookId
         val sourceId = runBlocking {
             bookId?.let { getBookUseCases.findBookById(it)?.sourceId }
@@ -89,9 +95,13 @@ class BookDetailViewModel(
             }
             toggleBookLoading(true)
             chapterIsLoading = true
-            subscribeBook(bookId = bookId)
-            subscribeChapters(bookId = bookId)
-            getLastReadChapter(bookId)
+            viewModelScope.launch {
+                subscribeBook(bookId = bookId)
+                subscribeChapters(bookId = bookId)
+                getLastReadChapter(bookId)
+                initBook(bookId)
+            }
+
         } else {
             viewModelScope.launch {
                 showSnackBar(UiText.StringResource(R.string.something_is_wrong_with_this_book))
@@ -99,25 +109,40 @@ class BookDetailViewModel(
         }
     }
 
-    private fun subscribeBook(bookId: Long) {
-        getBookUseCases.subscribeBookById(bookId)
-            .onEach { snapshot ->
-                state.book = snapshot
-                toggleBookLoading(false)
-                if (!initBooks) {
-                    initBooks = true
-                    if (snapshot != null && snapshot.lastUpdate < 1L && source != null) {
-                        getRemoteBookDetail(snapshot, catalogSource)
-                        getRemoteChapterDetail(snapshot, catalogSource)
-                    } else {
-                        toggleBookLoading(false)
-                        chapterIsLoading = false
-                    }
-                }
-            }.launchIn(scope)
+
+
+
+    private suspend fun initBook(bookId: Long) {
+        var book = getBookUseCases.findBookById(bookId)
+
+        if (book != null && book.lastUpdate < 1L && source != null) {
+            book = book?.copy(
+                id = bookId,
+                initialized = true,
+                lastUpdate = Clock.System.now().toEpochMilliseconds(),
+
+            )
+            booksState.replaceBook(book)
+            localInsertUseCases.updateBook.update(
+                book
+            )
+            getRemoteBookDetail(book, catalogSource)
+            getRemoteChapterDetail(book, catalogSource)
+        } else {
+            toggleBookLoading(false)
+            chapterIsLoading = false
+        }
+
     }
 
-    private fun subscribeChapters(bookId: Long) {
+
+    private  fun subscribeBook(bookId: Long) {
+        getBookUseCases.subscribeBookById(bookId).onEach { snapshot ->
+            booksState.replaceBook(snapshot)
+        }.launchIn(viewModelScope)
+    }
+
+    private  fun subscribeChapters(bookId: Long) {
         getChapterUseCase.subscribeChaptersByBookId(bookId).onEach { snapshot ->
             chapters = snapshot
         }.launchIn(viewModelScope)
@@ -144,6 +169,7 @@ class BookDetailViewModel(
             )
         onStart(intent)
     }
+
     @Composable
     fun getChapters(bookId: Long?): State<List<Chapter>> {
         if (bookId == null) return remember {
@@ -203,14 +229,13 @@ class BookDetailViewModel(
     }
 
     fun getLastReadChapter(bookId: Long) {
-        viewModelScope.launch {
-            historyUseCase.subscribeHistoryByBookId(bookId).onEach {
-                lastRead = it?.chapterId
-            }.launchIn(viewModelScope)
-        }
+        historyUseCase.subscribeHistoryByBookId(bookId).onEach {
+            lastRead = it?.chapterId
+        }.launchIn(viewModelScope)
     }
 
-    suspend fun getRemoteBookDetail(book: Book, source: CatalogLocal?) {
+    suspend fun getRemoteBookDetail(book: Book?, source: CatalogLocal?) {
+        if (book == null) return
         toggleBookLoading(true)
         getBookDetailJob?.cancel()
         getBookDetailJob = viewModelScope.launch {
@@ -235,6 +260,7 @@ class BookDetailViewModel(
             )
         }
     }
+
     fun getLastChapterIndex(): Int {
         return when (val index = chapters.reversed().indexOfFirst { it.id == lastRead }) {
             -1 -> {
@@ -266,6 +292,15 @@ class BookDetailViewModel(
                     }
                 },
                 onSuccess = { result ->
+                    Log.error {
+                        "NEW" + result.toString()
+                    }
+                    Log.error {
+                        "BOOK" + book.toString()
+                    }
+                    Log.error {
+                        "OLD " + chapterState.chapters.toString()
+                    }
                     localInsertUseCases.insertChapters(result)
                     withUIContext {
                         chapterIsLoading = false
@@ -306,7 +341,7 @@ class BookDetailViewModel(
     }
 
     fun downloadChapters() {
-        book?.let { book ->
+        booksState.book?.let { book ->
             serviceUseCases.startDownloadServicesUseCase(chapterIds = this.selection.toLongArray())
         }
     }
@@ -314,6 +349,7 @@ class BookDetailViewModel(
     fun startDownloadService(book: Book) {
         serviceUseCases.startDownloadServicesUseCase(bookIds = longArrayOf(book.id))
     }
+
     fun toggleFilter(type: ChaptersFilters.Type) {
         val newFilters = filters.value
             .map { filterState ->
@@ -336,6 +372,7 @@ class BookDetailViewModel(
     private fun toggleBookLoading(isLoading: Boolean) {
         this.detailIsLoading = isLoading
     }
+
     fun toggleSort(type: ChapterSort.Type) {
         val currentSort = sorting
         sorting.value = if (type == currentSort.value.type) {

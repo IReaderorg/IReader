@@ -67,11 +67,11 @@ class GlobalSearchViewModel (
 
     fun insertSearchItem(searchItem: SearchItem) {
         val item = searchItems.find { it.source.id == searchItem.source.id }
-        if (item != null) {
+        searchItems = if (item != null) {
             val index = searchItems.indexOf(item)
-            searchItems = searchItems.replace(index, searchItem)
+            searchItems.replace(index, searchItem)
         } else {
-            searchItems = searchItems + searchItem
+            searchItems + searchItem
         }
     }
 }

@@ -18,6 +18,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -46,9 +48,21 @@ fun GlobalSearchScreen(
 
 ) {
 
-    val uiSearch = vm.searchItems.filter { it.items.isNotEmpty() }
-    val emptySearches = vm.searchItems.filter { it.items.isEmpty() }
-    val allSearch = uiSearch + emptySearches
+    val uiSearch = remember {
+        derivedStateOf {
+            vm.searchItems.filter { it.items.isNotEmpty() }
+        }
+    }
+    val emptySearches = remember {
+        derivedStateOf {
+            vm.searchItems.filter { it.items.isEmpty() }
+        }
+    }
+    val allSearch = remember {
+        derivedStateOf {
+            uiSearch.value + emptySearches.value
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -60,20 +74,14 @@ fun GlobalSearchScreen(
             )
         }
     ) { padding ->
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(padding)
-//                .verticalScroll(rememberScrollState()),
-//        ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            items(count = allSearch.size) { index ->
+            items(count = allSearch.value.size) { index ->
                 GlobalSearchBookInfo(
-                    allSearch[index],
+                    allSearch.value[index],
                     onBook = onBook,
                     goToExplore = { onGoToExplore(index) }
                 )

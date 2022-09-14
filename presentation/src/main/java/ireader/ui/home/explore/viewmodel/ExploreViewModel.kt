@@ -4,8 +4,10 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import ireader.common.extensions.DefaultPaginator
+import ireader.common.extensions.replaceFirst
 import ireader.common.resources.SourceNotFoundException
 import ireader.common.models.DisplayMode
+import ireader.common.models.entities.Book
 import ireader.common.models.entities.BookItem
 import ireader.common.models.entities.toBook
 import ireader.common.resources.UiText
@@ -29,9 +31,9 @@ class ExploreViewModel(
     private val remoteUseCases: RemoteUseCases,
     private val catalogStore: GetLocalCatalogs,
     private val browseScreenPrefUseCase: BrowseScreenPrefUseCase,
-    private val getBookUseCases: LocalGetBookUseCases,
     val insertUseCases: LocalInsertUseCases,
     private val param: Param,
+    val booksState: BooksState
 ) : BaseViewModel(), ExploreState by state {
     data class Param(val sourceId: Long?, val query: String?)
     companion object {
@@ -44,7 +46,7 @@ class ExploreViewModel(
     }
 
     init {
-
+        booksState.empty()
         val sourceId = param.sourceId
         val query = param.query
         val catalog =
@@ -82,7 +84,7 @@ class ExploreViewModel(
         getBooksJob?.cancel()
         if (reset) {
             page = 1
-            stateItems = emptyList()
+            booksState.books = emptyList()
         }
         getBooksJob = viewModelScope.launch {
             kotlin.runCatching {
@@ -128,7 +130,7 @@ class ExploreViewModel(
                     },
                     onError = { e ->
                         endReached = true
-                        stateItems = emptyList()
+                        booksState.books = emptyList()
                         e?.let {
                             error = exceptionHandler(it)
                         }
@@ -139,11 +141,10 @@ class ExploreViewModel(
                                 sourceId = source?.id ?: -1,
                             )
                         }
-                        stateItems = stateItems + books
+                        booksState.books = booksState.books + books
 
                         page = newKey
                         endReached = !items.hasNextPage
-                        Log.debug { "Request was finished $stateItems" }
                     },
                 ).loadNextItems()
             }
@@ -152,9 +153,13 @@ class ExploreViewModel(
 
     private var getBooksJob: Job? = null
 
-    suspend fun addToFavorite(bookItem: BookItem) {
-        insertUseCases.insertBook(bookItem.toBook().copy(favorite = !bookItem.favorite))
+    suspend fun addToFavorite(bookItem: BookItem, onFavorite: (Book) -> Unit) {
+        val favorite = !bookItem.favorite
+        val book = bookItem.toBook().copy(favorite = favorite)
+        val bookId = insertUseCases.insertBook(book)
+        onFavorite(book.copy(id = bookId))
     }
+
 
     fun toggleSearchMode(inSearchMode: Boolean) {
         state.isSearchModeEnable = inSearchMode

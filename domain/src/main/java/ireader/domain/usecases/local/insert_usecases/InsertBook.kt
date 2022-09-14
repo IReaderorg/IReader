@@ -7,9 +7,10 @@ import org.koin.core.annotation.Factory
 
 @Factory
 class InsertBook(private val bookRepository: BookRepository) {
-    suspend operator fun invoke(book: Book): Long {
+    suspend operator fun invoke(book: Book?): Long {
+        if (book == null) return -1
         return ireader.common.extensions.withIOContext {
-            return@withIOContext bookRepository.upsert(book)
+            return@withIOContext bookRepository.upsert(book) ?: -1
         }
     }
 }
@@ -20,7 +21,8 @@ class UpdateBook(private val bookRepository: BookRepository) {
             return@withIOContext bookRepository.updateBook(book, favorite = favorite)
         }
     }
-    suspend fun update(book: Book) {
+    suspend fun update(book: Book?) {
+        if (book == null) return
         return ireader.common.extensions.withIOContext {
             return@withIOContext bookRepository.updateBook(book)
         }

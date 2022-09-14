@@ -69,7 +69,7 @@ fun ExploreScreen(
     onFilterClick: () -> Unit,
     getBooks: (query: String?, listing: Listing?, filters: List<Filter<*>>) -> Unit,
     loadItems: (Boolean) -> Unit,
-    onBook: (Book) -> Unit,
+    onBook: (BookItem) -> Unit,
     onAppbarWebView: (url: String) -> Unit,
     onPopBackStack: () -> Unit,
     snackBarHostState: SnackbarHostState,
@@ -176,14 +176,16 @@ fun ExploreScreen(
                 }
                 else -> {
                     LayoutComposable(
-                        books = vm.stateItems.mapIndexed { index, book ->  book.toBookItem().copy(column= index.toLong())},
+                        books = vm.booksState.books
+                            .mapIndexed { index, book ->  book.toBookItem()
+                                .copy(column= index.toLong())},
                         layout = vm.layout,
                         scrollState = scrollState,
                         source = source,
                         isLocal = false,
                         gridState = gridState,
                         onClick = { book ->
-                            onBook(book.toBook())
+                            onBook(book)
                         },
                         isLoading = vm.isLoading,
                         showInLibraryBadge = true,

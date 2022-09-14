@@ -4,6 +4,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import ireader.common.extensions.replaceFirst
 import ireader.common.models.DisplayMode
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.BookItem
@@ -12,6 +13,7 @@ import ireader.common.resources.UiText
 import ireader.core.api.source.model.Filter
 import ireader.core.api.source.model.Listing
 import org.koin.core.annotation.Factory
+import org.koin.core.annotation.Single
 
 interface ExploreState {
     var isLoading: Boolean
@@ -28,7 +30,7 @@ interface ExploreState {
     var modifiedFilter: List<Filter<*>>
 
     var page: Int
-    var stateItems: List<Book>
+    //var stateItems: List<Book>
     var endReached: Boolean
 
     var stateFilters: List<Filter<*>>?
@@ -50,8 +52,31 @@ open class ExploreStateImpl: ExploreState {
     override var topMenuEnable: Boolean by mutableStateOf<Boolean>(false)
     override var modifiedFilter by mutableStateOf(emptyList<Filter<*>>())
     override var page by mutableStateOf<Int>(1)
-    override var stateItems by mutableStateOf<List<Book>>(emptyList())
+  //  override var stateItems by mutableStateOf<List<Book>>(emptyList())
     override var endReached by mutableStateOf(false)
     override var stateFilters by mutableStateOf<List<Filter<*>>?>(null)
     override var stateListing by mutableStateOf<Listing?>(null)
+}
+
+@Single
+class BooksState {
+    var books : List<Book> by mutableStateOf(emptyList())
+    var book : Book? by mutableStateOf(null)
+
+    fun replaceBook(book: Book?) {
+        if (book != null) {
+            books =  books.replaceFirst({
+                it.key == book.key
+            }, book)
+            if ((this@BooksState.book == null) || (this@BooksState.book?.id == book.id)) {
+                this@BooksState.book = book
+            }
+        }
+
+    }
+
+    fun empty() {
+        books = emptyList()
+        book = null
+    }
 }

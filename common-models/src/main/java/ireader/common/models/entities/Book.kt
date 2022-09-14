@@ -239,6 +239,7 @@ fun Book.toBookItem() : BookItem {
         sourceId = this.sourceId,
         customCover = this.customCover,
         cover = this.cover,
+
     )
 }
 
