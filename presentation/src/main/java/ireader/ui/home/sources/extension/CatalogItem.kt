@@ -1,5 +1,6 @@
 package ireader.ui.home.sources.extension
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -145,11 +146,19 @@ private fun CatalogPic(catalog: Catalog, modifier: Modifier = Modifier) {
             LetterIcon(catalog.name, modifier)
         }
         is CatalogInstalled -> {
-            AsyncImage(
-                model = catalog,
-                contentDescription = null,
-                modifier = modifier
-            )
+            if (catalog.iconUrl.isNotBlank()) {
+                AsyncImage(
+                    model = catalog.iconUrl,
+                    contentDescription = null,
+                    modifier = modifier
+                )
+            } else {
+                AsyncImage(
+                    model = catalog,
+                    contentDescription = null,
+                    modifier = modifier
+                )
+            }
         }
         is CatalogRemote -> {
             AsyncImage(

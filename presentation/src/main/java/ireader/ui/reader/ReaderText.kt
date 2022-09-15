@@ -331,7 +331,6 @@ private fun ContinuesReaderPage(
                 ?.let { chapter ->
                     if (chapter.id != lastChapterId?.id) {
                         lastChapterId = chapter
-                        Log.error { "UPDATE" }
                     }
                 }
         }

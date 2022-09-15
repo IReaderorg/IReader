@@ -16,11 +16,13 @@ import ireader.core.api.http.HttpClients
 import ireader.core.api.log.Log
 import ireader.core.api.prefs.AndroidPreferenceStore
 import ireader.core.api.prefs.PrefixedPreferenceStore
+import ireader.core.api.source.LocalSource
 import ireader.core.api.source.Source
 import ireader.core.api.source.TestSource
 import ireader.domain.catalogs.service.CatalogLoader
 import ireader.data.R
 import java.io.File
+import kotlin.random.Random
 
 /**
  * Class that handles the loading of the catalogs installed in the system and the app.
@@ -131,7 +133,8 @@ class AndroidCatalogLoader(
             versionName = data.versionName,
             versionCode = data.versionCode,
             nsfw = data.nsfw,
-            installDir = file.parentFile!!
+            installDir = file.parentFile!!,
+            iconUrl = data.icon
         )
     }
 
@@ -146,6 +149,7 @@ class AndroidCatalogLoader(
         pkgInfo: PackageInfo,
     ): ireader.common.models.entities.CatalogInstalled.SystemWide? {
         val data = validateMetadata(pkgName, pkgInfo) ?: return null
+
         val loader = PathClassLoader(pkgInfo.applicationInfo.sourceDir, null, context.classLoader)
         val source = loadSource(pkgName, loader, data)
 
@@ -156,7 +160,8 @@ class AndroidCatalogLoader(
             pkgName = pkgName,
             versionName = data.versionName,
             versionCode = data.versionCode,
-            nsfw = data.nsfw
+            nsfw = data.nsfw,
+            iconUrl = data.icon
         )
     }
 
@@ -206,6 +211,7 @@ class AndroidCatalogLoader(
         }
 
         val description = metadata.getString(METADATA_DESCRIPTION).orEmpty()
+        val icon = metadata.getString(METADATA_ICON).orEmpty()
 
         val classToLoad = if (sourceClassName.startsWith(".")) {
             pkgInfo.packageName + sourceClassName
@@ -218,7 +224,7 @@ class AndroidCatalogLoader(
         val preferenceSource = PrefixedPreferenceStore(catalogPreferences, pkgName)
         val dependencies = ireader.core.api.source.Dependencies(httpClients, preferenceSource)
 
-        return ValidatedData(versionCode, versionName, description, nsfw, classToLoad, dependencies)
+        return ValidatedData(versionCode, versionName, description,icon, nsfw, classToLoad, dependencies)
     }
 
     private fun loadSource(pkgName: String, loader: ClassLoader, data: ValidatedData): Source? {
@@ -238,6 +244,7 @@ class AndroidCatalogLoader(
         val versionCode: Int,
         val versionName: String,
         val description: String,
+        val icon: String,
         val nsfw: Boolean,
         val classToLoad: String,
         val dependencies: ireader.core.api.source.Dependencies,
@@ -248,6 +255,7 @@ class AndroidCatalogLoader(
         const val METADATA_SOURCE_CLASS = "source.class"
         const val METADATA_DESCRIPTION = "source.description"
         const val METADATA_NSFW = "source.nsfw"
+        const val METADATA_ICON = "source.icon"
         const val LIB_VERSION_MIN = 1
         const val LIB_VERSION_MAX = 1
 

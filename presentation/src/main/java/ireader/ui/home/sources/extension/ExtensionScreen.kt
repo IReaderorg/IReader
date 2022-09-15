@@ -125,7 +125,7 @@ private fun ExtensionContent(
     onClickUninstall: (Catalog) -> Unit,
     onCancelInstaller: ((Catalog) -> Unit)? = null,
 
-) {
+    ) {
     val pagerState = rememberPagerState()
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect {
@@ -172,16 +172,16 @@ private fun ExtensionPager(
                 UserSourcesScreen(
                     onClickCatalog = onClickCatalog,
                     onClickTogglePinned = onClickTogglePinned,
-                    state = vm,
+                    vm = vm,
                 )
             }
             1 -> {
                 RemoteSourcesScreen(
-                    state = vm,
+                    vm = vm,
                     onRefreshCatalogs = onRefreshCatalogs,
                     onClickInstall = onClickInstall,
                     onClickUninstall = onClickUninstall,
-                    onCancelInstaller = onCancelInstaller
+                    onCancelInstaller = onCancelInstaller,
                 )
             }
         }
@@ -195,7 +195,7 @@ private fun ExtensionTabs(
     pagerState: PagerState,
     pages: List<String>,
 
-) {
+    ) {
     val scope = rememberCoroutineScope()
     TabRow(
         selectedTabIndex = pagerState.currentPage,

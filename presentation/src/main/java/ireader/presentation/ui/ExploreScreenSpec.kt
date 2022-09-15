@@ -98,12 +98,12 @@ object ExploreScreenSpec : ScreenSpec {
                     vm.loadItems(reset)
                 },
                 onBook = { book ->
-                    Log.error { book.toString() }
+
                     vm.viewModelScope.launch {
                         val newBook = vm.booksState.books.getOrNull(book.column.toInt())
                         vm.booksState.book = null
                         val bookId = vm.insertUseCases.insertBook(newBook)
-                        Log.error { bookId.toString()}
+
                         if (bookId != 0L) {
                             vm.booksState.replaceBook(newBook?.copy(id = bookId))
                             controller.navController.navigate(

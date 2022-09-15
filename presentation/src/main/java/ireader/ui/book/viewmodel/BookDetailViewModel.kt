@@ -292,15 +292,6 @@ class BookDetailViewModel(
                     }
                 },
                 onSuccess = { result ->
-                    Log.error {
-                        "NEW" + result.toString()
-                    }
-                    Log.error {
-                        "BOOK" + book.toString()
-                    }
-                    Log.error {
-                        "OLD " + chapterState.chapters.toString()
-                    }
                     localInsertUseCases.insertChapters(result)
                     withUIContext {
                         chapterIsLoading = false

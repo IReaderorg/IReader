@@ -3,3 +3,10 @@ _id INTEGER NOT NULL PRIMARY KEY,
 key TEXT NOT NULL,
 last_update INTEGER NOT NULL
 );
+
+insert:
+INSERT INTO remoterepository(key,last_update) VALUES (:key, :lastUpdate);
+
+
+findAll:
+SELECT * FROM remoterepository;

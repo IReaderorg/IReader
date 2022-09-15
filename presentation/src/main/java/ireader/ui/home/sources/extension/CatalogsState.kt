@@ -15,6 +15,7 @@ import ireader.ui.home.sources.extension.composables.SourceUiModel
 import org.koin.core.annotation.Single
 
 interface CatalogsState {
+    val allCatalogs: List<CatalogLocal>
     val pinnedCatalogs: List<CatalogLocal>
     val unpinnedCatalogs: List<CatalogLocal>
 
@@ -24,7 +25,6 @@ interface CatalogsState {
     val installSteps: Map<String, InstallStep>
     val isRefreshing: Boolean
     //  val userSources: List<SourceUiModel>
-    val remoteSources: List<SourceUiModel>
     var searchQuery: String?
     var currentPagerPage: Int
 }
@@ -38,78 +38,12 @@ class CatalogsStateImpl : CatalogsState {
 
     override var currentPagerPage by mutableStateOf(0)
 
+    override var allCatalogs by mutableStateOf(emptyList<CatalogLocal>())
     override var pinnedCatalogs by mutableStateOf(emptyList<CatalogLocal>())
     override var unpinnedCatalogs by mutableStateOf(emptyList<CatalogLocal>())
 
     override var remoteCatalogs by mutableStateOf(emptyList<CatalogRemote>())
     override var languageChoices by mutableStateOf(emptyList<LanguageChoice>())
-//    override val userSources: List<SourceUiModel> by derivedStateOf {
-//        val list = mutableListOf<SourceUiModel>()
-//        if (lastReadCatalog != null) {
-//
-//           (pinnedCatalogs + unpinnedCatalogs).firstOrNull {
-//                it.sourceId == lastReadCatalog
-//            }?.let { c ->
-//                list.addAll(
-//                    listOf<SourceUiModel>(
-//                        SourceUiModel.Header(LAST_USED_KEY),
-//                        SourceUiModel.Item(c,SourceState.LastUsed)
-//
-//                    )
-//                )
-//            }
-//
-//        }
-//
-//        if (pinnedCatalogs.isNotEmpty()) {
-//            list.addAll(
-//                listOf<SourceUiModel>(
-//                    SourceUiModel.Header(PINNED_KEY),
-//                    *pinnedCatalogs.map { source ->
-//                        SourceUiModel.Item(source,SourceState.Pinned)
-//                    }.toTypedArray()
-//                )
-//            )
-//        }
-//        if (unpinnedCatalogs.isNotEmpty()) {
-//            list.addAll(unpinnedCatalogs.groupBy {
-//                it.source?.lang ?: "others"
-//            }.flatMap {
-//                listOf<SourceUiModel>(
-//                    SourceUiModel.Header(it.key),
-//                    *it.value.map { source ->
-//                        SourceUiModel.Item(source,SourceState.UnPinned)
-//                    }.toTypedArray()
-//                )
-//            })
-//        }
-//        list
-//    }
-    override val remoteSources: List<SourceUiModel> by derivedStateOf {
-        val allCatalogs = pinnedCatalogs + unpinnedCatalogs
-        val list = mutableListOf<SourceUiModel>()
-        if (allCatalogs.isNotEmpty()) {
-            list.addAll(
-                listOf<SourceUiModel>(
-                    SourceUiModel.Header(INSTALLED_KEY),
-                    *allCatalogs.map { source ->
-                        SourceUiModel.Item(source, SourceState.Installed)
-                    }.toTypedArray()
-                )
-            )
-        }
-        if (remoteCatalogs.isNotEmpty()) {
-            list.addAll(
-                listOf<SourceUiModel>(
-                    SourceUiModel.Header(AVAILABLE),
-                    *remoteCatalogs.map { source ->
-                        SourceUiModel.Item(source, SourceState.Remote)
-                    }.toTypedArray()
-                )
-            )
-        }
-        list
-    }
 
     override var selectedLanguage by mutableStateOf<LanguageChoice>(LanguageChoice.All)
     override var installSteps by mutableStateOf(emptyMap<String, InstallStep>())
