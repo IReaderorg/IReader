@@ -13,6 +13,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.state.ToggleableState
 import androidx.lifecycle.viewModelScope
+import ireader.common.models.entities.BookCategory
+import ireader.common.models.entities.BookItem
+import ireader.common.models.entities.Category
+import ireader.common.models.library.LibraryFilter
+import ireader.common.models.library.LibrarySort
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,13 +29,8 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
-import ireader.common.models.DisplayMode
-import ireader.common.models.entities.BookCategory
-import ireader.common.models.entities.BookItem
-import ireader.common.models.entities.Category
-import ireader.common.models.library.LibraryFilter
-import ireader.common.models.library.LibrarySort
-import ireader.core.ui.preferences.LibraryPreferences
+import ireader.domain.models.DisplayMode
+import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.core.ui.viewmodel.BaseViewModel
 import ireader.domain.usecases.category.CategoriesUseCases
 import ireader.domain.usecases.local.DeleteUseCase

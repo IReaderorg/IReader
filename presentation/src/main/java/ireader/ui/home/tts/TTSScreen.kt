@@ -40,15 +40,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import ireader.common.models.entities.Chapter
+import ireader.core.api.source.Source
+import ireader.core.ui.modifier.clickableNoIndication
+import ireader.domain.models.prefs.mapAlignment
+import ireader.domain.models.prefs.mapTextAlign
+import ireader.domain.services.tts_service.TTSState
+import ireader.presentation.R
 import ireader.ui.component.components.ShowLoading
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.ui.component.reusable_composable.SuperSmallTextComposable
-import ireader.core.api.source.Source
-import ireader.core.ui.modifier.clickableNoIndication
-import ireader.core.ui.ui.mapAlignment
-import ireader.core.ui.ui.mapTextAlign
-import ireader.domain.services.tts_service.TTSState
-import ireader.presentation.R
 
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)

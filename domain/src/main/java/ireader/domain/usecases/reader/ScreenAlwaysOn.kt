@@ -2,7 +2,8 @@ package ireader.domain.usecases.reader
 
 import android.content.Context
 import android.view.WindowManager
-import ireader.common.extensions.findComponentActivity
+import ireader.domain.utils.extensions.findComponentActivity
+import ireader.domain.utils.extensions.findComponentActivity
 import org.koin.core.annotation.Factory
 
 @Factory

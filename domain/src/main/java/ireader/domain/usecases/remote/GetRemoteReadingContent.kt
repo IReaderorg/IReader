@@ -1,6 +1,6 @@
 package ireader.domain.usecases.remote
 
-import ireader.common.extensions.async.withIOContext
+import ireader.domain.utils.extensions.async.withIOContext
 import ireader.common.models.entities.CatalogLocal
 import ireader.common.models.entities.Chapter
 import ireader.common.models.entities.toChapterInfo
@@ -11,8 +11,10 @@ import ireader.core.api.source.model.ImageBase64
 import ireader.core.api.source.model.ImageUrl
 import ireader.core.api.source.model.Page
 import ireader.core.api.source.model.Text
-import ireader.core.ui.exceptionHandler
 import ireader.domain.R
+import ireader.domain.utils.exceptionHandler
+import ireader.domain.utils.extensions.async.withIOContext
+import ireader.domain.utils.extensions.currentTimeToLong
 import org.koin.core.annotation.Factory
 
 @Factory
@@ -61,7 +63,7 @@ class GetRemoteReadingContent() {
                         onSuccess(
                             chapter.copy(
                                 content = content,
-                                dateFetch = ireader.common.extensions.currentTimeToLong()
+                                dateFetch = currentTimeToLong()
                             )
                         )
                     }

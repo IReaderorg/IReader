@@ -8,7 +8,6 @@ import ir.kazemcodes.infinityreader.Database
 import okio.FileSystem
 import ireader.core.api.db.Transactions
 import org.koin.core.annotation.ComponentScan
-import ireader.core.api.di.ISingleton
 import ireader.data.local.*
 import org.koin.core.annotation.Single
 

@@ -1,7 +1,7 @@
 package ireader.domain.usecases.local.book_usecases
 
-import ireader.common.extensions.convertLongToTime
-import ireader.common.extensions.currentTimeToLong
+import ireader.domain.utils.extensions.convertLongToTime
+import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.takeIf
 import java.net.URI

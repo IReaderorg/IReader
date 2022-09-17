@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import ireader.ui.component.Controller
 import ireader.ui.settings.about.AboutSettingScreen
-import ireader.common.extensions.toDateTimestampString
+import ireader.domain.utils.extensions.toDateTimestampString
 import ireader.common.resources.BuildConfig
 import ireader.presentation.R
 import ireader.ui.component.components.TitleToolbar

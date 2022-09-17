@@ -1,7 +1,7 @@
 package ireader.domain.usecases.preferences.reader_preferences
 
-import ireader.core.ui.preferences.ReaderPreferences
-import ireader.core.ui.theme.FontType
+import ireader.domain.preferences.prefs.ReaderPreferences
+import ireader.domain.preferences.models.FontType
 
 class SelectedFontStateUseCase(
     private val prefs: ReaderPreferences,

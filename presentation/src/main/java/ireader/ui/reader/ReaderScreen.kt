@@ -30,13 +30,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import ireader.common.models.entities.Chapter
+import ireader.domain.preferences.prefs.ReadingMode
+import ireader.ui.reader.components.MainBottomSettingComposable
+import ireader.ui.reader.custom.WebView
 import ireader.ui.reader.reverse_swip_refresh.SwipeRefreshState
 import ireader.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.launch
-import ireader.common.models.entities.Chapter
-import ireader.core.ui.preferences.ReadingMode
-import ireader.ui.reader.components.MainBottomSettingComposable
-import ireader.ui.reader.custom.WebView
 
 @ExperimentalAnimationApi
 @OptIn(

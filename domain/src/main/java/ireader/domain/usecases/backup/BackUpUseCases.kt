@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.ActivityResult
 import ireader.domain.data.repository.DownloadRepository
-import ireader.common.extensions.findComponentActivity
+import ireader.domain.utils.extensions.findComponentActivity
 import org.koin.core.annotation.Factory
 import java.io.FileInputStream
 import java.io.FileOutputStream

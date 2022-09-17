@@ -1,6 +1,6 @@
 package ireader.domain.usecases.preferences.reader_preferences
 
-import ireader.core.ui.preferences.ReaderPreferences
+import ireader.domain.preferences.prefs.ReaderPreferences
 
 class FontSizeStateUseCase(
     private val prefs: ReaderPreferences,

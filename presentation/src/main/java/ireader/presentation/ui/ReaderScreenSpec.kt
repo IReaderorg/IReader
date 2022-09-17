@@ -41,11 +41,11 @@ import ireader.common.resources.asString
 import ireader.ui.component.Controller
 import ireader.ui.component.findComponentActivity
 import ireader.core.api.log.Log
-import ireader.core.ui.preferences.ReadingMode
 import ireader.core.ui.theme.AppColors
 import ireader.core.ui.theme.CustomSystemColor
-import ireader.core.ui.theme.FontType
-import ireader.core.ui.theme.getDefaultFont
+import ireader.domain.preferences.models.FontType
+import ireader.domain.preferences.models.getDefaultFont
+import ireader.domain.preferences.prefs.ReadingMode
 import ireader.presentation.ui.util.NavigationArgs
 import ireader.presentation.R
 import ireader.ui.reader.ReaderScreenDrawer

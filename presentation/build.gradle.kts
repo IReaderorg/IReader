@@ -32,9 +32,9 @@ dependencies {
     implementation(project(Modules.coreApi))
     implementation(androidx.biometric)
 
-    implementation(project(Modules.commonModels))
+
     implementation(project(Modules.commonResources))
-    implementation(project(Modules.commonExtensions))
+
     implementation(libs.coil.core)
     implementation(libs.coil.gif)
 
@@ -78,7 +78,7 @@ dependencies {
 
     implementation(androidx.work.runtime)
 
-    implementation(project(Modules.commonModels))
+
 
     implementation(libs.koin.android)
     ksp(libs.koin.kspCompiler)

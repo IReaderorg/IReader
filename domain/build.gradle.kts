@@ -24,14 +24,20 @@ dependencies {
     implementation("org.slf4j:slf4j-android:1.7.25")
 
 
-    implementation(project(Modules.coreUi))
+    //implementation(project(Modules.coreUi))
 
     implementation(project(Modules.commonResources))
 
-    implementation(project(Modules.commonExtensions))
+
 
 
     implementation(project(Modules.coreApi))
+
+
+    implementation(androidx.biometric)
+    implementation(androidx.lifecycle.viewmodelktx)
+    implementation(composeLib.compose.googlFonts)
+    implementation(composeLib.material3.core)
 
     implementation(androidx.media)
     implementation(kotlinx.serialization.protobuf)
@@ -43,7 +49,7 @@ dependencies {
     implementation(composeLib.compose.coil)
     implementation(composeLib.compose.paging)
     implementation(libs.gson)
-    implementation(project(mapOf("path" to ":common-models")))
+
     debugImplementation(composeLib.compose.uiTestManifest)
 
     implementation(androidx.work.runtime)

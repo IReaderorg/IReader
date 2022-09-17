@@ -12,29 +12,21 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import ireader.domain.data.repository.ReaderThemeRepository
-import ireader.common.extensions.async.nextAfter
-import ireader.common.extensions.async.prevBefore
-import ireader.common.extensions.findComponentActivity
 import ireader.common.models.entities.Chapter
 import ireader.common.resources.LAST_CHAPTER
 import ireader.common.resources.NO_VALUE
 import ireader.common.resources.UiText
 import ireader.core.api.http.WebViewManger
 import ireader.core.api.source.model.Text
-import ireader.domain.catalogs.interactor.GetLocalCatalog
-import ireader.core.ui.preferences.ReaderPreferences
-import ireader.core.ui.preferences.ReadingMode
-import ireader.core.ui.preferences.UiPreferences
 import ireader.core.ui.theme.ReaderColors
-import ireader.core.ui.theme.readerThemes
 import ireader.core.ui.viewmodel.BaseViewModel
-import ireader.presentation.ui.util.NavigationArgs
+import ireader.domain.catalogs.interactor.GetLocalCatalog
+import ireader.domain.data.repository.ReaderThemeRepository
+import ireader.domain.preferences.models.ReaderColors
+import ireader.domain.preferences.models.prefs.readerThemes
+import ireader.domain.preferences.prefs.ReaderPreferences
+import ireader.domain.preferences.prefs.ReadingMode
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.history.HistoryUseCase
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
@@ -43,11 +35,20 @@ import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
 import ireader.domain.usecases.reader.ScreenAlwaysOn
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.translate.TranslationEnginesManager
-import ireader.ui.component.Controller
+import ireader.domain.utils.extensions.async.nextAfter
+import ireader.domain.utils.extensions.async.prevBefore
+import ireader.domain.utils.extensions.findComponentActivity
 import ireader.presentation.R
-
+import ireader.presentation.ui.util.NavigationArgs
+import ireader.ui.component.Controller
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.annotation.KoinViewModel
+
 @OptIn(ExperimentalTextApi::class)
 @KoinViewModel
 class ReaderScreenViewModel(

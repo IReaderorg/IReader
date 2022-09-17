@@ -2,8 +2,8 @@ package ireader.ui.home.updates.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import ireader.common.models.BookCover
 import ireader.common.models.entities.UpdatesWithRelations
+import ireader.domain.models.BookCover
 
 private val book
     get() = UpdatesWithRelations(

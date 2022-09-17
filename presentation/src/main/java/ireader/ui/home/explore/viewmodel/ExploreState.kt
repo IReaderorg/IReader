@@ -4,14 +4,13 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import ireader.common.extensions.replaceFirst
-import ireader.common.models.DisplayMode
 import ireader.common.models.entities.Book
-import ireader.common.models.entities.BookItem
 import ireader.common.models.entities.CatalogLocal
 import ireader.common.resources.UiText
 import ireader.core.api.source.model.Filter
 import ireader.core.api.source.model.Listing
+import ireader.domain.models.DisplayMode
+import ireader.domain.utils.extensions.replaceFirst
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Single
 

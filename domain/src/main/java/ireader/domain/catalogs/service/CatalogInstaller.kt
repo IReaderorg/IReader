@@ -10,3 +10,5 @@ interface CatalogInstaller {
 
     suspend fun uninstall(pkgName: String): InstallStep
 }
+
+

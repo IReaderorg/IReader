@@ -62,6 +62,7 @@ import ireader.common.resources.ARG_HAVE_MODAL_SHEET
 import ireader.common.resources.ARG_HAVE_VARIANT_BOTTOM_BAR
 import ireader.common.resources.ARG_HIDE_BOTTOM_BAR
 import ireader.common.resources.ARG_TRANSPARENT_STATUS_BAR
+import ireader.core.api.log.Log
 import ireader.ui.component.Controller
 import ireader.ui.component.components.ConfirmExitBackHandler
 import ireader.ui.component.components.ISnackBarHost

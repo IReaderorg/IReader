@@ -41,22 +41,21 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import kotlinx.coroutines.launch
 import ireader.common.models.entities.Chapter
-import ireader.ui.component.list.scrollbars.ColumnScrollbar
-import ireader.ui.component.list.scrollbars.LazyColumnScrollbar
-import ireader.core.api.log.Log
 import ireader.core.api.source.model.ImageUrl
 import ireader.core.api.source.model.Page
 import ireader.core.api.source.model.Text
-import ireader.core.ui.preferences.ReadingMode
-import ireader.core.ui.ui.PreferenceTextAlignment
-import ireader.core.ui.ui.mapTextAlign
+import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.models.prefs.mapTextAlign
+import ireader.domain.preferences.prefs.ReadingMode
+import ireader.ui.component.list.scrollbars.ColumnScrollbar
+import ireader.ui.component.list.scrollbars.LazyColumnScrollbar
 import ireader.ui.reader.reverse_swip_refresh.ISwipeRefreshIndicator
 import ireader.ui.reader.reverse_swip_refresh.MultiSwipeRefresh
 import ireader.ui.reader.reverse_swip_refresh.SwipeRefreshState
 import ireader.ui.reader.viewmodel.ReaderScreenState
 import ireader.ui.reader.viewmodel.ReaderScreenViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -214,7 +213,7 @@ private fun PagedReaderText(
             thumbColor = vm.unselectedScrollBarColor.value,
             thumbSelectedColor = vm.selectedScrollBarColor.value,
             selectionMode = vm.isScrollIndicatorDraggable.value,
-            rightSide = vm.scrollIndicatorAlignment.value == PreferenceTextAlignment.Right
+            rightSide = vm.scrollIndicatorAlignment.value == PreferenceValues.PreferenceTextAlignment.Right
         ) {
                 Column(
                     modifier = Modifier
@@ -276,7 +275,7 @@ private fun MainText(
                 AsyncImage(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .requiredHeight(300.dp),
+                        .requiredHeight(500.dp),
                     model = ImageRequest.Builder(context)
                         .data(page.url)
                         .diskCachePolicy(CachePolicy.DISABLED)
@@ -351,7 +350,7 @@ private fun ContinuesReaderPage(
         thumbColor = vm.unselectedScrollBarColor.value,
         thumbSelectedColor = vm.selectedScrollBarColor.value,
         selectionMode = vm.isScrollIndicatorDraggable.value,
-        rightSide = vm.scrollIndicatorAlignment.value == PreferenceTextAlignment.Right,
+        rightSide = vm.scrollIndicatorAlignment.value == PreferenceValues.PreferenceTextAlignment.Right,
     ) {
 
         LazyColumn(

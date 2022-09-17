@@ -1,10 +1,10 @@
 package ireader.domain.usecases.local.chapter_usecases
 
 import kotlinx.datetime.Clock
-import ireader.common.extensions.currentTimeToLong
+import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.common.models.entities.Chapter
 import ireader.common.models.entities.History
-import ireader.core.ui.preferences.UiPreferences
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.history.HistoryUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
 import org.koin.core.annotation.Factory

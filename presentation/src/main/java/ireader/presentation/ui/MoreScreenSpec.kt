@@ -62,9 +62,6 @@ object MoreScreenSpec : BottomNavScreenSpec {
             onSettings = {
                 controller.navController.navigate(SettingScreenSpec.navHostRoute)
             },
-            onAppearanceScreen = {
-                controller.navController.navigate(AppearanceScreenSpec.navHostRoute)
-            },
             onBackupScreen = {
                 controller.navController.navigate(BackupAndRestoreScreenSpec.navHostRoute)
             },

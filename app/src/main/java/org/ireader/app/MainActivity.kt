@@ -8,7 +8,7 @@ import androidx.compose.material3.Surface
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import org.ireader.app.initiators.SecureActivityDelegateImpl
-import ireader.core.ui.preferences.UiPreferences
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.ScreenContent
 import ireader.presentation.theme.AppTheme
 import org.ireader.app.initiators.AppInitializers

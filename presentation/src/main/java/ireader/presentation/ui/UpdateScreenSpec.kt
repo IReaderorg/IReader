@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 import androidx.navigation.NamedNavArgument
 import ireader.ui.component.Controller
-import ireader.common.extensions.async.viewModelIOCoroutine
+import ireader.domain.utils.extensions.async.viewModelIOCoroutine
 import ireader.presentation.ui.util.NavigationArgs
 import ireader.presentation.R
 import ireader.ui.home.updates.UpdateScreen

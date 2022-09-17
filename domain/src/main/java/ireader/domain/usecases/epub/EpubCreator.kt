@@ -2,15 +2,15 @@ package ireader.domain.usecases.epub
 
 import android.content.Context
 import android.net.Uri
+import ireader.common.models.entities.Book
+import ireader.domain.data.repository.ChapterRepository
+import ireader.domain.image.cache.CoverCache
+import ireader.domain.models.BookCover
 import nl.siegmann.epublib.domain.Author
 import nl.siegmann.epublib.domain.MediaType
 import nl.siegmann.epublib.domain.Resource
 import nl.siegmann.epublib.epub.EpubWriter
 import nl.siegmann.epublib.service.MediatypeService
-import ireader.domain.data.repository.ChapterRepository
-import ireader.common.models.entities.Book
-import ireader.common.models.BookCover
-import ireader.domain.image.cache.CoverCache
 import org.koin.core.annotation.Factory
 import java.io.FileOutputStream
 

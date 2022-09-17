@@ -2,7 +2,7 @@ package ireader.domain.image.cache
 
 import android.content.Context
 import coil.imageLoader
-import ireader.common.models.BookCover
+import ireader.domain.models.BookCover
 import java.io.File
 import java.io.IOException
 import java.io.InputStream

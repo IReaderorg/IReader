@@ -16,13 +16,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.items
-import ireader.common.extensions.asRelativeTimeString
 import ireader.common.models.entities.HistoryWithRelations
-import ireader.core.ui.preferences.PreferenceValues
 import ireader.core.ui.utils.shimmerGradient
 import ireader.ui.component.text_related.TextSection
 import ireader.ui.home.history.viewmodel.HistoryUiModel
-import ireader.ui.home.history.viewmodel.HistoryViewModel
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

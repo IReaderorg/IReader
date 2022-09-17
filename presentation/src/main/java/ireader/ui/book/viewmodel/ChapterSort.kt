@@ -1,7 +1,7 @@
 package ireader.ui.book.viewmodel
 
-import ireader.common.models.R
 import ireader.common.resources.UiText
+import ireader.presentation.R
 
 data class ChapterSort(val type: Type, val isAscending: Boolean) {
 

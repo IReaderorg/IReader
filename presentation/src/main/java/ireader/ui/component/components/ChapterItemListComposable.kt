@@ -20,17 +20,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
-import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import ireader.common.extensions.asRelativeTimeString
-import ireader.common.extensions.toLocalDate
 import ireader.common.models.entities.Chapter
-import ireader.core.api.util.asRelativeTimeString
 import ireader.core.ui.modifier.selectedBackground
-import ireader.core.ui.preferences.PreferenceValues
+import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.utils.extensions.asRelativeTimeString
+import ireader.domain.utils.extensions.toLocalDate
 
-private val dateFormat = ireader.core.api.util.DateTimeFormatter("dd/MM/yy")
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

@@ -1,17 +1,12 @@
 [versions]
 kotlin = "1.7.10"
 ktor = "2.0.3"
-room = "2.4.2"
 okhttp = "5.0.0-alpha.10"
-moshi = "1.13.0"
-hilt = "2.43.2"
-retrofit = "2.9.0"
 aboutLibraries = "10.0.0-b03"
 ksp = "1.7.10-1.0.6"
 tinylog = "2.5.0-M2.1"
-roomigrant = "0.3.4"
 modernstorage = "1.0.0-alpha06"
-coil_version = "2.1.0"
+coil_version = "2.2.1"
 jsoup = "1.15.2"
 moko = "0.20.1"
 koinAnnotation = "1.0.1"
@@ -23,10 +18,9 @@ detekt = "1.21.0"
 
 [libraries]
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
-gradle-tools = "com.android.tools.build:gradle:7.2.2"
+gradle-tools = "com.android.tools.build:gradle:7.3.0"
 gradle-kotlinSerialization = { module =  "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
-gradle-hilt = "com.google.dagger:hilt-android-gradle-plugin:2.42"
-gradle-google = "com.google.gms:google-services:4.3.10"
+gradle-google = "com.google.gms:google-services:4.3.14"
 gradle-firebaseCrashlytic = "com.google.firebase:firebase-crashlytics-gradle:2.9.1"
 gradle-benmanes = "com.github.ben-manes:gradle-versions-plugin:0.42.0"
 gradle-idea-ext = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.5"
@@ -47,8 +41,6 @@ modernstorage-storage = { module = "com.google.modernstorage:modernstorage-stora
 ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 ksp-gradle = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
 
-moshi-codegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshi" }
-
 
 ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-core-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
@@ -63,26 +55,10 @@ ktor-contentNegotiation-jackson = { module = "io.ktor:ktor-serialization-jackson
 moko-core = { module = "dev.icerock.moko:resources", version.ref  = "moko" }
 moko-gradle = { module = "dev.icerock.moko:resources-generator", version.ref  = "moko" }
 
-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
-room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
-
-room-roomigrant-lib = { module = "com.github.MatrixDev.Roomigrant:RoomigrantLib", version.ref = "roomigrant" }
-room-roomigrant-compiler = { module = "com.github.MatrixDev.Roomigrant:RoomigrantCompiler", version.ref = "roomigrant" }
-
 
 okhttp-okhttp3 = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
 okhttp-doh = { module = "com.squareup.okhttp3:okhttp-dnsoverhttps", version.ref = "okhttp" }
-
-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
-hilt-androidcompiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
-hilt-compiler = "androidx.hilt:hilt-compiler:1.0.0"
-hilt-worker = "androidx.hilt:hilt-work:1.0.0"
-hilt-androidtest = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
-
 
 firebase-bom = "com.google.firebase:firebase-bom:30.1.0"
 firebase-analyticKtx = { module = "com.google.firebase:firebase-analytics-ktx" }
@@ -136,9 +112,8 @@ ireader = ["ireader-ktorCore", "ireader-ktorContentNegotiation","ireader-ktorSer
 [plugins]
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "kotlin" }
-daggerHilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ideaExt = { id = "org.jetbrains.gradle.plugin.idea-ext", version.ref = "ideaExt" }
-jetbrainCompose = { id = "org.jetbrains.compose", version = "1.2.0-alpha01-dev774" }
+jetbrainCompose = { id = "org.jetbrains.compose", version = "1.2.0-beta01" }
 vanniktech = { id = "com.vanniktech.maven.publish", version = "0.21.0" }
 kotlinSerilization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version = "1.3.0" }
@@ -146,3 +121,4 @@ benGradleVersions = { id = "com.github.ben-manes.versions", version = "0.42.0" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 sqldelight = { id = "com.squareup.sqldelight", version.ref = "sqldelight" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+google = { id = "com.google.gms.google-services", version = "4.3.14" }

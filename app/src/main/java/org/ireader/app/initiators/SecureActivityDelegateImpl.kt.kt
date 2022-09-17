@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.Clock
 import org.ireader.app.SecureActivityDelegate
-import ireader.common.extensions.AuthenticatorUtil.isAuthenticationSupported
-import ireader.common.extensions.setSecureScreen
-import ireader.core.ui.preferences.PreferenceValues
-import ireader.core.ui.preferences.UiPreferences
+import ireader.domain.utils.extensions.AuthenticatorUtil.isAuthenticationSupported
+import ireader.domain.utils.extensions.setSecureScreen
+import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.ui.UnlockActivity
 import org.koin.core.annotation.Factory
 

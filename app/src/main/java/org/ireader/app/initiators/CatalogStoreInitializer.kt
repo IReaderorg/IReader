@@ -1,6 +1,6 @@
 package org.ireader.app.initiators
 
-import ireader.common.extensions.launchIO
+import ireader.domain.utils.extensions.launchIO
 import ireader.domain.catalogs.interactor.SyncRemoteCatalogs
 import org.koin.core.annotation.Factory
 

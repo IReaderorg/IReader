@@ -1,8 +1,8 @@
 package ireader.domain.data.repository
 
 import kotlinx.coroutines.flow.Flow
-import ireader.common.models.theme.CustomTheme
-import ireader.common.models.theme.Theme
+import ireader.domain.models.theme.CustomTheme
+import ireader.domain.models.theme.Theme
 
 interface ThemeRepository {
 

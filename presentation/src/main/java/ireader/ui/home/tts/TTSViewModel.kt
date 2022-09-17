@@ -12,18 +12,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
-import ireader.common.extensions.findComponentActivity
 import ireader.common.models.entities.Chapter
-import ireader.domain.catalogs.interactor.GetLocalCatalog
-import ireader.core.ui.preferences.ReaderPreferences
 import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.domain.catalogs.interactor.GetLocalCatalog
+import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.services.tts_service.Player
 import ireader.domain.services.tts_service.TTSState
 import ireader.domain.services.tts_service.TTSStateImpl
 import ireader.domain.services.tts_service.media_player.TTSService
 import ireader.domain.services.tts_service.media_player.isPlaying
-import ireader.presentation.ui.util.NavigationArgs
 import ireader.domain.usecases.local.LocalGetBookUseCases
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
@@ -31,7 +28,10 @@ import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
 import ireader.domain.usecases.preferences.reader_preferences.TextReaderPrefUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.services.ServiceUseCases
+import ireader.domain.utils.extensions.findComponentActivity
+import ireader.presentation.ui.util.NavigationArgs
 import ireader.ui.component.Controller
+import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel

@@ -4,12 +4,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import ireader.common.extensions.launchIO
 import ireader.common.models.entities.Catalog
 import ireader.common.models.entities.CatalogInstalled
 import ireader.common.models.entities.CatalogLocal
@@ -17,17 +11,22 @@ import ireader.common.models.entities.CatalogRemote
 import ireader.common.models.entities.SourceState
 import ireader.common.resources.UiText
 import ireader.core.api.os.InstallStep
+import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.core.ui.viewmodel.showSnackBar
 import ireader.domain.catalogs.interactor.GetCatalogsByType
 import ireader.domain.catalogs.interactor.InstallCatalog
 import ireader.domain.catalogs.interactor.SyncRemoteCatalogs
 import ireader.domain.catalogs.interactor.TogglePinnedCatalog
-import ireader.domain.catalogs.interactor.UninstallCatalog
+import ireader.domain.catalogs.interactor.UninstallCatalogs
 import ireader.domain.catalogs.interactor.UpdateCatalog
-import ireader.core.ui.exceptionHandler
-import ireader.core.ui.preferences.UiPreferences
-import ireader.core.ui.viewmodel.BaseViewModel
-import ireader.core.ui.viewmodel.showSnackBar
+import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.utils.exceptionHandler
 import ireader.ui.home.sources.extension.composables.SourceUiModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
@@ -36,7 +35,7 @@ class ExtensionViewModel(
     private val getCatalogsByType: GetCatalogsByType,
     private val updateCatalog: UpdateCatalog,
     private val installCatalog: InstallCatalog,
-    private val uninstallCatalog: UninstallCatalog,
+    private val uninstallCatalog: UninstallCatalogs,
     private val togglePinnedCatalog: TogglePinnedCatalog,
     private val syncRemoteCatalogs: SyncRemoteCatalogs,
     val uiPreferences: UiPreferences,

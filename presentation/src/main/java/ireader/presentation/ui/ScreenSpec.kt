@@ -38,7 +38,8 @@ sealed interface ScreenSpec {
             DownloadSettingSpec,
             LibraryScreenSpec,
             SecuritySettingSpec,
-            TrackingSettingSpec
+            TrackingSettingSpec,
+            RepositoryScreenSpec
         ).associateBy { it.navHostRoute }
     }
 

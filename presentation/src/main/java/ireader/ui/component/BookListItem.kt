@@ -15,7 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import coil.compose.AsyncImage
 import ireader.common.models.entities.Book
-import ireader.common.models.BookCover
+import ireader.domain.models.BookCover
 
 sealed class BookListItem(val name: String) {
 

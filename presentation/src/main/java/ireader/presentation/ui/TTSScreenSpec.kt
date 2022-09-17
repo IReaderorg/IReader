@@ -21,13 +21,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
 import com.google.accompanist.pager.ExperimentalPagerApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import ireader.core.api.log.Log
+import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.preferences.models.prefs.readerThemes
+import ireader.presentation.R
+import ireader.presentation.ui.util.NavigationArgs
 import ireader.ui.component.Controller
 import ireader.ui.component.CustomizeAnimateVisibility
 import ireader.ui.component.NavigationBarTokens
@@ -37,15 +39,16 @@ import ireader.ui.component.components.Components
 import ireader.ui.component.components.component.ChipChoicePreference
 import ireader.ui.component.components.component.SliderPreference
 import ireader.ui.component.components.component.SwitchPreference
-import ireader.core.api.log.Log
-import ireader.core.ui.theme.readerThemes
-import ireader.core.ui.ui.PreferenceAlignment
-import ireader.presentation.ui.util.NavigationArgs
-import ireader.presentation.R
-import ireader.ui.home.tts.*
+import ireader.ui.home.tts.MediaControllers
+import ireader.ui.home.tts.TTLScreenPlay
+import ireader.ui.home.tts.TTSScreen
+import ireader.ui.home.tts.TTSTopBar
+import ireader.ui.home.tts.TTSViewModel
 import ireader.ui.reader.ReaderScreenDrawer
-import java.math.RoundingMode
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
+import java.math.RoundingMode
 
 object TTSScreenSpec : ScreenSpec {
     override val navHostRoute: String = "tts_screen_route/{bookId}/{chapterId}/{sourceId}"
@@ -375,9 +378,9 @@ object TTSScreenSpec : ScreenSpec {
                 title = stringResource(id = R.string.alignment),
                 onValueChange = {
                     when (it) {
-                        0 -> vm.ttsIconAlignments.value = PreferenceAlignment.TopLeft
-                        1 -> vm.ttsIconAlignments.value = PreferenceAlignment.BottomLeft
-                        2 -> vm.ttsIconAlignments.value = PreferenceAlignment.Hide
+                        0 -> vm.ttsIconAlignments.value = PreferenceValues.PreferenceAlignment.TopLeft
+                        1 -> vm.ttsIconAlignments.value = PreferenceValues.PreferenceAlignment.BottomLeft
+                        2 -> vm.ttsIconAlignments.value = PreferenceValues.PreferenceAlignment.Hide
                     }
                 },
                 selected = vm.ttsIconAlignments.value.ordinal

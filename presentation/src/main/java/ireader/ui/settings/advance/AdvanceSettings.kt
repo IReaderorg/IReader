@@ -13,9 +13,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import kotlinx.serialization.ExperimentalSerializationApi
 import ireader.ui.component.Controller
-import ireader.common.extensions.findComponentActivity
-import ireader.common.extensions.getCacheSize
-import ireader.common.extensions.launchIO
+import ireader.domain.utils.extensions.findComponentActivity
+import ireader.domain.utils.extensions.getCacheSize
+import ireader.domain.utils.extensions.launchIO
 import ireader.common.resources.UiText
 import ireader.ui.component.components.Components
 import ireader.ui.component.components.SetupSettingComponents

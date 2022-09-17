@@ -1,7 +1,11 @@
 package ireader.data.apptheme
 
-import androidx.compose.material3.ColorScheme
-import ireader.common.models.theme.*
+import ireader.domain.models.theme.CustomColorScheme
+import ireader.domain.models.theme.CustomExtraColors
+import ireader.domain.models.theme.ReaderTheme
+import ireader.domain.models.theme.Theme
+import ireader.domain.models.theme.toColorScheme
+import ireader.domain.models.theme.toExtraColor
 
 val  appThemeMapper = {
         id: Long,

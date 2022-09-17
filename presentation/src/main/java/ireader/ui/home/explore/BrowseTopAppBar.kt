@@ -19,8 +19,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import ireader.common.models.DisplayMode
-import ireader.common.models.getLayoutName
+import ireader.domain.models.DisplayMode
+import ireader.domain.models.getLayoutName
 import ireader.ui.component.components.Toolbar
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.ui.component.reusable_composable.AppTextField

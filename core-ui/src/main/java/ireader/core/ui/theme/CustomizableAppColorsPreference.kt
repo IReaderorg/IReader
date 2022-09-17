@@ -7,8 +7,8 @@ import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.CoroutineScope
 import ireader.core.api.prefs.Preference
-import ireader.core.ui.preferences.UiPreferences
-import ireader.core.ui.theme.prefs.asThemeColor
+import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.preferences.models.prefs.asThemeColor
 import ireader.core.ui.ui.PreferenceMutableState
 import ireader.core.ui.ui.asStateIn
 

@@ -1,11 +1,11 @@
 package ireader.domain.usecases.preferences.reader_preferences
 
 import ireader.domain.data.repository.CategoryRepository
-import ireader.common.models.DisplayMode
-import ireader.common.models.DisplayMode.Companion.set
 import ireader.common.models.entities.Category
-import ireader.core.ui.preferences.AppPreferences
-import ireader.core.ui.preferences.LibraryPreferences
+import ireader.domain.models.DisplayMode
+import ireader.domain.models.DisplayMode.Companion.set
+import ireader.domain.preferences.prefs.AppPreferences
+import ireader.domain.preferences.prefs.LibraryPreferences
 
 class LibraryLayoutTypeUseCase(
     private val libraryPreferences: LibraryPreferences,

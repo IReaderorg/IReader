@@ -11,8 +11,9 @@ import androidx.compose.ui.res.stringResource
 import ireader.ui.component.components.Components
 import ireader.ui.component.components.SetupSettingComponents
 import ireader.ui.component.components.component.ChoicePreference
-import ireader.core.ui.preferences.AppPreferences
-import ireader.core.ui.preferences.UiPreferences
+import ireader.domain.preferences.prefs.AppPreferences
+import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.core.ui.viewmodel.BaseViewModel
 import ireader.presentation.R
 import org.koin.android.annotation.KoinViewModel
@@ -41,6 +42,18 @@ fun GeneralSettingScreen(
                 preference = vm.confirmExit,
                 title = context.getString(R.string.confirm_exit)
             ),
+            Components.Dynamic {
+                ChoicePreference<PreferenceValues.Installer>(
+                    preference = vm.installer,
+                    choices = mapOf(
+                        PreferenceValues.Installer.AndroidPackageManager to context.getString(R.string.package_manager),
+                        PreferenceValues.Installer.AndroidInApp to context.getString(R.string.local_installer),
+                    ),
+                    title = stringResource(
+                        id = R.string.installer_mode
+                    ),
+                )
+            },
             Components.Row(
                 title = context.getString(R.string.manage_notification),
                 onClick = {
@@ -82,6 +95,7 @@ class GeneralSettingScreenViewModel(
     var showHistory = uiPreferences.showHistoryInButtonBar().asState()
     var showUpdate = uiPreferences.showUpdatesInButtonBar().asState()
     var confirmExit = uiPreferences.confirmExit().asState()
+    var installer = uiPreferences.installerMode().asState()
     var language = uiPreferences.language().asState()
 
     @Composable

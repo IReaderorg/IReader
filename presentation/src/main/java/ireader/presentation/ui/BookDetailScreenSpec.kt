@@ -1,4 +1,5 @@
 package ireader.presentation.ui
+
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -13,34 +14,29 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+import ireader.common.models.entities.Book
+import ireader.common.resources.LAST_CHAPTER
+import ireader.common.resources.UiText
+import ireader.core.api.source.HttpSource
+import ireader.core.ui.ui.SnackBarListener
+import ireader.domain.utils.extensions.async.viewModelIOCoroutine
+import ireader.domain.utils.extensions.findComponentActivity
+import ireader.domain.utils.extensions.launchIO
+import ireader.presentation.R
+import ireader.presentation.ui.util.NavigationArgs
 import ireader.ui.book.BookDetailScreen
 import ireader.ui.book.BookDetailTopAppBar
 import ireader.ui.book.components.ChapterCommandBottomSheet
 import ireader.ui.book.components.ChapterScreenBottomTabComposable
 import ireader.ui.book.viewmodel.BookDetailViewModel
-import ireader.common.extensions.async.viewModelIOCoroutine
-import ireader.common.extensions.findComponentActivity
-import ireader.common.extensions.launchIO
-import ireader.common.extensions.replaceFirst
-import ireader.common.models.entities.Book
-import ireader.common.resources.LAST_CHAPTER
-import ireader.common.resources.UiEvent
-import ireader.common.resources.UiText
-import ireader.common.resources.asString
 import ireader.ui.component.Controller
-import ireader.core.api.source.HttpSource
-import ireader.presentation.ui.util.NavigationArgs
-import ireader.presentation.R
-import ireader.ui.home.explore.viewmodel.ExploreViewModel
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 
 object BookDetailScreenSpec : ScreenSpec {
@@ -94,6 +90,7 @@ object BookDetailScreenSpec : ScreenSpec {
                 controller.setScrollBehavior(controller.scrollBehavior)
             }
         }
+
         val onShare =
             rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
                 if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
@@ -259,19 +256,7 @@ object BookDetailScreenSpec : ScreenSpec {
                 BookDetailViewModel.createParam(controller)
             )
         })
-        val context = LocalContext.current
-        LaunchedEffect(key1 = true) {
-            vm.eventFlow.collectLatest { event ->
-                when (event) {
-                    is UiEvent.ShowSnackbar -> {
-                        controller.snackBarHostState.showSnackbar(
-                            event.uiText.asString(context)
-                        )
-                    }
-                    else -> {}
-                }
-            }
-        }
+        SnackBarListener(vm = vm, host = controller.snackBarHostState)
         val state = vm
         val book = state.booksState.book
         val source = state.catalogSource?.source

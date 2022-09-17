@@ -53,9 +53,9 @@ dependencies {
     implementation(project(Modules.coreApi))
 
     implementation(project(Modules.domain))
-    implementation(project(Modules.commonModels))
 
-    implementation(project(Modules.commonExtensions))
+
+
     implementation(project(Modules.commonResources))
 
     implementation(androidx.core)
@@ -90,7 +90,7 @@ dependencies {
 
     testImplementation(test.bundles.common)
 
-
+    implementation(libs.koin.android)
 
     androidTestImplementation(test.bundles.common)
 

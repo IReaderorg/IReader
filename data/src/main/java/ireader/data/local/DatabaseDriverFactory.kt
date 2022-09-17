@@ -9,7 +9,6 @@ import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import data.Book
 import data.Chapter
-import data.History
 import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
 import ir.kazemcodes.infinityreader.Database
 import ireader.data.BuildConfig
@@ -25,7 +24,7 @@ class DatabaseDriverFactory constructor(
     return AndroidSqliteDriver(
       schema = Database.Schema,
       context = app,
-      name = "infinity_db.db",
+      name = "ireader.db",
       factory = if (BuildConfig.DEBUG && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         // Support database inspector in Android Studio
         FrameworkSQLiteOpenHelperFactory()

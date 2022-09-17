@@ -1,6 +1,5 @@
 package ireader.ui.home.history
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,17 +24,16 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import ireader.common.models.BookCover
 import ireader.common.models.entities.HistoryWithRelations
+import ireader.core.ui.coil.rememberBookCover
+import ireader.core.ui.utils.horizontalPadding
 import ireader.ui.component.BookListItem
 import ireader.ui.component.BookListItemColumn
 import ireader.ui.component.BookListItemImage
 import ireader.ui.component.BookListItemSubtitle
 import ireader.ui.component.BookListItemTitle
-import ireader.ui.component.reusable_composable.AppIconButton
-import ireader.core.ui.coil.rememberBookCover
-import ireader.core.ui.utils.horizontalPadding
 import ireader.ui.component.components.BookImageCover
+import ireader.ui.component.reusable_composable.AppIconButton
 
 
 val HISTORY_ITEM_HEIGHT = 96.dp

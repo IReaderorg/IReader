@@ -7,9 +7,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.domain.data.repository.ThemeRepository
 import ireader.common.models.theme.ExtraColors
-import ireader.common.models.theme.Theme
-import ireader.core.ui.preferences.PreferenceValues
-import ireader.core.ui.preferences.UiPreferences
+import ireader.domain.models.theme.Theme
+import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.core.ui.theme.CustomizableAppColorsPreferenceState
 import ireader.core.ui.theme.asState
 import ireader.core.ui.theme.getDarkColors

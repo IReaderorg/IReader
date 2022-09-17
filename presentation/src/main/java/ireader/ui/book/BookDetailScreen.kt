@@ -1,8 +1,12 @@
 package ireader.ui.book
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -13,8 +17,17 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -24,10 +37,16 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import ireader.common.models.entities.Book
+import ireader.common.models.entities.Chapter
+import ireader.core.api.source.Source
+import ireader.core.ui.utils.isScrolledToEnd
+import ireader.core.ui.utils.isScrollingUp
+import ireader.domain.preferences.prefs.ChapterDisplayMode
+import ireader.presentation.R
 import ireader.ui.book.components.ActionHeader
 import ireader.ui.book.components.BookHeader
 import ireader.ui.book.components.BookHeaderImage
@@ -35,16 +54,9 @@ import ireader.ui.book.components.BookSummaryInfo
 import ireader.ui.book.components.ChapterBar
 import ireader.ui.book.components.ChapterDetailBottomBar
 import ireader.ui.book.viewmodel.BookDetailViewModel
-import ireader.common.models.entities.Book
-import ireader.common.models.entities.Chapter
 import ireader.ui.component.components.ChapterRow
 import ireader.ui.component.list.scrollbars.VerticalFastScroller
 import ireader.ui.component.reusable_composable.AppTextField
-import ireader.core.api.source.Source
-import ireader.core.ui.preferences.ChapterDisplayMode
-import ireader.core.ui.utils.isScrolledToEnd
-import ireader.core.ui.utils.isScrollingUp
-import ireader.presentation.R
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")

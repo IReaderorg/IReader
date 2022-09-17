@@ -6,8 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.HistoryWithRelations
-import ireader.common.models.BookCover
 import ireader.common.models.entities.UpdatesWithRelations
+import ireader.domain.models.BookCover
 
 @Composable
 fun rememberBookCover(manga: Book): BookCover {

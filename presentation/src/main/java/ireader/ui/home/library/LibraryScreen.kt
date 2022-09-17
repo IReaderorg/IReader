@@ -20,17 +20,17 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.StateFlow
-import ireader.ui.home.library.components.EditCategoriesDialog
-import ireader.ui.home.library.ui.LibraryContent
-import ireader.ui.home.library.ui.LibrarySelectionBar
-import ireader.ui.home.library.viewmodel.LibraryViewModel
 import ireader.common.models.entities.BookItem
 import ireader.common.models.entities.Category
 import ireader.core.ui.ui.EmptyScreen
 import ireader.core.ui.ui.LoadingScreen
 import ireader.presentation.R
+import ireader.ui.home.library.components.EditCategoriesDialog
+import ireader.ui.home.library.ui.LibraryContent
+import ireader.ui.home.library.ui.LibrarySelectionBar
+import ireader.ui.home.library.viewmodel.LibraryViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 
 @ExperimentalPagerApi
 @ExperimentalAnimationApi
@@ -62,7 +62,7 @@ fun LibraryScreen(
     editCategoryOnRemoteInDeleteQueue: (Category) -> Unit,
     editCategoryOnAddDeleteQueue: (Category) -> Unit,
 
-) {
+    ) {
 
     LaunchedEffect(vm.selectionMode) {
         requestHideBottomNav(vm.selectionMode)

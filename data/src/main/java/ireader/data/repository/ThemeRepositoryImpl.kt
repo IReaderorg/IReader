@@ -3,9 +3,9 @@ package ireader.data.repository
 
 import ireader.domain.data.repository.ReaderThemeRepository
 import ireader.domain.data.repository.ThemeRepository
-import ireader.common.models.theme.CustomTheme
-import ireader.common.models.theme.ReaderTheme
-import ireader.common.models.theme.Theme
+import ireader.domain.models.theme.CustomTheme
+import ireader.domain.models.theme.ReaderTheme
+import ireader.domain.models.theme.Theme
 import ireader.data.apptheme.appThemeMapper
 import ireader.data.apptheme.readerMapper
 import ireader.data.local.DatabaseHandler

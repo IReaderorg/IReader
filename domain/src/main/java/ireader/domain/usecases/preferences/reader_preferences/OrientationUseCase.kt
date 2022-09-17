@@ -2,20 +2,20 @@ package ireader.domain.usecases.preferences.reader_preferences
 
 import ireader.common.models.library.LibrarySort
 import ireader.common.models.library.deserialize
-import ireader.core.ui.preferences.AppPreferences
-import ireader.core.ui.preferences.ReaderPreferences
-import ireader.core.ui.theme.prefs.IReaderVoice
-import ireader.core.ui.ui.PreferenceTextAlignment
+import ireader.domain.preferences.prefs.AppPreferences
+import ireader.domain.preferences.prefs.ReaderPreferences
+import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.preferences.models.prefs.IReaderVoice
 import org.koin.core.annotation.Factory
 
 class TextAlignmentUseCase(
     private val prefs: ReaderPreferences,
 ) {
-    fun save(textAlign: PreferenceTextAlignment) {
+    fun save(textAlign: PreferenceValues.PreferenceTextAlignment) {
         prefs.textAlign().set(textAlign)
     }
 
-    suspend fun read(): PreferenceTextAlignment {
+    suspend fun read(): PreferenceValues.PreferenceTextAlignment {
         return prefs.textAlign().get()
     }
 }

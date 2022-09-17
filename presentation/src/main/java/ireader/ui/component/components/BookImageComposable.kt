@@ -17,7 +17,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import ireader.common.models.BookCover
+import ireader.domain.models.BookCover
 
 @Composable
 fun BookImageComposable(

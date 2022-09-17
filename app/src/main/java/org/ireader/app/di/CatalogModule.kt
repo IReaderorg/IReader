@@ -9,8 +9,10 @@ import ireader.core.api.http.WebViewCookieJar
 import ireader.core.api.http.WebViewManger
 import ireader.core.api.os.PackageInstaller
 import ireader.core.api.prefs.PreferenceStore
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.catalogs.CatalogPreferences
 import ireader.domain.catalogs.CatalogStore
+import ireader.data.catalog.impl.AndroidCatalogInstallationChanges
 import ireader.domain.catalogs.interactor.GetCatalogsByType
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.catalogs.interactor.GetLocalCatalogs
@@ -18,13 +20,16 @@ import ireader.domain.catalogs.interactor.GetRemoteCatalogs
 import ireader.domain.catalogs.interactor.InstallCatalog
 import ireader.domain.catalogs.interactor.SyncRemoteCatalogs
 import ireader.domain.catalogs.interactor.TogglePinnedCatalog
-import ireader.domain.catalogs.interactor.UninstallCatalog
+import ireader.data.catalog.impl.interactor.UninstallCatalogImpl
 import ireader.domain.catalogs.interactor.UpdateCatalog
 import ireader.domain.catalogs.service.CatalogInstaller
 import ireader.domain.catalogs.service.CatalogRemoteRepository
-import ireader.data.catalog.AndroidCatalogLoader
-import ireader.data.catalog.AndroidCatalogInstaller
-import ireader.data.catalog.CatalogGithubApi
+import ireader.data.catalog.impl.AndroidCatalogLoader
+import ireader.data.catalog.impl.AndroidCatalogInstaller
+import ireader.data.catalog.impl.AndroidLocalInstaller
+import ireader.data.catalog.impl.CatalogGithubApi
+import ireader.data.catalog.impl.interactor.InstallCatalogImpl
+import ireader.domain.catalogs.interactor.UninstallCatalogs
 import ireader.imageloader.coil.CoilLoaderFactory
 import ireader.domain.image.cache.CoverCache
 import org.koin.core.annotation.ComponentScan
@@ -36,18 +41,26 @@ import org.koin.core.annotation.Single
 class CatalogModule {
 
         @Single
-    fun provideAndroidCatalogInstallationChanges(context: Application): ireader.data.catalog.AndroidCatalogInstallationChanges {
-        return ireader.data.catalog.AndroidCatalogInstallationChanges(context)
+    fun provideAndroidCatalogInstallationChanges(context: Application): AndroidCatalogInstallationChanges {
+        return AndroidCatalogInstallationChanges(context)
     }
 
         @Single
     fun provideAndroidCatalogInstaller(
-        context: Application,
-        httpClient: HttpClients,
-        installationChanges: ireader.data.catalog.AndroidCatalogInstallationChanges,
-        packageInstaller: PackageInstaller
+            context: Application,
+            httpClient: HttpClients,
+            installationChanges: AndroidCatalogInstallationChanges,
+            packageInstaller: PackageInstaller
     ): CatalogInstaller {
         return AndroidCatalogInstaller(context, httpClient, installationChanges, packageInstaller)
+    }
+    @Single
+    fun provideInAppCatalogInstaller(
+        context: Application,
+        httpClient: HttpClients,
+        installationChanges: AndroidCatalogInstallationChanges,
+    ) : AndroidLocalInstaller {
+        return AndroidLocalInstaller(context, httpClient, installationChanges)
     }
 
         @Single
@@ -81,7 +94,7 @@ class CatalogModule {
     fun providesCatalogStore(
             catalogPreferences: CatalogPreferences,
             catalogRemoteRepository: CatalogRemoteRepository,
-            installationChanges: ireader.data.catalog.AndroidCatalogInstallationChanges,
+            installationChanges: AndroidCatalogInstallationChanges,
             context: Application,
             httpClients: HttpClients,
     ): CatalogStore {
@@ -126,10 +139,10 @@ class CatalogModule {
 
         @Single
     fun providesAndroidCatalogInstaller(
-        context: Application,
-        httpClient: HttpClients,
-        installationChanges: ireader.data.catalog.AndroidCatalogInstallationChanges,
-        packageInstaller: PackageInstaller
+            context: Application,
+            httpClient: HttpClients,
+            installationChanges: AndroidCatalogInstallationChanges,
+            packageInstaller: PackageInstaller
     ): AndroidCatalogInstaller {
         return AndroidCatalogInstaller(
             context,
@@ -179,17 +192,13 @@ class CatalogModule {
 
         @Single
     fun providesInstallCatalog(
-            catalogInstaller: CatalogInstaller,
+            androidCatalogInstaller: AndroidCatalogInstaller,
+            androidLocalInstaller: AndroidLocalInstaller,
+            uiPreferences: UiPreferences
     ): InstallCatalog {
-        return InstallCatalog(catalogInstaller)
+        return InstallCatalogImpl(androidCatalogInstaller,androidLocalInstaller,uiPreferences)
     }
 
-        @Single
-    fun providesUninstallCatalog(
-            catalogInstaller: CatalogInstaller,
-    ): UninstallCatalog {
-        return UninstallCatalog(catalogInstaller)
-    }
 
         @Single
     fun providesTogglePinnedCatalog(

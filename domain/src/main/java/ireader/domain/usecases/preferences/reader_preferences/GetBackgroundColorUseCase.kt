@@ -1,7 +1,7 @@
 package ireader.domain.usecases.preferences.reader_preferences
 
 import androidx.compose.ui.graphics.Color
-import ireader.core.ui.preferences.ReaderPreferences
+import ireader.domain.preferences.prefs.ReaderPreferences
 
 class BackgroundColorUseCase(
     private val prefs: ReaderPreferences,

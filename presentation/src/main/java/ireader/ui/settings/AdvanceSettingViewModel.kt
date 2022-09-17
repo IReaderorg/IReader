@@ -5,19 +5,19 @@ import android.content.pm.ActivityInfo
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import ireader.domain.data.repository.CategoryRepository
-import ireader.domain.data.repository.ThemeRepository
-import ireader.common.extensions.launchIO
 import ireader.common.models.entities.Category
 import ireader.common.resources.UiText
-import ireader.core.ui.preferences.ReaderPreferences
-import ireader.core.ui.theme.getDefaultFont
 import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.domain.data.repository.CategoryRepository
+import ireader.domain.data.repository.ThemeRepository
+import ireader.domain.image.cache.CoverCache
+import ireader.domain.preferences.models.getDefaultFont
+import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.usecases.epub.importer.ImportEpub
 import ireader.domain.usecases.local.DeleteUseCase
 import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
+import ireader.domain.utils.extensions.launchIO
 import ireader.presentation.R
-import ireader.domain.image.cache.CoverCache
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel

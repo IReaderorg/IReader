@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import ireader.ui.component.components.component.PreferenceRow
 import ireader.core.ui.modifier.clickableNoIndication
 import ireader.core.ui.theme.ReaderColors
+import ireader.domain.preferences.models.ReaderColors
 import ireader.presentation.R
 
 
@@ -29,7 +30,7 @@ fun ThemePreference(
     modifier: Modifier = Modifier,
     onBackgroundChange: (color:ReaderColors) -> Unit,
     themes: List<ReaderColors>,
-    selected:(color:ReaderColors) -> Boolean
+    selected:(color: ReaderColors) -> Boolean
 ) {
 
     PreferenceRow(

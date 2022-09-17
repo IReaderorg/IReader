@@ -23,7 +23,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -36,26 +40,25 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import ireader.common.models.entities.Book
-import kotlinx.coroutines.launch
 import ireader.common.models.entities.BookItem
 import ireader.common.models.entities.toBook
 import ireader.common.models.entities.toBookItem
 import ireader.common.resources.asString
-import ireader.ui.component.components.ShowLoading
-import ireader.ui.component.list.LayoutComposable
-import ireader.ui.component.reusable_composable.AppIconButton
-import ireader.ui.component.reusable_composable.MidSizeTextComposable
-import ireader.ui.component.reusable_composable.SmallTextComposable
 import ireader.core.api.source.HttpSource
 import ireader.core.api.source.Source
 import ireader.core.api.source.model.Filter
 import ireader.core.api.source.model.Listing
 import ireader.core.ui.theme.ContentAlpha
 import ireader.core.ui.ui.kaomojis
+import ireader.ui.component.components.ShowLoading
+import ireader.ui.component.list.LayoutComposable
 import ireader.ui.component.list.isScrolledToTheEnd
+import ireader.ui.component.reusable_composable.AppIconButton
+import ireader.ui.component.reusable_composable.MidSizeTextComposable
+import ireader.ui.component.reusable_composable.SmallTextComposable
 import ireader.ui.home.explore.viewmodel.ExploreViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(
     ExperimentalFoundationApi::class, ExperimentalMaterialApi::class,

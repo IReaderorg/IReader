@@ -22,8 +22,9 @@ android {
 
 dependencies {
     implementation(project(Modules.coreApi))
+    implementation(project(Modules.domain))
 
-    implementation(project(Modules.commonModels))
+
     implementation(project(Modules.commonResources))
 
 

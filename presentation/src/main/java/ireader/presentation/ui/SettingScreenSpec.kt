@@ -6,6 +6,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChromeReaderMode
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Tune
@@ -73,6 +74,12 @@ object SettingScreenSpec : ScreenSpec {
                     Icons.Default.Security,
                 ) {
                     controller.navController.navigate(SecuritySettingSpec.navHostRoute)
+                },
+                SettingsSection(
+                    R.string.repository,
+                    Icons.Default.Extension,
+                ) {
+                    controller.navController.navigate(RepositoryScreenSpec.navHostRoute)
                 },
                 SettingsSection(
                     R.string.advance_setting,

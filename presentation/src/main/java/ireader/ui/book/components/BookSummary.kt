@@ -43,7 +43,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowRow
-import ireader.common.extensions.copyToClipboard
+import ireader.domain.utils.extensions.copyToClipboard
 import ireader.core.ui.modifier.clickableNoIndication
 import ireader.presentation.R
 

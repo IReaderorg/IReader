@@ -13,14 +13,14 @@ import androidx.compose.ui.platform.LocalConfiguration
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.StateFlow
-import ireader.common.models.DisplayMode
-import ireader.common.models.DisplayMode.Companion.displayMode
 import ireader.common.models.entities.BookItem
 import ireader.common.models.entities.CategoryWithCount
+import ireader.domain.models.DisplayMode
+import ireader.domain.models.DisplayMode.Companion.displayMode
 import ireader.ui.component.list.LayoutComposable
 import ireader.ui.component.list.scrollbars.LazyColumnScrollbar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
@@ -41,7 +41,7 @@ internal fun LibraryPager(
     showInLibraryBadge: Boolean = false,
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
 
-) {
+    ) {
     HorizontalPager(
         count = pageCount,
         state = pagerState,

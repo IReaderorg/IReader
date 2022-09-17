@@ -27,8 +27,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.common.models.entities.BaseBook
+import ireader.domain.models.BookCover
 import ireader.ui.component.components.BookImageComposable
-import ireader.common.models.BookCover
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -105,15 +105,16 @@ fun BookImage(
         if (comfortableMode) {
             Text(
                 modifier = Modifier
-                    .padding(bottom = 8.dp)
+                    .padding(bottom = 2.dp)
                     .fillMaxWidth(),
                 text = book.title,
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
-                color = Color.White,
-                maxLines = 2
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 2,
+
             )
         }
     }

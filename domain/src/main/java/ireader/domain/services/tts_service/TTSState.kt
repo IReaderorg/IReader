@@ -13,7 +13,7 @@ import ireader.common.models.entities.CatalogLocal
 import ireader.common.models.entities.Chapter
 import ireader.core.api.source.Source
 import ireader.core.api.source.model.Text
-import ireader.core.ui.theme.prefs.IReaderVoice
+import ireader.domain.preferences.models.prefs.IReaderVoice
 import ireader.domain.services.tts_service.media_player.TTSService
 import org.koin.core.annotation.Factory
 import java.util.Locale

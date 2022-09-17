@@ -28,8 +28,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.common.models.entities.BookItem
+import ireader.domain.models.BookCover
 import ireader.ui.component.components.BookImageComposable
-import ireader.common.models.BookCover
 
 @Composable
 fun LinearBookItem(

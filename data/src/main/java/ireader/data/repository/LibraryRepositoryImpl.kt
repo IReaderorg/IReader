@@ -8,9 +8,12 @@ import ireader.common.models.entities.Book
 import ireader.common.models.entities.LibraryBook
 import ireader.common.models.library.LibrarySort
 import ireader.data.book.booksMapper
+import ireader.data.book.getLibraryMapper
 import ireader.data.book.libraryManga
+import ireader.data.history.historyMapper
 import ireader.data.local.DatabaseHandler
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 
 
 class LibraryRepositoryImpl(
@@ -27,21 +30,23 @@ class LibraryRepositoryImpl(
 
     private fun Database.getLibrary(sort: LibrarySort): Query<LibraryBook> {
         return when (sort.type) {
-            LibrarySort.Type.Title -> bookQueries.getLatestByChapterUploadDate(libraryManga)
-            LibrarySort.Type.LastRead -> bookQueries.getLatestByLastRead(libraryManga)
+            LibrarySort.Type.Title -> bookQueries.getLibrary(getLibraryMapper)
+            LibrarySort.Type.LastRead -> {
+                bookQueries.getLibrary(getLibraryMapper)
+            }
 
-            LibrarySort.Type.LastUpdated -> bookQueries.getLatestByChapterUploadDate(libraryManga)
+            LibrarySort.Type.LastUpdated -> bookQueries.getLibrary(getLibraryMapper)
 
-            LibrarySort.Type.Unread -> bookQueries.getLatestByChapterUploadDate(libraryManga)
+            LibrarySort.Type.Unread -> bookQueries.getLibrary(getLibraryMapper)
 
-            LibrarySort.Type.TotalChapters -> bookQueries.getLatestByChapterUploadDate(libraryManga)
+            LibrarySort.Type.TotalChapters -> bookQueries.getLibrary(getLibraryMapper)
 
-            LibrarySort.Type.Source -> bookQueries.getLatestByChapterUploadDate(libraryManga)
+            LibrarySort.Type.Source -> bookQueries.getLibrary(getLibraryMapper)
 
             LibrarySort.Type.DateAdded
-            -> bookQueries.getLatestByChapterUploadDate(libraryManga)
+            -> bookQueries.getLibrary(getLibraryMapper)
             LibrarySort.Type.DateFetched
-            -> bookQueries.getLatestByChapterFetchDate(libraryManga)
+            -> bookQueries.getLibrary(getLibraryMapper)
         }
     }
 
@@ -56,10 +61,20 @@ class LibraryRepositoryImpl(
         }
     }
 
-    private fun List<LibraryBook>.sortWith(sort: LibrarySort): List<LibraryBook> {
+    private suspend fun List<LibraryBook>.sortWith(sort: LibrarySort): List<LibraryBook> {
+
+
+
+
         return when (sort.type) {
             LibrarySort.Type.Title -> this.sortedBy { it.title }
-            LibrarySort.Type.LastRead -> this
+            LibrarySort.Type.LastRead -> {
+                val lastReads : List<LibraryBook> =
+                    handler.awaitList {
+                        bookQueries.getLastRead(libraryManga)
+                    }
+                (lastReads + this).distinctBy { it.id }
+            }
 
             LibrarySort.Type.LastUpdated -> this.sortedBy { it.lastUpdate }
 
@@ -70,9 +85,21 @@ class LibraryRepositoryImpl(
             LibrarySort.Type.Source -> this.sortedBy { it.sourceId }
 
             LibrarySort.Type.DateAdded
-            -> this
+            -> {
+                val dateAdded : List<LibraryBook> =
+                    handler.awaitList {
+                        bookQueries.getLatestByChapterUploadDate(libraryManga)
+                    }
+                (dateAdded + this).distinctBy { it.id }
+            }
             LibrarySort.Type.DateFetched
-            -> this
+            ->  {
+                val dateFetched : List<LibraryBook> =
+                    handler.awaitList {
+                        bookQueries.getLatestByChapterFetchDate(libraryManga)
+                    }
+                (dateFetched + this).distinctBy { it.id }
+            }
         }
     }
 

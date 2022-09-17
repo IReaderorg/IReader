@@ -14,12 +14,11 @@ import androidx.compose.ui.res.stringResource
 import ireader.ui.component.Controller
 import ireader.ui.component.components.SearchToolbar
 import ireader.ui.component.reusable_composable.AppIconButton
-import ireader.core.ui.theme.FontType
-import ireader.core.ui.theme.getDefaultFont
+import ireader.domain.preferences.models.FontType
+import ireader.domain.preferences.models.getDefaultFont
 import ireader.ui.settings.font_screens.FontScreen
 import ireader.ui.settings.font_screens.FontScreenViewModel
 import ireader.presentation.R
-import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalMaterial3Api

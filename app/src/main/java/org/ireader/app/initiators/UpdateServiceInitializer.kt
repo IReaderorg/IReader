@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import org.ireader.app.BuildConfig
-import ireader.core.ui.preferences.AppPreferences
+import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.services.update_service.UpdateService
 import org.koin.core.annotation.Factory
 

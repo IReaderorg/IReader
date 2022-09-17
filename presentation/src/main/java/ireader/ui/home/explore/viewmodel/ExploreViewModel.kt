@@ -1,28 +1,26 @@
 package ireader.ui.home.explore.viewmodel
 
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import ireader.common.extensions.DefaultPaginator
-import ireader.common.extensions.replaceFirst
-import ireader.common.resources.SourceNotFoundException
-import ireader.common.models.DisplayMode
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.BookItem
 import ireader.common.models.entities.toBook
+import ireader.common.resources.SourceNotFoundException
 import ireader.common.resources.UiText
 import ireader.core.api.log.Log
 import ireader.core.api.source.model.Filter
 import ireader.core.api.source.model.MangasPageInfo
-import ireader.domain.catalogs.interactor.GetLocalCatalogs
-import ireader.core.ui.exceptionHandler
 import ireader.core.ui.viewmodel.BaseViewModel
-import ireader.domain.usecases.local.LocalGetBookUseCases
+import ireader.domain.catalogs.interactor.GetLocalCatalogs
+import ireader.domain.models.DisplayMode
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.preferences.reader_preferences.BrowseScreenPrefUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
-import ireader.ui.component.Controller
+import ireader.domain.utils.exceptionHandler
+import ireader.domain.utils.extensions.DefaultPaginator
 import ireader.presentation.R
+import ireader.ui.component.Controller
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel

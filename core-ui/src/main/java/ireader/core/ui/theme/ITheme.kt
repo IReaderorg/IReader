@@ -4,7 +4,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 import ireader.common.models.theme.ExtraColors
-import ireader.common.models.theme.Theme
+import ireader.domain.models.theme.Theme
 import ireader.core.ui.theme.themes.DarkThemeColorsStrawberries
 import ireader.core.ui.theme.themes.DarkThemeColorsTachiyomi
 import ireader.core.ui.theme.themes.DarkThemeColorsTako

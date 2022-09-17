@@ -8,8 +8,8 @@
 //
 //package ireader.common.resources
 //
+//
 //import androidx.compose.runtime.Composable
-//import androidx.compose.runtime.ReadOnlyComposable
 //import androidx.compose.ui.platform.LocalContext
 //import dev.icerock.moko.resources.PluralsResource
 //import dev.icerock.moko.resources.StringResource
@@ -20,26 +20,26 @@
 //import dev.icerock.moko.resources.desc.StringDesc
 //
 //@Composable
-//@ReadOnlyComposable
 //actual fun localize(resource: StringResource): String {
 //  return StringDesc.Resource(resource).toString(LocalContext.current)
 //}
 //
 //@Composable
-//@ReadOnlyComposable
 //actual fun localize(resource: StringResource, vararg args: Any): String {
 //  return StringDesc.ResourceFormatted(resource, *args).toString(LocalContext.current)
 //}
 //
 //@Composable
-//@ReadOnlyComposable
 //actual fun localizePlural(resource: PluralsResource, quantity: Int): String {
 //  return StringDesc.Plural(resource, quantity).toString(LocalContext.current)
 //}
 //
 //@Composable
-//@ReadOnlyComposable
 //actual fun localizePlural(resource: PluralsResource, quantity: Int, vararg args: Any): String {
 //  return StringDesc.PluralFormatted(resource, quantity, *args).toString(LocalContext.current)
 //}
+//
+//
+//@Composable
+//fun read() {}
 //

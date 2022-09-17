@@ -4,7 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewModelScope
 import ireader.common.models.entities.Chapter
 import ireader.common.models.entities.UpdatesWithRelations
-import ireader.core.ui.preferences.UiPreferences
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.core.ui.viewmodel.BaseViewModel
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases

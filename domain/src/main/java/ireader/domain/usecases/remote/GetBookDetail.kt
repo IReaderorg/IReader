@@ -1,9 +1,9 @@
 package ireader.domain.usecases.remote
 
-import ireader.common.extensions.convertLongToTime
-import ireader.common.extensions.currentTimeToLong
+import ireader.domain.utils.extensions.convertLongToTime
+import ireader.domain.utils.extensions.currentTimeToLong
 import kotlinx.coroutines.CancellationException
-import ireader.common.extensions.withIOContext
+import ireader.domain.utils.extensions.withIOContext
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.Book.Companion.toBookInfo
 import ireader.common.models.entities.CatalogLocal
@@ -13,7 +13,9 @@ import ireader.common.resources.SourceNotFoundException
 import ireader.domain.usecases.local.book_usecases.updateBook
 import ireader.core.api.log.Log
 import ireader.core.api.source.model.CommandList
-import ireader.core.ui.exceptionHandler
+import ireader.domain.utils.exceptionHandler
+import ireader.domain.utils.extensions.async.withIOContext
+import ireader.domain.utils.extensions.currentTimeToLong
 import org.koin.core.annotation.Factory
 
 @Factory
@@ -26,7 +28,6 @@ class GetBookDetail() {
         commands: CommandList = emptyList()
     ) {
         val source = catalog?.source ?: throw SourceNotFoundException()
-        withIOContext {
             kotlin.runCatching {
                 try {
                     Log.debug { "Timber: Remote Book Detail for ${book.title} Was called" }
@@ -50,6 +51,5 @@ class GetBookDetail() {
             }.getOrElse { e ->
                 onError(exceptionHandler(e))
             }
-        }
     }
 }

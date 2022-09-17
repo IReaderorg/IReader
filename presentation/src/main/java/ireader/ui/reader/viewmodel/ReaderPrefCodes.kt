@@ -7,11 +7,11 @@ import android.view.WindowManager
 import androidx.compose.ui.graphics.Color
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import ireader.common.extensions.brightness
-import ireader.common.extensions.findComponentActivity
-import ireader.common.extensions.hideSystemUI
-import ireader.common.extensions.isImmersiveModeEnabled
-import ireader.common.extensions.showSystemUI
+import ireader.domain.utils.extensions.brightness
+import ireader.domain.utils.extensions.findComponentActivity
+import ireader.domain.utils.extensions.hideSystemUI
+import ireader.domain.utils.extensions.isImmersiveModeEnabled
+import ireader.domain.utils.extensions.showSystemUI
 import org.koin.core.annotation.Factory
 import kotlin.time.Duration.Companion.seconds
 

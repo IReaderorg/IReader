@@ -16,10 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import ireader.ui.book.viewmodel.BookDetailViewModel
 import ireader.common.models.entities.Chapter
-import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.R
+import ireader.ui.book.viewmodel.BookDetailViewModel
+import ireader.ui.component.reusable_composable.AppIconButton
 
 @Composable
 fun ChapterBar(

@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
 import ireader.common.models.entities.Book
-import ireader.common.models.BookCover
+import ireader.domain.models.BookCover
 
 @Composable
 fun BoxScope.BookHeaderImage(

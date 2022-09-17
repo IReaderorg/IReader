@@ -3,10 +3,10 @@ package org.ireader.app.di
 import android.content.Context
 import ireader.core.api.db.Transactions
 import ireader.core.api.http.WebViewCookieJar
-import ireader.core.ui.preferences.AppPreferences
-import ireader.core.ui.preferences.LibraryPreferences
-import ireader.core.ui.preferences.ReaderPreferences
-import ireader.core.ui.preferences.UiPreferences
+import ireader.domain.preferences.prefs.AppPreferences
+import ireader.domain.preferences.prefs.LibraryPreferences
+import ireader.domain.preferences.prefs.ReaderPreferences
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.data.repository.*
 import ireader.domain.usecases.download.DownloadUseCases
 import ireader.domain.usecases.download.delete.DeleteAllSavedDownload

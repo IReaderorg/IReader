@@ -37,10 +37,15 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
-import kotlinx.coroutines.launch
-import ireader.common.extensions.launchIO
-import ireader.common.models.theme.ReaderTheme
+import ireader.domain.models.theme.ReaderTheme
 import ireader.common.resources.UiText
+import ireader.core.ui.theme.ReaderTheme
+import ireader.core.ui.ui.Colour.contentColor
+import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.preferences.models.FontType
+import ireader.domain.preferences.prefs.ReadingMode
+import ireader.domain.utils.extensions.launchIO
+import ireader.presentation.R
 import ireader.ui.component.components.Components
 import ireader.ui.component.components.component.ChipChoicePreference
 import ireader.ui.component.components.component.ChipPreference
@@ -50,14 +55,8 @@ import ireader.ui.component.components.component.SwitchPreference
 import ireader.ui.component.components.setupUiComponent
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
-import ireader.core.ui.preferences.PreferenceValues
-import ireader.core.ui.preferences.ReadingMode
-import ireader.core.ui.theme.FontType
-import ireader.core.ui.theme.ReaderTheme
-import ireader.core.ui.ui.Colour.contentColor
-import ireader.core.ui.ui.PreferenceTextAlignment
-import ireader.presentation.R
 import ireader.ui.reader.viewmodel.ReaderScreenViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
 @Composable
@@ -68,7 +67,7 @@ fun ReaderSettingMainLayout(
     onToggleAutoBrightness: () -> Unit,
     onChangeBrightness: (Float) -> Unit,
     onBackgroundChange: (themeId: Long) -> Unit,
-    onTextAlign: (PreferenceTextAlignment) -> Unit
+    onTextAlign: (PreferenceValues.PreferenceTextAlignment) -> Unit
 ) {
     val pagerState = rememberPagerState()
     val context = LocalContext.current
@@ -152,8 +151,8 @@ fun ReaderSettingMainLayout(
                     title = stringResource(id = R.string.alignment),
                     onValueChange = {
                         when (it) {
-                            0 -> vm.scrollIndicatorAlignment.value = PreferenceTextAlignment.Right
-                            1 -> vm.scrollIndicatorAlignment.value = PreferenceTextAlignment.Left
+                            0 -> vm.scrollIndicatorAlignment.value = PreferenceValues.PreferenceTextAlignment.Right
+                            1 -> vm.scrollIndicatorAlignment.value = PreferenceValues.PreferenceTextAlignment.Left
                         }
                     },
                     selected = vm.scrollIndicatorAlignment.value.ordinal
@@ -241,33 +240,33 @@ fun ReaderSettingMainLayout(
                                         imageVector = Icons.Default.FormatAlignLeft,
                                         contentDescription = stringResource(R.string.text_align_left),
                                         onClick = {
-                                            onTextAlign(PreferenceTextAlignment.Left)
+                                            onTextAlign(PreferenceValues.PreferenceTextAlignment.Left)
                                         },
-                                        tint = if (vm.textAlignment.value == PreferenceTextAlignment.Left) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                        tint = if (vm.textAlignment.value == PreferenceValues.PreferenceTextAlignment.Left) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                                     )
                                     AppIconButton(
                                         imageVector = Icons.Default.FormatAlignCenter,
                                         contentDescription = stringResource(R.string.text_align_center),
                                         onClick = {
-                                            onTextAlign(PreferenceTextAlignment.Center)
+                                            onTextAlign(PreferenceValues.PreferenceTextAlignment.Center)
                                         },
-                                        tint = if (vm.textAlignment.value == PreferenceTextAlignment.Center) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                        tint = if (vm.textAlignment.value == PreferenceValues.PreferenceTextAlignment.Center) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                                     )
                                     AppIconButton(
                                         imageVector = Icons.Default.FormatAlignJustify,
                                         contentDescription = stringResource(R.string.text_align_justify),
                                         onClick = {
-                                            onTextAlign(PreferenceTextAlignment.Justify)
+                                            onTextAlign(PreferenceValues.PreferenceTextAlignment.Justify)
                                         },
-                                        tint = if (vm.textAlignment.value == PreferenceTextAlignment.Justify) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                        tint = if (vm.textAlignment.value == PreferenceValues.PreferenceTextAlignment.Justify) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                                     )
                                     AppIconButton(
                                         imageVector = Icons.Default.FormatAlignRight,
                                         contentDescription = stringResource(R.string.text_align_right),
                                         onClick = {
-                                            onTextAlign(PreferenceTextAlignment.Right)
+                                            onTextAlign(PreferenceValues.PreferenceTextAlignment.Right)
                                         },
-                                        tint = if (vm.textAlignment.value == PreferenceTextAlignment.Right) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                        tint = if (vm.textAlignment.value == PreferenceValues.PreferenceTextAlignment.Right) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                                     )
                                 }
                             }

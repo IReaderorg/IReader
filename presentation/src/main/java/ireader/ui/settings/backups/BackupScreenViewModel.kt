@@ -3,18 +3,19 @@ package ireader.ui.settings.backups
 import android.content.Intent
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.encodeToJsonElement
-import ireader.common.extensions.convertLongToTime
 import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.domain.models.BackUpBook
 import ireader.domain.usecases.backup.CreateBackup
 import ireader.domain.usecases.backup.RestoreBackup
 import ireader.domain.usecases.local.LocalGetBookUseCases
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
+import ireader.domain.utils.extensions.convertLongToTime
 import ireader.ui.settings.SettingState
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToJsonElement
 import org.koin.android.annotation.KoinViewModel
-import java.util.Calendar
+import java.util.*
 
 
 @KoinViewModel
@@ -55,13 +56,13 @@ class BackupScreenViewModel(
     }
 
     suspend fun getAllBooks(): String {
-        val list = mutableListOf<ireader.common.models.BackUpBook>()
+        val list = mutableListOf<BackUpBook>()
         val books = booksUseCasa.findAllInLibraryBooks()
 
         val chapters = chapterUseCase.findAllInLibraryChapters()
         books.forEach { book ->
             list.add(
-                ireader.common.models.BackUpBook(
+                BackUpBook(
                     book = book,
                     chapters.filter { it.bookId == book.id }
                 )
@@ -71,7 +72,7 @@ class BackupScreenViewModel(
         return Json.Default.encodeToJsonElement(list).toString()
     }
 
-    suspend fun insertBackup(list: List<ireader.common.models.BackUpBook>) {
+    suspend fun insertBackup(list: List<BackUpBook>) {
         val books = list.map { it.book }
 
         val chapters = list.map { it.chapters }.flatten()

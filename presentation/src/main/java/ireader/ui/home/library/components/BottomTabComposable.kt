@@ -10,11 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
-import ireader.ui.home.library.viewmodel.LibraryViewModel
-import ireader.common.models.DisplayMode
 import ireader.common.models.library.LibraryFilter
 import ireader.common.models.library.LibrarySort
+import ireader.domain.models.DisplayMode
 import ireader.presentation.R
+import ireader.ui.home.library.viewmodel.LibraryViewModel
 
 @ExperimentalMaterialApi
 @ExperimentalPagerApi

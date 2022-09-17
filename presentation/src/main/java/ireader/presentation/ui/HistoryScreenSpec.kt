@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 
 import androidx.navigation.NamedNavArgument
-import ireader.common.extensions.async.viewModelIOCoroutine
+import ireader.domain.utils.extensions.async.viewModelIOCoroutine
 import ireader.ui.component.Controller
 import ireader.ui.component.reusable_composable.WarningAlert
 import ireader.presentation.ui.util.NavigationArgs

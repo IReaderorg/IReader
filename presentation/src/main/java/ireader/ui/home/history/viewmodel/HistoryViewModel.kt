@@ -5,29 +5,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.insertSeparators
 import androidx.paging.map
-import ireader.common.extensions.asRelativeTimeString
-import ireader.common.extensions.toDateKey
-import ireader.common.extensions.toLocalDate
 import ireader.common.models.entities.HistoryWithRelations
-import ireader.core.ui.preferences.PreferenceValues
-import kotlinx.coroutines.launch
-import ireader.ui.component.reusable_composable.WarningAlertData
-import ireader.core.ui.preferences.UiPreferences
 import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.history.HistoryUseCase
+import ireader.domain.utils.extensions.asRelativeTimeString
+import ireader.domain.utils.extensions.toLocalDate
+import ireader.ui.component.reusable_composable.WarningAlertData
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.toLocalDate
 import org.koin.android.annotation.KoinViewModel
-import java.util.*
 
 @KoinViewModel
 class HistoryViewModel(

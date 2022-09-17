@@ -37,7 +37,7 @@ import ireader.core.api.log.Log
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
-import ireader.core.ui.preferences.ReaderPreferences
+import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.R
 import ireader.domain.notification.Notifications
 import ireader.domain.services.tts_service.Player

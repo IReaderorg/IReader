@@ -14,6 +14,8 @@ import androidx.core.graphics.drawable.toBitmap
 import coil.ImageLoader
 import coil.request.ImageRequest
 import ireader.domain.R
+import ireader.domain.utils.extensions.buildNotificationChannel
+import ireader.domain.utils.extensions.buildNotificationChannelGroup
 
 /**
  * Class to manage the basic information of all the notifications used in the app.
@@ -114,19 +116,19 @@ object Notifications {
 
         notificationService.createNotificationChannelGroupsCompat(
             listOf(
-                ireader.common.extensions.buildNotificationChannelGroup(GROUP_BACKUP_RESTORE) {
+                buildNotificationChannelGroup(GROUP_BACKUP_RESTORE) {
                     setName(context.getString(R.string.label_backup))
                 },
-                ireader.common.extensions.buildNotificationChannelGroup(GROUP_DOWNLOADER) {
+                buildNotificationChannelGroup(GROUP_DOWNLOADER) {
                     setName(context.getString(R.string.download_notifier_downloader_title))
                 },
-                ireader.common.extensions.buildNotificationChannelGroup(GROUP_LIBRARY) {
+                buildNotificationChannelGroup(GROUP_LIBRARY) {
                     setName(context.getString(R.string.label_library))
                 },
-                ireader.common.extensions.buildNotificationChannelGroup(GROUP_TTS) {
+                buildNotificationChannelGroup(GROUP_TTS) {
                     setName(context.getString(R.string.label_text_reader))
                 },
-                ireader.common.extensions.buildNotificationChannelGroup(GROUP_APK_UPDATES) {
+                buildNotificationChannelGroup(GROUP_APK_UPDATES) {
                     setName(context.getString(R.string.label_recent_updates))
                 },
             )
@@ -134,13 +136,13 @@ object Notifications {
 
         notificationService.createNotificationChannelsCompat(
             listOf(
-                ireader.common.extensions.buildNotificationChannel(
+                buildNotificationChannel(
                     CHANNEL_COMMON,
                     IMPORTANCE_LOW
                 ) {
                     setName(context.getString(R.string.channel_common))
                 },
-                ireader.common.extensions.buildNotificationChannel(
+                buildNotificationChannel(
                     CHANNEL_TTS,
                     IMPORTANCE_LOW
                 ) {
@@ -148,7 +150,7 @@ object Notifications {
                     setGroup(GROUP_TTS)
                     setShowBadge(false)
                 },
-                ireader.common.extensions.buildNotificationChannel(
+                buildNotificationChannel(
                     CHANNEL_TTS_ERROR,
                     IMPORTANCE_LOW
                 ) {
@@ -156,7 +158,7 @@ object Notifications {
                     setGroup(GROUP_TTS)
                     setShowBadge(false)
                 },
-                ireader.common.extensions.buildNotificationChannel(
+                buildNotificationChannel(
                     CHANNEL_LIBRARY_PROGRESS,
                     IMPORTANCE_LOW
                 ) {
@@ -164,7 +166,7 @@ object Notifications {
                     setGroup(GROUP_LIBRARY)
                     setShowBadge(false)
                 },
-                ireader.common.extensions.buildNotificationChannel(
+                buildNotificationChannel(
                     CHANNEL_LIBRARY_ERROR,
                     IMPORTANCE_LOW
                 ) {
@@ -173,13 +175,13 @@ object Notifications {
                     setShowBadge(false)
                 },
 
-                ireader.common.extensions.buildNotificationChannel(
+                buildNotificationChannel(
                     CHANNEL_NEW_CHAPTERS,
                     IMPORTANCE_DEFAULT
                 ) {
                     setName(context.getString(R.string.channel_new_chapters))
                 },
-                ireader.common.extensions.buildNotificationChannel(
+                buildNotificationChannel(
                     CHANNEL_DOWNLOADER_PROGRESS,
                     IMPORTANCE_LOW
                 ) {
@@ -187,7 +189,7 @@ object Notifications {
                     setGroup(GROUP_DOWNLOADER)
                     setShowBadge(false)
                 },
-                ireader.common.extensions.buildNotificationChannel(
+                buildNotificationChannel(
                     CHANNEL_DOWNLOADER_COMPLETE,
                     IMPORTANCE_LOW
                 ) {
@@ -195,7 +197,7 @@ object Notifications {
                     setGroup(GROUP_DOWNLOADER)
                     setShowBadge(false)
                 },
-                ireader.common.extensions.buildNotificationChannel(
+                buildNotificationChannel(
                     CHANNEL_DOWNLOADER_ERROR,
                     IMPORTANCE_LOW
                 ) {
@@ -203,7 +205,7 @@ object Notifications {
                     setGroup(GROUP_DOWNLOADER)
                     setShowBadge(false)
                 },
-                ireader.common.extensions.buildNotificationChannel(
+                buildNotificationChannel(
                     CHANNEL_BACKUP_RESTORE_PROGRESS,
                     IMPORTANCE_LOW
                 ) {
@@ -211,7 +213,7 @@ object Notifications {
                     setGroup(GROUP_BACKUP_RESTORE)
                     setShowBadge(false)
                 },
-                ireader.common.extensions.buildNotificationChannel(
+                buildNotificationChannel(
                     CHANNEL_BACKUP_RESTORE_COMPLETE,
                     IMPORTANCE_HIGH
                 ) {
@@ -220,20 +222,20 @@ object Notifications {
                     setShowBadge(false)
                     setSound(null, null)
                 },
-                ireader.common.extensions.buildNotificationChannel(
+                buildNotificationChannel(
                     CHANNEL_CRASH_LOGS,
                     IMPORTANCE_HIGH
                 ) {
                     setName(context.getString(R.string.channel_crash_logs))
                 },
-                ireader.common.extensions.buildNotificationChannel(
+                buildNotificationChannel(
                     CHANNEL_APP_UPDATE,
                     IMPORTANCE_DEFAULT
                 ) {
                     setGroup(GROUP_APK_UPDATES)
                     setName(context.getString(R.string.channel_app_updates))
                 },
-                ireader.common.extensions.buildNotificationChannel(
+                buildNotificationChannel(
                     CHANNEL_EXTENSIONS_UPDATE,
                     IMPORTANCE_DEFAULT
                 ) {

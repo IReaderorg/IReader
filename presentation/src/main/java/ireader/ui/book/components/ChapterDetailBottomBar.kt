@@ -43,8 +43,8 @@ import ireader.ui.book.viewmodel.ChaptersFilters
 import ireader.common.resources.asString
 import ireader.ui.component.components.component.pagerTabIndicatorOffset
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
-import ireader.core.ui.preferences.ChapterDisplayMode
 import ireader.core.ui.ui.Colour.contentColor
+import ireader.domain.preferences.prefs.ChapterDisplayMode
 import ireader.presentation.R
 
 @ExperimentalPagerApi

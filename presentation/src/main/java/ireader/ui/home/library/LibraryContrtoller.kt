@@ -8,12 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewModelScope
 import com.google.accompanist.pager.ExperimentalPagerApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import ireader.ui.component.Controller
-import ireader.ui.home.library.viewmodel.LibraryViewModel
 import ireader.common.models.entities.BookItem
 import ireader.common.models.entities.toBookCategory
+import ireader.ui.component.Controller
+import ireader.ui.home.library.viewmodel.LibraryViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialApi::class)
 @Composable
@@ -24,7 +24,7 @@ fun LibraryController(
     goToReader: (BookItem) -> Unit,
     goToDetail: (BookItem) -> Unit,
 
-) {
+    ) {
 
     LibraryScreen(
         modifier = modifier,

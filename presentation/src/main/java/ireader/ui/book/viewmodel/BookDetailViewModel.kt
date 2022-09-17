@@ -10,23 +10,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.shareIn
-import ireader.common.extensions.async.withIOContext
-import ireader.common.extensions.currentTimeToLong
-import ireader.common.extensions.withUIContext
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.CatalogLocal
 import ireader.common.models.entities.Chapter
 import ireader.common.resources.UiText
 import ireader.core.api.log.Log
 import ireader.core.api.source.model.CommandList
-import ireader.domain.catalogs.interactor.GetLocalCatalog
-import ireader.core.ui.preferences.ReaderPreferences
 import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.domain.catalogs.interactor.GetLocalCatalog
+import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.usecases.epub.EpubCreator
 import ireader.domain.usecases.history.HistoryUseCase
 import ireader.domain.usecases.local.DeleteUseCase
@@ -34,14 +26,24 @@ import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.services.ServiceUseCases
+import ireader.domain.utils.extensions.async.withIOContext
+import ireader.domain.utils.extensions.withUIContext
 import ireader.presentation.R
 import ireader.ui.component.Controller
 import ireader.ui.home.explore.viewmodel.BooksState
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
-import java.util.Calendar
 import org.koin.android.annotation.KoinViewModel
+import java.util.*
 
 
 @KoinViewModel
@@ -79,7 +81,7 @@ class BookDetailViewModel(
     var layout by readerPreferences.showChapterNumberPreferences().asState()
 
     init {
-
+        booksState.book = null
         val bookId = param.bookId
         val sourceId = runBlocking {
             bookId?.let { getBookUseCases.findBookById(it)?.sourceId }
@@ -286,7 +288,7 @@ class BookDetailViewModel(
                 catalog = source,
                 onError = { message ->
                     Log.error { message.toString() }
-                    // showSnackBar(message)
+                     showSnackBar(message)
                     withUIContext {
                         chapterIsLoading = false
                     }

@@ -12,9 +12,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
 import kotlinx.datetime.Clock
-import ireader.common.extensions.AuthenticatorUtil
-import ireader.common.extensions.AuthenticatorUtil.isAuthenticationSupported
-import ireader.common.extensions.AuthenticatorUtil.startAuthentication
+import ireader.domain.utils.extensions.AuthenticatorUtil
+import ireader.domain.utils.extensions.AuthenticatorUtil.isAuthenticationSupported
+import ireader.domain.utils.extensions.AuthenticatorUtil.startAuthentication
 import ireader.common.resources.R
 import ireader.ui.component.Controller
 import ireader.ui.component.components.Components
@@ -22,8 +22,8 @@ import ireader.ui.component.components.SetupSettingComponents
 import ireader.ui.component.components.TitleToolbar
 import ireader.ui.component.components.component.ChoicePreference
 import ireader.core.api.log.Log
-import ireader.core.ui.preferences.PreferenceValues
-import ireader.core.ui.preferences.UiPreferences
+import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.core.ui.viewmodel.BaseViewModel
 import org.koin.android.annotation.KoinViewModel
 import org.koin.androidx.compose.getViewModel

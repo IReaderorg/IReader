@@ -24,6 +24,7 @@ import ireader.domain.notification.flags
 import ireader.domain.notification.setLargeIcon
 import ireader.domain.services.tts_service.Player
 import ireader.domain.services.tts_service.media_player.TTSService.Companion.ACTION_CANCEL
+import ireader.domain.utils.extensions.launchMainActivityIntent
 
 /**
  * Helper class to encapsulate code for building notifications.
@@ -182,7 +183,7 @@ class TTSNotificationBuilder constructor(
     ): PendingIntent = PendingIntent.getActivity(
         context,
         5,
-        ireader.common.extensions.launchMainActivityIntent(context)
+        launchMainActivityIntent(context)
             .apply {
                 action = Intent.ACTION_VIEW
                 data = buildReaderScreenDeepLink(

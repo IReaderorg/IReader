@@ -136,11 +136,11 @@ dependencies {
 
     implementation(project(Modules.presentation))
     implementation(project(Modules.commonResources))
-    implementation(project(Modules.commonModels))
 
 
 
-    implementation(project(Modules.commonExtensions))
+
+
 
 
     /** Firebase **/

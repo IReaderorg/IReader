@@ -5,7 +5,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import ireader.common.models.entities.Book
 import ireader.common.models.entities.CatalogLocal
 import ireader.core.api.source.HttpSource
 import ireader.core.api.source.Source

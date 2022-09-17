@@ -1,7 +1,8 @@
 package ireader.data.updates
 
-import ireader.common.models.BookCover
+
 import ireader.common.models.entities.UpdatesWithRelations
+import ireader.domain.models.BookCover
 
 val updatesMapper = {
         mangaId: Long, mangaTitle: String, chapterId: Long, chapterName: String, scanlator: String?, read: Boolean, bookmark: Boolean, source: Long, favorite: Boolean, thumbnailUrl: String?, coverLastModified: Long, dateUpload: Long, datefetch: Long,downloaded:Boolean ->

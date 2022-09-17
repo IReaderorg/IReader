@@ -43,6 +43,7 @@ class CatalogRemoteRepositoryImpl(
     private fun Database.insertBlocking(catalogs: CatalogRemote) {
         catalogQueries.insert(
             catalogs.sourceId,
+            catalogs.source,
             catalogs.name,
             catalogs.description,
             catalogs.pkgName,

@@ -2,7 +2,7 @@ package org.ireader.app.di
 
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.googlefonts.GoogleFont
-import ireader.core.ui.preferences.ReaderPreferences
+import ireader.domain.preferences.prefs.ReaderPreferences
 import org.ireader.app.R
 import org.ireader.app.initiators.AppInitializers
 import org.ireader.app.initiators.CatalogStoreInitializer

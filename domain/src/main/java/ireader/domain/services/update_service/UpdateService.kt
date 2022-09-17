@@ -10,7 +10,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import ireader.common.models.update_service_models.Release
 import ireader.common.models.update_service_models.Version
-import ireader.core.ui.preferences.AppPreferences
+import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.R
 import ireader.domain.notification.Notifications.CHANNEL_APP_UPDATE
 import ireader.domain.notification.Notifications.ID_APP_UPDATER
@@ -21,8 +21,8 @@ import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 class UpdateService  constructor(
-     private val context: Context,
-     params: WorkerParameters,
+    private val context: Context,
+    params: WorkerParameters,
     private val appPreferences: AppPreferences,
     private val api: UpdateApi,
 ) : CoroutineWorker(context, params) {

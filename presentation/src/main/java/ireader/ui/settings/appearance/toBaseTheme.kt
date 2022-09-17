@@ -1,11 +1,11 @@
 package ireader.ui.settings.appearance
 
-import ireader.common.models.theme.CustomTheme
-import ireader.common.models.theme.Theme
-import ireader.common.models.theme.toColorScheme
-import ireader.common.models.theme.toCustomColorScheme
-import ireader.common.models.theme.toCustomExtraColors
-import ireader.common.models.theme.toExtraColor
+import ireader.domain.models.theme.CustomTheme
+import ireader.domain.models.theme.Theme
+import ireader.domain.models.theme.toColorScheme
+import ireader.domain.models.theme.toCustomColorScheme
+import ireader.domain.models.theme.toCustomExtraColors
+import ireader.domain.models.theme.toExtraColor
 
 
 fun CustomTheme.toBaseTheme(): Theme {

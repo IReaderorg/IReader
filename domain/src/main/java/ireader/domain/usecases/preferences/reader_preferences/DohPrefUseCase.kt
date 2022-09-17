@@ -1,6 +1,6 @@
 package ireader.domain.usecases.preferences.reader_preferences
 
-import ireader.core.ui.preferences.AppPreferences
+import ireader.domain.preferences.prefs.AppPreferences
 import org.koin.core.annotation.Factory
 
 @Factory

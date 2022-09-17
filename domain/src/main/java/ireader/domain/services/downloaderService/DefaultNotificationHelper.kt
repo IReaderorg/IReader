@@ -23,6 +23,7 @@ import ireader.domain.notification.flags
 import ireader.domain.notification.setLargeIcon
 import ireader.domain.services.tts_service.Player
 import ireader.domain.services.tts_service.media_player.TTSService
+import ireader.domain.utils.extensions.launchMainActivityIntent
 import org.koin.core.annotation.Single
 import java.util.UUID
 
@@ -44,7 +45,7 @@ class DefaultNotificationHelper(
         bookId: Long,
         sourceId: Long,
     ): Intent {
-        return ireader.common.extensions.launchMainActivityIntent(context)
+        return launchMainActivityIntent(context)
             .apply {
                 action = Intent.ACTION_VIEW
                 data = "https://www.ireader.org/book_detail_route/$bookId/$sourceId".toUri()
@@ -60,7 +61,7 @@ class DefaultNotificationHelper(
         )
     }
 
-    val openDownloadIntent = ireader.common.extensions.launchMainActivityIntent(
+    val openDownloadIntent = launchMainActivityIntent(
         context
     )
         .apply {
@@ -342,7 +343,7 @@ class DefaultNotificationHelper(
     ): PendingIntent = PendingIntent.getActivity(
         context.applicationContext,
         5,
-        ireader.common.extensions.launchMainActivityIntent(context)
+        launchMainActivityIntent(context)
             .apply {
                 action = Intent.ACTION_VIEW
                 data = buildDownloadScreenDeepLink(

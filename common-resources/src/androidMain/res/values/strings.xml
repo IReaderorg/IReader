@@ -96,6 +96,9 @@
     <string name="updater_is_enable">Updater</string>
     <string name="show_update">Show Update</string>
     <string name="confirm_exit">Confirm Exit</string>
+    <string name="installer_mode">Installer Mode</string>
+    <string name="package_manager">Package Manager</string>
+    <string name="local_installer">Local Installer</string>
     <string name="use_auth">Require unlock</string>
     <string name="manage_notification">Manage Notification</string>
     <string name="confirm_exit_message">Press back again to exit</string>
@@ -215,6 +218,8 @@
     <string name="installation_error_incompatible">PackageManger: Incompatible with installed package</string>
     <string name="installation_error_conflicted">PackageManger: Conflicted with installed package</string>
     <string name="installation_error_blocked">PackageManger: Installer was blocked</string>
+
+    <string name="url_is_invalid">Url is invalid</string>
 
 
 
@@ -429,6 +434,7 @@
     <string name="Refreshed">Refreshed</string>
     <string name="label_more">Load More</string>
     <string name="more">More</string>
+    <string name="repository">Repository</string>
     <string name="select_all">Select All</string>
     <string name="select_inverted">Select Inverted</string>
     <string name="select_between">Select Between</string>

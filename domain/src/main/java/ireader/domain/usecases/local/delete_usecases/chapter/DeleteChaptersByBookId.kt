@@ -1,6 +1,7 @@
 package ireader.domain.usecases.local.delete_usecases.chapter
 
 import ireader.domain.data.repository.ChapterRepository
+import ireader.domain.utils.extensions.withIOContext
 import org.koin.core.annotation.Factory
 
 /**
@@ -9,7 +10,7 @@ import org.koin.core.annotation.Factory
 @Factory
 class DeleteChaptersByBookId(private val chapterRepository: ChapterRepository) {
     suspend operator fun invoke(bookId: Long) {
-        return ireader.common.extensions.withIOContext {
+        return withIOContext {
             return@withIOContext chapterRepository.deleteChaptersByBookId(bookId)
         }
     }

@@ -1,7 +1,7 @@
 package ireader.domain.services.tts_service
 
 import android.speech.tts.Voice
-import ireader.core.ui.theme.prefs.IReaderVoice
+import ireader.domain.preferences.models.prefs.IReaderVoice
 
 // @Serializable
 // data class IReaderVoice(

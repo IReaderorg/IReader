@@ -13,8 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.common.models.entities.Chapter
-import ireader.ui.component.text_related.CardTile
 import ireader.ui.component.loading.DotsFlashing
+import ireader.ui.component.text_related.CardTile
 
 @Composable
 fun ChapterContentHeader(

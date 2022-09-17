@@ -29,10 +29,11 @@ fun UserSourcesScreen(
     onClickTogglePinned: (Catalog) -> Unit,
 ) {
     val scrollState = rememberLazyListState()
+
     val usersSources = remember {
         derivedStateOf {
             vm.userSources.mapIndexed { index, sourceUiModel ->
-                Pair(index.toLong(), sourceUiModel)
+                Pair((vm.userSources.size - index).toLong(), sourceUiModel)
             }
         }
     }

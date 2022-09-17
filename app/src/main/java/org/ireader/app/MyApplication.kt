@@ -42,6 +42,7 @@ class MyApplication : Application(), KoinComponent, ImageLoaderFactory {
             androidContext(this@MyApplication)
             androidLogger()
             modules(
+                DataModule().module,
                 CatalogModule().module,
                 DatabaseInject().module,
                 LocalModule().module,

@@ -1,0 +1,30 @@
+import java.lang.Boolean;
+
+CREATE TABLE IF NOT EXISTS repository (
+_id INTEGER NOT NULL PRIMARY KEY,
+name TEXT NOT NULL,
+key TEXT NOT NULL,
+owner TEXT NOT NULL,
+source TEXT NOT NULL,
+last_update INTEGER NOT NULL,
+is_enable INTEGER AS Boolean NOT NULL DEFAULT 1
+);
+-- Insert system repo
+INSERT OR IGNORE INTO repository(_id,name,key,owner,source,last_update,is_enable) VALUES (-1,"","","","","",1);
+
+-- Disallow deletion of default category
+CREATE TRIGGER IF NOT EXISTS system_repository_delete_trigger BEFORE DELETE
+ON repository
+BEGIN SELECT CASE
+    WHEN old._id <= 0 THEN
+        RAISE(ABORT, "System Repository can't be deleted")
+    END;
+END;
+
+
+insert:
+INSERT INTO repository(name,key,owner,source,last_update,is_enable) VALUES (:name,:key,:owner,:source ,:lastUpdate,:isEnable);
+
+
+findAll:
+SELECT * FROM repository;

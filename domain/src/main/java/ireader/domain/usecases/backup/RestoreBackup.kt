@@ -20,7 +20,7 @@ import ireader.common.models.entities.BookCategory
 import ireader.common.models.entities.Chapter
 import ireader.common.resources.UiText
 import ireader.core.api.db.Transactions
-import ireader.core.ui.preferences.LibraryPreferences
+import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.domain.usecases.backup.backup.Backup
 import ireader.domain.usecases.backup.backup.BookProto
 import ireader.domain.usecases.backup.backup.CategoryProto

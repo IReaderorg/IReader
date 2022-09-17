@@ -1,11 +1,4 @@
-import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
-import org.apache.tools.ant.taskdefs.Execute.runCommand
-import org.jetbrains.kotlin.builtins.StandardNames.FqNames.target
-//import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
     repositories {
@@ -36,30 +29,11 @@ plugins {
     alias(libs.plugins.dokka) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.sqldelight) apply false
+    //alias(libs.plugins.google) apply false
+    id("nl.littlerobots.version-catalog-update") version "0.6.1"
 }
 
 
-subprojects {
-    subprojects {
-        tasks.withType<KotlinJvmCompile> {
-            kotlinOptions {
-                freeCompilerArgs = freeCompilerArgs + listOf(
-                    "-opt-in=kotlin.RequiresOptIn",
-                    "-Xjvm-default=compatibility",
-                    "-opt-in=org.mylibrary.OptInAnnotation",
-                )
-                kotlinOptions.jvmTarget = "11"
-            }
-        }
-
-        tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
-            rejectVersionIf {
-                isNonStable(candidate.version) && !isNonStable(currentVersion)
-            }
-        }
-
-    }
-}
 fun isNonStable(version: String): Boolean {
     val stableKeyword =
         listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
@@ -68,26 +42,41 @@ fun isNonStable(version: String): Boolean {
     return isStable.not()
 }
 
-
+detekt {
+    source = files("src/main/java", "src/main/kotlin")
+    parallel = false
+    ignoredBuildTypes = listOf("release")
+    basePath = projectDir.absolutePath
+    buildUponDefaultConfig = true
+    allRules = false
+    config = files("$projectDir/config/detekt.yml")
+}
+tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
+    rejectVersionIf {
+        isNonStable(candidate.version) && !isNonStable(currentVersion)
+    }
+}
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    jvmTarget = "11"
+}
+tasks.withType<io.gitlab.arturbosch.detekt.DetektCreateBaselineTask>().configureEach {
+    jvmTarget = "11"
+}
 
 subprojects {
     plugins.apply("io.gitlab.arturbosch.detekt")
-    detekt {
-        source = files("src/main/java", "src/main/kotlin")
-        parallel = false
-        ignoredBuildTypes = listOf("release")
-        basePath = projectDir.absolutePath
-        buildUponDefaultConfig = true
-        allRules = false
-        config = files("$projectDir/config/detekt.yml")
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        kotlinOptions.freeCompilerArgs += "-opt-in=org.mylibrary.OptInAnnotation"
     }
+//    plugins.withType<org.jetbrains.kotlin.gradle.plugin.KotlinMultiplatformPluginWrapper> {
+//        configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> {
+//            sourceSets.all {
+//                languageSettings.optIn("org.mylibrary.OptInAnnotation")
+//            }
+//        }
+//    }
 
-    tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-        jvmTarget = "11"
-    }
-    tasks.withType<io.gitlab.arturbosch.detekt.DetektCreateBaselineTask>().configureEach {
-        jvmTarget = "11"
-    }
+
     tasks.withType<Test> {
         useJUnitPlatform()
     }
@@ -121,7 +110,6 @@ subprojects {
 
             dependencies {
                 add("coreLibraryDesugaring", libs.desugarJdkLibs)
-//                add("detektPlugins ", libs.detekt)
             }
         }
 

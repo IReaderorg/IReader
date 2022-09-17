@@ -46,7 +46,7 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import kotlinx.coroutines.launch
 import ireader.ui.home.library.viewmodel.LibraryViewModel
-import ireader.common.models.DisplayMode
+import ireader.domain.models.DisplayMode
 import ireader.common.models.library.LibraryFilter
 import ireader.common.models.library.LibrarySort
 import ireader.common.resources.asString

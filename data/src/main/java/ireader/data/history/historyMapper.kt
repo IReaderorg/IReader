@@ -1,8 +1,8 @@
 package ireader.data.history
 
-import ireader.common.models.BookCover
 import ireader.common.models.entities.History
 import ireader.common.models.entities.HistoryWithRelations
+import ireader.domain.models.BookCover
 
 import java.util.Date
 

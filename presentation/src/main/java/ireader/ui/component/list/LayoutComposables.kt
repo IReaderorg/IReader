@@ -4,13 +4,13 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import ireader.common.models.DisplayMode
 import ireader.common.models.entities.BookItem
+import ireader.core.api.source.Source
+import ireader.domain.models.DisplayMode
+import ireader.ui.component.list.layouts.ComfortableGridLayout
 import ireader.ui.component.list.layouts.CompactGridLayoutComposable
 import ireader.ui.component.list.layouts.CoverOnlyGrid
-import ireader.ui.component.list.layouts.GridLayoutComposable
 import ireader.ui.component.list.layouts.LinearListDisplay
-import ireader.core.api.source.Source
 
 
 @Composable
@@ -39,7 +39,7 @@ fun LayoutComposable(
 ) {
     when (layout) {
         DisplayMode.ComfortableGrid -> {
-            GridLayoutComposable(
+            ComfortableGridLayout(
                 books = books,
                 onClick = { book ->
                     onClick(book)

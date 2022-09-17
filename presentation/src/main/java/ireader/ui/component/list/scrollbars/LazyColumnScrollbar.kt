@@ -58,7 +58,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import kotlinx.coroutines.launch
-import ireader.core.ui.preferences.PreferenceValues
+import ireader.domain.models.prefs.PreferenceValues
 import kotlin.math.floor
 
 

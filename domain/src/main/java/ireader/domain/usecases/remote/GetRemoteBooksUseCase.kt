@@ -1,12 +1,12 @@
 package ireader.domain.usecases.remote
 
+import ireader.common.models.entities.CatalogLocal
 import ireader.common.resources.EmptyQuery
 import ireader.common.resources.SourceNotFoundException
-import ireader.common.extensions.withIOContext
-import ireader.common.models.entities.CatalogLocal
 import ireader.core.api.source.model.Filter
 import ireader.core.api.source.model.Listing
 import ireader.core.api.source.model.MangasPageInfo
+import ireader.domain.utils.extensions.async.withIOContext
 import org.koin.core.annotation.Factory
 
 @Factory

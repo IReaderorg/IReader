@@ -22,7 +22,7 @@ import ireader.ui.component.components.LogoHeader
 import ireader.ui.component.components.component.Divider
 import ireader.ui.component.components.component.PreferenceRow
 import ireader.ui.component.components.component.SwitchPreference
-import ireader.core.ui.preferences.UiPreferences
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.core.ui.viewmodel.BaseViewModel
 import ireader.presentation.R
 import org.koin.android.annotation.KoinViewModel
@@ -33,7 +33,6 @@ fun MoreScreen(
     modifier: Modifier = Modifier,
     vm: MainSettingScreenViewModel,
     onDownloadScreen: () -> Unit,
-    onAppearanceScreen: () -> Unit,
     onBackupScreen: () -> Unit,
     onCategory: () -> Unit,
     onSettings: () -> Unit,

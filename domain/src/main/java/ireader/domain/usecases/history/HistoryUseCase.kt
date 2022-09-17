@@ -4,7 +4,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import ireader.domain.data.repository.HistoryRepository
-import ireader.common.extensions.toLocalDate
+import ireader.domain.utils.extensions.toLocalDate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.datetime.LocalDate

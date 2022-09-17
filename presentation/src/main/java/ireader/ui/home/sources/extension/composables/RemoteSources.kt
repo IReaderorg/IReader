@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
@@ -70,8 +69,6 @@ fun RemoteSourcesScreen(
             (installed.value + remotes.value).mapIndexed { index, sourceUiModel ->  Pair(index,sourceUiModel) }
         }
     }
-    ireader.core.api.log.Log.error { allCatalogs.value.toString()}
-
     val scrollState = rememberLazyListState()
     val swipeState = rememberSwipeRefreshState(isRefreshing = vm.isRefreshing)
 

@@ -2,11 +2,10 @@ package org.ireader.app.di
 
 import androidx.compose.ui.text.ExperimentalTextApi
 import ireader.core.api.prefs.PreferenceStore
-import ireader.core.ui.preferences.AppPreferences
-import ireader.core.ui.preferences.LibraryPreferences
-import ireader.core.ui.preferences.UiPreferences
+import ireader.domain.preferences.prefs.AppPreferences
+import ireader.domain.preferences.prefs.LibraryPreferences
+import ireader.domain.preferences.prefs.UiPreferences
 import org.koin.core.annotation.ComponentScan
-import ireader.core.api.di.ISingleton
 import org.koin.core.annotation.Single
 
 @org.koin.core.annotation.Module

@@ -119,21 +119,22 @@ GROUP BY source;
 getLibrary:
 SELECT M.*, COALESCE(MC.category_id, 0) AS category
 FROM (
-    SELECT book.*, COALESCE(C.unreadCount, 0) AS unread_count, COALESCE(R.readCount, 0) AS read_count
+    SELECT book.*, COALESCE(UR.unreadCount, 0) AS unread_count, COALESCE(R.readCount, 0) AS read_count
     FROM book
     LEFT JOIN (
         SELECT chapter.book_id, COUNT(*) AS unreadCount
         FROM chapter
         WHERE chapter.read = 0
         GROUP BY chapter.book_id
-    ) AS C
-    ON book._id = C.book_id
+    ) AS UR
+    ON book._id = UR.book_id
     LEFT JOIN (
         SELECT chapter.book_id, COUNT(*) AS readCount
         FROM chapter
         WHERE chapter.read = 1
         GROUP BY chapter.book_id
     ) AS R
+    ON book._id = R.book_id
     WHERE book.favorite = 1
     GROUP BY book._id
     ORDER BY book.title
@@ -151,7 +152,7 @@ SELECT book.* FROM book
  WHERE content IS NOT "";
 
 getLastRead:
-SELECT M.*, MAX(H.time_read) AS max
+SELECT M.*, MAX(H.last_read) AS max
 FROM book M
 JOIN chapter C
 ON M._id = C.book_id
@@ -159,7 +160,7 @@ JOIN history H
 ON C._id = H.chapter_id
 GROUP BY M._id
 HAVING M.favorite = 1
-ORDER BY max ASC;
+ORDER BY max DESC;
 
 getLatestByLastRead:
 SELECT M.*, MAX(H.last_read) AS max
@@ -170,7 +171,7 @@ LEFT JOIN history H
 ON H.chapter_id = C._id
 GROUP BY M._id
 HAVING favorite = 1
-ORDER BY max ASC;
+ORDER BY max DESC ;
 
 getLatestByChapterUploadDate:
 SELECT M.*, MAX(C.date_upload) AS max
@@ -179,7 +180,7 @@ JOIN chapter C
 ON M._id = C.book_id
 GROUP BY M._id
 HAVING favorite = 1
-ORDER BY max ASC;
+ORDER BY max DESC;
 
 getLatestByChapterFetchDate:
 SELECT M.*, MAX(C.date_fetch) AS max
@@ -188,7 +189,7 @@ JOIN chapter C
 ON M._id = C.book_id
 GROUP BY M._id
 HAVING favorite = 1
-ORDER BY max ASC;
+ORDER BY max DESC;
 
 deleteMangasNotInLibraryBySourceIds:
 DELETE FROM book

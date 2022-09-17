@@ -8,27 +8,21 @@
 
 package ireader.common.resources
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ReadOnlyComposable
 import dev.icerock.moko.resources.PluralsResource
 import dev.icerock.moko.resources.StringResource
 
-@Composable
-@ReadOnlyComposable
+
 @Suppress("NO_ACTUAL_FOR_EXPECT")
 expect fun localize(resource: StringResource): String
 
-@Composable
-@ReadOnlyComposable
+
 @Suppress("NO_ACTUAL_FOR_EXPECT")
 expect fun localize(resource: StringResource, vararg args: Any): String
 
-@Composable
-@ReadOnlyComposable
+
 @Suppress("NO_ACTUAL_FOR_EXPECT")
 expect fun localizePlural(resource: PluralsResource, quantity: Int): String
 
-@Composable
-@ReadOnlyComposable
+
 @Suppress("NO_ACTUAL_FOR_EXPECT")
 expect fun localizePlural(resource: PluralsResource, quantity: Int, vararg args: Any): String

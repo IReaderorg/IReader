@@ -18,8 +18,8 @@ import androidx.navigation.NamedNavArgument
 import kotlinx.coroutines.launch
 import okhttp3.Headers
 import ireader.ui.component.Controller
-import ireader.common.extensions.launchIO
-import ireader.common.extensions.replaceFirst
+import ireader.domain.utils.extensions.launchIO
+import ireader.domain.utils.extensions.replaceFirst
 import ireader.common.models.entities.toBook
 import ireader.common.models.entities.toBookItem
 import ireader.common.resources.UiText

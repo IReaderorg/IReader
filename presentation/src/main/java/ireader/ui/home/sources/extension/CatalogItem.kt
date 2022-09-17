@@ -1,6 +1,5 @@
 package ireader.ui.home.sources.extension
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -37,12 +36,12 @@ import ireader.common.models.entities.CatalogBundled
 import ireader.common.models.entities.CatalogInstalled
 import ireader.common.models.entities.CatalogLocal
 import ireader.common.models.entities.CatalogRemote
+import ireader.core.api.os.InstallStep
+import ireader.presentation.R
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
-import ireader.core.api.os.InstallStep
 import ireader.ui.home.sources.extension.composables.LetterIcon
-import ireader.presentation.R
-import java.util.Locale
+import java.util.*
 import kotlin.math.max
 
 @Composable
@@ -284,6 +283,7 @@ private fun CatalogItemPreview() {
             pkgUrl = "",
             iconUrl = "",
             nsfw = false,
+            source = -1
         ),
         onClick = {},
         onInstall = {},

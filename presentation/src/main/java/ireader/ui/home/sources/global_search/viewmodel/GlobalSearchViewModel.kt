@@ -4,7 +4,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ireader.common.extensions.replace
+import ireader.domain.utils.extensions.replace
 import ireader.common.models.entities.toBook
 import ireader.core.api.source.model.Filter
 import ireader.domain.catalogs.interactor.GetLocalCatalogs

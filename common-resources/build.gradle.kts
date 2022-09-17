@@ -1,29 +1,27 @@
-import org.jetbrains.compose.compose
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.TimeZone
+import java.util.*
 
 plugins {
-    kotlin("multiplatform")
     id("com.android.library")
+    kotlin("multiplatform")
+    id("org.jetbrains.compose")
     id("org.jetbrains.gradle.plugin.idea-ext")
 }
 kotlin {
     android()
     jvm("desktop")
     sourceSets {
-        named("commonMain") {
+        val commonMain by getting {
             dependencies {
+                api(libs.moko.core)
                 compileOnly(compose.runtime)
                 compileOnly(compose.ui)
-                api(libs.moko.core)
             }
+
         }
-        named("androidMain") {
-        }
-        named("desktopMain") {
-        }
+        val androidMain by getting
+        val desktopMain by getting
     }
 
 }
@@ -35,6 +33,12 @@ android {
         named("main") {
             res.srcDir("src/commonMain/resources")
         }
+    }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = composeLib.versions.compiler.get()
     }
     defaultConfig {
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
@@ -60,13 +64,13 @@ fun getGitSha(): String {
 }
 
 fun getBuildTime(): String {
-    val df : java.text.SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
+    val df: java.text.SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
     df.timeZone = TimeZone.getTimeZone("UTC")
     return df.format(Date())
 }
 
 fun runCommand(command: String): String {
-    val byteOut : java.io.ByteArrayOutputStream = ByteArrayOutputStream()
+    val byteOut: java.io.ByteArrayOutputStream = ByteArrayOutputStream()
     project.exec {
         commandLine = command.split(" ")
         standardOutput = byteOut

@@ -9,11 +9,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
+import ireader.domain.preferences.prefs.ChapterDisplayMode
+import ireader.presentation.R
 import ireader.ui.book.viewmodel.BookDetailViewModel
 import ireader.ui.book.viewmodel.ChapterSort
 import ireader.ui.book.viewmodel.ChaptersFilters
-import ireader.core.ui.preferences.ChapterDisplayMode
-import ireader.presentation.R
 
 @ExperimentalMaterialApi
 @ExperimentalPagerApi

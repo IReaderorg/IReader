@@ -25,12 +25,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import ireader.common.resources.UiText
+import ireader.core.ui.utils.asString
+import ireader.presentation.R
 import ireader.ui.component.components.Toolbar
 import ireader.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.ui.component.reusable_composable.BuildDropDownMenu
 import ireader.ui.component.reusable_composable.DropDownMenuItem
-import ireader.core.ui.asString
-import ireader.presentation.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

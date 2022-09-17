@@ -14,9 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ireader.common.models.entities.Book
-import ireader.ui.component.components.BookImageCover
 import ireader.core.api.source.Source
-import ireader.common.models.BookCover
+import ireader.domain.models.BookCover
+import ireader.ui.component.components.BookImageCover
 
 @Composable
 internal fun BookHeader(

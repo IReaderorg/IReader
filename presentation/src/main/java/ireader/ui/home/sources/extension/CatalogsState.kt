@@ -1,17 +1,12 @@
 package ireader.ui.home.sources.extension
 
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.referentialEqualityPolicy
 import androidx.compose.runtime.setValue
 import ireader.common.models.entities.CatalogLocal
 import ireader.common.models.entities.CatalogRemote
-import ireader.common.models.entities.SourceState
 import ireader.core.api.os.InstallStep
-import ireader.ui.home.sources.extension.SourceKeys.AVAILABLE
-import ireader.ui.home.sources.extension.SourceKeys.INSTALLED_KEY
-import ireader.ui.home.sources.extension.composables.SourceUiModel
 import org.koin.core.annotation.Single
 
 interface CatalogsState {
