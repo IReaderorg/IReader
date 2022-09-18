@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import ireader.domain.preferences.prefs.ChapterDisplayMode
+import ireader.i18n.localize
 import ireader.presentation.R
 import ireader.ui.book.viewmodel.BookDetailViewModel
 import ireader.ui.book.viewmodel.ChapterSort
@@ -31,6 +32,7 @@ fun ChapterScreenBottomTabComposable(
     vm: BookDetailViewModel
 ) {
     val context = LocalContext.current
+    localize(ireader.i18n.MR.strings.go)
     val tabs = remember {
         listOf(
             context.getString(R.string.filter),

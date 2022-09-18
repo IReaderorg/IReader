@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <plurals name="lock_after_mins">
+        <item quantity="one">After %1$s minute</item>
+        <item quantity="other">After %1$s minutes</item>
+    </plurals>
+
+    <plurals name="relative_time">
+        <item quantity="one">Yesterday</item>
+        <item quantity="other">%1$d days ago</item>
+    </plurals>
+</resources>

@@ -15,6 +15,7 @@ buildscript {
         classpath(libs.gradle.tools)
         classpath(libs.gradle.google)
         classpath(libs.gradle.firebaseCrashlytic)
+        classpath(libs.moko.gradle)
     }
 }
 
@@ -29,7 +30,7 @@ plugins {
     alias(libs.plugins.dokka) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.sqldelight) apply false
-    //alias(libs.plugins.google) apply false
+   // alias(libs.plugins.moko) apply false
     id("nl.littlerobots.version-catalog-update") version "0.6.1"
 }
 
@@ -70,13 +71,13 @@ subprojects {
             "-opt-in=org.mylibrary.OptInAnnotation"
         )
     }
-//    plugins.withType<org.jetbrains.kotlin.gradle.plugin.KotlinMultiplatformPluginWrapper> {
-//        configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> {
-//            sourceSets.all {
-//                languageSettings.optIn("org.mylibrary.OptInAnnotation")
-//            }
-//        }
-//    }
+    plugins.withType<org.jetbrains.kotlin.gradle.plugin.KotlinMultiplatformPluginWrapper> {
+        configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> {
+            sourceSets.all {
+                languageSettings.optIn("org.mylibrary.OptInAnnotation")
+            }
+        }
+    }
 
 
     tasks.withType<Test> {

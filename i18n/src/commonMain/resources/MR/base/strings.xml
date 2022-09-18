@@ -27,10 +27,7 @@
     <string name="lock_when_idle">Lock when Idle After</string>
     <string name="authentication">Authentication</string>
     <string name="authenticate_to_confirm_change">Authenticate to confirm change</string>
-    <plurals name="lock_after_mins">
-        <item quantity="one">After %1$s minute</item>
-        <item quantity="other">After %1$s minutes</item>
-    </plurals>
+
     <string name="pref_incognito_mode_summary">Pause reading history</string>
     <string name="no_app_was_found_to_lauch">Something went wrong. you don\'t have the required app.</string>
     <string name="the_downloads_was_interrupted">The Downloads was interrupted</string>
@@ -48,10 +45,7 @@
     <string name="toggle_search_mode_off">Toggle search mode off</string>
     <string name="recently">Recently</string>
     <string name="relative_time_today">Today</string>
-    <plurals name="relative_time">
-        <item quantity="one">Yesterday</item>
-        <item quantity="other">%1$d days ago</item>
-    </plurals>
+
     <string name="display_mode">Display Mode</string>
     <string name="tabs">Tabs</string>
     <string name="badge">Badge</string>
@@ -70,7 +64,7 @@
     <string name="fetch_book">Fetch Book</string>
     <string name="fetch_chapter">Fetch Chapter</string>
     <string name="fetch_chapters">Fetch Chapters</string>
-    <string name="Go">Go</string>
+    <string name="go">Go</string>
     <string name="filter">Filter</string>
     <string name="sort">Sort</string>
     <string name="search">Search</string>
@@ -431,7 +425,7 @@
     <string name="source_not_available">this Source is not available in your device.</string>
     <string name="uninstalled">Uninstalled</string>
     <string name="uninstalled_failed">Uninstalled Failed</string>
-    <string name="Refreshed">Refreshed</string>
+    <string name="refreshed">Refreshed</string>
     <string name="label_more">Load More</string>
     <string name="more">More</string>
     <string name="repository">Repository</string>

@@ -12,14 +12,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import ireader.core.source.findInstance
+import ireader.core.source.model.Command
+import ireader.presentation.R
 import ireader.ui.component.CustomTextField
 import ireader.ui.component.components.Toolbar
 import ireader.ui.component.reusable_composable.BuildDropDownMenu
 import ireader.ui.component.reusable_composable.DropDownMenuItem
 import ireader.ui.component.reusable_composable.TopAppBarBackButton
-import ireader.core.source.findInstance
-import ireader.core.source.model.Command
-import ireader.presentation.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,7 +38,8 @@ fun WebPageTopBar(
     onFetchChapters: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
-
+    ireader.i18n.MR.strings.go
+    R.string.app_name
     Toolbar(
         scrollBehavior = scrollBehavior,
         title = {
@@ -66,7 +67,7 @@ fun WebPageTopBar(
             val list =
                 mutableListOf<DropDownMenuItem>(
                     DropDownMenuItem(
-                        stringResource(R.string.Go)
+                        stringResource(R.string.go)
                     ) {
                         onGo()
                     },

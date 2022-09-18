@@ -3,32 +3,35 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 plugins {
-    id("com.android.library")
     kotlin("multiplatform")
+    id("com.android.library")
     id("org.jetbrains.compose")
+    id("dev.icerock.mobile.multiplatform-resources")
     id("org.jetbrains.gradle.plugin.idea-ext")
 }
 kotlin {
     android()
     jvm("desktop")
     sourceSets {
-        val commonMain by getting {
+       val commonMain by getting {
             dependencies {
                 api(libs.moko.core)
                 compileOnly(compose.runtime)
                 compileOnly(compose.ui)
             }
-
         }
-        val androidMain by getting
-        val desktopMain by getting
+        val androidMain by getting {
+        }
+        val desktopMain by getting {
+        }
+
     }
 
 }
 
 
 android {
-    namespace = "ireader.i18n"
+    //namespace = "ireader.i18n"
     sourceSets {
         named("main") {
             res.srcDir("src/commonMain/resources")
@@ -77,6 +80,11 @@ fun runCommand(command: String): String {
     }
     return String(byteOut.toByteArray()).trim()
 }
+multiplatformResources {
+    multiplatformResourcesPackage = "ireader.i18n"
+    this.disableStaticFrameworkWarning = true
+}
+
 idea {
     module {
         (this as ExtensionAware).configure<org.jetbrains.gradle.ext.ModuleSettings> {
@@ -85,7 +93,6 @@ idea {
                     "src/commonMain/kotlin",
                     "src/androidMain/kotlin",
                     "src/desktopMain/kotlin",
-                    "src/jvmMain/kotlin"
                 ).forEach { put(it, "ireader.i18n") }
             }
         }

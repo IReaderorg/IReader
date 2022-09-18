@@ -42,12 +42,5 @@
     <string name="failed_to_download">عملیات دانلود ناموفق بود</string>
     <string name="was_cancelled">کنسل شدند</string>
     <string name="display_mode">حالت نمایش</string>
-    <plurals name="relative_time">
-        <item quantity="one">دیروز</item>
-        <item quantity="other">%1$ روز پیش</item>
-    </plurals>
-    <plurals name="lock_after_mins">
-        <item quantity="one">بعد از %1$s دقیقه</item>
-        <item quantity="other">بعد از %1$s دقیقه</item>
-    </plurals>
+
 </resources>
