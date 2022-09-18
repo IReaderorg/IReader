@@ -28,7 +28,6 @@
     <string name="fetch_book">Récupérer le livre</string>
     <string name="fetch_chapter">Récupérer le chapitre</string>
     <string name="fetch_chapters">Récupérer les chapitres</string>
-    <string name="Go">Aller</string>
     <string name="filter">Filtrer</string>
     <string name="sort">Trier</string>
     <string name="search">Rechercher</string>
@@ -238,10 +237,6 @@
     <string name="check_the_update">Vérifier les mises à jour</string>
     <string name="confirm_exit_message">Appuyez à nouveau pour quitter</string>
     <string name="whats_new">Quoi de neuf</string>
-    <plurals name="relative_time">
-        <item quantity="one">Hier</item>
-        <item quantity="other">Il y a %1$d jours</item>
-    </plurals>
     <string name="columns">Colonnes</string>
     <string name="in_library">dans la bibliothèque</string>
     <string name="compact_layout">Affichage compact</string>
@@ -251,10 +246,6 @@
     <string name="updater_is_enable">Mises à jour</string>
     <string name="use_auth">Authentification requise</string>
     <string name="days">Heure</string>
-    <plurals name="lock_after_mins">
-        <item quantity="one">Après %1$s minute</item>
-        <item quantity="other">Après %1$s minutes</item>
-    </plurals>
     <string name="decrease">Réduire</string>
     <string name="source_title">Nom de la source</string>
     <string name="cover_only_layout">Grille des couvertures</string>
@@ -350,7 +341,6 @@
     <string name="catalog_not_found_error">Aucune extension disponible.</string>
     <string name="label_text_reader">Lecteur de texte</string>
     <string name="source_not_available">Cette source n\'est pas disponible pour votre appareil.</string>
-    <string name="Refreshed">Actualisé</string>
     <string name="there_was_a_problem_in_getting_chapter">Une erreur s\'est produite lors de la récupération du chapitre.</string>
     <string name="latest_book">Dernier</string>
     <string name="uninstalled">Désinstallé</string>
