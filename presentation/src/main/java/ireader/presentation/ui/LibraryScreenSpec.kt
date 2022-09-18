@@ -15,7 +15,7 @@ import com.google.accompanist.pager.rememberPagerState
 import ireader.ui.home.library.LibraryScreenTopBar
 import ireader.ui.home.library.components.BottomTabComposable
 import ireader.ui.home.library.viewmodel.LibraryViewModel
-import ireader.common.resources.LAST_CHAPTER
+import ireader.i18n.LAST_CHAPTER
 import ireader.ui.component.Controller
 import ireader.presentation.ui.util.NavigationArgs
 import ireader.presentation.ui.util.NavigationArgs.showModalSheet

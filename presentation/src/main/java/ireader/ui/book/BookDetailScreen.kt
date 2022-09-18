@@ -42,9 +42,9 @@ import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.Chapter
-import ireader.core.api.source.Source
-import ireader.core.ui.utils.isScrolledToEnd
-import ireader.core.ui.utils.isScrollingUp
+import ireader.core.source.Source
+import ireader.ui.core.utils.isScrolledToEnd
+import ireader.ui.core.utils.isScrollingUp
 import ireader.domain.preferences.prefs.ChapterDisplayMode
 import ireader.presentation.R
 import ireader.ui.book.components.ActionHeader

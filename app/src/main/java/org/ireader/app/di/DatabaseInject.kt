@@ -6,7 +6,7 @@ import com.squareup.sqldelight.db.SqlDriver
 import data.Book
 import ir.kazemcodes.infinityreader.Database
 import okio.FileSystem
-import ireader.core.api.db.Transactions
+import ireader.core.db.Transactions
 import org.koin.core.annotation.ComponentScan
 import ireader.data.local.*
 import org.koin.core.annotation.Single

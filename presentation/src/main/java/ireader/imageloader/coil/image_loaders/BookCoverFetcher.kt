@@ -10,9 +10,9 @@ import coil.fetch.SourceResult
 import coil.network.HttpException
 import coil.request.Options
 import coil.request.Parameters
-import ireader.core.api.http.okhttp
-import ireader.core.api.log.Log
-import ireader.core.api.source.HttpSource
+import ireader.core.http.okhttp
+import ireader.core.log.Log
+import ireader.core.source.HttpSource
 import ireader.domain.image.cache.CoverCache
 import ireader.domain.models.BookCover
 import ireader.imageloader.coil.image_loaders.BookCoverFetcher.Companion.USE_CUSTOM_COVER

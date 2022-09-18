@@ -8,11 +8,11 @@ import ireader.common.models.entities.Book
 import ireader.common.models.entities.Book.Companion.toBookInfo
 import ireader.common.models.entities.CatalogLocal
 import ireader.common.models.entities.toBook
-import ireader.common.resources.UiText
-import ireader.common.resources.SourceNotFoundException
+import ireader.i18n.UiText
+import ireader.i18n.SourceNotFoundException
 import ireader.domain.usecases.local.book_usecases.updateBook
-import ireader.core.api.log.Log
-import ireader.core.api.source.model.CommandList
+import ireader.core.log.Log
+import ireader.core.source.model.CommandList
 import ireader.domain.utils.exceptionHandler
 import ireader.domain.utils.extensions.async.withIOContext
 import ireader.domain.utils.extensions.currentTimeToLong

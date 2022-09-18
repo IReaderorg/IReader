@@ -49,13 +49,14 @@ import ireader.ui.home.library.viewmodel.LibraryViewModel
 import ireader.domain.models.DisplayMode
 import ireader.common.models.library.LibraryFilter
 import ireader.common.models.library.LibrarySort
-import ireader.common.resources.asString
+import ireader.i18n.asString
 import ireader.ui.component.components.component.pagerTabIndicatorOffset
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.ui.component.text_related.TextSection
-import ireader.core.ui.theme.AppColors
-import ireader.core.ui.ui.Colour.contentColor
+
+import ireader.ui.core.ui.Colour.contentColor
 import ireader.presentation.R
+import ireader.ui.core.theme.AppColors
 
 @ExperimentalPagerApi
 @ExperimentalMaterialApi

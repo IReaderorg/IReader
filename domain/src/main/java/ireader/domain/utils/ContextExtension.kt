@@ -6,7 +6,7 @@ import android.content.Context
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.content.getSystemService
-import ireader.core.api.log.Log
+import ireader.core.log.Log
 import ireader.domain.R
 
 private const val TABLET_UI_MIN_SCREEN_WIDTH_DP = 720

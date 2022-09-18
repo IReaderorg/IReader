@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import ireader.common.resources.DEFAULT
+import ireader.i18n.DEFAULT
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.R
 import ireader.ui.reader.viewmodel.ReaderScreenViewModel

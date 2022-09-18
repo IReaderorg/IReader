@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import ireader.common.models.entities.CategoryWithCount
-import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.domain.usecases.category.CategoriesUseCases
 import ireader.domain.usecases.category.CreateCategoryWithName
 import ireader.domain.usecases.category.ReorderCategory

@@ -2,13 +2,13 @@ package ireader.presentation.ui.util
 
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import ireader.common.resources.ARG_HAVE_CUSTOMIZED_VARIANT_BOTTOM_BAR
-import ireader.common.resources.ARG_HAVE_DRAWER
-import ireader.common.resources.ARG_HAVE_MODAL_SHEET
-import ireader.common.resources.ARG_HAVE_VARIANT_BOTTOM_BAR
-import ireader.common.resources.ARG_HIDE_BOTTOM_BAR
-import ireader.common.resources.ARG_SYSTEM_BAR_PADDING
-import ireader.common.resources.ARG_TRANSPARENT_STATUS_BAR
+import ireader.i18n.ARG_HAVE_CUSTOMIZED_VARIANT_BOTTOM_BAR
+import ireader.i18n.ARG_HAVE_DRAWER
+import ireader.i18n.ARG_HAVE_MODAL_SHEET
+import ireader.i18n.ARG_HAVE_VARIANT_BOTTOM_BAR
+import ireader.i18n.ARG_HIDE_BOTTOM_BAR
+import ireader.i18n.ARG_SYSTEM_BAR_PADDING
+import ireader.i18n.ARG_TRANSPARENT_STATUS_BAR
 
 object NavigationArgs {
     val bookId = navArgument("bookId") {

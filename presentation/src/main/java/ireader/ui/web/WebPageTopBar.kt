@@ -17,8 +17,8 @@ import ireader.ui.component.components.Toolbar
 import ireader.ui.component.reusable_composable.BuildDropDownMenu
 import ireader.ui.component.reusable_composable.DropDownMenuItem
 import ireader.ui.component.reusable_composable.TopAppBarBackButton
-import ireader.core.api.source.findInstance
-import ireader.core.api.source.model.Command
+import ireader.core.source.findInstance
+import ireader.core.source.model.Command
 import ireader.presentation.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,7 +32,7 @@ fun WebPageTopBar(
     goBack: () -> Unit,
     goForward: () -> Unit,
     onPopBackStack: () -> Unit,
-    source: ireader.core.api.source.CatalogSource?,
+    source: ireader.core.source.CatalogSource?,
     onFetchBook: () -> Unit,
     onFetchChapter: () -> Unit,
     onFetchChapters: () -> Unit,

@@ -4,8 +4,8 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.delay
 import ireader.domain.data.engines.TranslateEngine
-import ireader.common.resources.UiText
-import ireader.core.api.http.HttpClients
+import ireader.i18n.UiText
+import ireader.core.http.HttpClients
 import java.net.URLEncoder
 
 class TranslateDictUseCase(

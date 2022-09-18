@@ -6,7 +6,7 @@ import androidx.compose.ui.res.stringResource
 
 import ireader.ui.component.Controller
 import ireader.ui.component.components.TitleToolbar
-import ireader.core.ui.ui.SnackBarListener
+import ireader.ui.core.ui.SnackBarListener
 import ireader.ui.settings.AdvanceSettingViewModel
 import ireader.ui.settings.advance.AdvanceSettings
 import ireader.presentation.R

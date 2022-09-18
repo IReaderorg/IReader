@@ -6,9 +6,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ireader.domain.utils.extensions.replace
 import ireader.common.models.entities.toBook
-import ireader.core.api.source.model.Filter
+import ireader.core.source.model.Filter
 import ireader.domain.catalogs.interactor.GetLocalCatalogs
-import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.ui.component.Controller
 import org.koin.android.annotation.KoinViewModel
@@ -42,7 +42,7 @@ class GlobalSearchViewModel (
             catalogStore.catalogs.map { it.source }.forEachIndexed { index, source ->
                 viewModelScope.launch {
                     try {
-                        if (source is ireader.core.api.source.CatalogSource) {
+                        if (source is ireader.core.source.CatalogSource) {
                             insertSearchItem(SearchItem(source, loading = true))
                             var items = source.getMangaList(
                                 filters = listOf(

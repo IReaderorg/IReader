@@ -6,8 +6,8 @@ import ireader.common.models.library.LibrarySort
 import ireader.common.models.library.deserialize
 import ireader.common.models.library.deserializeList
 import ireader.common.models.library.serialize
-import ireader.core.api.prefs.Preference
-import ireader.core.api.prefs.PreferenceStore
+import ireader.core.prefs.Preference
+import ireader.core.prefs.PreferenceStore
 
 class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 

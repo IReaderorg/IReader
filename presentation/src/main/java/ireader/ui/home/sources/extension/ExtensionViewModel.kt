@@ -9,10 +9,10 @@ import ireader.common.models.entities.CatalogInstalled
 import ireader.common.models.entities.CatalogLocal
 import ireader.common.models.entities.CatalogRemote
 import ireader.common.models.entities.SourceState
-import ireader.common.resources.UiText
-import ireader.core.api.os.InstallStep
-import ireader.core.ui.viewmodel.BaseViewModel
-import ireader.core.ui.viewmodel.showSnackBar
+import ireader.i18n.UiText
+import ireader.core.os.InstallStep
+import ireader.ui.core.viewmodel.BaseViewModel
+import ireader.ui.core.viewmodel.showSnackBar
 import ireader.domain.catalogs.interactor.GetCatalogsByType
 import ireader.domain.catalogs.interactor.InstallCatalog
 import ireader.domain.catalogs.interactor.SyncRemoteCatalogs

@@ -21,10 +21,10 @@ import androidx.navigation.navDeepLink
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import ireader.common.models.entities.Book
-import ireader.common.resources.LAST_CHAPTER
-import ireader.common.resources.UiText
-import ireader.core.api.source.HttpSource
-import ireader.core.ui.ui.SnackBarListener
+import ireader.i18n.LAST_CHAPTER
+import ireader.i18n.UiText
+import ireader.core.source.HttpSource
+import ireader.ui.core.ui.SnackBarListener
 import ireader.domain.utils.extensions.async.viewModelIOCoroutine
 import ireader.domain.utils.extensions.findComponentActivity
 import ireader.domain.utils.extensions.launchIO
@@ -213,7 +213,7 @@ object BookDetailScreenSpec : ScreenSpec {
                     vm = vm
                 )
             } else {
-                if (source is ireader.core.api.source.CatalogSource) {
+                if (source is ireader.core.source.CatalogSource) {
                     ChapterCommandBottomSheet(
                         onFetch = {
                             source.let { source ->

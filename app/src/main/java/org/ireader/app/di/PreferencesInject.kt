@@ -1,7 +1,7 @@
 package org.ireader.app.di
 
 import androidx.compose.ui.text.ExperimentalTextApi
-import ireader.core.api.prefs.PreferenceStore
+import ireader.core.prefs.PreferenceStore
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.domain.preferences.prefs.UiPreferences

@@ -3,7 +3,7 @@ package ireader.data.book
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.Chapter
 import ireader.common.models.entities.LibraryBook
-import ireader.core.api.source.model.MangaInfo
+import ireader.core.source.model.MangaInfo
 
 val bookMapper = {
         _id: Long,

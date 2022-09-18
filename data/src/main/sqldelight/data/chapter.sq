@@ -1,4 +1,4 @@
-import ireader.core.api.source.model.Page;
+import ireader.core.source.model.Page;
 import kotlin.collections.List;
 
 CREATE TABLE chapter(

@@ -18,7 +18,7 @@ import ireader.ui.component.components.component.PreferenceRow
 import ireader.ui.component.components.component.SliderPreference
 import ireader.ui.component.components.component.SwitchPreference
 import ireader.ui.component.text_related.TextSection
-import ireader.core.ui.ui.PreferenceMutableState
+import ireader.ui.core.ui.PreferenceMutableState
 
 sealed class Components {
     data class Header(

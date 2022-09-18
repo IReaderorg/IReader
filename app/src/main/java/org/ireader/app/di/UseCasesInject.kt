@@ -1,8 +1,8 @@
 package org.ireader.app.di
 
 import android.content.Context
-import ireader.core.api.db.Transactions
-import ireader.core.api.http.WebViewCookieJar
+import ireader.core.db.Transactions
+import ireader.core.http.WebViewCookieJar
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences

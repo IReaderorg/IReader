@@ -42,9 +42,9 @@ import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import ireader.common.models.entities.Chapter
-import ireader.core.api.source.model.ImageUrl
-import ireader.core.api.source.model.Page
-import ireader.core.api.source.model.Text
+import ireader.core.source.model.ImageUrl
+import ireader.core.source.model.Page
+import ireader.core.source.model.Text
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.prefs.mapTextAlign
 import ireader.domain.preferences.prefs.ReadingMode

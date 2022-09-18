@@ -1,6 +1,6 @@
 package ireader.domain.utils
 
-import ireader.common.resources.UiText
+import ireader.i18n.UiText
 
 sealed class Resource<T>(val data: T? = null, val uiText: UiText? = null) {
     class Success<T>(data: T?) : Resource<T>(data)

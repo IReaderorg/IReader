@@ -24,16 +24,16 @@ import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewState
 import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import ireader.core.api.http.setDefaultSettings
-import ireader.core.api.source.HttpSource
-import ireader.core.ui.ui.SnackBarListener
+import ireader.core.http.setDefaultSettings
+import ireader.core.source.HttpSource
+import ireader.ui.core.ui.SnackBarListener
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @ExperimentalCoroutinesApi
 @Composable
 fun WebPageScreen(
     viewModel: WebViewPageModel,
-    source: ireader.core.api.source.CatalogSource?,
+    source: ireader.core.source.CatalogSource?,
     snackBarHostState: SnackbarHostState,
     scaffoldPadding: PaddingValues
 ) {

@@ -22,10 +22,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.domain.utils.extensions.launchIO
 import ireader.domain.models.theme.Theme
-import ireader.common.resources.UiText
+import ireader.i18n.UiText
 import ireader.domain.models.prefs.PreferenceValues
-import ireader.core.ui.theme.AppColors
-import ireader.core.ui.theme.isLight
+
+import ireader.ui.core.theme.isLight
 import ireader.ui.component.components.Components
 import ireader.ui.component.components.SetupSettingComponents
 import ireader.ui.component.components.Toolbar
@@ -33,6 +33,7 @@ import ireader.ui.component.components.component.ChoicePreference
 import ireader.ui.component.components.component.ColorPreference
 import ireader.presentation.R
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
+import ireader.ui.core.theme.AppColors
 import kotlinx.coroutines.launch
 
 @Composable

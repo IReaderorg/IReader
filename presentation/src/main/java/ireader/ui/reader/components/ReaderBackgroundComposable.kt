@@ -18,7 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import ireader.core.ui.modifier.clickableNoIndication
+import ireader.ui.core.modifier.clickableNoIndication
 import ireader.domain.preferences.models.ReaderColors
 import ireader.presentation.R
 import ireader.ui.component.components.component.PreferenceRow

@@ -1,7 +1,7 @@
 package ireader.presentation
 
 import ireader.domain.preferences.prefs.UiPreferences
-import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.ui.core.viewmodel.BaseViewModel
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel

@@ -3,7 +3,7 @@
 -dontobfuscate
 
 # Keep extension's common dependencies
--keep class ireader.core.api.source.** { public protected *; }
+-keep class ireader.core.source.** { public protected *; }
 -keep,allowoptimization class org.ireader.** { public protected *; }
 -keep,allowoptimization class kotlinx.coroutines.** { public protected *; }
 -keep,allowoptimization class androidx.preference.** { public protected *; }

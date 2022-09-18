@@ -18,11 +18,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ireader.common.resources.UiText
-import ireader.common.resources.asString
+import ireader.i18n.UiText
+import ireader.i18n.asString
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
-import ireader.core.ui.ui.string
+import ireader.ui.core.ui.string
 import ireader.presentation.R
 
 

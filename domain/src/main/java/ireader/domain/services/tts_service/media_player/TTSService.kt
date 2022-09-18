@@ -33,7 +33,7 @@ import kotlinx.datetime.Clock
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.CatalogLocal
 import ireader.common.models.entities.Chapter
-import ireader.core.api.log.Log
+import ireader.core.log.Log
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository

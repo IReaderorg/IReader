@@ -13,10 +13,10 @@ import androidx.lifecycle.viewModelScope
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.CatalogLocal
 import ireader.common.models.entities.Chapter
-import ireader.common.resources.UiText
-import ireader.core.api.log.Log
-import ireader.core.api.source.model.CommandList
-import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.i18n.UiText
+import ireader.core.log.Log
+import ireader.core.source.model.CommandList
+import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.usecases.epub.EpubCreator
@@ -92,7 +92,7 @@ class BookDetailViewModel(
             this.catalogSource = catalogSource
 
             val source = catalogSource?.source
-            if (source is ireader.core.api.source.CatalogSource) {
+            if (source is ireader.core.source.CatalogSource) {
                 this.modifiedCommands = source.getCommands()
             }
             toggleBookLoading(true)

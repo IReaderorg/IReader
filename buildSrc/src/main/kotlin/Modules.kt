@@ -3,8 +3,8 @@ object Modules {
     const val coreUi = ":core-ui"
     const val data = ":data"
     const val domain = ":domain"
-    const val coreApi = ":core-api"
-    const val commonResources = ":common-resources"
+    const val coreApi = ":core"
+    const val commonResources = ":i18n"
     const val presentation = ":presentation"
 
 

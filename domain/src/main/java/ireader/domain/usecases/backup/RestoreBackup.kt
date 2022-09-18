@@ -18,8 +18,8 @@ import ireader.domain.data.repository.LibraryRepository
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.BookCategory
 import ireader.common.models.entities.Chapter
-import ireader.common.resources.UiText
-import ireader.core.api.db.Transactions
+import ireader.i18n.UiText
+import ireader.core.db.Transactions
 import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.domain.usecases.backup.backup.Backup
 import ireader.domain.usecases.backup.backup.BookProto
@@ -69,7 +69,7 @@ class RestoreBackup  internal constructor(
             onSuccess()
             Result.Success
         } catch (e: Exception) {
-            ireader.core.api.log.Log.error(e, "Restore Backup was failed")
+            ireader.core.log.Log.error(e, "Restore Backup was failed")
             onError(UiText.ExceptionString(e))
             Result.Error(e)
         }

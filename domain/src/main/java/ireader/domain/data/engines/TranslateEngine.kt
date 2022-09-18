@@ -1,6 +1,6 @@
 package ireader.domain.data.engines
 
-import ireader.common.resources.UiText
+import ireader.i18n.UiText
 
 interface TranslateEngine {
 

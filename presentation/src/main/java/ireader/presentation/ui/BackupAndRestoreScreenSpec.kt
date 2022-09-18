@@ -9,7 +9,7 @@ import androidx.compose.ui.res.stringResource
 
 import ireader.ui.component.Controller
 import ireader.ui.component.components.TitleToolbar
-import ireader.core.ui.ui.SnackBarListener
+import ireader.ui.core.ui.SnackBarListener
 import ireader.ui.settings.backups.BackUpAndRestoreScreen
 import ireader.ui.settings.backups.BackupScreenViewModel
 import ireader.presentation.R

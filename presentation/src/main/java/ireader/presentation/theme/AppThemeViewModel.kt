@@ -15,8 +15,8 @@ import ireader.common.models.theme.ExtraColors
 import ireader.domain.models.theme.Theme
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
-import ireader.core.ui.theme.*
-import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.ui.core.theme.*
+import ireader.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel

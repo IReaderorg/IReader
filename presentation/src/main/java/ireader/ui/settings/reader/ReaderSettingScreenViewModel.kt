@@ -3,7 +3,7 @@ package ireader.ui.settings.reader
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import ireader.domain.preferences.prefs.ReaderPreferences
-import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.ui.settings.SettingState
 import org.koin.android.annotation.KoinViewModel
 

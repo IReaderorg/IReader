@@ -11,7 +11,7 @@ import ireader.domain.utils.extensions.launchIO
 import ireader.common.models.entities.Chapter
 import ireader.common.models.entities.SavedDownload
 import ireader.common.models.entities.buildSavedDownload
-import ireader.common.resources.asString
+import ireader.i18n.asString
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.R
 import ireader.domain.notification.Notifications
@@ -163,11 +163,11 @@ class DownloaderService  constructor(
                                 }
                             }
                     }
-                    ireader.core.api.log.Log.debug { "getNotifications: Successfully to downloaded ${savedDownload.bookName} chapter ${savedDownload.chapterName}" }
+                    ireader.core.log.Log.debug { "getNotifications: Successfully to downloaded ${savedDownload.bookName} chapter ${savedDownload.chapterName}" }
                     delay(1000)
                 }
             } catch (e: Throwable) {
-                ireader.core.api.log.Log.error { "getNotifications: Failed to download ${savedDownload.chapterName}" }
+                ireader.core.log.Log.error { "getNotifications: Failed to download ${savedDownload.chapterName}" }
                 cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
                 notify(
                     ID_DOWNLOAD_CHAPTER_ERROR,

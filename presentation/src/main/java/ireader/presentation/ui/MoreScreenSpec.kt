@@ -13,7 +13,7 @@ import androidx.compose.ui.res.stringResource
 
 import androidx.navigation.NamedNavArgument
 import ireader.ui.component.Controller
-import ireader.common.resources.discord
+import ireader.i18n.discord
 import ireader.ui.component.components.TitleToolbar
 import ireader.presentation.ui.util.NavigationArgs
 import ireader.presentation.R

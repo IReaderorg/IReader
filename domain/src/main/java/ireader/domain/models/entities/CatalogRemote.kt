@@ -3,7 +3,7 @@ package ireader.common.models.entities
 
 import androidx.annotation.Keep
 
-import ireader.core.api.source.Source
+import ireader.core.source.Source
 import java.io.File
 import kotlin.random.Random
 

@@ -8,8 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.paging.LoadState
 import ireader.common.models.entities.HistoryWithRelations
-import ireader.core.ui.ui.EmptyScreen
-import ireader.core.ui.ui.LoadingScreen
+import ireader.ui.core.ui.EmptyScreen
+import ireader.ui.core.ui.LoadingScreen
 import ireader.presentation.R
 import ireader.ui.home.history.viewmodel.HistoryViewModel
 

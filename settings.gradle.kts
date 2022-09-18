@@ -1,12 +1,11 @@
 enableFeaturePreview("VERSION_CATALOGS")
 rootProject.name = "Infinity"
 include(":app")
-include(":core-ui")
 include(":data")
 include(":domain")
 include(":presentation")
-include(":core-api")
-include(":common-resources")
+include(":core")
+include(":i18n")
 
 
 

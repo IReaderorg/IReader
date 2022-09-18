@@ -12,9 +12,9 @@ import com.google.accompanist.web.WebViewState
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.CatalogLocal
 import ireader.common.models.entities.Chapter
-import ireader.common.resources.UiText
-import ireader.core.api.source.model.Command
-import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.i18n.UiText
+import ireader.core.source.model.Command
+import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
@@ -233,7 +233,7 @@ interface WebViewPageState {
     var webUrl: String
     var isLoading: Boolean
 
-    val source: ireader.core.api.source.CatalogSource?
+    val source: ireader.core.source.CatalogSource?
     var catalog: CatalogLocal?
 
     var bookId: Long?
@@ -261,9 +261,9 @@ open class WebViewPageStateImpl() : WebViewPageState {
 
     override var isLoading: Boolean by mutableStateOf(false)
 
-    override val source: ireader.core.api.source.CatalogSource? by derivedStateOf {
+    override val source: ireader.core.source.CatalogSource? by derivedStateOf {
         val source = catalog?.source
-        if (source is ireader.core.api.source.CatalogSource) source else null
+        if (source is ireader.core.source.CatalogSource) source else null
     }
     override var catalog: CatalogLocal? by mutableStateOf(null)
 

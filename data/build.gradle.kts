@@ -69,7 +69,7 @@ dependencies {
     implementation(kotlinx.serialization.json)
     implementation(composeLib.compose.activity)
     implementation(composeLib.material3.core)
-    implementation(project(mapOf("path" to ":core-ui")))
+
     
 
     implementation(libs.jsoup)

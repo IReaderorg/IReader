@@ -1,8 +1,8 @@
 package ireader.domain.utils.extensions
 
 import kotlinx.coroutines.flow.MutableSharedFlow
-import ireader.common.resources.UiEvent
-import ireader.common.resources.UiText
+import ireader.i18n.UiEvent
+import ireader.i18n.UiText
 import ireader.domain.R
 
 

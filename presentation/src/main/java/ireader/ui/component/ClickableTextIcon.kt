@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import ireader.common.resources.UiText
-import ireader.common.resources.asString
+import ireader.i18n.UiText
+import ireader.i18n.asString
 
 @Composable
 fun ClickableTextIcon(

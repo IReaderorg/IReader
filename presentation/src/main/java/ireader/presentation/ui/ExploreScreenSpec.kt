@@ -22,12 +22,12 @@ import ireader.domain.utils.extensions.launchIO
 import ireader.domain.utils.extensions.replaceFirst
 import ireader.common.models.entities.toBook
 import ireader.common.models.entities.toBookItem
-import ireader.common.resources.UiText
-import ireader.core.api.log.Log
+import ireader.i18n.UiText
+import ireader.core.log.Log
 import ireader.ui.component.components.EmptyScreenComposable
 import ireader.ui.component.hideKeyboard
 
-import ireader.core.api.source.HttpSource
+import ireader.core.source.HttpSource
 import ireader.presentation.ui.util.NavigationArgs
 import ireader.ui.home.explore.BrowseTopAppBar
 import ireader.ui.home.explore.ExploreScreen

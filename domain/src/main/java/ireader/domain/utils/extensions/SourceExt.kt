@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.webkit.WebView
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
-import ireader.core.api.source.model.MangasPageInfo
+import ireader.core.source.model.MangasPageInfo
 import java.net.URI
 import java.net.URISyntaxException
 
@@ -53,8 +53,6 @@ fun emptyMangaInfoPage(): MangasPageInfo {
     return MangasPageInfo(emptyList(), false)
 }
 
-const val DEFAULT_USER_AGENT =
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0"
 
 // @SuppressLint("SetJavaScriptEnabled")
 // @ExperimentalCoroutinesApi

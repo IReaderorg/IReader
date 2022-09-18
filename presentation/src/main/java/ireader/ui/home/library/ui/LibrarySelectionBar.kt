@@ -19,7 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.ui.component.reusable_composable.AppIconButton
-import ireader.core.ui.theme.AppColors
+import ireader.ui.core.theme.AppColors
+
 
 @Composable
 internal fun LibrarySelectionBar(

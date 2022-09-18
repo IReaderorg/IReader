@@ -4,7 +4,7 @@ import com.google.mlkit.nl.translate.TranslateLanguage
 import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.TranslatorOptions
 import ireader.domain.data.engines.TranslateEngine
-import ireader.common.resources.UiText
+import ireader.i18n.UiText
 
 class GoogleTranslateML : TranslateEngine {
     override val id: Long = -1

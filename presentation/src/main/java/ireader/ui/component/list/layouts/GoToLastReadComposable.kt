@@ -21,8 +21,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import ireader.common.resources.UiText
-import ireader.common.resources.asString
+import ireader.i18n.UiText
+import ireader.i18n.asString
 import ireader.presentation.R
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.ui.component.reusable_composable.SuperSmallTextComposable

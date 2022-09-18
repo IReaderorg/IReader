@@ -1,6 +1,6 @@
 package ireader.data.local
 
-import ireader.core.api.db.Transactions
+import ireader.core.db.Transactions
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asContextElement

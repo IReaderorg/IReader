@@ -10,8 +10,8 @@ import coil.ImageLoaderFactory
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.disk.DiskCache
-import ireader.core.api.http.HttpClients
-import ireader.core.api.http.okhttp
+import ireader.core.http.HttpClients
+import ireader.core.http.okhttp
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.image.cache.CoverCache
 import ireader.imageloader.coil.image_loaders.BookCoverFetcher

@@ -1,7 +1,7 @@
 package ireader.data.chapter
 
 import com.squareup.sqldelight.ColumnAdapter
-import ireader.core.api.source.model.Page
+import ireader.core.source.model.Page
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

@@ -10,7 +10,7 @@ import androidx.compose.ui.res.stringResource
 import ireader.ui.component.Controller
 import ireader.ui.settings.about.AboutSettingScreen
 import ireader.domain.utils.extensions.toDateTimestampString
-import ireader.common.resources.BuildConfig
+import ireader.i18n.BuildConfig
 import ireader.presentation.R
 import ireader.ui.component.components.TitleToolbar
 import java.text.DateFormat

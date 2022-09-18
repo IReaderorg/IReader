@@ -12,7 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
-import ireader.core.api.source.model.Filter
+import ireader.core.source.model.Filter
 
 @Composable
 fun FilterCheckItem(

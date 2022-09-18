@@ -56,8 +56,8 @@ import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.dp
 import ireader.ui.component.reusable_composable.CaptionTextComposable
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
-import ireader.core.ui.ui.PreferenceMutableState
-import ireader.core.ui.utils.horizontalPadding
+import ireader.ui.core.ui.PreferenceMutableState
+import ireader.ui.core.utils.horizontalPadding
 
 @Composable
 fun Divider(

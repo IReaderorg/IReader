@@ -26,12 +26,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import ireader.presentation.R
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.ui.component.reusable_composable.AppTextField
 import ireader.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.ui.component.reusable_composable.TopAppBarBackButton
-import ireader.core.ui.theme.AppColors
-import ireader.presentation.R
+import ireader.ui.core.theme.AppColors
 
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -23,8 +23,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ireader.common.models.entities.UpdatesWithRelations
 import ireader.ui.component.reusable_composable.AppIconButton
-import ireader.core.ui.ui.EmptyScreen
-import ireader.core.ui.ui.LoadingScreen
+import ireader.ui.core.ui.EmptyScreen
+import ireader.ui.core.ui.LoadingScreen
 import ireader.ui.home.updates.component.UpdatesContent
 import ireader.ui.home.updates.viewmodel.UpdateState
 import ireader.ui.home.updates.viewmodel.UpdatesViewModel

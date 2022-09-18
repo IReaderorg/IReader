@@ -36,8 +36,8 @@ package ireader.ui.component.components
 // import androidx.compose.ui.platform.LocalDensity
 // import androidx.compose.ui.unit.Dp
 // import androidx.compose.ui.unit.dp
-// import ireader.core.ui.theme.AppColors
-// import ireader.core.ui.theme.ContentAlpha
+//
+// import ireader.ui.core.theme.ContentAlpha
 // import kotlin.math.abs
 // import kotlin.math.max
 //

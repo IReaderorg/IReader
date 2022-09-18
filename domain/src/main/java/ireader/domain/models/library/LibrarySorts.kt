@@ -1,6 +1,6 @@
 package ireader.common.models.library
 
-import ireader.common.resources.UiText
+import ireader.i18n.UiText
 import ireader.domain.R
 
 data class LibrarySort(val type: Type, val isAscending: Boolean) {

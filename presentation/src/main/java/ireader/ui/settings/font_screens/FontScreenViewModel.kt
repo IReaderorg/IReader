@@ -6,7 +6,7 @@ import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import ireader.domain.preferences.prefs.ReaderPreferences
-import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.domain.usecases.fonts.FontUseCase
 import org.koin.android.annotation.KoinViewModel
 

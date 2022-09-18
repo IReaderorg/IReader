@@ -66,7 +66,9 @@ tasks.withType<io.gitlab.arturbosch.detekt.DetektCreateBaselineTask>().configure
 subprojects {
     plugins.apply("io.gitlab.arturbosch.detekt")
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        kotlinOptions.freeCompilerArgs += "-opt-in=org.mylibrary.OptInAnnotation"
+        kotlinOptions.freeCompilerArgs += listOf(
+            "-opt-in=org.mylibrary.OptInAnnotation"
+        )
     }
 //    plugins.withType<org.jetbrains.kotlin.gradle.plugin.KotlinMultiplatformPluginWrapper> {
 //        configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> {

@@ -1,7 +1,7 @@
 package ireader.data.catalog.impl.interactor
 
 import ireader.common.models.entities.CatalogRemote
-import ireader.core.api.os.InstallStep
+import ireader.core.os.InstallStep
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.data.catalog.impl.AndroidCatalogInstaller

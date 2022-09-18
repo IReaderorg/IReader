@@ -12,9 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import ireader.common.resources.R
-import ireader.core.ui.theme.AppColors
-import ireader.core.ui.ui.Colour.Transparent
+import ireader.i18n.R
+import ireader.ui.core.theme.AppColors
+
+import ireader.ui.core.ui.Colour.Transparent
 
 @Composable
 fun LogoHeader() {

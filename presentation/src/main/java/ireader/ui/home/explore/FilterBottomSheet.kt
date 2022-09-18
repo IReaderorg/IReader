@@ -18,10 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import ireader.core.api.source.CatalogSource
+import ireader.core.source.CatalogSource
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
-import ireader.core.api.source.TestSource
-import ireader.core.api.source.model.Filter
+import ireader.core.source.TestSource
+import ireader.core.source.model.Filter
 import ireader.presentation.R
 
 @Composable

@@ -13,8 +13,8 @@ import ireader.domain.data.repository.CategoryRepository
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.data.repository.LibraryRepository
-import ireader.common.resources.UiText
-import ireader.core.api.db.Transactions
+import ireader.i18n.UiText
+import ireader.core.db.Transactions
 import ireader.domain.usecases.backup.backup.Backup
 import ireader.domain.usecases.backup.backup.BookProto
 import ireader.domain.usecases.backup.backup.CategoryProto

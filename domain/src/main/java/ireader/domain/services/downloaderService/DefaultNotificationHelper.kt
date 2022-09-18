@@ -15,7 +15,7 @@ import androidx.work.WorkManager
 import kotlinx.coroutines.flow.MutableSharedFlow
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.Chapter
-import ireader.common.resources.string
+import ireader.i18n.string
 import ireader.domain.R
 
 import ireader.domain.notification.Notifications

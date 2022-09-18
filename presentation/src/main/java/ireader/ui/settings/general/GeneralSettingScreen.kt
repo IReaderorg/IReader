@@ -14,7 +14,7 @@ import ireader.ui.component.components.component.ChoicePreference
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
-import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.R
 import org.koin.android.annotation.KoinViewModel
 

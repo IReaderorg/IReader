@@ -10,13 +10,13 @@ import ireader.common.models.theme.ExtraColors
 import ireader.domain.models.theme.Theme
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
-import ireader.core.ui.theme.CustomizableAppColorsPreferenceState
-import ireader.core.ui.theme.asState
-import ireader.core.ui.theme.getDarkColors
-import ireader.core.ui.theme.getLightColors
-import ireader.core.ui.theme.isLight
-import ireader.core.ui.theme.themes
-import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.ui.core.theme.CustomizableAppColorsPreferenceState
+import ireader.ui.core.theme.asState
+import ireader.ui.core.theme.getDarkColors
+import ireader.ui.core.theme.getLightColors
+import ireader.ui.core.theme.isLight
+import ireader.ui.core.theme.themes
+import ireader.ui.core.viewmodel.BaseViewModel
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel

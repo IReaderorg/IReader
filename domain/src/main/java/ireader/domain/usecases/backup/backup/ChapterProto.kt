@@ -6,7 +6,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 import ireader.common.models.entities.Chapter
-import ireader.core.api.source.model.Page
+import ireader.core.source.model.Page
 
 @Serializable
 internal data class ChapterProto(

@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.lifecycleScope
 import ireader.domain.utils.extensions.findComponentActivity
 import ireader.domain.utils.extensions.launchIO
-import ireader.common.resources.UiText
+import ireader.i18n.UiText
 import ireader.ui.settings.SettingsSection
 import ireader.ui.settings.SetupLayout
 import ireader.presentation.R

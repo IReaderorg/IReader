@@ -11,8 +11,9 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import ireader.common.models.entities.CategoryWithCount
-import ireader.core.ui.theme.AppColors
+
 import ireader.ui.component.components.component.pagerTabIndicatorOffset
+import ireader.ui.core.theme.AppColors
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable

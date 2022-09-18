@@ -35,7 +35,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import ireader.domain.utils.extensions.launchIO
 import ireader.common.models.entities.CategoryWithCount
-import ireader.common.resources.R
+import ireader.i18n.R
 import ireader.ui.component.components.component.PreferenceRow
 import ireader.ui.component.reorderable.ReorderableLazyListState
 import ireader.ui.component.reorderable.detectReorderAfterLongPress

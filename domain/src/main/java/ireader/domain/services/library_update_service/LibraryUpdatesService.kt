@@ -7,7 +7,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import ireader.common.models.entities.Chapter
-import ireader.core.api.log.Log
+import ireader.core.log.Log
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.R
 import ireader.domain.notification.Notifications

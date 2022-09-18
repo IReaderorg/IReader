@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextField(
-    filter: ireader.core.api.source.model.Filter.Text,
+    filter: ireader.core.source.model.Filter.Text,
     onUpdate: (String) -> Unit,
 ) {
     var state by remember {
@@ -52,7 +52,7 @@ fun TextField(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextField(
-    command: ireader.core.api.source.model.Command.Chapter.Text,
+    command: ireader.core.source.model.Command.Chapter.Text,
     onUpdate: (String) -> Unit,
 ) {
     var state by remember {

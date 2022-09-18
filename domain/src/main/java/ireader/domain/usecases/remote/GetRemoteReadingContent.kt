@@ -4,13 +4,13 @@ import ireader.domain.utils.extensions.async.withIOContext
 import ireader.common.models.entities.CatalogLocal
 import ireader.common.models.entities.Chapter
 import ireader.common.models.entities.toChapterInfo
-import ireader.common.resources.SourceNotFoundException
-import ireader.common.resources.UiText
-import ireader.core.api.source.model.CommandList
-import ireader.core.api.source.model.ImageBase64
-import ireader.core.api.source.model.ImageUrl
-import ireader.core.api.source.model.Page
-import ireader.core.api.source.model.Text
+import ireader.i18n.SourceNotFoundException
+import ireader.i18n.UiText
+import ireader.core.source.model.CommandList
+import ireader.core.source.model.ImageBase64
+import ireader.core.source.model.ImageUrl
+import ireader.core.source.model.Page
+import ireader.core.source.model.Text
 import ireader.domain.R
 import ireader.domain.utils.exceptionHandler
 import ireader.domain.utils.extensions.async.withIOContext
@@ -30,7 +30,7 @@ class GetRemoteReadingContent() {
         withIOContext {
             kotlin.runCatching {
                 try {
-                    ireader.core.api.log.Log.debug("Timber: GetRemoteReadingContentUseCase was Called")
+                    ireader.core.log.Log.debug("Timber: GetRemoteReadingContentUseCase was Called")
                     // val page = source.getPageList(chapter.toChapterInfo())
                     val content = mutableListOf<Page>()
                     val page = source.getPageList(chapter.toChapterInfo(), commands)
@@ -59,7 +59,7 @@ class GetRemoteReadingContent() {
                     if (content.joinToString().isBlank()) {
                         onError(UiText.StringResource(R.string.cant_get_content))
                     } else {
-                        ireader.core.api.log.Log.debug("Timber: GetRemoteReadingContentUseCase was Finished Successfully")
+                        ireader.core.log.Log.debug("Timber: GetRemoteReadingContentUseCase was Finished Successfully")
                         onSuccess(
                             chapter.copy(
                                 content = content,

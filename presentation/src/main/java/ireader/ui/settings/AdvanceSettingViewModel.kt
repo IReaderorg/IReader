@@ -6,8 +6,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import ireader.common.models.entities.Category
-import ireader.common.resources.UiText
-import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.i18n.UiText
+import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.domain.data.repository.CategoryRepository
 import ireader.domain.data.repository.ThemeRepository
 import ireader.domain.image.cache.CoverCache

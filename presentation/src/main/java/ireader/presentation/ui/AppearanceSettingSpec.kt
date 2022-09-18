@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import ireader.ui.component.Controller
 import ireader.ui.settings.appearance.AppearanceSettingScreen
-import ireader.core.ui.ui.SnackBarListener
+import ireader.ui.core.ui.SnackBarListener
 import ireader.ui.settings.appearance.AppearanceToolbar
 import ireader.ui.settings.appearance.AppearanceViewModel
 import org.koin.androidx.compose.getViewModel

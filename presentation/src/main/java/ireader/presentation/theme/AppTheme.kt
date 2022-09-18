@@ -7,15 +7,13 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.ExperimentalTextApi
-
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import ireader.core.ui.theme.AppColors
-import ireader.core.ui.theme.AppTypography
-import ireader.core.ui.theme.LocalCustomSystemCOlor
-import ireader.core.ui.theme.LocalTransparentStatusBar
-import ireader.core.ui.theme.Shapes
-import ireader.core.ui.theme.isLight
-import org.koin.androidx.compose.get
+import ireader.ui.core.theme.AppColors
+import ireader.ui.core.theme.AppTypography
+import ireader.ui.core.theme.LocalCustomSystemCOlor
+import ireader.ui.core.theme.LocalTransparentStatusBar
+import ireader.ui.core.theme.Shapes
+import ireader.ui.core.theme.isLight
 import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalTextApi::class)

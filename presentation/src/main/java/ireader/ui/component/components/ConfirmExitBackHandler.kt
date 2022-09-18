@@ -14,7 +14,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import ireader.common.resources.R
+import ireader.i18n.R
 
 @Composable
 fun ConfirmExitBackHandler(confirmExit: Boolean) {

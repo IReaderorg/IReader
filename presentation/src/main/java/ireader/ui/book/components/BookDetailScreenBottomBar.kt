@@ -15,9 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ireader.common.resources.UiText
-import ireader.core.ui.ui.string
-import ireader.core.ui.utils.asString
+import ireader.i18n.UiText
+import ireader.ui.core.ui.string
+import ireader.ui.core.utils.asString
 import ireader.presentation.R
 import ireader.ui.component.ClickableTextIcon
 import ireader.ui.component.components.ShowLoading

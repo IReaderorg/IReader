@@ -10,7 +10,7 @@ import ireader.common.models.entities.CategoryWithCount
 import ireader.common.models.entities.History
 import ireader.common.models.entities.LibraryBook
 import ireader.common.models.library.LibrarySort
-import ireader.common.resources.UiText
+import ireader.i18n.UiText
 import ireader.presentation.R
 import org.koin.core.annotation.Single
 

@@ -29,15 +29,16 @@ import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import ireader.common.models.entities.Catalog
-import ireader.common.resources.UiEvent
-import ireader.common.resources.asString
+import ireader.i18n.UiEvent
+import ireader.i18n.asString
 import ireader.ui.component.components.component.pagerTabIndicatorOffset
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
-import ireader.core.ui.theme.AppColors
-import ireader.core.ui.utils.horizontalPadding
+
+import ireader.ui.core.utils.horizontalPadding
 import ireader.ui.home.sources.extension.composables.RemoteSourcesScreen
 import ireader.ui.home.sources.extension.composables.UserSourcesScreen
 import ireader.presentation.R
+import ireader.ui.core.theme.AppColors
 
 @ExperimentalMaterialApi
 @OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)

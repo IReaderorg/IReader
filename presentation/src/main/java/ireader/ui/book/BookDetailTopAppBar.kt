@@ -27,8 +27,8 @@ import ireader.ui.component.components.Toolbar
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.ui.component.reusable_composable.TopAppBarBackButton
-import ireader.core.api.source.Source
-import ireader.core.api.source.model.Command
+import ireader.core.source.Source
+import ireader.core.source.model.Command
 import ireader.presentation.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -122,7 +122,7 @@ fun RegularChapterDetailTopAppBar(
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }
-            if (source is ireader.core.api.source.CatalogSource && source.getCommands().any { it !is Command.Fetchers }) {
+            if (source is ireader.core.source.CatalogSource && source.getCommands().any { it !is Command.Fetchers }) {
                 IconButton(onClick = {
                     onCommand()
                 }) {

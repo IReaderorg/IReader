@@ -2,7 +2,7 @@ package ireader.domain.di
 
 import android.app.Service
 import ireader.common.models.entities.Download
-import ireader.common.resources.ModulesMetaData
+import ireader.i18n.ModulesMetaData
 import ireader.domain.services.downloaderService.DownloaderService
 import ireader.domain.services.library_update_service.LibraryUpdatesService
 import ireader.domain.services.tts_service.media_player.TTSService

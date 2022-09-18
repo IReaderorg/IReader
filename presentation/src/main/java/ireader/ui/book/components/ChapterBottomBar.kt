@@ -23,10 +23,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
+import ireader.presentation.R
 import ireader.ui.book.viewmodel.BookDetailViewModel
 import ireader.ui.component.reusable_composable.AppIconButton
-import ireader.core.ui.theme.AppColors
-import ireader.presentation.R
+import ireader.ui.core.theme.AppColors
 import kotlinx.coroutines.launch
 
 @Composable

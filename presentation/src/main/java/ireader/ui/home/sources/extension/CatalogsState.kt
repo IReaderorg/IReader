@@ -6,7 +6,7 @@ import androidx.compose.runtime.referentialEqualityPolicy
 import androidx.compose.runtime.setValue
 import ireader.common.models.entities.CatalogLocal
 import ireader.common.models.entities.CatalogRemote
-import ireader.core.api.os.InstallStep
+import ireader.core.os.InstallStep
 import org.koin.core.annotation.Single
 
 interface CatalogsState {

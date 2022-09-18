@@ -11,8 +11,8 @@ import kotlinx.datetime.Instant
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.CatalogLocal
 import ireader.common.models.entities.Chapter
-import ireader.core.api.source.Source
-import ireader.core.api.source.model.Text
+import ireader.core.source.Source
+import ireader.core.source.model.Text
 import ireader.domain.preferences.models.prefs.IReaderVoice
 import ireader.domain.services.tts_service.media_player.TTSService
 import org.koin.core.annotation.Factory

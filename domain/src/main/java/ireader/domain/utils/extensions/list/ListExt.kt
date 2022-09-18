@@ -1,6 +1,6 @@
 package ireader.domain.utils.extensions.list
 
-import ireader.core.api.source.model.Listing
+import ireader.core.source.model.Listing
 
 class LatestListing : Listing("Latest")
 class PopularListing : Listing("Popular")

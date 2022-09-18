@@ -28,7 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.ui.component.reusable_composable.CaptionTextComposable
-import ireader.core.ui.ui.string
+import ireader.ui.core.ui.string
 import ireader.domain.services.tts_service.TTSState
 import ireader.domain.services.tts_service.isSame
 import ireader.presentation.R

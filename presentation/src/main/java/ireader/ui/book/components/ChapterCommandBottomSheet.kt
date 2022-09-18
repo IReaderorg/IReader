@@ -30,9 +30,9 @@ import androidx.compose.ui.unit.dp
 import ireader.ui.component.reusable_composable.DropDownMenu
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.ui.component.reusable_composable.TextField
-import ireader.core.api.source.model.Command
-import ireader.core.api.source.model.CommandList
-import ireader.core.api.util.replace
+import ireader.core.source.model.Command
+import ireader.core.source.model.CommandList
+import ireader.core.util.replace
 import ireader.presentation.R
 
 @Composable

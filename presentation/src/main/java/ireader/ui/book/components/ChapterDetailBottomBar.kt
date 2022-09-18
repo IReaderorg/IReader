@@ -40,10 +40,10 @@ import kotlinx.coroutines.launch
 import ireader.ui.book.viewmodel.BookDetailViewModel
 import ireader.ui.book.viewmodel.ChapterSort
 import ireader.ui.book.viewmodel.ChaptersFilters
-import ireader.common.resources.asString
+import ireader.i18n.asString
 import ireader.ui.component.components.component.pagerTabIndicatorOffset
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
-import ireader.core.ui.ui.Colour.contentColor
+import ireader.ui.core.ui.Colour.contentColor
 import ireader.domain.preferences.prefs.ChapterDisplayMode
 import ireader.presentation.R
 

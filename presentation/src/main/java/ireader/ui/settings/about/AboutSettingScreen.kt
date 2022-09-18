@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import ireader.common.resources.BuildConfig
+import ireader.i18n.BuildConfig
 import ireader.ui.component.components.LogoHeader
 import ireader.ui.component.components.component.LinkIcon
 import ireader.ui.component.components.component.PreferenceRow

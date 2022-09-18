@@ -9,7 +9,7 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import ireader.ui.component.Controller
-import ireader.core.api.log.Log
+import ireader.core.log.Log
 import ireader.ui.book.viewmodel.BookDetailViewModel
 import ireader.ui.home.sources.global_search.GlobalSearchScreen
 import ireader.ui.home.sources.global_search.viewmodel.GlobalSearchViewModel

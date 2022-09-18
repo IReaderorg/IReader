@@ -31,7 +31,7 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import ireader.domain.models.DisplayMode
 import ireader.domain.preferences.prefs.LibraryPreferences
-import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.domain.usecases.category.CategoriesUseCases
 import ireader.domain.usecases.local.DeleteUseCase
 import ireader.domain.usecases.local.LocalGetBookUseCases

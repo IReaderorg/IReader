@@ -22,8 +22,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 
 import androidx.navigation.NamedNavArgument
-import ireader.common.resources.UiText
-import ireader.core.ui.ui.SnackBarListener
+import ireader.i18n.UiText
+import ireader.ui.core.ui.SnackBarListener
 import ireader.ui.component.Controller
 import ireader.ui.component.components.TitleToolbar
 import ireader.presentation.R

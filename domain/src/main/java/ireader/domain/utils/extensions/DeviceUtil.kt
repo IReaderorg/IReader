@@ -2,7 +2,7 @@ package ireader.domain.utils.extensions
 
 import android.annotation.SuppressLint
 import android.os.Build
-import ireader.core.api.log.Log
+import ireader.core.log.Log
 
 object DeviceUtil {
 

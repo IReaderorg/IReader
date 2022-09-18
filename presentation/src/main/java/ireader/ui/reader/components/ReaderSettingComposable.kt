@@ -38,9 +38,9 @@ import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import ireader.domain.models.theme.ReaderTheme
-import ireader.common.resources.UiText
-import ireader.core.ui.theme.ReaderTheme
-import ireader.core.ui.ui.Colour.contentColor
+import ireader.i18n.UiText
+import ireader.ui.core.theme.ReaderTheme
+import ireader.ui.core.ui.Colour.contentColor
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.prefs.ReadingMode

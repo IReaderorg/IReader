@@ -5,9 +5,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.googlefonts.GoogleFont
-import ireader.core.api.prefs.Preference
-import ireader.core.api.prefs.PreferenceStore
-import ireader.core.api.prefs.getEnum
+import ireader.core.prefs.Preference
+import ireader.core.prefs.PreferenceStore
+import ireader.core.prefs.getEnum
 import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.models.prefs.asColor
 import ireader.domain.preferences.models.prefs.asFont

@@ -44,7 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowRow
 import ireader.domain.utils.extensions.copyToClipboard
-import ireader.core.ui.modifier.clickableNoIndication
+import ireader.ui.core.modifier.clickableNoIndication
 import ireader.presentation.R
 
 private val whitespaceLineRegex = Regex("[\\r\\n]{2,}", setOf(RegexOption.MULTILINE))

@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
-import ireader.core.ui.ui.Colour.iconColor
+import ireader.ui.core.ui.Colour.iconColor
 
 @Composable
 fun TextIcon(title: String, icon: ImageVector, isEnable: Boolean, onClick: () -> Unit) {

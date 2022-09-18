@@ -23,7 +23,7 @@ import ireader.ui.component.components.component.Divider
 import ireader.ui.component.components.component.PreferenceRow
 import ireader.ui.component.components.component.SwitchPreference
 import ireader.domain.preferences.prefs.UiPreferences
-import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.R
 import org.koin.android.annotation.KoinViewModel
 

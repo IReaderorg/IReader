@@ -1,7 +1,7 @@
+
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.TimeZone
+import java.util.*
 
 plugins {
     id("com.android.application")
@@ -129,7 +129,6 @@ dependencies {
     implementation(composeLib.compose.googlFonts)
 
     implementation(project(Modules.coreApi))
-    implementation(project(Modules.coreUi))
     implementation(project(Modules.data))
 
     implementation(project(Modules.domain))

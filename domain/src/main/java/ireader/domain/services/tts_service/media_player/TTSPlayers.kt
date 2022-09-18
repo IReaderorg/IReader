@@ -10,8 +10,8 @@
 // import kotlinx.coroutines.Job
 // import kotlinx.coroutines.launch
 // import kotlinx.datetime.Clock
-// import ireader.core.api.log.Log
-// import ireader.core.api.source.Source
+// import ireader.core.log.Log
+// import ireader.core.source.Source
 // import org.ireader.infinity.Book
 // import org.ireader.infinity.Chapter
 // import ireader.domain.notification.Notifications

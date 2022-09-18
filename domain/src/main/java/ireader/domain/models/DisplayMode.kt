@@ -2,7 +2,7 @@ package ireader.domain.models
 
 import android.content.Context
 import ireader.common.models.entities.Category
-import ireader.core.api.prefs.Preference
+import ireader.core.prefs.Preference
 import ireader.domain.R
 
 // sealed class DisplayMode(val title: Int, val layout: LayoutType, val layoutIndex: Int) {

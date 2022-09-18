@@ -7,8 +7,8 @@ import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.Chapter
-import ireader.core.api.source.LocalSource
-import ireader.core.api.source.model.MangaInfo
+import ireader.core.source.LocalSource
+import ireader.core.source.model.MangaInfo
 import org.jsoup.Jsoup
 import org.jsoup.nodes.TextNode
 import org.jsoup.parser.Parser
@@ -77,7 +77,7 @@ class ImportEpub(
             }?.let { output ->
                 val title = tableOfContents[epubResourceModel.href] ?: output.title
 
-                val content = output.body.split("\n").filter { it.isNotBlank() }.map { ireader.core.api.source.model.Text(text = it) }
+                val content = output.body.split("\n").filter { it.isNotBlank() }.map { ireader.core.source.model.Text(text = it) }
                 index++
                 Chapter(
                     name = title ?: "Unknown",

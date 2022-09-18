@@ -22,7 +22,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import ireader.common.models.entities.BookItem
-import ireader.common.resources.UiText
+import ireader.i18n.UiText
 import ireader.ui.component.list.isScrolledToTheEnd
 import ireader.presentation.R
 

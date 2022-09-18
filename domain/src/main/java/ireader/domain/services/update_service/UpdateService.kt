@@ -10,11 +10,11 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import ireader.common.models.update_service_models.Release
 import ireader.common.models.update_service_models.Version
-import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.R
 import ireader.domain.notification.Notifications.CHANNEL_APP_UPDATE
 import ireader.domain.notification.Notifications.ID_APP_UPDATER
 import ireader.domain.notification.flags
+import ireader.domain.preferences.prefs.AppPreferences
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlin.time.DurationUnit
@@ -31,7 +31,7 @@ class UpdateService  constructor(
         val lastCheck = Instant.fromEpochMilliseconds(appPreferences.lastUpdateCheck().get())
         val now = Clock.System.now()
 
-        if ((!ireader.common.resources.BuildConfig.DEBUG || !ireader.common.resources.BuildConfig.PREVIEW) && now - lastCheck < minTimeUpdateCheck) {
+        if ((!ireader.i18n.BuildConfig.DEBUG || !ireader.i18n.BuildConfig.PREVIEW) && now - lastCheck < minTimeUpdateCheck) {
             return Result.success()
         }
 
@@ -40,7 +40,7 @@ class UpdateService  constructor(
         val version = Version.create(release.tag_name)
 
 
-        val versionCode: String = ireader.common.resources.BuildConfig.VERSION_NAME
+        val versionCode: String = ireader.i18n.BuildConfig.VERSION_NAME
         val current = Version.create(versionCode)
 
         if (Version.isNewVersion(release.tag_name, versionCode)) {

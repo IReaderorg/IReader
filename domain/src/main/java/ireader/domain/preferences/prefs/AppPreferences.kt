@@ -1,8 +1,8 @@
 package ireader.domain.preferences.prefs
 
 import ireader.common.models.library.LibrarySort
-import ireader.core.api.prefs.Preference
-import ireader.core.api.prefs.PreferenceStore
+import ireader.core.prefs.Preference
+import ireader.core.prefs.PreferenceStore
 
 class AppPreferences(
     private val preferenceStore: PreferenceStore,

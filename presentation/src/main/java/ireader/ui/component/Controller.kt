@@ -11,7 +11,7 @@ import androidx.compose.material3.TopAppBarState
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import ireader.core.ui.theme.CustomSystemColor
+import ireader.ui.core.theme.CustomSystemColor
 
 data class Controller @OptIn(
     ExperimentalMaterial3Api::class,

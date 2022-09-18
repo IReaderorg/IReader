@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import ireader.common.models.entities.Chapter
 import ireader.common.models.entities.UpdatesWithRelations
 import ireader.domain.preferences.prefs.UiPreferences
-import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.services.ServiceUseCases

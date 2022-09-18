@@ -22,8 +22,8 @@ import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import ireader.common.models.entities.BookItem
 import ireader.common.models.entities.Category
-import ireader.core.ui.ui.EmptyScreen
-import ireader.core.ui.ui.LoadingScreen
+import ireader.ui.core.ui.EmptyScreen
+import ireader.ui.core.ui.LoadingScreen
 import ireader.presentation.R
 import ireader.ui.home.library.components.EditCategoriesDialog
 import ireader.ui.home.library.ui.LibraryContent

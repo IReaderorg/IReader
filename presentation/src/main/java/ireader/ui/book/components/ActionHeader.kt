@@ -24,9 +24,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ireader.core.api.source.HttpSource
-import ireader.core.api.source.Source
-import ireader.common.resources.R
+import ireader.core.source.HttpSource
+import ireader.core.source.Source
+import ireader.i18n.R
 
 @Composable
 fun ActionHeader(

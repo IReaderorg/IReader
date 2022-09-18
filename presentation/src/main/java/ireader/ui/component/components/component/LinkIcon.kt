@@ -9,7 +9,8 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
-import ireader.core.ui.theme.AppColors
+import ireader.ui.core.theme.AppColors
+
 
 @Composable
 fun LinkIcon(

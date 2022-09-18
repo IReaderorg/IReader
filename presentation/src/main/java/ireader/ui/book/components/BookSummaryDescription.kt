@@ -24,7 +24,7 @@ import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.sp
-import ireader.core.ui.modifier.secondaryItemAlpha
+import ireader.ui.core.modifier.secondaryItemAlpha
 import ireader.presentation.R
 import kotlin.math.roundToInt
 

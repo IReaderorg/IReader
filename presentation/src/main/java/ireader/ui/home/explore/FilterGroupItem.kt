@@ -21,8 +21,8 @@ import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.ui.component.reusable_composable.DropDownMenu
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.ui.component.reusable_composable.TextField
-import ireader.core.api.source.model.Filter
-import ireader.core.api.util.replace
+import ireader.core.source.model.Filter
+import ireader.core.util.replace
 
 @Composable
 fun FilterGroupItem(

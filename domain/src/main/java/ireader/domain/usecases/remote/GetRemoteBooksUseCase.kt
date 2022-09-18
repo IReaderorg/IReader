@@ -1,11 +1,11 @@
 package ireader.domain.usecases.remote
 
 import ireader.common.models.entities.CatalogLocal
-import ireader.common.resources.EmptyQuery
-import ireader.common.resources.SourceNotFoundException
-import ireader.core.api.source.model.Filter
-import ireader.core.api.source.model.Listing
-import ireader.core.api.source.model.MangasPageInfo
+import ireader.i18n.EmptyQuery
+import ireader.i18n.SourceNotFoundException
+import ireader.core.source.model.Filter
+import ireader.core.source.model.Listing
+import ireader.core.source.model.MangasPageInfo
 import ireader.domain.utils.extensions.async.withIOContext
 import org.koin.core.annotation.Factory
 
@@ -21,7 +21,7 @@ class GetRemoteBooksUseCase() {
         onSuccess: suspend (MangasPageInfo) -> Unit,
     ) {
         val source = catalog?.source ?: throw SourceNotFoundException()
-        if (source !is ireader.core.api.source.CatalogSource) throw SourceNotFoundException()
+        if (source !is ireader.core.source.CatalogSource) throw SourceNotFoundException()
         withIOContext {
             try {
                 var item: MangasPageInfo = MangasPageInfo(emptyList(), false)

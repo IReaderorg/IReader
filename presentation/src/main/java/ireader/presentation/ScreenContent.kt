@@ -56,24 +56,24 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import kotlinx.coroutines.launch
-import ireader.common.resources.ARG_HAVE_CUSTOMIZED_VARIANT_BOTTOM_BAR
-import ireader.common.resources.ARG_HAVE_DRAWER
-import ireader.common.resources.ARG_HAVE_MODAL_SHEET
-import ireader.common.resources.ARG_HAVE_VARIANT_BOTTOM_BAR
-import ireader.common.resources.ARG_HIDE_BOTTOM_BAR
-import ireader.common.resources.ARG_TRANSPARENT_STATUS_BAR
-import ireader.core.api.log.Log
+import ireader.i18n.ARG_HAVE_CUSTOMIZED_VARIANT_BOTTOM_BAR
+import ireader.i18n.ARG_HAVE_DRAWER
+import ireader.i18n.ARG_HAVE_MODAL_SHEET
+import ireader.i18n.ARG_HAVE_VARIANT_BOTTOM_BAR
+import ireader.i18n.ARG_HIDE_BOTTOM_BAR
+import ireader.i18n.ARG_TRANSPARENT_STATUS_BAR
+import ireader.core.log.Log
 import ireader.ui.component.Controller
 import ireader.ui.component.components.ConfirmExitBackHandler
 import ireader.ui.component.components.ISnackBarHost
-import ireader.core.ui.theme.AppColors
-import ireader.core.ui.theme.CustomSystemColor
-import ireader.core.ui.theme.TransparentStatusBar
 import ireader.presentation.ui.BottomNavScreenSpec
 import ireader.presentation.ui.HistoryScreenSpec
 import ireader.presentation.ui.LibraryScreenSpec
 import ireader.presentation.ui.ScreenSpec
 import ireader.presentation.ui.UpdateScreenSpec
+import ireader.ui.core.theme.AppColors
+import ireader.ui.core.theme.CustomSystemColor
+import ireader.ui.core.theme.TransparentStatusBar
 import org.koin.androidx.compose.getViewModel
 
 @OptIn(
@@ -309,7 +309,7 @@ fun ScreenContent() {
                                                 Icon(
                                                     bottomNavDestination.icon,
                                                     contentDescription = null,
-                                                    tint = if (isSelected) androidx.compose.material3.MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
+                                                    tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
                                                 )
                                             },
                                             label = {

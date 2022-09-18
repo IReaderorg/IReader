@@ -2,11 +2,11 @@ package ireader.domain.utils
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import ireader.common.resources.EmptyQuery
-import ireader.common.resources.SourceNotFoundException
-import ireader.common.resources.UiText
-import ireader.core.api.log.Log
-import ireader.core.api.source.LocalSourceException
+import ireader.i18n.EmptyQuery
+import ireader.i18n.SourceNotFoundException
+import ireader.i18n.UiText
+import ireader.core.log.Log
+import ireader.core.source.LocalSourceException
 import ireader.domain.R
 import java.io.IOException
 import java.net.SocketTimeoutException
@@ -29,16 +29,16 @@ fun exceptionHandler(e: Throwable): UiText? {
             UiText.StringResource(R.string.cant_get_content)
         }
         is NoSuchMethodError -> {
-            UiText.StringResource(ireader.common.resources.R.string.library_is_out_of_date)
+            UiText.StringResource(ireader.i18n.R.string.library_is_out_of_date)
         }
         is TimeoutException -> {
-            UiText.StringResource(ireader.common.resources.R.string.time_out_exception)
+            UiText.StringResource(ireader.i18n.R.string.time_out_exception)
         }
         is java.lang.ClassCastException -> {
             null
         }
         is CatalogNotFoundException -> {
-            UiText.StringResource(ireader.common.resources.R.string.catalog_not_found_error)
+            UiText.StringResource(ireader.i18n.R.string.catalog_not_found_error)
         }
         is EmptyQuery -> UiText.StringResource(R.string.query_must_not_be_empty)
         is LocalSourceException -> null

@@ -2,8 +2,8 @@
 
 package ireader.domain.catalogs
 
-import ireader.core.api.prefs.Preference
-import ireader.core.api.prefs.PreferenceStore
+import ireader.core.prefs.Preference
+import ireader.core.prefs.PreferenceStore
 
 class CatalogPreferences(private val store: PreferenceStore) {
 

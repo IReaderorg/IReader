@@ -11,14 +11,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import ireader.domain.utils.extensions.withIOContext
-import ireader.common.resources.BuildConfig
-import ireader.core.api.http.HttpClients
-import ireader.core.api.log.Log
-import ireader.core.api.prefs.AndroidPreferenceStore
-import ireader.core.api.prefs.PrefixedPreferenceStore
-import ireader.core.api.source.LocalSource
-import ireader.core.api.source.Source
-import ireader.core.api.source.TestSource
+import ireader.i18n.BuildConfig
+import ireader.core.http.HttpClients
+import ireader.core.log.Log
+import ireader.core.prefs.AndroidPreferenceStore
+import ireader.core.prefs.PrefixedPreferenceStore
+import ireader.core.source.LocalSource
+import ireader.core.source.Source
+import ireader.core.source.TestSource
 import ireader.domain.catalogs.service.CatalogLoader
 import ireader.domain.R
 import org.koin.core.annotation.Single
@@ -224,7 +224,7 @@ class AndroidCatalogLoader(
         val nsfw = metadata.getInt(METADATA_NSFW, 0) == 1
 
         val preferenceSource = PrefixedPreferenceStore(catalogPreferences, pkgName)
-        val dependencies = ireader.core.api.source.Dependencies(httpClients, preferenceSource)
+        val dependencies = ireader.core.source.Dependencies(httpClients, preferenceSource)
 
         return ValidatedData(versionCode, versionName, description,icon, nsfw, classToLoad, dependencies)
     }
@@ -232,7 +232,7 @@ class AndroidCatalogLoader(
     private fun loadSource(pkgName: String, loader: ClassLoader, data: ValidatedData): Source? {
         return try {
             val obj = Class.forName(data.classToLoad, false, loader)
-                .getConstructor(ireader.core.api.source.Dependencies::class.java)
+                .getConstructor(ireader.core.source.Dependencies::class.java)
                 .newInstance(data.dependencies)
 
             obj as? Source ?: throw Exception("Unknown source class type! ${obj.javaClass}")
@@ -249,7 +249,7 @@ class AndroidCatalogLoader(
         val icon: String,
         val nsfw: Boolean,
         val classToLoad: String,
-        val dependencies: ireader.core.api.source.Dependencies,
+        val dependencies: ireader.core.source.Dependencies,
     )
 
     private companion object {

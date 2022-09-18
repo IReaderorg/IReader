@@ -13,8 +13,8 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.CatalogLocal
 import ireader.common.models.entities.Chapter
-import ireader.core.api.source.Source
-import ireader.core.api.source.model.Page
+import ireader.core.source.Source
+import ireader.core.source.model.Page
 import org.koin.core.annotation.Factory
 @Factory
 open class ReaderScreenStateImpl: ReaderScreenState {

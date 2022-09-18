@@ -3,7 +3,7 @@ package ireader.ui.home.library.components
 import androidx.compose.runtime.Composable
 import ireader.common.models.entities.Category
 import ireader.common.models.entities.CategoryWithCount
-import ireader.core.ui.ui.string
+import ireader.ui.core.ui.string
 import ireader.presentation.R
 
 val Category.visibleName

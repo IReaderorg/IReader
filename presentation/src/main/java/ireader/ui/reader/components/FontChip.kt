@@ -20,7 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.ui.component.components.component.PreferenceRow
 import ireader.ui.component.reusable_composable.CaptionTextComposable
-import ireader.core.ui.ui.string
+import ireader.ui.core.ui.string
 import ireader.presentation.R
 import ireader.ui.reader.viewmodel.ReaderScreenViewModel
 

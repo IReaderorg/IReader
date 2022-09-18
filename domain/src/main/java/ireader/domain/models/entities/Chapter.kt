@@ -5,8 +5,8 @@ package ireader.common.models.entities
 
 
 import kotlinx.serialization.Serializable
-import ireader.core.api.source.model.ChapterInfo
-import ireader.core.api.source.model.Page
+import ireader.core.source.model.ChapterInfo
+import ireader.core.source.model.Page
 
 @Serializable
 data class Chapter(

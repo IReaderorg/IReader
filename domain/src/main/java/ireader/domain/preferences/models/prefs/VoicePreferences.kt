@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import ireader.core.api.prefs.Preference
+import ireader.core.prefs.Preference
 
 class IReaderVoicePreferences @OptIn(ExperimentalTextApi::class) constructor(
     private val preference: Preference<String>,

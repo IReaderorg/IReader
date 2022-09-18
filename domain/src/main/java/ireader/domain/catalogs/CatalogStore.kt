@@ -13,8 +13,8 @@ import ireader.common.models.entities.CatalogBundled
 import ireader.common.models.entities.CatalogInstalled
 import ireader.common.models.entities.CatalogLocal
 import ireader.common.models.entities.CatalogRemote
-import ireader.core.api.source.LocalSource
-import ireader.core.api.util.replace
+import ireader.core.source.LocalSource
+import ireader.core.util.replace
 import ireader.domain.catalogs.service.CatalogInstallationChange
 import ireader.domain.catalogs.service.CatalogInstallationChanges
 import ireader.domain.catalogs.service.CatalogLoader

@@ -25,8 +25,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.common.models.entities.HistoryWithRelations
-import ireader.core.ui.coil.rememberBookCover
-import ireader.core.ui.utils.horizontalPadding
+import ireader.ui.core.coil.rememberBookCover
+import ireader.ui.core.utils.horizontalPadding
 import ireader.ui.component.BookListItem
 import ireader.ui.component.BookListItemColumn
 import ireader.ui.component.BookListItemImage

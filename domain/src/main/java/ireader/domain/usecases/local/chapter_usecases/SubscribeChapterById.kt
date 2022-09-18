@@ -2,7 +2,7 @@ package ireader.domain.usecases.local.chapter_usecases
 
 import ireader.domain.data.repository.ChapterRepository
 import ireader.common.models.entities.Chapter
-import ireader.common.resources.LAST_CHAPTER
+import ireader.i18n.LAST_CHAPTER
 
 
 

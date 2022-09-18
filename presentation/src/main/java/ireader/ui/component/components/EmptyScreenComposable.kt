@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import ireader.ui.component.reusable_composable.TopAppBarBackButton
-import ireader.core.ui.ui.EmptyScreen
+import ireader.ui.core.ui.EmptyScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

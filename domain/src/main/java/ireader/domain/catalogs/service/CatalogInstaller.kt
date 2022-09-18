@@ -2,7 +2,7 @@ package ireader.domain.catalogs.service
 
 import kotlinx.coroutines.flow.Flow
 import ireader.common.models.entities.CatalogRemote
-import ireader.core.api.os.InstallStep
+import ireader.core.os.InstallStep
 
 interface CatalogInstaller {
 

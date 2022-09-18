@@ -4,7 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import ireader.core.api.log.Log
+import ireader.core.log.Log
 import ireader.domain.catalogs.CatalogPreferences
 import ireader.domain.catalogs.service.CatalogRemoteApi
 import ireader.domain.catalogs.service.CatalogRemoteRepository

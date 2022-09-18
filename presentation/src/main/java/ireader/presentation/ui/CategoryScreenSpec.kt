@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 
 import ireader.ui.component.Controller
-import ireader.common.resources.R
+import ireader.i18n.R
 import ireader.ui.component.components.TitleToolbar
 import ireader.ui.settings.category.CategoryScreen
 import ireader.ui.settings.category.CategoryScreenViewModel

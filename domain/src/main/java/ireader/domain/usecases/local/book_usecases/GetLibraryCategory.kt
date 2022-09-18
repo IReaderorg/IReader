@@ -8,7 +8,7 @@ import ireader.domain.data.repository.LibraryRepository
 import ireader.common.models.entities.LibraryBook
 import ireader.common.models.library.LibraryFilter
 import ireader.common.models.library.LibrarySort
-import ireader.core.api.source.model.MangaInfo
+import ireader.core.source.model.MangaInfo
 import org.koin.core.annotation.Factory
 
 @Factory

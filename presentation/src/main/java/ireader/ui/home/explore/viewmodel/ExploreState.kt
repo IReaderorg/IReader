@@ -6,9 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.CatalogLocal
-import ireader.common.resources.UiText
-import ireader.core.api.source.model.Filter
-import ireader.core.api.source.model.Listing
+import ireader.i18n.UiText
+import ireader.core.source.model.Filter
+import ireader.core.source.model.Listing
 import ireader.domain.models.DisplayMode
 import ireader.domain.utils.extensions.replaceFirst
 import org.koin.core.annotation.Factory
@@ -20,7 +20,7 @@ interface ExploreState {
     val layout: DisplayMode
     val isSearchModeEnable: Boolean
     var searchQuery: String?
-    val source: ireader.core.api.source.CatalogSource?
+    val source: ireader.core.source.CatalogSource?
     val catalog: CatalogLocal?
     val isFilterEnable: Boolean
     var topMenuEnable: Boolean
@@ -42,9 +42,9 @@ open class ExploreStateImpl: ExploreState {
     override var layout by mutableStateOf<DisplayMode>(DisplayMode.ComfortableGrid)
     override var isSearchModeEnable by mutableStateOf<Boolean>(false)
     override var searchQuery by mutableStateOf<String?>(null)
-    override val source: ireader.core.api.source.CatalogSource? by derivedStateOf {
+    override val source: ireader.core.source.CatalogSource? by derivedStateOf {
         val source = catalog?.source
-        if (source is ireader.core.api.source.CatalogSource) source else null
+        if (source is ireader.core.source.CatalogSource) source else null
     }
     override var catalog by mutableStateOf<CatalogLocal?>(null)
     override var isFilterEnable by mutableStateOf<Boolean>(false)

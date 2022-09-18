@@ -2,7 +2,7 @@ package ireader.ui.settings.repository
 
 import androidx.compose.runtime.mutableStateOf
 import ireader.common.models.entities.ExtensionSource
-import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.domain.data.repository.CatalogSourceRepository
 import org.koin.android.annotation.KoinViewModel
 

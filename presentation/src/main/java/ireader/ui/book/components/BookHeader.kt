@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ireader.common.models.entities.Book
-import ireader.core.api.source.Source
+import ireader.core.source.Source
 import ireader.domain.models.BookCover
 import ireader.ui.component.components.BookImageCover
 

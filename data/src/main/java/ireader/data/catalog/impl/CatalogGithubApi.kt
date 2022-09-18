@@ -7,10 +7,10 @@ import ireader.common.models.entities.CatalogRemote
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import ireader.common.resources.REPO_URL
-import ireader.core.api.http.HttpClients
-import ireader.core.api.log.Log
-import ireader.core.api.os.AppState
+import ireader.i18n.REPO_URL
+import ireader.core.http.HttpClients
+import ireader.core.log.Log
+import ireader.core.os.AppState
 import ireader.domain.catalogs.service.CatalogRemoteApi
 import ireader.domain.utils.CatalogNotFoundException
 import org.koin.core.annotation.Single

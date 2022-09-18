@@ -27,7 +27,7 @@ import ireader.ui.component.components.Toolbar
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.ui.component.reusable_composable.AppTextField
 import ireader.ui.component.reusable_composable.BigSizeTextComposable
-import ireader.core.ui.ui.DEFAULT_ELEVATION
+import ireader.ui.core.ui.DEFAULT_ELEVATION
 import ireader.presentation.R
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)

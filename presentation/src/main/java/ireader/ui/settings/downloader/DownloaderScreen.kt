@@ -40,8 +40,8 @@ import kotlinx.coroutines.flow.collectLatest
 import ireader.common.models.entities.SavedDownload
 import ireader.common.models.entities.SavedDownloadWithInfo
 import ireader.common.models.entities.toSavedDownload
-import ireader.common.resources.UiEvent
-import ireader.common.resources.asString
+import ireader.i18n.UiEvent
+import ireader.i18n.asString
 import ireader.ui.component.BookListItem
 import ireader.ui.component.BookListItemColumn
 import ireader.ui.component.BookListItemSubtitle
@@ -50,7 +50,7 @@ import ireader.ui.component.list.scrollbars.VerticalFastScroller
 import ireader.ui.component.reusable_composable.BuildDropDownMenu
 import ireader.ui.component.reusable_composable.DropDownMenuItem
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
-import ireader.core.ui.modifier.selectedBackground
+import ireader.ui.core.modifier.selectedBackground
 import ireader.presentation.R
 
 

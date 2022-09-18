@@ -58,7 +58,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import ireader.common.resources.R
+import ireader.i18n.R
 import kotlin.math.round
 
 @Composable

@@ -25,10 +25,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.common.models.entities.Book
-import ireader.core.api.source.Source
-import ireader.core.api.source.model.MangaInfo
-import ireader.core.ui.modifier.clickableNoIndication
-import ireader.core.ui.modifier.secondaryItemAlpha
+import ireader.core.source.Source
+import ireader.core.source.model.MangaInfo
+import ireader.ui.core.modifier.clickableNoIndication
+import ireader.ui.core.modifier.secondaryItemAlpha
 import ireader.domain.utils.copyToClipboard
 
 @Composable

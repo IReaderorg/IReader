@@ -6,9 +6,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.common.models.entities.CatalogLocal
-import ireader.core.api.source.HttpSource
-import ireader.core.api.source.Source
-import ireader.core.api.source.model.Command
+import ireader.core.source.HttpSource
+import ireader.core.source.Source
+import ireader.core.source.model.Command
 import org.koin.core.annotation.Factory
 
 @Factory

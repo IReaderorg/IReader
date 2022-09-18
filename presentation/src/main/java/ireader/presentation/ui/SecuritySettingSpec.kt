@@ -15,16 +15,16 @@ import kotlinx.datetime.Clock
 import ireader.domain.utils.extensions.AuthenticatorUtil
 import ireader.domain.utils.extensions.AuthenticatorUtil.isAuthenticationSupported
 import ireader.domain.utils.extensions.AuthenticatorUtil.startAuthentication
-import ireader.common.resources.R
+import ireader.i18n.R
 import ireader.ui.component.Controller
 import ireader.ui.component.components.Components
 import ireader.ui.component.components.SetupSettingComponents
 import ireader.ui.component.components.TitleToolbar
 import ireader.ui.component.components.component.ChoicePreference
-import ireader.core.api.log.Log
+import ireader.core.log.Log
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
-import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.ui.core.viewmodel.BaseViewModel
 import org.koin.android.annotation.KoinViewModel
 import org.koin.androidx.compose.getViewModel
 

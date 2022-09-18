@@ -16,10 +16,10 @@ import ireader.ui.component.Controller
 import ireader.domain.utils.extensions.findComponentActivity
 import ireader.domain.utils.extensions.getCacheSize
 import ireader.domain.utils.extensions.launchIO
-import ireader.common.resources.UiText
+import ireader.i18n.UiText
 import ireader.ui.component.components.Components
 import ireader.ui.component.components.SetupSettingComponents
-import ireader.core.api.log.Log
+import ireader.core.log.Log
 import ireader.ui.settings.AdvanceSettingViewModel
 import ireader.presentation.R
 

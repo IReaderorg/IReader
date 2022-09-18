@@ -11,12 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.stringResource
 import ireader.domain.utils.extensions.launchIO
-import ireader.common.resources.UiText
+import ireader.i18n.UiText
 import ireader.ui.component.components.Toolbar
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.ui.component.reusable_composable.TopAppBarBackButton
-import ireader.core.ui.theme.isLight
+import ireader.ui.core.theme.isLight
 import ireader.presentation.R
 
 @OptIn(ExperimentalMaterial3Api::class)

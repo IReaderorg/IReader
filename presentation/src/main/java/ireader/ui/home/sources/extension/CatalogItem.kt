@@ -36,7 +36,7 @@ import ireader.common.models.entities.CatalogBundled
 import ireader.common.models.entities.CatalogInstalled
 import ireader.common.models.entities.CatalogLocal
 import ireader.common.models.entities.CatalogRemote
-import ireader.core.api.os.InstallStep
+import ireader.core.os.InstallStep
 import ireader.presentation.R
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.ui.component.reusable_composable.MidSizeTextComposable

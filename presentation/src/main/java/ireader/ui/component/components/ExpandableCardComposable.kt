@@ -27,7 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ireader.core.ui.theme.Shapes
+import ireader.ui.core.theme.Shapes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

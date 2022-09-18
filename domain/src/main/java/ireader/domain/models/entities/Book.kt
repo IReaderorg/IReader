@@ -2,7 +2,7 @@ package ireader.common.models.entities
 
 
 import kotlinx.serialization.Serializable
-import ireader.core.api.source.model.MangaInfo
+import ireader.core.source.model.MangaInfo
 import kotlinx.datetime.Clock
 
 @Serializable

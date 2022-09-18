@@ -40,8 +40,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import ireader.common.models.entities.Chapter
-import ireader.core.api.source.Source
-import ireader.core.ui.modifier.clickableNoIndication
+import ireader.core.source.Source
+import ireader.ui.core.modifier.clickableNoIndication
 import ireader.domain.models.prefs.mapAlignment
 import ireader.domain.models.prefs.mapTextAlign
 import ireader.domain.services.tts_service.TTSState

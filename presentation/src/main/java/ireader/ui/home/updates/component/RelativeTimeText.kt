@@ -5,7 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import kotlinx.datetime.LocalDate
-import ireader.core.api.util.asRelativeTimeString
+import ireader.core.util.asRelativeTimeString
 
 @Composable
 fun RelativeTimeText(modifier: Modifier = Modifier, date: LocalDate) {

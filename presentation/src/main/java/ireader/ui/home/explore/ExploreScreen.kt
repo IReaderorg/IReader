@@ -44,13 +44,13 @@ import ireader.common.models.entities.Book
 import ireader.common.models.entities.BookItem
 import ireader.common.models.entities.toBook
 import ireader.common.models.entities.toBookItem
-import ireader.common.resources.asString
-import ireader.core.api.source.HttpSource
-import ireader.core.api.source.Source
-import ireader.core.api.source.model.Filter
-import ireader.core.api.source.model.Listing
-import ireader.core.ui.theme.ContentAlpha
-import ireader.core.ui.ui.kaomojis
+import ireader.i18n.asString
+import ireader.core.source.HttpSource
+import ireader.core.source.Source
+import ireader.core.source.model.Filter
+import ireader.core.source.model.Listing
+import ireader.ui.core.theme.ContentAlpha
+import ireader.ui.core.ui.kaomojis
 import ireader.ui.component.components.ShowLoading
 import ireader.ui.component.list.LayoutComposable
 import ireader.ui.component.list.isScrolledToTheEnd
@@ -68,7 +68,7 @@ import kotlinx.coroutines.launch
 fun ExploreScreen(
     modifier: Modifier = Modifier,
     vm: ExploreViewModel,
-    source: ireader.core.api.source.CatalogSource,
+    source: ireader.core.source.CatalogSource,
     onFilterClick: () -> Unit,
     getBooks: (query: String?, listing: Listing?, filters: List<Filter<*>>) -> Unit,
     loadItems: (Boolean) -> Unit,
@@ -140,7 +140,7 @@ fun ExploreScreen(
             androidx.compose.material3.ExtendedFloatingActionButton(
                 text = {
                     MidSizeTextComposable(
-                        text = stringResource(ireader.common.resources.R.string.filter),
+                        text = stringResource(ireader.i18n.R.string.filter),
                         color = MaterialTheme.colorScheme.onSecondary
                     )
                 },
@@ -259,12 +259,12 @@ private fun BoxScope.ExploreScreenErrorComposable(
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.Refresh,
-                    contentDescription = stringResource(ireader.common.resources.R.string.retry),
+                    contentDescription = stringResource(ireader.i18n.R.string.retry),
                     onClick = {
                         onRefresh()
                     }
                 )
-                SmallTextComposable(text = stringResource(ireader.common.resources.R.string.retry))
+                SmallTextComposable(text = stringResource(ireader.i18n.R.string.retry))
             }
             Column(
                 Modifier
@@ -275,13 +275,13 @@ private fun BoxScope.ExploreScreenErrorComposable(
                 if (source is HttpSource) {
                     AppIconButton(
                         imageVector = Icons.Default.Public,
-                        contentDescription = stringResource(ireader.common.resources.R.string.open_in_webView),
+                        contentDescription = stringResource(ireader.i18n.R.string.open_in_webView),
                         onClick = {
                             onWebView(source)
                         }
                     )
                 }
-                SmallTextComposable(text = stringResource(ireader.common.resources.R.string.open_in_webView))
+                SmallTextComposable(text = stringResource(ireader.i18n.R.string.open_in_webView))
             }
         }
     }

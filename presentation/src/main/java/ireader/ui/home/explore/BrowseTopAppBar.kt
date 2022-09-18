@@ -27,8 +27,8 @@ import ireader.ui.component.reusable_composable.AppTextField
 import ireader.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.ui.component.text_related.RadioButton
-import ireader.core.api.source.HttpSource
-import ireader.core.api.source.model.Filter
+import ireader.core.source.HttpSource
+import ireader.core.source.model.Filter
 import ireader.ui.home.explore.viewmodel.ExploreState
 import ireader.presentation.R
 
@@ -36,7 +36,7 @@ import ireader.presentation.R
 @Composable
 fun BrowseTopAppBar(
     state: ExploreState,
-    source: ireader.core.api.source.CatalogSource?,
+    source: ireader.core.source.CatalogSource?,
     onValueChange: (String) -> Unit,
     onSearch: () -> Unit,
     onSearchDisable: () -> Unit,

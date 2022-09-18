@@ -6,7 +6,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import ireader.common.models.entities.SavedDownload
-import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.domain.services.downloaderService.DownloadServiceStateImpl
 import ireader.domain.services.downloaderService.DownloaderService
 import ireader.domain.usecases.download.DownloadUseCases

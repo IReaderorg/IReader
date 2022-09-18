@@ -31,8 +31,8 @@ import ireader.ui.component.BookListItemColumn
 import ireader.ui.component.BookListItemImage
 import ireader.ui.component.BookListItemSubtitle
 import ireader.ui.component.BookListItemTitle
-import ireader.core.ui.coil.rememberBookCover
-import ireader.core.ui.modifier.selectedBackground
+import ireader.ui.core.coil.rememberBookCover
+import ireader.ui.core.modifier.selectedBackground
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

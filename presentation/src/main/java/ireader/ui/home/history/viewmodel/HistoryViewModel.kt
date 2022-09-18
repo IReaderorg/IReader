@@ -12,7 +12,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import ireader.common.models.entities.HistoryWithRelations
-import ireader.core.ui.viewmodel.BaseViewModel
+import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.history.HistoryUseCase
@@ -40,7 +40,7 @@ class HistoryViewModel(
         val flow = remember(query) {
             historyUseCase.findHistoriesPaging(query)
                 .catch { error ->
-                    ireader.core.api.log.Log.debug(error)
+                    ireader.core.log.Log.debug(error)
 
                 }
                 .map { pagingData ->

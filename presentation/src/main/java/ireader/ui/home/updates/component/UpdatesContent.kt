@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.common.models.entities.UpdatesWithRelations
-import ireader.core.api.util.asRelativeTimeString
+import ireader.core.util.asRelativeTimeString
 import ireader.ui.component.text_related.TextSection
 import ireader.ui.home.updates.viewmodel.UpdatesViewModel
 
