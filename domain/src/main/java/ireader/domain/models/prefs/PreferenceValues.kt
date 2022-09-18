@@ -29,7 +29,7 @@ object PreferenceValues {
     }
     enum class Installer {
         AndroidPackageManager,
-        AndroidInApp;
+        LocalInstaller;
     }
 
     /**

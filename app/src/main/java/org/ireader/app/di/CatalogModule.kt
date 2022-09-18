@@ -1,18 +1,21 @@
 package org.ireader.app.di
 
 import android.app.Application
-import io.ktor.client.plugins.cookies.CookiesStorage
-import ireader.domain.data.repository.BookRepository
+import io.ktor.client.plugins.cookies.*
 import ireader.core.http.BrowserEngine
 import ireader.core.http.HttpClients
 import ireader.core.http.WebViewCookieJar
 import ireader.core.http.WebViewManger
 import ireader.core.os.PackageInstaller
 import ireader.core.prefs.PreferenceStore
-import ireader.domain.preferences.prefs.UiPreferences
+import ireader.data.catalog.impl.AndroidCatalogInstallationChanges
+import ireader.data.catalog.impl.AndroidCatalogInstaller
+import ireader.data.catalog.impl.AndroidCatalogLoader
+import ireader.data.catalog.impl.AndroidLocalInstaller
+import ireader.data.catalog.impl.CatalogGithubApi
+import ireader.data.catalog.impl.interactor.InstallCatalogImpl
 import ireader.domain.catalogs.CatalogPreferences
 import ireader.domain.catalogs.CatalogStore
-import ireader.data.catalog.impl.AndroidCatalogInstallationChanges
 import ireader.domain.catalogs.interactor.GetCatalogsByType
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.catalogs.interactor.GetLocalCatalogs
@@ -20,18 +23,14 @@ import ireader.domain.catalogs.interactor.GetRemoteCatalogs
 import ireader.domain.catalogs.interactor.InstallCatalog
 import ireader.domain.catalogs.interactor.SyncRemoteCatalogs
 import ireader.domain.catalogs.interactor.TogglePinnedCatalog
-import ireader.data.catalog.impl.interactor.UninstallCatalogImpl
 import ireader.domain.catalogs.interactor.UpdateCatalog
 import ireader.domain.catalogs.service.CatalogInstaller
 import ireader.domain.catalogs.service.CatalogRemoteRepository
-import ireader.data.catalog.impl.AndroidCatalogLoader
-import ireader.data.catalog.impl.AndroidCatalogInstaller
-import ireader.data.catalog.impl.AndroidLocalInstaller
-import ireader.data.catalog.impl.CatalogGithubApi
-import ireader.data.catalog.impl.interactor.InstallCatalogImpl
-import ireader.domain.catalogs.interactor.UninstallCatalogs
-import ireader.imageloader.coil.CoilLoaderFactory
+import ireader.domain.data.repository.BookRepository
+import ireader.domain.data.repository.CatalogSourceRepository
 import ireader.domain.image.cache.CoverCache
+import ireader.domain.preferences.prefs.UiPreferences
+import ireader.imageloader.coil.CoilLoaderFactory
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
@@ -212,10 +211,12 @@ class CatalogModule {
             catalogRemoteRepository: CatalogRemoteRepository,
             catalogPreferences: CatalogPreferences,
             httpClient: HttpClients,
+            uiPreferences: UiPreferences,
+            repo: CatalogSourceRepository
     ): SyncRemoteCatalogs {
         return SyncRemoteCatalogs(
             catalogRemoteRepository,
-            CatalogGithubApi(httpClient),
+            CatalogGithubApi(httpClient, uiPreferences = uiPreferences,repo),
             catalogPreferences
         )
     }

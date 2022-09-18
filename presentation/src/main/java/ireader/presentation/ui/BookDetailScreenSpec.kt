@@ -21,13 +21,12 @@ import androidx.navigation.navDeepLink
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import ireader.common.models.entities.Book
-import ireader.i18n.LAST_CHAPTER
-import ireader.i18n.UiText
 import ireader.core.source.HttpSource
-import ireader.ui.core.ui.SnackBarListener
 import ireader.domain.utils.extensions.async.viewModelIOCoroutine
 import ireader.domain.utils.extensions.findComponentActivity
 import ireader.domain.utils.extensions.launchIO
+import ireader.i18n.LAST_CHAPTER
+import ireader.i18n.UiText
 import ireader.presentation.R
 import ireader.presentation.ui.util.NavigationArgs
 import ireader.ui.book.BookDetailScreen
@@ -36,6 +35,7 @@ import ireader.ui.book.components.ChapterCommandBottomSheet
 import ireader.ui.book.components.ChapterScreenBottomTabComposable
 import ireader.ui.book.viewmodel.BookDetailViewModel
 import ireader.ui.component.Controller
+import ireader.ui.core.ui.SnackBarListener
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 
@@ -394,7 +394,8 @@ object BookDetailScreenSpec : ScreenSpec {
                 if (book != null) {
                     vm.toggleInLibrary(book = book)
                 }
-            }
+            },
+            controller = controller
 
         )
     }

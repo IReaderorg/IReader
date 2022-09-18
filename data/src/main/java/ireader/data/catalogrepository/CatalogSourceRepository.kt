@@ -1,8 +1,8 @@
 package ireader.data.catalogrepository
 
-import ireader.common.models.entities.ExtensionSource
 import ireader.data.local.DatabaseHandler
 import ireader.domain.data.repository.CatalogSourceRepository
+import ireader.domain.models.entities.ExtensionSource
 import kotlinx.coroutines.flow.Flow
 import org.koin.core.annotation.Single
 
@@ -14,6 +14,12 @@ class CatalogSourceRepositoryImpl(val handler: DatabaseHandler): CatalogSourceRe
        }
     }
 
+    override suspend fun find(id: Long): ExtensionSource? {
+        return handler.awaitOneOrNull {
+            repositoryQueries.find(id,extensionMapper)
+        }
+    }
+
 
     override suspend fun insert(extensionSource: ExtensionSource) {
         handler.await {
@@ -21,5 +27,23 @@ class CatalogSourceRepositoryImpl(val handler: DatabaseHandler): CatalogSourceRe
         }
     }
 
+    override suspend fun delete(extensionSource: ExtensionSource) {
+        handler.await {
+            repositoryQueries.delete(extensionSource.id)
+        }
+    }
 
+
+}
+
+val extensionMapper =  {_id: Long, name: String, key: String, owner: String, source: String, last_update: Long, is_enable: Boolean ->
+    ExtensionSource(
+        _id,
+        name,
+        key,
+        owner,
+        source,
+        last_update,
+        is_enable
+    )
 }

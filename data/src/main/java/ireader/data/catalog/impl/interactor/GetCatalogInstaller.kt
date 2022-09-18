@@ -18,7 +18,7 @@ class InstallCatalogImpl(
 
     override fun await(catalog: CatalogRemote): Flow<InstallStep> {
         return when (uiPreferences.installerMode().get()) {
-            PreferenceValues.Installer.AndroidInApp -> {
+            PreferenceValues.Installer.LocalInstaller -> {
                 androidInAppInstaller.install(catalog)
             }
             else -> {

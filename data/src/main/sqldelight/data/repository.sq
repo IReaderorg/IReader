@@ -16,7 +16,7 @@ INSERT OR IGNORE INTO repository(_id,name,key,owner,source,last_update,is_enable
 CREATE TRIGGER IF NOT EXISTS system_repository_delete_trigger BEFORE DELETE
 ON repository
 BEGIN SELECT CASE
-    WHEN old._id <= 0 THEN
+    WHEN old._id < 0 THEN
         RAISE(ABORT, "System Repository can't be deleted")
     END;
 END;
@@ -28,3 +28,9 @@ INSERT INTO repository(name,key,owner,source,last_update,is_enable) VALUES (:nam
 
 findAll:
 SELECT * FROM repository;
+
+find:
+SELECT * FROM repository WHERE _id = :id;
+
+delete:
+DELETE FROM repository WHERE _id = :id;

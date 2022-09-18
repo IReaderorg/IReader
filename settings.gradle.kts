@@ -30,6 +30,7 @@ dependencyResolutionManagement {
         maven(url = "https://jitpack.io")
         maven(url ="https://github.com/psiegman/mvn-repo/raw/master/releases")
         maven(url ="https://androidx.dev/storage/compose-compiler/repository/")
+        maven(url ="https://maven.pkg.github.com/octocat/hello-world/")
 
     }
     versionCatalogs {

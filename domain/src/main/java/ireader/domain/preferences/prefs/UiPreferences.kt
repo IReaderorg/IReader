@@ -9,7 +9,7 @@ import ireader.core.prefs.getEnum
 import ireader.domain.models.prefs.PreferenceValues
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.util.Locale
+import java.util.*
 
 
 class UiPreferences(private val preferenceStore: PreferenceStore) {
@@ -18,7 +18,7 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
         return preferenceStore.getEnum("theme_mode", PreferenceValues.ThemeMode.System)
     }
         fun installerMode(): Preference<ireader.domain.models.prefs.PreferenceValues.Installer> {
-        return preferenceStore.getEnum("installer_mode", ireader.domain.models.prefs.PreferenceValues.Installer.AndroidPackageManager)
+        return preferenceStore.getEnum("installer_mode", ireader.domain.models.prefs.PreferenceValues.Installer.LocalInstaller)
     }
 
     fun colorTheme(): Preference<Long> {
@@ -26,6 +26,9 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     }
     fun showUpdatesAfter(): Preference<Long> {
         return preferenceStore.getLong("show_updates_after", 0)
+    }
+    fun defaultRepository() : Preference<Long> {
+        return preferenceStore.getLong("default_repository", -1)
     }
 
     fun colorPrimaryLight(): Preference<Int> {

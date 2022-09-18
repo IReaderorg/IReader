@@ -1,6 +1,6 @@
-package ireader.common.models.entities
+package ireader.domain.models.entities
 
-import androidx.compose.runtime.Composable
+import ireader.i18n.REPO_URL
 
 data class ExtensionSource(
     val id: Long,
@@ -16,6 +16,20 @@ data class ExtensionSource(
         return when {
             id < 0 -> "IReader"
             else -> name
+        }
+    }
+
+    companion object {
+        fun default() : ExtensionSource {
+            return ExtensionSource(
+                id = -1,
+                name = "IReader",
+                key = "$REPO_URL/index.min.json",
+                owner = "IReader",
+                source = "https://github.com/IReaderorg/IReader-extensions",
+                lastUpdate = 0,
+                isEnable = true
+            )
         }
     }
 }

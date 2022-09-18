@@ -1,16 +1,19 @@
 package ireader.presentation.ui
 
 
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,15 +23,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
-
 import androidx.navigation.NamedNavArgument
 import ireader.i18n.UiText
-import ireader.ui.core.ui.SnackBarListener
-import ireader.ui.component.Controller
-import ireader.ui.component.components.TitleToolbar
 import ireader.presentation.R
-import ireader.ui.component.components.component.SwitchPreference
+import ireader.ui.component.Controller
+import ireader.ui.component.components.Toolbar
+import ireader.ui.component.components.component.PreferenceRow
+import ireader.ui.component.reusable_composable.AppIconButton
+import ireader.ui.component.reusable_composable.CaptionTextComposable
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
+import ireader.ui.core.ui.SnackBarListener
 import ireader.ui.settings.repository.SourceRepositoryViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
@@ -46,9 +50,10 @@ object RepositoryScreenSpec : ScreenSpec {
     override fun TopBar(
         controller: Controller
     ) {
-        TitleToolbar(
-            title = stringResource(R.string.repository),
-            navController = null,
+        Toolbar(
+            title ={
+                   MidSizeTextComposable(text =  stringResource(R.string.repository))
+            },
             scrollBehavior = controller.scrollBehavior
         )
     }
@@ -95,7 +100,21 @@ object RepositoryScreenSpec : ScreenSpec {
 
             LazyColumn {
                 items(vm.sources.value) { source ->
-                    SwitchPreference(title = source.visibleName(), preference = vm.default)
+                    PreferenceRow(title = source.visibleName(), subtitle = source.key , action = {
+                        Row {
+                            if(source.id >= 0) {
+                                AppIconButton(onClick = {
+                                    vm.viewModelScope.launch {
+                                        vm.catalogSourceRepository.delete(source)
+                                    }
+                                }, imageVector = Icons.Default.DeleteForever)
+                            }
+                            Switch(checked = vm.default.value == source.id, onCheckedChange = {
+                                vm.default.value = source.id
+                            })
+                        }
+                    })
+
                 }
 
             }
@@ -110,13 +129,26 @@ object RepositoryScreenSpec : ScreenSpec {
                                 vm.showSnackBar(UiText.StringResource(R.string.url_is_invalid))
                             }
                         }
+                        showDialog = false
                     }) {
                         MidSizeTextComposable(text = stringResource(id = R.string.add))
                     }
                 }, title = {
                     MidSizeTextComposable(text = stringResource(id = R.string.add_as_new))
                 }, text = {
-                    BasicTextField(value = text, onValueChange = {text = it} )
+                    androidx.compose.material3.OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = text,
+                        onValueChange = {
+                                        text = it
+                        },
+                        label = {
+                            CaptionTextComposable(text = "please enter a valid repository URL")
+                        },
+                        maxLines = 5,
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                    )
                 },)
             }
 

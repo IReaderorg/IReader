@@ -47,7 +47,7 @@ fun GeneralSettingScreen(
                     preference = vm.installer,
                     choices = mapOf(
                         PreferenceValues.Installer.AndroidPackageManager to context.getString(R.string.package_manager),
-                        PreferenceValues.Installer.AndroidInApp to context.getString(R.string.local_installer),
+                        PreferenceValues.Installer.LocalInstaller to context.getString(R.string.local_installer),
                     ),
                     title = stringResource(
                         id = R.string.installer_mode

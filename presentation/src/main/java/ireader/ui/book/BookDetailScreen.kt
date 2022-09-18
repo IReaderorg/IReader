@@ -43,8 +43,6 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.Chapter
 import ireader.core.source.Source
-import ireader.ui.core.utils.isScrolledToEnd
-import ireader.ui.core.utils.isScrollingUp
 import ireader.domain.preferences.prefs.ChapterDisplayMode
 import ireader.presentation.R
 import ireader.ui.book.components.ActionHeader
@@ -54,9 +52,12 @@ import ireader.ui.book.components.BookSummaryInfo
 import ireader.ui.book.components.ChapterBar
 import ireader.ui.book.components.ChapterDetailBottomBar
 import ireader.ui.book.viewmodel.BookDetailViewModel
+import ireader.ui.component.Controller
 import ireader.ui.component.components.ChapterRow
 import ireader.ui.component.list.scrollbars.VerticalFastScroller
 import ireader.ui.component.reusable_composable.AppTextField
+import ireader.ui.core.utils.isScrolledToEnd
+import ireader.ui.core.utils.isScrollingUp
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -86,7 +87,8 @@ fun BookDetailScreen(
     scrollState: LazyListState,
     onMap: () -> Unit,
     onFavorite: () -> Unit,
-    onWebView: () -> Unit
+    onWebView: () -> Unit,
+    controller: Controller
 ) {
     val context = LocalContext.current
     val swipeRefreshState =
@@ -164,6 +166,7 @@ fun BookDetailScreen(
                     ) {
                         item {
                             Box {
+
                                 BookHeaderImage(book = book)
                                 BookHeader(
                                     book = book,
@@ -228,6 +231,7 @@ fun BookDetailScreen(
                             )
                         }
                     }
+
                     Box(modifier = Modifier.fillMaxSize()) {
                         ChapterDetailBottomBar(
                             vm,
@@ -244,6 +248,7 @@ fun BookDetailScreen(
                     }
 
                 }
+
             }
         }
 

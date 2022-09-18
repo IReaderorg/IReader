@@ -126,7 +126,7 @@ publishing {
         }
         maven {
             name = "GitHubPackages"
-            setUrl("https://maven.pkg.github.com/octocat/hello-world")
+            setUrl("https://maven.pkg.github.com/IReaderorg/ireader")
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")

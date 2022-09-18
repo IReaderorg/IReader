@@ -1,13 +1,13 @@
 package ireader.domain.catalogs.interactor
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import ireader.core.log.Log
 import ireader.domain.catalogs.CatalogPreferences
 import ireader.domain.catalogs.service.CatalogRemoteApi
 import ireader.domain.catalogs.service.CatalogRemoteRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlin.time.Duration.Companion.minutes
 
 class SyncRemoteCatalogs(

@@ -6,10 +6,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package ireader.core
+package ireader.core.http
 
 import app.cash.quickjs.QuickJs
-import ireader.core.di.ISingleton
 import org.koin.core.annotation.Single
 
 /**

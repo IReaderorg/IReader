@@ -2,10 +2,16 @@ package ireader.ui.book
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.FlipToBack
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.filled.SyncAlt
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -22,14 +28,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import ireader.core.source.Source
+import ireader.core.source.model.Command
+import ireader.presentation.R
 import ireader.ui.book.viewmodel.BookDetailViewModel
 import ireader.ui.component.components.Toolbar
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.ui.component.reusable_composable.TopAppBarBackButton
-import ireader.core.source.Source
-import ireader.core.source.model.Command
-import ireader.presentation.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,11 +56,11 @@ fun BookDetailTopAppBar(
     paddingValues: PaddingValues,
     onInfo: () -> Unit,
 ) {
-    Box(modifier = Modifier.fillMaxWidth()) {
+
         when {
             state.hasSelection -> {
                 EditModeChapterDetailTopAppBar(
-                    modifier = modifier,
+                    modifier = modifier.padding(paddingValues),
                     selectionSize = state.selection.size,
                     onClickCancelSelection = onClickCancelSelection,
                     onClickSelectAll = onClickSelectAll,
@@ -77,7 +83,7 @@ fun BookDetailTopAppBar(
                 )
             }
         }
-    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -100,7 +106,7 @@ fun RegularChapterDetailTopAppBar(
         scrollBehavior = scrollBehavior,
         title = {},
         applyInsets = true,
-        backgroundColor = Color.Transparent,
+        backgroundColor = Color.Transparent.copy(alpha = 0f),
         contentColor = MaterialTheme.colorScheme.onBackground,
         elevation = 0.dp,
         actions = {
@@ -180,7 +186,7 @@ private fun EditModeChapterDetailTopAppBar(
     paddingValues: PaddingValues
 ) {
     Toolbar(
-        modifier = modifier.padding(paddingValues),
+        modifier = modifier,
         title = { BigSizeTextComposable(text = "$selectionSize") },
         navigationIcon = {
             AppIconButton(

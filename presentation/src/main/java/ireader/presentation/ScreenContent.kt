@@ -48,32 +48,30 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import kotlinx.coroutines.launch
 import ireader.i18n.ARG_HAVE_CUSTOMIZED_VARIANT_BOTTOM_BAR
 import ireader.i18n.ARG_HAVE_DRAWER
 import ireader.i18n.ARG_HAVE_MODAL_SHEET
 import ireader.i18n.ARG_HAVE_VARIANT_BOTTOM_BAR
 import ireader.i18n.ARG_HIDE_BOTTOM_BAR
 import ireader.i18n.ARG_TRANSPARENT_STATUS_BAR
-import ireader.core.log.Log
-import ireader.ui.component.Controller
-import ireader.ui.component.components.ConfirmExitBackHandler
-import ireader.ui.component.components.ISnackBarHost
 import ireader.presentation.ui.BottomNavScreenSpec
 import ireader.presentation.ui.HistoryScreenSpec
 import ireader.presentation.ui.LibraryScreenSpec
 import ireader.presentation.ui.ScreenSpec
 import ireader.presentation.ui.UpdateScreenSpec
+import ireader.ui.component.Controller
+import ireader.ui.component.components.ConfirmExitBackHandler
+import ireader.ui.component.components.ISnackBarHost
 import ireader.ui.core.theme.AppColors
 import ireader.ui.core.theme.CustomSystemColor
 import ireader.ui.core.theme.TransparentStatusBar
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 
 @OptIn(
@@ -112,6 +110,7 @@ fun ScreenContent() {
     }
 
 
+
     val (requestedHideBottomNav, requestHideBottomNav) = remember { mutableStateOf(false) }
     val (requestedHideSystemNavBar, requestHideSystemNavBar) = remember { mutableStateOf(false) }
     val (requestedHideSystemStatusBar, requestHideSystemStatusBar) = remember { mutableStateOf(false) }
@@ -137,6 +136,7 @@ fun ScreenContent() {
             }
         }
     }
+
     ConfirmExitBackHandler(vm.confirmExit.value)
 
     DisposableEffect(navBackStackEntry) {

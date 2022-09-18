@@ -54,8 +54,8 @@ fun Toolbar(
         shadowElevation = elevation,
     ) {
         SmallTopAppBar(
-            modifier = if (applyInsets) modifier.statusBarsPadding() else modifier,
             title = title,
+            modifier = if (applyInsets) modifier.statusBarsPadding() else modifier,
             navigationIcon = navigationIcon,
             actions = actions,
             colors = TopAppBarDefaults.mediumTopAppBarColors(
@@ -63,7 +63,7 @@ fun Toolbar(
                 titleContentColor = contentColor,
                 scrolledContainerColor = backgroundColor
             ),
-            scrollBehavior = scrollBehavior,
+            scrollBehavior = scrollBehavior
         )
     }
 }
