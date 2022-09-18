@@ -104,7 +104,7 @@ fun RemoteSourcesScreen(
                 key = {
                     when (val catalog : SourceUiModel = it.second) {
                         is SourceUiModel.Header -> it.second.hashCode()
-                        is SourceUiModel.Item -> catalog.source.key(catalog.state,it.first.toLong())
+                        is SourceUiModel.Item -> catalog.source.key(catalog.state,it.first.toLong(),vm.defaultRepo.value)
                     }
                 },
             ) { catalog ->

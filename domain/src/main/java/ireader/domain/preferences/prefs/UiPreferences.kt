@@ -20,6 +20,12 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
         fun installerMode(): Preference<ireader.domain.models.prefs.PreferenceValues.Installer> {
         return preferenceStore.getEnum("installer_mode", ireader.domain.models.prefs.PreferenceValues.Installer.LocalInstaller)
     }
+    fun showSystemWideCatalogs(): Preference<Boolean> {
+        return preferenceStore.getBoolean("show_system_catalogs", true)
+    }
+    fun showLocalCatalogs(): Preference<Boolean> {
+        return preferenceStore.getBoolean("show_local_catalogs", true)
+    }
 
     fun colorTheme(): Preference<Long> {
         return preferenceStore.getLong("color_theme", -1L)
@@ -58,6 +64,7 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun confirmExit(): Preference<Boolean> {
         return preferenceStore.getBoolean("confirm_exit", false)
     }
+
 
     fun hideBottomBarOnScroll(): Preference<Boolean> {
         return preferenceStore.getBoolean("hide_bottom_bar_on_scroll", true)

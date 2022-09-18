@@ -43,6 +43,7 @@ class ExtensionViewModel(
 
     val incognito = uiPreferences.incognitoMode().asState()
     val lastUsedSource = uiPreferences.lastUsedSource().asState()
+    val defaultRepo = uiPreferences.defaultRepository().asState()
     val userSources: List<SourceUiModel> by derivedStateOf {
 
         val list = mutableListOf<SourceUiModel>()

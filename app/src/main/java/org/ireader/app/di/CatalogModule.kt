@@ -96,9 +96,10 @@ class CatalogModule {
             installationChanges: AndroidCatalogInstallationChanges,
             context: Application,
             httpClients: HttpClients,
+            uiPreferences:UiPreferences
     ): CatalogStore {
         return CatalogStore(
-            AndroidCatalogLoader(context, httpClients),
+            AndroidCatalogLoader(context, httpClients, uiPreferences ),
             catalogPreferences,
             catalogRemoteRepository,
             installationChanges

@@ -7,23 +7,22 @@ import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
 import dalvik.system.DexClassLoader
 import dalvik.system.PathClassLoader
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import ireader.domain.utils.extensions.withIOContext
-import ireader.i18n.BuildConfig
 import ireader.core.http.HttpClients
 import ireader.core.log.Log
 import ireader.core.prefs.AndroidPreferenceStore
 import ireader.core.prefs.PrefixedPreferenceStore
-import ireader.core.source.LocalSource
 import ireader.core.source.Source
 import ireader.core.source.TestSource
-import ireader.domain.catalogs.service.CatalogLoader
 import ireader.domain.R
+import ireader.domain.catalogs.service.CatalogLoader
+import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.utils.extensions.withIOContext
+import ireader.i18n.BuildConfig
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import org.koin.core.annotation.Single
 import java.io.File
-import kotlin.random.Random
 
 /**
  * Class that handles the loading of the catalogs installed in the system and the app.
@@ -32,6 +31,7 @@ import kotlin.random.Random
 class AndroidCatalogLoader(
     private val context: Context,
     private val httpClients: HttpClients,
+    val uiPreferences: UiPreferences
 ) : CatalogLoader {
 
     private val pkgManager = context.packageManager
@@ -44,6 +44,7 @@ class AndroidCatalogLoader(
     @SuppressLint("QueryPermissionsNeeded")
     override suspend fun loadAll(): List<ireader.common.models.entities.CatalogLocal> {
         val bundled = mutableListOf<ireader.common.models.entities.CatalogLocal>()
+
         if (BuildConfig.DEBUG) {
             val testCatalog = ireader.common.models.entities.CatalogBundled(
                 TestSource(),
@@ -61,16 +62,21 @@ class AndroidCatalogLoader(
 
         // Load each catalog concurrently and wait for completion
         val installedCatalogs = withIOContext {
-            val deferred = localPkgs.map { file ->
-                async(Dispatchers.Default) {
-                    loadLocalCatalog(file.nameWithoutExtension)
+            val local = if (uiPreferences.showLocalCatalogs().get()) {
+                localPkgs.map { file ->
+                    async(Dispatchers.Default) {
+                        loadLocalCatalog(file.nameWithoutExtension)
+                    }
                 }
-            } + systemPkgs.map { pkgInfo ->
-                async(Dispatchers.Default) {
-                    loadSystemCatalog(pkgInfo.packageName, pkgInfo)
+            } else emptyList()
+            val system = if (uiPreferences.showSystemWideCatalogs().get()) {
+                systemPkgs.map { pkgInfo ->
+                    async(Dispatchers.Default) {
+                        loadSystemCatalog(pkgInfo.packageName, pkgInfo)
+                    }
                 }
-            }
-
+            } else emptyList()
+            val deferred = local + system
             deferred.awaitAll()
         }.filterNotNull().distinctBy { it.pkgName }
 

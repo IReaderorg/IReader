@@ -8,14 +8,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.preferences.prefs.AppPreferences
+import ireader.domain.preferences.prefs.UiPreferences
+import ireader.presentation.R
 import ireader.ui.component.components.Components
 import ireader.ui.component.components.SetupSettingComponents
 import ireader.ui.component.components.component.ChoicePreference
-import ireader.domain.preferences.prefs.AppPreferences
-import ireader.domain.models.prefs.PreferenceValues
-import ireader.domain.preferences.prefs.UiPreferences
 import ireader.ui.core.viewmodel.BaseViewModel
-import ireader.presentation.R
 import org.koin.android.annotation.KoinViewModel
 
 @Composable
@@ -54,6 +54,14 @@ fun GeneralSettingScreen(
                     ),
                 )
             },
+            Components.Switch(
+                preference = vm.showSystemWideCatalogs,
+                title = context.getString(R.string.show_system_catalogs)
+            ),
+            Components.Switch(
+                preference = vm.showLocalCatalogs,
+                title = context.getString(R.string.show_local_catalogs)
+            ),
             Components.Row(
                 title = context.getString(R.string.manage_notification),
                 onClick = {
@@ -97,6 +105,8 @@ class GeneralSettingScreenViewModel(
     var confirmExit = uiPreferences.confirmExit().asState()
     var installer = uiPreferences.installerMode().asState()
     var language = uiPreferences.language().asState()
+    var showSystemWideCatalogs = uiPreferences.showSystemWideCatalogs().asState()
+    var showLocalCatalogs = uiPreferences.showLocalCatalogs().asState()
 
     @Composable
     fun getLanguageChoices(): Map<String, String> {

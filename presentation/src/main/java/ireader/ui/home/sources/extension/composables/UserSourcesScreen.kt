@@ -55,7 +55,7 @@ fun UserSourcesScreen(
             key = {
                 when (val uiModel = it.second) {
                     is SourceUiModel.Header -> it.hashCode()
-                    is SourceUiModel.Item -> uiModel.source.key(uiModel.state, it.first)
+                    is SourceUiModel.Item -> uiModel.source.key(uiModel.state, it.first,vm.defaultRepo.value)
                 }
             },
         ) { catalog ->

@@ -25,12 +25,7 @@ class CatalogGithubApi(
 
     override suspend fun fetchCatalogs(): List<ireader.common.models.entities.CatalogRemote> {
         val defaultRepo = uiPreferences.defaultRepository().get()
-        val repo = repository.find(defaultRepo)?.let {
-            if (it.id < 0) {
-                ExtensionSource.default()
-            }
-            it
-        } ?: ExtensionSource.default()
+        val repo = repository.find(defaultRepo)?.takeIf { it.id >= 0 } ?: ExtensionSource.default()
         val response: String =
             httpClient.default
                 .get(repo.key)

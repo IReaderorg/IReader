@@ -2,10 +2,8 @@
 package ireader.common.models.entities
 
 import androidx.annotation.Keep
-
 import ireader.core.source.Source
 import java.io.File
-import kotlin.random.Random
 
 @Keep
 data class CatalogRemote(
@@ -92,14 +90,14 @@ enum class SourceState {
     Nothing
 }
 
-fun Catalog.key(state: SourceState,index: Long): String {
+fun Catalog.key(state: SourceState,index: Long,repoId: Long): String {
     if (sourceId == -1L) return  "$index-installed"
     return when (state) {
-        SourceState.LastUsed -> "$sourceId-lastused"
-        SourceState.Pinned -> "$sourceId-pinned"
-        SourceState.UnPinned -> "$sourceId-unpinned"
-        SourceState.Installed -> "$sourceId-installed"
-        SourceState.Remote -> "$sourceId-remote"
+        SourceState.LastUsed -> "$repoId-$sourceId-lastused"
+        SourceState.Pinned -> "$repoId-$sourceId-pinned"
+        SourceState.UnPinned -> "$repoId-$sourceId-unpinned"
+        SourceState.Installed -> "$repoId-$sourceId-installed"
+        SourceState.Remote -> "$repoId-$sourceId-remote"
         else -> "$sourceId"
     }
 }
