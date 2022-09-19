@@ -96,7 +96,7 @@ body:
           required: true
         - label: If this is an issue with an extension, I should be opening an issue in the [extensions repository](https://github.com/IReaderorg/IReader-extensions/issues/new/choose).
           required: true
-        - label: I have updated the app to version **[0.1.28](https://github.com/IReaderorg/IReader/releases/latest)**.
+        - label: I have updated the app to version **[0.1.29](https://github.com/IReaderorg/IReader/releases/latest)**.
           required: true
         - label: I have updated all installed extensions.
           required: true

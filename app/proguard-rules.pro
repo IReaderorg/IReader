@@ -44,11 +44,6 @@
 
 -dontwarn org.conscrypt.**
 
-# Dagger
--dontwarn com.google.errorprone.annotations.*
--keepnames @dagger.hilt.android.lifecycle.HiltViewModel class * extends androidx.lifecycle.ViewModel
-
-
 
 ##---------------Begin: proguard configuration for couroutines  ----------
 # When editing this file, update the following files as well:
@@ -69,19 +64,6 @@
     volatile <fields>;
 }
 
-# These classes are only required by kotlinx.coroutines.debug.AgentPremain, which is only loaded when
-# kotlinx-coroutines-core is used as a Java agent, so these are not needed in contexts where ProGuard is used.
--dontwarn java.lang.instrument.ClassFileTransformer
--dontwarn sun.misc.SignalHandler
--dontwarn java.lang.instrument.Instrumentation
--dontwarn sun.misc.Signal
-
-# Only used in `kotlinx.coroutines.internal.ExceptionsConstructor`.
-# The case when it is not available is hidden in a `try`-`catch`, as well as a check for Android.
--dontwarn java.lang.ClassValue
-
-# An annotation used for build tooling, won't be directly accessed.
--dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
 
 
 ##---------------End: proguard configuration for Couroutines  ----------
@@ -119,13 +101,6 @@
 -dontwarn com.typesafe.**
 -dontwarn org.slf4j.**
 ##---------------End: proguard configuration for Ktor  ----------
-
-#runtime issue
-
--dontwarn org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
--dontwarn org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
--dontwarn org.jetbrains.kotlin.diagnostics.rendering.DefaultErrorMessages
-
 
 
 #---------
@@ -167,7 +142,6 @@
 
 ##---------------Begin: proguard configuration for kotlinx.serialization  ----------
 -keepattributes *Annotation*, InnerClasses
--dontnote kotlinx.serialization.AnnotationsKt # core serialization annotations
 
 # kotlinx-serialization-json specific.
 -keepclassmembers class kotlinx.serialization.json.** {
