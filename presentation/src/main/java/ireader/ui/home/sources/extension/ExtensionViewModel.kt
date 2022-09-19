@@ -9,10 +9,7 @@ import ireader.common.models.entities.CatalogInstalled
 import ireader.common.models.entities.CatalogLocal
 import ireader.common.models.entities.CatalogRemote
 import ireader.common.models.entities.SourceState
-import ireader.i18n.UiText
 import ireader.core.os.InstallStep
-import ireader.ui.core.viewmodel.BaseViewModel
-import ireader.ui.core.viewmodel.showSnackBar
 import ireader.domain.catalogs.interactor.GetCatalogsByType
 import ireader.domain.catalogs.interactor.InstallCatalog
 import ireader.domain.catalogs.interactor.SyncRemoteCatalogs
@@ -20,7 +17,11 @@ import ireader.domain.catalogs.interactor.TogglePinnedCatalog
 import ireader.domain.catalogs.interactor.UninstallCatalogs
 import ireader.domain.catalogs.interactor.UpdateCatalog
 import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.services.extensions_insstaller_service.interactor.StartExtensionManagerService
 import ireader.domain.utils.exceptionHandler
+import ireader.i18n.UiText
+import ireader.ui.core.viewmodel.BaseViewModel
+import ireader.ui.core.viewmodel.showSnackBar
 import ireader.ui.home.sources.extension.composables.SourceUiModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -38,6 +39,8 @@ class ExtensionViewModel(
     private val uninstallCatalog: UninstallCatalogs,
     private val togglePinnedCatalog: TogglePinnedCatalog,
     private val syncRemoteCatalogs: SyncRemoteCatalogs,
+    private val startExtensionManagerService: StartExtensionManagerService,
+
     val uiPreferences: UiPreferences,
 ) : BaseViewModel(), CatalogsState by state {
 
@@ -189,6 +192,7 @@ class ExtensionViewModel(
                 showSnackBar(exceptionHandler(error))
             })
             state.isRefreshing = false
+            startExtensionManagerService()
         }
     }
 

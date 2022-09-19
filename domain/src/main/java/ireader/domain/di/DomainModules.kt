@@ -2,6 +2,7 @@ package ireader.domain.di
 
 import android.app.Service
 import ireader.domain.services.downloaderService.DownloaderService
+import ireader.domain.services.extensions_insstaller_service.ExtensionManagerService
 import ireader.domain.services.library_update_service.LibraryUpdatesService
 import ireader.domain.services.tts_service.media_player.TTSService
 import ireader.domain.services.update_service.UpdateService
@@ -19,6 +20,9 @@ class DomainModules
 val DomainServices = module {
     worker {
         DownloaderService(get(),get(),get(),get(),get(),get(),get(),get(),get(),get())
+    }
+    worker {
+        ExtensionManagerService(get(),get(),get(),get(),get(),get(),get())
     }
     worker {
         UpdateService(get(), get(),get(),get())

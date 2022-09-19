@@ -44,6 +44,17 @@ object Notifications {
     const val ID_TTS_ERROR = -602
 
     /**
+     * Notification channel and ids used by the installer.
+     */
+    const val GROUP_INSTALLER = "group_installer"
+    const val CHANNEL_INSTALLER_PROGRESS = "installer_progress_channel"
+    const val ID_INSTALLER_PROGRESS = -801
+    const val CHANNEL_INSTALLER_COMPLETE = "installer_complete_channel"
+    const val ID_INSTALLER_COMPLETE = -803
+    const val CHANNEL_INSTALLER_ERROR = "installer_error_channel"
+    const val ID_INSTALLER_ERROR = -802
+
+    /**
      * Notification channel and ids used by the downloader.
      */
     const val GROUP_DOWNLOADER = "group_downloader"
@@ -121,6 +132,9 @@ object Notifications {
                 },
                 buildNotificationChannelGroup(GROUP_DOWNLOADER) {
                     setName(context.getString(R.string.download_notifier_downloader_title))
+                },
+                buildNotificationChannelGroup(GROUP_INSTALLER) {
+                    setName(context.getString(R.string.install))
                 },
                 buildNotificationChannelGroup(GROUP_LIBRARY) {
                     setName(context.getString(R.string.label_library))
@@ -203,6 +217,38 @@ object Notifications {
                 ) {
                     setName(context.getString(R.string.channel_errors))
                     setGroup(GROUP_DOWNLOADER)
+                    setShowBadge(false)
+                },
+                buildNotificationChannel(
+                    CHANNEL_BACKUP_RESTORE_PROGRESS,
+                    IMPORTANCE_LOW
+                ) {
+                    setName(context.getString(R.string.channel_progress))
+                    setGroup(GROUP_BACKUP_RESTORE)
+                    setShowBadge(false)
+                },
+                buildNotificationChannel(
+                    CHANNEL_INSTALLER_PROGRESS,
+                    IMPORTANCE_LOW
+                ) {
+                    setName(context.getString(R.string.channel_progress))
+                    setGroup(GROUP_INSTALLER)
+                    setShowBadge(false)
+                },
+                buildNotificationChannel(
+                    CHANNEL_INSTALLER_COMPLETE,
+                    IMPORTANCE_LOW
+                ) {
+                    setName(context.getString(R.string.channel_complete))
+                    setGroup(GROUP_INSTALLER)
+                    setShowBadge(false)
+                },
+                buildNotificationChannel(
+                    CHANNEL_INSTALLER_ERROR,
+                    IMPORTANCE_LOW
+                ) {
+                    setName(context.getString(R.string.channel_errors))
+                    setGroup(GROUP_INSTALLER)
                     setShowBadge(false)
                 },
                 buildNotificationChannel(

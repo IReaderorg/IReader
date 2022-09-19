@@ -5,14 +5,14 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import ireader.common.models.entities.CatalogRemote
-import ireader.i18n.UiText
-import ireader.i18n.asString
 import ireader.core.http.HttpClients
 import ireader.core.io.saveTo
 import ireader.core.log.Log
 import ireader.core.os.InstallStep
 import ireader.domain.catalogs.service.CatalogInstaller
-import kotlinx.coroutines.flow.flow
+import ireader.i18n.UiText
+import ireader.i18n.asString
+import kotlinx.coroutines.flow.channelFlow
 import org.koin.core.annotation.Single
 import java.io.File
 
@@ -40,8 +40,8 @@ class AndroidLocalInstaller(
      *
      * @param catalog The catalog to install.
      */
-    override fun install(catalog: CatalogRemote) = flow {
-        emit(InstallStep.Downloading)
+    override fun install(catalog: CatalogRemote) = channelFlow  {
+        send(InstallStep.Downloading)
         val tmpApkFile = File(context.cacheDir, "${catalog.pkgName}.apk")
         val tmpIconFile = File(context.cacheDir, "${catalog.pkgName}.png")
         try {
@@ -55,7 +55,7 @@ class AndroidLocalInstaller(
             }
             iconResponse.bodyAsChannel().saveTo(tmpIconFile)
 
-            emit(InstallStep.Downloading)
+            send(InstallStep.Downloading)
 
             val extDir = File(context.filesDir, "catalogs/${catalog.pkgName}").apply { mkdirs() }
             val apkFile = File(extDir, tmpApkFile.name)
@@ -66,15 +66,19 @@ class AndroidLocalInstaller(
             val success = apkSuccess && iconSuccess
             if (success) {
                 installationChanges.notifyAppInstall(catalog.pkgName)
+                send(InstallStep.Success)
             }
 
-            emit(InstallStep.Success)
+            send(InstallStep.Success)
+            send(InstallStep.Idle)
         } catch (e: Exception) {
             Log.warn(e, "Error installing package")
-            emit(InstallStep.Error(UiText.ExceptionString(e).asString(context)))
+            send(InstallStep.Error(UiText.ExceptionString(e).asString(context)))
+            send(InstallStep.Idle)
         } finally {
             tmpApkFile.delete()
             tmpIconFile.delete()
+            send(InstallStep.Idle)
         }
     }
 

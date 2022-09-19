@@ -27,9 +27,9 @@ import ireader.domain.catalogs.interactor.UpdateCatalog
 import ireader.domain.catalogs.service.CatalogInstaller
 import ireader.domain.catalogs.service.CatalogRemoteRepository
 import ireader.domain.data.repository.BookRepository
-import ireader.domain.data.repository.CatalogSourceRepository
 import ireader.domain.image.cache.CoverCache
 import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.services.extensions_insstaller_service.GetDefaultRepo
 import ireader.imageloader.coil.CoilLoaderFactory
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
@@ -212,12 +212,11 @@ class CatalogModule {
             catalogRemoteRepository: CatalogRemoteRepository,
             catalogPreferences: CatalogPreferences,
             httpClient: HttpClients,
-            uiPreferences: UiPreferences,
-            repo: CatalogSourceRepository
+            getDefaultRepo: GetDefaultRepo
     ): SyncRemoteCatalogs {
         return SyncRemoteCatalogs(
             catalogRemoteRepository,
-            CatalogGithubApi(httpClient, uiPreferences = uiPreferences,repo),
+            CatalogGithubApi(httpClient, getDefaultRepo),
             catalogPreferences
         )
     }

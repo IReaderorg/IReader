@@ -2,12 +2,13 @@
 
 package ireader.domain.catalogs.interactor
 
+import ireader.common.models.entities.CatalogInstalled
+import ireader.domain.catalogs.CatalogStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import ireader.common.models.entities.CatalogInstalled
-import ireader.domain.catalogs.CatalogStore
 
+@org.koin.core.annotation.Factory
 class GetInstalledCatalog(
     private val catalogStore: CatalogStore,
 ) {
@@ -23,5 +24,8 @@ class GetInstalledCatalog(
                 catalogs.find { (it as? CatalogInstalled)?.pkgName == pkgName } as? CatalogInstalled
             }
             .distinctUntilChanged()
+    }
+    fun get() : List<CatalogInstalled> {
+        return catalogStore.catalogs.filterIsInstance<CatalogInstalled>()
     }
 }

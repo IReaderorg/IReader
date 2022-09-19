@@ -6,9 +6,7 @@ import io.ktor.client.statement.*
 import ireader.common.models.entities.CatalogRemote
 import ireader.core.http.HttpClients
 import ireader.domain.catalogs.service.CatalogRemoteApi
-import ireader.domain.data.repository.CatalogSourceRepository
-import ireader.domain.models.entities.ExtensionSource
-import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.services.extensions_insstaller_service.GetDefaultRepo
 import ireader.domain.utils.CatalogNotFoundException
 import ireader.i18n.REPO_URL
 import kotlinx.serialization.Serializable
@@ -19,13 +17,11 @@ import org.koin.core.annotation.Single
 @Single
 class CatalogGithubApi(
     private val httpClient: HttpClients,
-    private val uiPreferences: UiPreferences,
-    private val repository: CatalogSourceRepository
+    private val getDefaultRepo: GetDefaultRepo
 ) : CatalogRemoteApi {
 
     override suspend fun fetchCatalogs(): List<ireader.common.models.entities.CatalogRemote> {
-        val defaultRepo = uiPreferences.defaultRepository().get()
-        val repo = repository.find(defaultRepo)?.takeIf { it.id >= 0 } ?: ExtensionSource.default()
+        val repo = getDefaultRepo()
         val response: String =
             httpClient.default
                 .get(repo.key)

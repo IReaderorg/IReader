@@ -12,21 +12,19 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.work.WorkManager
-import kotlinx.coroutines.flow.MutableSharedFlow
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.Chapter
-import ireader.i18n.string
 import ireader.domain.R
-
 import ireader.domain.notification.Notifications
 import ireader.domain.notification.flags
 import ireader.domain.notification.setLargeIcon
 import ireader.domain.services.tts_service.Player
 import ireader.domain.services.tts_service.media_player.TTSService
 import ireader.domain.utils.extensions.launchMainActivityIntent
+import ireader.i18n.string
+import kotlinx.coroutines.flow.MutableSharedFlow
 import org.koin.core.annotation.Single
-import java.util.UUID
-
+import java.util.*
 import javax.inject.Singleton
 
 @Single
@@ -72,6 +70,33 @@ class DefaultNotificationHelper(
     val openDownloadsPendingIntent: PendingIntent = PendingIntent.getActivity(
         context, 0, openDownloadIntent, flags
     )
+    fun baseInstallerNotification(
+        workManagerId: UUID,
+        addCancel: Boolean = true
+    ): NotificationCompat.Builder {
+        val cancelDownloadIntent = WorkManager.getInstance(context)
+            .createCancelPendingIntent(workManagerId)
+        return NotificationCompat.Builder(
+            context,
+            Notifications.CHANNEL_DOWNLOADER_PROGRESS
+        ).apply {
+
+            setContentTitle("Installing")
+            setSmallIcon(R.drawable.ic_downloading)
+            setOnlyAlertOnce(true)
+            priority = NotificationCompat.PRIORITY_LOW
+            setAutoCancel(true)
+            setOngoing(true)
+            if (addCancel) {
+                addAction(
+                    R.drawable.baseline_close_24,
+                    context.resources.getString(R.string.cancel),
+                    cancelDownloadIntent
+                )
+            }
+
+        }
+    }
 
     fun baseNotificationDownloader(
         chapter: Chapter? = null,
