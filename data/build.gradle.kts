@@ -44,6 +44,8 @@ android {
             packageName = "ir.kazemcodes.infinityreader"
             dialect = "sqlite:3.24"
             version = 1
+            schemaOutputDirectory = file("src/main/sqldelight/databases")
+            verifyMigrations = true
         }
     }
 }

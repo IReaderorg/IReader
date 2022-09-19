@@ -14,7 +14,7 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-val SUPPORTED_ABIS = setOf("armeabi-v7a", "arm64-v8a", "x86")
+val SUPPORTED_ABIS = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 
 android {
     namespace = "org.ireader.app"
@@ -95,16 +95,33 @@ android {
             isMinifyEnabled = true
             proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
         }
-//        create("preview") {
-//            initWith(getByName("release"))
-//            buildConfigField("boolean", "PREVIEW", "true")
-//
-//            val debugType = getByName("debug")
-//            signingConfig = debugType.signingConfig
-//            versionNameSuffix = debugType.versionNameSuffix
-//            applicationIdSuffix = debugType.applicationIdSuffix
-//        }
+        create("preview") {
+            initWith(getByName("release"))
+            buildConfigField("boolean", "PREVIEW", "true")
+
+            val debugType = getByName("debug")
+            signingConfig = debugType.signingConfig
+            versionNameSuffix = debugType.versionNameSuffix
+            applicationIdSuffix = debugType.applicationIdSuffix
+            matchingFallbacks.add("release")
+        }
     }
+    flavorDimensions.add("default")
+
+    productFlavors {
+        create("standard") {
+            buildConfigField("boolean", "INCLUDE_UPDATER", "true")
+            dimension = "default"
+        }
+        create("dev") {
+            resourceConfigurations.addAll(listOf("en", "xxhdpi"))
+            dimension = "default"
+        }
+    }
+    sourceSets {
+        getByName("preview").res.srcDirs("src/debug/res")
+    }
+
     androidComponents.onVariants { variant ->
         val name = variant.name
         sourceSets {
