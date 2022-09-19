@@ -1,17 +1,7 @@
-package ireader.sourcefactory
+package ireader.core.source
 
-import io.ktor.client.request.HttpRequestBuilder
-import io.ktor.client.request.get
-import io.ktor.client.request.headers
-import io.ktor.client.request.url
-import io.ktor.http.HeadersBuilder
-import io.ktor.http.HttpHeaders
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import ireader.core.source.Dependencies
-import ireader.core.source.HttpSource
-import ireader.core.source.asJsoup
-import ireader.core.source.findInstance
+import io.ktor.client.request.*
+import io.ktor.http.*
 import ireader.core.source.model.ChapterInfo
 import ireader.core.source.model.Command
 import ireader.core.source.model.Filter
@@ -21,6 +11,8 @@ import ireader.core.source.model.MangaInfo
 import ireader.core.source.model.MangasPageInfo
 import ireader.core.source.model.Page
 import ireader.core.source.model.Text
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -37,17 +29,17 @@ abstract class SourceFactory(
     /**
      * devs need to fill this if they wanted parse detail functionality
      */
-    open val detailFetcher: SourceFactory.Detail = SourceFactory.Detail()
+    open val detailFetcher: Detail = Detail()
 
     /**
      * devs need to fill this if they wanted parse chapters functionality
      */
-    open val chapterFetcher: SourceFactory.Chapters = SourceFactory.Chapters()
+    open val chapterFetcher: Chapters = Chapters()
 
     /**
      * devs need to fill this if they wanted parse content functionality
      */
-    open val contentFetcher: SourceFactory.Content = SourceFactory.Content()
+    open val contentFetcher: Content = Content()
 
     /**
      * devs need to fill this if they wanted parse explore functionality

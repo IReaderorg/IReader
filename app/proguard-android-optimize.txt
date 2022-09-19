@@ -7,6 +7,7 @@
 -keepclasseswithmembernames,includedescriptorclasses class * {
     native <methods>;
 }
+-keepclassmembers class * { public <init>(...); }
 
 -keepclassmembers enum * {
     public static **[] values();

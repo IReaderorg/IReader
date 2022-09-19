@@ -47,6 +47,7 @@ class ExtensionViewModel(
     val incognito = uiPreferences.incognitoMode().asState()
     val lastUsedSource = uiPreferences.lastUsedSource().asState()
     val defaultRepo = uiPreferences.defaultRepository().asState()
+    val autoInstaller = uiPreferences.autoCatalogUpdater().asState()
     val userSources: List<SourceUiModel> by derivedStateOf {
 
         val list = mutableListOf<SourceUiModel>()
@@ -192,7 +193,9 @@ class ExtensionViewModel(
                 showSnackBar(exceptionHandler(error))
             })
             state.isRefreshing = false
-            startExtensionManagerService()
+            if (autoInstaller.value) {
+                startExtensionManagerService()
+            }
         }
     }
 

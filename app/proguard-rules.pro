@@ -4,7 +4,8 @@
 
 # Keep extension's common dependencies
 -keep class ireader.core.source.** { public protected *; }
--keep,allowoptimization class org.ireader.** { public protected *; }
+-keep class ireader.core.http.** { public protected *; }
+-keep,allowoptimization class ireader.** { public protected *; }
 -keep,allowoptimization class kotlinx.coroutines.** { public protected *; }
 -keep,allowoptimization class androidx.preference.** { public protected *; }
 -keep,allowoptimization class okhttp3.** { public protected *; }
@@ -13,8 +14,6 @@
 -keep,allowoptimization class kotlin.** { public protected *; }
 -keep,allowoptimization class io.ktor.** { public protected *; }
 -keep,allowoptimization class android.content.pm.** { public protected *; }
--keep,allowoptimization class androidx.room.** { public protected *; }
--keep,allowoptimization class com.google.dagger.** { public protected *; }
 -keep,allowoptimization class com.google.gson.** { public protected *; }
 -keep,allowoptimization class androidx.lifecycle.** { public protected *; }
 -keep,allowoptimization class androidx.work.** { public protected *; }
@@ -28,6 +27,8 @@
 -keep,allowoptimization class nl.siegmann.epublib.** { public protected *; }
 -keep,allowoptimization class org.slf4j.** { public protected *; }
 -keep class org.xmlpull.** { public protected *; }
+-keep,allowoptimization class org.koin.** { public protected *; }
+-keep,allowoptimization class com.squareup.sqldelight.** { public protected *; }
 
 
 -dontwarn android.support.**
@@ -63,6 +64,7 @@
 -keepclassmembers class kotlin.coroutines.SafeContinuation {
     volatile <fields>;
 }
+
 
 
 
@@ -133,6 +135,7 @@
 
 # For using GSON @Expose annotation
 -keepattributes *Annotation*
+-dontnote kotlinx.serialization.AnnotationsKt # core serialization annotations
 
 # Gson specific classes
 -dontwarn sun.misc.**
@@ -151,11 +154,11 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 
--keep,includedescriptorclasses class eu.kanade.tachiyomi.**$$serializer { *; }
+-keep,includedescriptorclasses class ireader.**$$serializer { *; }
 -keepclassmembers class org.ireader.** {
     *** Companion;
 }
--keepclasseswithmembers class eu.kanade.tachiyomi.** {
+-keepclasseswithmembers class ireader.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
 
@@ -163,4 +166,5 @@
 -keepclassmembers class kotlinx.serialization.** {
     <methods>;
 }
+
 ##---------------End: proguard configuration for kotlinx.serialization  ----------

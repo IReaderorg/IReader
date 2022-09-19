@@ -92,12 +92,18 @@ enum class SourceState {
 
 fun Catalog.key(state: SourceState,index: Long,repoId: Long): String {
     if (sourceId == -1L) return  "$index-installed"
+    val name = when(this) {
+        is CatalogInstalled.SystemWide -> "system-"
+        is CatalogInstalled.Locally -> "local-"
+        is CatalogRemote -> "remote-"
+        else -> ""
+    }
     return when (state) {
-        SourceState.LastUsed -> "$repoId-$sourceId-lastused"
-        SourceState.Pinned -> "$repoId-$sourceId-pinned"
-        SourceState.UnPinned -> "$repoId-$sourceId-unpinned"
-        SourceState.Installed -> "$repoId-$sourceId-installed"
-        SourceState.Remote -> "$repoId-$sourceId-remote"
-        else -> "$sourceId"
+        SourceState.LastUsed -> "$repoId-$name$sourceId-lastused"
+        SourceState.Pinned -> "$repoId-$name$sourceId-pinned"
+        SourceState.UnPinned -> "$repoId-$name$sourceId-unpinned"
+        SourceState.Installed -> "$repoId-$name$sourceId-installed"
+        SourceState.Remote -> "$repoId-$name$sourceId-remote"
+        else -> "$repoId-$name$sourceId"
     }
 }

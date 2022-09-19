@@ -73,7 +73,7 @@ afterEvaluate {
         }
     }
 }
-val packageVersion = "1.2.1"
+val packageVersion = "1.2.2"
 val dokkaHtml by tasks.getting(org.jetbrains.dokka.gradle.DokkaTask::class)
 
 val javadocJar: TaskProvider<Jar> by tasks.registering(Jar::class) {

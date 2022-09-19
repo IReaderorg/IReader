@@ -13,6 +13,7 @@
     <string name="view_book">View Book</string>
     <string name="show_system_catalogs">Show System Extensions</string>
     <string name="show_local_catalogs">Show Local Extensions</string>
+    <string name="auto_installer">Auto Installer</string>
     <string name="search_hint">Search…</string>
     <string name="nothing_read_recently">Nothing read recently</string>
     <string name="hint">…</string>

@@ -26,6 +26,9 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun showLocalCatalogs(): Preference<Boolean> {
         return preferenceStore.getBoolean("show_local_catalogs", true)
     }
+    fun autoCatalogUpdater(): Preference<Boolean> {
+        return preferenceStore.getBoolean("auto_catalog_updater_catalogs", false)
+    }
 
     fun colorTheme(): Preference<Long> {
         return preferenceStore.getLong("color_theme", -1L)
