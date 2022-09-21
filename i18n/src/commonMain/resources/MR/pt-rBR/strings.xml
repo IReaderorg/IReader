@@ -1,2 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="library_screen_label">Biblioteca</string>
+    <string name="explore_screen_label">Explorar</string>
+    <string name="delete_all_downloads">Deletar todos os downloads</string>
+    <string name="cancel_all">Cancelar tudo</string>
+    <string name="cancel">Cancelar</string>
+    <string name="apply">Aplicar</string>
+    <string name="add_as_new">Novo</string>
+    <string name="add">Adicionar</string>
+    <string name="view_book">Ver livro</string>
+    <string name="search_hint">Pesquisar…</string>
+    <string name="hint">…</string>
+    <string name="category_hint">Nome…</string>
+    <string name="about">Sobre</string>
+    <string name="edit_category">Editar categorias</string>
+    <string name="confirm">Confirmar</string>
+    <string name="category">Categorias</string>
+    <string name="help">Ajuda</string>
+    <string name="relative_time_today">Hoje</string>
+    <string name="previous_result">Resultado anterior</string>
+    <string name="next_result">Próximo resultado</string>
+    <string name="expand_menu">Expandir menu</string>
+    <string name="filter">Filtro</string>
+    <string name="weeks">Semana</string>
+    <string name="lock_never">Nunca</string>
+    <string name="authentication">Autenticação</string>
+    <string name="authenticate_to_confirm_change">Autenticar para confirmar alterações</string>
+    <string name="error">Erro</string>
+    <string name="book_name">Nome do livro</string>
+    <string name="advance_setting">Configurações avançadas</string>
+    <string name="lock_always">Sempre</string>
+    <string name="auto_installer">Instalador automático</string>
+    <string name="share">Compartilhar</string>
+    <string name="export_book_as_epub">Exportar livro como Epub</string>
+    <string name="refresh">Atualizar</string>
+    <string name="description_placeholder">Sem descrição</string>
+    <string name="columns">Colunas</string>
+</resources>
