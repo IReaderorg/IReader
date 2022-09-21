@@ -1,9 +1,9 @@
 package ireader.common.models.entities
 
 
-import kotlinx.serialization.Serializable
 import ireader.core.source.model.MangaInfo
 import kotlinx.datetime.Clock
+import kotlinx.serialization.Serializable
 
 @Serializable
 data class Book(
@@ -163,6 +163,8 @@ data class LibraryBook(
     val cover: String,
     val lastUpdate: Long = 0,
 ) : BookBase {
+    var dateFetched: Long = 0
+    var dateUpload: Long = 0
     var unreadCount: Int = 0
     var readCount: Int = 0
     val totalChapters
@@ -179,7 +181,9 @@ data class LibraryBook(
             title = title,
             cover = cover,
             unread = unreadCount,
-            downloaded = readCount
+            downloaded = readCount,
+            key = key,
+            customCover = cover,
         )
     }
 

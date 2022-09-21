@@ -1,10 +1,9 @@
 package ireader.domain.data.repository
 
 import androidx.paging.PagingSource
-import kotlinx.coroutines.flow.Flow
-import ireader.common.models.entities.History
 import ireader.common.models.entities.HistoryWithRelations
-import kotlinx.datetime.LocalDate
+import ireader.domain.models.entities.History
+import kotlinx.coroutines.flow.Flow
 
 interface HistoryRepository {
     suspend fun findHistory(id: Long): History?

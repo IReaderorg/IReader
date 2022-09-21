@@ -2,14 +2,12 @@ package ireader.data.history
 
 import androidx.paging.PagingSource
 import ir.kazemcodes.infinityreader.Database
-import ireader.domain.data.repository.HistoryRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import ireader.common.models.entities.History
 import ireader.common.models.entities.HistoryWithRelations
 import ireader.data.local.DatabaseHandler
 import ireader.data.util.toDB
-import java.util.*
+import ireader.domain.data.repository.HistoryRepository
+import ireader.domain.models.entities.History
+import kotlinx.coroutines.flow.Flow
 
 
 class HistoryRepositoryImpl constructor(
@@ -17,11 +15,11 @@ class HistoryRepositoryImpl constructor(
 
     ) :
     HistoryRepository {
-    override suspend fun findHistory(id: Long): ireader.common.models.entities.History? {
+    override suspend fun findHistory(id: Long): History? {
         return handler.awaitOneOrNull { historyQueries.findHistoryByBookId(id, historyMapper) }
     }
 
-    override suspend fun findHistoryByBookId(bookId: Long): ireader.common.models.entities.History? {
+    override suspend fun findHistoryByBookId(bookId: Long): History? {
         return handler.awaitOneOrNull { historyQueries.findHistoryByBookId(bookId, historyMapper) }
     }
 
@@ -44,16 +42,16 @@ class HistoryRepositoryImpl constructor(
             )
     }
 
-    override suspend fun findHistories(): List<ireader.common.models.entities.History> {
+    override suspend fun findHistories(): List<History> {
         return handler
             .awaitList { historyQueries.findHistories(historyMapper) }
     }
 
-    override suspend fun insertHistory(history: ireader.common.models.entities.History) {
+    override suspend fun insertHistory(history: History) {
         return handler.await { insertBlocking(history) }
     }
 
-    override suspend fun insertHistories(histories: List<ireader.common.models.entities.History>) {
+    override suspend fun insertHistories(histories: List<History>) {
         return handler.await(inTransaction = true) {
             for (i in histories) {
                 insertBlocking(i)
@@ -61,7 +59,7 @@ class HistoryRepositoryImpl constructor(
         }
     }
 
-    override suspend fun deleteHistories(histories: List<ireader.common.models.entities.History>) {
+    override suspend fun deleteHistories(histories: List<History>) {
         return handler.await(inTransaction = true) {
             for (i in histories) {
                 historyQueries.deleteHistoryByBookId(i.id)
@@ -83,7 +81,7 @@ class HistoryRepositoryImpl constructor(
 
     private fun Database.insertBlocking(history: History) {
         historyQueries.upsert(
-            chapterId = history.chapterId,
+            chapterId = history.chapterId.toDB()?:0,
             readAt = history.readAt,
             time_read = history.readDuration,
         )

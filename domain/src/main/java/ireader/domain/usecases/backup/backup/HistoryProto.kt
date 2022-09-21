@@ -1,11 +1,11 @@
-@file:OptIn(ExperimentalSerializationApi::class)
+
+
 
 package ireader.domain.usecases.backup.backup
 
-import kotlinx.serialization.ExperimentalSerializationApi
+import ireader.domain.models.entities.History
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
-import ireader.common.models.entities.History
 
 @Serializable
 internal data class HistoryProto(
@@ -21,7 +21,7 @@ internal data class HistoryProto(
             id = bookId,
             chapterId = chapterId,
             readAt = readAt,
-            readDuration = progress
+            readDuration = progress,
         )
     }
 
@@ -36,3 +36,5 @@ internal data class HistoryProto(
         }
     }
 }
+
+

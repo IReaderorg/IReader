@@ -13,13 +13,8 @@ import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import ireader.common.models.entities.Chapter
-import ireader.i18n.LAST_CHAPTER
-import ireader.i18n.NO_VALUE
-import ireader.i18n.UiText
 import ireader.core.http.WebViewManger
 import ireader.core.source.model.Text
-import ireader.ui.core.theme.ReaderColors
-import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.data.repository.ReaderThemeRepository
 import ireader.domain.preferences.models.ReaderColors
@@ -38,9 +33,14 @@ import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.domain.utils.extensions.async.nextAfter
 import ireader.domain.utils.extensions.async.prevBefore
 import ireader.domain.utils.extensions.findComponentActivity
+import ireader.i18n.LAST_CHAPTER
+import ireader.i18n.NO_VALUE
+import ireader.i18n.UiText
 import ireader.presentation.R
 import ireader.presentation.ui.util.NavigationArgs
 import ireader.ui.component.Controller
+import ireader.ui.core.theme.ReaderColors
+import ireader.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
@@ -149,9 +149,6 @@ class ReaderScreenViewModel(
                 }
 
             }
-
-
-            if (source != null) {
                 state.catalog = source
                 subscribeReaderThemes()
                 subscribeChapters(bookId)
@@ -159,11 +156,6 @@ class ReaderScreenViewModel(
                     state.book = getBookUseCases.findBookById(bookId)
                     setupChapters(bookId, chapterId)
                 }
-            } else {
-                viewModelScope.launch {
-                    showSnackBar(UiText.StringResource(R.string.the_source_is_not_found))
-                }
-            }
         } else {
             viewModelScope.launch {
                 showSnackBar(UiText.StringResource(R.string.something_is_wrong_with_this_book))

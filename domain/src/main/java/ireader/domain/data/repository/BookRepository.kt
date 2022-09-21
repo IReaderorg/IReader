@@ -1,10 +1,10 @@
 package ireader.domain.data.repository
 
-import kotlinx.coroutines.flow.Flow
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.Chapter
 import ireader.common.models.entities.LibraryBook
 import ireader.common.models.library.LibrarySort
+import kotlinx.coroutines.flow.Flow
 
 interface BookRepository {
 
@@ -43,6 +43,7 @@ interface BookRepository {
     suspend fun updateBook(book: LibraryBook, favorite: Boolean)
     suspend fun updateBook(book: List<Book>)
     suspend fun upsert(book: Book): Long
+    suspend fun updatePartial(book: Book): Long
     suspend fun insertBooks(book: List<Book>): List<Long>
     suspend fun delete(key: String)
 

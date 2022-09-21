@@ -1,11 +1,11 @@
-@file:OptIn(ExperimentalSerializationApi::class)
+
+
 
 package ireader.domain.usecases.backup.backup
 
-import kotlinx.serialization.ExperimentalSerializationApi
+import ireader.common.models.entities.Category
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
-import ireader.common.models.entities.Category
 
 @Serializable
 internal data class CategoryProto(
@@ -19,7 +19,7 @@ internal data class CategoryProto(
         return Category(
             name = name,
             order = order,
-            flags = flags
+            flags = flags,
         )
     }
 
@@ -32,4 +32,8 @@ internal data class CategoryProto(
             )
         }
     }
+
 }
+
+
+

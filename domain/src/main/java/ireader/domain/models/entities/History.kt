@@ -1,6 +1,4 @@
-package ireader.common.models.entities
-
-import java.util.*
+package ireader.domain.models.entities
 
 
 data class History(

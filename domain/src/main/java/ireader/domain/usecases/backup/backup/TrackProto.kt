@@ -2,11 +2,11 @@
 
 package ireader.domain.usecases.backup.backup
 
+import ireader.common.models.entities.Track
+import ireader.common.models.entities.TrackStatus
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
-import ireader.common.models.entities.Track
-import ireader.common.models.entities.TrackStatus
 
 @Serializable
 internal data class TrackProto(

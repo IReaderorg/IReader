@@ -1,10 +1,8 @@
 package ireader.data.history
 
-import ireader.common.models.entities.History
+import ireader.domain.models.entities.History
 import ireader.common.models.entities.HistoryWithRelations
 import ireader.domain.models.BookCover
-
-import java.util.Date
 
 val historyMapper: (Long, Long, Long?, Long) -> History = { id, chapterId, readAt, readDuration ->
   History(

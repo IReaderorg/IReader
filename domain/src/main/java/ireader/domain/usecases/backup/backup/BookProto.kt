@@ -1,10 +1,9 @@
-@file:OptIn(ExperimentalSerializationApi::class)
+
 
 package ireader.domain.usecases.backup.backup
-import kotlinx.serialization.ExperimentalSerializationApi
+import ireader.common.models.entities.Book
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
-import ireader.common.models.entities.Book
 
 @Serializable
 internal data class BookProto(
@@ -75,7 +74,9 @@ internal data class BookProto(
                 categories = categories,
                 tracks = tracks,
                 histories = histories,
+
             )
         }
     }
 }
+

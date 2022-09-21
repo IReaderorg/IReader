@@ -2,18 +2,16 @@ package ireader.data.repository
 
 import com.squareup.sqldelight.Query
 import ir.kazemcodes.infinityreader.Database
-import ireader.domain.data.repository.LibraryRepository
-import kotlinx.coroutines.flow.Flow
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.LibraryBook
 import ireader.common.models.library.LibrarySort
 import ireader.data.book.booksMapper
 import ireader.data.book.getLibraryMapper
 import ireader.data.book.libraryManga
-import ireader.data.history.historyMapper
 import ireader.data.local.DatabaseHandler
+import ireader.domain.data.repository.LibraryRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
 
 
 class LibraryRepositoryImpl(
@@ -44,7 +42,9 @@ class LibraryRepositoryImpl(
             LibrarySort.Type.Source -> bookQueries.getLibrary(getLibraryMapper)
 
             LibrarySort.Type.DateAdded
-            -> bookQueries.getLibrary(getLibraryMapper)
+            -> {
+                bookQueries.getLibrary(getLibraryMapper)
+            }
             LibrarySort.Type.DateFetched
             -> bookQueries.getLibrary(getLibraryMapper)
         }
@@ -55,17 +55,13 @@ class LibraryRepositoryImpl(
         return handler.subscribeToList {
             getLibrary(sort)
         }.map { flow ->
-            flow.sortWith(sort)
+            flow.sortWith(sort).distinctBy { it.id }
         }.let { flow ->
             if (sort.isAscending) flow else flow.map { it.reversed() }
         }
     }
 
     private suspend fun List<LibraryBook>.sortWith(sort: LibrarySort): List<LibraryBook> {
-
-
-
-
         return when (sort.type) {
             LibrarySort.Type.Title -> this.sortedBy { it.title }
             LibrarySort.Type.LastRead -> {
@@ -90,7 +86,11 @@ class LibraryRepositoryImpl(
                     handler.awaitList {
                         bookQueries.getLatestByChapterUploadDate(libraryManga)
                     }
-                (dateAdded + this).distinctBy { it.id }
+                return this.map { book ->
+                    dateAdded.firstOrNull { it.id == book.id }?.let { newOne ->
+                        book.apply {  dateUpload =newOne.dateUpload }
+                    } ?: book
+                }.sortedBy { it.dateUpload }
             }
             LibrarySort.Type.DateFetched
             ->  {
@@ -98,7 +98,11 @@ class LibraryRepositoryImpl(
                     handler.awaitList {
                         bookQueries.getLatestByChapterFetchDate(libraryManga)
                     }
-                (dateFetched + this).distinctBy { it.id }
+                return this.map { book ->
+                    dateFetched.firstOrNull { it.id == book.id }?.let { newOne ->
+                        book.apply {  this.dateFetched  = newOne.dateFetched }
+                    } ?: book
+                }.sortedBy { it.dateFetched }
             }
         }
     }

@@ -1,12 +1,11 @@
-@file:OptIn(ExperimentalSerializationApi::class)
+
 
 package ireader.domain.usecases.backup.backup
 
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.protobuf.ProtoNumber
 import ireader.common.models.entities.Chapter
 import ireader.core.source.model.Page
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.protobuf.ProtoNumber
 
 @Serializable
 internal data class ChapterProto(
@@ -20,6 +19,8 @@ internal data class ChapterProto(
     @ProtoNumber(8) val number: Float = 0f,
     @ProtoNumber(9) val sourceOrder: Long = 0,
     @ProtoNumber(10) val content: List<Page> = emptyList(),
+    @ProtoNumber(11) val type:Long = 0,
+    @ProtoNumber(12) val lastPageRead: Long = 0,
 
 ) {
 
@@ -36,6 +37,8 @@ internal data class ChapterProto(
             number = number,
             sourceOrder = sourceOrder,
             content = content,
+            type = type,
+            lastPageRead = lastPageRead,
         )
     }
 
@@ -52,7 +55,12 @@ internal data class ChapterProto(
                 number = chapter.number,
                 sourceOrder = chapter.sourceOrder,
                 content = chapter.content,
+                type = chapter.type,
+                lastPageRead = chapter.lastPageRead,
             )
         }
     }
 }
+
+
+

@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import ireader.common.models.entities.CategoryWithCount
-import ireader.common.models.entities.History
+import ireader.domain.models.entities.History
 import ireader.common.models.entities.LibraryBook
 import ireader.common.models.library.LibrarySort
 import ireader.i18n.UiText

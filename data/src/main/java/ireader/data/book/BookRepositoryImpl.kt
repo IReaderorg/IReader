@@ -1,7 +1,5 @@
 package ireader.data.book
 
-import ireader.domain.data.repository.BookRepository
-import kotlinx.coroutines.flow.Flow
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.Chapter
 import ireader.common.models.entities.LibraryBook
@@ -10,6 +8,8 @@ import ireader.data.local.DatabaseHandler
 import ireader.data.util.BaseDao
 import ireader.data.util.toDB
 import ireader.data.util.toLong
+import ireader.domain.data.repository.BookRepository
+import kotlinx.coroutines.flow.Flow
 
 class BookRepositoryImpl(
     private val handler: DatabaseHandler,
@@ -99,28 +99,24 @@ class BookRepositoryImpl(
 
     override suspend fun updateBook(book: Book) {
         return handler.await {
-            book.let { book ->
-                bookQueries.update(
-                    source = book.sourceId,
-                    dateAdded = book.dateAdded,
-                    lastUpdate = book.lastUpdate,
-                    title = book.title,
-                    status = book.status,
-                    description = book.description,
-                    author = book.author,
-                    url = book.key,
-                    chapterFlags = book.flags,
-                    coverLastModified = 0,
-                    thumbnailUrl = book.cover,
-                    viewer = book.viewer,
-                    id = book.id,
-                    initialized = book.initialized.toLong(),
-                    favorite = book.favorite.toLong(),
-                    genre = book.genres.let(bookGenresConverter::encode),
-
-
-                    )
-            }
+            bookQueries.update(
+                source = book.sourceId,
+                dateAdded = book.dateAdded,
+                lastUpdate = book.lastUpdate,
+                title = book.title,
+                status = book.status,
+                description = book.description,
+                author = book.author,
+                url = book.key,
+                chapterFlags = book.flags,
+                coverLastModified = 0,
+                thumbnailUrl = book.cover,
+                viewer = book.viewer,
+                id = book.id,
+                initialized = book.initialized.toLong(),
+                favorite = book.favorite.toLong(),
+                genre = book.genres.let(bookGenresConverter::encode),
+            )
 
         }
     }
@@ -217,6 +213,32 @@ class BookRepositoryImpl(
         } ?: -1
 
 
+    }
+
+    override suspend fun updatePartial(book: Book): Long {
+        return handler.awaitOneOrNull {
+            bookQueries.upsert(
+                id = book.id.toDB(),
+                source = book.sourceId,
+                dateAdded = book.dateAdded,
+                lastUpdate = book.lastUpdate,
+                favorite = book.favorite,
+                title = book.title,
+                status = book.status,
+                genre = book.genres,
+                description = book.description,
+                author = book.author,
+                initialized = book.initialized,
+                url = book.key,
+                artist = book.author,
+                chapterFlags = book.flags,
+                coverLastModified = 0,
+                nextUpdate = 0,
+                thumbnailUrl = book.cover,
+                viewerFlags = book.viewer,
+            )
+            bookQueries.selectLastInsertedRowId()
+        } ?: -1
     }
 
     override suspend fun insertBooks(book: List<Book>): List<Long> {
@@ -334,7 +356,7 @@ class BookRepositoryImpl(
                     id = book.id,
                     initialized = book.initialized.toLong(),
                     favorite = book.favorite.toLong(),
-                    genre = book.genres.let(bookGenresConverter::encode)
+                    genre = book.genres.let(bookGenresConverter::encode),
                 )
             }
 

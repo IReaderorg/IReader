@@ -2,9 +2,7 @@ package ireader.data.catalog
 
 import ir.kazemcodes.infinityreader.Database
 import ireader.common.models.entities.CatalogRemote
-import ireader.common.models.entities.History
 import ireader.domain.catalogs.service.CatalogRemoteRepository
-import ireader.data.catalog.catalogMapper
 import ireader.data.local.DatabaseHandler
 import kotlinx.coroutines.flow.Flow
 

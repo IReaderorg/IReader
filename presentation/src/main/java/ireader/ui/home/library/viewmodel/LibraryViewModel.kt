@@ -18,6 +18,18 @@ import ireader.common.models.entities.BookItem
 import ireader.common.models.entities.Category
 import ireader.common.models.library.LibraryFilter
 import ireader.common.models.library.LibrarySort
+import ireader.domain.models.DisplayMode
+import ireader.domain.preferences.prefs.LibraryPreferences
+import ireader.domain.usecases.category.CategoriesUseCases
+import ireader.domain.usecases.local.DeleteUseCase
+import ireader.domain.usecases.local.LocalGetBookUseCases
+import ireader.domain.usecases.local.LocalGetChapterUseCase
+import ireader.domain.usecases.local.LocalInsertUseCases
+import ireader.domain.usecases.local.book_usecases.GetLibraryCategory
+import ireader.domain.usecases.local.book_usecases.MarkBookAsReadOrNotUseCase
+import ireader.domain.usecases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
+import ireader.domain.usecases.services.ServiceUseCases
+import ireader.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,18 +41,6 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
-import ireader.domain.models.DisplayMode
-import ireader.domain.preferences.prefs.LibraryPreferences
-import ireader.ui.core.viewmodel.BaseViewModel
-import ireader.domain.usecases.category.CategoriesUseCases
-import ireader.domain.usecases.local.DeleteUseCase
-import ireader.domain.usecases.local.LocalGetBookUseCases
-import ireader.domain.usecases.local.LocalGetChapterUseCase
-import ireader.domain.usecases.local.LocalInsertUseCases
-import ireader.domain.usecases.local.book_usecases.GetLibraryCategory
-import ireader.domain.usecases.local.book_usecases.MarkBookAsReadOrNotUseCase
-import ireader.domain.usecases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
-import ireader.domain.usecases.services.ServiceUseCases
 import org.koin.android.annotation.KoinViewModel
 
 
@@ -206,8 +206,8 @@ class LibraryViewModel(
             getLibraryCategory.subscribe(categoryId, sorting.value, filters.value)
                 .map { list ->
                     books = list
-                    list.map {
-                        it.toBookItem()
+                    list.mapIndexed { index, libraryBook ->
+                        libraryBook.toBookItem().copy(column = index.toLong())
                     }
                 }
                 .shareIn(scope, SharingStarted.WhileSubscribed(1000), 1)

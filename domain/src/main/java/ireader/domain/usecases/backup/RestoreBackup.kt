@@ -2,32 +2,32 @@ package ireader.domain.usecases.backup
 
 import android.content.Context
 import android.net.Uri
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.decodeFromByteArray
-import kotlinx.serialization.protobuf.ProtoBuf
-import okio.FileSystem
-import okio.buffer
-import okio.gzip
-import okio.source
+import ireader.common.models.entities.Book
+import ireader.common.models.entities.BookCategory
+import ireader.common.models.entities.Chapter
+import ireader.core.db.Transactions
 import ireader.domain.data.repository.BookCategoryRepository
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.CategoryRepository
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.data.repository.LibraryRepository
-import ireader.common.models.entities.Book
-import ireader.common.models.entities.BookCategory
-import ireader.common.models.entities.Chapter
-import ireader.i18n.UiText
-import ireader.core.db.Transactions
 import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.domain.usecases.backup.backup.Backup
 import ireader.domain.usecases.backup.backup.BookProto
 import ireader.domain.usecases.backup.backup.CategoryProto
+import ireader.domain.usecases.backup.backup.createStableBackup
+import ireader.domain.usecases.backup.backup.legecy.createLegacyBackup
+import ireader.i18n.UiText
+import kotlinx.serialization.ExperimentalSerializationApi
+import okio.FileSystem
+import okio.buffer
+import okio.gzip
+import okio.source
 import org.koin.core.annotation.Factory
 
 @Factory
-class RestoreBackup  internal constructor(
+class RestoreBackup internal constructor(
     private val fileSystem: FileSystem,
     private val libraryRepository: LibraryRepository,
     private val bookRepository: BookRepository,
@@ -63,7 +63,7 @@ class RestoreBackup  internal constructor(
                     restoreChapters(manga)
                     restoreCategoriesOfBook(mangaId, categoryIdsOfManga)
                     restoreTracks(manga, mangaId)
-                    restoreHistories(manga, mangaId)
+                    // restoreHistories(manga, mangaId)
                 }
             }
             onSuccess()
@@ -81,9 +81,14 @@ class RestoreBackup  internal constructor(
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
+
     private fun loadDump(data: ByteArray): Backup {
-        return ProtoBuf.decodeFromByteArray(data)
+        return kotlin.runCatching {
+            data.createStableBackup()
+        }.getOrElse {
+            data.createLegacyBackup()
+        }
+
     }
 
     private suspend fun restoreManga(manga: BookProto): Long {
@@ -111,7 +116,7 @@ class RestoreBackup  internal constructor(
                 key = manga.key,
                 sourceId = manga.sourceId,
             )
-            bookRepository.upsert(update)
+            bookRepository.updateBook(update)
         }
         return dbManga.id
     }
@@ -204,7 +209,7 @@ class RestoreBackup  internal constructor(
         if (categoryIds.isEmpty()) return
 
         val bookCategories = categoryIds.map { categoryId ->
-            BookCategory( bookId, categoryId)
+            BookCategory(bookId, categoryId)
         }
 
         if (bookCategories.isNotEmpty()) {
@@ -212,15 +217,15 @@ class RestoreBackup  internal constructor(
         }
     }
 
-    private suspend fun restoreHistories(bookProto: BookProto, bookId: Long) {
-        if (bookProto.histories.isEmpty()) return
-
-        val histories = bookProto.histories.map { it.toDomain(bookId) }
-
-        if (histories.isNotEmpty()) {
-            historyRepository.insertHistories(histories)
-        }
-    }
+//    private suspend fun restoreHistories(bookProto: BookProto, bookId: Long) {
+//        if (bookProto.histories.isEmpty()) return
+//
+//        val histories = bookProto.histories.map { it.toDomain(bookId).copy(chapterId = 0) }
+//
+//        if (histories.isNotEmpty()) {
+//          //  historyRepository.insertHistories(histories)
+//        }
+//    }
 
     private suspend fun restoreTracks(manga: BookProto, mangaId: Long) {
         return

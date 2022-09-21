@@ -3,14 +3,11 @@ package ireader.domain.usecases.history
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import ireader.common.models.entities.HistoryWithRelations
 import ireader.domain.data.repository.HistoryRepository
-import ireader.domain.utils.extensions.toLocalDate
+import ireader.domain.models.entities.History
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.datetime.LocalDate
-import ireader.common.models.entities.History
-import ireader.common.models.entities.HistoryWithRelations
-import kotlinx.coroutines.flow.mapLatest
 import org.koin.core.annotation.Factory
 
 @Factory

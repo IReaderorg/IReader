@@ -74,7 +74,8 @@ val mangaChapterMapper: (Long, Long, String, String?, String?, String?, List<Str
 val libraryManga:
             (Long, Long, String, String?, String?, String?, List<String>?, String, Long, String?, Boolean, Long?, Long?, Boolean, Long, Long, Long, Long, Long?) -> LibraryBook =
     { _id, source, url, artist, author, description, genre, title,
-        status, thumbnail_url, favorite, last_update, next_update, initialized, viewer, chapter_flags,
+        status, thumbnail_url, favorite, last_update,
+      next_update, initialized, viewer, chapter_flags,
         cover_last_modified, date_added, max ->
         LibraryBook(
             _id,
@@ -83,7 +84,7 @@ val libraryManga:
             title,
             status,
             thumbnail_url?:"",
-            last_update?:0L
+            last_update?:0L,
         ).apply {
             this.unreadCount = unreadCount.toInt()
             this.readCount = readCount.toInt()
@@ -114,7 +115,12 @@ val booksMapper= { _id: Long, source: Long, url: String, artist: String?, author
 
 }
 
-val getLibraryMapper = { _id: Long, source: Long, url: String, artist: String?, author: String?, description: String?, genre: List<String>?, title: String, status: Long, thumbnail_url: String?, favorite: Boolean, last_update: Long?, next_update: Long?, initialized: Boolean, viewer: Long, chapter_flags: Long, cover_last_modified: Long, date_added: Long, unread_count: Long, read_count: Long, category: Long ->
+val getLibraryMapper = { _id: Long, source: Long, url: String, artist: String?,
+                         author: String?, description: String?, genre: List<String>?,
+                         title: String, status: Long, thumbnail_url: String?, favorite: Boolean,
+                         last_update: Long?, next_update: Long?, initialized: Boolean, viewer: Long,
+                         chapter_flags: Long, cover_last_modified: Long, date_added: Long,
+                         unread_count: Long, read_count: Long, category: Long ->
 
     LibraryBook(
         _id,
@@ -123,10 +129,10 @@ val getLibraryMapper = { _id: Long, source: Long, url: String, artist: String?, 
         title,
         status,
         thumbnail_url?:"",
-        last_update?:0L
+        last_update?:0L,
     ).apply {
-        this.unreadCount = unreadCount.toInt()
-        this.readCount = readCount.toInt()
+        this.unreadCount = unread_count.toInt()
+        this.readCount = read_count.toInt()
         this.category = category.toInt()
     }
 

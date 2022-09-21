@@ -1,9 +1,8 @@
 package ireader.domain.usecases.local.chapter_usecases
 
-import kotlinx.datetime.Clock
 import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.common.models.entities.Chapter
-import ireader.common.models.entities.History
+import ireader.domain.models.entities.History
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.history.HistoryUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases

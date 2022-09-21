@@ -19,9 +19,9 @@ class CrashHandler(private val context: Application) {
         val systemHandler = Thread.getDefaultUncaughtExceptionHandler()
 
         // 2. Set the default handler as a dummy (so that crashlytics fallbacks to this one, once set)
-        Thread.setDefaultUncaughtExceptionHandler { t, e -> /* do nothing */ }
+        Thread.setDefaultUncaughtExceptionHandler { _, _ -> /* do nothing */ }
 
-        // 3. Setup crashlytics so that it becomes the default handler (and fallbacking to our dummy handler)
+        // 3. Setup crashlytics so that it becomes the default handler (and fallback to our dummy handler)
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
 
         val fabricExceptionHandler = Thread.getDefaultUncaughtExceptionHandler()
