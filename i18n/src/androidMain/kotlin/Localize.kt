@@ -19,6 +19,9 @@ import dev.icerock.moko.resources.desc.Resource
 import dev.icerock.moko.resources.desc.ResourceFormatted
 import dev.icerock.moko.resources.desc.StringDesc
 
+// don't use this functions yet because moko-resource is not configured yet.
+
+
 @Composable
 actual fun localize(resource: StringResource): String {
   return StringDesc.Resource(resource).toString(LocalContext.current)

@@ -38,8 +38,6 @@ fun WebPageTopBar(
     onFetchChapters: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
-    ireader.i18n.MR.strings.go
-    R.string.app_name
     Toolbar(
         scrollBehavior = scrollBehavior,
         title = {

@@ -15,7 +15,6 @@ buildscript {
         classpath(libs.gradle.tools)
         classpath(libs.gradle.google)
         classpath(libs.gradle.firebaseCrashlytic)
-        classpath(libs.moko.gradle)
     }
 }
 
@@ -30,7 +29,6 @@ plugins {
     alias(libs.plugins.dokka) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.sqldelight) apply false
-   // alias(libs.plugins.moko) apply false
     id("nl.littlerobots.version-catalog-update") version "0.6.1"
 }
 

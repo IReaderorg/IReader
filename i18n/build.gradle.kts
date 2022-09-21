@@ -6,7 +6,6 @@ plugins {
     kotlin("multiplatform")
     id("com.android.library")
     id("org.jetbrains.compose")
-    id("dev.icerock.mobile.multiplatform-resources")
     id("org.jetbrains.gradle.plugin.idea-ext")
 }
 kotlin {
@@ -20,7 +19,12 @@ kotlin {
                 compileOnly(compose.ui)
             }
         }
+        //the compose is not available in android module for ???
         val androidMain by getting {
+            dependencies {
+                compileOnly(composeLib.compose.runtime)
+                compileOnly(composeLib.compose.ui)
+            }
         }
         val desktopMain by getting {
         }
@@ -79,10 +83,6 @@ fun runCommand(command: String): String {
         standardOutput = byteOut
     }
     return String(byteOut.toByteArray()).trim()
-}
-multiplatformResources {
-    multiplatformResourcesPackage = "ireader.i18n"
-    this.disableStaticFrameworkWarning = true
 }
 
 idea {
