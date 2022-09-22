@@ -22,12 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ireader.common.models.entities.Chapter
+import ireader.presentation.R
 import ireader.ui.component.components.ChapterRow
 import ireader.ui.component.list.scrollbars.VerticalFastScroller
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.ui.component.text_related.ErrorTextWithEmojis
-import ireader.presentation.R
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -42,7 +42,6 @@ fun ReaderScreenDrawer(
     drawerScrollState: LazyListState,
     onMap: (LazyListState) -> Unit,
 ) {
-
     Column(
         modifier = modifier.fillMaxWidth(.9f),
         horizontalAlignment = Alignment.CenterHorizontally,

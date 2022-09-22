@@ -19,6 +19,7 @@ import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.DismissibleDrawerSheet
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -425,14 +426,22 @@ fun IModalDrawer(
     sheetContent: @Composable () -> Unit,
     content: @Composable () -> Unit
 ) {
+
+
     if (isEnable) {
         ModalNavigationDrawer(
             modifier = Modifier,
             drawerState = state,
             drawerContent = {
-                sheetContent()
+                DismissibleDrawerSheet(
+                    drawerContentColor = MaterialTheme.colorScheme.onSurface,
+                    drawerContainerColor = MaterialTheme.colorScheme.surface,
+
+                ) {
+                    sheetContent()
+                }
             },
-            scrimColor = androidx.compose.material3.MaterialTheme.colorScheme.surface,
+            scrimColor = Color.Transparent,
             content = content,
         )
     } else {
