@@ -104,7 +104,8 @@ SET
     read = :read,
     bookmark = :bookmark,
     last_page_read = :last_page_read,
-    content = :content
+    content = :content,
+    type = :type
 
 WHERE _id = :id;
 

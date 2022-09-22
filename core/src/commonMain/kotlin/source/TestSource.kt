@@ -1,7 +1,5 @@
 package ireader.core.source
 
-import kotlinx.coroutines.delay
-import kotlinx.datetime.Clock
 import ireader.core.source.model.ChapterInfo
 import ireader.core.source.model.Command
 import ireader.core.source.model.CommandList
@@ -11,8 +9,11 @@ import ireader.core.source.model.ImageUrl
 import ireader.core.source.model.Listing
 import ireader.core.source.model.MangaInfo
 import ireader.core.source.model.MangasPageInfo
+import ireader.core.source.model.MovieUrl
 import ireader.core.source.model.Page
 import ireader.core.source.model.Text
+import kotlinx.coroutines.delay
+import kotlinx.datetime.Clock
 
 class TestSource : ireader.core.source.CatalogSource {
     override val id = 1L
@@ -53,6 +54,9 @@ class TestSource : ireader.core.source.CatalogSource {
 
     override suspend fun getPageList(chapter: ChapterInfo, commands: List<Command<*>>): List<Page> {
         delay(1000)
+        if (chapter.key == "4") {
+            return listOf(MovieUrl("https://archive.org/download/Popeye_forPresident/Popeye_forPresident_512kb.mp4"))
+        }
         return getTestPages()
     }
 
@@ -200,8 +204,9 @@ class TestSource : ireader.core.source.CatalogSource {
         )
         val chapter2 = chapter1.copy(key = "2", name = "Chapter2")
         val chapter3 = chapter1.copy(key = "3", name = "Chapter3")
+        val chapter4 = chapter1.copy(key = "4", name = "Chapter4", type = ChapterInfo.MOVIE)
 
-        return listOf(chapter1, chapter2, chapter3)
+        return listOf(chapter1, chapter2, chapter3,chapter4)
     }
 
     private fun getTestPages(): List<Page> {

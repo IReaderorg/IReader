@@ -4,9 +4,9 @@ package ireader.common.models.entities
 
 
 
-import kotlinx.serialization.Serializable
 import ireader.core.source.model.ChapterInfo
 import ireader.core.source.model.Page
+import kotlinx.serialization.Serializable
 
 @Serializable
 data class Chapter(
@@ -50,5 +50,7 @@ fun ChapterInfo.toChapter(bookId: Long): Chapter {
         number = number,
         dateUpload = dateUpload,
         translator = this.scanlator,
+        type =  this.type,
+
     )
 }

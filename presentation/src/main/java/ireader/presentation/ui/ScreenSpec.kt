@@ -1,6 +1,5 @@
 package ireader.presentation.ui
 
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -39,7 +38,8 @@ sealed interface ScreenSpec {
             LibraryScreenSpec,
             SecuritySettingSpec,
             TrackingSettingSpec,
-            RepositoryScreenSpec
+            RepositoryScreenSpec,
+            VideoScreenSpec
         ).associateBy { it.navHostRoute }
     }
 

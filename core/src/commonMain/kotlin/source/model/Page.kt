@@ -16,5 +16,7 @@ data class ImageUrl(val url: String) : PageComplete()
 data class ImageBase64(val data: String) : PageComplete()
 @Serializable
 data class Text(val text: String) : PageComplete()
+
+// need to add a listOf string for subtitles
 @Serializable
 data class MovieUrl(val url: String) : PageComplete()

@@ -28,7 +28,7 @@
     <string name="fetch_book">Récupérer le livre</string>
     <string name="fetch_chapter">Récupérer le chapitre</string>
     <string name="fetch_chapters">Récupérer les chapitres</string>
-    <string name="Go">Aller</string>
+    <string name="go">Aller</string>
     <string name="filter">Filtrer</string>
     <string name="sort">Trier</string>
     <string name="search">Rechercher</string>
@@ -276,7 +276,7 @@
     <string name="success">Succès</string>
     <string name="complete">Terminé</string>
     <string name="download_notifier_download_finish">Téléchargement terminé</string>
-    <string name="ireader.ui.settings.appearance">Apparence</string>
+    <string name="appearance">Apparence</string>
     <string name="second">Seconde</string>
     <string name="hour">Jour</string>
     <string name="night_mode">Mode nuit</string>
@@ -350,7 +350,7 @@
     <string name="catalog_not_found_error">Aucune extension disponible.</string>
     <string name="label_text_reader">Lecteur de texte</string>
     <string name="source_not_available">Cette source n\'est pas disponible pour votre appareil.</string>
-    <string name="Refreshed">Actualisé</string>
+    <string name="refreshed">Actualisé</string>
     <string name="there_was_a_problem_in_getting_chapter">Une erreur s\'est produite lors de la récupération du chapitre.</string>
     <string name="latest_book">Dernier</string>
     <string name="uninstalled">Désinstallé</string>

@@ -22,6 +22,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import ireader.common.models.entities.Book
 import ireader.core.source.HttpSource
+import ireader.core.source.model.ChapterInfo
 import ireader.domain.utils.extensions.async.viewModelIOCoroutine
 import ireader.domain.utils.extensions.findComponentActivity
 import ireader.domain.utils.extensions.launchIO
@@ -302,12 +303,24 @@ object BookDetailScreenSpec : ScreenSpec {
             onItemClick = { chapter ->
                 if (vm.selection.isEmpty()) {
                     if (book != null) {
-                        controller.navController.navigate(
-                            ReaderScreenSpec.buildRoute(
-                                bookId = book.id,
-                                chapterId = chapter.id,
-                            )
-                        )
+                        when(chapter.type) {
+                            ChapterInfo.MOVIE -> {
+                                controller.navController.navigate(
+                                    VideoScreenSpec.buildRoute(
+                                        chapterId = chapter.id,
+                                    )
+                                )
+                            }
+                            else -> {
+                                controller.navController.navigate(
+                                    ReaderScreenSpec.buildRoute(
+                                        bookId = book.id,
+                                        chapterId = chapter.id,
+                                    )
+                                )
+                            }
+                        }
+
                     }
                 } else {
                     when (chapter.id) {

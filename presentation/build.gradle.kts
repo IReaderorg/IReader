@@ -72,8 +72,11 @@ dependencies {
 
     implementation(androidx.appCompat)
     implementation(androidx.media)
+    implementation(libs.exoplayer.core)
+    implementation(libs.exoplayer.ui)
+    implementation(libs.exoplayer.dash)
     implementation(androidx.core)
-    // implementation(androidx.material)
+
     implementation(androidx.emoji)
 
     implementation(androidx.work.runtime)
@@ -84,8 +87,7 @@ dependencies {
     ksp(libs.koin.kspCompiler)
     implementation(libs.koin.androidCompose)
     compileOnly(libs.koin.annotations)
-//    kapt(libs.hilt.androidcompiler)
-    // kapt(libs.hilt.compiler)
+
 
     testImplementation(test.bundles.common)
     androidTestImplementation(test.bundles.common)

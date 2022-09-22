@@ -1,11 +1,10 @@
 package ireader.data.chapter
 
-import ireader.domain.data.repository.ChapterRepository
-import kotlinx.coroutines.flow.Flow
 import ireader.common.models.entities.Chapter
-import ireader.data.chapter.chapterMapper
 import ireader.data.local.DatabaseHandler
 import ireader.data.util.toDB
+import ireader.domain.data.repository.ChapterRepository
+import kotlinx.coroutines.flow.Flow
 
 
 class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
@@ -75,7 +74,7 @@ class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
                     chapter.dateFetch,
                     chapter.dateUpload,
                     chapter.content,
-                    chapter.type
+                    chapter.type,
                 )
              chapterQueries.selectLastInsertedRowId()
         }

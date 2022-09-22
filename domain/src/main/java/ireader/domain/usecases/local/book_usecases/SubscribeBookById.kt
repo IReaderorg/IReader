@@ -1,8 +1,8 @@
 package ireader.domain.usecases.local.book_usecases
 
+import ireader.common.models.entities.Book
 import ireader.domain.data.repository.BookRepository
 import kotlinx.coroutines.flow.Flow
-import ireader.common.models.entities.Book
 import org.koin.core.annotation.Factory
 
 /**
@@ -16,7 +16,8 @@ class SubscribeBookById(private val bookRepository: BookRepository) {
 }
 @Factory
 class FindBookById(private val bookRepository: BookRepository) {
-    suspend operator fun invoke(id: Long): Book? {
+    suspend operator fun invoke(id: Long?): Book? {
+        if (id == null) return null
         return bookRepository.findBookById(id = id)
     }
 }
