@@ -1,24 +1,26 @@
 package ireader.ui.home.explore.viewmodel
 
+import androidx.compose.ui.util.fastMap
 import androidx.lifecycle.viewModelScope
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.BookItem
 import ireader.common.models.entities.toBook
-import ireader.i18n.SourceNotFoundException
-import ireader.i18n.UiText
 import ireader.core.log.Log
 import ireader.core.source.model.Filter
 import ireader.core.source.model.MangasPageInfo
-import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.domain.catalogs.interactor.GetLocalCatalogs
 import ireader.domain.models.DisplayMode
 import ireader.domain.usecases.local.LocalInsertUseCases
+import ireader.domain.usecases.local.book_usecases.FindDuplicateBook
 import ireader.domain.usecases.preferences.reader_preferences.BrowseScreenPrefUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.utils.exceptionHandler
 import ireader.domain.utils.extensions.DefaultPaginator
+import ireader.i18n.SourceNotFoundException
+import ireader.i18n.UiText
 import ireader.presentation.R
 import ireader.ui.component.Controller
+import ireader.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
@@ -31,6 +33,7 @@ class ExploreViewModel(
     private val browseScreenPrefUseCase: BrowseScreenPrefUseCase,
     val insertUseCases: LocalInsertUseCases,
     private val param: Param,
+    private val findDuplicateBook: FindDuplicateBook,
     val booksState: BooksState
 ) : BaseViewModel(), ExploreState by state {
     data class Param(val sourceId: Long?, val query: String?)
@@ -140,6 +143,10 @@ class ExploreViewModel(
                             )
                         }
                         booksState.books = booksState.books + books
+
+                        booksState.books = booksState.books.fastMap {  book ->
+                            findDuplicateBook(book.title,book.sourceId) ?: book
+                        }
 
                         page = newKey
                         endReached = !items.hasNextPage

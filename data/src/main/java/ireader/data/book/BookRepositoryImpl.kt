@@ -10,6 +10,7 @@ import ireader.data.util.toDB
 import ireader.data.util.toLong
 import ireader.domain.data.repository.BookRepository
 import kotlinx.coroutines.flow.Flow
+import java.util.*
 
 class BookRepositoryImpl(
     private val handler: DatabaseHandler,
@@ -82,6 +83,12 @@ class BookRepositoryImpl(
     override suspend fun deleteBookById(id: Long) {
         handler.await {
             bookQueries.deleteBook(id)
+        }
+    }
+
+    override suspend fun findDuplicateBook(title: String, sourceId: Long): Book? {
+        return handler.awaitOneOrNull() {
+            bookQueries.getDuplicateLibraryManga(title.lowercase(Locale.getDefault()),sourceId, booksMapper)
         }
     }
 

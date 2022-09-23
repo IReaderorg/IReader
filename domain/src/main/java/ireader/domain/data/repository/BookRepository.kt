@@ -33,6 +33,7 @@ interface BookRepository {
     suspend fun insertBooksAndChapters(books: List<Book>, chapters: List<Chapter>)
 
     suspend fun deleteBookById(id: Long)
+    suspend fun findDuplicateBook(title: String,sourceId: Long) : Book?
 
     suspend fun deleteAllBooks()
     suspend fun deleteNotInLibraryBooks()

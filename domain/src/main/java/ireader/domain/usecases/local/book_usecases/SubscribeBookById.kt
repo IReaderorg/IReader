@@ -21,3 +21,10 @@ class FindBookById(private val bookRepository: BookRepository) {
         return bookRepository.findBookById(id = id)
     }
 }
+
+@Factory
+class FindDuplicateBook(private val bookRepository: BookRepository) {
+    suspend operator fun invoke(title:String, source: Long): Book? {
+       return bookRepository.findDuplicateBook(title,source)
+    }
+}
