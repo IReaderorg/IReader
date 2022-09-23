@@ -10,11 +10,10 @@ CREATE TABLE history(
 );
 
 findHistoryByChapterId:
-SELECT * FROM history WHERE chapter_id = :id  LIMIT 1;
-
+SELECT * FROM history WHERE chapter_id = :chapterId ORDER BY history.last_read DESC LIMIT 1;
 
 findHistoryByBookId:
-SELECT * FROM history WHERE _id = :bookId LIMIT 1;
+SELECT * FROM history WHERE chapter_id IN (SELECT  chapter._id FROM chapter WHERE chapter.book_id = :bookId) ORDER BY history.last_read DESC LIMIT 1;
 
 
 findHistories:
@@ -25,16 +24,13 @@ SELECT history.*,
 book.title,book.source, book.thumbnail_url, book.favorite,chapter.name,
 date(ROUND(last_read / 1000), 'unixepoch', 'localtime') AS date,chapter.chapter_number
     FROM history
-    JOIN book ON history._id = book._id
     JOIN chapter ON history.chapter_id = chapter._id
+    JOIN book ON history.chapter_id = chapter._id
     WHERE book.title LIKE '%' || :query || '%'
     ORDER BY history.last_read DESC;
 
 deleteHistoryByChapterId:
 DELETE FROM history WHERE chapter_id = :id;
-
-deleteHistoryByBookId:
-DELETE FROM history WHERE _id = :id;
 
 deleteAllHistories:
 DELETE FROM history;
@@ -42,7 +38,6 @@ DELETE FROM history;
 
 update:
 UPDATE history SET
-    _id = coalesce(:bookId, _id),
     chapter_id = coalesce(:chapter_id, chapter_id),
     time_read = coalesce(:readAt, time_read),
     last_read = coalesce(:progress, last_read)
@@ -115,3 +110,6 @@ SET
     last_read = :readAt,
     time_read = time_read + :time_read
 WHERE chapter_id = :chapterId;
+
+deleteByBookId:
+DELETE FROM history WHERE chapter_id IN (SELECT chapter._id FROM chapter WHERE chapter.book_id = :bookId);

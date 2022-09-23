@@ -316,6 +316,7 @@ class ReaderScreenViewModel(
                     stateChapter?.let { chapter ->
                         activity.lifecycleScope.launch {
                             insertUseCases.insertChapter(chapter.copy(lastPageRead = scrollState.value.toLong()))
+                             getChapterUseCase.updateLastReadTime(chapter)
                         }
                     }
                 }

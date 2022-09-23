@@ -10,6 +10,8 @@ import ireader.domain.models.entities.History
 import kotlinx.coroutines.flow.Flow
 
 
+// I may need to add bookId as Primary Key instead of using id
+
 class HistoryRepositoryImpl constructor(
     private val handler: DatabaseHandler,
 
@@ -62,7 +64,7 @@ class HistoryRepositoryImpl constructor(
     override suspend fun deleteHistories(histories: List<History>) {
         return handler.await(inTransaction = true) {
             for (i in histories) {
-                historyQueries.deleteHistoryByBookId(i.id)
+                historyQueries.deleteByBookId(i.id)
             }
         }
     }
@@ -72,7 +74,9 @@ class HistoryRepositoryImpl constructor(
     }
 
     override suspend fun deleteHistoryByBookId(bookId: Long) {
-        return handler.await { historyQueries.deleteHistoryByBookId(bookId) }
+        return handler.await {
+            historyQueries.deleteByBookId(bookId)
+        }
     }
 
     override suspend fun deleteAllHistories() {
@@ -89,7 +93,6 @@ class HistoryRepositoryImpl constructor(
 
     private fun Database.updateBlocking(history: History) {
         historyQueries.update(
-            bookId = history.id,
             chapter_id = history.chapterId,
             readAt = history.readAt,
             progress = history.readDuration.toLong(),

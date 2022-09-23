@@ -88,10 +88,10 @@ DELETE FROM chapter WHERE _id = :chapterId;
 getLastChapter:
 SELECT chapter._id,book_id,url,name,scanlator,read,bookmark, last_page_read,chapter_number,source_order,date_fetch,date_upload,content,type
         FROM chapter
-               LEFT JOIN history ON history._id == chapter.book_id
+               LEFT JOIN history ON history.chapter_id == chapter._id
         GROUP BY chapter._id
-        HAVING chapter.book_id == :bookId AND history.time_read != 0
-        ORDER BY time_read DESC
+        HAVING chapter.book_id == :bookId AND history.last_read != 0
+        ORDER BY last_read DESC
         LIMIT 1;
 
 upsert:

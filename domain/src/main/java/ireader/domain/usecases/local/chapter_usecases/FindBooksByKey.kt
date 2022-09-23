@@ -1,11 +1,11 @@
 package ireader.domain.usecases.local.chapter_usecases
 
-import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.common.models.entities.Chapter
 import ireader.domain.models.entities.History
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.history.HistoryUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
+import ireader.domain.utils.extensions.currentTimeToLong
 import org.koin.core.annotation.Factory
 
 
@@ -28,7 +28,7 @@ class UpdateLastReadTime(
 
             historyUseCase.insertHistory(
                 History(
-                    id = 0,
+                    id = history?.id ?: 0,
                     chapterId = chapter.id,
                     readAt = currentTimeToLong(),
                     readDuration = history?.readDuration ?: 0,
