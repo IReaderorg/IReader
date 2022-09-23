@@ -21,6 +21,8 @@
     <string name="about">About</string>
     <string name="edit_category">Edit Categories</string>
     <string name="confirm">Confirm</string>
+    <string name="status">Status</string>
+    <string name="cover">Cover</string>
     <string name="category">Categories</string>
     <string name="help">Help</string>
     <string name="pref_incognito_mode">Incognito mode</string>
@@ -45,6 +47,8 @@
     <string name="share">Share</string>
     <string name="export_book_as_epub">Export Book As Epub</string>
     <string name="description_placeholder">No description</string>
+    <string name="description">Description</string>
+    <string name="tags">Tags</string>
     <string name="toggle_search_mode_off">Toggle search mode off</string>
     <string name="recently">Recently</string>
     <string name="relative_time_today">Today</string>
@@ -154,6 +158,7 @@
     <string name="backup_created_successfully">Create Backup Successfully</string>
     <string name="restore_backup">Restore Backup</string>
 
+    <string name="author">Author</string>
     <string name="download">Download</string>
     <string name="bookmark">Bookmark</string>
     <string name="wait">Please Wait</string>

@@ -440,6 +440,9 @@ fun ChipPreference(
     title: String,
     subtitle: String? = null,
     icon: ImageVector? = null,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
+    labelColor: Color = MaterialTheme.colorScheme.onPrimary,
+    selectedContainerColor: Color = MaterialTheme.colorScheme.primary,
     onValueChange: ((Int) -> Unit)?
 ) {
     PreferenceRow(
@@ -457,16 +460,16 @@ fun ChipPreference(
                             }
                         },
                         colors = FilterChipDefaults.filterChipColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            labelColor = MaterialTheme.colorScheme.onPrimary,
-                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            containerColor = containerColor,
+                            labelColor = labelColor,
+                            selectedContainerColor = selectedContainerColor,
                         ),
                         label = {
                             CaptionTextComposable(
                                 text = preference[index],
                                 maxLine = 1,
                                 align = TextAlign.Center,
-                                modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+                                modifier = Modifier.padding(vertical = 8.dp, horizontal = 8.dp),
                                 color = if (selected == index) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
                             )
                         }

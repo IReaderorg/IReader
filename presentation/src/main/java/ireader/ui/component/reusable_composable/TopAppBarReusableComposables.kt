@@ -296,7 +296,7 @@ fun AppTextField(
                 keyboardActions = keyboardActions,
                 singleLine = true,
                 textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
 
 
             )

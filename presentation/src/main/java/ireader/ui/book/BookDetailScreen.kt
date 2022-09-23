@@ -5,20 +5,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -37,6 +33,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -51,6 +48,7 @@ import ireader.ui.book.components.BookHeaderImage
 import ireader.ui.book.components.BookSummaryInfo
 import ireader.ui.book.components.ChapterBar
 import ireader.ui.book.components.ChapterDetailBottomBar
+import ireader.ui.book.components.EditInfoAlertDialog
 import ireader.ui.book.viewmodel.BookDetailViewModel
 import ireader.ui.component.Controller
 import ireader.ui.component.components.ChapterRow
@@ -58,6 +56,7 @@ import ireader.ui.component.list.scrollbars.VerticalFastScroller
 import ireader.ui.component.reusable_composable.AppTextField
 import ireader.ui.core.utils.isScrolledToEnd
 import ireader.ui.core.utils.isScrollingUp
+import kotlinx.coroutines.launch
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -144,16 +143,11 @@ fun BookDetailScreen(
             val dialogScrollState = rememberScrollState()
             Box {
                 if (vm.showDialog) {
-                    AlertDialog(onDismissRequest = { vm.showDialog = false }, confirmButton = {
-                    }, title = {
-                        Card(
-                            modifier = Modifier
-                                .heightIn(max = 350.dp, min = 200.dp)
-                                .verticalScroll(dialogScrollState)
-                        ) {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                Text(text = vm.booksState.book.toString())
-                            }
+                    EditInfoAlertDialog(onStateChange = {
+                        vm.showDialog = it
+                    }, book, onConfirm = {
+                        vm.viewModelScope.launch {
+                            vm.insertUseCases.insertBook(it)
                         }
                     })
                 }

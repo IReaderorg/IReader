@@ -44,6 +44,14 @@ data class Book(
         const val COMPLETED = 2
         const val LICENSED = 3
     }
+    fun allStatus() : List<String> {
+        return listOf(
+            "UNKNOWN",
+            "ONGOING",
+            "COMPLETED",
+            "LICENSED",
+        )
+    }
 
     fun getStatusByName(): String {
         return when (status) {
