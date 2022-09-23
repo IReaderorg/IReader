@@ -19,17 +19,17 @@ fun LibraryBadges(
     if (unread == null && downloaded == null) return
 
     Row(modifier = modifier.clip(androidx.compose.material3.MaterialTheme.shapes.medium)) {
-        if (unread != null && unread > 0) {
+        if (unread != null) {
             Text(
-                text = unread.toString(),
+                text = (unread ?: 0).toString(),
                 modifier = Modifier.background(androidx.compose.material3.MaterialTheme.colorScheme.primary).then(BadgesInnerPadding),
                 style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
                 color = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
             )
         }
-        if (downloaded != null && downloaded > 0) {
+        if (downloaded != null) {
             Text(
-                text = downloaded.toString(),
+                text = (downloaded ?: 0).toString(),
                 modifier = Modifier.background(MaterialTheme.colorScheme.tertiary).then(BadgesInnerPadding),
                 style = MaterialTheme.typography.labelSmall,
                 color = androidx.compose.material3.MaterialTheme.colorScheme.onTertiary
