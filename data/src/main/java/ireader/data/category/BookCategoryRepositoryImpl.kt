@@ -2,7 +2,6 @@ package ireader.data.category
 
 import ireader.common.models.entities.BookCategory
 import ireader.data.local.DatabaseHandler
-import ireader.data.util.toDB
 import ireader.domain.data.repository.BookCategoryRepository
 import kotlinx.coroutines.flow.Flow
 
@@ -24,21 +23,23 @@ class BookCategoryRepositoryImpl(
 
     override suspend fun insert(category: BookCategory) {
         return handler.await {
-            bookcategoryQueries.insert(category.bookId,category.categoryId)
+            bookcategoryQueries.insert(category.bookId, category.categoryId)
         }
     }
 
     override suspend fun insertAll(categories: List<BookCategory>) {
         return handler.await(true) {
             categories.forEach { category ->
-                bookcategoryQueries.insert(category.bookId,category.categoryId)
+                bookcategoryQueries.insert(category.bookId, category.categoryId)
             }
         }
     }
 
-    override suspend fun delete(category: BookCategory) {
-        return handler.await {
-            bookcategoryQueries.delete(category.categoryId)
+    override suspend fun delete(category: List<BookCategory>) {
+        return handler.await(true) {
+            category.forEach { item ->
+                bookcategoryQueries.deleteByBookId(item.bookId)
+            }
         }
     }
 

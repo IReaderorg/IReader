@@ -12,8 +12,8 @@ findAll:
 SELECT * FROM bookcategories;
 
 insert:
-INSERT INTO bookcategories( book_id, category_id)
-VALUES (:mangaId, :categoryId);
+INSERT OR REPLACE INTO bookcategories(_id,book_id,category_id) VALUES (:bookId,:bookId,:categoryId);
+
 
 deleteMangaCategoryByMangaId:
 DELETE FROM bookcategories
@@ -26,4 +26,4 @@ delete:
 DELETE FROM bookcategories WHERE category_id= :categoryId;
 
 deleteByBookId:
-DELETE FROM bookcategories WHERE bookcategories.book_id = :categoryId;
+DELETE FROM bookcategories WHERE bookcategories.book_id = :bookId;

@@ -1,13 +1,13 @@
 package ireader.domain.usecases.category
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
-import ireader.domain.data.repository.BookCategoryRepository
-import ireader.domain.data.repository.CategoryRepository
 import ireader.common.models.entities.BookCategory
 import ireader.common.models.entities.Category
 import ireader.common.models.entities.CategoryWithCount
+import ireader.domain.data.repository.BookCategoryRepository
+import ireader.domain.data.repository.CategoryRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Factory
 
 @Factory
@@ -60,10 +60,10 @@ class CategoriesUseCases  internal constructor(
     }
 
     suspend fun deleteBookCategory(categories: List<BookCategory>) {
-        bookCategoryRepository.deleteAll(categories)
+        bookCategoryRepository.delete(categories)
     }
     suspend fun deleteBookCategory(categories: BookCategory) {
-        bookCategoryRepository.delete(categories)
+        bookCategoryRepository.delete(listOf(categories))
     }
 
     fun subscribeBookCategories(): Flow<List<BookCategory>> {
