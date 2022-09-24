@@ -14,7 +14,7 @@ internal data class Backup(
     val categories: List<CategoryProto> = emptyList()
 )
 
-internal fun ByteArray.createStableBackup() : Backup {
+internal fun ByteArray.dunmpStableBackup() : Backup {
     return ProtoBuf.decodeFromByteArray<BackupProto>(this).toBackup()
 }
 

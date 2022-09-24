@@ -16,8 +16,9 @@ import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.domain.usecases.backup.backup.Backup
 import ireader.domain.usecases.backup.backup.BookProto
 import ireader.domain.usecases.backup.backup.CategoryProto
-import ireader.domain.usecases.backup.backup.createStableBackup
-import ireader.domain.usecases.backup.backup.legecy.createLegacyBackup
+import ireader.domain.usecases.backup.backup.dunmpStableBackup
+import ireader.domain.usecases.backup.backup.legecy.nineteensep.dumpNineteenSepLegacyBackup
+import ireader.domain.usecases.backup.backup.legecy.twnetysep.dumpTwentySepLegacyBackup
 import ireader.i18n.UiText
 import kotlinx.serialization.ExperimentalSerializationApi
 import okio.FileSystem
@@ -84,9 +85,14 @@ class RestoreBackup internal constructor(
 
     private fun loadDump(data: ByteArray): Backup {
         return kotlin.runCatching {
-            data.createStableBackup()
+            data.dunmpStableBackup()
         }.getOrElse {
-            data.createLegacyBackup()
+            kotlin.runCatching {
+                data.dumpNineteenSepLegacyBackup()
+
+            }.getOrElse {
+                data.dumpTwentySepLegacyBackup()
+            }
         }
 
     }

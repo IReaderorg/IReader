@@ -54,12 +54,7 @@ fun BottomTabComposable(
             libraryTabs = tabs,
             pagerState = pagerState,
             filters = filters,
-            toggleFilter = toggleFilter,
-            sortType = sortType,
-            isSortDesc,
-            onSortSelected,
-            layoutType,
-            onLayoutSelected,
+            onLayoutSelected=onLayoutSelected,
             vm = vm,
             scaffoldPadding = scaffoldPadding
         )

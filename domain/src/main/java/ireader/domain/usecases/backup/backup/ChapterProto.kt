@@ -3,7 +3,8 @@
 package ireader.domain.usecases.backup.backup
 
 import ireader.common.models.entities.Chapter
-import ireader.core.source.model.Page
+import ireader.core.source.model.decode
+import ireader.core.source.model.encode
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
@@ -18,7 +19,7 @@ internal data class ChapterProto(
     @ProtoNumber(7) val dateUpload: Long = 0,
     @ProtoNumber(8) val number: Float = 0f,
     @ProtoNumber(9) val sourceOrder: Long = 0,
-    @ProtoNumber(10) val content: List<Page> = emptyList(),
+    @ProtoNumber(10) val content: String = "",
     @ProtoNumber(11) val type:Long = 0,
     @ProtoNumber(12) val lastPageRead: Long = 0,
 
@@ -36,7 +37,7 @@ internal data class ChapterProto(
             dateUpload = dateUpload,
             number = number,
             sourceOrder = sourceOrder,
-            content = content,
+            content = content.decode(),
             type = type,
             lastPageRead = lastPageRead,
         )
@@ -54,7 +55,7 @@ internal data class ChapterProto(
                 dateUpload = chapter.dateUpload,
                 number = chapter.number,
                 sourceOrder = chapter.sourceOrder,
-                content = chapter.content,
+                content = chapter.content.encode(),
                 type = chapter.type,
                 lastPageRead = chapter.lastPageRead,
             )

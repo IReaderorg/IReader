@@ -24,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -44,19 +43,18 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
-import kotlinx.coroutines.launch
-import ireader.ui.home.library.viewmodel.LibraryViewModel
-import ireader.domain.models.DisplayMode
 import ireader.common.models.library.LibraryFilter
 import ireader.common.models.library.LibrarySort
+import ireader.domain.models.DisplayMode
 import ireader.i18n.asString
+import ireader.presentation.R
 import ireader.ui.component.components.component.pagerTabIndicatorOffset
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.ui.component.text_related.TextSection
-
-import ireader.ui.core.ui.Colour.contentColor
-import ireader.presentation.R
 import ireader.ui.core.theme.AppColors
+import ireader.ui.core.ui.Colour.contentColor
+import ireader.ui.home.library.viewmodel.LibraryViewModel
+import kotlinx.coroutines.launch
 
 @ExperimentalPagerApi
 @ExperimentalMaterialApi
@@ -139,11 +137,6 @@ fun TabsContent(
     libraryTabs: List<TabItem>,
     pagerState: PagerState,
     filters: List<LibraryFilter>,
-    toggleFilter: (LibraryFilter) -> Unit,
-    sortType: LibrarySort,
-    isSortDesc: Boolean,
-    onSortSelected: (LibrarySort) -> Unit,
-    layoutType: DisplayMode,
     onLayoutSelected: (DisplayMode) -> Unit,
     vm: LibraryViewModel,
     scaffoldPadding: PaddingValues
@@ -245,7 +238,7 @@ private fun LazyListScope.SortPage(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 private fun LazyListScope.DispalyPage(
     layouts: List<DisplayMode>,
     vm: LibraryViewModel,

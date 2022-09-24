@@ -55,7 +55,7 @@ class TestSource : ireader.core.source.CatalogSource {
     override suspend fun getPageList(chapter: ChapterInfo, commands: List<Command<*>>): List<Page> {
         delay(1000)
         if (chapter.key == "4") {
-            return listOf(MovieUrl("https://archive.org/download/Popeye_forPresident/Popeye_forPresident_512kb.mp4"))
+            return listOf(MovieUrl("https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"))
         }
         return getTestPages()
     }

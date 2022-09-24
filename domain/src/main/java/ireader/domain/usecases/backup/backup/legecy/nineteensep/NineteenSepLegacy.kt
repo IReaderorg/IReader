@@ -1,7 +1,8 @@
-package ireader.domain.usecases.backup.backup.legecy
+package ireader.domain.usecases.backup.backup.legecy.nineteensep
 
 import ireader.core.source.model.ChapterInfo
 import ireader.core.source.model.Text
+import ireader.core.source.model.encode
 import ireader.domain.usecases.backup.backup.Backup
 import ireader.domain.usecases.backup.backup.BookProto
 import ireader.domain.usecases.backup.backup.CategoryProto
@@ -60,9 +61,9 @@ private data class LegacyChapterProto(
             dateUpload = dateUpload,
             number = number,
             sourceOrder = sourceOrder.toLong(),
-            content = content.map {
-                Text(it)
-            },
+            content = content.map { text ->
+                Text(text)
+            }.encode(),
             type = ChapterInfo.MIX,
             lastPageRead = 0,
         )
@@ -115,7 +116,7 @@ private data class LegacyBackupProto(
 }
 
 
-internal  fun ByteArray.createLegacyBackup() : Backup {
+internal  fun ByteArray.dumpNineteenSepLegacyBackup() : Backup {
     return ProtoBuf.decodeFromByteArray<LegacyBackupProto>(this).toBackup()
 }
 

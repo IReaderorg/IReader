@@ -102,8 +102,9 @@ class LibraryViewModel(
     private val loadedManga = mutableMapOf<Long, List<BookItem>>()
 
     fun onLayoutTypeChange(layoutType: DisplayMode) {
-        categories.firstOrNull { it.id == lastUsedCategory.value }?.let { category ->
-            viewModelScope.launch {
+        viewModelScope.launch {
+            categories.firstOrNull { it.id == lastUsedCategory.value }?.let { category ->
+
                 libraryScreenPrefUseCases.libraryLayoutTypeUseCase.await(
                     category = category.category,
                     displayMode = layoutType
@@ -112,126 +113,132 @@ class LibraryViewModel(
         }
     }
 
-    fun downloadChapters() {
-        serviceUseCases.startDownloadServicesUseCase(bookIds = selectedBooks.toLongArray())
-        selectedBooks.clear()
+fun downloadChapters() {
+    serviceUseCases.startDownloadServicesUseCase(bookIds = selectedBooks.toLongArray())
+    selectedBooks.clear()
+}
+
+fun readLayoutTypeAndFilterTypeAndSortType() {
+    viewModelScope.launch {
+        val sortType = libraryScreenPrefUseCases.sortersUseCase.read()
+        val sortBy = libraryScreenPrefUseCases.sortersDescUseCase.read()
+        this@LibraryViewModel.sortType = sortType
+        this@LibraryViewModel.desc = sortBy
     }
+}
 
-    fun readLayoutTypeAndFilterTypeAndSortType() {
-        viewModelScope.launch {
-            val sortType = libraryScreenPrefUseCases.sortersUseCase.read()
-            val sortBy = libraryScreenPrefUseCases.sortersDescUseCase.read()
-            this@LibraryViewModel.sortType = sortType
-            this@LibraryViewModel.desc = sortBy
-        }
-    }
-
-    fun toggleFilter(type: LibraryFilter.Type) {
-        val newFilters = filters.value
-            .map { filterState ->
-                if (type == filterState.type) {
-                    LibraryFilter(
-                        type,
-                        when (filterState.value) {
-                            LibraryFilter.Value.Included -> LibraryFilter.Value.Excluded
-                            LibraryFilter.Value.Excluded -> LibraryFilter.Value.Missing
-                            LibraryFilter.Value.Missing -> LibraryFilter.Value.Included
-                        }
-                    )
-                } else {
-                    filterState
-                }
-            }
-
-        this.filters.value = newFilters
-    }
-
-    fun toggleSort(type: LibrarySort.Type) {
-        val currentSort = sorting
-        sorting.value = if (type == currentSort.value.type) {
-            currentSort.value.copy(isAscending = !currentSort.value.isAscending)
-        } else {
-            currentSort.value.copy(type = type)
-        }
-    }
-
-    fun refreshUpdate() {
-        serviceUseCases.startLibraryUpdateServicesUseCase()
-    }
-
-    fun setSelectedPage(index: Int) {
-        if (index == selectedCategoryIndex) return
-        val categories = categories
-        val category = categories.getOrNull(index) ?: return
-        state.selectedCategoryIndex = index
-        state.selectedCategory
-        lastUsedCategory.value = category.id
-    }
-
-    fun unselectAll() {
-        state.selectedBooks.clear()
-    }
-
-    fun selectAllInCurrentCategory() {
-        val mangaInCurrentCategory = loadedManga[selectedCategory?.id] ?: return
-        val currentSelected = selectedBooks.toList()
-        val mangaIds = mangaInCurrentCategory.map { it.id }.filter { it !in currentSelected }
-        state.selectedBooks.addAll(mangaIds)
-    }
-
-    fun flipAllInCurrentCategory() {
-        val mangaInCurrentCategory = loadedManga[selectedCategory?.id] ?: return
-        val currentSelected = selectedBooks.toList()
-        val (toRemove, toAdd) = mangaInCurrentCategory.map { it.id }
-            .partition { it in currentSelected }
-        state.selectedBooks.removeAll(toRemove)
-        state.selectedBooks.addAll(toAdd)
-    }
-
-    fun getDefaultValue(categories: Category): ToggleableState {
-        val defaultValue: Boolean = selectedBooks.any { id ->
-            id in bookCategories.value.filter { it.categoryId == categories.id }.map { it.bookId }
-        }
-        return if (defaultValue) ToggleableState.On else ToggleableState.Off
-    }
-
-    @Composable
-    fun getLibraryForCategoryIndex(categoryIndex: Int): State<List<BookItem>> {
-        val scope = rememberCoroutineScope()
-        val categoryId = categories.getOrNull(categoryIndex)?.id ?: return remember {
-            mutableStateOf(emptyList())
-        }
-
-        val unfiltered = remember(sorting.value, filters.value, categoryId,categories.size) {
-            getLibraryCategory.subscribe(categoryId, sorting.value, filters.value)
-                .map { list ->
-                    books = list
-                    list.mapIndexed { index, libraryBook ->
-                        libraryBook.toBookItem().copy(column = index.toLong())
+fun toggleFilter(type: LibraryFilter.Type) {
+    val newFilters = filters.value
+        .map { filterState ->
+            if (type == filterState.type) {
+                LibraryFilter(
+                    type,
+                    when (filterState.value) {
+                        LibraryFilter.Value.Included -> LibraryFilter.Value.Excluded
+                        LibraryFilter.Value.Excluded -> LibraryFilter.Value.Missing
+                        LibraryFilter.Value.Missing -> LibraryFilter.Value.Included
                     }
-                }
-                .shareIn(scope, SharingStarted.WhileSubscribed(1000), 1)
+                )
+            } else {
+                filterState
+            }
         }
 
-        return remember(sorting.value, filters.value, searchQuery, showAllCategoryTab.value,categories.size) {
-            val query = searchQuery
-            if (query.isNullOrBlank()) {
-                unfiltered
-            } else {
-                unfiltered.map { mangas ->
-                    mangas.filter { it.title.contains(query, true) }
-                }
-            }
-                .onEach { loadedManga[categoryId] = it }
-                .onCompletion { loadedManga.remove(categoryId) }
-        }.collectAsState(emptyList())
+    this.filters.value = newFilters
+}
+
+fun toggleSort(type: LibrarySort.Type) {
+    val currentSort = sorting
+    sorting.value = if (type == currentSort.value.type) {
+        currentSort.value.copy(isAscending = !currentSort.value.isAscending)
+    } else {
+        currentSort.value.copy(type = type)
+    }
+}
+
+fun refreshUpdate() {
+    serviceUseCases.startLibraryUpdateServicesUseCase()
+}
+
+fun setSelectedPage(index: Int) {
+    if (index == selectedCategoryIndex) return
+    val categories = categories
+    val category = categories.getOrNull(index) ?: return
+    state.selectedCategoryIndex = index
+    state.selectedCategory
+    lastUsedCategory.value = category.id
+}
+
+fun unselectAll() {
+    state.selectedBooks.clear()
+}
+
+fun selectAllInCurrentCategory() {
+    val mangaInCurrentCategory = loadedManga[selectedCategory?.id] ?: return
+    val currentSelected = selectedBooks.toList()
+    val mangaIds = mangaInCurrentCategory.map { it.id }.filter { it !in currentSelected }
+    state.selectedBooks.addAll(mangaIds)
+}
+
+fun flipAllInCurrentCategory() {
+    val mangaInCurrentCategory = loadedManga[selectedCategory?.id] ?: return
+    val currentSelected = selectedBooks.toList()
+    val (toRemove, toAdd) = mangaInCurrentCategory.map { it.id }
+        .partition { it in currentSelected }
+    state.selectedBooks.removeAll(toRemove)
+    state.selectedBooks.addAll(toAdd)
+}
+
+fun getDefaultValue(categories: Category): ToggleableState {
+    val defaultValue: Boolean = selectedBooks.any { id ->
+        id in bookCategories.value.filter { it.categoryId == categories.id }.map { it.bookId }
+    }
+    return if (defaultValue) ToggleableState.On else ToggleableState.Off
+}
+
+@Composable
+fun getLibraryForCategoryIndex(categoryIndex: Int): State<List<BookItem>> {
+    val scope = rememberCoroutineScope()
+    val categoryId = categories.getOrNull(categoryIndex)?.id ?: return remember {
+        mutableStateOf(emptyList())
     }
 
-    fun getColumnsForOrientation(isLandscape: Boolean, scope: CoroutineScope): StateFlow<Int> {
-        return if (isLandscape) {
-            libraryPreferences.columnsInLandscape()
-        } else {
-            libraryPreferences.columnsInPortrait()
-        }.stateIn(scope)
+    val unfiltered = remember(sorting.value, filters.value, categoryId, categories.size) {
+        getLibraryCategory.subscribe(categoryId, sorting.value, filters.value)
+            .map { list ->
+                books = list
+                list.mapIndexed { index, libraryBook ->
+                    libraryBook.toBookItem().copy(column = index.toLong())
+                }
+            }
+            .shareIn(scope, SharingStarted.WhileSubscribed(1000), 1)
     }
+
+    return remember(
+        sorting.value,
+        filters.value,
+        searchQuery,
+        showAllCategoryTab.value,
+        categories.size
+    ) {
+        val query = searchQuery
+        if (query.isNullOrBlank()) {
+            unfiltered
+        } else {
+            unfiltered.map { mangas ->
+                mangas.filter { it.title.contains(query, true) }
+            }
+        }
+            .onEach { loadedManga[categoryId] = it }
+            .onCompletion { loadedManga.remove(categoryId) }
+    }.collectAsState(emptyList())
+}
+
+fun getColumnsForOrientation(isLandscape: Boolean, scope: CoroutineScope): StateFlow<Int> {
+    return if (isLandscape) {
+        libraryPreferences.columnsInLandscape()
+    } else {
+        libraryPreferences.columnsInPortrait()
+    }.stateIn(scope)
+}
 }
