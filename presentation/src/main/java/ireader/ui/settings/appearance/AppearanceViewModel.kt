@@ -6,7 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.domain.data.repository.ThemeRepository
-import ireader.common.models.theme.ExtraColors
+import ireader.domain.models.theme.ExtraColors
 import ireader.domain.models.theme.Theme
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences

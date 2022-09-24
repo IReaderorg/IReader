@@ -4,6 +4,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
@@ -11,11 +12,16 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.lifecycle.viewModelScope
 import ireader.domain.data.repository.ThemeRepository
-import ireader.common.models.theme.ExtraColors
-import ireader.domain.models.theme.Theme
 import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.models.theme.ExtraColors
+import ireader.domain.models.theme.Theme
 import ireader.domain.preferences.prefs.UiPreferences
-import ireader.ui.core.theme.*
+import ireader.ui.core.theme.AppRippleTheme
+import ireader.ui.core.theme.asState
+import ireader.ui.core.theme.getDarkColors
+import ireader.ui.core.theme.getLightColors
+import ireader.ui.core.theme.isLight
+import ireader.ui.core.theme.themes
 import ireader.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -81,7 +87,8 @@ class AppThemeViewModel(
     ): Theme {
         @Composable
         fun getTheme(fallbackIsLight: Boolean): Theme {
-            return themes.firstOrNull { it.id == colorTheme } ?: themes.first { it.materialColors.isLight() == fallbackIsLight }
+            return themes.firstOrNull { it.id == colorTheme }
+                ?: themes.first { it.materialColors.isLight() == fallbackIsLight }
         }
 
         return when (themeMode) {

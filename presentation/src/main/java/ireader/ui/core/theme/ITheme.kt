@@ -3,7 +3,7 @@ package ireader.ui.core.theme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
-import ireader.common.models.theme.ExtraColors
+import ireader.domain.models.theme.ExtraColors
 import ireader.domain.models.theme.Theme
 import ireader.ui.core.theme.themes.DarkThemeColorsStrawberries
 import ireader.ui.core.theme.themes.DarkThemeColorsTachiyomi
@@ -43,7 +43,7 @@ val themes = listOf<Theme>(
         onSurface = Colour.black_900,
         error = Colour.red_600,
         onError = Colour.white_50,
-    ), extraColors =ExtraColors(
+    ), extraColors = ExtraColors(
         bars = Color.White,
         onBars = Color.Black
     ), isDark = false),
@@ -59,15 +59,15 @@ val themes = listOf<Theme>(
         onSurface = Colour.white_50,
         error = Colour.red_600,
         onError = Colour.black_900,
-    ), extraColors =ExtraColors(
+    ), extraColors = ExtraColors(
         bars = Color(0xFF181818),
         onBars = Color.White
     ), isDark = true),
-    Theme(id =-5, materialColors =MidNightLightColorScheme, extraColors =ExtraColors(
+    Theme(id =-5, materialColors =MidNightLightColorScheme, extraColors = ExtraColors(
         bars = MidNightLightColorScheme.surface,
         onBars = MidNightLightColorScheme.onSurface
     ), isDark = false),
-    Theme(id =-6, materialColors =MidNightDarkColorScheme, extraColors =ExtraColors(
+    Theme(id =-6, materialColors =MidNightDarkColorScheme, extraColors = ExtraColors(
         bars = MidNightDarkColorScheme.surface,
         onBars = MidNightDarkColorScheme.onSurface
     ), isDark = true),
@@ -75,23 +75,23 @@ val themes = listOf<Theme>(
         bars = GreenAppleLightThemeColors.surface,
         onBars = GreenAppleLightThemeColors.onSurface
     ), isDark = false),
-    Theme(id =-8, materialColors =GreenAppleDarkThemeColors, extraColors =ExtraColors(
+    Theme(id =-8, materialColors =GreenAppleDarkThemeColors, extraColors = ExtraColors(
         bars = GreenAppleDarkThemeColors.surface,
         onBars = GreenAppleDarkThemeColors.onSurface
     ), isDark = true),
-    Theme(id =-9, materialColors =LightThemeColorsStrawberries, extraColors =ExtraColors(
+    Theme(id =-9, materialColors =LightThemeColorsStrawberries, extraColors = ExtraColors(
         bars = LightThemeColorsStrawberries.surface,
         onBars = LightThemeColorsStrawberries.onSurface
     ), isDark = false),
-    Theme(id =-10, materialColors =DarkThemeColorsStrawberries, extraColors =ExtraColors(
+    Theme(id =-10, materialColors =DarkThemeColorsStrawberries, extraColors = ExtraColors(
         bars = DarkThemeColorsStrawberries.surface,
         onBars = DarkThemeColorsStrawberries.onSurface
     ), isDark = true),
-    Theme(id =-11, materialColors =LightThemeColorsTako, extraColors =ExtraColors(
+    Theme(id =-11, materialColors =LightThemeColorsTako, extraColors = ExtraColors(
         bars = LightThemeColorsTako.surface,
         onBars = LightThemeColorsTako.onSurface
     ), isDark = false),
-    Theme(id =-12, materialColors =DarkThemeColorsTako, extraColors =ExtraColors(
+    Theme(id =-12, materialColors =DarkThemeColorsTako, extraColors = ExtraColors(
         bars = DarkThemeColorsTako.surface,
         onBars = DarkThemeColorsTako.onSurface
     ), isDark = true),

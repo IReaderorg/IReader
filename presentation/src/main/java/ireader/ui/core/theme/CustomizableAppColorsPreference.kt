@@ -5,12 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.graphics.Color
-import kotlinx.coroutines.CoroutineScope
 import ireader.core.prefs.Preference
-import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.preferences.models.prefs.asThemeColor
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.ui.core.ui.PreferenceMutableState
 import ireader.ui.core.ui.asStateIn
+import kotlinx.coroutines.CoroutineScope
 
 data class CustomizableAppColorsPreference(
     val primary: Preference<Color>,

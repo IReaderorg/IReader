@@ -4,15 +4,34 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,20 +39,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ireader.domain.utils.extensions.launchIO
-import ireader.domain.models.theme.Theme
-import ireader.i18n.UiText
 import ireader.domain.models.prefs.PreferenceValues
-
-import ireader.ui.core.theme.isLight
+import ireader.domain.models.theme.Theme
+import ireader.domain.utils.extensions.launchIO
+import ireader.i18n.UiText
+import ireader.presentation.R
 import ireader.ui.component.components.Components
 import ireader.ui.component.components.SetupSettingComponents
 import ireader.ui.component.components.Toolbar
 import ireader.ui.component.components.component.ChoicePreference
 import ireader.ui.component.components.component.ColorPreference
-import ireader.presentation.R
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.ui.core.theme.AppColors
+import ireader.ui.core.theme.isLight
 import kotlinx.coroutines.launch
 
 @Composable
@@ -65,7 +83,7 @@ fun AppearanceSettingScreen(
             vm.vmThemes.filter { it.isDark }
     }
     val themeItem: State<Components.Dynamic> =
-        remember {
+        remember(themesForCurrentMode) {
             derivedStateOf {
                 Components.Dynamic {
                     LazyRow(modifier = Modifier.padding(horizontal = 8.dp)) {
@@ -88,7 +106,7 @@ fun AppearanceSettingScreen(
             }
         }
 
-    val items: State<List<Components>> = remember {
+    val items: State<List<Components>> = remember(themeItem.value) {
         derivedStateOf {
             listOf<Components>(
                 Components.Header(

@@ -4,7 +4,6 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
-import ireader.common.models.theme.ExtraColors
 
 
 import kotlinx.serialization.Serializable

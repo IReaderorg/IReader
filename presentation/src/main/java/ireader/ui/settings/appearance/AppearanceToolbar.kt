@@ -1,23 +1,16 @@
 package ireader.ui.settings.appearance
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.stringResource
-import ireader.domain.utils.extensions.launchIO
-import ireader.i18n.UiText
+import ireader.presentation.R
 import ireader.ui.component.components.Toolbar
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.ui.component.reusable_composable.TopAppBarBackButton
-import ireader.ui.core.theme.isLight
-import ireader.presentation.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

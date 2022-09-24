@@ -10,7 +10,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
-import ireader.common.models.theme.ExtraColors
+import ireader.domain.models.theme.ExtraColors
 
 /**
  * All the application colors from both [MaterialTheme.colorScheme] and [ExtraColors] which can be

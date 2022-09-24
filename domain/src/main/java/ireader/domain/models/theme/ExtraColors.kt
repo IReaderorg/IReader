@@ -1,4 +1,4 @@
-package ireader.common.models.theme
+package ireader.domain.models.theme
 
 
 import androidx.compose.runtime.Stable

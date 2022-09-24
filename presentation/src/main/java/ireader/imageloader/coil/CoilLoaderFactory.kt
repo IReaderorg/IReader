@@ -12,10 +12,11 @@ import coil.decode.ImageDecoderDecoder
 import coil.disk.DiskCache
 import ireader.core.http.HttpClients
 import ireader.core.http.okhttp
-import ireader.domain.catalogs.CatalogStore
 import ireader.domain.image.cache.CoverCache
 import ireader.imageloader.coil.image_loaders.BookCoverFetcher
 import ireader.imageloader.coil.image_loaders.BookCoverKeyer
+import ireader.imageloader.coil.image_loaders.CatalogRemoteKeyer
+import ireader.imageloader.coil.image_loaders.InstalledCatalogKeyer
 
 class CoilLoaderFactory(
     private val context: Application,
@@ -40,6 +41,8 @@ class CoilLoaderFactory(
                 add(CatalogRemoteMapper())
                 add(CatalogInstalledFetcher.Factory())
                 add(BookCoverKeyer())
+                add(CatalogRemoteKeyer())
+                add(InstalledCatalogKeyer())
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     add(ImageDecoderDecoder.Factory())
                 } else {
