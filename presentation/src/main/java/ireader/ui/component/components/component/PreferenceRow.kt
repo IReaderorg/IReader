@@ -146,7 +146,7 @@ fun PreferenceRow(
     subtitle: String? = null,
     clickable: Boolean = true,
     actionAlignment: Alignment = Alignment.CenterEnd,
-    enable:Boolean = true,
+    enable: Boolean = true,
     action: @Composable (() -> Unit)? = null,
 ) {
     if (enable) {
@@ -719,19 +719,22 @@ fun ColorPreference(
     unsetColor: Color = Color.Unspecified,
     onChangeColor: () -> Unit = {},
     onRestToDefault: () -> Unit = {},
-    showColorDialog:MutableState<Boolean>?=null,
+    showColorDialog: MutableState<Boolean>? = null,
     onShow: (ColorPickerInfo) -> Unit = {}
 ) {
+    var showDialog by remember { mutableStateOf(false) }
     val initialColor = preference.value.takeOrElse { unsetColor }
-
     PreferenceRow(
         title = title,
         subtitle = subtitle,
         onClick = {
-            showColorDialog?.value = true
-            onShow(ColorPickerInfo(preference,title, onChangeColor, initialColor))
-
-                  },
+            if (showColorDialog == null) {
+                showDialog = true
+            } else {
+                showColorDialog.value = true
+                onShow(ColorPickerInfo(preference, title, onChangeColor, initialColor))
+            }
+        },
         onLongClick = {
             preference.value = Color.Unspecified
             onRestToDefault()
@@ -750,4 +753,16 @@ fun ColorPreference(
             }
         }
     )
+    if (showDialog) {
+        ColorPickerDialog(
+            title = { Text(title) },
+            onDismissRequest = { showDialog = false },
+            onSelected = {
+                preference.value = it
+                showDialog = false
+                onChangeColor()
+            },
+            initialColor = initialColor
+        )
+    }
 }
