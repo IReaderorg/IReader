@@ -25,11 +25,10 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -55,6 +54,7 @@ import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -108,6 +108,7 @@ fun ColorPickerDialog(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ColorPresets(
     initialColor: Color,
@@ -216,6 +217,7 @@ private fun shadeColor(f: Long, percent: Double): Color {
     return Color(red = red, green = green, blue = blue, alpha = 255)
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ColorPalette(
     initialColor: Color = Color.White,
@@ -337,7 +339,7 @@ fun ColorPalette(
                     .border(1.dp, MaterialTheme.colors.onBackground.copy(alpha = 0.54f))
             )
             Spacer(Modifier.requiredWidth(32.dp))
-            OutlinedTextField(
+            androidx.compose.material3.OutlinedTextField(
                 value = textFieldHex,
                 onValueChange = {
                     val newColor = hexStringToColor(it)
@@ -417,12 +419,12 @@ private fun hueToColor(hue: Float): Color {
 }
 
 private fun Color.toHexString(): String {
-    return buildString {
+    return buildAnnotatedString {
         append("#")
         val color = (0xFFFFFF and toArgb()).toString(16).uppercase()
-        repeat(6 - color.length) { append(0) } // Prepend 0s if needed
+        repeat(6 - color.length) { append("0") } // Prepend 0s if needed
         append(color)
-    }
+    }.text
 }
 
 private fun hexStringToColor(hex: String): Color? {

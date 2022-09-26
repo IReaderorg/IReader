@@ -58,6 +58,7 @@ import ireader.ui.component.reusable_composable.CaptionTextComposable
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.ui.core.ui.PreferenceMutableState
 import ireader.ui.core.utils.horizontalPadding
+import ireader.ui.settings.appearance.ColorPickerInfo
 
 @Composable
 fun Divider(
@@ -717,15 +718,20 @@ fun ColorPreference(
     subtitle: String? = null,
     unsetColor: Color = Color.Unspecified,
     onChangeColor: () -> Unit = {},
-    onRestToDefault: () -> Unit = {}
+    onRestToDefault: () -> Unit = {},
+    showColorDialog:MutableState<Boolean>?=null,
+    onShow: (ColorPickerInfo) -> Unit = {}
 ) {
-    var showDialog by remember { mutableStateOf(false) }
     val initialColor = preference.value.takeOrElse { unsetColor }
 
     PreferenceRow(
         title = title,
         subtitle = subtitle,
-        onClick = { showDialog = true },
+        onClick = {
+            showColorDialog?.value = true
+            onShow(ColorPickerInfo(preference,title, onChangeColor, initialColor))
+
+                  },
         onLongClick = {
             preference.value = Color.Unspecified
             onRestToDefault()
@@ -744,17 +750,4 @@ fun ColorPreference(
             }
         }
     )
-
-    if (showDialog) {
-        ColorPickerDialog(
-            title = { Text(title) },
-            onDismissRequest = { showDialog = false },
-            onSelected = {
-                preference.value = it
-                showDialog = false
-                onChangeColor()
-            },
-            initialColor = initialColor
-        )
-    }
 }

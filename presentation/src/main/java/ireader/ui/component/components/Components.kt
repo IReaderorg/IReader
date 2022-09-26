@@ -20,12 +20,15 @@ import ireader.ui.component.components.component.SwitchPreference
 import ireader.ui.component.text_related.TextSection
 import ireader.ui.core.ui.PreferenceMutableState
 
-sealed class Components {
+sealed class Components(
+    open val visible: Boolean = true
+) {
     data class Header(
         val text: String,
         val toUpper: Boolean = false,
         val padding: PaddingValues = PaddingValues(16.dp),
-        val visible: Boolean = true,
+        override val visible: Boolean = true,
+
 
         ) : Components()
 
@@ -42,7 +45,7 @@ sealed class Components {
         val valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
         val onValueChangeFinished: ((Float) -> Unit)? = null,
         val steps: Int = 0,
-        val visible: Boolean = true
+        override val visible: Boolean = true
     ) : Components()
 
     data class Row(
@@ -52,7 +55,7 @@ sealed class Components {
         val onLongClick: () -> Unit = {},
         val subtitle: String? = null,
         val action: @Composable (() -> Unit)? = null,
-        val visible: Boolean = true
+        override val visible: Boolean = true
     ) : Components()
 
     data class Switch(
@@ -63,10 +66,11 @@ sealed class Components {
         val painter: Painter? = null,
         val icon: ImageVector? = null,
         val onValue: ((Boolean) -> Unit)? = null,
-        val visible: Boolean = true
+        override val visible: Boolean = true
     ) : Components()
 
     data class Dynamic(
+        override val visible: Boolean = true,
         val component: @Composable () -> Unit,
     ) : Components()
 
@@ -77,7 +81,7 @@ sealed class Components {
         val subtitle: String? = null,
         val icon: ImageVector? = null,
         val onValueChange: ((Int) -> Unit)?,
-        val visible: Boolean = true
+        override val visible: Boolean = true
     ) : Components()
 
     object Space : Components()
@@ -94,6 +98,19 @@ fun SetupSettingComponents(
             .fillMaxSize()
     ) {
         setupUiComponent(items)
+    }
+}
+
+@Composable
+fun LazyColumnWithInsets(scaffoldPadding: PaddingValues, content: LazyListScope.() -> Unit) {
+    LazyColumn(
+        modifier = androidx.compose.ui.Modifier
+            .padding(scaffoldPadding)
+            .fillMaxSize(),
+
+    ) {
+        content()
+
     }
 }
 
@@ -183,82 +200,8 @@ fun LazyListScope.setupUiComponent(
 ) {
     list.forEach { component ->
         item {
-            when (component) {
-                is Components.Header -> {
-                    if (component.visible) {
-                        if (component.visible) {
-                            TextSection(
-                                text = component.text,
-                                padding = component.padding,
-                                toUpper = component.toUpper
-                            )
-                        }
-                    }
-                }
-                is Components.Slider -> {
-                    if (component.visible) {
-                        SliderPreference(
-                            preferenceAsLong = component.preferenceAsLong,
-                            preferenceAsFloat = component.preferenceAsFloat,
-                            preferenceAsInt = component.preferenceAsInt,
-                            title = component.title,
-                            onValueChange = {
-                                component.onValueChange?.let { it1 -> it1(it) }
-                            },
-                            trailing = component.trailing,
-                            valueRange = component.valueRange,
-                            onValueChangeFinished = {
-                                component.onValueChangeFinished?.let { it1 -> it1(it) }
-                            },
-                            steps = component.steps
-                        )
-                    }
-                }
-                is Components.Row -> {
-                    if (component.visible) {
-                        PreferenceRow(
-                            title = component.title,
-                            action = component.action,
-                            subtitle = component.subtitle,
-                            onClick = component.onClick,
-                            icon = component.icon,
-                            onLongClick = component.onLongClick,
-                        )
-                    }
-                }
-                is Components.Chip -> {
-                    if (component.visible) {
-                        ChipPreference(
-                            preference = component.preference,
-                            selected = component.selected,
-                            onValueChange = component.onValueChange,
-                            title = component.title,
-                            subtitle = component.subtitle,
-                            icon = component.icon
-                        )
-                    }
-                }
-                is Components.Switch -> {
-                    if (component.visible) {
-                        SwitchPreference(
-                            preference = component.preference,
-                            title = component.title,
-                            icon = component.icon,
-                            subtitle = component.subtitle,
-                            onValue = component.onValue
-                        )
-                    }
-                }
-                is Components.Dynamic -> {
-                    component.component()
-                }
-                is Components.Space -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp)
-                    )
-                }
+            if (component.visible) {
+                component.Build()
             }
         }
     }

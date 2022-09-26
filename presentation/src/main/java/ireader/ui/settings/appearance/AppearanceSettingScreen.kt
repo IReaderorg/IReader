@@ -28,10 +28,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,14 +45,17 @@ import ireader.domain.models.theme.Theme
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
 import ireader.presentation.R
+import ireader.ui.component.components.Build
 import ireader.ui.component.components.Components
-import ireader.ui.component.components.SetupSettingComponents
+import ireader.ui.component.components.LazyColumnWithInsets
 import ireader.ui.component.components.Toolbar
 import ireader.ui.component.components.component.ChoicePreference
+import ireader.ui.component.components.component.ColorPickerDialog
 import ireader.ui.component.components.component.ColorPreference
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.ui.core.theme.AppColors
 import ireader.ui.core.theme.isLight
+import ireader.ui.core.ui.PreferenceMutableState
 import kotlinx.coroutines.launch
 
 @Composable
@@ -68,162 +72,210 @@ fun AppearanceSettingScreen(
     val customizedColors = vm.getCustomizedColors()
     val systemTheme = isSystemInDarkTheme()
     val isLight = remember(vm.themeMode.value) {
-        if(vm.themeMode.value == PreferenceValues.ThemeMode.System) {
+        if (vm.themeMode.value == PreferenceValues.ThemeMode.System) {
             !systemTheme
-        } else  {
+        } else {
             vm.themeMode.value == PreferenceValues.ThemeMode.Light
         }
     }
 
     val scope = rememberCoroutineScope()
-    val themesForCurrentMode = remember(vm.themeMode.value, vm.vmThemes.size,isLight) {
+    val themesForCurrentMode = remember(vm.themeMode.value, vm.vmThemes.size, isLight) {
         if (isLight)
             vm.vmThemes.filter { !it.isDark }
         else
             vm.vmThemes.filter { it.isDark }
     }
-    val themeItem: State<Components.Dynamic> =
-        remember(themesForCurrentMode) {
-            derivedStateOf {
-                Components.Dynamic {
-                    LazyRow(modifier = Modifier.padding(horizontal = 8.dp)) {
-                        items(items = themesForCurrentMode) { theme ->
-                            ThemeItem(
-                                theme,
-                                onClick = {
-                                    vm.colorTheme.value = it.id
-                                    customizedColors.primaryState.value = it.materialColors.primary
-                                    customizedColors.secondaryState.value =
-                                        it.materialColors.secondary
-                                    customizedColors.barsState.value = it.extraColors.bars
-                                    vm.isSavable = false
-                                },
-                                isSelected = vm.colorTheme.value == theme.id,
-                            )
+    var showColorDialog = remember {
+        mutableStateOf(false)
+    }
+    var colorPickerInfo by remember {
+        mutableStateOf(ColorPickerInfo())
+    }
+
+    LazyColumnWithInsets(scaffoldPaddingValues) {
+        item {
+            Components.Header(
+                text = "Theme",
+            ).Build()
+        }
+        item {
+            Components.Dynamic {
+                ChoicePreference(
+                    preference = vm.themeMode,
+                    choices = mapOf(
+                        PreferenceValues.ThemeMode.System to stringResource(id = R.string.follow_system_settings),
+                        PreferenceValues.ThemeMode.Light to stringResource(id = R.string.light),
+                        PreferenceValues.ThemeMode.Dark to stringResource(id = R.string.dark)
+                    ),
+                    title = stringResource(id = R.string.theme),
+                    subtitle = null,
+                    onValue = {
+                        vm.saveNightModePreferences(it)
+                    }
+                )
+            }.Build()
+        }
+        item {
+            Components.Header(
+                text = "Preset themes",
+            ).Build()
+        }
+        item {
+            Components.Dynamic {
+                LazyRow(modifier = Modifier.padding(horizontal = 8.dp)) {
+                    items(items = themesForCurrentMode) { theme ->
+                        ThemeItem(
+                            theme,
+                            onClick = {
+                                vm.colorTheme.value = it.id
+                                customizedColors.primaryState.value = it.materialColors.primary
+                                customizedColors.secondaryState.value =
+                                    it.materialColors.secondary
+                                customizedColors.barsState.value = it.extraColors.bars
+                                vm.isSavable = false
+                            },
+                            isSelected = vm.colorTheme.value == theme.id,
+                        )
+                    }
+                }
+            }.Build()
+        }
+        item {
+            Components.Dynamic {
+                ColorPreference(
+                    preference = customizedColors.primaryState,
+                    title = "Color primary",
+                    subtitle = "Displayed most frequently across your app",
+                    unsetColor = MaterialTheme.colorScheme.primary,
+                    onChangeColor = onColorChange,
+                    onRestToDefault = onColorReset,
+                    showColorDialog = showColorDialog,
+                    onShow = {
+                        colorPickerInfo = it
+                    }
+                )
+            }.Build()
+        }
+        item {
+            Components.Dynamic {
+                ColorPreference(
+                    preference = customizedColors.secondaryState,
+                    title = "Color secondary",
+                    subtitle = "Accents select parts of the UI",
+                    unsetColor = MaterialTheme.colorScheme.secondary,
+                    onChangeColor = onColorChange,
+                    onRestToDefault = onColorReset,
+                    showColorDialog = showColorDialog,
+                    onShow = {
+                        colorPickerInfo = it
+                    }
+                )
+            }.Build()
+        }
+        item {
+            Components.Dynamic {
+                ColorPreference(
+                    preference = customizedColors.barsState,
+                    title = "Toolbar color",
+                    unsetColor = AppColors.current.bars,
+                    onChangeColor = onColorChange,
+                    onRestToDefault = onColorReset,
+                    showColorDialog = showColorDialog,
+                    onShow = {
+                        colorPickerInfo = it
+                    }
+                )
+            }.Build()
+        }
+        item {
+            Components.Dynamic {
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (vm.isSavable) {
+                        TextButton(onClick = {
+                            vm.isSavable = false
+                            scope.launchIO {
+                                val theme = vm.getThemes(vm.colorTheme.value, isLight)
+                                if (theme != null) {
+                                    scope.launchIO {
+                                        val themeId =
+                                            vm.themeRepository.insert(theme.toCustomTheme())
+                                        vm.colorTheme.value = themeId
+                                        vm.showSnackBar(UiText.StringResource(R.string.theme_was_saved))
+                                    }
+                                } else {
+                                    vm.showSnackBar(UiText.StringResource(R.string.theme_was_not_valid))
+                                }
+                                vm.isSavable = false
+                            }
+                        }) {
+                            MidSizeTextComposable(text = stringResource(id = R.string.save_custom_theme))
+                        }
+                    } else if (vm.colorTheme.value > 0) {
+                        TextButton(onClick = {
+                            scope.launchIO {
+                                scope.launch {
+                                    vm.vmThemes.find { it.id == vm.colorTheme.value }
+                                        ?.toCustomTheme()
+                                        ?.let { vm.themeRepository.delete(it) }
+                                }
+                                vm.showSnackBar(UiText.StringResource(R.string.theme_was_deleted))
+                            }
+                        }) {
+                            MidSizeTextComposable(text = stringResource(id = R.string.delete_custom_theme))
                         }
                     }
                 }
-            }
+            }.Build()
+        }
+        item {
+            Components.Header(
+                text = "Timestamp",
+            ).Build()
+        }
+        item {
+            Components.Dynamic {
+                ChoicePreference(
+                    preference = vm.relativeTime,
+                    choices = vm.relativeTimes.associateWith { value ->
+                        when (value) {
+                            PreferenceValues.RelativeTime.Off -> context.getString(R.string.off)
+                            PreferenceValues.RelativeTime.Day -> context.getString(R.string.pref_relative_time_short)
+                            PreferenceValues.RelativeTime.Week -> context.getString(R.string.pref_relative_time_long)
+                            else -> context.getString(R.string.off)
+                        }
+                    },
+                    title = stringResource(id = R.string.pref_relative_format),
+                    subtitle = null,
+                )
+            }.Build()
         }
 
-    val items: State<List<Components>> = remember(themeItem.value) {
-        derivedStateOf {
-            listOf<Components>(
-                Components.Header(
-                    text = "Theme",
-                ),
-                Components.Dynamic {
-                    ChoicePreference(
-                        preference = vm.themeMode,
-                        choices = mapOf(
-                            PreferenceValues.ThemeMode.System to stringResource(id = R.string.follow_system_settings),
-                            PreferenceValues.ThemeMode.Light to stringResource(id = R.string.light),
-                            PreferenceValues.ThemeMode.Dark to stringResource(id = R.string.dark)
-                        ),
-                        title = stringResource(id = R.string.theme),
-                        subtitle = null,
-                        onValue = {
-                            vm.saveNightModePreferences(it)
-                        }
-                    )
-                },
-                Components.Header(
-                    text = "Preset themes",
-                ),
-                themeItem.value,
-                Components.Dynamic {
-                    ColorPreference(
-                        preference = customizedColors.primaryState,
-                        title = "Color primary",
-                        subtitle = "Displayed most frequently across your app",
-                        unsetColor = MaterialTheme.colorScheme.primary,
-                        onChangeColor = onColorChange,
-                        onRestToDefault = onColorReset
-                    )
-                },
-                Components.Dynamic {
-                    ColorPreference(
-                        preference = customizedColors.secondaryState,
-                        title = "Color secondary",
-                        subtitle = "Accents select parts of the UI",
-                        unsetColor = MaterialTheme.colorScheme.secondary,
-                        onChangeColor = onColorChange,
-                        onRestToDefault = onColorReset
-                    )
-                },
-                Components.Dynamic {
-                    ColorPreference(
-                        preference = customizedColors.barsState,
-                        title = "Toolbar color",
-                        unsetColor = AppColors.current.bars,
-                        onChangeColor = onColorChange,
-                        onRestToDefault = onColorReset
-                    )
-                },
-                Components.Dynamic {
-                    Row(
-                        horizontalArrangement = Arrangement.End,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        if (vm.isSavable) {
-                            TextButton(onClick = {
-                                vm.isSavable = false
-                                scope.launchIO {
-                                    val theme = vm.getThemes(vm.colorTheme.value,isLight)
-                                    if (theme != null) {
-                                        scope.launchIO {
-                                            val themeId = vm.themeRepository.insert(theme.toCustomTheme())
-                                            vm.colorTheme.value = themeId
-                                            vm.showSnackBar(UiText.StringResource(R.string.theme_was_saved))
-                                        }
-                                    } else {
-                                        vm.showSnackBar(UiText.StringResource(R.string.theme_was_not_valid))
-                                    }
-                                    vm.isSavable = false
-                                }
-                            }) {
-                                MidSizeTextComposable(text = stringResource(id = R.string.save_custom_theme))
-                            }
-                        } else if (vm.colorTheme.value > 0) {
-                            TextButton(onClick = {
-                                scope.launchIO {
-                                    scope.launch {
-                                        vm.vmThemes.find { it.id == vm.colorTheme.value }?.toCustomTheme()
-                                            ?.let { vm.themeRepository.delete(it) }
-                                    }
-                                    vm.showSnackBar(UiText.StringResource(R.string.theme_was_deleted))
-                                }
-                            }) {
-                                MidSizeTextComposable(text = stringResource(id = R.string.delete_custom_theme))
-                            }
-                        }
-                    }
-                },
-                Components.Header(
-                    text = "Timestamp",
-                ),
-                Components.Dynamic {
-                    ChoicePreference(
-                        preference = vm.relativeTime,
-                        choices = vm.relativeTimes.associateWith { value ->
-                            when (value) {
-                                PreferenceValues.RelativeTime.Off -> context.getString(R.string.off)
-                                PreferenceValues.RelativeTime.Day -> context.getString(R.string.pref_relative_time_short)
-                                PreferenceValues.RelativeTime.Week -> context.getString(R.string.pref_relative_time_long)
-                                else -> context.getString(R.string.off)
-                            }
-                        },
-                        title = stringResource(id = R.string.pref_relative_format),
-                        subtitle = null,
-                    )
-                },
-            )
-        }
+
     }
-
-
-    SetupSettingComponents(scaffoldPadding = scaffoldPaddingValues, items = items.value)
+    if (showColorDialog.value) {
+        ColorPickerDialog(
+            title = { Text(colorPickerInfo.title?:"") },
+            onDismissRequest = { showColorDialog.value = false },
+            onSelected = {
+                colorPickerInfo.preference?.value = it
+                showColorDialog.value = false
+                colorPickerInfo.onChangeColor()
+            },
+            initialColor = colorPickerInfo.initialColor,
+        )
+    }
 }
+
+data class ColorPickerInfo(
+    val preference: PreferenceMutableState<Color>? = null,
+    val title: String ? = null,
+    val onChangeColor: () -> Unit = {},
+    val initialColor: Color = Color.Unspecified,
+)
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
