@@ -37,14 +37,12 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
-import ireader.domain.models.theme.ReaderTheme
-import ireader.i18n.UiText
-import ireader.ui.core.theme.ReaderTheme
-import ireader.ui.core.ui.Colour.contentColor
 import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.models.theme.ReaderTheme
 import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.domain.utils.extensions.launchIO
+import ireader.i18n.UiText
 import ireader.presentation.R
 import ireader.ui.component.components.Components
 import ireader.ui.component.components.component.ChipChoicePreference
@@ -55,6 +53,8 @@ import ireader.ui.component.components.component.SwitchPreference
 import ireader.ui.component.components.setupUiComponent
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
+import ireader.ui.core.theme.ReaderTheme
+import ireader.ui.core.ui.Colour.contentColor
 import ireader.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.launch
 
@@ -400,6 +400,9 @@ fun ReaderSettingMainLayout(
                         title = stringResource(id = R.string.show_scrollbar),
                     )
                 }
+                item {
+                    Spacer(modifier = Modifier.height(100.dp))
+                }
             }
         }
     }
@@ -492,7 +495,8 @@ fun ReaderSettingMainLayout(
                     preference = vm.unselectedScrollBarColor,
                     title = stringResource(id = R.string.unselected_scrollbar_color)
                 )
-            }
+            },
+            Components.Space
         )
     }
     val colorTabItem = remember {
