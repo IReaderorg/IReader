@@ -145,69 +145,75 @@ fun PreferenceRow(
     subtitle: String? = null,
     clickable: Boolean = true,
     actionAlignment: Alignment = Alignment.CenterEnd,
+    enable:Boolean = true,
     action: @Composable (() -> Unit)? = null,
 ) {
-    val height = if (subtitle != null) 72.dp else 56.dp
+    if (enable) {
+        val height = if (subtitle != null) 72.dp else 56.dp
 
-    val titleTextStyle = androidx.compose.material3.MaterialTheme.typography.bodyLarge
-    val subtitleTextStyle = androidx.compose.material3.MaterialTheme.typography.bodyMedium.copy(
-        color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
-    )
+        val titleTextStyle = androidx.compose.material3.MaterialTheme.typography.bodyLarge
+        val subtitleTextStyle = androidx.compose.material3.MaterialTheme.typography.bodyMedium.copy(
+            color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+        )
 
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(min = height)
-            .combinedClickable(
-                onLongClick = onLongClick,
-                onClick = onClick,
-            ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (painter != null) {
-            Icon(
-                painter = painter,
-                modifier = Modifier
-                    .padding(horizontal = horizontalPadding)
-                    .size(24.dp),
-                tint = androidx.compose.material3.MaterialTheme.colorScheme.primary,
-                contentDescription = null,
-            )
-        }
-        if (icon != null) {
-            Icon(
-                imageVector = icon,
-                modifier = Modifier
-                    .padding(horizontal = horizontalPadding)
-                    .size(24.dp),
-                tint = androidx.compose.material3.MaterialTheme.colorScheme.primary,
-                contentDescription = null,
-            )
-        }
-        Column(
-            Modifier
-                .padding(horizontal = horizontalPadding)
-                .weight(1f)
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .heightIn(min = height)
+                .combinedClickable(
+                    onLongClick = onLongClick,
+                    onClick = onClick,
+                ),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = title,
-                overflow = Ellipsis,
-                maxLines = 1,
-                style = MaterialTheme.typography.labelMedium,
-            )
-            if (subtitle != null) {
-                Text(
-                    text = subtitle,
-                    overflow = Ellipsis,
-                    maxLines = 1,
-                    color = LocalContentColor.current.copy(alpha = ContentAlpha.medium),
-                    style = MaterialTheme.typography.labelMedium
+            if (painter != null) {
+                Icon(
+                    painter = painter,
+                    modifier = Modifier
+                        .padding(horizontal = horizontalPadding)
+                        .size(24.dp),
+                    tint = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+                    contentDescription = null,
                 )
             }
-        }
-        if (action != null) {
-            Box(Modifier.widthIn(min = 56.dp, max = 250.dp), contentAlignment = actionAlignment) {
-                action()
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    modifier = Modifier
+                        .padding(horizontal = horizontalPadding)
+                        .size(24.dp),
+                    tint = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+                    contentDescription = null,
+                )
+            }
+            Column(
+                Modifier
+                    .padding(horizontal = horizontalPadding)
+                    .weight(1f)
+            ) {
+                Text(
+                    text = title,
+                    overflow = Ellipsis,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.labelMedium,
+                )
+                if (subtitle != null) {
+                    Text(
+                        text = subtitle,
+                        overflow = Ellipsis,
+                        maxLines = 1,
+                        color = LocalContentColor.current.copy(alpha = ContentAlpha.medium),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            }
+            if (action != null) {
+                Box(
+                    Modifier.widthIn(min = 56.dp, max = 250.dp),
+                    contentAlignment = actionAlignment
+                ) {
+                    action()
+                }
             }
         }
     }
@@ -645,14 +651,18 @@ fun <Key> ChoicePreference(
     subtitle: String? = null,
     onValue: ((Key) -> Unit)? = null,
     confirmText: String = "",
-    onConfirm: (() -> Unit)? = null
+    onConfirm: (() -> Unit)? = null,
+    onItemSelected: (() -> Unit)? = null,
+    enable: Boolean = true
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
     PreferenceRow(
         title = title,
         subtitle = if (subtitle == null) choices[preference.value] else null,
-        onClick = { showDialog = true }
+        onClick = { showDialog = true },
+        enable = enable
+
     )
 
     if (showDialog) {
@@ -671,6 +681,9 @@ fun <Key> ChoicePreference(
                                         onValue(value)
                                     } else {
                                         preference.value = value
+                                    }
+                                    if (onItemSelected != null) {
+                                        onItemSelected()
                                     }
 
                                     showDialog = false

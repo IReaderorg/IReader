@@ -29,6 +29,15 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun autoCatalogUpdater(): Preference<Boolean> {
         return preferenceStore.getBoolean("auto_catalog_updater_catalogs", false)
     }
+    fun lastBackUpTime(): Preference<Long> {
+        return preferenceStore.getLong("last_automatic_backup_time", 0)
+    }
+    fun automaticBackupTime(): Preference<PreferenceValues.AutomaticBackup> {
+        return preferenceStore.getEnum("automatic_backup_time", PreferenceValues.AutomaticBackup.Off)
+    }
+    fun maxAutomaticBackupFiles(): Preference<Int> {
+        return preferenceStore.getInt("max_automatic_backup_size", 5)
+    }
 
     fun colorTheme(): Preference<Long> {
         return preferenceStore.getLong("color_theme", -1L)

@@ -111,6 +111,9 @@
     <string name="hour">Day</string>
     <string name="days">Hour</string>
     <string name="weeks">Week</string>
+    <string name="weekly">Weekly</string>
+    <string name="daily">Daily</string>
+
     <string name="off">Off</string>
     <string name="on">On</string>
     <string name="auto">Auto</string>
@@ -318,6 +321,8 @@
     <string name="backup">Backup</string>
     <string name="backup_and_restore">Backup and restore</string>
     <string name="restore">Restore</string>
+    <string name="automatic_backup">Automatic Backup</string>
+    <string name="maximum_backups">Maximum backups</string>
     <string name="auto_backup">Auto backup</string>
     <string name="import_epub">Import Epub</string>
     <string name="data">Data</string>
@@ -461,7 +466,6 @@
     <string name="uncategorized_category">Default</string>
     <string name="pinned_sources">Pinned</string>
     <string name="last_used_source">Last Used</string>
-
 </resources>
 
 

@@ -3,6 +3,7 @@ package ireader.domain.usecases.epub
 import android.content.Context
 import android.net.Uri
 import ireader.common.models.entities.Book
+import ireader.core.source.model.Text
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.image.cache.CoverCache
 import ireader.domain.models.BookCover
@@ -33,7 +34,14 @@ class EpubCreator(
         }
 
         chapters.forEachIndexed { index, chapter ->
-            val resource: Resource = Resource("$index", chapter.content.map { "<p>$it</p>" }.joinToString("\n").toByteArray(), "${chapter.name}-$index.html", MediatypeService.XHTML)
+            val contents = chapter.content.mapNotNull {
+                when(it) {
+                    is Text -> it.text
+                    else -> null
+                }
+            }
+            val resource: Resource = Resource("$index", contents.joinToString("\n") { "<p>$it</p>" }
+                .toByteArray(), "${chapter.name}-$index.html", MediatypeService.XHTML)
             epubBook.addSection(chapter.name, resource)
         }
         writeToUri(uri, context, epubBook)

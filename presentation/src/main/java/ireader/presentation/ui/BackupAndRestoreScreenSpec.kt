@@ -6,14 +6,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-
+import ireader.presentation.R
 import ireader.ui.component.Controller
 import ireader.ui.component.components.TitleToolbar
 import ireader.ui.core.ui.SnackBarListener
 import ireader.ui.settings.backups.BackUpAndRestoreScreen
 import ireader.ui.settings.backups.BackupScreenViewModel
-import ireader.presentation.R
-import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 object BackupAndRestoreScreenSpec : ScreenSpec {
@@ -46,7 +44,8 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
             {
                 controller.navController.popBackStack()
             },
-            snackbarHostState = controller.snackBarHostState
+            snackbarHostState = controller.snackBarHostState,
+            scaffoldPadding = controller.scaffoldPadding
         )
     }
 }

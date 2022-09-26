@@ -6,22 +6,22 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
-import kotlinx.serialization.ExperimentalSerializationApi
-import ireader.ui.component.Controller
+import ireader.core.log.Log
 import ireader.domain.utils.extensions.findComponentActivity
 import ireader.domain.utils.extensions.getCacheSize
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
+import ireader.presentation.R
+import ireader.ui.component.Controller
 import ireader.ui.component.components.Components
 import ireader.ui.component.components.SetupSettingComponents
-import ireader.core.log.Log
 import ireader.ui.settings.AdvanceSettingViewModel
-import ireader.presentation.R
+import kotlinx.serialization.ExperimentalSerializationApi
 
 @OptIn(ExperimentalSerializationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -48,85 +48,88 @@ fun AdvanceSettings(
             }
         }
 
-    val items = listOf<Components>(
-        Components.Header(stringResource(R.string.data)),
-        Components.Row(
-            title = stringResource(id = R.string.clear_all_database),
-            onClick = {
-                vm.deleteAllDatabase()
-                vm.showSnackBar(
-                    UiText.StringResource(R.string.database_was_cleared)
-                )
-            }
-        ),
-        Components.Row(
-            title = stringResource(id = R.string.clear_not_in_library_books),
-            onClick = {
-                vm.viewModelScope.launchIO {
-                    vm.deleteUseCase.deleteNotInLibraryBooks()
+    val items = remember {
+        listOf<Components>(
+            Components.Header(context.getString(R.string.data)),
+            Components.Row(
+                title = context.getString(R.string.clear_all_database),
+                onClick = {
+                    vm.deleteAllDatabase()
                     vm.showSnackBar(
-                        UiText.StringResource(R.string.success)
+                        UiText.StringResource(R.string.database_was_cleared)
                     )
                 }
-            }
-        ),
-        Components.Row(
-            title = stringResource(id = R.string.clear_all_chapters),
-            onClick = {
-                vm.deleteAllChapters()
-                vm.showSnackBar(
-                    UiText.StringResource(R.string.chapters_was_cleared)
-                )
-            }
-        ),
-        Components.Row(
-            title = stringResource(id = R.string.clear_all_cache),
-            subtitle = getCacheSize(context = context),
-            onClick = {
-                context.cacheDir.deleteRecursively()
-                vm.showSnackBar(UiText.DynamicString("Clear was cleared."))
-            }
-        ),
-        Components.Row(
-            title = stringResource(id = R.string.clear_all_cover_cache),
-            onClick = {
-                vm.coverCache.clearMemoryCache()
-                vm.showSnackBar(UiText.DynamicString("Clear was cleared."))
-            }
-        ),
-        Components.Header(stringResource(R.string.reset_setting)),
-        Components.Row(
-            title = stringResource(id = R.string.reset_reader_screen_settings),
-            onClick = {
-                vm.deleteDefaultSettings()
-            }
-        ),
-        Components.Row(
-            title = context.getString(R.string.reset_themes),
-            onClick = {
-                vm.resetThemes()
-            }
-        ),
-        Components.Row(
-            title = context.getString(R.string.reset_categories),
-            onClick = {
-                vm.resetCategories()
-            }
-        ),
-        Components.Header(stringResource(R.string.epub)),
-        Components.Row(
-            title = stringResource(id = R.string.import_epub),
-            onClick = {
-                context.findComponentActivity()
-                    ?.let { activity ->
-                        vm.onEpubImportRequested { intent: Intent ->
-                            onEpub.launch(intent)
-                        }
+            ),
+            Components.Row(
+                title = context.getString(R.string.clear_not_in_library_books),
+                onClick = {
+                    vm.viewModelScope.launchIO {
+                        vm.deleteUseCase.deleteNotInLibraryBooks()
+                        vm.showSnackBar(
+                            UiText.StringResource(R.string.success)
+                        )
                     }
-            }
-        )
+                }
+            ),
+            Components.Row(
+                title = context.getString(R.string.clear_all_chapters),
+                onClick = {
+                    vm.deleteAllChapters()
+                    vm.showSnackBar(
+                        UiText.StringResource(R.string.chapters_was_cleared)
+                    )
+                }
+            ),
+            Components.Row(
+                title = context.getString(R.string.clear_all_cache),
+                subtitle = getCacheSize(context = context),
+                onClick = {
+                    context.cacheDir.deleteRecursively()
+                    vm.showSnackBar(UiText.DynamicString("Clear was cleared."))
+                }
+            ),
+            Components.Row(
+                title = context.getString(R.string.clear_all_cover_cache),
+                onClick = {
+                    vm.coverCache.clearMemoryCache()
+                    vm.showSnackBar(UiText.DynamicString("Clear was cleared."))
+                }
+            ),
+            Components.Header(context.getString(R.string.reset_setting)),
+            Components.Row(
+                title = context.getString(R.string.reset_reader_screen_settings),
+                onClick = {
+                    vm.deleteDefaultSettings()
+                }
+            ),
+            Components.Row(
+                title = context.getString(R.string.reset_themes),
+                onClick = {
+                    vm.resetThemes()
+                }
+            ),
+            Components.Row(
+                title = context.getString(R.string.reset_categories),
+                onClick = {
+                    vm.resetCategories()
+                }
+            ),
+            Components.Header(context.getString(R.string.epub)),
+            Components.Row(
+                title = context.getString(R.string.import_epub),
+                onClick = {
+                    context.findComponentActivity()
+                        ?.let { activity ->
+                            vm.onEpubImportRequested { intent: Intent ->
+                                onEpub.launch(intent)
+                            }
+                        }
+                }
+            )
 
-    )
+        )
+    }
+
 
     SetupSettingComponents(scaffoldPadding = controller.scaffoldPadding, items = items)
 }

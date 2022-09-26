@@ -3,14 +3,16 @@ package ireader.ui.settings.backups
 import android.content.Intent
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.domain.models.BackUpBook
+import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.usecases.backup.AutomaticBackup
 import ireader.domain.usecases.backup.CreateBackup
 import ireader.domain.usecases.backup.RestoreBackup
 import ireader.domain.usecases.local.LocalGetBookUseCases
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.utils.extensions.convertLongToTime
+import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.ui.settings.SettingState
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
@@ -25,10 +27,14 @@ class BackupScreenViewModel(
     private val insertUseCases: LocalInsertUseCases,
     val restoreBackup: RestoreBackup,
     val createBackup: CreateBackup,
+    val uiPreferences: UiPreferences,
+    val automaticBackupUseCase: AutomaticBackup
 ) : BaseViewModel() {
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
 
+    val automaticBackup = uiPreferences.automaticBackupTime().asState()
+    val maxAutomaticFiles = uiPreferences.maxAutomaticBackupFiles().asState()
     fun onLocalBackupRequested(onStart: (Intent) -> Unit) {
         val mimeTypes = arrayOf("application/gzip")
         val fn = "IReader_${convertLongToTime(Calendar.getInstance().timeInMillis)}.gz"

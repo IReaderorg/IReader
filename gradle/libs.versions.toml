@@ -43,6 +43,7 @@ ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.re
 ksp-gradle = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
 
 
+storage = { module = "com.anggrayudi:storage", version = "1.4.1" }
 ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-core-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 ktor-core-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }

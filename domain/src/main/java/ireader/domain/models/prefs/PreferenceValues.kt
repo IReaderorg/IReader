@@ -72,6 +72,14 @@ object PreferenceValues {
         Hide,
 
     }
+    enum class AutomaticBackup {
+        Off,
+        Every6Hours,
+        Every12Hours,
+        Daily,
+        Every2Days,
+        Weekly
+    }
 }
 fun PreferenceValues.PreferenceAlignment.mapAlignment() : Alignment? {
     return when(this) {

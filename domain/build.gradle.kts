@@ -32,7 +32,8 @@ dependencies {
 
 
     implementation(project(Modules.coreApi))
-
+    implementation(libs.storage)
+    implementation("androidx.documentfile:documentfile:1.0.1")
 
     implementation(androidx.biometric)
     implementation(androidx.lifecycle.viewmodelktx)
