@@ -28,10 +28,11 @@ class GetSimpleStorage(
     fun extensionDirectory(): File =
         File(Environment.getExternalStorageDirectory(), "IReader/Extensions")
 
-    fun checkPermission() {
-        if (!storage.isStorageAccessGranted(StorageId.PRIMARY)) {
+    fun checkPermission() : Boolean {
+        return if (!storage.isStorageAccessGranted(StorageId.PRIMARY)) {
             storage.requestFullStorageAccess()
-        }
+            return false
+        } else true
     }
 
     fun get(dirName: String): DocumentFile {

@@ -115,7 +115,7 @@ fun BackUpAndRestoreScreen(
 
                         context.findComponentActivity()
                             ?.let { activity ->
-                                vm.automaticBackupUseCase.checkPermission()
+                                vm.getSimpleStorage.checkPermission()
                             }
 
                     }

@@ -8,6 +8,7 @@ import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.backup.AutomaticBackup
 import ireader.domain.usecases.backup.CreateBackup
 import ireader.domain.usecases.backup.RestoreBackup
+import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.usecases.local.LocalGetBookUseCases
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
@@ -28,7 +29,8 @@ class BackupScreenViewModel(
     val restoreBackup: RestoreBackup,
     val createBackup: CreateBackup,
     val uiPreferences: UiPreferences,
-    val automaticBackupUseCase: AutomaticBackup
+    val automaticBackupUseCase: AutomaticBackup,
+    val getSimpleStorage: GetSimpleStorage,
 ) : BaseViewModel() {
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state

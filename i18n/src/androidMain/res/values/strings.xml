@@ -21,6 +21,7 @@
     <string name="about">About</string>
     <string name="edit_category">Edit Categories</string>
     <string name="confirm">Confirm</string>
+    <string name="permissions">Permissions</string>
     <string name="status">Status</string>
     <string name="cover">Cover</string>
     <string name="category">Categories</string>
@@ -91,7 +92,8 @@
     <string name="whats_new">Whats New</string>
     <string name="discord">Discord</string>
     <string name="github">Github</string>
-    <string name="check_the_update">"Check the Update"</string>
+    <string name="check_the_update">Check the Update</string>
+    <string name="check_permissions">Check Permissions</string>
 
     <string name="appearance">Appearance</string>
     <string name="updater_is_enable">Updater</string>

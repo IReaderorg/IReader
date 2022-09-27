@@ -2,13 +2,13 @@ package ireader.domain.usecases.epub.importer
 
 import android.content.Context
 import android.net.Uri
-import nl.siegmann.epublib.epub.EpubReader
-import ireader.domain.data.repository.BookRepository
-import ireader.domain.data.repository.ChapterRepository
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.Chapter
 import ireader.core.source.LocalSource
 import ireader.core.source.model.MangaInfo
+import ireader.domain.data.repository.BookRepository
+import ireader.domain.data.repository.ChapterRepository
+import nl.siegmann.epublib.epub.EpubReader
 import org.jsoup.Jsoup
 import org.jsoup.nodes.TextNode
 import org.jsoup.parser.Parser
@@ -16,7 +16,6 @@ import org.koin.core.annotation.Factory
 import org.xml.sax.InputSource
 import java.io.File
 import java.io.InputStream
-
 import javax.xml.parsers.DocumentBuilderFactory
 @Factory
 class ImportEpub(
@@ -89,26 +88,6 @@ class ImportEpub(
         }.mapNotNull { it }.let {
             chapterRepository.insertChapters(it)
         }
-
-//        epub.resources.all.sortedBy { it.id }.map { epubResourceModel ->
-//            epubResourceModel.data?.let {
-//                EpubXMLFileParser(it).parse()
-//            }?.let { output ->
-//                val title = tableOfContents[epubResourceModel.href] ?: output.title
-//
-//                val content = output.body.split("\n").filter { it.isNotBlank() }
-//                index++
-//                Chapter(
-//                    name = title ?: "Chapter $index",
-//                    key = epubResourceModel.href ?: "",
-//                    bookId = bookId,
-//                    content = content,
-//                )
-//            }
-//
-//        }.mapNotNull { it }.let {
-//            chapterRepository.insertChapters(it)
-//        }
 
         epub.coverImage?.data?.let {
             imgFile.parentFile?.also { parent ->
