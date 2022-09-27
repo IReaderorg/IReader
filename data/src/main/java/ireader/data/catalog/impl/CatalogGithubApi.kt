@@ -33,6 +33,8 @@ class CatalogGithubApi(
         }
         val repoUrl = repo.key.substringBefore("index.min.json","").takeIf { it.isNotBlank() } ?: REPO_URL
         return catalogs.map { catalog ->
+            val iconUrl = "$repoUrl/icon/${catalog.apk.replace(".apk", ".png")}"
+            val appUrl = "$repoUrl/apk/${catalog.apk}"
             ireader.common.models.entities.CatalogRemote(
                 name = catalog.name,
                 description = catalog.description,
@@ -41,8 +43,8 @@ class CatalogGithubApi(
                 versionName = catalog.version,
                 versionCode = catalog.code,
                 lang = catalog.lang,
-                pkgUrl = "$repoUrl/apk/${catalog.apk}",
-                iconUrl = "$repoUrl/icon/${catalog.apk.replace(".apk", ".png")}",
+                pkgUrl = appUrl,
+                iconUrl = iconUrl,
                 nsfw = catalog.nsfw,
                 source = CatalogRemote.DEFAULT_ID
             )

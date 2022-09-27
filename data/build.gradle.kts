@@ -75,6 +75,8 @@ dependencies {
     
 
     implementation(libs.jsoup)
+    implementation(libs.bundles.simplestorage)
+
 
     /** LifeCycle **/
     implementation(androidx.lifecycle.runtime)

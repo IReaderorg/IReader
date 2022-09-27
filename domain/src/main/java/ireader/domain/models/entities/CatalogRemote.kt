@@ -52,6 +52,7 @@ sealed class CatalogInstalled : CatalogLocal() {
     abstract val versionName: String
     abstract val iconUrl: String
     abstract val versionCode: Int
+    abstract val installDir: File?
 
     data class SystemWide(
         override val name: String,
@@ -63,7 +64,8 @@ sealed class CatalogInstalled : CatalogLocal() {
         override val nsfw: Boolean,
         override val isPinned: Boolean = false,
         override val hasUpdate: Boolean = false,
-        override val iconUrl: String
+        override val iconUrl: String,
+        override val installDir: File?
     ) : CatalogInstalled()
 
     data class Locally(
@@ -74,7 +76,7 @@ sealed class CatalogInstalled : CatalogLocal() {
         override val versionName: String,
         override val versionCode: Int,
         override val nsfw: Boolean,
-        val installDir: File,
+        override val installDir: File,
         override val isPinned: Boolean = false,
         override val hasUpdate: Boolean = false,
         override val iconUrl: String

@@ -16,6 +16,7 @@ import ireader.core.source.TestSource
 import ireader.domain.R
 import ireader.domain.catalogs.service.CatalogLoader
 import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.utils.extensions.withIOContext
 import ireader.i18n.BuildConfig
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +32,8 @@ import java.io.File
 class AndroidCatalogLoader(
     private val context: Context,
     private val httpClients: HttpClients,
-    val uiPreferences: UiPreferences
+    val uiPreferences: UiPreferences,
+    val simpleStorage: GetSimpleStorage
 ) : CatalogLoader {
 
     private val pkgManager = context.packageManager
@@ -52,13 +54,15 @@ class AndroidCatalogLoader(
             )
             bundled.add(testCatalog)
         }
+
         val systemPkgs =
             pkgManager.getInstalledPackages(PACKAGE_FLAGS).filter(::isPackageAnExtension)
-        val localPkgs = File(context.filesDir, "catalogs").listFiles()
+        val localPkgs= simpleStorage.extensionDirectory().listFiles()
             .orEmpty()
             .filter { it.isDirectory }
             .map { File(it, it.name + ".apk") }
             .filter { it.exists() }
+
 
         // Load each catalog concurrently and wait for completion
         val installedCatalogs = withIOContext {
@@ -88,7 +92,7 @@ class AndroidCatalogLoader(
      * contains the required feature flag before trying to load it.
      */
     override fun loadLocalCatalog(pkgName: String): ireader.common.models.entities.CatalogInstalled.Locally? {
-        val file = File(context.filesDir, "catalogs/$pkgName/$pkgName.apk")
+        val file = File(simpleStorage.extensionDirectory(), "${pkgName}/${pkgName}.apk")
         val pkgInfo = if (file.exists()) {
             pkgManager.getPackageArchiveInfo(file.absolutePath, PACKAGE_FLAGS)
         } else {
@@ -107,6 +111,7 @@ class AndroidCatalogLoader(
      * contains the required feature flag before trying to load it.
      */
     override fun loadSystemCatalog(pkgName: String): ireader.common.models.entities.CatalogInstalled.SystemWide? {
+        val iconFile = File(simpleStorage.extensionDirectory(), "${pkgName}/${pkgName}.png")
         val pkgInfo = try {
             pkgManager.getPackageInfo(pkgName, PACKAGE_FLAGS)
         } catch (error: NameNotFoundException) {
@@ -114,7 +119,7 @@ class AndroidCatalogLoader(
             Log.warn("Failed to load catalog: the package {} isn't installed", pkgName)
             return null
         }
-        return loadSystemCatalog(pkgName, pkgInfo)
+        return loadSystemCatalog(pkgName, pkgInfo,iconFile)
     }
 
     /**
@@ -155,6 +160,7 @@ class AndroidCatalogLoader(
     private fun loadSystemCatalog(
         pkgName: String,
         pkgInfo: PackageInfo,
+        iconFile: File? = null
     ): ireader.common.models.entities.CatalogInstalled.SystemWide? {
         val data = validateMetadata(pkgName, pkgInfo) ?: return null
 
@@ -169,7 +175,8 @@ class AndroidCatalogLoader(
             versionName = data.versionName,
             versionCode = data.versionCode,
             nsfw = data.nsfw,
-            iconUrl = data.icon
+            iconUrl = data.icon,
+            installDir = iconFile?.parentFile,
         )
     }
 
@@ -204,7 +211,7 @@ class AndroidCatalogLoader(
         val majorLibVersion = versionName.substringBefore('.').toInt()
         if (majorLibVersion < LIB_VERSION_MIN || majorLibVersion > LIB_VERSION_MAX) {
             val exception = "Failed to load catalog, the package {} lib version is {}," +
-                "while only versions {} to {} are allowed"
+                    "while only versions {} to {} are allowed"
             Log.warn(exception, pkgName, majorLibVersion, LIB_VERSION_MIN, LIB_VERSION_MAX)
             return null
         }
@@ -232,7 +239,15 @@ class AndroidCatalogLoader(
         val preferenceSource = PrefixedPreferenceStore(catalogPreferences, pkgName)
         val dependencies = ireader.core.source.Dependencies(httpClients, preferenceSource)
 
-        return ValidatedData(versionCode, versionName, description,icon, nsfw, classToLoad, dependencies)
+        return ValidatedData(
+            versionCode,
+            versionName,
+            description,
+            icon,
+            nsfw,
+            classToLoad,
+            dependencies
+        )
     }
 
     private fun loadSource(pkgName: String, loader: ClassLoader, data: ValidatedData): Source? {

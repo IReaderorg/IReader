@@ -25,15 +25,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import coil.request.CachePolicy
-import coil.request.ImageRequest
 import ireader.common.models.entities.Catalog
 import ireader.common.models.entities.CatalogBundled
 import ireader.common.models.entities.CatalogInstalled
@@ -143,46 +140,23 @@ fun CatalogItem(
 
 @Composable
 private fun CatalogPic(catalog: Catalog, modifier: Modifier = Modifier) {
-    when (catalog) {
+    when(catalog) {
         is CatalogBundled -> {
             LetterIcon(catalog.name, modifier)
-        }
-        is CatalogInstalled -> {
-            if (catalog.iconUrl.isNotBlank()) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(catalog.iconUrl)
-                        .diskCacheKey(catalog.iconUrl)
-                        .crossfade(true)
-                        .memoryCachePolicy(CachePolicy.ENABLED)
-                        .diskCachePolicy(CachePolicy.ENABLED)
-                        .build(),
-                    contentDescription = null,
-                    modifier = modifier,
-                )
-            } else {
-                AsyncImage(
-                    model = catalog,
-                    contentDescription = null,
-                    modifier = modifier
-                )
-            }
-        }
-        is CatalogRemote -> {
-            AsyncImage(
-                model = catalog.iconUrl,
-                contentDescription = null,
-                modifier = modifier,
-            )
         }
         else -> {
             AsyncImage(
                 model = catalog,
                 contentDescription = null,
-                modifier = modifier
+                modifier = modifier,
             )
         }
     }
+    AsyncImage(
+        model = catalog,
+        contentDescription = null,
+        modifier = modifier,
+    )
 }
 
 @Composable

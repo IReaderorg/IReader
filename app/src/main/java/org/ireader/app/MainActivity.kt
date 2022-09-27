@@ -9,6 +9,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.backup.AutomaticBackup
+import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.presentation.ScreenContent
 import ireader.presentation.theme.AppTheme
 import org.ireader.app.initiators.AppInitializers
@@ -18,7 +19,7 @@ import org.koin.android.ext.android.inject
 
 
 class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivityDelegateImpl() {
-
+    private val getSimpleStorage: GetSimpleStorage = get()
     private val uiPreferences: UiPreferences by inject()
     private val automaticBackup: AutomaticBackup = get(parameters = { org.koin.core.parameter.parametersOf(this@MainActivity) })
     val initializers: AppInitializers = get<AppInitializers>()
@@ -26,7 +27,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         registerSecureActivity(this, uiPreferences)
-
+        getSimpleStorage.provideActivity(this,savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         installSplashScreen()
         setContent {

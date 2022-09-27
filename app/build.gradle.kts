@@ -164,8 +164,8 @@ dependencies {
     implementation(libs.firebase.analyticKtx)
     implementation(libs.firebase.analytic)
     implementation(libs.firebase.crashlytics)
-    implementation(libs.storage)
-    implementation("androidx.documentfile:documentfile:1.0.1")
+    implementation(libs.bundles.simplestorage)
+
 
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)

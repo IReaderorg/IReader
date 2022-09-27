@@ -1,15 +1,17 @@
 package ireader.data.catalog.impl
 
 import android.app.Application
+import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.utils.io.*
 import ireader.common.models.entities.CatalogRemote
 import ireader.core.http.HttpClients
 import ireader.core.io.saveTo
 import ireader.core.log.Log
 import ireader.core.os.InstallStep
 import ireader.domain.catalogs.service.CatalogInstaller
+import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.i18n.UiText
 import ireader.i18n.asString
 import kotlinx.coroutines.flow.channelFlow
@@ -27,13 +29,16 @@ class AndroidLocalInstaller(
     private val context: Application,
     private val httpClients: HttpClients,
     private val installationChanges: AndroidCatalogInstallationChanges,
+    private val getSimpleStorage: GetSimpleStorage,
 ) : CatalogInstaller {
 
     /**
      * The client used for http requests.
      */
     private val client get() = httpClients.default
-
+    init {
+        getSimpleStorage.checkPermission()
+    }
     /**
      * Adds the given extension to the downloads queue and returns an observable containing its
      * step in the installation process.
@@ -45,24 +50,25 @@ class AndroidLocalInstaller(
         val tmpApkFile = File(context.cacheDir, "${catalog.pkgName}.apk")
         val tmpIconFile = File(context.cacheDir, "${catalog.pkgName}.png")
         try {
-            val apkResponse = client.get(catalog.pkgUrl) {
+            val apkResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
                 headers.append(HttpHeaders.CacheControl, "no-store")
-            }
-            apkResponse.bodyAsChannel().saveTo(tmpApkFile)
+            }.body()
+            apkResponse.saveTo(tmpApkFile)
 
-            val iconResponse = client.get(catalog.iconUrl) {
+            val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
                 headers.append(HttpHeaders.CacheControl, "no-store")
-            }
-            iconResponse.bodyAsChannel().saveTo(tmpIconFile)
+            }.body()
+            iconResponse.saveTo(tmpIconFile)
 
             send(InstallStep.Downloading)
+            val extDir = File(getSimpleStorage.extensionDirectory(), catalog.pkgName).apply { mkdirs() }
 
-            val extDir = File(context.filesDir, "catalogs/${catalog.pkgName}").apply { mkdirs() }
             val apkFile = File(extDir, tmpApkFile.name)
             val iconFile = File(extDir, tmpIconFile.name)
 
-            val apkSuccess = tmpApkFile.renameTo(apkFile)
-            val iconSuccess = tmpIconFile.renameTo(iconFile)
+
+            val apkSuccess = tmpApkFile.copyRecursively(apkFile,true)
+            val iconSuccess = tmpIconFile.copyRecursively(iconFile,true)
             val success = apkSuccess && iconSuccess
             if (success) {
                 installationChanges.notifyAppInstall(catalog.pkgName)
@@ -89,7 +95,7 @@ class AndroidLocalInstaller(
      */
     override suspend fun uninstall(pkgName: String): InstallStep {
         return try {
-        val file = File(context.filesDir, "catalogs/${pkgName}")
+        val file = File(getSimpleStorage.extensionDirectory(), pkgName)
         file.deleteRecursively()
         installationChanges.notifyAppUninstall(pkgName)
         InstallStep.Success

@@ -44,6 +44,7 @@ ksp-gradle = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin
 
 
 storage = { module = "com.anggrayudi:storage", version = "1.4.1" }
+documentfile = { module = "androidx.documentfile:documentfile", version = "1.0.1" }
 ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-core-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 ktor-core-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
@@ -112,6 +113,7 @@ exoplayer-dash = { module = "androidx.media3:media3-exoplayer-dash", version.ref
 
 
 [bundles]
+simplestorage = ["storage", "documentfile"]
 tinylog = ["tinylog-impl", "tinylog-api"]
 ireader = ["ireader-ktorCore", "ireader-ktorContentNegotiation","ireader-ktorSerialization","ireader-ktorGson","ireader-ktorOkhttp","ireader-ktorAndroid"]
 

@@ -3,14 +3,13 @@ package ireader.domain.usecases.backup
 import android.os.Environment
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
-import com.anggrayudi.storage.SimpleStorage
 import com.anggrayudi.storage.file.CreateMode
 import com.anggrayudi.storage.file.DocumentFileCompat
-import com.anggrayudi.storage.file.StorageId.PRIMARY
 import com.anggrayudi.storage.file.createBinaryFile
 import ireader.core.log.Log
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.utils.extensions.convertLongToTime
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -25,9 +24,9 @@ import kotlin.time.Duration.Companion.hours
 class AutomaticBackup(
     val context: ComponentActivity,
     val createBackup: CreateBackup,
-    private val uiPreferences: UiPreferences
+    private val uiPreferences: UiPreferences,
+    val simpleStorage: GetSimpleStorage
 ) {
-    val storage = SimpleStorage(context, null)
 
     init {
         context.lifecycleScope.launch {
@@ -44,9 +43,7 @@ class AutomaticBackup(
         val now = Clock.System.now()
         if (force || now - lastCheck > backupEveryXTime) {
             try {
-                if (!storage.isStorageAccessGranted(PRIMARY)) {
-                    storage.requestFullStorageAccess()
-                }
+                simpleStorage.checkPermission()
                 val root = Environment.getExternalStorageDirectory()
                 val dir = File(root, "IReader/Backups/Automatic")
                 if (!dir.exists()) {
@@ -85,12 +82,6 @@ class AutomaticBackup(
                 PreferenceValues.AutomaticBackup.Weekly -> 7.days
                 PreferenceValues.AutomaticBackup.Off -> null
             }
-        }
-    }
-
-    fun checkPermission() {
-        if (!storage.isStorageAccessGranted(PRIMARY)) {
-            storage.requestFullStorageAccess()
         }
     }
 }

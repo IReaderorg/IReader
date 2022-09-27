@@ -30,6 +30,7 @@ import ireader.domain.data.repository.BookRepository
 import ireader.domain.image.cache.CoverCache
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.services.extensions_insstaller_service.GetDefaultRepo
+import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.imageloader.coil.CoilLoaderFactory
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
@@ -49,17 +50,19 @@ class CatalogModule {
             context: Application,
             httpClient: HttpClients,
             installationChanges: AndroidCatalogInstallationChanges,
-            packageInstaller: PackageInstaller
+            packageInstaller: PackageInstaller,
+            simpleStorage: GetSimpleStorage
     ): CatalogInstaller {
-        return AndroidCatalogInstaller(context, httpClient, installationChanges, packageInstaller)
+        return AndroidCatalogInstaller(context, httpClient, installationChanges, packageInstaller,simpleStorage)
     }
     @Single
     fun provideInAppCatalogInstaller(
         context: Application,
         httpClient: HttpClients,
         installationChanges: AndroidCatalogInstallationChanges,
+        getSimpleStorage: GetSimpleStorage,
     ) : AndroidLocalInstaller {
-        return AndroidLocalInstaller(context, httpClient, installationChanges)
+        return AndroidLocalInstaller(context, httpClient, installationChanges,getSimpleStorage,)
     }
 
         @Single
@@ -96,10 +99,11 @@ class CatalogModule {
             installationChanges: AndroidCatalogInstallationChanges,
             context: Application,
             httpClients: HttpClients,
-            uiPreferences:UiPreferences
+            uiPreferences:UiPreferences,
+            getSimpleStorage: GetSimpleStorage
     ): CatalogStore {
         return CatalogStore(
-            AndroidCatalogLoader(context, httpClients, uiPreferences ),
+            AndroidCatalogLoader(context, httpClients, uiPreferences ,getSimpleStorage),
             catalogPreferences,
             catalogRemoteRepository,
             installationChanges
@@ -142,13 +146,15 @@ class CatalogModule {
             context: Application,
             httpClient: HttpClients,
             installationChanges: AndroidCatalogInstallationChanges,
-            packageInstaller: PackageInstaller
+            packageInstaller: PackageInstaller,
+            simpleStorage: GetSimpleStorage
     ): AndroidCatalogInstaller {
         return AndroidCatalogInstaller(
             context,
             httpClient,
             installationChanges,
-            packageInstaller
+            packageInstaller,
+            simpleStorage
         )
     }
 
