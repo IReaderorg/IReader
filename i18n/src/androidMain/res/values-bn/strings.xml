@@ -1,2 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="library_screen_label">লাইব্রেরি</string>
+    <string name="explore_screen_label">অন্বেষণ</string>
+    <string name="setting_screen_label">সেটিং</string>
+    <string name="delete_all_downloads">সব ডাউনলোড ডিলিট করে দিন</string>
+    <string name="cancel_all">সব বাতিল করুন</string>
+    <string name="cancel">বাতিল</string>
+    <string name="apply">প্রয়োগ করুন</string>
+    <string name="add_as_new">নতুন</string>
+    <string name="add">যোগ</string>
+    <string name="view_book">বইটি দেখুন</string>
+    <string name="nothing_read_recently">সম্প্রতি কিছু পড়েন নি</string>
+    <string name="hint">…</string>
+    <string name="about">সম্পর্কে</string>
+    <string name="category_hint">নাম…</string>
+    <string name="search_hint">খুজুন…</string>
+    <string name="auto_installer">অটো ইন্সটলার</string>
+</resources>
