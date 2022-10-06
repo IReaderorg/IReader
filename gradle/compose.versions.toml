@@ -1,9 +1,9 @@
 [versions]
-compose = "1.2.1"
+compose = "1.3.0-rc01"
 compiler = "1.3.1"
 activity = "1.5.1"
 lifecycle = "2.5.1"
-material3 = "1.0.0-beta01"
+material3 = "1.0.0-rc01"
 paging = "1.0.0-alpha16"
 navigation = "2.5.2"
 coil = "2.2.1"

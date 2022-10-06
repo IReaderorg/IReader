@@ -19,15 +19,15 @@ buildscript {
 }
 
 plugins {
-    alias(libs.plugins.kotlinAndroid) apply false
+    alias(kotlinx.plugins.kotlinAndroid) apply false
     alias(libs.plugins.detekt)
     alias(libs.plugins.benGradleVersions)
     alias(libs.plugins.dependencyAnalysis)
-    alias(libs.plugins.kotlinSerilization) apply false
+    alias(kotlinx.plugins.kotlinSerilization) apply false
     alias(libs.plugins.jetbrainCompose) apply false
     alias(libs.plugins.ideaExt) apply false
-    alias(libs.plugins.dokka) apply false
-    alias(libs.plugins.ksp) apply false
+    alias(kotlinx.plugins.dokka) apply false
+    alias(kotlinx.plugins.ksp) apply false
     alias(libs.plugins.sqldelight) apply false
     id("nl.littlerobots.version-catalog-update") version "0.6.1"
 }

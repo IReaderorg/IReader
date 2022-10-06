@@ -13,10 +13,8 @@ import androidx.lifecycle.viewModelScope
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.CatalogLocal
 import ireader.common.models.entities.Chapter
-import ireader.i18n.UiText
 import ireader.core.log.Log
 import ireader.core.source.model.CommandList
-import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.usecases.epub.EpubCreator
@@ -28,8 +26,10 @@ import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.services.ServiceUseCases
 import ireader.domain.utils.extensions.async.withIOContext
 import ireader.domain.utils.extensions.withUIContext
+import ireader.i18n.UiText
 import ireader.presentation.R
 import ireader.ui.component.Controller
+import ireader.ui.core.viewmodel.BaseViewModel
 import ireader.ui.home.explore.viewmodel.BooksState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -112,8 +112,6 @@ class BookDetailViewModel(
     }
 
 
-
-
     private suspend fun initBook(bookId: Long) {
         var book = getBookUseCases.findBookById(bookId)
 
@@ -123,7 +121,7 @@ class BookDetailViewModel(
                 initialized = true,
                 lastUpdate = Clock.System.now().toEpochMilliseconds(),
 
-            )
+                )
             booksState.replaceBook(book)
             localInsertUseCases.updateBook.update(
                 book
@@ -138,13 +136,13 @@ class BookDetailViewModel(
     }
 
 
-    private  fun subscribeBook(bookId: Long) {
+    private fun subscribeBook(bookId: Long) {
         getBookUseCases.subscribeBookById(bookId).onEach { snapshot ->
             booksState.replaceBook(snapshot)
         }.launchIn(viewModelScope)
     }
 
-    private  fun subscribeChapters(bookId: Long) {
+    private fun subscribeChapters(bookId: Long) {
         getChapterUseCase.subscribeChaptersByBookId(bookId).onEach { snapshot ->
             chapters = snapshot
         }.launchIn(viewModelScope)
@@ -247,6 +245,7 @@ class BookDetailViewModel(
                 onError = { message ->
                     withUIContext {
                         toggleBookLoading(false)
+                        showSnackBar(message)
                         if (message != null) {
                             Log.error { message.toString() }
                         }
@@ -288,7 +287,7 @@ class BookDetailViewModel(
                 catalog = source,
                 onError = { message ->
                     Log.error { message.toString() }
-                     showSnackBar(message)
+                    showSnackBar(message)
                     withUIContext {
                         chapterIsLoading = false
                     }
