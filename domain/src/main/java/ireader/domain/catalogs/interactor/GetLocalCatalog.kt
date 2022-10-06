@@ -2,7 +2,7 @@
 
 package ireader.domain.catalogs.interactor
 
-import ireader.common.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.catalogs.CatalogStore
 
 class GetLocalCatalog(

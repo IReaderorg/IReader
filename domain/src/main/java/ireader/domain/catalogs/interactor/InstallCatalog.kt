@@ -1,6 +1,6 @@
 package ireader.domain.catalogs.interactor
 
-import ireader.common.models.entities.CatalogRemote
+import ireader.domain.models.entities.CatalogRemote
 import ireader.core.os.InstallStep
 import ireader.domain.catalogs.service.CatalogInstaller
 import ireader.domain.models.prefs.PreferenceValues

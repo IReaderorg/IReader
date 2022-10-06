@@ -4,7 +4,7 @@ package ireader.domain.catalogs.interactor
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import ireader.common.models.entities.CatalogRemote
+import ireader.domain.models.entities.CatalogRemote
 import ireader.domain.catalogs.service.CatalogRemoteRepository
 
 class GetRemoteCatalogs(

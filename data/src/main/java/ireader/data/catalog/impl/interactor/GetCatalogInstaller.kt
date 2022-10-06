@@ -1,6 +1,6 @@
 package ireader.data.catalog.impl.interactor
 
-import ireader.common.models.entities.CatalogRemote
+import ireader.domain.models.entities.CatalogRemote
 import ireader.core.os.InstallStep
 import ireader.data.catalog.impl.AndroidCatalogInstaller
 import ireader.data.catalog.impl.AndroidLocalInstaller

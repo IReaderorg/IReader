@@ -11,7 +11,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import ireader.common.models.entities.Book
-import ireader.common.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogLocal
 import ireader.common.models.entities.Chapter
 import ireader.core.log.Log
 import ireader.core.source.model.CommandList

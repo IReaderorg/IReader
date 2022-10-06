@@ -31,11 +31,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import ireader.common.models.entities.Catalog
-import ireader.common.models.entities.CatalogBundled
-import ireader.common.models.entities.CatalogInstalled
-import ireader.common.models.entities.CatalogLocal
-import ireader.common.models.entities.CatalogRemote
+import ireader.domain.models.entities.Catalog
+import ireader.domain.models.entities.CatalogBundled
+import ireader.domain.models.entities.CatalogInstalled
+import ireader.domain.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogRemote
 import ireader.core.os.InstallStep
 import ireader.presentation.R
 import ireader.ui.component.reusable_composable.AppIconButton

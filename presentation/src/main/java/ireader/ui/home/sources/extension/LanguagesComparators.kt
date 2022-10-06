@@ -1,7 +1,7 @@
 package ireader.ui.home.sources.extension
 
 import androidx.compose.ui.text.intl.LocaleList
-import ireader.common.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogLocal
 
 class UserLanguagesComparator : Comparator<Language> {
 

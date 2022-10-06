@@ -2,8 +2,8 @@ package ireader.imageloader.coil.image_loaders
 
 import coil.key.Keyer
 import coil.request.Options
-import ireader.common.models.entities.CatalogInstalled
-import ireader.common.models.entities.CatalogRemote
+import ireader.domain.models.entities.CatalogInstalled
+import ireader.domain.models.entities.CatalogRemote
 import ireader.domain.models.BookCover
 
 class BookCoverKeyer : Keyer<BookCover> {

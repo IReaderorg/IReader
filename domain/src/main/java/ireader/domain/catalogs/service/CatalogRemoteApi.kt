@@ -1,6 +1,6 @@
 package ireader.domain.catalogs.service
 
-import ireader.common.models.entities.CatalogRemote
+import ireader.domain.models.entities.CatalogRemote
 
 interface CatalogRemoteApi {
 

@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.common.models.entities.Book
-import ireader.common.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogLocal
 import ireader.i18n.UiText
 import ireader.core.source.model.Filter
 import ireader.core.source.model.Listing

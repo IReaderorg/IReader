@@ -2,7 +2,7 @@ package ireader.imageloader.coil
 
 import coil.map.Mapper
 import coil.request.Options
-import ireader.common.models.entities.CatalogRemote
+import ireader.domain.models.entities.CatalogRemote
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 

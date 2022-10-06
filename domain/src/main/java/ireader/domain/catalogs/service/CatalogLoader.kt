@@ -1,7 +1,7 @@
 package ireader.domain.catalogs.service
 
-import ireader.common.models.entities.CatalogInstalled
-import ireader.common.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogInstalled
+import ireader.domain.models.entities.CatalogLocal
 
 interface CatalogLoader {
 

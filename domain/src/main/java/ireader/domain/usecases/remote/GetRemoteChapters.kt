@@ -2,7 +2,7 @@ package ireader.domain.usecases.remote
 
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.Book.Companion.toBookInfo
-import ireader.common.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogLocal
 import ireader.common.models.entities.Chapter
 import ireader.common.models.entities.toChapter
 import ireader.i18n.SourceNotFoundException

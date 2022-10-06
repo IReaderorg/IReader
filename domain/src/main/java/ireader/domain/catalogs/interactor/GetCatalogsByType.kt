@@ -4,9 +4,9 @@ package ireader.domain.catalogs.interactor
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import ireader.common.models.entities.CatalogInstalled
-import ireader.common.models.entities.CatalogLocal
-import ireader.common.models.entities.CatalogRemote
+import ireader.domain.models.entities.CatalogInstalled
+import ireader.domain.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogRemote
 import ireader.domain.catalogs.model.CatalogSort
 
 class GetCatalogsByType(

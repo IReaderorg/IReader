@@ -10,7 +10,7 @@ import coil.fetch.Fetcher
 import coil.fetch.SourceResult
 import coil.key.Keyer
 import coil.request.Options
-import ireader.common.models.entities.CatalogInstalled
+import ireader.domain.models.entities.CatalogInstalled
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okio.buffer

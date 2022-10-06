@@ -1,6 +1,6 @@
 package ireader.domain.usecases.remote
 
-import ireader.common.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogLocal
 import ireader.common.models.entities.Chapter
 import ireader.common.models.entities.toChapterInfo
 import ireader.core.source.model.CommandList

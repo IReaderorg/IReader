@@ -10,7 +10,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.viewModelScope
 import com.google.accompanist.web.WebViewState
 import ireader.common.models.entities.Book
-import ireader.common.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogLocal
 import ireader.common.models.entities.Chapter
 import ireader.i18n.UiText
 import ireader.core.source.model.Command

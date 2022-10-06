@@ -3,7 +3,7 @@ package ireader.data.catalog.impl
 import androidx.annotation.Keep
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import ireader.common.models.entities.CatalogRemote
+import ireader.domain.models.entities.CatalogRemote
 import ireader.core.http.HttpClients
 import ireader.domain.catalogs.service.CatalogRemoteApi
 import ireader.domain.services.extensions_insstaller_service.GetDefaultRepo
@@ -20,7 +20,7 @@ class CatalogGithubApi(
     private val getDefaultRepo: GetDefaultRepo
 ) : CatalogRemoteApi {
 
-    override suspend fun fetchCatalogs(): List<ireader.common.models.entities.CatalogRemote> {
+    override suspend fun fetchCatalogs(): List<CatalogRemote> {
         val repo = getDefaultRepo()
         val response: String =
             httpClient.default
@@ -35,7 +35,7 @@ class CatalogGithubApi(
         return catalogs.map { catalog ->
             val iconUrl = "$repoUrl/icon/${catalog.apk.replace(".apk", ".png")}"
             val appUrl = "$repoUrl/apk/${catalog.apk}"
-            ireader.common.models.entities.CatalogRemote(
+            CatalogRemote(
                 name = catalog.name,
                 description = catalog.description,
                 sourceId = catalog.id,

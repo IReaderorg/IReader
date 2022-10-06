@@ -1,6 +1,6 @@
 package ireader.domain.usecases.remote
 
-import ireader.common.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogLocal
 import ireader.i18n.EmptyQuery
 import ireader.i18n.SourceNotFoundException
 import ireader.core.source.model.Filter

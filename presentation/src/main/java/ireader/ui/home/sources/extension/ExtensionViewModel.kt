@@ -4,11 +4,11 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.viewModelScope
-import ireader.common.models.entities.Catalog
-import ireader.common.models.entities.CatalogInstalled
-import ireader.common.models.entities.CatalogLocal
-import ireader.common.models.entities.CatalogRemote
-import ireader.common.models.entities.SourceState
+import ireader.domain.models.entities.Catalog
+import ireader.domain.models.entities.CatalogInstalled
+import ireader.domain.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogRemote
+import ireader.domain.models.entities.SourceState
 import ireader.core.os.InstallStep
 import ireader.domain.catalogs.interactor.GetCatalogsByType
 import ireader.domain.catalogs.interactor.InstallCatalog

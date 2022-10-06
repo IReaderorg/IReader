@@ -2,7 +2,7 @@
 
 package ireader.domain.catalogs.interactor
 
-import ireader.common.models.entities.Catalog
+import ireader.domain.models.entities.Catalog
 import ireader.domain.catalogs.CatalogStore
 
 class TogglePinnedCatalog(

@@ -65,12 +65,12 @@ object GlobalSearchScreenSpec : ScreenSpec {
                     Log.error(e, "")
                 }
             },
-            onGoToExplore = { index ->
+            onGoToExplore = { item ->
                 try {
                     if (vm.query.isNotBlank()) {
                         controller.navController.navigate(
                             ExploreScreenSpec.buildRoute(
-                                vm.searchItems[index].source.id,
+                                item.source.id,
                                 query = vm.query
                             )
                         )
@@ -82,3 +82,4 @@ object GlobalSearchScreenSpec : ScreenSpec {
         )
     }
 }
+

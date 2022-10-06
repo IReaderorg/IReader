@@ -1,6 +1,6 @@
 package ireader.ui.home.sources.extension
 
-import ireader.common.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogLocal
 
 data class ExtensionScreenState(
     val sources: List<ireader.core.source.CatalogSource> = emptyList(),

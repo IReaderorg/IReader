@@ -15,6 +15,9 @@ import ireader.core.source.Source
 import ireader.core.source.TestSource
 import ireader.domain.R
 import ireader.domain.catalogs.service.CatalogLoader
+import ireader.domain.models.entities.CatalogBundled
+import ireader.domain.models.entities.CatalogInstalled
+import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.utils.extensions.withIOContext
@@ -44,11 +47,11 @@ class AndroidCatalogLoader(
      * Return a list of all the installed catalogs initialized concurrently.
      */
     @SuppressLint("QueryPermissionsNeeded")
-    override suspend fun loadAll(): List<ireader.common.models.entities.CatalogLocal> {
-        val bundled = mutableListOf<ireader.common.models.entities.CatalogLocal>()
+    override suspend fun loadAll(): List<CatalogLocal> {
+        val bundled = mutableListOf<CatalogLocal>()
 
         if (BuildConfig.DEBUG) {
-            val testCatalog = ireader.common.models.entities.CatalogBundled(
+            val testCatalog = CatalogBundled(
                 TestSource(),
                 "Source used for testing"
             )
@@ -91,7 +94,7 @@ class AndroidCatalogLoader(
      * Attempts to load an catalog from the given package name. It checks if the catalog
      * contains the required feature flag before trying to load it.
      */
-    override fun loadLocalCatalog(pkgName: String): ireader.common.models.entities.CatalogInstalled.Locally? {
+    override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? {
         val file = File(simpleStorage.extensionDirectory(), "${pkgName}/${pkgName}.apk")
         val pkgInfo = if (file.exists()) {
             pkgManager.getPackageArchiveInfo(file.absolutePath, PACKAGE_FLAGS)
@@ -110,7 +113,7 @@ class AndroidCatalogLoader(
      * Attempts to load an catalog from the given package name. It checks if the catalog
      * contains the required feature flag before trying to load it.
      */
-    override fun loadSystemCatalog(pkgName: String): ireader.common.models.entities.CatalogInstalled.SystemWide? {
+    override fun loadSystemCatalog(pkgName: String): CatalogInstalled.SystemWide? {
         val iconFile = File(simpleStorage.extensionDirectory(), "${pkgName}/${pkgName}.png")
         val pkgInfo = try {
             pkgManager.getPackageInfo(pkgName, PACKAGE_FLAGS)
@@ -132,13 +135,13 @@ class AndroidCatalogLoader(
         pkgName: String,
         pkgInfo: PackageInfo,
         file: File,
-    ): ireader.common.models.entities.CatalogInstalled.Locally? {
+    ): CatalogInstalled.Locally? {
         val data = validateMetadata(pkgName, pkgInfo) ?: return null
         val dexOutputDir = context.codeCacheDir.absolutePath
         val loader = DexClassLoader(file.absolutePath, dexOutputDir, null, context.classLoader)
         val source = loadSource(pkgName, loader, data) ?: return null
 
-        return ireader.common.models.entities.CatalogInstalled.Locally(
+        return CatalogInstalled.Locally(
             name = source.name,
             description = data.description,
             source = source,
@@ -161,13 +164,13 @@ class AndroidCatalogLoader(
         pkgName: String,
         pkgInfo: PackageInfo,
         iconFile: File? = null
-    ): ireader.common.models.entities.CatalogInstalled.SystemWide? {
+    ): CatalogInstalled.SystemWide? {
         val data = validateMetadata(pkgName, pkgInfo) ?: return null
 
         val loader = PathClassLoader(pkgInfo.applicationInfo.sourceDir, null, context.classLoader)
         val source = loadSource(pkgName, loader, data)
 
-        return ireader.common.models.entities.CatalogInstalled.SystemWide(
+        return CatalogInstalled.SystemWide(
             name = source?.name ?: context.resources.getString(R.string.unknown),
             description = data.description,
             source = source,

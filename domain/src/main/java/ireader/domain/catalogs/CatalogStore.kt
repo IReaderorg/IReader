@@ -9,10 +9,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import ireader.common.models.entities.CatalogBundled
-import ireader.common.models.entities.CatalogInstalled
-import ireader.common.models.entities.CatalogLocal
-import ireader.common.models.entities.CatalogRemote
+import ireader.domain.models.entities.CatalogBundled
+import ireader.domain.models.entities.CatalogInstalled
+import ireader.domain.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogRemote
 import ireader.core.source.LocalSource
 import ireader.core.util.replace
 import ireader.domain.catalogs.service.CatalogInstallationChange

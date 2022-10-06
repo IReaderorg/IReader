@@ -12,10 +12,10 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import ireader.common.models.entities.Catalog
-import ireader.common.models.entities.CatalogInstalled
-import ireader.common.models.entities.SourceState
-import ireader.common.models.entities.key
+import ireader.domain.models.entities.Catalog
+import ireader.domain.models.entities.CatalogInstalled
+import ireader.domain.models.entities.SourceState
+import ireader.domain.models.entities.key
 import ireader.ui.home.sources.extension.CatalogItem
 import ireader.ui.home.sources.extension.ExtensionViewModel
 import ireader.ui.home.sources.extension.SourceHeader

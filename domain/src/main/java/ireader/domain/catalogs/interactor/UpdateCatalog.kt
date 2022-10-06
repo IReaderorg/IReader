@@ -4,7 +4,7 @@ package ireader.domain.catalogs.interactor
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import ireader.common.models.entities.CatalogInstalled
+import ireader.domain.models.entities.CatalogInstalled
 import ireader.core.os.InstallStep
 import ireader.domain.catalogs.service.CatalogRemoteRepository
 

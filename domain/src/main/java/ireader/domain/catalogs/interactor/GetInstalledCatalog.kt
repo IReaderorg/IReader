@@ -2,8 +2,8 @@
 
 package ireader.domain.catalogs.interactor
 
-import ireader.common.models.entities.CatalogInstalled
 import ireader.domain.catalogs.CatalogStore
+import ireader.domain.models.entities.CatalogInstalled
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map

@@ -1,5 +1,5 @@
 
-package ireader.common.models.entities
+package ireader.domain.models.entities
 
 import androidx.annotation.Keep
 import ireader.core.source.Source
@@ -92,7 +92,7 @@ enum class SourceState {
     Nothing
 }
 
-fun Catalog.key(state: SourceState,index: Long,repoId: Long): String {
+fun Catalog.key(state: SourceState, index: Long, repoId: Long): String {
     if (sourceId == -1L) return  "$index-installed"
     val name = when(this) {
         is CatalogInstalled.SystemWide -> "system-"

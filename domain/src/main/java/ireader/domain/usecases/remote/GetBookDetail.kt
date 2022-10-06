@@ -1,12 +1,10 @@
 package ireader.domain.usecases.remote
 
-import ireader.domain.utils.extensions.convertLongToTime
 import ireader.domain.utils.extensions.currentTimeToLong
 import kotlinx.coroutines.CancellationException
-import ireader.domain.utils.extensions.withIOContext
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.Book.Companion.toBookInfo
-import ireader.common.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogLocal
 import ireader.common.models.entities.toBook
 import ireader.i18n.UiText
 import ireader.i18n.SourceNotFoundException
@@ -14,8 +12,6 @@ import ireader.domain.usecases.local.book_usecases.updateBook
 import ireader.core.log.Log
 import ireader.core.source.model.CommandList
 import ireader.domain.utils.exceptionHandler
-import ireader.domain.utils.extensions.async.withIOContext
-import ireader.domain.utils.extensions.currentTimeToLong
 import org.koin.core.annotation.Factory
 
 @Factory

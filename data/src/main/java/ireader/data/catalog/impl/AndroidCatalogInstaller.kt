@@ -11,6 +11,7 @@ import ireader.core.log.Log
 import ireader.core.os.InstallStep
 import ireader.core.os.PackageInstaller
 import ireader.domain.catalogs.service.CatalogInstaller
+import ireader.domain.models.entities.CatalogRemote
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.i18n.UiText
 import ireader.i18n.asString
@@ -44,7 +45,7 @@ class AndroidCatalogInstaller(
      *
      * @param catalog The catalog to install.
      */
-    override fun install(catalog: ireader.common.models.entities.CatalogRemote): Flow<InstallStep> =
+    override fun install(catalog: CatalogRemote): Flow<InstallStep> =
         flow {
             emit(InstallStep.Downloading)
             val tmpApkFile = File(context.cacheDir, "${catalog.pkgName}.apk")

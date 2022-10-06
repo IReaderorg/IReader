@@ -2,11 +2,10 @@
 
 package ireader.data.catalog.impl.interactor
 
-import ireader.common.models.entities.CatalogInstalled
+import ireader.domain.models.entities.CatalogInstalled
 import ireader.data.catalog.impl.AndroidCatalogInstaller
 import ireader.data.catalog.impl.AndroidLocalInstaller
 import ireader.domain.catalogs.interactor.UninstallCatalogs
-import ireader.domain.catalogs.service.CatalogInstaller
 import org.koin.core.annotation.Single
 
 @Single

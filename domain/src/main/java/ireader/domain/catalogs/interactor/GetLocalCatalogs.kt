@@ -5,7 +5,7 @@ package ireader.domain.catalogs.interactor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import ireader.domain.data.repository.BookRepository
-import ireader.common.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.catalogs.model.CatalogSort
 

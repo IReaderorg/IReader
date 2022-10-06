@@ -1,6 +1,6 @@
 package ireader.ui.home.sources.global_search
 
-import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,57 +12,41 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import ireader.common.models.entities.BaseBook
 import ireader.common.models.entities.Book
+import ireader.core.source.Source
+import ireader.presentation.R
 import ireader.ui.component.list.layouts.BookImage
+import ireader.ui.component.loading.DotsFlashing
 import ireader.ui.component.reusable_composable.AppIconButton
 import ireader.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.ui.component.reusable_composable.SmallTextComposable
-import ireader.ui.component.loading.DotsFlashing
-import ireader.ui.home.sources.global_search.viewmodel.GlobalSearchState
+import ireader.ui.home.sources.global_search.viewmodel.GlobalSearchViewModel
 import ireader.ui.home.sources.global_search.viewmodel.SearchItem
-import ireader.presentation.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GlobalSearchScreen(
-    vm: GlobalSearchState,
+    vm: GlobalSearchViewModel,
     onPopBackStack: () -> Unit,
     onSearch: (query: String) -> Unit,
     onBook: (Book) -> Unit,
-    onGoToExplore: (Int) -> Unit,
+    onGoToExplore: (SearchItem) -> Unit,
     scrollBehavior: TopAppBarScrollBehavior?
 
 ) {
 
-    val uiSearch = remember {
-        derivedStateOf {
-            vm.searchItems.filter { it.items.isNotEmpty() }
-        }
-    }
-    val emptySearches = remember {
-        derivedStateOf {
-            vm.searchItems.filter { it.items.isEmpty() }
-        }
-    }
-    val allSearch = remember {
-        derivedStateOf {
-            uiSearch.value + emptySearches.value
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -79,11 +63,39 @@ fun GlobalSearchScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            items(count = allSearch.value.size) { index ->
+            items(
+                items = vm.withResult,
+                key = { item ->
+                    item.source.key(Types.WithResult)
+                },
+            ) { item ->
                 GlobalSearchBookInfo(
-                    allSearch.value[index],
+                    item,
                     onBook = onBook,
-                    goToExplore = { onGoToExplore(index) }
+                    goToExplore = { onGoToExplore(item) },
+                    false
+                )
+            }
+            items(items = vm.inProgress,
+                key = { item ->
+                    item.source.key(Types.InProgress)
+                },) { item ->
+                GlobalSearchBookInfo(
+                    item,
+                    onBook = onBook,
+                    goToExplore = { onGoToExplore(item) },
+                    true
+                )
+            }
+            items(items = vm.noResult,
+                key = { item ->
+                    item.source.key(Types.NoResult)
+                },) { item ->
+                GlobalSearchBookInfo(
+                    item,
+                    onBook = onBook,
+                    goToExplore = { onGoToExplore(item) },
+                    false
                 )
             }
         }
@@ -91,17 +103,34 @@ fun GlobalSearchScreen(
 //    }
 }
 
+private enum class Types {
+    WithResult,
+    NoResult,
+    InProgress;
+}
+
+
+private fun Source.key(type:Types) :String {
+   return when(type) {
+        Types.InProgress -> "in_progress-${this.id}"
+        Types.NoResult -> "no_result-${this.id}"
+        Types.WithResult -> "with_result-${this.id}"
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GlobalSearchBookInfo(
     book: SearchItem,
     onBook: (Book) -> Unit,
     goToExplore: () -> Unit,
+    loading:Boolean
 ) {
     val modifier = when (book.items.isNotEmpty()) {
         true ->
             Modifier
                 .fillMaxWidth()
-                .animateContentSize()
+
         else -> Modifier
     }
     Column(modifier = modifier) {
@@ -121,7 +150,7 @@ fun GlobalSearchBookInfo(
                 SmallTextComposable(text = book.source.lang.uppercase())
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                DotsFlashing(book.loading)
+                DotsFlashing(loading)
                 AppIconButton(
                     imageVector = Icons.Default.ArrowForward,
                     contentDescription = stringResource(R.string.open_explore),

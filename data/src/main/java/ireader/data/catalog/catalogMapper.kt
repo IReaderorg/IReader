@@ -1,6 +1,6 @@
 package ireader.data.catalog
 
-import ireader.common.models.entities.CatalogRemote
+import ireader.domain.models.entities.CatalogRemote
 
 val catalogMapper = { sourceId: Long,source:Long, name: String, description: String, pkgName: String, versionName: String, versionCode: Int, lang: String, pkgUrl: String, iconUrl: String, nsfw: Boolean ->
 
