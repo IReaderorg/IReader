@@ -406,4 +406,5 @@
     <string name="light">Светлый режим</string>
     <string name="other_source">Другие</string>
     <string name="all_lang">Все</string>
+    <string name="no_error">Без ошибок</string>
 </resources>
