@@ -65,11 +65,16 @@ class LibraryRepositoryImpl(
         return when (sort.type) {
             LibrarySort.Type.Title -> this.sortedBy { it.title }
             LibrarySort.Type.LastRead -> {
-                val lastReads : List<LibraryBook> =
-                    handler.awaitList {
-                        bookQueries.getLastRead(libraryManga)
+                val list = handler.awaitList {
+                    bookQueries.getLastRead(libraryManga)
+                }
+                val books: List<LibraryBook> = this.map { book ->
+                    book.apply {
+                        lastRead = list.find { item -> item.id == book.id }?.lastRead ?: 0L
                     }
-                (lastReads + this).distinctBy { it.id }
+
+                }
+                books.sortedBy { it.lastRead }
             }
 
             LibrarySort.Type.LastUpdated -> this.sortedBy { it.lastUpdate }
@@ -82,25 +87,25 @@ class LibraryRepositoryImpl(
 
             LibrarySort.Type.DateAdded
             -> {
-                val dateAdded : List<LibraryBook> =
+                val dateAdded: List<LibraryBook> =
                     handler.awaitList {
                         bookQueries.getLatestByChapterUploadDate(libraryManga)
                     }
                 return this.map { book ->
                     dateAdded.firstOrNull { it.id == book.id }?.let { newOne ->
-                        book.apply {  dateUpload =newOne.dateUpload }
+                        book.apply { dateUpload = newOne.dateUpload }
                     } ?: book
                 }.sortedBy { it.dateUpload }
             }
             LibrarySort.Type.DateFetched
-            ->  {
-                val dateFetched : List<LibraryBook> =
+            -> {
+                val dateFetched: List<LibraryBook> =
                     handler.awaitList {
                         bookQueries.getLatestByChapterFetchDate(libraryManga)
                     }
                 return this.map { book ->
                     dateFetched.firstOrNull { it.id == book.id }?.let { newOne ->
-                        book.apply {  this.dateFetched  = newOne.dateFetched }
+                        book.apply { this.dateFetched = newOne.dateFetched }
                     } ?: book
                 }.sortedBy { it.dateFetched }
             }

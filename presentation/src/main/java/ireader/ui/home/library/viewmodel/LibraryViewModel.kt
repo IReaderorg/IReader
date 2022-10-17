@@ -219,7 +219,7 @@ fun getLibraryForCategoryIndex(categoryIndex: Int): State<List<BookItem>> {
         filters.value,
         searchQuery,
         showAllCategoryTab.value,
-        categories.size
+        categories.size,
     ) {
         val query = searchQuery
         if (query.isNullOrBlank()) {

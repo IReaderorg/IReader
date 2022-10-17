@@ -181,6 +181,7 @@ data class LibraryBook(
     val hasStarted
         get() = readCount > 0
     var category: Int = 0
+    var lastRead: Long = 0
 
     fun toBookItem(): BookItem {
         return BookItem(

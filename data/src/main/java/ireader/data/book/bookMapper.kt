@@ -89,6 +89,7 @@ val libraryManga:
             this.unreadCount = unreadCount.toInt()
             this.readCount = readCount.toInt()
             this.category = category.toInt()
+            this.lastRead = max?.toLong()?:0L
         }
     }
 
