@@ -386,4 +386,5 @@
     <string name="bottom_left">En bas à gauche</string>
     <string name="selectable_mode">Mode sélection</string>
     <string name="select_between">Sélectionner entre</string>
+    <string name="secure_screen">Écran sécurisé</string>
 </resources>
