@@ -8,8 +8,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
+import com.google.common.collect.ImmutableList
 import ireader.common.models.entities.Chapter
 import ireader.core.log.Log
 import ireader.core.source.findInstance
@@ -36,34 +39,57 @@ class VideoScreenViewModel(
     val insertUseCases: LocalInsertUseCases,
     private val playerCreator: PlayerCreator,
     val savedStateHandle: SavedStateHandle,
+    val subtitleHandler: SubtitleHandler,
 ) : BaseViewModel() {
-    val chapterId : StateFlow<Long> = savedStateHandle.getStateFlow(NavigationArgs.chapterId.name, -1L)
+    val chapterId: StateFlow<Long> =
+        savedStateHandle.getStateFlow(NavigationArgs.chapterId.name, -1L)
+
+    val playbackspeed = mutableStateOf(1f)
+
 
     lateinit var player: Player
 
+    val ss = player.currentCues.cues
+
+    val subtitle = MediaItem.SubtitleConfiguration.Builder(subtitleHandler.subtitles)
+        .setMimeType(MimeTypes.APPLICATION_SUBRIP)
+        .setLanguage("en")
+        .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+        .build()
+
 
     var chapter by mutableStateOf<Chapter?>(null)
-    val videoUri : State<String?> =  derivedStateOf { chapter?.content?.findInstance<MovieUrl>()?.url }
+    val videoUri: State<String?> =
+        derivedStateOf { chapter?.content?.findInstance<MovieUrl>()?.url }
+
+    var showMenu by mutableStateOf(false)
 
 
-    val mediaItem = derivedStateOf { videoUri.value?.let { MediaItem.Builder().setMediaId(it).setUri(videoUri.value).build() } }
+    val mediaItem = derivedStateOf {
+        videoUri.value?.let {
+            MediaItem.Builder().setMediaId(it).setUri(videoUri.value).setSubtitleConfigurations(
+                ImmutableList.of(subtitle)
+            ).build()
+        }
+    }
 
 
     init {
+        player.currentCues
         val chapter = runBlocking {
             getChapterUseCase.findChapterById(chapterId.value)
         }
         val book = runBlocking {
             getBookUseCases.findBookById(chapter?.bookId)
         }
-        player  = playerCreator.init()
+        player = playerCreator.init()
         val source = book?.sourceId?.let { getLocalCatalog.get(it) }
         this@VideoScreenViewModel.chapter = chapter
         viewModelScope.launch {
             if (chapter != null && chapter.content.isEmpty()) {
                 remoteUseCases.getRemoteReadingContent(chapter, source, onError = {
                     Log.error(it.toString())
-                }, onSuccess = {result ->
+                }, onSuccess = { result ->
                     insertUseCases.insertChapter(result)
                     this@VideoScreenViewModel.chapter = result
                 },

@@ -625,25 +625,73 @@ fun SwitchPreference(
         onClick = { preference.value = !preference.value }
     )
 }
+@Composable
+fun <Key> ChoicePreference(
+    preference: MutableState<Key>,
+    choices: Map<Key, String>,
+    title: String,
+    subtitle: String? = null,
+    onValue: ((Key) -> Unit)? = null,
+    confirmText: String = "",
+    onConfirm: (() -> Unit)? = null,
+    onItemSelected: (() -> Unit)? = null,
+    enable: Boolean = true
+) {
+    var showDialog by remember { mutableStateOf(false) }
 
-// @Composable
-// fun <Key> ChoicePreference(
-//    preference: PreferenceMutableState<Key>,
-//    choices: Map<Key, String>,
-//    title: String,
-//    subtitle: String? = null,
-//    onValue: ((Key) -> Unit)? = null
-// ) {
-//    ChoicePreference(
-//        preference,
-//        choices.mapValues { map -> stringResource(map.value) },
-//        stringResource(title),
-//        subtitle,
-//        onValue
-//    )
-// }
+    PreferenceRow(
+        title = title,
+        subtitle = if (subtitle == null) choices[preference.value] else null,
+        onClick = { showDialog = true },
+        enable = enable
 
-@OptIn(ExperimentalMaterial3Api::class)
+    )
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(title) },
+            text = {
+                LazyColumn {
+                    items(choices.toList()) { (value, text) ->
+                        Row(
+                            modifier = Modifier
+                                .requiredHeight(48.dp)
+                                .fillMaxWidth()
+                                .clickable(onClick = {
+                                    if (onValue != null) {
+                                        onValue(value)
+                                    } else {
+                                        preference.value = value
+                                    }
+                                    if (onItemSelected != null) {
+                                        onItemSelected()
+                                    }
+
+                                    showDialog = false
+                                }),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = value == preference.value,
+                                onClick = null,
+                            )
+                            Text(text = text, modifier = Modifier.padding(start = 24.dp))
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                if (onConfirm != null) {
+                    TextButton(onClick = onConfirm) {
+                        MidSizeTextComposable(text = confirmText)
+                    }
+                }
+            }
+        )
+    }
+}
+
 @Composable
 fun <Key> ChoicePreference(
     preference: PreferenceMutableState<Key>,

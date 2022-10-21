@@ -7,6 +7,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -18,7 +22,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
+import androidx.media3.ui.SubtitleView
+import com.google.common.collect.ImmutableList
+import ireader.presentation.BuildConfig
 import ireader.presentation.R
 import ireader.presentation.ui.component.LockScreenOrientation
 import ireader.presentation.ui.video.component.SimpleController
@@ -46,26 +55,36 @@ private enum class ControllerType {
 
 private val ControllerTypes = ControllerType.values().toList()
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun VideoPresenter(
-    vm: VideoScreenViewModel
+    vm: VideoScreenViewModel,
+    onShowMenu: () -> Unit
 ) {
     LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
     val context = LocalContext.current
 
-    val url by rememberSaveable { mutableStateOf(Uri.parse(
-        ContentResolver.SCHEME_ANDROID_RESOURCE
-                + File.pathSeparator + File.separator + File.separator
-                + context.packageName
-                + File.separator
-                + R.raw.sample
-    )) }
+    val url by rememberSaveable {
+        mutableStateOf(
+            Uri.parse(
+                ContentResolver.SCHEME_ANDROID_RESOURCE
+                        + File.pathSeparator + File.separator + File.separator
+                        + context.packageName
+                        + File.separator
+                        + R.raw.sample
+            )
+        )
+    }
 
     val setPlayer by rememberSaveable { mutableStateOf(true) }
     val playWhenReady by rememberSaveable { mutableStateOf(true) }
-
+    // need to change this part later
+    val uri = if (BuildConfig.DEBUG) {
+        url
+    } else vm.videoUri.value?.toUri()
     val mediaItem = remember {
-        MediaItem.Builder().setMediaId(url.toString()).setUri(url).build()
+        MediaItem.Builder().setMediaId(uri.toString()).setUri(uri)
+            .setSubtitleConfigurations(ImmutableList.of(vm.subtitle)).build()
     }
     var rememberedMediaItemIdAndPosition: Pair<String, Long>? by remember { mutableStateOf(null) }
     val player = vm.player
@@ -73,6 +92,7 @@ fun VideoPresenter(
         player?.playWhenReady = playWhenReady
         onDispose {}
     }
+    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     DisposableEffect(mediaItem, player) {
         player?.run {
             if (mediaItem != null) {
@@ -101,9 +121,22 @@ fun VideoPresenter(
             Box(Modifier.fillMaxSize(), Alignment.Center) {
                 CircularProgressIndicator()
             }
-        }
+        },
+        subtitles = {
+            AndroidView(factory = {
+                SubtitleView(it)
+            }, update = { view ->
+
+            })
+            Text(text = "Test")
+        },
     ) { playerState ->
-        SimpleController(vm.chapter?.name ?: "",playerState, Modifier.fillMaxSize())
+        SimpleController(
+            vm.chapter?.name ?: "",
+            playerState,
+            Modifier.fillMaxSize(),
+            onShowMenu = onShowMenu
+        )
     }
 }
 
