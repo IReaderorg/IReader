@@ -49,7 +49,6 @@ class VideoScreenViewModel(
 
     lateinit var player: Player
 
-    val ss = player.currentCues.cues
 
     val subtitle = MediaItem.SubtitleConfiguration.Builder(subtitleHandler.subtitles)
         .setMimeType(MimeTypes.APPLICATION_SUBRIP)
@@ -75,7 +74,6 @@ class VideoScreenViewModel(
 
 
     init {
-        player.currentCues
         val chapter = runBlocking {
             getChapterUseCase.findChapterById(chapterId.value)
         }

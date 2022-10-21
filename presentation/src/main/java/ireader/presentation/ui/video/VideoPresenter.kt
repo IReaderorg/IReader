@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
+import androidx.media3.common.text.Cue
 import androidx.media3.ui.SubtitleView
 import com.google.common.collect.ImmutableList
 import ireader.presentation.BuildConfig
@@ -126,7 +127,12 @@ fun VideoPresenter(
             AndroidView(factory = {
                 SubtitleView(it)
             }, update = { view ->
-
+                view.setCues(listOf(
+                    Cue.Builder().setText("Test").setPosition(1f).build(),
+                    Cue.Builder().setText("Test1").setPosition(2f).build(),
+                    Cue.Builder().setText("Test2").setPosition(3f).build(),
+                    Cue.Builder().setText("Test3").setPosition(4f).build(),
+                ))
             })
             Text(text = "Test")
         },
