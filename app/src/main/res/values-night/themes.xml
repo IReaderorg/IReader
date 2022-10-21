@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.Splash" parent="Theme.App">
+        <item name="colorBackgroundSplash">#FF000000</item>
+        <item name="colorOnSurface">#FFFFFF</item>
+
+        <item name="android:windowBackground">@drawable/bg_splash_dark</item>
+        <item name="android:statusBarColor">?attr/colorBackgroundSplash</item>
+        <item name="android:navigationBarColor">?attr/colorBackgroundSplash</item>
+        <item name="postSplashScreenTheme">@style/Theme.App</item>
+
+
+    </style>
+
+</resources>

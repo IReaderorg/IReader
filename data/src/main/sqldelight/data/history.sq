@@ -1,0 +1,115 @@
+import java.util.Date;
+
+CREATE TABLE history(
+    _id INTEGER NOT NULL PRIMARY KEY,
+    chapter_id INTEGER NOT NULL UNIQUE,
+    last_read INTEGER,
+    time_read INTEGER NOT NULL,
+    FOREIGN KEY(chapter_id) REFERENCES chapter (_id)
+    ON DELETE CASCADE
+);
+
+findHistoryByChapterId:
+SELECT * FROM history WHERE chapter_id = :chapterId ORDER BY history.last_read DESC LIMIT 1;
+
+findHistoryByBookId:
+SELECT * FROM history WHERE chapter_id IN (SELECT  chapter._id FROM chapter WHERE chapter.book_id = :bookId) ORDER BY history.last_read DESC LIMIT 1;
+
+
+findHistories:
+SELECT * FROM history;
+
+searchHistories:
+SELECT history.*,
+book.title,book.source, book.thumbnail_url, book.favorite,chapter.name,
+date(ROUND(last_read / 1000), 'unixepoch', 'localtime') AS date,chapter.chapter_number
+    FROM history
+    JOIN chapter ON history.chapter_id = chapter._id
+    JOIN book ON history.chapter_id = chapter._id
+    WHERE book.title LIKE '%' || :query || '%'
+    ORDER BY history.last_read DESC;
+
+deleteHistoryByChapterId:
+DELETE FROM history WHERE chapter_id = :id;
+
+deleteAllHistories:
+DELETE FROM history;
+
+
+update:
+UPDATE history SET
+    chapter_id = coalesce(:chapter_id, chapter_id),
+    time_read = coalesce(:readAt, time_read),
+    last_read = coalesce(:progress, last_read)
+WHERE chapter_id = :chapter_id;
+
+
+findAllWithRelations:
+SELECT history._id
+FROM history
+JOIN book ON history._id = book._id
+JOIN chapter ON history.chapter_id = chapter._id
+ORDER BY last_read DESC;
+
+--
+CREATE INDEX history_history_chapter_id_index ON history(chapter_id);
+
+getHistoryByMangaId:
+SELECT
+H._id,
+H.chapter_id,
+H.last_read,
+H.time_read
+FROM history H
+JOIN chapter C
+ON H.chapter_id = C._id
+WHERE C.book_id = :mangaId AND C._id = H.chapter_id;
+
+getHistoryByChapterUrl:
+SELECT
+H._id,
+H.chapter_id,
+H.last_read,
+H.time_read
+FROM history H
+JOIN chapter C
+ON H.chapter_id = C._id
+WHERE C.url = :chapterUrl AND C._id = H.chapter_id;
+
+resetHistoryById:
+UPDATE history
+SET last_read = 0
+WHERE _id = :historyId;
+
+resetHistoryByMangaId:
+UPDATE history
+SET last_read = 0
+WHERE _id IN (
+    SELECT H._id
+    FROM book M
+    INNER JOIN chapter C
+    ON M._id = C.book_id
+    INNER JOIN history H
+    ON C._id = H.chapter_id
+    WHERE M._id = :mangaId
+);
+
+removeAllHistory:
+DELETE FROM history;
+
+removeResettedHistory:
+DELETE FROM history
+WHERE last_read = 0;
+
+upsert:
+INSERT INTO history(chapter_id, last_read, time_read)
+VALUES (:chapterId, :readAt, :time_read)
+ON CONFLICT(chapter_id)
+DO UPDATE
+SET
+    last_read = :readAt,
+    time_read = time_read + :time_read
+WHERE chapter_id = :chapterId;
+
+deleteByBookId:
+DELETE FROM history WHERE chapter_id IN (SELECT chapter._id FROM chapter WHERE chapter.book_id = :bookId);

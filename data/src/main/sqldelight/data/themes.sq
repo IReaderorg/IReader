@@ -1,0 +1,77 @@
+CREATE TABLE
+IF NOT EXISTS theme
+(
+_id INTEGER NOT NULL PRIMARY KEY,
+isDark INTEGER AS Boolean NOT NULL,
+`primary` INTEGER AS Int NOT NULL,
+onPrimary INTEGER AS Int NOT NULL,
+primaryContainer INTEGER AS Int NOT NULL,
+onPrimaryContainer INTEGER AS Int NOT NULL,
+inversePrimary INTEGER AS Int NOT NULL,
+secondary INTEGER AS Int NOT NULL,
+onSecondary INTEGER AS Int NOT NULL,
+secondaryContainer INTEGER AS Int NOT NULL,
+onSecondaryContainer INTEGER AS Int NOT NULL,
+tertiary INTEGER AS Int NOT NULL,
+onTertiary INTEGER AS Int NOT NULL,
+tertiaryContainer INTEGER AS Int NOT NULL,
+onTertiaryContainer INTEGER AS Int NOT NULL,
+background INTEGER AS Int NOT NULL,
+onBackground INTEGER AS Int NOT NULL,
+surface INTEGER AS Int NOT NULL,
+onSurface INTEGER AS Int NOT NULL,
+surfaceVariant INTEGER AS Int NOT NULL,
+onSurfaceVariant INTEGER AS Int NOT NULL,
+surfaceTint INTEGER AS Int NOT NULL,
+inverseSurface INTEGER AS Int NOT NULL,
+inverseOnSurface INTEGER AS Int NOT NULL,
+error INTEGER AS Int NOT NULL,
+onError INTEGER AS Int NOT NULL,
+errorContainer INTEGER AS Int NOT NULL,
+onErrorContainer INTEGER AS Int NOT NULL,
+outline INTEGER AS Int NOT NULL,
+outlineVariant INTEGER AS Int NOT NULL,
+scrim INTEGER AS Int NOT NULL,
+bars INTEGER AS Int NOT NULL,
+onBars INTEGER AS Int NOT NULL,
+isBarLight INTEGER AS Boolean NOT NULL
+);
+
+subscribe:
+SELECT * FROM theme;
+delete:
+DELETE FROM theme WHERE theme._id = :id;
+
+deleteAll:
+DELETE FROM theme;
+
+upsert:
+INSERT INTO theme(
+_id,isDark,`primary`,onPrimary,primaryContainer,
+onPrimaryContainer,inversePrimary,secondary,onSecondary,
+secondaryContainer,onSecondaryContainer,tertiary,`onTertiary`,
+tertiaryContainer,background,onBackground,surface,onSurface,
+surfaceTint,inverseSurface,inverseOnSurface,error,onError,
+errorContainer,onErrorContainer,outline,outlineVariant,
+scrim,bars,onBars,isBarLight,surfaceVariant,
+onSurfaceVariant,onTertiaryContainer)
+VALUES (:id,:isDark,:primary,:onPrimary,
+:primaryContainer,:onPrimaryContainer,
+:inversePrimary,:secondary,:onSecondary,
+:secondaryContainer,:onSecondaryContainer,:tertiary,
+:setOnTertiary,:tertiaryContainer,:background,:onBackground,
+:surface,:onSurface,:surfaceTint,:inverseSurface,:inverseOnSurface,
+:error,:onError,:errorContainer,:onErrorContainer,
+:outline,:outlineVariant,:scrim,:bars,:onBars,
+:isBarLight,:surfaceVariant,:onSurfaceVariant,:onTertiaryContainer)
+ON CONFLICT(_id)
+DO UPDATE
+SET
+    `primary` = :primary,
+    secondary = :secondary,
+    bars = :bars
+WHERE _id = :id;
+
+
+selectLastInsertedRowId:
+SELECT last_insert_rowid();

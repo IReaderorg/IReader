@@ -1,0 +1,30 @@
+[versions]
+kotlin = "1.7.10"
+gradle = "1.7.10"
+coroutines = "1.6.4"
+serialization = "1.4.0"
+datetime = "0.4.0"
+ksp = "1.7.10-1.0.6"
+
+
+[libraries]
+gradle-kotlinSerialization = { module =  "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
+gradle-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "gradle" }
+stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-common", version.ref = "kotlin" }
+reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+dokka = { module = "org.jetbrains.dokka:kotlin-as-java-plugin", version.ref = "kotlin" }
+
+coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+
+serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+serialization-protobuf = { module = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf", version.ref = "serialization" }
+
+datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
+ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
+ksp-gradle = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
+[plugins]
+dokka = { id = "org.jetbrains.dokka", version = "1.7.10" }
+kotlinSerilization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

@@ -1,0 +1,131 @@
+[versions]
+ktor = "2.0.3"
+okhttp = "5.0.0-alpha.10"
+aboutLibraries = "10.0.0-b03"
+
+tinylog = "2.5.0-M2.1"
+modernstorage = "1.0.0-alpha06"
+coil_version = "2.2.1"
+jsoup = "1.15.2"
+moko = "0.20.1"
+koinAnnotation = "1.0.3"
+koin = "3.2.1"
+ideaExt = "1.1.6"
+sqldelight = "1.5.3"
+detekt = "1.21.0"
+exoplayer="1.0.0-beta02"
+
+
+[libraries]
+desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
+gradle-tools = "com.android.tools.build:gradle:7.3.1"
+
+gradle-google = "com.google.gms:google-services:4.3.14"
+gradle-firebaseCrashlytic = "com.google.firebase:firebase-crashlytics-gradle:2.9.1"
+gradle-benmanes = "com.github.ben-manes:gradle-versions-plugin:0.42.0"
+gradle-idea-ext = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.5"
+gradle-compose = "org.jetbrains.compose:compose-gradle-plugin:1.1.1"
+gradle-publish = "com.vanniktech:gradle-maven-publish-plugin:0.21.0"
+
+coil-core = { module = "io.coil-kt:coil", version.ref = "coil_version" }
+coil-gif = { module = "io.coil-kt:coil-gif", version.ref = "coil_version" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil_version" }
+
+gson = "com.google.code.gson:gson:2.9.0"
+googleTranslator = "com.google.mlkit:translate:17.0.0"
+htmlUnit-android = "net.sourceforge.htmlunit:htmlunit-android:2.63.0-SNAPSHOT"
+
+modernstorage-permissions = { module = "com.google.modernstorage:modernstorage-permissions", version.ref = "modernstorage" }
+modernstorage-storage = { module = "com.google.modernstorage:modernstorage-storage", version.ref = "modernstorage" }
+
+
+
+
+storage = { module = "com.anggrayudi:storage", version = "1.4.1" }
+documentfile = { module = "androidx.documentfile:documentfile", version = "1.0.1" }
+ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-core-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
+ktor-core-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-contentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-contentNegotiation-gson = { module = "io.ktor:ktor-serialization-gson", version.ref = "ktor" }
+ktor-contentNegotiation-kotlinx = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-contentNegotiation-jackson = { module = "io.ktor:ktor-serialization-jackson", version.ref = "ktor" }
+
+
+moko-core = { module = "dev.icerock.moko:resources", version.ref  = "moko" }
+moko-gradle = { module = "dev.icerock.moko:resources-generator", version.ref  = "moko" }
+
+
+okhttp-okhttp3 = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+okhttp-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
+okhttp-doh = { module = "com.squareup.okhttp3:okhttp-dnsoverhttps", version.ref = "okhttp" }
+
+firebase-bom = "com.google.firebase:firebase-bom:30.1.0"
+firebase-analyticKtx = { module = "com.google.firebase:firebase-analytics-ktx" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
+firebase-analytic = { module = "com.google.firebase:firebase-analytics" }
+
+
+multidex = "androidx.multidex:multidex:2.0.1"
+okio = "com.squareup.okio:okio:3.1.0"
+quickjs-android = "app.cash.quickjs:quickjs-android:0.9.2"
+quickjs-jvm = "app.cash.quickjs:quickjs-jvm:0.9.2"
+jsoup = { module =  "org.jsoup:jsoup", version.ref = "jsoup" }
+
+tinylog-impl = { module = "org.tinylog:tinylog-impl", version.ref = "tinylog" }
+tinylog-api = { module = "org.tinylog:tinylog-api", version.ref = "tinylog" }
+
+
+ireader-ktorCore =  { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ireader-ktorContentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ireader-ktorSerialization =  { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ireader-ktorGson =  { module = "io.ktor:ktor-serialization-gson", version.ref = "ktor" }
+ireader-ktorOkhttp =   { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ireader-ktorAndroid = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
+
+
+
+koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koinAnnotation" }
+koin-kspCompiler = { module = "io.insert-koin:koin-ksp-compiler", version.ref = "koinAnnotation" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-workManager = { module = "io.insert-koin:koin-androidx-workmanager", version.ref = "koin" }
+koin-androidCompose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+
+
+sqldelight-runtime = { module = "com.squareup.sqldelight:runtime", version.ref = "sqldelight" }
+sqldelight-coroutines = { module = "com.squareup.sqldelight:coroutines-extensions", version.ref ="sqldelight" }
+sqldelight-jvm = { module = "com.squareup.sqldelight:sqlite-driver", version.ref = "sqldelight" }
+sqldelight-android = { module = "com.squareup.sqldelight:android-driver", version.ref ="sqldelight" }
+sqldelight-gradle = { module = "com.squareup.sqldelight:gradle-plugin", version.ref = "sqldelight" }
+sqldelight-android-paging = { module = "com.squareup.sqldelight:android-paging3-extensions", version.ref = "sqldelight" }
+detekt = { module = "com.twitter.compose.rules:detekt", version.ref = "detekt" }
+
+requerySqlite = "com.github.requery:sqlite-android:3.36.0"
+androidSqlite = "androidx.sqlite:sqlite-framework:2.3.0-alpha01"
+
+exoplayer-core = { module = "androidx.media3:media3-exoplayer", version.ref = "exoplayer" }
+exoplayer-ui = { module = "androidx.media3:media3-ui", version.ref = "exoplayer" }
+exoplayer-dash = { module = "androidx.media3:media3-exoplayer-dash", version.ref = "exoplayer" }
+
+
+[bundles]
+simplestorage = ["storage", "documentfile"]
+tinylog = ["tinylog-impl", "tinylog-api"]
+ireader = ["ireader-ktorCore", "ireader-ktorContentNegotiation","ireader-ktorSerialization","ireader-ktorGson","ireader-ktorOkhttp","ireader-ktorAndroid"]
+
+[plugins]
+
+
+ideaExt = { id = "org.jetbrains.gradle.plugin.idea-ext", version.ref = "ideaExt" }
+jetbrainCompose = { id = "org.jetbrains.compose", version = "1.2.0-beta01" }
+vanniktech = { id = "com.vanniktech.maven.publish", version = "0.21.0" }
+
+dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version = "1.3.0" }
+benGradleVersions = { id = "com.github.ben-manes.versions", version = "0.42.0" }
+
+sqldelight = { id = "com.squareup.sqldelight", version.ref = "sqldelight" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+google = { id = "com.google.gms.google-services", version = "4.3.14" }
+moko = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko" }

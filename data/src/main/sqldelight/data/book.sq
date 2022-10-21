@@ -1,0 +1,253 @@
+import kotlin.collections.List;
+
+
+
+CREATE TABLE book(
+    _id INTEGER NOT NULL PRIMARY KEY,
+    source INTEGER NOT NULL,
+    url TEXT NOT NULL,
+    artist TEXT,
+    author TEXT,
+    description TEXT,
+    genre TEXT AS List<String>,
+    title TEXT NOT NULL,
+    status INTEGER NOT NULL,
+    thumbnail_url TEXT,
+    favorite INTEGER AS Boolean NOT NULL,
+    last_update INTEGER AS Long,
+    next_update INTEGER AS Long,
+    initialized INTEGER AS Boolean NOT NULL,
+    viewer INTEGER NOT NULL,
+    chapter_flags INTEGER NOT NULL,
+    cover_last_modified INTEGER AS Long NOT NULL,
+    date_added INTEGER AS Long NOT NULL
+);
+
+
+CREATE INDEX library_favorite_index ON book(favorite) WHERE favorite = 1;
+CREATE INDEX mangas_url_index ON book(url);
+
+findAllBooks:
+SELECT * FROM book;
+
+
+findInLibraryBooks:
+SELECT  * FROM book WHERE favorite = 1;
+
+findBookById:
+SELECT  * FROM book WHERE _id = ?;
+
+
+findBook:
+SELECT * FROM book WHERE url = :url AND source = :sourceId;
+
+findBookByKey:
+SELECT * FROM book WHERE url = :url;
+
+searchBook:
+SELECT * FROM book WHERE title LIKE '%' || :query || '%' AND favorite = 1;
+
+deleteBook:
+DELETE FROM book WHERE _id = :bookId;
+
+deleteBookByKey:
+DELETE FROM book WHERE url = :url;
+
+deleteAllBook:
+DELETE FROM book;
+
+deleteNotInLibraryBook:
+DELETE FROM book WHERE favorite = 0;
+
+
+findFavotiteSourceId:
+SELECT source FROM book GROUP BY source ORDER BY COUNT(source) DESC;
+
+
+-- external
+
+getMangaById:
+SELECT *
+FROM book
+WHERE _id = :id;
+
+getBookByKey:
+SELECT * FROM book WHERE url = :key AND source = :sourceId;
+
+getMangaByUrlAndSource:
+SELECT *
+FROM book
+WHERE url = :url AND source = :source;
+
+getFavorites:
+SELECT *
+FROM book
+WHERE favorite = 1;
+
+getSourceIdWithFavoriteCount:
+SELECT
+source,
+count(*)
+FROM book
+WHERE favorite = 1
+GROUP BY source;
+
+getFavoriteBySourceId:
+SELECT *
+FROM book
+WHERE favorite = 1
+AND source = :source;
+
+getDuplicateLibraryManga:
+SELECT *
+FROM book
+WHERE favorite = 1
+AND LOWER(title) = :title
+AND source = :source
+LIMIT 1;
+
+resetViewerFlags:
+UPDATE book
+SET viewer = 0;
+
+getSourceIdsWithNonLibraryManga:
+SELECT source, COUNT(*) AS manga_count
+FROM book
+WHERE favorite = 0
+GROUP BY source;
+
+getLibrary:
+SELECT M.*, COALESCE(MC.category_id, 0) AS category
+FROM (
+    SELECT book.*, COALESCE(UR.unreadCount, 0) AS unread_count, COALESCE(R.readCount, 0) AS read_count
+    FROM book
+    LEFT JOIN (
+        SELECT chapter.book_id, COUNT(*) AS unreadCount
+        FROM chapter
+        WHERE chapter.read = 0
+        GROUP BY chapter.book_id
+    ) AS UR
+    ON book._id = UR.book_id
+    LEFT JOIN (
+        SELECT chapter.book_id, COUNT(*) AS readCount
+        FROM chapter
+        WHERE chapter.read = 1
+        GROUP BY chapter.book_id
+    ) AS R
+    ON book._id = R.book_id
+    WHERE book.favorite = 1
+    GROUP BY book._id
+    ORDER BY book.title
+) AS M
+LEFT JOIN (
+    SELECT *
+    FROM bookcategories
+) AS MC
+ON M._id = MC.book_id;
+
+getDownloaded:
+SELECT book.* FROM book
+ JOIN chapter
+ ON chapter.book_id = book._id
+ WHERE content IS NOT "";
+
+
+
+
+
+getLastRead:
+SELECT M.*, MAX(H.last_read) AS max
+FROM book M
+LEFT JOIN chapter C
+ON M._id = C.book_id
+LEFT JOIN history H
+ON C._id = H.chapter_id
+GROUP BY M._id
+HAVING M.favorite = 1
+ORDER BY max DESC;
+
+getLatestByLastRead:
+SELECT M.*, MAX(H.last_read) AS max
+FROM book M
+JOIN chapter C
+ON M._id = C.book_id
+LEFT JOIN history H
+ON H.chapter_id = C._id
+GROUP BY M._id
+HAVING favorite = 1
+ORDER BY max DESC ;
+
+getLatestByChapterUploadDate:
+SELECT M.*, MAX(C.date_upload) AS max
+FROM book M
+JOIN chapter C
+ON M._id = C.book_id
+GROUP BY M._id
+HAVING favorite = 1
+ORDER BY max DESC;
+
+getLatestByChapterFetchDate:
+SELECT M.*, MAX(C.date_fetch) AS max
+FROM book M
+JOIN chapter C
+ON M._id = C.book_id
+GROUP BY M._id
+HAVING favorite = 1
+ORDER BY max DESC;
+
+deleteMangasNotInLibraryBySourceIds:
+DELETE FROM book
+WHERE favorite = 0 AND source IN :sourceIds;
+
+upsert:
+INSERT OR IGNORE INTO book(
+_id,source,url,
+artist,author,description,
+genre,title,status,
+thumbnail_url,favorite,
+last_update,next_update,initialized,
+viewer,chapter_flags,cover_last_modified,
+date_added)
+VALUES (:id,:source,:url,
+:artist,:author,:description,
+:genre,:title,:status,:thumbnailUrl,
+:favorite,:lastUpdate,:nextUpdate,:initialized,
+:viewerFlags,:chapterFlags,:coverLastModified,
+:dateAdded);
+
+
+update:
+UPDATE book SET
+    source = coalesce(:source, source),
+    url = coalesce(:url, url),
+    author = coalesce(:author, author),
+    description = coalesce(:description, description),
+    genre = coalesce(:genre, genre),
+    title = coalesce(:title, title),
+    status = coalesce(:status, status),
+    thumbnail_url = coalesce(:thumbnailUrl, thumbnail_url),
+    favorite = coalesce(:favorite, favorite),
+    last_update = coalesce(:lastUpdate, last_update),
+    initialized = coalesce(:initialized, initialized),
+    viewer = coalesce(:viewer, viewer),
+    chapter_flags = coalesce(:chapterFlags, chapter_flags),
+    cover_last_modified = coalesce(:coverLastModified, cover_last_modified),
+    date_added = coalesce(:dateAdded, date_added)
+WHERE _id = :id;
+
+deleteByKey:
+DELETE FROM book
+WHERE url = :key;
+
+deleteNotInLibraryBooks:
+DELETE FROM book WHERE book.favorite = 0;
+
+deleteAll:
+DELETE FROM book;
+deleteByBookId:
+DELETE FROM book WHERE book._id = :bookId;
+
+
+
+selectLastInsertedRowId:
+SELECT last_insert_rowid();

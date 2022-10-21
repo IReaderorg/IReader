@@ -1,0 +1,102 @@
+CREATE TABLE categories(
+    _id INTEGER NOT NULL PRIMARY KEY ,
+    name TEXT NOT NULL,
+    sort INTEGER NOT NULL,
+    flags INTEGER NOT NULL
+);
+
+-- Insert system category
+INSERT OR IGNORE INTO categories(_id, name, sort, flags) VALUES (0, "", -1, 0);
+INSERT OR IGNORE INTO categories(_id, name, sort, flags) VALUES (-1, "", -1, 0);
+-- Disallow deletion of default category
+CREATE TRIGGER IF NOT EXISTS system_category_delete_trigger BEFORE DELETE
+ON categories
+BEGIN SELECT CASE
+    WHEN old._id <= 0 THEN
+        RAISE(ABORT, "System category can't be deleted")
+    END;
+END;
+
+
+findAllWithCount:
+-- User categories
+SELECT categories.*, COUNT(bookcategories.book_id) AS mangaCount
+FROM categories
+LEFT JOIN bookcategories
+ON categories._id = bookcategories.category_id
+WHERE categories._id > 0
+GROUP BY categories._id
+UNION ALL
+-- Category.ALL
+SELECT *, (
+  SELECT COUNT()
+  FROM book
+  WHERE book.favorite = 1
+) AS mangaCount
+FROM categories
+WHERE categories._id = -2
+UNION ALL
+ -- Category.UNCATEGORIZED_ID
+SELECT *, (
+  SELECT COUNT(book._id)
+  FROM book
+
+  WHERE book.favorite = 1 AND NOT EXISTS (
+    SELECT bookcategories.book_id
+    FROM bookcategories
+    WHERE book._id = bookcategories.book_id AND book.favorite = 1
+  )
+) AS mangaCount
+FROM categories
+WHERE categories._id = 0
+ORDER BY sort;
+
+getCategory:
+SELECT *
+FROM categories
+WHERE _id = :id
+LIMIT 1;
+
+getCategories:
+SELECT
+_id AS id,
+name,
+sort AS `order`,
+flags
+FROM categories
+ORDER BY sort;
+
+getCategoriesByMangaId:
+SELECT
+C._id AS id,
+C.name,
+C.sort AS `order`,
+C.flags
+FROM categories C
+JOIN bookcategories MC
+ON C._id = MC.category_id
+WHERE MC.book_id = :mangaId;
+
+insert:
+INSERT INTO categories(name, sort, flags)
+VALUES (:name, :order, :flags);
+
+delete:
+DELETE FROM categories
+WHERE _id = :categoryId;
+deleteAll:
+DELETE FROM categories;
+
+update:
+UPDATE categories
+SET name = coalesce(:name, name),
+    sort = coalesce(:order, sort),
+    flags = coalesce(:flags, flags)
+WHERE _id = :categoryId;
+
+updateAllFlags:
+UPDATE categories SET
+flags = coalesce(?, flags);
+
+selectLastInsertedRowId:
+SELECT last_insert_rowid();
