@@ -19,8 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.media3.common.MediaItem
-import ireader.core.source.findInstance
-import ireader.core.source.model.MovieUrl
 import ireader.presentation.R
 import ireader.presentation.ui.component.LockScreenOrientation
 import ireader.presentation.ui.video.component.SimpleController
@@ -54,9 +52,7 @@ fun VideoPresenter(
 ) {
     LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
     val context = LocalContext.current
-    val uri = remember(vm.chapter) {
-        vm.chapter?.content?.findInstance<MovieUrl>()?.url ?: ""
-    }
+
     val url by rememberSaveable { mutableStateOf(Uri.parse(
         ContentResolver.SCHEME_ANDROID_RESOURCE
                 + File.pathSeparator + File.separator + File.separator
@@ -65,41 +61,30 @@ fun VideoPresenter(
                 + R.raw.sample
     )) }
 
-
-
-
-    var surfaceType by rememberSaveable { mutableStateOf(SurfaceType.SurfaceView) }
-    var resizeMode by rememberSaveable { mutableStateOf(ResizeMode.Fit) }
-    var keepContentOnPlayerReset by rememberSaveable { mutableStateOf(false) }
-    var useArtwork by rememberSaveable { mutableStateOf(true) }
-    var showBuffering by rememberSaveable { mutableStateOf(ShowBuffering.Always) }
-
     val setPlayer by rememberSaveable { mutableStateOf(true) }
     val playWhenReady by rememberSaveable { mutableStateOf(true) }
 
-    var controllerHideOnTouch by rememberSaveable { mutableStateOf(true) }
-    var controllerAutoShow by rememberSaveable { mutableStateOf(true) }
-    var controllerType by rememberSaveable { mutableStateOf(ControllerType.Simple) }
-
+    val mediaItem = remember {
+        MediaItem.Builder().setMediaId(url.toString()).setUri(url).build()
+    }
     var rememberedMediaItemIdAndPosition: Pair<String, Long>? by remember { mutableStateOf(null) }
     val player = vm.player
     DisposableEffect(player, playWhenReady) {
         player?.playWhenReady = playWhenReady
         onDispose {}
     }
-
-    val mediaItem = remember(url) { MediaItem.Builder().setMediaId(url.toString()).setUri(url).build() }
     DisposableEffect(mediaItem, player) {
         player?.run {
-            setMediaItem(mediaItem)
+            if (mediaItem != null) {
+                setMediaItem(mediaItem)
+            }
             rememberedMediaItemIdAndPosition?.let { (id, position) ->
-                if (id == mediaItem.mediaId) seekTo(position)
+                if (id == mediaItem?.mediaId) seekTo(position)
             }?.also { rememberedMediaItemIdAndPosition = null }
             prepare()
         }
         onDispose {}
     }
-
     val state = rememberMediaState(player = player.takeIf { setPlayer })
     Media(
         state = state,
@@ -120,7 +105,5 @@ fun VideoPresenter(
     ) { playerState ->
         SimpleController(vm.chapter?.name ?: "",playerState, Modifier.fillMaxSize())
     }
-    //VideoView(Uri.parse(uri))
-
 }
 

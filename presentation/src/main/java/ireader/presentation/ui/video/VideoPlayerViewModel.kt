@@ -1,14 +1,19 @@
 package ireader.presentation.ui.video
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import ireader.common.models.entities.Chapter
 import ireader.core.log.Log
+import ireader.core.source.findInstance
+import ireader.core.source.model.MovieUrl
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
@@ -38,6 +43,10 @@ class VideoScreenViewModel(
 
 
     var chapter by mutableStateOf<Chapter?>(null)
+    val videoUri : State<String?> =  derivedStateOf { chapter?.content?.findInstance<MovieUrl>()?.url }
+
+
+    val mediaItem = derivedStateOf { videoUri.value?.let { MediaItem.Builder().setMediaId(it).setUri(videoUri.value).build() } }
 
 
     init {
