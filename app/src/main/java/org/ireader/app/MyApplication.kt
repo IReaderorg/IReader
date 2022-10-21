@@ -9,8 +9,8 @@ import ireader.data.di.DataModule
 import ireader.domain.di.DomainModules
 import ireader.domain.di.DomainServices
 import ireader.domain.utils.WebViewUtil
-import ireader.imageloader.coil.CoilLoaderFactory
-import ireader.presentation.di.uiModules
+import ireader.presentation.core.di.uiModules
+import ireader.presentation.imageloader.coil.CoilLoaderFactory
 import org.ireader.app.di.AppModule
 import org.ireader.app.di.CatalogModule
 import org.ireader.app.di.DatabaseInject

@@ -5,8 +5,7 @@ import java.util.*
 
 plugins {
     id("com.android.application")
-    id("kotlin-android")
-
+    kotlin("android")
     id("kotlin-parcelize")
     id("com.google.gms.google-services")
     kotlin("plugin.serialization")

@@ -1,13 +1,13 @@
 package org.ireader.app.di
 
 import android.content.Context
-import io.ktor.client.plugins.cookies.CookiesStorage
-import ireader.i18n.ProjectConfig
+import io.ktor.client.plugins.cookies.*
 import ireader.core.http.AcceptAllCookiesStorage
 import ireader.core.http.WebViewManger
 import ireader.core.prefs.AndroidPreferenceStore
 import ireader.core.prefs.PreferenceStore
-import ireader.imageloader.LibraryCovers
+import ireader.i18n.ProjectConfig
+import ireader.presentation.imageloader.LibraryCovers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

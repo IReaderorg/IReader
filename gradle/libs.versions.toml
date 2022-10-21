@@ -18,7 +18,7 @@ exoplayer="1.0.0-beta02"
 
 [libraries]
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
-gradle-tools = "com.android.tools.build:gradle:7.2.2"
+gradle-tools = "com.android.tools.build:gradle:7.3.1"
 
 gradle-google = "com.google.gms:google-services:4.3.14"
 gradle-firebaseCrashlytic = "com.google.firebase:firebase-crashlytics-gradle:2.9.1"

@@ -1,9 +1,9 @@
 package ireader.domain.catalogs.interactor
 
-import ireader.domain.models.entities.CatalogRemote
-import ireader.core.os.InstallStep
 import ireader.domain.catalogs.service.CatalogInstaller
+import ireader.domain.models.entities.CatalogRemote
 import ireader.domain.models.prefs.PreferenceValues
+import ireader.core.os.InstallStep
 import kotlinx.coroutines.flow.Flow
 
 interface InstallCatalog {

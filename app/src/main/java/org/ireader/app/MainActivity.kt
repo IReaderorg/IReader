@@ -20,10 +20,10 @@ import com.anggrayudi.storage.file.StorageId.PRIMARY
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.backup.AutomaticBackup
 import ireader.domain.usecases.files.GetSimpleStorage
-import ireader.presentation.ScreenContent
-import ireader.presentation.theme.AppTheme
-import ireader.ui.component.reusable_composable.BigSizeTextComposable
-import ireader.ui.component.reusable_composable.MidSizeTextComposable
+import ireader.presentation.core.ScreenContent
+import ireader.presentation.core.theme.AppTheme
+import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
+import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import org.ireader.app.initiators.AppInitializers
 import org.ireader.app.initiators.SecureActivityDelegateImpl
 import org.koin.android.ext.android.get
@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         registerSecureActivity(this, uiPreferences)
-        getSimpleStorage.provideActivity(this, savedInstanceState)
+        getSimpleStorage.provideActivity(this, null)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         installSplashScreen()
         setContent {

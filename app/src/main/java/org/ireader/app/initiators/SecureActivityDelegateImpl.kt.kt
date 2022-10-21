@@ -14,7 +14,7 @@ import ireader.domain.utils.extensions.AuthenticatorUtil.isAuthenticationSupport
 import ireader.domain.utils.extensions.setSecureScreen
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
-import ireader.presentation.ui.UnlockActivity
+import ireader.presentation.core.ui.UnlockActivity
 import org.koin.core.annotation.Factory
 
 @Factory

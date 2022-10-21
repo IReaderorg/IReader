@@ -1,4 +1,5 @@
 enableFeaturePreview("VERSION_CATALOGS")
+enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 rootProject.name = "Infinity"
 include(":app")
 include(":data")
@@ -23,14 +24,13 @@ dependencyResolutionManagement {
         mavenLocal()
         mavenCentral()
         google()
-        maven(url = "https://maven.pkg.jetbrains.space/public/p/compose/dev")
-        maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/")
+       // maven(url = "https://maven.pkg.jetbrains.space/public/p/compose/dev")
+       // maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/")
         maven("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+       // maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         maven(url = "https://jitpack.io")
         maven(url ="https://github.com/psiegman/mvn-repo/raw/master/releases")
-        maven(url ="https://androidx.dev/storage/compose-compiler/repository/")
-        maven(url ="https://maven.pkg.github.com/octocat/hello-world/")
+       // maven(url ="https://androidx.dev/storage/compose-compiler/repository/")
 
     }
     versionCatalogs {
@@ -50,5 +50,12 @@ dependencyResolutionManagement {
             from(files("gradle/testing.versions.toml"))
         }
 
+    }
+}
+
+buildCache {
+    local {
+        directory =  File(rootDir, "build-cache")
+        removeUnusedEntriesAfterDays = 30
     }
 }

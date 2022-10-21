@@ -35,7 +35,7 @@ kotlin {
 
 
 android {
-    //namespace = "ireader.i18n"
+    namespace = "ireader.i18n"
     sourceSets {
         named("main") {
             res.srcDir("src/commonMain/resources")

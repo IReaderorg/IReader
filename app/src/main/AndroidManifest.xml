@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="org.ireader.app">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Storage -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
@@ -79,7 +78,7 @@
 
         </activity>
         <activity
-            android:name="ireader.presentation.ui.UnlockActivity"
+            android:name="ireader.presentation.core.ui.UnlockActivity"
             android:exported="false"
             android:theme="@style/Theme.Splash" />
 

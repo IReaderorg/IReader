@@ -19,12 +19,12 @@ import android.content.IntentSender
 import android.content.pm.PackageInstaller
 import android.os.Build
 import android.os.SystemClock
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import ireader.core.R
 import ireader.core.log.Log
 import ireader.core.util.calculateSizeRecursively
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 
 class PackageInstaller(
@@ -156,7 +156,7 @@ class PackageInstaller(
           deferred.complete(InstallStep.Error(context.getString(R.string.installation_error_invalid)))
         }
         else -> {
-          ireader.core.log.Log.error(
+          Log.error(
             "Package installer failed to install packages",
             status.toString()
           )

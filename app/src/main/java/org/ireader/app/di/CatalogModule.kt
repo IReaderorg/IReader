@@ -31,7 +31,7 @@ import ireader.domain.image.cache.CoverCache
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.services.extensions_insstaller_service.GetDefaultRepo
 import ireader.domain.usecases.files.GetSimpleStorage
-import ireader.imageloader.coil.CoilLoaderFactory
+import ireader.presentation.imageloader.coil.CoilLoaderFactory
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
@@ -128,10 +128,10 @@ class CatalogModule {
 
         @Single
     fun providesHttpClients(
-        context: Application,
-        cookiesStorage: CookiesStorage,
-        webViewManger: WebViewManger,
-        webViewCookieJar: WebViewCookieJar,
+            context: Application,
+            cookiesStorage: CookiesStorage,
+            webViewManger: WebViewManger,
+            webViewCookieJar: WebViewCookieJar,
     ): HttpClients {
         return HttpClients(
             context,

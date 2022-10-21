@@ -1,4 +1,4 @@
-package ireader.core.di
+package ireader.presentation.core.di
 
 import kotlin.reflect.KClass
 
