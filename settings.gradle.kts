@@ -21,16 +21,17 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        mavenLocal()
         mavenCentral()
         google()
        // maven(url = "https://maven.pkg.jetbrains.space/public/p/compose/dev")
-       // maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/")
+        maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/")
         maven("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
+        maven("https://oss.sonatype.org/service/local/staging/deploy/maven2")
        // maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         maven(url = "https://jitpack.io")
         maven(url ="https://github.com/psiegman/mvn-repo/raw/master/releases")
        // maven(url ="https://androidx.dev/storage/compose-compiler/repository/")
+        maven(url ="https://repo1.maven.org/maven2/")
 
     }
     versionCatalogs {

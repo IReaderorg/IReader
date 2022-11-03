@@ -24,6 +24,7 @@ kotlin {
             dependencies {
                 compileOnly(composeLib.compose.runtime)
                 compileOnly(composeLib.compose.ui)
+                compileOnly(composeLib.compose.compiler)
             }
         }
         val desktopMain by getting {

@@ -33,7 +33,7 @@
     <string name="lock_when_idle">Lock when Idle After</string>
     <string name="authentication">Authentication</string>
     <string name="authenticate_to_confirm_change">Authenticate to confirm change</string>
-
+    <string name="subtitles_encoding_key" translatable="false">subtitles_encoding_key</string>
     <string name="pref_incognito_mode_summary">Pause reading history</string>
     <string name="no_app_was_found_to_lauch">Something went wrong. you don\'t have the required app.</string>
     <string name="the_downloads_was_interrupted">The Downloads was interrupted</string>

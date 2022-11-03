@@ -1,11 +1,12 @@
 package ireader.domain.usecases.files
 
-import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.os.Environment
+import androidx.activity.ComponentActivity
 import androidx.documentfile.provider.DocumentFile
 import com.anggrayudi.storage.SimpleStorage
+import com.anggrayudi.storage.SimpleStorageHelper
 import com.anggrayudi.storage.file.DocumentFileCompat
 import com.anggrayudi.storage.file.StorageId
 import org.koin.core.annotation.Single
@@ -17,9 +18,11 @@ class GetSimpleStorage(
 ) {
 
     lateinit var storage: SimpleStorage
+    lateinit var simpleStorageHelper: SimpleStorageHelper
 
-    fun provideActivity(activity: Activity,savedState: Bundle?) {
+    fun provideActivity(activity: ComponentActivity,savedState: Bundle?) {
         storage = SimpleStorage(activity,savedState)
+        simpleStorageHelper = SimpleStorageHelper(activity,savedState)
     }
 
     fun ireaderDirectory(dirName: String): File =

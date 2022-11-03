@@ -56,10 +56,10 @@ tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
     }
 }
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    jvmTarget = "11"
+    jvmTarget = "1.8"
 }
 tasks.withType<io.gitlab.arturbosch.detekt.DetektCreateBaselineTask>().configureEach {
-    jvmTarget = "11"
+    jvmTarget = "1.8"
 }
 
 subprojects {
@@ -100,8 +100,8 @@ subprojects {
 
             compileOptions {
                 isCoreLibraryDesugaringEnabled = true
-                sourceCompatibility(JavaVersion.VERSION_11)
-                targetCompatibility(JavaVersion.VERSION_11)
+                sourceCompatibility(JavaVersion.VERSION_1_8)
+                targetCompatibility(JavaVersion.VERSION_1_8)
             }
             sourceSets {
                 named("main") {

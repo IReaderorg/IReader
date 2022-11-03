@@ -3,11 +3,7 @@ package ireader.presentation.ui.component
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.TopAppBarState
+import androidx.compose.material3.*
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
@@ -30,5 +26,5 @@ data class Controller @OptIn(
     val requestedCustomSystemColor: (CustomSystemColor?) -> Unit = {},
     val scrollBehavior: TopAppBarScrollBehavior,
     val topScrollState: TopAppBarState,
-    val setScrollBehavior: (TopAppBarScrollBehavior) -> Unit = {}
+    val setScrollBehavior: (TopAppBarScrollBehavior) -> Unit = {},
 )

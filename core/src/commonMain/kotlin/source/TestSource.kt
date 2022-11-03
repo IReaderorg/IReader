@@ -1,17 +1,6 @@
 package ireader.core.source
 
-import ireader.core.source.model.ChapterInfo
-import ireader.core.source.model.Command
-import ireader.core.source.model.CommandList
-import ireader.core.source.model.Filter
-import ireader.core.source.model.FilterList
-import ireader.core.source.model.ImageUrl
-import ireader.core.source.model.Listing
-import ireader.core.source.model.MangaInfo
-import ireader.core.source.model.MangasPageInfo
-import ireader.core.source.model.MovieUrl
-import ireader.core.source.model.Page
-import ireader.core.source.model.Text
+import ireader.core.source.model.*
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
 
@@ -55,7 +44,7 @@ class TestSource : ireader.core.source.CatalogSource {
     override suspend fun getPageList(chapter: ChapterInfo, commands: List<Command<*>>): List<Page> {
         delay(1000)
         if (chapter.key == "4") {
-            return listOf(MovieUrl("https://download.samplelib.com/mp4/sample-5s.mp4"))
+            return listOf(MovieUrl("https://storage.googleapis.com/exoplayer-test-media-1/mp4/dizzy-with-tx3g.mp4"))
         }
         return getTestPages()
     }

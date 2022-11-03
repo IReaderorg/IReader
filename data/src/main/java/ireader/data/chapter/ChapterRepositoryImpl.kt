@@ -57,6 +57,16 @@ class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
         }
     }
 
+    override suspend fun subscribeLastReadChapter(bookId: Long): Flow<Chapter?> {
+        return handler.subscribeToOneOrNull {
+            chapterQueries.getLastChapter(
+                    bookId,
+                    chapterMapper
+            )
+
+        }
+    }
+
 
     override suspend fun insertChapter(chapter: Chapter): Long {
         return handler.awaitOne {
