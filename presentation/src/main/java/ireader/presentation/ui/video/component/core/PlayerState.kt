@@ -84,6 +84,7 @@ interface PlayerState {
     val deviceVolume: Int
 
     val isDeviceMuted: Boolean
+    var isFulLScreen: Boolean
 
     val videoSize: VideoSize
 
@@ -184,6 +185,7 @@ internal class PlayerStateImpl(
 
     override var isDeviceMuted: Boolean by mutableStateOf(player.isDeviceMuted)
         private set
+    override var isFulLScreen: Boolean by mutableStateOf(true)
 
     override var videoSize: VideoSize by mutableStateOf(player.videoSize)
         private set

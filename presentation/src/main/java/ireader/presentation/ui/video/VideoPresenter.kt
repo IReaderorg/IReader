@@ -1,10 +1,10 @@
 package ireader.presentation.ui.video
 
+import android.content.pm.ActivityInfo
 import android.view.accessibility.CaptioningManager.CaptionStyle.EDGE_TYPE_NONE
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -16,6 +16,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.CaptionStyleCompat
 import androidx.media3.ui.SubtitleView
+import ireader.presentation.ui.component.LockScreenOrientation
 import ireader.presentation.ui.video.component.SimpleController
 import ireader.presentation.ui.video.component.core.*
 
@@ -44,7 +45,7 @@ fun VideoPresenter(
         player: ExoPlayer?,
         state: MediaState
 ) {
-    //LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+    LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE,state.playerState?.isFulLScreen)
     val playWhenReady by rememberSaveable { mutableStateOf(true) }
     DisposableEffect(player, playWhenReady) {
         player?.playWhenReady = playWhenReady
@@ -63,7 +64,7 @@ fun VideoPresenter(
             showBuffering = ShowBuffering.Always,
             buffering = {
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    CircularProgressIndicator()
+                    androidx.compose.material3.CircularProgressIndicator()
                 }
             },
             subtitles = {

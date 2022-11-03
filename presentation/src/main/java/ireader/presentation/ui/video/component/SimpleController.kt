@@ -16,7 +16,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import ireader.presentation.R
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
@@ -39,12 +41,18 @@ fun SimpleController(
     val maxDuration = remember {
         mutableStateOf("")
     }
+
     Crossfade(targetState = mediaState.isControllerShowing, modifier) { isShowing ->
 
         if (isShowing) {
             val controllerState = rememberControllerState(mediaState)
             val maxDurationInFormat = remember {
                 getMaxDuration(controllerState.durationMs, maxDuration)
+            }
+            val currentDuration = remember(controllerState.positionMs) {
+                mutableStateOf(formatDuration(
+                    controllerState.positionMs,
+                ))
             }
             var scrubbing by remember { mutableStateOf(false) }
             val hideWhenTimeout = !mediaState.shouldShowControllerIndefinitely && !scrubbing
@@ -70,16 +78,15 @@ fun SimpleController(
 
 
                 Row(modifier = Modifier.align(Alignment.Center)) {
-                    AppIconButton(
-                        imageVector = Icons.Default.FastRewind, modifier = Modifier
-                            .size(52.dp), onClick = {
-                            mediaState.player?.currentPosition?.let { position ->
-                                controllerState.seekTo(position.minus(15000L))
-                            }
+                    AppIconButton(painter = painterResource(R.drawable.go_back_30), modifier = Modifier
+                        .size(52.dp), onClick = {
+                        mediaState.player?.currentPosition?.let { position ->
+                            controllerState.seekTo(position.minus(30000L))
+                        }
 
-                        }, tint = Color.White
+                    }, tint = Color.White.copy(alpha = .9f)
                     )
-                    Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.width(30.dp))
                     Image(
                         imageVector =
                         if (controllerState.showPause) Icons.Default.Pause
@@ -94,16 +101,15 @@ fun SimpleController(
                                 hideEffectReset++
                                 controllerState.playOrPause()
                             },
-                        colorFilter = ColorFilter.tint(Color.White)
+                        colorFilter = ColorFilter.tint(Color.White.copy(alpha = 1f))
                     )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    AppIconButton(
-                        imageVector = Icons.Default.FastForward, modifier = Modifier
-                            .size(52.dp), onClick = {
-                            mediaState.player?.currentPosition?.let { position ->
-                                controllerState.seekTo(position.plus(15000L))
-                            }
-                        }, tint = Color.White
+                    Spacer(modifier = Modifier.width(30.dp))
+                    AppIconButton(painter = painterResource(R.drawable.go_forward_30), modifier = Modifier
+                        .size(52.dp), onClick = {
+                        mediaState.player?.currentPosition?.let { position ->
+                            controllerState.seekTo(position.plus(30000L))
+                        }
+                    }, tint = Color.White.copy(alpha = .9f)
                     )
                 }
 
@@ -121,14 +127,19 @@ fun SimpleController(
                         .fillMaxWidth()
 
                 ) {
-                    MidSizeTextComposable(
-                        modifier = Modifier
-                            .padding(horizontal = 10.dp),
-                        text = formatDuration(
-                            controllerState.positionMs,
-                        ).plus("/" + maxDurationInFormat),
-                        color = Color.White
-                    )
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        MidSizeTextComposable(
+                            modifier = Modifier
+                                .padding(horizontal = 10.dp),
+                            text = currentDuration.value.plus("/$maxDurationInFormat"),
+                            color = Color.White
+                        )
+                        AppIconButton(imageVector =  if (mediaState.playerState?.isFulLScreen == true) Icons.Default.FullscreenExit else Icons.Default.Fullscreen, onClick = {
+                            mediaState.playerState?.isFulLScreen = !(mediaState.playerState?.isFulLScreen ?: false)
+                        }, tint = Color.White)
+
+                    }
+
                     TimeBar(
                         controllerState.durationMs,
                         controllerState.positionMs,

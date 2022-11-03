@@ -71,7 +71,7 @@ fun VideoPlayerBottomSheet(
                 scope.launch {
                     controller.sheetState.hide()
                 }
-                vm.showSnackBar(UiText.DynamicString("Audio Tracks: ${subtitleData?.name}."))
+                vm.showSnackBar(UiText.DynamicString("Subtitle: ${subtitleData?.name}."))
             })
             loadLocalFileComposable(playerState) {
                 vm.simpleStorage.simpleStorageHelper.openFilePicker(300, false, "video/*")
