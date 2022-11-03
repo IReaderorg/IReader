@@ -22,8 +22,8 @@ import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.video.component.core.*
 import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 /**
  * A simple controller, which consists of a play/pause button and a time bar.
@@ -40,8 +40,12 @@ fun SimpleController(
         mutableStateOf("")
     }
     Crossfade(targetState = mediaState.isControllerShowing, modifier) { isShowing ->
+
         if (isShowing) {
             val controllerState = rememberControllerState(mediaState)
+            val maxDurationInFormat = remember {
+                getMaxDuration(controllerState.durationMs, maxDuration)
+            }
             var scrubbing by remember { mutableStateOf(false) }
             val hideWhenTimeout = !mediaState.shouldShowControllerIndefinitely && !scrubbing
             var hideEffectReset by remember { mutableStateOf(0) }
@@ -122,7 +126,7 @@ fun SimpleController(
                             .padding(horizontal = 10.dp),
                         text = formatDuration(
                             controllerState.positionMs,
-                        ).plus("/" + getMaxDuration(controllerState.durationMs, maxDuration)),
+                        ).plus("/" + maxDurationInFormat),
                         color = Color.White
                     )
                     TimeBar(
@@ -160,18 +164,10 @@ fun SimpleController(
 
 fun getMaxDuration(time: Long, lastTime: MutableState<String>): String {
     if (lastTime.value != "") return lastTime.value
-    val hour = String.format("%02d", TimeUnit.MILLISECONDS.toHours(time)).takeIf { it != "00" }
-    val min = String.format("%02d", TimeUnit.MILLISECONDS.toMinutes(time))
-    val sec = String.format("%02d", TimeUnit.MILLISECONDS.toSeconds(time))
+    if (time < 0) return "00:00"
+    val dd = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
 
-    var maxDuration = ""
-    if (hour != null) {
-        maxDuration += "$hour:"
-    }
-    maxDuration += "$min:"
-    maxDuration += sec
-
-    return maxDuration
+    return dd.format(time - TimeZone.getDefault().rawOffset)
 }
 
 
