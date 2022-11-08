@@ -2,15 +2,11 @@ package ireader.presentation.ui.video.component.cores
 
 import android.content.Context
 import android.graphics.Typeface
-import android.util.Log
-import android.util.TypedValue
-import android.view.ViewGroup
-import android.widget.FrameLayout
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.res.ResourcesCompat
 import androidx.media3.common.MimeTypes
 import androidx.media3.ui.CaptionStyleCompat
-import androidx.media3.ui.SubtitleView
-import ireader.presentation.ui.video.component.cores.UIHelper.toPx
 import java.io.File
 
 enum class SubtitleStatus {
@@ -39,27 +35,29 @@ data class SubtitleData(
 )
 
 class PlayerSubtitleHelper {
-    var subView: SubtitleView? = null
-    var subHolder: FrameLayout? = null
 
-    private var activeSubtitles: Set<SubtitleData> = emptySet()
-    private var allSubtitles: Set<SubtitleData> = emptySet()
+    var activeSubtitles: MutableState<Set<SubtitleData>> = mutableStateOf(emptySet())
+        private set
+    var allSubtitles: MutableState<Set<SubtitleData>> = mutableStateOf(emptySet())
+        private set
+//
+//    fun getAllSubtitles(): List<SubtitleData> {
+//        return allSubtitles.value.toList()
+//    }
+//    fun getActiveSubtitles(): List<SubtitleData> {
+//        return activeSubtitles.value.toList()
+//    }
 
+    var internalSubtitles : MutableState<Set<SubtitleData>> = mutableStateOf(emptySet())
+        private set
 
-    fun getAllSubtitles(): Set<SubtitleData> {
-        return allSubtitles
+    fun setActiveSubtitles(list: List<SubtitleData>) {
+        activeSubtitles.value = (list + internalSubtitles.value).toSet()
     }
 
-    fun setActiveSubtitles(list: Set<SubtitleData>) {
-        activeSubtitles = list
+    fun setAllSubtitles(list: List<SubtitleData>) {
+        allSubtitles.value = (list + internalSubtitles.value).toSet()
     }
-
-    fun setAllSubtitles(list: Set<SubtitleData>) {
-        allSubtitles = list
-    }
-
-    private var subStyle: SaveCaptionStyle? = null
-    private var subtitleView: SubtitleView? = null
 
     companion object {
         fun String.toSubtitleMimeType(): String {
@@ -106,38 +104,14 @@ class PlayerSubtitleHelper {
     }
 
     fun subtitleStatus(sub : SubtitleData?): SubtitleStatus {
-        if(activeSubtitles.contains(sub)) {
+        if(activeSubtitles.value.contains(sub)) {
             return SubtitleStatus.IS_ACTIVE
         }
-        if(allSubtitles.contains(sub)) {
+        if(allSubtitles.value.contains(sub)) {
             return SubtitleStatus.REQUIRES_RELOAD
         }
         return SubtitleStatus.NOT_FOUND
     }
 
-    fun setSubStyle(style: SaveCaptionStyle) {
-        subtitleView?.context?.let { ctx ->
-            subStyle = style
-            Log.i("TAG","SET STYLE = $style")
-            subtitleView?.setStyle(ctx.fromSaveToStyle(style))
-            subtitleView?.translationY = -style.elevation.toPx.toFloat()
-            val size = style.fixedTextSize
-            if (size != null) {
-                subtitleView?.setFixedTextSize(TypedValue.COMPLEX_UNIT_SP, size)
-            } else {
-                subtitleView?.setUserDefaultTextSize()
-            }
-        }
-    }
 
-    fun initSubtitles(subView: SubtitleView?, subHolder: FrameLayout?, style: SaveCaptionStyle?) {
-        subtitleView = subView
-        subView?.let { sView ->
-            (sView.parent as ViewGroup?)?.removeView(sView)
-            subHolder?.addView(sView)
-        }
-        style?.let {
-            setSubStyle(it)
-        }
-    }
 }

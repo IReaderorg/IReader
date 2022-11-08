@@ -684,7 +684,6 @@ fun <Key> ChoicePreference(
         onDismiss: () -> Unit = {}
 ) {
     var showDialog by remember { mutableStateOf(false) }
-
     PreferenceRow(
             title = title,
             subtitle = if (subtitle == null) choices[preference] else null,

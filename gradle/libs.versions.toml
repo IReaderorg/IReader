@@ -119,6 +119,8 @@ exoplayer-common = { module = "androidx.media3:media3-common", version.ref = "ex
 exoplayer-subtitleDecoder = { module = "com.github.albfernandez:juniversalchardet", version = "2.4.0" }
 
 
+epublib = { module = "io.github.kazemcodes:epublib-core", version = "4.0-SNAPSHOT" }
+
 [bundles]
 simplestorage = ["storage", "documentfile"]
 exoplayer = ["exoplayer-core", "exoplayer-ui", "exoplayer-dash","exoplayer-subtitleDecoder","exoplayer-rtsp","exoplayer-okhttp","exoplayer-extractor","exoplayer-transformer","exoplayer-decoder","exoplayer-datasource","exoplayer-common", ]

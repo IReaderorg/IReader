@@ -17,7 +17,7 @@ android {
 
 dependencies {
 
-    implementation("io.github.kazemcodes:epublib-core:4.0-SNAPSHOT") {
+    implementation(libs.epublib) {
         exclude(group = "org.slf4j")
         exclude(group = "xmlpull")
     }

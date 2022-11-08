@@ -14,7 +14,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 
 @Composable
-fun rememberManagedExoPlayer(): ExoPlayer?  {
+fun rememberManagedExoPlayer(): ExoPlayer  {
     val context = LocalContext.current
     return remember {
         val builder = ExoPlayer.Builder(context)

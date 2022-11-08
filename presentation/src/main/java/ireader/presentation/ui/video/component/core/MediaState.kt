@@ -17,21 +17,35 @@ import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.datasource.okhttp.OkHttpDataSource
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.*
 import androidx.media3.exoplayer.text.TextRenderer
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
+import androidx.media3.exoplayer.trackselection.TrackSelector
 import com.google.common.net.HttpHeaders
 import com.google.common.net.HttpHeaders.USER_AGENT
+import ireader.core.http.HttpClients
 import ireader.core.http.UserAgentInterceptor
 import ireader.core.http.okhttp
 import ireader.core.source.HttpSource
 import ireader.core.source.model.ImageUrl
+import ireader.core.source.model.MovieUrl
+import ireader.core.source.model.Page
+import ireader.core.source.model.Subtitles
 import ireader.presentation.imageloader.coil.image_loaders.convertToOkHttpRequest
 import ireader.presentation.ui.video.component.cores.*
+import ireader.presentation.ui.video.component.cores.PlayerSubtitleHelper.Companion.toSubtitleMimeType
+import ireader.presentation.ui.video.component.cores.player.SSLTrustManager
+import okhttp3.Request
 import org.koin.core.annotation.Factory
+import org.koin.java.KoinJavaComponent.inject
 import java.io.File
+import java.net.URI
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLSession
 import kotlin.math.absoluteValue
 
 
@@ -45,7 +59,6 @@ import kotlin.math.absoluteValue
 @Composable
 fun rememberMediaState(
         player: ExoPlayer?,
-        source: HttpSource?,
         context: Context,
 ): MediaState = remember { MediaState(initPlayer = player, context = context) }.apply {
     this.player = player
@@ -61,7 +74,10 @@ class MediaState(
         private val initPlayer: ExoPlayer? = null,
         private val context: Context
 ) {
-    internal val stateOfPlayerState = mutableStateOf(initPlayer?.state())
+    val subtitleHelper : PlayerSubtitleHelper = PlayerSubtitleHelper()
+    internal val stateOfPlayerState = mutableStateOf(initPlayer?.state(subtitleHelper))
+
+    var activeSubtitles: State<List<SubtitleData>> = derivedStateOf<List<SubtitleData>> { subtitleHelper.activeSubtitles.value.toList() }
     /**
      * The player to use, or null to detach the current player.
      * Only players which are accessed on the main thread are supported (`
@@ -96,6 +112,8 @@ class MediaState(
             controllerVisibility = if (value) ControllerVisibility.Visible
             else ControllerVisibility.Invisible
         }
+    var medias = emptyList<MovieUrl>()
+    var subs = emptyList<Subtitles>()
 
     /**
      * The current [visibility][ControllerVisibility] of the controller.
@@ -117,7 +135,7 @@ class MediaState(
         } ?: true
     }
 
-    val subtitleHelper : PlayerSubtitleHelper = PlayerSubtitleHelper()
+
 
     internal var controllerAutoShow: Boolean by mutableStateOf(true)
 
@@ -143,12 +161,13 @@ class MediaState(
                 maybeShowController()
             }
         }
+
     }
     private var _player: ExoPlayer? by mutableStateOf(initPlayer)
     private fun onPlayerChanged(previous: Player?, current: ExoPlayer?) {
         previous?.removeListener(listener)
         stateOfPlayerState.value?.dispose()
-        stateOfPlayerState.value = current?.state()
+        stateOfPlayerState.value = current?.state(subtitleHelper)
         current?.addListener(listener)
         if (current == null) {
             controllerVisibility = ControllerVisibility.Invisible
@@ -199,107 +218,157 @@ class MediaState(
 
 
 
-    fun createPlayer(source: HttpSource?): ExoPlayer? {
-
-        val offlineSourceFactory = context.createOfflineSource()
-        val onlineSourceFactory = source?.let { createOnlineSource(emptyMap(), it) }
-
-        val (subSources, activeSubtitles) = getSubSources(
-                onlineSourceFactory = onlineSourceFactory,
-                offlineSourceFactory = offlineSourceFactory,
-                subtitleHelper,
-        )
-        player = init(context,onlineSourceFactory, offlineSourceFactory, emptyList(), emptyList())
-
-        return player
-    }
 
     companion object {
          var simpleCacheSize: Long  by mutableStateOf(0L)
          var simpleCache: SimpleCache? by mutableStateOf(null)
         var currentTextRenderer: CustomTextRenderer? by mutableStateOf(null)
     }
+    private var currentWindow: Int = 0
+    private var playbackPosition: Long = 0
+    var cacheSize = 0L
+    var simpleCacheSize = 0L
+    var videoBufferMs = 0L
 
-    fun init(
-            context: Context,
-            onlineSourceFactory: HttpDataSource.Factory?,
-            createOfflineSource: DataSource.Factory,
-            subSources: List<SingleSampleMediaSource>,
-            mediaItemSlices: List<MediaItem>,
+    var currentSubtitleOffset: Long = 0
+
+    private fun loadExo(
+        context: Context,
+        mediaSlices: List<MediaItem>,
+        subSources: List<SingleSampleMediaSource>,
+        cacheFactory: CacheDataSource.Factory? = null
+    ) {
+
+        player = buildExoPlayer(
+            context,
+            mediaSlices,
+            subSources,
+            currentWindow,
+            playbackPosition,
+            playBackSpeed =playerState?.playbackSpeed ?: 1F,
+            cacheSize = cacheSize,
+            videoBufferMs = videoBufferMs,
+            playWhenReady = playerState?.isPlaying ?: false, // this keep the current state of the player
+            cacheFactory = cacheFactory,
+            subtitleOffset = currentSubtitleOffset,
+            maxVideoHeight = null,
+        )
+
+    }
+
+    private fun buildExoPlayer(
+        context: Context,
+        mediaItemSlices: List<MediaItem>,
+        subSources: List<SingleSampleMediaSource>,
+        currentWindow: Int,
+        playbackPosition: Long,
+        playBackSpeed: Float,
+        subtitleOffset: Long,
+        cacheSize: Long,
+        videoBufferMs: Long,
+        playWhenReady: Boolean = true,
+        cacheFactory: CacheDataSource.Factory? = null,
+        trackSelector: TrackSelector? = null,
+        /**
+         * Sets the m3u8 preferred video quality, will not force stop anything with higher quality.
+         * Does not work if trackSelector is defined.
+         **/
+        maxVideoHeight: Int? = null
     ): ExoPlayer {
-
-        var simpleCache = simpleCache
-        if (simpleCache == null)
-            simpleCache = getCache(context, simpleCacheSize)
-
-        val cacheFactory = CacheDataSource.Factory().apply {
-            simpleCache?.let { setCache(it) }
-            setUpstreamDataSourceFactory(onlineSourceFactory)
-        }
-        val builder = ExoPlayer.Builder(context)
-        builder.apply {
-            setMediaSourceFactory(ProgressiveMediaSource.Factory(DefaultDataSource.Factory(context)))
-            setHandleAudioBecomingNoisy(true)
-            setTrackSelector(DefaultTrackSelector(context))
-            setRenderersFactory { eventHandler, videoRendererEventListener, audioRendererEventListener, textRendererOutput, metadataRendererOutput ->
-                DefaultRenderersFactory(context).createRenderers(
+        val exoPlayerBuilder =
+            ExoPlayer.Builder(context)
+                .setRenderersFactory { eventHandler, videoRendererEventListener, audioRendererEventListener, textRendererOutput, metadataRendererOutput ->
+                    DefaultRenderersFactory(context).createRenderers(
                         eventHandler,
                         videoRendererEventListener,
                         audioRendererEventListener,
                         textRendererOutput,
                         metadataRendererOutput
-                ).map {
-                    if (it is TextRenderer) {
-                        currentTextRenderer = CustomTextRenderer(
-                                0,
+                    ).map {
+                        if (it is TextRenderer) {
+                            currentTextRenderer = CustomTextRenderer(
+                                subtitleOffset,
                                 textRendererOutput,
                                 eventHandler.looper,
                                 CustomSubtitleDecoderFactory()
+                            )
+                            currentTextRenderer!!
+                        } else it
+                    }.toTypedArray()
+                }
+                .setTrackSelector(trackSelector ?: getTrackSelector(context, maxVideoHeight))
+                .setLoadControl(
+                    DefaultLoadControl.Builder()
+                        .setTargetBufferBytes(
+                            if (cacheSize <= 0) {
+                                DefaultLoadControl.DEFAULT_TARGET_BUFFER_BYTES
+                            } else {
+                                if (cacheSize > Int.MAX_VALUE) Int.MAX_VALUE else cacheSize.toInt()
+                            }
                         )
-                        currentTextRenderer!!
-                    } else it
-                }.toTypedArray()
-            }
-        }
-        val factory =
-                DefaultMediaSourceFactory(cacheFactory)
+                        .setBufferDurationsMs(
+                            DefaultLoadControl.DEFAULT_MIN_BUFFER_MS,
+                            if (videoBufferMs <= 0) {
+                                DefaultLoadControl.DEFAULT_MAX_BUFFER_MS
+                            } else {
+                                videoBufferMs.toInt()
+                            },
+                            DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS,
+                            DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS
+                        ).build()
+                )
 
+
+        val factory =
+            if (cacheFactory == null) DefaultMediaSourceFactory(context)
+            else DefaultMediaSourceFactory(cacheFactory)
+
+        // If there is only one item then treat it as normal, if multiple: concatenate the items.
         val videoMediaSource = if (mediaItemSlices.size == 1) {
             factory.createMediaSource(mediaItemSlices.first())
         } else {
             val source = ConcatenatingMediaSource()
             mediaItemSlices.map {
                 source.addMediaSource(
-                        // The duration MUST be known for it to work properly, see https://github.com/google/ExoPlayer/issues/4727
-                        ClippingMediaSource(
-                                factory.createMediaSource(it),
-                                0L
-                        )
+                    // The duration MUST be known for it to work properly, see https://github.com/google/ExoPlayer/issues/4727
+                    ClippingMediaSource(
+                        factory.createMediaSource(it),
+                        Long.MAX_VALUE
+                    )
                 )
             }
             source
         }
 
-        return builder.build().apply {
-            playWhenReady = true
+        println("PLAYBACK POS $playbackPosition")
+        return exoPlayerBuilder.build().apply {
+            setPlayWhenReady(playWhenReady)
+            seekTo(currentWindow, playbackPosition)
             setMediaSource(
-                    MergingMediaSource(
-                            videoMediaSource, *subSources.toTypedArray()
-                    ),
-                    0
+                MergingMediaSource(
+                    videoMediaSource, *subSources.toTypedArray()
+                ),
+                playbackPosition
             )
-            trackSelector!!.parameters = DefaultTrackSelector(context)
-                    .buildUponParameters()
-                    .setSelectUndeterminedTextLanguage(true)
-                    .setPreferredTextLanguage(null)
-                    .setPreferredAudioLanguage("ko")
-                    .setTrackTypeDisabled(C.TRACK_TYPE_VIDEO, false)
-                    .setIgnoredTextSelectionFlags(C.SELECTION_FLAG_DEFAULT)
-                    .build()
+            setHandleAudioBecomingNoisy(true)
+            setPlaybackSpeed(playBackSpeed)
         }
-
     }
-
+    private fun getTrackSelector(context: Context, maxVideoHeight: Int?): TrackSelector {
+        val trackSelector = DefaultTrackSelector(context)
+        trackSelector.parameters = DefaultTrackSelector.ParametersBuilder(context)
+            // .setRendererDisabled(C.TRACK_TYPE_VIDEO, true)
+            .setRendererDisabled(C.TRACK_TYPE_TEXT, true)
+            // Experimental, I think this causes issues with audio track init 5001
+//                .setTunnelingEnabled(true)
+            .setDisabledTextTrackSelectionFlags(C.TRACK_TYPE_TEXT)
+            // This will not force higher quality videos to fail
+            // but will make the m3u8 pick the correct preferred
+            .setMaxVideoSize(Int.MAX_VALUE, maxVideoHeight ?: Int.MAX_VALUE)
+            .setPreferredAudioLanguage(null)
+            .build()
+        return trackSelector
+    }
     fun setPreferredAudioTrack(trackLanguage: String?) {
         //playerState?.preferredAudioTrackLanguage = trackLanguage
         player.let { exo ->
@@ -310,17 +379,22 @@ class MediaState(
         }
 
     }
+    val client : HttpClients by inject<HttpClients>(HttpClients::class.java)
 
-    private fun createOnlineSource(headers: Map<String, String>, extensions: HttpSource): HttpDataSource.Factory {
-        val source = OkHttpDataSource.Factory(extensions.client.okhttp).setUserAgent(USER_AGENT)
+    private fun createOnlineSource(headers: Map<String, String>): HttpDataSource.Factory {
+        val source = OkHttpDataSource.Factory(client.default.okhttp).setUserAgent(USER_AGENT)
         return source.apply {
             setDefaultRequestProperties(headers)
         }
     }
 
-    private fun createOnlineSource(extensions: HttpSource, link: String): HttpDataSource.Factory {
-        val okhttp = extensions.client.okhttp
-        val extensionHeaders = extensions.getImageRequest(ImageUrl(link)).second.build().convertToOkHttpRequest()
+    private fun createOnlineSource( link: String?,extensions: HttpSource? = null): HttpDataSource.Factory? {
+        // this like can prevent from crashing the app when local file was loaded.
+        if (link == null || !link.contains("http")) {
+            return null
+        }
+        val okhttp = extensions?.client?.okhttp ?: client.default.okhttp
+        val extensionHeaders = extensions?.getImageRequest(ImageUrl(link))?.second?.build()?.convertToOkHttpRequest() ?: Request.Builder().url(link).build()
         val interceptor = UserAgentInterceptor()
 
         val source = run {
@@ -331,7 +405,7 @@ class MediaState(
         }
 
         val headers = mapOf(
-                "referer" to extensions.baseUrl,
+                "referer" to (extensions?.baseUrl ?: "https://google.com"),
                 "accept" to "*/*",
                 "sec-ch-ua" to "\"Chromium\";v=\"91\", \" Not;A Brand\";v=\"99\"",
                 "sec-ch-ua-mobile" to "?0",
@@ -361,7 +435,7 @@ class MediaState(
                                 .setPreferredTextLanguage(null)
                 )
             } else {
-                when (playerState?.subtitleHelper?.subtitleStatus(subtitle)) {
+                when (subtitleHelper?.subtitleStatus(subtitle)) {
                     SubtitleStatus.REQUIRES_RELOAD -> {
                         return@let true
                     }
@@ -387,13 +461,16 @@ class MediaState(
         } ?: false
     }
 
-    fun resetPlayer(setMediaItem: () -> Unit = {}) {
-        player?.stop()
-        //player = null
-        //player = createPlayer()
-        setMediaItem()
-        playerState?.player?.prepare()
-        playerState?.player?.play()
+    fun reloadPlayer() {
+        simpleCache?.release()
+        simpleCache = null
+
+        player?.release()
+        currentLink?.let {
+            loadOnlinePlayer(context,  medias + subs)
+        }?: currentDownloadedFile?.let {
+            loadOfflinePlayer(context, it)
+        }
     }
 
     private fun getSubSources(
@@ -402,7 +479,7 @@ class MediaState(
             subHelper: PlayerSubtitleHelper,
     ): Pair<List<SingleSampleMediaSource>, List<SubtitleData>> {
         val activeSubtitles = ArrayList<SubtitleData>()
-        val subSources = subHelper.getAllSubtitles().mapNotNull { sub ->
+        val subSources = subHelper.allSubtitles.value.mapNotNull { sub ->
             val subConfig = MediaItem.SubtitleConfiguration.Builder(Uri.parse(sub.url))
                     .setMimeType(sub.mimeType)
                     .setLanguage("_${sub.name}")
@@ -459,6 +536,151 @@ class MediaState(
             null
         }
     }
+    var currentLink :String? = null
+    var currentDownloadedFile :String? = null
+    var ignoreSSL = false
+    private fun loadOnlinePlayer(context: Context, link: List<Page>) {
+        val movies = link.filterIsInstance<MovieUrl>() ?: emptyList()
+        val subtitles = link.filterIsInstance<Subtitles>() ?: emptyList()
+        Log.i("TAG", "loadOnlinePlayer $link")
+        try {
+            currentLink = movies.firstOrNull()?.url
+            if (currentLink == null) return
+            if (ignoreSSL) {
+                // Disables ssl check
+                val sslContext: SSLContext = SSLContext.getInstance("TLS")
+                sslContext.init(null, arrayOf(SSLTrustManager()), java.security.SecureRandom())
+                sslContext.createSSLEngine()
+                HttpsURLConnection.setDefaultHostnameVerifier { _: String, _: SSLSession ->
+                    true
+                }
+                HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.socketFactory)
+            }
+
+            val mime = if (URI(currentLink).path.endsWith(".m3u8")) {
+                MimeTypes.APPLICATION_M3U8
+            } else {
+                MimeTypes.VIDEO_MP4
+            }
+
+            val mediaItems = movies.map {
+                getMediaItem(mime, it.url).build()
+            }
+
+
+            val onlineSourceFactory = createOnlineSource(currentLink)
+            val offlineSourceFactory = context.createOfflineSource()
+
+            val (subSources, activeSubtitles) = getSubSources(
+                onlineSourceFactory = onlineSourceFactory,
+                offlineSourceFactory = offlineSourceFactory,
+                subtitleHelper
+            )
+
+            subtitleHelper.setActiveSubtitles(activeSubtitles)
+
+            if (simpleCache == null)
+                simpleCache = getCache(context, simpleCacheSize)
+
+            val cacheFactory = CacheDataSource.Factory().apply {
+                simpleCache?.let { setCache(it) }
+                setUpstreamDataSourceFactory(onlineSourceFactory)
+            }
+
+            loadExo(context, mediaItems, subSources, cacheFactory)
+        } catch (e: Exception) {
+            Log.e("TAG", "loadOnlinePlayer error", e)
+            //playerError?.invoke(e)
+        }
+    }
+    fun loadPlayer(
+        sameEpisode: Boolean,
+        link: String?,
+        data: String?,
+        startPosition: Long?,
+        subtitles: Set<SubtitleData>,
+        subtitle: SubtitleData?,
+        autoPlay: Boolean?
+    ) {
+        if (sameEpisode) {
+            saveData()
+        } else {
+            playerState?.currentSubtitle = subtitle
+            playbackPosition = 0
+        }
+
+        startPosition?.let {
+            playbackPosition = it
+        }
+
+
+        // we want autoplay because of TV and UX
+       // isPlaying = autoPlay ?: isPlaying
+
+        // release the current exoplayer and cache
+        releasePlayer()
+        if (link != null) {
+            loadOnlinePlayer(context, listOf(MovieUrl(link)))
+        } else if (data != null) {
+            loadOfflinePlayer(context, data)
+        }
+    }
+    fun releasePlayer(saveTime: Boolean = true) {
+
+        player?.release()
+        simpleCache?.release()
+        currentTextRenderer = null
+
+        player = null
+        //simpleCache = null
+    }
+    private fun loadOfflinePlayer(context: Context, data: String) {
+        Log.i("TAG", "loadOfflinePlayer")
+        try {
+            currentDownloadedFile = data
+            val offlineSourceFactory = context.createOfflineSource()
+            val onlineSourceFactory = createOnlineSource(emptyMap())
+
+            val (subSources, activeSubtitles) = getSubSources(
+                onlineSourceFactory = onlineSourceFactory,
+                offlineSourceFactory = offlineSourceFactory,
+                subtitleHelper,
+            )
+            val mediaItem = getMediaItem(MimeTypes.VIDEO_MP4, data).build()
+            subtitleHelper.setActiveSubtitles(activeSubtitles)
+            loadExo(context, listOf(mediaItem), subSources)
+        } catch (e: Exception) {
+            Log.e("TAG", "loadOfflinePlayer error", e)
+
+        }
+    }
+
+    private fun getMediaItemBuilder(mimeType: String):
+            MediaItem.Builder {
+        return MediaItem.Builder()
+            //Replace needed for android 6.0.0  https://github.com/google/ExoPlayer/issues/5983
+            .setMimeType(mimeType)
+    }
+
+    private fun getMediaItem(mimeType: String, uri: Uri): MediaItem {
+        return getMediaItemBuilder(mimeType).setUri(uri).build()
+    }
+
+    private fun getMediaItem(mimeType: String, url: String): MediaItem.Builder {
+        return getMediaItemBuilder(mimeType).setUri(url)
+    }
+
+    fun saveData() {
+
+        player?.let { exo ->
+            playbackPosition = exo.currentPosition
+            currentWindow = exo.currentWindowIndex
+        }
+    }
+    fun setActiveSubtitles(subtitles: List<SubtitleData>) {
+        subtitleHelper.setAllSubtitles(subtitles)
+        subtitleHelper.setActiveSubtitles(subtitles)
+    }
 }
 
 /**
@@ -490,3 +712,19 @@ private val Painter.aspectRatio
         if (this == Size.Unspecified || width.isNaN() || height.isNaN() || height == 0f) 0f
         else width / height
     }
+
+
+fun Subtitles.toSubtitleData() : SubtitleData {
+    val origin = if (url.contains("http")) {
+        SubtitleOrigin.URL
+    } else {
+        SubtitleOrigin.DOWNLOADED_FILE
+    }
+    return SubtitleData(
+        name = url.substringBeforeLast(".").substringAfterLast("/"),
+        url = url,
+        origin,
+        url.toSubtitleMimeType(),
+        emptyMap()
+    )
+}

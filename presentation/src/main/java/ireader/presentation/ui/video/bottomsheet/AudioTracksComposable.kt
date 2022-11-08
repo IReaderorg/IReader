@@ -13,7 +13,7 @@ internal fun LazyListScope.audioTracksComposable(playerState: PlayerState, media
         ChoicePreference<String?>(preference = playerState.selectedAudioTrack, choices =
         (mediaState?.playerState?.currentTracks?.allAudioTracks
                 ?: emptyList()).associate {
-            (it.label ?: "fa") to (it.label ?: "Audio Track: ${it.language}")
+            (it.label) to (it.label ?: "Audio Track: ${it.language}")
         } ?: emptyMap(), title = "Audio Tracks", onValue = {
             Log.error { "PlayerAudioSelected: " + playerState.selectedAudioTrack.toString() }
             onValue(it)

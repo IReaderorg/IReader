@@ -8,9 +8,9 @@ import androidx.media3.common.*
 import androidx.media3.common.text.Cue
 import androidx.media3.common.text.CueGroup
 import androidx.media3.exoplayer.ExoPlayer
-import ireader.core.log.Log
 import ireader.presentation.ui.video.component.cores.*
-import ireader.presentation.ui.video.component.cores.player.SubtitleHelper
+import ireader.presentation.ui.video.component.cores.player.SubtitleHelper.fromTwoLettersToLanguage
+import org.koin.core.annotation.Factory
 
 /**
  * Create a instance of [PlayerState] and register a [listener][Player.Listener] to the [Player] to
@@ -19,8 +19,8 @@ import ireader.presentation.ui.video.component.cores.player.SubtitleHelper
  * NOTE: Should call [dispose][PlayerState.dispose] to unregister the listener to avoid leaking this
  * instance when it is no longer used.
  */
-fun ExoPlayer.state(): PlayerState {
-    return PlayerStateImpl(this)
+fun ExoPlayer.state(subtitleHelper: PlayerSubtitleHelper): PlayerState {
+    return PlayerStateImpl(this, subtitleHelper)
 }
 
 /**
@@ -91,21 +91,20 @@ interface PlayerState {
     val cues: List<Cue>
     val cueGroup: List<CueGroup>
 
-    val currentTracks: CurrentTracks?
+    var currentTracks: CurrentTracks?
 
-    var currentSubtitles: List<SubtitleData>?
     var currentSubtitle: SubtitleData?
-    var localSubtitles: List<SubtitleData>
-
 
 
     fun dispose()
 }
 
+@Factory
 internal class PlayerStateImpl(
-        override val player: ExoPlayer
+        override val player: ExoPlayer,
+        subtitleHelper: PlayerSubtitleHelper
 ) : PlayerState {
-    override val subtitleHelper: PlayerSubtitleHelper = PlayerSubtitleHelper()
+    override val subtitleHelper: PlayerSubtitleHelper = subtitleHelper
     override var timeline: Timeline by mutableStateOf(player.currentTimeline)
         private set
 
@@ -196,80 +195,9 @@ internal class PlayerStateImpl(
         private set
 
     override var currentTracks: CurrentTracks? by mutableStateOf<CurrentTracks?>(null)
-        private set
 
-    override var currentSubtitles: List<SubtitleData>? by mutableStateOf<List<SubtitleData>?>(null)
+
     override var currentSubtitle: SubtitleData? by mutableStateOf<SubtitleData?>(null)
-    override var localSubtitles: List<SubtitleData> by mutableStateOf<List<SubtitleData>>(emptyList())
-
-
-
-    /**
-     * get all information about tracks
-     */
-    fun getVideoTracks(tracks: Tracks): CurrentTracks {
-        val allTracks = tracks.groups
-        val videoTracks = allTracks.mapIndexed { index, group ->
-            group.getTrackFormat(0)
-        }.filter { it.sampleMimeType?.contains("video/") == true }
-                .map { it.toVideoTrack() }
-        val audioTracks = allTracks.mapIndexed { index, group ->
-            group.getTrackFormat(0)
-        }.filter { it.sampleMimeType?.contains("audio/") == true }
-                .map { it.toAudioTrack() }
-
-        val selected = allTracks.filter { it.isSelected }.map { it.getTrackFormat(0) }.map { it.toString() }
-        Log.error {  "selected tracks: " + selected}
-
-        val embeddedSubtitles =  allTracks.filter { it.type == C.TRACK_TYPE_TEXT }.mapIndexed { index, group ->
-            group.getTrackFormat(0)
-        }
-        fun Format.isSubtitle(): Boolean {
-            return this.sampleMimeType?.contains("video/") == false &&
-                    this.sampleMimeType?.contains("audio/") == false
-        }
-
-
-        val exoPlayerSelectedTracks =
-                tracksInfo.groups.mapNotNull {
-                    val format = it.getTrackFormat(0)
-                    if (format.isSubtitle())
-                        format.language?.let { lang -> lang to it.isSelected }
-                    else null
-                }
-
-        currentSubtitles = tracksInfo.groups.map {
-            // Filter out unsupported tracks
-            it.getTrackFormat(0)
-
-        }.mapNotNull {
-            // Filter out non subs, already used subs and subs without languages
-            if (!it.isSubtitle() ||
-                    // Anything starting with - is not embedded
-                    it.language?.startsWith("-") == true ||
-                    it.language == null
-            ) return@mapNotNull null
-            return@mapNotNull SubtitleData(
-                    // Nicer looking displayed names
-                    SubtitleHelper.fromTwoLettersToLanguage(it.language!!) ?: it.language!!,
-                    // See setPreferredTextLanguage
-                    it.language!!,
-                    SubtitleOrigin.EMBEDDED_IN_VIDEO,
-                    it.sampleMimeType ?: MimeTypes.APPLICATION_SUBRIP,
-                    emptyMap()
-            )
-        }
-        subtitleHelper.setActiveSubtitles((currentSubtitles ?: emptySet()).toSet() ?: emptySet())
-        subtitleHelper.setAllSubtitles((currentSubtitles ?: emptySet()).toSet() ?: emptySet())
-        Log.error {  "Video tracks: " + player.videoFormat}
-        Log.error {  "Audio tracks: " + player.audioFormat}
-        return CurrentTracks(
-                currentVideoTrack = player.videoFormat?.toVideoTrack(),
-                currentAudioTrack = player.audioFormat?.toAudioTrack(),
-                videoTracks,
-                audioTracks
-        )
-    }
 
     private fun getLanguage(): List<String> {
         return player.currentTracks.groups.map {
@@ -277,24 +205,82 @@ internal class PlayerStateImpl(
         }
     }
 
-    private fun Format.toAudioTrack(): AudioTrack {
-        return AudioTrack(
+
+        private fun Format.toAudioTrack(): AudioTrack {
+            return AudioTrack(
                 this.id,
                 this.label,
-                this.language
-        )
-    }
+                this.language,
+            )
+        }
 
 
-    private fun Format.toVideoTrack(): VideoTrack {
-        return VideoTrack(
+        private fun Format.toVideoTrack(): VideoTrack {
+            return VideoTrack(
                 this.id,
                 this.label,
                 this.language,
                 this.width,
                 this.height
-        )
-    }
+            )
+        }
+
+        fun Format.isSubtitle(): Boolean {
+            return this.sampleMimeType?.contains("video/") == false &&
+                    this.sampleMimeType?.contains("audio/") == false
+        }
+        /**
+         * get all information about tracks
+         */
+        fun getVideoTracks(tracks: Tracks): CurrentTracks {
+            val allTracks = tracks.groups
+            val videoTracks = allTracks.mapIndexed { index, group ->
+                group.getTrackFormat(0)
+            }.filter { it.sampleMimeType?.contains("video/") == true }
+                .map { it.toVideoTrack() }
+            val audioTracks = allTracks.mapIndexed { index, group ->
+                group.getTrackFormat(0)
+            }.filter { it.sampleMimeType?.contains("audio/") == true }
+                .map { it.toAudioTrack() }
+
+            val selectedAudio = allTracks.filter { it.isSelected && it.length > 0 }.map { it.getTrackFormat(0) }.firstOrNull { it.sampleMimeType?.startsWith("audio") == true }
+            val selectedVideo = allTracks.filter { it.isSelected && it.length > 0 }.map { it.getTrackFormat(0) }.firstOrNull { it.sampleMimeType?.startsWith("video") == true }
+
+
+            val exoPlayerReportedTracks = allTracks.mapNotNull {
+                // Filter out unsupported tracks
+                if (it.isSupported)
+                    it.getTrackFormat(0)
+                else
+                    null
+            }.mapNotNull {
+                // Filter out non subs, already used subs and subs without languages
+                if (!it.isSubtitle() ||
+                    // Anything starting with - is not embedded
+                    it.language?.startsWith("-") == true ||
+                    it.language == null
+                ) return@mapNotNull null
+                return@mapNotNull SubtitleData(
+                    // Nicer looking displayed names
+                    fromTwoLettersToLanguage(it.language!!) ?: it.language!!,
+                    // See setPreferredTextLanguage
+                    url= it.language!!,
+                    SubtitleOrigin.EMBEDDED_IN_VIDEO,
+                    it.sampleMimeType ?: MimeTypes.APPLICATION_SUBRIP,
+                    emptyMap()
+                )
+            }
+            subtitleHelper.setActiveSubtitles(exoPlayerReportedTracks)
+            return CurrentTracks(
+                currentVideoTrack = selectedAudio?.toVideoTrack(),
+                currentAudioTrack = selectedVideo?.toAudioTrack(),
+                videoTracks,
+                audioTracks
+            )
+        }
+
+
+
 
 
     private val listener = object : Player.Listener {

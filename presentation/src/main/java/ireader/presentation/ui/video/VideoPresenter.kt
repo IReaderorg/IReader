@@ -71,9 +71,8 @@ fun VideoPresenter(
                 AndroidView(factory = { context ->
                     SubtitleView(context)
                 }, update = { view ->
-                    view.setStyle(CaptionStyleCompat(Color.Black.toArgb(),Color.Transparent.toArgb(),Color.Transparent.toArgb(),EDGE_TYPE_NONE,Color.Transparent.toArgb(),null))
+                    view.setStyle(CaptionStyleCompat(Color.White.toArgb(),Color.Transparent.toArgb(),Color.Transparent.toArgb(),EDGE_TYPE_NONE,Color.Transparent.toArgb(),null))
                     view.setCues(it)
-                    view.setStyle(CaptionStyleCompat(Color.Black.toArgb(), Color.White.toArgb(), Color.White.toArgb(), Color.White.toArgb(), Color.White.toArgb(), null))
                 })
             },
     ) { playerState ->
