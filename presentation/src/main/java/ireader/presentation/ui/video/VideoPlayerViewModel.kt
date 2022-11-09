@@ -13,10 +13,12 @@ import ireader.core.source.HttpSource
 import ireader.core.source.model.MovieUrl
 import ireader.core.source.model.Subtitles
 import ireader.domain.catalogs.interactor.GetLocalCatalog
+import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
+import ireader.domain.utils.extensions.withUIContext
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.ui.video.component.PlayerCreator
@@ -61,6 +63,8 @@ class VideoScreenViewModel(
     var chapter by mutableStateOf<Chapter?>(null)
     var currentMovie by mutableStateOf<Int?>(null)
 
+    var appUrl by mutableStateOf<String?>(null)
+
     fun subscribeChapter() {
         viewModelScope.launch {
             getChapterUseCase.subscribeChapterById(chapterId.value, null).collect { chapter1 ->
@@ -68,20 +72,16 @@ class VideoScreenViewModel(
                 chapter1?.content?.let { pages ->
                     val movies = pages.filterIsInstance<MovieUrl>()
                     val subs = pages.filterIsInstance<Subtitles>()
-                    mediaState.subtitleHelper.internalSubtitles.value = subs.map { it.toSubtitleData() }.toSet()
+                    mediaState.subtitleHelper.internalSubtitles.value =
+                        subs.map { it.toSubtitleData() }.toSet()
                     mediaState.subs = emptyList()
                     mediaState.medias = emptyList()
-                    mediaState.subs =subs
-                    mediaState.medias =movies
-
+                    mediaState.subs = subs
+                    mediaState.medias = movies
                 }
             }
-
         }
     }
-
-
-
 
 
     init {
@@ -97,6 +97,32 @@ class VideoScreenViewModel(
         if (localSource is HttpSource) {
             source = localSource
         }
+        viewModelScope.launch {
+            if (chapter != null && chapter.content.isEmpty() && catalogLocal != null) {
+                getRemoteChapter(chapter, catalogLocal)
+            } else {
+                loadMedia(chapter)
+            }
+
+
+        }
+    }
+
+    suspend fun getRemoteChapter(chapter: Chapter, catalogLocal: CatalogLocal) {
+        remoteUseCases.getRemoteReadingContent(chapter, catalogLocal, onError = {
+            Log.error(it.toString())
+        }, onSuccess = { result ->
+            withUIContext {
+                insertUseCases.insertChapter(result)
+                loadMedia(result)
+            }
+
+        },
+            emptyList()
+        )
+    }
+
+    fun loadMedia(chapter: Chapter?) {
         val movieUrl = chapter?.content?.filterIsInstance<MovieUrl>()?.firstOrNull()?.url ?: ""
         chapter?.content?.let {
             val subtitles = it.filterIsInstance<Subtitles>()
@@ -121,55 +147,14 @@ class VideoScreenViewModel(
         }
         val link = if (movieUrl.contains("http")) movieUrl else null
         val data = if (link == null) movieUrl else null
-        mediaState.loadPlayer(false, link = link,data = data,null, emptySet(),null,true)
-        this@VideoScreenViewModel.chapter = chapter
-        viewModelScope.launch {
-            if (chapter != null && chapter.content.isEmpty()) {
-                remoteUseCases.getRemoteReadingContent(chapter, catalogLocal, onError = {
-                    Log.error(it.toString())
-                }, onSuccess = { result ->
-                    insertUseCases.insertChapter(result)
-                    this@VideoScreenViewModel.chapter = result
-                },
-                    emptyList()
-                )
-            }
-        }
-    }
+        mediaState.loadPlayer(false, link = link, data = data, null, emptySet(), null, true)
 
-//    fun setMediaItem(): List<MediaItem> {
-//        val movies = chapter?.content?.filterIsInstance<MovieUrl>() ?: emptyList()
-//        val subtitles = chapter?.content?.filterIsInstance<Subtitles>() ?: emptyList()
-//        val mediaItems = movies.map {
-//            MediaItem.Builder().setMediaId(it.url).setUri(it.url).let { mediaItem ->
-//                val subs = mutableListOf<SubtitleConfiguration>()
-//                mediaState.subtitleHelper.allSubtitles.map { subtitle ->
-//                    subs.add(
-//                        SubtitleConfiguration.Builder(Uri.parse(subtitle.url)).setLabel("Local")
-//                            .setLanguage("En").setMimeType(MimeTypes.APPLICATION_SUBRIP)
-//                            .setSelectionFlags(C.SELECTION_FLAG_DEFAULT).build()
-//                    )
-//                }
-//                subtitles.map { subtitle ->
-//                    subs.add(
-//                        SubtitleConfiguration.Builder(Uri.parse(subtitle.url)).setLabel("Local")
-//                            .setLanguage("En").setMimeType(MimeTypes.APPLICATION_SUBRIP)
-//                            .setSelectionFlags(C.SELECTION_FLAG_DEFAULT).build()
-//                    )
-//                }
-//                mediaItem.setSubtitleConfigurations(subs.toImmutableList()).build()
-//            }
-//        }
-//        currentMovie = movies.indexOfFirst { it is MovieUrl }
-//        player?.setMediaItems(mediaItems)
-//
-//        return mediaItems
-//    }
+    }
 
 
     override fun onDestroy() {
-        mediaState?.player?.stop()
-        mediaState?.player?.release()
+        mediaState.player?.stop()
+        mediaState.player?.release()
         super.onDestroy()
     }
 

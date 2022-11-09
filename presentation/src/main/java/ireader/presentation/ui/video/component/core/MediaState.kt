@@ -628,7 +628,7 @@ class MediaState(
     fun releasePlayer(saveTime: Boolean = true) {
 
         player?.release()
-        simpleCache?.release()
+        //simpleCache?.release()
         currentTextRenderer = null
 
         player = null
