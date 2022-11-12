@@ -1,25 +1,35 @@
-package ireader.presentation.ui.video.component
+package ireader.presentation.ui.video.component.core
 
 import android.content.Context
 import android.os.Build
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.RememberObserver
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
+
+@Composable
+fun rememberManagedExoPlayer(): ExoPlayer  {
+    val context = LocalContext.current
+    return remember {
+        val builder = ExoPlayer.Builder(context)
+        builder.setMediaSourceFactory(ProgressiveMediaSource.Factory(DefaultDataSource.Factory(context)))
+        return@remember builder.build().apply {
+            playWhenReady = true
+        }
+    }
+
+}
 
 @Composable
 fun rememberManagedPlayer(
-    lifecycle: Lifecycle = LocalLifecycleOwner.current.lifecycle,
-    factory: (Context) -> Player
+        lifecycle: Lifecycle = LocalLifecycleOwner.current.lifecycle,
+        factory: (Context) -> Player
 ): State<Player?> {
     val currentContext = LocalContext.current.applicationContext
     val playerManager = remember { PlayerManager { factory(currentContext) } }
@@ -46,7 +56,7 @@ fun rememberManagedPlayer(
 
 @Stable
 internal class PlayerManager(
-    private val factory: () -> Player,
+        private val factory: () -> Player,
 ) : RememberObserver {
     var player = mutableStateOf<Player?>(null)
     private var rememberedState: Triple<String, Int, Long>? = null
@@ -59,15 +69,15 @@ internal class PlayerManager(
                 override fun onTimelineChanged(timeline: Timeline, reason: Int) {
                     // recover the remembered state if media id matched
                     rememberedState
-                        ?.let { (id, index, position) ->
-                            if (!timeline.isEmpty
-                                && timeline.windowCount > index
-                                && id == timeline.getWindow(index, window).mediaItem.mediaId
-                            ) {
-                                player.seekTo(index, position)
+                            ?.let { (id, index, position) ->
+                                if (!timeline.isEmpty
+                                        && timeline.windowCount > index
+                                        && id == timeline.getWindow(index, window).mediaItem.mediaId
+                                ) {
+                                    player.seekTo(index, position)
+                                }
                             }
-                        }
-                        ?.also { rememberedState = null }
+                            ?.also { rememberedState = null }
                 }
             })
         }
@@ -78,9 +88,9 @@ internal class PlayerManager(
             // remember the current state before release
             player.currentMediaItem?.let { mediaItem ->
                 rememberedState = Triple(
-                    mediaItem.mediaId,
-                    player.currentMediaItemIndex,
-                    player.currentPosition
+                        mediaItem.mediaId,
+                        player.currentMediaItemIndex,
+                        player.currentPosition
                 )
             }
             player.release()

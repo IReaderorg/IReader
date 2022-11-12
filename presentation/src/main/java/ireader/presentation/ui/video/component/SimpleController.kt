@@ -6,48 +6,26 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FastForward
-import androidx.compose.material.icons.filled.FastRewind
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import ireader.presentation.R
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
-import ireader.presentation.ui.video.component.core.MediaState
-import ireader.presentation.ui.video.component.core.TimeBar
-import ireader.presentation.ui.video.component.core.TimeBarProgress
-import ireader.presentation.ui.video.component.core.TimeBarScrubber
-import ireader.presentation.ui.video.component.core.rememberControllerState
+import ireader.presentation.ui.video.component.core.*
 import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 /**
  * A simple controller, which consists of a play/pause button and a time bar.
@@ -63,9 +41,19 @@ fun SimpleController(
     val maxDuration = remember {
         mutableStateOf("")
     }
+
     Crossfade(targetState = mediaState.isControllerShowing, modifier) { isShowing ->
+
         if (isShowing) {
             val controllerState = rememberControllerState(mediaState)
+            val maxDurationInFormat = remember {
+                getMaxDuration(controllerState.durationMs, maxDuration)
+            }
+            val currentDuration = remember(controllerState.positionMs) {
+                mutableStateOf(formatDuration(
+                    controllerState.positionMs,
+                ))
+            }
             var scrubbing by remember { mutableStateOf(false) }
             val hideWhenTimeout = !mediaState.shouldShowControllerIndefinitely && !scrubbing
             var hideEffectReset by remember { mutableStateOf(0) }
@@ -90,16 +78,15 @@ fun SimpleController(
 
 
                 Row(modifier = Modifier.align(Alignment.Center)) {
-                    AppIconButton(
-                        imageVector = Icons.Default.FastRewind, modifier = Modifier
-                            .size(52.dp), onClick = {
-                            mediaState.player?.currentPosition?.let { position ->
-                                controllerState.seekTo(position.minus(15000L))
-                            }
+                    AppIconButton(painter = painterResource(R.drawable.go_back_30), modifier = Modifier
+                        .size(52.dp), onClick = {
+                        mediaState.player?.currentPosition?.let { position ->
+                            controllerState.seekTo(position.minus(30000L))
+                        }
 
-                        }, tint = Color.White
+                    }, tint = Color.White.copy(alpha = .9f)
                     )
-                    Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.width(30.dp))
                     Image(
                         imageVector =
                         if (controllerState.showPause) Icons.Default.Pause
@@ -114,16 +101,15 @@ fun SimpleController(
                                 hideEffectReset++
                                 controllerState.playOrPause()
                             },
-                        colorFilter = ColorFilter.tint(Color.White)
+                        colorFilter = ColorFilter.tint(Color.White.copy(alpha = 1f))
                     )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    AppIconButton(
-                        imageVector = Icons.Default.FastForward, modifier = Modifier
-                            .size(52.dp), onClick = {
-                            mediaState.player?.currentPosition?.let { position ->
-                                controllerState.seekTo(position.plus(15000L))
-                            }
-                        }, tint = Color.White
+                    Spacer(modifier = Modifier.width(30.dp))
+                    AppIconButton(painter = painterResource(R.drawable.go_forward_30), modifier = Modifier
+                        .size(52.dp), onClick = {
+                        mediaState.player?.currentPosition?.let { position ->
+                            controllerState.seekTo(position.plus(30000L))
+                        }
+                    }, tint = Color.White.copy(alpha = .9f)
                     )
                 }
 
@@ -141,14 +127,19 @@ fun SimpleController(
                         .fillMaxWidth()
 
                 ) {
-                    MidSizeTextComposable(
-                        modifier = Modifier
-                            .padding(horizontal = 10.dp),
-                        text = formatDuration(
-                            controllerState.positionMs,
-                        ).plus("/" + getMaxDuration(controllerState.durationMs, maxDuration)),
-                        color = Color.White
-                    )
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        MidSizeTextComposable(
+                            modifier = Modifier
+                                .padding(horizontal = 10.dp),
+                            text = currentDuration.value.plus("/$maxDurationInFormat"),
+                            color = Color.White
+                        )
+                        AppIconButton(imageVector =  if (mediaState.playerState?.isFulLScreen == true) Icons.Default.FullscreenExit else Icons.Default.Fullscreen, onClick = {
+                            mediaState.playerState?.isFulLScreen = !(mediaState.playerState?.isFulLScreen ?: false)
+                        }, tint = Color.White)
+
+                    }
+
                     TimeBar(
                         controllerState.durationMs,
                         controllerState.positionMs,
@@ -184,18 +175,10 @@ fun SimpleController(
 
 fun getMaxDuration(time: Long, lastTime: MutableState<String>): String {
     if (lastTime.value != "") return lastTime.value
-    val hour = String.format("%02d", TimeUnit.MILLISECONDS.toHours(time)).takeIf { it != "00" }
-    val min = String.format("%02d", TimeUnit.MILLISECONDS.toMinutes(time))
-    val sec = String.format("%02d", TimeUnit.MILLISECONDS.toSeconds(time))
+    if (time < 0) return "00:00"
+    val dd = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
 
-    var maxDuration = ""
-    if (hour != null) {
-        maxDuration += "$hour:"
-    }
-    maxDuration += "$min:"
-    maxDuration += sec
-
-    return maxDuration
+    return dd.format(time - TimeZone.getDefault().rawOffset)
 }
 
 

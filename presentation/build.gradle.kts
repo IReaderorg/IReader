@@ -37,8 +37,9 @@ dependencies {
 
     implementation(libs.coil.core)
     implementation(libs.coil.gif)
+    implementation(libs.bundles.simplestorage)
 
-
+    implementation(composeLib.compose.compiler)
     implementation("androidx.core:core-splashscreen:1.0.0")
     implementation(composeLib.compose.foundation)
     implementation(composeLib.compose.animations)
@@ -72,10 +73,7 @@ dependencies {
 
     implementation(androidx.appCompat)
     implementation(androidx.media)
-    implementation(libs.exoplayer.core)
-    implementation(libs.exoplayer.ui)
-    implementation(libs.exoplayer.dash)
-    implementation(androidx.core)
+    implementation(libs.bundles.exoplayer)
 
     implementation(androidx.emoji)
 

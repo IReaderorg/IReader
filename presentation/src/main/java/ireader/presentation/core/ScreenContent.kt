@@ -1,47 +1,18 @@
 package ireader.presentation.core
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.DismissibleDrawerSheet
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.*
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.material3.rememberTopAppBarState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -55,17 +26,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import ireader.i18n.ARG_HAVE_CUSTOMIZED_VARIANT_BOTTOM_BAR
-import ireader.i18n.ARG_HAVE_DRAWER
-import ireader.i18n.ARG_HAVE_MODAL_SHEET
-import ireader.i18n.ARG_HAVE_VARIANT_BOTTOM_BAR
-import ireader.i18n.ARG_HIDE_BOTTOM_BAR
-import ireader.i18n.ARG_TRANSPARENT_STATUS_BAR
-import ireader.presentation.core.ui.BottomNavScreenSpec
-import ireader.presentation.core.ui.HistoryScreenSpec
-import ireader.presentation.core.ui.LibraryScreenSpec
-import ireader.presentation.core.ui.ScreenSpec
-import ireader.presentation.core.ui.UpdateScreenSpec
+import ireader.i18n.*
+import ireader.presentation.core.ui.*
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.components.ConfirmExitBackHandler
 import ireader.presentation.ui.component.components.ISnackBarHost
@@ -132,8 +94,8 @@ fun ScreenContent() {
                 requestedHideSystemNavBar -> Modifier.statusBarsPadding()
                 else ->
                     Modifier
-                        .navigationBarsPadding()
-                        .statusBarsPadding()
+                            .navigationBarsPadding()
+                            .statusBarsPadding()
             }
         }
     }
@@ -172,7 +134,8 @@ fun ScreenContent() {
                         requestHideSystemNavbar = requestHideSystemNavBar,
                         requestedCustomSystemColor = requestedCustomColor,
                         scrollBehavior = scrollBehavior,
-                        topScrollState = topAppBarState
+                        topScrollState = topAppBarState,
+
                     )
                 )
             }
@@ -195,7 +158,8 @@ fun ScreenContent() {
                             requestHideSystemNavbar = requestHideSystemNavBar,
                             requestedCustomSystemColor = requestedCustomColor,
                             scrollBehavior = scrollBehavior,
-                            topScrollState = topAppBarState
+                            topScrollState = topAppBarState,
+
                         )
                     )
                 }
@@ -211,8 +175,8 @@ fun ScreenContent() {
                 TransparentStatusBar(enable = transparentStatusBar) {
                     Scaffold(
                         modifier = scaffoldModifier.value
-                            .nestedScroll(scrollBehavior.nestedScrollConnection)
-                            .fillMaxSize(),
+                                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                                .fillMaxSize(),
                         topBar = {
                             val height = remember(topAppBarState.heightOffset) {
                                 if (topAppBarState.heightOffset == topAppBarState.heightOffsetLimit) 0 else (-100)
@@ -238,6 +202,7 @@ fun ScreenContent() {
                                             scrollBehavior = scrollBehavior,
                                             setScrollBehavior = setScrollBehavior,
                                             topScrollState = topAppBarState,
+
                                         )
                                     )
                                 }
@@ -261,7 +226,8 @@ fun ScreenContent() {
                                                 requestHideSystemNavbar = requestHideSystemNavBar,
                                                 requestedCustomSystemColor = requestedCustomColor,
                                                 scrollBehavior = scrollBehavior,
-                                                topScrollState = topAppBarState
+                                                topScrollState = topAppBarState,
+
                                             )
                                         )
                                     }
@@ -280,7 +246,8 @@ fun ScreenContent() {
                                             requestHideSystemNavbar = requestHideSystemNavBar,
                                             requestedCustomSystemColor = requestedCustomColor,
                                             scrollBehavior = scrollBehavior,
-                                            topScrollState = topAppBarState
+                                            topScrollState = topAppBarState,
+
                                         )
                                     )
                                 }
@@ -377,7 +344,7 @@ fun ScreenContent() {
                                             requestHideSystemNavbar = requestHideSystemNavBar,
                                             requestedCustomSystemColor = requestedCustomColor,
                                             scrollBehavior = scrollBehavior,
-                                            topScrollState = topAppBarState
+                                            topScrollState = topAppBarState,
                                         )
                                     )
                                 }

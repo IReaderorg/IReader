@@ -1,33 +1,38 @@
 package ireader.presentation.ui.video
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.media3.common.C
-import androidx.media3.common.MediaItem
-import androidx.media3.common.MimeTypes
-import androidx.media3.common.Player
-import com.google.common.collect.ImmutableList
+import androidx.media3.common.*
+import androidx.media3.exoplayer.ExoPlayer
 import ireader.common.models.entities.Chapter
+import ireader.core.http.HttpClients
 import ireader.core.log.Log
-import ireader.core.source.findInstance
+import ireader.core.source.HttpSource
 import ireader.core.source.model.MovieUrl
+import ireader.core.source.model.Subtitle
 import ireader.domain.catalogs.interactor.GetLocalCatalog
+import ireader.domain.models.entities.CatalogLocal
+import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
+import ireader.domain.utils.extensions.withUIContext
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.ui.video.component.PlayerCreator
+import ireader.presentation.ui.video.component.core.MediaState
+import ireader.presentation.ui.video.component.core.toSubtitleData
+import ireader.presentation.ui.video.component.cores.PlayerSubtitleHelper.Companion.toSubtitleMimeType
+import ireader.presentation.ui.video.component.cores.SubtitleData
+import ireader.presentation.ui.video.component.cores.SubtitleOrigin
+import ireader.presentation.ui.video.component.cores.player.*
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.annotation.KoinViewModel
+import java.util.*
 
 @OptIn(ExperimentalTextApi::class)
 @KoinViewModel
@@ -37,38 +42,44 @@ class VideoScreenViewModel(
     val remoteUseCases: RemoteUseCases,
     val getLocalCatalog: GetLocalCatalog,
     val insertUseCases: LocalInsertUseCases,
-    private val playerCreator: PlayerCreator,
+    val playerCreator: PlayerCreator,
     val savedStateHandle: SavedStateHandle,
-    val subtitleHandler: SubtitleHandler,
+    httpClient: HttpClients,
+    val simpleStorage: GetSimpleStorage,
+    val mediaState: MediaState,
 ) : BaseViewModel() {
+
+
     val chapterId: StateFlow<Long> =
         savedStateHandle.getStateFlow(NavigationArgs.chapterId.name, -1L)
 
-    val playbackspeed = mutableStateOf(1f)
+    var player: State<ExoPlayer?> = derivedStateOf { mediaState.player }
 
 
-    lateinit var player: Player
-
-
-    val subtitle = MediaItem.SubtitleConfiguration.Builder(subtitleHandler.subtitles)
-        .setMimeType(MimeTypes.APPLICATION_SUBRIP)
-        .setLanguage("en")
-        .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
-        .build()
+    var source: HttpSource? by mutableStateOf<HttpSource?>(null)
+    var initialize: Boolean? by mutableStateOf(false)
 
 
     var chapter by mutableStateOf<Chapter?>(null)
-    val videoUri: State<String?> =
-        derivedStateOf { chapter?.content?.findInstance<MovieUrl>()?.url }
+    var currentMovie by mutableStateOf<Int?>(null)
 
-    var showMenu by mutableStateOf(false)
+    var appUrl by mutableStateOf<String?>(null)
 
-
-    val mediaItem = derivedStateOf {
-        videoUri.value?.let {
-            MediaItem.Builder().setMediaId(it).setUri(videoUri.value).setSubtitleConfigurations(
-                ImmutableList.of(subtitle)
-            ).build()
+    fun subscribeChapter() {
+        viewModelScope.launch {
+            getChapterUseCase.subscribeChapterById(chapterId.value, null).collect { chapter1 ->
+                chapter = chapter1
+                chapter1?.content?.let { pages ->
+                    val movies = pages.filterIsInstance<MovieUrl>()
+                    val subs = pages.filterIsInstance<Subtitle>()
+                    mediaState.subtitleHelper.internalSubtitles.value =
+                        subs.map { it.toSubtitleData() }.toSet()
+                    mediaState.subs = emptyList()
+                    mediaState.medias = emptyList()
+                    mediaState.subs = subs
+                    mediaState.medias = movies
+                }
+            }
         }
     }
 
@@ -77,27 +88,74 @@ class VideoScreenViewModel(
         val chapter = runBlocking {
             getChapterUseCase.findChapterById(chapterId.value)
         }
+        subscribeChapter()
         val book = runBlocking {
             getBookUseCases.findBookById(chapter?.bookId)
         }
-        player = playerCreator.init()
-        val source = book?.sourceId?.let { getLocalCatalog.get(it) }
-        this@VideoScreenViewModel.chapter = chapter
+        val catalogLocal = book?.sourceId?.let { getLocalCatalog.get(it) }
+        val localSource = catalogLocal?.source
+        if (localSource is HttpSource) {
+            source = localSource
+        }
         viewModelScope.launch {
-            if (chapter != null && chapter.content.isEmpty()) {
-                remoteUseCases.getRemoteReadingContent(chapter, source, onError = {
-                    Log.error(it.toString())
-                }, onSuccess = { result ->
-                    insertUseCases.insertChapter(result)
-                    this@VideoScreenViewModel.chapter = result
-                },
-                    emptyList()
-                )
+            if (chapter != null && chapter.content.isEmpty() && catalogLocal != null) {
+                getRemoteChapter(chapter, catalogLocal)
+            } else {
+                loadMedia(chapter)
             }
 
+
         }
+    }
+
+    suspend fun getRemoteChapter(chapter: Chapter, catalogLocal: CatalogLocal) {
+        remoteUseCases.getRemoteReadingContent(chapter, catalogLocal, onError = {
+            Log.error(it.toString())
+        }, onSuccess = { result ->
+            withUIContext {
+                insertUseCases.insertChapter(result)
+                loadMedia(result)
+            }
+
+        },
+            emptyList()
+        )
+    }
+
+    fun loadMedia(chapter: Chapter?) {
+        val movieUrl = chapter?.content?.filterIsInstance<MovieUrl>()?.firstOrNull()?.url ?: ""
+        chapter?.content?.let {
+            val subtitles = it.filterIsInstance<Subtitle>()
+            mediaState.subtitleHelper.setActiveSubtitles(subtitles.map { sub ->
+                SubtitleData(
+                    name = sub.url.substringBeforeLast(".").substringAfterLast("/"),
+                    url = sub.url,
+                    SubtitleOrigin.URL,
+                    sub.url.toSubtitleMimeType(),
+                    emptyMap()
+                )
+            })
+            mediaState.subtitleHelper.setAllSubtitles(subtitles.map { sub ->
+                SubtitleData(
+                    name = sub.url.substringBeforeLast(".").substringAfterLast("/"),
+                    url = sub.url,
+                    SubtitleOrigin.URL,
+                    sub.url.toSubtitleMimeType(),
+                    emptyMap()
+                )
+            })
+        }
+        val link = if (movieUrl.contains("http")) movieUrl else null
+        val data = if (link == null) movieUrl else null
+        mediaState.loadPlayer(false, link = link, data = data, null, emptySet(), null, true)
+
+    }
 
 
+    override fun onDestroy() {
+        mediaState.player?.stop()
+        mediaState.player?.release()
+        super.onDestroy()
     }
 
 

@@ -56,7 +56,12 @@ sealed interface ScreenSpec {
         return this.navBackStackEntry.arguments!!.getString("query")
     }
 
-
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun InitComposable(
+            controller: Controller
+    ) {
+    }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable

@@ -1,19 +1,16 @@
 package ireader.presentation.ui.video.component.core
 
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.media3.common.AudioAttributes
-import androidx.media3.common.DeviceInfo
-import androidx.media3.common.MediaMetadata
-import androidx.media3.common.PlaybackException
-import androidx.media3.common.PlaybackParameters
-import androidx.media3.common.Player
-import androidx.media3.common.Timeline
-import androidx.media3.common.TrackSelectionParameters
-import androidx.media3.common.Tracks
-import androidx.media3.common.VideoSize
+import androidx.media3.common.*
 import androidx.media3.common.text.Cue
+import androidx.media3.common.text.CueGroup
+import androidx.media3.exoplayer.ExoPlayer
+import ireader.presentation.ui.video.component.cores.*
+import ireader.presentation.ui.video.component.cores.player.SubtitleHelper.fromTwoLettersToLanguage
+import org.koin.core.annotation.Factory
 
 /**
  * Create a instance of [PlayerState] and register a [listener][Player.Listener] to the [Player] to
@@ -22,15 +19,17 @@ import androidx.media3.common.text.Cue
  * NOTE: Should call [dispose][PlayerState.dispose] to unregister the listener to avoid leaking this
  * instance when it is no longer used.
  */
-fun Player.state(): PlayerState {
-    return PlayerStateImpl(this)
+fun ExoPlayer.state(subtitleHelper: PlayerSubtitleHelper): PlayerState {
+    return PlayerStateImpl(this, subtitleHelper)
 }
 
 /**
  * A state object that can be used to observe the [player]'s states.
  */
 interface PlayerState {
-    val player: Player
+    val player: ExoPlayer
+
+    val subtitleHelper : PlayerSubtitleHelper
 
     val timeline: Timeline
 
@@ -57,6 +56,7 @@ interface PlayerState {
     val playbackSuppressionReason: Int
 
     val isPlaying: Boolean
+    var playbackSpeed: Float
 
     @get:Player.RepeatMode
     val repeatMode: Int
@@ -75,6 +75,8 @@ interface PlayerState {
 
     val audioAttributes: AudioAttributes
 
+    val selectedAudioTrack: String?
+
     val volume: Float
 
     val deviceInfo: DeviceInfo
@@ -82,17 +84,27 @@ interface PlayerState {
     val deviceVolume: Int
 
     val isDeviceMuted: Boolean
+    var isFulLScreen: Boolean
 
     val videoSize: VideoSize
 
     val cues: List<Cue>
+    val cueGroup: List<CueGroup>
+
+    var currentTracks: CurrentTracks?
+
+    var currentSubtitle: SubtitleData?
+
 
     fun dispose()
 }
 
+@Factory
 internal class PlayerStateImpl(
-    override val player: Player
+        override val player: ExoPlayer,
+        subtitleHelper: PlayerSubtitleHelper
 ) : PlayerState {
+    override val subtitleHelper: PlayerSubtitleHelper = subtitleHelper
     override var timeline: Timeline by mutableStateOf(player.currentTimeline)
         private set
 
@@ -131,6 +143,9 @@ internal class PlayerStateImpl(
     override var isPlaying: Boolean by mutableStateOf(player.isPlaying)
         private set
 
+    override var playbackSpeed: Float by mutableStateOf(1f)
+
+
     @get:Player.RepeatMode
     override var repeatMode: Int by mutableStateOf(player.repeatMode)
         private set
@@ -156,6 +171,8 @@ internal class PlayerStateImpl(
     override var audioAttributes: AudioAttributes by mutableStateOf(player.audioAttributes)
         private set
 
+    override val selectedAudioTrack: String? by derivedStateOf { currentTracks?.currentAudioTrack?.label }
+
     override var volume: Float by mutableStateOf(player.volume)
         private set
 
@@ -167,21 +184,117 @@ internal class PlayerStateImpl(
 
     override var isDeviceMuted: Boolean by mutableStateOf(player.isDeviceMuted)
         private set
+    override var isFulLScreen: Boolean by mutableStateOf(true)
 
     override var videoSize: VideoSize by mutableStateOf(player.videoSize)
         private set
 
     override var cues: List<Cue> by mutableStateOf(player.currentCues.cues)
         private set
+    override var cueGroup: List<CueGroup> by mutableStateOf(listOf(player.currentCues))
+        private set
+
+    override var currentTracks: CurrentTracks? by mutableStateOf<CurrentTracks?>(null)
+
+
+    override var currentSubtitle: SubtitleData? by mutableStateOf<SubtitleData?>(null)
+
+    private fun getLanguage(): List<String> {
+        return player.currentTracks.groups.map {
+            it.getTrackFormat(0).language ?: "Unknown Langauge"
+        }
+    }
+
+
+        private fun Format.toAudioTrack(): AudioTrack {
+            return AudioTrack(
+                this.id,
+                this.label,
+                this.language,
+            )
+        }
+
+
+        private fun Format.toVideoTrack(): VideoTrack {
+            return VideoTrack(
+                this.id,
+                this.label,
+                this.language,
+                this.width,
+                this.height
+            )
+        }
+
+        fun Format.isSubtitle(): Boolean {
+            return this.sampleMimeType?.contains("video/") == false &&
+                    this.sampleMimeType?.contains("audio/") == false
+        }
+        /**
+         * get all information about tracks
+         */
+        fun getVideoTracks(tracks: Tracks): CurrentTracks {
+            val allTracks = tracks.groups
+            val videoTracks = allTracks.mapIndexed { index, group ->
+                group.getTrackFormat(0)
+            }.filter { it.sampleMimeType?.contains("video/") == true }
+                .map { it.toVideoTrack() }
+            val audioTracks = allTracks.mapIndexed { index, group ->
+                group.getTrackFormat(0)
+            }.filter { it.sampleMimeType?.contains("audio/") == true }
+                .map { it.toAudioTrack() }
+
+            val selectedAudio = allTracks.filter { it.isSelected && it.length > 0 }.map { it.getTrackFormat(0) }.firstOrNull { it.sampleMimeType?.startsWith("audio") == true }
+            val selectedVideo = allTracks.filter { it.isSelected && it.length > 0 }.map { it.getTrackFormat(0) }.firstOrNull { it.sampleMimeType?.startsWith("video") == true }
+
+
+            val exoPlayerReportedTracks = allTracks.mapNotNull {
+                // Filter out unsupported tracks
+                if (it.isSupported)
+                    it.getTrackFormat(0)
+                else
+                    null
+            }.mapNotNull {
+                // Filter out non subs, already used subs and subs without languages
+                if (!it.isSubtitle() ||
+                    // Anything starting with - is not embedded
+                    it.language?.startsWith("-") == true ||
+                    it.language == null
+                ) return@mapNotNull null
+                return@mapNotNull SubtitleData(
+                    // Nicer looking displayed names
+                    fromTwoLettersToLanguage(it.language!!) ?: it.language!!,
+                    // See setPreferredTextLanguage
+                    url= it.language!!,
+                    SubtitleOrigin.EMBEDDED_IN_VIDEO,
+                    it.sampleMimeType ?: MimeTypes.APPLICATION_SUBRIP,
+                    emptyMap()
+                )
+            }
+            subtitleHelper.setActiveSubtitles(exoPlayerReportedTracks)
+            return CurrentTracks(
+                currentVideoTrack = selectedAudio?.toVideoTrack(),
+                currentAudioTrack = selectedVideo?.toAudioTrack(),
+                videoTracks,
+                audioTracks
+            )
+        }
+
+
+
+
 
     private val listener = object : Player.Listener {
+
+
         override fun onTimelineChanged(timeline: Timeline, reason: Int) {
             this@PlayerStateImpl.timeline = timeline
             this@PlayerStateImpl.mediaItemIndex = player.currentMediaItemIndex
         }
 
         override fun onTracksChanged(tracks: Tracks) {
-            this@PlayerStateImpl.tracksInfo = tracksInfo
+            this@PlayerStateImpl.tracksInfo = tracks
+            this@PlayerStateImpl.currentTracks = getVideoTracks(tracks)
+
         }
 
 
@@ -194,7 +307,7 @@ internal class PlayerStateImpl(
         }
 
         override fun onIsLoadingChanged(isLoading: Boolean) {
-            this@PlayerStateImpl.isLoading
+            this@PlayerStateImpl.isLoading = isLoading
         }
 
         override fun onAvailableCommandsChanged(availableCommands: Player.Commands) {
@@ -210,8 +323,8 @@ internal class PlayerStateImpl(
         }
 
         override fun onPlayWhenReadyChanged(
-            playWhenReady: Boolean,
-            @Player.PlayWhenReadyChangeReason reason: Int
+                playWhenReady: Boolean,
+                @Player.PlayWhenReadyChangeReason reason: Int
         ) {
             this@PlayerStateImpl.playWhenReady = playWhenReady
         }
@@ -237,9 +350,9 @@ internal class PlayerStateImpl(
         }
 
         override fun onPositionDiscontinuity(
-            oldPosition: Player.PositionInfo,
-            newPosition: Player.PositionInfo,
-            reason: Int
+                oldPosition: Player.PositionInfo,
+                newPosition: Player.PositionInfo,
+                reason: Int
         ) {
             this@PlayerStateImpl.mediaItemIndex = player.currentMediaItemIndex
         }
@@ -296,6 +409,8 @@ internal class PlayerStateImpl(
         override fun onCues(cues: List<Cue>) {
             this@PlayerStateImpl.cues = cues
         }
+
+
     }
 
     init {

@@ -1,13 +1,6 @@
 package ireader.presentation.ui.video.component.core
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
@@ -17,7 +10,7 @@ import androidx.media3.common.Timeline
  */
 @Composable
 fun rememberControllerState(
-    mediaState: MediaState
+        mediaState: MediaState
 ): ControllerState {
     return remember { ControllerState(mediaState) }
 }
@@ -31,7 +24,7 @@ fun ControllerState(mediaState: MediaState): ControllerState {
 
 @Stable
 class ControllerState internal constructor(
-    stateOfPlayerState: State<PlayerState?>
+        stateOfPlayerState: State<PlayerState?>
 ) {
     private val playerState: PlayerState? by stateOfPlayerState
     private val player: Player? get() = playerState?.player
@@ -53,8 +46,8 @@ class ControllerState internal constructor(
     fun playOrPause() {
         player?.run {
             if (playbackState == Player.STATE_IDLE
-                || playbackState == Player.STATE_ENDED
-                || !playWhenReady
+                    || playbackState == Player.STATE_ENDED
+                    || !playWhenReady
             ) {
                 if (playbackState == Player.STATE_IDLE) {
                     prepare()
@@ -73,10 +66,10 @@ class ControllerState internal constructor(
      */
     val durationMs: Long by derivedStateOf {
         windowOffsetAndDurations
-            ?.run {
-                if (multiWindowTimeBar) this.lastOrNull()?.run { first + second }
-                else this[playerState?.mediaItemIndex!!].second
-            } ?: C.TIME_UNSET
+                ?.run {
+                    if (multiWindowTimeBar) this.lastOrNull()?.run { first + second }
+                    else this[playerState?.mediaItemIndex!!].second
+                } ?: C.TIME_UNSET
     }
 
     /**

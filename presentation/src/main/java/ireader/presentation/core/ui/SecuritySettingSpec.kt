@@ -101,7 +101,7 @@ object SecuritySettingSpec : ScreenSpec {
                 Components.Dynamic {
                     if (vm.useAuth.value) {
                         val values = arrayOf(0L, 1L, 2L, 5L, 10L, -1L)
-                        ChoicePreference(
+                        ChoicePreference<Long>(
                             preference = vm.lockAppAfter,
                             choices = values.associate { text ->
                                 when (text) {
@@ -139,7 +139,7 @@ object SecuritySettingSpec : ScreenSpec {
                     }
                 },
                 Components.Dynamic {
-                    ChoicePreference(
+                    ChoicePreference<PreferenceValues.SecureScreenMode>(
                         preference = vm.secureScreen,
                         choices = mapOf(
                             PreferenceValues.SecureScreenMode.ALWAYS to stringResource(id = PreferenceValues.SecureScreenMode.ALWAYS.titleResId),

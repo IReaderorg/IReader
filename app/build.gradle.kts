@@ -177,6 +177,7 @@ dependencies {
     testImplementation(libs.ktor.core.cio)
 
     implementation(composeLib.compose.runtime)
+    implementation(composeLib.compose.compiler)
 
     testImplementation(test.bundles.common)
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")

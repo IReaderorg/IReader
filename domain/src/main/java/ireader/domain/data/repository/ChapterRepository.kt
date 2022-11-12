@@ -1,7 +1,7 @@
 package ireader.domain.data.repository
 
-import kotlinx.coroutines.flow.Flow
 import ireader.common.models.entities.Chapter
+import kotlinx.coroutines.flow.Flow
 
 interface ChapterRepository {
 
@@ -12,6 +12,7 @@ interface ChapterRepository {
     suspend fun findChapterById(
         chapterId: Long,
     ): Chapter?
+
 
     suspend fun findAllChapters(): List<Chapter>
 
@@ -24,6 +25,7 @@ interface ChapterRepository {
 
 
     suspend fun findLastReadChapter(bookId: Long): Chapter?
+    suspend fun subscribeLastReadChapter(bookId: Long): Flow<Chapter?>
 
     suspend fun insertChapter(chapter: Chapter): Long
 

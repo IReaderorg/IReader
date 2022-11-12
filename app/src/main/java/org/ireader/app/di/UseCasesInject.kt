@@ -3,11 +3,12 @@ package org.ireader.app.di
 import android.content.Context
 import ireader.core.db.Transactions
 import ireader.core.http.WebViewCookieJar
+import ireader.domain.data.repository.*
+import ireader.domain.image.cache.CoverCache
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.preferences.prefs.UiPreferences
-import ireader.domain.data.repository.*
 import ireader.domain.usecases.download.DownloadUseCases
 import ireader.domain.usecases.download.delete.DeleteAllSavedDownload
 import ireader.domain.usecases.download.delete.DeleteSavedDownload
@@ -42,7 +43,6 @@ import ireader.domain.usecases.services.*
 import ireader.domain.usecases.updates.DeleteAllUpdates
 import ireader.domain.usecases.updates.SubscribeUpdates
 import ireader.domain.usecases.updates.UpdateUseCases
-import ireader.domain.image.cache.CoverCache
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Single
@@ -108,7 +108,8 @@ class UseCasesInject {
             findChapterById = FindChapterById(chapterRepository),
             findChaptersByBookId = FindChaptersByBookId(chapterRepository),
             subscribeChaptersByBookId = SubscribeChaptersByBookId(chapterRepository),
-            updateLastReadTime = UpdateLastReadTime(insertUseCases = insertUseCases, historyUseCase = historyUseCase, uiPreferences = uiPreferences)
+            updateLastReadTime = UpdateLastReadTime(insertUseCases = insertUseCases, historyUseCase = historyUseCase, uiPreferences = uiPreferences),
+                subscribeChapterById = SubscribeChapterById(chapterRepository)
         )
     }
 

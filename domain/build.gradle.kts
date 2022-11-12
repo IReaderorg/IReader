@@ -17,7 +17,7 @@ android {
 
 dependencies {
 
-    implementation("nl.siegmann.epublib:epublib-core:3.1") {
+    implementation(libs.epublib) {
         exclude(group = "org.slf4j")
         exclude(group = "xmlpull")
     }
