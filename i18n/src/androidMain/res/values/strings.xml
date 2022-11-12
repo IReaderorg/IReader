@@ -34,6 +34,7 @@
     <string name="authentication">Authentication</string>
     <string name="authenticate_to_confirm_change">Authenticate to confirm change</string>
     <string name="subtitles_encoding_key" translatable="false">subtitles_encoding_key</string>
+
     <string name="pref_incognito_mode_summary">Pause reading history</string>
     <string name="no_app_was_found_to_lauch">Something went wrong. you don\'t have the required app.</string>
     <string name="the_downloads_was_interrupted">The Downloads was interrupted</string>
@@ -53,7 +54,6 @@
     <string name="toggle_search_mode_off">Toggle search mode off</string>
     <string name="recently">Recently</string>
     <string name="relative_time_today">Today</string>
-
     <string name="display_mode">Display Mode</string>
     <string name="tabs">Tabs</string>
     <string name="badge">Badge</string>
@@ -94,7 +94,6 @@
     <string name="github">Github</string>
     <string name="check_the_update">Check the Update</string>
     <string name="check_permissions">Check Permissions</string>
-
     <string name="appearance">Appearance</string>
     <string name="updater_is_enable">Updater</string>
     <string name="show_update">Show Update</string>
@@ -115,7 +114,6 @@
     <string name="weeks">Week</string>
     <string name="weekly">Weekly</string>
     <string name="daily">Daily</string>
-
     <string name="off">Off</string>
     <string name="on">On</string>
     <string name="auto">Auto</string>
@@ -150,19 +148,13 @@
     <string name="pause">Pause</string>
     <string name="resume">Resume</string>
     <string name="unknown">Unknown</string>
-
-
-
     <string name="remove">Remove</string>
     <string name="dialog_remove_chapter_history_description">This will remove the read date of this chapter. Are you sure?</string>
     <string name="dialog_remove_chapter_book_description">This will remove the read date of this book. Are you sure?</string>
     <string name="dialog_remove_chapter_books_description">This will remove the read date of all books. Are you sure?</string>
-
-
     <string name="create_backup">Create Backup</string>
     <string name="backup_created_successfully">Create Backup Successfully</string>
     <string name="restore_backup">Restore Backup</string>
-
     <string name="author">Author</string>
     <string name="download">Download</string>
     <string name="bookmark">Bookmark</string>
@@ -193,8 +185,6 @@
     <string name="mark_as_not_read">Mark as Not read</string>
     <string name="mark_previous_as_read">Mark Previous as read</string>
     <string name="return_to_previous_screen">Return to previous screen</string>
-
-
     <string name="title">Title</string>
     <string name="last_read">Last Read</string>
     <string name="last_update">Last Updated</string>
@@ -209,13 +199,8 @@
     <string name="by_date_fetched">By date fetched</string>
     <string name="by_date_uploaded">By date Uploaded</string>
     <string name="by_date_read">By read</string>
-
-
-
-
     <!--- UiText -->
     <string name="empty_library">There is no book is Library, you can add books in the Explore screen.</string>
-
     <!--- install steps -->
     <string name="fatal_error">Fatal error for</string>
     <string name="installation_error">Error while (un)installing package</string>
@@ -225,32 +210,12 @@
     <string name="installation_error_incompatible">PackageManger: Incompatible with installed package</string>
     <string name="installation_error_conflicted">PackageManger: Conflicted with installed package</string>
     <string name="installation_error_blocked">PackageManger: Installer was blocked</string>
-
     <string name="url_is_invalid">Url is invalid</string>
-
-
-
-
-
-
-
     <!-- IReader-->
-
-
     <!-- Detail-->
     <string name="start">Start</string>
-
-
-
-
-
-
-
-
-
-
     <string name="error_unknown">An Unknown Error Happened.</string>
-    <string name="no_error" />
+    <string name="no_error">No error</string>
     <string name="no_book_found_error">There is no book with this id.</string>
     <string name="no_chapters_found_error">There is no chapters here.</string>
     <string name="no_chapter_found_error">There is No chapter with this name.</string>
@@ -265,7 +230,6 @@
     <string name="trying_to_fetch">Trying to fetch…</string>
     <string name="this_is_first_chapter">This is the first chapter</string>
     <string name="this_is_last_chapter">This is the last chapter</string>
-
     <!-- Download Notification -->
     <string name="download_notifier_downloader_title">Downloader</string>
     <string name="download_notifier_title_error">Error</string>
@@ -274,7 +238,6 @@
     <string name="download_notifier_no_network">No network connection available</string>
     <string name="download_notifier_download_paused">Download paused</string>
     <string name="download_notifier_download_finish">Download completed</string>
-
     <!-- Notification channels -->
     <string name="channel_common">Common</string>
     <string name="channel_progress">Progress</string>
@@ -299,11 +262,8 @@
     <string name="information_cloudflare_bypass_failure">Can\'t bypass the cloudflare</string>
     <string name="update_notification">Application Updates</string>
     <string name="library_updates_notification">Library Updates</string>
-
     <string name="origin_language">Origin Language</string>
     <string name="target_language">Target Language</string>
-
-
     <string name="query_must_not_be_empty">query must not be empty.</string>
     <string name="no_filter_applied">No Filter Applied.</string>
     <string name="previous_chapter">Previous chapter</string>
@@ -403,10 +363,6 @@
     <string name="horizontal">Horizontal</string>
     <string name="selectable_mode">Selectable mode</string>
     <string name="custom_brightness">Custom Brightness</string>
-
-
-
-
     <!--- core -->
     <string name="history_screen_label">History</string>
     <string name="updates_screen_label">Updates</string>
@@ -420,22 +376,16 @@
     <string name="open_in_webView">Open in WebView</string>
     <string name="downloads_queue">Downloads queue</string>
     <string name="cancel_all_for_this_series">"Cancel all for this series</string>
-
-
     <!-- IReader-->
-
     <string name="catalog_not_found_error">Can\'t found any Extensions.</string>
     <string name="there_was_a_problem_in_getting_chapter">There was a problem in getting the chapter.</string>
     <string name="something_is_wrong_with_this_chapter">Something is wrong with this chapter.</string>
     <string name="restoredSuccessfully">The Backup Restored Successfully.</string>
-
     <string name="library_is_out_of_date">Library is Out of date.</string>
     <string name="time_out_exception">The request was timed out.</string>
     <string name="the_source_is_not_found">The Source was not found.</string>
     <string name="something_is_wrong_with_this_book">Something is wrong with this book.</string>
-
     <string name="label_text_reader">Text Reader</string>
-
     <string name="latest_book">Latest</string>
     <string name="source_not_available">this Source is not available in your device.</string>
     <string name="uninstalled">Uninstalled</string>
@@ -469,5 +419,3 @@
     <string name="pinned_sources">Pinned</string>
     <string name="last_used_source">Last Used</string>
 </resources>
-
-
