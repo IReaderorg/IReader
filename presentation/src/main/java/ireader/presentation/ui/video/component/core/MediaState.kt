@@ -33,7 +33,7 @@ import ireader.core.source.HttpSource
 import ireader.core.source.model.ImageUrl
 import ireader.core.source.model.MovieUrl
 import ireader.core.source.model.Page
-import ireader.core.source.model.Subtitles
+import ireader.core.source.model.Subtitle
 import ireader.presentation.imageloader.coil.image_loaders.convertToOkHttpRequest
 import ireader.presentation.ui.video.component.cores.*
 import ireader.presentation.ui.video.component.cores.PlayerSubtitleHelper.Companion.toSubtitleMimeType
@@ -113,7 +113,7 @@ class MediaState(
             else ControllerVisibility.Invisible
         }
     var medias = emptyList<MovieUrl>()
-    var subs = emptyList<Subtitles>()
+    var subs = emptyList<Subtitle>()
 
     /**
      * The current [visibility][ControllerVisibility] of the controller.
@@ -541,7 +541,7 @@ class MediaState(
     var ignoreSSL = false
     private fun loadOnlinePlayer(context: Context, link: List<Page>) {
         val movies = link.filterIsInstance<MovieUrl>() ?: emptyList()
-        val subtitles = link.filterIsInstance<Subtitles>() ?: emptyList()
+        val subtitles = link.filterIsInstance<Subtitle>() ?: emptyList()
         Log.i("TAG", "loadOnlinePlayer $link")
         try {
             currentLink = movies.firstOrNull()?.url
@@ -714,7 +714,7 @@ private val Painter.aspectRatio
     }
 
 
-fun Subtitles.toSubtitleData() : SubtitleData {
+fun Subtitle.toSubtitleData() : SubtitleData {
     val origin = if (url.contains("http")) {
         SubtitleOrigin.URL
     } else {

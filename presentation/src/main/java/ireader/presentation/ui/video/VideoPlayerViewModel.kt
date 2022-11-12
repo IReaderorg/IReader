@@ -11,7 +11,7 @@ import ireader.core.http.HttpClients
 import ireader.core.log.Log
 import ireader.core.source.HttpSource
 import ireader.core.source.model.MovieUrl
-import ireader.core.source.model.Subtitles
+import ireader.core.source.model.Subtitle
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.usecases.files.GetSimpleStorage
@@ -71,7 +71,7 @@ class VideoScreenViewModel(
                 chapter = chapter1
                 chapter1?.content?.let { pages ->
                     val movies = pages.filterIsInstance<MovieUrl>()
-                    val subs = pages.filterIsInstance<Subtitles>()
+                    val subs = pages.filterIsInstance<Subtitle>()
                     mediaState.subtitleHelper.internalSubtitles.value =
                         subs.map { it.toSubtitleData() }.toSet()
                     mediaState.subs = emptyList()
@@ -125,7 +125,7 @@ class VideoScreenViewModel(
     fun loadMedia(chapter: Chapter?) {
         val movieUrl = chapter?.content?.filterIsInstance<MovieUrl>()?.firstOrNull()?.url ?: ""
         chapter?.content?.let {
-            val subtitles = it.filterIsInstance<Subtitles>()
+            val subtitles = it.filterIsInstance<Subtitle>()
             mediaState.subtitleHelper.setActiveSubtitles(subtitles.map { sub ->
                 SubtitleData(
                     name = sub.url.substringBeforeLast(".").substringAfterLast("/"),

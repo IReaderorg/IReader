@@ -104,7 +104,7 @@ sqldelight-android-paging = { module = "com.squareup.sqldelight:android-paging3-
 detekt = { module = "com.twitter.compose.rules:detekt", version.ref = "detekt" }
 
 requerySqlite = "com.github.requery:sqlite-android:3.36.0"
-androidSqlite = "androidx.sqlite:sqlite-framework:2.3.0-alpha01"
+androidSqlite = "androidx.sqlite:sqlite-framework:2.1.0"
 
 exoplayer-core = { module = "androidx.media3:media3-exoplayer", version.ref = "exoplayer" }
 exoplayer-ui = { module = "androidx.media3:media3-ui", version.ref = "exoplayer" }
@@ -131,7 +131,7 @@ ireader = ["ireader-ktorCore", "ireader-ktorContentNegotiation","ireader-ktorSer
 
 
 ideaExt = { id = "org.jetbrains.gradle.plugin.idea-ext", version.ref = "ideaExt" }
-jetbrainCompose = { id = "org.jetbrains.compose", version = "1.2.0" }
+jetbrainCompose = { id = "org.jetbrains.compose", version = "1.2.1" }
 vanniktech = { id = "com.vanniktech.maven.publish", version = "0.21.0" }
 
 dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version = "1.13.1" }
