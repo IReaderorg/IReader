@@ -1,2 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="library_screen_label">Bibliotek</string>
+    <string name="explore_screen_label">Utforske</string>
+    <string name="setting_screen_label">Innstilling</string>
+    <string name="delete_all_downloads">Slett alle nedlastinger</string>
+    <string name="cancel">Avbryt</string>
+    <string name="show_system_catalogs">Vis systemutvidelser</string>
+    <string name="show_local_catalogs">Vis lokale utvidelser</string>
+    <string name="auto_installer">Autoinstallasjon</string>
+    <string name="search_hint">Søk…</string>
+    <string name="nothing_read_recently">Ingenting lest nylig</string>
+    <string name="hint">…</string>
+    <string name="category_hint">Navn…</string>
+    <string name="about">Om</string>
+    <string name="edit_category">Rediger kategorier</string>
+    <string name="confirm">Bekrefte</string>
+    <string name="category">Kategorier</string>
+    <string name="help">Hjelp</string>
+    <string name="pref_incognito_mode">Inkognitomodus</string>
+    <string name="lock_never">Aldri</string>
+    <string name="status">Status</string>
+    <string name="cover">Omslag</string>
+    <string name="page_progress_num">Side %d</string>
+    <string name="permissions">Tillatelser</string>
+    <string name="lock_when_idle">Lås når inaktiv etter</string>
+    <string name="authentication">Godkjenning</string>
+    <string name="authenticate_to_confirm_change">Autentiser for å bekrefte endring</string>
+    <string name="pref_incognito_mode_summary">Sett lesehistorikken på pause</string>
+    <string name="the_downloads_was_interrupted">Nedlastingene ble avbrutt</string>
+    <string name="add">Legg til</string>
+    <string name="cancel_all">Avbryt alle</string>
+    <string name="add_as_new">Ny</string>
+    <string name="apply">Legg til</string>
+    <string name="the_downloads_was_cancelled">Nedlastingene ble kansellert</string>
+    <string name="downloads_was_cancelled">Nedlasting av ble avbrutt</string>
+    <string name="was_cancelled">ble avbrutt</string>
+    <string name="download_of">Nedlasting av</string>
+    <string name="loading">Åpner</string>
+    <string name="error">Feil</string>
+    <string name="refresh">Oppfrisk</string>
+    <string name="share">Del</string>
+    <string name="view_book">Se bok</string>
+    <string name="no_app_was_found_to_lauch">Noe gikk galt. du har ikke den nødvendige appen.</string>
+    <string name="lock_always">Alltid</string>
+    <string name="failed_to_download">Kunne ikke laste ned</string>
+</resources>
