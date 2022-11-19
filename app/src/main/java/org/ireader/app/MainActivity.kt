@@ -94,8 +94,6 @@ fun GetPermissions(context: Context, getSimpleStorage: GetSimpleStorage,uiPrefer
     var showDialog  by remember {
         mutableStateOf(checkAccess())
     }
-
-
     if (showDialog) {
         AlertDialog(onDismissRequest = { }, title = {
             BigSizeTextComposable(text = context.getString(R.string.permissions))
@@ -115,6 +113,9 @@ fun GetPermissions(context: Context, getSimpleStorage: GetSimpleStorage,uiPrefer
                 TextButton(onClick = {
                     runCatching {
                         getSimpleStorage.checkPermission().let { granted ->
+                            if (granted) {
+                                getSimpleStorage.createNoMediaFile()
+                            }
                             showDialog =  granted
                         }
                     }.getOrElse {
