@@ -283,4 +283,6 @@
     <string name="copied_to_clipboard">Panoya kopyalandı</string>
     <string name="query_must_not_be_empty">sorgu boş olmamalı.</string>
     <string name="available">Mevcut</string>
+    <string name="text_align">Yazı Hizası</string>
+    <string name="text_align_left">Sol Yazı Hizası</string>
 </resources>
