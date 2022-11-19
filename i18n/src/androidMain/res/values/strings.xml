@@ -14,6 +14,7 @@
     <string name="show_system_catalogs">Show System Extensions</string>
     <string name="show_local_catalogs">Show Local Extensions</string>
     <string name="auto_installer">Auto Installer</string>
+    <string name="saved_local_source_location">Saved Sources to Cache</string>
     <string name="search_hint">Search…</string>
     <string name="nothing_read_recently">Nothing read recently</string>
     <string name="hint">…</string>
@@ -94,6 +95,7 @@
     <string name="github">Github</string>
     <string name="check_the_update">Check the Update</string>
     <string name="check_permissions">Check Permissions</string>
+    <string name="use_local_cache">Use Local Cache</string>
 
     <string name="appearance">Appearance</string>
     <string name="updater_is_enable">Updater</string>

@@ -166,7 +166,9 @@ object SecuritySettingSpec : ScreenSpec {
  */
 
 class UnlockActivity : FragmentActivity() {
+
     var appPreferences: UiPreferences = get<UiPreferences>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val title = intent.extras?.getString(TITLE)
@@ -192,8 +194,10 @@ class UnlockActivity : FragmentActivity() {
                     result: BiometricPrompt.AuthenticationResult,
                 ) {
                     super.onAuthenticationSucceeded(activity, result)
-                    appPreferences.isAppLocked = false
-                    appPreferences.lastAppUnlock().set(Clock.System.now().toEpochMilliseconds())
+                    kotlin.runCatching {
+                        appPreferences.isAppLocked = false
+                        appPreferences.lastAppUnlock().set(Clock.System.now().toEpochMilliseconds())
+                    }
                     setResult(SUCCESS, intent)
                     finish()
                 }

@@ -29,6 +29,9 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun autoCatalogUpdater(): Preference<Boolean> {
         return preferenceStore.getBoolean("auto_catalog_updater_catalogs", false)
     }
+    fun savedLocalCatalogLocation(): Preference<Boolean> {
+        return preferenceStore.getBoolean("saved_local_catalog_location", false)
+    }
     fun lastBackUpTime(): Preference<Long> {
         return preferenceStore.getLong("last_automatic_backup_time", 0)
     }

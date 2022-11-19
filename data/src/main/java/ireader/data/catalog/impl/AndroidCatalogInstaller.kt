@@ -12,6 +12,7 @@ import ireader.core.os.InstallStep
 import ireader.core.os.PackageInstaller
 import ireader.domain.catalogs.service.CatalogInstaller
 import ireader.domain.models.entities.CatalogRemote
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.i18n.UiText
 import ireader.i18n.asString
@@ -32,6 +33,7 @@ class AndroidCatalogInstaller(
     private val installationChanges: AndroidCatalogInstallationChanges,
     private val packageInstaller: PackageInstaller,
     private val getSimpleStorage: GetSimpleStorage,
+    private val uiPreferences: UiPreferences
 ) : CatalogInstaller {
 
     /**
@@ -61,7 +63,7 @@ class AndroidCatalogInstaller(
 
                 // copy installed App Icon to the storage
                 iconResponse.saveTo(tmpIconFile)
-                val extDir = File(getSimpleStorage.extensionDirectory(), catalog.pkgName).apply { mkdirs() }
+                val extDir = File(context.cacheDir, catalog.pkgName).apply { mkdirs() }
                 val iconFile = File(extDir, tmpIconFile.name)
                 tmpIconFile.copyRecursively(iconFile,true)
 

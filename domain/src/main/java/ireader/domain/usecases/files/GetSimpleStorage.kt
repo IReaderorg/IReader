@@ -9,12 +9,14 @@ import com.anggrayudi.storage.SimpleStorage
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.anggrayudi.storage.file.DocumentFileCompat
 import com.anggrayudi.storage.file.StorageId
+import ireader.domain.preferences.prefs.UiPreferences
 import org.koin.core.annotation.Single
 import java.io.File
 
 @Single
 class GetSimpleStorage(
     private val context: Context,
+    private val uiPreferences: UiPreferences
 ) {
 
     lateinit var storage: SimpleStorage
@@ -32,6 +34,10 @@ class GetSimpleStorage(
         File(Environment.getExternalStorageDirectory(), "IReader/Extensions")
 
     fun checkPermission() : Boolean {
+        val useCacheLocation = uiPreferences.savedLocalCatalogLocation().get()
+        if (useCacheLocation) {
+            return true
+        }
         return if (!storage.isStorageAccessGranted(StorageId.PRIMARY)) {
             storage.requestFullStorageAccess()
             return false

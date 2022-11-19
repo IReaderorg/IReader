@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -48,7 +49,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
 
                     ) {
                     ScreenContent()
-                    GetPermissions(this,getSimpleStorage)
+                    GetPermissions(this,getSimpleStorage,uiPreferences)
                 }
             }
         }
@@ -78,14 +79,24 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
 }
 
 @Composable
-fun GetPermissions(context: Context, getSimpleStorage: GetSimpleStorage) {
+fun GetPermissions(context: Context, getSimpleStorage: GetSimpleStorage,uiPreferences: UiPreferences) {
 
-    var isPermissionGranted by remember {
-        mutableStateOf(getSimpleStorage.storage.isStorageAccessGranted(PRIMARY))
+    val useLocalCache = remember {
+        uiPreferences.savedLocalCatalogLocation().get()
+    }
+    val checkAccess = {
+        if (useLocalCache) {
+            false
+        } else {
+            !getSimpleStorage.storage.isStorageAccessGranted(PRIMARY)
+        }
+    }
+    var showDialog  by remember {
+        mutableStateOf(checkAccess())
     }
 
 
-    if (!isPermissionGranted) {
+    if (showDialog) {
         AlertDialog(onDismissRequest = { }, title = {
             BigSizeTextComposable(text = context.getString(R.string.permissions))
         }, text = {
@@ -100,13 +111,28 @@ fun GetPermissions(context: Context, getSimpleStorage: GetSimpleStorage) {
             }
 
         }, confirmButton = {
-            TextButton(onClick = {
-                getSimpleStorage.checkPermission().let { granted ->
-                    isPermissionGranted = granted
+            Row {
+                TextButton(onClick = {
+                    runCatching {
+                        getSimpleStorage.checkPermission().let { granted ->
+                            showDialog =  granted
+                        }
+                    }.getOrElse {
+                        showDialog = false
+                        uiPreferences.savedLocalCatalogLocation().set(true)
+                    }
+                }) {
+                    MidSizeTextComposable(text = context.getString(R.string.check_permissions))
                 }
-            }) {
-                MidSizeTextComposable(text = context.getString(R.string.check_permissions))
+                TextButton(onClick = {
+                    showDialog = false
+                    uiPreferences.savedLocalCatalogLocation().set(true)
+
+                }) {
+                    MidSizeTextComposable(text = context.getString(R.string.use_local_cache))
+                }
             }
+
         })
     }
 

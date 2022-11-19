@@ -5,12 +5,13 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.utils.io.*
-import ireader.domain.models.entities.CatalogRemote
 import ireader.core.http.HttpClients
 import ireader.core.io.saveTo
 import ireader.core.log.Log
 import ireader.core.os.InstallStep
 import ireader.domain.catalogs.service.CatalogInstaller
+import ireader.domain.models.entities.CatalogRemote
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.i18n.UiText
 import ireader.i18n.asString
@@ -30,7 +31,17 @@ class AndroidLocalInstaller(
     private val httpClients: HttpClients,
     private val installationChanges: AndroidCatalogInstallationChanges,
     private val getSimpleStorage: GetSimpleStorage,
+    private val uiPreferences: UiPreferences,
+
 ) : CatalogInstaller {
+
+    fun savedCatalogLocation(catalog: CatalogRemote): File {
+        val savedFromCache= uiPreferences.savedLocalCatalogLocation().get()
+        val cacheLocation = File(context.cacheDir, catalog.pkgName).apply { mkdirs() }
+        val primaryLocation = File(getSimpleStorage.extensionDirectory(), catalog.pkgName).apply { mkdirs() }
+
+        return if (savedFromCache) cacheLocation else primaryLocation
+    }
 
     /**
      * The client used for http requests.
@@ -61,7 +72,7 @@ class AndroidLocalInstaller(
             iconResponse.saveTo(tmpIconFile)
 
             send(InstallStep.Downloading)
-            val extDir = File(getSimpleStorage.extensionDirectory(), catalog.pkgName).apply { mkdirs() }
+            val extDir = savedCatalogLocation(catalog)
 
             val apkFile = File(extDir, tmpApkFile.name)
             val iconFile = File(extDir, tmpIconFile.name)

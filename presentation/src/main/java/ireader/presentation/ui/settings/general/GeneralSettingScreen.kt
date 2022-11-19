@@ -66,6 +66,10 @@ fun GeneralSettingScreen(
                 preference = vm.autoInstaller,
                 title = context.getString(R.string.auto_installer)
             ),
+            Components.Switch(
+                preference = vm.localSourceLocation,
+                title = context.getString(R.string.saved_local_source_location)
+            ),
             Components.Row(
                 title = context.getString(R.string.manage_notification),
                 onClick = {
@@ -112,6 +116,7 @@ class GeneralSettingScreenViewModel(
     var showSystemWideCatalogs = uiPreferences.showSystemWideCatalogs().asState()
     var showLocalCatalogs = uiPreferences.showLocalCatalogs().asState()
     var autoInstaller = uiPreferences.autoCatalogUpdater().asState()
+    var localSourceLocation = uiPreferences.savedLocalCatalogLocation().asState()
 
     @Composable
     fun getLanguageChoices(): Map<String, String> {
