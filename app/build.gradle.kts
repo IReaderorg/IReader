@@ -164,6 +164,7 @@ dependencies {
     implementation(libs.firebase.analytic)
     implementation(libs.firebase.crashlytics)
     implementation(libs.bundles.simplestorage)
+    implementation(accompanist.permissions)
 
 
     /** Coroutine **/

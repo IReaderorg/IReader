@@ -2,29 +2,25 @@ package ireader.presentation.ui.home.library
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import ireader.common.models.entities.BookItem
 import ireader.common.models.entities.Category
+import ireader.presentation.R
 import ireader.presentation.ui.core.ui.EmptyScreen
 import ireader.presentation.ui.core.ui.LoadingScreen
-import ireader.presentation.R
 import ireader.presentation.ui.home.library.components.EditCategoriesDialog
 import ireader.presentation.ui.home.library.ui.LibraryContent
 import ireader.presentation.ui.home.library.ui.LibrarySelectionBar
@@ -67,71 +63,62 @@ fun LibraryScreen(
     LaunchedEffect(vm.selectionMode) {
         requestHideBottomNav(vm.selectionMode)
     }
-    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = false)
+    val refresh = remember {
+        mutableStateOf(false)
+    }
+    val swipeRefreshState = rememberPullRefreshState(refresh.value, onRefresh = refreshUpdate)
 
     BoxWithConstraints(
         modifier = modifier
+            .pullRefresh(swipeRefreshState)
             .padding(scaffoldPadding)
             .fillMaxSize(),
     ) {
-        SwipeRefresh(
-            state = swipeRefreshState,
-            onRefresh = refreshUpdate,
-            indicator = { state, trigger ->
-                SwipeRefreshIndicator(
-                    state = state,
-                    refreshTriggerDistance = trigger,
-                    scale = true,
-                    backgroundColor = MaterialTheme.colorScheme.background,
-                    contentColor = MaterialTheme.colorScheme.primaryContainer,
-                    elevation = 8.dp,
-                )
-            }
-        ) {
-            Column {
-                LibraryContent(
-                    vm = vm,
-                    onBook = onBook,
-                    onLongBook = onLongBook,
-                    goToLatestChapter = goToLatestChapter,
-                    onPageChanged = onPagerPageChange,
-                    getColumnsForOrientation = getColumnsForOrientation,
 
-                )
-            }
-            EditCategoriesDialog(
+        Column {
+            LibraryContent(
                 vm = vm,
-                onConfirm = editCategoryOnConfirm,
-                dismissDialog = editCategoryDismissDialog,
-                onAddDeleteQueue = editCategoryOnAddDeleteQueue,
-                onRemoteInInsertQueue = editCategoryOnRemoteInInsertQueue,
-                onAddToInsertQueue = editCategoryOnAddToInsertQueue,
-                onRemoteInDeleteQueue = editCategoryOnRemoteInDeleteQueue,
-                categories = vm.categories.filter { !it.category.isSystemCategory }
-            )
-            Crossfade(
-                targetState = Pair(
-                    vm.isLoading,
-                    vm.isEmpty
-                )
-            ) { (isLoading, isEmpty) ->
-                when {
-                    isLoading -> LoadingScreen()
-                    isEmpty && vm.filters.value.isEmpty() -> EmptyScreen(
-                        text = stringResource(R.string.empty_library)
-                    )
-                }
-            }
+                onBook = onBook,
+                onLongBook = onLongBook,
+                goToLatestChapter = goToLatestChapter,
+                onPageChanged = onPagerPageChange,
+                getColumnsForOrientation = getColumnsForOrientation,
 
-            LibrarySelectionBar(
-                modifier = Modifier.align(Alignment.BottomCenter),
-                visible = vm.selectionMode,
-                onClickChangeCategory = onClickChangeCategory,
-                onClickDeleteDownload = onDelete,
-                onClickDownload = onDownload,
-                onClickMarkAsRead = onMarkAsRead,
-                onClickMarkAsUnread = onMarkAsNotRead
-            )
+                )
         }
+        EditCategoriesDialog(
+            vm = vm,
+            onConfirm = editCategoryOnConfirm,
+            dismissDialog = editCategoryDismissDialog,
+            onAddDeleteQueue = editCategoryOnAddDeleteQueue,
+            onRemoteInInsertQueue = editCategoryOnRemoteInInsertQueue,
+            onAddToInsertQueue = editCategoryOnAddToInsertQueue,
+            onRemoteInDeleteQueue = editCategoryOnRemoteInDeleteQueue,
+            categories = vm.categories.filter { !it.category.isSystemCategory }
+        )
+        Crossfade(
+            targetState = Pair(
+                vm.isLoading,
+                vm.isEmpty
+            )
+        ) { (isLoading, isEmpty) ->
+            when {
+                isLoading -> LoadingScreen()
+                isEmpty && vm.filters.value.isEmpty() -> EmptyScreen(
+                    text = stringResource(R.string.empty_library)
+                )
+            }
+        }
+
+        LibrarySelectionBar(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            visible = vm.selectionMode,
+            onClickChangeCategory = onClickChangeCategory,
+            onClickDeleteDownload = onDelete,
+            onClickDownload = onDownload,
+            onClickMarkAsRead = onMarkAsRead,
+            onClickMarkAsUnread = onMarkAsNotRead
+        )
+        PullRefreshIndicator(refresh.value, swipeRefreshState, Modifier.align(Alignment.TopCenter))
     }
 }

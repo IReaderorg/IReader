@@ -7,26 +7,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.accompanist.web.AccompanistWebChromeClient
 import com.google.accompanist.web.AccompanistWebViewClient
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewState
-import io.ktor.http.HttpHeaders
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import io.ktor.http.*
 import ireader.core.http.setDefaultSettings
 import ireader.core.source.HttpSource
 import ireader.presentation.ui.core.ui.SnackBarListener
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @ExperimentalCoroutinesApi
@@ -55,25 +54,12 @@ fun WebPageScreen(
     webViewState.content.getCurrentUrl()
 
     SnackBarListener(vm = viewModel, host = snackBarHostState)
-    val refreshState = rememberSwipeRefreshState(isRefreshing = viewModel.isLoading)
-    Box(modifier = Modifier.padding(scaffoldPadding)) {
-        SwipeRefresh(
-            state = refreshState,
-            onRefresh = {
-                viewModel.webView?.reload()
-                viewModel.toggleLoading(true)
-            },
-            indicator = { state, trigger ->
-                SwipeRefreshIndicator(
-                    state = state,
-                    refreshTriggerDistance = trigger,
-                    scale = true,
-                    backgroundColor = MaterialTheme.colorScheme.background,
-                    contentColor = MaterialTheme.colorScheme.primaryContainer,
-                    elevation = 8.dp
-                )
-            }
-        ) {
+    val refresh = viewModel.isLoading
+    val refreshState = rememberPullRefreshState(viewModel.isLoading, onRefresh = {
+        viewModel.webView?.reload()
+        viewModel.toggleLoading(true)
+    })
+    Box(modifier = Modifier.padding(scaffoldPadding).pullRefresh(refreshState)) {
             if (webViewState.isLoading) {
                 LinearProgressIndicator(
                     Modifier
@@ -90,6 +76,6 @@ fun WebPageScreen(
                 chromeClient = chromeClient,
                 client = webclient
             )
-        }
+        PullRefreshIndicator(refresh, refreshState, Modifier.align(Alignment.TopCenter))
     }
 }

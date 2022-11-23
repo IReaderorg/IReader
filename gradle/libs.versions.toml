@@ -42,7 +42,7 @@ modernstorage-storage = { module = "com.google.modernstorage:modernstorage-stora
 
 
 
-storage = { module = "com.anggrayudi:storage", version = "1.4.1" }
+storage = { module = "com.anggrayudi:storage", version = "1.5.1" }
 documentfile = { module = "androidx.documentfile:documentfile", version = "1.0.1" }
 ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-core-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }

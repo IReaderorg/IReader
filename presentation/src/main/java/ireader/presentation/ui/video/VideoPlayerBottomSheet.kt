@@ -14,6 +14,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.lifecycleScope
+import com.anggrayudi.storage.file.FileFullPath
+import com.anggrayudi.storage.file.StorageType
 import com.anggrayudi.storage.file.getAbsolutePath
 import ireader.core.source.model.MovieUrl
 import ireader.core.source.model.Subtitle
@@ -88,7 +90,7 @@ fun VideoPlayerBottomSheet(
                 vm.showSnackBar(UiText.DynamicString("Subtitle: ${subtitleData?.name}."))
             }
             loadLocalFileComposable("Load Video From Local Storage") {
-                vm.simpleStorage.simpleStorageHelper.openFilePicker(300, false, "video/*")
+                vm.simpleStorage.simpleStorageHelper.openFilePicker(300, false, FileFullPath(context, StorageType.EXTERNAL), filterMimeTypes = arrayOf("video/*"))
                 vm.simpleStorage.simpleStorageHelper.onFileSelected = { requestCode, files ->
                     context.findComponentActivity()?.lifecycleScope?.launchIO {
                         val firstFile = files.first().getAbsolutePath(context)
@@ -112,7 +114,8 @@ fun VideoPlayerBottomSheet(
                 }
             }
             loadLocalFileComposable("Load Subtitle from Local Storage") {
-                vm.simpleStorage.simpleStorageHelper.openFilePicker(300, false, "application/*")
+                vm.simpleStorage.simpleStorageHelper.openFilePicker(300, false, filterMimeTypes = arrayOf("application/*")
+                    )
                 vm.simpleStorage.simpleStorageHelper.onFileSelected = { requestCode, files ->
                     context.findComponentActivity()?.lifecycleScope?.launchIO {
                         val file = files.first()

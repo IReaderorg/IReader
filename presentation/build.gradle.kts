@@ -68,7 +68,7 @@ dependencies {
     implementation(accompanist.pagerIndicator)
     implementation(accompanist.systemUiController)
     implementation(accompanist.pager)
-    implementation(accompanist.swipeRefresh)
+    implementation(accompanist.permissions)
     implementation(accompanist.web)
 
     implementation(androidx.appCompat)
