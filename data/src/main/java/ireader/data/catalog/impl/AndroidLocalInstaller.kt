@@ -58,8 +58,8 @@ class AndroidLocalInstaller(
      */
     override fun install(catalog: CatalogRemote) = channelFlow  {
         send(InstallStep.Downloading)
-        val tmpApkFile = File(context.cacheDir, "${catalog.pkgName}.apk")
-        val tmpIconFile = File(context.cacheDir, "${catalog.pkgName}.png")
+        val tmpApkFile = File(context.codeCacheDir, "${catalog.pkgName}.apk")
+        val tmpIconFile = File(context.codeCacheDir, "${catalog.pkgName}.png")
         try {
             val apkResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
                 headers.append(HttpHeaders.CacheControl, "no-store")
@@ -74,8 +74,8 @@ class AndroidLocalInstaller(
             send(InstallStep.Downloading)
             val extDir = savedCatalogLocation(catalog)
 
-            val apkFile = File(extDir, tmpApkFile.name)
-            val iconFile = File(extDir, tmpIconFile.name)
+            val apkFile = File(extDir, tmpApkFile.name).apply { mkdirs() }
+            val iconFile = File(extDir, tmpIconFile.name).apply { mkdirs() }
 
 
             val apkSuccess = tmpApkFile.copyRecursively(apkFile,true)

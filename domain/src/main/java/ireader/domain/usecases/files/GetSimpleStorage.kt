@@ -8,7 +8,8 @@ import androidx.documentfile.provider.DocumentFile
 import com.anggrayudi.storage.SimpleStorage
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.anggrayudi.storage.file.DocumentFileCompat
-import com.anggrayudi.storage.file.tryCreateNewFile
+import com.anggrayudi.storage.file.FileFullPath
+import com.anggrayudi.storage.file.StorageType
 import ireader.domain.preferences.prefs.UiPreferences
 import org.koin.core.annotation.Single
 import java.io.File
@@ -39,32 +40,39 @@ class GetSimpleStorage(
 
     // No need for this right now.
     fun checkPermission(): Boolean {
+        createIReaderDir()
         createNoMediaFile()
-        return true
-//        val isGranted = SimpleStorage.hasStorageAccess(
-//            context,
-//            mainIReaderDir().absolutePath,
-//            requiresWriteAccess = true
-//        )
-//        return if (!isGranted) {
-//            simpleStorageHelper.requestStorageAccess(
-//                200, expectedStorageType = StorageType.EXTERNAL, initialPath = FileFullPath(
-//                    context,
-//                    mainIReaderDir()
-//                )
-//            )
-//            return false
-//        } else true
+        val isGranted = SimpleStorage.hasStorageAccess(
+            context,
+            mainIReaderDir().absolutePath,
+            requiresWriteAccess = true
+        )
+        return if (!isGranted) {
+            simpleStorageHelper.requestStorageAccess(
+                200, expectedStorageType = StorageType.EXTERNAL, initialPath = FileFullPath(
+                    context,
+                    mainIReaderDir()
+                )
+            )
+            return false
+        } else true
+    }
+
+    fun createIReaderDir() {
+        kotlin.runCatching {
+            if (!mainIReaderDir().exists()) {
+                DocumentFile.fromFile(Environment.getExternalStorageDirectory()).createDirectory("IReader")
+            }
+        }
     }
 
     fun createNoMediaFile() {
-        val temp = File(context.cacheDir, ".nomedia")
-        if (!temp.exists()) {
-            temp.tryCreateNewFile()
-        }
-        val noMediaFile = File(mainIReaderDir(), ".nomedia")
-        if (!noMediaFile.exists()) {
-            temp.copyRecursively(mainIReaderDir(), false)
+
+        kotlin.runCatching {
+            val noMediaFile = File(mainIReaderDir(), ".nomedia")
+            if (!noMediaFile.exists()) {
+                DocumentFile.fromFile(mainIReaderDir()).createFile("",".nomedia")
+            }
         }
     }
 
