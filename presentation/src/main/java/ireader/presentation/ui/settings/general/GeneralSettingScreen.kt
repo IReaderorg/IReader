@@ -12,10 +12,12 @@ import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.R
+import ireader.presentation.core.theme.LocaleHelper
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.component.components.component.ChoicePreference
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
+import ireader.presentation.ui.video.component.cores.player.SubtitleHelper
 import org.koin.android.annotation.KoinViewModel
 
 @Composable
@@ -89,6 +91,10 @@ fun GeneralSettingScreen(
                     title = stringResource(
                         id = R.string.languages
                     ),
+                    onValue = { value ->
+                        vm.language.value = value
+                        vm.localeHelper.updateLocal()
+                    }
                 )
             }
         )
@@ -103,7 +109,8 @@ fun GeneralSettingScreen(
 @KoinViewModel
 class GeneralSettingScreenViewModel(
     private val appPreferences: AppPreferences,
-    private val uiPreferences: UiPreferences
+    private val uiPreferences: UiPreferences,
+    val localeHelper: LocaleHelper
 ) : BaseViewModel() {
 
     val appUpdater = appPreferences.appUpdater().asState()
@@ -120,9 +127,7 @@ class GeneralSettingScreenViewModel(
 
     @Composable
     fun getLanguageChoices(): Map<String, String> {
-        val currentLocaleDisplayName = androidx.compose.ui.text.intl.Locale.current.toLanguageTag()
-        return mapOf(
-            "" to "${stringResource(R.string.system_default)} ($currentLocaleDisplayName)"
-        )
+        val lanuages = localeHelper.languages.mapNotNull { SubtitleHelper.fromTwoLettersToLanguage(it)?.let { lang -> it to lang } }
+        return lanuages.toMap()
     }
 }

@@ -1,26 +1,23 @@
 package ireader.presentation.core.theme
 
+import android.content.Context
+import android.content.res.Configuration
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.ColorScheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.text.intl.Locale
 import androidx.lifecycle.viewModelScope
 import ireader.domain.data.repository.ThemeRepository
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.theme.ExtraColors
 import ireader.domain.models.theme.Theme
 import ireader.domain.preferences.prefs.UiPreferences
-import ireader.presentation.ui.core.theme.AppRippleTheme
-import ireader.presentation.ui.core.theme.asState
-import ireader.presentation.ui.core.theme.getDarkColors
-import ireader.presentation.ui.core.theme.getLightColors
-import ireader.presentation.ui.core.theme.isLight
-import ireader.presentation.ui.core.theme.themes
+import ireader.presentation.ui.core.theme.*
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -29,6 +26,7 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.Single
 
 @KoinViewModel
 class AppThemeViewModel(
@@ -128,5 +126,68 @@ class AppThemeViewModel(
 
     override fun onDestroy() {
         baseThemeScope.cancel()
+    }
+
+
+    var locales by mutableStateOf(listOf<Locale>())
+        private set
+
+
+}
+
+@Single
+class LocaleHelper(
+    val context: Context,
+    val uiPreferences: UiPreferences
+) {
+    val language = uiPreferences.language()
+
+    val languages = mutableListOf<String>()
+
+    init {
+        getLocales()
+    }
+
+
+    fun setLocaleLang(context: Context) {
+        val lang = language.get()
+        val locale = java.util.Locale(lang)
+        java.util.Locale.setDefault(locale)
+        val resources = context.resources
+        val configuration = resources.configuration
+        configuration.setLocale(locale)
+        resources.updateConfiguration(configuration, resources.displayMetrics)
+    }
+
+
+    fun updateLocal() {
+        context.resources.apply {
+            val locale = java.util.Locale(language.get())
+            val config = Configuration(configuration)
+
+            context.createConfigurationContext(configuration)
+            java.util.Locale.setDefault(locale)
+            config.setLocale(locale)
+            context.resources.updateConfiguration(config, displayMetrics)
+        }
+    }
+
+    fun resetLocale() {
+        context.resources.apply {
+            val config = Configuration(configuration)
+            val default = this.configuration.locale
+            config.setLocale(default)
+            context.resources.updateConfiguration(config, displayMetrics)
+        }
+    }
+
+
+    private fun getLocales() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val locales = context.resources.assets.locales
+            for (i in locales.indices) {
+                languages.add(locales[i])
+            }
+        }
     }
 }

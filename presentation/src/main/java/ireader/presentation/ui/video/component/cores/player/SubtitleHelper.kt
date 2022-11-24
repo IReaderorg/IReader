@@ -70,7 +70,6 @@ object SubtitleHelper {
             ISO_639_1Map[lang.ISO_639_1] = lang.languageName
         }
     }
-
     /** ISO_639_1 -> lang*/
     fun fromTwoLettersToLanguage(input: String): String? {
         // pr-BR

@@ -26,7 +26,7 @@ class AutomaticBackup(
     val simpleStorage: GetSimpleStorage
 ) {
     suspend fun initialize() {
-        create(true)
+        create(false)
     }
 
     private suspend fun create(force: Boolean = false) {

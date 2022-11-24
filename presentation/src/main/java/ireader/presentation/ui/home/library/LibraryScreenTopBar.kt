@@ -3,13 +3,7 @@ package ireader.presentation.ui.home.library
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.FlipToBack
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.SelectAll
-import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,15 +14,16 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import kotlinx.coroutines.launch
-import ireader.presentation.ui.home.library.viewmodel.LibraryState
-import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
+import ireader.presentation.R
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
+import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.core.ui.DEFAULT_ELEVATION
-import ireader.presentation.R
+import ireader.presentation.ui.home.library.viewmodel.LibraryState
+import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -144,14 +139,10 @@ private fun RegularTopBar(
         },
         navigationIcon = {
             if (vm.inSearchMode) {
-                AppIconButton(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = stringResource(R.string.toggle_search_mode_off),
-                    onClick = {
-                        vm.inSearchMode = false
-                        vm.searchQuery = null
-                    }
-                )
+                TopAppBarBackButton {
+                    vm.inSearchMode = false
+                    vm.searchQuery = null
+                }
             } else null
         },
         scrollBehavior = scrollBehavior

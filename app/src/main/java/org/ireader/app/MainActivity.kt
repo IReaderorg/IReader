@@ -24,12 +24,14 @@ import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.utils.extensions.launchIO
 import ireader.presentation.core.ScreenContent
 import ireader.presentation.core.theme.AppTheme
+import ireader.presentation.core.theme.LocaleHelper
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import org.ireader.app.initiators.AppInitializers
 import org.ireader.app.initiators.SecureActivityDelegateImpl
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
+import java.util.*
 
 
 class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivityDelegateImpl() {
@@ -37,6 +39,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     private val uiPreferences: UiPreferences by inject()
     val initializers: AppInitializers = get<AppInitializers>()
     private val automaticBackup: AutomaticBackup = get()
+    private val localeHelper: LocaleHelper = get()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +49,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         lifecycleScope.launchIO {
             automaticBackup.initialize()
         }
+        localeHelper.setLocaleLang( this)
         installSplashScreen()
         setContent {
             AppTheme {

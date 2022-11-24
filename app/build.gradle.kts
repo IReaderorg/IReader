@@ -113,7 +113,7 @@ android {
             dimension = "default"
         }
         create("dev") {
-            resourceConfigurations.addAll(listOf("en", "xxhdpi"))
+            resourceConfigurations += listOf("en", "xxhdpi","fa","fr")
             dimension = "default"
         }
     }
