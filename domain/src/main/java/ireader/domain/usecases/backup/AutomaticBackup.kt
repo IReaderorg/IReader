@@ -1,8 +1,7 @@
 package ireader.domain.usecases.backup
 
+import android.content.Context
 import android.os.Environment
-import androidx.activity.ComponentActivity
-import androidx.lifecycle.lifecycleScope
 import com.anggrayudi.storage.file.CreateMode
 import com.anggrayudi.storage.file.DocumentFileCompat
 import com.anggrayudi.storage.file.createBinaryFile
@@ -11,7 +10,6 @@ import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.utils.extensions.convertLongToTime
-import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.koin.core.annotation.Single
@@ -22,19 +20,16 @@ import kotlin.time.Duration.Companion.hours
 
 @Single
 class AutomaticBackup(
-    val context: ComponentActivity,
+    val context: Context,
     val createBackup: CreateBackup,
     private val uiPreferences: UiPreferences,
     val simpleStorage: GetSimpleStorage
 ) {
-
-    init {
-        context.lifecycleScope.launch {
-            create(false)
-        }
+    suspend fun initialize() {
+        create(true)
     }
 
-    suspend fun create(force: Boolean = false) {
+    private suspend fun create(force: Boolean = false) {
         val lastCheckPref = uiPreferences.lastBackUpTime()
         val maxFiles = uiPreferences.maxAutomaticBackupFiles().get()
         val automaticBackupPref = uiPreferences.automaticBackupTime().get()
@@ -50,7 +45,7 @@ class AutomaticBackup(
                     dir.mkdirs()
                 }
                 val name =
-                    "IReader_${convertLongToTime(Calendar.getInstance().timeInMillis)}.proto.gz"
+                    "IReader_${convertLongToTime(Calendar.getInstance().timeInMillis)}.gz"
                 val file = DocumentFileCompat.fromFile(
                     context,
                     dir,
@@ -66,7 +61,7 @@ class AutomaticBackup(
                 lastCheckPref.set(now.toEpochMilliseconds())
             } catch (e: Exception) {
                 Log.error(e, "AutomaticBackup")
-                uiPreferences.automaticBackupTime().set(PreferenceValues.AutomaticBackup.Off)
+                //uiPreferences.automaticBackupTime().set(PreferenceValues.AutomaticBackup.Off)
             }
         }
 

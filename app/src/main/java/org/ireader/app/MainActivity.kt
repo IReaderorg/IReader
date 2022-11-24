@@ -14,12 +14,14 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.backup.AutomaticBackup
 import ireader.domain.usecases.files.GetSimpleStorage
+import ireader.domain.utils.extensions.launchIO
 import ireader.presentation.core.ScreenContent
 import ireader.presentation.core.theme.AppTheme
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
@@ -33,15 +35,17 @@ import org.koin.android.ext.android.inject
 class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivityDelegateImpl() {
     private val getSimpleStorage: GetSimpleStorage = get()
     private val uiPreferences: UiPreferences by inject()
-    private val automaticBackup: AutomaticBackup =
-        get(parameters = { org.koin.core.parameter.parametersOf(this@MainActivity) })
     val initializers: AppInitializers = get<AppInitializers>()
+    private val automaticBackup: AutomaticBackup = get()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         registerSecureActivity(this, uiPreferences)
         getSimpleStorage.provideActivity(this, null)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        lifecycleScope.launchIO {
+            automaticBackup.initialize()
+        }
         installSplashScreen()
         setContent {
             AppTheme {

@@ -28,30 +28,47 @@ class GetSimpleStorage(
         simpleStorageHelper = SimpleStorageHelper(activity, savedState)
     }
 
-    fun mainIReaderDir(): File {
-        return File(Environment.getExternalStorageDirectory(), "IReader/")
-    }
+    val mainIReaderDir: File = File(Environment.getExternalStorageDirectory(), "IReader/")
+
 
     fun ireaderDirectory(dirName: String): File =
-        File(Environment.getExternalStorageDirectory(), "IReader/${dirName}")
+        File(Environment.getExternalStorageDirectory(), "IReader/${dirName}/")
 
     fun extensionDirectory(): File =
-        File(Environment.getExternalStorageDirectory(), "IReader/Extensions")
+        File(Environment.getExternalStorageDirectory(), "IReader/Extensions/")
+    val backupDirectory: File =
+        File(Environment.getExternalStorageDirectory(), "IReader/Backups/")
+    val booksDirectory: File =
+        File(Environment.getExternalStorageDirectory(), "IReader/Books/")
+    val automaticBackupDirectory: File =
+        File(Environment.getExternalStorageDirectory(), "IReader/Backups/Automatic/")
 
     // No need for this right now.
     fun checkPermission(): Boolean {
+        if(!mainIReaderDir.isDirectory) {
+            mainIReaderDir.deleteRecursively()
+        }
+        if(!backupDirectory.isDirectory) {
+            backupDirectory.deleteRecursively()
+        }
+        if(!automaticBackupDirectory.isDirectory) {
+            automaticBackupDirectory.deleteRecursively()
+        }
+        if(!booksDirectory.isDirectory) {
+            booksDirectory.deleteRecursively()
+        }
         createIReaderDir()
         createNoMediaFile()
         val isGranted = SimpleStorage.hasStorageAccess(
             context,
-            mainIReaderDir().absolutePath,
+            mainIReaderDir.absolutePath,
             requiresWriteAccess = true
         )
         return if (!isGranted) {
             simpleStorageHelper.requestStorageAccess(
                 200, expectedStorageType = StorageType.EXTERNAL, initialPath = FileFullPath(
                     context,
-                    mainIReaderDir()
+                    mainIReaderDir
                 )
             )
             return false
@@ -60,7 +77,7 @@ class GetSimpleStorage(
 
     fun createIReaderDir() {
         kotlin.runCatching {
-            if (!mainIReaderDir().exists()) {
+            if (!mainIReaderDir.exists()) {
                 DocumentFile.fromFile(Environment.getExternalStorageDirectory()).createDirectory("IReader")
             }
         }
@@ -69,9 +86,9 @@ class GetSimpleStorage(
     fun createNoMediaFile() {
 
         kotlin.runCatching {
-            val noMediaFile = File(mainIReaderDir(), ".nomedia")
+            val noMediaFile = File(mainIReaderDir, ".nomedia")
             if (!noMediaFile.exists()) {
-                DocumentFile.fromFile(mainIReaderDir()).createFile("",".nomedia")
+                DocumentFile.fromFile(mainIReaderDir).createFile("",".nomedia")
             }
         }
     }
