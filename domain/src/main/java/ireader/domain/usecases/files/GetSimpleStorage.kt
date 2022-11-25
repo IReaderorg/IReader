@@ -8,8 +8,6 @@ import androidx.documentfile.provider.DocumentFile
 import com.anggrayudi.storage.SimpleStorage
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.anggrayudi.storage.file.DocumentFileCompat
-import com.anggrayudi.storage.file.FileFullPath
-import com.anggrayudi.storage.file.StorageType
 import ireader.domain.preferences.prefs.UiPreferences
 import org.koin.core.annotation.Single
 import java.io.File
@@ -36,6 +34,7 @@ class GetSimpleStorage(
 
     fun extensionDirectory(): File =
         File(Environment.getExternalStorageDirectory(), "IReader/Extensions/")
+
     val backupDirectory: File =
         File(Environment.getExternalStorageDirectory(), "IReader/Backups/")
     val booksDirectory: File =
@@ -43,42 +42,48 @@ class GetSimpleStorage(
     val automaticBackupDirectory: File =
         File(Environment.getExternalStorageDirectory(), "IReader/Backups/Automatic/")
 
-    // No need for this right now.
+    init {
+
+    }
+
     fun checkPermission(): Boolean {
-        if(!mainIReaderDir.isDirectory) {
+        if (!mainIReaderDir.isDirectory) {
             mainIReaderDir.deleteRecursively()
         }
-        if(!backupDirectory.isDirectory) {
+        if (!backupDirectory.isDirectory) {
             backupDirectory.deleteRecursively()
         }
-        if(!automaticBackupDirectory.isDirectory) {
+        if (!automaticBackupDirectory.isDirectory) {
             automaticBackupDirectory.deleteRecursively()
         }
-        if(!booksDirectory.isDirectory) {
+        if (!booksDirectory.isDirectory) {
             booksDirectory.deleteRecursively()
         }
+
         createIReaderDir()
         createNoMediaFile()
-        val isGranted = SimpleStorage.hasStorageAccess(
-            context,
-            mainIReaderDir.absolutePath,
-            requiresWriteAccess = true
-        )
-        return if (!isGranted) {
-            simpleStorageHelper.requestStorageAccess(
-                200, expectedStorageType = StorageType.EXTERNAL, initialPath = FileFullPath(
-                    context,
-                    mainIReaderDir
-                )
-            )
-            return false
-        } else true
+//        val isGranted = SimpleStorage.hasStorageAccess(
+//            context,
+//            mainIReaderDir.absolutePath,
+//            requiresWriteAccess = true
+//        )
+//        return if (!isGranted) {
+//            simpleStorageHelper.requestStorageAccess(
+//                200, expectedStorageType = StorageType.EXTERNAL, initialPath = FileFullPath(
+//                    context,
+//                    mainIReaderDir
+//                )
+//            )
+//            return false
+//        } else true
+        return true
     }
 
     fun createIReaderDir() {
         kotlin.runCatching {
             if (!mainIReaderDir.exists()) {
-                DocumentFile.fromFile(Environment.getExternalStorageDirectory()).createDirectory("IReader")
+                DocumentFile.fromFile(Environment.getExternalStorageDirectory())
+                    .createDirectory("IReader")
             }
         }
     }
@@ -88,7 +93,7 @@ class GetSimpleStorage(
         kotlin.runCatching {
             val noMediaFile = File(mainIReaderDir, ".nomedia")
             if (!noMediaFile.exists()) {
-                DocumentFile.fromFile(mainIReaderDir).createFile("",".nomedia")
+                DocumentFile.fromFile(mainIReaderDir).createFile("", ".nomedia")
             }
         }
     }
