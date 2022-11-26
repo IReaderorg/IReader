@@ -67,7 +67,7 @@ class AndroidCatalogLoader(
             .map { File(it, it.name + ".apk") }
             .filter { it.exists() }
 
-        val cachePkgs = File(context.cacheDir, "IReader/Extensions").listFiles()
+        val cachePkgs = simpleStorage.cacheExtensionDir(context).listFiles()
             .orEmpty()
             .filter { it.isDirectory }
             .map { File(it, it.name + ".apk") }
@@ -110,13 +110,13 @@ class AndroidCatalogLoader(
      */
     override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? {
         val file = File(simpleStorage.extensionDirectory(), "${pkgName}/${pkgName}.apk")
-        val cacheFile = File(context.cacheDir, "${pkgName}/${pkgName}.apk")
-        val finalFile = if (file.exists()) {
+        val cacheFile = File(simpleStorage.cacheExtensionDir(context), "${pkgName}/${pkgName}.apk")
+        val finalFile = if (file.canRead() && file.canRead()) {
             file
         } else {
             cacheFile
         }
-        val pkgInfo = if (finalFile.exists()) {
+        val pkgInfo = if (finalFile.exists() && finalFile.canRead()) {
             pkgManager.getPackageArchiveInfo(finalFile.absolutePath, PACKAGE_FLAGS)
         } else {
             null
@@ -136,7 +136,7 @@ class AndroidCatalogLoader(
     override fun loadSystemCatalog(pkgName: String): CatalogInstalled.SystemWide? {
         val iconFile = File(simpleStorage.extensionDirectory(), "${pkgName}/${pkgName}.png")
         val cacheFile = File(context.cacheDir, "${pkgName}/${pkgName}.apk")
-        val icon = if (iconFile.exists()) {
+        val icon = if (iconFile.exists() && iconFile.canRead()) {
             iconFile
         } else {
             cacheFile

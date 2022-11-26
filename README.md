@@ -11,7 +11,10 @@ IReader is a free and open source applicaiton for Android.
 ## Release Page
 
 - You Can Download the App From [Here](https://github.com/kazemcodes/Infinity/releases)
+- 
+## Contributing in Translation
 
+- You Can contributing in the App translation in [Here](https://hosted.weblate.org/projects/ireader/ireader/)
 
 ## Creating a new Source
 

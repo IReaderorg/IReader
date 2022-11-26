@@ -59,9 +59,10 @@ class CatalogModule {
         httpClient: HttpClients,
         installationChanges: AndroidCatalogInstallationChanges,
         getSimpleStorage: GetSimpleStorage,
-        uiPreferences: UiPreferences
+        uiPreferences: UiPreferences,
+        simpleStorage: GetSimpleStorage
     ): AndroidLocalInstaller {
-        return AndroidLocalInstaller(context, httpClient, installationChanges, getSimpleStorage,uiPreferences)
+        return AndroidLocalInstaller(context, httpClient, installationChanges, getSimpleStorage,uiPreferences,simpleStorage)
     }
 
     @Single

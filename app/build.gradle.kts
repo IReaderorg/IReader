@@ -135,7 +135,7 @@ dependencies {
     implementation(androidx.emoji)
     implementation(androidx.appCompat)
     implementation(androidx.core)
-    implementation(androidx.material)
+
     implementation(androidx.media)
     implementation(composeLib.compose.activity)
     implementation("androidx.core:core-splashscreen:1.0.0-rc01")

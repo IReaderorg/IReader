@@ -32,12 +32,13 @@ class AndroidLocalInstaller(
     private val installationChanges: AndroidCatalogInstallationChanges,
     private val getSimpleStorage: GetSimpleStorage,
     private val uiPreferences: UiPreferences,
-
+    private val simpleStorage: GetSimpleStorage
 ) : CatalogInstaller {
 
-    fun savedCatalogLocation(catalog: CatalogRemote): File {
+
+    private fun savedCatalogLocation(catalog: CatalogRemote): File {
         val savedFromCache= uiPreferences.savedLocalCatalogLocation().get()
-        val cacheLocation = File(context.cacheDir, catalog.pkgName).apply { mkdirs() }
+        val cacheLocation = File(simpleStorage.cacheExtensionDir(context), catalog.pkgName).apply { mkdirs() }
         val primaryLocation = File(getSimpleStorage.extensionDirectory(), catalog.pkgName).apply { mkdirs() }
 
         return if (savedFromCache) cacheLocation else primaryLocation
@@ -107,7 +108,9 @@ class AndroidLocalInstaller(
     override suspend fun uninstall(pkgName: String): InstallStep {
         return try {
         val file = File(getSimpleStorage.extensionDirectory(), pkgName)
+        val cacheFile = File(getSimpleStorage.cacheExtensionDir(context), pkgName)
         file.deleteRecursively()
+            cacheFile.deleteRecursively()
         installationChanges.notifyAppUninstall(pkgName)
         InstallStep.Success
         } catch (e: Throwable) {

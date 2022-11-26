@@ -54,6 +54,7 @@ dependencies {
     implementation(composeLib.material3.windowsizeclass)
 
     implementation(composeLib.compose.uiToolingPreview)
+    debugImplementation(composeLib.compose.uiTooling)
 
     implementation(composeLib.compose.icons)
     implementation(composeLib.compose.navigation)

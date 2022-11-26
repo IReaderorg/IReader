@@ -1,18 +1,10 @@
 package ireader.core.source
 
 import androidx.annotation.Keep
-import io.ktor.client.request.HttpRequestBuilder
-import io.ktor.client.request.get
-import io.ktor.client.request.headers
-import io.ktor.client.request.url
-import io.ktor.http.HeadersBuilder
-import io.ktor.http.HttpHeaders
-import ireader.core.source.model.ChapterInfo
-import ireader.core.source.model.Command
-import ireader.core.source.model.MangaInfo
-import ireader.core.source.model.MangasPageInfo
-import ireader.core.source.model.Page
-import ireader.core.source.model.Text
+import io.ktor.client.request.*
+import io.ktor.http.*
+import ireader.core.http.DEFAULT_USER_AGENT
+import ireader.core.source.model.*
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.security.MessageDigest
@@ -29,7 +21,7 @@ abstract class ParsedHttpSource(private val dependencies: ireader.core.source.De
     }
 
     open fun getUserAgent() =
-        "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36"
+            DEFAULT_USER_AGENT
     open fun HttpRequestBuilder.headersBuilder(
         block: HeadersBuilder.() -> Unit = {
             append(HttpHeaders.UserAgent, getUserAgent())

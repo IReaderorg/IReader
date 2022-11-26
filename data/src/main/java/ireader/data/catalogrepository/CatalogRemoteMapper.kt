@@ -11,6 +11,8 @@ val catalogRemoteMapper =
             key,
             owner,
             source,
+                null,
+                null,
             last_update,
             is_enable
         )

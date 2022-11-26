@@ -64,7 +64,7 @@ dependencies {
     implementation(androidx.appCompat)
     implementation(androidx.webkit)
     implementation(androidx.browser)
-    implementation(androidx.material)
+
     implementation(kotlinx.serialization.json)
     implementation(kotlinx.reflect)
     implementation(kotlinx.datetime)

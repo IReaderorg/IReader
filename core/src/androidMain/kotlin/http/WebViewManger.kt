@@ -5,11 +5,7 @@ import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
@@ -18,7 +14,7 @@ class WebViewManger(private val context: Context) {
     var isInit = false
     var webView: WebView? = null
 
-    var userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36"
+    var userAgent = DEFAULT_USER_AGENT
 
     var selector: String? = null
     var html: org.jsoup.nodes.Document = org.jsoup.nodes.Document("")
