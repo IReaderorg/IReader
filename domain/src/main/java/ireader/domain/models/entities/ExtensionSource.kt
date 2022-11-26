@@ -8,8 +8,10 @@ data class ExtensionSource(
     val key: String,
     val owner: String,
     val source: String,
-    val lastUpdate:Long,
-    val isEnable:Boolean,
+    val username:String? = null,
+    val password:String? = null,
+    val lastUpdate:Long = 0,
+    val isEnable:Boolean = true,
 ) {
 
     fun visibleName(): String {
@@ -28,7 +30,7 @@ data class ExtensionSource(
                 owner = "IReader",
                 source = "https://github.com/IReaderorg/IReader-extensions",
                 lastUpdate = 0,
-                isEnable = true
+                isEnable = true,
             )
         }
     }

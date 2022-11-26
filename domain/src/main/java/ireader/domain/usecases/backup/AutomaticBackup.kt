@@ -6,10 +6,13 @@ import com.anggrayudi.storage.file.CreateMode
 import com.anggrayudi.storage.file.DocumentFileCompat
 import com.anggrayudi.storage.file.createBinaryFile
 import ireader.core.log.Log
+import ireader.domain.R
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.utils.extensions.convertLongToTime
+import ireader.domain.utils.extensions.toast
+import ireader.domain.utils.extensions.withUIContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.koin.core.annotation.Single
@@ -20,10 +23,10 @@ import kotlin.time.Duration.Companion.hours
 
 @Single
 class AutomaticBackup(
-    val context: Context,
-    val createBackup: CreateBackup,
-    private val uiPreferences: UiPreferences,
-    val simpleStorage: GetSimpleStorage
+        val context: Context,
+        val createBackup: CreateBackup,
+        private val uiPreferences: UiPreferences,
+        val simpleStorage: GetSimpleStorage
 ) {
     suspend fun initialize() {
         create(false)
@@ -45,12 +48,12 @@ class AutomaticBackup(
                     dir.mkdirs()
                 }
                 val name =
-                    "IReader_${convertLongToTime(Calendar.getInstance().timeInMillis)}.gz"
+                        "IReader_${convertLongToTime(Calendar.getInstance().timeInMillis)}.gz"
                 val file = DocumentFileCompat.fromFile(
-                    context,
-                    dir,
-                    requiresWriteAccess = true,
-                    considerRawFile = true
+                        context,
+                        dir,
+                        requiresWriteAccess = true,
+                        considerRawFile = true
                 )
                 val allFiles = file?.listFiles()
                 if ((allFiles?.size ?: 0) > maxFiles) {
@@ -61,7 +64,10 @@ class AutomaticBackup(
                 lastCheckPref.set(now.toEpochMilliseconds())
             } catch (e: Exception) {
                 Log.error(e, "AutomaticBackup")
-                //uiPreferences.automaticBackupTime().set(PreferenceValues.AutomaticBackup.Off)
+                uiPreferences.automaticBackupTime().set(PreferenceValues.AutomaticBackup.Off)
+                withUIContext {
+                    context.toast(R.string.permission_not_given)
+                }
             }
         }
 

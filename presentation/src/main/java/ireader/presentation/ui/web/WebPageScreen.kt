@@ -1,4 +1,3 @@
-
 package ireader.presentation.ui.web
 
 import androidx.compose.foundation.layout.Box
@@ -6,7 +5,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -59,23 +57,27 @@ fun WebPageScreen(
         viewModel.webView?.reload()
         viewModel.toggleLoading(true)
     })
-    Box(modifier = Modifier.padding(scaffoldPadding).pullRefresh(refreshState)) {
-            if (webViewState.isLoading) {
-                LinearProgressIndicator(
-                    Modifier
-                        .fillMaxWidth(),
-                )
-            }
-            WebView(
-                state = webViewState,
-                onCreated = {
-                    userAgent?.let { ua -> it.setUserAgent(ua) }
-                    it.setDefaultSettings()
-                    viewModel.webView = it
-                },
-                chromeClient = chromeClient,
-                client = webclient
+
+    Box(modifier = Modifier
+        .padding(scaffoldPadding)
+        .pullRefresh(refreshState)) {
+
+        WebView(
+            state = webViewState,
+            onCreated = {
+                userAgent?.let { ua -> it.setUserAgent(ua) }
+                it.setDefaultSettings()
+                viewModel.webView = it
+            },
+            chromeClient = chromeClient,
+            client = webclient
+        )
+        if (webViewState.isLoading) {
+            androidx.compose.material3.LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth().align(Alignment.TopCenter),
             )
+        }
         PullRefreshIndicator(refresh, refreshState, Modifier.align(Alignment.TopCenter))
     }
 }

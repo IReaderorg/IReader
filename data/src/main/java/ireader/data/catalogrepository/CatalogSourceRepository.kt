@@ -43,6 +43,8 @@ val extensionMapper =  {_id: Long, name: String, key: String, owner: String, sou
         key,
         owner,
         source,
+            null,
+            null,
         last_update,
         is_enable
     )

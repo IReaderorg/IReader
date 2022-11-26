@@ -2,15 +2,8 @@ package ireader.core.source
 
 import io.ktor.client.request.*
 import io.ktor.http.*
-import ireader.core.source.model.ChapterInfo
-import ireader.core.source.model.Command
-import ireader.core.source.model.Filter
-import ireader.core.source.model.FilterList
-import ireader.core.source.model.Listing
-import ireader.core.source.model.MangaInfo
-import ireader.core.source.model.MangasPageInfo
-import ireader.core.source.model.Page
-import ireader.core.source.model.Text
+import ireader.core.http.DEFAULT_USER_AGENT
+import ireader.core.source.model.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
@@ -102,8 +95,7 @@ abstract class SourceFactory(
     /**
      * default user agent for requests
      */
-    open fun getUserAgent() =
-        "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36"
+    open fun getUserAgent() = DEFAULT_USER_AGENT
 
     /**
      * simple header builder

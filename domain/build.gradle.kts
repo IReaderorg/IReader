@@ -20,6 +20,7 @@ dependencies {
     implementation(libs.epublib) {
         exclude(group = "org.slf4j")
         exclude(group = "xmlpull")
+        this.isChanging = false
     }
     implementation("org.slf4j:slf4j-android:1.7.25")
 
@@ -74,7 +75,7 @@ dependencies {
     implementation(androidx.appCompat)
     implementation(androidx.webkit)
     implementation(androidx.browser)
-    implementation(androidx.material)
+
     implementation(kotlinx.serialization.json)
     implementation(kotlinx.reflect)
 

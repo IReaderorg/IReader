@@ -39,7 +39,8 @@ sealed interface ScreenSpec {
             SecuritySettingSpec,
             TrackingSettingSpec,
             RepositoryScreenSpec,
-            VideoScreenSpec
+            VideoScreenSpec,
+            RepositoryAddScreenSpec
         ).associateBy { it.navHostRoute }
     }
 

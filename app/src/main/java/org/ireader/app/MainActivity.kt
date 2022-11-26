@@ -1,18 +1,14 @@
 package org.ireader.app
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.*
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberPermissionState
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.backup.AutomaticBackup
 import ireader.domain.usecases.files.GetSimpleStorage
@@ -21,10 +17,10 @@ import ireader.presentation.core.ScreenContent
 import ireader.presentation.core.theme.AppTheme
 import ireader.presentation.core.theme.LocaleHelper
 import org.ireader.app.initiators.AppInitializers
+import org.ireader.app.initiators.GetPermissions
 import org.ireader.app.initiators.SecureActivityDelegateImpl
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
-import java.util.*
 
 
 class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivityDelegateImpl() {
@@ -81,30 +77,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     }
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-fun GetPermissions(context: Context, getSimpleStorage: GetSimpleStorage,uiPreferences: UiPreferences) {
-
-    val useLocalCache = remember {
-        uiPreferences.savedLocalCatalogLocation().get()
-    }
-    val readStoragePermission = rememberPermissionState(
-        android.Manifest.permission.READ_EXTERNAL_STORAGE,
-    ) {
-        uiPreferences.savedLocalCatalogLocation().set(!it)
-    }
-    val writeStoragePermission = rememberPermissionState(
-        android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-    ) {
-        uiPreferences.savedLocalCatalogLocation().set(!it)
-    }
-    LaunchedEffect(key1 = true) {
-        if (!useLocalCache) {
-            readStoragePermission.launchPermissionRequest()
-            writeStoragePermission.launchPermissionRequest()
-        }
-    }
-}
 
 interface SecureActivityDelegate {
     fun registerSecureActivity(activity: ComponentActivity, preferences: UiPreferences)

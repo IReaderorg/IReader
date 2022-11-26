@@ -2,23 +2,20 @@ package ireader.presentation.core.ui
 
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.google.accompanist.web.WebContent
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import ireader.presentation.ui.component.Controller
 import ireader.presentation.core.ui.util.NavigationArgs
+import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.web.WebPageScreen
 import ireader.presentation.ui.web.WebPageTopBar
 import ireader.presentation.ui.web.WebViewPageModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.koin.androidx.compose.getViewModel
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import org.koin.androidx.compose.getViewModel
 
 @OptIn(
     ExperimentalMaterialApi::class,
@@ -104,7 +101,9 @@ object WebViewScreenSpec : ScreenSpec {
             )
         })
         val webView = vm.webView
-        val url by derivedStateOf { vm.webUrl }
+        val url by remember {
+            derivedStateOf { vm.webUrl }
+        }
         val source = vm.source
 
         WebPageTopBar(

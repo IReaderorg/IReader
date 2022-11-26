@@ -39,7 +39,7 @@ import org.koin.androidx.compose.getViewModel
 
 object RepositoryScreenSpec : ScreenSpec {
 
-    override val navHostRoute: String = "repository-source"
+    override val navHostRoute: String = "repository_source"
 
     override val arguments: List<NamedNavArgument> = listOf(
 
@@ -63,12 +63,6 @@ object RepositoryScreenSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        var showDialog by remember {
-            mutableStateOf(false)
-        }
-        var text by remember {
-            mutableStateOf("")
-        }
         val vm : SourceRepositoryViewModel =  getViewModel(owner = controller.navBackStackEntry)
         SnackBarListener(vm = vm, host = controller.snackBarHostState)
         androidx.compose.material3.Scaffold(
@@ -83,7 +77,8 @@ object RepositoryScreenSpec : ScreenSpec {
                         )
                     },
                     onClick = {
-                        showDialog = true
+                        controller.navController.navigate(RepositoryAddScreenSpec.navHostRoute)
+                        //showDialog = true
                     },
                     icon = {
                         Icon(
@@ -118,42 +113,7 @@ object RepositoryScreenSpec : ScreenSpec {
                 }
 
             }
-            if (showDialog) {
-                androidx.compose.material3.AlertDialog(onDismissRequest = { showDialog = false}, confirmButton = {
-                    TextButton(onClick = {
-                        vm.viewModelScope.launch {
-                            try {
-                            vm.catalogSourceRepository.insert(vm.parseUrl(text))
 
-                            }catch (e:Exception) {
-                                vm.showSnackBar(UiText.StringResource(R.string.url_is_invalid))
-                            }
-                        }
-                        showDialog = false
-                    }) {
-                        MidSizeTextComposable(text = stringResource(id = R.string.add))
-                    }
-                }, title = {
-                    MidSizeTextComposable(text = stringResource(id = R.string.add_as_new))
-                }, text = {
-                    androidx.compose.material3.OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = text,
-                        onValueChange = {
-                                        text = it
-                        },
-                        label = {
-                            CaptionTextComposable(text = "please enter a valid repository URL")
-                        },
-                        maxLines = 5,
-                        singleLine = true,
-                        textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                    )
-                },)
-            }
-
-        }
-
-
+    }
     }
 }
