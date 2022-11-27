@@ -16,4 +16,8 @@
     <string name="category_hint">নাম…</string>
     <string name="search_hint">খুজুন…</string>
     <string name="auto_installer">অটো ইন্সটলার</string>
+    <string name="name">নাম…</string>
+    <string name="library">লাইব্রেরি</string>
+    <string name="search">খুজুন…</string>
+    <string name="settings">সেটিং</string>
 </resources>
