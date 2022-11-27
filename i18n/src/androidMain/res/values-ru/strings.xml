@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="library_screen_label">Библиотека</string>
-    <string name="explore_screen_label">Исследовать</string>
+    <string name="explore_screen_label">Обзор</string>
     <string name="setting_screen_label">Настройка</string>
     <string name="delete_all_downloads">Удалить все загрузки</string>
     <string name="cancel_all">Отменить все</string>
@@ -17,7 +17,7 @@
     <string name="nothing_read_recently">В последнее время ничего не читал</string>
     <string name="hint">…</string>
     <string name="category_hint">Имя…</string>
-    <string name="about">О нас</string>
+    <string name="about">О программе</string>
     <string name="edit_category">Редактировать категории</string>
     <string name="confirm">Подтвердить</string>
     <string name="aborted">Успех</string>
@@ -74,14 +74,14 @@
     <string name="browse">Просмотреть</string>
     <string name="open_last_chapter">Открыть последнюю главу</string>
     <string name="in_library">в библиотеке</string>
-    <string name="compact_layout">Компактная компоновка</string>
+    <string name="compact_layout">Компактно</string>
     <string name="chapter_number">Номер главы</string>
     <string name="increase">Увеличить</string>
     <string name="version">Версия</string>
-    <string name="whats_new">Что нового</string>
+    <string name="whats_new">Что нового\?</string>
     <string name="discord">Discord</string>
     <string name="github">Github</string>
-    <string name="check_the_update">Проверьте обновление</string>
+    <string name="check_the_update">Проверить обновления</string>
     <string name="appearance">Внешний вид</string>
     <string name="updater_is_enable">Обновления</string>
     <string name="manage_notification">Управление уведомлениями</string>
@@ -105,7 +105,7 @@
     <string name="bookmark">Закладка</string>
     <string name="wait">Пожалуйста, подождите</string>
     <string name="success">Успех</string>
-    <string name="epub">Epub</string>
+    <string name="epub">EPUB</string>
     <string name="enable_sleep_timer">Режим сна</string>
     <string name="full">Полный</string>
     <string name="partial">Частично</string>
@@ -132,8 +132,8 @@
     <string name="was_cancelled">был отменен</string>
     <string name="download_of">Загрузка</string>
     <string name="columns">Колонки</string>
-    <string name="comfortable_layout">Удобная сетка</string>
-    <string name="list_layout">Макет списка</string>
+    <string name="comfortable_layout">Сетка</string>
+    <string name="list_layout">Список</string>
     <string name="added_to_library">Добавлено в библиотеку</string>
     <string name="delete">Удалить</string>
     <string name="theme_was_deleted">Тема была удалена</string>
@@ -141,7 +141,7 @@
     <string name="auto_sort_chapters_in_db">Автоматическая сортировка глав в БД</string>
     <string name="unknown">Неизвестно</string>
     <string name="loading">Загрузка</string>
-    <string name="cover_only_layout">Сетка только для обложки</string>
+    <string name="cover_only_layout">Сетка c обложками</string>
     <string name="decrease">Уменьшить</string>
     <string name="share">Поделиться</string>
     <string name="fetch_book">Получить книгу</string>
@@ -150,7 +150,7 @@
     <string name="confirm_exit">Подтвердите выход</string>
     <string name="installer_mode">Режим установщика</string>
     <string name="toggle_in_library">переключение в библиотеке</string>
-    <string name="export_book_as_epub">Экспорт книги в формате Epub</string>
+    <string name="export_book_as_epub">Экспорт книги в формате EPUB</string>
     <string name="badge">Значок</string>
     <string name="unread">Непрочитанное</string>
     <string name="search">Поиск</string>
@@ -407,8 +407,8 @@
     <string name="other_source">Другие</string>
     <string name="all_lang">Все</string>
     <string name="no_error">Без ошибок</string>
-    <string name="permission_not_given">Достаточное разрешение не дано, Пожалуйста, проверьте ваше разрешение</string>
-    <string name="use_local_cache">Используйте локальный кэш</string>
+    <string name="permission_not_given">Даны не все разрешения, Пожалуйста, проверьте ваше разрешение</string>
+    <string name="use_local_cache">Использовать локальный кэш</string>
     <string name="url">Url</string>
     <string name="name">Имя</string>
     <string name="username">Имя пользователя</string>
