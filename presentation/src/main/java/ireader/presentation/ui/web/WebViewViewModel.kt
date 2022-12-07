@@ -11,7 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.accompanist.web.WebViewState
 import ireader.common.models.entities.Book
 import ireader.domain.models.entities.CatalogLocal
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.i18n.UiText
 import ireader.core.source.model.Command
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
@@ -110,8 +110,8 @@ class WebViewPageModel(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getContentFromWebView(
-        chapter: Chapter,
-        webView: WebView,
+            chapter: Chapter,
+            webView: WebView,
     ) {
         val catalog = catalog
         viewModelScope.launch {

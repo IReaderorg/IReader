@@ -1,6 +1,6 @@
 package ireader.domain.usecases.local.chapter_usecases
 
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.domain.data.repository.ChapterRepository
 import ireader.i18n.LAST_CHAPTER
 import kotlinx.coroutines.flow.emptyFlow

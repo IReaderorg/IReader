@@ -1,8 +1,8 @@
 package ireader.domain.usecases.remote
 
 import ireader.domain.models.entities.CatalogLocal
-import ireader.common.models.entities.Chapter
-import ireader.common.models.entities.toChapterInfo
+import ireader.domain.models.entities.Chapter
+import ireader.domain.models.entities.toChapterInfo
 import ireader.core.source.model.CommandList
 import ireader.domain.R
 import ireader.domain.utils.exceptionHandler
@@ -15,11 +15,11 @@ import org.koin.core.annotation.Factory
 @Factory
 class GetRemoteReadingContent() {
     suspend operator fun invoke(
-        chapter: Chapter,
-        catalog: CatalogLocal?,
-        onError: suspend (message: UiText?) -> Unit,
-        onSuccess: suspend (chapter: Chapter) -> Unit,
-        commands: CommandList = emptyList()
+            chapter: Chapter,
+            catalog: CatalogLocal?,
+            onError: suspend (message: UiText?) -> Unit,
+            onSuccess: suspend (chapter: Chapter) -> Unit,
+            commands: CommandList = emptyList()
     ) {
         val source = catalog?.source ?: throw SourceNotFoundException()
         withIOContext {

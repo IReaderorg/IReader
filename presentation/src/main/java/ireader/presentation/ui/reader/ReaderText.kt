@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.core.source.model.ImageUrl
 import ireader.core.source.model.Page
 import ireader.core.source.model.Text
@@ -60,17 +60,17 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ReaderText(
-    modifier: Modifier = Modifier,
-    vm: ReaderScreenViewModel,
-    uiState: ReaderScreenState,
-    onNext: () -> Unit,
-    onPrev: () -> Unit,
-    swipeState: SwipeRefreshState,
-    scrollState: ScrollState,
-    lazyListState: LazyListState,
-    modalState: ModalBottomSheetState,
-    toggleReaderMode: () -> Unit,
-    onChapterShown: (chapter: Chapter) -> Unit,
+        modifier: Modifier = Modifier,
+        vm: ReaderScreenViewModel,
+        uiState: ReaderScreenState,
+        onNext: () -> Unit,
+        onPrev: () -> Unit,
+        swipeState: SwipeRefreshState,
+        scrollState: ScrollState,
+        lazyListState: LazyListState,
+        modalState: ModalBottomSheetState,
+        toggleReaderMode: () -> Unit,
+        onChapterShown: (chapter: Chapter) -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -304,15 +304,15 @@ private fun MainText(
 
 @Composable
 private fun ContinuesReaderPage(
-    modifier: Modifier = Modifier,
-    interactionSource: MutableInteractionSource,
-    scrollState: LazyListState,
-    vm: ReaderScreenViewModel,
-    maxHeight: Float,
-    onPrev: () -> Unit,
-    onNext: () -> Unit,
-    toggleReaderMode: () -> Unit,
-    onChapterShown: (chapter: Chapter) -> Unit,
+        modifier: Modifier = Modifier,
+        interactionSource: MutableInteractionSource,
+        scrollState: LazyListState,
+        vm: ReaderScreenViewModel,
+        maxHeight: Float,
+        onPrev: () -> Unit,
+        onNext: () -> Unit,
+        toggleReaderMode: () -> Unit,
+        onChapterShown: (chapter: Chapter) -> Unit,
 ) {
     var lastChapterId: Chapter? by remember {
         mutableStateOf(null)

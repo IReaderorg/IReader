@@ -2,6 +2,8 @@
 
 package ireader.common.models.entities
 
+import ireader.domain.models.entities.Chapter
+
 data class Download(
     val chapterId: Long,
     val bookId: Long,

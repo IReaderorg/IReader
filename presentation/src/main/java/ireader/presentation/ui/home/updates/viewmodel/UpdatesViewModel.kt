@@ -2,7 +2,7 @@ package ireader.presentation.ui.home.updates.viewmodel
 
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewModelScope
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.common.models.entities.UpdatesWithRelations
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.ui.core.viewmodel.BaseViewModel

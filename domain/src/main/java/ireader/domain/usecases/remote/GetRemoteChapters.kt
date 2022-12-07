@@ -2,8 +2,8 @@ package ireader.domain.usecases.remote
 
 import ireader.common.models.entities.Book
 import ireader.common.models.entities.Book.Companion.toBookInfo
-import ireader.common.models.entities.Chapter
-import ireader.common.models.entities.toChapter
+import ireader.domain.models.entities.Chapter
+import ireader.domain.models.entities.toChapter
 import ireader.core.log.Log
 import ireader.core.source.model.CommandList
 import ireader.domain.models.entities.CatalogLocal

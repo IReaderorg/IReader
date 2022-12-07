@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import ireader.common.models.entities.Book
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.core.source.Source
 import ireader.domain.preferences.prefs.ChapterDisplayMode
 import ireader.presentation.R
@@ -55,27 +55,27 @@ import kotlinx.coroutines.launch
     )
 @Composable
 fun BookDetailScreen(
-    modifier: Modifier = Modifier,
-    vm: BookDetailViewModel,
-    modalBottomSheetState: ModalBottomSheetState,
-    onSummaryExpand: () -> Unit,
-    onSwipeRefresh: () -> Unit,
-    book: Book,
-    onTitle: (String) -> Unit,
-    snackBarHostState: SnackbarHostState,
-    source: Source?,
-    isSummaryExpanded: Boolean,
-    appbarPadding: Dp,
-    onItemClick: (Chapter) -> Unit,
-    onLongItemClick: (Chapter) -> Unit,
-    onRead: () -> Unit,
-    onSortClick: () -> Unit,
-    chapters: State<List<Chapter>>,
-    scrollState: LazyListState,
-    onMap: () -> Unit,
-    onFavorite: () -> Unit,
-    onWebView: () -> Unit,
-    controller: Controller
+        modifier: Modifier = Modifier,
+        vm: BookDetailViewModel,
+        modalBottomSheetState: ModalBottomSheetState,
+        onSummaryExpand: () -> Unit,
+        onSwipeRefresh: () -> Unit,
+        book: Book,
+        onTitle: (String) -> Unit,
+        snackBarHostState: SnackbarHostState,
+        source: Source?,
+        isSummaryExpanded: Boolean,
+        appbarPadding: Dp,
+        onItemClick: (Chapter) -> Unit,
+        onLongItemClick: (Chapter) -> Unit,
+        onRead: () -> Unit,
+        onSortClick: () -> Unit,
+        chapters: State<List<Chapter>>,
+        scrollState: LazyListState,
+        onMap: () -> Unit,
+        onFavorite: () -> Unit,
+        onWebView: () -> Unit,
+        controller: Controller
 ) {
     val context = LocalContext.current
     val refreshing = remember {

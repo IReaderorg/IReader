@@ -2,7 +2,7 @@
 
 package ireader.domain.usecases.backup.backup
 
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.core.source.model.decode
 import ireader.core.source.model.encode
 import kotlinx.serialization.Serializable

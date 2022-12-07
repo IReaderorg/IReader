@@ -1,7 +1,7 @@
 package ireader.domain.data.repository
 
 import ireader.common.models.entities.Book
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.common.models.entities.LibraryBook
 import ireader.common.models.library.LibrarySort
 import kotlinx.coroutines.flow.Flow

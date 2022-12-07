@@ -13,7 +13,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.work.WorkManager
 import ireader.common.models.entities.Book
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.domain.R
 import ireader.domain.notification.Notifications
 import ireader.domain.notification.flags
@@ -99,8 +99,8 @@ class DefaultNotificationHelper(
     }
 
     fun baseNotificationDownloader(
-        chapter: Chapter? = null,
-        workManagerId: UUID,
+            chapter: Chapter? = null,
+            workManagerId: UUID,
     ): NotificationCompat.Builder {
         val cancelDownloadIntent = WorkManager.getInstance(context)
             .createCancelPendingIntent(workManagerId)
@@ -262,13 +262,13 @@ class DefaultNotificationHelper(
     )
 
     suspend fun basicPlayingTextReaderNotification(
-        chapter: Chapter,
-        book: Book,
-        playing: Boolean,
-        progress: Int,
-        mediaSessionCompat: MediaSessionCompat,
-        isLoading: Boolean = false,
-        isError: Boolean = false,
+            chapter: Chapter,
+            book: Book,
+            playing: Boolean,
+            progress: Int,
+            mediaSessionCompat: MediaSessionCompat,
+            isLoading: Boolean = false,
+            isError: Boolean = false,
     ): NotificationCompat.Builder {
         val contentText =
             when {
@@ -362,9 +362,9 @@ class DefaultNotificationHelper(
     }
 
     private fun openReaderScreenIntent(
-        chapter: Chapter,
-        book: Book,
-        currentReadingParagraph: Int = 0,
+            chapter: Chapter,
+            book: Book,
+            currentReadingParagraph: Int = 0,
     ): PendingIntent = PendingIntent.getActivity(
         context.applicationContext,
         5,

@@ -12,7 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.preferences.prefs.ReaderPreferences
@@ -288,7 +288,7 @@ class TTSViewModel(
     }
 
     private suspend fun getRemoteChapter(
-        chapter: Chapter,
+            chapter: Chapter,
     ) {
         val catalog = ttsState.ttsCatalog
         remoteUseCases.getRemoteReadingContent(

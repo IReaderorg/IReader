@@ -7,8 +7,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
-import ireader.domain.utils.extensions.launchIO
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.common.models.entities.SavedDownload
 import ireader.common.models.entities.buildSavedDownload
 import ireader.i18n.asString

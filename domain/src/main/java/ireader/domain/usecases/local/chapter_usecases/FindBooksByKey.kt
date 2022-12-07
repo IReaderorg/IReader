@@ -1,6 +1,6 @@
 package ireader.domain.usecases.local.chapter_usecases
 
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.domain.models.entities.History
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.history.HistoryUseCase

@@ -13,7 +13,7 @@ import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.core.http.WebViewManger
 import ireader.core.source.model.Text
 import ireader.domain.catalogs.interactor.GetLocalCatalog
@@ -217,7 +217,7 @@ class ReaderScreenViewModel(
     }
 
     private suspend fun getRemoteChapter(
-        chapter: Chapter,
+            chapter: Chapter,
     ) {
         val catalog = catalog
         remoteUseCases.getRemoteReadingContent(

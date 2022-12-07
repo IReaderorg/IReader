@@ -1,6 +1,6 @@
 package ireader.data.chapter
 
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.core.source.model.Page
 
 val chapterMapper = {_id: Long, book_id: Long, url: String, name: String, scanlator: String?, read: Boolean, bookmark: Boolean, last_page_read: Long, chapter_number: Float, source_order: Long, date_fetch: Long, date_upload: Long, content: List<Page> ,type: Long->

@@ -1,7 +1,7 @@
 package ireader.domain.usecases.local.delete_usecases.chapter
 
 import ireader.domain.data.repository.ChapterRepository
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 
 
 /**

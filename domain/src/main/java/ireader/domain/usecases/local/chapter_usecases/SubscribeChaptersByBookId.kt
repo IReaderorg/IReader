@@ -2,7 +2,7 @@ package ireader.domain.usecases.local.chapter_usecases
 
 import ireader.domain.data.repository.ChapterRepository
 import kotlinx.coroutines.flow.Flow
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import kotlinx.coroutines.flow.map
 
 

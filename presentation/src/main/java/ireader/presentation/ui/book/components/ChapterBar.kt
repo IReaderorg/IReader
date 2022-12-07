@@ -16,17 +16,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.presentation.R
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 
 @Composable
 fun ChapterBar(
-    vm: BookDetailViewModel,
-    chapters:List<Chapter>,
-    onMap: () -> Unit,
-    onSortClick: () -> Unit
+        vm: BookDetailViewModel,
+        chapters:List<Chapter>,
+        onMap: () -> Unit,
+        onSortClick: () -> Unit
 ) {
     Row(
         modifier = Modifier

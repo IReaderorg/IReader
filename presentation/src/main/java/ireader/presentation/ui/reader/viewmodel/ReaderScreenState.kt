@@ -12,7 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import ireader.common.models.entities.Book
 import ireader.domain.models.entities.CatalogLocal
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.core.source.Source
 import ireader.core.source.model.Page
 import org.koin.core.annotation.Factory

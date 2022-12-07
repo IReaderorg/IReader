@@ -1,6 +1,6 @@
 package ireader.data.chapter
 
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.data.local.DatabaseHandler
 import ireader.data.util.toDB
 import ireader.domain.data.repository.ChapterRepository

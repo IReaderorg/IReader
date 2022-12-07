@@ -4,6 +4,7 @@ import androidx.annotation.Keep
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.url
+import ireader.core.source.CatalogSource.Companion.TYPE_NOVEL
 import ireader.core.source.model.Command
 import ireader.core.source.model.CommandList
 import ireader.core.source.model.ImageUrl
@@ -35,6 +36,8 @@ abstract class HttpSource(private val dependencies: ireader.core.source.Dependen
      */
     open val client: HttpClient
         get() = dependencies.httpClients.default
+
+    open val type: Int = TYPE_NOVEL
 
     /**
      * Visible name of the source.

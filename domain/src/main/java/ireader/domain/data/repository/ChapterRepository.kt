@@ -1,6 +1,6 @@
 package ireader.domain.data.repository
 
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import kotlinx.coroutines.flow.Flow
 
 interface ChapterRepository {
@@ -30,7 +30,7 @@ interface ChapterRepository {
     suspend fun insertChapter(chapter: Chapter): Long
 
     suspend fun insertChapters(
-        chapters: List<Chapter>,
+            chapters: List<Chapter>,
     ): List<Long>
 
     suspend fun deleteChaptersByBookId(
@@ -40,7 +40,7 @@ interface ChapterRepository {
     suspend fun deleteChapters(chapters: List<Chapter>)
 
     suspend fun deleteChapter(
-        chapter: Chapter,
+            chapter: Chapter,
     )
 
     suspend fun deleteAllChapters()

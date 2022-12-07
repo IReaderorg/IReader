@@ -1,6 +1,6 @@
 package ireader.domain.usecases.local.book_usecases
 
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.domain.usecases.local.LocalInsertUseCases
 import org.koin.core.annotation.Factory
 
@@ -9,7 +9,7 @@ class BookMarkChapterUseCase(
     private val insertUseCases: LocalInsertUseCases
 ) {
 
-    suspend fun bookMarkChapter(chapter:Chapter?):Chapter? {
+    suspend fun bookMarkChapter(chapter: Chapter?): Chapter? {
         chapter?.let { item ->
                 insertUseCases.insertChapter(chapter.copy(bookmark = !item.bookmark))
                 return chapter.copy(bookmark = !item.bookmark)

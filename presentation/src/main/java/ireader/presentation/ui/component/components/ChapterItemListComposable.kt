@@ -20,7 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.presentation.ui.core.modifier.selectedBackground
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.utils.extensions.asRelativeTimeString
@@ -30,14 +30,14 @@ import ireader.domain.utils.extensions.toLocalDate
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ChapterRow(
-    modifier: Modifier = Modifier,
-    chapter: Chapter,
-    onItemClick: () -> Unit,
-    onLongClick: () -> Unit = {},
-    isLastRead: Boolean = false,
-    isSelected: Boolean = false,
-    isLoading: Boolean = false,
-    showNumber: Boolean = true,
+        modifier: Modifier = Modifier,
+        chapter: Chapter,
+        onItemClick: () -> Unit,
+        onLongClick: () -> Unit = {},
+        isLastRead: Boolean = false,
+        isSelected: Boolean = false,
+        isLoading: Boolean = false,
+        showNumber: Boolean = true,
 ) {
     Row(
         modifier = Modifier

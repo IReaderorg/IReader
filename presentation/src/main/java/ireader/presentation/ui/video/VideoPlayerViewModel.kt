@@ -4,9 +4,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.media3.common.*
 import androidx.media3.exoplayer.ExoPlayer
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.core.http.HttpClients
 import ireader.core.log.Log
 import ireader.core.source.HttpSource
@@ -27,12 +26,10 @@ import ireader.presentation.ui.video.component.core.toSubtitleData
 import ireader.presentation.ui.video.component.cores.PlayerSubtitleHelper.Companion.toSubtitleMimeType
 import ireader.presentation.ui.video.component.cores.SubtitleData
 import ireader.presentation.ui.video.component.cores.SubtitleOrigin
-import ireader.presentation.ui.video.component.cores.player.*
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.annotation.KoinViewModel
-import java.util.*
 
 @OptIn(ExperimentalTextApi::class)
 @KoinViewModel

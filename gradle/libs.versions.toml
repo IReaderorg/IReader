@@ -14,7 +14,7 @@ koinCompose = "3.2.2"
 ideaExt = "1.1.6"
 sqldelight = "1.5.4"
 detekt = "1.21.0"
-exoplayer="1.0.0-beta02"
+exoplayer="1.0.0-beta03"
 
 
 [libraries]

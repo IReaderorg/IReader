@@ -30,7 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.presentation.ui.reader.components.MainBottomSettingComposable
 import ireader.presentation.ui.reader.custom.WebView
@@ -45,22 +45,22 @@ import kotlinx.coroutines.launch
 )
 @Composable
 fun ReadingScreen(
-    vm: ReaderScreenViewModel,
-    scrollState: ScrollState,
-    lazyListState: LazyListState,
-    swipeState: SwipeRefreshState,
-    onNext: (reset: Boolean) -> Unit,
-    onPrev: (reset: Boolean) -> Unit,
-    readerScreenPreferencesState: ReaderScreenViewModel,
-    toggleReaderMode: () -> Unit,
-    onBackgroundColorAndTextColorApply: (bgColor: String, txtColor: String) -> Unit,
-    snackBarHostState: SnackbarHostState,
-    drawerState: DrawerState,
-    onReaderBottomOnSetting: () -> Unit,
-    onSliderFinished: () -> Unit,
-    onSliderChange: (index: Float) -> Unit,
-    onReaderPlay: () -> Unit,
-    onChapterShown: (chapter: Chapter) -> Unit,
+        vm: ReaderScreenViewModel,
+        scrollState: ScrollState,
+        lazyListState: LazyListState,
+        swipeState: SwipeRefreshState,
+        onNext: (reset: Boolean) -> Unit,
+        onPrev: (reset: Boolean) -> Unit,
+        readerScreenPreferencesState: ReaderScreenViewModel,
+        toggleReaderMode: () -> Unit,
+        onBackgroundColorAndTextColorApply: (bgColor: String, txtColor: String) -> Unit,
+        snackBarHostState: SnackbarHostState,
+        drawerState: DrawerState,
+        onReaderBottomOnSetting: () -> Unit,
+        onSliderFinished: () -> Unit,
+        onSliderChange: (index: Float) -> Unit,
+        onReaderPlay: () -> Unit,
+        onChapterShown: (chapter: Chapter) -> Unit,
 ) {
 
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)

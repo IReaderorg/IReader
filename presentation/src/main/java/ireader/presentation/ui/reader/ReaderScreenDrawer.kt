@@ -21,7 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.presentation.R
 import ireader.presentation.ui.component.components.ChapterRow
 import ireader.presentation.ui.component.list.scrollbars.VerticalFastScroller
@@ -32,15 +32,15 @@ import ireader.presentation.ui.component.text_related.ErrorTextWithEmojis
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ReaderScreenDrawer(
-    modifier: Modifier = Modifier,
-    relativeTime: Int = 0,
-    dateFormat: String = "",
-    chapter: Chapter?,
-    onChapter: (chapter: Chapter) -> Unit,
-    chapters: List<Chapter>,
-    onReverseIcon: () -> Unit,
-    drawerScrollState: LazyListState,
-    onMap: (LazyListState) -> Unit,
+        modifier: Modifier = Modifier,
+        relativeTime: Int = 0,
+        dateFormat: String = "",
+        chapter: Chapter?,
+        onChapter: (chapter: Chapter) -> Unit,
+        chapters: List<Chapter>,
+        onReverseIcon: () -> Unit,
+        drawerScrollState: LazyListState,
+        onMap: (LazyListState) -> Unit,
 ) {
     Column(
         modifier = modifier.fillMaxWidth(.9f),

@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.R
 
@@ -23,18 +23,18 @@ import ireader.presentation.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainBottomSettingComposable(
-    modifier: Modifier = Modifier,
-    scope: CoroutineScope,
-    drawerState: DrawerState,
-    chapters: List<Chapter>,
-    chapter: Chapter?,
-    currentChapterIndex: Int,
-    onSetting: () -> Unit,
-    onNext: () -> Unit,
-    onPrev: () -> Unit,
-    onPlay: () -> Unit,
-    onSliderFinished: () -> Unit,
-    onSliderChange: (index: Float) -> Unit,
+        modifier: Modifier = Modifier,
+        scope: CoroutineScope,
+        drawerState: DrawerState,
+        chapters: List<Chapter>,
+        chapter: Chapter?,
+        currentChapterIndex: Int,
+        onSetting: () -> Unit,
+        onNext: () -> Unit,
+        onPrev: () -> Unit,
+        onPlay: () -> Unit,
+        onSliderFinished: () -> Unit,
+        onSliderChange: (index: Float) -> Unit,
 ) {
     ChaptersSliderComposable(
         onNext = {

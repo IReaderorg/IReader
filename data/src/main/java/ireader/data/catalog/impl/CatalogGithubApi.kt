@@ -19,6 +19,9 @@ class CatalogGithubApi(
     private val httpClient: HttpClients,
     private val getDefaultRepo: GetDefaultRepo
 ) : CatalogRemoteApi {
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
 
     override suspend fun fetchCatalogs(): List<CatalogRemote> {
         val repo = getDefaultRepo()
@@ -27,7 +30,7 @@ class CatalogGithubApi(
                 .get(repo.key)
                 .bodyAsText()
 
-        val catalogs = Json.Default.decodeFromString<List<CatalogRemoteApiModel>>(response)
+        val catalogs = json.decodeFromString<List<CatalogRemoteApiModel>>(response)
         if (catalogs.isEmpty()) {
             throw CatalogNotFoundException()
         }

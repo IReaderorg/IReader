@@ -1,7 +1,7 @@
 package ireader.data.book
 
 import ireader.common.models.entities.Book
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.common.models.entities.LibraryBook
 import ireader.common.models.library.LibrarySort
 import ireader.data.local.DatabaseHandler

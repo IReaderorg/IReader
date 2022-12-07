@@ -22,7 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
@@ -33,17 +33,17 @@ import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ReaderScreenTopBar(
-    modifier: Modifier,
-    isReaderModeEnable: Boolean,
-    vm: ReaderScreenViewModel,
-    state: ReaderScreenState,
-    modalBottomSheetValue: ModalBottomSheetValue,
-    chapter: Chapter?,
-    onRefresh: () -> Unit,
-    onWebView: () -> Unit,
-    onBookMark: () -> Unit,
-    onPopBackStack: () -> Unit,
-    isLoaded: Boolean = false,
+        modifier: Modifier,
+        isReaderModeEnable: Boolean,
+        vm: ReaderScreenViewModel,
+        state: ReaderScreenState,
+        modalBottomSheetValue: ModalBottomSheetValue,
+        chapter: Chapter?,
+        onRefresh: () -> Unit,
+        onWebView: () -> Unit,
+        onBookMark: () -> Unit,
+        onPopBackStack: () -> Unit,
+        isLoaded: Boolean = false,
 ) {
 
     AnimatedVisibility(

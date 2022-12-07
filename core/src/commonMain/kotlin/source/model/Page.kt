@@ -42,22 +42,17 @@ data class ImageBase64(val data: String) : PageComplete()
 @Serializable
 data class Text(val text: String) : PageComplete()
 
-@Serializable
-data class MovieUrl(val url: String) : PageComplete()
 
-//@Serializable
-//data class MovieUrl(
-//    val url: String,
-//    val name: String? = null,
-//    val quality: Int = Quality.UNSPECIFIC
-//) : PageComplete()
 
 @Serializable
-data class Subtitle(val url: String) : PageComplete()
+data class MovieUrl(
+    val url: String,
+) : PageComplete()
 
-//@Serializable
-//data class Subtitle(val url: String, val language: String? = null, val name: String? = null) :
-//    PageComplete()
+
+@Serializable
+data class Subtitle(val url: String, val language: String? = null, val name: String? = null) :
+    PageComplete()
 
 // creating a customized encoding and decoding because kotlin serialization may cause some problem in future.
 // Unlike tachiyomi, right now ireader is using saving files in app db

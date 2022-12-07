@@ -2,7 +2,7 @@ package ireader.domain.usecases.local.insert_usecases
 
 import ireader.domain.data.repository.BookRepository
 import ireader.common.models.entities.Book
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.domain.utils.extensions.withIOContext
 import org.koin.core.annotation.Factory
 

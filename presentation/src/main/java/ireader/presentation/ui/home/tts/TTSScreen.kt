@@ -39,7 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.pager.ExperimentalPagerApi
-import ireader.common.models.entities.Chapter
+import ireader.domain.models.entities.Chapter
 import ireader.core.source.Source
 import ireader.presentation.ui.core.modifier.clickableNoIndication
 import ireader.domain.models.prefs.mapAlignment
@@ -54,16 +54,16 @@ import ireader.presentation.ui.component.reusable_composable.SuperSmallTextCompo
 @OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TTSScreen(
-    modifier: Modifier = Modifier,
-    vm: TTSViewModel,
-    source: Source?,
-    drawerState: DrawerState,
-    onChapter: (Chapter) -> Unit,
-    onPopStack: () -> Unit,
-    onPlay: () -> Unit,
-    bottomSheetState: ModalBottomSheetState,
-    lazyState: LazyListState,
-    paddingValues: PaddingValues
+        modifier: Modifier = Modifier,
+        vm: TTSViewModel,
+        source: Source?,
+        drawerState: DrawerState,
+        onChapter: (Chapter) -> Unit,
+        onPopStack: () -> Unit,
+        onPlay: () -> Unit,
+        bottomSheetState: ModalBottomSheetState,
+        lazyState: LazyListState,
+        paddingValues: PaddingValues
 ) {
     val gradient = Brush.verticalGradient(
         colors = listOf(
