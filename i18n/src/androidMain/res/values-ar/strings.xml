@@ -237,7 +237,7 @@
     <string name="no_data_found_error">لم يتم العثور على بيانات.</string>
     <string name="cant_get_content">لا يمكن الحصول على محتوى الفصل.</string>
     <string name="did_not_get_anything">لم أحصل على أي شيء.</string>
-    <string name="trying_to_fetch_chapters_content">محاولة جلب محتوى الفصل …</string>
+    <string name="trying_to_fetch_chapters_content">جارٍ محاولة جلب محتوى الفصل …</string>
     <string name="trying_to_fetch">جارٍ محاولة الجلب …</string>
     <string name="this_is_first_chapter">هذا هو الفصل الأول</string>
     <string name="this_is_last_chapter">هذا هو الفصل الأخير</string>
@@ -392,4 +392,30 @@
     <string name="uncategorized_category">تقصير</string>
     <string name="pinned_sources">مثبت</string>
     <string name="last_used_source">آخر أستخدام</string>
+    <string name="permission_not_given">لم يتم إعطاء الإذن الكافي ، يرجى التحقق من إذنك</string>
+    <string name="saved_local_source_location">المصادر المحفوظة في ذاكرة التخزين المؤقت</string>
+    <string name="description">وصف</string>
+    <string name="weekly">أسبوعي</string>
+    <string name="daily">اليومي</string>
+    <string name="author">مؤلف</string>
+    <string name="maximum_backups">أقصى عدد من النسخ الاحتياطية</string>
+    <string name="status">حالة</string>
+    <string name="cover">التغطية</string>
+    <string name="subtitles_encoding_key" translatable="false">subtitles_encoding_key</string>
+    <string name="url">عنوان Url</string>
+    <string name="name">اسم</string>
+    <string name="username">اسم المستخدم</string>
+    <string name="password">كلمة المرور</string>
+    <string name="owner">صاحب</string>
+    <string name="automatic_backup">النسخ الاحتياطي التلقائي</string>
+    <string name="repository_adding_a_new">إضافة مستودع جديد</string>
+    <string name="auto_installer">المثبت التلقائي</string>
+    <string name="app_name">IReader</string>
+    <string name="show_system_catalogs">عرض ملحقات النظام</string>
+    <string name="show_local_catalogs">إظهار الامتدادات المحلية</string>
+    <string name="tags">العلامات</string>
+    <string name="permissions">أذونات</string>
+    <string name="no_error">لا خطأ</string>
+    <string name="check_permissions">تحقق من الأذونات</string>
+    <string name="use_local_cache">استخدم ذاكرة التخزين المؤقت المحلية</string>
 </resources>

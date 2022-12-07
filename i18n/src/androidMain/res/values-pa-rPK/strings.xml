@@ -1,2 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="search_hint">کھوجو…</string>
+    <string name="category_hint">ناں…</string>
+    <string name="permissions">اِجازتاں</string>
+    <string name="tags">ٹیگ</string>
+    <string name="recently">حالیہ</string>
+    <string name="relative_time_today">اج</string>
+    <string name="tabs">ٹیباں</string>
+    <string name="badge">بیج</string>
+    <string name="columns">کالم</string>
+    <string name="display">ڈسپلے</string>
+    <string name="go">جاؤ</string>
+    <string name="download">ڈاؤن‌لوڈ کیتا گیا</string>
+    <string name="complete">پورا ہویا</string>
+    <string name="name">ناں…</string>
+    <string name="download_notifier_downloader_title">ڈاؤن‌لوڈ کیتا گیا</string>
+    <string name="download_notifier_title_error">غلطی</string>
+    <string name="channel_complete">پورا ہویا</string>
+    <string name="add">پایو</string>
+    <string name="explore_screen_label">پڑچول کرو</string>
+    <string name="setting_screen_label">سیٹنگ</string>
+    <string name="confirm">پکا کرو</string>
+    <string name="library_screen_label">لائبریری</string>
+    <string name="about">بارے</string>
+    <string name="share">سانجھ کرو</string>
+    <string name="description">تفصیل</string>
+    <string name="completed">پورا ہویا</string>
+    <string name="downloaded">ڈاؤن‌لوڈ کیتا گیا</string>
+    <string name="filter">فِلٹر کرو</string>
+    <string name="search">کھوجو</string>
+    <string name="status">حالت</string>
+    <string name="category">گٹھاں</string>
+    <string name="help">مدد</string>
+    <string name="lock_never">کدے نہیں</string>
+    <string name="lock_always">ہمیشاں</string>
+    <string name="authentication">تصدیق</string>
+    <string name="loading">لوڈ کر رہا اے</string>
+    <string name="error">غلطی</string>
+    <string name="refresh">تازہ کرو</string>
+    <string name="library">لائبریری</string>
+    <string name="settings">سیٹنگ</string>
+</resources>
