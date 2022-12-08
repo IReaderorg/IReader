@@ -3,6 +3,7 @@ package ireader.domain.image.cache
 import android.content.Context
 import coil.imageLoader
 import ireader.domain.models.BookCover
+import ireader.domain.usecases.files.GetSimpleStorage
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -16,7 +17,7 @@ import java.io.InputStream
  * @param context the application context.
  * @constructor creates an instance of the cover cache.
  */
-class CoverCache(private val context: Context) {
+class CoverCache(private val context: Context,private val getSimpleStorage: GetSimpleStorage) {
 
     companion object {
         private const val COVERS_DIR = "covers"
@@ -107,7 +108,6 @@ class CoverCache(private val context: Context) {
     }
 
     private fun getCacheDir(dir: String): File {
-        return context.getExternalFilesDir(dir)
-            ?: File(context.filesDir, dir).also { it.mkdirs() }
+        return File(getSimpleStorage.ireaderCacheDir(), dir).also { it.mkdirs() }
     }
 }

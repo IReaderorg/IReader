@@ -29,6 +29,7 @@ class GetSimpleStorage(
     val mainIReaderDir: File = File(Environment.getExternalStorageDirectory(), "IReader/")
 
 
+
     fun ireaderDirectory(dirName: String): File =
         File(Environment.getExternalStorageDirectory(), "IReader/${dirName}/")
 
@@ -36,6 +37,7 @@ class GetSimpleStorage(
         File(Environment.getExternalStorageDirectory(), "IReader/Extensions/")
 
     fun cacheExtensionDir(context:Context) = File(context.cacheDir,"IReader/Extensions/")
+    fun ireaderCacheDir() = File(context.cacheDir,"IReader/")
 
     val backupDirectory: File =
         File(Environment.getExternalStorageDirectory(), "IReader/Backups/")

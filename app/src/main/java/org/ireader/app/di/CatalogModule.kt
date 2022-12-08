@@ -73,8 +73,8 @@ class CatalogModule {
     }
 
     @Single
-    fun provideCoverCache(context: Application): CoverCache {
-        return CoverCache(context)
+    fun provideCoverCache(context: Application,simpleStorage: GetSimpleStorage): CoverCache {
+        return CoverCache(context,simpleStorage)
     }
 
     @Single
