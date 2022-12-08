@@ -100,7 +100,7 @@ object WebViewScreenSpec : ScreenSpec {
                 WebViewPageModel.createParam(controller)
             )
         })
-        val webView = vm.webView
+        val webView = vm.webViewManager.webView
         val url by remember {
             derivedStateOf { vm.webUrl }
         }

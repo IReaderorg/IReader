@@ -10,6 +10,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.viewModelScope
 import com.google.accompanist.web.WebViewState
 import ireader.common.models.entities.Book
+import ireader.core.http.WebViewManger
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
 import ireader.i18n.UiText
@@ -39,6 +40,7 @@ class WebViewPageModel(
     private val remoteUseCases: RemoteUseCases,
     private val param: Param,
     private val webpageImpl: WebViewPageStateImpl,
+    val webViewManager : WebViewManger
 ) : BaseViewModel(), WebViewPageState by webpageImpl {
     data class Param(
         val url: String?,
@@ -226,7 +228,6 @@ interface WebViewPageState {
     var stateChapter: Chapter?
     var stateBook: Book?
 
-    var webView: WebView?
     var webViewState: WebViewState?
 
     var url: String
@@ -256,7 +257,7 @@ interface WebViewPageState {
 open class WebViewPageStateImpl() : WebViewPageState {
     override var url: String by mutableStateOf("")
     override var webUrl: String by mutableStateOf("")
-    override var webView: WebView? by mutableStateOf(null)
+
     override var webViewState: WebViewState? by mutableStateOf(null)
 
     override var isLoading: Boolean by mutableStateOf(false)

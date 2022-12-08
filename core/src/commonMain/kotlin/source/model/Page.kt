@@ -43,7 +43,6 @@ data class ImageBase64(val data: String) : PageComplete()
 data class Text(val text: String) : PageComplete()
 
 
-
 @Serializable
 data class MovieUrl(
     val url: String,
@@ -60,9 +59,7 @@ const val SEPARATOR = "##$$%%@@"
 const val EQUAL = "##$$@@"
 
 
-fun Page.encode(): String {
-    return Json.encodeToString(this)
-}
+
 
 fun String.decode(): List<Page> {
     return kotlin.runCatching {
@@ -86,5 +83,6 @@ fun String.decode(): List<Page> {
 }
 
 fun List<Page>.encode(): String {
-    return this.joinToString { it.encode() }
+    return  Json.encodeToString<List<Page>>(this)
+
 }

@@ -15,10 +15,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.google.accompanist.web.AccompanistWebChromeClient
-import com.google.accompanist.web.AccompanistWebViewClient
-import com.google.accompanist.web.WebView
-import com.google.accompanist.web.rememberWebViewState
+import com.google.accompanist.web.*
 import io.ktor.http.*
 import ireader.core.http.setDefaultSettings
 import ireader.core.source.HttpSource
@@ -29,10 +26,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @ExperimentalCoroutinesApi
 @Composable
 fun WebPageScreen(
-    viewModel: WebViewPageModel,
-    source: ireader.core.source.CatalogSource?,
-    snackBarHostState: SnackbarHostState,
-    scaffoldPadding: PaddingValues
+        viewModel: WebViewPageModel,
+        source: ireader.core.source.CatalogSource?,
+        snackBarHostState: SnackbarHostState,
+        scaffoldPadding: PaddingValues
 ) {
     val userAgent = remember {
         (source as? HttpSource)?.getCoverRequest("")?.second?.headers?.get(HttpHeaders.UserAgent)
@@ -48,34 +45,40 @@ fun WebPageScreen(
     }
     val chromeClient = AccompanistWebChromeClient()
     val webclient = AccompanistWebViewClient()
+    val webNavigator = rememberWebViewNavigator()
 
     webViewState.content.getCurrentUrl()
 
     SnackBarListener(vm = viewModel, host = snackBarHostState)
     val refresh = viewModel.isLoading
     val refreshState = rememberPullRefreshState(viewModel.isLoading, onRefresh = {
-        viewModel.webView?.reload()
+        webNavigator.reload()
         viewModel.toggleLoading(true)
     })
 
     Box(modifier = Modifier
-        .padding(scaffoldPadding)
-        .pullRefresh(refreshState)) {
+            .padding(scaffoldPadding)
+            .pullRefresh(refreshState)) {
 
         WebView(
-            state = webViewState,
-            onCreated = {
-                userAgent?.let { ua -> it.setUserAgent(ua) }
-                it.setDefaultSettings()
-                viewModel.webView = it
-            },
-            chromeClient = chromeClient,
-            client = webclient
+                state = webViewState,
+                onCreated = {
+                    userAgent?.let { ua -> it.setUserAgent(ua) }
+                    it.setDefaultSettings()
+                },
+                chromeClient = chromeClient,
+                client = webclient,
+                factory = {
+                    viewModel.webViewManager.init()
+                },
+                navigator = webNavigator
+
         )
         if (webViewState.isLoading) {
             androidx.compose.material3.LinearProgressIndicator(
-                modifier = Modifier
-                    .fillMaxWidth().align(Alignment.TopCenter),
+                    modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.TopCenter),
             )
         }
         PullRefreshIndicator(refresh, refreshState, Modifier.align(Alignment.TopCenter))
