@@ -69,7 +69,7 @@ object BookDetailScreenSpec : ScreenSpec {
     override fun TopBar(
         controller: Controller
     ) {
-        val vm: BookDetailViewModel = getViewModel(owner = controller.navBackStackEntry, parameters = {
+        val vm: BookDetailViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
             org.koin.core.parameter.parametersOf(
                 BookDetailViewModel.createParam(controller)
             )
@@ -184,7 +184,7 @@ object BookDetailScreenSpec : ScreenSpec {
     override fun BottomModalSheet(
         controller: Controller
     ) {
-        val vm: BookDetailViewModel = getViewModel(owner = controller.navBackStackEntry, parameters = {
+        val vm: BookDetailViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
             org.koin.core.parameter.parametersOf(
                 BookDetailViewModel.createParam(controller)
             )
@@ -252,7 +252,7 @@ object BookDetailScreenSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: BookDetailViewModel = getViewModel(owner = controller.navBackStackEntry, parameters = {
+        val vm: BookDetailViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
             org.koin.core.parameter.parametersOf(
                 BookDetailViewModel.createParam(controller)
             )

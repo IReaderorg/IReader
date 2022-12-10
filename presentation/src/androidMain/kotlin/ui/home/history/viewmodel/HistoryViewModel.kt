@@ -12,13 +12,14 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import ireader.domain.models.entities.HistoryWithRelations
-import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.usecases.history.HistoryPagingUseCase
 import ireader.domain.usecases.history.HistoryUseCase
 import ireader.domain.utils.extensions.asRelativeTimeString
 import ireader.domain.utils.extensions.toLocalDate
 import ireader.presentation.ui.component.reusable_composable.WarningAlertData
+import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import org.koin.android.annotation.KoinViewModel
@@ -27,6 +28,7 @@ import org.koin.android.annotation.KoinViewModel
 class HistoryViewModel(
     private val state: HistoryStateImpl,
     val historyUseCase: HistoryUseCase,
+    val historyPagingUseCase: HistoryPagingUseCase,
     val uiPreferences: UiPreferences,
 ) : BaseViewModel(), HistoryState by state {
 
@@ -38,7 +40,7 @@ class HistoryViewModel(
         val scope = rememberCoroutineScope()
         val query = searchQuery ?: ""
         val flow = remember(query) {
-            historyUseCase.findHistoriesPaging(query)
+            historyPagingUseCase.findHistoriesPaging(query)
                 .catch { error ->
                     ireader.core.log.Log.debug(error)
 

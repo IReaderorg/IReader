@@ -22,7 +22,7 @@ class UpdatesViewModel(
     private val insertUseCases: LocalInsertUseCases,
     private val serviceUseCases: ServiceUseCases,
     private val uiPreferences: UiPreferences
-) : BaseViewModel(), UpdateState by updateStateImpl {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), UpdateState by updateStateImpl {
     val after = uiPreferences.showUpdatesAfter().asState()
     val relativeFormat by uiPreferences.relativeTime().asState()
     init {

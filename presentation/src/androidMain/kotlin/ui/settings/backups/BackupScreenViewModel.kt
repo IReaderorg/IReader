@@ -31,7 +31,7 @@ class BackupScreenViewModel(
     val uiPreferences: UiPreferences,
     val automaticBackupUseCase: AutomaticBackup,
     val getSimpleStorage: GetSimpleStorage,
-) : BaseViewModel() {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
 

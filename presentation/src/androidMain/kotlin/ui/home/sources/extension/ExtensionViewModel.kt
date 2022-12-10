@@ -42,7 +42,7 @@ class ExtensionViewModel(
     private val startExtensionManagerService: StartExtensionManagerService,
 
     val uiPreferences: UiPreferences,
-) : BaseViewModel(), CatalogsState by state {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), CatalogsState by state {
 
     val incognito = uiPreferences.incognitoMode().asState()
     val lastUsedSource = uiPreferences.lastUsedSource().asState()

@@ -26,7 +26,7 @@ object DownloaderScreenSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: DownloaderViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: DownloaderViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         DownloaderScreen(
             onDownloadItem = { item ->
                 controller.navController.navigate(
@@ -45,7 +45,7 @@ object DownloaderScreenSpec : ScreenSpec {
     override fun TopBar(
         controller: Controller
     ) {
-        val vm: DownloaderViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: DownloaderViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         DownloaderTopAppBar(
             onPopBackStack = {
                 controller.navController.popBackStack()

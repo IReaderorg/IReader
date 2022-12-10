@@ -39,7 +39,7 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
     override fun TopBar(
         controller: Controller
     ) {
-        val vm: ExtensionViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: ExtensionViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         var searchMode by remember {
             mutableStateOf(false)
         }
@@ -85,7 +85,7 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: ExtensionViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: ExtensionViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
 
         ExtensionScreen(
             modifier = Modifier.padding(controller.scaffoldPadding),

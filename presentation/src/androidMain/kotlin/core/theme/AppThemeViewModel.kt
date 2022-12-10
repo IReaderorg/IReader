@@ -32,7 +32,7 @@ import org.koin.core.annotation.Single
 class AppThemeViewModel(
     private val uiPreferences: UiPreferences,
     private val themeRepository: ThemeRepository,
-) : BaseViewModel() {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
     private val themeMode by uiPreferences.themeMode().asState()
     private val colorTheme by uiPreferences.colorTheme().asState()
 

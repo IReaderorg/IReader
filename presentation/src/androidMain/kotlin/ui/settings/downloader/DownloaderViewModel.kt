@@ -19,7 +19,7 @@ class DownloaderViewModel(
     private val serviceUseCases: ServiceUseCases,
     private val downloadState: DownloadStateImpl,
     val downloadServiceStateImpl: DownloadServiceStateImpl
-) : BaseViewModel(), DownloadState by downloadState {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), DownloadState by downloadState {
 
     init {
         subscribeDownloads()

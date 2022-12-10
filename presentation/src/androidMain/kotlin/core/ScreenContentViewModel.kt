@@ -7,7 +7,7 @@ import org.koin.android.annotation.KoinViewModel
 @KoinViewModel
 class ScreenContentViewModel(
     private val uiPreferences: UiPreferences,
-) : BaseViewModel() {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
 
     var showUpdate = uiPreferences.showUpdatesInButtonBar().asState()
     var showHistory = uiPreferences.showHistoryInButtonBar().asState()

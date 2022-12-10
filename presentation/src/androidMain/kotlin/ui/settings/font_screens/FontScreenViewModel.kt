@@ -18,7 +18,7 @@ class FontScreenViewModel(
     private val fontUseCase: FontUseCase,
     val readerPreferences: ReaderPreferences,
     val androidUiPreferences: AndroidUiPreferences,
-) : BaseViewModel(), FontScreenState by fontScreenState {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), FontScreenState by fontScreenState {
 
     val font = androidUiPreferences.font().asState()
     val previewMode = mutableStateOf(false)

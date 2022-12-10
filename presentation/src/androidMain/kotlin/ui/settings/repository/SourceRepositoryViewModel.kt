@@ -11,7 +11,7 @@ import org.koin.android.annotation.KoinViewModel
 class SourceRepositoryViewModel(
     val catalogSourceRepository: CatalogSourceRepository,
     val uiPreferences: UiPreferences
-) : BaseViewModel() {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
 
     val sources = catalogSourceRepository.subscribe().asState(emptyList())
     var showAutomaticSourceDialog = mutableStateOf(false)

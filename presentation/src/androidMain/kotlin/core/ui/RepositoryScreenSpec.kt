@@ -63,7 +63,7 @@ object RepositoryScreenSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm : SourceRepositoryViewModel =  getViewModel(owner = controller.navBackStackEntry)
+        val vm : SourceRepositoryViewModel =  getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         SnackBarListener(vm = vm, host = controller.snackBarHostState)
         androidx.compose.material3.Scaffold(
             modifier = Modifier.padding(top = controller.scaffoldPadding.calculateTopPadding()),

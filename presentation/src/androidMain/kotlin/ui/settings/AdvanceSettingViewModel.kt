@@ -32,7 +32,7 @@ class AdvanceSettingViewModel(
     private val categoryRepository: CategoryRepository,
     private val androidUiPreferences: AndroidUiPreferences,
 
-    ) : BaseViewModel() {
+    ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
 
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state

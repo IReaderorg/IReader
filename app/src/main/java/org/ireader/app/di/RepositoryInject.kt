@@ -1,15 +1,5 @@
 package org.ireader.app.di
 
-import ireader.domain.data.repository.BookCategoryRepository
-import ireader.domain.data.repository.BookRepository
-import ireader.domain.data.repository.CategoryRepository
-import ireader.domain.data.repository.ChapterRepository
-import ireader.domain.data.repository.DownloadRepository
-import ireader.domain.data.repository.HistoryRepository
-import ireader.domain.data.repository.LibraryRepository
-import ireader.domain.data.repository.ReaderThemeRepository
-import ireader.domain.data.repository.ThemeRepository
-import ireader.domain.data.repository.UpdatesRepository
 import ireader.domain.catalogs.service.CatalogRemoteRepository
 import ireader.data.book.BookRepositoryImpl
 import ireader.data.catalog.CatalogRemoteRepositoryImpl
@@ -20,10 +10,12 @@ import ireader.data.core.AndroidDatabaseHandler
 import ireader.data.core.DatabaseHandler
 import ireader.data.downloads.DownloadRepositoryImpl
 import ireader.data.history.HistoryRepositoryImpl
+import ireader.data.pagination.PaginationRepositoryImpl
 import ireader.data.repository.LibraryRepositoryImpl
 import ireader.data.repository.ReaderThemeRepositoryImpl
 import ireader.data.repository.ThemeRepositoryImpl
 import ireader.data.repository.UpdatesRepositoryImpl
+import ireader.domain.data.repository.*
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Single
 
@@ -39,6 +31,12 @@ class RepositoryInject {
         handler: DatabaseHandler
     ): DownloadRepository {
         return DownloadRepositoryImpl(handler)
+    }
+    @Single
+    fun providePaginationRepository(
+        handler: AndroidDatabaseHandler
+    ): PaginationRepository {
+        return PaginationRepositoryImpl(handler)
     }
 
     @Single

@@ -35,7 +35,7 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: BackupScreenViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: BackupScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         SnackBarListener(vm = vm, host = controller.snackBarHostState)
         BackUpAndRestoreScreen(
             modifier = Modifier.padding(controller.scaffoldPadding),

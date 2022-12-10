@@ -40,7 +40,7 @@ object RepositoryAddScreenSpec : ScreenSpec {
     override fun TopBar(
         controller: Controller
     ) {
-        val vm : SourceRepositoryViewModel =  getViewModel(owner = controller.navBackStackEntry)
+        val vm : SourceRepositoryViewModel =  getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         Toolbar(
             title = {
                 MidSizeTextComposable(text = stringResource(R.string.repository_adding_a_new))
@@ -67,7 +67,7 @@ object RepositoryAddScreenSpec : ScreenSpec {
         var text by remember {
             mutableStateOf("")
         }
-        val vm : SourceRepositoryViewModel =  getViewModel(owner = controller.navBackStackEntry)
+        val vm : SourceRepositoryViewModel =  getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         SnackBarListener(vm = vm, host = controller.snackBarHostState)
         val showDialog = vm.showAutomaticSourceDialog
         AddingRepositoryScreen(controller.scaffoldPadding, onSave = {

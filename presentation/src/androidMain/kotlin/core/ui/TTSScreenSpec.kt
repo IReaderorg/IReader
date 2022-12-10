@@ -94,7 +94,7 @@ object TTSScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class,)
     @Composable
     override fun TopBar(controller: Controller) {
-        val vm: TTSViewModel = getViewModel(owner = controller.navBackStackEntry, parameters = {
+        val vm: TTSViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
             org.koin.core.parameter.parametersOf(
                 TTSViewModel.createParam(controller)
             )
@@ -132,7 +132,7 @@ object TTSScreenSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: TTSViewModel = getViewModel(owner = controller.navBackStackEntry, parameters = {
+        val vm: TTSViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
             org.koin.core.parameter.parametersOf(
                 TTSViewModel.createParam(controller)
             )
@@ -189,7 +189,7 @@ object TTSScreenSpec : ScreenSpec {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun BottomAppBar(controller: Controller) {
-        val vm: TTSViewModel  = getViewModel(owner = controller.navBackStackEntry, parameters = {
+        val vm: TTSViewModel  = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
             org.koin.core.parameter.parametersOf(
                 TTSViewModel.createParam(controller)
             )
@@ -246,7 +246,7 @@ object TTSScreenSpec : ScreenSpec {
     override fun ModalDrawer(
         controller: Controller
     ) {
-        val vm: TTSViewModel = getViewModel(owner = controller.navBackStackEntry, parameters = {
+        val vm: TTSViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
             org.koin.core.parameter.parametersOf(
                 TTSViewModel.createParam(controller)
             )
@@ -300,7 +300,7 @@ object TTSScreenSpec : ScreenSpec {
     override fun BottomModalSheet(
         controller: Controller
     ) {
-        val vm: TTSViewModel = getViewModel(owner = controller.navBackStackEntry, parameters = {
+        val vm: TTSViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
             org.koin.core.parameter.parametersOf(
                 TTSViewModel.createParam(controller)
             )

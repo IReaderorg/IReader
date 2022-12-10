@@ -34,7 +34,7 @@ object GlobalSearchScreenSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: GlobalSearchViewModel= getViewModel(owner = controller.navBackStackEntry, parameters = {
+        val vm: GlobalSearchViewModel= getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
             org.koin.core.parameter.parametersOf(
                 GlobalSearchViewModel.createParam(controller)
             )

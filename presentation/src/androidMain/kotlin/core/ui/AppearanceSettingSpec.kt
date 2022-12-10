@@ -36,7 +36,7 @@ object AppearanceScreenSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val viewModel: AppearanceViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val viewModel: AppearanceViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         SnackBarListener(viewModel, controller.snackBarHostState)
         AppearanceSettingScreen(
             modifier = Modifier.padding(controller.scaffoldPadding),

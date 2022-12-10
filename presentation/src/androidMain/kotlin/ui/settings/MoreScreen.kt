@@ -139,6 +139,6 @@ fun SetupLayout(
 @KoinViewModel
 class MainSettingScreenViewModel(
     uiPreferences: UiPreferences
-) : BaseViewModel() {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
     val incognitoMode = uiPreferences.incognitoMode().asState()
 }

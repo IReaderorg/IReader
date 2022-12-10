@@ -1,9 +1,6 @@
 package ireader.data.history
 
-import androidx.paging.PagingSource
 import ir.kazemcodes.infinityreader.Database
-import ireader.domain.models.entities.HistoryWithRelations
-import ireader.data.core.AndroidDatabaseHandler
 import ireader.data.core.DatabaseHandler
 import ireader.data.util.toDB
 import ireader.domain.data.repository.HistoryRepository
@@ -14,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 // I may need to add bookId as Primary Key instead of using id
 
 class HistoryRepositoryImpl constructor(
-    private val handler: AndroidDatabaseHandler,
+    private val handler: DatabaseHandler,
 
     ) :
     HistoryRepository {
@@ -33,17 +30,7 @@ class HistoryRepositoryImpl constructor(
     override fun subscribeHistoryByBookId(bookId: Long): Flow<History?> {
         return handler.subscribeToOneOrNull { historyQueries.findHistoryByBookId(bookId, historyMapper) }
     }
-    
-    override fun findHistoriesPaging(query: String):
-            PagingSource<Long, HistoryWithRelations> {
-        return handler
-            .subscribeToPagingSource(
-                countQuery = { historyViewQueries.countHistory(query) },
-                queryProvider = { limit, offset ->
-                    historyViewQueries.history(query,limit,offset,historyWithRelationsMapper)
-                },
-            )
-    }
+
 
     override suspend fun findHistories(): List<History> {
         return handler

@@ -10,7 +10,7 @@ import ireader.i18n.asString
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 
 @Composable
-fun SnackBarListener(vm: BaseViewModel, host: SnackbarHostState) {
+fun SnackBarListener(vm: ireader.presentation.ui.core.viewmodel.BaseViewModel, host: SnackbarHostState) {
     val context = LocalContext.current
     LaunchedEffect(key1 = true) {
         vm.eventFlow.collectLatest { event ->

@@ -45,7 +45,7 @@ object ReaderSettingSpec : ScreenSpec {
         controller: Controller
     ) {
         val context = LocalContext.current
-        val vm: ReaderSettingScreenViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: ReaderSettingScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         val items = remember {
             listOf<Components>(
                 Components.Header(

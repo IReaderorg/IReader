@@ -41,7 +41,7 @@ class WebViewPageModel(
     private val param: Param,
     private val webpageImpl: WebViewPageStateImpl,
     val webViewManager : WebViewManger
-) : BaseViewModel(), WebViewPageState by webpageImpl {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), WebViewPageState by webpageImpl {
     data class Param(
         val url: String?,
         val bookId: Long?,

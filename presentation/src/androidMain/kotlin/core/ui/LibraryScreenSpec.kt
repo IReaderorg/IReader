@@ -40,7 +40,7 @@ object LibraryScreenSpec : BottomNavScreenSpec {
     override fun BottomModalSheet(
         controller: Controller
     ) {
-        val vm: LibraryViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: LibraryViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
 
         val pagerState = rememberPagerState()
         BottomTabComposable(
@@ -67,7 +67,7 @@ object LibraryScreenSpec : BottomNavScreenSpec {
     override fun TopBar(
         controller: Controller
     ) {
-        val vm: LibraryViewModel  = getViewModel(owner = controller.navBackStackEntry)
+        val vm: LibraryViewModel  = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         LibraryScreenTopBar(
             state = vm,
             bottomSheetState = controller.sheetState,
@@ -91,7 +91,7 @@ object LibraryScreenSpec : BottomNavScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: LibraryViewModel  = getViewModel(owner = controller.navBackStackEntry)
+        val vm: LibraryViewModel  = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
 
         LaunchedEffect(key1 = vm.selectionMode) {
             controller.requestHideNavigator(vm.selectionMode)

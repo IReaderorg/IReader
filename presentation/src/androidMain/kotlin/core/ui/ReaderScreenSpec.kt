@@ -103,7 +103,7 @@ object ReaderScreenSpec : ScreenSpec {
     ) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
-        val vm: ReaderScreenViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: ReaderScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         val currentIndex = vm.currentChapterIndex
         val chapters = vm.stateChapters
         val chapter = vm.stateChapter
@@ -350,7 +350,7 @@ object ReaderScreenSpec : ScreenSpec {
     override fun ModalDrawer(
         controller: Controller
     ) {
-        val vm: ReaderScreenViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: ReaderScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         val drawerScrollState = rememberLazyListState()
         val drawerState = controller.drawerState
         val chapter = vm.stateChapter
@@ -419,7 +419,7 @@ object ReaderScreenSpec : ScreenSpec {
         controller: Controller
     ) {
 
-        val vm: ReaderScreenViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: ReaderScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         val catalog = vm.catalog
         val book = vm.book
         val chapter = vm.stateChapter
@@ -480,7 +480,7 @@ object ReaderScreenSpec : ScreenSpec {
     override fun BottomModalSheet(
         controller: Controller
     ) {
-        val vm: ReaderScreenViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: ReaderScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         val context = LocalContext.current
 
         Column(

@@ -25,14 +25,6 @@ class HistoryUseCase(private val historyRepository: HistoryRepository) {
         return historyRepository.subscribeHistoryByBookId(bookId)
     }
 
-    fun findHistoriesPaging(query: String): Flow<PagingData<HistoryWithRelations>> {
-        return Pager(
-            PagingConfig(pageSize = 25),
-        ) {
-            historyRepository.findHistoriesPaging(query)
-        }.flow
-    }
-
     suspend fun findHistories(): List<History> {
         return historyRepository.findHistories()
     }

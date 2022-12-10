@@ -12,8 +12,6 @@ interface HistoryRepository {
     suspend fun findHistoriesByBookId(bookId: Long): List<History>
     fun subscribeHistoryByBookId(bookId: Long): Flow<History?>
 
-    fun findHistoriesPaging(query: String): PagingSource<Long, HistoryWithRelations>
-
     suspend fun findHistories(): List<History>
 
     suspend fun insertHistory(history: History)

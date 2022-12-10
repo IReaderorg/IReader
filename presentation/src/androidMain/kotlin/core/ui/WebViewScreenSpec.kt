@@ -77,7 +77,7 @@ object WebViewScreenSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: WebViewPageModel = getViewModel(owner = controller.navBackStackEntry, parameters = {
+        val vm: WebViewPageModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
             org.koin.core.parameter.parametersOf(
                 WebViewPageModel.createParam(controller)
             )
@@ -95,7 +95,7 @@ object WebViewScreenSpec : ScreenSpec {
     override fun TopBar(
         controller: Controller
     ) {
-        val vm: WebViewPageModel = getViewModel(owner = controller.navBackStackEntry, parameters = {
+        val vm: WebViewPageModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
             org.koin.core.parameter.parametersOf(
                 WebViewPageModel.createParam(controller)
             )

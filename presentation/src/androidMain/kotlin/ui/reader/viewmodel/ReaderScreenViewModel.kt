@@ -73,7 +73,7 @@ class ReaderScreenViewModel(
     val bookMarkChapterUseCase: BookMarkChapterUseCase,
     val translationEnginesManager: TranslationEnginesManager,
     val savedStateHandle: SavedStateHandle
-) : BaseViewModel(),
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel(),
     ReaderScreenPreferencesState by prefState,
     ReaderScreenState by state,
     ReaderPrefFunctions by prefFunc {

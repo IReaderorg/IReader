@@ -111,7 +111,7 @@ class GeneralSettingScreenViewModel(
     private val appPreferences: AppPreferences,
     private val uiPreferences: UiPreferences,
     val localeHelper: LocaleHelper
-) : BaseViewModel() {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
 
     val appUpdater = appPreferences.appUpdater().asState()
 

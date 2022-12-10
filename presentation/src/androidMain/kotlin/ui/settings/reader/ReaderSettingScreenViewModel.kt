@@ -12,7 +12,7 @@ import org.koin.android.annotation.KoinViewModel
 class ReaderSettingScreenViewModel(
     private val readerPreferences: ReaderPreferences,
     private val androidUiPreferences: AndroidUiPreferences
-) : BaseViewModel() {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
 

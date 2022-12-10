@@ -35,7 +35,7 @@ class ExploreViewModel(
     private val param: Param,
     private val findDuplicateBook: FindDuplicateBook,
     val booksState: BooksState
-) : BaseViewModel(), ExploreState by state {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), ExploreState by state {
     data class Param(val sourceId: Long?, val query: String?)
     companion object {
         fun createParam(controller: Controller): Param {

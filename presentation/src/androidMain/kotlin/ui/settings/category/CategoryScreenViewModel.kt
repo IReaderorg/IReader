@@ -20,7 +20,7 @@ class CategoryScreenViewModel(
     val categoriesUseCase: CategoriesUseCases,
     val reorderCategory: ReorderCategory,
     val createCategoryWithName: CreateCategoryWithName,
-) : BaseViewModel() {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
     var categories: SnapshotStateList<CategoryWithCount> = mutableStateListOf()
     var showDialog by mutableStateOf(false)
     init {

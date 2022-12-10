@@ -30,7 +30,7 @@ object FontScreenSpec : ScreenSpec {
     override fun TopBar(
         controller: Controller
     ) {
-        val vm: FontScreenViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: FontScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         SearchToolbar(
             title = stringResource(R.string.font),
             actions = {
@@ -59,7 +59,7 @@ object FontScreenSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: FontScreenViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: FontScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
 
         Box(modifier = Modifier.padding(controller.scaffoldPadding)) {
             FontScreen(

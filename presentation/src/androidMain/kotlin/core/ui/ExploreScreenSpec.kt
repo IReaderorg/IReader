@@ -62,7 +62,7 @@ object ExploreScreenSpec : ScreenSpec {
     @Composable
     override fun Content(controller: Controller) {
         val vm: ExploreViewModel =
-            getViewModel(owner = controller.navBackStackEntry, parameters = {
+            getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
                 org.koin.core.parameter.parametersOf(
                     ExploreViewModel.createParam(controller)
                 )
@@ -155,7 +155,7 @@ object ExploreScreenSpec : ScreenSpec {
     override fun BottomModalSheet(
         controller: Controller
     ) {
-        val vm: ExploreViewModel = getViewModel(owner = controller.navBackStackEntry, parameters = {
+        val vm: ExploreViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
             org.koin.core.parameter.parametersOf(
                 ExploreViewModel.createParam(controller)
             )
@@ -186,7 +186,7 @@ object ExploreScreenSpec : ScreenSpec {
     override fun TopBar(
         controller: Controller
     ) {
-        val vm: ExploreViewModel = getViewModel(owner = controller.navBackStackEntry, parameters = {
+        val vm: ExploreViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
             org.koin.core.parameter.parametersOf(
                 ExploreViewModel.createParam(controller)
             )

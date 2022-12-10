@@ -49,7 +49,7 @@ object SecuritySettingSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: SecuritySettingViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: SecuritySettingViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         val context = LocalContext.current
         val onIdleAfter =
             rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
@@ -218,7 +218,7 @@ class UnlockActivity : FragmentActivity() {
 @KoinViewModel
 class SecuritySettingViewModel(
     private val appPreferences: UiPreferences,
-) : BaseViewModel() {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
 
     var useAuth = appPreferences.useAuthenticator().asState()
     var secureScreen = appPreferences.secureScreen().asState()

@@ -58,7 +58,7 @@ class LibraryViewModel(
     private val libraryPreferences: LibraryPreferences,
     val markBookAsReadOrNotUseCase: MarkBookAsReadOrNotUseCase,
     val getCategory: CategoriesUseCases
-) : BaseViewModel(), LibraryState by state {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), LibraryState by state {
 
     var lastUsedCategory = libraryPreferences.lastUsedCategory().asState()
     var filters = libraryPreferences.filters(true).asState()

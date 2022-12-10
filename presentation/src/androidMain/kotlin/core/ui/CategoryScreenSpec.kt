@@ -40,7 +40,7 @@ object CategoryScreenSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: CategoryScreenViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: CategoryScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         Box(modifier = Modifier.padding(controller.scaffoldPadding)) {
             CategoryScreen(
                 vm = vm

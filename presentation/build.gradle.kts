@@ -4,7 +4,6 @@ plugins {
     id("org.jetbrains.compose")
     id("kotlinx-serialization")
     id("com.google.devtools.ksp")
-    id("org.jetbrains.gradle.plugin.idea-ext")
 }
 
 kotlin {
@@ -26,37 +25,43 @@ kotlin {
     sourceSets {
          val commonMain by getting {
             dependencies {
+                implementation(project(Modules.domain))
+                implementation(project(Modules.coreApi))
+                implementation(project(Modules.commonResources))
+
                 api(compose.foundation)
-                api(compose.runtime)
+                implementation(compose.runtime)
                 api(compose.animation)
                 api(compose.animationGraphics)
                 api(compose.materialIconsExtended)
                 api(compose.preview)
+                api(compose.ui)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-                api(compose.material)
+                api(compose.material3)
                 api(compose.materialIconsExtended)
+                compileOnly(libs.koin.annotations)
+                api(libs.koin.android)
+                api(libs.koin.androidCompose)
             }
         }
         val jvmMain by creating {
             dependsOn(commonMain)
             dependencies {
-                api(kotlin("stdlib-jdk8"))
-                api(compose.desktop.currentOs)
+
+
             }
         }
         val androidMain by getting {
             dependsOn(jvmMain)
             dependencies {
-                implementation(project(Modules.domain))
-                implementation(project(Modules.coreApi))
-                implementation(project(Modules.commonResources))
+
                 api(androidx.biometric)
                 api(libs.coil.core)
                 api(libs.coil.gif)
                 api(libs.bundles.simplestorage)
                 api("androidx.core:core-splashscreen:1.0.0")
                 api(composeLib.compose.googlFonts)
-                api(compose.ui)
+
                 api(composeLib.compose.paging)
                 api(composeLib.material3.core)
                 api(composeLib.material3.windowsizeclass)
@@ -77,16 +82,14 @@ kotlin {
                 api(libs.bundles.exoplayer)
                 api(androidx.emoji)
                 api(androidx.work.runtime)
-                api(libs.koin.android)
-                api(libs.koin.androidCompose)
-                compileOnly(libs.koin.annotations)
+
+
             }
         }
         val desktopMain by getting {
-            dependsOn(jvmMain)
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
-
+                api(compose.desktop.currentOs)
             }
         }
     }
@@ -114,18 +117,4 @@ dependencies {
 //    androidTestImplementation(composeLib.compose.testing)
 //    androidTestImplementation(composeLib.compose.composeTooling)
 //    detektPlugins("com.twitter.compose.rules:detekt:0.0.5")
-}
-idea {
-    module {
-        (this as ExtensionAware).configure<org.jetbrains.gradle.ext.ModuleSettings> {
-            (this as ExtensionAware).configure<org.jetbrains.gradle.ext.PackagePrefixContainer> {
-                arrayOf(
-                    "src/commonMain/kotlin",
-                    "src/androidMain/kotlin",
-                    "src/desktopMain/kotlin",
-                    "src/jvmMain/kotlin"
-                ).forEach { put(it, "ireader.presentation") }
-            }
-        }
-    }
 }

@@ -33,7 +33,7 @@ object GeneralScreenSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: GeneralSettingScreenViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: GeneralSettingScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
 
         val context = LocalContext.current
         GeneralSettingScreen(

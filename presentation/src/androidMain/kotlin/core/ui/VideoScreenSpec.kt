@@ -41,7 +41,7 @@ object VideoScreenSpec : ScreenSpec {
         val context = LocalContext.current
 
         val vm: VideoScreenViewModel =
-            koinViewModel(owner = controller.navBackStackEntry)
+            koinViewModel(viewModelStoreOwner = controller.navBackStackEntry)
 
         val state = vm.mediaState
         DisposableEffect(key1 = true) {
@@ -71,7 +71,7 @@ object VideoScreenSpec : ScreenSpec {
     @Composable
     override fun BottomModalSheet(controller: Controller) {
         val vm: VideoScreenViewModel =
-            koinViewModel(owner = controller.navBackStackEntry)
+            koinViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         val state = vm.mediaState
         val stateOfPlayer = state.playerState
         if (stateOfPlayer != null) {

@@ -23,7 +23,7 @@ import org.koin.android.annotation.KoinViewModel
 class AppearanceViewModel(
     val uiPreferences: UiPreferences,
     val themeRepository: ThemeRepository
-) : BaseViewModel() {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
 
     private val _state = mutableStateOf(MainScreenState())
     val state = _state

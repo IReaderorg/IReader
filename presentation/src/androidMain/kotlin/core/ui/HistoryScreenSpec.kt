@@ -36,7 +36,7 @@ object HistoryScreenSpec : BottomNavScreenSpec {
     override fun TopBar(
         controller: Controller
     ) {
-        val vm: HistoryViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: HistoryViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         val context = LocalContext.current
 
         HistoryTopAppBar(
@@ -66,7 +66,7 @@ object HistoryScreenSpec : BottomNavScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: HistoryViewModel  = getViewModel(owner = controller.navBackStackEntry)
+        val vm: HistoryViewModel  = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         val context = LocalContext.current
 
         WarningAlert(data = vm.warningAlert.value)

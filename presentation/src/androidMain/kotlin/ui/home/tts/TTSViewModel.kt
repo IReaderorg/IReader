@@ -49,7 +49,7 @@ class TTSViewModel(
     private val readerPreferences: ReaderPreferences,
     private val androidUiPreferences: AndroidUiPreferences,
     private val insertUseCases: LocalInsertUseCases,
-) : BaseViewModel(),
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel(),
     TTSState by ttsState {
     data class Param(val sourceId:Long? ,val chapterId: Long?, val bookId: Long?,val readingParagraph: String?)
 

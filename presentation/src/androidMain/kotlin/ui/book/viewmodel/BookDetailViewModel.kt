@@ -64,7 +64,7 @@ class BookDetailViewModel(
     val insertUseCases: LocalInsertUseCases,
     private val param: Param,
     val booksState: BooksState
-) : BaseViewModel(), DetailState by state, ChapterState by chapterState {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), DetailState by state, ChapterState by chapterState {
     data class Param(val bookId: Long?)
 
     companion object {

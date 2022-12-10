@@ -28,7 +28,7 @@ class GlobalSearchViewModel(
     val insertUseCases: LocalInsertUseCases,
     val getInstalledCatalog: GetInstalledCatalog,
     val param: Param
-) : BaseViewModel(), GlobalSearchState by state {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), GlobalSearchState by state {
     data class Param(val query: String?)
 
     var installedCatalogs by mutableStateOf(emptyList<CatalogInstalled>())

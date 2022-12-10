@@ -51,7 +51,7 @@ object MoreScreenSpec : BottomNavScreenSpec {
         controller: Controller
     ) {
         val uriHandler = LocalUriHandler.current
-        val vm: MainSettingScreenViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: MainSettingScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
 
         MoreScreen(
             modifier = Modifier.padding(controller.scaffoldPadding),

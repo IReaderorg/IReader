@@ -34,7 +34,7 @@ object UpdateScreenSpec : BottomNavScreenSpec {
     override fun TopBar(
         controller: Controller
     ) {
-        val vm: UpdatesViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: UpdatesViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         UpdatesToolbar(
             state = vm,
             onClickCancelSelection = {
@@ -71,7 +71,7 @@ object UpdateScreenSpec : BottomNavScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: UpdatesViewModel = getViewModel(owner = controller.navBackStackEntry)
+        val vm: UpdatesViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
 
         UpdateScreen(
             modifier = Modifier.padding(controller.scaffoldPadding),

@@ -44,7 +44,7 @@ class VideoScreenViewModel(
     httpClient: HttpClients,
     val simpleStorage: GetSimpleStorage,
     val mediaState: MediaState,
-) : BaseViewModel() {
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
 
 
     val chapterId: StateFlow<Long> =
