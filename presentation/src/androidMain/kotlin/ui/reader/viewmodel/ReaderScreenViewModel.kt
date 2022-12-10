@@ -20,6 +20,7 @@ import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.data.repository.ReaderThemeRepository
 import ireader.domain.preferences.models.ReaderColors
 import ireader.domain.preferences.models.prefs.readerThemes
+import ireader.domain.preferences.prefs.AndroidUiPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.domain.preferences.prefs.UiPreferences
@@ -64,6 +65,7 @@ class ReaderScreenViewModel(
     val state: ReaderScreenStateImpl,
     val prefFunc: ReaderPrefFunctionsImpl,
     val readerPreferences: ReaderPreferences,
+    val androidUiPreferences: AndroidUiPreferences,
     val uiPreferences: UiPreferences,
     val screenAlwaysOnUseCase: ScreenAlwaysOn,
     val webViewManger: WebViewManger,
@@ -86,8 +88,8 @@ class ReaderScreenViewModel(
     val relativeTime by uiPreferences.relativeTime().asState()
     val translatorOriginLanguage = readerPreferences.translatorOriginLanguage().asState()
     val translatorTargetLanguage = readerPreferences.translatorTargetLanguage().asState()
-    val readerTheme = readerPreferences.readerTheme().asState()
-    val backgroundColor = readerPreferences.backgroundColorReader().asState()
+    val readerTheme = androidUiPreferences.readerTheme().asState()
+    val backgroundColor = androidUiPreferences.backgroundColorReader().asState()
 
     val topContentPadding = readerPreferences.topContentPadding().asState()
     val screenAlwaysOn = readerPreferences.screenAlwaysOn().asState()
@@ -96,17 +98,17 @@ class ReaderScreenViewModel(
     val leftMargin = readerPreferences.leftMargin().asState()
     val rightMargin = readerPreferences.rightMargin().asState()
     val bottomMargin = readerPreferences.bottomMargin().asState()
-    val textColor = readerPreferences.textColorReader().asState()
+    val textColor = androidUiPreferences.textColorReader().asState()
     var readerThemeSavable by mutableStateOf(false)
-    val selectedScrollBarColor = readerPreferences.selectedScrollBarColor().asState()
-    val unselectedScrollBarColor = readerPreferences.unselectedScrollBarColor().asState()
+    val selectedScrollBarColor = androidUiPreferences.selectedScrollBarColor().asState()
+    val unselectedScrollBarColor = androidUiPreferences.unselectedScrollBarColor().asState()
     val lineHeight = readerPreferences.lineHeight().asState()
     val betweenLetterSpaces = readerPreferences.betweenLetterSpaces().asState()
     val textWeight = readerPreferences.textWeight().asState()
     val paragraphsIndent = readerPreferences.paragraphIndent().asState()
     val showScrollIndicator = readerPreferences.showScrollIndicator().asState()
     val textAlignment = readerPreferences.textAlign().asState()
-    val orientation = readerPreferences.orientation().asState()
+    val orientation = androidUiPreferences.orientation().asState()
     var lastOrientationChangedTime =
         mutableStateOf(kotlinx.datetime.Clock.System.now().toEpochMilliseconds())
     val scrollIndicatorWith = readerPreferences.scrollIndicatorWith().asState()
@@ -119,7 +121,7 @@ class ReaderScreenViewModel(
     val brightness = readerPreferences.brightness().asState()
     var chapterNumberMode by readerPreferences.showChapterNumberPreferences().asState()
     val isScrollIndicatorDraggable = readerPreferences.scrollbarMode().asState()
-    val font = readerPreferences.font().asState()
+    val font = androidUiPreferences.font().asState()
     val webViewIntegration = readerPreferences.webViewIntegration().asState()
     val selectableMode = readerPreferences.selectableText().asState()
     val fontSize = readerPreferences.fontSize().asState()

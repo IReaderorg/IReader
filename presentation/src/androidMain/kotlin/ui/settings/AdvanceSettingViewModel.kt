@@ -12,6 +12,7 @@ import ireader.domain.data.repository.CategoryRepository
 import ireader.domain.data.repository.ThemeRepository
 import ireader.domain.image.cache.CoverCache
 import ireader.domain.preferences.models.getDefaultFont
+import ireader.domain.preferences.prefs.AndroidUiPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.usecases.epub.importer.ImportEpub
 import ireader.domain.usecases.local.DeleteUseCase
@@ -29,6 +30,7 @@ class AdvanceSettingViewModel(
     private val readerPreferences: ReaderPreferences,
     private val themeRepository: ThemeRepository,
     private val categoryRepository: CategoryRepository,
+    private val androidUiPreferences: AndroidUiPreferences,
 
     ) : BaseViewModel() {
 
@@ -54,7 +56,7 @@ class AdvanceSettingViewModel(
             prefUseCases.fontHeightUseCase.save(25)
             prefUseCases.fontSizeStateUseCase.save(18)
             prefUseCases.paragraphDistanceUseCase.save(2)
-            readerPreferences.orientation().set(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
+            androidUiPreferences.orientation().set(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
             prefUseCases.paragraphIndentUseCase.save(8)
             prefUseCases.scrollModeUseCase.save(true)
             prefUseCases.scrollIndicatorUseCase.savePadding(0)

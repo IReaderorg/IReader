@@ -34,13 +34,7 @@ kotlin {
         }
          val androidMain by getting {
              dependsOn(commonMain)
-            ///  kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
-//                implementation(libs.epublib) {
-//                    exclude(group = "org.slf4j")
-//                    exclude(group = "xmlpull")
-//                    this.isChanging = false
-//                }
                 implementation("org.slf4j:slf4j-android:1.7.25")
                 implementation(libs.bundles.simplestorage)
                 implementation(androidx.biometric)

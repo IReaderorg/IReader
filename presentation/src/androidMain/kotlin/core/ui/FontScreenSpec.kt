@@ -65,7 +65,7 @@ object FontScreenSpec : ScreenSpec {
             FontScreen(
                 vm,
                 onFont = { font ->
-                    vm.readerPreferences.font()
+                    vm.androidUiPreferences.font()
                         .set(FontType(font, getDefaultFont().fontFamily))
                 }
             )

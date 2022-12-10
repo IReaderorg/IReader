@@ -1,10 +1,11 @@
 package ireader.domain.usecases.preferences.reader_preferences
 
 import androidx.compose.ui.graphics.Color
+import ireader.domain.preferences.prefs.AndroidUiPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
 
 class BackgroundColorUseCase(
-    private val prefs: ReaderPreferences,
+    private val prefs: AndroidUiPreferences,
 ) {
     fun save(value: Color) {
         prefs.backgroundColorReader().set(value)
@@ -16,7 +17,7 @@ class BackgroundColorUseCase(
 }
 
 class TextColorUseCase(
-    private val prefs: ReaderPreferences,
+    private val prefs: AndroidUiPreferences,
 ) {
     fun save(value: Color) {
         prefs.textColorReader().set(value)

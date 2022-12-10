@@ -1,36 +1,26 @@
 package ireader.domain.preferences.prefs
 
-import android.content.pm.ActivityInfo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.ExperimentalTextApi
-import androidx.compose.ui.text.googlefonts.GoogleFont
 import ireader.core.prefs.Preference
 import ireader.core.prefs.PreferenceStore
 import ireader.core.prefs.getEnum
-import ireader.domain.preferences.models.FontType
-import ireader.domain.preferences.models.prefs.asColor
-import ireader.domain.preferences.models.prefs.asFont
-import ireader.domain.preferences.models.prefs.asReaderTheme
-import ireader.domain.preferences.models.prefs.asVoice
 import ireader.domain.models.prefs.PreferenceValues
-import ireader.domain.preferences.models.ReaderColors
-import ireader.domain.preferences.models.getDefaultFont
 
 @OptIn(ExperimentalTextApi::class)
 class ReaderPreferences constructor(
     private val preferenceStore: PreferenceStore,
-    private val provider: GoogleFont.Provider
 ) {
     companion object PreferenceKeys {
         const val SAVED_FONT_SIZE_PREFERENCES = "reader_font_size"
-        const val SAVED_FONT_PREFERENCES = "reader_font_family"
+
         const val SAVED_BRIGHTNESS_PREFERENCES = "reader_brightness"
         const val SAVED_IMMERSIVE_MODE_PREFERENCES = "reader_immersive_mode"
         const val SAVED_AUTO_BRIGHTNESS_PREFERENCES = "reader_auto_brightness"
         const val READING_MODE = "reader_mode"
 
-        const val SAVED_BACKGROUND_COLOR = "background_color"
+
         const val SAVED_TEXT_COLOR = "text_color"
         const val SAVED_FONT_HEIGHT = "font_height"
         const val SAVED_PARAGRAPH_DISTANCE = "paragraph_distance"
@@ -75,41 +65,21 @@ class ReaderPreferences constructor(
         return preferenceStore.getInt(SAVED_FONT_SIZE_PREFERENCES, 18)
     }
 
-    @OptIn(ExperimentalTextApi::class)
-    fun font(): Preference<FontType> {
-        return preferenceStore.getString(SAVED_FONT_PREFERENCES, getDefaultFont().name).asFont(provider)
-    }
 
-    fun backgroundColorReader(): Preference<Color> {
-        return preferenceStore.getInt(SAVED_BACKGROUND_COLOR, Color(0xff262626).toArgb()).asColor()
-    }
-    fun backgroundColorTTS(): Preference<ReaderColors> {
-        return preferenceStore.getLong("background_color_tts").asReaderTheme()
-    }
+
     fun followTTSSpeaker(): Preference<Boolean> {
         return preferenceStore.getBoolean("follow_tts_speaker",false)
     }
 
-    fun textColorReader(): Preference<Color> {
-        return preferenceStore.getInt(SAVED_TEXT_COLOR, Color(0xFFE9E9E9).toArgb()).asColor()
-    }
-    fun readerTheme(): Preference<ReaderColors> {
-        return preferenceStore.getLong("readerTheme", 0).asReaderTheme()
-    }
+
 
     fun webViewIntegration(): Preference<Boolean> {
         return preferenceStore.getBoolean("webView_integration", false)
     }
 
-    fun unselectedScrollBarColor(): Preference<Color> {
-        return preferenceStore.getInt(SCROLL_INDICATOR_SELECTED_COLOR, Color(0xFF2A59B6).toArgb())
-            .asColor()
-    }
 
-    fun selectedScrollBarColor(): Preference<Color> {
-        return preferenceStore.getInt(SCROLL_INDICATOR_UNSELECTED_COLOR, Color(0xFF5281CA).toArgb())
-            .asColor()
-    }
+
+
 
     fun scrollBarAlignment(): Preference<PreferenceValues.PreferenceTextAlignment> {
         return preferenceStore.getEnum(SCROLL_INDICATOR_ALIGNMENT, PreferenceValues.PreferenceTextAlignment.Right)
@@ -130,12 +100,7 @@ class ReaderPreferences constructor(
         return preferenceStore.getInt(SAVED_PARAGRAPH_DISTANCE, 2)
     }
 
-    fun orientation(): Preference<Int> {
-        return preferenceStore.getInt(
-            SAVED_ORIENTATION,
-            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-        )
-    }
+
 
     fun sleepTime(): Preference<Long> {
         return preferenceStore.getLong(SLEEP_TIMER, 15)
@@ -239,9 +204,7 @@ class ReaderPreferences constructor(
         return preferenceStore.getFloat(TEXT_READER_SPEECH_PITCH, .8f)
     }
 
-    fun speechVoice(): Preference<ireader.domain.preferences.models.prefs.IReaderVoice> {
-        return preferenceStore.getString(TEXT_READER_SPEECH_VOICE, "").asVoice()
-    }
+
 
     fun speechLanguage(): Preference<String> {
         return preferenceStore.getString(TEXT_READER_SPEECH_LANGUAGE, "")

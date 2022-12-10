@@ -48,6 +48,6 @@ class AppPreferences(
     }
 
     fun lastUpdateCheck(): Preference<Long> {
-        return preferenceStore.getLong(AppPreferences.Last_UPDATE_CHECK, 0)
+        return preferenceStore.getLong(Last_UPDATE_CHECK, 0)
     }
 }

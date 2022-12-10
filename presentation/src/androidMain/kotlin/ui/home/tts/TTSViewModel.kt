@@ -15,6 +15,7 @@ import androidx.lifecycle.viewModelScope
 import ireader.domain.models.entities.Chapter
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.domain.catalogs.interactor.GetLocalCatalog
+import ireader.domain.preferences.prefs.AndroidUiPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.services.tts_service.Player
 import ireader.domain.services.tts_service.TTSState
@@ -46,6 +47,7 @@ class TTSViewModel(
     val speechPrefUseCases: TextReaderPrefUseCase,
     private val readerUseCases: ReaderPrefUseCases,
     private val readerPreferences: ReaderPreferences,
+    private val androidUiPreferences: AndroidUiPreferences,
     private val insertUseCases: LocalInsertUseCases,
 ) : BaseViewModel(),
     TTSState by ttsState {
@@ -64,11 +66,11 @@ class TTSViewModel(
     val sleepModeUi = readerPreferences.sleepMode().asState()
     val sleepTimeUi = readerPreferences.sleepTime().asState()
     val autoNext = readerPreferences.readerAutoNext().asState()
-    val voice = readerPreferences.speechVoice().asState()
+    val voice = androidUiPreferences.speechVoice().asState()
     val language = readerPreferences.speechLanguage().asState()
     val isTtsTrackerEnable = readerPreferences.followTTSSpeaker().asState()
 
-    val theme = readerPreferences.backgroundColorTTS().asState()
+    val theme = androidUiPreferences.backgroundColorTTS().asState()
 
     // val textColor = readerPreferences.textColorReader().asState()
     val lineHeight = readerPreferences.lineHeight().asState()
@@ -77,7 +79,7 @@ class TTSViewModel(
     val paragraphsIndent = readerPreferences.paragraphIndent().asState()
     val paragraphDistance = readerPreferences.paragraphDistance().asState()
     val textAlignment = readerPreferences.textAlign().asState()
-    val font = readerPreferences.font().asState()
+    val font = androidUiPreferences.font().asState()
     val fontSize = readerPreferences.fontSize().asState()
     val ttsIconAlignments = readerPreferences.ttsIconAlignments().asState()
 

@@ -6,6 +6,7 @@ import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.models.prefs.IReaderVoice
+import ireader.domain.preferences.prefs.AndroidUiPreferences
 import org.koin.core.annotation.Factory
 
 class TextAlignmentUseCase(
@@ -46,6 +47,7 @@ class SortersDescUseCase(
 @Factory
 class TextReaderPrefUseCase(
     private val prefs: ReaderPreferences,
+    private val AndroidPrefs: AndroidUiPreferences,
 ) {
     fun savePitch(value: Float) {
         prefs.speechPitch().set(value)
@@ -73,7 +75,7 @@ class TextReaderPrefUseCase(
 
     fun saveVoice(value: IReaderVoice) {
         kotlin.runCatching {
-            prefs.speechVoice().set(value)
+            AndroidPrefs.speechVoice().set(value)
         }
     }
 
@@ -82,7 +84,7 @@ class TextReaderPrefUseCase(
          * because the default value is "" which means the first value should return null
          */
         return kotlin.runCatching {
-            return prefs.speechVoice().get()
+            return AndroidPrefs.speechVoice().get()
         }.getOrNull()
     }
 

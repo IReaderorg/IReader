@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.lifecycle.viewModelScope
+import ireader.domain.preferences.prefs.AndroidUiPreferences
 import kotlinx.coroutines.launch
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
@@ -16,9 +17,10 @@ class FontScreenViewModel(
     private val fontScreenState: FontScreenStateImpl,
     private val fontUseCase: FontUseCase,
     val readerPreferences: ReaderPreferences,
+    val androidUiPreferences: AndroidUiPreferences,
 ) : BaseViewModel(), FontScreenState by fontScreenState {
 
-    val font = readerPreferences.font().asState()
+    val font = androidUiPreferences.font().asState()
     val previewMode = mutableStateOf(false)
 
     init {

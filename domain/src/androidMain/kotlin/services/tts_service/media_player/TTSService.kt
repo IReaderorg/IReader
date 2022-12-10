@@ -40,6 +40,7 @@ import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.R
 import ireader.domain.notification.Notifications
+import ireader.domain.preferences.prefs.AndroidUiPreferences
 import ireader.domain.services.tts_service.Player
 import ireader.domain.services.tts_service.TTSState
 import ireader.domain.services.tts_service.TTSStateImpl
@@ -86,6 +87,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
 
 
     private val readerPreferences: ReaderPreferences  by inject()
+    private val androidReaderPreferences: AndroidUiPreferences  by inject()
 
     lateinit var mediaSession: MediaSessionCompat
     lateinit var stateBuilder: PlaybackStateCompat.Builder
@@ -156,7 +158,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             }
         }
         scope.launch {
-            readerPreferences.speechVoice().changes().collect {
+            androidReaderPreferences.speechVoice().changes().collect {
                 state.currentVoice = it
             }
         }
