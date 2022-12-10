@@ -17,10 +17,10 @@ buildscript {
         classpath(libs.gradle.firebaseCrashlytic)
     }
 }
-
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     alias(kotlinx.plugins.kotlinAndroid) apply false
-    alias(libs.plugins.detekt)
+    alias(libs.plugins.kotlinter) apply false
     alias(libs.plugins.benGradleVersions)
     alias(libs.plugins.dependencyAnalysis)
     alias(kotlinx.plugins.kotlinSerilization) apply false
@@ -41,29 +41,15 @@ fun isNonStable(version: String): Boolean {
     return isStable.not()
 }
 
-detekt {
-    source = files("src/main/java", "src/main/kotlin")
-    parallel = false
-    ignoredBuildTypes = listOf("release")
-    basePath = projectDir.absolutePath
-    buildUponDefaultConfig = true
-    allRules = false
-    config = files("$projectDir/config/detekt.yml")
-}
+
 tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
     rejectVersionIf {
         isNonStable(candidate.version) && !isNonStable(currentVersion)
     }
 }
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    jvmTarget = "1.8"
-}
-tasks.withType<io.gitlab.arturbosch.detekt.DetektCreateBaselineTask>().configureEach {
-    jvmTarget = "1.8"
-}
+
 
 subprojects {
-    plugins.apply("io.gitlab.arturbosch.detekt")
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
         kotlinOptions.freeCompilerArgs += listOf(
             "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",

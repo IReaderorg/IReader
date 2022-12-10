@@ -7,14 +7,16 @@ include(":domain")
 include(":presentation")
 include(":core")
 include(":i18n")
+include(":desktop")
 
 
 
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        google()
         mavenCentral()
+        google()
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
 }
 

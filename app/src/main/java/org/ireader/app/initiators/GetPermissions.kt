@@ -11,7 +11,7 @@ import ireader.domain.usecases.files.GetSimpleStorage
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun GetPermissions(context: Context, getSimpleStorage: GetSimpleStorage, uiPreferences: UiPreferences) {
+fun GetPermissions(uiPreferences: UiPreferences) {
 
     val useLocalCache = remember {
         uiPreferences.savedLocalCatalogLocation().get()

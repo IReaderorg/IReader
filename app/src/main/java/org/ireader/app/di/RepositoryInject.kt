@@ -11,12 +11,13 @@ import ireader.domain.data.repository.ReaderThemeRepository
 import ireader.domain.data.repository.ThemeRepository
 import ireader.domain.data.repository.UpdatesRepository
 import ireader.domain.catalogs.service.CatalogRemoteRepository
-import ireader.data.local.DatabaseHandler
 import ireader.data.book.BookRepositoryImpl
 import ireader.data.catalog.CatalogRemoteRepositoryImpl
 import ireader.data.category.BookCategoryRepositoryImpl
 import ireader.data.category.CategoryRepositoryImpl
 import ireader.data.chapter.ChapterRepositoryImpl
+import ireader.data.core.AndroidDatabaseHandler
+import ireader.data.core.DatabaseHandler
 import ireader.data.downloads.DownloadRepositoryImpl
 import ireader.data.history.HistoryRepositoryImpl
 import ireader.data.repository.LibraryRepositoryImpl
@@ -85,7 +86,7 @@ class RepositoryInject {
 
         @Single
     fun providesHistoryRepository(
-            handler: DatabaseHandler
+            handler: AndroidDatabaseHandler
     ): HistoryRepository {
         return HistoryRepositoryImpl(handler)
     }

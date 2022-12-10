@@ -54,7 +54,6 @@ class UseCasesInject {
 
         @Single
     fun provideRemoteUseCase(
-        webViewCookieJar: WebViewCookieJar
     ): RemoteUseCases {
         return RemoteUseCases(
             getBookDetail = GetBookDetail(),

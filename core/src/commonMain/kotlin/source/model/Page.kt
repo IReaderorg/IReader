@@ -32,6 +32,9 @@ data class Quality(val quality: String) {
         const val QUALITY_8K = 8000
     }
 }
+val json = Json {
+    ignoreUnknownKeys = true
+}
 
 @Serializable
 data class ImageUrl(val url: String) : PageComplete()
@@ -63,7 +66,7 @@ const val EQUAL = "##$$@@"
 
 fun String.decode(): List<Page> {
     return kotlin.runCatching {
-        Json.decodeFromString<List<Page>>(this)
+        json.decodeFromString<List<Page>>(this)
     }.getOrElse {
         this.split(SEPARATOR).mapNotNull { text ->
             val type = text.substringBefore(EQUAL)
@@ -83,6 +86,6 @@ fun String.decode(): List<Page> {
 }
 
 fun List<Page>.encode(): String {
-    return  Json.encodeToString<List<Page>>(this)
+    return  json.encodeToString<List<Page>>(this)
 
 }

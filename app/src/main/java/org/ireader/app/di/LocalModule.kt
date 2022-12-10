@@ -40,7 +40,7 @@ class LocalModule {
     }
 
         @Single
-    fun provideProjectConfig(context: Context): ProjectConfig {
+    fun provideProjectConfig(): ProjectConfig {
         return ProjectConfig(
             buildTime = BuildConfig.BUILD_TIME,
             commitCount = BuildConfig.COMMIT_COUNT,

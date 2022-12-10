@@ -21,7 +21,7 @@ kotlin {
     jvm("desktop")
 
     sourceSets {
-        named("commonMain") {
+         val commonMain by getting {
             dependencies {
                 api(kotlinx.coroutines.core)
                 api(kotlinx.stdlib)
@@ -36,7 +36,7 @@ kotlin {
                 compileOnly(libs.koin.annotations)
             }
         }
-        named("androidMain") {
+         val androidMain by getting {
           ///  kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
                 implementation(androidx.core)
@@ -49,7 +49,7 @@ kotlin {
                 compileOnly(libs.koin.annotations)
             }
         }
-        named("desktopMain") {
+        val desktopMain by getting {
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
                 implementation(libs.quickjs.jvm)

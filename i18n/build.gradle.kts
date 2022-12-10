@@ -19,12 +19,9 @@ kotlin {
                 compileOnly(compose.ui)
             }
         }
-        //the compose is not available in android module for ???
         val androidMain by getting {
             dependencies {
-                compileOnly(composeLib.compose.runtime)
-                compileOnly(composeLib.compose.ui)
-                compileOnly(composeLib.compose.compiler)
+
             }
         }
         val desktopMain by getting {
@@ -41,12 +38,6 @@ android {
         named("main") {
             res.srcDir("src/commonMain/resources")
         }
-    }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = composeLib.versions.compiler.get()
     }
     defaultConfig {
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")

@@ -11,6 +11,7 @@ import ireader.core.source.model.ImageUrl
 import ireader.core.source.model.Listing
 import ireader.core.source.model.PageComplete
 import ireader.core.source.model.PageUrl
+import java.security.MessageDigest
 
 /**
  * A simple implementation for sources from a website.
@@ -30,6 +31,17 @@ abstract class HttpSource(private val dependencies: ireader.core.source.Dependen
      * incompatible, you may increase this value and it'll be considered as a new source.
      */
     open val versionId = 1
+
+    /**
+     * Id of the source. By default it uses a generated id using the first 16 characters (64 bits)
+     * of the MD5 of the string: sourcename/language/versionId
+     * Note the generated id sets the sign bit to 0.
+     */
+    override val id : Long by lazy {
+        val key = "${name.lowercase()}/$lang/$versionId"
+        val bytes = MessageDigest.getInstance("MD5").digest(key.toByteArray())
+        (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }.reduce(Long::or) and Long.MAX_VALUE
+    }
 
     /**
      * Default network client for doing requests.
