@@ -8,8 +8,20 @@ plugins {
 }
 
 kotlin {
-    android()
-    jvm("desktop")
+    android {
+        compilations {
+            all {
+                kotlinOptions.jvmTarget = ProjectConfig.androidJvmTarget.toString()
+            }
+        }
+    }
+    jvm("desktop") {
+        compilations {
+            all {
+                kotlinOptions.jvmTarget = ProjectConfig.desktopJvmTarget.toString()
+            }
+        }
+    }
     sourceSets {
         val commonMain by getting {
             dependencies {

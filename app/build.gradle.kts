@@ -123,7 +123,14 @@ android {
             getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
         }
     }
+    compileOptions {
+        sourceCompatibility(ProjectConfig.androidJvmTarget)
+        targetCompatibility(ProjectConfig.androidJvmTarget)
+    }
 
+    kotlinOptions {
+        jvmTarget = ProjectConfig.androidJvmTarget.toString()
+    }
 }
 
 

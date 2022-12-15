@@ -31,7 +31,6 @@ dependencyResolutionManagement {
         maven("https://oss.sonatype.org/service/local/staging/deploy/maven2")
        // maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         maven(url = "https://jitpack.io")
-        maven(url ="https://github.com/psiegman/mvn-repo/raw/master/releases")
        // maven(url ="https://androidx.dev/storage/compose-compiler/repository/")
         maven(url ="https://repo1.maven.org/maven2/")
 

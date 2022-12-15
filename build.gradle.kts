@@ -86,9 +86,11 @@ subprojects {
 
             compileOptions {
                 isCoreLibraryDesugaringEnabled = true
-                sourceCompatibility(JavaVersion.VERSION_1_8)
-                targetCompatibility(JavaVersion.VERSION_1_8)
+                sourceCompatibility(ProjectConfig.androidJvmTarget)
+                targetCompatibility(ProjectConfig.androidJvmTarget)
             }
+
+
             sourceSets {
                 named("main") {
                     val altManifest = file("src/androidMain/AndroidManifest.xml")
@@ -96,7 +98,9 @@ subprojects {
                         manifest.srcFile(altManifest.path)
                     }
                 }
+
             }
+
 
             dependencies {
                 add("coreLibraryDesugaring", libs.desugarJdkLibs)

@@ -104,6 +104,7 @@ android {
         val name = variant.name
         sourceSets {
             getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
+
         }
     }
 }

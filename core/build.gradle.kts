@@ -16,9 +16,19 @@ android {
 kotlin {
     android {
         publishLibraryVariants("release")
+        compilations {
+            all {
+                kotlinOptions.jvmTarget = ProjectConfig.androidJvmTarget.toString()
+            }
+        }
     }
-    android()
-    jvm("desktop")
+    jvm("desktop") {
+        compilations {
+            all {
+                kotlinOptions.jvmTarget = ProjectConfig.desktopJvmTarget.toString()
+            }
+        }
+    }
 
     sourceSets {
          val commonMain by getting {
@@ -34,6 +44,7 @@ kotlin {
                 api(libs.okio)
                 compileOnly(libs.jsoup)
                 compileOnly(libs.koin.annotations)
+                compileOnly(libs.koin.core)
             }
         }
          val androidMain by getting {

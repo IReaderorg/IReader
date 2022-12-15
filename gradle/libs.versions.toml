@@ -33,7 +33,6 @@ darklaf = "3.0.2"
 ksp = "1.7.20-1.0.8"
 
 # Dependency Injection
-kotlinInject = "0.5.1"
 koinAnnotation = "1.0.3"
 koin = "3.2.2"
 koinAndroid = "3.3.0"
@@ -106,9 +105,11 @@ gson = "com.google.code.gson:gson:2.9.0"
 googleTranslator = "com.google.mlkit:translate:17.0.0"
 htmlUnit-android = "net.sourceforge.htmlunit:htmlunit-android:2.63.0-SNAPSHOT"
 
-
-
-
+voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
+voyager-bottomSheetnavigator = { module = "cafe.adriel.voyager:voyager-bottom-sheet-navigator", version.ref = "voyager" }
+voyager-tabNavigator = { module = "ca.gosyer:voyager-tab-navigator", version.ref = "voyager" }
+voyager-transitions = { module = "ca.gosyer:voyager-transitions", version.ref = "voyager" }
+voyager-koin = { module = "cafe.adriel.voyager:voyager-koin", version.ref = "voyager" }
 
 
 storage = { module = "com.anggrayudi:storage", version = "1.5.1" }
@@ -155,7 +156,7 @@ ireader-ktorOkhttp =   { module = "io.ktor:ktor-client-okhttp", version.ref = "k
 ireader-ktorAndroid = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 
 
-
+# Inject
 koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koinAnnotation" }
 koin-kspCompiler = { module = "io.insert-koin:koin-ksp-compiler", version.ref = "koinAnnotation" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndroid" }

@@ -19,8 +19,21 @@ android {
     }
 }
 kotlin {
-    android()
-    jvm("desktop")
+    android {
+        compilations {
+            all {
+                kotlinOptions.jvmTarget = ProjectConfig.androidJvmTarget.toString()
+            }
+        }
+    }
+    jvm("desktop") {
+        compilations {
+            all {
+                kotlinOptions.jvmTarget = ProjectConfig.desktopJvmTarget.toString()
+            }
+        }
+    }
+
 
     sourceSets {
          val commonMain by getting {
@@ -96,11 +109,12 @@ dependencies {
 
     setupKSP(libs.koin.kspCompiler)
     debugImplementation(composeLib.compose.uiTestManifest)
-    implementation(libs.epublib) {
-        exclude(group = "org.slf4j")
-        exclude(group = "xmlpull")
-        this.isChanging = false
-    }
+    implementation(files("libs/epublib-core-latest.jar"))
+//    {
+//        exclude(group = "org.slf4j")
+//        exclude(group = "xmlpull")
+//        this.isChanging = false
+//    }
 }
 
 
