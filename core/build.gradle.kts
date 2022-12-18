@@ -12,6 +12,15 @@ plugins {
 }
 android {
     namespace = "ireader.core"
+    compileSdk = ProjectConfig.compileSdk
+    defaultConfig {
+        minSdk = ProjectConfig.minSdk
+        targetSdk = ProjectConfig.targetSdk
+    }
+    compileOptions {
+        sourceCompatibility = ProjectConfig.androidJvmTarget
+        targetCompatibility = ProjectConfig.androidJvmTarget
+    }
 }
 kotlin {
     android {

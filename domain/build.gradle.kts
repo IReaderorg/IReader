@@ -11,6 +11,15 @@ plugins {
 
 android {
     namespace = "ireader.domain"
+    compileSdk = ProjectConfig.compileSdk
+    defaultConfig {
+        minSdk = ProjectConfig.minSdk
+        targetSdk = ProjectConfig.targetSdk
+    }
+    compileOptions {
+        sourceCompatibility = ProjectConfig.androidJvmTarget
+        targetCompatibility = ProjectConfig.androidJvmTarget
+    }
     androidComponents.onVariants { variant ->
         val name = variant.name
         sourceSets {

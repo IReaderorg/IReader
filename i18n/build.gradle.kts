@@ -34,6 +34,15 @@ kotlin {
 
 android {
     namespace = "ireader.i18n"
+    compileSdk = ProjectConfig.compileSdk
+    defaultConfig {
+        minSdk = ProjectConfig.minSdk
+        targetSdk = ProjectConfig.targetSdk
+    }
+    compileOptions {
+        sourceCompatibility = ProjectConfig.androidJvmTarget
+        targetCompatibility = ProjectConfig.androidJvmTarget
+    }
     sourceSets {
         named("main") {
             res.srcDir("src/commonMain/resources")

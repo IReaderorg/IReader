@@ -97,6 +97,15 @@ kotlin {
 
 android {
     namespace = "ireader.presentation"
+    compileSdk = ProjectConfig.compileSdk
+    defaultConfig {
+        minSdk = ProjectConfig.minSdk
+        targetSdk = ProjectConfig.targetSdk
+    }
+    compileOptions {
+        sourceCompatibility = ProjectConfig.androidJvmTarget
+        targetCompatibility = ProjectConfig.androidJvmTarget
+    }
     lint {
         baseline = file("lint-baseline.xml")
     }

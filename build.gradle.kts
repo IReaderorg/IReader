@@ -48,111 +48,24 @@ tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
     }
 }
 
-
 subprojects {
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        kotlinOptions.freeCompilerArgs += listOf(
-            "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",
-            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-            "-opt-in=kotlinx.coroutines.FlowPreview",
-            "-opt-in=kotlinx.coroutines.InternalCoroutinesApi",
-        )
-    }
-    plugins.withType<org.jetbrains.kotlin.gradle.plugin.KotlinMultiplatformPluginWrapper> {
-        configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> {
-            sourceSets.all {
-                languageSettings.optIn("org.mylibrary.OptInAnnotation")
-            }
-        }
-    }
-
-
-    tasks.withType<Test> {
-        useJUnitPlatform()
-    }
-    plugins.withType<com.android.build.gradle.BasePlugin> {
-        configure<com.android.build.gradle.BaseExtension>() {
-            compileSdkVersion(ProjectConfig.compileSdk)
-            defaultConfig {
-                minSdk = ProjectConfig.minSdk
-                targetSdk = ProjectConfig.targetSdk
-                versionCode = ProjectConfig.versionCode
-                versionName = ProjectConfig.versionName
-                ndk {
-                    version = ProjectConfig.ndk
-                }
-
-            }
-
-            compileOptions {
-                isCoreLibraryDesugaringEnabled = true
-                sourceCompatibility(ProjectConfig.androidJvmTarget)
-                targetCompatibility(ProjectConfig.androidJvmTarget)
-            }
-
-
-            sourceSets {
-                named("main") {
-                    val altManifest = file("src/androidMain/AndroidManifest.xml")
-                    if (altManifest.exists()) {
-                        manifest.srcFile(altManifest.path)
-                    }
-                }
-
-            }
-
-
-            dependencies {
-                add("coreLibraryDesugaring", libs.desugarJdkLibs)
-            }
-        }
-
-    }
     afterEvaluate {
         // Remove log pollution until Android support in KMP improves.
-        project.extensions.findByType<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension>()?.let { kmpExt ->
-            kmpExt.sourceSets.removeAll {
-                setOf(
-                    "androidAndroidTestRelease",
-                    "androidTestFixtures",
-                    "androidTestFixturesDebug",
-                    "androidTestFixturesRelease",
-                ).contains(it.name)
+        project.extensions.findByType<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension>()
+            ?.let { kmpExt ->
+                kmpExt.sourceSets.removeAll {
+                    setOf(
+                        "androidAndroidTestRelease",
+                        "androidTestFixtures",
+                        "androidTestFixturesDebug",
+                        "androidTestFixturesRelease",
+                    ).contains(it.name)
+                }
             }
-        }
     }
-
 }
 
 
 tasks.register("delete", Delete::class) {
     delete(rootProject.buildDir)
 }
-
-// Git is needed in your system PATH for these commands to work.
-// If it's not installed, you can return a random value as a workaround
-fun getCommitCount(): String {
-    return runCommand("git rev-list --count HEAD")
-    // return "1"
-}
-
-fun getGitSha(): String {
-    return runCommand("git rev-parse --short HEAD")
-    // return "1"
-}
-
-fun getBuildTime(): String {
-    val df = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
-    df.timeZone = java.util.TimeZone.getTimeZone("UTC")
-    return df.format(java.util.Date())
-}
-
-fun runCommand(command: String): String {
-    val byteOut = java.io.ByteArrayOutputStream()
-    project.exec {
-        commandLine = command.split(" ")
-        standardOutput = byteOut
-    }
-    return String(byteOut.toByteArray()).trim()
-}
-

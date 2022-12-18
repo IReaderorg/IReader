@@ -124,6 +124,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility(ProjectConfig.androidJvmTarget)
         targetCompatibility(ProjectConfig.androidJvmTarget)
     }
@@ -135,6 +136,7 @@ android {
 
 
 dependencies {
+    add("coreLibraryDesugaring", libs.desugarJdkLibs)
     implementation(androidx.emoji)
     implementation(androidx.appCompat)
     implementation(androidx.core)
