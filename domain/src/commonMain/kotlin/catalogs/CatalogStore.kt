@@ -55,7 +55,7 @@ class CatalogStore(
 
     init {
         scope.launch {
-            val loadedCatalogs = loader.loadAll().distinctBy { it.sourceId }
+            val loadedCatalogs = loader.loadAll().distinctBy { it.sourceId }.toSet().toList()
             val pinnedCatalogIds = pinnedCatalogsPreference.get()
             catalogs = loadedCatalogs.map { catalog ->
                 if (catalog.sourceId.toString() in pinnedCatalogIds) {

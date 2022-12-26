@@ -54,6 +54,7 @@ class AndroidCatalogLoader(
                 "Source used for testing"
             )
             bundled.add(testCatalog)
+            bundled.add(testCatalog)
         }
 
         val systemPkgs =
@@ -95,11 +96,11 @@ class AndroidCatalogLoader(
                     }
                 }
             } else emptyList()
-            val deferred = local + localCache + system
+            val deferred = (local + localCache + system)
             deferred.awaitAll()
-        }.filterNotNull().distinctBy { it.pkgName }
+        }.filterNotNull()
 
-        return bundled + installedCatalogs
+        return (bundled + installedCatalogs).distinctBy { it.sourceId }.toSet().toList()
     }
 
     /**
