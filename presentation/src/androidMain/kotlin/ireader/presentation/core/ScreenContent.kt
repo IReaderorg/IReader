@@ -178,9 +178,6 @@ fun ScreenContent() {
                                 .nestedScroll(scrollBehavior.nestedScrollConnection)
                                 .fillMaxSize(),
                         topBar = {
-                            val height = remember(topAppBarState.heightOffset) {
-                                if (topAppBarState.heightOffset == topAppBarState.heightOffsetLimit) 0 else (-100)
-                            }
                             if (navStackEntry != null) {
                                 AnimatedVisibility(
                                     visible = requestedHideTopBar,

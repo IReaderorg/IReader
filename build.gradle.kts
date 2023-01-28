@@ -1,16 +1,6 @@
 
 
 buildscript {
-    repositories {
-        mavenCentral()
-        google()
-        maven("https://plugins.gradle.org/m2/")
-        maven("https://oss.sonatype.org/content/repositories/snapshots/")
-        maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-        gradlePluginPortal()
-        maven(url = "https://jitpack.io")
-        maven(url = "https://github.com/psiegman/mvn-repo/raw/master/releases")
-    }
     dependencies {
         classpath(libs.gradle.tools)
         classpath(libs.gradle.google)

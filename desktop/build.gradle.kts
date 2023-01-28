@@ -1,5 +1,5 @@
 plugins {
-    id(libs.plugins.kotlin.jvm.get().pluginId)
+    id(kotlinx.plugins.kotlin.jvm.get().pluginId)
     id(libs.plugins.ksp.get().pluginId)
     id(libs.plugins.compose.get().pluginId)
     id(libs.plugins.kotlinter.get().pluginId)
