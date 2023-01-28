@@ -6,7 +6,7 @@ IReader is a free and open source applicaiton for Android.
 
 | Build | Support Server |
 |-------|---------|
-| [Latest Version](https://github.com/kazemcodes/IReader/releases/latest) | [Discord Server](https://discord.gg/HBU6zD8c5v) |
+| [Latest Version](https://github.com/IReaderorg/IReader/releases/latest) | [Discord Server](https://discord.gg/HBU6zD8c5v) |
 
 ## Release Page
 
