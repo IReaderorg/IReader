@@ -1,2 +1,0 @@
-
-package ireader.domain.models

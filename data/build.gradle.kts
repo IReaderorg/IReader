@@ -1,10 +1,66 @@
 plugins {
+    kotlin("multiplatform")
     id("com.android.library")
-    id("kotlin-android")
-    id("kotlin-parcelize")
     kotlin("plugin.serialization")
     id("com.squareup.sqldelight")
     id("com.google.devtools.ksp")
+    id("org.jetbrains.gradle.plugin.idea-ext")
+}
+
+kotlin {
+    android {
+        compilations {
+            all {
+                kotlinOptions.jvmTarget = ProjectConfig.androidJvmTarget.toString()
+            }
+        }
+    }
+    jvm("desktop") {
+        compilations {
+            all {
+                kotlinOptions.jvmTarget = ProjectConfig.desktopJvmTarget.toString()
+            }
+        }
+    }
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(project(Modules.coreApi))
+                implementation(project(Modules.domain))
+                implementation(project(Modules.commonResources))
+                implementation(kotlinx.serialization.json)
+                implementation(libs.sqldelight.runtime)
+                implementation(libs.sqldelight.coroutines)
+                implementation(libs.requerySqlite)
+            }
+        }
+        val androidMain by getting {
+            dependsOn(commonMain)
+            dependencies {
+                implementation(androidx.core)
+                implementation(kotlinx.stdlib)
+                implementation(libs.sqldelight.android)
+                compileOnly(libs.androidSqlite)
+            }
+        }
+
+        val desktopMain by getting {
+            kotlin.srcDir("./src/jvmMain/kotlin")
+            dependencies {
+                implementation(libs.sqldelight.jvm)
+            }
+        }
+
+    }
+
+}
+dependencies {
+
+    implementation(libs.sqldelight.android.paging)
+    setupKSP(libs.koin.kspCompiler)
+    testImplementation(test.bundles.common)
+    debugImplementation(libs.androidSqlite)
+    androidTestImplementation(test.bundles.common)
 }
 
 android {
@@ -50,62 +106,18 @@ android {
     }
 }
 
-dependencies {
 
-    implementation(project(Modules.coreApi))
-
-    implementation(project(Modules.domain))
-
-
-
-    implementation(project(Modules.commonResources))
-
-    implementation(androidx.core)
-    implementation(androidx.appCompat)
-    implementation(androidx.webkit)
-    implementation(androidx.browser)
-
-    implementation(kotlinx.serialization.json)
-    implementation(kotlinx.reflect)
-    implementation(kotlinx.datetime)
-    implementation(kotlinx.serialization.json)
-    implementation(composeLib.compose.activity)
-    implementation(composeLib.material3.core)
-
-    
-
-    implementation(libs.jsoup)
-    implementation(libs.bundles.simplestorage)
-
-
-    /** LifeCycle **/
-    implementation(androidx.lifecycle.runtime)
-    implementation(androidx.lifecycle.viewModel)
-
-    implementation(kotlinx.stdlib)
-
-
-    implementation(libs.okhttp.interceptor)
-
-    /** Coroutine **/
-    implementation(kotlinx.coroutines.core)
-    implementation(kotlinx.coroutines.android)
-
-
-    testImplementation(test.bundles.common)
-
-    implementation(libs.koin.android)
-
-    androidTestImplementation(test.bundles.common)
-
-
-    implementation(libs.sqldelight.android)
-    implementation(libs.sqldelight.coroutines)
-    implementation(libs.sqldelight.runtime)
-    implementation(libs.sqldelight.android.paging)
-    implementation(libs.requerySqlite)
-    implementation(libs.koin.annotations)
-    ksp(libs.koin.kspCompiler)
-    compileOnly(libs.androidSqlite)
-    debugImplementation(libs.androidSqlite)
+idea {
+    module {
+        (this as ExtensionAware).configure<org.jetbrains.gradle.ext.ModuleSettings> {
+            (this as ExtensionAware).configure<org.jetbrains.gradle.ext.PackagePrefixContainer> {
+                arrayOf(
+                    "src/commonMain/kotlin",
+                    "src/androidMain/kotlin",
+                    "src/desktopMain/kotlin",
+                    "src/jvmMain/kotlin"
+                ).forEach { put(it, "ireader.data") }
+            }
+        }
+    }
 }

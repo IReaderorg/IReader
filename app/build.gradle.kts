@@ -6,10 +6,10 @@ import java.util.*
 plugins {
     id("com.android.application")
     kotlin("android")
-    id("kotlin-parcelize")
     id("com.google.gms.google-services")
     kotlin("plugin.serialization")
     id("com.google.firebase.crashlytics")
+    id("org.jetbrains.compose")
     id("com.google.devtools.ksp")
 }
 
@@ -44,8 +44,6 @@ android {
         java.srcDirs("build/generated/ksp/main/kotlin")
     }
     buildFeatures {
-        compose = true
-
         // Disable some unused things
         aidl = false
         renderScript = false
@@ -65,9 +63,7 @@ android {
         checkReleaseBuilds = false
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = composeLib.versions.compiler.get()
-    }
+
     defaultConfig {
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
         buildConfigField("String", "COMMIT_SHA", "\"${getGitSha()}\"")
@@ -127,19 +123,29 @@ android {
             getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
         }
     }
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility(ProjectConfig.androidJvmTarget)
+        targetCompatibility(ProjectConfig.androidJvmTarget)
+    }
 
+    kotlinOptions {
+        jvmTarget = ProjectConfig.androidJvmTarget.toString()
+    }
 }
 
 
 dependencies {
+    add("coreLibraryDesugaring", libs.desugarJdkLibs)
     implementation(androidx.emoji)
     implementation(androidx.appCompat)
     implementation(androidx.core)
 
     implementation(androidx.media)
     implementation(composeLib.compose.activity)
-    implementation("androidx.core:core-splashscreen:1.0.0-rc01")
-    implementation(composeLib.material3.core)
+    implementation("androidx.core:core-splashscreen:1.0.0")
+    @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+    implementation(compose.material3)
 
     implementation(composeLib.compose.coil)
     implementation(composeLib.compose.googlFonts)
@@ -177,10 +183,10 @@ dependencies {
     implementation(libs.jsoup)
     testImplementation(libs.ktor.core.cio)
 
-    implementation(composeLib.compose.runtime)
-    implementation(composeLib.compose.compiler)
+    implementation(compose.runtime)
 
     testImplementation(test.bundles.common)
+    testImplementation(libs.koin.test)
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
    androidTestImplementation(test.bundles.common)
 

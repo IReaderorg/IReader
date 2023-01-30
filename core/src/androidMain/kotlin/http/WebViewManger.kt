@@ -8,7 +8,9 @@ import android.webkit.WebViewClient
 import kotlinx.coroutines.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.koin.core.annotation.Single
 
+@Single
 class WebViewManger(private val context: Context) {
 
     var isInit = false
@@ -22,7 +24,7 @@ class WebViewManger(private val context: Context) {
     var inProgress: Boolean = false
 
     val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-    fun init() {
+    fun init() : WebView {
         if (webView == null) {
             webView = WebView(context)
             webView?.setDefaultSettings()
@@ -64,6 +66,9 @@ class WebViewManger(private val context: Context) {
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
             isInit = true
+            return webView as WebView
+        } else {
+            return webView as WebView
         }
     }
 

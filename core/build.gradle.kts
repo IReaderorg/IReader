@@ -12,16 +12,35 @@ plugins {
 }
 android {
     namespace = "ireader.core"
+    compileSdk = ProjectConfig.compileSdk
+    defaultConfig {
+        minSdk = ProjectConfig.minSdk
+        targetSdk = ProjectConfig.targetSdk
+    }
+    compileOptions {
+        sourceCompatibility = ProjectConfig.androidJvmTarget
+        targetCompatibility = ProjectConfig.androidJvmTarget
+    }
 }
 kotlin {
     android {
         publishLibraryVariants("release")
+        compilations {
+            all {
+                kotlinOptions.jvmTarget = ProjectConfig.androidJvmTarget.toString()
+            }
+        }
     }
-    android()
-    jvm("desktop")
+    jvm("desktop") {
+        compilations {
+            all {
+                kotlinOptions.jvmTarget = ProjectConfig.desktopJvmTarget.toString()
+            }
+        }
+    }
 
     sourceSets {
-        named("commonMain") {
+         val commonMain by getting {
             dependencies {
                 api(kotlinx.coroutines.core)
                 api(kotlinx.stdlib)
@@ -34,9 +53,10 @@ kotlin {
                 api(libs.okio)
                 compileOnly(libs.jsoup)
                 compileOnly(libs.koin.annotations)
+                compileOnly(libs.koin.core)
             }
         }
-        named("androidMain") {
+         val androidMain by getting {
           ///  kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
                 implementation(androidx.core)
@@ -49,7 +69,7 @@ kotlin {
                 compileOnly(libs.koin.annotations)
             }
         }
-        named("desktopMain") {
+        val desktopMain by getting {
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
                 implementation(libs.quickjs.jvm)

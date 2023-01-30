@@ -19,12 +19,9 @@ kotlin {
                 compileOnly(compose.ui)
             }
         }
-        //the compose is not available in android module for ???
         val androidMain by getting {
             dependencies {
-                compileOnly(composeLib.compose.runtime)
-                compileOnly(composeLib.compose.ui)
-                compileOnly(composeLib.compose.compiler)
+
             }
         }
         val desktopMain by getting {
@@ -37,16 +34,19 @@ kotlin {
 
 android {
     namespace = "ireader.i18n"
+    compileSdk = ProjectConfig.compileSdk
+    defaultConfig {
+        minSdk = ProjectConfig.minSdk
+        targetSdk = ProjectConfig.targetSdk
+    }
+    compileOptions {
+        sourceCompatibility = ProjectConfig.androidJvmTarget
+        targetCompatibility = ProjectConfig.androidJvmTarget
+    }
     sourceSets {
         named("main") {
             res.srcDir("src/commonMain/resources")
         }
-    }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = composeLib.versions.compiler.get()
     }
     defaultConfig {
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")

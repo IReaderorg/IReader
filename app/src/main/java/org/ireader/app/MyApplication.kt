@@ -5,19 +5,12 @@ import android.os.Build
 import android.os.Looper
 import coil.ImageLoader
 import coil.ImageLoaderFactory
-import ireader.data.di.DataModule
 import ireader.domain.di.DomainModules
 import ireader.domain.di.DomainServices
 import ireader.domain.utils.WebViewUtil
 import ireader.presentation.core.di.uiModules
 import ireader.presentation.imageloader.coil.CoilLoaderFactory
-import org.ireader.app.di.AppModule
-import org.ireader.app.di.CatalogModule
-import org.ireader.app.di.DatabaseInject
-import org.ireader.app.di.LocalModule
-import org.ireader.app.di.PreferencesInject
-import org.ireader.app.di.RepositoryInject
-import org.ireader.app.di.UseCasesInject
+import org.ireader.app.di.*
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.workmanager.koin.workManagerFactory
@@ -38,7 +31,7 @@ class MyApplication : Application(), KoinComponent, ImageLoaderFactory {
             androidContext(this@MyApplication)
             androidLogger()
             modules(
-                DataModule().module,
+                DataModule,
                 CatalogModule().module,
                 DatabaseInject().module,
                 LocalModule().module,

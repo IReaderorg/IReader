@@ -1,14 +1,13 @@
 package org.ireader.app.di
 
 import android.content.Context
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import ireader.core.db.Transactions
-import ireader.core.http.WebViewCookieJar
+import ireader.core.prefs.PreferenceStore
 import ireader.domain.data.repository.*
 import ireader.domain.image.cache.CoverCache
-import ireader.domain.preferences.prefs.AppPreferences
-import ireader.domain.preferences.prefs.LibraryPreferences
-import ireader.domain.preferences.prefs.ReaderPreferences
-import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.preferences.prefs.*
 import ireader.domain.usecases.download.DownloadUseCases
 import ireader.domain.usecases.download.delete.DeleteAllSavedDownload
 import ireader.domain.usecases.download.delete.DeleteSavedDownload
@@ -54,7 +53,6 @@ class UseCasesInject {
 
         @Single
     fun provideRemoteUseCase(
-        webViewCookieJar: WebViewCookieJar
     ): RemoteUseCases {
         return RemoteUseCases(
             getBookDetail = GetBookDetail(),
@@ -147,9 +145,9 @@ class UseCasesInject {
 
         @Single
     fun providesLibraryScreenPrefUseCases(
-        appPreferences: AppPreferences,
-        libraryPreferences: LibraryPreferences,
-        categoryRepository: CategoryRepository
+            appPreferences: AppPreferences,
+            libraryPreferences: LibraryPreferences,
+            categoryRepository: CategoryRepository
     ): LibraryScreenPrefUseCases {
         return LibraryScreenPrefUseCases(
             libraryLayoutTypeUseCase = LibraryLayoutTypeUseCase(libraryPreferences, categoryRepository),
@@ -160,11 +158,12 @@ class UseCasesInject {
 
         @Single
     fun providesReaderPrefUseCases(
-        prefs: ReaderPreferences
+        prefs: ReaderPreferences,
+        androidUiPreferences: AndroidUiPreferences
     ): ReaderPrefUseCases {
         return ReaderPrefUseCases(
             autoScrollMode = AutoScrollMode(prefs),
-            backgroundColorUseCase = BackgroundColorUseCase(prefs),
+            backgroundColorUseCase = BackgroundColorUseCase(androidUiPreferences),
             brightnessStateUseCase = BrightnessStateUseCase(prefs),
             fontHeightUseCase = FontHeightUseCase(prefs),
             fontSizeStateUseCase = FontSizeStateUseCase(prefs),
@@ -173,9 +172,9 @@ class UseCasesInject {
             paragraphIndentUseCase = ParagraphIndentUseCase(prefs),
             scrollIndicatorUseCase = ScrollIndicatorUseCase(prefs),
             scrollModeUseCase = ScrollModeUseCase(prefs),
-            selectedFontStateUseCase = SelectedFontStateUseCase(prefs),
+            selectedFontStateUseCase = SelectedFontStateUseCase(prefs,androidUiPreferences),
             textAlignmentUseCase = TextAlignmentUseCase(prefs),
-            textColorUseCase = TextColorUseCase(prefs)
+            textColorUseCase = TextColorUseCase(androidUiPreferences)
         )
     }
 

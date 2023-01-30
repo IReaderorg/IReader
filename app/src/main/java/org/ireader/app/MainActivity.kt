@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
 
                     ) {
                     ScreenContent()
-                    GetPermissions(this,getSimpleStorage,uiPreferences)
+                    GetPermissions(uiPreferences)
                 }
             }
         }

@@ -32,6 +32,9 @@ data class Quality(val quality: String) {
         const val QUALITY_8K = 8000
     }
 }
+val json = Json {
+    ignoreUnknownKeys = true
+}
 
 @Serializable
 data class ImageUrl(val url: String) : PageComplete()
@@ -42,22 +45,16 @@ data class ImageBase64(val data: String) : PageComplete()
 @Serializable
 data class Text(val text: String) : PageComplete()
 
-@Serializable
-data class MovieUrl(val url: String) : PageComplete()
-
-//@Serializable
-//data class MovieUrl(
-//    val url: String,
-//    val name: String? = null,
-//    val quality: Int = Quality.UNSPECIFIC
-//) : PageComplete()
 
 @Serializable
-data class Subtitle(val url: String) : PageComplete()
+data class MovieUrl(
+    val url: String,
+) : PageComplete()
 
-//@Serializable
-//data class Subtitle(val url: String, val language: String? = null, val name: String? = null) :
-//    PageComplete()
+
+@Serializable
+data class Subtitle(val url: String, val language: String? = null, val name: String? = null) :
+    PageComplete()
 
 // creating a customized encoding and decoding because kotlin serialization may cause some problem in future.
 // Unlike tachiyomi, right now ireader is using saving files in app db
@@ -65,13 +62,11 @@ const val SEPARATOR = "##$$%%@@"
 const val EQUAL = "##$$@@"
 
 
-fun Page.encode(): String {
-    return Json.encodeToString(this)
-}
+
 
 fun String.decode(): List<Page> {
     return kotlin.runCatching {
-        Json.decodeFromString<List<Page>>(this)
+        json.decodeFromString<List<Page>>(this)
     }.getOrElse {
         this.split(SEPARATOR).mapNotNull { text ->
             val type = text.substringBefore(EQUAL)
@@ -91,5 +86,6 @@ fun String.decode(): List<Page> {
 }
 
 fun List<Page>.encode(): String {
-    return this.joinToString { it.encode() }
+    return  json.encodeToString<List<Page>>(this)
+
 }

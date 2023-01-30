@@ -4,12 +4,14 @@ import androidx.annotation.Keep
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.url
+import ireader.core.source.CatalogSource.Companion.TYPE_NOVEL
 import ireader.core.source.model.Command
 import ireader.core.source.model.CommandList
 import ireader.core.source.model.ImageUrl
 import ireader.core.source.model.Listing
 import ireader.core.source.model.PageComplete
 import ireader.core.source.model.PageUrl
+import java.security.MessageDigest
 
 /**
  * A simple implementation for sources from a website.
@@ -31,10 +33,23 @@ abstract class HttpSource(private val dependencies: ireader.core.source.Dependen
     open val versionId = 1
 
     /**
+     * Id of the source. By default it uses a generated id using the first 16 characters (64 bits)
+     * of the MD5 of the string: sourcename/language/versionId
+     * Note the generated id sets the sign bit to 0.
+     */
+    override val id : Long by lazy {
+        val key = "${name.lowercase()}/$lang/$versionId"
+        val bytes = MessageDigest.getInstance("MD5").digest(key.toByteArray())
+        (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }.reduce(Long::or) and Long.MAX_VALUE
+    }
+
+    /**
      * Default network client for doing requests.
      */
     open val client: HttpClient
         get() = dependencies.httpClients.default
+
+    open val type: Int = TYPE_NOVEL
 
     /**
      * Visible name of the source.

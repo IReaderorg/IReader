@@ -1,17 +1,15 @@
 package org.ireader.app.initiators
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import ireader.domain.preferences.prefs.UiPreferences
-import ireader.domain.usecases.files.GetSimpleStorage
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun GetPermissions(context: Context, getSimpleStorage: GetSimpleStorage, uiPreferences: UiPreferences) {
+fun GetPermissions(uiPreferences: UiPreferences) {
 
     val useLocalCache = remember {
         uiPreferences.savedLocalCatalogLocation().get()
