@@ -5,6 +5,7 @@ package ireader.presentation.ui.home.library
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewModelScope
@@ -24,7 +25,8 @@ fun LibraryController(
     controller: Controller,
     goToReader: (BookItem) -> Unit,
     goToDetail: (BookItem) -> Unit,
-    scaffoldPadding: PaddingValues
+    scaffoldPadding: PaddingValues,
+    sheetState: ModalBottomSheetState
     ) {
 
     LibraryScreen(
@@ -80,7 +82,7 @@ fun LibraryController(
         refreshUpdate = {
             vm.refreshUpdate()
         },
-        bottomSheetState = controller.sheetState,
+        bottomSheetState = sheetState,
         onClickChangeCategory = {
             vm.showDialog = true
         },

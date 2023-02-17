@@ -117,30 +117,6 @@ fun ScreenContent() {
         }
     }
 
-    IModalSheets(
-        bottomSheetState = modalBottomSheetState,
-        isEnable = shoeModalSheet,
-        sheetContent = {
-            if (navStackEntry != null) {
-                screenSpec?.BottomModalSheet(
-                    Controller(
-                        navController = navController,
-                        navBackStackEntry = navStackEntry,
-                        snackBarHostState = snackBarHostState,
-                        sheetState = modalBottomSheetState,
-                        drawerState = drawerState,
-                        requestHideNavigator = requestHideBottomNav,
-                        requestedHideSystemStatusBar = requestHideSystemStatusBar,
-                        requestHideSystemNavbar = requestHideSystemNavBar,
-                        requestedCustomSystemColor = requestedCustomColor,
-                        scrollBehavior = scrollBehavior,
-                        topScrollState = topAppBarState,
-
-                    )
-                )
-            }
-        }
-    ) {
         IModalDrawer(
             state = drawerState,
             sheetContent = {
@@ -150,7 +126,7 @@ fun ScreenContent() {
                             navController = navController,
                             navBackStackEntry = navStackEntry,
                             snackBarHostState = snackBarHostState,
-                            sheetState = modalBottomSheetState,
+
                             drawerState = drawerState,
                             requestHideNavigator = requestHideBottomNav,
                             requestedHideSystemStatusBar = requestHideSystemStatusBar,
@@ -186,7 +162,6 @@ fun ScreenContent() {
                                                 navController = navController,
                                                 navBackStackEntry = navStackEntry,
                                                 snackBarHostState = snackBarHostState,
-                                                sheetState = modalBottomSheetState,
                                                 drawerState = drawerState,
                                                 requestHideNavigator = requestHideBottomNav,
                                                 requestedHideSystemStatusBar = requestHideSystemStatusBar,
@@ -205,7 +180,6 @@ fun ScreenContent() {
                                             navController = navController,
                                             navBackStackEntry = navStackEntry,
                                             snackBarHostState = snackBarHostState,
-                                            sheetState = modalBottomSheetState,
                                             drawerState = drawerState,
                                             requestHideNavigator = requestHideBottomNav,
                                             requestedHideSystemStatusBar = requestHideSystemStatusBar,
@@ -301,7 +275,6 @@ fun ScreenContent() {
                                             navController = navController,
                                             navBackStackEntry = navBackStackEntry,
                                             snackBarHostState = snackBarHostState,
-                                            sheetState = modalBottomSheetState,
                                             drawerState = drawerState,
                                             requestHideNavigator = requestHideBottomNav,
                                             requestedHideSystemStatusBar = requestHideSystemStatusBar,
@@ -317,7 +290,6 @@ fun ScreenContent() {
                     }
                 }
             }
-        }
     }
 }
 
@@ -325,7 +297,7 @@ fun ScreenContent() {
 @Composable
 fun IModalSheets(
     modifier: Modifier = Modifier,
-    isEnable: Boolean = false,
+    isEnable: Boolean = true,
     bottomSheetState: ModalBottomSheetState,
     sheetContent: @Composable () -> Unit,
     content: @Composable () -> Unit

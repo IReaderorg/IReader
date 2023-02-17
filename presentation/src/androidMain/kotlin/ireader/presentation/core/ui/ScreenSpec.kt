@@ -58,20 +58,6 @@ sealed interface ScreenSpec {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun InitComposable(
-            controller: Controller
-    ) {
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun BottomModalSheet(
-        controller: Controller
-    ) {
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
     fun BottomAppBar(
         controller: Controller
     ) {

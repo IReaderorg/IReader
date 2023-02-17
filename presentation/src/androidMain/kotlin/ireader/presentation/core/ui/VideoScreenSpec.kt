@@ -3,10 +3,12 @@ package ireader.presentation.core.ui
 
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NamedNavArgument
 import ireader.domain.utils.extensions.*
+import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.core.ui.SnackBarListener
@@ -56,31 +58,30 @@ object VideoScreenSpec : ScreenSpec {
                 controller.requestedHideSystemStatusBar(false)
             }
         }
+        val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
         SnackBarListener(vm = vm, host = controller.snackBarHostState)
+        IModalSheets(bottomSheetState = sheetState,
+        sheetContent = {
+            val stateOfPlayer = state.playerState
+            if (stateOfPlayer != null) {
+                VideoPlayerBottomSheet(
+                    playerState = stateOfPlayer,
+                    mediaState = state,
+                    vm = vm,
+                    sheetState = sheetState
+                )
+            }
+        }) {
             VideoPresenter(
                 vm, onShowMenu = {
                     scope.launch {
-                        controller.sheetState.animateTo(ModalBottomSheetValue.Expanded)
+                        sheetState.animateTo(ModalBottomSheetValue.Expanded)
                     }
                 },
                 state = state,
                 player = state.player
             )
-
-    }
-    @Composable
-    override fun BottomModalSheet(controller: Controller) {
-        val vm: VideoScreenViewModel =
-            koinViewModel(viewModelStoreOwner = controller.navBackStackEntry)
-        val state = vm.mediaState
-        val stateOfPlayer = state.playerState
-        if (stateOfPlayer != null) {
-                VideoPlayerBottomSheet(
-                    playerState = stateOfPlayer,
-                    mediaState = state,
-                    controller = controller,
-                    vm = vm
-                )
         }
+
     }
 }

@@ -3,6 +3,8 @@ package ireader.presentation.core.ui
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +21,7 @@ import ireader.core.source.HttpSource
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
 import ireader.presentation.R
+import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.imageloader.coil.image_loaders.convertToOkHttpRequest
 import ireader.presentation.ui.component.Controller
@@ -58,7 +61,8 @@ object ExploreScreenSpec : ScreenSpec {
 
     @OptIn(
         ExperimentalAnimationApi::class,
-        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
+        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class,
+        ExperimentalComposeUiApi::class
     )
     @Composable
     override fun Content(controller: Controller) {
@@ -73,171 +77,168 @@ object ExploreScreenSpec : ScreenSpec {
         val headers = remember {
             mutableStateOf<Headers?>(null)
         }
-        IScaffold(
-            topBar = {
-                val focusManager = LocalFocusManager.current
+        val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+        IModalSheets(
+            sheetContent = {
                 val source = vm.source
                 val scope = rememberCoroutineScope()
-                BrowseTopAppBar(
-                    scrollBehavior = controller.scrollBehavior,
-                    state = vm,
-                    source = source,
-                    onValueChange = {
-                        vm.searchQuery = it
-                    },
-                    onSearch = {
-                        val query = vm.searchQuery
-                        if (query != null && query.isNotBlank()) {
-                            vm.searchQuery = query
-                            vm.loadItems(true)
-                        } else {
-                            vm.stateListing = source?.getListings()?.first()
-                            vm.loadItems()
-                            scope.launch {
-                                vm.showSnackBar(UiText.StringResource(R.string.query_must_not_be_empty))
-                            }
-                        }
-                        focusManager.clearFocus()
-                    },
-                    onSearchDisable = {
-                        vm.toggleSearchMode(false)
+                val focusManager = LocalFocusManager.current
+                val keyboardController = LocalSoftwareKeyboardController.current
+                FilterBottomSheet(
+                    onApply = {
+                        val mFilters = vm.modifiedFilter.filterNot { it.isDefaultValue() }
+                        vm.stateFilters = mFilters
                         vm.searchQuery = null
-                        vm.loadItems(true)
+                        vm.loadItems(reset = true)
+                        hideKeyboard(softwareKeyboardController = keyboardController, focusManager)
                     },
-                    onSearchEnable = {
-                        vm.toggleSearchMode(true)
+                    filters = vm.modifiedFilter,
+                    onReset = {
+                        vm.modifiedFilter = source?.getFilters() ?: emptyList()
                     },
-                    onWebView = {
-                        if (source is HttpSource) {
-                            controller.navController.navigate(
-                                WebViewScreenSpec.buildRoute(
-                                    url = (source).baseUrl,
-                                    sourceId = source.id,
-                                    chapterId = null,
-                                    bookId = null,
-                                    enableChaptersFetch = true,
-                                    enableBookFetch = true
-                                )
-                            )
-                        }
-                    },
-                    onPop = { controller.navController.popBackStack() },
-                    onLayoutTypeSelect = { layout ->
-                        vm.saveLayoutType(layout)
-                    },
-                    currentLayout = vm.layout
+                    onUpdate = {
+                        vm.modifiedFilter = it
+                    }
                 )
             }
-        ) {scaffoldPadding ->
-        if (source != null) {
-            ExploreScreen(
-                modifier = Modifier.padding(top = scaffoldPadding.calculateTopPadding()),
-                vm = vm,
-                onFilterClick = {
-                    vm.toggleFilterMode()
-                },
-                source = source,
-                getBooks = { query, listing, filters ->
-                    vm.searchQuery = query
-                    vm.stateListing = listing
-                    vm.stateFilters = filters
-                    vm.loadItems()
-                },
-                loadItems = { reset ->
-                    vm.loadItems(reset)
-                },
-                onBook = { book ->
+        , bottomSheetState = sheetState
+        ) {
 
-                    vm.viewModelScope.launch {
-                        val newBook = vm.booksState.books.getOrNull(book.column.toInt())
-                        vm.booksState.book = null
-                        val bookId = vm.insertUseCases.insertBook(newBook)
+            IScaffold(
+                topBar = {
+                    val focusManager = LocalFocusManager.current
+                    val source = vm.source
+                    val scope = rememberCoroutineScope()
+                    BrowseTopAppBar(
+                        scrollBehavior = controller.scrollBehavior,
+                        state = vm,
+                        source = source,
+                        onValueChange = {
+                            vm.searchQuery = it
+                        },
+                        onSearch = {
+                            val query = vm.searchQuery
+                            if (query != null && query.isNotBlank()) {
+                                vm.searchQuery = query
+                                vm.loadItems(true)
+                            } else {
+                                vm.stateListing = source?.getListings()?.first()
+                                vm.loadItems()
+                                scope.launch {
+                                    vm.showSnackBar(UiText.StringResource(R.string.query_must_not_be_empty))
+                                }
+                            }
+                            focusManager.clearFocus()
+                        },
+                        onSearchDisable = {
+                            vm.toggleSearchMode(false)
+                            vm.searchQuery = null
+                            vm.loadItems(true)
+                        },
+                        onSearchEnable = {
+                            vm.toggleSearchMode(true)
+                        },
+                        onWebView = {
+                            if (source is HttpSource) {
+                                controller.navController.navigate(
+                                    WebViewScreenSpec.buildRoute(
+                                        url = (source).baseUrl,
+                                        sourceId = source.id,
+                                        chapterId = null,
+                                        bookId = null,
+                                        enableChaptersFetch = true,
+                                        enableBookFetch = true
+                                    )
+                                )
+                            }
+                        },
+                        onPop = { controller.navController.popBackStack() },
+                        onLayoutTypeSelect = { layout ->
+                            vm.saveLayoutType(layout)
+                        },
+                        currentLayout = vm.layout
+                    )
+                }
+            ) { scaffoldPadding ->
+                if (source != null) {
+                    ExploreScreen(
+                        modifier = Modifier.padding(top = scaffoldPadding.calculateTopPadding()),
+                        vm = vm,
+                        onFilterClick = {
+                            vm.toggleFilterMode()
+                        },
+                        source = source,
+                        getBooks = { query, listing, filters ->
+                            vm.searchQuery = query
+                            vm.stateListing = listing
+                            vm.stateFilters = filters
+                            vm.loadItems()
+                        },
+                        loadItems = { reset ->
+                            vm.loadItems(reset)
+                        },
+                        onBook = { book ->
 
-                        if (bookId != 0L) {
-                            vm.booksState.replaceBook(newBook?.copy(id = bookId))
+                            vm.viewModelScope.launch {
+                                val newBook = vm.booksState.books.getOrNull(book.column.toInt())
+                                vm.booksState.book = null
+                                val bookId = vm.insertUseCases.insertBook(newBook)
+
+                                if (bookId != 0L) {
+                                    vm.booksState.replaceBook(newBook?.copy(id = bookId))
+                                    controller.navController.navigate(
+                                        route = BookDetailScreenSpec.buildRoute(
+                                            bookId = bookId
+                                        )
+                                    )
+                                }
+
+                            }
+
+                        },
+                        onAppbarWebView = {
                             controller.navController.navigate(
-                                route = BookDetailScreenSpec.buildRoute(
-                                    bookId = bookId
+                                WebViewScreenSpec.buildRoute(
+                                    url = it,
+                                    sourceId = source.id,
+                                    enableBookFetch = true,
+                                    enableChaptersFetch = true
                                 )
                             )
+                        },
+                        onPopBackStack = {
+                            controller.navController.popBackStack()
+                        },
+                        snackBarHostState = controller.snackBarHostState,
+                        modalState = sheetState,
+                        scaffoldPadding = scaffoldPadding,
+                        headers = {
+                            if (headers.value == null) {
+                                headers.value =
+                                    (source as? HttpSource)?.getCoverRequest(it)?.second?.build()
+                                        ?.convertToOkHttpRequest()?.headers
+                                headers.value
+                            } else headers.value
+                        },
+                        onLongClick = {
+                            vm.viewModelScope.launchIO {
+                                vm.addToFavorite(it.toBookItem()) { book ->
+                                    vm.booksState.replaceBook(book)
+                                }
+                            }
                         }
-
-                    }
-
-                },
-                onAppbarWebView = {
-                    controller.navController.navigate(
-                        WebViewScreenSpec.buildRoute(
-                            url = it,
-                            sourceId = source.id,
-                            enableBookFetch = true,
-                            enableChaptersFetch = true
-                        )
                     )
-                },
-                onPopBackStack = {
-                    controller.navController.popBackStack()
-                },
-                snackBarHostState = controller.snackBarHostState,
-                modalState = controller.sheetState,
-                scaffoldPadding = scaffoldPadding,
-                headers = {
-                    if (headers.value == null) {
-                        headers.value =
-                            (source as? HttpSource)?.getCoverRequest(it)?.second?.build()
-                                ?.convertToOkHttpRequest()?.headers
-                        headers.value
-                    } else headers.value
-                },
-                onLongClick = {
-                    vm.viewModelScope.launchIO {
-                        vm.addToFavorite(it.toBookItem()) { book ->
-                            vm.booksState.replaceBook(book)
+                } else {
+                    EmptyScreenComposable(
+                        R.string.source_not_available,
+                        onPopBackStack = {
+                            controller.navController.popBackStack()
                         }
-                    }
+                    )
                 }
-            )
-        } else {
-            EmptyScreenComposable(
-                R.string.source_not_available,
-                onPopBackStack = {
-                    controller.navController.popBackStack()
-                }
-            )
-        }
 
-        }
-    }
-
-    @OptIn(ExperimentalComposeUiApi::class)
-    @Composable
-    override fun BottomModalSheet(
-        controller: Controller
-    ) {
-        val vm: ExploreViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
-            org.koin.core.parameter.parametersOf(
-                ExploreViewModel.createParam(controller)
-            )
-        })
-        val source = vm.source
-        val scope = rememberCoroutineScope()
-        val focusManager = LocalFocusManager.current
-        val keyboardController = LocalSoftwareKeyboardController.current
-        FilterBottomSheet(
-            onApply = {
-                val mFilters = vm.modifiedFilter.filterNot { it.isDefaultValue() }
-                vm.stateFilters = mFilters
-                vm.searchQuery = null
-                vm.loadItems(reset = true)
-                hideKeyboard(softwareKeyboardController = keyboardController, focusManager)
-            },
-            filters = vm.modifiedFilter,
-            onReset = {
-                vm.modifiedFilter = source?.getFilters() ?: emptyList()
-            },
-            onUpdate = {
-                vm.modifiedFilter = it
             }
-        )
+        }
+
     }
 }

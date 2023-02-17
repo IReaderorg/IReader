@@ -4,6 +4,8 @@ import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +26,7 @@ import ireader.core.log.Log
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.models.prefs.readerThemes
 import ireader.presentation.R
+import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.ui.component.*
 import ireader.presentation.ui.component.components.Build
@@ -91,19 +94,106 @@ object TTSScreenSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: TTSViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
-            org.koin.core.parameter.parametersOf(
-                TTSViewModel.createParam(controller)
-            )
-        })
+        val vm: TTSViewModel =
+            getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
+                org.koin.core.parameter.parametersOf(
+                    TTSViewModel.createParam(controller)
+                )
+            })
         val context = LocalContext.current
         val lazyState = rememberLazyListState()
-        DisposableEffect(key1 = true ) {
+        DisposableEffect(key1 = true) {
             vm.initMedia(context)
             onDispose {
                 vm.browser?.disconnect()
             }
         }
+        val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+        IModalSheets(
+            sheetContent = {
+                LaunchedEffect(key1 = sheetState.hashCode()) {
+                    sheetState.hide()
+                }
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    ChipChoicePreference(
+                        preference = vm.voice,
+                        choices = vm.uiVoices.associate { voice ->
+                            return@associate voice to voice.localDisplayName
+                        },
+                        title = stringResource(id = R.string.voices),
+                        onFailToFindElement = stringResource(id = R.string.system_default)
+                    )
+                    ChipChoicePreference(
+                        preference = vm.language,
+                        choices = vm.languages.associate { language ->
+                            return@associate language.displayName to language.displayName
+                        },
+                        title = stringResource(id = R.string.languages),
+                        onFailToFindElement = stringResource(id = R.string.system_default)
+                    )
+                    ThemePreference(onBackgroundChange = {
+                        vm.theme.value = it
+                    }, themes = readerThemes, selected = {
+                        vm.theme.value == it
+                    })
+                    SwitchPreference(
+                        preference = vm.isTtsTrackerEnable,
+                        title = stringResource(id = R.string.tracker)
+                    )
+                    SwitchPreference(
+                        preference = vm.autoNext,
+                        title = stringResource(id = R.string.auto_next_chapter)
+                    )
+                    SliderPreference(
+                        title = stringResource(R.string.speech_rate),
+                        preferenceAsFloat = vm.speechRate,
+                        valueRange = .5F..3F,
+                        trailing = vm.speechRate.value.toBigDecimal().setScale(1, RoundingMode.FLOOR)
+                            .toString()
+                    )
+                    SliderPreference(
+                        title = stringResource(R.string.pitch),
+                        preferenceAsFloat = vm.speechPitch,
+                        valueRange = .5F..2.1F,
+                        trailing = vm.speechPitch.value.toBigDecimal().setScale(1, RoundingMode.FLOOR)
+                            .toString()
+                    )
+                    SwitchPreference(
+                        preference = vm.sleepModeUi,
+                        title = stringResource(id = R.string.enable_sleep_timer)
+                    )
+                    SliderPreference(
+                        title = stringResource(R.string.sleep),
+                        preferenceAsLong = vm.sleepTimeUi,
+                        valueRange = 0F..60F,
+                        trailing = "${vm.sleepTimeUi.value.toInt()} M",
+                        isEnable = vm.sleepModeUi.value
+                    )
+                    Components.Chip(
+                        preference = listOf(
+                            stringResource(id = R.string.top_left),
+                            stringResource(id = R.string.bottom_left),
+                            stringResource(id = R.string.hide),
+                        ),
+                        title = stringResource(id = R.string.alignment),
+                        onValueChange = {
+                            when (it) {
+                                0 -> vm.ttsIconAlignments.value = PreferenceValues.PreferenceAlignment.TopLeft
+                                1 -> vm.ttsIconAlignments.value = PreferenceValues.PreferenceAlignment.BottomLeft
+                                2 -> vm.ttsIconAlignments.value = PreferenceValues.PreferenceAlignment.Hide
+                            }
+                        },
+                        selected = vm.ttsIconAlignments.value.ordinal
+                    ).Build()
+                }
+            },
+            bottomSheetState = sheetState,
+        ) {
         IScaffold(
             topBar = {
                 val scope = rememberCoroutineScope()
@@ -115,7 +205,7 @@ object TTSScreenSpec : ScreenSpec {
                         scrollBehavior = controller.scrollBehavior,
                         onSetting = {
                             scope.launch {
-                                controller.sheetState.show()
+                                sheetState.show()
                             }
                         },
                         onContent = {
@@ -130,7 +220,7 @@ object TTSScreenSpec : ScreenSpec {
                     )
                 }
             }
-        ) {scaffoldPadding ->
+        ) { scaffoldPadding ->
             TTSScreen(
                 modifier = Modifier,
                 vm = vm,
@@ -142,7 +232,7 @@ object TTSScreenSpec : ScreenSpec {
                     controller.navController.popBackStack()
                 },
                 lazyState = lazyState,
-                bottomSheetState = controller.sheetState,
+                bottomSheetState = sheetState,
                 drawerState = controller.drawerState,
                 paddingValues = scaffoldPadding,
                 onPlay = {
@@ -151,6 +241,7 @@ object TTSScreenSpec : ScreenSpec {
             )
 
         }
+    }
 
         LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph) {
             try {
@@ -283,96 +374,4 @@ object TTSScreenSpec : ScreenSpec {
     }
 
 
-    @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
-    @Composable
-    override fun BottomModalSheet(
-        controller: Controller
-    ) {
-        val vm: TTSViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
-            org.koin.core.parameter.parametersOf(
-                TTSViewModel.createParam(controller)
-            )
-        })
-
-        LaunchedEffect(key1 = controller.sheetState.hashCode()) {
-            controller.sheetState.hide()
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            ChipChoicePreference(
-                preference = vm.voice,
-                choices = vm.uiVoices.associate { voice ->
-                    return@associate voice to voice.localDisplayName
-                },
-                title = stringResource(id = R.string.voices),
-                onFailToFindElement = stringResource(id = R.string.system_default)
-            )
-            ChipChoicePreference(
-                preference = vm.language,
-                choices = vm.languages.associate { language ->
-                    return@associate language.displayName to language.displayName
-                },
-                title = stringResource(id = R.string.languages),
-                onFailToFindElement = stringResource(id = R.string.system_default)
-            )
-            ThemePreference(onBackgroundChange = {
-                vm.theme.value = it
-            }, themes = readerThemes, selected = {
-                vm.theme.value == it
-            })
-            SwitchPreference(
-                preference = vm.isTtsTrackerEnable,
-                title = stringResource(id = R.string.tracker)
-            )
-            SwitchPreference(
-                preference = vm.autoNext,
-                title = stringResource(id = R.string.auto_next_chapter)
-            )
-            SliderPreference(
-                title = stringResource(R.string.speech_rate),
-                preferenceAsFloat = vm.speechRate,
-                valueRange = .5F..3F,
-                trailing = vm.speechRate.value.toBigDecimal().setScale(1, RoundingMode.FLOOR)
-                    .toString()
-            )
-            SliderPreference(
-                title = stringResource(R.string.pitch),
-                preferenceAsFloat = vm.speechPitch,
-                valueRange = .5F..2.1F,
-                trailing = vm.speechPitch.value.toBigDecimal().setScale(1, RoundingMode.FLOOR)
-                    .toString()
-            )
-            SwitchPreference(
-                preference = vm.sleepModeUi,
-                title = stringResource(id = R.string.enable_sleep_timer)
-            )
-            SliderPreference(
-                title = stringResource(R.string.sleep),
-                preferenceAsLong = vm.sleepTimeUi,
-                valueRange = 0F..60F,
-                trailing = "${vm.sleepTimeUi.value.toInt()} M",
-                isEnable = vm.sleepModeUi.value
-            )
-            Components.Chip(
-                preference = listOf(
-                    stringResource(id = R.string.top_left),
-                    stringResource(id = R.string.bottom_left),
-                    stringResource(id = R.string.hide),
-                ),
-                title = stringResource(id = R.string.alignment),
-                onValueChange = {
-                    when (it) {
-                        0 -> vm.ttsIconAlignments.value = PreferenceValues.PreferenceAlignment.TopLeft
-                        1 -> vm.ttsIconAlignments.value = PreferenceValues.PreferenceAlignment.BottomLeft
-                        2 -> vm.ttsIconAlignments.value = PreferenceValues.PreferenceAlignment.Hide
-                    }
-                },
-                selected = vm.ttsIconAlignments.value.ordinal
-            ).Build()
-        }
-    }
 }

@@ -6,7 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -31,6 +31,7 @@ import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.UiText
 import ireader.presentation.R
+import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.ui.book.BookDetailScreen
 import ireader.presentation.ui.book.BookDetailTopAppBar
@@ -65,86 +66,19 @@ object BookDetailScreenSpec : ScreenSpec {
             NavigationArgs.sourceId
         }
     )
-
-    @OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
-    @ExperimentalMaterial3Api
-    @Composable
-    override fun BottomModalSheet(
-        controller: Controller
-    ) {
-        val vm: BookDetailViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
-            org.koin.core.parameter.parametersOf(
-                BookDetailViewModel.createParam(controller)
-            )
-        })
-        val detailState = vm.state
-        val book = vm.booksState.book
-        val catalog = vm.catalogSource
-
-        detailState.source.let { source ->
-            if (vm.chapterMode) {
-                val pagerState = rememberPagerState()
-                ChapterScreenBottomTabComposable(
-                    pagerState = pagerState,
-                    filters = vm.filters.value,
-                    toggleFilter = {
-                        vm.toggleFilter(it.type)
-                    },
-                    onSortSelected = {
-                        vm.toggleSort(it.type)
-                    },
-                    sortType = vm.sorting.value,
-                    isSortDesc = vm.isAsc,
-                    onLayoutSelected = { layout ->
-                        vm.layout = layout
-                    },
-                    layoutType = vm.layout,
-                    vm = vm
-                )
-            } else {
-                if (source is ireader.core.source.CatalogSource) {
-                    ChapterCommandBottomSheet(
-                        onFetch = {
-                            source.let { source ->
-                                vm.viewModelIOCoroutine {
-                                    if (book != null) {
-                                        vm.getRemoteChapterDetail(
-                                            book,
-                                            catalog,
-                                            vm.modifiedCommands.filter { !it.isDefaultValue() }
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                        onReset = {
-                            source.let { source ->
-                                vm.modifiedCommands = source.getCommands()
-                            }
-                        },
-                        onUpdate = {
-                            vm.modifiedCommands = it
-                        },
-                        detailState.modifiedCommands
-                    )
-                }
-            }
-
-        }
-    }
-
     @OptIn(
-        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
+        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class, ExperimentalPagerApi::class
     )
     @Composable
     override fun Content(
         controller: Controller
     ) {
-        val vm: BookDetailViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
-            org.koin.core.parameter.parametersOf(
-                BookDetailViewModel.createParam(controller)
-            )
-        })
+        val vm: BookDetailViewModel =
+            getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
+                org.koin.core.parameter.parametersOf(
+                    BookDetailViewModel.createParam(controller)
+                )
+            })
         SnackBarListener(vm = vm, host = controller.snackBarHostState)
         val state = vm
         val book = state.booksState.book
@@ -153,6 +87,7 @@ object BookDetailScreenSpec : ScreenSpec {
         val scope = rememberCoroutineScope()
         val chapters = vm.getChapters(book?.id)
         val scrollState = rememberLazyListState();
+        val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
 
         DisposableEffect(key1 = true) {
             controller.requestedHideSystemStatusBar(true)
@@ -165,6 +100,65 @@ object BookDetailScreenSpec : ScreenSpec {
             controller.requestedHideSystemStatusBar(!vm.hasSelection)
         }
 
+        IModalSheets(
+            sheetContent = {
+                val detailState = vm.state
+                val book = vm.booksState.book
+                val catalog = vm.catalogSource
+
+                detailState.source.let { source ->
+                    if (vm.chapterMode) {
+                        val pagerState = rememberPagerState()
+                        ChapterScreenBottomTabComposable(
+                            pagerState = pagerState,
+                            filters = vm.filters.value,
+                            toggleFilter = {
+                                vm.toggleFilter(it.type)
+                            },
+                            onSortSelected = {
+                                vm.toggleSort(it.type)
+                            },
+                            sortType = vm.sorting.value,
+                            isSortDesc = vm.isAsc,
+                            onLayoutSelected = { layout ->
+                                vm.layout = layout
+                            },
+                            layoutType = vm.layout,
+                            vm = vm
+                        )
+                    } else {
+                        if (source is ireader.core.source.CatalogSource) {
+                            ChapterCommandBottomSheet(
+                                onFetch = {
+                                    source.let { source ->
+                                        vm.viewModelIOCoroutine {
+                                            if (book != null) {
+                                                vm.getRemoteChapterDetail(
+                                                    book,
+                                                    catalog,
+                                                    vm.modifiedCommands.filter { !it.isDefaultValue() }
+                                                )
+                                            }
+                                        }
+                                    }
+                                },
+                                onReset = {
+                                    source.let { source ->
+                                        vm.modifiedCommands = source.getCommands()
+                                    }
+                                },
+                                onUpdate = {
+                                    vm.modifiedCommands = it
+                                },
+                                detailState.modifiedCommands
+                            )
+                        }
+                    }
+
+                }
+            },
+            bottomSheetState = sheetState
+        ) {
         IScaffold(
             topBar = {
                 val scope = rememberCoroutineScope()
@@ -176,7 +170,7 @@ object BookDetailScreenSpec : ScreenSpec {
                 val decay = rememberSplineBasedDecay<Float>()
                 val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(state)
 
-                DisposableEffect(key1 = true ) {
+                DisposableEffect(key1 = true) {
                     controller.setScrollBehavior(scrollBehavior)
                     onDispose {
                         val defaultBehavior = controller.topScrollState
@@ -218,7 +212,7 @@ object BookDetailScreenSpec : ScreenSpec {
                     source = vm.source,
                     onCommand = {
                         scope.launch {
-                            controller.sheetState.show()
+                            sheetState.show()
                         }
                     },
                     onShare = {
@@ -270,7 +264,7 @@ object BookDetailScreenSpec : ScreenSpec {
                     }
                 )
             }
-        ) {scaffoldPadding ->
+        ) { scaffoldPadding ->
             BookDetailScreen(
                 modifier = Modifier,
                 onSummaryExpand = {
@@ -290,14 +284,14 @@ object BookDetailScreenSpec : ScreenSpec {
                     }
                 },
                 snackBarHostState = controller.snackBarHostState,
-                modalBottomSheetState = controller.sheetState,
+                modalBottomSheetState = sheetState,
                 isSummaryExpanded = vm.expandedSummary,
                 source = vm.source,
                 appbarPadding = scaffoldPadding.calculateTopPadding(),
                 onItemClick = { chapter ->
                     if (vm.selection.isEmpty()) {
                         if (book != null) {
-                            when(chapter.type) {
+                            when (chapter.type) {
                                 ChapterInfo.MOVIE -> {
                                     controller.navController.navigate(
                                         VideoScreenSpec.buildRoute(
@@ -367,7 +361,7 @@ object BookDetailScreenSpec : ScreenSpec {
                 onSortClick = {
                     scope.launch {
                         vm.chapterMode = true
-                        controller.sheetState.show()
+                        sheetState.show()
                     }
                 },
                 chapters = chapters,
@@ -406,7 +400,7 @@ object BookDetailScreenSpec : ScreenSpec {
 
             )
         }
-
+    }
     }
 
 }

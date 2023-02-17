@@ -16,7 +16,6 @@ data class Controller @OptIn(
     val navController: NavController,
     val navBackStackEntry: NavBackStackEntry,
     val snackBarHostState: SnackbarHostState,
-    val sheetState: ModalBottomSheetState,
     val drawerState: DrawerState,
     val requestHideNavigator: (Boolean) -> Unit = {},
     val requestHideSystemNavbar: (Boolean) -> Unit = {},
