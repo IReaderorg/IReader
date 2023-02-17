@@ -16,6 +16,7 @@ import ireader.domain.models.entities.ExtensionSource
 import ireader.i18n.UiText
 import ireader.presentation.R
 import ireader.presentation.ui.component.Controller
+import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.CaptionTextComposable
@@ -34,30 +35,6 @@ object RepositoryAddScreenSpec : ScreenSpec {
 
     )
 
-    @ExperimentalMaterial3Api
-    @OptIn(ExperimentalMaterialApi::class)
-    @Composable
-    override fun TopBar(
-        controller: Controller
-    ) {
-        val vm : SourceRepositoryViewModel =  getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
-        Toolbar(
-            title = {
-                MidSizeTextComposable(text = stringResource(R.string.repository_adding_a_new))
-            },
-            scrollBehavior = controller.scrollBehavior,
-                actions = {
-                    AppIconButton(
-                            imageVector = Icons.Default.ContentPasteSearch,
-                            onClick = {
-                                vm.showAutomaticSourceDialog.value = true
-                            }
-
-                    )
-                }
-        )
-    }
-
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content(
@@ -70,9 +47,28 @@ object RepositoryAddScreenSpec : ScreenSpec {
         val vm : SourceRepositoryViewModel =  getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         SnackBarListener(vm = vm, host = controller.snackBarHostState)
         val showDialog = vm.showAutomaticSourceDialog
-        AddingRepositoryScreen(controller.scaffoldPadding, onSave = {
-            scope.launch {
-                vm.catalogSourceRepository.insert(ExtensionSource(
+        IScaffold(
+            topBar = {
+                    Toolbar(
+                        title = {
+                            MidSizeTextComposable(text = stringResource(R.string.repository_adding_a_new))
+                        },
+                        scrollBehavior = controller.scrollBehavior,
+                        actions = {
+                            AppIconButton(
+                                imageVector = Icons.Default.ContentPasteSearch,
+                                onClick = {
+                                    vm.showAutomaticSourceDialog.value = true
+                                }
+
+                            )
+                        }
+                    )
+            }
+        ) {scaffoldPadding ->
+            AddingRepositoryScreen(scaffoldPadding, onSave = {
+                scope.launch {
+                    vm.catalogSourceRepository.insert(ExtensionSource(
                         name = it.name,
                         key = it.key,
                         owner = it.owner,
@@ -80,30 +76,30 @@ object RepositoryAddScreenSpec : ScreenSpec {
                         username = it.username,
                         password = it.password,
                         id = 0,
-                ))
-            }
-            controller.navController.popBackStack()
-        }
-        )
-        if (showDialog.value) {
-            androidx.compose.material3.AlertDialog(onDismissRequest = { showDialog.value = false}, confirmButton = {
-                TextButton(onClick = {
-                    vm.viewModelScope.launch {
-                        try {
-                            vm.catalogSourceRepository.insert(vm.parseUrl(text))
-
-                        }catch (e:Exception) {
-                            vm.showSnackBar(UiText.StringResource(R.string.url_is_invalid))
-                        }
-                    }
-                    showDialog.value = false
-                }) {
-                    MidSizeTextComposable(text = stringResource(id = R.string.add))
+                    ))
                 }
-            }, title = {
-                MidSizeTextComposable(text = stringResource(id = R.string.add_as_new))
-            }, text = {
-                androidx.compose.material3.OutlinedTextField(
+                controller.navController.popBackStack()
+            }
+            )
+            if (showDialog.value) {
+                androidx.compose.material3.AlertDialog(onDismissRequest = { showDialog.value = false}, confirmButton = {
+                    TextButton(onClick = {
+                        vm.viewModelScope.launch {
+                            try {
+                                vm.catalogSourceRepository.insert(vm.parseUrl(text))
+
+                            }catch (e:Exception) {
+                                vm.showSnackBar(UiText.StringResource(R.string.url_is_invalid))
+                            }
+                        }
+                        showDialog.value = false
+                    }) {
+                        MidSizeTextComposable(text = stringResource(id = R.string.add))
+                    }
+                }, title = {
+                    MidSizeTextComposable(text = stringResource(id = R.string.add_as_new))
+                }, text = {
+                    androidx.compose.material3.OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),
                         value = text,
                         onValueChange = {
@@ -115,8 +111,10 @@ object RepositoryAddScreenSpec : ScreenSpec {
                         maxLines = 5,
                         singleLine = true,
                         textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                )
-            },)
+                    )
+                },)
+            }
         }
+
     }
 }

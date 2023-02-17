@@ -1,5 +1,6 @@
 package ireader.presentation.core.ui
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
@@ -8,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 
 import androidx.navigation.NamedNavArgument
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -20,6 +22,7 @@ import ireader.presentation.ui.component.Controller
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.core.ui.util.NavigationArgs.showModalSheet
 import ireader.presentation.R
+import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.home.library.LibraryController
 import org.koin.androidx.compose.getViewModel
 
@@ -59,34 +62,9 @@ object LibraryScreenSpec : BottomNavScreenSpec {
             },
             layoutType = vm.layout,
             vm = vm,
-            scaffoldPadding = controller.scaffoldPadding
+            scaffoldPadding = PaddingValues(0.dp)
         )
     }
-
-    @Composable
-    override fun TopBar(
-        controller: Controller
-    ) {
-        val vm: LibraryViewModel  = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
-        LibraryScreenTopBar(
-            state = vm,
-            bottomSheetState = controller.sheetState,
-            refreshUpdate = {
-                vm.refreshUpdate()
-            },
-            onClearSelection = {
-                vm.unselectAll()
-            },
-            onClickInvertSelection = {
-                vm.flipAllInCurrentCategory()
-            },
-            onClickSelectAll = {
-                vm.selectAllInCurrentCategory()
-            },
-            scrollBehavior = controller.scrollBehavior
-        )
-    }
-
     @Composable
     override fun Content(
         controller: Controller
@@ -96,6 +74,28 @@ object LibraryScreenSpec : BottomNavScreenSpec {
         LaunchedEffect(key1 = vm.selectionMode) {
             controller.requestHideNavigator(vm.selectionMode)
         }
+
+        IScaffold(
+            topBar = {
+                LibraryScreenTopBar(
+                    state = vm,
+                    bottomSheetState = controller.sheetState,
+                    refreshUpdate = {
+                        vm.refreshUpdate()
+                    },
+                    onClearSelection = {
+                        vm.unselectAll()
+                    },
+                    onClickInvertSelection = {
+                        vm.flipAllInCurrentCategory()
+                    },
+                    onClickSelectAll = {
+                        vm.selectAllInCurrentCategory()
+                    },
+                    scrollBehavior = controller.scrollBehavior
+                )
+            }
+        ) { scaffoldPadding ->
 
         LibraryController(
             modifier = Modifier,
@@ -115,7 +115,9 @@ object LibraryScreenSpec : BottomNavScreenSpec {
                         bookId = book.id
                     )
                 )
-            }
+            },
+            scaffoldPadding = scaffoldPadding
         )
+        }
     }
 }

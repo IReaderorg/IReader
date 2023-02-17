@@ -7,6 +7,7 @@ import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
 import ireader.domain.models.entities.toSavedDownload
 import ireader.presentation.ui.component.Controller
+import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.settings.downloader.DownloaderScreen
 import ireader.presentation.ui.settings.downloader.DownloaderTopAppBar
 import ireader.presentation.ui.settings.downloader.DownloaderViewModel
@@ -22,52 +23,53 @@ object DownloaderScreenSpec : ScreenSpec {
         }
     )
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content(
         controller: Controller
     ) {
         val vm: DownloaderViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
-        DownloaderScreen(
-            onDownloadItem = { item ->
-                controller.navController.navigate(
-                    BookDetailScreenSpec.buildRoute(
-                        bookId = item.bookId
+
+        IScaffold(
+            topBar = {
+                DownloaderTopAppBar(
+                    onPopBackStack = {
+                        controller.navController.popBackStack()
+                    },
+                    onCancelAll = {
+                        vm.deleteSelectedDownloads(vm.downloads.map { it.toSavedDownload() })
+                    },
+                    onMenuIcon = {
+                        vm.toggleExpandMenu(enable = true)
+                    },
+                    onDeleteAllDownload = {
+                        vm.deleteAllDownloads()
+                    },
+                    state = vm,
+                    onDelete = {
+                        vm.deleteSelectedDownloads(
+                            vm.downloads.filter { it.chapterId in vm.selection }
+                                .map { it.toSavedDownload() }
+                        )
+                        vm.selection.clear()
+                    },
+                    scrollBehavior = controller.scrollBehavior
+                )
+            }
+        ) { padding ->
+            DownloaderScreen(
+                onDownloadItem = { item ->
+                    controller.navController.navigate(
+                        BookDetailScreenSpec.buildRoute(
+                            bookId = item.bookId
+                        )
                     )
-                )
-            },
-            vm = vm,
-            snackBarHostState = controller.snackBarHostState,
-            paddingValues = controller.scaffoldPadding
-        )
-    }
-    @ExperimentalMaterial3Api
-    @Composable
-    override fun TopBar(
-        controller: Controller
-    ) {
-        val vm: DownloaderViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
-        DownloaderTopAppBar(
-            onPopBackStack = {
-                controller.navController.popBackStack()
-            },
-            onCancelAll = {
-                vm.deleteSelectedDownloads(vm.downloads.map { it.toSavedDownload() })
-            },
-            onMenuIcon = {
-                vm.toggleExpandMenu(enable = true)
-            },
-            onDeleteAllDownload = {
-                vm.deleteAllDownloads()
-            },
-            state = vm,
-            onDelete = {
-                vm.deleteSelectedDownloads(
-                    vm.downloads.filter { it.chapterId in vm.selection }
-                        .map { it.toSavedDownload() }
-                )
-                vm.selection.clear()
-            },
-            scrollBehavior = controller.scrollBehavior
-        )
+                },
+                vm = vm,
+                snackBarHostState = controller.snackBarHostState,
+                paddingValues = padding
+            )
+        }
+
     }
 }

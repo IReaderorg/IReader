@@ -12,6 +12,7 @@ import ireader.presentation.ui.settings.about.AboutSettingScreen
 import ireader.domain.utils.extensions.toDateTimestampString
 import ireader.i18n.BuildConfig
 import ireader.presentation.R
+import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -21,18 +22,6 @@ import java.util.TimeZone
 object AboutSettingSpec : ScreenSpec {
 
     override val navHostRoute: String = "about_screen_route"
-    @ExperimentalMaterial3Api
-    @OptIn(ExperimentalMaterialApi::class)
-    @Composable
-    override fun TopBar(
-        controller: Controller
-    ) {
-        TitleToolbar(
-            title = stringResource(R.string.about),
-            navController = controller.navController,
-            scrollBehavior = controller.scrollBehavior
-        )
-    }
 
     @OptIn(
         ExperimentalAnimationApi::class,
@@ -42,13 +31,24 @@ object AboutSettingSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        AboutSettingScreen(
-            modifier = Modifier.padding(controller.scaffoldPadding),
-            onPopBackStack = {
-                controller.navController.popBackStack()
-            },
-            getFormattedBuildTime = this::getFormattedBuildTime,
-        )
+        IScaffold(
+            topBar = {
+                TitleToolbar(
+                    title = stringResource(R.string.about),
+                    navController = controller.navController,
+                    scrollBehavior = controller.scrollBehavior
+                )
+            }
+        ) { padding ->
+            AboutSettingScreen(
+                modifier = Modifier.padding(padding),
+                onPopBackStack = {
+                    controller.navController.popBackStack()
+                },
+                getFormattedBuildTime = this::getFormattedBuildTime,
+            )
+        }
+
     }
     private fun getFormattedBuildTime(): String {
         return try {

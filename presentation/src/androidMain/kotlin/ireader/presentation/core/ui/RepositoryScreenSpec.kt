@@ -24,9 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NamedNavArgument
+import io.ktor.http.*
 import ireader.i18n.UiText
 import ireader.presentation.R
 import ireader.presentation.ui.component.Controller
+import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.components.component.PreferenceRow
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
@@ -44,19 +46,6 @@ object RepositoryScreenSpec : ScreenSpec {
     override val arguments: List<NamedNavArgument> = listOf(
 
     )
-    @ExperimentalMaterial3Api
-    @OptIn(ExperimentalMaterialApi::class)
-    @Composable
-    override fun TopBar(
-        controller: Controller
-    ) {
-        Toolbar(
-            title ={
-                   MidSizeTextComposable(text =  stringResource(R.string.repository))
-            },
-            scrollBehavior = controller.scrollBehavior
-        )
-    }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -64,10 +53,18 @@ object RepositoryScreenSpec : ScreenSpec {
         controller: Controller
     ) {
         val vm : SourceRepositoryViewModel =  getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
-        SnackBarListener(vm = vm, host = controller.snackBarHostState)
-        androidx.compose.material3.Scaffold(
-            modifier = Modifier.padding(top = controller.scaffoldPadding.calculateTopPadding()),
-            floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
+        val host = SnackBarListener(vm = vm)
+        IScaffold(
+            topBar = {
+                Toolbar(
+                    title ={
+                        MidSizeTextComposable(text =  stringResource(R.string.repository))
+                    },
+                    scrollBehavior = controller.scrollBehavior
+                )
+            },
+            snackbarHostState = host,
+            floatingActionButtonPosition = ireader.presentation.ui.component.FabPosition.End,
             floatingActionButton = {
                 androidx.compose.material.ExtendedFloatingActionButton(
                     text = {
@@ -92,8 +89,9 @@ object RepositoryScreenSpec : ScreenSpec {
                 )
             },
         ) { padding ->
-
-            LazyColumn {
+            LazyColumn(
+                modifier = Modifier.padding(padding)
+            ) {
                 items(vm.sources.value) { source ->
                     PreferenceRow(title = source.visibleName(), subtitle = source.key , action = {
                         Row {

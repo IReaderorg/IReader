@@ -9,6 +9,7 @@ import androidx.navigation.navArgument
 import com.google.accompanist.web.WebContent
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.ui.component.Controller
+import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.web.WebPageScreen
 import ireader.presentation.ui.web.WebPageTopBar
 import ireader.presentation.ui.web.WebViewPageModel
@@ -83,89 +84,84 @@ object WebViewScreenSpec : ScreenSpec {
             )
         })
         val scope = rememberCoroutineScope()
-        WebPageScreen(
-            viewModel = vm,
-            source = vm.source,
-            snackBarHostState = controller.snackBarHostState,
-            scaffoldPadding = controller.scaffoldPadding
-        )
-    }
+        IScaffold(
+            topBar = {
+                val webView = vm.webViewManager.webView
+                val url by remember {
+                    derivedStateOf { vm.webUrl }
+                }
+                val source = vm.source
 
-    @Composable
-    override fun TopBar(
-        controller: Controller
-    ) {
-        val vm: WebViewPageModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
-            org.koin.core.parameter.parametersOf(
-                WebViewPageModel.createParam(controller)
+                WebPageTopBar(
+                    scrollBehavior = controller.scrollBehavior,
+                    urlToRender = url ?: vm.url,
+                    onGo = {
+                        vm.webViewState?.content = WebContent.Url(vm.webUrl)
+                        vm.updateWebUrl(vm.url)
+                    },
+                    refresh = {
+                        webView?.reload()
+                    },
+                    goBack = {
+                        webView?.goBack()
+                    },
+                    goForward = {
+                        webView?.goForward()
+                    },
+                    onValueChange = {
+                        vm.webUrl = it
+                    },
+                    onPopBackStack = {
+                        controller.navController.popBackStack()
+                    },
+                    source = source,
+                    onFetchBook = {
+                        webView?.let {
+                            val book = vm.stateBook
+
+                            if (source != null) {
+                                vm.getDetails(
+                                    book = book,
+                                    webView = it,
+                                )
+                            }
+                        }
+                    },
+                    onFetchChapter = {
+                        webView?.let {
+                            val chapter = vm.stateChapter
+
+                            if (chapter != null && source != null) {
+                                vm.getContentFromWebView(
+                                    chapter = chapter,
+                                    webView = it,
+                                )
+                            }
+                        }
+                    },
+                    onFetchChapters = {
+                        webView?.let {
+                            val book = vm.stateBook
+                            val source = vm.source
+                            if (book != null && source != null) {
+                                vm.getChapters(
+                                    book = book,
+                                    webView = it,
+                                )
+                            }
+                        }
+                    },
+                    state = vm,
+                )
+            }
+        ) { scaffoldPadding ->
+            WebPageScreen(
+                viewModel = vm,
+                source = vm.source,
+                snackBarHostState = controller.snackBarHostState,
+                scaffoldPadding = scaffoldPadding
             )
-        })
-        val webView = vm.webViewManager.webView
-        val url by remember {
-            derivedStateOf { vm.webUrl }
         }
-        val source = vm.source
 
-        WebPageTopBar(
-            scrollBehavior = controller.scrollBehavior,
-            urlToRender = url ?: vm.url,
-            onGo = {
-                vm.webViewState?.content = WebContent.Url(vm.webUrl)
-                vm.updateWebUrl(vm.url)
-            },
-            refresh = {
-                webView?.reload()
-            },
-            goBack = {
-                webView?.goBack()
-            },
-            goForward = {
-                webView?.goForward()
-            },
-            onValueChange = {
-                vm.webUrl = it
-            },
-            onPopBackStack = {
-                controller.navController.popBackStack()
-            },
-            source = source,
-            onFetchBook = {
-                webView?.let {
-                    val book = vm.stateBook
-
-                    if (source != null) {
-                        vm.getDetails(
-                            book = book,
-                            webView = it,
-                        )
-                    }
-                }
-            },
-            onFetchChapter = {
-                webView?.let {
-                    val chapter = vm.stateChapter
-
-                    if (chapter != null && source != null) {
-                        vm.getContentFromWebView(
-                            chapter = chapter,
-                            webView = it,
-                        )
-                    }
-                }
-            },
-            onFetchChapters = {
-                webView?.let {
-                    val book = vm.stateBook
-                    val source = vm.source
-                    if (book != null && source != null) {
-                        vm.getChapters(
-                            book = book,
-                            webView = it,
-                        )
-                    }
-                }
-            },
-            state = vm,
-        )
     }
 }

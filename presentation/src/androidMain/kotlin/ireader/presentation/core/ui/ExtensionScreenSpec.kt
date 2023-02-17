@@ -19,6 +19,7 @@ import androidx.navigation.NamedNavArgument
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.R
+import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.home.sources.extension.ExtensionScreen
 import ireader.presentation.ui.home.sources.extension.ExtensionScreenTopAppBar
 import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
@@ -32,51 +33,6 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
     override val arguments: List<NamedNavArgument> = listOf(
         NavigationArgs.showBottomNav
     )
-
-    @ExperimentalMaterial3Api
-    @OptIn(ExperimentalMaterialApi::class)
-    @Composable
-    override fun TopBar(
-        controller: Controller
-    ) {
-        val vm: ExtensionViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
-        var searchMode by remember {
-            mutableStateOf(false)
-        }
-        val focusManager = LocalFocusManager.current
-        ExtensionScreenTopAppBar(
-            searchMode = searchMode,
-            query = vm.searchQuery ?: "",
-            onValueChange = {
-                vm.searchQuery = it
-            },
-            onConfirm = {
-                focusManager.clearFocus()
-            },
-            currentPage = vm.currentPagerPage,
-            onClose = {
-                searchMode = false
-                vm.searchQuery = ""
-            },
-            onSearchDisable = {
-                searchMode = false
-                vm.searchQuery = ""
-            },
-            onRefresh = {
-                vm.refreshCatalogs()
-            },
-            onSearchEnable = {
-                searchMode = true
-            },
-            onSearchNavigate = {
-                controller.navController.navigate(
-                    GlobalSearchScreenSpec.navHostRoute
-                )
-            },
-            scrollBehavior = controller.scrollBehavior,
-        )
-    }
-
     @OptIn(
         ExperimentalAnimationApi::class,
         ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
@@ -85,27 +41,66 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        val vm: ExtensionViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
+        val vm: ExtensionViewModel =
+            getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
+        var searchMode by remember {
+            mutableStateOf(false)
+        }
+            val focusManager = LocalFocusManager.current
+        IScaffold(topBar = {
 
-        ExtensionScreen(
-            modifier = Modifier.padding(controller.scaffoldPadding),
-            vm = vm,
-            onClickCatalog = {
-                if (!vm.incognito.value) {
-                    vm.lastUsedSource.value = it.sourceId
-                }
-                controller.navController.navigate(
-                    ExploreScreenSpec.buildRoute(
-                        sourceId = it.sourceId,
+            ExtensionScreenTopAppBar(
+                searchMode = searchMode,
+                query = vm.searchQuery ?: "",
+                onValueChange = {
+                    vm.searchQuery = it
+                },
+                onConfirm = {
+                    focusManager.clearFocus()
+                },
+                currentPage = vm.currentPagerPage,
+                onClose = {
+                    searchMode = false
+                    vm.searchQuery = ""
+                },
+                onSearchDisable = {
+                    searchMode = false
+                    vm.searchQuery = ""
+                },
+                onRefresh = {
+                    vm.refreshCatalogs()
+                },
+                onSearchEnable = {
+                    searchMode = true
+                },
+                onSearchNavigate = {
+                    controller.navController.navigate(
+                        GlobalSearchScreenSpec.navHostRoute
                     )
-                )
-            },
-            onRefreshCatalogs = { vm.refreshCatalogs() },
-            onClickInstall = { vm.installCatalog(it) },
-            onClickTogglePinned = { vm.togglePinnedCatalog(it) },
-            onClickUninstall = { vm.uninstallCatalog(it) },
-            snackBarHostState = controller.snackBarHostState,
-            onCancelInstaller = { vm.cancelCatalogJob(it) },
-        )
+                },
+                scrollBehavior = controller.scrollBehavior,
+            )
+        }) { scaffoldPadding ->
+            ExtensionScreen(
+                modifier = Modifier.padding(scaffoldPadding),
+                vm = vm,
+                onClickCatalog = {
+                    if (!vm.incognito.value) {
+                        vm.lastUsedSource.value = it.sourceId
+                    }
+                    controller.navController.navigate(
+                        ExploreScreenSpec.buildRoute(
+                            sourceId = it.sourceId,
+                        )
+                    )
+                },
+                onRefreshCatalogs = { vm.refreshCatalogs() },
+                onClickInstall = { vm.installCatalog(it) },
+                onClickTogglePinned = { vm.togglePinnedCatalog(it) },
+                onClickUninstall = { vm.uninstallCatalog(it) },
+                snackBarHostState = controller.snackBarHostState,
+                onCancelInstaller = { vm.cancelCatalogJob(it) },
+            )
+        }
     }
 }

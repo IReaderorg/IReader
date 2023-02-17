@@ -17,13 +17,7 @@
 package ireader.presentation.ui.component
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ScaffoldDefaults
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.contentColorFor
-import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -40,6 +34,7 @@ import androidx.compose.ui.unit.max
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.util.fastMaxBy
+import ireader.presentation.ui.component.components.ISnackBarHost
 import kotlin.math.max
 
 /**
@@ -88,16 +83,21 @@ import kotlin.math.max
  * properly offset top and bottom bars. If using [Modifier.verticalScroll], apply this modifier to
  * the child of the scroll, and not on the scroll itself.
  */
-@OptIn(ExperimentalLayoutApi::class,ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 
 @Composable
 fun IScaffold(
     modifier: Modifier = Modifier,
-    topBarScrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState()),
+    topBarScrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(
+        rememberTopAppBarState()
+    ),
+    snackbarHostState: SnackbarHostState = SnackbarHostState(),
     topBar: @Composable (TopAppBarScrollBehavior) -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
     startBar: @Composable () -> Unit = {},
-    snackbarHost: @Composable () -> Unit = {},
+    snackbarHost: @Composable () -> Unit = {
+        ISnackBarHost(snackbarHostState)
+    },
     floatingActionButton: @Composable () -> Unit = {},
     floatingActionButtonPosition: FabPosition = FabPosition.End,
     containerColor: Color = MaterialTheme.colorScheme.background,
@@ -110,7 +110,9 @@ fun IScaffold(
     androidx.compose.material3.Surface(
         modifier = Modifier
             .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
-            .withConsumedWindowInsets { remainingWindowInsets.insets = contentWindowInsets.exclude(it) }
+            .withConsumedWindowInsets {
+                remainingWindowInsets.insets = contentWindowInsets.exclude(it)
+            }
             .then(modifier),
         color = containerColor,
         contentColor = contentColor,
@@ -262,7 +264,10 @@ private fun ScaffoldLayout(
                     } else {
                         max(bottomBarHeightPx.toDp(), fabOffsetDp)
                     },
-                    start = max(insets.calculateStartPadding((this@SubcomposeLayout).layoutDirection), startBarWidth.toDp()),
+                    start = max(
+                        insets.calculateStartPadding((this@SubcomposeLayout).layoutDirection),
+                        startBarWidth.toDp()
+                    ),
                     end = insets.calculateEndPadding((this@SubcomposeLayout).layoutDirection),
                 )
                 content(innerPadding)

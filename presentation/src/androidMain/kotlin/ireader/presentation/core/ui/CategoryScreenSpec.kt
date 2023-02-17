@@ -11,6 +11,7 @@ import androidx.compose.ui.res.stringResource
 
 import ireader.presentation.ui.component.Controller
 import ireader.i18n.R
+import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.category.CategoryScreen
 import ireader.presentation.ui.settings.category.CategoryScreenViewModel
@@ -19,18 +20,6 @@ import org.koin.androidx.compose.getViewModel
 object CategoryScreenSpec : ScreenSpec {
 
     override val navHostRoute: String = "edit_category_screen_route"
-    @ExperimentalMaterial3Api
-    @OptIn(ExperimentalMaterialApi::class)
-    @Composable
-    override fun TopBar(
-        controller: Controller
-    ) {
-        TitleToolbar(
-            title = stringResource(R.string.edit_category),
-            navController = controller.navController,
-            scrollBehavior = controller.scrollBehavior
-        )
-    }
 
     @OptIn(
         ExperimentalAnimationApi::class,
@@ -41,10 +30,21 @@ object CategoryScreenSpec : ScreenSpec {
         controller: Controller
     ) {
         val vm: CategoryScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
-        Box(modifier = Modifier.padding(controller.scaffoldPadding)) {
-            CategoryScreen(
-                vm = vm
-            )
+        IScaffold(
+            topBar = {
+                TitleToolbar(
+                    title = stringResource(R.string.edit_category),
+                    navController = controller.navController,
+                    scrollBehavior = controller.scrollBehavior
+                )
+            }
+        ) { padding ->
+            Box(modifier = Modifier.padding(padding)) {
+                CategoryScreen(
+                    vm = vm
+                )
+            }
         }
+
     }
 }

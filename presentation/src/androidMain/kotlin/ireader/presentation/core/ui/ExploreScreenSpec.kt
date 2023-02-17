@@ -22,6 +22,7 @@ import ireader.presentation.R
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.imageloader.coil.image_loaders.convertToOkHttpRequest
 import ireader.presentation.ui.component.Controller
+import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.EmptyScreenComposable
 import ireader.presentation.ui.component.hideKeyboard
 import ireader.presentation.ui.home.explore.BrowseTopAppBar
@@ -72,9 +73,65 @@ object ExploreScreenSpec : ScreenSpec {
         val headers = remember {
             mutableStateOf<Headers?>(null)
         }
+        IScaffold(
+            topBar = {
+                val focusManager = LocalFocusManager.current
+                val source = vm.source
+                val scope = rememberCoroutineScope()
+                BrowseTopAppBar(
+                    scrollBehavior = controller.scrollBehavior,
+                    state = vm,
+                    source = source,
+                    onValueChange = {
+                        vm.searchQuery = it
+                    },
+                    onSearch = {
+                        val query = vm.searchQuery
+                        if (query != null && query.isNotBlank()) {
+                            vm.searchQuery = query
+                            vm.loadItems(true)
+                        } else {
+                            vm.stateListing = source?.getListings()?.first()
+                            vm.loadItems()
+                            scope.launch {
+                                vm.showSnackBar(UiText.StringResource(R.string.query_must_not_be_empty))
+                            }
+                        }
+                        focusManager.clearFocus()
+                    },
+                    onSearchDisable = {
+                        vm.toggleSearchMode(false)
+                        vm.searchQuery = null
+                        vm.loadItems(true)
+                    },
+                    onSearchEnable = {
+                        vm.toggleSearchMode(true)
+                    },
+                    onWebView = {
+                        if (source is HttpSource) {
+                            controller.navController.navigate(
+                                WebViewScreenSpec.buildRoute(
+                                    url = (source).baseUrl,
+                                    sourceId = source.id,
+                                    chapterId = null,
+                                    bookId = null,
+                                    enableChaptersFetch = true,
+                                    enableBookFetch = true
+                                )
+                            )
+                        }
+                    },
+                    onPop = { controller.navController.popBackStack() },
+                    onLayoutTypeSelect = { layout ->
+                        vm.saveLayoutType(layout)
+                    },
+                    currentLayout = vm.layout
+                )
+            }
+        ) {scaffoldPadding ->
         if (source != null) {
             ExploreScreen(
-                modifier = Modifier.padding(top = controller.scaffoldPadding.calculateTopPadding()),
+                modifier = Modifier.padding(top = scaffoldPadding.calculateTopPadding()),
                 vm = vm,
                 onFilterClick = {
                     vm.toggleFilterMode()
@@ -123,7 +180,7 @@ object ExploreScreenSpec : ScreenSpec {
                 },
                 snackBarHostState = controller.snackBarHostState,
                 modalState = controller.sheetState,
-                scaffoldPadding = controller.scaffoldPadding,
+                scaffoldPadding = scaffoldPadding,
                 headers = {
                     if (headers.value == null) {
                         headers.value =
@@ -147,6 +204,8 @@ object ExploreScreenSpec : ScreenSpec {
                     controller.navController.popBackStack()
                 }
             )
+        }
+
         }
     }
 
@@ -179,69 +238,6 @@ object ExploreScreenSpec : ScreenSpec {
             onUpdate = {
                 vm.modifiedFilter = it
             }
-        )
-    }
-
-    @Composable
-    override fun TopBar(
-        controller: Controller
-    ) {
-        val vm: ExploreViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
-            org.koin.core.parameter.parametersOf(
-                ExploreViewModel.createParam(controller)
-            )
-        })
-        val focusManager = LocalFocusManager.current
-        val source = vm.source
-        val scope = rememberCoroutineScope()
-        BrowseTopAppBar(
-            scrollBehavior = controller.scrollBehavior,
-            state = vm,
-            source = source,
-            onValueChange = {
-                vm.searchQuery = it
-            },
-            onSearch = {
-                val query = vm.searchQuery
-                if (query != null && query.isNotBlank()) {
-                    vm.searchQuery = query
-                    vm.loadItems(true)
-                } else {
-                    vm.stateListing = source?.getListings()?.first()
-                    vm.loadItems()
-                    scope.launch {
-                        vm.showSnackBar(UiText.StringResource(R.string.query_must_not_be_empty))
-                    }
-                }
-                focusManager.clearFocus()
-            },
-            onSearchDisable = {
-                vm.toggleSearchMode(false)
-                vm.searchQuery = null
-                vm.loadItems(true)
-            },
-            onSearchEnable = {
-                vm.toggleSearchMode(true)
-            },
-            onWebView = {
-                if (source is HttpSource) {
-                    controller.navController.navigate(
-                        WebViewScreenSpec.buildRoute(
-                            url = (source).baseUrl,
-                            sourceId = source.id,
-                            chapterId = null,
-                            bookId = null,
-                            enableChaptersFetch = true,
-                            enableBookFetch = true
-                        )
-                    )
-                }
-            },
-            onPop = { controller.navController.popBackStack() },
-            onLayoutTypeSelect = { layout ->
-                vm.saveLayoutType(layout)
-            },
-            currentLayout = vm.layout
         )
     }
 }

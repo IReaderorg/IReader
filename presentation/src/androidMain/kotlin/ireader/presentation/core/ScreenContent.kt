@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -77,7 +78,7 @@ fun ScreenContent() {
     val (requestedHideBottomNav, requestHideBottomNav) = remember { mutableStateOf(false) }
     val (requestedHideSystemNavBar, requestHideSystemNavBar) = remember { mutableStateOf(false) }
     val (requestedHideSystemStatusBar, requestHideSystemStatusBar) = remember { mutableStateOf(false) }
-    val (requestedHideTopBar, requestHideTopBar) = remember { mutableStateOf(true) }
+
     val (requestCustomSystemColor, requestedCustomColor) = remember {
         mutableStateOf<CustomSystemColor?>(
             null
@@ -129,7 +130,6 @@ fun ScreenContent() {
                         sheetState = modalBottomSheetState,
                         drawerState = drawerState,
                         requestHideNavigator = requestHideBottomNav,
-                        requestHideTopAppbar = requestHideTopBar,
                         requestedHideSystemStatusBar = requestHideSystemStatusBar,
                         requestHideSystemNavbar = requestHideSystemNavBar,
                         requestedCustomSystemColor = requestedCustomColor,
@@ -153,7 +153,6 @@ fun ScreenContent() {
                             sheetState = modalBottomSheetState,
                             drawerState = drawerState,
                             requestHideNavigator = requestHideBottomNav,
-                            requestHideTopAppbar = requestHideTopBar,
                             requestedHideSystemStatusBar = requestHideSystemStatusBar,
                             requestHideSystemNavbar = requestHideSystemNavBar,
                             requestedCustomSystemColor = requestedCustomColor,
@@ -177,34 +176,6 @@ fun ScreenContent() {
                         modifier = scaffoldModifier.value
                                 .nestedScroll(scrollBehavior.nestedScrollConnection)
                                 .fillMaxSize(),
-                        topBar = {
-                            if (navStackEntry != null) {
-                                AnimatedVisibility(
-                                    visible = requestedHideTopBar,
-                                    enter = slideInVertically(initialOffsetY = { it }),
-                                    exit = slideOutVertically(targetOffsetY = { it })
-                                ) {
-                                    screenSpec?.TopBar(
-                                        Controller(
-                                            navController = navController,
-                                            navBackStackEntry = navStackEntry,
-                                            snackBarHostState = snackBarHostState,
-                                            sheetState = modalBottomSheetState,
-                                            drawerState = drawerState,
-                                            requestHideNavigator = requestHideBottomNav,
-                                            requestHideTopAppbar = requestHideTopBar,
-                                            requestedHideSystemStatusBar = requestHideSystemStatusBar,
-                                            requestHideSystemNavbar = requestHideSystemNavBar,
-                                            requestedCustomSystemColor = requestedCustomColor,
-                                            scrollBehavior = scrollBehavior,
-                                            setScrollBehavior = setScrollBehavior,
-                                            topScrollState = topAppBarState,
-
-                                        )
-                                    )
-                                }
-                            }
-                        },
                         bottomBar = {
                             if (navStackEntry != null) {
                                 IBottomAppBar(
@@ -218,7 +189,6 @@ fun ScreenContent() {
                                                 sheetState = modalBottomSheetState,
                                                 drawerState = drawerState,
                                                 requestHideNavigator = requestHideBottomNav,
-                                                requestHideTopAppbar = requestHideTopBar,
                                                 requestedHideSystemStatusBar = requestHideSystemStatusBar,
                                                 requestHideSystemNavbar = requestHideSystemNavBar,
                                                 requestedCustomSystemColor = requestedCustomColor,
@@ -238,7 +208,6 @@ fun ScreenContent() {
                                             sheetState = modalBottomSheetState,
                                             drawerState = drawerState,
                                             requestHideNavigator = requestHideBottomNav,
-                                            requestHideTopAppbar = requestHideTopBar,
                                             requestedHideSystemStatusBar = requestHideSystemStatusBar,
                                             requestHideSystemNavbar = requestHideSystemNavBar,
                                             requestedCustomSystemColor = requestedCustomColor,
@@ -315,10 +284,10 @@ fun ScreenContent() {
                             navController = navController,
                             startDestination = LibraryScreenSpec.navHostRoute,
                             enterTransition = {
-                                fadeIn(animationSpec = tween(500))
+                                slideIn(animationSpec = tween(500), initialOffset = { IntOffset(0,0) })
                             },
                             exitTransition = {
-                                fadeOut(animationSpec = tween(500))
+                                slideOut(animationSpec = tween(500), targetOffset = { IntOffset(0,0) })
                             },
                         ) {
                             ScreenSpec.allScreens.values.forEach { screen ->
@@ -335,8 +304,6 @@ fun ScreenContent() {
                                             sheetState = modalBottomSheetState,
                                             drawerState = drawerState,
                                             requestHideNavigator = requestHideBottomNav,
-                                            requestHideTopAppbar = requestHideTopBar,
-                                            scaffoldPadding = padding,
                                             requestedHideSystemStatusBar = requestHideSystemStatusBar,
                                             requestHideSystemNavbar = requestHideSystemNavBar,
                                             requestedCustomSystemColor = requestedCustomColor,

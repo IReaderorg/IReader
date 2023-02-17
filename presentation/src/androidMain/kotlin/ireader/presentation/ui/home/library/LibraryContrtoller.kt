@@ -3,6 +3,7 @@
 package ireader.presentation.ui.home.library
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -23,7 +24,7 @@ fun LibraryController(
     controller: Controller,
     goToReader: (BookItem) -> Unit,
     goToDetail: (BookItem) -> Unit,
-
+    scaffoldPadding: PaddingValues
     ) {
 
     LibraryScreen(
@@ -83,7 +84,7 @@ fun LibraryController(
         onClickChangeCategory = {
             vm.showDialog = true
         },
-        scaffoldPadding = controller.scaffoldPadding,
+        scaffoldPadding = scaffoldPadding,
         requestHideBottomNav = controller.requestHideNavigator,
         getColumnsForOrientation = { isLandscape ->
             vm.getColumnsForOrientation(isLandscape, this)

@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import ireader.presentation.R
 import ireader.presentation.ui.component.Controller
+import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
@@ -20,21 +21,6 @@ import ireader.presentation.ui.settings.SetupLayout
 
 object SettingScreenSpec : ScreenSpec {
     override val navHostRoute: String = "settings"
-
-    @ExperimentalMaterial3Api
-    @OptIn(ExperimentalMaterialApi::class)
-    @Composable
-    override fun TopBar(
-        controller: Controller
-    ) {
-        Toolbar(
-            scrollBehavior = controller.scrollBehavior,
-            title = {
-                BigSizeTextComposable(text = stringResource(R.string.settings))
-            },
-            navigationIcon = { TopAppBarBackButton(onClick = { controller.navController.popBackStack() }) },
-        )
-    }
 
     @OptIn(
         ExperimentalAnimationApi::class,
@@ -84,6 +70,19 @@ object SettingScreenSpec : ScreenSpec {
                 },
             )
         }
-        SetupLayout(modifier = Modifier.padding(controller.scaffoldPadding), items = settingItems)
+        IScaffold(
+            topBar = {
+                Toolbar(
+                    scrollBehavior = controller.scrollBehavior,
+                    title = {
+                        BigSizeTextComposable(text = stringResource(R.string.settings))
+                    },
+                    navigationIcon = { TopAppBarBackButton(onClick = { controller.navController.popBackStack() }) },
+                )
+            }
+        ) { padding ->
+            SetupLayout(modifier = Modifier.padding(padding), items = settingItems)
+        }
+
     }
 }

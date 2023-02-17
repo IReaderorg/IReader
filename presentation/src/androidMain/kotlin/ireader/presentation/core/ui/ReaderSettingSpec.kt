@@ -18,23 +18,12 @@ import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.component.components.setupUiComponent
 import ireader.presentation.ui.settings.reader.ReaderSettingScreenViewModel
 import ireader.presentation.R
+import ireader.presentation.ui.component.IScaffold
 import org.koin.androidx.compose.getViewModel
 
 object ReaderSettingSpec : ScreenSpec {
 
     override val navHostRoute: String = "reader_settings_screen_route"
-    @ExperimentalMaterial3Api
-    @OptIn(ExperimentalMaterialApi::class)
-    @Composable
-    override fun TopBar(
-        controller: Controller
-    ) {
-        TitleToolbar(
-            title = stringResource(R.string.reader),
-            navController = controller.navController,
-            scrollBehavior = controller.scrollBehavior
-        )
-    }
 
     @OptIn(
         ExperimentalAnimationApi::class,
@@ -120,12 +109,21 @@ object ReaderSettingSpec : ScreenSpec {
             )
         }
 
-        LazyColumn(
-            modifier = Modifier
-                .padding(controller.scaffoldPadding)
-                .fillMaxSize()
-        ) {
-            setupUiComponent(items)
+        IScaffold(topBar = {
+            TitleToolbar(
+                title = stringResource(R.string.reader),
+                navController = controller.navController,
+                scrollBehavior = controller.scrollBehavior
+            )
+        }) { padding ->
+            LazyColumn(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize()
+            ) {
+                setupUiComponent(items)
+            }
         }
+
     }
 }

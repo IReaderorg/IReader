@@ -1,12 +1,7 @@
 package ireader.presentation.core.ui
 
 import androidx.compose.animation.core.TweenSpec
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.DrawerValue
@@ -30,10 +25,7 @@ import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.models.prefs.readerThemes
 import ireader.presentation.R
 import ireader.presentation.core.ui.util.NavigationArgs
-import ireader.presentation.ui.component.Controller
-import ireader.presentation.ui.component.CustomizeAnimateVisibility
-import ireader.presentation.ui.component.NavigationBarTokens
-import ireader.presentation.ui.component.ThemePreference
+import ireader.presentation.ui.component.*
 import ireader.presentation.ui.component.components.Build
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.component.ChipChoicePreference
@@ -91,39 +83,6 @@ object TTSScreenSpec : ScreenSpec {
 
         )
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class,)
-    @Composable
-    override fun TopBar(controller: Controller) {
-        val vm: TTSViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
-            org.koin.core.parameter.parametersOf(
-                TTSViewModel.createParam(controller)
-            )
-        })
-        val scope = rememberCoroutineScope()
-        CustomizeAnimateVisibility(visible = !vm.fullScreenMode) {
-            TTSTopBar(
-                onPopBackStack = {
-                    controller.navController.popBackStack()
-                },
-                scrollBehavior = controller.scrollBehavior,
-                onSetting = {
-                    scope.launch {
-                        controller.sheetState.show()
-                    }
-                },
-                onContent = {
-                    scope.launch {
-                        controller.drawerState.animateTo(
-                            DrawerValue.Open,
-                            TweenSpec()
-                        )
-                    }
-                },
-                vm = vm,
-            )
-        }
-    }
-
     @OptIn(
         ExperimentalMaterialApi::class, ExperimentalPagerApi::class,
         ExperimentalMaterial3Api::class
@@ -145,24 +104,53 @@ object TTSScreenSpec : ScreenSpec {
                 vm.browser?.disconnect()
             }
         }
-        TTSScreen(
-            modifier = Modifier,
-            vm = vm,
-            onChapter = { ch ->
-                vm.getLocalChapter(ch.id)
-            },
-            source = vm.ttsSource,
-            onPopStack = {
-                controller.navController.popBackStack()
-            },
-            lazyState = lazyState,
-            bottomSheetState = controller.sheetState,
-            drawerState = controller.drawerState,
-            paddingValues = controller.scaffoldPadding,
-            onPlay = {
-                vm.play(context)
+        IScaffold(
+            topBar = {
+                val scope = rememberCoroutineScope()
+                CustomizeAnimateVisibility(visible = !vm.fullScreenMode) {
+                    TTSTopBar(
+                        onPopBackStack = {
+                            controller.navController.popBackStack()
+                        },
+                        scrollBehavior = controller.scrollBehavior,
+                        onSetting = {
+                            scope.launch {
+                                controller.sheetState.show()
+                            }
+                        },
+                        onContent = {
+                            scope.launch {
+                                controller.drawerState.animateTo(
+                                    DrawerValue.Open,
+                                    TweenSpec()
+                                )
+                            }
+                        },
+                        vm = vm,
+                    )
+                }
             }
-        )
+        ) {scaffoldPadding ->
+            TTSScreen(
+                modifier = Modifier,
+                vm = vm,
+                onChapter = { ch ->
+                    vm.getLocalChapter(ch.id)
+                },
+                source = vm.ttsSource,
+                onPopStack = {
+                    controller.navController.popBackStack()
+                },
+                lazyState = lazyState,
+                bottomSheetState = controller.sheetState,
+                drawerState = controller.drawerState,
+                paddingValues = scaffoldPadding,
+                onPlay = {
+                    vm.play(context)
+                }
+            )
+
+        }
 
         LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph) {
             try {
@@ -208,7 +196,7 @@ object TTSScreenSpec : ScreenSpec {
                 content = {
                     Column() {
                         TTLScreenPlay(
-                            modifier = Modifier.padding(controller.scaffoldPadding),
+                            modifier = Modifier.padding(PaddingValues(0.dp)),
                             vm = vm,
                             onValueChange = {
                                 vm.controller?.transportControls?.seekTo(it.toLong())

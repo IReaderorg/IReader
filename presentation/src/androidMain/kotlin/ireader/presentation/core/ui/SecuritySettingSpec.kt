@@ -19,6 +19,7 @@ import ireader.domain.utils.extensions.AuthenticatorUtil.isAuthenticationSupport
 import ireader.domain.utils.extensions.AuthenticatorUtil.startAuthentication
 import ireader.i18n.R
 import ireader.presentation.ui.component.Controller
+import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.component.components.TitleToolbar
@@ -34,17 +35,6 @@ object SecuritySettingSpec : ScreenSpec {
     override val navHostRoute: String = "security_settings_screen_route"
 
     @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    override fun TopBar(
-        controller: Controller
-    ) {
-        TitleToolbar(
-            title = stringResource(R.string.security),
-            navController = controller.navController,
-            scrollBehavior = controller.scrollBehavior
-        )
-    }
-
     @Composable
     override fun Content(
         controller: Controller
@@ -154,10 +144,21 @@ object SecuritySettingSpec : ScreenSpec {
 
             )
         }
-        SetupSettingComponents(
-            scaffoldPadding = controller.scaffoldPadding,
-            items = items,
-        )
+        IScaffold(
+            topBar = {
+                TitleToolbar(
+                    title = stringResource(R.string.security),
+                    navController = controller.navController,
+                    scrollBehavior = controller.scrollBehavior
+                )
+            }
+        ) { padding ->
+            SetupSettingComponents(
+                scaffoldPadding = padding,
+                items = items,
+            )
+        }
+
     }
 }
 

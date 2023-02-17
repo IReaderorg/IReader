@@ -7,6 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import ireader.core.log.Log
 import ireader.presentation.ui.component.Controller
+import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.home.sources.global_search.GlobalSearchScreen
 import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchViewModel
 import kotlinx.coroutines.runBlocking
@@ -39,47 +40,52 @@ object GlobalSearchScreenSpec : ScreenSpec {
                 GlobalSearchViewModel.createParam(controller)
             )
         })
-        GlobalSearchScreen(
-            scrollBehavior = controller.scrollBehavior,
-            onPopBackStack = {
-                controller.navController.popBackStack()
-            },
-            onSearch = { query ->
-                vm.searchBooks(query = query)
-            },
-            vm = vm,
-            onBook = { book ->
-                try {
-                    runBlocking {
-                        vm.insertUseCases.insertBook(book).let { bookId ->
+        IScaffold(
+
+        ) {
+            GlobalSearchScreen(
+                scrollBehavior = controller.scrollBehavior,
+                onPopBackStack = {
+                    controller.navController.popBackStack()
+                },
+                onSearch = { query ->
+                    vm.searchBooks(query = query)
+                },
+                vm = vm,
+                onBook = { book ->
+                    try {
+                        runBlocking {
+                            vm.insertUseCases.insertBook(book).let { bookId ->
+                                controller.navController.navigate(
+                                    BookDetailScreenSpec.buildRoute(
+                                        bookId = bookId,
+                                    )
+                                )
+                            }
+
+                        }
+
+                    } catch (e: Throwable) {
+                        Log.error(e, "")
+                    }
+                },
+                onGoToExplore = { item ->
+                    try {
+                        if (vm.query.isNotBlank()) {
                             controller.navController.navigate(
-                                BookDetailScreenSpec.buildRoute(
-                                    bookId = bookId,
+                                ExploreScreenSpec.buildRoute(
+                                    item.source.id,
+                                    query = vm.query
                                 )
                             )
                         }
-
+                    } catch (e: Throwable) {
+                        Log.error(e, "")
                     }
+                },
+            )
 
-                } catch (e: Throwable) {
-                    Log.error(e, "")
-                }
-            },
-            onGoToExplore = { item ->
-                try {
-                    if (vm.query.isNotBlank()) {
-                        controller.navController.navigate(
-                            ExploreScreenSpec.buildRoute(
-                                item.source.id,
-                                query = vm.query
-                            )
-                        )
-                    }
-                } catch (e: Throwable) {
-                    Log.error(e, "")
-                }
-            },
-        )
+        }
     }
 }
 

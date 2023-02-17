@@ -17,6 +17,7 @@ import ireader.i18n.discord
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.R
+import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.settings.MainSettingScreenViewModel
 import ireader.presentation.ui.settings.MoreScreen
 import org.koin.androidx.compose.getViewModel
@@ -29,19 +30,6 @@ object MoreScreenSpec : BottomNavScreenSpec {
     override val arguments: List<NamedNavArgument> = listOf(
         NavigationArgs.showBottomNav
     )
-    @ExperimentalMaterial3Api
-    @OptIn(ExperimentalMaterialApi::class)
-    @Composable
-    override fun TopBar(
-        controller: Controller
-    ) {
-        TitleToolbar(
-            title = stringResource(R.string.more),
-            navController = null,
-            scrollBehavior = controller.scrollBehavior
-        )
-    }
-
     @OptIn(
         ExperimentalMaterialApi::class,
         ExperimentalMaterial3Api::class
@@ -53,27 +41,38 @@ object MoreScreenSpec : BottomNavScreenSpec {
         val uriHandler = LocalUriHandler.current
         val vm: MainSettingScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
 
-        MoreScreen(
-            modifier = Modifier.padding(controller.scaffoldPadding),
-            vm = vm,
-            onAbout = {
-                controller.navController.navigate(AboutSettingSpec.navHostRoute)
-            },
-            onSettings = {
-                controller.navController.navigate(SettingScreenSpec.navHostRoute)
-            },
-            onBackupScreen = {
-                controller.navController.navigate(BackupAndRestoreScreenSpec.navHostRoute)
-            },
-            onDownloadScreen = {
-                controller.navController.navigate(DownloaderScreenSpec.navHostRoute)
-            },
-            onHelp = {
-                uriHandler.openUri(discord)
-            },
-            onCategory = {
-                controller.navController.navigate(CategoryScreenSpec.navHostRoute)
+        IScaffold(
+            topBar = {
+                TitleToolbar(
+                    title = stringResource(R.string.more),
+                    navController = null,
+                    scrollBehavior = controller.scrollBehavior
+                )
             }
-        )
+        ) { padding ->
+            MoreScreen(
+                modifier = Modifier.padding(padding),
+                vm = vm,
+                onAbout = {
+                    controller.navController.navigate(AboutSettingSpec.navHostRoute)
+                },
+                onSettings = {
+                    controller.navController.navigate(SettingScreenSpec.navHostRoute)
+                },
+                onBackupScreen = {
+                    controller.navController.navigate(BackupAndRestoreScreenSpec.navHostRoute)
+                },
+                onDownloadScreen = {
+                    controller.navController.navigate(DownloaderScreenSpec.navHostRoute)
+                },
+                onHelp = {
+                    uriHandler.openUri(discord)
+                },
+                onCategory = {
+                    controller.navController.navigate(CategoryScreenSpec.navHostRoute)
+                }
+            )
+        }
+
     }
 }

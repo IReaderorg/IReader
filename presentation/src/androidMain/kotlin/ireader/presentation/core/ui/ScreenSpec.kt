@@ -33,7 +33,6 @@ sealed interface ScreenSpec {
             FontScreenSpec,
             CategoryScreenSpec,
             GeneralScreenSpec,
-            BrowseSettingSpec,
             DownloadSettingSpec,
             LibraryScreenSpec,
             SecuritySettingSpec,
@@ -81,13 +80,6 @@ sealed interface ScreenSpec {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun ModalDrawer(
-        controller: Controller
-    ) {
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun TopBar(
         controller: Controller
     ) {
     }

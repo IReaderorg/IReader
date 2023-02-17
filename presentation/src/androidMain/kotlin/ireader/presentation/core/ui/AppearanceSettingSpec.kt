@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 
 import androidx.navigation.NavController
 import ireader.presentation.ui.component.Controller
+import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.settings.appearance.AppearanceSettingScreen
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.settings.appearance.AppearanceToolbar
@@ -17,45 +18,44 @@ object AppearanceScreenSpec : ScreenSpec {
 
     override val navHostRoute: String = "appearance_setting_route"
 
-    @ExperimentalMaterial3Api
-    @Composable
-    override fun TopBar(
-        controller: Controller
-    ) {
-        val vm: AppearanceViewModel = getViewModel()
-        AppearanceToolbar(
-            vm = vm,
-            onPopBackStack = {
-                popBackStack(controller.navController)
-            },
-            scrollBehavior = controller.scrollBehavior
-        )
-    }
-
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content(
         controller: Controller
     ) {
         val viewModel: AppearanceViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         SnackBarListener(viewModel, controller.snackBarHostState)
-        AppearanceSettingScreen(
-            modifier = Modifier.padding(controller.scaffoldPadding),
-            saveDarkModePreference = { theme ->
-                viewModel.saveNightModePreferences(theme)
-            },
-            onPopBackStack = {
-                controller.navController.popBackStack()
-            },
-            vm = viewModel,
-            scaffoldPaddingValues = controller.scaffoldPadding,
-            onColorChange = {
-                viewModel.isSavable = true
-            },
-            onColorReset = {
-                viewModel.isSavable = false
+        IScaffold(
+            topBar = {
+                AppearanceToolbar(
+                    vm = viewModel,
+                    onPopBackStack = {
+                        popBackStack(controller.navController)
+                    },
+                    scrollBehavior = controller.scrollBehavior
+                )
             }
+        ) { padding ->
+            AppearanceSettingScreen(
+                modifier = Modifier.padding(padding),
+                saveDarkModePreference = { theme ->
+                    viewModel.saveNightModePreferences(theme)
+                },
+                onPopBackStack = {
+                    controller.navController.popBackStack()
+                },
+                vm = viewModel,
+                scaffoldPaddingValues = padding,
+                onColorChange = {
+                    viewModel.isSavable = true
+                },
+                onColorReset = {
+                    viewModel.isSavable = false
+                }
 
-        )
+            )
+        }
+
     }
 }
 

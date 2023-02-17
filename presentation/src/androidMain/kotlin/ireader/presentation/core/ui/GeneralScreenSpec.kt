@@ -9,6 +9,7 @@ import androidx.compose.ui.res.stringResource
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.R
+import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.settings.general.GeneralSettingScreen
 import ireader.presentation.ui.settings.general.GeneralSettingScreenViewModel
 import org.koin.androidx.compose.getViewModel
@@ -19,26 +20,24 @@ object GeneralScreenSpec : ScreenSpec {
     override val navHostRoute: String = "general_screen_spec"
 
     @Composable
-    override fun TopBar(
-        controller: Controller
-    ) {
-        TitleToolbar(
-            title = stringResource(id = R.string.general),
-            navController = controller.navController,
-            scrollBehavior = controller.scrollBehavior
-        )
-    }
-
-    @Composable
     override fun Content(
         controller: Controller
     ) {
         val vm: GeneralSettingScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
+        IScaffold(
+            topBar = {
+                TitleToolbar(
+                    title = stringResource(id = R.string.general),
+                    navController = controller.navController,
+                    scrollBehavior = controller.scrollBehavior
+                )
+            }
+        ) {scaffoldPadding ->
+            GeneralSettingScreen(
+                scaffoldPadding = scaffoldPadding,
+                vm = vm,
+            )
+        }
 
-        val context = LocalContext.current
-        GeneralSettingScreen(
-            scaffoldPadding = controller.scaffoldPadding,
-            vm = vm,
-        )
     }
 }

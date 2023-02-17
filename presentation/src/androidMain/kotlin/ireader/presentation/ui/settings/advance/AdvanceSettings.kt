@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -28,8 +29,8 @@ import kotlinx.serialization.ExperimentalSerializationApi
 fun AdvanceSettings(
     modifier: Modifier = Modifier,
     vm: AdvanceSettingViewModel,
-    controller: Controller
-
+    controller: Controller,
+    padding: PaddingValues
 ) {
     val context = LocalContext.current
     val onEpub =
@@ -131,5 +132,5 @@ fun AdvanceSettings(
     }
 
 
-    SetupSettingComponents(scaffoldPadding = controller.scaffoldPadding, items = items)
+    SetupSettingComponents(scaffoldPadding = padding, items = items)
 }
