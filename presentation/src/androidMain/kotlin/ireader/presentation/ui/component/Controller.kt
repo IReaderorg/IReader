@@ -16,7 +16,6 @@ data class Controller @OptIn(
     val navController: NavController,
     val navBackStackEntry: NavBackStackEntry,
     val snackBarHostState: SnackbarHostState,
-    val drawerState: DrawerState,
     val requestHideNavigator: (Boolean) -> Unit = {},
     val requestHideSystemNavbar: (Boolean) -> Unit = {},
     val requestedHideSystemStatusBar: (Boolean) -> Unit = {},

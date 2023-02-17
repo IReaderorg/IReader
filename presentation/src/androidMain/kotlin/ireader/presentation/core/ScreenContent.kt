@@ -117,30 +117,6 @@ fun ScreenContent() {
         }
     }
 
-        IModalDrawer(
-            state = drawerState,
-            sheetContent = {
-                if (navStackEntry != null) {
-                    screenSpec?.ModalDrawer(
-                        Controller(
-                            navController = navController,
-                            navBackStackEntry = navStackEntry,
-                            snackBarHostState = snackBarHostState,
-
-                            drawerState = drawerState,
-                            requestHideNavigator = requestHideBottomNav,
-                            requestedHideSystemStatusBar = requestHideSystemStatusBar,
-                            requestHideSystemNavbar = requestHideSystemNavBar,
-                            requestedCustomSystemColor = requestedCustomColor,
-                            scrollBehavior = scrollBehavior,
-                            topScrollState = topAppBarState,
-
-                        )
-                    )
-                }
-            },
-            isEnable = haveDrawer,
-        ) {
             CustomSystemColor(
                 enable = requestCustomSystemColor != null,
                 statusBar = requestCustomSystemColor?.status ?: Color.White,
@@ -153,46 +129,6 @@ fun ScreenContent() {
                                 .nestedScroll(scrollBehavior.nestedScrollConnection)
                                 .fillMaxSize(),
                         bottomBar = {
-                            if (navStackEntry != null) {
-                                IBottomAppBar(
-                                    isEnable = haveVariantBottomAppBar,
-                                    sheetContent = {
-                                        screenSpec?.BottomAppBar(
-                                            Controller(
-                                                navController = navController,
-                                                navBackStackEntry = navStackEntry,
-                                                snackBarHostState = snackBarHostState,
-                                                drawerState = drawerState,
-                                                requestHideNavigator = requestHideBottomNav,
-                                                requestedHideSystemStatusBar = requestHideSystemStatusBar,
-                                                requestHideSystemNavbar = requestHideSystemNavBar,
-                                                requestedCustomSystemColor = requestedCustomColor,
-                                                scrollBehavior = scrollBehavior,
-                                                topScrollState = topAppBarState,
-
-                                            )
-                                        )
-                                    }
-                                )
-                                if (haveCustomizedVariantBottomAppBar) {
-                                    screenSpec?.BottomAppBar(
-                                        Controller(
-                                            navController = navController,
-                                            navBackStackEntry = navStackEntry,
-                                            snackBarHostState = snackBarHostState,
-                                            drawerState = drawerState,
-                                            requestHideNavigator = requestHideBottomNav,
-                                            requestedHideSystemStatusBar = requestHideSystemStatusBar,
-                                            requestHideSystemNavbar = requestHideSystemNavBar,
-                                            requestedCustomSystemColor = requestedCustomColor,
-                                            scrollBehavior = scrollBehavior,
-                                            topScrollState = topAppBarState,
-
-                                        )
-                                    )
-                                }
-                            }
-
                             AnimatedVisibility(
                                 visible = (hideBottomBar == null || hideBottomBar == true) && !requestedHideBottomNav,
                                 enter = slideInVertically(initialOffsetY = { it }),
@@ -275,7 +211,6 @@ fun ScreenContent() {
                                             navController = navController,
                                             navBackStackEntry = navBackStackEntry,
                                             snackBarHostState = snackBarHostState,
-                                            drawerState = drawerState,
                                             requestHideNavigator = requestHideBottomNav,
                                             requestedHideSystemStatusBar = requestHideSystemStatusBar,
                                             requestHideSystemNavbar = requestHideSystemNavBar,
@@ -290,7 +225,6 @@ fun ScreenContent() {
                     }
                 }
             }
-    }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -324,7 +258,7 @@ fun IModalSheets(
 @Composable
 fun IModalDrawer(
     modifier: Modifier = Modifier,
-    isEnable: Boolean = false,
+    isEnable: Boolean = true,
     state: DrawerState,
     sheetContent: @Composable () -> Unit,
     content: @Composable () -> Unit

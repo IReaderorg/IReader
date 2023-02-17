@@ -58,20 +58,6 @@ sealed interface ScreenSpec {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun BottomAppBar(
-        controller: Controller
-    ) {
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun ModalDrawer(
-        controller: Controller
-    ) {
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
     fun Content(
         controller: Controller,
     )

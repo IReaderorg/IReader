@@ -9,6 +9,7 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +27,7 @@ import ireader.core.log.Log
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.models.prefs.readerThemes
 import ireader.presentation.R
+import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.ui.component.*
@@ -109,268 +111,256 @@ object TTSScreenSpec : ScreenSpec {
             }
         }
         val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-        IModalSheets(
+        val drawerState = rememberDrawerState(DrawerValue.Closed)
+        IModalDrawer(
+            state = drawerState,
             sheetContent = {
-                LaunchedEffect(key1 = sheetState.hashCode()) {
-                    sheetState.hide()
-                }
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                ) {
-                    ChipChoicePreference(
-                        preference = vm.voice,
-                        choices = vm.uiVoices.associate { voice ->
-                            return@associate voice to voice.localDisplayName
-                        },
-                        title = stringResource(id = R.string.voices),
-                        onFailToFindElement = stringResource(id = R.string.system_default)
-                    )
-                    ChipChoicePreference(
-                        preference = vm.language,
-                        choices = vm.languages.associate { language ->
-                            return@associate language.displayName to language.displayName
-                        },
-                        title = stringResource(id = R.string.languages),
-                        onFailToFindElement = stringResource(id = R.string.system_default)
-                    )
-                    ThemePreference(onBackgroundChange = {
-                        vm.theme.value = it
-                    }, themes = readerThemes, selected = {
-                        vm.theme.value == it
-                    })
-                    SwitchPreference(
-                        preference = vm.isTtsTrackerEnable,
-                        title = stringResource(id = R.string.tracker)
-                    )
-                    SwitchPreference(
-                        preference = vm.autoNext,
-                        title = stringResource(id = R.string.auto_next_chapter)
-                    )
-                    SliderPreference(
-                        title = stringResource(R.string.speech_rate),
-                        preferenceAsFloat = vm.speechRate,
-                        valueRange = .5F..3F,
-                        trailing = vm.speechRate.value.toBigDecimal().setScale(1, RoundingMode.FLOOR)
-                            .toString()
-                    )
-                    SliderPreference(
-                        title = stringResource(R.string.pitch),
-                        preferenceAsFloat = vm.speechPitch,
-                        valueRange = .5F..2.1F,
-                        trailing = vm.speechPitch.value.toBigDecimal().setScale(1, RoundingMode.FLOOR)
-                            .toString()
-                    )
-                    SwitchPreference(
-                        preference = vm.sleepModeUi,
-                        title = stringResource(id = R.string.enable_sleep_timer)
-                    )
-                    SliderPreference(
-                        title = stringResource(R.string.sleep),
-                        preferenceAsLong = vm.sleepTimeUi,
-                        valueRange = 0F..60F,
-                        trailing = "${vm.sleepTimeUi.value.toInt()} M",
-                        isEnable = vm.sleepModeUi.value
-                    )
-                    Components.Chip(
-                        preference = listOf(
-                            stringResource(id = R.string.top_left),
-                            stringResource(id = R.string.bottom_left),
-                            stringResource(id = R.string.hide),
-                        ),
-                        title = stringResource(id = R.string.alignment),
-                        onValueChange = {
-                            when (it) {
-                                0 -> vm.ttsIconAlignments.value = PreferenceValues.PreferenceAlignment.TopLeft
-                                1 -> vm.ttsIconAlignments.value = PreferenceValues.PreferenceAlignment.BottomLeft
-                                2 -> vm.ttsIconAlignments.value = PreferenceValues.PreferenceAlignment.Hide
-                            }
-                        },
-                        selected = vm.ttsIconAlignments.value.ordinal
-                    ).Build()
-                }
-            },
-            bottomSheetState = sheetState,
-        ) {
-        IScaffold(
-            topBar = {
                 val scope = rememberCoroutineScope()
-                CustomizeAnimateVisibility(visible = !vm.fullScreenMode) {
-                    TTSTopBar(
-                        onPopBackStack = {
-                            controller.navController.popBackStack()
-                        },
-                        scrollBehavior = controller.scrollBehavior,
-                        onSetting = {
-                            scope.launch {
-                                sheetState.show()
-                            }
-                        },
-                        onContent = {
-                            scope.launch {
-                                controller.drawerState.animateTo(
-                                    DrawerValue.Open,
-                                    TweenSpec()
-                                )
-                            }
-                        },
-                        vm = vm,
-                    )
-                }
-            }
-        ) { scaffoldPadding ->
-            TTSScreen(
-                modifier = Modifier,
-                vm = vm,
-                onChapter = { ch ->
-                    vm.getLocalChapter(ch.id)
-                },
-                source = vm.ttsSource,
-                onPopStack = {
-                    controller.navController.popBackStack()
-                },
-                lazyState = lazyState,
-                bottomSheetState = sheetState,
-                drawerState = controller.drawerState,
-                paddingValues = scaffoldPadding,
-                onPlay = {
-                    vm.play(context)
-                }
-            )
+                val drawerScrollState = rememberLazyListState()
+                val chapter = vm.ttsChapter
+                LaunchedEffect(key1 =drawerState.targetValue) {
+                    if (chapter != null && drawerState.targetValue == androidx.compose.material3.DrawerValue.Open && vm.ttsChapters.isNotEmpty()) {
 
-        }
-    }
-
-        LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph) {
-            try {
-                if (vm.currentReadingParagraph != vm.prevPar && vm.ttsState.currentReadingParagraph < lazyState.layoutInfo.totalItemsCount) {
-                    if(vm.currentReadingParagraph !in lazyState.layoutInfo.visibleItemsInfo.map { it.index }.dropLast(2) || vm.isTtsTrackerEnable.value) {
-                        lazyState.scrollToItem(
-                            vm.currentReadingParagraph
-                        )
-                    }
-
-                    if (vm.isPlaying) {
-                        delay(100)
-                        vm.controller?.transportControls?.seekTo(vm.ttsState.currentReadingParagraph.toLong())
-                    } else {
-                        vm.controller?.transportControls?.seekTo(vm.ttsState.currentReadingParagraph.toLong())
-                    }
-                }
-            } catch (e: Throwable) {
-                Log.error(e, "")
-            }
-        }
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    override fun BottomAppBar(controller: Controller) {
-        val vm: TTSViewModel  = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
-            org.koin.core.parameter.parametersOf(
-                TTSViewModel.createParam(controller)
-            )
-        })
-        val context = LocalContext.current
-        val scrollableTabsHeight = LocalDensity.current.run {
-            NavigationBarTokens.ContainerHeight + (if (controller.scrollBehavior.state.heightOffset == controller.scrollBehavior.state.heightOffsetLimit) controller.scrollBehavior.state.heightOffset * 2 else controller.scrollBehavior.state.heightOffsetLimit).toDp()
-        }
-        CustomizeAnimateVisibility(visible = !vm.fullScreenMode, goUp = false) {
-            androidx.compose.material3.BottomAppBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(NavigationBarTokens.ContainerHeight * 2),
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                content = {
-                    Column() {
-                        TTLScreenPlay(
-                            modifier = Modifier.padding(PaddingValues(0.dp)),
-                            vm = vm,
-                            onValueChange = {
-                                vm.controller?.transportControls?.seekTo(it.toLong())
-                            },
-                            onValueChangeFinished = {},
-                            content = vm.ttsContent?.value
-                        )
-                        MediaControllers(
-                            vm = vm,
-                            onPrev = {
-                                vm.controller?.transportControls?.skipToPrevious()
-                            },
-                            onPlay = {
-                                vm.play(context)
-                            },
-                            onNext = {
-                                vm.controller?.transportControls?.skipToNext()
-                            },
-                            onPrevPar = {
-                                vm.controller?.transportControls?.rewind()
-                            },
-                            onNextPar = {
-                                vm.controller?.transportControls?.fastForward()
-                            },
-                        )
-                    }
-                }
-            )
-        }
-
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    override fun ModalDrawer(
-        controller: Controller
-    ) {
-        val vm: TTSViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
-            org.koin.core.parameter.parametersOf(
-                TTSViewModel.createParam(controller)
-            )
-        })
-        val scope = rememberCoroutineScope()
-        val drawerScrollState = rememberLazyListState()
-        val chapter = vm.ttsChapter
-        LaunchedEffect(key1 = controller.drawerState.targetValue) {
-            if (chapter != null && controller.drawerState.targetValue == androidx.compose.material3.DrawerValue.Open && vm.ttsChapters.isNotEmpty()) {
-
-                val index = vm.ttsChapters.indexOfFirst { it.id == chapter.id }
-                if (index != -1) {
-                    drawerScrollState.scrollToItem(index)
-                }
-            }
-        }
-        ReaderScreenDrawer(
-            modifier = Modifier.statusBarsPadding(),
-            onReverseIcon = {
-                if (vm.ttsChapter != null) {
-                    vm.isDrawerAsc = !vm.isDrawerAsc
-                }
-            },
-            onChapter = { ch ->
-                vm.getLocalChapter(ch.id)
-            },
-            chapter = vm.ttsChapter,
-            chapters = vm.uiChapters.value,
-            drawerScrollState = drawerScrollState,
-            onMap = { drawer ->
-                scope.launch {
-                    try {
-                        val index =
-                            vm.ttsState.uiChapters.value.indexOfFirst { it.id == vm.ttsChapter?.id }
+                        val index = vm.ttsChapters.indexOfFirst { it.id == chapter.id }
                         if (index != -1) {
-                            drawer.scrollToItem(
-                                index,
-                                -drawer.layoutInfo.viewportEndOffset / 2
+                            drawerScrollState.scrollToItem(index)
+                        }
+                    }
+                }
+                ReaderScreenDrawer(
+                    modifier = Modifier.statusBarsPadding(),
+                    onReverseIcon = {
+                        if (vm.ttsChapter != null) {
+                            vm.isDrawerAsc = !vm.isDrawerAsc
+                        }
+                    },
+                    onChapter = { ch ->
+                        vm.getLocalChapter(ch.id)
+                    },
+                    chapter = vm.ttsChapter,
+                    chapters = vm.uiChapters.value,
+                    drawerScrollState = drawerScrollState,
+                    onMap = { drawer ->
+                        scope.launch {
+                            try {
+                                val index =
+                                    vm.ttsState.uiChapters.value.indexOfFirst { it.id == vm.ttsChapter?.id }
+                                if (index != -1) {
+                                    drawer.scrollToItem(
+                                        index,
+                                        -drawer.layoutInfo.viewportEndOffset / 2
+                                    )
+                                }
+                            } catch (e: Throwable) {
+                            }
+                        }
+                    },
+                )
+            }
+        ) {
+            IModalSheets(
+                sheetContent = {
+                    LaunchedEffect(key1 = sheetState.hashCode()) {
+                        sheetState.hide()
+                    }
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    ) {
+                        ChipChoicePreference(
+                            preference = vm.voice,
+                            choices = vm.uiVoices.associate { voice ->
+                                return@associate voice to voice.localDisplayName
+                            },
+                            title = stringResource(id = R.string.voices),
+                            onFailToFindElement = stringResource(id = R.string.system_default)
+                        )
+                        ChipChoicePreference(
+                            preference = vm.language,
+                            choices = vm.languages.associate { language ->
+                                return@associate language.displayName to language.displayName
+                            },
+                            title = stringResource(id = R.string.languages),
+                            onFailToFindElement = stringResource(id = R.string.system_default)
+                        )
+                        ThemePreference(onBackgroundChange = {
+                            vm.theme.value = it
+                        }, themes = readerThemes, selected = {
+                            vm.theme.value == it
+                        })
+                        SwitchPreference(
+                            preference = vm.isTtsTrackerEnable,
+                            title = stringResource(id = R.string.tracker)
+                        )
+                        SwitchPreference(
+                            preference = vm.autoNext,
+                            title = stringResource(id = R.string.auto_next_chapter)
+                        )
+                        SliderPreference(
+                            title = stringResource(R.string.speech_rate),
+                            preferenceAsFloat = vm.speechRate,
+                            valueRange = .5F..3F,
+                            trailing = vm.speechRate.value.toBigDecimal()
+                                .setScale(1, RoundingMode.FLOOR)
+                                .toString()
+                        )
+                        SliderPreference(
+                            title = stringResource(R.string.pitch),
+                            preferenceAsFloat = vm.speechPitch,
+                            valueRange = .5F..2.1F,
+                            trailing = vm.speechPitch.value.toBigDecimal()
+                                .setScale(1, RoundingMode.FLOOR)
+                                .toString()
+                        )
+                        SwitchPreference(
+                            preference = vm.sleepModeUi,
+                            title = stringResource(id = R.string.enable_sleep_timer)
+                        )
+                        SliderPreference(
+                            title = stringResource(R.string.sleep),
+                            preferenceAsLong = vm.sleepTimeUi,
+                            valueRange = 0F..60F,
+                            trailing = "${vm.sleepTimeUi.value.toInt()} M",
+                            isEnable = vm.sleepModeUi.value
+                        )
+                        Components.Chip(
+                            preference = listOf(
+                                stringResource(id = R.string.top_left),
+                                stringResource(id = R.string.bottom_left),
+                                stringResource(id = R.string.hide),
+                            ),
+                            title = stringResource(id = R.string.alignment),
+                            onValueChange = {
+                                when (it) {
+                                    0 -> vm.ttsIconAlignments.value =
+                                        PreferenceValues.PreferenceAlignment.TopLeft
+                                    1 -> vm.ttsIconAlignments.value =
+                                        PreferenceValues.PreferenceAlignment.BottomLeft
+                                    2 -> vm.ttsIconAlignments.value =
+                                        PreferenceValues.PreferenceAlignment.Hide
+                                }
+                            },
+                            selected = vm.ttsIconAlignments.value.ordinal
+                        ).Build()
+                    }
+                },
+                bottomSheetState = sheetState,
+            ) {
+                IScaffold(
+                    topBar = {
+                        val scope = rememberCoroutineScope()
+                        CustomizeAnimateVisibility(visible = !vm.fullScreenMode) {
+                            TTSTopBar(
+                                onPopBackStack = {
+                                    controller.navController.popBackStack()
+                                },
+                                scrollBehavior = controller.scrollBehavior,
+                                onSetting = {
+                                    scope.launch {
+                                        sheetState.show()
+                                    }
+                                },
+                                onContent = {
+                                    scope.launch {
+                                      drawerState.animateTo(
+                                            DrawerValue.Open,
+                                            TweenSpec()
+                                        )
+                                    }
+                                },
+                                vm = vm,
                             )
                         }
-                    } catch (e: Throwable) {
+                    },
+                    bottomBar = {
+                        CustomizeAnimateVisibility(visible = !vm.fullScreenMode, goUp = false) {
+                            androidx.compose.material3.BottomAppBar(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(NavigationBarTokens.ContainerHeight * 2),
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                contentColor = MaterialTheme.colorScheme.onSurface,
+                                content = {
+                                    Column() {
+                                        TTLScreenPlay(
+                                            modifier = Modifier.padding(PaddingValues(0.dp)),
+                                            vm = vm,
+                                            onValueChange = {
+                                                vm.controller?.transportControls?.seekTo(it.toLong())
+                                            },
+                                            onValueChangeFinished = {},
+                                            content = vm.ttsContent?.value
+                                        )
+                                        MediaControllers(
+                                            vm = vm,
+                                            onPrev = {
+                                                vm.controller?.transportControls?.skipToPrevious()
+                                            },
+                                            onPlay = {
+                                                vm.play(context)
+                                            },
+                                            onNext = {
+                                                vm.controller?.transportControls?.skipToNext()
+                                            },
+                                            onPrevPar = {
+                                                vm.controller?.transportControls?.rewind()
+                                            },
+                                            onNextPar = {
+                                                vm.controller?.transportControls?.fastForward()
+                                            },
+                                        )
+                                    }
+                                }
+                            )
+                        }
                     }
+                ) { scaffoldPadding ->
+                    TTSScreen(
+                        modifier = Modifier,
+                        vm = vm,
+                        onChapter = { ch ->
+                            vm.getLocalChapter(ch.id)
+                        },
+                        source = vm.ttsSource,
+                        onPopStack = {
+                            controller.navController.popBackStack()
+                        },
+                        lazyState = lazyState,
+                        bottomSheetState = sheetState,
+                        drawerState = drawerState,
+                        paddingValues = scaffoldPadding,
+                        onPlay = {
+                            vm.play(context)
+                        }
+                    )
+
                 }
-            },
-        )
+            }
+
+            LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph) {
+                try {
+                    if (vm.currentReadingParagraph != vm.prevPar && vm.ttsState.currentReadingParagraph < lazyState.layoutInfo.totalItemsCount) {
+                        if (vm.currentReadingParagraph !in lazyState.layoutInfo.visibleItemsInfo.map { it.index }
+                                .dropLast(2) || vm.isTtsTrackerEnable.value) {
+                            lazyState.scrollToItem(
+                                vm.currentReadingParagraph
+                            )
+                        }
+
+                        if (vm.isPlaying) {
+                            delay(100)
+                            vm.controller?.transportControls?.seekTo(vm.ttsState.currentReadingParagraph.toLong())
+                        } else {
+                            vm.controller?.transportControls?.seekTo(vm.ttsState.currentReadingParagraph.toLong())
+                        }
+                    }
+                } catch (e: Throwable) {
+                    Log.error(e, "")
+                }
+            }
+        }
     }
 
 
