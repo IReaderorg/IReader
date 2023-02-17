@@ -25,6 +25,7 @@ import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.R
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.core.theme.LocalHideNavigator
 import ireader.presentation.ui.home.library.LibraryController
 import org.koin.androidx.compose.getViewModel
 
@@ -45,9 +46,9 @@ object LibraryScreenSpec : BottomNavScreenSpec {
         controller: Controller
     ) {
         val vm: LibraryViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
-
+        val hideNavigator = LocalHideNavigator.current
         LaunchedEffect(key1 = vm.selectionMode) {
-            controller.requestHideNavigator(vm.selectionMode)
+            hideNavigator.value = vm.selectionMode
         }
         val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
 
@@ -117,7 +118,10 @@ object LibraryScreenSpec : BottomNavScreenSpec {
                         )
                     },
                     scaffoldPadding = scaffoldPadding,
-                    sheetState = sheetState
+                    sheetState = sheetState,
+                    requestHideNavigator = {
+                        hideNavigator.value = it
+                    }
                 )
             }
         }

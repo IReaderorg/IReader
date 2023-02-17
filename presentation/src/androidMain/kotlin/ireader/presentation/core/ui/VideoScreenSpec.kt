@@ -48,7 +48,6 @@ object VideoScreenSpec : ScreenSpec {
 
         val state = vm.mediaState
         DisposableEffect(key1 = true) {
-            controller.requestedHideSystemStatusBar(true)
             context.findComponentActivity()?.let { activity ->
                 activity.findComponentActivity()?.hideSystemUI()
             }
@@ -56,7 +55,6 @@ object VideoScreenSpec : ScreenSpec {
                 context.findComponentActivity()?.let { activity ->
                     activity.findComponentActivity()?.showSystemUI()
                 }
-                controller.requestedHideSystemStatusBar(false)
             }
         }
         val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)

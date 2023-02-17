@@ -41,6 +41,7 @@ import ireader.presentation.ui.book.components.ChapterScreenBottomTabComposable
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.core.theme.TransparentStatusBar
 import ireader.presentation.ui.core.ui.SnackBarListener
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
@@ -89,16 +90,6 @@ object BookDetailScreenSpec : ScreenSpec {
         val scrollState = rememberLazyListState();
         val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
 
-        DisposableEffect(key1 = true) {
-            controller.requestedHideSystemStatusBar(true)
-
-            onDispose {
-                controller.requestedHideSystemStatusBar(false)
-            }
-        }
-        LaunchedEffect(vm.hasSelection) {
-            controller.requestedHideSystemStatusBar(!vm.hasSelection)
-        }
 
         val topbarState = rememberTopAppBarState()
         val snackBarHostState = SnackBarListener(vm)
@@ -161,233 +152,242 @@ object BookDetailScreenSpec : ScreenSpec {
             },
             bottomSheetState = sheetState
         ) {
-        IScaffold(
-            topBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topbarState) ,
-            snackbarHostState = snackbarHostState,
-            topBar = { scrollBehavior ->
-                val context = LocalContext.current
-                val onShare =
-                    rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
-                        if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
-                            val uri = resultIntent.data!!.data!!
-                            context.findComponentActivity()?.lifecycleScope?.launchIO {
-                                try {
-                                    vm.booksState.book?.let {
-                                        vm.showSnackBar(UiText.StringResource(R.string.wait))
-                                        vm.createEpub(it, uri, context)
-                                        vm.showSnackBar(UiText.StringResource(R.string.success))
+            TransparentStatusBar {
+                IScaffold(
+                    topBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
+                        topbarState
+                    ),
+                    snackbarHostState = snackbarHostState,
+                    topBar = { scrollBehavior ->
+                        val context = LocalContext.current
+                        val onShare =
+                            rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
+                                if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
+                                    val uri = resultIntent.data!!.data!!
+                                    context.findComponentActivity()?.lifecycleScope?.launchIO {
+                                        try {
+                                            vm.booksState.book?.let {
+                                                vm.showSnackBar(UiText.StringResource(R.string.wait))
+                                                vm.createEpub(it, uri, context)
+                                                vm.showSnackBar(UiText.StringResource(R.string.success))
+                                            }
+                                        } catch (e: Throwable) {
+                                            vm.showSnackBar(UiText.ExceptionString(e))
+                                        }
                                     }
-                                } catch (e: Throwable) {
-                                    vm.showSnackBar(UiText.ExceptionString(e))
                                 }
                             }
-                        }
+                        BookDetailTopAppBar(
+                            scrollBehavior = scrollBehavior,
+                            onRefresh = {
+                                scope.launch {
+                                    if (book != null) {
+                                        vm.getRemoteBookDetail(book, source = catalog)
+                                        vm.getRemoteChapterDetail(book, catalog)
+                                    }
+                                }
+                            },
+                            onPopBackStack = {
+                                controller.navController.popBackStack()
+                            },
+                            source = vm.source,
+                            onCommand = {
+                                scope.launch {
+                                    sheetState.show()
+                                }
+                            },
+                            onShare = {
+                                book?.let { book ->
+                                    vm.onEpubCreateRequested(book) {
+                                        onShare.launch(it)
+                                    }
+                                }
+                            },
+                            state = vm,
+                            onSelectBetween = {
+                                val ids: List<Long> =
+                                    vm.chapters.map { it.id }
+                                        .filter { it in vm.selection }.distinct().sortedBy { it }
+                                        .let {
+                                            val list = mutableListOf<Long>()
+                                            val min = it.minOrNull() ?: 0
+                                            val max = it.maxOrNull() ?: 0
+                                            for (id in min..max) {
+                                                list.add(id)
+                                            }
+                                            list
+                                        }
+                                vm.selection.clear()
+                                vm.selection.addAll(ids)
+                            },
+                            onClickSelectAll = {
+                                vm.selection.clear()
+                                vm.selection.addAll(vm.chapters.map { it.id })
+                                vm.selection.distinct()
+                            },
+                            onClickInvertSelection = {
+                                val ids: List<Long> =
+                                    vm.chapters.map { it.id }
+                                        .filterNot { it in vm.selection }.distinct()
+                                vm.selection.clear()
+                                vm.selection.addAll(ids)
+                            },
+                            onClickCancelSelection = {
+                                vm.selection.clear()
+                            },
+                            paddingValues = PaddingValues(0.dp),
+                            onDownload = {
+                                if (book != null) {
+                                    vm.startDownloadService(book = book)
+                                }
+                            },
+                            onInfo = {
+                                vm.showDialog = true
+                            }
+                        )
                     }
-                BookDetailTopAppBar(
-                    scrollBehavior = scrollBehavior,
-                    onRefresh = {
-                        scope.launch {
-                            if (book != null) {
-                                vm.getRemoteBookDetail(book, source = catalog)
+                ) { scaffoldPadding ->
+                    BookDetailScreen(
+                        modifier = Modifier,
+                        onSummaryExpand = {
+                            vm.expandedSummary = !vm.expandedSummary
+                        },
+                        onSwipeRefresh = {
+                            scope.launch {
                                 vm.getRemoteChapterDetail(book, catalog)
                             }
-                        }
-                    },
-                    onPopBackStack = {
-                        controller.navController.popBackStack()
-                    },
-                    source = vm.source,
-                    onCommand = {
-                        scope.launch {
-                            sheetState.show()
-                        }
-                    },
-                    onShare = {
-                        book?.let { book ->
-                            vm.onEpubCreateRequested(book) {
-                                onShare.launch(it)
-                            }
-                        }
-                    },
-                    state = vm,
-                    onSelectBetween = {
-                        val ids: List<Long> =
-                            vm.chapters.map { it.id }
-                                .filter { it in vm.selection }.distinct().sortedBy { it }.let {
-                                    val list = mutableListOf<Long>()
-                                    val min = it.minOrNull() ?: 0
-                                    val max = it.maxOrNull() ?: 0
-                                    for (id in min..max) {
-                                        list.add(id)
-                                    }
-                                    list
-                                }
-                        vm.selection.clear()
-                        vm.selection.addAll(ids)
-                    },
-                    onClickSelectAll = {
-                        vm.selection.clear()
-                        vm.selection.addAll(vm.chapters.map { it.id })
-                        vm.selection.distinct()
-                    },
-                    onClickInvertSelection = {
-                        val ids: List<Long> =
-                            vm.chapters.map { it.id }
-                                .filterNot { it in vm.selection }.distinct()
-                        vm.selection.clear()
-                        vm.selection.addAll(ids)
-                    },
-                    onClickCancelSelection = {
-                        vm.selection.clear()
-                    },
-                    paddingValues = PaddingValues(0.dp),
-                    onDownload = {
-                        if (book != null) {
-                            vm.startDownloadService(book = book)
-                        }
-                    },
-                    onInfo = {
-                        vm.showDialog = true
-                    }
-                )
-            }
-        ) { scaffoldPadding ->
-            BookDetailScreen(
-                modifier = Modifier,
-                onSummaryExpand = {
-                    vm.expandedSummary = !vm.expandedSummary
-                },
-                onSwipeRefresh = {
-                    scope.launch {
-                        vm.getRemoteChapterDetail(book, catalog)
-                    }
-                },
-                book = book ?: Book(key = "", sourceId = 0, title = ""),
-                vm = vm,
-                onTitle = {
-                    try {
-                        controller.navController.navigate(GlobalSearchScreenSpec.buildRoute(query = it))
-                    } catch (e: Throwable) {
-                    }
-                },
-                snackBarHostState = snackBarHostState,
-                modalBottomSheetState = sheetState,
-                isSummaryExpanded = vm.expandedSummary,
-                source = vm.source,
-                appbarPadding = scaffoldPadding.calculateTopPadding(),
-                onItemClick = { chapter ->
-                    if (vm.selection.isEmpty()) {
-                        if (book != null) {
-                            when (chapter.type) {
-                                ChapterInfo.MOVIE -> {
-                                    controller.navController.navigate(
-                                        VideoScreenSpec.buildRoute(
-                                            chapterId = chapter.id,
-                                        )
+                        },
+                        book = book ?: Book(key = "", sourceId = 0, title = ""),
+                        vm = vm,
+                        onTitle = {
+                            try {
+                                controller.navController.navigate(
+                                    GlobalSearchScreenSpec.buildRoute(
+                                        query = it
                                     )
+                                )
+                            } catch (e: Throwable) {
+                            }
+                        },
+                        snackBarHostState = snackBarHostState,
+                        modalBottomSheetState = sheetState,
+                        isSummaryExpanded = vm.expandedSummary,
+                        source = vm.source,
+                        appbarPadding = scaffoldPadding.calculateTopPadding(),
+                        onItemClick = { chapter ->
+                            if (vm.selection.isEmpty()) {
+                                if (book != null) {
+                                    when (chapter.type) {
+                                        ChapterInfo.MOVIE -> {
+                                            controller.navController.navigate(
+                                                VideoScreenSpec.buildRoute(
+                                                    chapterId = chapter.id,
+                                                )
+                                            )
+                                        }
+                                        else -> {
+                                            controller.navController.navigate(
+                                                ReaderScreenSpec.buildRoute(
+                                                    bookId = book.id,
+                                                    chapterId = chapter.id,
+                                                )
+                                            )
+                                        }
+                                    }
+
+                                }
+                            } else {
+                                when (chapter.id) {
+                                    in vm.selection -> {
+                                        vm.selection.remove(chapter.id)
+                                    }
+                                    else -> {
+                                        vm.selection.add(chapter.id)
+                                    }
+                                }
+                            }
+                        },
+                        onLongItemClick = { chapter ->
+                            when (chapter.id) {
+                                in vm.selection -> {
+                                    vm.selection.remove(chapter.id)
                                 }
                                 else -> {
+                                    vm.selection.add(chapter.id)
+                                }
+                            }
+                        },
+                        onRead = {
+                            if (catalog != null && book != null) {
+                                if (vm.chapters.any { it.read } && vm.chapters.isNotEmpty()) {
                                     controller.navController.navigate(
                                         ReaderScreenSpec.buildRoute(
                                             bookId = book.id,
-                                            chapterId = chapter.id,
+                                            chapterId = LAST_CHAPTER,
                                         )
                                     )
+                                } else if (vm.chapters.isNotEmpty()) {
+                                    controller.navController.navigate(
+                                        ReaderScreenSpec.buildRoute(
+                                            bookId = book.id,
+                                            chapterId = vm.chapters.first().id,
+                                        )
+                                    )
+                                } else {
+                                    scope.launch {
+                                        vm.showSnackBar(UiText.StringResource(R.string.no_chapter_is_available))
+                                    }
+                                }
+                            } else {
+                                scope.launch {
+                                    vm.showSnackBar(UiText.StringResource(R.string.source_not_available))
                                 }
                             }
-
-                        }
-                    } else {
-                        when (chapter.id) {
-                            in vm.selection -> {
-                                vm.selection.remove(chapter.id)
-                            }
-                            else -> {
-                                vm.selection.add(chapter.id)
-                            }
-                        }
-                    }
-                },
-                onLongItemClick = { chapter ->
-                    when (chapter.id) {
-                        in vm.selection -> {
-                            vm.selection.remove(chapter.id)
-                        }
-                        else -> {
-                            vm.selection.add(chapter.id)
-                        }
-                    }
-                },
-                onRead = {
-                    if (catalog != null && book != null) {
-                        if (vm.chapters.any { it.read } && vm.chapters.isNotEmpty()) {
-                            controller.navController.navigate(
-                                ReaderScreenSpec.buildRoute(
-                                    bookId = book.id,
-                                    chapterId = LAST_CHAPTER,
-                                )
-                            )
-                        } else if (vm.chapters.isNotEmpty()) {
-                            controller.navController.navigate(
-                                ReaderScreenSpec.buildRoute(
-                                    bookId = book.id,
-                                    chapterId = vm.chapters.first().id,
-                                )
-                            )
-                        } else {
+                        },
+                        onSortClick = {
                             scope.launch {
-                                vm.showSnackBar(UiText.StringResource(R.string.no_chapter_is_available))
+                                vm.chapterMode = true
+                                sheetState.show()
                             }
-                        }
-                    } else {
-                        scope.launch {
-                            vm.showSnackBar(UiText.StringResource(R.string.source_not_available))
-                        }
-                    }
-                },
-                onSortClick = {
-                    scope.launch {
-                        vm.chapterMode = true
-                        sheetState.show()
-                    }
-                },
-                chapters = chapters,
-                scrollState = scrollState,
-                onMap = {
-                    scope.launch {
-                        try {
-                            scrollState?.scrollToItem(
-                                vm.getLastChapterIndex(),
-                                -scrollState.layoutInfo.viewportEndOffset / 2
-                            )
-                        } catch (e: Throwable) {
-                        }
-                    }
-                },
-                onWebView = {
-                    if (source != null && source is HttpSource && book != null) {
-                        controller.navController.navigate(
-                            WebViewScreenSpec.buildRoute(
-                                url = book.key,
-                                sourceId = book.sourceId,
-                                bookId = book.id,
-                                chapterId = null,
-                                enableChaptersFetch = true,
-                                enableBookFetch = true
-                            )
-                        )
-                    }
-                },
-                onFavorite = {
-                    if (book != null) {
-                        vm.toggleInLibrary(book = book)
-                    }
-                },
-                controller = controller
+                        },
+                        chapters = chapters,
+                        scrollState = scrollState,
+                        onMap = {
+                            scope.launch {
+                                try {
+                                    scrollState?.scrollToItem(
+                                        vm.getLastChapterIndex(),
+                                        -scrollState.layoutInfo.viewportEndOffset / 2
+                                    )
+                                } catch (e: Throwable) {
+                                }
+                            }
+                        },
+                        onWebView = {
+                            if (source != null && source is HttpSource && book != null) {
+                                controller.navController.navigate(
+                                    WebViewScreenSpec.buildRoute(
+                                        url = book.key,
+                                        sourceId = book.sourceId,
+                                        bookId = book.id,
+                                        chapterId = null,
+                                        enableChaptersFetch = true,
+                                        enableBookFetch = true
+                                    )
+                                )
+                            }
+                        },
+                        onFavorite = {
+                            if (book != null) {
+                                vm.toggleInLibrary(book = book)
+                            }
+                        },
+                        controller = controller
 
-            )
+                    )
+                }
+            }
         }
-    }
     }
 
 }

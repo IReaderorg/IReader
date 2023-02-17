@@ -26,7 +26,8 @@ fun LibraryController(
     goToReader: (BookItem) -> Unit,
     goToDetail: (BookItem) -> Unit,
     scaffoldPadding: PaddingValues,
-    sheetState: ModalBottomSheetState
+    sheetState: ModalBottomSheetState,
+    requestHideNavigator : (Boolean) -> Unit
     ) {
 
     LibraryScreen(
@@ -87,7 +88,7 @@ fun LibraryController(
             vm.showDialog = true
         },
         scaffoldPadding = scaffoldPadding,
-        requestHideBottomNav = controller.requestHideNavigator,
+        requestHideBottomNav = requestHideNavigator,
         getColumnsForOrientation = { isLandscape ->
             vm.getColumnsForOrientation(isLandscape, this)
         },

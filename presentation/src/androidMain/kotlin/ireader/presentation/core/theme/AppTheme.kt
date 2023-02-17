@@ -8,12 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.ExperimentalTextApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import ireader.presentation.ui.core.theme.AppColors
-import ireader.presentation.ui.core.theme.AppTypography
-import ireader.presentation.ui.core.theme.LocalCustomSystemCOlor
-import ireader.presentation.ui.core.theme.LocalTransparentStatusBar
-import ireader.presentation.ui.core.theme.Shapes
-import ireader.presentation.ui.core.theme.isLight
+import ireader.presentation.ui.core.theme.*
 import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalTextApi::class)
@@ -26,10 +21,11 @@ fun AppTheme(
     val rippleTheme = vm.getRippleTheme()
     val systemUiController = rememberSystemUiController()
     val transparentStatusBar = LocalTransparentStatusBar.current.enabled
-    val isCustomColorEnable = LocalCustomSystemCOlor.current.enabled
-    val status = LocalCustomSystemCOlor.current.enabled
-    val navigation = LocalCustomSystemCOlor.current.enabled
-    val customStatusColor = LocalCustomSystemCOlor.current
+    val isCustomColorEnable = LocalCustomSystemColor.current.enabled
+    val status = LocalCustomSystemColor.current.enabled
+    val navigation = LocalCustomSystemColor.current.enabled
+    val customStatusColor = LocalCustomSystemColor.current
+    val hideNavigator = LocalHideNavigator.current
 
     systemUiController.setSystemBarsColor(
         color = customColors.bars,
@@ -82,6 +78,7 @@ fun AppTheme(
     ) {
         CompositionLocalProvider(
             LocalRippleTheme provides rippleTheme,
+            LocalHideNavigator provides hideNavigator,
             content = content
         )
     }
