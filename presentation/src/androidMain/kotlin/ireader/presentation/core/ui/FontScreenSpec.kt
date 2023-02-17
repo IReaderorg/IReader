@@ -34,7 +34,7 @@ object FontScreenSpec : ScreenSpec {
         val vm: FontScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
 
         IScaffold(
-            topBar = {
+            topBar = { scrollBehavior ->
                 SearchToolbar(
                     title = stringResource(R.string.font),
                     actions = {
@@ -55,7 +55,7 @@ object FontScreenSpec : ScreenSpec {
                     onSearch = {
                         vm.searchQuery = it
                     },
-                    scrollBehavior = controller.scrollBehavior
+                    scrollBehavior = scrollBehavior
                 )
             }
         ) { padding ->

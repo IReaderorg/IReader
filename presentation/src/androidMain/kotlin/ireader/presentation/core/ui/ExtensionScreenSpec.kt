@@ -20,6 +20,7 @@ import ireader.presentation.ui.component.Controller
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.R
 import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.home.sources.extension.ExtensionScreen
 import ireader.presentation.ui.home.sources.extension.ExtensionScreenTopAppBar
 import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
@@ -47,7 +48,8 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
             mutableStateOf(false)
         }
             val focusManager = LocalFocusManager.current
-        IScaffold(topBar = {
+        val snackBarHostState = SnackBarListener(vm)
+        IScaffold(topBar = { scrollBehavior ->
 
             ExtensionScreenTopAppBar(
                 searchMode = searchMode,
@@ -78,7 +80,7 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
                         GlobalSearchScreenSpec.navHostRoute
                     )
                 },
-                scrollBehavior = controller.scrollBehavior,
+                scrollBehavior = scrollBehavior,
             )
         }) { scaffoldPadding ->
             ExtensionScreen(
@@ -98,7 +100,7 @@ object ExtensionScreenSpec : BottomNavScreenSpec {
                 onClickInstall = { vm.installCatalog(it) },
                 onClickTogglePinned = { vm.togglePinnedCatalog(it) },
                 onClickUninstall = { vm.uninstallCatalog(it) },
-                snackBarHostState = controller.snackBarHostState,
+                snackBarHostState = snackBarHostState,
                 onCancelInstaller = { vm.cancelCatalogJob(it) },
             )
         }

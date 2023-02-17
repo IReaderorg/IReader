@@ -4,6 +4,7 @@ package ireader.presentation.core.ui
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NamedNavArgument
@@ -11,6 +12,7 @@ import ireader.domain.utils.extensions.*
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.ui.component.Controller
+import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.video.VideoPlayerBottomSheet
 import ireader.presentation.ui.video.VideoPresenter
@@ -30,11 +32,10 @@ object VideoScreenSpec : ScreenSpec {
 
     override val arguments: List<NamedNavArgument> = listOf(
         NavigationArgs.chapterId,
-        NavigationArgs.showModalSheet,
     )
 
 
-    @OptIn(ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
     @Composable
     override fun Content(
         controller: Controller
@@ -59,7 +60,7 @@ object VideoScreenSpec : ScreenSpec {
             }
         }
         val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-        SnackBarListener(vm = vm, host = controller.snackBarHostState)
+        val snackBarHostState = SnackBarListener(vm = vm)
         IModalSheets(bottomSheetState = sheetState,
         sheetContent = {
             val stateOfPlayer = state.playerState
@@ -72,6 +73,12 @@ object VideoScreenSpec : ScreenSpec {
                 )
             }
         }) {
+            IScaffold(
+
+                        snackbarHostState = snackBarHostState
+            ) {
+
+            }
             VideoPresenter(
                 vm, onShowMenu = {
                     scope.launch {

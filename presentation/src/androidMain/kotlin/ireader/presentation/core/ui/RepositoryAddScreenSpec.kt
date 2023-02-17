@@ -45,15 +45,15 @@ object RepositoryAddScreenSpec : ScreenSpec {
             mutableStateOf("")
         }
         val vm : SourceRepositoryViewModel =  getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
-        SnackBarListener(vm = vm, host = controller.snackBarHostState)
+        SnackBarListener(vm = vm)
         val showDialog = vm.showAutomaticSourceDialog
         IScaffold(
-            topBar = {
+            topBar = { scrollBehavior ->
                     Toolbar(
                         title = {
                             MidSizeTextComposable(text = stringResource(R.string.repository_adding_a_new))
                         },
-                        scrollBehavior = controller.scrollBehavior,
+                        scrollBehavior = scrollBehavior,
                         actions = {
                             AppIconButton(
                                 imageVector = Icons.Default.ContentPasteSearch,

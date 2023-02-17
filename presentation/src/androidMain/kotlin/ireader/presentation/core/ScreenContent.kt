@@ -46,32 +46,20 @@ import org.koin.androidx.compose.getViewModel
 fun ScreenContent() {
     val navController = rememberAnimatedNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val navStackEntry = navBackStackEntry
+
     val currentDestination = navBackStackEntry?.destination
-    val screenSpec = ScreenSpec.allScreens[currentDestination?.route]
+
     val hideBottomBar = navBackStackEntry?.arguments?.getBoolean(ARG_HIDE_BOTTOM_BAR)
-    val shoeModalSheet = navBackStackEntry?.arguments?.getBoolean(ARG_HAVE_MODAL_SHEET) ?: false
+
     val transparentStatusBar =
         navBackStackEntry?.arguments?.getBoolean(ARG_TRANSPARENT_STATUS_BAR) ?: false
-    val haveDrawer = navBackStackEntry?.arguments?.getBoolean(ARG_HAVE_DRAWER) ?: false
-    val haveVariantBottomAppBar =
-        navBackStackEntry?.arguments?.getBoolean(ARG_HAVE_VARIANT_BOTTOM_BAR) ?: false
-    val haveCustomizedVariantBottomAppBar =
-        navBackStackEntry?.arguments?.getBoolean(ARG_HAVE_CUSTOMIZED_VARIANT_BOTTOM_BAR) ?: false
 
-    val snackBarHostState = remember { SnackbarHostState() }
-    val modalBottomSheetState =
-        rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-    val topAppBarState = rememberTopAppBarState()
+
+
+
 
     val vm: ScreenContentViewModel = getViewModel<ScreenContentViewModel>()
-    val scrollBarBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
-
-    val (scrollBehavior, setScrollBehavior) = remember {
-        mutableStateOf(scrollBarBehavior)
-    }
 
 
 
@@ -105,15 +93,10 @@ fun ScreenContent() {
 
     DisposableEffect(navBackStackEntry) {
         onDispose {
-            scrollBehavior.state.heightOffset = 0F
             requestHideBottomNav(false)
             requestHideSystemStatusBar(false)
             requestHideSystemNavBar(false)
             requestedCustomColor(null)
-            scope.launch {
-                modalBottomSheetState.hide()
-                drawerState.close()
-            }
         }
     }
 
@@ -122,11 +105,8 @@ fun ScreenContent() {
                 statusBar = requestCustomSystemColor?.status ?: Color.White,
                 navigationBar = requestCustomSystemColor?.navigation ?: Color.White
             ) {
-
-                TransparentStatusBar(enable = transparentStatusBar) {
                     Scaffold(
                         modifier = scaffoldModifier.value
-                                .nestedScroll(scrollBehavior.nestedScrollConnection)
                                 .fillMaxSize(),
                         bottomBar = {
                             AnimatedVisibility(
@@ -187,7 +167,6 @@ fun ScreenContent() {
                                 }
                             }
                         },
-                        snackbarHost = { ISnackBarHost(snackBarHostState = snackBarHostState) },
                     ) { padding ->
                         AnimatedNavHost(
                             modifier = Modifier.fillMaxSize(),
@@ -210,20 +189,16 @@ fun ScreenContent() {
                                         Controller(
                                             navController = navController,
                                             navBackStackEntry = navBackStackEntry,
-                                            snackBarHostState = snackBarHostState,
                                             requestHideNavigator = requestHideBottomNav,
                                             requestedHideSystemStatusBar = requestHideSystemStatusBar,
                                             requestHideSystemNavbar = requestHideSystemNavBar,
                                             requestedCustomSystemColor = requestedCustomColor,
-                                            scrollBehavior = scrollBehavior,
-                                            topScrollState = topAppBarState,
                                         )
                                     )
                                 }
                             }
                         }
                     }
-                }
             }
 }
 

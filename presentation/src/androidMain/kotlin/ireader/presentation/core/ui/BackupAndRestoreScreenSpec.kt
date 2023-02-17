@@ -27,16 +27,16 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
         controller: Controller
     ) {
         val vm: BackupScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
-        val host = SnackBarListener(vm = vm)
+        val snackBarHostState = SnackBarListener(vm = vm)
         IScaffold(
-            topBar = {
+            topBar = {scrollBehavior ->
                 TitleToolbar(
                     title = stringResource(R.string.backup_and_restore),
                     navController = controller.navController,
-                    scrollBehavior = controller.scrollBehavior
+                    scrollBehavior = scrollBehavior
                 )
             },
-            snackbarHostState = host
+            snackbarHostState = snackBarHostState
         ) { padding ->
             BackUpAndRestoreScreen(
                 modifier = Modifier.padding(padding),
@@ -45,7 +45,7 @@ object BackupAndRestoreScreenSpec : ScreenSpec {
                 {
                     controller.navController.popBackStack()
                 },
-                snackbarHostState = controller.snackBarHostState,
+                snackbarHostState = snackBarHostState,
                 scaffoldPadding = padding
             )
         }

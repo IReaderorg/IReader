@@ -22,7 +22,6 @@ import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import ireader.i18n.LAST_CHAPTER
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.core.ui.util.NavigationArgs
-import ireader.presentation.core.ui.util.NavigationArgs.showModalSheet
 import ireader.presentation.R
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.ui.component.IScaffold
@@ -38,7 +37,6 @@ object LibraryScreenSpec : BottomNavScreenSpec {
 
     override val arguments: List<NamedNavArgument> = listOf(
         NavigationArgs.showBottomNav,
-        showModalSheet
     )
 
     @OptIn(ExperimentalPagerApi::class)
@@ -78,7 +76,7 @@ object LibraryScreenSpec : BottomNavScreenSpec {
             }
         ) {
             IScaffold(
-                topBar = {
+                topBar = {scrollBehavior ->
                     LibraryScreenTopBar(
                         state = vm,
                         bottomSheetState = sheetState,
@@ -94,7 +92,7 @@ object LibraryScreenSpec : BottomNavScreenSpec {
                         onClickSelectAll = {
                             vm.selectAllInCurrentCategory()
                         },
-                        scrollBehavior = controller.scrollBehavior
+                        scrollBehavior = scrollBehavior
                     )
                 }
             ) { scaffoldPadding ->

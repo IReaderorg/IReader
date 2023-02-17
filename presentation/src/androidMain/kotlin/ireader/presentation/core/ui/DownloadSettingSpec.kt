@@ -17,11 +17,11 @@ object DownloadSettingSpec : ScreenSpec {
     override fun Content(
         controller: Controller
     ) {
-        IScaffold(topBar = {
+        IScaffold(topBar = { scrollBehavior ->
             TitleToolbar(
                 title = stringResource(R.string.download),
                 navController = controller.navController,
-                scrollBehavior = controller.scrollBehavior
+                scrollBehavior = scrollBehavior
             )
         }) {
 

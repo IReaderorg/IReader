@@ -109,11 +109,11 @@ object ReaderSettingSpec : ScreenSpec {
             )
         }
 
-        IScaffold(topBar = {
+        IScaffold(topBar = { scrollBehavior ->
             TitleToolbar(
                 title = stringResource(R.string.reader),
                 navController = controller.navController,
-                scrollBehavior = controller.scrollBehavior
+                scrollBehavior = scrollBehavior
             )
         }) { padding ->
             LazyColumn(

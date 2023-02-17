@@ -15,12 +15,9 @@ data class Controller @OptIn(
 ) constructor(
     val navController: NavController,
     val navBackStackEntry: NavBackStackEntry,
-    val snackBarHostState: SnackbarHostState,
     val requestHideNavigator: (Boolean) -> Unit = {},
     val requestHideSystemNavbar: (Boolean) -> Unit = {},
     val requestedHideSystemStatusBar: (Boolean) -> Unit = {},
     val requestedCustomSystemColor: (CustomSystemColor?) -> Unit = {},
-    val scrollBehavior: TopAppBarScrollBehavior,
-    val topScrollState: TopAppBarState,
     val setScrollBehavior: (TopAppBarScrollBehavior) -> Unit = {},
 )

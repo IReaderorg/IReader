@@ -32,11 +32,11 @@ object AboutSettingSpec : ScreenSpec {
         controller: Controller
     ) {
         IScaffold(
-            topBar = {
+            topBar = { scrollBehavior ->
                 TitleToolbar(
                     title = stringResource(R.string.about),
                     navController = controller.navController,
-                    scrollBehavior = controller.scrollBehavior
+                    scrollBehavior = scrollBehavior
                 )
             }
         ) { padding ->

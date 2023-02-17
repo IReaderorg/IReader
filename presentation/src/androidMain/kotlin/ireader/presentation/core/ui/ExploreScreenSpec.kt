@@ -28,6 +28,7 @@ import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.EmptyScreenComposable
 import ireader.presentation.ui.component.hideKeyboard
+import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.home.explore.BrowseTopAppBar
 import ireader.presentation.ui.home.explore.ExploreScreen
 import ireader.presentation.ui.home.explore.FilterBottomSheet
@@ -47,7 +48,6 @@ object ExploreScreenSpec : ScreenSpec {
     override val arguments: List<NamedNavArgument> = listOf(
         NavigationArgs.query,
         NavigationArgs.sourceId,
-        NavigationArgs.showModalSheet,
     )
 
     fun buildRoute(sourceId: Long, query: String? = null): String {
@@ -78,6 +78,7 @@ object ExploreScreenSpec : ScreenSpec {
             mutableStateOf<Headers?>(null)
         }
         val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+        val snackBarHostState = SnackBarListener(vm)
         IModalSheets(
             sheetContent = {
                 val source = vm.source
@@ -105,12 +106,12 @@ object ExploreScreenSpec : ScreenSpec {
         ) {
 
             IScaffold(
-                topBar = {
+                topBar = { scrollBehavior ->
                     val focusManager = LocalFocusManager.current
                     val source = vm.source
                     val scope = rememberCoroutineScope()
                     BrowseTopAppBar(
-                        scrollBehavior = controller.scrollBehavior,
+                        scrollBehavior = scrollBehavior,
                         state = vm,
                         source = source,
                         onValueChange = {
@@ -209,7 +210,7 @@ object ExploreScreenSpec : ScreenSpec {
                         onPopBackStack = {
                             controller.navController.popBackStack()
                         },
-                        snackBarHostState = controller.snackBarHostState,
+                        snackBarHostState = snackBarHostState,
                         modalState = sheetState,
                         scaffoldPadding = scaffoldPadding,
                         headers = {

@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -56,7 +57,6 @@ object BookDetailScreenSpec : ScreenSpec {
         listOf(
             NavigationArgs.bookId,
             NavigationArgs.transparentStatusBar,
-            NavigationArgs.showModalSheet,
         )
 
     override val deepLinks: List<NavDeepLink> = listOf(
@@ -79,7 +79,7 @@ object BookDetailScreenSpec : ScreenSpec {
                     BookDetailViewModel.createParam(controller)
                 )
             })
-        SnackBarListener(vm = vm, host = controller.snackBarHostState)
+        val snackbarHostState = SnackBarListener(vm = vm)
         val state = vm
         val book = state.booksState.book
         val source = state.catalogSource?.source
@@ -100,6 +100,8 @@ object BookDetailScreenSpec : ScreenSpec {
             controller.requestedHideSystemStatusBar(!vm.hasSelection)
         }
 
+        val topbarState = rememberTopAppBarState()
+        val snackBarHostState = SnackBarListener(vm)
         IModalSheets(
             sheetContent = {
                 val detailState = vm.state
@@ -160,25 +162,10 @@ object BookDetailScreenSpec : ScreenSpec {
             bottomSheetState = sheetState
         ) {
         IScaffold(
-            topBar = {
-                val scope = rememberCoroutineScope()
-                val source = vm.source
-                val catalog = vm.catalogSource
-                val book = vm.booksState.book
+            topBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topbarState) ,
+            snackbarHostState = snackbarHostState,
+            topBar = { scrollBehavior ->
                 val context = LocalContext.current
-                val state = controller.topScrollState
-                val decay = rememberSplineBasedDecay<Float>()
-                val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(state)
-
-                DisposableEffect(key1 = true) {
-                    controller.setScrollBehavior(scrollBehavior)
-                    onDispose {
-                        val defaultBehavior = controller.topScrollState
-                        defaultBehavior.heightOffset = 0F
-                        controller.setScrollBehavior(controller.scrollBehavior)
-                    }
-                }
-
                 val onShare =
                     rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
                         if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
@@ -197,7 +184,7 @@ object BookDetailScreenSpec : ScreenSpec {
                         }
                     }
                 BookDetailTopAppBar(
-                    scrollBehavior = controller.scrollBehavior,
+                    scrollBehavior = scrollBehavior,
                     onRefresh = {
                         scope.launch {
                             if (book != null) {
@@ -283,7 +270,7 @@ object BookDetailScreenSpec : ScreenSpec {
                     } catch (e: Throwable) {
                     }
                 },
-                snackBarHostState = controller.snackBarHostState,
+                snackBarHostState = snackBarHostState,
                 modalBottomSheetState = sheetState,
                 isSummaryExpanded = vm.expandedSummary,
                 source = vm.source,

@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Book
 import ireader.core.source.Source
 import ireader.presentation.R
+import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.list.layouts.BookImage
 import ireader.presentation.ui.component.loading.DotsFlashing
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
@@ -43,13 +44,11 @@ fun GlobalSearchScreen(
     onSearch: (query: String) -> Unit,
     onBook: (Book) -> Unit,
     onGoToExplore: (SearchItem) -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior?
-
 ) {
 
 
-    Scaffold(
-        topBar = {
+    IScaffold(
+        topBar = { scrollBehavior ->
             GlobalScreenTopBar(
                 onPop = onPopBackStack,
                 onSearch = onSearch,

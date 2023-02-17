@@ -71,9 +71,9 @@ object SettingScreenSpec : ScreenSpec {
             )
         }
         IScaffold(
-            topBar = {
+            topBar = { scrollBehavior ->
                 Toolbar(
-                    scrollBehavior = controller.scrollBehavior,
+                    scrollBehavior = scrollBehavior,
                     title = {
                         BigSizeTextComposable(text = stringResource(R.string.settings))
                     },

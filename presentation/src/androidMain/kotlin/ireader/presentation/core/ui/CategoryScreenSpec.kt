@@ -31,11 +31,11 @@ object CategoryScreenSpec : ScreenSpec {
     ) {
         val vm: CategoryScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         IScaffold(
-            topBar = {
-                TitleToolbar(
+            topBar = {scrollBehavior ->
+            TitleToolbar(
                     title = stringResource(R.string.edit_category),
                     navController = controller.navController,
-                    scrollBehavior = controller.scrollBehavior
+                    scrollBehavior = scrollBehavior
                 )
             }
         ) { padding ->

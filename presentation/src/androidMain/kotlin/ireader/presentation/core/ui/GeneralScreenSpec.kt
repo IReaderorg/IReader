@@ -25,11 +25,11 @@ object GeneralScreenSpec : ScreenSpec {
     ) {
         val vm: GeneralSettingScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         IScaffold(
-            topBar = {
+            topBar = { scrollBehavior ->
                 TitleToolbar(
                     title = stringResource(id = R.string.general),
                     navController = controller.navController,
-                    scrollBehavior = controller.scrollBehavior
+                    scrollBehavior = scrollBehavior
                 )
             }
         ) {scaffoldPadding ->

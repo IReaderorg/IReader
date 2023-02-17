@@ -44,7 +44,6 @@ object GlobalSearchScreenSpec : ScreenSpec {
 
         ) {
             GlobalSearchScreen(
-                scrollBehavior = controller.scrollBehavior,
                 onPopBackStack = {
                     controller.navController.popBackStack()
                 },

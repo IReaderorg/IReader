@@ -10,6 +10,7 @@ import com.google.accompanist.web.WebContent
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.web.WebPageScreen
 import ireader.presentation.ui.web.WebPageTopBar
 import ireader.presentation.ui.web.WebViewPageModel
@@ -47,7 +48,6 @@ object WebViewScreenSpec : ScreenSpec {
         NavigationArgs.sourceId,
         NavigationArgs.chapterId,
         NavigationArgs.bookId,
-        NavigationArgs.showModalSheet,
     )
 
     fun buildRoute(
@@ -84,8 +84,10 @@ object WebViewScreenSpec : ScreenSpec {
             )
         })
         val scope = rememberCoroutineScope()
+        val host = SnackBarListener(vm)
         IScaffold(
-            topBar = {
+            snackbarHostState = host,
+            topBar = { scrollBehavior ->
                 val webView = vm.webViewManager.webView
                 val url by remember {
                     derivedStateOf { vm.webUrl }
@@ -93,7 +95,7 @@ object WebViewScreenSpec : ScreenSpec {
                 val source = vm.source
 
                 WebPageTopBar(
-                    scrollBehavior = controller.scrollBehavior,
+                    scrollBehavior = scrollBehavior,
                     urlToRender = url ?: vm.url,
                     onGo = {
                         vm.webViewState?.content = WebContent.Url(vm.webUrl)
@@ -158,7 +160,7 @@ object WebViewScreenSpec : ScreenSpec {
             WebPageScreen(
                 viewModel = vm,
                 source = vm.source,
-                snackBarHostState = controller.snackBarHostState,
+                snackBarHostState = host,
                 scaffoldPadding = scaffoldPadding
             )
         }

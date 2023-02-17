@@ -19,6 +19,7 @@ import ireader.presentation.ui.home.history.HistoryTopAppBar
 import ireader.presentation.ui.home.history.viewmodel.HistoryViewModel
 import ireader.presentation.R
 import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.home.history.HistoryScreen
 import org.koin.androidx.compose.getViewModel
 
@@ -40,8 +41,9 @@ object HistoryScreenSpec : BottomNavScreenSpec {
         val context = LocalContext.current
 
         WarningAlert(data = vm.warningAlert.value)
+        val host = SnackBarListener(vm)
         IScaffold(
-            topBar = {
+            topBar = { scrollBehavior->
                 HistoryTopAppBar(
                     vm = vm,
                     onDeleteAll = {
@@ -61,7 +63,7 @@ object HistoryScreenSpec : BottomNavScreenSpec {
                             }
                         }
                     },
-                    scrollBehavior = controller.scrollBehavior,
+                    scrollBehavior =scrollBehavior,
 
                     )
             }

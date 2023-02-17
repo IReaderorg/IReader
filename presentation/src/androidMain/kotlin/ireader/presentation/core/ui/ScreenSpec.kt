@@ -48,13 +48,6 @@ sealed interface ScreenSpec {
     val arguments: List<NamedNavArgument> get() = emptyList()
 
     val deepLinks: List<NavDeepLink> get() = emptyList()
-    fun Controller.getSourceId(): Long {
-        return this.navBackStackEntry.arguments!!.getLong("sourceId")
-    }
-
-    fun Controller.getQuery(): String? {
-        return this.navBackStackEntry.arguments!!.getString("query")
-    }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable

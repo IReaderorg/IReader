@@ -145,11 +145,11 @@ object SecuritySettingSpec : ScreenSpec {
             )
         }
         IScaffold(
-            topBar = {
+            topBar = { scrollBehavior ->
                 TitleToolbar(
                     title = stringResource(R.string.security),
                     navController = controller.navController,
-                    scrollBehavior = controller.scrollBehavior
+                    scrollBehavior = scrollBehavior
                 )
             }
         ) { padding ->

@@ -37,7 +37,7 @@ object UpdateScreenSpec : BottomNavScreenSpec {
         val vm: UpdatesViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
 
         IScaffold(
-            topBar = {
+            topBar = { scrollBehavior ->
                 UpdatesToolbar(
                     state = vm,
                     onClickCancelSelection = {
@@ -67,7 +67,7 @@ object UpdateScreenSpec : BottomNavScreenSpec {
                             vm.updates = emptyMap()
                         }
                     },
-                    scrollBehavior = controller.scrollBehavior,
+                    scrollBehavior = scrollBehavior,
                 )
             }
         ) { scaffoldPadding ->

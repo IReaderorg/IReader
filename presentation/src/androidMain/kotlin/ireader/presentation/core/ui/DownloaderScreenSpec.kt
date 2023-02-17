@@ -8,6 +8,7 @@ import androidx.navigation.navDeepLink
 import ireader.domain.models.entities.toSavedDownload
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.settings.downloader.DownloaderScreen
 import ireader.presentation.ui.settings.downloader.DownloaderTopAppBar
 import ireader.presentation.ui.settings.downloader.DownloaderViewModel
@@ -30,9 +31,10 @@ object DownloaderScreenSpec : ScreenSpec {
     ) {
         val vm: DownloaderViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
 
+        val snackBarHostState = SnackBarListener(vm)
         IScaffold(
-            topBar = {
-                DownloaderTopAppBar(
+            topBar = { scrollBehavior ->
+            DownloaderTopAppBar(
                     onPopBackStack = {
                         controller.navController.popBackStack()
                     },
@@ -53,7 +55,7 @@ object DownloaderScreenSpec : ScreenSpec {
                         )
                         vm.selection.clear()
                     },
-                    scrollBehavior = controller.scrollBehavior
+                    scrollBehavior = scrollBehavior
                 )
             }
         ) { padding ->
@@ -66,7 +68,7 @@ object DownloaderScreenSpec : ScreenSpec {
                     )
                 },
                 vm = vm,
-                snackBarHostState = controller.snackBarHostState,
+                snackBarHostState = snackBarHostState,
                 paddingValues = padding
             )
         }

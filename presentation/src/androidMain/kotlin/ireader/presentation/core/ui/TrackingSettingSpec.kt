@@ -18,11 +18,11 @@ object TrackingSettingSpec : ScreenSpec {
         controller: Controller
     ) {
         IScaffold(
-            topBar = {
+            topBar = {scrollBehavior ->
                 TitleToolbar(
                     title = stringResource(R.string.tracking),
                     navController = controller.navController,
-                    scrollBehavior = controller.scrollBehavior
+                    scrollBehavior =scrollBehavior
                 )
             }
         ) {

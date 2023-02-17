@@ -82,9 +82,6 @@ object TTSScreenSpec : ScreenSpec {
         NavigationArgs.bookId,
         NavigationArgs.chapterId,
         NavigationArgs.sourceId,
-        NavigationArgs.showModalSheet,
-        NavigationArgs.haveDrawer,
-        NavigationArgs.haveCustomizedBottomBar,
 
         )
 
@@ -249,14 +246,14 @@ object TTSScreenSpec : ScreenSpec {
                 bottomSheetState = sheetState,
             ) {
                 IScaffold(
-                    topBar = {
+                    topBar = { scrollBehavior ->
                         val scope = rememberCoroutineScope()
                         CustomizeAnimateVisibility(visible = !vm.fullScreenMode) {
                             TTSTopBar(
                                 onPopBackStack = {
                                     controller.navController.popBackStack()
                                 },
-                                scrollBehavior = controller.scrollBehavior,
+                                scrollBehavior = scrollBehavior,
                                 onSetting = {
                                     scope.launch {
                                         sheetState.show()

@@ -46,6 +46,7 @@ import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.ui.core.theme.CustomSystemColor
+import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.reader.ReaderScreenDrawer
 import ireader.presentation.ui.reader.ReaderScreenTopBar
 import ireader.presentation.ui.reader.ReadingScreen
@@ -65,8 +66,6 @@ object ReaderScreenSpec : ScreenSpec {
     override val arguments: List<NamedNavArgument> = listOf(
         NavigationArgs.bookId,
         NavigationArgs.chapterId,
-        NavigationArgs.haveDrawer,
-        NavigationArgs.showModalSheet,
     )
 
     fun buildRoute(
@@ -177,18 +176,7 @@ object ReaderScreenSpec : ScreenSpec {
                 )
             }
         }
-        LaunchedEffect(key1 = true) {
-            vm.eventFlow.collectLatest { event ->
-                when (event) {
-                    is UiEvent.ShowSnackbar -> {
-                        controller.snackBarHostState.showSnackbar(
-                            event.uiText.asString(context)
-                        )
-                    }
-                    else -> {}
-                }
-            }
-        }
+        val host = SnackBarListener(vm)
 
         val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
         val drawerState = androidx.compose.material3.rememberDrawerState(androidx.compose.material3.DrawerValue.Closed)
@@ -457,7 +445,7 @@ object ReaderScreenSpec : ScreenSpec {
                             }
                         },
 
-                        snackBarHostState = controller.snackBarHostState,
+                        snackBarHostState = host,
                         swipeState = swipeState,
                         onSliderFinished = {
                             scope.launch {

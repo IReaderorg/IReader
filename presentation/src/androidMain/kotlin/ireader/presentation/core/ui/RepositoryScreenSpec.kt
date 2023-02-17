@@ -55,12 +55,12 @@ object RepositoryScreenSpec : ScreenSpec {
         val vm : SourceRepositoryViewModel =  getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
         val host = SnackBarListener(vm = vm)
         IScaffold(
-            topBar = {
+            topBar = { scrollBehavior ->
                 Toolbar(
                     title ={
                         MidSizeTextComposable(text =  stringResource(R.string.repository))
                     },
-                    scrollBehavior = controller.scrollBehavior
+                    scrollBehavior = scrollBehavior
                 )
             },
             snackbarHostState = host,

@@ -27,11 +27,11 @@ object AdvanceSettingSpec : ScreenSpec {
         val vm: AdvanceSettingViewModel = getViewModel()
         val host = SnackBarListener(vm = vm)
         IScaffold(
-            topBar = {
+            topBar = {scrollBehavior ->
                 TitleToolbar(
                     title = stringResource(R.string.advance_setting),
                     navController = controller.navController,
-                    scrollBehavior = controller.scrollBehavior
+                    scrollBehavior = scrollBehavior
                 )
             }, snackbarHostState = host
         ) {padding ->

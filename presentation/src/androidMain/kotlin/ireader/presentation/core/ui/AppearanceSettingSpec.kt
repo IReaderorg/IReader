@@ -24,15 +24,15 @@ object AppearanceScreenSpec : ScreenSpec {
         controller: Controller
     ) {
         val viewModel: AppearanceViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
-        SnackBarListener(viewModel, controller.snackBarHostState)
+        SnackBarListener(viewModel)
         IScaffold(
-            topBar = {
+            topBar = { scrollBehavior ->
                 AppearanceToolbar(
                     vm = viewModel,
                     onPopBackStack = {
                         popBackStack(controller.navController)
                     },
-                    scrollBehavior = controller.scrollBehavior
+                    scrollBehavior = scrollBehavior
                 )
             }
         ) { padding ->
