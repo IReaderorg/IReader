@@ -21,7 +21,7 @@ import ireader.domain.utils.extensions.launchIO
 import ireader.presentation.R
 import org.koin.android.annotation.KoinViewModel
 
-@KoinViewModel
+
 class AdvanceSettingViewModel(
     val deleteUseCase: DeleteUseCase,
     private val prefUseCases: ReaderPrefUseCases,
@@ -38,20 +38,20 @@ class AdvanceSettingViewModel(
     val state: State<SettingState> = _state
 
     fun deleteAllDatabase() {
-        viewModelScope.launchIO {
+        scope.launchIO {
             deleteUseCase.deleteAllBook()
             deleteUseCase.deleteAllChapters()
         }
     }
 
     fun deleteAllChapters() {
-        viewModelScope.launchIO {
+        scope.launchIO {
             deleteUseCase.deleteAllChapters()
         }
     }
 
     fun deleteDefaultSettings() {
-        viewModelScope.launchIO {
+        scope.launchIO {
             prefUseCases.selectedFontStateUseCase.saveFont(getDefaultFont())
             prefUseCases.fontHeightUseCase.save(25)
             prefUseCases.fontSizeStateUseCase.save(18)
@@ -77,7 +77,7 @@ class AdvanceSettingViewModel(
     }
 
     fun resetCategories() {
-        viewModelScope.launchIO {
+        scope.launchIO {
             categoryRepository.deleteAll()
             categoryRepository.insert(Category.baseCategories)
             showSnackBar(UiText.StringResource(R.string.success))
@@ -85,7 +85,7 @@ class AdvanceSettingViewModel(
     }
 
     fun resetThemes() {
-        viewModelScope.launchIO {
+        scope.launchIO {
             themeRepository.deleteAll()
             showSnackBar(UiText.StringResource(R.string.success))
         }

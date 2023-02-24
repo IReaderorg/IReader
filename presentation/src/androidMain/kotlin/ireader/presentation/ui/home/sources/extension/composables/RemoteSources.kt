@@ -28,7 +28,6 @@ import ireader.presentation.ui.home.sources.extension.SourceKeys
 fun RemoteSourcesScreen(
     modifier: Modifier = Modifier,
     vm: ExtensionViewModel,
-    onRefreshCatalogs: () -> Unit,
     onClickInstall: (Catalog) -> Unit,
     onClickUninstall: (Catalog) -> Unit,
     onCancelInstaller: ((Catalog) -> Unit)? = null,
@@ -65,10 +64,7 @@ fun RemoteSourcesScreen(
         }
     }
     val scrollState = rememberLazyListState()
-    val refreshing = vm.isRefreshing
-    val swipeState = rememberPullRefreshState( refreshing,onRefreshCatalogs)
 
-    Box(Modifier.pullRefresh(swipeState)) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             state = scrollState,
@@ -133,6 +129,5 @@ fun RemoteSourcesScreen(
                 }
             }
         }
-        PullRefreshIndicator(refreshing, swipeState, Modifier.align(Alignment.TopCenter))
-    }
+
 }

@@ -14,6 +14,7 @@ import ireader.domain.R
 import ireader.domain.notification.Notifications.CHANNEL_APP_UPDATE
 import ireader.domain.notification.Notifications.ID_APP_UPDATER
 import ireader.domain.notification.flags
+import ireader.domain.notification.legacyFlags
 import ireader.domain.preferences.prefs.AppPreferences
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -66,7 +67,7 @@ class UpdateService  constructor(
         context.applicationContext,
         release.hashCode(),
         Intent(Intent.ACTION_VIEW, release.html_url.toUri()),
-        flags
+        legacyFlags
     )
 
     private val Version.simpleText: String

@@ -27,9 +27,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 @OptIn(ExperimentalSerializationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AdvanceSettings(
-    modifier: Modifier = Modifier,
     vm: AdvanceSettingViewModel,
-    controller: Controller,
     padding: PaddingValues
 ) {
     val context = LocalContext.current
@@ -64,7 +62,7 @@ fun AdvanceSettings(
             Components.Row(
                 title = context.getString(R.string.clear_not_in_library_books),
                 onClick = {
-                    vm.viewModelScope.launchIO {
+                    vm.scope.launchIO {
                         vm.deleteUseCase.deleteNotInLibraryBooks()
                         vm.showSnackBar(
                             UiText.StringResource(R.string.success)

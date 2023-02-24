@@ -23,6 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.log.Log
 import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.models.getDefaultFont
@@ -33,7 +37,9 @@ import ireader.i18n.asString
 import ireader.presentation.R
 import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.IModalSheets
+import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.core.ui.util.NavigationArgs
+import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.theme.AppColors
@@ -49,62 +55,36 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
-object ReaderScreenSpec : ScreenSpec {
+data class ReaderScreenSpec(
+    val bookId: Long,
+    val chapterId: Long
+) : VoyagerScreen() {
 
-    override val navHostRoute: String = "reader_screen_route/{bookId}/{chapterId}/"
-
-    override val arguments: List<NamedNavArgument> = listOf(
-        NavigationArgs.bookId,
-        NavigationArgs.chapterId,
-    )
-
-    fun buildRoute(
-        bookId: Long,
-        chapterId: Long,
-    ): String {
-        return "reader_screen_route/$bookId/$chapterId/"
-    }
-
-    fun buildDeepLink(
-        bookId: Long,
-        sourceId: Long,
-        chapterId: Long,
-        readingParagraph: Long,
-    ): String {
-        return "https://www.ireader.org/reader_screen_route/$bookId/$chapterId/$readingParagraph"
-    }
-
-    override val deepLinks: List<NavDeepLink> = listOf(
-
-        navDeepLink {
-            uriPattern =
-                "https://www.ireader.org/reader_screen_route/{bookId}/{chapterId}/{readingParagraph}"
-            NavigationArgs.bookId
-            NavigationArgs.chapterId
-            NavigationArgs.readingParagraph
-        }
-    )
-
+    override val key: ScreenKey = "Reader_Screen#$chapterId"
     @OptIn(
         ExperimentalAnimationApi::class,
         ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
     )
     @Composable
-    override fun Content(
-        controller: Controller
-    ) {
+    override fun Content() {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
         val vm: ReaderScreenViewModel =
-            getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
+            getIViewModel(parameters = {
+                org.koin.core.parameter.parametersOf(
+                    ReaderScreenViewModel.Param(chapterId,bookId)
+                )
+            })
         val currentIndex = vm.currentChapterIndex
         val chapters = vm.stateChapters
         val chapter = vm.stateChapter
 
         val scrollState = rememberScrollState()
         val lazyListState = rememberLazyListState()
+        val navigator = LocalNavigator.currentOrThrow
 
         DisposableEffect(key1 = scrollState.hashCode()) {
             vm.readerScrollState = scrollState
@@ -235,7 +215,7 @@ object ReaderScreenSpec : ScreenSpec {
                                     vm.getLocalChapter(ch.id)
                                 }
                                 scope.launch {
-                                    scrollState?.scrollTo(0)
+                                    scrollState.scrollTo(0)
                                 }
                                 vm.currentChapterIndex = index
                             }
@@ -336,8 +316,8 @@ object ReaderScreenSpec : ScreenSpec {
                                     onWebView = {
                                         try {
                                             catalog?.let { catalog ->
-                                                controller.navController.navigate(
-                                                    WebViewScreenSpec.buildRoute(
+                                                navigator.push(
+                                                    WebViewScreenSpec(
                                                         url = chapter?.key,
                                                         sourceId = catalog.sourceId,
                                                         chapterId = chapter?.id,
@@ -362,7 +342,7 @@ object ReaderScreenSpec : ScreenSpec {
                                         vm.bookmarkChapter()
                                     },
                                     onPopBackStack = {
-                                        controller.navController.popBackStack()
+                                       popBackStack(navigator)
                                     }
                                 )
                             }
@@ -498,11 +478,11 @@ object ReaderScreenSpec : ScreenSpec {
                             onReaderPlay = {
                                 vm.book?.let { book ->
                                     vm.stateChapter?.let { chapter ->
-                                        controller.navController.navigate(
-                                            TTSScreenSpec.buildRoute(
-                                                book.id,
-                                                book.sourceId,
-                                                chapterId = chapter.id
+                                        navigator.push(
+                                            TTSScreenSpec(
+                                                bookId = book.id,
+                                                sourceId = book.sourceId,
+                                                chapterId = chapter.id,
                                             )
                                         )
                                     }

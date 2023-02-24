@@ -11,6 +11,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.components.Components
@@ -18,23 +21,25 @@ import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.component.components.setupUiComponent
 import ireader.presentation.ui.settings.reader.ReaderSettingScreenViewModel
 import ireader.presentation.R
+import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import org.koin.androidx.compose.getViewModel
 
-object ReaderSettingSpec : ScreenSpec {
+class ReaderSettingSpec : VoyagerScreen() {
 
-    override val navHostRoute: String = "reader_settings_screen_route"
+
 
     @OptIn(
-        ExperimentalAnimationApi::class,
-        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
+         ExperimentalMaterial3Api::class
     )
     @Composable
     override fun Content(
-        controller: Controller
+
     ) {
         val context = LocalContext.current
-        val vm: ReaderSettingScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
+        val vm: ReaderSettingScreenViewModel = getIViewModel()
+        val navigator = LocalNavigator.currentOrThrow
+
         val items = remember {
             listOf<Components>(
                 Components.Header(
@@ -43,7 +48,7 @@ object ReaderSettingSpec : ScreenSpec {
                 Components.Row(
                     title = context.getString(R.string.font),
                     onClick = {
-                        controller.navController.navigate(FontScreenSpec.navHostRoute)
+                        navigator.push(FontScreenSpec())
                     },
                 ),
                 Components.Slider(
@@ -112,8 +117,10 @@ object ReaderSettingSpec : ScreenSpec {
         IScaffold(topBar = { scrollBehavior ->
             TitleToolbar(
                 title = stringResource(R.string.reader),
-                navController = controller.navController,
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                popBackStack = {
+                    popBackStack(navigator)
+                }
             )
         }) { padding ->
             LazyColumn(

@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SmallTopAppBar
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -19,7 +21,7 @@ import java.lang.reflect.Modifier
 import kotlin.system.exitProcess
 
 
-@OptIn(DelicateCoroutinesApi::class)
+@OptIn(DelicateCoroutinesApi::class, ExperimentalMaterial3Api::class)
 suspend fun main() {
     awaitApplication {
         val state = rememberWindowState()
@@ -31,10 +33,9 @@ suspend fun main() {
 
             Scaffold(
                 topBar = {
-                    SmallTopAppBar(title = {
+                    TopAppBar(title = {
                         Text("Library")
-                    },
-                    )
+                    })
                 }
             ) {
                 Box(

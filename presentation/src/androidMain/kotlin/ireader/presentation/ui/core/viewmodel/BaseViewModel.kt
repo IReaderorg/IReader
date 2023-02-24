@@ -3,6 +3,8 @@ package ireader.presentation.ui.core.viewmodel
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import cafe.adriel.voyager.core.model.ScreenModel
+import cafe.adriel.voyager.core.model.coroutineScope
 import ireader.core.prefs.Preference
 import ireader.i18n.UiEvent
 import ireader.i18n.UiText
@@ -26,10 +28,10 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-actual abstract class BaseViewModel : androidx.lifecycle.ViewModel() {
+actual abstract class BaseViewModel : ScreenModel {
 
-    protected actual val scope: CoroutineScope
-        get() = viewModelScope
+    actual val scope: CoroutineScope
+        get() = this.coroutineScope
 
     private val activeScope = MutableStateFlow<CoroutineScope?>(null)
 
@@ -37,13 +39,17 @@ actual abstract class BaseViewModel : androidx.lifecycle.ViewModel() {
     open val eventFlow = _eventFlow.asSharedFlow()
 
     open fun showSnackBar(message: UiText?) {
-        viewModelScope.launch {
+        scope.launch {
             _eventFlow.showSnackBar(message ?: UiText.StringResource(R.string.error_unknown))
         }
     }
 
-    final override fun onCleared() {
+    //    final override fun onCleared() {
+//        onDestroy()
+//    }
+    override fun onDispose() {
         onDestroy()
+        super.onDispose()
     }
 
     actual open fun onDestroy() {

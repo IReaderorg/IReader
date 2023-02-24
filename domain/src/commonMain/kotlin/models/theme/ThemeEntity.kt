@@ -92,6 +92,8 @@ fun CustomColorScheme.toColorScheme(): ColorScheme {
         surfaceVariant = this.surfaceVariant.toArgColor(),
         tertiary = this.tertiary.toArgColor(),
         tertiaryContainer = this.tertiaryContainer.toArgColor(),
+        outlineVariant = this.outlineVariant.toArgColor(),
+        scrim = this.scrim.toArgColor()
     )
 }
 
@@ -124,8 +126,8 @@ fun ColorScheme.toCustomColorScheme(): CustomColorScheme {
         surfaceVariant = this.surfaceVariant.toArgb(),
         tertiary = this.tertiary.toArgb(),
         tertiaryContainer = this.tertiaryContainer.toArgb(),
-        scrim = 0,
-        outlineVariant = 0
+        scrim = this.scrim.toArgb(),
+        outlineVariant = this.outlineVariant.toArgb()
     )
 }
 

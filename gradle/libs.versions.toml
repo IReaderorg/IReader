@@ -9,7 +9,7 @@ json = "1.4.1"
 composeGradle = "1.3.0-rc05"
 composeCompiler = "1.3.2.1"
 composeAndroid = "1.2.1"
-voyager = "1.0.0-rc06"
+voyager = "1.0.0-rc07"
 accompanist = "0.25.2"
 googleAccompanist = "0.25.1"
 imageloader = "1.2.2.1"
@@ -104,11 +104,10 @@ gson = "com.google.code.gson:gson:2.9.0"
 googleTranslator = "com.google.mlkit:translate:17.0.0"
 htmlUnit-android = "net.sourceforge.htmlunit:htmlunit-android:2.63.0-SNAPSHOT"
 
-voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
-voyager-bottomSheetnavigator = { module = "cafe.adriel.voyager:voyager-bottom-sheet-navigator", version.ref = "voyager" }
-voyager-tabNavigator = { module = "ca.gosyer:voyager-tab-navigator", version.ref = "voyager" }
+voyager-navigator = { module = "ca.gosyer:voyager-navigator", version.ref = "voyager" }
+voyager-tab-navigator = { module = "ca.gosyer:voyager-tab-navigator", version.ref = "voyager" }
 voyager-transitions = { module = "ca.gosyer:voyager-transitions", version.ref = "voyager" }
-voyager-koin = { module = "cafe.adriel.voyager:voyager-koin", version.ref = "voyager" }
+voyager-koin = { module = "ca.gosyer:voyager-koin", version.ref = "voyager" }
 
 
 storage = { module = "com.anggrayudi:storage", version = "1.5.1" }
@@ -226,7 +225,7 @@ versions = { id = "com.github.ben-manes.versions", version.ref = "versions"}
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries"}
 
 ideaExt = { id = "org.jetbrains.gradle.plugin.idea-ext", version.ref = "ideaExt" }
-jetbrainCompose = { id = "org.jetbrains.compose", version = "1.2.1" }
+jetbrainCompose = { id = "org.jetbrains.compose", version = "1.3.0" }
 vanniktech = { id = "com.vanniktech.maven.publish", version = "0.21.0" }
 
 dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version = "1.13.1" }

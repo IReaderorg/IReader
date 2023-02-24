@@ -5,7 +5,13 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.log.Log
+import ireader.presentation.core.VoyagerScreen
+import ireader.presentation.core.ui.util.NavigationArgs.bookId
+import ireader.presentation.core.ui.util.NavigationArgs.query
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.home.sources.global_search.GlobalSearchScreen
@@ -13,39 +19,30 @@ import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearch
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.compose.getViewModel
 
-object GlobalSearchScreenSpec : ScreenSpec {
-
-    override val navHostRoute: String = "global?query={query}"
-
-    override val arguments: List<NamedNavArgument> = listOf(
-        navArgument("query") {
-            type = NavType.StringType
-            defaultValue = ""
-        }
-    )
-
-    fun buildRoute(query: String): String {
-        return "global?query=$query"
-    }
+data class GlobalSearchScreenSpec(
+    val query: String? = null
+) : VoyagerScreen() {
 
     @OptIn(
         ExperimentalMaterial3Api::class
     )
     @Composable
     override fun Content(
-        controller: Controller
+
     ) {
-        val vm: GlobalSearchViewModel= getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
+        val vm: GlobalSearchViewModel= getIViewModel(parameters = {
             org.koin.core.parameter.parametersOf(
-                GlobalSearchViewModel.createParam(controller)
+                GlobalSearchViewModel.Param(query)
             )
         })
+        val navigator = LocalNavigator.currentOrThrow
+
         IScaffold(
 
         ) {
             GlobalSearchScreen(
                 onPopBackStack = {
-                    controller.navController.popBackStack()
+                    popBackStack(navigator)
                 },
                 onSearch = { query ->
                     vm.searchBooks(query = query)
@@ -55,8 +52,8 @@ object GlobalSearchScreenSpec : ScreenSpec {
                     try {
                         runBlocking {
                             vm.insertUseCases.insertBook(book).let { bookId ->
-                                controller.navController.navigate(
-                                    BookDetailScreenSpec.buildRoute(
+                                navigator.push(
+                                    BookDetailScreenSpec(
                                         bookId = bookId,
                                     )
                                 )
@@ -71,8 +68,8 @@ object GlobalSearchScreenSpec : ScreenSpec {
                 onGoToExplore = { item ->
                     try {
                         if (vm.query.isNotBlank()) {
-                            controller.navController.navigate(
-                                ExploreScreenSpec.buildRoute(
+                            navigator.push(
+                                ExploreScreenSpec(
                                     item.source.id,
                                     query = vm.query
                                 )

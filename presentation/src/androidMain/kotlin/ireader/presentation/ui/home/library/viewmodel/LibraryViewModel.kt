@@ -45,7 +45,7 @@ import org.koin.android.annotation.KoinViewModel
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@KoinViewModel
+
 class LibraryViewModel(
     private val localGetBookUseCases: LocalGetBookUseCases,
     private val insertUseCases: LocalInsertUseCases,
@@ -102,7 +102,7 @@ class LibraryViewModel(
     private val loadedManga = mutableMapOf<Long, List<BookItem>>()
 
     fun onLayoutTypeChange(layoutType: DisplayMode) {
-        viewModelScope.launch {
+        scope.launch {
             categories.firstOrNull { it.id == lastUsedCategory.value }?.let { category ->
 
                 libraryScreenPrefUseCases.libraryLayoutTypeUseCase.await(
@@ -119,7 +119,7 @@ fun downloadChapters() {
 }
 
 fun readLayoutTypeAndFilterTypeAndSortType() {
-    viewModelScope.launch {
+    scope.launch {
         val sortType = libraryScreenPrefUseCases.sortersUseCase.read()
         val sortBy = libraryScreenPrefUseCases.sortersDescUseCase.read()
         this@LibraryViewModel.sortType = sortType

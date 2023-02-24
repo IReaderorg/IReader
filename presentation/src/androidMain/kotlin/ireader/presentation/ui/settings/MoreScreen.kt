@@ -136,7 +136,7 @@ fun SetupLayout(
     }
 }
 
-@KoinViewModel
+
 class MainSettingScreenViewModel(
     uiPreferences: UiPreferences
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {

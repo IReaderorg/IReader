@@ -35,7 +35,7 @@ import ireader.presentation.ui.component.Controller
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
-@KoinViewModel
+
 class TTSViewModel(
     val ttsState: TTSStateImpl,
     private val param: Param,
@@ -51,11 +51,11 @@ class TTSViewModel(
     private val insertUseCases: LocalInsertUseCases,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(),
     TTSState by ttsState {
-    data class Param(val sourceId:Long? ,val chapterId: Long?, val bookId: Long?,val readingParagraph: String?)
+    data class Param(val sourceId:Long? ,val chapterId: Long?, val bookId: Long?,val readingParagraph: Int?)
 
     companion object  {
         fun createParam(controller: Controller) : Param {
-            return Param(controller.navBackStackEntry.arguments?.getLong("sourceId"),controller.navBackStackEntry.arguments?.getLong("chapterId"),controller.navBackStackEntry.arguments?.getLong("bookId"),controller.navBackStackEntry.arguments?.getString(
+            return Param(controller.navBackStackEntry.arguments?.getLong("sourceId"),controller.navBackStackEntry.arguments?.getLong("chapterId"),controller.navBackStackEntry.arguments?.getLong("bookId"),controller.navBackStackEntry.arguments?.getInt(
                 NavigationArgs.readingParagraph.name))
         }
     }
@@ -106,7 +106,7 @@ class TTSViewModel(
         if (sourceId != null && chapterId != null && bookId != null) {
             this.chapterId = chapterId
             ttsCatalog = getLocalCatalog.get(sourceId = sourceId)
-            viewModelScope.launch {
+            scope.launch {
                 val book = getBookUseCases.findBookById(bookId)
                 ttsBook = book
             }
@@ -122,7 +122,7 @@ class TTSViewModel(
     }
 
     fun readPreferences() {
-        viewModelScope.launch {
+        scope.launch {
             speechSpeed = speechPrefUseCases.readRate()
             pitch = speechPrefUseCases.readPitch()
             currentLanguage = speechPrefUseCases.readLanguage()
@@ -222,7 +222,7 @@ class TTSViewModel(
             val isLoading = metadata.getLong(TTSService.IS_LOADING)
             val error = metadata.getLong(TTSService.ERROR)
             if (ttsBook?.id != novelId && novelId != -1L) {
-                viewModelScope.launch {
+                scope.launch {
                     ttsBook = getBookUseCases.findBookById(novelId)
                 }
             }
@@ -230,7 +230,7 @@ class TTSViewModel(
                 currentReadingParagraph = currentParagraph.toInt()
             }
             if (chapterId != ttsChapter?.id && chapterId != -1L) {
-                viewModelScope.launch {
+                scope.launch {
                     getChapterUseCase.findChapterById(chapterId)?.let {
                         ttsChapter = it
 
@@ -267,7 +267,7 @@ class TTSViewModel(
     }
 
     fun getLocalChapter(chapterId: Long) {
-        viewModelScope.launch {
+        scope.launch {
             getChapterUseCase.findChapterById(chapterId)?.let { chapter ->
                 ttsChapter = chapter
                 if (chapter.isEmpty()) {
@@ -280,7 +280,7 @@ class TTSViewModel(
     }
 
     private fun subscribeChapters(bookId: Long) {
-        viewModelScope.launch {
+        scope.launch {
             getChapterUseCase.subscribeChaptersByBookId(
                 bookId
             ).collect {

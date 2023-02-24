@@ -21,7 +21,7 @@ import org.koin.android.annotation.KoinViewModel
 import java.util.*
 
 
-@KoinViewModel
+
 class BackupScreenViewModel(
     private val booksUseCasa: LocalGetBookUseCases,
     private val chapterUseCase: LocalGetChapterUseCase,

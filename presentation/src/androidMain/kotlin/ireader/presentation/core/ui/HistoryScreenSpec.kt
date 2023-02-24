@@ -4,14 +4,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 
 import androidx.navigation.NamedNavArgument
-import ireader.domain.utils.extensions.async.viewModelIOCoroutine
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.navigator.tab.Tab
+import cafe.adriel.voyager.navigator.tab.TabOptions
+
+import ireader.domain.utils.extensions.launchIO
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.reusable_composable.WarningAlert
 import ireader.presentation.core.ui.util.NavigationArgs
@@ -21,25 +32,32 @@ import ireader.presentation.R
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.home.history.HistoryScreen
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 
-object HistoryScreenSpec : BottomNavScreenSpec {
-    override val icon: ImageVector = Icons.Filled.History
-    override val label: Int = R.string.history_screen_label
-    override val navHostRoute: String = "history"
+object HistoryScreenSpec : Tab {
 
-    override val arguments: List<NamedNavArgument> = listOf(
-        NavigationArgs.showBottomNav
-    )
+    override val options: TabOptions
+        @Composable
+        get()  {
+            val title = stringResource(R.string.history_screen_label)
+            val icon = rememberVectorPainter(Icons.Filled.History)
+            return remember {
+                TabOptions(
+                    index = 2u,
+                    title = title,
+                    icon = icon,
+                )
+            }
+
+        }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content(
-        controller: Controller
-    ) {
-        val vm: HistoryViewModel  = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
+    override fun Content() {
+        val vm: HistoryViewModel  = getIViewModel()
         val context = LocalContext.current
-
+        val navigator = LocalNavigator.currentOrThrow
         WarningAlert(data = vm.warningAlert.value)
         val host = SnackBarListener(vm)
         IScaffold(
@@ -57,7 +75,7 @@ object HistoryScreenSpec : BottomNavScreenSpec {
                             }
                             this.onConfirm.value = {
                                 this.enable.value = false
-                                vm.viewModelIOCoroutine {
+                                vm.scope.launch {
                                     vm.historyUseCase.deleteAllHistories()
                                 }
                             }
@@ -66,22 +84,23 @@ object HistoryScreenSpec : BottomNavScreenSpec {
                     scrollBehavior =scrollBehavior,
 
                     )
-            }
+            },
+            snackbarHostState = host
         ) {scaffoldPadding ->
             HistoryScreen(
                 modifier = Modifier
                     .padding(scaffoldPadding),
                 onHistory = { history ->
-                    controller.navController.navigate(
-                        ReaderScreenSpec.buildRoute(
+                    navigator.push(
+                        ReaderScreenSpec(
                             history.bookId,
                             history.chapterId
                         )
                     )
                 },
                 onHistoryPlay = { history ->
-                    controller.navController.navigate(
-                        ReaderScreenSpec.buildRoute(
+                    navigator.push(
+                        ReaderScreenSpec(
                             history.bookId,
                             history.chapterId
                         )
@@ -89,8 +108,8 @@ object HistoryScreenSpec : BottomNavScreenSpec {
                 },
                 vm = vm,
                 onBookCover = { history ->
-                    controller.navController.navigate(
-                        BookDetailScreenSpec.buildRoute(
+                    navigator.push(
+                        BookDetailScreenSpec(
                             history.bookId
                         )
                     )
@@ -106,7 +125,7 @@ object HistoryScreenSpec : BottomNavScreenSpec {
                         }
                         this.onConfirm.value = {
                             this.enable.value = false
-                            vm.viewModelIOCoroutine {
+                            vm.scope.launchIO {
                                 vm.historyUseCase.deleteHistory(history.chapterId)
                             }
                         }
@@ -123,7 +142,7 @@ object HistoryScreenSpec : BottomNavScreenSpec {
                         }
                         this.onConfirm.value = {
                             this.enable.value = false
-                            vm.viewModelIOCoroutine {
+                            vm.scope.launchIO {
                                 vm.historyUseCase.deleteHistoryByBookId(history.bookId)
                             }
                         }

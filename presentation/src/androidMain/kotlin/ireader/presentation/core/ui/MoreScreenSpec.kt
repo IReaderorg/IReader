@@ -3,15 +3,24 @@ package ireader.presentation.core.ui
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 
 import androidx.navigation.NamedNavArgument
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.navigator.tab.Tab
+import cafe.adriel.voyager.navigator.tab.TabOptions
 import ireader.presentation.ui.component.Controller
 import ireader.i18n.discord
 import ireader.presentation.ui.component.components.TitleToolbar
@@ -22,31 +31,39 @@ import ireader.presentation.ui.settings.MainSettingScreenViewModel
 import ireader.presentation.ui.settings.MoreScreen
 import org.koin.androidx.compose.getViewModel
 
-object MoreScreenSpec : BottomNavScreenSpec {
-    override val icon: ImageVector = Icons.Filled.MoreHoriz
-    override val label: Int = R.string.more
-    override val navHostRoute: String = "more"
+object MoreScreenSpec : Tab {
 
-    override val arguments: List<NamedNavArgument> = listOf(
-        NavigationArgs.showBottomNav
-    )
+    override val options: TabOptions
+        @Composable
+        get()  {
+            val title = stringResource(R.string.more)
+            val icon = rememberVectorPainter(Icons.Filled.MoreHoriz)
+            return remember {
+                TabOptions(
+                    index = 4u,
+                    title = title,
+                    icon = icon,
+                )
+            }
+
+        }
     @OptIn(
         ExperimentalMaterialApi::class,
         ExperimentalMaterial3Api::class
     )
     @Composable
-    override fun Content(
-        controller: Controller
-    ) {
+    override fun Content() {
         val uriHandler = LocalUriHandler.current
-        val vm: MainSettingScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
-
+        val vm: MainSettingScreenViewModel = getIViewModel()
+        val navigator = LocalNavigator.currentOrThrow
         IScaffold(
             topBar = { scrollBehavior ->
                 TitleToolbar(
                     title = stringResource(R.string.more),
-                    navController = null,
-                    scrollBehavior = scrollBehavior
+                    scrollBehavior = scrollBehavior,
+                    popBackStack  = {
+                        popBackStack(navigator)
+                    },
                 )
             }
         ) { padding ->
@@ -54,22 +71,22 @@ object MoreScreenSpec : BottomNavScreenSpec {
                 modifier = Modifier.padding(padding),
                 vm = vm,
                 onAbout = {
-                    controller.navController.navigate(AboutSettingSpec.navHostRoute)
+                    navigator.push(AboutSettingSpec())
                 },
                 onSettings = {
-                    controller.navController.navigate(SettingScreenSpec.navHostRoute)
+                    navigator.push(SettingScreenSpec())
                 },
                 onBackupScreen = {
-                    controller.navController.navigate(BackupAndRestoreScreenSpec.navHostRoute)
+                    navigator.push(BackupAndRestoreScreenSpec())
                 },
                 onDownloadScreen = {
-                    controller.navController.navigate(DownloaderScreenSpec.navHostRoute)
+                    navigator.push(DownloaderScreenSpec())
                 },
                 onHelp = {
                     uriHandler.openUri(discord)
                 },
                 onCategory = {
-                    controller.navController.navigate(CategoryScreenSpec.navHostRoute)
+                    navigator.push(CategoryScreenSpec())
                 }
             )
         }

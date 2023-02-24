@@ -10,7 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.presentation.R
+import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Toolbar
@@ -19,54 +23,55 @@ import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.settings.SettingsSection
 import ireader.presentation.ui.settings.SetupLayout
 
-object SettingScreenSpec : ScreenSpec {
-    override val navHostRoute: String = "settings"
+class SettingScreenSpec : VoyagerScreen() {
 
     @OptIn(
-        ExperimentalAnimationApi::class,
-        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
+         ExperimentalMaterial3Api::class
     )
     @Composable
-    override fun Content(
-        controller: Controller
-    ) {
+    override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
         val settingItems = remember {
             listOf(
                 SettingsSection(
                     R.string.appearance,
                     Icons.Default.Palette,
                 ) {
-                    controller.navController.navigate(AppearanceScreenSpec.navHostRoute)
+                    navigator.push(AppearanceScreenSpec())
                 },
                 SettingsSection(
                     R.string.general,
                     Icons.Default.Tune,
                 ) {
-                    controller.navController.navigate(GeneralScreenSpec.navHostRoute)
+                    navigator.push(GeneralScreenSpec())
                 },
                 SettingsSection(
                     R.string.reader,
                     Icons.Default.ChromeReaderMode,
                 ) {
-                    controller.navController.navigate(ReaderSettingSpec.navHostRoute)
+                    navigator.push(ReaderSettingSpec())
+
                 },
                 SettingsSection(
                     R.string.security,
                     Icons.Default.Security,
                 ) {
-                    controller.navController.navigate(SecuritySettingSpec.navHostRoute)
+                    navigator.push(SecuritySettingSpec())
+
                 },
                 SettingsSection(
                     R.string.repository,
                     Icons.Default.Extension,
                 ) {
-                    controller.navController.navigate(RepositoryScreenSpec.navHostRoute)
+                    navigator.push(RepositoryScreenSpec())
+
                 },
                 SettingsSection(
                     R.string.advance_setting,
                     Icons.Default.Code
                 ) {
-                    controller.navController.navigate(AdvanceSettingSpec.navHostRoute)
+                    navigator.push(AdvanceSettingSpec())
+
                 },
             )
         }
@@ -77,7 +82,7 @@ object SettingScreenSpec : ScreenSpec {
                     title = {
                         BigSizeTextComposable(text = stringResource(R.string.settings))
                     },
-                    navigationIcon = { TopAppBarBackButton(onClick = { controller.navController.popBackStack() }) },
+                    navigationIcon = { TopAppBarBackButton(onClick = { popBackStack(navigator) }) },
                 )
             }
         ) { padding ->

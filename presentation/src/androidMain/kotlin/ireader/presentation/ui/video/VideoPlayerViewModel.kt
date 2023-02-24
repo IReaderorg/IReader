@@ -2,7 +2,6 @@ package ireader.presentation.ui.video
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.text.ExperimentalTextApi
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.media3.exoplayer.ExoPlayer
 import ireader.domain.models.entities.Chapter
@@ -32,7 +31,7 @@ import kotlinx.coroutines.runBlocking
 import org.koin.android.annotation.KoinViewModel
 
 @OptIn(ExperimentalTextApi::class)
-@KoinViewModel
+
 class VideoScreenViewModel(
     val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases,
     val getChapterUseCase: LocalGetChapterUseCase,
@@ -40,15 +39,16 @@ class VideoScreenViewModel(
     val getLocalCatalog: GetLocalCatalog,
     val insertUseCases: LocalInsertUseCases,
     val playerCreator: PlayerCreator,
-    val savedStateHandle: SavedStateHandle,
     httpClient: HttpClients,
     val simpleStorage: GetSimpleStorage,
     val mediaState: MediaState,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
 
 
-    val chapterId: StateFlow<Long> =
-        savedStateHandle.getStateFlow(NavigationArgs.chapterId.name, -1L)
+    data class Param(
+        val chapterId: Long
+    )
+    val chapterId: State<Long> by mutableStateOf(chapterId)
 
     var player: State<ExoPlayer?> = derivedStateOf { mediaState.player }
 
@@ -63,7 +63,7 @@ class VideoScreenViewModel(
     var appUrl by mutableStateOf<String?>(null)
 
     fun subscribeChapter() {
-        viewModelScope.launch {
+        scope.launch {
             getChapterUseCase.subscribeChapterById(chapterId.value, null).collect { chapter1 ->
                 chapter = chapter1
                 chapter1?.content?.let { pages ->
@@ -94,7 +94,7 @@ class VideoScreenViewModel(
         if (localSource is HttpSource) {
             source = localSource
         }
-        viewModelScope.launch {
+        scope.launch {
             if (chapter != null && chapter.content.isEmpty() && catalogLocal != null) {
                 getRemoteChapter(chapter, catalogLocal)
             } else {

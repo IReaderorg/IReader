@@ -35,7 +35,5 @@ object NavigationArgs {
     val showBottomNav = navArgument(ARG_HIDE_BOTTOM_BAR) {
         defaultValue = true
     }
-    val transparentStatusBar = navArgument(ARG_TRANSPARENT_STATUS_BAR) {
-        defaultValue = true
-    }
+
 }

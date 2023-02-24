@@ -21,7 +21,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.koin.android.annotation.KoinViewModel
 
-@KoinViewModel
+
 class GlobalSearchViewModel(
     private val state: GlobalSearchStateImpl,
     private val catalogStore: GetLocalCatalogs,
@@ -52,13 +52,13 @@ class GlobalSearchViewModel(
     }
 
     fun searchBooks(query: String) {
-        viewModelScope.launch {
+        scope.launch {
             installedCatalogs = getInstalledCatalog.get()
             val catalogs =
                 installedCatalogs.mapNotNull { it.source }.filterIsInstance<CatalogSource>()
             var availableThreads = 5
             catalogs.forEach { source ->
-                viewModelScope.launch {
+                scope.launch {
                     SearchItem(source).handleSearchItems(true)
                     while (availableThreads <= 0) {
                         delay(500)

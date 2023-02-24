@@ -22,6 +22,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.google.accompanist.pager.ExperimentalPagerApi
 import ireader.core.log.Log
 import ireader.domain.models.prefs.PreferenceValues
@@ -29,6 +33,7 @@ import ireader.domain.preferences.models.prefs.readerThemes
 import ireader.presentation.R
 import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.IModalSheets
+import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.ui.component.*
 import ireader.presentation.ui.component.components.Build
@@ -47,56 +52,50 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 import java.math.RoundingMode
 
-object TTSScreenSpec : ScreenSpec {
-    override val navHostRoute: String = "tts_screen_route/{bookId}/{chapterId}/{sourceId}"
+class TTSScreenSpec(
+    val bookId: Long,
+    val chapterId: Long,
+    val sourceId: Long,
+    val readingParagraph: Int = 0,
+) : VoyagerScreen() {
 
-    fun buildRoute(
-        bookId: Long,
-        sourceId: Long,
-        chapterId: Long,
-    ): String {
-        return "tts_screen_route/$bookId/$chapterId/$sourceId"
-    }
 
-    fun buildDeepLink(
-        bookId: Long,
-        sourceId: Long,
-        chapterId: Long,
-        readingParagraph: Long,
-    ): String {
-        return "https://www.ireader.org/tts_screen_route/$bookId/$chapterId/$sourceId/$readingParagraph"
-    }
+    override val key: ScreenKey
+        get() = "TTS_SCREEN#$chapterId"
+//    fun buildDeepLink(
+//        bookId: Long,
+//        sourceId: Long,
+//        chapterId: Long,
+//        readingParagraph: Long,
+//    ): String {
+//        return "https://www.ireader.org/tts_screen_route/$bookId/$chapterId/$sourceId/$readingParagraph"
+//    }
+//
+//    override val deepLinks: List<NavDeepLink> = listOf(
+//
+//        navDeepLink {
+//            uriPattern =
+//                "https://www.ireader.org/tts_screen_route/{bookId}/{chapterId}/{sourceId}/{readingParagraph}"
+//            NavigationArgs.bookId
+//            NavigationArgs.chapterId
+//            NavigationArgs.sourceId
+//            NavigationArgs.readingParagraph
+//        }
+//    )
 
-    override val deepLinks: List<NavDeepLink> = listOf(
-
-        navDeepLink {
-            uriPattern =
-                "https://www.ireader.org/tts_screen_route/{bookId}/{chapterId}/{sourceId}/{readingParagraph}"
-            NavigationArgs.bookId
-            NavigationArgs.chapterId
-            NavigationArgs.sourceId
-            NavigationArgs.readingParagraph
-        }
-    )
-    override val arguments: List<NamedNavArgument> = listOf(
-        NavigationArgs.bookId,
-        NavigationArgs.chapterId,
-        NavigationArgs.sourceId,
-
-        )
 
     @OptIn(
         ExperimentalMaterialApi::class, ExperimentalPagerApi::class,
         ExperimentalMaterial3Api::class
     )
     @Composable
-    override fun Content(
-        controller: Controller
-    ) {
+    override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+
         val vm: TTSViewModel =
-            getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
+            getIViewModel(parameters = {
                 org.koin.core.parameter.parametersOf(
-                    TTSViewModel.createParam(controller)
+                    TTSViewModel.Param(sourceId,chapterId,bookId,readingParagraph)
                 )
             })
         val context = LocalContext.current
@@ -251,7 +250,7 @@ object TTSScreenSpec : ScreenSpec {
                         CustomizeAnimateVisibility(visible = !vm.fullScreenMode) {
                             TTSTopBar(
                                 onPopBackStack = {
-                                    controller.navController.popBackStack()
+                                    popBackStack(navigator)
                                 },
                                 scrollBehavior = scrollBehavior,
                                 onSetting = {
@@ -322,7 +321,7 @@ object TTSScreenSpec : ScreenSpec {
                         },
                         source = vm.ttsSource,
                         onPopStack = {
-                            controller.navController.popBackStack()
+                            popBackStack(navigator)
                         },
                         lazyState = lazyState,
                         bottomSheetState = sheetState,

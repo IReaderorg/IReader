@@ -6,7 +6,7 @@ import ireader.i18n.SourceNotFoundException
 import ireader.core.source.model.Filter
 import ireader.core.source.model.Listing
 import ireader.core.source.model.MangasPageInfo
-import ireader.domain.utils.extensions.async.withIOContext
+import ireader.domain.utils.extensions.withIOContext
 import org.koin.core.annotation.Factory
 
 @Factory

@@ -45,7 +45,6 @@ import kotlinx.coroutines.launch
 fun ExtensionScreen(
     modifier: Modifier = Modifier,
     vm: ExtensionViewModel,
-    onRefreshCatalogs: () -> Unit,
     onClickCatalog: (Catalog) -> Unit,
     onClickInstall: (Catalog) -> Unit,
     onClickUninstall: (Catalog) -> Unit,
@@ -84,7 +83,6 @@ fun ExtensionScreen(
             onClickInstall = onClickInstall,
             onClickTogglePinned = onClickTogglePinned,
             onClickUninstall = onClickUninstall,
-            onRefreshCatalogs = onRefreshCatalogs,
             pages = pages,
             onCancelInstaller = onCancelInstaller,
         )
@@ -120,7 +118,6 @@ private fun ExtensionContent(
     onClickCatalog: (Catalog) -> Unit,
     onClickTogglePinned: (Catalog) -> Unit,
     vm: ExtensionViewModel,
-    onRefreshCatalogs: () -> Unit,
     onClickInstall: (Catalog) -> Unit,
     onClickUninstall: (Catalog) -> Unit,
     onCancelInstaller: ((Catalog) -> Unit)? = null,
@@ -141,7 +138,6 @@ private fun ExtensionContent(
         onClickInstall = onClickInstall,
         onClickTogglePinned = onClickTogglePinned,
         onClickUninstall = onClickUninstall,
-        onRefreshCatalogs = onRefreshCatalogs,
         pages = pages,
         onCancelInstaller = onCancelInstaller
     )
@@ -157,7 +153,6 @@ private fun ExtensionPager(
     onClickCatalog: (Catalog) -> Unit,
     onClickTogglePinned: (Catalog) -> Unit,
     vm: ExtensionViewModel,
-    onRefreshCatalogs: () -> Unit,
     onClickInstall: (Catalog) -> Unit,
     onClickUninstall: (Catalog) -> Unit,
     onCancelInstaller: ((Catalog) -> Unit)? = null,
@@ -178,7 +173,6 @@ private fun ExtensionPager(
             1 -> {
                 RemoteSourcesScreen(
                     vm = vm,
-                    onRefreshCatalogs = onRefreshCatalogs,
                     onClickInstall = onClickInstall,
                     onClickUninstall = onClickUninstall,
                     onCancelInstaller = onCancelInstaller,

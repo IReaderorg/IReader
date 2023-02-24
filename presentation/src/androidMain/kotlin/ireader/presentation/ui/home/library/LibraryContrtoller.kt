@@ -17,12 +17,11 @@ import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
 fun LibraryController(
     modifier: Modifier,
     vm: LibraryViewModel,
-    controller: Controller,
     goToReader: (BookItem) -> Unit,
     goToDetail: (BookItem) -> Unit,
     scaffoldPadding: PaddingValues,
@@ -34,7 +33,7 @@ fun LibraryController(
         modifier = modifier,
         onMarkAsRead = {
             with(vm) {
-                viewModelScope.launch(Dispatchers.IO) {
+                scope.launch(Dispatchers.IO) {
                     markBookAsReadOrNotUseCase.markAsRead(selectedBooks)
                     selectedBooks.clear()
                 }
@@ -45,7 +44,7 @@ fun LibraryController(
         },
         onMarkAsNotRead = {
             with(vm) {
-                viewModelScope.launch(Dispatchers.IO) {
+                scope.launch(Dispatchers.IO) {
                     markBookAsReadOrNotUseCase.markAsNotRead(selectedBooks)
                     selectedBooks.clear()
                 }
@@ -53,7 +52,7 @@ fun LibraryController(
         },
         onDelete = {
             with(vm) {
-                viewModelScope.launch(Dispatchers.IO) {
+                scope.launch(Dispatchers.IO) {
                     kotlin.runCatching {
                         deleteUseCase.unFavoriteBook(selectedBooks)
                     }
@@ -105,7 +104,7 @@ fun LibraryController(
             vm.addQueues.addAll(category.toBookCategory(vm.selectedBooks))
         },
         editCategoryOnConfirm = {
-            vm.viewModelScope.launch(Dispatchers.IO) {
+            vm.scope.launch(Dispatchers.IO) {
                 vm.getCategory.insertBookCategory(vm.addQueues)
                 vm.getCategory.deleteBookCategory(vm.deleteQueues)
                 vm.deleteQueues.clear()

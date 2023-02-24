@@ -6,7 +6,11 @@ import androidx.compose.runtime.*
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.google.accompanist.web.WebContent
+import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
@@ -23,66 +27,26 @@ import java.nio.charset.StandardCharsets
     ExperimentalMaterialApi::class,
     ExperimentalCoroutinesApi::class, ExperimentalMaterial3Api::class
 )
-object WebViewScreenSpec : ScreenSpec {
+data class WebViewScreenSpec(
+    val url: String?,
+    val sourceId: Long?,
+    val bookId: Long?,
+    val chapterId: Long?,
+    val enableBookFetch: Boolean = false,
+    val enableChapterFetch: Boolean = false,
+    val enableChaptersFetch: Boolean = false,
+) : VoyagerScreen() {
 
-    override val navHostRoute: String =
-        "web_page_route/{url}/{sourceId}/{bookId}/{chapterId}/{enableChapterFetch}/{enableChaptersFetch}/{enableBookFetch}"
-
-    override val arguments: List<NamedNavArgument> = listOf(
-        navArgument("url") {
-            type = NavType.StringType
-            defaultValue = "No_Url"
-        },
-        navArgument("enableChapterFetch") {
-            type = NavType.BoolType
-            defaultValue = false
-        },
-        navArgument("enableChaptersFetch") {
-            type = NavType.BoolType
-            defaultValue = false
-        },
-        navArgument("enableBookFetch") {
-            type = NavType.BoolType
-            defaultValue = false
-        },
-        NavigationArgs.sourceId,
-        NavigationArgs.chapterId,
-        NavigationArgs.bookId,
-    )
-
-    fun buildRoute(
-        url: String? = null,
-        sourceId: Long? = null,
-        bookId: Long? = null,
-        chapterId: Long? = null,
-        enableChapterFetch: Boolean = false,
-        enableChaptersFetch: Boolean = false,
-        enableBookFetch: Boolean = false,
-    ): String {
-        return "web_page_route/${
-        URLEncoder.encode(
-            url,
-            StandardCharsets.UTF_8.name()
-        )
-        }/${sourceId ?: 0}/${bookId ?: 0}/${chapterId ?: 0}/$enableChapterFetch/$enableChaptersFetch/$enableBookFetch".trim()
-    }
-
-    private fun Boolean.encodeBoolean(): String {
-        return if (this) "true" else "false"
-    }
-    private fun String.decodeBoolean(): Boolean {
-        return this == "true"
-    }
 
     @Composable
-    override fun Content(
-        controller: Controller
-    ) {
-        val vm: WebViewPageModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
+    override fun Content() {
+        val vm: WebViewPageModel = getIViewModel(parameters = {
             org.koin.core.parameter.parametersOf(
-                WebViewPageModel.createParam(controller)
+                WebViewPageModel.Param(url,bookId,sourceId,chapterId,enableChapterFetch,enableChaptersFetch,enableBookFetch)
             )
         })
+        val navigator = LocalNavigator.currentOrThrow
+
         val scope = rememberCoroutineScope()
         val host = SnackBarListener(vm)
         IScaffold(
@@ -114,7 +78,7 @@ object WebViewScreenSpec : ScreenSpec {
                         vm.webUrl = it
                     },
                     onPopBackStack = {
-                        controller.navController.popBackStack()
+                        popBackStack(navigator)
                     },
                     source = source,
                     onFetchBook = {

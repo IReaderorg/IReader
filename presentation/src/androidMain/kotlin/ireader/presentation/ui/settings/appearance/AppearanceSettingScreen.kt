@@ -36,6 +36,7 @@ import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposab
 import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.ui.core.theme.isLight
 import ireader.presentation.ui.core.ui.PreferenceMutableState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -107,13 +108,20 @@ fun AppearanceSettingScreen(
                     items(items = themesForCurrentMode) { theme ->
                         ThemeItem(
                             theme,
-                            onClick = {
-                                vm.colorTheme.value = it.id
-                                customizedColors.primaryState.value = it.materialColors.primary
-                                customizedColors.secondaryState.value =
-                                    it.materialColors.secondary
-                                customizedColors.barsState.value = it.extraColors.bars
-                                vm.isSavable = false
+                            onClick = { theme ->
+                                scope.launch {
+                                    vm.colorTheme.value = theme.id
+                                    repeat(3) {_ ->
+                                        customizedColors.primaryState.value = theme.materialColors.primary
+                                        customizedColors.secondaryState.value =
+                                            theme.materialColors.secondary
+                                        customizedColors.barsState.value = theme.extraColors.bars
+                                        delay(1000)
+                                    }
+
+
+                                    vm.isSavable = false
+                                }
                             },
                             isSelected = vm.colorTheme.value == theme.id,
                         )

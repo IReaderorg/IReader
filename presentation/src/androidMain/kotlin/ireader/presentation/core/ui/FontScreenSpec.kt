@@ -10,6 +10,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.components.SearchToolbar
@@ -19,20 +22,17 @@ import ireader.domain.preferences.models.getDefaultFont
 import ireader.presentation.ui.settings.font_screens.FontScreen
 import ireader.presentation.ui.settings.font_screens.FontScreenViewModel
 import ireader.presentation.R
+import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalMaterial3Api
-@OptIn(ExperimentalMaterialApi::class)
-object FontScreenSpec : ScreenSpec {
-    override val navHostRoute: String = "font_screen_spec"
+class FontScreenSpec : VoyagerScreen() {
 
     @Composable
-    override fun Content(
-        controller: Controller
-    ) {
-        val vm: FontScreenViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
-
+    override fun Content() {
+        val vm: FontScreenViewModel = getIViewModel()
+        val navigator = LocalNavigator.currentOrThrow
         IScaffold(
             topBar = { scrollBehavior ->
                 SearchToolbar(
@@ -47,7 +47,7 @@ object FontScreenSpec : ScreenSpec {
                         )
                     },
                     onPopBackStack = {
-                        controller.navController.popBackStack()
+                       popBackStack(navigator)
                     },
                     onValueChange = {
                         vm.searchQuery = it

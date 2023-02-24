@@ -2,6 +2,22 @@
 
 package ireader.i18n
 
+
+
+object Args {
+    const val ARG_BOOK_ID = "bookId"
+    const val ARG_SOURCE_ID = "sourceId"
+    const val ARG_CHAPTER_ID = "chapterId"
+    const val ARG_READING_PARAGRAPH = "reading_paragraph"
+}
+object SHORTCUTS {
+    const val SHORTCUT_TTS = "ireader.SHORTCUT_TTS"
+    const val SHORTCUT_DOWNLOAD = "ireader.SHORTCUT_DOWNLOAD"
+    const val SHORTCUT_READER = "ireader.SHORTCUT_READER"
+    const val SHORTCUT_DETAIL = "ireader.SHORTCUT_DETAIL"
+}
+
+
 const val SHARED_PREF_NAME = "shared_pref_name"
 
 const val CLOUDFLARE_LOG = "Performance & security by Cloudflare"
@@ -14,6 +30,8 @@ const val KODEIN_MODULE = "kodein_module"
 const val EXPLORE_BOOK_TABLE = "explore"
 
 const val ARG_HIDE_BOTTOM_BAR = "ARG_HIDE_BOTTOM_BAR"
+
+
 
 
 

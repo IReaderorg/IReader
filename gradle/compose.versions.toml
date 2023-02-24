@@ -40,6 +40,7 @@ material3-core = { module = "androidx.compose.material3:material3", version.ref 
 material3-windowsizeclass = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "material3" }
 material3-adapter = { module = "com.google.android.material:compose-theme-adapter-3", version.ref = "material3" }
 material-icons = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose" }
+materialmotion-core = "io.github.fornewid:material-motion-compose-core:0.10.3"
 
 [bundles]
 compose-android = [

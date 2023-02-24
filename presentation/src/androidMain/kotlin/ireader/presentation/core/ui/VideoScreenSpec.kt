@@ -8,8 +8,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NamedNavArgument
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.utils.extensions.*
 import ireader.presentation.core.IModalSheets
+import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
@@ -21,30 +25,18 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 
-object VideoScreenSpec : ScreenSpec {
-    override val navHostRoute: String = "video_screen_route/{chapterId}"
-
-    fun buildRoute(
-        chapterId: Long,
-    ): String {
-        return "video_screen_route/$chapterId"
-    }
-
-    override val arguments: List<NamedNavArgument> = listOf(
-        NavigationArgs.chapterId,
-    )
+data class VideoScreenSpec(val chapterId: Long) : VoyagerScreen() {
 
 
     @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content(
-        controller: Controller
-    ) {
+    override fun Content() {
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
+        val navigator = LocalNavigator.currentOrThrow
 
         val vm: VideoScreenViewModel =
-            koinViewModel(viewModelStoreOwner = controller.navBackStackEntry)
+            getIViewModel()
 
         val state = vm.mediaState
         DisposableEffect(key1 = true) {

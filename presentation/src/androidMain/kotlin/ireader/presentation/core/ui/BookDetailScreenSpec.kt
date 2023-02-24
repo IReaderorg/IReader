@@ -16,23 +16,32 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
+import cafe.adriel.voyager.core.model.coroutineScope
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
+import cafe.adriel.voyager.koin.getScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import ireader.domain.models.entities.Book
 import ireader.core.source.HttpSource
 import ireader.core.source.model.ChapterInfo
-import ireader.domain.utils.extensions.async.viewModelIOCoroutine
+
 import ireader.domain.utils.extensions.findComponentActivity
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.UiText
 import ireader.presentation.R
 import ireader.presentation.core.IModalSheets
+import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.ui.book.BookDetailScreen
 import ireader.presentation.ui.book.BookDetailTopAppBar
@@ -45,39 +54,26 @@ import ireader.presentation.ui.core.theme.TransparentStatusBar
 import ireader.presentation.ui.core.ui.SnackBarListener
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 
-object BookDetailScreenSpec : ScreenSpec {
+data class BookDetailScreenSpec(
+    val bookId: Long,
+) : VoyagerScreen() {
 
-    override val navHostRoute: String = "book_detail_route/{bookId}/"
 
-    fun buildRoute( bookId: Long): String {
-        return "book_detail_route/$bookId/"
-    }
+    override val key: ScreenKey = "Detail_Screen#$bookId"
 
-    override val arguments: List<NamedNavArgument> =
-        listOf(
-            NavigationArgs.bookId,
-            NavigationArgs.transparentStatusBar,
-        )
-
-    override val deepLinks: List<NavDeepLink> = listOf(
-        navDeepLink {
-            uriPattern = "https://www.ireader.org/book_detail_route/{bookId}/{sourceId}"
-            NavigationArgs.bookId
-            NavigationArgs.sourceId
-        }
-    )
     @OptIn(
         ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class, ExperimentalPagerApi::class
     )
     @Composable
     override fun Content(
-        controller: Controller
     ) {
+        val navigator = LocalNavigator.currentOrThrow
         val vm: BookDetailViewModel =
-            getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
+            getScreenModel(parameters = {
                 org.koin.core.parameter.parametersOf(
-                    BookDetailViewModel.createParam(controller)
+                    BookDetailViewModel.Param(bookId)
                 )
             })
         val snackbarHostState = SnackBarListener(vm = vm)
@@ -124,7 +120,7 @@ object BookDetailScreenSpec : ScreenSpec {
                             ChapterCommandBottomSheet(
                                 onFetch = {
                                     source.let { source ->
-                                        vm.viewModelIOCoroutine {
+                                        vm.scope.launch {
                                             if (book != null) {
                                                 vm.getRemoteChapterDetail(
                                                     book,
@@ -188,7 +184,7 @@ object BookDetailScreenSpec : ScreenSpec {
                                 }
                             },
                             onPopBackStack = {
-                                controller.navController.popBackStack()
+                                popBackStack(navigator)
                             },
                             source = vm.source,
                             onCommand = {
@@ -261,8 +257,8 @@ object BookDetailScreenSpec : ScreenSpec {
                         vm = vm,
                         onTitle = {
                             try {
-                                controller.navController.navigate(
-                                    GlobalSearchScreenSpec.buildRoute(
+                                navigator.push(
+                                    GlobalSearchScreenSpec(
                                         query = it
                                     )
                                 )
@@ -279,15 +275,16 @@ object BookDetailScreenSpec : ScreenSpec {
                                 if (book != null) {
                                     when (chapter.type) {
                                         ChapterInfo.MOVIE -> {
-                                            controller.navController.navigate(
-                                                VideoScreenSpec.buildRoute(
+                                            navigator.push(
+                                                VideoScreenSpec(
                                                     chapterId = chapter.id,
                                                 )
                                             )
+
                                         }
                                         else -> {
-                                            controller.navController.navigate(
-                                                ReaderScreenSpec.buildRoute(
+                                            navigator.push(
+                                                ReaderScreenSpec(
                                                     bookId = book.id,
                                                     chapterId = chapter.id,
                                                 )
@@ -320,15 +317,15 @@ object BookDetailScreenSpec : ScreenSpec {
                         onRead = {
                             if (catalog != null && book != null) {
                                 if (vm.chapters.any { it.read } && vm.chapters.isNotEmpty()) {
-                                    controller.navController.navigate(
-                                        ReaderScreenSpec.buildRoute(
+                                    navigator.push(
+                                        ReaderScreenSpec(
                                             bookId = book.id,
                                             chapterId = LAST_CHAPTER,
                                         )
                                     )
                                 } else if (vm.chapters.isNotEmpty()) {
-                                    controller.navController.navigate(
-                                        ReaderScreenSpec.buildRoute(
+                                    navigator.push(
+                                        ReaderScreenSpec(
                                             bookId = book.id,
                                             chapterId = vm.chapters.first().id,
                                         )
@@ -365,8 +362,8 @@ object BookDetailScreenSpec : ScreenSpec {
                         },
                         onWebView = {
                             if (source != null && source is HttpSource && book != null) {
-                                controller.navController.navigate(
-                                    WebViewScreenSpec.buildRoute(
+                                navigator.push(
+                                    WebViewScreenSpec(
                                         url = book.key,
                                         sourceId = book.sourceId,
                                         bookId = book.id,
@@ -382,7 +379,6 @@ object BookDetailScreenSpec : ScreenSpec {
                                 vm.toggleInLibrary(book = book)
                             }
                         },
-                        controller = controller
 
                     )
                 }

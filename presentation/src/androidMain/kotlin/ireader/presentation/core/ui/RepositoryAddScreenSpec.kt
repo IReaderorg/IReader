@@ -12,9 +12,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NamedNavArgument
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.getScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.ExtensionSource
 import ireader.i18n.UiText
 import ireader.presentation.R
+import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Toolbar
@@ -27,27 +32,22 @@ import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 
-object RepositoryAddScreenSpec : ScreenSpec {
-
-    override val navHostRoute: String = "repository_add_screen"
-
-    override val arguments: List<NamedNavArgument> = listOf(
-
-    )
+class RepositoryAddScreenSpec : VoyagerScreen() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content(
-        controller: Controller
-    ) {
+    override fun Content() {
         val scope = rememberCoroutineScope()
         var text by remember {
             mutableStateOf("")
         }
-        val vm : SourceRepositoryViewModel =  getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
-        SnackBarListener(vm = vm)
+        val vm : SourceRepositoryViewModel =  getScreenModel()
+        val host = SnackBarListener(vm = vm)
+        val navigator = LocalNavigator.currentOrThrow
+
         val showDialog = vm.showAutomaticSourceDialog
         IScaffold(
+            snackbarHostState = host,
             topBar = { scrollBehavior ->
                     Toolbar(
                         title = {
@@ -62,7 +62,7 @@ object RepositoryAddScreenSpec : ScreenSpec {
                                 }
 
                             )
-                        }
+                        },
                     )
             }
         ) {scaffoldPadding ->
@@ -78,13 +78,13 @@ object RepositoryAddScreenSpec : ScreenSpec {
                         id = 0,
                     ))
                 }
-                controller.navController.popBackStack()
+                popBackStack(navigator)
             }
             )
             if (showDialog.value) {
                 androidx.compose.material3.AlertDialog(onDismissRequest = { showDialog.value = false}, confirmButton = {
                     TextButton(onClick = {
-                        vm.viewModelScope.launch {
+                        vm.scope.launch {
                             try {
                                 vm.catalogSourceRepository.insert(vm.parseUrl(text))
 

@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import org.koin.android.annotation.KoinViewModel
 
-@KoinViewModel
+
 class HistoryViewModel(
     private val state: HistoryStateImpl,
     val historyUseCase: HistoryUseCase,

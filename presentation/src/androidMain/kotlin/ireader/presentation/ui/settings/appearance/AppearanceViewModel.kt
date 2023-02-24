@@ -19,7 +19,7 @@ import ireader.presentation.ui.core.theme.themes
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import org.koin.android.annotation.KoinViewModel
 
-@KoinViewModel
+
 class AppearanceViewModel(
     val uiPreferences: UiPreferences,
     val themeRepository: ThemeRepository

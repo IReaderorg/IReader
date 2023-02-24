@@ -11,6 +11,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.log.Log
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
@@ -18,6 +21,7 @@ import ireader.domain.utils.extensions.AuthenticatorUtil
 import ireader.domain.utils.extensions.AuthenticatorUtil.isAuthenticationSupported
 import ireader.domain.utils.extensions.AuthenticatorUtil.startAuthentication
 import ireader.i18n.R
+import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Components
@@ -30,17 +34,16 @@ import org.koin.android.annotation.KoinViewModel
 import org.koin.android.ext.android.get
 import org.koin.androidx.compose.getViewModel
 
-object SecuritySettingSpec : ScreenSpec {
+class SecuritySettingSpec : VoyagerScreen() {
 
-    override val navHostRoute: String = "security_settings_screen_route"
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content(
-        controller: Controller
-    ) {
-        val vm: SecuritySettingViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
+    override fun Content() {
+        val vm: SecuritySettingViewModel = getIViewModel()
         val context = LocalContext.current
+        val navigator = LocalNavigator.currentOrThrow
+
         val onIdleAfter =
             rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
                 when (resultIntent.resultCode) {
@@ -148,8 +151,10 @@ object SecuritySettingSpec : ScreenSpec {
             topBar = { scrollBehavior ->
                 TitleToolbar(
                     title = stringResource(R.string.security),
-                    navController = controller.navController,
-                    scrollBehavior = scrollBehavior
+                    scrollBehavior = scrollBehavior,
+                    popBackStack = {
+                        popBackStack(navigator)
+                    }
                 )
             }
         ) { padding ->
@@ -216,7 +221,7 @@ class UnlockActivity : FragmentActivity() {
     }
 }
 
-@KoinViewModel
+
 class SecuritySettingViewModel(
     private val appPreferences: UiPreferences,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {

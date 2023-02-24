@@ -196,6 +196,9 @@ dependencies {
     implementation(libs.koin.core)
     implementation(libs.koin.annotations)
     ksp(libs.koin.kspCompiler)
+
+
+    implementation(libs.voyager.navigator)
 }
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround

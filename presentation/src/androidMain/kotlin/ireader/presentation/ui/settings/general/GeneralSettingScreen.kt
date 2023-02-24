@@ -106,7 +106,7 @@ fun GeneralSettingScreen(
     )
 }
 
-@KoinViewModel
+
 class GeneralSettingScreenViewModel(
     private val appPreferences: AppPreferences,
     private val uiPreferences: UiPreferences,

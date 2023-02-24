@@ -24,7 +24,7 @@ import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.services.ServiceUseCases
-import ireader.domain.utils.extensions.async.withIOContext
+import ireader.domain.utils.extensions.withIOContext
 import ireader.domain.utils.extensions.withUIContext
 import ireader.i18n.UiText
 import ireader.presentation.R
@@ -46,7 +46,7 @@ import org.koin.android.annotation.KoinViewModel
 import java.util.*
 
 
-@KoinViewModel
+
 class BookDetailViewModel(
     private val localInsertUseCases: LocalInsertUseCases,
     private val getChapterUseCase: LocalGetChapterUseCase,
@@ -73,6 +73,15 @@ class BookDetailViewModel(
         }
     }
 
+    init {
+        Log.error { "Init Reader" }
+    }
+
+    override fun onDestroy() {
+        Log.error { "destroy Reader" }
+        super.onDestroy()
+    }
+
     var getBookDetailJob: Job? = null
     var getChapterDetailJob: Job? = null
     var initBooks = false
@@ -97,7 +106,7 @@ class BookDetailViewModel(
             }
             toggleBookLoading(true)
             chapterIsLoading = true
-            viewModelScope.launch {
+            scope.launch {
                 subscribeBook(bookId = bookId)
                 subscribeChapters(bookId = bookId)
                 getLastReadChapter(bookId)
@@ -105,7 +114,7 @@ class BookDetailViewModel(
             }
 
         } else {
-            viewModelScope.launch {
+            scope.launch {
                 showSnackBar(UiText.StringResource(R.string.something_is_wrong_with_this_book))
             }
         }
@@ -139,13 +148,13 @@ class BookDetailViewModel(
     private fun subscribeBook(bookId: Long) {
         getBookUseCases.subscribeBookById(bookId).onEach { snapshot ->
             booksState.replaceBook(snapshot)
-        }.launchIn(viewModelScope)
+        }.launchIn(scope)
     }
 
     private fun subscribeChapters(bookId: Long) {
         getChapterUseCase.subscribeChaptersByBookId(bookId).onEach { snapshot ->
             chapters = snapshot
-        }.launchIn(viewModelScope)
+        }.launchIn(scope)
     }
 
     private val reservedChars = "|\\?*<\":>+[]/'"
@@ -231,14 +240,14 @@ class BookDetailViewModel(
     fun getLastReadChapter(bookId: Long) {
         historyUseCase.subscribeHistoryByBookId(bookId).onEach {
             lastRead = it?.chapterId
-        }.launchIn(viewModelScope)
+        }.launchIn(scope)
     }
 
     suspend fun getRemoteBookDetail(book: Book?, source: CatalogLocal?) {
         if (book == null) return
         toggleBookLoading(true)
         getBookDetailJob?.cancel()
-        getBookDetailJob = viewModelScope.launch {
+        getBookDetailJob = scope.launch {
             remoteUseCases.getBookDetail(
                 book = book,
                 catalog = source,
@@ -281,7 +290,7 @@ class BookDetailViewModel(
         if (book == null) return
         chapterIsLoading = true
         getChapterDetailJob?.cancel()
-        getChapterDetailJob = viewModelScope.launch {
+        getChapterDetailJob = scope.launch {
             remoteUseCases.getRemoteChapters(
                 book = book,
                 catalog = source,
@@ -327,7 +336,7 @@ class BookDetailViewModel(
 
 
     fun deleteChapters(chapters: List<Chapter>) {
-        viewModelScope.launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.IO) {
             deleteUseCase.deleteChapters(chapters)
         }
     }

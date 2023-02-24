@@ -16,13 +16,19 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NamedNavArgument
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.getScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.toBookItem
 import ireader.core.source.HttpSource
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
 import ireader.presentation.R
 import ireader.presentation.core.IModalSheets
+import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.core.ui.util.NavigationArgs
+import ireader.presentation.core.ui.util.NavigationArgs.bookId
 import ireader.presentation.imageloader.coil.image_loaders.convertToOkHttpRequest
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
@@ -41,37 +47,23 @@ import org.koin.androidx.compose.getViewModel
     ExperimentalAnimationApi::class,
     ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
 )
-object ExploreScreenSpec : ScreenSpec {
-
-    override val navHostRoute: String = "explore_route/{sourceId}?query={query}"
-
-    override val arguments: List<NamedNavArgument> = listOf(
-        NavigationArgs.query,
-        NavigationArgs.sourceId,
-    )
-
-    fun buildRoute(sourceId: Long, query: String? = null): String {
-        return if (query != null) {
-            "explore_route/$sourceId?query=$query"
-        } else {
-            "explore_route/$sourceId"
-        }
-    }
-
-
+data class ExploreScreenSpec(
+    val sourceId: Long,
+    val query: String? = null
+) : VoyagerScreen() {
     @OptIn(
-        ExperimentalAnimationApi::class,
         ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class,
         ExperimentalComposeUiApi::class
     )
     @Composable
-    override fun Content(controller: Controller) {
+    override fun Content() {
         val vm: ExploreViewModel =
-            getViewModel(viewModelStoreOwner = controller.navBackStackEntry, parameters = {
+            getScreenModel(parameters = {
                 org.koin.core.parameter.parametersOf(
-                    ExploreViewModel.createParam(controller)
+                    ExploreViewModel.Param(sourceId, query)
                 )
             })
+        val navigator = LocalNavigator.currentOrThrow
         val source = vm.source
         val scope = rememberCoroutineScope()
         val headers = remember {
@@ -101,8 +93,7 @@ object ExploreScreenSpec : ScreenSpec {
                         vm.modifiedFilter = it
                     }
                 )
-            }
-        , bottomSheetState = sheetState
+            }, bottomSheetState = sheetState
         ) {
 
             IScaffold(
@@ -141,8 +132,8 @@ object ExploreScreenSpec : ScreenSpec {
                         },
                         onWebView = {
                             if (source is HttpSource) {
-                                controller.navController.navigate(
-                                    WebViewScreenSpec.buildRoute(
+                                navigator.push(
+                                    WebViewScreenSpec(
                                         url = (source).baseUrl,
                                         sourceId = source.id,
                                         chapterId = null,
@@ -153,7 +144,7 @@ object ExploreScreenSpec : ScreenSpec {
                                 )
                             }
                         },
-                        onPop = { controller.navController.popBackStack() },
+                        onPop = { popBackStack(navigator) },
                         onLayoutTypeSelect = { layout ->
                             vm.saveLayoutType(layout)
                         },
@@ -180,35 +171,33 @@ object ExploreScreenSpec : ScreenSpec {
                         },
                         onBook = { book ->
 
-                            vm.viewModelScope.launch {
+                            vm.scope.launch {
                                 val newBook = vm.booksState.books.getOrNull(book.column.toInt())
                                 vm.booksState.book = null
                                 val bookId = vm.insertUseCases.insertBook(newBook)
 
                                 if (bookId != 0L) {
                                     vm.booksState.replaceBook(newBook?.copy(id = bookId))
-                                    controller.navController.navigate(
-                                        route = BookDetailScreenSpec.buildRoute(
-                                            bookId = bookId
-                                        )
-                                    )
+                                    navigator.push(BookDetailScreenSpec(bookId = bookId))
                                 }
 
                             }
 
                         },
                         onAppbarWebView = {
-                            controller.navController.navigate(
-                                WebViewScreenSpec.buildRoute(
+                            navigator.push(
+                                WebViewScreenSpec(
                                     url = it,
                                     sourceId = source.id,
                                     enableBookFetch = true,
-                                    enableChaptersFetch = true
+                                    enableChaptersFetch = true,
+                                    bookId = null,
+                                    chapterId = null
                                 )
                             )
                         },
                         onPopBackStack = {
-                            controller.navController.popBackStack()
+                            popBackStack(navigator)
                         },
                         snackBarHostState = snackBarHostState,
                         modalState = sheetState,
@@ -222,7 +211,7 @@ object ExploreScreenSpec : ScreenSpec {
                             } else headers.value
                         },
                         onLongClick = {
-                            vm.viewModelScope.launchIO {
+                            vm.scope.launchIO {
                                 vm.addToFavorite(it.toBookItem()) { book ->
                                     vm.booksState.replaceBook(book)
                                 }
@@ -233,7 +222,7 @@ object ExploreScreenSpec : ScreenSpec {
                     EmptyScreenComposable(
                         R.string.source_not_available,
                         onPopBackStack = {
-                            controller.navController.popBackStack()
+                            popBackStack(navigator)
                         }
                     )
                 }

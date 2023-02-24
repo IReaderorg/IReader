@@ -12,7 +12,7 @@ import ireader.domain.usecases.fonts.FontUseCase
 import org.koin.android.annotation.KoinViewModel
 
 @OptIn(ExperimentalTextApi::class)
-@KoinViewModel
+
 class FontScreenViewModel(
     private val fontScreenState: FontScreenStateImpl,
     private val fontUseCase: FontUseCase,
@@ -28,7 +28,7 @@ class FontScreenViewModel(
     }
 
     private fun setup() {
-        viewModelScope.launch {
+        scope.launch {
             fontScreenState.fonts = fontUseCase.getRemoteFonts()
             snapshotFlow {
                 fonts.filteredByQuery(searchQuery)

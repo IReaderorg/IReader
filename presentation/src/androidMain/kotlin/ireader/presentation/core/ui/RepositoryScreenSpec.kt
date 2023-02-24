@@ -24,9 +24,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NamedNavArgument
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.getScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import io.ktor.http.*
 import ireader.i18n.UiText
 import ireader.presentation.R
+import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Toolbar
@@ -39,21 +44,16 @@ import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 
-object RepositoryScreenSpec : ScreenSpec {
+class RepositoryScreenSpec : VoyagerScreen() {
 
-    override val navHostRoute: String = "repository_source"
-
-    override val arguments: List<NamedNavArgument> = listOf(
-
-    )
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content(
-        controller: Controller
-    ) {
-        val vm : SourceRepositoryViewModel =  getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
+    override fun Content() {
+        val vm : SourceRepositoryViewModel =  getScreenModel()
         val host = SnackBarListener(vm = vm)
+        val navigator = LocalNavigator.currentOrThrow
+
         IScaffold(
             topBar = { scrollBehavior ->
                 Toolbar(
@@ -74,7 +74,7 @@ object RepositoryScreenSpec : ScreenSpec {
                         )
                     },
                     onClick = {
-                        controller.navController.navigate(RepositoryAddScreenSpec.navHostRoute)
+                        navigator.push(RepositoryAddScreenSpec())
                         //showDialog = true
                     },
                     icon = {
@@ -97,7 +97,7 @@ object RepositoryScreenSpec : ScreenSpec {
                         Row {
                             if(source.id >= 0) {
                                 AppIconButton(onClick = {
-                                    vm.viewModelScope.launch {
+                                    vm.scope.launch {
                                         vm.catalogSourceRepository.delete(source)
                                     }
                                 }, imageVector = Icons.Default.DeleteForever)

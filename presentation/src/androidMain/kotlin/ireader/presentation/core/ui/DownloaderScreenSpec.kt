@@ -5,7 +5,11 @@ import androidx.compose.runtime.Composable
 
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.toSavedDownload
+import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.ui.SnackBarListener
@@ -14,29 +18,20 @@ import ireader.presentation.ui.settings.downloader.DownloaderTopAppBar
 import ireader.presentation.ui.settings.downloader.DownloaderViewModel
 import org.koin.androidx.compose.getViewModel
 
-object DownloaderScreenSpec : ScreenSpec {
-
-    override val navHostRoute: String = "downloader_route"
-
-    override val deepLinks: List<NavDeepLink> = listOf(
-        navDeepLink {
-            uriPattern = "https://www.ireader/downloader_route"
-        }
-    )
+class DownloaderScreenSpec : VoyagerScreen() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content(
-        controller: Controller
     ) {
-        val vm: DownloaderViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
-
+        val vm: DownloaderViewModel = getIViewModel()
+        val navigator = LocalNavigator.currentOrThrow
         val snackBarHostState = SnackBarListener(vm)
         IScaffold(
             topBar = { scrollBehavior ->
             DownloaderTopAppBar(
                     onPopBackStack = {
-                        controller.navController.popBackStack()
+                        popBackStack(navigator)
                     },
                     onCancelAll = {
                         vm.deleteSelectedDownloads(vm.downloads.map { it.toSavedDownload() })
@@ -61,8 +56,8 @@ object DownloaderScreenSpec : ScreenSpec {
         ) { padding ->
             DownloaderScreen(
                 onDownloadItem = { item ->
-                    controller.navController.navigate(
-                        BookDetailScreenSpec.buildRoute(
+                    navigator.push(
+                        BookDetailScreenSpec(
                             bookId = item.bookId
                         )
                     )
