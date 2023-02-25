@@ -27,23 +27,18 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
+    val hostedRepository =  System.getenv("CUSTOM_HOST_REPOSITORY")
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-//        maven("https://maven.aliyun.com/repository/public")
-//        maven("https://maven.aliyun.com/repository/central")
-//        maven("https://maven.aliyun.com/repository/apache-snapshots")
-//        maven("https://maven.aliyun.com/repository/google")
-//        maven("https://maven.aliyun.com/repository/gradle-plugin")
-        maven("https://gradle.iranrepo.ir")
+        if (hostedRepository != null) {
+            maven(hostedRepository)
+        }
         mavenCentral()
         google()
-       // maven(url = "https://maven.pkg.jetbrains.space/public/p/compose/dev")
         maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/")
         maven("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
         maven("https://oss.sonatype.org/service/local/staging/deploy/maven2")
-       // maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         maven(url = "https://jitpack.io")
-       // maven(url ="https://androidx.dev/storage/compose-compiler/repository/")
         maven(url ="https://repo1.maven.org/maven2/")
 
     }
