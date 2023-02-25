@@ -5,7 +5,6 @@ import android.os.Build
 import android.os.Looper
 import coil.ImageLoader
 import coil.ImageLoaderFactory
-import ireader.domain.di.DomainModules
 import ireader.domain.di.DomainServices
 import ireader.domain.utils.WebViewUtil
 import ireader.presentation.core.di.uiModules
@@ -17,7 +16,7 @@ import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.GlobalContext.startKoin
-import org.koin.ksp.generated.module
+
 
 class MyApplication : Application(), KoinComponent, ImageLoaderFactory {
 
@@ -30,19 +29,15 @@ class MyApplication : Application(), KoinComponent, ImageLoaderFactory {
         startKoin {
             androidContext(this@MyApplication)
             androidLogger()
-            modules(
-                DataModule,
-                CatalogModule().module,
-                DatabaseInject().module,
-                LocalModule().module,
-                PreferencesInject().module,
-                RepositoryInject().module,
-                UseCasesInject().module,
-                DomainModules().module,
-                AppModule,
-            )
+            modules(AppModule,)
 
+            modules(UseCasesInject)
+            modules(repositoryInjectModule)
+            modules(localModule)
+            modules(DataModule)
             modules(uiModules)
+            modules(CatalogModule)
+            modules(preferencesInjectModule)
             modules(DomainServices)
             workManagerFactory()
         }

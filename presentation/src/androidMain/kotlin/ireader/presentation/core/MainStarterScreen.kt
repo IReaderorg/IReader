@@ -3,28 +3,17 @@ package ireader.presentation.core
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.BottomNavigation
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
-import ireader.core.source.SourceFactory
-import ireader.presentation.core.MainStarterScreen.showBottomNavEvent
-import ireader.presentation.core.theme.AppTheme
-import ireader.presentation.core.theme.AppThemeViewModel
 import ireader.presentation.core.ui.*
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.theme.AppColors
@@ -44,6 +33,7 @@ object MainStarterScreen : VoyagerScreen() {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
+        val vm: ScreenContentViewModel = getIViewModel()
         TabNavigator(LibraryScreenSpec) { tabNavigator ->
             CompositionLocalProvider(LocalNavigator provides navigator) {
                 IScaffold(
@@ -63,8 +53,12 @@ object MainStarterScreen : VoyagerScreen() {
                                 tonalElevation = 0.dp,
                             ) {
                                 TabNavigationItem(LibraryScreenSpec)
-                                TabNavigationItem(UpdateScreenSpec)
-                                TabNavigationItem(HistoryScreenSpec)
+                                if (vm.showUpdate.value) {
+                                    TabNavigationItem(UpdateScreenSpec)
+                                }
+                                if (vm.showUpdate.value) {
+                                    TabNavigationItem(HistoryScreenSpec)
+                                }
                                 TabNavigationItem(ExtensionScreenSpec)
                                 TabNavigationItem(MoreScreenSpec)
                             }

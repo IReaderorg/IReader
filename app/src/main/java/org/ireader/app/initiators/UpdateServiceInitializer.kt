@@ -6,9 +6,9 @@ import androidx.work.WorkManager
 import org.ireader.app.BuildConfig
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.services.update_service.UpdateService
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class UpdateServiceInitializer(app: Application, appPreferences: AppPreferences) {
 
     init {

@@ -42,7 +42,7 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
-import org.koin.android.annotation.KoinViewModel
+
 import java.util.*
 
 

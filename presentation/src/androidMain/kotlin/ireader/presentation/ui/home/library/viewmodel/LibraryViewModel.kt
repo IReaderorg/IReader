@@ -41,7 +41,7 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
-import org.koin.android.annotation.KoinViewModel
+
 
 
 @OptIn(ExperimentalCoroutinesApi::class)

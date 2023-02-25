@@ -7,7 +7,7 @@ import androidx.compose.runtime.setValue
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.CatalogRemote
 import ireader.core.os.InstallStep
-import org.koin.core.annotation.Single
+
 
 interface CatalogsState {
     val allCatalogs: List<CatalogLocal>
@@ -28,7 +28,7 @@ fun CatalogsState(): CatalogsState {
     return CatalogsStateImpl()
 }
 
-    @Single
+
 class CatalogsStateImpl : CatalogsState {
 
     override var currentPagerPage by mutableStateOf(0)

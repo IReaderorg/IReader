@@ -4,9 +4,9 @@ import android.content.Context
 import android.view.WindowManager
 import ireader.domain.utils.extensions.findComponentActivity
 import ireader.domain.utils.extensions.findComponentActivity
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class ScreenAlwaysOn() {
     operator fun invoke(context: Context, enable: Boolean) {
         when (enable) {

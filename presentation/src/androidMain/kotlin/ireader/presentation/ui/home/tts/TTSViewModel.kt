@@ -33,7 +33,7 @@ import ireader.domain.utils.extensions.findComponentActivity
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.ui.component.Controller
 import kotlinx.coroutines.launch
-import org.koin.android.annotation.KoinViewModel
+
 
 
 class TTSViewModel(

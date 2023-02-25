@@ -39,7 +39,6 @@ kotlin {
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 implementation(compose.material3)
                 api(compose.materialIconsExtended)
-                compileOnly(libs.koin.annotations)
                 api(libs.koin.android)
                 api(libs.koin.androidCompose)
 

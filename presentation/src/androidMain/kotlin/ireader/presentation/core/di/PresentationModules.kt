@@ -54,8 +54,8 @@ import ireader.presentation.ui.web.WebViewPageModel
 import ireader.presentation.ui.web.WebViewPageState
 import ireader.presentation.ui.web.WebViewPageStateImpl
 import org.koin.androidx.viewmodel.dsl.viewModel
-import org.koin.core.annotation.ComponentScan
-import org.koin.core.annotation.Module
+
+
 import org.koin.dsl.bind
 import org.koin.dsl.binds
 import org.koin.dsl.module

@@ -11,7 +11,7 @@ import ireader.domain.services.downloaderService.DownloadServiceStateImpl
 import ireader.domain.services.downloaderService.DownloaderService
 import ireader.domain.usecases.download.DownloadUseCases
 import ireader.domain.usecases.services.ServiceUseCases
-import org.koin.android.annotation.KoinViewModel
+
 
 
 class DownloaderViewModel(

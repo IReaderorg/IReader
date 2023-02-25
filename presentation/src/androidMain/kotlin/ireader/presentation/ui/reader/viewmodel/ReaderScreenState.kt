@@ -15,8 +15,8 @@ import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
 import ireader.core.source.Source
 import ireader.core.source.model.Page
-import org.koin.core.annotation.Factory
-@Factory
+
+
 open class ReaderScreenStateImpl: ReaderScreenState {
     override var isLoading by mutableStateOf<Boolean>(false)
 
@@ -66,7 +66,7 @@ interface ReaderScreenState {
     var readerScrollState: ScrollState?
     @OptIn(ExperimentalMaterialApi::class) var modalBottomSheetState: ModalBottomSheetState?
 }
-@Factory
+
 open class ReaderScreenPreferencesStateImpl() : ReaderScreenPreferencesState {
     override var isAsc by mutableStateOf<Boolean>(true)
 

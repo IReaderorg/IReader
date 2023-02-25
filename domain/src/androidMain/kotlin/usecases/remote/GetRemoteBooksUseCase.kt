@@ -7,9 +7,9 @@ import ireader.core.source.model.Filter
 import ireader.core.source.model.Listing
 import ireader.core.source.model.MangasPageInfo
 import ireader.domain.utils.extensions.withIOContext
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class GetRemoteBooksUseCase() {
     suspend operator fun invoke(
         query: String? = null,

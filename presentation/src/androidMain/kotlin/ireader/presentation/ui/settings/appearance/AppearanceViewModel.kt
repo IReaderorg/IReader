@@ -17,7 +17,7 @@ import ireader.presentation.ui.core.theme.getLightColors
 import ireader.presentation.ui.core.theme.isLight
 import ireader.presentation.ui.core.theme.themes
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
-import org.koin.android.annotation.KoinViewModel
+
 
 
 class AppearanceViewModel(

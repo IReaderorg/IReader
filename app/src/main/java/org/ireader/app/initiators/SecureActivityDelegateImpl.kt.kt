@@ -15,9 +15,9 @@ import ireader.domain.utils.extensions.setSecureScreen
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.core.ui.UnlockActivity
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class SecureActivityDelegateImpl : SecureActivityDelegate, DefaultLifecycleObserver {
 
     private lateinit var activity: ComponentActivity

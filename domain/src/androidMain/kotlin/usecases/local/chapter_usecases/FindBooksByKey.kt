@@ -6,10 +6,10 @@ import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.history.HistoryUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.utils.extensions.currentTimeToLong
-import org.koin.core.annotation.Factory
 
 
-@Factory
+
+
 class UpdateLastReadTime(
     private val insertUseCases: LocalInsertUseCases,
     private val historyUseCase: HistoryUseCase,

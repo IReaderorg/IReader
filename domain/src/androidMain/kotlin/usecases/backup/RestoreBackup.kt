@@ -25,9 +25,9 @@ import okio.FileSystem
 import okio.buffer
 import okio.gzip
 import okio.source
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class RestoreBackup internal constructor(
     private val fileSystem: FileSystem,
     private val libraryRepository: LibraryRepository,

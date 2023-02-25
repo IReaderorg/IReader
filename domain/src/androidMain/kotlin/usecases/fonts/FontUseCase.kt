@@ -4,9 +4,9 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import ireader.core.http.HttpClients
 import org.jsoup.Jsoup
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class FontUseCase(
     private val clients: HttpClients,
 ) {

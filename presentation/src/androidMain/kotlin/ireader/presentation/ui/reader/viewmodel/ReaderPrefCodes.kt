@@ -12,7 +12,7 @@ import ireader.domain.utils.extensions.findComponentActivity
 import ireader.domain.utils.extensions.hideSystemUI
 import ireader.domain.utils.extensions.isImmersiveModeEnabled
 import ireader.domain.utils.extensions.showSystemUI
-import org.koin.core.annotation.Factory
+
 import kotlin.time.Duration.Companion.seconds
 
 interface ReaderPrefFunctions {
@@ -29,7 +29,7 @@ interface ReaderPrefFunctions {
     fun ReaderScreenViewModel.showSystemBars(context: Context)
     fun ReaderScreenViewModel.hideSystemBars(context: Context)
 }
-@Factory
+
 class ReaderPrefFunctionsImpl: ReaderPrefFunctions {
 
     override fun ReaderScreenViewModel.toggleReaderMode(enable: Boolean?) {

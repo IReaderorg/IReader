@@ -2,9 +2,9 @@ package ireader.domain.usecases.local.book_usecases
 
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class MarkBookAsReadOrNotUseCase(
     private val localGetChapterUseCase: LocalGetChapterUseCase,
     private val insertUseCases: LocalInsertUseCases,

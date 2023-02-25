@@ -100,7 +100,6 @@ kotlin {
                 implementation(libs.koin.android)
                 //ksp(libs.koin.kspCompiler)
                 implementation(libs.koin.androidCompose)
-                compileOnly(libs.koin.annotations)
                 compileOnly(libs.koin.workManager)
             }
         }

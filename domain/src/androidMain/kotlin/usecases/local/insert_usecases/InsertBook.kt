@@ -4,9 +4,9 @@ import ireader.domain.data.repository.BookRepository
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.LibraryBook
 import ireader.domain.utils.extensions.withIOContext
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class InsertBook(private val bookRepository: BookRepository) {
     suspend operator fun invoke(book: Book?): Long {
         if (book == null) return -1
@@ -15,7 +15,7 @@ class InsertBook(private val bookRepository: BookRepository) {
         }
     }
 }
-@Factory
+
 class UpdateBook(private val bookRepository: BookRepository) {
     suspend fun update(book: LibraryBook, favorite: Boolean) {
         return withIOContext {

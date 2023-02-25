@@ -26,8 +26,8 @@ import ireader.presentation.ui.component.Controller
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import org.koin.android.annotation.KoinViewModel
-import org.koin.core.annotation.Factory
+
+
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
@@ -253,7 +253,7 @@ interface WebViewPageState {
     var enableChaptersFetch: Boolean
     var enableBookFetch: Boolean
 }
-@Factory
+
 open class WebViewPageStateImpl() : WebViewPageState {
     override var url: String by mutableStateOf("")
     override var webUrl: String by mutableStateOf("")

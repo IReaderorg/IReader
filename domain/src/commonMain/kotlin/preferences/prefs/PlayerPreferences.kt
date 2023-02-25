@@ -2,9 +2,9 @@ package ireader.domain.preferences.prefs
 
 import ireader.core.prefs.Preference
 import ireader.core.prefs.PreferenceStore
-import org.koin.core.annotation.Single
 
-@Single
+
+
 class PlayerPreferences(private val preferenceStore: PreferenceStore) {
 
     fun preferredAudioTrackLanguage(): Preference<String> {

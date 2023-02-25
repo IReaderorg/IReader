@@ -9,9 +9,9 @@ import ireader.domain.models.entities.CatalogLocal
 import ireader.core.source.HttpSource
 import ireader.core.source.Source
 import ireader.core.source.model.Command
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 open class DetailStateImpl : DetailState {
     override var catalogSource by mutableStateOf<CatalogLocal?>(null)
     override val source by derivedStateOf { catalogSource?.source }

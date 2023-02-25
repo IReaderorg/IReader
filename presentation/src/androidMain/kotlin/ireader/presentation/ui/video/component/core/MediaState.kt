@@ -39,7 +39,7 @@ import ireader.presentation.ui.video.component.cores.*
 import ireader.presentation.ui.video.component.cores.PlayerSubtitleHelper.Companion.toSubtitleMimeType
 import ireader.presentation.ui.video.component.cores.player.SSLTrustManager
 import okhttp3.Request
-import org.koin.core.annotation.Factory
+
 import org.koin.java.KoinJavaComponent.inject
 import java.io.File
 import java.net.URI
@@ -68,7 +68,7 @@ fun rememberMediaState(
 /**
  * A state object that can be hoisted to control and observe changes for [Media].
  */
-@Factory
+
 @Stable
 class MediaState(
         private val initPlayer: ExoPlayer? = null,

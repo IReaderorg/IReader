@@ -194,7 +194,6 @@ dependencies {
     implementation(libs.koin.androidCompose)
     implementation(libs.koin.workManager)
     implementation(libs.koin.core)
-    implementation(libs.koin.annotations)
     ksp(libs.koin.kspCompiler)
 
 

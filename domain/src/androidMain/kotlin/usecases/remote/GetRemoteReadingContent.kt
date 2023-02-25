@@ -10,9 +10,9 @@ import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.domain.utils.extensions.withIOContext
 import ireader.i18n.SourceNotFoundException
 import ireader.i18n.UiText
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class GetRemoteReadingContent() {
     suspend operator fun invoke(
             chapter: Chapter,

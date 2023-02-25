@@ -17,7 +17,7 @@ import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.ui.settings.SettingState
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
-import org.koin.android.annotation.KoinViewModel
+
 import java.util.*
 
 

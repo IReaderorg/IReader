@@ -13,6 +13,7 @@ import ireader.data.catalog.impl.interactor.InstallCatalogImpl
 import ireader.domain.catalogs.CatalogPreferences
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.catalogs.interactor.*
+import ireader.domain.catalogs.service.CatalogInstallationChanges
 import ireader.domain.catalogs.service.CatalogInstaller
 import ireader.domain.catalogs.service.CatalogRemoteRepository
 import ireader.domain.data.repository.BookRepository
@@ -21,212 +22,30 @@ import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.services.extensions_insstaller_service.GetDefaultRepo
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.presentation.imageloader.coil.CoilLoaderFactory
-import org.koin.core.annotation.ComponentScan
-import org.koin.core.annotation.Module
-import org.koin.core.annotation.Single
-
-@Module
-@ComponentScan("org.ireader.app.di.CatalogModule")
-class CatalogModule {
-
-    @Single
-    fun provideAndroidCatalogInstallationChanges(context: Application): AndroidCatalogInstallationChanges {
-        return AndroidCatalogInstallationChanges(context)
-    }
-
-    @Single
-    fun provideAndroidCatalogInstaller(
-        context: Application,
-        httpClient: HttpClients,
-        installationChanges: AndroidCatalogInstallationChanges,
-        packageInstaller: PackageInstaller,
-        simpleStorage: GetSimpleStorage,
-        uiPreferences: UiPreferences
-    ): CatalogInstaller {
-        return AndroidCatalogInstaller(
-            context,
-            httpClient,
-            installationChanges,
-            packageInstaller,
-            simpleStorage,
-            uiPreferences
-        )
-    }
-
-    @Single
-    fun provideInAppCatalogInstaller(
-        context: Application,
-        httpClient: HttpClients,
-        installationChanges: AndroidCatalogInstallationChanges,
-        getSimpleStorage: GetSimpleStorage,
-        uiPreferences: UiPreferences,
-        simpleStorage: GetSimpleStorage
-    ): AndroidLocalInstaller {
-        return AndroidLocalInstaller(context, httpClient, installationChanges, getSimpleStorage,uiPreferences,simpleStorage)
-    }
-
-    @Single
-    fun provideCatalogPreferences(
-        store: PreferenceStore
-    ): CatalogPreferences {
-        return CatalogPreferences(store)
-    }
-
-    @Single
-    fun provideCoverCache(context: Application,simpleStorage: GetSimpleStorage): CoverCache {
-        return CoverCache(context,simpleStorage)
-    }
-
-    @Single
-    fun provideImageLoader(
-        context: Application,
-        coverCache: CoverCache,
-        client: HttpClients,
-        catalogStore: CatalogStore,
-    ): CoilLoaderFactory {
-        return CoilLoaderFactory(
-            client = client,
-            context = context,
-            coverCache = coverCache,
-            catalogStore = catalogStore,
-        )
-    }
-
-    @Single
-    fun providesCatalogStore(
-        catalogPreferences: CatalogPreferences,
-        catalogRemoteRepository: CatalogRemoteRepository,
-        installationChanges: AndroidCatalogInstallationChanges,
-        context: Application,
-        httpClients: HttpClients,
-        uiPreferences: UiPreferences,
-        getSimpleStorage: GetSimpleStorage
-    ): CatalogStore {
-        return CatalogStore(
-            AndroidCatalogLoader(context, httpClients, uiPreferences, getSimpleStorage),
-            catalogPreferences,
-            catalogRemoteRepository,
-            installationChanges
-        )
-    }
-
-    @Single
-    fun providesPackageInstaller(
-        app: Application
-    ): PackageInstaller {
-        return PackageInstaller(
-            app
-        )
-    }
-
-    @Single
-    fun providesWebViewCookieJar(
-        cookiesStorage: CookiesStorage,
-    ): WebViewCookieJar {
-        return WebViewCookieJar(cookiesStorage)
-    }
-
-    @Single
-    fun providesHttpClients(
-        context: Application,
-        cookiesStorage: CookiesStorage,
-        webViewManger: WebViewManger,
-        webViewCookieJar: WebViewCookieJar,
-    ): HttpClients {
-        return HttpClients(
-            context,
-            BrowserEngine(webViewManger, webViewCookieJar),
-            cookiesStorage,
-            webViewCookieJar
-        )
-    }
-
-    @Single
-    fun providesAndroidCatalogInstaller(
-        context: Application,
-        httpClient: HttpClients,
-        installationChanges: AndroidCatalogInstallationChanges,
-        packageInstaller: PackageInstaller,
-        simpleStorage: GetSimpleStorage,
-        uiPreferences: UiPreferences
-    ): AndroidCatalogInstaller {
-        return AndroidCatalogInstaller(
-            context,
-            httpClient,
-            installationChanges,
-            packageInstaller,
-            simpleStorage,
-            uiPreferences
-        )
-    }
-
-    @Single
-    fun providesGetCatalogsByType(
-        localCatalogs: GetLocalCatalogs,
-        remoteCatalogs: GetRemoteCatalogs,
-    ): GetCatalogsByType {
-        return GetCatalogsByType(localCatalogs, remoteCatalogs)
-    }
-
-    @Single
-    fun providesGetRemoteCatalogs(
-        catalogRemoteRepository: CatalogRemoteRepository,
-    ): GetRemoteCatalogs {
-        return GetRemoteCatalogs(catalogRemoteRepository)
-    }
-
-    @Single
-    fun providesGetLocalCatalogs(
-        catalogStore: CatalogStore,
-        libraryRepository: BookRepository,
-    ): GetLocalCatalogs {
-        return GetLocalCatalogs(catalogStore, libraryRepository)
-    }
-
-    @Single
-    fun providesGetLocalCatalog(
-        store: CatalogStore
-    ): GetLocalCatalog {
-        return GetLocalCatalog(store)
-    }
-
-    @Single
-    fun providesUpdateCatalog(
-        catalogRemoteRepository: CatalogRemoteRepository,
-        installCatalog: InstallCatalog,
-    ): UpdateCatalog {
-        return UpdateCatalog(catalogRemoteRepository, installCatalog)
-    }
-
-    @Single
-    fun providesInstallCatalog(
-        androidCatalogInstaller: AndroidCatalogInstaller,
-        androidLocalInstaller: AndroidLocalInstaller,
-        uiPreferences: UiPreferences
-    ): InstallCatalog {
-        return InstallCatalogImpl(androidCatalogInstaller, androidLocalInstaller, uiPreferences)
-    }
 
 
-    @Single
-    fun providesTogglePinnedCatalog(
-        store: CatalogStore,
-    ): TogglePinnedCatalog {
-        return TogglePinnedCatalog(store)
-    }
 
-    @Single
-    fun providesSyncRemoteCatalogs(
-        catalogRemoteRepository: CatalogRemoteRepository,
-        catalogPreferences: CatalogPreferences,
-        httpClient: HttpClients,
-        getDefaultRepo: GetDefaultRepo
-    ): SyncRemoteCatalogs {
-        return SyncRemoteCatalogs(
-            catalogRemoteRepository,
-            CatalogGithubApi(httpClient, getDefaultRepo),
-            catalogPreferences
-        )
-    }
+import org.koin.dsl.module
+
+val CatalogModule = module {
+    single<AndroidCatalogInstallationChanges>(qualifier=null) { AndroidCatalogInstallationChanges(get()) }
+    single<CatalogInstallationChanges>(qualifier=null) { AndroidCatalogInstallationChanges(get()) }
+    single<CatalogInstaller>(qualifier=null) { AndroidCatalogInstaller(get(),get(),get(),get(),get(),get()) }
+    single<AndroidLocalInstaller>(qualifier=null) { AndroidLocalInstaller(get(),get(),get(),get(),get(),get()) }
+    single<CatalogPreferences>(qualifier=null) { CatalogPreferences(get()) }
+    single<CoverCache>(qualifier=null) { CoverCache(get(),get()) }
+    single<CoilLoaderFactory>(qualifier=null) { CoilLoaderFactory(get(),get(),get(),get()) }
+    single<CatalogStore>(qualifier=null) { CatalogStore(AndroidCatalogLoader(get(),get(),get(),get()),get(),get(),get()) }
+    single<PackageInstaller>(qualifier=null) { PackageInstaller(get()) }
+    single<WebViewCookieJar>(qualifier=null) { WebViewCookieJar(get()) }
+    single<HttpClients>(qualifier=null) { HttpClients(get(),BrowserEngine(get(), get()),get(),get()) }
+    single<AndroidCatalogInstaller>(qualifier=null) { AndroidCatalogInstaller(get(),get(),get(),get(),get(),get()) }
+    single<GetCatalogsByType>(qualifier=null) { GetCatalogsByType(get(),get()) }
+    single<GetRemoteCatalogs>(qualifier=null) { GetRemoteCatalogs(get()) }
+    single<GetLocalCatalogs>(qualifier=null) { GetLocalCatalogs(get(),get()) }
+    single<GetLocalCatalog>(qualifier=null) { GetLocalCatalog(get()) }
+    single<UpdateCatalog>(qualifier=null) { UpdateCatalog(get(),get()) }
+    single<InstallCatalog>(qualifier=null) { InstallCatalogImpl(get(),get(),get()) }
+    single<TogglePinnedCatalog>(qualifier=null) { TogglePinnedCatalog(get()) }
+    single<SyncRemoteCatalogs>(qualifier=null) { SyncRemoteCatalogs(get(),CatalogGithubApi(get(),get()),get()) }
 }
-

@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import ireader.domain.models.entities.SavedDownloadWithInfo
-import org.koin.core.annotation.Factory
+
 
 interface DownloadState {
     var downloads: List<SavedDownloadWithInfo>
@@ -15,7 +15,7 @@ interface DownloadState {
     var selection: SnapshotStateList<Long>
     val hasSelection: Boolean
 }
-@Factory
+
 open class DownloadStateImpl : DownloadState {
     override var downloads: List<SavedDownloadWithInfo> by mutableStateOf(emptyList())
     override var isMenuExpanded: Boolean by mutableStateOf(false)

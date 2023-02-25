@@ -26,11 +26,11 @@ import ireader.i18n.Args
 import ireader.i18n.SHORTCUTS
 import ireader.i18n.string
 import kotlinx.coroutines.flow.MutableSharedFlow
-import org.koin.core.annotation.Single
+
 import java.util.*
 import javax.inject.Singleton
 
-@Single
+
 class DefaultNotificationHelper(
      private val context: Context,
 ) {

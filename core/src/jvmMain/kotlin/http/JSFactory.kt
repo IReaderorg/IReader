@@ -9,12 +9,12 @@
 package ireader.core.http
 
 import app.cash.quickjs.QuickJs
-import org.koin.core.annotation.Single
+
 
 /**
  * A factory for creating instances of [JS].
  */
-@Single
+
 actual class JSFactory  internal constructor() {
 
   /**

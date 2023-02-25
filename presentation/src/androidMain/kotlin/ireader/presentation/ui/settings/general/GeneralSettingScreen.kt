@@ -18,7 +18,7 @@ import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.component.components.component.ChoicePreference
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.ui.video.component.cores.player.SubtitleHelper
-import org.koin.android.annotation.KoinViewModel
+
 
 @Composable
 fun GeneralSettingScreen(

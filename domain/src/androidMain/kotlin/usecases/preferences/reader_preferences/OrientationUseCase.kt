@@ -7,7 +7,7 @@ import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.models.prefs.IReaderVoice
 import ireader.domain.preferences.prefs.AndroidUiPreferences
-import org.koin.core.annotation.Factory
+
 
 class TextAlignmentUseCase(
     private val prefs: ReaderPreferences,
@@ -44,7 +44,7 @@ class SortersDescUseCase(
         return appPreferences.sortDescLibraryScreen().read()
     }
 }
-@Factory
+
 class TextReaderPrefUseCase(
     private val prefs: ReaderPreferences,
     private val AndroidPrefs: AndroidUiPreferences,

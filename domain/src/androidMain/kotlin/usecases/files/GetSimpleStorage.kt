@@ -9,10 +9,10 @@ import com.anggrayudi.storage.SimpleStorage
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.anggrayudi.storage.file.DocumentFileCompat
 import ireader.domain.preferences.prefs.UiPreferences
-import org.koin.core.annotation.Single
+
 import java.io.File
 
-@Single
+
 class GetSimpleStorage(
     private val context: Context,
     private val uiPreferences: UiPreferences

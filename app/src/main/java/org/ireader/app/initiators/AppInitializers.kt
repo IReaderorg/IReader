@@ -1,6 +1,6 @@
 package org.ireader.app.initiators
 
-import org.koin.core.annotation.Single
+
 
 
 class AppInitializers(

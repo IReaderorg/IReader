@@ -1,13 +1,7 @@
 package org.ireader.app.di
 
-import android.content.Context
-import androidx.compose.ui.text.ExperimentalTextApi
-import androidx.compose.ui.text.googlefonts.GoogleFont
-import ireader.core.db.Transactions
-import ireader.core.prefs.PreferenceStore
-import ireader.domain.data.repository.*
-import ireader.domain.image.cache.CoverCache
-import ireader.domain.preferences.prefs.*
+
+
 import ireader.domain.usecases.download.DownloadUseCases
 import ireader.domain.usecases.download.delete.DeleteAllSavedDownload
 import ireader.domain.usecases.download.delete.DeleteSavedDownload
@@ -42,196 +36,98 @@ import ireader.domain.usecases.services.*
 import ireader.domain.usecases.updates.DeleteAllUpdates
 import ireader.domain.usecases.updates.SubscribeUpdates
 import ireader.domain.usecases.updates.UpdateUseCases
-import org.koin.core.annotation.ComponentScan
-import org.koin.core.annotation.Factory
-import org.koin.core.annotation.Single
-
-@org.koin.core.annotation.Module
-@ComponentScan("org.ireader.app.di.UseCasesInject")
-class UseCasesInject {
+import org.koin.dsl.module
 
 
-        @Single
-    fun provideRemoteUseCase(
-    ): RemoteUseCases {
-        return RemoteUseCases(
-            getBookDetail = GetBookDetail(),
-            getRemoteBooks = GetRemoteBooksUseCase(),
-            getRemoteChapters = GetRemoteChapters(),
-            getRemoteReadingContent = GetRemoteReadingContent(),
-        )
-    }
+val UseCasesInject = module {
 
-        @Single
-    fun provideLocalInsertUseCases(
-            chapterRepository: ChapterRepository,
-            bookRepository: BookRepository
-    ): LocalInsertUseCases {
-        return LocalInsertUseCases(
-            insertBook = InsertBook(bookRepository),
-            insertBookAndChapters = InsertBookAndChapters(bookRepository),
-            insertBooks = InsertBooks(bookRepository),
-            insertChapter = InsertChapter(chapterRepository),
-            insertChapters = InsertChapters(chapterRepository),
-            updateBook = UpdateBook(bookRepository)
-        )
-    }
-
-
-        @Single
-    fun provideLocalGetBookUseCases(
-        bookRepository: BookRepository
-    ): LocalGetBookUseCases {
-        return LocalGetBookUseCases(
-            findAllInLibraryBooks = FindAllInLibraryBooks(bookRepository),
-            findBookById = FindBookById(bookRepository),
-            findBookByKey = FindBookByKey(bookRepository),
-            findBooksByKey = FindBooksByKey(bookRepository),
-            subscribeBookById = SubscribeBookById(bookRepository),
-            subscribeBooksByKey = SubscribeBooksByKey(bookRepository),
-            SubscribeInLibraryBooks = SubscribeInLibraryBooks(bookRepository),
-        )
-    }
-
-
-        @Single
-    fun provideLocalChapterUseCase(
-            chapterRepository: ChapterRepository,
-            historyUseCase: HistoryUseCase,
-            insertUseCases: LocalInsertUseCases,
-            uiPreferences: UiPreferences
-    ): LocalGetChapterUseCase {
-        return LocalGetChapterUseCase(
-            findAllInLibraryChapters = FindAllInLibraryChapters(chapterRepository),
-            findChapterById = FindChapterById(chapterRepository),
-            findChaptersByBookId = FindChaptersByBookId(chapterRepository),
-            subscribeChaptersByBookId = SubscribeChaptersByBookId(chapterRepository),
-            updateLastReadTime = UpdateLastReadTime(insertUseCases = insertUseCases, historyUseCase = historyUseCase, uiPreferences = uiPreferences),
-                subscribeChapterById = SubscribeChapterById(chapterRepository)
-        )
-    }
-
-        @Single
-    fun provideDeleteUseCase(
-            chapterRepository: ChapterRepository,
-            bookRepository: BookRepository,
-            bookCategoryRepository: BookCategoryRepository,
-            transactions: Transactions
-    ): DeleteUseCase {
-        return DeleteUseCase(
-            deleteAllBook = DeleteAllBooks(bookRepository),
-            deleteAllChapters = DeleteAllChapters(chapterRepository),
-            deleteBookById = DeleteBookById(bookRepository),
-            deleteChapterByChapter = DeleteChapterByChapter(chapterRepository),
-            deleteChapters = DeleteChapters(chapterRepository),
-            deleteChaptersByBookId = DeleteChaptersByBookId(chapterRepository),
-            unFavoriteBook = UnFavoriteBook(bookRepository, bookCategoryRepository = bookCategoryRepository, transactions),
-            deleteNotInLibraryBooks = DeleteNotInLibraryBooks(bookRepository)
-        )
-    }
-
-
-        @Single
-    fun providesServiceUseCases(
-         context: Context
-    ): ServiceUseCases {
-        return ServiceUseCases(
-            startDownloadServicesUseCase = StartDownloadServicesUseCase(context),
-            startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(context),
-            startTTSServicesUseCase = StartTTSServicesUseCase(context),
-            stopServicesUseCase = StopServiceUseCase(context),
-        )
-    }
-
-        @Single
-    fun providesLibraryScreenPrefUseCases(
-            appPreferences: AppPreferences,
-            libraryPreferences: LibraryPreferences,
-            categoryRepository: CategoryRepository
-    ): LibraryScreenPrefUseCases {
-        return LibraryScreenPrefUseCases(
-            libraryLayoutTypeUseCase = LibraryLayoutTypeUseCase(libraryPreferences, categoryRepository),
-            sortersDescUseCase = SortersDescUseCase(appPreferences),
-            sortersUseCase = SortersUseCase(appPreferences)
-        )
-    }
-
-        @Single
-    fun providesReaderPrefUseCases(
-        prefs: ReaderPreferences,
-        androidUiPreferences: AndroidUiPreferences
-    ): ReaderPrefUseCases {
-        return ReaderPrefUseCases(
-            autoScrollMode = AutoScrollMode(prefs),
-            backgroundColorUseCase = BackgroundColorUseCase(androidUiPreferences),
-            brightnessStateUseCase = BrightnessStateUseCase(prefs),
-            fontHeightUseCase = FontHeightUseCase(prefs),
-            fontSizeStateUseCase = FontSizeStateUseCase(prefs),
-            immersiveModeUseCase = ImmersiveModeUseCase(prefs),
-            paragraphDistanceUseCase = ParagraphDistanceUseCase(prefs),
-            paragraphIndentUseCase = ParagraphIndentUseCase(prefs),
-            scrollIndicatorUseCase = ScrollIndicatorUseCase(prefs),
-            scrollModeUseCase = ScrollModeUseCase(prefs),
-            selectedFontStateUseCase = SelectedFontStateUseCase(prefs,androidUiPreferences),
-            textAlignmentUseCase = TextAlignmentUseCase(prefs),
-            textColorUseCase = TextColorUseCase(androidUiPreferences)
-        )
-    }
-
-
-        @Single
-    fun providesBrowseScreenPrefUseCase(
-        appPreferences: AppPreferences
-    ): BrowseScreenPrefUseCase {
-        return BrowseScreenPrefUseCase(
-            browseLayoutTypeUseCase = BrowseLayoutTypeUseCase(appPreferences)
-        )
-    }
-
-        @Single
-    fun providesHistoryUseCase(
-        historyRepository: HistoryRepository
-    ): HistoryUseCase {
-        return HistoryUseCase(
-            historyRepository
-        )
-    }
-
-
-        @Single
-    fun providesUpdateUseCases(
-            updatesRepository: UpdatesRepository,
-            uiPreferences: UiPreferences
-    ): UpdateUseCases {
-        return UpdateUseCases(
-            subscribeUpdates = SubscribeUpdates(updatesRepository),
-            deleteAllUpdates = DeleteAllUpdates(uiPreferences),
-        )
-    }
-
-    @Factory
-    fun providesEpubCreator(
-        coverCache: CoverCache,
-        chapterRepository: ChapterRepository
-    ): EpubCreator {
-        return EpubCreator(coverCache, chapterRepository)
-    }
-
-
-        @Single
-    fun providesDownloadUseCases(
-        downloadRepository: DownloadRepository
-    ): DownloadUseCases {
-        return DownloadUseCases(
-            deleteAllSavedDownload = DeleteAllSavedDownload(downloadRepository),
-            deleteSavedDownload = DeleteSavedDownload(downloadRepository),
-            deleteSavedDownloadByBookId = DeleteSavedDownloadByBookId(downloadRepository),
-            deleteSavedDownloads = DeleteSavedDownloads(downloadRepository),
-            findAllDownloadsUseCase = FindAllDownloadsUseCase(downloadRepository),
-            findDownloadsUseCase = FindDownloadsUseCase(downloadRepository),
-            insertDownload = InsertDownload(downloadRepository),
-            insertDownloads = InsertDownloads(downloadRepository),
-            subscribeDownloadsUseCase = SubscribeDownloadsUseCase(downloadRepository),
-        )
-    }
+    single<RemoteUseCases>(qualifier=null) { RemoteUseCases(
+        getBookDetail = GetBookDetail(),
+        getRemoteBooks = GetRemoteBooksUseCase(),
+        getRemoteChapters = GetRemoteChapters(),
+        getRemoteReadingContent = GetRemoteReadingContent(),
+    ) }
+    single<LocalInsertUseCases>(qualifier=null) { LocalInsertUseCases(
+        insertBook = InsertBook(get()),
+        insertBookAndChapters = InsertBookAndChapters(get()),
+        insertBooks = InsertBooks(get()),
+        insertChapter = InsertChapter(get()),
+        insertChapters = InsertChapters(get()),
+        updateBook = UpdateBook(get())
+    ) }
+    single<LocalGetBookUseCases>(qualifier=null) { LocalGetBookUseCases(
+        findAllInLibraryBooks = FindAllInLibraryBooks(get()),
+        findBookById = FindBookById(get()),
+        findBookByKey = FindBookByKey(get()),
+        findBooksByKey = FindBooksByKey(get()),
+        subscribeBookById = SubscribeBookById(get()),
+        subscribeBooksByKey = SubscribeBooksByKey(get()),
+        SubscribeInLibraryBooks = SubscribeInLibraryBooks(get()),
+    ) }
+    single<LocalGetChapterUseCase>(qualifier=null) { LocalGetChapterUseCase(
+        findAllInLibraryChapters = FindAllInLibraryChapters(get()),
+        findChapterById = FindChapterById(get()),
+        findChaptersByBookId = FindChaptersByBookId(get()),
+        subscribeChaptersByBookId = SubscribeChaptersByBookId(get()),
+        updateLastReadTime = UpdateLastReadTime(insertUseCases = get(), historyUseCase = get(), uiPreferences = get()),
+        subscribeChapterById = SubscribeChapterById(get())
+    ) }
+    single<DeleteUseCase>(qualifier=null) { DeleteUseCase(
+        deleteAllBook = DeleteAllBooks(get()),
+        deleteAllChapters = DeleteAllChapters(get()),
+        deleteBookById = DeleteBookById(get()),
+        deleteChapterByChapter = DeleteChapterByChapter(get()),
+        deleteChapters = DeleteChapters(get()),
+        deleteChaptersByBookId = DeleteChaptersByBookId(get()),
+        unFavoriteBook = UnFavoriteBook(get(), bookCategoryRepository = get(), get()),
+        deleteNotInLibraryBooks = DeleteNotInLibraryBooks(get())
+    ) }
+    single<ServiceUseCases>(qualifier=null) { ServiceUseCases(
+        startDownloadServicesUseCase = StartDownloadServicesUseCase(get()),
+        startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(get()),
+        startTTSServicesUseCase = StartTTSServicesUseCase(get()),
+        stopServicesUseCase = StopServiceUseCase(get()),
+    ) }
+    single<LibraryScreenPrefUseCases>(qualifier=null) { LibraryScreenPrefUseCases(
+        libraryLayoutTypeUseCase = LibraryLayoutTypeUseCase(get(), get()),
+        sortersDescUseCase = SortersDescUseCase(get()),
+        sortersUseCase = SortersUseCase(get())
+    ) }
+    single<ReaderPrefUseCases>(qualifier=null) { ReaderPrefUseCases(
+        autoScrollMode = AutoScrollMode(get()),
+        backgroundColorUseCase = BackgroundColorUseCase(get()),
+        brightnessStateUseCase = BrightnessStateUseCase(get()),
+        fontHeightUseCase = FontHeightUseCase(get()),
+        fontSizeStateUseCase = FontSizeStateUseCase(get()),
+        immersiveModeUseCase = ImmersiveModeUseCase(get()),
+        paragraphDistanceUseCase = ParagraphDistanceUseCase(get()),
+        paragraphIndentUseCase = ParagraphIndentUseCase(get()),
+        scrollIndicatorUseCase = ScrollIndicatorUseCase(get()),
+        scrollModeUseCase = ScrollModeUseCase(get()),
+        selectedFontStateUseCase = SelectedFontStateUseCase(get(),get()),
+        textAlignmentUseCase = TextAlignmentUseCase(get()),
+        textColorUseCase = TextColorUseCase(get())
+    ) }
+    single<BrowseScreenPrefUseCase>(qualifier=null) { BrowseScreenPrefUseCase(
+        browseLayoutTypeUseCase = BrowseLayoutTypeUseCase(get())
+    ) }
+    single<HistoryUseCase>(qualifier=null) { HistoryUseCase(
+        get()
+    ) }
+    single<UpdateUseCases>(qualifier=null) { UpdateUseCases(
+        subscribeUpdates = SubscribeUpdates(get()),
+        deleteAllUpdates = DeleteAllUpdates(get()),
+    ) }
+    factory<EpubCreator>(qualifier=null) { EpubCreator(get(), get()) }
+    single<DownloadUseCases>(qualifier=null) {DownloadUseCases(
+        deleteAllSavedDownload = DeleteAllSavedDownload(get()),
+        deleteSavedDownload = DeleteSavedDownload(get()),
+        deleteSavedDownloadByBookId = DeleteSavedDownloadByBookId(get()),
+        deleteSavedDownloads = DeleteSavedDownloads(get()),
+        findAllDownloadsUseCase = FindAllDownloadsUseCase(get()),
+        findDownloadsUseCase = FindDownloadsUseCase(get()),
+        insertDownload = InsertDownload(get()),
+        insertDownloads = InsertDownloads(get()),
+        subscribeDownloadsUseCase = SubscribeDownloadsUseCase(get()),
+    ) }
 }

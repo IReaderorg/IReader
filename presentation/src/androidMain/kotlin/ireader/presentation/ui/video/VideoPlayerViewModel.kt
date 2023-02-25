@@ -28,7 +28,7 @@ import ireader.presentation.ui.video.component.cores.SubtitleOrigin
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.koin.android.annotation.KoinViewModel
+
 
 @OptIn(ExperimentalTextApi::class)
 

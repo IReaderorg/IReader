@@ -10,7 +10,7 @@ import androidx.media3.common.text.CueGroup
 import androidx.media3.exoplayer.ExoPlayer
 import ireader.presentation.ui.video.component.cores.*
 import ireader.presentation.ui.video.component.cores.player.SubtitleHelper.fromTwoLettersToLanguage
-import org.koin.core.annotation.Factory
+
 
 /**
  * Create a instance of [PlayerState] and register a [listener][Player.Listener] to the [Player] to
@@ -99,7 +99,7 @@ interface PlayerState {
     fun dispose()
 }
 
-@Factory
+
 internal class PlayerStateImpl(
         override val player: ExoPlayer,
         subtitleHelper: PlayerSubtitleHelper

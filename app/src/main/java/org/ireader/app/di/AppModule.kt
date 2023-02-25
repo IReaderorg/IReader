@@ -13,8 +13,14 @@ import org.ireader.app.initiators.EmojiCompatInitializer
 import org.ireader.app.initiators.FirebaseInitializer
 import org.ireader.app.initiators.NotificationsInitializer
 import org.ireader.app.initiators.UpdateServiceInitializer
-import org.koin.core.annotation.Single
+
+import org.koin.dsl.binds
 import org.koin.dsl.module
+
+
+
+
+
 
 @OptIn(ExperimentalTextApi::class) val AppModule = module {
     single {
@@ -39,6 +45,13 @@ import org.koin.dsl.module
             provider = get()
         )
     }
+    factory(qualifier=null) { org.ireader.app.initiators.CatalogStoreInitializer(get()) }
+    factory(qualifier=null) { org.ireader.app.initiators.CrashHandler(get()) }
+    factory(qualifier=null) { org.ireader.app.initiators.EmojiCompatInitializer(get()) }
+    factory(qualifier=null) { org.ireader.app.initiators.FirebaseInitializer(get()) }
+    factory(qualifier=null) { org.ireader.app.initiators.NotificationsInitializer(get()) }
+    factory(qualifier=null) { org.ireader.app.initiators.SecureActivityDelegateImpl() } binds(arrayOf(org.ireader.app.SecureActivityDelegate::class,androidx.lifecycle.DefaultLifecycleObserver::class))
+    factory(qualifier=null) { org.ireader.app.initiators.UpdateServiceInitializer(get(),get()) }
 
 
 }

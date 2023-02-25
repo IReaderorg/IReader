@@ -3,9 +3,9 @@ package ireader.domain.services.extensions_insstaller_service
 import ireader.domain.data.repository.CatalogSourceRepository
 import ireader.domain.models.entities.ExtensionSource
 import ireader.domain.preferences.prefs.UiPreferences
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class GetDefaultRepo(
     private val uiPreferences: UiPreferences,
     private val repository: CatalogSourceRepository

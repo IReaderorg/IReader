@@ -12,7 +12,7 @@ import ireader.domain.usecases.services.ServiceUseCases
 import ireader.domain.usecases.updates.UpdateUseCases
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.koin.android.annotation.KoinViewModel
+
 
 
 class UpdatesViewModel(

@@ -30,7 +30,7 @@ import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.component.components.component.ChoicePreference
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.datetime.Clock
-import org.koin.android.annotation.KoinViewModel
+
 import org.koin.android.ext.android.get
 import org.koin.androidx.compose.getViewModel
 

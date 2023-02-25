@@ -19,7 +19,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
-import org.koin.android.annotation.KoinViewModel
+
 
 
 class GlobalSearchViewModel(

@@ -4,9 +4,9 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import ireader.domain.data.repository.CategoryRepository
 import ireader.domain.models.entities.Category
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class ReorderCategory  internal constructor(
     private val categoryRepository: CategoryRepository
 ) {

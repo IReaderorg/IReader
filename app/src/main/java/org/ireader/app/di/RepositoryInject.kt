@@ -16,100 +16,22 @@ import ireader.data.repository.ReaderThemeRepositoryImpl
 import ireader.data.repository.ThemeRepositoryImpl
 import ireader.data.repository.UpdatesRepositoryImpl
 import ireader.domain.data.repository.*
-import org.koin.core.annotation.ComponentScan
-import org.koin.core.annotation.Single
-
-@org.koin.core.annotation.Module
-@ComponentScan("org.ireader.app.di.RepositoryInject")
-class RepositoryInject {
 
 
+import org.koin.dsl.module
 
 
-    @Single
-    fun provideDownloadRepository(
-        handler: DatabaseHandler
-    ): DownloadRepository {
-        return DownloadRepositoryImpl(handler)
-    }
-    @Single
-    fun providePaginationRepository(
-        handler: AndroidDatabaseHandler
-    ): PaginationRepository {
-        return PaginationRepositoryImpl(handler)
-    }
-
-    @Single
-    fun provideUpdatesRepository(
-        handler: DatabaseHandler
-    ): UpdatesRepository {
-        return UpdatesRepositoryImpl(handler)
-    }
-
-    @Single
-    fun provideLibraryRepository(
-        handler: DatabaseHandler
-    ): LibraryRepository {
-        return LibraryRepositoryImpl(handler)
-    }
-    @Single
-    fun provideCategoryRepository(
-        handler: DatabaseHandler
-    ): CategoryRepository {
-        return CategoryRepositoryImpl(handler)
-    }
-
-
-    @Single
-    fun provideCatalogRemoteRepository(        handler: DatabaseHandler): CatalogRemoteRepository {
-        return CatalogRemoteRepositoryImpl(handler)
-    }
-
-
-    @Single
-    fun providesLocalChapterRepository(        handler: DatabaseHandler): ChapterRepository {
-        return ChapterRepositoryImpl(handler)
-    }
-
-
-    @Single
-    fun providesLibraryRepository(
-        handler: DatabaseHandler
-    ): BookRepository {
-        return BookRepositoryImpl(
-            handler
-        )
-    }
-
-
-        @Single
-    fun providesHistoryRepository(
-            handler: AndroidDatabaseHandler
-    ): HistoryRepository {
-        return HistoryRepositoryImpl(handler)
-    }
-
-
-        @Single
-    fun providesBookCategoryRepository(
-            handler: DatabaseHandler
-    ): BookCategoryRepository {
-        return BookCategoryRepositoryImpl(handler)
-    }
-
-
-        @Single
-    fun providesThemeRepository(
-            handler: DatabaseHandler
-    ): ThemeRepository {
-        return ThemeRepositoryImpl(handler)
-    }
-
-
-        @Single
-    fun providesReaderThemeRepository(
-            handler: DatabaseHandler
-    ): ReaderThemeRepository {
-        return ReaderThemeRepositoryImpl(handler)
-    }
+val repositoryInjectModule = module {
+    single<DownloadRepository>(qualifier=null) { DownloadRepositoryImpl(get()) }
+    single<PaginationRepository>(qualifier=null) { PaginationRepositoryImpl(get()) }
+    single<UpdatesRepository>(qualifier=null) { UpdatesRepositoryImpl(get()) }
+    single<LibraryRepository>(qualifier=null) { LibraryRepositoryImpl(get()) }
+    single<CategoryRepository>(qualifier=null) { CategoryRepositoryImpl(get()) }
+    single<CatalogRemoteRepository>(qualifier=null) { CatalogRemoteRepositoryImpl(get()) }
+    single<ChapterRepository>(qualifier=null) { ChapterRepositoryImpl(get()) }
+    single<BookRepository>(qualifier=null) { BookRepositoryImpl(get()) }
+    single<HistoryRepository>(qualifier=null) { HistoryRepositoryImpl(get()) }
+    single<BookCategoryRepository>(qualifier=null) { BookCategoryRepositoryImpl(get()) }
+    single<ThemeRepository>(qualifier=null) { ThemeRepositoryImpl(get()) }
+    single<ReaderThemeRepository>(qualifier=null) { ReaderThemeRepositoryImpl(get()) }
 }

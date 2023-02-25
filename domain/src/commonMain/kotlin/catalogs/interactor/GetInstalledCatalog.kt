@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
-@org.koin.core.annotation.Factory
+
 class GetInstalledCatalog(
     private val catalogStore: CatalogStore,
 ) {

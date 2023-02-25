@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.domain.usecases.fonts.FontUseCase
-import org.koin.android.annotation.KoinViewModel
+
 
 @OptIn(ExperimentalTextApi::class)
 

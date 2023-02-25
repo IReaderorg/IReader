@@ -49,7 +49,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.koin.android.annotation.KoinViewModel
+
 
 @OptIn(ExperimentalTextApi::class)
 

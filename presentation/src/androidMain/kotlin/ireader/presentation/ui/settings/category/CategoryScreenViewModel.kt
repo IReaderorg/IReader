@@ -13,7 +13,7 @@ import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.domain.usecases.category.CategoriesUseCases
 import ireader.domain.usecases.category.CreateCategoryWithName
 import ireader.domain.usecases.category.ReorderCategory
-import org.koin.android.annotation.KoinViewModel
+
 
 
 class CategoryScreenViewModel(

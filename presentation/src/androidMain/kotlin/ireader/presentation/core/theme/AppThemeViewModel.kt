@@ -27,8 +27,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.koin.android.annotation.KoinViewModel
-import org.koin.core.annotation.Single
+
+
 
 
 class AppThemeViewModel(
@@ -136,7 +136,7 @@ class AppThemeViewModel(
 
 }
 
-@Single
+
 class LocaleHelper(
     val context: Context,
     val uiPreferences: UiPreferences
