@@ -16,7 +16,7 @@ import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.settings.general.GeneralSettingScreen
 import ireader.presentation.ui.settings.general.GeneralSettingScreenViewModel
-import org.koin.androidx.compose.getViewModel
+
 
 @ExperimentalMaterial3Api
 @OptIn(ExperimentalMaterialApi::class)

@@ -1,13 +1,16 @@
 package ireader.presentation.ui.video.component.core
 
+
 import android.content.Context
 import android.net.Uri
 import android.os.Looper
 import android.util.Log
+import androidx.annotation.OptIn
 import androidx.compose.runtime.*
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.media3.common.*
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
@@ -24,7 +27,6 @@ import androidx.media3.exoplayer.source.*
 import androidx.media3.exoplayer.text.TextRenderer
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.exoplayer.trackselection.TrackSelector
-import com.google.common.net.HttpHeaders
 import com.google.common.net.HttpHeaders.USER_AGENT
 import ireader.core.http.HttpClients
 import ireader.core.http.UserAgentInterceptor
@@ -35,14 +37,20 @@ import ireader.core.source.model.MovieUrl
 import ireader.core.source.model.Page
 import ireader.core.source.model.Subtitle
 import ireader.presentation.imageloader.coil.image_loaders.convertToOkHttpRequest
+import ireader.presentation.ui.component.findComponentActivity
 import ireader.presentation.ui.video.component.cores.*
 import ireader.presentation.ui.video.component.cores.PlayerSubtitleHelper.Companion.toSubtitleMimeType
 import ireader.presentation.ui.video.component.cores.player.SSLTrustManager
 import okhttp3.Request
-
-import org.koin.java.KoinJavaComponent.inject
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.compose.rememberDI
+import org.kodein.di.compose.rememberInstance
+import org.kodein.di.direct
+import org.kodein.di.instance
 import java.io.File
 import java.net.URI
+import java.security.SecureRandom
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSession
@@ -56,24 +64,25 @@ import kotlin.math.absoluteValue
  *
  * @param player the value for [MediaState.player]
  */
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
 fun rememberMediaState(
         player: ExoPlayer?,
         context: Context,
-): MediaState = remember { MediaState(initPlayer = player, context = context) }.apply {
-    this.player = player
+): MediaState {
+    val di : DI by rememberInstance()
+    return remember { MediaState(initPlayer = player, context = context,di) }.apply {
+        this.player = player
+    }
 }
 
 
-/**
- * A state object that can be hoisted to control and observe changes for [Media].
- */
-
 @Stable
 class MediaState(
-        private val initPlayer: ExoPlayer? = null,
-        private val context: Context
-) {
+    private val initPlayer: ExoPlayer? = null,
+    private val context: Context, override val di: DI,
+
+    ) : DIAware {
     val subtitleHelper : PlayerSubtitleHelper = PlayerSubtitleHelper()
     internal val stateOfPlayerState = mutableStateOf(initPlayer?.state(subtitleHelper))
 
@@ -255,8 +264,8 @@ class MediaState(
         )
 
     }
-
-    private fun buildExoPlayer(
+    @OptIn(UnstableApi::class)
+    private fun  buildExoPlayer(
         context: Context,
         mediaItemSlices: List<MediaItem>,
         subSources: List<SingleSampleMediaSource>,
@@ -379,7 +388,7 @@ class MediaState(
         }
 
     }
-    val client : HttpClients by inject<HttpClients>(HttpClients::class.java)
+    val client : HttpClients by instance<HttpClients>()
 
     private fun createOnlineSource(headers: Map<String, String>): HttpDataSource.Factory {
         val source = OkHttpDataSource.Factory(client.default.okhttp).setUserAgent(USER_AGENT)
@@ -401,7 +410,7 @@ class MediaState(
             val client = okhttp.newBuilder()
                     .addInterceptor(interceptor)
                     .build()
-            DefaultHttpDataSource.Factory().setUserAgent(HttpHeaders.USER_AGENT)
+            DefaultHttpDataSource.Factory().setUserAgent(USER_AGENT)
         }
 
         val headers = mapOf(
@@ -423,7 +432,7 @@ class MediaState(
         return DefaultDataSource.Factory(this)
     }
 
-    fun setPreferredSubtitles(subtitle: ireader.presentation.ui.video.component.cores.SubtitleData?): Boolean {
+    fun setPreferredSubtitles(subtitle: SubtitleData?): Boolean {
         Log.i("TAG", "setPreferredSubtitles init $subtitle")
         playerState?.currentSubtitle = subtitle
 
@@ -549,7 +558,7 @@ class MediaState(
             if (ignoreSSL) {
                 // Disables ssl check
                 val sslContext: SSLContext = SSLContext.getInstance("TLS")
-                sslContext.init(null, arrayOf(SSLTrustManager()), java.security.SecureRandom())
+                sslContext.init(null, arrayOf(SSLTrustManager()), SecureRandom())
                 sslContext.createSSLEngine()
                 HttpsURLConnection.setDefaultHostnameVerifier { _: String, _: SSLSession ->
                     true

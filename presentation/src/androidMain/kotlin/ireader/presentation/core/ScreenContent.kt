@@ -38,7 +38,7 @@ import ireader.presentation.ui.core.theme.LocalHideNavigator
 import ireader.presentation.ui.core.theme.TransparentStatusBar
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonNull.content
-import org.koin.androidx.compose.getViewModel
+
 
 //@OptIn(
 //    ExperimentalMaterialApi::class, ExperimentalAnimationApi::class,

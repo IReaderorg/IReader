@@ -3,25 +3,16 @@ package ireader.presentation.core.ui
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
-import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.google.accompanist.web.WebContent
 import ireader.presentation.core.VoyagerScreen
-import ireader.presentation.core.ui.util.NavigationArgs
-import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.web.WebPageScreen
 import ireader.presentation.ui.web.WebPageTopBar
 import ireader.presentation.ui.web.WebViewPageModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.koin.androidx.compose.getViewModel
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 @OptIn(
     ExperimentalMaterialApi::class,
@@ -40,11 +31,9 @@ data class WebViewScreenSpec(
 
     @Composable
     override fun Content() {
-        val vm: WebViewPageModel = getIViewModel(parameters = {
-            org.koin.core.parameter.parametersOf(
+        val vm: WebViewPageModel = getIViewModel(parameters =
                 WebViewPageModel.Param(url,bookId,sourceId,chapterId,enableChapterFetch,enableChaptersFetch,enableBookFetch)
             )
-        })
         val navigator = LocalNavigator.currentOrThrow
 
         val scope = rememberCoroutineScope()

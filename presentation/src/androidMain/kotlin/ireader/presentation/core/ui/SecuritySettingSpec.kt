@@ -11,7 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.log.Log
@@ -22,17 +21,17 @@ import ireader.domain.utils.extensions.AuthenticatorUtil.isAuthenticationSupport
 import ireader.domain.utils.extensions.AuthenticatorUtil.startAuthentication
 import ireader.i18n.R
 import ireader.presentation.core.VoyagerScreen
-import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.component.components.component.ChoicePreference
-import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.datetime.Clock
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.android.closestDI
+import org.kodein.di.instance
 
-import org.koin.android.ext.android.get
-import org.koin.androidx.compose.getViewModel
 
 class SecuritySettingSpec : VoyagerScreen() {
 
@@ -171,9 +170,11 @@ class SecuritySettingSpec : VoyagerScreen() {
  * Blank activity with a BiometricPrompt.
  */
 
-class UnlockActivity : FragmentActivity() {
+class UnlockActivity : FragmentActivity(),DIAware {
 
-    var appPreferences: UiPreferences = get<UiPreferences>()
+    override val di: DI by closestDI()
+
+    val appPreferences: UiPreferences by instance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

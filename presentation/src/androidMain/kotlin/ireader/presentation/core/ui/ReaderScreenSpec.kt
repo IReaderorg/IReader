@@ -54,8 +54,8 @@ import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.getViewModel
-import org.koin.core.parameter.parametersOf
+
+
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 data class ReaderScreenSpec(
@@ -73,11 +73,7 @@ data class ReaderScreenSpec(
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
         val vm: ReaderScreenViewModel =
-            getIViewModel(parameters = {
-                org.koin.core.parameter.parametersOf(
-                    ReaderScreenViewModel.Param(chapterId,bookId)
-                )
-            })
+            getIViewModel(parameters = ReaderScreenViewModel.Param(chapterId,bookId))
         val currentIndex = vm.currentChapterIndex
         val chapters = vm.stateChapters
         val chapter = vm.stateChapter

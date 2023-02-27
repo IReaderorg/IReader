@@ -2,22 +2,15 @@ package ireader.presentation.core.ui
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.log.Log
 import ireader.presentation.core.VoyagerScreen
-import ireader.presentation.core.ui.util.NavigationArgs.bookId
-import ireader.presentation.core.ui.util.NavigationArgs.query
-import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.home.sources.global_search.GlobalSearchScreen
 import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchViewModel
 import kotlinx.coroutines.runBlocking
-import org.koin.androidx.compose.getViewModel
+
 
 data class GlobalSearchScreenSpec(
     val query: String? = null
@@ -30,11 +23,9 @@ data class GlobalSearchScreenSpec(
     override fun Content(
 
     ) {
-        val vm: GlobalSearchViewModel= getIViewModel(parameters = {
-            org.koin.core.parameter.parametersOf(
+        val vm: GlobalSearchViewModel= getIViewModel(parameters =
                 GlobalSearchViewModel.Param(query)
             )
-        })
         val navigator = LocalNavigator.currentOrThrow
 
         IScaffold(

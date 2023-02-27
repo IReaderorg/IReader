@@ -19,7 +19,7 @@ import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.category.CategoryScreen
 import ireader.presentation.ui.settings.category.CategoryScreenViewModel
-import org.koin.androidx.compose.getViewModel
+
 
 class CategoryScreenSpec : VoyagerScreen() {
 

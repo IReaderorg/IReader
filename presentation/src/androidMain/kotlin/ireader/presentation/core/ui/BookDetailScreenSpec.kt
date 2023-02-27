@@ -3,38 +3,28 @@ package ireader.presentation.core.ui
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavDeepLink
-import androidx.navigation.navDeepLink
-import cafe.adriel.voyager.core.model.coroutineScope
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
-import cafe.adriel.voyager.core.screen.uniqueScreenKey
-import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
-import ireader.domain.models.entities.Book
 import ireader.core.source.HttpSource
 import ireader.core.source.model.ChapterInfo
-
+import ireader.domain.models.entities.Book
 import ireader.domain.utils.extensions.findComponentActivity
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.LAST_CHAPTER
@@ -42,19 +32,15 @@ import ireader.i18n.UiText
 import ireader.presentation.R
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
-import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.ui.book.BookDetailScreen
 import ireader.presentation.ui.book.BookDetailTopAppBar
 import ireader.presentation.ui.book.components.ChapterCommandBottomSheet
 import ireader.presentation.ui.book.components.ChapterScreenBottomTabComposable
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
-import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.theme.TransparentStatusBar
 import ireader.presentation.ui.core.ui.SnackBarListener
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.getViewModel
-import org.koin.androidx.compose.koinViewModel
 
 data class BookDetailScreenSpec(
     val bookId: Long,
@@ -71,11 +57,7 @@ data class BookDetailScreenSpec(
     ) {
         val navigator = LocalNavigator.currentOrThrow
         val vm: BookDetailViewModel =
-            getScreenModel(parameters = {
-                org.koin.core.parameter.parametersOf(
-                    BookDetailViewModel.Param(bookId)
-                )
-            })
+            getIViewModel(parameters = BookDetailViewModel.Param(bookId))
         val snackbarHostState = SnackBarListener(vm = vm)
         val state = vm
         val book = state.booksState.book

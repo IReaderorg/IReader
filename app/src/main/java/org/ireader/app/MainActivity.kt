@@ -33,33 +33,35 @@ import ireader.presentation.core.ui.BookDetailScreenSpec
 import ireader.presentation.core.ui.DownloaderScreenSpec
 import ireader.presentation.core.ui.ReaderScreenSpec
 import ireader.presentation.core.ui.TTSScreenSpec
-import ireader.presentation.core.ui.util.NavigationArgs.bookId
-import ireader.presentation.core.ui.util.NavigationArgs.chapterId
-import ireader.presentation.core.ui.util.NavigationArgs.sourceId
 import ireader.presentation.ui.component.IScaffold
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import org.ireader.app.initiators.AppInitializers
 import org.ireader.app.initiators.GetPermissions
 import org.ireader.app.initiators.SecureActivityDelegateImpl
-import org.koin.android.ext.android.get
-import org.koin.android.ext.android.inject
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.android.closestDI
+import org.kodein.di.compose.withDI
+import org.kodein.di.instance
 
 
-class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivityDelegateImpl() {
-    private val getSimpleStorage: GetSimpleStorage = get()
-    private val uiPreferences: UiPreferences by inject()
-    val initializers: AppInitializers = get<AppInitializers>()
-    private val automaticBackup: AutomaticBackup = get()
-    private val localeHelper: LocaleHelper = get()
+class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivityDelegateImpl(),
+    DIAware {
+
+
+    private val getSimpleStorage: GetSimpleStorage by instance()
+    private val uiPreferences: UiPreferences by instance()
+    val initializers: AppInitializers by instance<AppInitializers>()
+    private val automaticBackup: AutomaticBackup by instance()
+    private val localeHelper: LocaleHelper by instance()
     private var navigator: cafe.adriel.voyager.navigator.Navigator? = null
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        registerSecureActivity(this, uiPreferences)
+        registerSecureActivity(this, uiPreferences,initializers)
         getSimpleStorage.provideActivity(this, null)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         lifecycleScope.launchIO {
@@ -68,34 +70,38 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         localeHelper.setLocaleLang(this)
         installSplashScreen()
         setContent {
-            AppTheme {
-                Surface(
-                    color = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
+            withDI(di) {
 
-                    ) {
-                    Navigator(
-                        screen = MainStarterScreen,
-                        disposeBehavior = NavigatorDisposeBehavior(
-                            disposeNestedNavigators = false,
-                            disposeSteps = true
-                        ),
-                    ) { navigator ->
-                        LaunchedEffect(navigator) {
-                            this@MainActivity.navigator = navigator
-                            if (savedInstanceState == null) {
-                                // Set start screen
-                                handleIntentAction(intent, navigator)
+
+                AppTheme {
+                    Surface(
+                        color = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+
+                        ) {
+                        Navigator(
+                            screen = MainStarterScreen,
+                            disposeBehavior = NavigatorDisposeBehavior(
+                                disposeNestedNavigators = false,
+                                disposeSteps = true
+                            ),
+                        ) { navigator ->
+                            LaunchedEffect(navigator) {
+                                this@MainActivity.navigator = navigator
+                                if (savedInstanceState == null) {
+                                    // Set start screen
+                                    handleIntentAction(intent, navigator)
+                                }
                             }
-                        }
-                        IScaffold {
-                            DefaultNavigatorScreenTransition(navigator = navigator)
-                            GetPermissions(uiPreferences)
+                            IScaffold {
+                                DefaultNavigatorScreenTransition(navigator = navigator)
+                                GetPermissions(uiPreferences)
+                            }
+
+                            HandleOnNewIntent(this, navigator)
                         }
 
-                        HandleOnNewIntent(this, navigator)
                     }
-
                 }
             }
         }
@@ -193,11 +199,13 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         }
     }
 
+    override val di: DI by closestDI()
+
 
 }
 
 
 interface SecureActivityDelegate {
-    fun registerSecureActivity(activity: ComponentActivity, preferences: UiPreferences)
+    fun registerSecureActivity(activity: ComponentActivity, preferences: UiPreferences,initializers: AppInitializers)
 }
 

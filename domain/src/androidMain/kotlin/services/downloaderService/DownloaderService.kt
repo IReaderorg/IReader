@@ -25,20 +25,24 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.instance
 
 class DownloaderService  constructor(
     private val context: Context,
     params: WorkerParameters,
-    private val bookRepo: BookRepository,
-    private val chapterRepo: ChapterRepository,
-    private val remoteUseCases: RemoteUseCases,
-    private val extensions: CatalogStore,
-    private val insertUseCases: LocalInsertUseCases,
-    private val defaultNotificationHelper: DefaultNotificationHelper,
-    private val downloadUseCases: DownloadUseCases,
-    private val downloadServiceState: DownloadServiceStateImpl,
-) : CoroutineWorker(context, params) {
+) : CoroutineWorker(context, params), DIAware {
 
+    override val di: DI = (this@DownloaderService.applicationContext as DIAware).di
+    private val bookRepo: BookRepository by instance()
+    private val chapterRepo: ChapterRepository by instance()
+    private val remoteUseCases: RemoteUseCases by instance()
+    private val extensions: CatalogStore by instance()
+    private val insertUseCases: LocalInsertUseCases by instance()
+    private val defaultNotificationHelper: DefaultNotificationHelper by instance()
+    private val downloadUseCases: DownloadUseCases by instance()
+    private val downloadServiceState: DownloadServiceStateImpl by instance()
     private val downloadJob = Job()
 
     val scope = CoroutineScope(Dispatchers.Main.immediate + downloadJob)

@@ -16,13 +16,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavDeepLink
-import androidx.navigation.navDeepLink
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -34,22 +29,19 @@ import ireader.presentation.R
 import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
-import ireader.presentation.core.ui.util.NavigationArgs
-import ireader.presentation.ui.component.*
+import ireader.presentation.ui.component.CustomizeAnimateVisibility
+import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.component.NavigationBarTokens
+import ireader.presentation.ui.component.ThemePreference
 import ireader.presentation.ui.component.components.Build
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.component.ChipChoicePreference
 import ireader.presentation.ui.component.components.component.SliderPreference
 import ireader.presentation.ui.component.components.component.SwitchPreference
-import ireader.presentation.ui.home.tts.MediaControllers
-import ireader.presentation.ui.home.tts.TTLScreenPlay
-import ireader.presentation.ui.home.tts.TTSScreen
-import ireader.presentation.ui.home.tts.TTSTopBar
-import ireader.presentation.ui.home.tts.TTSViewModel
+import ireader.presentation.ui.home.tts.*
 import ireader.presentation.ui.reader.ReaderScreenDrawer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.getViewModel
 import java.math.RoundingMode
 
 class TTSScreenSpec(
@@ -93,11 +85,9 @@ class TTSScreenSpec(
         val navigator = LocalNavigator.currentOrThrow
 
         val vm: TTSViewModel =
-            getIViewModel(parameters = {
-                org.koin.core.parameter.parametersOf(
+            getIViewModel(parameters =
                     TTSViewModel.Param(sourceId,chapterId,bookId,readingParagraph)
                 )
-            })
         val context = LocalContext.current
         val lazyState = rememberLazyListState()
         DisposableEffect(key1 = true) {

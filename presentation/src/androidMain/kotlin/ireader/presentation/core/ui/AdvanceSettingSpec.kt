@@ -17,7 +17,6 @@ import ireader.presentation.ui.settings.advance.AdvanceSettings
 import ireader.presentation.R
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
-import org.koin.androidx.compose.getViewModel
 
 class AdvanceSettingSpec : VoyagerScreen() {
 

@@ -16,7 +16,7 @@ import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.settings.downloader.DownloaderScreen
 import ireader.presentation.ui.settings.downloader.DownloaderTopAppBar
 import ireader.presentation.ui.settings.downloader.DownloaderViewModel
-import org.koin.androidx.compose.getViewModel
+
 
 class DownloaderScreenSpec : VoyagerScreen() {
 

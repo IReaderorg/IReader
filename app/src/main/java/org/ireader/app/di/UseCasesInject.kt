@@ -36,98 +36,101 @@ import ireader.domain.usecases.services.*
 import ireader.domain.usecases.updates.DeleteAllUpdates
 import ireader.domain.usecases.updates.SubscribeUpdates
 import ireader.domain.usecases.updates.UpdateUseCases
-import org.koin.dsl.module
+import org.kodein.di.DI
+import org.kodein.di.bindProvider
+import org.kodein.di.bindSingleton
+import org.kodein.di.instance
 
 
-val UseCasesInject = module {
+val UseCasesInject = DI.Module("usecaseModule") {
 
-    single<RemoteUseCases>(qualifier=null) { RemoteUseCases(
+    bindSingleton<RemoteUseCases> { RemoteUseCases(
         getBookDetail = GetBookDetail(),
         getRemoteBooks = GetRemoteBooksUseCase(),
         getRemoteChapters = GetRemoteChapters(),
         getRemoteReadingContent = GetRemoteReadingContent(),
     ) }
-    single<LocalInsertUseCases>(qualifier=null) { LocalInsertUseCases(
-        insertBook = InsertBook(get()),
-        insertBookAndChapters = InsertBookAndChapters(get()),
-        insertBooks = InsertBooks(get()),
-        insertChapter = InsertChapter(get()),
-        insertChapters = InsertChapters(get()),
-        updateBook = UpdateBook(get())
+    bindSingleton<LocalInsertUseCases> { LocalInsertUseCases(
+        insertBook = InsertBook(instance()),
+        insertBookAndChapters = InsertBookAndChapters(instance()),
+        insertBooks = InsertBooks(instance()),
+        insertChapter = InsertChapter(instance()),
+        insertChapters = InsertChapters(instance()),
+        updateBook = UpdateBook(instance())
     ) }
-    single<LocalGetBookUseCases>(qualifier=null) { LocalGetBookUseCases(
-        findAllInLibraryBooks = FindAllInLibraryBooks(get()),
-        findBookById = FindBookById(get()),
-        findBookByKey = FindBookByKey(get()),
-        findBooksByKey = FindBooksByKey(get()),
-        subscribeBookById = SubscribeBookById(get()),
-        subscribeBooksByKey = SubscribeBooksByKey(get()),
-        SubscribeInLibraryBooks = SubscribeInLibraryBooks(get()),
+    bindSingleton<LocalGetBookUseCases> { LocalGetBookUseCases(
+        findAllInLibraryBooks = FindAllInLibraryBooks(instance()),
+        findBookById = FindBookById(instance()),
+        findBookByKey = FindBookByKey(instance()),
+        findBooksByKey = FindBooksByKey(instance()),
+        subscribeBookById = SubscribeBookById(instance()),
+        subscribeBooksByKey = SubscribeBooksByKey(instance()),
+        SubscribeInLibraryBooks = SubscribeInLibraryBooks(instance()),
     ) }
-    single<LocalGetChapterUseCase>(qualifier=null) { LocalGetChapterUseCase(
-        findAllInLibraryChapters = FindAllInLibraryChapters(get()),
-        findChapterById = FindChapterById(get()),
-        findChaptersByBookId = FindChaptersByBookId(get()),
-        subscribeChaptersByBookId = SubscribeChaptersByBookId(get()),
-        updateLastReadTime = UpdateLastReadTime(insertUseCases = get(), historyUseCase = get(), uiPreferences = get()),
-        subscribeChapterById = SubscribeChapterById(get())
+    bindSingleton<LocalGetChapterUseCase> { LocalGetChapterUseCase(
+        findAllInLibraryChapters = FindAllInLibraryChapters(instance()),
+        findChapterById = FindChapterById(instance()),
+        findChaptersByBookId = FindChaptersByBookId(instance()),
+        subscribeChaptersByBookId = SubscribeChaptersByBookId(instance()),
+        updateLastReadTime = UpdateLastReadTime(insertUseCases = instance(), historyUseCase = instance(), uiPreferences = instance()),
+        subscribeChapterById = SubscribeChapterById(instance())
     ) }
-    single<DeleteUseCase>(qualifier=null) { DeleteUseCase(
-        deleteAllBook = DeleteAllBooks(get()),
-        deleteAllChapters = DeleteAllChapters(get()),
-        deleteBookById = DeleteBookById(get()),
-        deleteChapterByChapter = DeleteChapterByChapter(get()),
-        deleteChapters = DeleteChapters(get()),
-        deleteChaptersByBookId = DeleteChaptersByBookId(get()),
-        unFavoriteBook = UnFavoriteBook(get(), bookCategoryRepository = get(), get()),
-        deleteNotInLibraryBooks = DeleteNotInLibraryBooks(get())
+    bindSingleton<DeleteUseCase> { DeleteUseCase(
+        deleteAllBook = DeleteAllBooks(instance()),
+        deleteAllChapters = DeleteAllChapters(instance()),
+        deleteBookById = DeleteBookById(instance()),
+        deleteChapterByChapter = DeleteChapterByChapter(instance()),
+        deleteChapters = DeleteChapters(instance()),
+        deleteChaptersByBookId = DeleteChaptersByBookId(instance()),
+        unFavoriteBook = UnFavoriteBook(instance(), bookCategoryRepository = instance(), instance()),
+        deleteNotInLibraryBooks = DeleteNotInLibraryBooks(instance())
     ) }
-    single<ServiceUseCases>(qualifier=null) { ServiceUseCases(
-        startDownloadServicesUseCase = StartDownloadServicesUseCase(get()),
-        startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(get()),
-        startTTSServicesUseCase = StartTTSServicesUseCase(get()),
-        stopServicesUseCase = StopServiceUseCase(get()),
+    bindSingleton<ServiceUseCases> { ServiceUseCases(
+        startDownloadServicesUseCase = StartDownloadServicesUseCase(instance()),
+        startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(instance()),
+        startTTSServicesUseCase = StartTTSServicesUseCase(instance()),
+        stopServicesUseCase = StopServiceUseCase(instance()),
     ) }
-    single<LibraryScreenPrefUseCases>(qualifier=null) { LibraryScreenPrefUseCases(
-        libraryLayoutTypeUseCase = LibraryLayoutTypeUseCase(get(), get()),
-        sortersDescUseCase = SortersDescUseCase(get()),
-        sortersUseCase = SortersUseCase(get())
+    bindSingleton<LibraryScreenPrefUseCases> { LibraryScreenPrefUseCases(
+        libraryLayoutTypeUseCase = LibraryLayoutTypeUseCase(instance(), instance()),
+        sortersDescUseCase = SortersDescUseCase(instance()),
+        sortersUseCase = SortersUseCase(instance())
     ) }
-    single<ReaderPrefUseCases>(qualifier=null) { ReaderPrefUseCases(
-        autoScrollMode = AutoScrollMode(get()),
-        backgroundColorUseCase = BackgroundColorUseCase(get()),
-        brightnessStateUseCase = BrightnessStateUseCase(get()),
-        fontHeightUseCase = FontHeightUseCase(get()),
-        fontSizeStateUseCase = FontSizeStateUseCase(get()),
-        immersiveModeUseCase = ImmersiveModeUseCase(get()),
-        paragraphDistanceUseCase = ParagraphDistanceUseCase(get()),
-        paragraphIndentUseCase = ParagraphIndentUseCase(get()),
-        scrollIndicatorUseCase = ScrollIndicatorUseCase(get()),
-        scrollModeUseCase = ScrollModeUseCase(get()),
-        selectedFontStateUseCase = SelectedFontStateUseCase(get(),get()),
-        textAlignmentUseCase = TextAlignmentUseCase(get()),
-        textColorUseCase = TextColorUseCase(get())
+    bindSingleton<ReaderPrefUseCases> { ReaderPrefUseCases(
+        autoScrollMode = AutoScrollMode(instance()),
+        backgroundColorUseCase = BackgroundColorUseCase(instance()),
+        brightnessStateUseCase = BrightnessStateUseCase(instance()),
+        fontHeightUseCase = FontHeightUseCase(instance()),
+        fontSizeStateUseCase = FontSizeStateUseCase(instance()),
+        immersiveModeUseCase = ImmersiveModeUseCase(instance()),
+        paragraphDistanceUseCase = ParagraphDistanceUseCase(instance()),
+        paragraphIndentUseCase = ParagraphIndentUseCase(instance()),
+        scrollIndicatorUseCase = ScrollIndicatorUseCase(instance()),
+        scrollModeUseCase = ScrollModeUseCase(instance()),
+        selectedFontStateUseCase = SelectedFontStateUseCase(instance(),instance()),
+        textAlignmentUseCase = TextAlignmentUseCase(instance()),
+        textColorUseCase = TextColorUseCase(instance())
     ) }
-    single<BrowseScreenPrefUseCase>(qualifier=null) { BrowseScreenPrefUseCase(
-        browseLayoutTypeUseCase = BrowseLayoutTypeUseCase(get())
+    bindSingleton<BrowseScreenPrefUseCase> { BrowseScreenPrefUseCase(
+        browseLayoutTypeUseCase = BrowseLayoutTypeUseCase(instance())
     ) }
-    single<HistoryUseCase>(qualifier=null) { HistoryUseCase(
-        get()
+    bindSingleton<HistoryUseCase> { HistoryUseCase(
+        instance()
     ) }
-    single<UpdateUseCases>(qualifier=null) { UpdateUseCases(
-        subscribeUpdates = SubscribeUpdates(get()),
-        deleteAllUpdates = DeleteAllUpdates(get()),
+    bindSingleton<UpdateUseCases> { UpdateUseCases(
+        subscribeUpdates = SubscribeUpdates(instance()),
+        deleteAllUpdates = DeleteAllUpdates(instance()),
     ) }
-    factory<EpubCreator>(qualifier=null) { EpubCreator(get(), get()) }
-    single<DownloadUseCases>(qualifier=null) {DownloadUseCases(
-        deleteAllSavedDownload = DeleteAllSavedDownload(get()),
-        deleteSavedDownload = DeleteSavedDownload(get()),
-        deleteSavedDownloadByBookId = DeleteSavedDownloadByBookId(get()),
-        deleteSavedDownloads = DeleteSavedDownloads(get()),
-        findAllDownloadsUseCase = FindAllDownloadsUseCase(get()),
-        findDownloadsUseCase = FindDownloadsUseCase(get()),
-        insertDownload = InsertDownload(get()),
-        insertDownloads = InsertDownloads(get()),
-        subscribeDownloadsUseCase = SubscribeDownloadsUseCase(get()),
+    bindProvider<EpubCreator> { EpubCreator(instance(), instance()) }
+    bindSingleton<DownloadUseCases> {DownloadUseCases(
+        deleteAllSavedDownload = DeleteAllSavedDownload(instance()),
+        deleteSavedDownload = DeleteSavedDownload(instance()),
+        deleteSavedDownloadByBookId = DeleteSavedDownloadByBookId(instance()),
+        deleteSavedDownloads = DeleteSavedDownloads(instance()),
+        findAllDownloadsUseCase = FindAllDownloadsUseCase(instance()),
+        findDownloadsUseCase = FindDownloadsUseCase(instance()),
+        insertDownload = InsertDownload(instance()),
+        insertDownloads = InsertDownloads(instance()),
+        subscribeDownloadsUseCase = SubscribeDownloadsUseCase(instance()),
     ) }
 }

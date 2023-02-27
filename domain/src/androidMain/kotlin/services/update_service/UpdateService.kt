@@ -18,15 +18,21 @@ import ireader.domain.notification.legacyFlags
 import ireader.domain.preferences.prefs.AppPreferences
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.instance
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 class UpdateService  constructor(
     private val context: Context,
     params: WorkerParameters,
-    private val appPreferences: AppPreferences,
-    private val api: UpdateApi,
-) : CoroutineWorker(context, params) {
+) : CoroutineWorker(context, params),DIAware {
+
+    override val di: DI = (context.applicationContext as DIAware).di
+    private val appPreferences: AppPreferences by instance()
+    private val api: UpdateApi by instance()
+
 
     override suspend fun doWork(): Result {
         val lastCheck = Instant.fromEpochMilliseconds(appPreferences.lastUpdateCheck().get())

@@ -30,7 +30,7 @@ import ireader.presentation.ui.home.updates.UpdateScreen
 import ireader.presentation.ui.home.updates.component.UpdatesToolbar
 import ireader.presentation.ui.home.updates.viewmodel.UpdatesViewModel
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.getViewModel
+
 
 object UpdateScreenSpec : Tab {
 

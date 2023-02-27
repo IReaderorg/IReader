@@ -24,7 +24,7 @@ import ireader.presentation.ui.settings.font_screens.FontScreenViewModel
 import ireader.presentation.R
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
-import org.koin.androidx.compose.getViewModel
+
 
 @ExperimentalMaterial3Api
 class FontScreenSpec : VoyagerScreen() {

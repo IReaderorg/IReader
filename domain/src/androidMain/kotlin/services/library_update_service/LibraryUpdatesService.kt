@@ -6,13 +6,12 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import ireader.domain.models.entities.Chapter
 import ireader.core.log.Log
-import ireader.domain.catalogs.interactor.GetLocalCatalog
+import ireader.core.os.checkNotificationPermission
 import ireader.domain.R
+import ireader.domain.catalogs.interactor.GetLocalCatalog
+import ireader.domain.models.entities.Chapter
 import ireader.domain.notification.Notifications
-import ireader.domain.services.downloaderService.DefaultNotificationHelper
-import ireader.domain.usecases.local.DeleteUseCase
 import ireader.domain.usecases.local.LocalGetBookUseCases
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
@@ -20,19 +19,22 @@ import ireader.domain.usecases.remote.RemoteUseCases
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.instance
 import kotlin.time.ExperimentalTime
 
-class LibraryUpdatesService  constructor(
+class LibraryUpdatesService(
     private val context: Context,
     params: WorkerParameters,
-    private val getBookUseCases: LocalGetBookUseCases,
-    private val getChapterUseCase: LocalGetChapterUseCase,
-    private val remoteUseCases: RemoteUseCases,
-    private val getLocalCatalog: GetLocalCatalog,
-    private val defaultNotificationHelper: DefaultNotificationHelper,
-    private val insertUseCases: LocalInsertUseCases,
-    private val deleteUseCase: DeleteUseCase,
-) : CoroutineWorker(context, params) {
+) : CoroutineWorker(context, params), DIAware {
+    override val di: DI = (context.applicationContext as DIAware).di
+
+    private val getBookUseCases: LocalGetBookUseCases by instance()
+    private val getChapterUseCase: LocalGetChapterUseCase by instance()
+    private val remoteUseCases: RemoteUseCases by instance()
+    private val getLocalCatalog: GetLocalCatalog by instance()
+    private val insertUseCases: LocalInsertUseCases by instance()
 
     companion object {
         const val LibraryUpdateTag = "Library_Update_SERVICE"
@@ -41,7 +43,7 @@ class LibraryUpdatesService  constructor(
 
     @OptIn(ExperimentalTime::class)
     override suspend fun doWork(): Result {
-        val forceUpdate = inputData.getBoolean(FORCE_UPDATE,false)
+        val forceUpdate = inputData.getBoolean(FORCE_UPDATE, false)
         val libraryBooks = getBookUseCases.findAllInLibraryBooks()
         var skippedBooks = 0
 
@@ -66,7 +68,9 @@ class LibraryUpdatesService  constructor(
         NotificationManagerCompat.from(applicationContext).apply {
 
             builder.setProgress(libraryBooks.size, 0, false)
-            notify(Notifications.ID_LIBRARY_PROGRESS, builder.build())
+            checkNotificationPermission(context) {
+                notify(Notifications.ID_LIBRARY_PROGRESS, builder.build())
+            }
             try {
                 libraryBooks.forEachIndexed { index, book ->
                     val chapters = getChapterUseCase.findChaptersByBookId(bookId = book.id)

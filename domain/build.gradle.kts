@@ -1,5 +1,3 @@
-import org.gradle.internal.impldep.org.junit.experimental.categories.Categories.CategoryFilter.exclude
-
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
@@ -97,10 +95,9 @@ kotlin {
                 implementation(libs.ktor.contentNegotiation)
                 implementation(libs.ktor.okhttp)
                 implementation(libs.bundles.ireader)
-                implementation(libs.koin.android)
-                //ksp(libs.koin.kspCompiler)
-                implementation(libs.koin.androidCompose)
-                compileOnly(libs.koin.workManager)
+
+                //
+                compileOnly(libs.kodein.core)
             }
         }
         val desktopMain by getting {
@@ -114,8 +111,6 @@ kotlin {
 
 
 dependencies {
-
-    setupKSP(libs.koin.kspCompiler)
     debugImplementation(composeLib.compose.uiTestManifest)
     implementation(files("libs/epublib-core-latest.jar"))
 //    {

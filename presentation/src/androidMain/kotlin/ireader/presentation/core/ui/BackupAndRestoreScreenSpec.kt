@@ -17,7 +17,7 @@ import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.settings.backups.BackUpAndRestoreScreen
 import ireader.presentation.ui.settings.backups.BackupScreenViewModel
-import org.koin.androidx.compose.getViewModel
+
 
 class BackupAndRestoreScreenSpec : VoyagerScreen() {
 

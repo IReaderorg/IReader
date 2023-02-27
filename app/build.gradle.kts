@@ -186,17 +186,12 @@ dependencies {
     implementation(compose.runtime)
 
     testImplementation(test.bundles.common)
-    testImplementation(libs.koin.test)
+
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
    androidTestImplementation(test.bundles.common)
 
-    implementation(libs.koin.android)
-    implementation(libs.koin.androidCompose)
-    implementation(libs.koin.workManager)
-    implementation(libs.koin.core)
-    ksp(libs.koin.kspCompiler)
-
-
+    implementation(libs.kodein.core)
+    implementation(libs.kodein.compose)
     implementation(libs.voyager.navigator)
 }
 // Git is needed in your system PATH for these commands to work.

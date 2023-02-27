@@ -2,30 +2,24 @@ package ireader.presentation.ui.video
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.text.ExperimentalTextApi
-import androidx.lifecycle.viewModelScope
 import androidx.media3.exoplayer.ExoPlayer
-import ireader.domain.models.entities.Chapter
-import ireader.core.http.HttpClients
 import ireader.core.log.Log
 import ireader.core.source.HttpSource
 import ireader.core.source.model.MovieUrl
 import ireader.core.source.model.Subtitle
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.models.entities.CatalogLocal
+import ireader.domain.models.entities.Chapter
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.utils.extensions.withUIContext
-import ireader.presentation.core.ui.util.NavigationArgs
-import ireader.presentation.ui.core.viewmodel.BaseViewModel
-import ireader.presentation.ui.video.component.PlayerCreator
 import ireader.presentation.ui.video.component.core.MediaState
 import ireader.presentation.ui.video.component.core.toSubtitleData
 import ireader.presentation.ui.video.component.cores.PlayerSubtitleHelper.Companion.toSubtitleMimeType
 import ireader.presentation.ui.video.component.cores.SubtitleData
 import ireader.presentation.ui.video.component.cores.SubtitleOrigin
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -38,17 +32,16 @@ class VideoScreenViewModel(
     val remoteUseCases: RemoteUseCases,
     val getLocalCatalog: GetLocalCatalog,
     val insertUseCases: LocalInsertUseCases,
-    val playerCreator: PlayerCreator,
-    httpClient: HttpClients,
     val simpleStorage: GetSimpleStorage,
     val mediaState: MediaState,
+    val param: Param
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
 
 
     data class Param(
         val chapterId: Long
     )
-    val chapterId: State<Long> by mutableStateOf(chapterId)
+    val chapterId: State<Long> = mutableStateOf(param.chapterId)
 
     var player: State<ExoPlayer?> = derivedStateOf { mediaState.player }
 

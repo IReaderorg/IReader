@@ -73,15 +73,6 @@ class BookDetailViewModel(
         }
     }
 
-    init {
-        Log.error { "Init Reader" }
-    }
-
-    override fun onDestroy() {
-        Log.error { "destroy Reader" }
-        super.onDestroy()
-    }
-
     var getBookDetailJob: Job? = null
     var getChapterDetailJob: Job? = null
     var initBooks = false

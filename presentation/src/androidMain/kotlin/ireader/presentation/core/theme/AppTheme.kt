@@ -7,9 +7,9 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.ExperimentalTextApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import ireader.presentation.ui.core.theme.*
-import org.koin.androidx.compose.get
-import org.koin.androidx.compose.getViewModel
-import org.koin.core.parameter.parametersOf
+import org.kodein.di.compose.rememberInstance
+
+
 
 @OptIn(ExperimentalTextApi::class)
 @Composable
@@ -17,9 +17,7 @@ fun AppTheme(
     content: @Composable() () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val vm: AppThemeViewModel = get(parameters = {
-        parametersOf(scope)
-    })
+    val vm: AppThemeViewModel by rememberInstance()
     val (materialColors, customColors) = vm.getColors()
     val rippleTheme = vm.getRippleTheme()
     val systemUiController = rememberSystemUiController()

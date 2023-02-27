@@ -5,24 +5,24 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NamedNavArgument
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import ireader.domain.utils.extensions.*
+import ireader.domain.utils.extensions.findComponentActivity
+import ireader.domain.utils.extensions.hideSystemUI
+import ireader.domain.utils.extensions.showSystemUI
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
-import ireader.presentation.core.ui.util.NavigationArgs
-import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.video.VideoPlayerBottomSheet
 import ireader.presentation.ui.video.VideoPresenter
 import ireader.presentation.ui.video.VideoScreenViewModel
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
+
 
 
 data class VideoScreenSpec(val chapterId: Long) : VoyagerScreen() {
@@ -36,7 +36,7 @@ data class VideoScreenSpec(val chapterId: Long) : VoyagerScreen() {
         val navigator = LocalNavigator.currentOrThrow
 
         val vm: VideoScreenViewModel =
-            getIViewModel()
+            getIViewModel(parameters = VideoScreenViewModel.Param(chapterId))
 
         val state = vm.mediaState
         DisposableEffect(key1 = true) {

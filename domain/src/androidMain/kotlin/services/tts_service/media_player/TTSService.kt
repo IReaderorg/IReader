@@ -1,16 +1,8 @@
 package ireader.domain.services.tts_service.media_player
 
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.media.AudioAttributes
-import android.media.AudioFocusRequest
-import android.media.AudioManager
-import android.media.MediaMetadata
-import android.media.MediaPlayer
+import android.content.*
+import android.media.*
 import android.os.Build
 import android.os.Bundle
 import android.os.ResultReceiver
@@ -24,23 +16,17 @@ import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import ireader.domain.models.entities.Book
-import ireader.domain.models.entities.CatalogLocal
-import ireader.domain.models.entities.Chapter
 import ireader.core.log.Log
+import ireader.domain.R
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
-import ireader.domain.preferences.prefs.ReaderPreferences
-import ireader.domain.R
+import ireader.domain.models.entities.Book
+import ireader.domain.models.entities.CatalogLocal
+import ireader.domain.models.entities.Chapter
 import ireader.domain.notification.Notifications
 import ireader.domain.preferences.prefs.AndroidUiPreferences
+import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.services.tts_service.Player
 import ireader.domain.services.tts_service.TTSState
 import ireader.domain.services.tts_service.TTSStateImpl
@@ -49,36 +35,40 @@ import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.preferences.reader_preferences.TextReaderPrefUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
-import org.koin.android.ext.android.inject
-
+import ireader.domain.utils.extensions.findComponentActivity
+import kotlinx.coroutines.*
+import kotlinx.datetime.Clock
+import org.kodein.di.*
 import kotlin.time.Duration.Companion.minutes
 
-class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener {
+class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener, DIAware {
 
 
-    private val bookRepo: BookRepository by inject()
+    override lateinit var di: DI
+
+    private val bookRepo: BookRepository by instance()
 
 
-    private val chapterRepo: ChapterRepository by inject()
+    private val chapterRepo: ChapterRepository by instance()
 
 
-    private val chapterUseCase: LocalGetChapterUseCase by inject()
+    private val chapterUseCase: LocalGetChapterUseCase by instance()
 
 
-    private val remoteUseCases: RemoteUseCases by inject()
+    private val remoteUseCases: RemoteUseCases by instance()
 
 
-    private val extensions: CatalogStore by inject()
+    private val extensions: CatalogStore by instance()
 
     lateinit var ttsNotificationBuilder: TTSNotificationBuilder
 
     lateinit var state: TTSStateImpl
 
 
-    private val insertUseCases: LocalInsertUseCases by inject()
+    private val insertUseCases: LocalInsertUseCases by instance()
 
 
-    private val textReaderPrefUseCase: TextReaderPrefUseCase by inject()
+    private val textReaderPrefUseCase: TextReaderPrefUseCase by instance()
 
     private val noisyReceiver = NoisyReceiver()
     private var noisyReceiverHooked = false
@@ -86,8 +76,8 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     private var resumeOnFocus = true
 
 
-    private val readerPreferences: ReaderPreferences  by inject()
-    private val androidReaderPreferences: AndroidUiPreferences  by inject()
+    private val readerPreferences: ReaderPreferences  by instance()
+    private val androidReaderPreferences: AndroidUiPreferences  by instance()
 
     lateinit var mediaSession: MediaSessionCompat
     lateinit var stateBuilder: PlaybackStateCompat.Builder
@@ -186,6 +176,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
 
     var silence: MediaPlayer? = null
     override fun onCreate() {
+        di = (this@TTSService.application as DIAware).di
         super.onCreate()
         state = TTSStateImpl()
 
@@ -998,4 +989,5 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             }
         }
     }
+
 }

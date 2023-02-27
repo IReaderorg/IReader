@@ -14,23 +14,16 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.lifecycle.viewModelScope
-import androidx.navigation.NamedNavArgument
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import ireader.domain.models.entities.toBookItem
 import ireader.core.source.HttpSource
+import ireader.domain.models.entities.toBookItem
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
 import ireader.presentation.R
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
-import ireader.presentation.core.ui.util.NavigationArgs
-import ireader.presentation.core.ui.util.NavigationArgs.bookId
 import ireader.presentation.imageloader.coil.image_loaders.convertToOkHttpRequest
-import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.EmptyScreenComposable
 import ireader.presentation.ui.component.hideKeyboard
@@ -41,7 +34,7 @@ import ireader.presentation.ui.home.explore.FilterBottomSheet
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
 import kotlinx.coroutines.launch
 import okhttp3.Headers
-import org.koin.androidx.compose.getViewModel
+
 
 @OptIn(
     ExperimentalAnimationApi::class,
@@ -58,11 +51,9 @@ data class ExploreScreenSpec(
     @Composable
     override fun Content() {
         val vm: ExploreViewModel =
-            getScreenModel(parameters = {
-                org.koin.core.parameter.parametersOf(
+            getIViewModel(parameters =
                     ExploreViewModel.Param(sourceId, query)
                 )
-            })
         val navigator = LocalNavigator.currentOrThrow
         val source = vm.source
         val scope = rememberCoroutineScope()

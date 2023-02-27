@@ -5,16 +5,16 @@ import androidx.activity.ComponentActivity
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.utils.extensions.AuthenticatorUtil.isAuthenticationSupported
+import ireader.domain.utils.extensions.setSecureScreen
+import ireader.presentation.core.ui.UnlockActivity
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.Clock
 import org.ireader.app.SecureActivityDelegate
-import ireader.domain.utils.extensions.AuthenticatorUtil.isAuthenticationSupported
-import ireader.domain.utils.extensions.setSecureScreen
-import ireader.domain.models.prefs.PreferenceValues
-import ireader.domain.preferences.prefs.UiPreferences
-import ireader.presentation.core.ui.UnlockActivity
 
 
 
@@ -23,7 +23,7 @@ class SecureActivityDelegateImpl : SecureActivityDelegate, DefaultLifecycleObser
     private lateinit var activity: ComponentActivity
     private lateinit var preferences: UiPreferences
 
-    override fun registerSecureActivity(activity: ComponentActivity, preferences: UiPreferences) {
+    override fun registerSecureActivity(activity: ComponentActivity, preferences: UiPreferences,initializers: AppInitializers) {
         this.activity = activity
         this.preferences = preferences
         activity.lifecycle.addObserver(this)

@@ -1,46 +1,38 @@
 package org.ireader.app
 
 import android.app.Application
+import android.content.Context
 import android.os.Build
 import android.os.Looper
+import androidx.work.Configuration
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import ireader.domain.di.DomainServices
 import ireader.domain.utils.WebViewUtil
-import ireader.presentation.core.di.uiModules
+import ireader.presentation.core.di.PresentationModules
 import ireader.presentation.imageloader.coil.CoilLoaderFactory
 import org.ireader.app.di.*
-import org.koin.android.ext.koin.androidContext
-import org.koin.android.ext.koin.androidLogger
-import org.koin.androidx.workmanager.koin.workManagerFactory
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
-import org.koin.core.context.GlobalContext.startKoin
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.bindSingleton
+import org.kodein.di.instance
 
 
-class MyApplication : Application(), KoinComponent, ImageLoaderFactory {
+class MyApplication : Application(), ImageLoaderFactory, DIAware, Configuration.Provider {
 
+    override val di: DI by DI.lazy(allowSilentOverride = true) {
+        bindSingleton<Context> { this@MyApplication }
+        bindSingleton<Application> { this@MyApplication }
+        importAll(AppModule, CatalogModule, DataModule, localModule, preferencesInjectModule,
+            repositoryInjectModule, UseCasesInject, PresentationModules,DomainServices)
 
-    val coil: CoilLoaderFactory by inject()
+    }
+
+    val coil: CoilLoaderFactory by instance()
 
 
     override fun onCreate() {
         super.onCreate()
-        startKoin {
-            androidContext(this@MyApplication)
-            androidLogger()
-            modules(AppModule,)
-
-            modules(UseCasesInject)
-            modules(repositoryInjectModule)
-            modules(localModule)
-            modules(DataModule)
-            modules(uiModules)
-            modules(CatalogModule)
-            modules(preferencesInjectModule)
-            modules(DomainServices)
-            workManagerFactory()
-        }
 
     }
 
@@ -69,5 +61,11 @@ class MyApplication : Application(), KoinComponent, ImageLoaderFactory {
             }
         }
         return super.getPackageName()
+    }
+
+    override fun getWorkManagerConfiguration(): Configuration {
+        return Configuration.Builder()
+            .setMinimumLoggingLevel(android.util.Log.ERROR)
+            .build();
     }
 }

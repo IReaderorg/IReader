@@ -33,7 +33,7 @@ import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.home.history.HistoryScreen
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.getViewModel
+
 
 object HistoryScreenSpec : Tab {
 

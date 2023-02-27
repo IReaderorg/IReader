@@ -32,6 +32,7 @@ darklaf = "3.0.2"
 ksp = "1.7.20-1.0.8"
 
 # Dependency Injection
+kodein = "7.18.0"
 koinAnnotation = "1.0.3"
 koin = "3.2.2"
 koinAndroid = "3.3.0"
@@ -49,7 +50,7 @@ tinylog = "2.5.0-M2.1"
 # Storage
 okio = "3.2.0"
 appDirs = "1.2.1"
-sqldelight = "1.5.4"
+sqldelight = "1.5.5"
 
 # Preferences
 multiplatformSettings = "1.0.0-alpha01"
@@ -107,7 +108,7 @@ htmlUnit-android = "net.sourceforge.htmlunit:htmlunit-android:2.63.0-SNAPSHOT"
 voyager-navigator = { module = "ca.gosyer:voyager-navigator", version.ref = "voyager" }
 voyager-tab-navigator = { module = "ca.gosyer:voyager-tab-navigator", version.ref = "voyager" }
 voyager-transitions = { module = "ca.gosyer:voyager-transitions", version.ref = "voyager" }
-voyager-koin = { module = "ca.gosyer:voyager-koin", version.ref = "voyager" }
+voyager-kodein = { module = "ca.gosyer:voyager-kodein", version.ref = "voyager" }
 
 
 storage = { module = "com.anggrayudi:storage", version = "1.5.1" }
@@ -155,6 +156,9 @@ ireader-ktorAndroid = { module = "io.ktor:ktor-client-android", version.ref = "k
 
 
 # Inject
+kodein-core = { module = "org.kodein.di:kodein-di", version.ref = "kodein" }
+kodein-compose = { module = "org.kodein.di:kodein-di-framework-compose", version.ref = "kodein" }
+
 koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koinAnnotation" }
 koin-kspCompiler = { module = "io.insert-koin:koin-ksp-compiler", version.ref = "koinAnnotation" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndroid" }

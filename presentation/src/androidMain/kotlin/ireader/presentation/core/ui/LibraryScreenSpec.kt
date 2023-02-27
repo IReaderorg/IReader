@@ -39,7 +39,7 @@ import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.theme.LocalHideNavigator
 import ireader.presentation.ui.home.library.LibraryController
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.getViewModel
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @ExperimentalMaterialApi

@@ -29,7 +29,7 @@ import ireader.presentation.R
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.settings.MainSettingScreenViewModel
 import ireader.presentation.ui.settings.MoreScreen
-import org.koin.androidx.compose.getViewModel
+
 
 object MoreScreenSpec : Tab {
 

@@ -39,14 +39,12 @@ kotlin {
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 implementation(compose.material3)
                 api(compose.materialIconsExtended)
-                api(libs.koin.android)
-                api(libs.koin.androidCompose)
 
 
                 implementation(libs.voyager.navigator)
                 implementation(libs.voyager.tab.navigator)
                 implementation(libs.voyager.transitions)
-                implementation(libs.voyager.koin)
+                implementation(libs.voyager.kodein)
                 implementation(composeLib.materialmotion.core)
             }
         }
@@ -87,6 +85,8 @@ kotlin {
                 api(libs.bundles.exoplayer)
                 api(androidx.emoji)
                 api(androidx.work.runtime)
+                api(libs.kodein.core)
+                api(libs.kodein.compose)
 
 
             }
@@ -124,7 +124,6 @@ android {
 }
 
 dependencies {
-    setupKSP(libs.koin.kspCompiler)
 //    debugImplementation(composeLib.compose.uiTooling)
 //    testImplementation(test.bundles.common)
 //    androidTestImplementation(test.bundles.common)

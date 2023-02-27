@@ -41,7 +41,7 @@ import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.home.sources.extension.ExtensionScreen
 import ireader.presentation.ui.home.sources.extension.ExtensionScreenTopAppBar
 import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
-import org.koin.androidx.compose.getViewModel
+
 
 object ExtensionScreenSpec : Tab {
 

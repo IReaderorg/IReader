@@ -1,5 +1,6 @@
 package org.ireader.app.di
 
+
 import android.content.Context
 import io.ktor.client.plugins.cookies.*
 import ireader.core.http.AcceptAllCookiesStorage
@@ -14,19 +15,19 @@ import kotlinx.coroutines.SupervisorJob
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import org.ireader.app.BuildConfig
-
-
-
-import org.koin.dsl.module
+import org.kodein.di.DI
+import org.kodein.di.bindProvider
+import org.kodein.di.bindSingleton
+import org.kodein.di.instance
 import java.io.File
 
-val localModule = module {
-    single<LibraryCovers>(qualifier=null) { LibraryCovers(
+val localModule = DI.Module("localModule") {
+    bindSingleton<LibraryCovers> { LibraryCovers(
         FileSystem.SYSTEM,
-        File(get<Context>().filesDir, "library_covers").toOkioPath()
+        File(instance<Context>().filesDir, "library_covers").toOkioPath()
     ) }
-    single<PreferenceStore>(qualifier=null) { AndroidPreferenceStore(get(),"ui") }
-    single<ProjectConfig>(qualifier=null) { ProjectConfig(
+    bindSingleton<PreferenceStore> { AndroidPreferenceStore(instance(),"ui") }
+    bindSingleton<ProjectConfig> { ProjectConfig(
         buildTime = BuildConfig.BUILD_TIME,
         commitCount = BuildConfig.COMMIT_COUNT,
         commitSHA = BuildConfig.COMMIT_SHA,
@@ -36,7 +37,7 @@ val localModule = module {
         versionName = BuildConfig.VERSION_NAME,
         applicationId = BuildConfig.APPLICATION_ID
     ) }
-    single<CookiesStorage>(qualifier=null) { AcceptAllCookiesStorage() }
-    single<WebViewManger>(qualifier=null) { WebViewManger(get()) }
-    factory<CoroutineScope>(qualifier=null) { CoroutineScope(Dispatchers.IO + SupervisorJob()) }
+    bindSingleton<CookiesStorage> { AcceptAllCookiesStorage() }
+    bindSingleton<WebViewManger> { WebViewManger(instance()) }
+    bindProvider<CoroutineScope> { CoroutineScope(Dispatchers.IO + SupervisorJob()) }
 }
