@@ -25,7 +25,7 @@ import ireader.presentation.ui.component.components.component.SwitchPreference
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.R
-import org.koin.android.annotation.KoinViewModel
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -136,7 +136,7 @@ fun SetupLayout(
     }
 }
 
-@KoinViewModel
+
 class MainSettingScreenViewModel(
     uiPreferences: UiPreferences
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {

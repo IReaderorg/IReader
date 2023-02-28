@@ -11,8 +11,8 @@ import ireader.core.source.model.Filter
 import ireader.core.source.model.Listing
 import ireader.domain.models.DisplayMode
 import ireader.domain.utils.extensions.replaceFirst
-import org.koin.core.annotation.Factory
-import org.koin.core.annotation.Single
+
+
 
 interface ExploreState {
     var isLoading: Boolean
@@ -35,7 +35,7 @@ interface ExploreState {
     var stateFilters: List<Filter<*>>?
     var stateListing: Listing?
 }
-@Factory
+
 open class ExploreStateImpl: ExploreState {
     override var isLoading by mutableStateOf<Boolean>(false)
     override var error by mutableStateOf<UiText?>(null)
@@ -57,7 +57,7 @@ open class ExploreStateImpl: ExploreState {
     override var stateListing by mutableStateOf<Listing?>(null)
 }
 
-@Single
+
 class BooksState {
     var books : List<Book> by mutableStateOf(emptyList())
     var book : Book? by mutableStateOf(null)

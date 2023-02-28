@@ -10,8 +10,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 @Composable
-fun TransparentStatusBar(enable: Boolean = false, content: @Composable () -> Unit) {
-    if (enable) {
+fun TransparentStatusBar( content: @Composable () -> Unit) {
+
         val state = LocalTransparentStatusBar.current
         DisposableEffect(Unit) {
             state.enabled = true
@@ -19,7 +19,6 @@ fun TransparentStatusBar(enable: Boolean = false, content: @Composable () -> Uni
                 state.enabled = false
             }
         }
-    }
     content()
 }
 
@@ -31,7 +30,7 @@ fun CustomSystemColor(
     content: @Composable () -> Unit
 ) {
     if (enable) {
-        val state = LocalCustomSystemCOlor.current
+        val state = LocalCustomSystemColor.current
         LaunchedEffect(key1 = statusBar, key2 = navigationBar) {
             state.statusBar = statusBar
             state.navigationBar = navigationBar
@@ -48,8 +47,8 @@ fun CustomSystemColor(
 }
 
 val LocalTransparentStatusBar = staticCompositionLocalOf { TransparentStatusBar(false) }
-val LocalCustomSystemCOlor = staticCompositionLocalOf { CustomStatusBar(false) }
-
+val LocalCustomSystemColor = staticCompositionLocalOf { CustomStatusBar(false) }
+val LocalHideNavigator = staticCompositionLocalOf { mutableStateOf(false) }
 class TransparentStatusBar(enabled: Boolean) {
     var enabled by mutableStateOf(enabled)
 }

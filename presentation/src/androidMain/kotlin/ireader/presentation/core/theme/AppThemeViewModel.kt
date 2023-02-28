@@ -12,12 +12,14 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.intl.Locale
 import androidx.lifecycle.viewModelScope
+import ireader.core.prefs.Preference
 import ireader.domain.data.repository.ThemeRepository
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.theme.ExtraColors
 import ireader.domain.models.theme.Theme
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.ui.core.theme.*
+import ireader.presentation.ui.core.ui.PreferenceMutableState
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -25,14 +27,17 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.koin.android.annotation.KoinViewModel
-import org.koin.core.annotation.Single
 
-@KoinViewModel
+
+
+
 class AppThemeViewModel(
     private val uiPreferences: UiPreferences,
     private val themeRepository: ThemeRepository,
-) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
+    val scope: CoroutineScope
+)  {
+    fun <T> Preference<T>.asState() = PreferenceMutableState(this, scope)
+
     private val themeMode by uiPreferences.themeMode().asState()
     private val colorTheme by uiPreferences.colorTheme().asState()
 
@@ -43,7 +48,7 @@ class AppThemeViewModel(
         themeRepository.subscribe().onEach {
             themes.removeIf { baseTheme -> baseTheme.id > 0L }
             themes.addAll(it)
-        }.launchIn(viewModelScope)
+        }.launchIn(scope)
     }
 
     @Composable
@@ -122,11 +127,7 @@ class AppThemeViewModel(
             bars = appbar,
             onBars = if (appbar.luminance() > 0.5) Color.Black else Color.White
         )
-    }
-
-    override fun onDestroy() {
-        baseThemeScope.cancel()
-    }
+        }
 
 
     var locales by mutableStateOf(listOf<Locale>())
@@ -135,7 +136,7 @@ class AppThemeViewModel(
 
 }
 
-@Single
+
 class LocaleHelper(
     val context: Context,
     val uiPreferences: UiPreferences

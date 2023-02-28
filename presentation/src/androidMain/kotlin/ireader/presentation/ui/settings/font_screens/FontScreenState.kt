@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.i18n.UiText
 import ireader.presentation.R
-import org.koin.core.annotation.Factory
+
 
 
 interface FontScreenState {
@@ -19,7 +19,7 @@ interface FontScreenState {
     var inSearchMode: Boolean
     var searchQuery: String
 }
-@Factory
+
 open class FontScreenStateImpl : FontScreenState {
     override var isLoading by mutableStateOf<Boolean>(false)
     override var fonts by mutableStateOf<List<String>>(emptyList())

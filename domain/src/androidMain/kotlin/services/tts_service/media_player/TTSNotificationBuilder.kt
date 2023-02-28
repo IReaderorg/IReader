@@ -9,6 +9,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Bundle
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -21,10 +22,14 @@ import ireader.domain.R
 import ireader.domain.notification.Notifications
 import ireader.domain.notification.Notifications.CHANNEL_TTS
 import ireader.domain.notification.flags
+import ireader.domain.notification.legacyFlags
 import ireader.domain.notification.setLargeIcon
 import ireader.domain.services.tts_service.Player
 import ireader.domain.services.tts_service.media_player.TTSService.Companion.ACTION_CANCEL
+import ireader.domain.utils.extensions.findComponentActivity
 import ireader.domain.utils.extensions.launchMainActivityIntent
+import ireader.i18n.Args
+import ireader.i18n.SHORTCUTS
 
 /**
  * Helper class to encapsulate code for building notifications.
@@ -166,15 +171,6 @@ class TTSNotificationBuilder constructor(
             .build()
     }
 
-    fun buildReaderScreenDeepLink(
-        bookId: Long,
-        sourceId: Long,
-        chapterId: Long,
-        readingParagraph: Long,
-    ): String {
-        return "https://www.ireader.org/tts_screen_route/$bookId/$chapterId/$sourceId/$readingParagraph"
-    }
-
     private fun openReaderScreenIntent(
         bookId: Long,
         sourceId: Long,
@@ -184,16 +180,21 @@ class TTSNotificationBuilder constructor(
         context,
         5,
         launchMainActivityIntent(context)
+            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
             .apply {
-                action = Intent.ACTION_VIEW
-                data = buildReaderScreenDeepLink(
-                    bookId = bookId,
-                    chapterId = chapterId,
-                    sourceId = sourceId,
-                    readingParagraph = currentReadingParagraph.toLong(),
-                ).toUri()
+                action = SHORTCUTS.SHORTCUT_TTS
+                putExtra(Args.ARG_BOOK_ID,bookId)
+                putExtra(Args.ARG_CHAPTER_ID,chapterId)
+                putExtra(Args.ARG_SOURCE_ID,sourceId)
+                putExtra(Args.ARG_READING_PARAGRAPH,currentReadingParagraph.toLong())
+//                data = buildReaderScreenDeepLink(
+//                    bookId = bookId,
+//                    chapterId = chapterId,
+//                    sourceId = sourceId,
+//                    readingParagraph = currentReadingParagraph.toLong(),
+//                ).toUri()
             },
-        flags
+        legacyFlags
     )
 
     suspend fun buildTTSNotification(

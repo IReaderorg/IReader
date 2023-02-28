@@ -73,7 +73,7 @@ fun CategoryScreen(
         state = state,
         data = data,
         onDelete = {
-            vm.viewModelScope.launch {
+            vm.scope.launch {
                 vm.categoriesUseCase.deleteCategory(it.category)
             }
         }
@@ -82,7 +82,7 @@ fun CategoryScreen(
     CategoryFloatingActionButton(vm)
 
     ShowEditScreen(vm, onConfirm = {
-        vm.viewModelScope.launch {
+        vm.scope.launch {
             vm.createCategoryWithName.await(it)
         }
     })

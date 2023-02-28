@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -26,10 +27,8 @@ import kotlinx.serialization.ExperimentalSerializationApi
 @OptIn(ExperimentalSerializationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AdvanceSettings(
-    modifier: Modifier = Modifier,
     vm: AdvanceSettingViewModel,
-    controller: Controller
-
+    padding: PaddingValues
 ) {
     val context = LocalContext.current
     val onEpub =
@@ -63,7 +62,7 @@ fun AdvanceSettings(
             Components.Row(
                 title = context.getString(R.string.clear_not_in_library_books),
                 onClick = {
-                    vm.viewModelScope.launchIO {
+                    vm.scope.launchIO {
                         vm.deleteUseCase.deleteNotInLibraryBooks()
                         vm.showSnackBar(
                             UiText.StringResource(R.string.success)
@@ -131,5 +130,5 @@ fun AdvanceSettings(
     }
 
 
-    SetupSettingComponents(scaffoldPadding = controller.scaffoldPadding, items = items)
+    SetupSettingComponents(scaffoldPadding = padding, items = items)
 }

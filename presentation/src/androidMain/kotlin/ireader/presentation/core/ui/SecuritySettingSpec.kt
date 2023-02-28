@@ -11,6 +11,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.log.Log
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
@@ -18,39 +20,29 @@ import ireader.domain.utils.extensions.AuthenticatorUtil
 import ireader.domain.utils.extensions.AuthenticatorUtil.isAuthenticationSupported
 import ireader.domain.utils.extensions.AuthenticatorUtil.startAuthentication
 import ireader.i18n.R
-import ireader.presentation.ui.component.Controller
+import ireader.presentation.core.VoyagerScreen
+import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.component.components.component.ChoicePreference
-import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.datetime.Clock
-import org.koin.android.annotation.KoinViewModel
-import org.koin.android.ext.android.get
-import org.koin.androidx.compose.getViewModel
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.android.closestDI
+import org.kodein.di.instance
 
-object SecuritySettingSpec : ScreenSpec {
 
-    override val navHostRoute: String = "security_settings_screen_route"
+class SecuritySettingSpec : VoyagerScreen() {
+
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun TopBar(
-        controller: Controller
-    ) {
-        TitleToolbar(
-            title = stringResource(R.string.security),
-            navController = controller.navController,
-            scrollBehavior = controller.scrollBehavior
-        )
-    }
-
-    @Composable
-    override fun Content(
-        controller: Controller
-    ) {
-        val vm: SecuritySettingViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
+    override fun Content() {
+        val vm: SecuritySettingViewModel = getIViewModel()
         val context = LocalContext.current
+        val navigator = LocalNavigator.currentOrThrow
+
         val onIdleAfter =
             rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
                 when (resultIntent.resultCode) {
@@ -154,10 +146,23 @@ object SecuritySettingSpec : ScreenSpec {
 
             )
         }
-        SetupSettingComponents(
-            scaffoldPadding = controller.scaffoldPadding,
-            items = items,
-        )
+        IScaffold(
+            topBar = { scrollBehavior ->
+                TitleToolbar(
+                    title = stringResource(R.string.security),
+                    scrollBehavior = scrollBehavior,
+                    popBackStack = {
+                        popBackStack(navigator)
+                    }
+                )
+            }
+        ) { padding ->
+            SetupSettingComponents(
+                scaffoldPadding = padding,
+                items = items,
+            )
+        }
+
     }
 }
 
@@ -165,9 +170,11 @@ object SecuritySettingSpec : ScreenSpec {
  * Blank activity with a BiometricPrompt.
  */
 
-class UnlockActivity : FragmentActivity() {
+class UnlockActivity : FragmentActivity(),DIAware {
 
-    var appPreferences: UiPreferences = get<UiPreferences>()
+    override val di: DI by closestDI()
+
+    val appPreferences: UiPreferences by instance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -215,7 +222,7 @@ class UnlockActivity : FragmentActivity() {
     }
 }
 
-@KoinViewModel
+
 class SecuritySettingViewModel(
     private val appPreferences: UiPreferences,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {

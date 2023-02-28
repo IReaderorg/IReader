@@ -12,9 +12,9 @@ import ireader.domain.usecases.services.ServiceUseCases
 import ireader.domain.usecases.updates.UpdateUseCases
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.koin.android.annotation.KoinViewModel
 
-@KoinViewModel
+
+
 class UpdatesViewModel(
     private val updateStateImpl: UpdateStateImpl,
     val updateUseCases: UpdateUseCases,
@@ -26,7 +26,7 @@ class UpdatesViewModel(
     val after = uiPreferences.showUpdatesAfter().asState()
     val relativeFormat by uiPreferences.relativeTime().asState()
     init {
-        viewModelScope.launch {
+        scope.launch {
             updateUseCases.subscribeUpdates(after.value).collect {
                 updates = it
             }
@@ -50,7 +50,7 @@ class UpdatesViewModel(
             this.updates.values.flatten().map { it.chapterId }.filter { it in selection }
         val chapterIds = this.updates.values.flatten().filter { it.chapterId in updateIds }
             .map { it.chapterId }
-        viewModelScope.launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.IO) {
 
             val chapters = chapterIds.mapNotNull {
                 getChapterUseCase.findChapterById(it)
@@ -60,7 +60,7 @@ class UpdatesViewModel(
     }
 
     fun downloadChapters() {
-        viewModelScope.launch {
+        scope.launch {
             val chapterIds =
                 updates.values.flatMap { it }.filter { it.chapterId in selection }.map { it.chapterId }
             serviceUseCases.startDownloadServicesUseCase(

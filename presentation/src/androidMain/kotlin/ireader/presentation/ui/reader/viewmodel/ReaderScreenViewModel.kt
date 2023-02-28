@@ -5,12 +5,12 @@ import android.content.pm.ActivityInfo
 import android.view.WindowManager
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.text.ExperimentalTextApi
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import ireader.domain.models.entities.Chapter
@@ -49,10 +49,10 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.koin.android.annotation.KoinViewModel
+
 
 @OptIn(ExperimentalTextApi::class)
-@KoinViewModel
+
 class ReaderScreenViewModel(
     val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases,
     val getChapterUseCase: LocalGetChapterUseCase,
@@ -72,15 +72,15 @@ class ReaderScreenViewModel(
     val readerThemeRepository: ReaderThemeRepository,
     val bookMarkChapterUseCase: BookMarkChapterUseCase,
     val translationEnginesManager: TranslationEnginesManager,
-    val savedStateHandle: SavedStateHandle
+    val params: Param
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(),
     ReaderScreenPreferencesState by prefState,
     ReaderScreenState by state,
     ReaderPrefFunctions by prefFunc {
     data class Param(val chapterId: Long?, val bookId: Long?)
 
-    val globalChapterId : StateFlow<Long?> = savedStateHandle.getStateFlow(NavigationArgs.chapterId.name,null)
-    val globalBookId : StateFlow<Long?> = savedStateHandle.getStateFlow(NavigationArgs.bookId.name,null)
+    val globalChapterId : State<Long?> = mutableStateOf(params.chapterId)
+    val globalBookId : State<Long?> = mutableStateOf(params.bookId)
 
     val readerColors: SnapshotStateList<ReaderColors> = readerThemes
 
@@ -152,12 +152,12 @@ class ReaderScreenViewModel(
                 state.catalog = source
                 subscribeReaderThemes()
                 subscribeChapters(bookId)
-                viewModelScope.launch {
+                scope.launch {
                     state.book = getBookUseCases.findBookById(bookId)
                     setupChapters(bookId, chapterId)
                 }
         } else {
-            viewModelScope.launch {
+            scope.launch {
                 showSnackBar(UiText.StringResource(R.string.something_is_wrong_with_this_book))
             }
         }
@@ -167,7 +167,7 @@ class ReaderScreenViewModel(
         readerThemeRepository.subscribe().onEach { list ->
             readerColors.removeIf { !it.isDefault }
             readerColors.addAll(0, list.map { it.ReaderColors() }.reversed())
-        }.launchIn(viewModelScope)
+        }.launchIn(scope)
     }
 
     private suspend fun setupChapters(bookId: Long, chapterId: Long) {
@@ -238,7 +238,7 @@ class ReaderScreenViewModel(
 
     private fun subscribeChapters(bookId: Long) {
         getChapterJob?.cancel()
-        getChapterJob = viewModelScope.launch {
+        getChapterJob = scope.launch {
             getChapterUseCase.subscribeChaptersByBookId(
                 bookId = bookId,
                 sort = if (prefState.isAsc) "default" else "defaultDesc",
@@ -282,13 +282,13 @@ class ReaderScreenViewModel(
         onHideNav: (Boolean) -> Unit,
         onHideStatus: (Boolean) -> Unit
     ) {
-        viewModelScope.launch {
+        scope.launch {
             readImmersiveMode(context, onHideNav = onHideNav, onHideStatus = onHideStatus)
         }
-        viewModelScope.launch {
+        scope.launch {
             readOrientation(context)
         }
-        viewModelScope.launch {
+        scope.launch {
             kotlin.runCatching {
                 stateChapter?.lastPageRead?.let { chapter ->
                     scrollState.scrollTo(chapter.toInt() ?: 1)
@@ -335,7 +335,7 @@ class ReaderScreenViewModel(
     }
 
     fun bookmarkChapter() {
-        viewModelScope.launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.IO) {
             bookMarkChapterUseCase.bookMarkChapter(stateChapter)?.let {
                 stateChapter = it
             }

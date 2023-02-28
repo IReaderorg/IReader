@@ -8,9 +8,9 @@ import ireader.domain.data.repository.CategoryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class CategoriesUseCases  internal constructor(
     private val repo: CategoryRepository,
     private val bookCategoryRepository: BookCategoryRepository,

@@ -9,9 +9,9 @@ import ireader.domain.models.entities.LibraryBook
 import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
 import ireader.core.source.model.MangaInfo
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class GetLibraryCategory  internal constructor(
     private val libraryRepository: LibraryRepository
 ) {

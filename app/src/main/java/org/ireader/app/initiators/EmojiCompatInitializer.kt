@@ -6,9 +6,9 @@ import androidx.emoji2.text.DefaultEmojiCompatConfig
 import androidx.emoji2.text.EmojiCompat
 import androidx.emoji2.text.FontRequestEmojiCompatConfig
 import org.ireader.app.R
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class EmojiCompatInitializer  constructor(context: Application) {
 
     init {

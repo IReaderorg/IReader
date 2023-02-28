@@ -12,7 +12,7 @@ import ireader.domain.models.entities.LibraryBook
 import ireader.domain.models.library.LibrarySort
 import ireader.i18n.UiText
 import ireader.presentation.R
-import org.koin.core.annotation.Single
+
 
 interface LibraryState {
     var isLoading: Boolean
@@ -36,7 +36,7 @@ interface LibraryState {
     val selectedCategory: CategoryWithCount?
 }
 
-    @Single
+
 open class LibraryStateImpl : LibraryState {
     override var isLoading by mutableStateOf<Boolean>(false)
     override var books by mutableStateOf<List<LibraryBook>>(emptyList())

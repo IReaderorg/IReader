@@ -6,9 +6,9 @@ import kotlinx.coroutines.flow.flow
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class SubscribeInLibraryBooks(private val bookRepository: BookRepository) {
     operator fun invoke(
         sortType: LibrarySort,

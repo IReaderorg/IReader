@@ -6,9 +6,9 @@ import ireader.domain.services.tts_service.media_player.TTSService
 import ireader.domain.services.tts_service.media_player.TTSService.Companion.COMMAND
 import ireader.domain.services.tts_service.media_player.TTSService.Companion.TTS_BOOK_ID
 import ireader.domain.services.tts_service.media_player.TTSService.Companion.TTS_Chapter_ID
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class StartTTSServicesUseCase( private val context: Context) {
     operator fun invoke(
         command: Int,

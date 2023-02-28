@@ -52,8 +52,7 @@ kotlin {
                 api(libs.ktor.contentNegotiation.kotlinx)
                 api(libs.okio)
                 compileOnly(libs.jsoup)
-                compileOnly(libs.koin.annotations)
-                compileOnly(libs.koin.core)
+                compileOnly(libs.kodein.core)
             }
         }
          val androidMain by getting {
@@ -66,7 +65,6 @@ kotlin {
                 api(libs.ktor.okhttp)
                 implementation(libs.bundles.tinylog)
                 compileOnly(libs.jsoup)
-                compileOnly(libs.koin.annotations)
             }
         }
         val desktopMain by getting {
@@ -76,7 +74,6 @@ kotlin {
                 api(libs.ktor.okhttp)
                 implementation(libs.bundles.tinylog)
                 compileOnly(libs.jsoup)
-                compileOnly(libs.koin.annotations)
             }
         }
     }

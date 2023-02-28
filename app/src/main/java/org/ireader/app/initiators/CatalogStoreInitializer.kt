@@ -1,12 +1,14 @@
 package org.ireader.app.initiators
 
-import ireader.domain.utils.extensions.launchIO
+import ireader.domain.catalogs.CatalogStore
 import ireader.domain.catalogs.interactor.SyncRemoteCatalogs
-import org.koin.core.annotation.Factory
+import ireader.domain.utils.extensions.launchIO
 
-@Factory
+
+
 class CatalogStoreInitializer(
     syncRemoteCatalogs: SyncRemoteCatalogs,
+    catalogStore: CatalogStore
 ) {
 
     init {

@@ -12,12 +12,12 @@ import nl.siegmann.epublib.epub.EpubReader
 import org.jsoup.Jsoup
 import org.jsoup.nodes.TextNode
 import org.jsoup.parser.Parser
-import org.koin.core.annotation.Factory
+
 import org.xml.sax.InputSource
 import java.io.File
 import java.io.InputStream
 import javax.xml.parsers.DocumentBuilderFactory
-@Factory
+
 class ImportEpub(
     private val bookRepository: BookRepository,
     private val chapterRepository: ChapterRepository,

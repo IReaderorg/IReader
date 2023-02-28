@@ -26,12 +26,12 @@ import ireader.presentation.ui.component.Controller
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import org.koin.android.annotation.KoinViewModel
-import org.koin.core.annotation.Factory
+
+
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
-@KoinViewModel
+
 class WebViewPageModel(
     private val insertUseCases: LocalInsertUseCases,
     private val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases,
@@ -78,19 +78,19 @@ class WebViewPageModel(
         enableChaptersFetch = param.enableChaptersFetch == true
         enableBookFetch =param.enableChaptersFetch == true
         bookId?.let {
-            viewModelScope.launch {
+            scope.launch {
                 stateBook = getBookUseCases.findBookById(bookId)
             }
         }
         sourceId?.let {
-            viewModelScope.launch {
+            scope.launch {
                 extensions.get(sourceId)?.let {
                     catalog = it
                 }
             }
         }
         chapterId?.let {
-            viewModelScope.launch {
+            scope.launch {
                 stateChapter = getChapterUseCase.findChapterById(chapterId, null)
             }
         }
@@ -116,7 +116,7 @@ class WebViewPageModel(
             webView: WebView,
     ) {
         val catalog = catalog
-        viewModelScope.launch {
+        scope.launch {
             val pageSource = webView.getHtml()
             val url = webView.url ?: ""
             remoteUseCases.getRemoteReadingContent(
@@ -145,7 +145,7 @@ class WebViewPageModel(
         book: Book,
         webView: WebView,
     ) {
-        viewModelScope.launch {
+        scope.launch {
             val pageSource = webView.getHtml()
             val url = webView.url ?: ""
             val localChapters = getChapterUseCase.findChaptersByBookId(book.id)
@@ -176,7 +176,7 @@ class WebViewPageModel(
         webView: WebView,
         book: Book? = null,
     ) {
-        viewModelScope.launch {
+        scope.launch {
             val pageSource = webView.getHtml()
             val url = webView.originalUrl ?: ""
             remoteUseCases.getBookDetail(
@@ -200,25 +200,25 @@ class WebViewPageModel(
     }
 
     fun insertBookDetailToLocal(book: Book) {
-        viewModelScope.launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.IO) {
             insertUseCases.insertBook(book)
         }
     }
 
     fun insertBook(book: Book) {
-        viewModelScope.launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.IO) {
             insertUseCases.insertBook(book)
         }
     }
 
     fun insertChapter(chapter: Chapter) {
-        viewModelScope.launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.IO) {
             insertUseCases.insertChapter(chapter)
         }
     }
 
     fun insertChapters(chapter: List<Chapter>) {
-        viewModelScope.launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.IO) {
             insertUseCases.insertChapters(chapter)
         }
     }
@@ -253,7 +253,7 @@ interface WebViewPageState {
     var enableChaptersFetch: Boolean
     var enableBookFetch: Boolean
 }
-@Factory
+
 open class WebViewPageStateImpl() : WebViewPageState {
     override var url: String by mutableStateOf("")
     override var webUrl: String by mutableStateOf("")

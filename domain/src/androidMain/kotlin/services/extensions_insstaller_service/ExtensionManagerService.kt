@@ -18,16 +18,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.instance
 
 class ExtensionManagerService constructor(
     private val context: Context,
     params: WorkerParameters,
-    private val repository: CatalogRemoteRepository,
-    val getDefaultRepo: GetDefaultRepo,
-    val getInstalledCatalog: GetInstalledCatalog,
-    private val installCatalog: InstallCatalog,
-    val defaultNotificationHelper: DefaultNotificationHelper
-) : CoroutineWorker(context, params) {
+) : CoroutineWorker(context, params),DIAware {
+    override val di: DI = (context.applicationContext as DIAware).di
+    private val repository: CatalogRemoteRepository by instance()
+    val getInstalledCatalog: GetInstalledCatalog by instance()
+    private val installCatalog: InstallCatalog by instance()
+    val defaultNotificationHelper: DefaultNotificationHelper by instance()
 
     private val downloadJob = Job()
 

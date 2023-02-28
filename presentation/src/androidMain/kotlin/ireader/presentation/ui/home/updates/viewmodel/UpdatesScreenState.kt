@@ -4,9 +4,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import ireader.domain.models.entities.UpdatesWithRelations
 import kotlinx.datetime.LocalDateTime
-import org.koin.core.annotation.Single
 
-@Single
+
+
 open class UpdateStateImpl: UpdateState {
     override var isLoading: Boolean by mutableStateOf(false)
     override val isEmpty: Boolean by derivedStateOf { updates.isEmpty() }

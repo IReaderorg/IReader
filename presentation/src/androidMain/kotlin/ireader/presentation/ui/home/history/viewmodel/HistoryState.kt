@@ -3,7 +3,7 @@ package ireader.presentation.ui.home.history.viewmodel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import org.koin.core.annotation.Single
+
 
 interface HistoryState {
     val isLoading: Boolean
@@ -14,7 +14,6 @@ interface HistoryState {
 
 }
 
-    @Single()
 class HistoryStateImpl : HistoryState {
     override var isLoading: Boolean by mutableStateOf(false)
     override val isEmpty: Boolean by  mutableStateOf(false)

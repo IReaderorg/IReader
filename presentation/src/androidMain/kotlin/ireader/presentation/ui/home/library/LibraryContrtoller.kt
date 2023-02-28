@@ -3,7 +3,9 @@
 package ireader.presentation.ui.home.library
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewModelScope
@@ -15,22 +17,23 @@ import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
 fun LibraryController(
     modifier: Modifier,
     vm: LibraryViewModel,
-    controller: Controller,
     goToReader: (BookItem) -> Unit,
     goToDetail: (BookItem) -> Unit,
-
+    scaffoldPadding: PaddingValues,
+    sheetState: ModalBottomSheetState,
+    requestHideNavigator : (Boolean) -> Unit
     ) {
 
     LibraryScreen(
         modifier = modifier,
         onMarkAsRead = {
             with(vm) {
-                viewModelScope.launch(Dispatchers.IO) {
+                scope.launch(Dispatchers.IO) {
                     markBookAsReadOrNotUseCase.markAsRead(selectedBooks)
                     selectedBooks.clear()
                 }
@@ -41,7 +44,7 @@ fun LibraryController(
         },
         onMarkAsNotRead = {
             with(vm) {
-                viewModelScope.launch(Dispatchers.IO) {
+                scope.launch(Dispatchers.IO) {
                     markBookAsReadOrNotUseCase.markAsNotRead(selectedBooks)
                     selectedBooks.clear()
                 }
@@ -49,7 +52,7 @@ fun LibraryController(
         },
         onDelete = {
             with(vm) {
-                viewModelScope.launch(Dispatchers.IO) {
+                scope.launch(Dispatchers.IO) {
                     kotlin.runCatching {
                         deleteUseCase.unFavoriteBook(selectedBooks)
                     }
@@ -79,12 +82,12 @@ fun LibraryController(
         refreshUpdate = {
             vm.refreshUpdate()
         },
-        bottomSheetState = controller.sheetState,
+        bottomSheetState = sheetState,
         onClickChangeCategory = {
             vm.showDialog = true
         },
-        scaffoldPadding = controller.scaffoldPadding,
-        requestHideBottomNav = controller.requestHideNavigator,
+        scaffoldPadding = scaffoldPadding,
+        requestHideBottomNav = requestHideNavigator,
         getColumnsForOrientation = { isLandscape ->
             vm.getColumnsForOrientation(isLandscape, this)
         },
@@ -101,7 +104,7 @@ fun LibraryController(
             vm.addQueues.addAll(category.toBookCategory(vm.selectedBooks))
         },
         editCategoryOnConfirm = {
-            vm.viewModelScope.launch(Dispatchers.IO) {
+            vm.scope.launch(Dispatchers.IO) {
                 vm.getCategory.insertBookCategory(vm.addQueues)
                 vm.getCategory.deleteBookCategory(vm.deleteQueues)
                 vm.deleteQueues.clear()

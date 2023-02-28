@@ -49,7 +49,6 @@ fun WebPageScreen(
 
     webViewState.content.getCurrentUrl()
 
-    SnackBarListener(vm = viewModel, host = snackBarHostState)
     val refresh = viewModel.isLoading
     val refreshState = rememberPullRefreshState(viewModel.isLoading, onRefresh = {
         webNavigator.reload()

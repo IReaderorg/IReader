@@ -23,9 +23,9 @@ import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.koin.android.annotation.KoinViewModel
 
-@KoinViewModel
+
+
 class ExploreViewModel(
     private val state: ExploreStateImpl,
     private val remoteUseCases: RemoteUseCases,
@@ -65,17 +65,17 @@ class ExploreViewModel(
                 if (listings.isNotEmpty()) {
                     state.stateListing = source.getListings().first()
                     loadItems()
-                    viewModelScope.launch {
+                    scope.launch {
                         readLayoutType()
                     }
                 } else {
-                    viewModelScope.launch {
+                    scope.launch {
                         showSnackBar(UiText.StringResource(R.string.the_source_is_not_found))
                     }
                 }
             }
         } else {
-            viewModelScope.launch {
+            scope.launch {
                 showSnackBar(UiText.StringResource(R.string.the_source_is_not_found))
             }
         }
@@ -87,7 +87,7 @@ class ExploreViewModel(
             page = 1
             booksState.books = emptyList()
         }
-        getBooksJob = viewModelScope.launch {
+        getBooksJob = scope.launch {
             kotlin.runCatching {
                 DefaultPaginator<Int, MangasPageInfo>(
                     initialKey = state.page,

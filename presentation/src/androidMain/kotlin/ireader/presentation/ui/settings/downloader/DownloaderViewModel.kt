@@ -11,9 +11,9 @@ import ireader.domain.services.downloaderService.DownloadServiceStateImpl
 import ireader.domain.services.downloaderService.DownloaderService
 import ireader.domain.usecases.download.DownloadUseCases
 import ireader.domain.usecases.services.ServiceUseCases
-import org.koin.android.annotation.KoinViewModel
 
-@KoinViewModel
+
+
 class DownloaderViewModel(
     private val downloadUseCases: DownloadUseCases,
     private val serviceUseCases: ServiceUseCases,
@@ -25,18 +25,10 @@ class DownloaderViewModel(
         subscribeDownloads()
     }
 
-    fun insertSavedDownload(download: SavedDownload) {
-        viewModelScope.launch(Dispatchers.IO) {
-            downloadUseCases.insertDownload(
-                download = download.toDownload()
-            )
-        }
-    }
-
     private var getBooksJob: Job? = null
     private fun subscribeDownloads() {
         getBooksJob?.cancel()
-        getBooksJob = viewModelScope.launch {
+        getBooksJob = scope.launch {
             downloadUseCases.subscribeDownloadsUseCase().distinctUntilChanged().collect { list ->
                 downloads = list.filter { it.chapterId != 0L }
             }
@@ -61,12 +53,12 @@ class DownloaderViewModel(
     }
 
     fun deleteAllDownloads() {
-        viewModelScope.launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.IO) {
             downloadUseCases.deleteAllSavedDownload()
         }
     }
     fun deleteSelectedDownloads(list: List<SavedDownload>) {
-        viewModelScope.launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.IO) {
             downloadUseCases.deleteSavedDownloads(list.map { it.toDownload() })
         }
     }

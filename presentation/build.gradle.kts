@@ -37,11 +37,15 @@ kotlin {
                 api(compose.preview)
                 api(compose.ui)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-                api(compose.material3)
+                implementation(compose.material3)
                 api(compose.materialIconsExtended)
-                compileOnly(libs.koin.annotations)
-                api(libs.koin.android)
-                api(libs.koin.androidCompose)
+
+
+                implementation(libs.voyager.navigator)
+                implementation(libs.voyager.tab.navigator)
+                implementation(libs.voyager.transitions)
+                implementation(libs.voyager.kodein)
+                implementation(composeLib.materialmotion.core)
             }
         }
         val jvmMain by creating {
@@ -63,7 +67,6 @@ kotlin {
                 api(composeLib.compose.googlFonts)
 
                 api(composeLib.compose.paging)
-                api(composeLib.material3.core)
                 api(composeLib.material3.windowsizeclass)
                 api(composeLib.compose.navigation)
                 api(composeLib.compose.coil)
@@ -82,6 +85,8 @@ kotlin {
                 api(libs.bundles.exoplayer)
                 api(androidx.emoji)
                 api(androidx.work.runtime)
+                api(libs.kodein.core)
+                api(libs.kodein.compose)
 
 
             }
@@ -119,7 +124,6 @@ android {
 }
 
 dependencies {
-    setupKSP(libs.koin.kspCompiler)
 //    debugImplementation(composeLib.compose.uiTooling)
 //    testImplementation(test.bundles.common)
 //    androidTestImplementation(test.bundles.common)

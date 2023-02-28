@@ -8,13 +8,13 @@ import ireader.core.log.Log
 import ireader.core.source.model.CommandList
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.utils.exceptionHandler
-import ireader.domain.utils.extensions.async.withIOContext
+import ireader.domain.utils.extensions.withIOContext
 import ireader.i18n.SourceNotFoundException
 import ireader.i18n.UiText
 import kotlinx.coroutines.CancellationException
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class GetRemoteChapters() {
     suspend operator fun invoke(
         book: Book,

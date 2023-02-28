@@ -1,5 +1,6 @@
 package org.ireader.app.di
 
+
 import android.content.Context
 import io.ktor.client.plugins.cookies.*
 import ireader.core.http.AcceptAllCookiesStorage
@@ -14,71 +15,29 @@ import kotlinx.coroutines.SupervisorJob
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import org.ireader.app.BuildConfig
-import org.koin.core.annotation.ComponentScan
-import org.koin.core.annotation.Factory
-import org.koin.core.annotation.Single
+import org.kodein.di.DI
+import org.kodein.di.bindProvider
+import org.kodein.di.bindSingleton
+import org.kodein.di.instance
 import java.io.File
 
-@org.koin.core.annotation.Module
-@ComponentScan("org.ireader.app.di.LocalModule")
-class LocalModule {
-
-        @Single
-    fun provideLibraryCovers(
-        context: Context,
-    ): LibraryCovers {
-        return LibraryCovers(
-            FileSystem.SYSTEM,
-            File(context.filesDir, "library_covers").toOkioPath()
-        )
-    }
-
-
-        @Single
-    fun providePreferencesStore(context: Context): PreferenceStore {
-        return AndroidPreferenceStore(context = context, "ui")
-    }
-
-        @Single
-    fun provideProjectConfig(): ProjectConfig {
-        return ProjectConfig(
-            buildTime = BuildConfig.BUILD_TIME,
-            commitCount = BuildConfig.COMMIT_COUNT,
-            commitSHA = BuildConfig.COMMIT_SHA,
-            includeUpdater = BuildConfig.INCLUDE_UPDATER,
-            preview = BuildConfig.PREVIEW,
-            versionCode = BuildConfig.VERSION_CODE,
-            versionName = BuildConfig.VERSION_NAME,
-            applicationId = BuildConfig.APPLICATION_ID
-        )
-    }
-
-
-        @Single
-    fun provideCookieJar(): CookiesStorage {
-        return AcceptAllCookiesStorage()
-    }
-
-        @Single
-    fun provideWebViewManager(context: Context): WebViewManger {
-        return WebViewManger(context)
-    }
-
-//    @OptIn(ExperimentalTextApi::class)
-//    @Singleton
-//    fun provideGoogleFontProvider(): GoogleFont.Provider {
-//        return GoogleFont.Provider(
-//            providerAuthority = "com.google.android.gms.fonts",
-//            providerPackage = "com.google.android.gms",
-//            certificates = R.array.com_google_android_gms_fonts_certs
-//        )
-//    }
-
-        @Factory
-    fun provideActivityCoroutineScope(): CoroutineScope {
-        return CoroutineScope(Dispatchers.IO + SupervisorJob())
-    }
-
-
-
+val localModule = DI.Module("localModule") {
+    bindSingleton<LibraryCovers> { LibraryCovers(
+        FileSystem.SYSTEM,
+        File(instance<Context>().filesDir, "library_covers").toOkioPath()
+    ) }
+    bindSingleton<PreferenceStore> { AndroidPreferenceStore(instance(),"ui") }
+    bindSingleton<ProjectConfig> { ProjectConfig(
+        buildTime = BuildConfig.BUILD_TIME,
+        commitCount = BuildConfig.COMMIT_COUNT,
+        commitSHA = BuildConfig.COMMIT_SHA,
+        includeUpdater = BuildConfig.INCLUDE_UPDATER,
+        preview = BuildConfig.PREVIEW,
+        versionCode = BuildConfig.VERSION_CODE,
+        versionName = BuildConfig.VERSION_NAME,
+        applicationId = BuildConfig.APPLICATION_ID
+    ) }
+    bindSingleton<CookiesStorage> { AcceptAllCookiesStorage() }
+    bindSingleton<WebViewManger> { WebViewManger(instance()) }
+    bindProvider<CoroutineScope> { CoroutineScope(Dispatchers.IO + SupervisorJob()) }
 }

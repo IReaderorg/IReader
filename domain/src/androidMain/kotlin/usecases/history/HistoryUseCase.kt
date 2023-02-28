@@ -8,9 +8,9 @@ import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.models.entities.History
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class HistoryUseCase(private val historyRepository: HistoryRepository) {
 
     suspend fun findHistory(chapterId: Long): History? {

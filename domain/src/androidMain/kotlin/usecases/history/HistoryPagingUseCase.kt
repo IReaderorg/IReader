@@ -6,9 +6,9 @@ import androidx.paging.PagingData
 import ireader.domain.data.repository.PaginationRepository
 import ireader.domain.models.entities.HistoryWithRelations
 import kotlinx.coroutines.flow.Flow
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class HistoryPagingUseCase(
     val paginationRepository: PaginationRepository
 ) {

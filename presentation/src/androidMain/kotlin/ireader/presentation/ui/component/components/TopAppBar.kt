@@ -74,17 +74,16 @@ fun Toolbar(
 @Composable
 fun TitleToolbar(
     title: String,
-    navController: NavController?,
-    scrollBehavior: TopAppBarScrollBehavior? = null
+    scrollBehavior: TopAppBarScrollBehavior? = null,
+    popBackStack: (() -> Unit)?
 ) {
     Toolbar(
         title = {
             BigSizeTextComposable(text = title)
         },
         navigationIcon = {
-            if (navController != null) {
-                TopAppBarBackButton(onClick = { navController.popBackStack() })
-            } else {
+            if (popBackStack != null) {
+                TopAppBarBackButton(onClick = { popBackStack() })
             }
         },
         scrollBehavior = scrollBehavior

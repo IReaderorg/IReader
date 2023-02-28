@@ -71,7 +71,7 @@ fun ChapterDetailBottomBar(
                     imageVector = Icons.Default.BookmarkBorder,
                     contentDescription = stringResource(R.string.bookmark),
                     onClick = {
-                        vm.viewModelScope.launch {
+                        vm.scope.launch {
                             vm.insertUseCases.insertChapters(
                                 vm.chapters.filter { it.id in vm.selection }
                                     .map { it.copy(bookmark = !it.bookmark) }
@@ -88,7 +88,7 @@ fun ChapterDetailBottomBar(
                     ) Icons.Default.DoneOutline else Icons.Default.Done,
                     contentDescription = stringResource(R.string.mark_as_read),
                     onClick = {
-                        vm.viewModelScope.launch {
+                        vm.scope.launch {
                             vm.insertUseCases.insertChapters(
                                 vm.chapters.filter { it.id in vm.selection }
                                     .map { it.copy(read = !it.read) }
@@ -101,7 +101,7 @@ fun ChapterDetailBottomBar(
                     imageVector = Icons.Default.PlaylistAddCheck,
                     contentDescription = stringResource(R.string.mark_previous_as_read),
                     onClick = {
-                        vm.viewModelScope.launch {
+                        vm.scope.launch {
                             vm.insertUseCases.insertChapters(
                                 vm.chapters.filter { it.id <= (vm.selection.maxOrNull() ?: 0) }
                                     .map { it.copy(read = true) }

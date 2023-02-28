@@ -13,9 +13,9 @@ import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.domain.usecases.category.CategoriesUseCases
 import ireader.domain.usecases.category.CreateCategoryWithName
 import ireader.domain.usecases.category.ReorderCategory
-import org.koin.android.annotation.KoinViewModel
 
-@KoinViewModel
+
+
 class CategoryScreenViewModel(
     val categoriesUseCase: CategoriesUseCases,
     val reorderCategory: ReorderCategory,
@@ -27,7 +27,7 @@ class CategoryScreenViewModel(
         categoriesUseCase.subscribe(false).onEach { list ->
             categories.clear()
             categories.addAll(list)
-        }.launchIn(viewModelScope)
+        }.launchIn(scope)
     }
     //  val categories by categoriesUseCase.subscribe(false).asState(emptyList())
 }

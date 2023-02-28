@@ -3,14 +3,14 @@ package ireader.domain.usecases.local.delete_usecases.book
 import ireader.domain.data.repository.BookCategoryRepository
 import ireader.domain.data.repository.BookRepository
 import ireader.core.db.Transactions
-import org.koin.core.annotation.Factory
-@Factory
+
+
 class DeleteBookById(private val bookRepository: BookRepository) {
     suspend operator fun invoke(id: Long) {
         return bookRepository.deleteBookById(id)
     }
 }
-@Factory
+
 class UnFavoriteBook(
     private val bookRepository: BookRepository,
     private val bookCategoryRepository: BookCategoryRepository,
@@ -26,7 +26,7 @@ class UnFavoriteBook(
         }
     }
 }
-@Factory
+
 class DeleteNotInLibraryBooks(
     private val bookRepository: BookRepository,
 ) {

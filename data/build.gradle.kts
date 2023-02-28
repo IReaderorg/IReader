@@ -57,7 +57,7 @@ kotlin {
 dependencies {
 
     implementation(libs.sqldelight.android.paging)
-    setupKSP(libs.koin.kspCompiler)
+
     testImplementation(test.bundles.common)
     debugImplementation(libs.androidSqlite)
     androidTestImplementation(test.bundles.common)

@@ -12,9 +12,9 @@ import ireader.domain.usecases.local.book_usecases.updateBook
 import ireader.core.log.Log
 import ireader.core.source.model.CommandList
 import ireader.domain.utils.exceptionHandler
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class GetBookDetail() {
     suspend operator fun invoke(
         book: Book,

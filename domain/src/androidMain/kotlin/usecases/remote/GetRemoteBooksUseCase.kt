@@ -6,10 +6,10 @@ import ireader.i18n.SourceNotFoundException
 import ireader.core.source.model.Filter
 import ireader.core.source.model.Listing
 import ireader.core.source.model.MangasPageInfo
-import ireader.domain.utils.extensions.async.withIOContext
-import org.koin.core.annotation.Factory
+import ireader.domain.utils.extensions.withIOContext
 
-@Factory
+
+
 class GetRemoteBooksUseCase() {
     suspend operator fun invoke(
         query: String? = null,

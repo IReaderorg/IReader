@@ -2,53 +2,46 @@ package ireader.presentation.ui.video
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.text.ExperimentalTextApi
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
 import androidx.media3.exoplayer.ExoPlayer
-import ireader.domain.models.entities.Chapter
-import ireader.core.http.HttpClients
 import ireader.core.log.Log
 import ireader.core.source.HttpSource
 import ireader.core.source.model.MovieUrl
 import ireader.core.source.model.Subtitle
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.models.entities.CatalogLocal
+import ireader.domain.models.entities.Chapter
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.utils.extensions.withUIContext
-import ireader.presentation.core.ui.util.NavigationArgs
-import ireader.presentation.ui.core.viewmodel.BaseViewModel
-import ireader.presentation.ui.video.component.PlayerCreator
 import ireader.presentation.ui.video.component.core.MediaState
 import ireader.presentation.ui.video.component.core.toSubtitleData
 import ireader.presentation.ui.video.component.cores.PlayerSubtitleHelper.Companion.toSubtitleMimeType
 import ireader.presentation.ui.video.component.cores.SubtitleData
 import ireader.presentation.ui.video.component.cores.SubtitleOrigin
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.koin.android.annotation.KoinViewModel
+
 
 @OptIn(ExperimentalTextApi::class)
-@KoinViewModel
+
 class VideoScreenViewModel(
     val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases,
     val getChapterUseCase: LocalGetChapterUseCase,
     val remoteUseCases: RemoteUseCases,
     val getLocalCatalog: GetLocalCatalog,
     val insertUseCases: LocalInsertUseCases,
-    val playerCreator: PlayerCreator,
-    val savedStateHandle: SavedStateHandle,
-    httpClient: HttpClients,
     val simpleStorage: GetSimpleStorage,
     val mediaState: MediaState,
+    val param: Param
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
 
 
-    val chapterId: StateFlow<Long> =
-        savedStateHandle.getStateFlow(NavigationArgs.chapterId.name, -1L)
+    data class Param(
+        val chapterId: Long
+    )
+    val chapterId: State<Long> = mutableStateOf(param.chapterId)
 
     var player: State<ExoPlayer?> = derivedStateOf { mediaState.player }
 
@@ -63,7 +56,7 @@ class VideoScreenViewModel(
     var appUrl by mutableStateOf<String?>(null)
 
     fun subscribeChapter() {
-        viewModelScope.launch {
+        scope.launch {
             getChapterUseCase.subscribeChapterById(chapterId.value, null).collect { chapter1 ->
                 chapter = chapter1
                 chapter1?.content?.let { pages ->
@@ -94,7 +87,7 @@ class VideoScreenViewModel(
         if (localSource is HttpSource) {
             source = localSource
         }
-        viewModelScope.launch {
+        scope.launch {
             if (chapter != null && chapter.content.isEmpty() && catalogLocal != null) {
                 getRemoteChapter(chapter, catalogLocal)
             } else {

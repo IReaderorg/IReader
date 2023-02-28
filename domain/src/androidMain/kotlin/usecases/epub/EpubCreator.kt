@@ -12,10 +12,10 @@ import nl.siegmann.epublib.domain.MediaType
 import nl.siegmann.epublib.domain.Resource
 import nl.siegmann.epublib.epub.EpubWriter
 import nl.siegmann.epublib.service.MediatypeService
-import org.koin.core.annotation.Factory
+
 import java.io.FileOutputStream
 
-@Factory
+
 class EpubCreator(
     private val coverCache: CoverCache,
     private val chapterRepository: ChapterRepository

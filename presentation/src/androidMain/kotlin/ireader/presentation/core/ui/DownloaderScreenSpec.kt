@@ -5,69 +5,68 @@ import androidx.compose.runtime.Composable
 
 import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.toSavedDownload
+import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.Controller
+import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.settings.downloader.DownloaderScreen
 import ireader.presentation.ui.settings.downloader.DownloaderTopAppBar
 import ireader.presentation.ui.settings.downloader.DownloaderViewModel
-import org.koin.androidx.compose.getViewModel
 
-object DownloaderScreenSpec : ScreenSpec {
 
-    override val navHostRoute: String = "downloader_route"
+class DownloaderScreenSpec : VoyagerScreen() {
 
-    override val deepLinks: List<NavDeepLink> = listOf(
-        navDeepLink {
-            uriPattern = "https://www.ireader/downloader_route"
-        }
-    )
-
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content(
-        controller: Controller
     ) {
-        val vm: DownloaderViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
-        DownloaderScreen(
-            onDownloadItem = { item ->
-                controller.navController.navigate(
-                    BookDetailScreenSpec.buildRoute(
-                        bookId = item.bookId
+        val vm: DownloaderViewModel = getIViewModel()
+        val navigator = LocalNavigator.currentOrThrow
+        val snackBarHostState = SnackBarListener(vm)
+        IScaffold(
+            topBar = { scrollBehavior ->
+            DownloaderTopAppBar(
+                    onPopBackStack = {
+                        popBackStack(navigator)
+                    },
+                    onCancelAll = {
+                        vm.deleteSelectedDownloads(vm.downloads.map { it.toSavedDownload() })
+                    },
+                    onMenuIcon = {
+                        vm.toggleExpandMenu(enable = true)
+                    },
+                    onDeleteAllDownload = {
+                        vm.deleteAllDownloads()
+                    },
+                    state = vm,
+                    onDelete = {
+                        vm.deleteSelectedDownloads(
+                            vm.downloads.filter { it.chapterId in vm.selection }
+                                .map { it.toSavedDownload() }
+                        )
+                        vm.selection.clear()
+                    },
+                    scrollBehavior = scrollBehavior
+                )
+            }
+        ) { padding ->
+            DownloaderScreen(
+                onDownloadItem = { item ->
+                    navigator.push(
+                        BookDetailScreenSpec(
+                            bookId = item.bookId
+                        )
                     )
-                )
-            },
-            vm = vm,
-            snackBarHostState = controller.snackBarHostState,
-            paddingValues = controller.scaffoldPadding
-        )
-    }
-    @ExperimentalMaterial3Api
-    @Composable
-    override fun TopBar(
-        controller: Controller
-    ) {
-        val vm: DownloaderViewModel = getViewModel(viewModelStoreOwner = controller.navBackStackEntry)
-        DownloaderTopAppBar(
-            onPopBackStack = {
-                controller.navController.popBackStack()
-            },
-            onCancelAll = {
-                vm.deleteSelectedDownloads(vm.downloads.map { it.toSavedDownload() })
-            },
-            onMenuIcon = {
-                vm.toggleExpandMenu(enable = true)
-            },
-            onDeleteAllDownload = {
-                vm.deleteAllDownloads()
-            },
-            state = vm,
-            onDelete = {
-                vm.deleteSelectedDownloads(
-                    vm.downloads.filter { it.chapterId in vm.selection }
-                        .map { it.toSavedDownload() }
-                )
-                vm.selection.clear()
-            },
-            scrollBehavior = controller.scrollBehavior
-        )
+                },
+                vm = vm,
+                snackBarHostState = snackBarHostState,
+                paddingValues = padding
+            )
+        }
+
     }
 }

@@ -15,7 +15,7 @@ import ireader.core.source.Source
 import ireader.core.source.model.Text
 import ireader.domain.preferences.models.prefs.IReaderVoice
 import ireader.domain.services.tts_service.media_player.TTSService
-import org.koin.core.annotation.Factory
+
 import java.util.Locale
 
 
@@ -59,7 +59,7 @@ interface TTSState {
     var startTime: Instant?
     var sleepMode: Boolean
 }
-@Factory
+
 class TTSStateImpl() : TTSState {
 
 

@@ -75,7 +75,6 @@ fun BookDetailScreen(
     onMap: () -> Unit,
     onFavorite: () -> Unit,
     onWebView: () -> Unit,
-    controller: Controller
 ) {
     val context = LocalContext.current
     val refreshing = remember {
@@ -122,7 +121,7 @@ fun BookDetailScreen(
                 EditInfoAlertDialog(onStateChange = {
                     vm.showDialog = it
                 }, book, onConfirm = {
-                    vm.viewModelScope.launch {
+                    vm.scope.launch {
                         vm.insertUseCases.insertBook(it)
                     }
                 })

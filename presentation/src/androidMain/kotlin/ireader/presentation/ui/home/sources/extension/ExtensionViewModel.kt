@@ -28,9 +28,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import org.koin.android.annotation.KoinViewModel
 
-@KoinViewModel
+
+
 class ExtensionViewModel(
     private val state: CatalogsStateImpl,
     private val getCatalogsByType: GetCatalogsByType,
@@ -98,7 +98,7 @@ class ExtensionViewModel(
     var installerJobs: MutableMap<Long, Job> = mutableMapOf()
 
     override fun showSnackBar(message: UiText?) {
-        viewModelScope.launch {
+        scope.launch {
             message?.let {
                 _eventFlow.showSnackBar(it)
             }
@@ -120,16 +120,16 @@ class ExtensionViewModel(
         // Update catalogs whenever the query changes or there's a new update from the backend
 
         snapshotFlow { state.allPinnedCatalogs.filteredByQuery(searchQuery) }
-            .onEach { state.pinnedCatalogs = it }.launchIn(viewModelScope)
+            .onEach { state.pinnedCatalogs = it }.launchIn(scope)
 
         snapshotFlow { state.allUnpinnedCatalogs.filteredByQuery(searchQuery) }
-            .onEach { state.unpinnedCatalogs = it }.launchIn(viewModelScope)
+            .onEach { state.unpinnedCatalogs = it }.launchIn(scope)
 
         snapshotFlow {
             state.allRemoteCatalogs.filteredByQuery(searchQuery)
                 .filteredByChoice(selectedLanguage)
         }
-            .onEach { state.remoteCatalogs = it }.launchIn(viewModelScope)
+            .onEach { state.remoteCatalogs = it }.launchIn(scope)
     }
 
     fun installCatalog(catalog: Catalog) {

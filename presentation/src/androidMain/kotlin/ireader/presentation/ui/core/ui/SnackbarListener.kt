@@ -3,6 +3,7 @@ package ireader.presentation.ui.core.ui
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.flow.collectLatest
 import ireader.i18n.UiEvent
@@ -24,4 +25,23 @@ fun SnackBarListener(vm: ireader.presentation.ui.core.viewmodel.BaseViewModel, h
             }
         }
     }
+}
+
+@Composable
+fun SnackBarListener(vm: ireader.presentation.ui.core.viewmodel.BaseViewModel) : SnackbarHostState{
+    val host = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    LaunchedEffect(key1 = true) {
+        vm.eventFlow.collectLatest { event ->
+            when (event) {
+                is UiEvent.ShowSnackbar -> {
+                    host.showSnackbar(
+                        event.uiText.asString(context)
+                    )
+                }
+                else -> {}
+            }
+        }
+    }
+    return host
 }

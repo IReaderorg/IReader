@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -37,8 +38,8 @@ import kotlinx.coroutines.launch
 fun VideoPlayerBottomSheet(
     playerState: PlayerState,
     mediaState: MediaState,
-    controller: Controller,
-    vm: VideoScreenViewModel
+    vm: VideoScreenViewModel,
+    sheetState: ModalBottomSheetState
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -62,14 +63,14 @@ fun VideoPlayerBottomSheet(
                 playerState.playbackSpeed = it
                 vm.player?.value?.setPlaybackSpeed(it)
                 scope.launch {
-                    controller.sheetState.hide()
+                   sheetState.hide()
                 }
                 vm.showSnackBar(UiText.DynamicString("Playback speed: $it."))
             }
             audioTracksComposable(playerState, mediaState) {
                 mediaState?.setPreferredAudioTrack(it)
                 scope.launch {
-                    controller.sheetState.hide()
+                    sheetState.hide()
                 }
                 vm.showSnackBar(UiText.DynamicString("Audio Tracks: $it."))
             }
@@ -85,7 +86,7 @@ fun VideoPlayerBottomSheet(
                     }
                 }
                 scope.launch {
-                    controller.sheetState.hide()
+                    sheetState.hide()
                 }
                 vm.showSnackBar(UiText.DynamicString("Subtitle: ${subtitleData?.name}."))
             }
@@ -108,7 +109,7 @@ fun VideoPlayerBottomSheet(
                         }
                         vm.showSnackBar(UiText.DynamicString("File Selected."))
                         scope.launch {
-                            controller.sheetState.hide()
+                           sheetState.hide()
                         }
                     }
                 }
@@ -129,7 +130,7 @@ fun VideoPlayerBottomSheet(
                         }
                         vm.showSnackBar(UiText.DynamicString("Subtitle is Selected."))
                         scope.launch {
-                            controller.sheetState.hide()
+                            sheetState.hide()
                         }
                     }
                 }

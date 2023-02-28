@@ -6,9 +6,9 @@ import ireader.domain.preferences.prefs.AndroidUiPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.ui.settings.SettingState
-import org.koin.android.annotation.KoinViewModel
 
-@KoinViewModel
+
+
 class ReaderSettingScreenViewModel(
     private val readerPreferences: ReaderPreferences,
     private val androidUiPreferences: AndroidUiPreferences

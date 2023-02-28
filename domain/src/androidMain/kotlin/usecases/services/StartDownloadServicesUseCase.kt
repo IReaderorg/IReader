@@ -8,9 +8,9 @@ import androidx.work.WorkManager
 import ireader.domain.services.downloaderService.DownloaderService
 import ireader.domain.services.downloaderService.DownloaderService.Companion.DOWNLOADER_MODE
 import ireader.domain.utils.toast
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class StartDownloadServicesUseCase( private val context: Context) {
     operator fun invoke(
         bookIds: LongArray? = null,

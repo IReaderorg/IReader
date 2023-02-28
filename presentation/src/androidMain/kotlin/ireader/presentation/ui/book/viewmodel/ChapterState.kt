@@ -7,9 +7,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import ireader.domain.models.entities.Chapter
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 open class ChapterStateImpl: ChapterState {
     override var chapterIsLoading by mutableStateOf<Boolean>(false)
     override val haveBeenRead by derivedStateOf { chapters.any { it.read } }

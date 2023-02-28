@@ -1,35 +1,31 @@
 package ireader.presentation.core.theme
 
 import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.ExperimentalTextApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import ireader.presentation.ui.core.theme.AppColors
-import ireader.presentation.ui.core.theme.AppTypography
-import ireader.presentation.ui.core.theme.LocalCustomSystemCOlor
-import ireader.presentation.ui.core.theme.LocalTransparentStatusBar
-import ireader.presentation.ui.core.theme.Shapes
-import ireader.presentation.ui.core.theme.isLight
-import org.koin.androidx.compose.getViewModel
+import ireader.presentation.ui.core.theme.*
+import org.kodein.di.compose.rememberInstance
+
+
 
 @OptIn(ExperimentalTextApi::class)
 @Composable
 fun AppTheme(
     content: @Composable() () -> Unit,
 ) {
-    val vm: AppThemeViewModel = getViewModel()
+    val scope = rememberCoroutineScope()
+    val vm: AppThemeViewModel by rememberInstance()
     val (materialColors, customColors) = vm.getColors()
     val rippleTheme = vm.getRippleTheme()
     val systemUiController = rememberSystemUiController()
     val transparentStatusBar = LocalTransparentStatusBar.current.enabled
-    val isCustomColorEnable = LocalCustomSystemCOlor.current.enabled
-    val status = LocalCustomSystemCOlor.current.enabled
-    val navigation = LocalCustomSystemCOlor.current.enabled
-    val customStatusColor = LocalCustomSystemCOlor.current
+    val isCustomColorEnable = LocalCustomSystemColor.current.enabled
+    val status = LocalCustomSystemColor.current.enabled
+    val navigation = LocalCustomSystemColor.current.enabled
+    val customStatusColor = LocalCustomSystemColor.current
 
     systemUiController.setSystemBarsColor(
         color = customColors.bars,

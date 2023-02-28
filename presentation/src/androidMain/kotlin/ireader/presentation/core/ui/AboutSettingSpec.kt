@@ -7,48 +7,51 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.settings.about.AboutSettingScreen
 import ireader.domain.utils.extensions.toDateTimestampString
 import ireader.i18n.BuildConfig
 import ireader.presentation.R
+import ireader.presentation.core.VoyagerScreen
+import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
 
-object AboutSettingSpec : ScreenSpec {
-
-    override val navHostRoute: String = "about_screen_route"
-    @ExperimentalMaterial3Api
-    @OptIn(ExperimentalMaterialApi::class)
-    @Composable
-    override fun TopBar(
-        controller: Controller
-    ) {
-        TitleToolbar(
-            title = stringResource(R.string.about),
-            navController = controller.navController,
-            scrollBehavior = controller.scrollBehavior
-        )
-    }
+class AboutSettingSpec : VoyagerScreen() {
 
     @OptIn(
         ExperimentalAnimationApi::class,
         ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
     )
     @Composable
-    override fun Content(
-        controller: Controller
-    ) {
-        AboutSettingScreen(
-            modifier = Modifier.padding(controller.scaffoldPadding),
-            onPopBackStack = {
-                controller.navController.popBackStack()
-            },
-            getFormattedBuildTime = this::getFormattedBuildTime,
-        )
+    override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+        IScaffold(
+            topBar = { scrollBehavior ->
+                TitleToolbar(
+                    title = stringResource(R.string.about),
+                    scrollBehavior = scrollBehavior,
+                    popBackStack = {
+                        navigator.pop()
+                    }
+                )
+            }
+        ) { padding ->
+            AboutSettingScreen(
+                modifier = Modifier.padding(padding),
+                onPopBackStack = {
+                    navigator.pop()
+                },
+                getFormattedBuildTime = this::getFormattedBuildTime,
+            )
+        }
+
     }
     private fun getFormattedBuildTime(): String {
         return try {

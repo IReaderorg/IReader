@@ -8,9 +8,9 @@ import android.webkit.WebViewClient
 import kotlinx.coroutines.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.koin.core.annotation.Single
 
-@Single
+
+
 class WebViewManger(private val context: Context) {
 
     var isInit = false

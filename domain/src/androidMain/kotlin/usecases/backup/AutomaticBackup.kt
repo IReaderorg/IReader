@@ -15,13 +15,13 @@ import ireader.domain.utils.extensions.toast
 import ireader.domain.utils.extensions.withUIContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import org.koin.core.annotation.Single
+
 import java.io.File
 import java.util.*
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 
-@Single
+
 class AutomaticBackup(
     val context: Context,
     val createBackup: CreateBackup,

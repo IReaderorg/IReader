@@ -21,9 +21,9 @@ import okio.buffer
 import okio.gzip
 import okio.sink
 import okio.source
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class CreateBackup  internal constructor(
     private val fileSystem: FileSystem,
     private val mangaRepository: LibraryRepository,

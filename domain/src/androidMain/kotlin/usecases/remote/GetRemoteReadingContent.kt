@@ -1,18 +1,18 @@
 package ireader.domain.usecases.remote
 
+import ireader.core.source.model.CommandList
+import ireader.domain.R
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.entities.toChapterInfo
-import ireader.core.source.model.CommandList
-import ireader.domain.R
 import ireader.domain.utils.exceptionHandler
-import ireader.domain.utils.extensions.async.withIOContext
 import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.domain.utils.extensions.withIOContext
 import ireader.i18n.SourceNotFoundException
 import ireader.i18n.UiText
-import org.koin.core.annotation.Factory
 
-@Factory
+
+
 class GetRemoteReadingContent() {
     suspend operator fun invoke(
             chapter: Chapter,

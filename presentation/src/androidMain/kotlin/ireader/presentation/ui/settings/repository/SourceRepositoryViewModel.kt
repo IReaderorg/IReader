@@ -5,9 +5,9 @@ import ireader.domain.data.repository.CatalogSourceRepository
 import ireader.domain.models.entities.ExtensionSource
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
-import org.koin.android.annotation.KoinViewModel
 
-@KoinViewModel
+
+
 class SourceRepositoryViewModel(
     val catalogSourceRepository: CatalogSourceRepository,
     val uiPreferences: UiPreferences
