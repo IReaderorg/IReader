@@ -49,7 +49,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-
+import ireader.i18n.resources.MR
 
 @OptIn(ExperimentalTextApi::class)
 
@@ -158,7 +158,7 @@ class ReaderScreenViewModel(
                 }
         } else {
             scope.launch {
-                showSnackBar(UiText.StringResource(R.string.something_is_wrong_with_this_book))
+                showSnackBar(UiText.MStringResource(MR.strings.something_is_wrong_with_this_book))
             }
         }
     }

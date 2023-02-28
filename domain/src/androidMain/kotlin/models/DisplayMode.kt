@@ -1,9 +1,10 @@
 package ireader.domain.models
-
+import ireader.i18n.resources.MR
 import android.content.Context
 import ireader.core.prefs.Preference
 import ireader.domain.R
 import ireader.domain.models.entities.Category
+import ireader.i18n.LocalizeHelper
 
 // sealed class DisplayMode(val title: Int, val layout: LayoutType, val layoutIndex: Int) {
 //    object CompactModel : DisplayMode(R.string.compact_layout, layout = LayoutType.CompactGrid, 0)
@@ -62,19 +63,19 @@ enum class DisplayMode(override val flag: Long) : Flag {
     }
 }
 
-fun DisplayMode.getLayoutName(context: Context): String {
+fun DisplayMode.getLayoutName(localizeHelper: LocalizeHelper): String {
     return when (this) {
         DisplayMode.CompactGrid -> {
-            context.getString(R.string.compact_layout)
+            localizeHelper.localize(MR.strings.compact_layout)
         }
         DisplayMode.ComfortableGrid -> {
-            context.getString(R.string.comfortable_layout)
+            localizeHelper.localize(MR.strings.comfortable_layout)
         }
         DisplayMode.List -> {
-            context.getString(R.string.list_layout)
+            localizeHelper.localize(MR.strings.list_layout)
         }
         DisplayMode.OnlyCover -> {
-            context.getString(R.string.cover_only_layout)
+            localizeHelper.localize(MR.strings.cover_only_layout)
         }
     }
 }

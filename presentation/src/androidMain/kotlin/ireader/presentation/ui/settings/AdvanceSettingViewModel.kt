@@ -19,7 +19,7 @@ import ireader.domain.usecases.local.DeleteUseCase
 import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
 import ireader.domain.utils.extensions.launchIO
 import ireader.presentation.R
-
+import ireader.i18n.resources.MR
 
 
 class AdvanceSettingViewModel(
@@ -80,14 +80,14 @@ class AdvanceSettingViewModel(
         scope.launchIO {
             categoryRepository.deleteAll()
             categoryRepository.insert(Category.baseCategories)
-            showSnackBar(UiText.StringResource(R.string.success))
+            showSnackBar(UiText.MStringResource(MR.strings.success))
         }
     }
 
     fun resetThemes() {
         scope.launchIO {
             themeRepository.deleteAll()
-            showSnackBar(UiText.StringResource(R.string.success))
+            showSnackBar(UiText.MStringResource(MR.strings.success))
         }
     }
 }

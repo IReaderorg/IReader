@@ -10,7 +10,7 @@ import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.domain.utils.extensions.withIOContext
 import ireader.i18n.SourceNotFoundException
 import ireader.i18n.UiText
-
+import ireader.i18n.resources.MR
 
 
 class GetRemoteReadingContent() {
@@ -30,7 +30,7 @@ class GetRemoteReadingContent() {
                     val page = source.getPageList(chapter.toChapterInfo(), commands)
 
                     if (page.isEmpty()) {
-                        onError(UiText.StringResource(R.string.cant_get_content))
+                        onError(UiText.MStringResource(MR.strings.cant_get_content))
                     } else {
                         ireader.core.log.Log.debug("Timber: GetRemoteReadingContentUseCase was Finished Successfully")
                         onSuccess(

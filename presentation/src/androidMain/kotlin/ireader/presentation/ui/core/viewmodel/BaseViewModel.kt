@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-
+import ireader.i18n.resources.MR
 actual abstract class BaseViewModel : ScreenModel {
 
     actual val scope: CoroutineScope
@@ -40,7 +40,7 @@ actual abstract class BaseViewModel : ScreenModel {
 
     open fun showSnackBar(message: UiText?) {
         scope.launch {
-            _eventFlow.showSnackBar(message ?: UiText.StringResource(R.string.error_unknown))
+            _eventFlow.showSnackBar(message ?: UiText.MStringResource(MR.strings.error_unknown))
         }
     }
 
@@ -119,7 +119,7 @@ actual abstract class BaseViewModel : ScreenModel {
 suspend fun MutableSharedFlow<UiEvent>.showSnackBar(message: UiText?) {
     this.emit(
         UiEvent.ShowSnackbar(
-            uiText = message ?: UiText.StringResource(R.string.error_unknown)
+            uiText = message ?: UiText.MStringResource(MR.strings.error_unknown)
         )
     )
 }

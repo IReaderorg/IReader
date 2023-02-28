@@ -22,11 +22,12 @@ import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.utils.extensions.withIOContext
 import ireader.i18n.BuildConfig
+import ireader.i18n.LocalizeHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import java.io.File
-
+import ireader.i18n.resources.MR
 /**
  * Class that handles the loading of the catalogs installed in the system and the app.
  */
@@ -34,7 +35,8 @@ class AndroidCatalogLoader(
     private val context: Context,
     private val httpClients: HttpClients,
     val uiPreferences: UiPreferences,
-    val simpleStorage: GetSimpleStorage
+    val simpleStorage: GetSimpleStorage,
+    val localizeHelper: LocalizeHelper,
 ) : CatalogLoader {
 
     private val pkgManager = context.packageManager
@@ -196,7 +198,7 @@ class AndroidCatalogLoader(
         val source = loadSource(pkgName, loader, data)
 
         return CatalogInstalled.SystemWide(
-            name = source?.name ?: context.resources.getString(R.string.unknown),
+            name = source?.name ?: localizeHelper.localize(MR.strings.unknown),
             description = data.description,
             source = source,
             pkgName = pkgName,

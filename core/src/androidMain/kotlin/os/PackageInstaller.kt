@@ -11,11 +11,7 @@ package ireader.core.os
 
 import android.app.Application
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.content.IntentSender
+import android.content.*
 import android.content.pm.PackageInstaller
 import android.os.Build
 import android.os.SystemClock
@@ -28,7 +24,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 class PackageInstaller(
-  private val context: Application
+  private val context: Application,
 ) {
   private val packageInstaller = context.packageManager.packageInstaller
 

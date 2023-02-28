@@ -11,26 +11,23 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import cafe.adriel.voyager.navigator.currentOrThrow
+import ireader.core.source.HttpSource
+import ireader.core.source.model.Filter
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.getLayoutName
+import ireader.presentation.R
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.component.text_related.RadioButton
-import ireader.core.source.HttpSource
-import ireader.core.source.model.Filter
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.home.explore.viewmodel.ExploreState
-import ireader.presentation.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +50,7 @@ fun BrowseTopAppBar(
     val layouts = remember {
         listOf(DisplayMode.ComfortableGrid, DisplayMode.CompactGrid, DisplayMode.List,DisplayMode.OnlyCover)
     }
-    val context = LocalContext.current
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     Toolbar(
         scrollBehavior = scrollBehavior,
         title = {
@@ -120,7 +117,7 @@ fun BrowseTopAppBar(
                         topMenu = false
                     }) {
                         RadioButton(
-                            text = layout.getLayoutName(context = context),
+                            text = layout.getLayoutName(localizeHelper),
                             selected = currentLayout == layout,
                             onClick = {
                                 onLayoutTypeSelect(layout)

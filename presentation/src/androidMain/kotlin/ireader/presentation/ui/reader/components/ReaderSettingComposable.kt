@@ -1,14 +1,7 @@
 package ireader.presentation.ui.reader.components
 
-import android.content.Context
 import android.content.pm.ActivityInfo
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.ExperimentalMaterialApi
@@ -27,36 +20,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.PagerState
-import com.google.accompanist.pager.pagerTabIndicatorOffset
-import com.google.accompanist.pager.rememberPagerState
+import cafe.adriel.voyager.navigator.currentOrThrow
+import com.google.accompanist.pager.*
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.theme.ReaderTheme
 import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
+import ireader.i18n.resources.MR
 import ireader.presentation.R
 import ireader.presentation.ui.component.components.Build
 import ireader.presentation.ui.component.components.Components
-import ireader.presentation.ui.component.components.component.ChipChoicePreference
-import ireader.presentation.ui.component.components.component.ChipPreference
-import ireader.presentation.ui.component.components.component.ColorPreference
-import ireader.presentation.ui.component.components.component.PreferenceRow
-import ireader.presentation.ui.component.components.component.SwitchPreference
+import ireader.presentation.ui.component.components.component.*
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.theme.ReaderTheme
 import ireader.presentation.ui.core.ui.Colour.contentColor
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.launch
-
 @OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun ReaderSettingMainLayout(
@@ -69,18 +55,18 @@ fun ReaderSettingMainLayout(
     onTextAlign: (PreferenceValues.PreferenceTextAlignment) -> Unit
 ) {
     val pagerState = rememberPagerState()
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+
     val readerTab: TabItem = remember {
         TabItem(
-            context.getString(R.string.reader)
+            localizeHelper.localize(MR.strings.reader)
         ) {
             ReaderScreenTab(vm, onTextAlign)
         }
     }
     val generalTab: TabItem = remember {
         TabItem(
-            context.getString(R.string.general)
+            localizeHelper.localize(MR.strings.general)
         ) {
             GeneralScreenTab(vm)
         }
@@ -88,8 +74,8 @@ fun ReaderSettingMainLayout(
 
 
     val colorTabItem = remember {
-        TabItem(context.getString(R.string.colors)) {
-            ColorScreenTab(vm, context, onChangeBrightness, onBackgroundChange)
+        TabItem(localizeHelper.localize(MR.strings.colors)) {
+            ColorScreenTab(vm, onChangeBrightness, onBackgroundChange)
         }
     }
 
@@ -510,10 +496,10 @@ fun GeneralScreenTab(
 @Composable
 private fun ColorScreenTab(
     vm: ReaderScreenViewModel,
-    context: Context,
     onChangeBrightness: (Float) -> Unit,
     onBackgroundChange: (themeId: Long) -> Unit,
 ) {
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     val scope = rememberCoroutineScope()
     LazyColumn(
         modifier = androidx.compose.ui.Modifier
@@ -527,7 +513,7 @@ private fun ColorScreenTab(
         item {
             Components.Switch(
                 preference = vm.autoBrightnessMode,
-                title = context.getString(R.string.custom_brightness),
+                title = localizeHelper.localize(MR.strings.custom_brightness),
             ).Build()
         }
         item {
@@ -588,7 +574,7 @@ private fun ColorScreenTab(
                                         onTextColor = vm.textColor.value.toArgb(),
                                     )
                                 )
-                                vm.showSnackBar(UiText.StringResource(R.string.theme_was_saved))
+                                vm.showSnackBar(UiText.MStringResource(MR.strings.theme_was_saved))
                             }
                         }) {
                             MidSizeTextComposable(text = stringResource(id = R.string.save_custom_theme))
@@ -599,7 +585,7 @@ private fun ColorScreenTab(
                                 vm.readerThemeRepository.delete(
                                     vm.readerTheme.value.ReaderTheme()
                                 )
-                                vm.showSnackBar(UiText.StringResource(R.string.theme_was_deleted))
+                                vm.showSnackBar(UiText.MStringResource(MR.strings.theme_was_deleted))
                             }
                         }) {
                             MidSizeTextComposable(text = stringResource(id = R.string.delete_custom_theme))

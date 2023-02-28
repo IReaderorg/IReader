@@ -9,18 +9,18 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.lifecycleScope
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.prefs.PreferenceValues
-import ireader.domain.utils.extensions.findComponentActivity
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
+import ireader.i18n.resources.MR
 import ireader.presentation.R
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.component.components.component.ChoicePreference
+import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,18 +31,17 @@ fun BackUpAndRestoreScreen(
     vm: BackupScreenViewModel,
     scaffoldPadding: PaddingValues
 ) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val globalScope = LocalGlobalCoroutineScope.currentOrThrow
     val onRestore =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
             if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
                 val uri = resultIntent.data!!.data!!
-                context.findComponentActivity()?.lifecycleScope?.launchIO {
-                    vm.restoreBackup.restoreFrom(uri, context, onError = {
+                globalScope.launchIO {
+                    vm.restoreBackup.restoreFrom(uri, onError = {
                         vm.showSnackBar(it)
                     }, onSuccess = {
-                        vm.showSnackBar((UiText.StringResource(R.string.restoredSuccessfully)))
+                        vm.showSnackBar((UiText.MStringResource(MR.strings.restoredSuccessfully)))
                     })
                 }
             }
@@ -52,11 +51,11 @@ fun BackUpAndRestoreScreen(
             if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
                 val uri = resultIntent.data!!.data!!
 
-                context.findComponentActivity()?.lifecycleScope?.launchIO {
-                    val result = vm.createBackup.saveTo(uri, context, onError = {
+                globalScope.launchIO {
+                    val result = vm.createBackup.saveTo(uri, onError = {
                         vm.showSnackBar(it)
                     }, onSuccess = {
-                        vm.showSnackBar((UiText.StringResource(R.string.backup_created_successfully)))
+                        vm.showSnackBar((UiText.MStringResource(MR.strings.backup_created_successfully)))
                     })
                 }
             }
@@ -64,60 +63,47 @@ fun BackUpAndRestoreScreen(
     val items = remember {
         listOf<Components>(
             Components.Row(
-                context.getString(R.string.create_backup), onClick = {
-                    context.findComponentActivity()
-                        ?.let { activity ->
-                            vm.onLocalBackupRequested { intent: Intent ->
-                                onBackup.launch(intent)
-                            }
-                        }
+                localizeHelper.localize(MR.strings.create_backup), onClick = {
+                    vm.onLocalBackupRequested { intent: Intent ->
+                        onBackup.launch(intent)
+                    }
                 }
             ),
             Components.Row(
-                context.getString(R.string.restore), onClick = {
-                    context.findComponentActivity()
-                        ?.let { activity ->
-                            context.findComponentActivity()
-                                ?.let { activity ->
-                                    vm.onRestoreBackupRequested { intent: Intent ->
-                                        onRestore.launch(intent)
-                                    }
-                                }
-                        }
+                localizeHelper.localize(MR.strings.restore), onClick = {
+
+                    vm.onRestoreBackupRequested { intent: Intent ->
+                        onRestore.launch(intent)
+                    }
                 }
             ),
-            Components.Header(context.getString(R.string.automatic_backup)),
+            Components.Header(localizeHelper.localize(MR.strings.automatic_backup)),
             Components.Dynamic {
                 ChoicePreference<PreferenceValues.AutomaticBackup>(
                     preference = vm.automaticBackup,
                     choices = mapOf(
-                        PreferenceValues.AutomaticBackup.Off to context.getString(R.string.off),
-                        PreferenceValues.AutomaticBackup.Every6Hours to context.resources.getQuantityString(
-                            R.plurals.every_hour,
+                        PreferenceValues.AutomaticBackup.Off to localizeHelper.localize(MR.strings.off),
+                        PreferenceValues.AutomaticBackup.Every6Hours to localizeHelper.localizePlural(
+                            MR.plurals.every_hour,
                             6, 6
 
                         ),
-                        PreferenceValues.AutomaticBackup.Every12Hours to context.resources.getQuantityString(
-                            R.plurals.every_hour,
+                        PreferenceValues.AutomaticBackup.Every12Hours to localizeHelper.localizePlural(
+                            MR.plurals.every_hour,
                             12, 12
                         ),
-                        PreferenceValues.AutomaticBackup.Daily to context.getString(R.string.daily),
-                        PreferenceValues.AutomaticBackup.Every2Days to context.resources.getQuantityString(
-                            R.plurals.every_day,
+                        PreferenceValues.AutomaticBackup.Daily to localizeHelper.localize(MR.strings.daily),
+                        PreferenceValues.AutomaticBackup.Every2Days to localizeHelper.localizePlural(
+                            MR.plurals.every_day,
                             2, 2
                         ),
-                        PreferenceValues.AutomaticBackup.Weekly to context.getString(R.string.weekly),
+                        PreferenceValues.AutomaticBackup.Weekly to localizeHelper.localize(MR.strings.weekly),
                     ),
-                    title = context.getString(
-                        R.string.automatic_backup
+                    title = localizeHelper.localize(
+                        MR.strings.automatic_backup
                     ),
                     onItemSelected = {
-
-                        context.findComponentActivity()
-                            ?.let { activity ->
-                                vm.getSimpleStorage.checkPermission()
-                            }
-
+                        vm.getSimpleStorage.checkPermission()
                     }
                 )
             },
@@ -131,8 +117,8 @@ fun BackUpAndRestoreScreen(
                         4 to "4",
                         5 to "5",
                     ),
-                    title = context.getString(
-                        R.string.maximum_backups
+                    title = localizeHelper.localize(
+                        MR.strings.maximum_backups
                     ),
                     enable = vm.automaticBackup.value != PreferenceValues.AutomaticBackup.Off
                 )

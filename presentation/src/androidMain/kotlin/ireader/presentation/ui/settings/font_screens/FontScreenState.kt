@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.i18n.UiText
 import ireader.presentation.R
-
+import ireader.i18n.resources.MR
 
 
 interface FontScreenState {
@@ -26,7 +26,7 @@ open class FontScreenStateImpl : FontScreenState {
     override var uiFonts by mutableStateOf<List<String>>(emptyList())
     override val isEmpty: Boolean by derivedStateOf { fonts.isEmpty() }
     override var searchedFonts by mutableStateOf<List<String>>(emptyList())
-    override var error by mutableStateOf<UiText>(UiText.StringResource(R.string.no_error))
+    override var error by mutableStateOf<UiText>(UiText.MStringResource(MR.strings.no_error))
     override var inSearchMode by mutableStateOf<Boolean>(false)
     override var searchQuery by mutableStateOf<String>("")
 }

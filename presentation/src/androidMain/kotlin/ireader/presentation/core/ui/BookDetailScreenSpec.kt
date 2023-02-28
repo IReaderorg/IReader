@@ -14,9 +14,7 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.lifecycleScope
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -25,7 +23,6 @@ import com.google.accompanist.pager.rememberPagerState
 import ireader.core.source.HttpSource
 import ireader.core.source.model.ChapterInfo
 import ireader.domain.models.entities.Book
-import ireader.domain.utils.extensions.findComponentActivity
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.UiText
@@ -38,10 +35,11 @@ import ireader.presentation.ui.book.components.ChapterCommandBottomSheet
 import ireader.presentation.ui.book.components.ChapterScreenBottomTabComposable
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
 import ireader.presentation.ui.core.theme.TransparentStatusBar
 import ireader.presentation.ui.core.ui.SnackBarListener
 import kotlinx.coroutines.launch
-
+import ireader.i18n.resources.MR
 data class BookDetailScreenSpec(
     val bookId: Long,
 ) : VoyagerScreen() {
@@ -137,17 +135,17 @@ data class BookDetailScreenSpec(
                     ),
                     snackbarHostState = snackbarHostState,
                     topBar = { scrollBehavior ->
-                        val context = LocalContext.current
+                        val globalScope = LocalGlobalCoroutineScope.currentOrThrow
                         val onShare =
                             rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
                                 if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
                                     val uri = resultIntent.data!!.data!!
-                                    context.findComponentActivity()?.lifecycleScope?.launchIO {
+                                    globalScope.launchIO {
                                         try {
                                             vm.booksState.book?.let {
-                                                vm.showSnackBar(UiText.StringResource(R.string.wait))
-                                                vm.createEpub(it, uri, context)
-                                                vm.showSnackBar(UiText.StringResource(R.string.success))
+                                                vm.showSnackBar(UiText.MStringResource(MR.strings.wait))
+                                                vm.createEpub(it, uri)
+                                                vm.showSnackBar(UiText.MStringResource(MR.strings.success))
                                             }
                                         } catch (e: Throwable) {
                                             vm.showSnackBar(UiText.ExceptionString(e))
@@ -158,7 +156,7 @@ data class BookDetailScreenSpec(
                         BookDetailTopAppBar(
                             scrollBehavior = scrollBehavior,
                             onRefresh = {
-                                scope.launch {
+                                globalScope.launch {
                                     if (book != null) {
                                         vm.getRemoteBookDetail(book, source = catalog)
                                         vm.getRemoteChapterDetail(book, catalog)
@@ -170,7 +168,7 @@ data class BookDetailScreenSpec(
                             },
                             source = vm.source,
                             onCommand = {
-                                scope.launch {
+                                globalScope.launch {
                                     sheetState.show()
                                 }
                             },
@@ -314,12 +312,12 @@ data class BookDetailScreenSpec(
                                     )
                                 } else {
                                     scope.launch {
-                                        vm.showSnackBar(UiText.StringResource(R.string.no_chapter_is_available))
+                                        vm.showSnackBar(UiText.MStringResource(MR.strings.no_chapter_is_available))
                                     }
                                 }
                             } else {
                                 scope.launch {
-                                    vm.showSnackBar(UiText.StringResource(R.string.source_not_available))
+                                    vm.showSnackBar(UiText.MStringResource(MR.strings.source_not_available))
                                 }
                             }
                         },

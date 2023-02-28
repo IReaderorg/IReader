@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.lifecycle.lifecycleScope
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.anggrayudi.storage.file.FileFullPath
 import com.anggrayudi.storage.file.StorageType
 import com.anggrayudi.storage.file.getAbsolutePath
@@ -22,8 +22,8 @@ import ireader.core.source.model.MovieUrl
 import ireader.core.source.model.Subtitle
 import ireader.domain.utils.extensions.*
 import ireader.i18n.UiText
-import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.components.component.PreferenceRow
+import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
 import ireader.presentation.ui.video.bottomsheet.audioTracksComposable
 import ireader.presentation.ui.video.bottomsheet.loadLocalFileComposable
 import ireader.presentation.ui.video.bottomsheet.playBackSpeedComposable
@@ -43,6 +43,7 @@ fun VideoPlayerBottomSheet(
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val globalScope = LocalGlobalCoroutineScope.currentOrThrow
     val uriHandler = LocalUriHandler.current
     Box(
         modifier = Modifier
@@ -93,7 +94,7 @@ fun VideoPlayerBottomSheet(
             loadLocalFileComposable("Load Video From Local Storage") {
                 vm.simpleStorage.simpleStorageHelper.openFilePicker(300, false, FileFullPath(context, StorageType.EXTERNAL), filterMimeTypes = arrayOf("video/*"))
                 vm.simpleStorage.simpleStorageHelper.onFileSelected = { requestCode, files ->
-                    context.findComponentActivity()?.lifecycleScope?.launchIO {
+                    globalScope.launchIO {
                         val firstFile = files.first().getAbsolutePath(context)
                         vm.chapter =
                             vm.chapter?.copy(content = listOf(MovieUrl(firstFile.toString())))
@@ -118,7 +119,7 @@ fun VideoPlayerBottomSheet(
                 vm.simpleStorage.simpleStorageHelper.openFilePicker(300, false, filterMimeTypes = arrayOf("application/*")
                     )
                 vm.simpleStorage.simpleStorageHelper.onFileSelected = { requestCode, files ->
-                    context.findComponentActivity()?.lifecycleScope?.launchIO {
+                    globalScope.launchIO {
                         val file = files.first()
                         val path = file.getAbsolutePath(context)
                         val sub = Subtitle(path).toSubtitleData()

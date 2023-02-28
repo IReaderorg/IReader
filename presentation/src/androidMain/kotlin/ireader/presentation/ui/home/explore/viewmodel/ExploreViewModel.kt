@@ -23,7 +23,7 @@ import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-
+import ireader.i18n.resources.MR
 
 
 class ExploreViewModel(
@@ -70,13 +70,13 @@ class ExploreViewModel(
                     }
                 } else {
                     scope.launch {
-                        showSnackBar(UiText.StringResource(R.string.the_source_is_not_found))
+                        showSnackBar(UiText.MStringResource(MR.strings.the_source_is_not_found))
                     }
                 }
             }
         } else {
             scope.launch {
-                showSnackBar(UiText.StringResource(R.string.the_source_is_not_found))
+                showSnackBar(UiText.MStringResource(MR.strings.the_source_is_not_found))
             }
         }
     }

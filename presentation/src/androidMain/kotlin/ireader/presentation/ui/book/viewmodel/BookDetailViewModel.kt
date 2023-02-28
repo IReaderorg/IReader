@@ -44,7 +44,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 
 import java.util.*
-
+import ireader.i18n.resources.MR
 
 
 class BookDetailViewModel(
@@ -106,7 +106,7 @@ class BookDetailViewModel(
 
         } else {
             scope.launch {
-                showSnackBar(UiText.StringResource(R.string.something_is_wrong_with_this_book))
+                showSnackBar(UiText.MStringResource(MR.strings.something_is_wrong_with_this_book))
             }
         }
     }

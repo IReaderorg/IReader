@@ -24,7 +24,7 @@ val DataModule = DI.Module("databaseModule") {
     bindSingleton<AndroidDatabaseHandler> { AndroidDatabaseHandler(instance(),instance()) }
     bindSingleton<Transactions> { AndroidTransaction(instance()) }
 
-    bindSingleton<CatalogLoader> { ireader.data.catalog.impl.AndroidCatalogLoader(instance(),instance(),instance(),instance()) }
+    bindSingleton<CatalogLoader> { ireader.data.catalog.impl.AndroidCatalogLoader(instance(),instance(),instance(),instance(),instance()) }
     bindSingleton<CatalogRemoteApi> { ireader.data.catalog.impl.CatalogGithubApi(instance(),instance()) }
     bindSingleton<UninstallCatalogs> { ireader.data.catalog.impl.interactor.UninstallCatalogImpl(instance(),instance()) }
     bindSingleton<CatalogSourceRepository> { CatalogSourceRepositoryImpl(instance()) }

@@ -28,12 +28,12 @@ import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.component.components.component.ChoicePreference
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import kotlinx.datetime.Clock
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
 import org.kodein.di.instance
-
 
 class SecuritySettingSpec : VoyagerScreen() {
 
@@ -43,6 +43,7 @@ class SecuritySettingSpec : VoyagerScreen() {
     override fun Content() {
         val vm: SecuritySettingViewModel = getIViewModel()
         val context = LocalContext.current
+        val localizeHelper = LocalLocalizeHelper.currentOrThrow
         val navigator = LocalNavigator.currentOrThrow
 
         val onIdleAfter =
@@ -72,7 +73,7 @@ class SecuritySettingSpec : VoyagerScreen() {
             listOf<Components>(
                 Components.Switch(
                     preference = vm.useAuth,
-                    title = context.getString(R.string.use_auth),
+                    title = localizeHelper.localize(MR.strings.use_auth),
                     visible = context.isAuthenticationSupported(),
                     onValue = {
                         onEnableAuthResult.launch(
@@ -83,11 +84,11 @@ class SecuritySettingSpec : VoyagerScreen() {
                                 .putExtra(UnlockActivity.ENABLE_AUTH, !vm.useAuth.value)
                                 .putExtra(
                                     UnlockActivity.TITLE,
-                                    context.getString(R.string.authentication)
+                                    localizeHelper.localize(MR.strings.authentication)
                                 )
                                 .putExtra(
                                     UnlockActivity.SUBTITLE,
-                                    context.getString(R.string.authenticate_to_confirm_change)
+                                    localizeHelper.localize(MR.strings.authenticate_to_confirm_change)
                                 )
                         )
                     }
@@ -99,8 +100,8 @@ class SecuritySettingSpec : VoyagerScreen() {
                             preference = vm.lockAppAfter,
                             choices = values.associate { text ->
                                 when (text) {
-                                    -1L -> -1L to context.getString(R.string.lock_never)
-                                    0L -> 0L to context.getString(R.string.lock_always)
+                                    -1L -> -1L to localizeHelper.localize(MR.strings.lock_never)
+                                    0L -> 0L to localizeHelper.localize(MR.strings.lock_always)
                                     else -> text.toLong() to localizePlural(MR.plurals.lock_after_mins, text.toInt())
                                 }
                             },
@@ -114,11 +115,11 @@ class SecuritySettingSpec : VoyagerScreen() {
                                         .putExtra(UnlockActivity.IDLE_AFTER, newValue)
                                         .putExtra(
                                             UnlockActivity.TITLE,
-                                            context.getString(R.string.lock_when_idle)
+                                            localizeHelper.localize(MR.strings.lock_when_idle)
                                         )
                                         .putExtra(
                                             UnlockActivity.SUBTITLE,
-                                            context.getString(R.string.authenticate_to_confirm_change)
+                                            localizeHelper.localize(MR.strings.authenticate_to_confirm_change)
                                         )
                                 )
                             },

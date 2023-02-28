@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.theme.Theme
 import ireader.domain.utils.extensions.launchIO
@@ -34,11 +35,12 @@ import ireader.presentation.ui.component.components.component.ColorPickerDialog
 import ireader.presentation.ui.component.components.component.ColorPreference
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.AppColors
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.theme.isLight
 import ireader.presentation.ui.core.ui.PreferenceMutableState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
+import ireader.i18n.resources.MR
 @Composable
 fun AppearanceSettingScreen(
     modifier: Modifier = Modifier,
@@ -49,7 +51,7 @@ fun AppearanceSettingScreen(
     onColorChange: () -> Unit,
     onColorReset: () -> Unit
 ) {
-    val context = LocalContext.current
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     val customizedColors = vm.getCustomizedColors()
     val systemTheme = isSystemInDarkTheme()
     val isLight = remember(vm.themeMode.value) {
@@ -192,10 +194,10 @@ fun AppearanceSettingScreen(
                                         val themeId =
                                             vm.themeRepository.insert(theme.toCustomTheme())
                                         vm.colorTheme.value = themeId
-                                        vm.showSnackBar(UiText.StringResource(R.string.theme_was_saved))
+                                        vm.showSnackBar(UiText.MStringResource(MR.strings.theme_was_saved))
                                     }
                                 } else {
-                                    vm.showSnackBar(UiText.StringResource(R.string.theme_was_not_valid))
+                                    vm.showSnackBar(UiText.MStringResource(MR.strings.theme_was_not_valid))
                                 }
                                 vm.isSavable = false
                             }
@@ -210,7 +212,7 @@ fun AppearanceSettingScreen(
                                         ?.toCustomTheme()
                                         ?.let { vm.themeRepository.delete(it) }
                                 }
-                                vm.showSnackBar(UiText.StringResource(R.string.theme_was_deleted))
+                                vm.showSnackBar(UiText.MStringResource(MR.strings.theme_was_deleted))
                             }
                         }) {
                             MidSizeTextComposable(text = stringResource(id = R.string.delete_custom_theme))
@@ -230,10 +232,10 @@ fun AppearanceSettingScreen(
                     preference = vm.relativeTime,
                     choices = vm.relativeTimes.associateWith { value ->
                         when (value) {
-                            PreferenceValues.RelativeTime.Off -> context.getString(R.string.off)
-                            PreferenceValues.RelativeTime.Day -> context.getString(R.string.pref_relative_time_short)
-                            PreferenceValues.RelativeTime.Week -> context.getString(R.string.pref_relative_time_long)
-                            else -> context.getString(R.string.off)
+                            PreferenceValues.RelativeTime.Off -> localizeHelper.localize(MR.strings.off)
+                            PreferenceValues.RelativeTime.Day -> localizeHelper.localize(MR.strings.pref_relative_time_short)
+                            PreferenceValues.RelativeTime.Week -> localizeHelper.localize(MR.strings.pref_relative_time_long)
+                            else -> localizeHelper.localize(MR.strings.off)
                         }
                     },
                     title = stringResource(id = R.string.pref_relative_format),

@@ -1,7 +1,7 @@
 package ireader.domain.models.library
 
 import ireader.i18n.UiText
-import ireader.domain.R
+import ireader.i18n.resources.MR
 
 data class LibrarySort(val type: Type, val isAscending: Boolean) {
 
@@ -18,14 +18,14 @@ data class LibrarySort(val type: Type, val isAscending: Boolean) {
         companion object {
             fun name(type: Type): UiText {
                 return when (type) {
-                    Type.DateFetched -> UiText.StringResource(R.string.date_fetched)
-                    Type.DateAdded -> UiText.StringResource(R.string.date_added)
-                    Type.Title -> UiText.StringResource(R.string.title)
-                    Type.Unread -> UiText.StringResource(R.string.unread)
-                    Type.Source -> UiText.StringResource(R.string.source)
-                    Type.TotalChapters -> UiText.StringResource(R.string.total_chapter)
-                    Type.LastRead -> UiText.StringResource(R.string.last_read)
-                    Type.LastUpdated -> UiText.StringResource(R.string.last_update)
+                    Type.DateFetched -> UiText.MStringResource(MR.strings.date_fetched)
+                    Type.DateAdded -> UiText.MStringResource(MR.strings.date_added)
+                    Type.Title -> UiText.MStringResource(MR.strings.title)
+                    Type.Unread -> UiText.MStringResource(MR.strings.unread)
+                    Type.Source -> UiText.MStringResource(MR.strings.source)
+                    Type.TotalChapters -> UiText.MStringResource(MR.strings.total_chapter)
+                    Type.LastRead -> UiText.MStringResource(MR.strings.last_read)
+                    Type.LastUpdated -> UiText.MStringResource(MR.strings.last_update)
                 }
             }
         }

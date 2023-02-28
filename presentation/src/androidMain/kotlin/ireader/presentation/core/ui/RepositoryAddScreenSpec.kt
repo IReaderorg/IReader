@@ -24,7 +24,7 @@ import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.settings.repository.AddingRepositoryScreen
 import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
 import kotlinx.coroutines.launch
-
+import ireader.i18n.resources.MR
 
 class RepositoryAddScreenSpec : VoyagerScreen() {
 
@@ -83,7 +83,7 @@ class RepositoryAddScreenSpec : VoyagerScreen() {
                                 vm.catalogSourceRepository.insert(vm.parseUrl(text))
 
                             }catch (e:Exception) {
-                                vm.showSnackBar(UiText.StringResource(R.string.url_is_invalid))
+                                vm.showSnackBar(UiText.MStringResource(MR.strings.url_is_invalid))
                             }
                         }
                         showDialog.value = false

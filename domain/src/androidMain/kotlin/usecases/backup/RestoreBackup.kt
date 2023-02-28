@@ -2,16 +2,11 @@ package ireader.domain.usecases.backup
 
 import android.content.Context
 import android.net.Uri
+import ireader.core.db.Transactions
+import ireader.domain.data.repository.*
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.BookCategory
 import ireader.domain.models.entities.Chapter
-import ireader.core.db.Transactions
-import ireader.domain.data.repository.BookCategoryRepository
-import ireader.domain.data.repository.BookRepository
-import ireader.domain.data.repository.CategoryRepository
-import ireader.domain.data.repository.ChapterRepository
-import ireader.domain.data.repository.HistoryRepository
-import ireader.domain.data.repository.LibraryRepository
 import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.domain.usecases.backup.backup.Backup
 import ireader.domain.usecases.backup.backup.BookProto
@@ -37,13 +32,13 @@ class RestoreBackup internal constructor(
     private val mangaCategoryRepository: BookCategoryRepository,
     private val historyRepository: HistoryRepository,
     private val libraryPreferences: LibraryPreferences,
-    private val transactions: Transactions
+    private val transactions: Transactions,
+    private val context: Context
 ) {
 
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun restoreFrom(
         uri: Uri,
-        context: Context,
         onError: (UiText) -> Unit,
         onSuccess: () -> Unit
     ): Result {

@@ -13,47 +13,6 @@ import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 
-@Composable
-fun rememberManagedExoPlayer(): ExoPlayer  {
-    val context = LocalContext.current
-    return remember {
-        val builder = ExoPlayer.Builder(context)
-        builder.setMediaSourceFactory(ProgressiveMediaSource.Factory(DefaultDataSource.Factory(context)))
-        return@remember builder.build().apply {
-            playWhenReady = true
-        }
-    }
-
-}
-
-@Composable
-fun rememberManagedPlayer(
-        lifecycle: Lifecycle = LocalLifecycleOwner.current.lifecycle,
-        factory: (Context) -> Player
-): State<Player?> {
-    val currentContext = LocalContext.current.applicationContext
-    val playerManager = remember { PlayerManager { factory(currentContext) } }
-    DisposableEffect(lifecycle) {
-        val observer = LifecycleEventObserver { _, event ->
-            when {
-                (event == Lifecycle.Event.ON_START && Build.VERSION.SDK_INT > 23)
-                        || (event == Lifecycle.Event.ON_RESUME && Build.VERSION.SDK_INT <= 23) -> {
-                    playerManager.initialize()
-                }
-                (event == Lifecycle.Event.ON_PAUSE && Build.VERSION.SDK_INT <= 23)
-                        || (event == Lifecycle.Event.ON_STOP && Build.VERSION.SDK_INT > 23) -> {
-                    playerManager.release()
-                }
-            }
-        }
-        lifecycle.addObserver(observer)
-        onDispose {
-            lifecycle.removeObserver(observer)
-        }
-    }
-    return playerManager.player
-}
-
 @Stable
 internal class PlayerManager(
         private val factory: () -> Player,

@@ -12,7 +12,7 @@ import ireader.domain.models.entities.LibraryBook
 import ireader.domain.models.library.LibrarySort
 import ireader.i18n.UiText
 import ireader.presentation.R
-
+import ireader.i18n.resources.MR
 
 interface LibraryState {
     var isLoading: Boolean
@@ -42,7 +42,7 @@ open class LibraryStateImpl : LibraryState {
     override var books by mutableStateOf<List<LibraryBook>>(emptyList())
     override val isEmpty: Boolean by derivedStateOf { books.isEmpty() }
     override var searchedBook by mutableStateOf<List<LibraryBook>>(emptyList())
-    override var error by mutableStateOf<UiText>(UiText.StringResource(R.string.no_error))
+    override var error by mutableStateOf<UiText>(UiText.MStringResource(MR.strings.no_error))
     override var inSearchMode by mutableStateOf<Boolean>(false)
     override var searchQuery by mutableStateOf<String?>(null)
     override var sortType by mutableStateOf<LibrarySort>(

@@ -11,22 +11,22 @@ import ireader.domain.R
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.util.concurrent.TimeoutException
-
+import ireader.i18n.resources.MR
 fun exceptionHandler(e: Throwable): UiText? {
     Log.error(e, "exceptionHandler catch an exception")
 
     return when (e) {
         is IOException -> {
-            UiText.StringResource(R.string.noInternetError)
+            UiText.MStringResource(MR.strings.noInternetError)
         }
         is SocketTimeoutException -> {
-            UiText.StringResource(R.string.noInternetError)
+            UiText.MStringResource(MR.strings.noInternetError)
         }
         is java.util.concurrent.CancellationException -> {
             null
         }
         is org.jsoup.select.Selector.SelectorParseException -> {
-            UiText.StringResource(R.string.cant_get_content)
+            UiText.MStringResource(MR.strings.cant_get_content)
         }
         is NoSuchMethodError -> {
             UiText.StringResource(ireader.i18n.R.string.library_is_out_of_date)
@@ -40,10 +40,10 @@ fun exceptionHandler(e: Throwable): UiText? {
         is CatalogNotFoundException -> {
             UiText.StringResource(ireader.i18n.R.string.catalog_not_found_error)
         }
-        is EmptyQuery -> UiText.StringResource(R.string.query_must_not_be_empty)
+        is EmptyQuery -> UiText.MStringResource(MR.strings.query_must_not_be_empty)
         is LocalSourceException -> null
 
-        is SourceNotFoundException -> UiText.StringResource(R.string.the_source_is_not_found)
+        is SourceNotFoundException -> UiText.MStringResource(MR.strings.the_source_is_not_found)
         else -> {
             UiText.ExceptionString(e)
         }

@@ -121,7 +121,7 @@ val UseCasesInject = DI.Module("usecaseModule") {
         subscribeUpdates = SubscribeUpdates(instance()),
         deleteAllUpdates = DeleteAllUpdates(instance()),
     ) }
-    bindProvider<EpubCreator> { EpubCreator(instance(), instance()) }
+    bindProvider<EpubCreator> { EpubCreator(instance(), instance(),instance()) }
     bindSingleton<DownloadUseCases> {DownloadUseCases(
         deleteAllSavedDownload = DeleteAllSavedDownload(instance()),
         deleteSavedDownload = DeleteSavedDownload(instance()),

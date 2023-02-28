@@ -1,10 +1,6 @@
 package ireader.presentation.ui.home.history
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,13 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.items
 import ireader.domain.models.entities.HistoryWithRelations
-import ireader.presentation.ui.core.utils.shimmerGradient
 import ireader.presentation.ui.component.text_related.TextSection
+import ireader.presentation.ui.core.utils.shimmerGradient
 import ireader.presentation.ui.home.history.viewmodel.HistoryUiModel
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -31,8 +26,6 @@ fun HistoryContent(
     onLongClickDelete: (HistoryWithRelations) -> Unit,
     onClickPlay: (HistoryWithRelations) -> Unit,
 ) {
-    val context = LocalContext.current
-
     LazyColumn(
         contentPadding = PaddingValues(
             bottom = 16.dp,

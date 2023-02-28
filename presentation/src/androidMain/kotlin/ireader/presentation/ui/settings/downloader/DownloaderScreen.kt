@@ -32,10 +32,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.flow.collectLatest
 import ireader.domain.models.entities.SavedDownload
 import ireader.domain.models.entities.SavedDownloadWithInfo
@@ -52,6 +52,7 @@ import ireader.presentation.ui.component.reusable_composable.DropDownMenuItem
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.modifier.selectedBackground
 import ireader.presentation.R
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
@@ -66,14 +67,14 @@ fun DownloaderScreen(
     snackBarHostState: SnackbarHostState,
     paddingValues: PaddingValues
 ) {
-    val context = LocalContext.current
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     val scrollState = rememberLazyListState()
     LaunchedEffect(key1 = true) {
         vm.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackbar -> {
                     snackBarHostState.showSnackbar(
-                        event.uiText.asString(context = context)
+                        event.uiText.asString(localizeHelper)
                     )
                 }
                 else -> {}
@@ -122,7 +123,7 @@ fun DownloaderScreen(
         },
     ) { padding ->
         VerticalFastScroller(listState = scrollState) {
-        LazyColumn(modifier = Modifier, state = scrollState) {
+        LazyColumn(modifier = Modifier.padding(padding), state = scrollState) {
             items(count = downloads.size) { index ->
                 DownloadScreenItem(
                     downloads[index].toSavedDownload(),

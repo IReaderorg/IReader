@@ -76,11 +76,13 @@ val DomainServices = DI.Module("domainModule") {
             instance(),
             instance(),
             instance(),
+            instance(),
             instance()
         )
     }
     bindProvider {
         ireader.domain.usecases.backup.RestoreBackup(
+            instance(),
             instance(),
             instance(),
             instance(),

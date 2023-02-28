@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
-
+import ireader.i18n.resources.MR
 
 class WebViewPageModel(
     private val insertUseCases: LocalInsertUseCases,
@@ -124,15 +124,15 @@ class WebViewPageModel(
                 catalog,
                 onError = {
                     showSnackBar(it)
-                    showSnackBar(UiText.StringResource(R.string.failed))
+                    showSnackBar(UiText.MStringResource(MR.strings.failed))
                 },
                 onSuccess = { result ->
                     if (result.content.isNotEmpty()) {
                         webChapter = result
                         insertChapter(result)
-                        showSnackBar(UiText.StringResource(R.string.success))
+                        showSnackBar(UiText.MStringResource(MR.strings.success))
                     } else {
-                        showSnackBar(UiText.StringResource(R.string.failed))
+                        showSnackBar(UiText.MStringResource(MR.strings.failed))
                     }
                 },
                 commands = listOf(Command.Content.Fetch(url = url, pageSource))
@@ -159,10 +159,10 @@ class WebViewPageModel(
 
                     webChapters = result
                     if (result.isNotEmpty()) {
-                        showSnackBar(UiText.StringResource(R.string.success))
+                        showSnackBar(UiText.MStringResource(MR.strings.success))
                         insertChapters(result.map { it.copy(bookId = book.id) })
                     } else {
-                        showSnackBar(UiText.StringResource(R.string.failed))
+                        showSnackBar(UiText.MStringResource(MR.strings.failed))
                     }
                 },
                 commands = listOf(Command.Chapter.Fetch(url = url, pageSource)),
@@ -183,15 +183,15 @@ class WebViewPageModel(
                 book ?: Book(key = "", title = "", sourceId = source?.id ?: 0),
                 catalog,
                 onError = {
-                    showSnackBar(UiText.StringResource(R.string.failed))
+                    showSnackBar(UiText.MStringResource(MR.strings.failed))
                 },
                 onSuccess = { result ->
                     if (result.title.isNotBlank()) {
                         webBook = result
                         insertBook(result.copy(favorite = true))
-                        showSnackBar(UiText.StringResource(R.string.success))
+                        showSnackBar(UiText.MStringResource(MR.strings.success))
                     } else {
-                        showSnackBar(UiText.StringResource(R.string.failed))
+                        showSnackBar(UiText.MStringResource(MR.strings.failed))
                     }
                 },
                 commands = listOf(Command.Detail.Fetch(url = url, pageSource))

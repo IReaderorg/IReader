@@ -36,7 +36,7 @@ fun AdvanceSettings(
                 globalScope.launchIO {
                     try {
                         vm.importEpub.parse(uri)
-                        vm.showSnackBar(UiText.StringResource(R.string.success))
+                        vm.showSnackBar(UiText.MStringResource(MR.strings.success))
                     } catch (e: Throwable) {
                         Log.error(e, "epub parser throws an exception")
                         vm.showSnackBar(UiText.ExceptionString(e))
@@ -53,7 +53,7 @@ fun AdvanceSettings(
                 onClick = {
                     vm.deleteAllDatabase()
                     vm.showSnackBar(
-                        UiText.StringResource(R.string.database_was_cleared)
+                        UiText.MStringResource(MR.strings.database_was_cleared)
                     )
                 }
             ),
@@ -63,7 +63,7 @@ fun AdvanceSettings(
                     vm.scope.launchIO {
                         vm.deleteUseCase.deleteNotInLibraryBooks()
                         vm.showSnackBar(
-                            UiText.StringResource(R.string.success)
+                            UiText.MStringResource(MR.strings.success)
                         )
                     }
                 }
@@ -73,7 +73,7 @@ fun AdvanceSettings(
                 onClick = {
                     vm.deleteAllChapters()
                     vm.showSnackBar(
-                        UiText.StringResource(R.string.chapters_was_cleared)
+                        UiText.MStringResource(MR.strings.chapters_was_cleared)
                     )
                 }
             ),

@@ -2,7 +2,7 @@ package ireader.presentation.ui.book.viewmodel
 
 import ireader.i18n.UiText
 import ireader.presentation.R
-
+import ireader.i18n.resources.MR
 data class ChapterSort(val type: Type, val isAscending: Boolean) {
 
     enum class Type {
@@ -19,14 +19,14 @@ data class ChapterSort(val type: Type, val isAscending: Boolean) {
         companion object {
             fun name(type: Type): UiText {
                 return when (type) {
-                    Type.Default -> UiText.StringResource(R.string.system_default)
-                    Type.ByName -> UiText.StringResource(R.string.by_name)
-                    Type.BySource -> UiText.StringResource(R.string.by_source)
-                    Type.ByChapterNumber -> UiText.StringResource(R.string.by_chapter_number)
-                    Type.Bookmark -> UiText.StringResource(R.string.by_bookmark)
-                    Type.DateFetched -> UiText.StringResource(R.string.date_fetched)
-                    Type.DateUpload -> UiText.StringResource(R.string.by_date_uploaded)
-                    Type.Read -> UiText.StringResource(R.string.by_date_read)
+                    Type.Default -> UiText.MStringResource(MR.strings.system_default)
+                    Type.ByName -> UiText.MStringResource(MR.strings.by_name)
+                    Type.BySource -> UiText.MStringResource(MR.strings.by_source)
+                    Type.ByChapterNumber -> UiText.MStringResource(MR.strings.by_chapter_number)
+                    Type.Bookmark -> UiText.MStringResource(MR.strings.by_bookmark)
+                    Type.DateFetched -> UiText.MStringResource(MR.strings.date_fetched)
+                    Type.DateUpload -> UiText.MStringResource(MR.strings.by_date_uploaded)
+                    Type.Read -> UiText.MStringResource(MR.strings.by_date_read)
                 }
             }
         }

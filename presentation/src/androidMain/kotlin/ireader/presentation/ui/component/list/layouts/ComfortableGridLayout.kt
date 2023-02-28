@@ -22,7 +22,7 @@ import ireader.domain.models.entities.BookItem
 import ireader.i18n.UiText
 import ireader.presentation.ui.component.list.isScrolledToTheEnd
 import ireader.presentation.R
-
+import ireader.i18n.resources.MR
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ComfortableGridLayout(
@@ -90,7 +90,7 @@ fun ComfortableGridLayout(
                         }
 
                         if (showInLibraryBadge && book.favorite) {
-                            TextBadge(text = UiText.StringResource(R.string.in_library))
+                            TextBadge(text = UiText.MStringResource(MR.strings.in_library))
                         }
                     }
                 }

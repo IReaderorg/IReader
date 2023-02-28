@@ -2,26 +2,26 @@ package ireader.domain.usecases.epub
 
 import android.content.Context
 import android.net.Uri
-import ireader.domain.models.entities.Book
 import ireader.core.source.model.Text
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.image.cache.CoverCache
 import ireader.domain.models.BookCover
+import ireader.domain.models.entities.Book
 import nl.siegmann.epublib.domain.Author
 import nl.siegmann.epublib.domain.MediaType
 import nl.siegmann.epublib.domain.Resource
 import nl.siegmann.epublib.epub.EpubWriter
 import nl.siegmann.epublib.service.MediatypeService
-
 import java.io.FileOutputStream
 
 
 class EpubCreator(
     private val coverCache: CoverCache,
-    private val chapterRepository: ChapterRepository
+    private val chapterRepository: ChapterRepository,
+    private val context: Context
 ) {
 
-    suspend operator fun invoke(book: Book, uri: Uri, context: Context) {
+    suspend operator fun invoke(book: Book, uri: Uri) {
         val epubBook = nl.siegmann.epublib.domain.Book()
         val chapters = chapterRepository.findChaptersByBookId(book.id)
         val metadata = epubBook.metadata
@@ -44,9 +44,9 @@ class EpubCreator(
                 .toByteArray(), "${chapter.name}-$index.html", MediatypeService.XHTML)
             epubBook.addSection(chapter.name, resource)
         }
-        writeToUri(uri, context, epubBook)
+        writeToUri(uri, epubBook)
     }
-    private fun writeToUri(uri: Uri, context: Context, book: nl.siegmann.epublib.domain.Book) {
+    private fun writeToUri(uri: Uri, book: nl.siegmann.epublib.domain.Book) {
         val contentResolver = context.contentResolver
         val pfd = contentResolver.openFileDescriptor(uri, "w") ?: return
         FileOutputStream(pfd.fileDescriptor).use {

@@ -11,11 +11,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.UiText
 import ireader.i18n.asString
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @Composable
 fun ClickableTextIcon(
@@ -25,6 +26,7 @@ fun ClickableTextIcon(
     contentDescription: String = "an Icon",
     onClick: () -> Unit,
 ) {
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     Button(
         modifier = modifier,
         onClick = { onClick() },
@@ -41,7 +43,7 @@ fun ClickableTextIcon(
         ) {
             icon(this)
             Text(
-                text = text.asString(LocalContext.current),
+                text = text.asString(localizeHelper),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onBackground,
                 overflow = TextOverflow.Visible,

@@ -40,6 +40,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.toBook
@@ -57,6 +58,7 @@ import ireader.presentation.ui.component.list.isScrolledToTheEnd
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.SmallTextComposable
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
 import kotlinx.coroutines.launch
 
@@ -82,7 +84,7 @@ fun ExploreScreen(
     scaffoldPadding: PaddingValues
 ) {
     val scrollState = rememberLazyListState()
-    val context = LocalContext.current
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
 
     val gridState = rememberLazyGridState()
 
@@ -118,9 +120,9 @@ fun ExploreScreen(
     }
     LaunchedEffect(key1 = vm.error != null) {
         val errors = vm.error
-        if (errors != null && errors.asString(context).isNotBlank() && vm.page > 1) {
+        if (errors != null && errors.asString(localizeHelper).isNotBlank() && vm.page > 1) {
             setShowSnackBar(true)
-            setSnackBarText(errors.asString(context))
+            setSnackBarText(errors.asString(localizeHelper))
         }
     }
     LaunchedEffect(key1 = scrollState.layoutInfo.totalItemsCount > 0, key2 = scrollState.isScrolledToTheEnd(), key3 = !vm.endReached && !vm.isLoading) {
@@ -160,6 +162,7 @@ fun ExploreScreen(
     ) { paddingValue ->
         Box(
             modifier = Modifier
+                .padding(paddingValue)
                 .fillMaxSize()
         ) {
 
@@ -169,7 +172,7 @@ fun ExploreScreen(
                 }
                 vm.error != null && vm.page == 1 -> {
                     ExploreScreenErrorComposable(
-                        error = vm.error!!.asString(context),
+                        error = vm.error!!.asString(localizeHelper),
                         source = source,
                         onRefresh = { getBooks(null, null, emptyList()) },
                         onWebView = {

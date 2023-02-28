@@ -18,7 +18,7 @@ import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.BuildDropDownMenu
 import ireader.presentation.ui.component.reusable_composable.DropDownMenuItem
-
+import ireader.i18n.resources.MR
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DownloaderTopAppBar(
@@ -78,7 +78,7 @@ private fun RegularTopBar(
         scrollBehavior = scrollBehavior,
         title = {
             Text(
-                text = UiText.StringResource(R.string.downloads_queue).asString(),
+                text = UiText.MStringResource(MR.strings.downloads_queue).asString(),
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,

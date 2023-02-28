@@ -34,7 +34,7 @@ import ireader.presentation.ui.home.explore.FilterBottomSheet
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
 import kotlinx.coroutines.launch
 import okhttp3.Headers
-
+import ireader.i18n.resources.MR
 
 @OptIn(
     ExperimentalAnimationApi::class,
@@ -108,7 +108,7 @@ data class ExploreScreenSpec(
                                 vm.stateListing = source?.getListings()?.first()
                                 vm.loadItems()
                                 scope.launch {
-                                    vm.showSnackBar(UiText.StringResource(R.string.query_must_not_be_empty))
+                                    vm.showSnackBar(UiText.MStringResource(MR.strings.query_must_not_be_empty))
                                 }
                             }
                             focusManager.clearFocus()

@@ -7,12 +7,7 @@ import ireader.domain.data.repository.CategoryRepository
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.data.repository.LibraryRepository
-import ireader.domain.usecases.backup.backup.Backup
-import ireader.domain.usecases.backup.backup.BookProto
-import ireader.domain.usecases.backup.backup.CategoryProto
-import ireader.domain.usecases.backup.backup.ChapterProto
-import ireader.domain.usecases.backup.backup.HistoryProto
-import ireader.domain.usecases.backup.backup.TrackProto
+import ireader.domain.usecases.backup.backup.*
 import ireader.i18n.UiText
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToByteArray
@@ -21,6 +16,7 @@ import okio.buffer
 import okio.gzip
 import okio.sink
 import okio.source
+import kotlin.io.use
 
 
 
@@ -31,11 +27,11 @@ class CreateBackup  internal constructor(
     private val chapterRepository: ChapterRepository,
     private val historyRepository: HistoryRepository,
     private val transactions: Transactions,
+    private val context: Context
 ) {
 
     suspend fun saveTo(
         uri: Uri,
-        context: Context,
         onError: (UiText) -> Unit,
         onSuccess: () -> Unit
     ): Result {
