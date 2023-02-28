@@ -26,7 +26,7 @@ import ireader.domain.models.entities.Book
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.UiText
-import ireader.presentation.R
+import ireader.i18n.resources.MR
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.book.BookDetailScreen
@@ -39,7 +39,6 @@ import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
 import ireader.presentation.ui.core.theme.TransparentStatusBar
 import ireader.presentation.ui.core.ui.SnackBarListener
 import kotlinx.coroutines.launch
-import ireader.i18n.resources.MR
 data class BookDetailScreenSpec(
     val bookId: Long,
 ) : VoyagerScreen() {

@@ -32,10 +32,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
+import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
 import ireader.domain.utils.extensions.launchIO
 import ireader.domain.models.entities.CategoryWithCount
 import ireader.i18n.R
+import ireader.i18n.localize
 import ireader.presentation.ui.component.components.component.PreferenceRow
 import ireader.presentation.ui.component.reorderable.ReorderableLazyListState
 import ireader.presentation.ui.component.reorderable.detectReorderAfterLongPress
@@ -45,7 +47,8 @@ import ireader.presentation.ui.component.reorderable.reorderable
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
-
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.MR
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun CategoryScreen(
@@ -100,7 +103,7 @@ fun CategoryFloatingActionButton(
                 .padding(16.dp),
             text = {
                 MidSizeTextComposable(
-                    text = stringResource(R.string.add),
+                    text = localize(MR.strings.add),
                     color = MaterialTheme.colorScheme.onSecondary
                 )
             },
@@ -157,7 +160,7 @@ private fun ShowEditScreen(
     vm: CategoryScreenViewModel,
     onConfirm: (String) -> Unit
 ) {
-
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     var query by remember {
         mutableStateOf("")
     }
@@ -168,14 +171,14 @@ private fun ShowEditScreen(
                 query = ""
                 vm.showDialog = false
             },
-            title = { Text(stringResource(id = R.string.edit_category)) },
+            title = { Text(localizeHelper.localize(MR.strings.edit_category)) },
             text = {
                 AppTextField(
                     query = query,
                     onValueChange = { query = it },
                     onConfirm = {},
-                    hint = stringResource(
-                        id = R.string.category_hint
+                    hint = localizeHelper.localize(
+                        MR.strings.category_hint
                     ),
                     mode = 1,
                     keyboardAction = KeyboardOptions(imeAction = ImeAction.Done),
@@ -187,7 +190,7 @@ private fun ShowEditScreen(
                     onConfirm(query)
                     query = ""
                 }) {
-                    MidSizeTextComposable(text = stringResource(id = R.string.confirm))
+                    MidSizeTextComposable(text = localizeHelper.localize(MR.strings.confirm))
                 }
             }
         )

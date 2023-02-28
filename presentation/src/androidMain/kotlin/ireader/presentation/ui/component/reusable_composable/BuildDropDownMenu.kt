@@ -12,8 +12,8 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 
 @Composable
 fun BuildDropDownMenu(
@@ -32,7 +32,7 @@ fun BuildDropDownMenu(
         IconButton(onClick = { setState(true) }) {
             Icon(
                 imageVector = Icons.Outlined.MoreVert,
-                contentDescription = stringResource(R.string.export_book_as_epub),
+                contentDescription = localize(MR.strings.export_book_as_epub),
             )
         }
         DropdownMenu(

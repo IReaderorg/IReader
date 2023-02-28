@@ -14,12 +14,13 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 
 import ireader.presentation.ui.component.Controller
 import ireader.i18n.R
+import ireader.i18n.localize
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.category.CategoryScreen
 import ireader.presentation.ui.settings.category.CategoryScreenViewModel
-
+import ireader.i18n.resources.MR
 
 class CategoryScreenSpec : VoyagerScreen() {
 
@@ -38,7 +39,7 @@ class CategoryScreenSpec : VoyagerScreen() {
         IScaffold(
             topBar = {scrollBehavior ->
             TitleToolbar(
-                    title = stringResource(R.string.edit_category),
+                    title = localize(MR.strings.edit_category),
                     scrollBehavior = scrollBehavior,
                 popBackStack = {
                     popBackStack(navigator)

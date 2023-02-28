@@ -1,37 +1,27 @@
 package ireader.presentation.ui.book.components
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.Book
+import ireader.i18n.resources.MR
 import ireader.presentation.R
 import ireader.presentation.ui.component.components.component.ChipPreference
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @Composable
 fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm: (Book) -> Unit) {
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     var state by remember {
         mutableStateOf(false)
     }
@@ -67,14 +57,14 @@ fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm:
                     onStateChange(state)
                     state = false
                 }) {
-                    MidSizeTextComposable(text = stringResource(id = R.string.cancel))
+                    MidSizeTextComposable(text = localizeHelper.localize(MR.strings.cancel))
                 }
                 TextButton(onClick = {
                     onStateChange(state)
                     state = false
                     onConfirm(book.copy(description = description.ifBlank { book.description }, title = title.ifBlank { book.title }, cover = cover.ifBlank { book.cover }, author = author.ifBlank { book.author }, status = status))
                 }) {
-                    MidSizeTextComposable(text = stringResource(id = R.string.confirm))
+                    MidSizeTextComposable(text = localizeHelper.localize(MR.strings.confirm))
                 }
 
             }
@@ -88,8 +78,8 @@ fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm:
                 Row(verticalAlignment = Alignment.CenterVertically,) {
                     MidSizeTextComposable(text = "Status")
                     Spacer(modifier = Modifier.width(8.dp))
-                    ChipPreference(preference = book.allStatus(), selected = status.toInt(), title = stringResource(
-                        id = R.string.status
+                    ChipPreference(preference = book.allStatus(), selected = status.toInt(), title = localizeHelper.localize(
+                        MR.strings.status
                     ), onValueChange = {
                         status = it.toLong()
                     } )
@@ -98,25 +88,25 @@ fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm:
                     query = title,
                     onValueChange = { title = it },
                     onConfirm = {},
-                    hint = stringResource(id = R.string.title) + ": " + book.title
+                    hint = localizeHelper.localize(MR.strings.title) + ": " + book.title
                 )
                 SimpleTextField(
                     query = author,
                     onValueChange = { author = it },
                     onConfirm = {},
-                    hint = stringResource(id = R.string.author) + ": " + book.author
+                    hint = localizeHelper.localize(MR.strings.author) + ": " + book.author
                 )
                 SimpleTextField(
                     query = description,
                     onValueChange = { description = it },
                     onConfirm = {},
-                    hint = stringResource(id = R.string.description) + ": " + book.description
+                    hint = localizeHelper.localize(MR.strings.description) + ": " + book.description
                 )
                 SimpleTextField(
                     query = cover,
                     onValueChange = { cover = it },
                     onConfirm = {},
-                    hint = stringResource(id = R.string.cover) + ": " + book.cover
+                    hint = localizeHelper.localize(MR.strings.cover) + ": " + book.cover
                 )
 //                SimpleTextField(
 //                    query = tags,
@@ -125,7 +115,7 @@ fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm:
 //                                editedTags = editedTags + tags
 //                        tags = ""
 //                    },
-//                    hint = stringResource(id = R.string.tags)
+//                    hint = localizeHelper.localize(MR.strings.tags)
 //                )
             }
         }

@@ -20,6 +20,7 @@ import ireader.domain.utils.extensions.AuthenticatorUtil
 import ireader.domain.utils.extensions.AuthenticatorUtil.isAuthenticationSupported
 import ireader.domain.utils.extensions.AuthenticatorUtil.startAuthentication
 import ireader.i18n.R
+import ireader.i18n.localize
 import ireader.i18n.localizePlural
 import ireader.i18n.resources.MR
 import ireader.presentation.core.VoyagerScreen
@@ -137,8 +138,8 @@ class SecuritySettingSpec : VoyagerScreen() {
                             PreferenceValues.SecureScreenMode.INCOGNITO to stringResource(id = PreferenceValues.SecureScreenMode.INCOGNITO.titleResId),
                             PreferenceValues.SecureScreenMode.NEVER to stringResource(id = PreferenceValues.SecureScreenMode.NEVER.titleResId)
                         ),
-                        title = stringResource(
-                            id = R.string.secure_screen
+                        title = localize(
+                            MR.strings.secure_screen
                         )
                     )
                 },
@@ -148,7 +149,7 @@ class SecuritySettingSpec : VoyagerScreen() {
         IScaffold(
             topBar = { scrollBehavior ->
                 TitleToolbar(
-                    title = stringResource(R.string.security),
+                    title = localize(MR.strings.security),
                     scrollBehavior = scrollBehavior,
                     popBackStack = {
                         popBackStack(navigator)

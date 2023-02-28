@@ -14,11 +14,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import io.ktor.http.*
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Toolbar
@@ -44,7 +44,7 @@ class RepositoryScreenSpec : VoyagerScreen() {
             topBar = { scrollBehavior ->
                 Toolbar(
                     title ={
-                        MidSizeTextComposable(text =  stringResource(R.string.repository))
+                        MidSizeTextComposable(text =  localize(MR.strings.repository))
                     },
                     scrollBehavior = scrollBehavior
                 )
@@ -55,7 +55,7 @@ class RepositoryScreenSpec : VoyagerScreen() {
                 androidx.compose.material.ExtendedFloatingActionButton(
                     text = {
                         MidSizeTextComposable(
-                            text = stringResource(R.string.add),
+                            text = localize(MR.strings.add),
                             color = MaterialTheme.colorScheme.onSecondary
                         )
                     },

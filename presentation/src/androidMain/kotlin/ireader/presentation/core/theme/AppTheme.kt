@@ -30,7 +30,7 @@ fun AppTheme(
     val navigation = LocalCustomSystemColor.current.enabled
     val customStatusColor = LocalCustomSystemColor.current
     val ctx = LocalContext.current
-    val mainLocalizeHelper = remember { LocalizeHelper(ctx) }
+    val mainLocalizeHelper by rememberInstance<LocalizeHelper>()
 
     systemUiController.setSystemBarsColor(
         color = customColors.bars,

@@ -1,8 +1,8 @@
 package ireader.presentation.ui.book.viewmodel
 
 import ireader.i18n.UiText
-import ireader.presentation.R
 import ireader.i18n.resources.MR
+
 data class ChapterSort(val type: Type, val isAscending: Boolean) {
 
     enum class Type {

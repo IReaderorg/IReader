@@ -1,6 +1,7 @@
 package ireader.domain.di
 
 import android.app.Service
+import ireader.domain.services.downloaderService.DefaultNotificationHelper
 import ireader.domain.services.downloaderService.DownloadServiceStateImpl
 import ireader.domain.services.downloaderService.DownloaderService
 import ireader.domain.services.extensions_insstaller_service.ExtensionManagerService
@@ -8,10 +9,7 @@ import ireader.domain.services.library_update_service.LibraryUpdatesService
 import ireader.domain.services.tts_service.TTSStateImpl
 import ireader.domain.services.tts_service.media_player.TTSService
 import ireader.domain.services.update_service.UpdateService
-import org.kodein.di.DI
-import org.kodein.di.bindProvider
-import org.kodein.di.bindSingleton
-import org.kodein.di.instance
+import org.kodein.di.*
 
 
 val DomainServices = DI.Module("domainModule") {
@@ -43,7 +41,7 @@ val DomainServices = DI.Module("domainModule") {
         TTSService()
     }
 
-    bindSingleton { ireader.domain.services.downloaderService.DefaultNotificationHelper(instance()) }
+    bindSingleton<DefaultNotificationHelper> { new(::DefaultNotificationHelper) }
     bindSingleton<DownloadServiceStateImpl> { ireader.domain.services.downloaderService.DownloadServiceStateImpl() }
     bindSingleton {
         ireader.domain.usecases.backup.AutomaticBackup(

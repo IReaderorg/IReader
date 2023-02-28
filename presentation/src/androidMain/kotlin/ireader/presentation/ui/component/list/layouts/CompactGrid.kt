@@ -23,9 +23,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.BookItem
 import ireader.i18n.UiText
-import ireader.presentation.R
-import ireader.presentation.ui.component.list.isScrolledToTheEnd
 import ireader.i18n.resources.MR
+import ireader.presentation.ui.component.list.isScrolledToTheEnd
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CompactGridLayoutComposable(

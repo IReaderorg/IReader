@@ -12,13 +12,13 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.home.history.viewmodel.HistoryState
-import ireader.presentation.R
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -33,7 +33,7 @@ fun HistoryTopAppBar(
     Toolbar(
         title = {
             if (!vm.searchMode) {
-                BigSizeTextComposable(text = stringResource(R.string.history_screen_label))
+                BigSizeTextComposable(text = localize(MR.strings.history_screen_label))
             } else {
                 AppTextField(
                     query = vm.searchQuery,
@@ -51,7 +51,7 @@ fun HistoryTopAppBar(
             if (vm.searchMode) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
-                    contentDescription = stringResource(R.string.close),
+                    contentDescription = localize(MR.strings.close),
                     onClick = {
                         vm.searchMode = false
                         vm.searchQuery = ""
@@ -61,14 +61,14 @@ fun HistoryTopAppBar(
             }
             AppIconButton(
                 imageVector = Icons.Default.Search,
-                contentDescription = stringResource(R.string.search),
+                contentDescription = localize(MR.strings.search),
                 onClick = {
                     vm.searchMode = true
                 },
             )
             AppIconButton(
                 imageVector = Icons.Default.Delete,
-                contentDescription = stringResource(R.string.delete_all_histories),
+                contentDescription = localize(MR.strings.delete_all_histories),
                 onClick = {
                     onDeleteAll()
                 },
@@ -78,7 +78,7 @@ fun HistoryTopAppBar(
             if (vm.searchMode) {
                 AppIconButton(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = stringResource(R.string.toggle_search_mode_off),
+                    contentDescription = localize(MR.strings.toggle_search_mode_off),
                     onClick = {
                         vm.searchMode = false
                         vm.searchQuery = ""

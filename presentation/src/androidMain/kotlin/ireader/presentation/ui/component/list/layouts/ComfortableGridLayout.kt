@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.BookItem
 import ireader.i18n.UiText
 import ireader.presentation.ui.component.list.isScrolledToTheEnd
-import ireader.presentation.R
 import ireader.i18n.resources.MR
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

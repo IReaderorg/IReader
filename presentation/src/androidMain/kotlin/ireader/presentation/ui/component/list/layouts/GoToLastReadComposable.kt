@@ -12,14 +12,14 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.UiText
 import ireader.i18n.asString
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.SuperSmallTextComposable
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -45,7 +45,7 @@ fun GoToLastReadComposable(modifier: Modifier = Modifier, size: Dp = 40.dp, onCl
         ) {
             AppIconButton(
                 imageVector = Icons.Default.ImportContacts,
-                contentDescription = stringResource(R.string.open_last_chapter),
+                contentDescription = localize(MR.strings.open_last_chapter),
                 onClick = {
                     onClick()
                 },

@@ -11,8 +11,8 @@ import ireader.domain.models.entities.History
 import ireader.domain.models.entities.LibraryBook
 import ireader.domain.models.library.LibrarySort
 import ireader.i18n.UiText
-import ireader.presentation.R
 import ireader.i18n.resources.MR
+
 
 interface LibraryState {
     var isLoading: Boolean

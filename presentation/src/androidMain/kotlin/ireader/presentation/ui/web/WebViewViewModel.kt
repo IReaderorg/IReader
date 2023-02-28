@@ -20,7 +20,7 @@ import ireader.domain.catalogs.CatalogStore
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
-import ireader.presentation.R
+
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.ui.component.Controller
 import kotlinx.coroutines.Dispatchers

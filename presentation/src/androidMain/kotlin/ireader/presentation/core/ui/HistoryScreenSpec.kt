@@ -14,8 +14,9 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import ireader.domain.utils.extensions.launchIO
+import ireader.i18n.localize
+
 import ireader.i18n.resources.MR
-import ireader.presentation.R
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.reusable_composable.WarningAlert
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -25,13 +26,12 @@ import ireader.presentation.ui.home.history.HistoryTopAppBar
 import ireader.presentation.ui.home.history.viewmodel.HistoryViewModel
 import kotlinx.coroutines.launch
 
-
 object HistoryScreenSpec : Tab {
 
     override val options: TabOptions
         @Composable
         get()  {
-            val title = stringResource(R.string.history_screen_label)
+            val title = localize(MR.strings.history_screen_label)
             val icon = rememberVectorPainter(Icons.Filled.History)
             return remember {
                 TabOptions(

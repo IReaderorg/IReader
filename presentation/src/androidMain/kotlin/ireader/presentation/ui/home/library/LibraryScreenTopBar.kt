@@ -13,8 +13,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
@@ -78,7 +78,7 @@ private fun RegularTopBar(
     Toolbar(
         title = {
             if (!vm.inSearchMode) {
-                BigSizeTextComposable(text = stringResource(R.string.library))
+                BigSizeTextComposable(text = localize(MR.strings.library))
             } else {
                 AppTextField(
                     query = vm.searchQuery ?: "",
@@ -100,7 +100,7 @@ private fun RegularTopBar(
             if (vm.inSearchMode) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
-                    contentDescription = stringResource(R.string.close),
+                    contentDescription = localize(MR.strings.close),
                     onClick = {
                         vm.inSearchMode = false
                         vm.searchQuery = null
@@ -110,7 +110,7 @@ private fun RegularTopBar(
             } else {
                 AppIconButton(
                     imageVector = Icons.Default.Sort,
-                    contentDescription = stringResource(R.string.filter),
+                    contentDescription = localize(MR.strings.filter),
                     onClick = {
                         scope.launch {
                             if (bottomSheetState.isVisible) {
@@ -123,14 +123,14 @@ private fun RegularTopBar(
                 )
                 AppIconButton(
                     imageVector = Icons.Default.Search,
-                    contentDescription = stringResource(R.string.search),
+                    contentDescription = localize(MR.strings.search),
                     onClick = {
                         vm.inSearchMode = true
                     },
                 )
                 AppIconButton(
                     imageVector = Icons.Default.Refresh,
-                    contentDescription = stringResource(R.string.refresh),
+                    contentDescription = localize(MR.strings.refresh),
                     onClick = {
                         refreshUpdate()
                     },

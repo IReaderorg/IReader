@@ -9,24 +9,20 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Autorenew
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Chapter
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
-import ireader.presentation.R
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 
@@ -76,7 +72,7 @@ fun ReaderScreenTopBar(
                 if (chapter != null) {
                     AppIconButton(
                         imageVector = if (vm.expandTopMenu) Icons.Default.ChevronRight else Icons.Default.ChevronLeft,
-                        contentDescription = stringResource(R.string.expand_menu),
+                        contentDescription = localize(MR.strings.expand_menu),
                         onClick = {
                             vm.expandTopMenu = !vm.expandTopMenu
                         }
@@ -84,7 +80,7 @@ fun ReaderScreenTopBar(
                     if (vm.expandTopMenu) {
                         AppIconButton(
                             imageVector = if (chapter.bookmark) Icons.Filled.Bookmark else Icons.Default.Bookmark,
-                            contentDescription = stringResource(R.string.bookmark),
+                            contentDescription = localize(MR.strings.bookmark),
                             tint = if (chapter.bookmark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
                             onClick = {
                                 onBookMark()
@@ -92,7 +88,7 @@ fun ReaderScreenTopBar(
                         )
                         AppIconButton(
                             imageVector = Icons.Default.Public,
-                            contentDescription = stringResource(R.string.webView),
+                            contentDescription = localize(MR.strings.webView),
                             onClick = {
                                 onWebView()
                             }
@@ -100,7 +96,7 @@ fun ReaderScreenTopBar(
                     }
                     AppIconButton(
                         imageVector = Icons.Default.Autorenew,
-                        contentDescription = stringResource(R.string.refresh),
+                        contentDescription = localize(MR.strings.refresh),
                         onClick = {
                             onRefresh()
                         }
@@ -119,7 +115,7 @@ fun ReaderScreenTopBar(
                 if (chapter != null) {
                     AppIconButton(
                         imageVector = Icons.Default.Autorenew,
-                        contentDescription = stringResource(R.string.refresh),
+                        contentDescription = localize(MR.strings.refresh),
                         onClick = {
                             onRefresh()
                         },
@@ -127,7 +123,7 @@ fun ReaderScreenTopBar(
                     )
                     AppIconButton(
                         imageVector = Icons.Default.Public,
-                        contentDescription = stringResource(R.string.webView),
+                        contentDescription = localize(MR.strings.webView),
                         onClick = {
                             onWebView()
                         },

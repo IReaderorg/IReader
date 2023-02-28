@@ -3,19 +3,16 @@ package ireader.presentation.ui.home.tts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.currentOrThrow
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.components.component.PreferenceRow
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
-import ireader.presentation.R
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,6 +25,7 @@ fun TTSTopBar(
     scrollBehavior: TopAppBarScrollBehavior?,
     vm: TTSViewModel
 ) {
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     Toolbar(
         title = {
                 PreferenceRow(title = vm.ttsChapter?.name?:"", subtitle = vm.ttsBook?.title?:"")
@@ -41,7 +39,7 @@ fun TTSTopBar(
             }) {
                 Icon(
                     imageVector = Icons.Default.List,
-                    contentDescription = stringResource(id = R.string.content),
+                    contentDescription = localizeHelper.localize(MR.strings.content),
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }
@@ -50,7 +48,7 @@ fun TTSTopBar(
             }) {
                 Icon(
                     imageVector = Icons.Default.Settings,
-                    contentDescription = stringResource(id = R.string.settings),
+                    contentDescription = localizeHelper.localize(MR.strings.settings),
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }

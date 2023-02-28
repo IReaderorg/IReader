@@ -16,7 +16,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -25,7 +24,8 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import ireader.core.log.Log
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.models.prefs.readerThemes
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
@@ -38,6 +38,7 @@ import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.component.ChipChoicePreference
 import ireader.presentation.ui.component.components.component.SliderPreference
 import ireader.presentation.ui.component.components.component.SwitchPreference
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.home.tts.*
 import ireader.presentation.ui.reader.ReaderScreenDrawer
 import kotlinx.coroutines.delay
@@ -83,7 +84,7 @@ class TTSScreenSpec(
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-
+        val localizeHelper = LocalLocalizeHelper.currentOrThrow
         val vm: TTSViewModel =
             getIViewModel(parameters =
                     TTSViewModel.Param(sourceId,chapterId,bookId,readingParagraph)
@@ -160,16 +161,16 @@ class TTSScreenSpec(
                             choices = vm.uiVoices.associate { voice ->
                                 return@associate voice to voice.localDisplayName
                             },
-                            title = stringResource(id = R.string.voices),
-                            onFailToFindElement = stringResource(id = R.string.system_default)
+                            title = localizeHelper.localize(MR.strings.voices),
+                            onFailToFindElement = localizeHelper.localize(MR.strings.system_default)
                         )
                         ChipChoicePreference(
                             preference = vm.language,
                             choices = vm.languages.associate { language ->
                                 return@associate language.displayName to language.displayName
                             },
-                            title = stringResource(id = R.string.languages),
-                            onFailToFindElement = stringResource(id = R.string.system_default)
+                            title = localizeHelper.localize(MR.strings.languages),
+                            onFailToFindElement = localizeHelper.localize(MR.strings.system_default)
                         )
                         ThemePreference(onBackgroundChange = {
                             vm.theme.value = it
@@ -178,14 +179,14 @@ class TTSScreenSpec(
                         })
                         SwitchPreference(
                             preference = vm.isTtsTrackerEnable,
-                            title = stringResource(id = R.string.tracker)
+                            title = localizeHelper.localize(MR.strings.tracker)
                         )
                         SwitchPreference(
                             preference = vm.autoNext,
-                            title = stringResource(id = R.string.auto_next_chapter)
+                            title = localizeHelper.localize(MR.strings.auto_next_chapter)
                         )
                         SliderPreference(
-                            title = stringResource(R.string.speech_rate),
+                            title = localize(MR.strings.speech_rate),
                             preferenceAsFloat = vm.speechRate,
                             valueRange = .5F..3F,
                             trailing = vm.speechRate.value.toBigDecimal()
@@ -193,7 +194,7 @@ class TTSScreenSpec(
                                 .toString()
                         )
                         SliderPreference(
-                            title = stringResource(R.string.pitch),
+                            title = localize(MR.strings.pitch),
                             preferenceAsFloat = vm.speechPitch,
                             valueRange = .5F..2.1F,
                             trailing = vm.speechPitch.value.toBigDecimal()
@@ -202,10 +203,10 @@ class TTSScreenSpec(
                         )
                         SwitchPreference(
                             preference = vm.sleepModeUi,
-                            title = stringResource(id = R.string.enable_sleep_timer)
+                            title = localizeHelper.localize(MR.strings.enable_sleep_timer)
                         )
                         SliderPreference(
-                            title = stringResource(R.string.sleep),
+                            title = localize(MR.strings.sleep),
                             preferenceAsLong = vm.sleepTimeUi,
                             valueRange = 0F..60F,
                             trailing = "${vm.sleepTimeUi.value.toInt()} M",
@@ -213,11 +214,11 @@ class TTSScreenSpec(
                         )
                         Components.Chip(
                             preference = listOf(
-                                stringResource(id = R.string.top_left),
-                                stringResource(id = R.string.bottom_left),
-                                stringResource(id = R.string.hide),
+                                localizeHelper.localize(MR.strings.top_left),
+                                localizeHelper.localize(MR.strings.bottom_left),
+                                localizeHelper.localize(MR.strings.hide),
                             ),
-                            title = stringResource(id = R.string.alignment),
+                            title = localizeHelper.localize(MR.strings.alignment),
                             onValueChange = {
                                 when (it) {
                                     0 -> vm.ttsIconAlignments.value =

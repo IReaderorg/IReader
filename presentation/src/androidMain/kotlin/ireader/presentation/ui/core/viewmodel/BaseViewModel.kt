@@ -8,7 +8,7 @@ import cafe.adriel.voyager.core.model.coroutineScope
 import ireader.core.prefs.Preference
 import ireader.i18n.UiEvent
 import ireader.i18n.UiText
-import ireader.presentation.R
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.core.ui.PreferenceMutableState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import ireader.i18n.resources.MR
+
 actual abstract class BaseViewModel : ScreenModel {
 
     actual val scope: CoroutineScope

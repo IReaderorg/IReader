@@ -5,8 +5,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
@@ -43,7 +43,7 @@ private fun MainAppearanceToolbar(
     Toolbar(
         scrollBehavior = scrollBehavior,
         title = {
-            BigSizeTextComposable(text = stringResource(R.string.appearance))
+            BigSizeTextComposable(text = localize(MR.strings.appearance))
         },
         navigationIcon = {
             TopAppBarBackButton() {

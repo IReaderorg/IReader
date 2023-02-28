@@ -12,12 +12,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import ireader.i18n.BuildConfig
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
+import ireader.presentation.R
 import ireader.presentation.ui.component.components.LogoHeader
 import ireader.presentation.ui.component.components.component.LinkIcon
 import ireader.presentation.ui.component.components.component.PreferenceRow
-import ireader.presentation.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,7 +36,7 @@ fun AboutSettingScreen(
         }
         item {
             PreferenceRow(
-                title = stringResource(R.string.version),
+                title = localize(MR.strings.version),
                 subtitle = when {
                     BuildConfig.DEBUG -> {
                         "Debug ${BuildConfig.COMMIT_SHA} (${getFormattedBuildTime()})"
@@ -51,7 +52,7 @@ fun AboutSettingScreen(
         }
         item {
             PreferenceRow(
-                title = stringResource(R.string.check_the_update),
+                title = localize(MR.strings.check_the_update),
                 onClick = {
                     uriHandler.openUri("https://github.com/kazemcodes/Infinity/releases")
                 },
@@ -59,7 +60,7 @@ fun AboutSettingScreen(
         }
         item {
             PreferenceRow(
-                title = stringResource(R.string.whats_new),
+                title = localize(MR.strings.whats_new),
                 onClick = { uriHandler.openUri("https://github.com/kazemcodes/IReader/releases/latest") },
             )
         }
@@ -69,7 +70,7 @@ fun AboutSettingScreen(
                 horizontalArrangement = Arrangement.Center,
             ) {
                 LinkIcon(
-                    label = stringResource(R.string.website),
+                    label = localize(MR.strings.website),
                     painter = rememberVectorPainter(Icons.Outlined.Public),
                     url = "https://github.com/kazemcodes/IReader",
                 )

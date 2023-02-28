@@ -7,13 +7,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.i18n.resources.MR
-import ireader.presentation.R
 import ireader.presentation.core.theme.LocaleHelper
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
@@ -53,8 +51,8 @@ fun GeneralSettingScreen(
                         PreferenceValues.Installer.AndroidPackageManager to localizeHelper.localize(MR.strings.package_manager),
                         PreferenceValues.Installer.LocalInstaller to localizeHelper.localize(MR.strings.local_installer),
                     ),
-                    title = stringResource(
-                        id = R.string.installer_mode
+                    title = localizeHelper.localize(
+                        MR.strings.installer_mode
                     ),
                 )
             },
@@ -90,8 +88,8 @@ fun GeneralSettingScreen(
                 ChoicePreference<String>(
                     preference = vm.language,
                     choices = vm.getLanguageChoices(),
-                    title = stringResource(
-                        id = R.string.languages
+                    title = localizeHelper.localize(
+                        MR.strings.languages
                     ),
                     onValue = { value ->
                         vm.language.value = value

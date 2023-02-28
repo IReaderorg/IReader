@@ -50,6 +50,7 @@ import ireader.core.source.HttpSource
 import ireader.core.source.Source
 import ireader.core.source.model.Filter
 import ireader.core.source.model.Listing
+import ireader.i18n.localize
 import ireader.presentation.ui.core.theme.ContentAlpha
 import ireader.presentation.ui.core.ui.kaomojis
 import ireader.presentation.ui.component.components.ShowLoading
@@ -61,7 +62,7 @@ import ireader.presentation.ui.component.reusable_composable.SmallTextComposable
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
 import kotlinx.coroutines.launch
-
+import ireader.i18n.resources.MR
 @OptIn(
     ExperimentalFoundationApi::class, ExperimentalMaterialApi::class,
     ExperimentalMaterial3Api::class
@@ -142,7 +143,7 @@ fun ExploreScreen(
             androidx.compose.material3.ExtendedFloatingActionButton(
                 text = {
                     MidSizeTextComposable(
-                        text = stringResource(ireader.i18n.R.string.filter),
+                        text = localize(MR.strings.filter),
                         color = MaterialTheme.colorScheme.onSecondary
                     )
                 },
@@ -262,12 +263,12 @@ private fun BoxScope.ExploreScreenErrorComposable(
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.Refresh,
-                    contentDescription = stringResource(ireader.i18n.R.string.retry),
+                    contentDescription = localize(MR.strings.retry),
                     onClick = {
                         onRefresh()
                     }
                 )
-                SmallTextComposable(text = stringResource(ireader.i18n.R.string.retry))
+                SmallTextComposable(text = localize(MR.strings.retry))
             }
             Column(
                 Modifier
@@ -278,13 +279,13 @@ private fun BoxScope.ExploreScreenErrorComposable(
                 if (source is HttpSource) {
                     AppIconButton(
                         imageVector = Icons.Default.Public,
-                        contentDescription = stringResource(ireader.i18n.R.string.open_in_webView),
+                        contentDescription = localize(MR.strings.open_in_webView),
                         onClick = {
                             onWebView(source)
                         }
                     )
                 }
-                SmallTextComposable(text = stringResource(ireader.i18n.R.string.open_in_webView))
+                SmallTextComposable(text = localize(MR.strings.open_in_webView))
             }
         }
     }

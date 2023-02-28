@@ -6,22 +6,19 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import ireader.presentation.ui.component.Controller
-import ireader.presentation.ui.settings.about.AboutSettingScreen
 import ireader.domain.utils.extensions.toDateTimestampString
 import ireader.i18n.BuildConfig
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
+import ireader.presentation.ui.settings.about.AboutSettingScreen
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.TimeZone
+import java.util.*
 
 class AboutSettingSpec : VoyagerScreen() {
 
@@ -35,7 +32,7 @@ class AboutSettingSpec : VoyagerScreen() {
         IScaffold(
             topBar = { scrollBehavior ->
                 TitleToolbar(
-                    title = stringResource(R.string.about),
+                    title = localize(MR.strings.about),
                     scrollBehavior = scrollBehavior,
                     popBackStack = {
                         navigator.pop()

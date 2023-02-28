@@ -23,20 +23,21 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import ireader.presentation.ui.component.Controller
 import ireader.i18n.discord
+import ireader.i18n.localize
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.core.ui.util.NavigationArgs
-import ireader.presentation.R
+
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.settings.MainSettingScreenViewModel
 import ireader.presentation.ui.settings.MoreScreen
-
+import ireader.i18n.resources.MR
 
 object MoreScreenSpec : Tab {
 
     override val options: TabOptions
         @Composable
         get()  {
-            val title = stringResource(R.string.more)
+            val title = localize(MR.strings.more)
             val icon = rememberVectorPainter(Icons.Filled.MoreHoriz)
             return remember {
                 TabOptions(
@@ -59,7 +60,7 @@ object MoreScreenSpec : Tab {
         IScaffold(
             topBar = { scrollBehavior ->
                 TitleToolbar(
-                    title = stringResource(R.string.more),
+                    title = localize(MR.strings.more),
                     scrollBehavior = scrollBehavior,
                     popBackStack  = {
                         popBackStack(navigator)

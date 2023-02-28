@@ -27,12 +27,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LocalMinimumTouchTargetEnforcement
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.SuggestionChipDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
@@ -40,12 +35,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.google.accompanist.flowlayout.FlowRow
 import ireader.domain.utils.extensions.copyToClipboard
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.core.modifier.clickableNoIndication
-import ireader.presentation.R
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 private val whitespaceLineRegex = Regex("[\\r\\n]{2,}", setOf(RegexOption.MULTILINE))
 
@@ -57,13 +53,14 @@ fun BookSummary(
     expandedSummary: Boolean,
 ) {
     val context = LocalContext.current
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     Column {
         val (expanded, onExpanded) = rememberSaveable {
             mutableStateOf(false)
         }
         val desc =
             description.takeIf { it.isNotBlank() }
-                ?: stringResource(id = R.string.description_placeholder)
+                ?: localizeHelper.localize(MR.strings.description_placeholder)
         val trimmedDescription = remember(desc) {
             desc
                 .replace(whitespaceLineRegex, "\n")

@@ -42,6 +42,7 @@ kotlin {
     sourceSets {
          val commonMain by getting {
             dependencies {
+                api(project(Modules.commonResources))
                 api(kotlinx.coroutines.core)
                 api(kotlinx.stdlib)
                 api(kotlinx.datetime)

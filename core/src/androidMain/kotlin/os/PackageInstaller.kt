@@ -18,13 +18,15 @@ import android.os.SystemClock
 import ireader.core.R
 import ireader.core.log.Log
 import ireader.core.util.calculateSizeRecursively
+import ireader.i18n.LocalizeHelper
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-
+import ireader.i18n.resources.MR
 class PackageInstaller(
   private val context: Application,
+  private val localizeHelper:LocalizeHelper
 ) {
   private val packageInstaller = context.packageManager.packageInstaller
 
@@ -63,7 +65,7 @@ class PackageInstaller(
 
   private suspend fun withInstallReceiver(block: suspend (IntentSender) -> Unit): InstallStep {
     val deferred = CompletableDeferred<InstallStep>()
-    val receiver = InstallResultReceiver(context, deferred)
+    val receiver = InstallResultReceiver(context, deferred,localizeHelper)
     val uid = SystemClock.elapsedRealtime()
     val action = "core-api.INSTALL_APK_$uid"
     // FLAG_MUTABLE is needed for android 12
@@ -103,7 +105,8 @@ class PackageInstaller(
 
   private class InstallResultReceiver(
     val context: Application,
-    val deferred: CompletableDeferred<InstallStep>
+    val deferred: CompletableDeferred<InstallStep>,
+    private val localizeHelper:LocalizeHelper
   ) : BroadcastReceiver() {
 
     override fun onReceive(ctx: Context?, intent: Intent?) {
@@ -115,7 +118,7 @@ class PackageInstaller(
           val confirmationIntent = intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
           if (confirmationIntent == null) {
             Log.warn { "Fatal error for $intent" }
-            deferred.complete(InstallStep.Error(context.getString(R.string.fatal_error)))
+            deferred.complete(InstallStep.Error(localizeHelper.localize(MR.strings.fatal_error)))
             return
           }
           confirmationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -127,36 +130,36 @@ class PackageInstaller(
             //  deferred.complete(InstallStep.Idle)
           } catch (e: Throwable) {
             Log.warn("Error while (un)installing package", e)
-            deferred.complete(InstallStep.Error(context.getString(R.string.installation_error)))
+            deferred.complete(InstallStep.Error(localizeHelper.localize(MR.strings.installation_error)))
           }
         }
         PackageInstaller.STATUS_SUCCESS -> {
           deferred.complete(InstallStep.Success)
         }
         PackageInstaller.STATUS_FAILURE_ABORTED -> {
-          deferred.complete(InstallStep.Error(context.getString(R.string.installation_error_aborted)))
+          deferred.complete(InstallStep.Error(localizeHelper.localize(MR.strings.installation_error_aborted)))
         }
         PackageInstaller.STATUS_FAILURE_BLOCKED -> {
-          deferred.complete(InstallStep.Error(context.getString(R.string.installation_error_blocked)))
+          deferred.complete(InstallStep.Error(localizeHelper.localize(MR.strings.installation_error_blocked)))
         }
         PackageInstaller.STATUS_FAILURE_CONFLICT -> {
-          deferred.complete(InstallStep.Error(context.getString(R.string.installation_error_conflicted)))
+          deferred.complete(InstallStep.Error(localizeHelper.localize(MR.strings.installation_error_conflicted)))
         }
         PackageInstaller.STATUS_FAILURE_INCOMPATIBLE -> {
-          deferred.complete(InstallStep.Error(context.getString(R.string.installation_error_incompatible)))
+          deferred.complete(InstallStep.Error(localizeHelper.localize(MR.strings.installation_error_incompatible)))
         }
         PackageInstaller.STATUS_FAILURE_STORAGE -> {
-          deferred.complete(InstallStep.Error(context.getString(R.string.installation_error_Storage)))
+          deferred.complete(InstallStep.Error(localizeHelper.localize(MR.strings.installation_error_Storage)))
         }
         PackageInstaller.STATUS_FAILURE_INVALID -> {
-          deferred.complete(InstallStep.Error(context.getString(R.string.installation_error_invalid)))
+          deferred.complete(InstallStep.Error(localizeHelper.localize(MR.strings.installation_error_invalid)))
         }
         else -> {
           Log.error(
             "Package installer failed to install packages",
             status.toString()
           )
-          deferred.complete(InstallStep.Error(context.getString(R.string.package_installer_failed_to_install_packages) + " $status"))
+          deferred.complete(InstallStep.Error(localizeHelper.localize(MR.strings.package_installer_failed_to_install_packages) + " $status"))
         }
       }
     }

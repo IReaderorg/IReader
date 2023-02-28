@@ -1,21 +1,17 @@
 package ireader.presentation.ui.home.sources.extension
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.TravelExplore
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
 import com.google.accompanist.pager.ExperimentalPagerApi
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
-import ireader.presentation.R
 
 @OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -36,7 +32,7 @@ fun ExtensionScreenTopAppBar(
         scrollBehavior = scrollBehavior,
         title = {
             if (!searchMode) {
-                BigSizeTextComposable(text = stringResource(R.string.extensions))
+                BigSizeTextComposable(text = localize(MR.strings.extensions))
             } else {
                 AppTextField(
                     query = query,
@@ -50,37 +46,37 @@ fun ExtensionScreenTopAppBar(
                 if (searchMode) {
                     AppIconButton(
                         imageVector = Icons.Default.Close,
-                        contentDescription = stringResource(R.string.close),
+                        contentDescription = localize(MR.strings.close),
                         onClick = onClose,
                     )
                 } else {
                     AppIconButton(
                         imageVector = Icons.Default.Search,
-                        contentDescription = stringResource(R.string.search),
+                        contentDescription = localize(MR.strings.search),
                         onClick = onSearchEnable,
                     )
                 }
                 AppIconButton(
                     imageVector = Icons.Default.Refresh,
-                    contentDescription = stringResource(R.string.refresh),
+                    contentDescription = localize(MR.strings.refresh),
                     onClick = onRefresh,
                 )
             } else {
                 if (searchMode) {
                     AppIconButton(
                         imageVector = Icons.Default.Close,
-                        contentDescription = stringResource(R.string.close),
+                        contentDescription = localize(MR.strings.close),
                         onClick = onSearchDisable,
                     )
                 } else {
                     AppIconButton(
                         imageVector = Icons.Default.Search,
-                        contentDescription = stringResource(R.string.search),
+                        contentDescription = localize(MR.strings.search),
                         onClick = onSearchEnable,
                     )
                     AppIconButton(
                         imageVector = Icons.Default.TravelExplore,
-                        contentDescription = stringResource(R.string.search),
+                        contentDescription = localize(MR.strings.search),
                         onClick = onSearchNavigate,
                     )
                 }
@@ -91,7 +87,7 @@ fun ExtensionScreenTopAppBar(
 
                 AppIconButton(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = stringResource(R.string.toggle_search_mode_off),
+                    contentDescription = localize(MR.strings.toggle_search_mode_off),
                     onClick = onSearchDisable
                 )
             } else null

@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.i18n.UiText
-import ireader.presentation.R
+
 import ireader.i18n.resources.MR
 
 

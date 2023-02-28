@@ -1,32 +1,24 @@
 package ireader.presentation.ui.home.library.components
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TriStateCheckbox
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.Category
 import ireader.domain.models.entities.CategoryWithCount
-import ireader.presentation.R
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 
 @Composable
@@ -41,12 +33,12 @@ fun EditCategoriesDialog(
     onAddDeleteQueue: (Category) -> Unit,
     categories: List<CategoryWithCount>
 ) {
-
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     if (vm.showDialog) {
         AlertDialog(
             modifier = modifier.heightIn(max = 350.dp, min = 200.dp),
             onDismissRequest = { vm.showDialog = false },
-            title = { Text(stringResource(id = R.string.edit_category)) },
+            title = { Text(localizeHelper.localize(MR.strings.edit_category)) },
             text = {
                 LazyColumn {
                     items(items = categories) { category ->
@@ -104,7 +96,7 @@ fun EditCategoriesDialog(
             },
             confirmButton = {
                 Button(onClick = onConfirm) {
-                    MidSizeTextComposable(text = stringResource(id = R.string.add))
+                    MidSizeTextComposable(text = localizeHelper.localize(MR.strings.add))
                 }
             }
         )

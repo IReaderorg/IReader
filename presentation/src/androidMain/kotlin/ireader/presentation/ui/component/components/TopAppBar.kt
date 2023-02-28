@@ -6,27 +6,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MediumTopAppBar
-import androidx.compose.material3.SmallTopAppBar
-import androidx.compose.material3.Surface
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
@@ -174,7 +164,7 @@ fun SearchToolbar(
             if (isSearchModeEnable) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
-                    contentDescription = stringResource(R.string.close),
+                    contentDescription = localize(MR.strings.close),
                     onClick = {
                         isSearchModeEnable = false
                         query = ""
@@ -186,7 +176,7 @@ fun SearchToolbar(
             } else {
                 AppIconButton(
                     imageVector = Icons.Default.Search,
-                    contentDescription = stringResource(R.string.search),
+                    contentDescription = localize(MR.strings.search),
                     onClick = {
                         isSearchModeEnable = true
                         query = ""
@@ -204,7 +194,7 @@ fun SearchToolbar(
             if (isSearchModeEnable) {
                 AppIconButton(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = stringResource(R.string.toggle_search_mode_off),
+                    contentDescription = localize(MR.strings.toggle_search_mode_off),
                     onClick = {
                         isSearchModeEnable = false
                         query = ""
@@ -214,7 +204,7 @@ fun SearchToolbar(
                 if (onPopBackStack != null) {
                     AppIconButton(
                         imageVector = Icons.Default.ArrowBack,
-                        contentDescription = stringResource(R.string.toggle_search_mode_off),
+                        contentDescription = localize(MR.strings.toggle_search_mode_off),
                         onClick = {
                             onPopBackStack()
                         }

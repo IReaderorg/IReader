@@ -8,23 +8,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.ExtensionSource
 import ireader.i18n.UiText
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.CaptionTextComposable
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.settings.repository.AddingRepositoryScreen
 import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
 import kotlinx.coroutines.launch
-import ireader.i18n.resources.MR
 
 class RepositoryAddScreenSpec : VoyagerScreen() {
 
@@ -35,6 +35,7 @@ class RepositoryAddScreenSpec : VoyagerScreen() {
         var text by remember {
             mutableStateOf("")
         }
+        val localizeHelper = LocalLocalizeHelper.currentOrThrow
         val vm : SourceRepositoryViewModel =  getIViewModel()
         val host = SnackBarListener(vm = vm)
         val navigator = LocalNavigator.currentOrThrow
@@ -45,7 +46,7 @@ class RepositoryAddScreenSpec : VoyagerScreen() {
             topBar = { scrollBehavior ->
                     Toolbar(
                         title = {
-                            MidSizeTextComposable(text = stringResource(R.string.repository_adding_a_new))
+                            MidSizeTextComposable(text = localize(MR.strings.repository_adding_a_new))
                         },
                         scrollBehavior = scrollBehavior,
                         actions = {
@@ -88,10 +89,10 @@ class RepositoryAddScreenSpec : VoyagerScreen() {
                         }
                         showDialog.value = false
                     }) {
-                        MidSizeTextComposable(text = stringResource(id = R.string.add))
+                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.add))
                     }
                 }, title = {
-                    MidSizeTextComposable(text = stringResource(id = R.string.add_as_new))
+                    MidSizeTextComposable(text = localizeHelper.localize(MR.strings.add_as_new))
                 }, text = {
                     androidx.compose.material3.OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),

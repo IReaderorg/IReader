@@ -31,6 +31,8 @@ import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
+import ireader.i18n.localize
+
 import ireader.i18n.resources.MR
 import ireader.presentation.R
 import ireader.presentation.ui.component.components.Build
@@ -103,6 +105,7 @@ private fun ReaderScreenTab(
     vm: ReaderScreenViewModel,
     onTextAlign: (PreferenceValues.PreferenceTextAlignment) -> Unit
 ) {
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     LazyColumn(
         verticalArrangement = Arrangement.Top,
         modifier = Modifier.fillMaxSize()
@@ -122,19 +125,19 @@ private fun ReaderScreenTab(
                         postion++
                         return@associate fontType to fontType.name
                     },
-                title = stringResource(id = R.string.font),
+                title = localizeHelper.localize(MR.strings.font),
                 onFailToFindElement = vm.font.value.name
             )
         }
         item {
             PreferenceRow(
-                title = stringResource(id = R.string.text_align),
+                title = localizeHelper.localize(MR.strings.text_align),
                 action = {
                     LazyRow {
                         item {
                             AppIconButton(
                                 imageVector = Icons.Default.FormatAlignLeft,
-                                contentDescription = stringResource(R.string.text_align_left),
+                                contentDescription = localize(MR.strings.text_align_left),
                                 onClick = {
                                     onTextAlign(PreferenceValues.PreferenceTextAlignment.Left)
                                 },
@@ -142,7 +145,7 @@ private fun ReaderScreenTab(
                             )
                             AppIconButton(
                                 imageVector = Icons.Default.FormatAlignCenter,
-                                contentDescription = stringResource(R.string.text_align_center),
+                                contentDescription = localize(MR.strings.text_align_center),
                                 onClick = {
                                     onTextAlign(PreferenceValues.PreferenceTextAlignment.Center)
                                 },
@@ -150,7 +153,7 @@ private fun ReaderScreenTab(
                             )
                             AppIconButton(
                                 imageVector = Icons.Default.FormatAlignJustify,
-                                contentDescription = stringResource(R.string.text_align_justify),
+                                contentDescription = localize(MR.strings.text_align_justify),
                                 onClick = {
                                     onTextAlign(PreferenceValues.PreferenceTextAlignment.Justify)
                                 },
@@ -158,7 +161,7 @@ private fun ReaderScreenTab(
                             )
                             AppIconButton(
                                 imageVector = Icons.Default.FormatAlignRight,
-                                contentDescription = stringResource(R.string.text_align_right),
+                                contentDescription = localize(MR.strings.text_align_right),
                                 onClick = {
                                     onTextAlign(PreferenceValues.PreferenceTextAlignment.Right)
                                 },
@@ -172,7 +175,7 @@ private fun ReaderScreenTab(
         item {
             Components.Slider(
                 preferenceAsInt = vm.fontSize,
-                title = stringResource(id = R.string.font_size),
+                title = localizeHelper.localize(MR.strings.font_size),
                 trailing = vm.fontSize.value.toInt().toString(),
                 valueRange = 8.0F..32.0F,
             ).Build()
@@ -180,20 +183,20 @@ private fun ReaderScreenTab(
         item {
             Components.Slider(
                 preferenceAsInt = vm.textWeight,
-                title = stringResource(id = R.string.font_weight),
+                title = localizeHelper.localize(MR.strings.font_weight),
                 trailing = vm.textWeight.value.toInt().toString(),
                 valueRange = 1f..900F,
             ).Build()
         }
         item {
             Components.Header(
-                stringResource(id = R.string.paragraph)
+                localizeHelper.localize(MR.strings.paragraph)
             ).Build()
         }
         item {
             Components.Slider(
                 preferenceAsInt = vm.paragraphsIndent,
-                title = stringResource(id = R.string.paragraph_indent),
+                title = localizeHelper.localize(MR.strings.paragraph_indent),
                 trailing = vm.paragraphsIndent.value.toInt().toString(),
                 valueRange = 0.0F..32.0F,
             ).Build()
@@ -201,33 +204,33 @@ private fun ReaderScreenTab(
         item {
             Components.Slider(
                 preferenceAsInt = vm.distanceBetweenParagraphs,
-                title = stringResource(id = R.string.paragraph_distance),
+                title = localizeHelper.localize(MR.strings.paragraph_distance),
                 trailing = vm.distanceBetweenParagraphs.value.toInt().toString(),
                 valueRange = 0.0F..8.0F,
             ).Build()
         }
         item {
             Components.Header(
-                stringResource(id = R.string.line)
+                localizeHelper.localize(MR.strings.line)
             ).Build()
         }
         item {
             Components.Slider(
                 preferenceAsInt = vm.lineHeight,
-                title = stringResource(id = R.string.line_height),
+                title = localizeHelper.localize(MR.strings.line_height),
                 trailing = vm.lineHeight.value.toInt().toString(),
                 valueRange = 22.0F..48.0F,
             ).Build()
         }
         item {
             Components.Header(
-                stringResource(id = R.string.autoscroll)
+                localizeHelper.localize(MR.strings.autoscroll)
             ).Build()
         }
         item {
             Components.Slider(
                 preferenceAsLong = vm.autoScrollInterval,
-                title = stringResource(id = R.string.interval),
+                title = localizeHelper.localize(MR.strings.interval),
                 trailing = (vm.autoScrollInterval.value / 1000).toInt().toString(),
                 valueRange = 500.0F..10000.0F,
             ).Build()
@@ -235,7 +238,7 @@ private fun ReaderScreenTab(
         item {
             Components.Slider(
                 preferenceAsInt = vm.autoScrollOffset,
-                title = stringResource(id = R.string.offset),
+                title = localizeHelper.localize(MR.strings.offset),
                 trailing = (vm.autoScrollOffset.value / 1000).toInt().toString(),
                 valueRange = 500.0F..10000F,
             ).Build()
@@ -243,13 +246,13 @@ private fun ReaderScreenTab(
         }
         item {
             Components.Header(
-                stringResource(id = R.string.scrollIndicator)
+                localizeHelper.localize(MR.strings.scrollIndicator)
             ).Build()
         }
         item {
             Components.Slider(
                 preferenceAsInt = vm.scrollIndicatorPadding,
-                title = stringResource(id = R.string.padding),
+                title = localizeHelper.localize(MR.strings.padding),
                 trailing = vm.scrollIndicatorPadding.value.toString(),
                 valueRange = 0F..32F,
             ).Build()
@@ -257,7 +260,7 @@ private fun ReaderScreenTab(
         item {
             Components.Slider(
                 preferenceAsInt = vm.scrollIndicatorWith,
-                title = stringResource(id = R.string.width),
+                title = localizeHelper.localize(MR.strings.width),
                 trailing = vm.scrollIndicatorWith.value.toString(),
                 valueRange = 0F..32F,
             ).Build()
@@ -265,10 +268,10 @@ private fun ReaderScreenTab(
         item {
             Components.Chip(
                 preference = listOf(
-                    stringResource(id = R.string.right),
-                    stringResource(id = R.string.left),
+                    localizeHelper.localize(MR.strings.right),
+                    localizeHelper.localize(MR.strings.left),
                 ),
-                title = stringResource(id = R.string.alignment),
+                title = localizeHelper.localize(MR.strings.alignment),
                 onValueChange = {
                     when (it) {
                         0 -> vm.scrollIndicatorAlignment.value =
@@ -282,13 +285,13 @@ private fun ReaderScreenTab(
         }
         item {
             Components.Header(
-                stringResource(id = R.string.margins)
+                localizeHelper.localize(MR.strings.margins)
             ).Build()
         }
         item {
             Components.Slider(
                 preferenceAsInt = vm.topMargin,
-                title = stringResource(id = R.string.top),
+                title = localizeHelper.localize(MR.strings.top),
                 trailing = vm.topMargin.value.toString(),
                 valueRange = 0F..200F,
             ).Build()
@@ -296,7 +299,7 @@ private fun ReaderScreenTab(
         item {
             Components.Slider(
                 preferenceAsInt = vm.bottomMargin,
-                title = stringResource(id = R.string.bottom),
+                title = localizeHelper.localize(MR.strings.bottom),
                 trailing = vm.bottomMargin.value.toString(),
                 valueRange = 0F..200F,
             ).Build()
@@ -304,7 +307,7 @@ private fun ReaderScreenTab(
         item {
             Components.Slider(
                 preferenceAsInt = vm.leftMargin,
-                title = stringResource(id = R.string.left),
+                title = localizeHelper.localize(MR.strings.left),
                 trailing = vm.leftMargin.value.toString(),
                 valueRange = 0F..200F,
             ).Build()
@@ -312,20 +315,20 @@ private fun ReaderScreenTab(
         item {
             Components.Slider(
                 preferenceAsInt = vm.rightMargin,
-                title = stringResource(id = R.string.right),
+                title = localizeHelper.localize(MR.strings.right),
                 trailing = vm.rightMargin.value.toString(),
                 valueRange = 0F..200F,
             ).Build()
         }
         item {
             Components.Header(
-                stringResource(id = R.string.content_padding)
+                localizeHelper.localize(MR.strings.content_padding)
             ).Build()
         }
         item {
             Components.Slider(
                 preferenceAsInt = vm.topContentPadding,
-                title = stringResource(id = R.string.top),
+                title = localizeHelper.localize(MR.strings.top),
                 trailing = vm.topContentPadding.value.toString(),
                 valueRange = 0F..32F,
             ).Build()
@@ -333,7 +336,7 @@ private fun ReaderScreenTab(
         item {
             Components.Slider(
                 preferenceAsInt = vm.bottomContentPadding,
-                title = stringResource(id = R.string.bottom),
+                title = localizeHelper.localize(MR.strings.bottom),
                 trailing = vm.bottomContentPadding.value.toString(),
                 valueRange = 0F..32F,
             ).Build()
@@ -341,7 +344,7 @@ private fun ReaderScreenTab(
         item {
             Components.Slider(
                 preferenceAsInt = vm.betweenLetterSpaces,
-                title = stringResource(id = R.string.letter),
+                title = localizeHelper.localize(MR.strings.letter),
                 trailing = vm.betweenLetterSpaces.value.toString(),
                 valueRange = 0F..32F,
             ).Build()
@@ -360,6 +363,7 @@ fun GeneralScreenTab(
     vm: ReaderScreenViewModel,
 ) {
     val scope = rememberCoroutineScope()
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     LazyColumn(
         verticalArrangement = Arrangement.Top,
         modifier = Modifier.fillMaxSize()
@@ -392,34 +396,34 @@ fun GeneralScreenTab(
         item {
             ChipPreference(
                 preference = listOf(
-                    stringResource(id = R.string.page),
-                    stringResource(id = R.string.continues),
+                    localizeHelper.localize(MR.strings.page),
+                    localizeHelper.localize(MR.strings.continues),
                 ),
                 selected = vm.readingMode.value.ordinal,
                 onValueChange = {
                     vm.readingMode.value = ReadingMode.valueOf(it)
                 },
-                title = stringResource(id = R.string.scroll_mode)
+                title = localizeHelper.localize(MR.strings.scroll_mode)
             )
         }
         item {
             ChipPreference(
                 preference = listOf(
-                    stringResource(id = R.string.horizontal),
-                    stringResource(id = R.string.vertical),
+                    localizeHelper.localize(MR.strings.horizontal),
+                    localizeHelper.localize(MR.strings.vertical),
                 ),
                 selected = vm.verticalScrolling.value.isTrue(),
                 onValueChange = {
                     vm.verticalScrolling.value = it == 1
                 },
-                title = stringResource(id = R.string.reading_mode)
+                title = localizeHelper.localize(MR.strings.reading_mode)
             )
         }
         item {
             ChipPreference(
                 preference = listOf(
-                    stringResource(id = R.string.landscape),
-                    stringResource(id = R.string.portrait),
+                    localizeHelper.localize(MR.strings.landscape),
+                    localizeHelper.localize(MR.strings.portrait),
                 ),
                 selected = vm.orientation.value,
                 onValueChange = {
@@ -432,59 +436,59 @@ fun GeneralScreenTab(
                                 ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                     }
                 },
-                title = stringResource(id = R.string.orientation)
+                title = localizeHelper.localize(MR.strings.orientation)
             )
         }
         item {
             ChipPreference(
                 preference = listOf(
-                    stringResource(id = R.string.full),
-                    stringResource(id = R.string.partial),
-                    stringResource(id = R.string.disable),
+                    localizeHelper.localize(MR.strings.full),
+                    localizeHelper.localize(MR.strings.partial),
+                    localizeHelper.localize(MR.strings.disable),
                 ),
                 selected = vm.isScrollIndicatorDraggable.value.ordinal,
                 onValueChange = {
                     vm.isScrollIndicatorDraggable.value =
                         PreferenceValues.ScrollbarSelectionMode.valueOf(it)
                 },
-                title = stringResource(id = R.string.scrollbar_mode)
+                title = localizeHelper.localize(MR.strings.scrollbar_mode)
             )
         }
         item {
             SwitchPreference(
                 preference = vm.autoScrollMode,
-                title = stringResource(id = R.string.autoScroll),
+                title = localizeHelper.localize(MR.strings.autoScroll),
                 onValueChange = { vm.autoScrollMode = it }
             )
         }
         item {
             SwitchPreference(
                 preference = vm.immersiveMode,
-                title = stringResource(id = R.string.immersive_mode),
+                title = localizeHelper.localize(MR.strings.immersive_mode),
             )
         }
         item {
             SwitchPreference(
                 preference = vm.webViewIntegration,
-                title = stringResource(id = R.string.show_webView_during_fetching),
+                title = localizeHelper.localize(MR.strings.show_webView_during_fetching),
             )
         }
         item {
             SwitchPreference(
                 preference = vm.screenAlwaysOn,
-                title = stringResource(id = R.string.screen_always_on),
+                title = localizeHelper.localize(MR.strings.screen_always_on),
             )
         }
         item {
             SwitchPreference(
                 preference = vm.selectableMode,
-                title = stringResource(id = R.string.selectable_mode),
+                title = localizeHelper.localize(MR.strings.selectable_mode),
             )
         }
         item {
             SwitchPreference(
                 preference = vm.showScrollIndicator,
-                title = stringResource(id = R.string.show_scrollbar),
+                title = localizeHelper.localize(MR.strings.show_scrollbar),
             )
         }
         item {
@@ -540,7 +544,7 @@ private fun ColorScreenTab(
             Components.Dynamic {
                 ColorPreference(
                     preference = vm.backgroundColor,
-                    title = stringResource(id = R.string.background_color),
+                    title = localizeHelper.localize(MR.strings.background_color),
                     onChangeColor = {
                         vm.readerThemeSavable = true
                     }
@@ -551,7 +555,7 @@ private fun ColorScreenTab(
             Components.Dynamic {
                 ColorPreference(
                     preference = vm.textColor,
-                    title = stringResource(id = R.string.text_color),
+                    title = localizeHelper.localize(MR.strings.text_color),
                     onChangeColor = {
                         vm.readerThemeSavable = true
                     }
@@ -577,7 +581,7 @@ private fun ColorScreenTab(
                                 vm.showSnackBar(UiText.MStringResource(MR.strings.theme_was_saved))
                             }
                         }) {
-                            MidSizeTextComposable(text = stringResource(id = R.string.save_custom_theme))
+                            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.save_custom_theme))
                         }
                     } else if (!vm.readerTheme.value.isDefault) {
                         TextButton(onClick = {
@@ -588,7 +592,7 @@ private fun ColorScreenTab(
                                 vm.showSnackBar(UiText.MStringResource(MR.strings.theme_was_deleted))
                             }
                         }) {
-                            MidSizeTextComposable(text = stringResource(id = R.string.delete_custom_theme))
+                            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.delete_custom_theme))
                         }
                     }
                 }
@@ -598,7 +602,7 @@ private fun ColorScreenTab(
             Components.Dynamic {
                 ColorPreference(
                     preference = vm.selectedScrollBarColor,
-                    title = stringResource(id = R.string.selected_scrollbar_color)
+                    title = localizeHelper.localize(MR.strings.selected_scrollbar_color)
                 )
             }.Build()
         }
@@ -606,7 +610,7 @@ private fun ColorScreenTab(
             Components.Dynamic {
                 ColorPreference(
                     preference = vm.unselectedScrollBarColor,
-                    title = stringResource(id = R.string.unselected_scrollbar_color)
+                    title = localizeHelper.localize(MR.strings.unselected_scrollbar_color)
                 )
             }.Build()
         }

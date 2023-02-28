@@ -11,12 +11,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import ireader.presentation.R
+import cafe.adriel.voyager.navigator.currentOrThrow
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.remember.rememberMutableString
 import ireader.presentation.ui.component.reusable_composable.SmallTextComposable
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,7 +32,7 @@ internal fun AddingRepositoryScreen(
     val source = rememberMutableString()
     val username = rememberMutableString()
     val password = rememberMutableString()
-
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     androidx.compose.material3.Scaffold(
             modifier = Modifier.fillMaxSize().padding(top = scaffoldPadding.calculateTopPadding()),
             floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
@@ -62,22 +63,22 @@ internal fun AddingRepositoryScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             item {
-                FormComponent(stringResource(id = R.string.name), Icons.Default.Badge, name)
+                FormComponent(localizeHelper.localize(MR.strings.name), Icons.Default.Badge, name)
             }
             item {
-                FormComponent(stringResource(id = R.string.url), Icons.Default.Link, url)
+                FormComponent(localizeHelper.localize(MR.strings.url), Icons.Default.Link, url)
             }
             item {
-                FormComponent(stringResource(id = R.string.owner), Icons.Default.Copyright, owner)
+                FormComponent(localizeHelper.localize(MR.strings.owner), Icons.Default.Copyright, owner)
             }
             item {
-                FormComponent(stringResource(id = R.string.source), Icons.Default.HideSource, source)
+                FormComponent(localizeHelper.localize(MR.strings.source), Icons.Default.HideSource, source)
             }
             item {
-                FormComponent(stringResource(id = R.string.username), Icons.Default.Person, username, false)
+                FormComponent(localizeHelper.localize(MR.strings.username), Icons.Default.Person, username, false)
             }
             item {
-                FormComponent(stringResource(id = R.string.password), Icons.Default.Key, password, false)
+                FormComponent(localizeHelper.localize(MR.strings.password), Icons.Default.Key, password, false)
             }
         }
 

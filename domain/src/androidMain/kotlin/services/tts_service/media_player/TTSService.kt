@@ -36,6 +36,7 @@ import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.preferences.reader_preferences.TextReaderPrefUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.utils.extensions.findComponentActivity
+import ireader.i18n.LocalizeHelper
 import kotlinx.coroutines.*
 import kotlinx.datetime.Clock
 import org.kodein.di.*
@@ -50,6 +51,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
 
 
     private val chapterRepo: ChapterRepository by instance()
+    private val localizeHelper: LocalizeHelper by instance()
 
 
     private val chapterUseCase: LocalGetChapterUseCase by instance()
@@ -246,7 +248,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         }
         mediaButtonIntent.setClass(this, MediaButtonReceiver::class.java)
 
-        ttsNotificationBuilder = TTSNotificationBuilder(this, mbrComponent)
+        ttsNotificationBuilder = TTSNotificationBuilder(this, localizeHelper)
         controller = MediaControllerCompat(this, mediaSession.sessionToken)
 
         /**

@@ -33,22 +33,23 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
+import ireader.i18n.localize
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.core.ui.util.NavigationArgs
-import ireader.presentation.R
+
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.home.sources.extension.ExtensionScreen
 import ireader.presentation.ui.home.sources.extension.ExtensionScreenTopAppBar
 import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
-
+import ireader.i18n.resources.MR
 
 object ExtensionScreenSpec : Tab {
 
     override val options: TabOptions
         @Composable
         get() {
-            val title = stringResource(R.string.explore_screen_label)
+            val title = localize(MR.strings.explore_screen_label)
             val icon = rememberVectorPainter(Icons.Filled.Explore)
             return remember {
                 TabOptions(

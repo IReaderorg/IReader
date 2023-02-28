@@ -1,32 +1,22 @@
 package ireader.presentation.ui.home.sources.global_search
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import ireader.domain.models.entities.Book
 import ireader.core.source.Source
-import ireader.presentation.R
+import ireader.domain.models.entities.Book
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.list.layouts.BookImage
 import ireader.presentation.ui.component.loading.DotsFlashing
@@ -152,7 +142,7 @@ fun GlobalSearchBookInfo(
                 DotsFlashing(loading)
                 AppIconButton(
                     imageVector = Icons.Default.ArrowForward,
-                    contentDescription = stringResource(R.string.open_explore),
+                    contentDescription = localize(MR.strings.open_explore),
                     onClick = goToExplore
                 )
             }

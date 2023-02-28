@@ -10,11 +10,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ireader.core.source.findInstance
 import ireader.core.source.model.Command
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.CustomTextField
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.BuildDropDownMenu
@@ -65,22 +65,22 @@ fun WebPageTopBar(
             val list =
                 mutableListOf<DropDownMenuItem>(
                     DropDownMenuItem(
-                        stringResource(R.string.go)
+                        localize(MR.strings.go)
                     ) {
                         onGo()
                     },
                     DropDownMenuItem(
-                        stringResource(R.string.refresh)
+                        localize(MR.strings.refresh)
                     ) {
                         refresh()
                     },
                     DropDownMenuItem(
-                        stringResource(R.string.go_back)
+                        localize(MR.strings.go_back)
                     ) {
                         goBack()
                     },
                     DropDownMenuItem(
-                        stringResource(R.string.go_forward)
+                        localize(MR.strings.go_forward)
                     ) {
                         goForward()
                     },
@@ -88,7 +88,7 @@ fun WebPageTopBar(
             if (source != null && source.getCommands().findInstance<Command.Detail.Fetch>() != null && state.enableBookFetch) {
                 list.add(
                     DropDownMenuItem(
-                        stringResource(R.string.fetch_book)
+                        localize(MR.strings.fetch_book)
                     ) {
                         onFetchBook()
                     }
@@ -97,7 +97,7 @@ fun WebPageTopBar(
             if (source != null && source.getCommands().findInstance<Command.Content.Fetch>() != null && state.stateChapter != null && state.enableChapterFetch) {
                 list.add(
                     DropDownMenuItem(
-                        stringResource(R.string.fetch_chapter)
+                        localize(MR.strings.fetch_chapter)
                     ) {
                         onFetchChapter()
                     }
@@ -106,7 +106,7 @@ fun WebPageTopBar(
             if (source != null && source.getCommands().findInstance<Command.Chapter.Fetch>() != null && state.stateBook != null && state.enableChaptersFetch) {
                 list.add(
                     DropDownMenuItem(
-                        stringResource(R.string.fetch_chapters)
+                        localize(MR.strings.fetch_chapters)
                     ) {
                         onFetchChapters()
                     }

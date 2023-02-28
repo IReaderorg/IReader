@@ -12,10 +12,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.DEFAULT
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
-import ireader.presentation.R
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 
 
@@ -25,6 +27,7 @@ fun BrightnessSliderComposable(
     viewModel: ReaderScreenViewModel,
     onChangeBrightness: (Float) -> Unit
 ) {
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -41,7 +44,7 @@ fun BrightnessSliderComposable(
             AppIconButton(
                 modifier = modifier.weight(1f),
                 imageVector = Icons.Default.LightMode,
-                contentDescription = stringResource(R.string.less_brightness),
+                contentDescription = localize(MR.strings.less_brightness),
             )
             Slider(
                 viewModel.brightness.value,
@@ -62,7 +65,7 @@ fun BrightnessSliderComposable(
             AppIconButton(
                 modifier = modifier.weight(1f),
                 imageVector = Icons.Default.Brightness7,
-                contentDescription = stringResource(id = R.string.more_brightness)
+                contentDescription = localizeHelper.localize(MR.strings.more_brightness)
             )
         }
     }

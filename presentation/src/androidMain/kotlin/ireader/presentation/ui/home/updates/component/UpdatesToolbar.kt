@@ -5,23 +5,19 @@ package ireader.presentation.ui.home.updates.component
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.FlipToBack
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIcon
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.home.updates.viewmodel.UpdateState
-import ireader.presentation.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,7 +88,7 @@ fun UpdatesRegularToolbar(
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Toolbar(
-        title = { BigSizeTextComposable(text = stringResource(R.string.updates_screen_label)) },
+        title = { BigSizeTextComposable(text = localize(MR.strings.updates_screen_label)) },
         actions = {
             IconButton(onClick = onClickRefresh) {
                 AppIcon(imageVector = Icons.Default.Refresh, contentDescription = null)

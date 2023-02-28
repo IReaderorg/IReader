@@ -15,12 +15,13 @@ import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ireader.i18n.R
-
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 @Composable
 fun ConfirmExitBackHandler(confirmExit: Boolean) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val message = stringResource(R.string.confirm_exit_message)
+    val message = localize(MR.strings.confirm_exit_message)
 
     var isConfirmingExit by remember { mutableStateOf(false) }
 

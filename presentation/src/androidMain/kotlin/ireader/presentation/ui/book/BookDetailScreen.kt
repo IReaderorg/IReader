@@ -26,14 +26,14 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ireader.core.source.Source
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ChapterDisplayMode
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.book.components.*
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.components.ChapterRow
@@ -90,11 +90,11 @@ fun BookDetailScreen(
                 ExtendedFloatingActionButton(
                     text = {
                         val id = if (chapters.value.any { it.read }) {
-                            R.string.resume
+                            MR.strings.resume
                         } else {
-                            R.string.start
+                            MR.strings.start
                         }
-                        Text(text = stringResource(id))
+                        Text(text = localize(id))
                     },
                     icon = {
                         Icon(

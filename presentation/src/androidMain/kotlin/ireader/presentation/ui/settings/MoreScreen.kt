@@ -6,25 +6,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Help
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Label
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SettingsBackupRestore
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import cafe.adriel.voyager.navigator.currentOrThrow
+import ireader.domain.preferences.prefs.UiPreferences
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
+import ireader.presentation.R
 import ireader.presentation.ui.component.components.LogoHeader
 import ireader.presentation.ui.component.components.component.Divider
 import ireader.presentation.ui.component.components.component.PreferenceRow
 import ireader.presentation.ui.component.components.component.SwitchPreference
-import ireader.domain.preferences.prefs.UiPreferences
-import ireader.presentation.ui.core.viewmodel.BaseViewModel
-import ireader.presentation.R
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,7 +37,7 @@ fun MoreScreen(
     onAbout: () -> Unit,
     onHelp: () -> Unit,
 ) {
-
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     LazyColumn(
         modifier = modifier,
         state = rememberLazyListState()
@@ -50,8 +48,8 @@ fun MoreScreen(
         item {
             SwitchPreference(
                 preference = vm.incognitoMode,
-                title = stringResource(R.string.pref_incognito_mode),
-                subtitle = stringResource(R.string.pref_incognito_mode_summary),
+                title = localize(MR.strings.pref_incognito_mode),
+                subtitle = localize(MR.strings.pref_incognito_mode_summary),
                 painter = painterResource(R.drawable.ic_glasses_24dp),
             )
         }
@@ -61,21 +59,21 @@ fun MoreScreen(
 
         item {
             PreferenceRow(
-                title = stringResource(id = R.string.download),
+                title = localizeHelper.localize(MR.strings.download),
                 icon = Icons.Default.Download,
                 onClick = onDownloadScreen
             )
         }
         item {
             PreferenceRow(
-                title = stringResource(id = R.string.backup_and_restore),
+                title = localizeHelper.localize(MR.strings.backup_and_restore),
                 icon = Icons.Default.SettingsBackupRestore,
                 onClick = onBackupScreen,
             )
         }
         item {
             PreferenceRow(
-                title = stringResource(id = R.string.category),
+                title = localizeHelper.localize(MR.strings.category),
                 icon = Icons.Default.Label,
                 onClick = onCategory,
             )
@@ -86,14 +84,14 @@ fun MoreScreen(
         }
         item {
             PreferenceRow(
-                title = stringResource(id = R.string.settings),
+                title = localizeHelper.localize(MR.strings.settings),
                 icon = Icons.Default.Settings,
                 onClick = onSettings,
             )
         }
         item {
             PreferenceRow(
-                title = stringResource(id = R.string.about),
+                title = localizeHelper.localize(MR.strings.about),
                 icon = Icons.Default.Info,
                 onClick = onAbout,
             )
@@ -101,7 +99,7 @@ fun MoreScreen(
 
         item {
             PreferenceRow(
-                title = stringResource(id = R.string.help),
+                title = localizeHelper.localize(MR.strings.help),
                 icon = Icons.Default.Help,
                 onClick = onHelp,
             )

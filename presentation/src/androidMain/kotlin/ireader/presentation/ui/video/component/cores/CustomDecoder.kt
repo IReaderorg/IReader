@@ -3,7 +3,9 @@ package ireader.presentation.ui.video.component.cores
 import android.content.Context
 import android.preference.PreferenceManager
 import android.util.Log
+import androidx.media3.common.Format
 import androidx.media3.common.MimeTypes
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.text.SubtitleDecoderFactory
 import androidx.media3.extractor.text.SubtitleDecoder
 import androidx.media3.extractor.text.SubtitleInputBuffer
@@ -12,25 +14,26 @@ import androidx.media3.extractor.text.ssa.SsaDecoder
 import androidx.media3.extractor.text.subrip.SubripDecoder
 import androidx.media3.extractor.text.ttml.TtmlDecoder
 import androidx.media3.extractor.text.webvtt.WebvttDecoder
+import ireader.i18n.LocalizeHelper
 import ireader.presentation.R
 import org.mozilla.universalchardet.UniversalDetector
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 
-class CustomDecoder : SubtitleDecoder {
+@UnstableApi class CustomDecoder() : SubtitleDecoder {
     companion object {
-        fun updateForcedEncoding(context: Context) {
-            val settingsManager = PreferenceManager.getDefaultSharedPreferences(context)
-            val value = settingsManager.getString(
-                context.getString(R.string.subtitles_encoding_key),
-                null
-            )
-            overrideEncoding = if (value.isNullOrBlank()) {
-                null
-            } else {
-                value
-            }
-        }
+//        fun updateForcedEncoding(context: Context) {
+//            val settingsManager = PreferenceManager.getDefaultSharedPreferences(context)
+//            val value = settingsManager.getString(
+//                localizeHelper.localize(MR.strings.subtitles_encoding_key),
+//                null
+//            )
+//            overrideEncoding = if (value.isNullOrBlank()) {
+//                null
+//            } else {
+//                value
+//            }
+//        }
 
         private const val UTF_8 = "UTF-8"
         private const val TAG = "CustomDecoder"
@@ -222,7 +225,7 @@ class CustomDecoder : SubtitleDecoder {
         realDecoder?.setPositionUs(positionUs)
     }
 }
-
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 /** See https://github.com/google/ExoPlayer/blob/release-v2/library/core/src/main/java/com/google/android/exoplayer2/text/SubtitleDecoderFactory.java */
 class CustomSubtitleDecoderFactory : SubtitleDecoderFactory {
 
@@ -236,7 +239,7 @@ class CustomSubtitleDecoderFactory : SubtitleDecoderFactory {
         ).contains(format.sampleMimeType)
     }
 
-    override fun createDecoder(format: androidx.media3.common.Format): SubtitleDecoder {
+    override fun  createDecoder(format: Format): SubtitleDecoder {
         return CustomDecoder()
     }
 

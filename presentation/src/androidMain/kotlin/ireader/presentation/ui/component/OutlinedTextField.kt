@@ -11,11 +11,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 
 
@@ -29,7 +29,7 @@ fun CustomTextField(
     paddingTrailingIconStart: Dp = 0.dp,
     leadingIcon: (@Composable() () -> Unit)? = null,
     trailingIcon: (@Composable() () -> Unit)? = null,
-    hint: String = stringResource(R.string.search_hint),
+    hint: String = localize(MR.strings.search_hint),
     textColor: Color = MaterialTheme.colorScheme.onBackground,
 ) {
 

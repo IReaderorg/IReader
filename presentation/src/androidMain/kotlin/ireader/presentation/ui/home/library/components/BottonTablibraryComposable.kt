@@ -20,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -32,7 +31,8 @@ import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
 import ireader.i18n.LocalizeHelper
 import ireader.i18n.asString
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.component.pagerTabIndicatorOffset
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.component.text_related.TextSection
@@ -234,13 +234,14 @@ private fun LazyListScope.DispalyPage(
 ) {
     item {
         TextSection(
-            text = stringResource(R.string.display_mode),
+            text = localize(MR.strings.display_mode),
             padding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
             style = MaterialTheme.typography.bodyMedium,
             toUpper = false
         )
     }
     items(layouts) { layout ->
+        val localizeHelper = LocalLocalizeHelper.currentOrThrow
         Column(
             Modifier
                 .fillMaxSize()
@@ -255,16 +256,16 @@ private fun LazyListScope.DispalyPage(
 
                 when (layout) {
                     DisplayMode.CompactGrid -> {
-                        MidSizeTextComposable(text = stringResource(id = R.string.compact_layout))
+                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.compact_layout))
                     }
                     DisplayMode.ComfortableGrid -> {
-                        MidSizeTextComposable(text = stringResource(id = R.string.comfortable_layout))
+                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.comfortable_layout))
                     }
                     DisplayMode.List -> {
-                        MidSizeTextComposable(text = stringResource(id = R.string.list_layout))
+                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.list_layout))
                     }
                     DisplayMode.OnlyCover -> {
-                        MidSizeTextComposable(text = stringResource(id = R.string.cover_only_layout))
+                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.cover_only_layout))
                     }
                 }
             }
@@ -272,7 +273,7 @@ private fun LazyListScope.DispalyPage(
     }
     item {
         TextSection(
-            text = stringResource(R.string.columns),
+            text = localize(MR.strings.columns),
             padding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
             style = MaterialTheme.typography.bodyMedium,
             toUpper = false
@@ -285,13 +286,14 @@ private fun LazyListScope.DispalyPage(
     }
     item {
         TextSection(
-            text = stringResource(R.string.badge),
+            text = localize(MR.strings.badge),
             padding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
             style = MaterialTheme.typography.bodyMedium,
             toUpper = false
         )
     }
     item {
+        val localizeHelper = LocalLocalizeHelper.currentOrThrow
         ClickableRow(onClick = { vm.readBadge.value = !vm.readBadge.value }) {
             Checkbox(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -300,10 +302,11 @@ private fun LazyListScope.DispalyPage(
                     vm.readBadge.value = it
                 }
             )
-            MidSizeTextComposable(text = stringResource(id = R.string.read_chapters))
+            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.read_chapters))
         }
     }
     item {
+        val localizeHelper = LocalLocalizeHelper.currentOrThrow
         ClickableRow(onClick = { vm.unreadBadge.value = !vm.unreadBadge.value }) {
             Checkbox(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -312,10 +315,11 @@ private fun LazyListScope.DispalyPage(
                     vm.unreadBadge.value = it
                 }
             )
-            MidSizeTextComposable(text = stringResource(id = R.string.unread_chapters))
+            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.unread_chapters))
         }
     }
     item {
+        val localizeHelper = LocalLocalizeHelper.currentOrThrow
         ClickableRow(onClick = { vm.goToLastChapterBadge.value = !vm.goToLastChapterBadge.value }) {
             Checkbox(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -324,18 +328,19 @@ private fun LazyListScope.DispalyPage(
                     vm.goToLastChapterBadge.value = it
                 }
             )
-            MidSizeTextComposable(text = stringResource(id = R.string.go_to_last_chapter))
+            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.go_to_last_chapter))
         }
     }
     item {
         TextSection(
-            text = stringResource(R.string.tabs),
+            text = localize(MR.strings.tabs),
             padding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
             style = MaterialTheme.typography.bodyMedium,
             toUpper = false
         )
     }
     item {
+        val localizeHelper = LocalLocalizeHelper.currentOrThrow
         ClickableRow(onClick = { vm.showCategoryTabs.value = !vm.showCategoryTabs.value }) {
             Checkbox(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -344,10 +349,11 @@ private fun LazyListScope.DispalyPage(
                     vm.showCategoryTabs.value = it
                 }
             )
-            MidSizeTextComposable(text = stringResource(id = R.string.show_category_tabs))
+            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.show_category_tabs))
         }
     }
     item {
+        val localizeHelper = LocalLocalizeHelper.currentOrThrow
         ClickableRow(onClick = { vm.showAllCategoryTab.value = !vm.showAllCategoryTab.value }) {
             Checkbox(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -356,10 +362,11 @@ private fun LazyListScope.DispalyPage(
                     vm.showAllCategoryTab.value = it
                 }
             )
-            MidSizeTextComposable(text = stringResource(id = R.string.show_all_category_tab))
+            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.show_all_category_tab))
         }
     }
     item {
+        val localizeHelper = LocalLocalizeHelper.currentOrThrow
         ClickableRow(onClick = { vm.showCountInCategory.value = !vm.showCountInCategory.value }) {
             Checkbox(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -368,7 +375,7 @@ private fun LazyListScope.DispalyPage(
                     vm.showCountInCategory.value = it
                 }
             )
-            MidSizeTextComposable(text = stringResource(id = R.string.show_count_in_category_tab))
+            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.show_count_in_category_tab))
         }
     }
 }

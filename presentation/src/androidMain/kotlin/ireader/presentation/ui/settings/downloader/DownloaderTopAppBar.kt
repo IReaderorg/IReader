@@ -8,17 +8,16 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import ireader.i18n.UiText
 import ireader.i18n.asString
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.BuildDropDownMenu
 import ireader.presentation.ui.component.reusable_composable.DropDownMenuItem
-import ireader.i18n.resources.MR
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DownloaderTopAppBar(
@@ -89,7 +88,7 @@ private fun RegularTopBar(
             val list =
                 listOf<DropDownMenuItem>(
                     DropDownMenuItem(
-                        stringResource(R.string.cancel_all)
+                        localize(MR.strings.cancel_all)
                     ) {
                         onCancelAll()
                     }
@@ -100,7 +99,7 @@ private fun RegularTopBar(
             IconButton(onClick = onPopBackStack) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = stringResource(R.string.return_to_previous_screen),
+                    contentDescription = localize(MR.strings.return_to_previous_screen),
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }

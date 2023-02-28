@@ -13,7 +13,6 @@ import ireader.core.log.Log
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
 import ireader.i18n.resources.MR
-import ireader.presentation.R
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope

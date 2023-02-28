@@ -20,7 +20,7 @@ import ireader.core.source.HttpSource
 import ireader.domain.models.entities.toBookItem
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
-import ireader.presentation.R
+import ireader.i18n.resources.MR
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.imageloader.coil.image_loaders.convertToOkHttpRequest
@@ -34,7 +34,7 @@ import ireader.presentation.ui.home.explore.FilterBottomSheet
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
 import kotlinx.coroutines.launch
 import okhttp3.Headers
-import ireader.i18n.resources.MR
+
 
 @OptIn(
     ExperimentalAnimationApi::class,
@@ -211,7 +211,7 @@ data class ExploreScreenSpec(
                     )
                 } else {
                     EmptyScreenComposable(
-                        R.string.source_not_available,
+                        UiText.MStringResource(MR.strings.source_not_available),
                         onPopBackStack = {
                             popBackStack(navigator)
                         }

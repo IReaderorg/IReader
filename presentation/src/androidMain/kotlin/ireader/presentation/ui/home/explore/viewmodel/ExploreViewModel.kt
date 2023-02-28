@@ -18,7 +18,7 @@ import ireader.domain.utils.exceptionHandler
 import ireader.domain.utils.extensions.DefaultPaginator
 import ireader.i18n.SourceNotFoundException
 import ireader.i18n.UiText
-import ireader.presentation.R
+
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.Job

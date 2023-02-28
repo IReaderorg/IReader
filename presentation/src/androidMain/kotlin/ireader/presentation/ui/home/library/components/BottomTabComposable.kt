@@ -7,13 +7,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
+import ireader.domain.models.DisplayMode
 import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
-import ireader.domain.models.DisplayMode
-import ireader.presentation.R
+import ireader.i18n.resources.MR
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 
 @ExperimentalMaterialApi
@@ -32,17 +33,18 @@ fun BottomTabComposable(
     vm: LibraryViewModel,
     scaffoldPadding: PaddingValues
 ) {
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     val tabs = listOf(
         TabItem(
-            stringResource(id = R.string.filter)
+            localizeHelper.localize(MR.strings.filter)
         ) {
         },
         TabItem(
-            stringResource(id = R.string.sort)
+            localizeHelper.localize(MR.strings.sort)
         ) {
         },
         TabItem(
-            stringResource(id = R.string.display)
+            localizeHelper.localize(MR.strings.display)
         ) {
         },
     )

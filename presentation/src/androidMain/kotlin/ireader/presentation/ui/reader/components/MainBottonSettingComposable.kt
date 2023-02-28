@@ -12,12 +12,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import ireader.domain.models.entities.Chapter
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
+import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import ireader.domain.models.entities.Chapter
-import ireader.presentation.ui.component.reusable_composable.AppIconButton
-import ireader.presentation.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,17 +60,17 @@ fun MainBottomSettingComposable(
     ) {
         AppIconButton(
             imageVector = Icons.Default.Menu,
-            contentDescription = stringResource(R.string.drawer),
+            contentDescription = localize(MR.strings.drawer),
             onClick = { scope.launch { drawerState.open() } }
         )
         AppIconButton(
             imageVector = Icons.Default.Headphones,
-            contentDescription = stringResource(R.string.play),
+            contentDescription = localize(MR.strings.play),
             onClick = { onPlay() }
         )
         AppIconButton(
             imageVector = Icons.Default.Settings,
-            contentDescription = stringResource(R.string.settings),
+            contentDescription = localize(MR.strings.settings),
             onClick = { onSetting() }
         )
     }

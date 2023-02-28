@@ -25,7 +25,7 @@ import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.theme.Theme
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
-import ireader.presentation.R
+
 import ireader.presentation.ui.component.components.Build
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.LazyColumnWithInsets
@@ -87,11 +87,11 @@ fun AppearanceSettingScreen(
                 ChoicePreference<PreferenceValues.ThemeMode>(
                     preference = vm.themeMode,
                     choices = mapOf(
-                        PreferenceValues.ThemeMode.System to stringResource(id = R.string.follow_system_settings),
-                        PreferenceValues.ThemeMode.Light to stringResource(id = R.string.light),
-                        PreferenceValues.ThemeMode.Dark to stringResource(id = R.string.dark)
+                        PreferenceValues.ThemeMode.System to localizeHelper.localize(MR.strings.follow_system_settings),
+                        PreferenceValues.ThemeMode.Light to localizeHelper.localize(MR.strings.light),
+                        PreferenceValues.ThemeMode.Dark to localizeHelper.localize(MR.strings.dark)
                     ),
-                    title = stringResource(id = R.string.theme),
+                    title = localizeHelper.localize(MR.strings.theme),
                     subtitle = null,
                     onValue = {
                         vm.saveNightModePreferences(it)
@@ -202,7 +202,7 @@ fun AppearanceSettingScreen(
                                 vm.isSavable = false
                             }
                         }) {
-                            MidSizeTextComposable(text = stringResource(id = R.string.save_custom_theme))
+                            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.save_custom_theme))
                         }
                     } else if (vm.colorTheme.value > 0) {
                         TextButton(onClick = {
@@ -215,7 +215,7 @@ fun AppearanceSettingScreen(
                                 vm.showSnackBar(UiText.MStringResource(MR.strings.theme_was_deleted))
                             }
                         }) {
-                            MidSizeTextComposable(text = stringResource(id = R.string.delete_custom_theme))
+                            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.delete_custom_theme))
                         }
                     }
                 }
@@ -238,7 +238,7 @@ fun AppearanceSettingScreen(
                             else -> localizeHelper.localize(MR.strings.off)
                         }
                     },
-                    title = stringResource(id = R.string.pref_relative_format),
+                    title = localizeHelper.localize(MR.strings.pref_relative_format),
                     subtitle = null,
                 )
             }.Build()

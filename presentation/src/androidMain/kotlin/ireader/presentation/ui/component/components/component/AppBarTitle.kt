@@ -3,21 +3,12 @@ package ireader.presentation.ui.component.components.component
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 
 @Composable
 fun AppBarTitle(
@@ -64,7 +55,7 @@ fun AppBarActions(
     val overflowActions = actions.filterIsInstance<AppBar.OverflowAction>()
     if (overflowActions.isNotEmpty()) {
         IconButton(onClick = { showMenu = !showMenu }) {
-            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.label_more))
+            Icon(Icons.Default.MoreVert, contentDescription = localize(MR.strings.label_more))
         }
 
         DropdownMenu(

@@ -9,7 +9,8 @@ import androidx.compose.ui.res.stringResource
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
@@ -33,7 +34,7 @@ class BackupAndRestoreScreenSpec : VoyagerScreen() {
         IScaffold(
             topBar = {scrollBehavior ->
                 TitleToolbar(
-                    title = stringResource(R.string.backup_and_restore),
+                    title = localize(MR.strings.backup_and_restore),
                     scrollBehavior = scrollBehavior,
                     popBackStack = {
                         popBackStack(navigator)

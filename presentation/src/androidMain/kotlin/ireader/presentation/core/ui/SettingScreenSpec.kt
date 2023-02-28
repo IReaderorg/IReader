@@ -1,25 +1,23 @@
 package ireader.presentation.core.ui
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.R
 import ireader.presentation.core.VoyagerScreen
-import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.SettingsSection
 import ireader.presentation.ui.settings.SetupLayout
 
@@ -31,6 +29,7 @@ class SettingScreenSpec : VoyagerScreen() {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
+        val localizeHelper = LocalLocalizeHelper.currentOrThrow
         val settingItems = remember {
             listOf(
                 SettingsSection(
@@ -80,7 +79,7 @@ class SettingScreenSpec : VoyagerScreen() {
                 Toolbar(
                     scrollBehavior = scrollBehavior,
                     title = {
-                        BigSizeTextComposable(text = stringResource(R.string.settings))
+                        BigSizeTextComposable(text = localize(MR.strings.settings))
                     },
                     navigationIcon = { TopAppBarBackButton(onClick = { popBackStack(navigator) }) },
                 )

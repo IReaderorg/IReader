@@ -19,12 +19,13 @@ import ireader.presentation.ui.component.components.SearchToolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.models.getDefaultFont
+import ireader.i18n.localize
 import ireader.presentation.ui.settings.font_screens.FontScreen
 import ireader.presentation.ui.settings.font_screens.FontScreenViewModel
-import ireader.presentation.R
+
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
-
+import ireader.i18n.resources.MR
 
 @ExperimentalMaterial3Api
 class FontScreenSpec : VoyagerScreen() {
@@ -36,7 +37,7 @@ class FontScreenSpec : VoyagerScreen() {
         IScaffold(
             topBar = { scrollBehavior ->
                 SearchToolbar(
-                    title = stringResource(R.string.font),
+                    title = localize(MR.strings.font),
                     actions = {
                         AppIconButton(
                             imageVector = Icons.Default.Preview,

@@ -1,15 +1,7 @@
 package ireader.presentation.ui.reader
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
@@ -19,10 +11,10 @@ import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Chapter
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.ChapterRow
 import ireader.presentation.ui.component.list.scrollbars.VerticalFastScroller
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
@@ -49,7 +41,7 @@ fun ReaderScreenDrawer(
     ) {
         Spacer(modifier = modifier.height(5.dp))
         Box(modifier = Modifier.fillMaxWidth()) {
-            BigSizeTextComposable(text = stringResource(R.string.content), modifier = Modifier.align(Alignment.Center))
+            BigSizeTextComposable(text = localize(MR.strings.content), modifier = Modifier.align(Alignment.Center))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End,
@@ -57,12 +49,12 @@ fun ReaderScreenDrawer(
             ) {
                 Box {}
 
-                AppIconButton(imageVector = Icons.Filled.Place, contentDescription = stringResource(R.string.find_current_chapter), onClick = {
+                AppIconButton(imageVector = Icons.Filled.Place, contentDescription = localize(MR.strings.find_current_chapter), onClick = {
                     onMap(drawerScrollState)
                 })
                 AppIconButton(
                     imageVector = Icons.Default.Sort,
-                    contentDescription = stringResource(R.string.reverse),
+                    contentDescription = localize(MR.strings.reverse),
                     onClick = {
                         onReverseIcon()
                     }

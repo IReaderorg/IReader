@@ -5,39 +5,35 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.os.Bundle
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.net.toUri
 import androidx.media.session.MediaButtonReceiver
 import ireader.domain.R
 import ireader.domain.notification.Notifications
 import ireader.domain.notification.Notifications.CHANNEL_TTS
-import ireader.domain.notification.flags
 import ireader.domain.notification.legacyFlags
 import ireader.domain.notification.setLargeIcon
 import ireader.domain.services.tts_service.Player
 import ireader.domain.services.tts_service.media_player.TTSService.Companion.ACTION_CANCEL
-import ireader.domain.utils.extensions.findComponentActivity
 import ireader.domain.utils.extensions.launchMainActivityIntent
 import ireader.i18n.Args
+import ireader.i18n.LocalizeHelper
 import ireader.i18n.SHORTCUTS
-
+import ireader.i18n.resources.MR
 /**
  * Helper class to encapsulate code for building notifications.
  */
 
 class TTSNotificationBuilder constructor(
     private val context: Context,
-    private val mbrComponent: ComponentName,
+    private val localizeHelper: LocalizeHelper
 ) {
 
     private val notificationManager = NotificationManagerCompat.from(context)
@@ -46,7 +42,7 @@ class TTSNotificationBuilder constructor(
 
     val skipPrevActionButton = NotificationCompat.Action(
         R.drawable.ic_baseline_skip_previous,
-        context.getString(R.string.previous_chapter),
+        localizeHelper.localize(MR.strings.previous_chapter),
         MediaButtonReceiver.buildMediaButtonPendingIntent(
             context,
             PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
@@ -54,7 +50,7 @@ class TTSNotificationBuilder constructor(
     )
     val rewindAction = NotificationCompat.Action(
         R.drawable.ic_baseline_fast_rewind,
-        context.getString(R.string.previous_paragraph),
+        localizeHelper.localize(MR.strings.previous_paragraph),
         MediaButtonReceiver.buildMediaButtonPendingIntent(
             context,
             PlaybackStateCompat.ACTION_REWIND
@@ -63,19 +59,19 @@ class TTSNotificationBuilder constructor(
 
     val pauseAction = NotificationCompat.Action(
         R.drawable.ic_baseline_pause,
-        context.getString(R.string.pause),
+        localizeHelper.localize(MR.strings.pause),
         MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_STOP)
     )
 
     val play = NotificationCompat.Action(
         R.drawable.ic_baseline_play_arrow,
-        context.getString(R.string.play),
+        localizeHelper.localize(MR.strings.play),
         MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_PLAY)
     )
 
     val next = NotificationCompat.Action(
         R.drawable.ic_baseline_fast_forward,
-        context.getString(R.string.next_chapter),
+        localizeHelper.localize(MR.strings.next_chapter),
         MediaButtonReceiver.buildMediaButtonPendingIntent(
             context,
             PlaybackStateCompat.ACTION_FAST_FORWARD
@@ -85,7 +81,7 @@ class TTSNotificationBuilder constructor(
     val skipNext =
         NotificationCompat.Action(
             R.drawable.ic_baseline_skip_next,
-            context.getString(R.string.next_chapter),
+            localizeHelper.localize(MR.strings.next_chapter),
             MediaButtonReceiver.buildMediaButtonPendingIntent(
                 context,
                 PlaybackStateCompat.ACTION_SKIP_TO_NEXT
@@ -100,7 +96,7 @@ class TTSNotificationBuilder constructor(
     ) =
         NotificationCompat.Action(
             R.drawable.ic_baseline_open_in_new_24,
-            context.getString(R.string.next_chapter),
+            localizeHelper.localize(MR.strings.next_chapter),
             openReaderScreenIntent(
                 chapterId = chapterId,
                 bookId = bookId,
@@ -112,7 +108,7 @@ class TTSNotificationBuilder constructor(
     val close =
         NotificationCompat.Action(
             R.drawable.baseline_close_24,
-            context.getString(R.string.close),
+            localizeHelper.localize(MR.strings.close),
             cancelMediaPlayer()
         )
 

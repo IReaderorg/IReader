@@ -27,7 +27,10 @@ import androidx.compose.ui.unit.sp
 import ireader.core.source.HttpSource
 import ireader.core.source.Source
 import ireader.i18n.R
+import ireader.i18n.localize
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
+import ireader.i18n.resources.MR
 @Composable
 fun ActionHeader(
     modifier: Modifier = Modifier,
@@ -40,9 +43,9 @@ fun ActionHeader(
         val defaultActionButtonColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .38f)
         ActionButton(
             title = if (favorite) {
-                stringResource(R.string.in_library)
+                localize(MR.strings.in_library)
             } else {
-                stringResource(R.string.add_to_library)
+                localize(MR.strings.add_to_library)
             },
             icon = if (favorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
             color = if (favorite) MaterialTheme.colorScheme.primary else defaultActionButtonColor,
@@ -51,7 +54,7 @@ fun ActionHeader(
         )
         if (source is HttpSource) {
             ActionButton(
-                title = stringResource(R.string.webView),
+                title = localize(MR.strings.webView),
                 icon = Icons.Default.Public,
                 color = defaultActionButtonColor,
                 onClick = onWebView,

@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import ireader.core.R
 import ireader.core.http.WebViewUtil.DEFAULT_USER_AGENT
 import ireader.core.log.Log
+import ireader.i18n.LocalizeHelper
 import kotlinx.coroutines.*
 import okhttp3.Cookie
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -22,8 +23,8 @@ import okhttp3.Response
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-
-class CloudflareInterceptor(private val context: Context, private val webViewCookieJar: WebViewCookieJar) : Interceptor {
+import ireader.i18n.resources.MR
+class CloudflareInterceptor(private val context: Context, private val webViewCookieJar: WebViewCookieJar,private val localizeHelper: LocalizeHelper) : Interceptor {
 
     private val executor = ContextCompat.getMainExecutor(context)
 
@@ -75,7 +76,7 @@ class CloudflareInterceptor(private val context: Context, private val webViewCoo
         // Because OkHttp's enqueue only handles IOExceptions, wrap the exception so that
         // we don't crash the entire app
         catch (e: CloudflareBypassException) {
-            throw IOException(context.getString(R.string.information_cloudflare_bypass_failure))
+            throw IOException(localizeHelper.localize(MR.strings.information_cloudflare_bypass_failure))
         } catch (e: Exception) {
             throw IOException(e)
         }

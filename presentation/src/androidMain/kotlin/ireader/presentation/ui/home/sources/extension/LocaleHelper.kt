@@ -3,7 +3,7 @@ package ireader.presentation.ui.home.sources.extension
 import android.content.Context
 import androidx.core.os.LocaleListCompat
 import ireader.i18n.LocalizeHelper
-import ireader.presentation.R
+
 import java.util.Locale
 import ireader.i18n.resources.MR
 

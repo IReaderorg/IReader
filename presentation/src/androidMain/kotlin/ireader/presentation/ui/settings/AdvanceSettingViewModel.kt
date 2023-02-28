@@ -18,7 +18,7 @@ import ireader.domain.usecases.epub.importer.ImportEpub
 import ireader.domain.usecases.local.DeleteUseCase
 import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
 import ireader.domain.utils.extensions.launchIO
-import ireader.presentation.R
+
 import ireader.i18n.resources.MR
 
 

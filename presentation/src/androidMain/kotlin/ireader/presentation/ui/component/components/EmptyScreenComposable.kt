@@ -5,13 +5,17 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import cafe.adriel.voyager.navigator.currentOrThrow
+import ireader.i18n.UiText
+import ireader.i18n.asString
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.ui.EmptyScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EmptyScreenComposable(errorResId: Int, onPopBackStack: () -> Unit) {
+fun EmptyScreenComposable(errorResId: UiText, onPopBackStack: () -> Unit) {
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     Scaffold(
         topBar = {
             Toolbar(
@@ -20,6 +24,6 @@ fun EmptyScreenComposable(errorResId: Int, onPopBackStack: () -> Unit) {
             )
         }
     ) { padding ->
-        EmptyScreen(text = stringResource(errorResId), modifier = Modifier.padding(padding))
+        EmptyScreen(text = errorResId.asString(localizeHelper), modifier = Modifier.padding(padding))
     }
 }

@@ -4,38 +4,26 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Autorenew
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.FlipToBack
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.SelectAll
-import androidx.compose.material.icons.filled.SyncAlt
-import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.source.Source
 import ireader.core.source.model.Command
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,6 +87,7 @@ fun RegularChapterDetailTopAppBar(
     onInfo: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior?
 ) {
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     val (dropDownState, setDropDownState) = remember {
         mutableStateOf(false)
     }
@@ -115,7 +104,7 @@ fun RegularChapterDetailTopAppBar(
             }) {
                 Icon(
                     imageVector = Icons.Default.Autorenew,
-                    contentDescription = stringResource(id = R.string.refresh),
+                    contentDescription = localizeHelper.localize(MR.strings.refresh),
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }
@@ -124,7 +113,7 @@ fun RegularChapterDetailTopAppBar(
             }) {
                 Icon(
                     imageVector = Icons.Default.Info,
-                    contentDescription = stringResource(id = R.string.share),
+                    contentDescription = localizeHelper.localize(MR.strings.share),
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }
@@ -134,7 +123,7 @@ fun RegularChapterDetailTopAppBar(
                 }) {
                     Icon(
                         imageVector = Icons.Default.Tune,
-                        contentDescription = stringResource(id = R.string.advance_commands),
+                        contentDescription = localizeHelper.localize(MR.strings.advance_commands),
                         tint = MaterialTheme.colorScheme.onBackground,
                     )
                 }
@@ -152,7 +141,7 @@ fun RegularChapterDetailTopAppBar(
                 IconButton(onClick = { setDropDownState(true) }) {
                     Icon(
                         imageVector = Icons.Outlined.MoreVert,
-                        contentDescription = stringResource(R.string.export_book_as_epub),
+                        contentDescription = localize(MR.strings.export_book_as_epub),
                     )
                 }
                 DropdownMenu(
@@ -162,7 +151,7 @@ fun RegularChapterDetailTopAppBar(
                         setDropDownState(false)
                     },
                 ) {
-                    DropdownMenuItem(text = { Text(text = stringResource(id = R.string.export_book_as_epub)) }, onClick = onShare)
+                    DropdownMenuItem(text = { Text(text = localizeHelper.localize(MR.strings.export_book_as_epub)) }, onClick = onShare)
 
                 }
             }
@@ -185,30 +174,31 @@ private fun EditModeChapterDetailTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior? = null,
     paddingValues: PaddingValues
 ) {
+
     Toolbar(
         modifier = modifier,
         title = { BigSizeTextComposable(text = "$selectionSize") },
         navigationIcon = {
             AppIconButton(
                 imageVector = Icons.Default.Close,
-                contentDescription = stringResource(R.string.close),
+                contentDescription = localize(MR.strings.close),
                 onClick = onClickCancelSelection
             )
         },
         actions = {
             AppIconButton(
                 imageVector = Icons.Default.SelectAll,
-                contentDescription = stringResource(R.string.select_all),
+                contentDescription = localize(MR.strings.select_all),
                 onClick = onClickSelectAll
             )
             AppIconButton(
                 imageVector = Icons.Default.FlipToBack,
-                contentDescription = stringResource(R.string.select_inverted),
+                contentDescription = localize(MR.strings.select_inverted),
                 onClick = onClickInvertSelection
             )
             AppIconButton(
                 imageVector = Icons.Default.SyncAlt,
-                contentDescription = stringResource(R.string.select_between),
+                contentDescription = localize(MR.strings.select_between),
                 onClick = onSelectBetween
             )
         }

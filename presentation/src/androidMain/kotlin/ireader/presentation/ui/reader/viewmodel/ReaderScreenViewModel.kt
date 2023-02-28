@@ -38,7 +38,7 @@ import ireader.domain.utils.extensions.findComponentActivity
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.NO_VALUE
 import ireader.i18n.UiText
-import ireader.presentation.R
+
 import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.ui.core.theme.ReaderColors
 import ireader.presentation.ui.core.viewmodel.BaseViewModel

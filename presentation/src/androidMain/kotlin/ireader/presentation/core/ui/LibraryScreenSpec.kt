@@ -22,7 +22,8 @@ import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import ireader.i18n.LAST_CHAPTER
-import ireader.presentation.R
+import ireader.i18n.localize
+
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.MainStarterScreen
 import ireader.presentation.ui.component.IScaffold
@@ -31,7 +32,7 @@ import ireader.presentation.ui.home.library.LibraryScreenTopBar
 import ireader.presentation.ui.home.library.components.BottomTabComposable
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import kotlinx.coroutines.launch
-
+import ireader.i18n.resources.MR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @ExperimentalMaterialApi
@@ -41,7 +42,7 @@ object LibraryScreenSpec : Tab {
     override val options: TabOptions
         @Composable
         get() {
-            val title = stringResource(R.string.library_screen_label)
+            val title = localize(MR.strings.library_screen_label)
             val icon = rememberVectorPainter(Icons.Filled.Book)
             return remember {
                 TabOptions(

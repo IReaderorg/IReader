@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -25,7 +24,7 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import ireader.domain.preferences.prefs.ChapterDisplayMode
 import ireader.i18n.asString
-import ireader.presentation.R
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.book.viewmodel.ChapterSort
 import ireader.presentation.ui.book.viewmodel.ChaptersFilters
@@ -177,6 +176,7 @@ private fun LazyListScope.DispalyPage(
     selectedLayout: ChapterDisplayMode
 ) {
     items(layouts) { layout ->
+        val localizeHelper = LocalLocalizeHelper.currentOrThrow
         Column(
             Modifier
                 .fillMaxSize()
@@ -191,10 +191,10 @@ private fun LazyListScope.DispalyPage(
 
                 when (layout) {
                     ChapterDisplayMode.SourceTitle -> {
-                        MidSizeTextComposable(text = stringResource(id = R.string.source_title))
+                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.source_title))
                     }
                     ChapterDisplayMode.ChapterNumber -> {
-                        MidSizeTextComposable(text = stringResource(id = R.string.chapter_number))
+                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.chapter_number))
                     }
                     else -> {}
                 }

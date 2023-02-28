@@ -14,11 +14,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import com.google.accompanist.pager.ExperimentalPagerApi
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.Category
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.core.ui.EmptyScreen
 import ireader.presentation.ui.core.ui.LoadingScreen
 import ireader.presentation.ui.home.library.components.EditCategoriesDialog
@@ -105,7 +105,7 @@ fun LibraryScreen(
             when {
                 isLoading -> LoadingScreen()
                 isEmpty && vm.filters.value.isEmpty() -> EmptyScreen(
-                    text = stringResource(R.string.empty_library)
+                    text = localize(MR.strings.empty_library)
                 )
             }
         }

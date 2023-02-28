@@ -7,16 +7,14 @@ import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.NotificationManagerCompat.IMPORTANCE_DEFAULT
-import androidx.core.app.NotificationManagerCompat.IMPORTANCE_HIGH
-import androidx.core.app.NotificationManagerCompat.IMPORTANCE_LOW
+import androidx.core.app.NotificationManagerCompat.*
 import androidx.core.graphics.drawable.toBitmap
 import coil.ImageLoader
 import coil.request.ImageRequest
-import ireader.domain.R
 import ireader.domain.utils.extensions.buildNotificationChannel
 import ireader.domain.utils.extensions.buildNotificationChannelGroup
-
+import ireader.i18n.LocalizeHelper
+import ireader.i18n.resources.MR
 /**
  * Class to manage the basic information of all the notifications used in the app.
  */
@@ -119,7 +117,7 @@ object Notifications {
      *
      * @param context The application context.
      */
-    fun createChannels(context: Context) {
+    fun createChannels(context: Context,localizeHelper:LocalizeHelper) {
         val notificationService = NotificationManagerCompat.from(context)
 
         // Delete old notification channels
@@ -128,22 +126,22 @@ object Notifications {
         notificationService.createNotificationChannelGroupsCompat(
             listOf(
                 buildNotificationChannelGroup(GROUP_BACKUP_RESTORE) {
-                    setName(context.getString(R.string.label_backup))
+                    setName(localizeHelper.localize(MR.strings.label_backup))
                 },
                 buildNotificationChannelGroup(GROUP_DOWNLOADER) {
-                    setName(context.getString(R.string.download_notifier_downloader_title))
+                    setName(localizeHelper.localize(MR.strings.download_notifier_downloader_title))
                 },
                 buildNotificationChannelGroup(GROUP_INSTALLER) {
-                    setName(context.getString(R.string.install))
+                    setName(localizeHelper.localize(MR.strings.install))
                 },
                 buildNotificationChannelGroup(GROUP_LIBRARY) {
-                    setName(context.getString(R.string.label_library))
+                    setName(localizeHelper.localize(MR.strings.label_library))
                 },
                 buildNotificationChannelGroup(GROUP_TTS) {
-                    setName(context.getString(R.string.label_text_reader))
+                    setName(localizeHelper.localize(MR.strings.label_text_reader))
                 },
                 buildNotificationChannelGroup(GROUP_APK_UPDATES) {
-                    setName(context.getString(R.string.label_recent_updates))
+                    setName(localizeHelper.localize(MR.strings.label_recent_updates))
                 },
             )
         )
@@ -154,13 +152,13 @@ object Notifications {
                     CHANNEL_COMMON,
                     IMPORTANCE_LOW
                 ) {
-                    setName(context.getString(R.string.channel_common))
+                    setName(localizeHelper.localize(MR.strings.channel_common))
                 },
                 buildNotificationChannel(
                     CHANNEL_TTS,
                     IMPORTANCE_LOW
                 ) {
-                    setName(context.getString(R.string.channel_progress))
+                    setName(localizeHelper.localize(MR.strings.channel_progress))
                     setGroup(GROUP_TTS)
                     setShowBadge(false)
                 },
@@ -168,7 +166,7 @@ object Notifications {
                     CHANNEL_TTS_ERROR,
                     IMPORTANCE_LOW
                 ) {
-                    setName(context.getString(R.string.channel_errors))
+                    setName(localizeHelper.localize(MR.strings.channel_errors))
                     setGroup(GROUP_TTS)
                     setShowBadge(false)
                 },
@@ -176,7 +174,7 @@ object Notifications {
                     CHANNEL_LIBRARY_PROGRESS,
                     IMPORTANCE_LOW
                 ) {
-                    setName(context.getString(R.string.channel_progress))
+                    setName(localizeHelper.localize(MR.strings.channel_progress))
                     setGroup(GROUP_LIBRARY)
                     setShowBadge(false)
                 },
@@ -184,7 +182,7 @@ object Notifications {
                     CHANNEL_LIBRARY_ERROR,
                     IMPORTANCE_LOW
                 ) {
-                    setName(context.getString(R.string.channel_errors))
+                    setName(localizeHelper.localize(MR.strings.channel_errors))
                     setGroup(GROUP_LIBRARY)
                     setShowBadge(false)
                 },
@@ -193,13 +191,13 @@ object Notifications {
                     CHANNEL_NEW_CHAPTERS,
                     IMPORTANCE_DEFAULT
                 ) {
-                    setName(context.getString(R.string.channel_new_chapters))
+                    setName(localizeHelper.localize(MR.strings.channel_new_chapters))
                 },
                 buildNotificationChannel(
                     CHANNEL_DOWNLOADER_PROGRESS,
                     IMPORTANCE_LOW
                 ) {
-                    setName(context.getString(R.string.channel_progress))
+                    setName(localizeHelper.localize(MR.strings.channel_progress))
                     setGroup(GROUP_DOWNLOADER)
                     setShowBadge(false)
                 },
@@ -207,7 +205,7 @@ object Notifications {
                     CHANNEL_DOWNLOADER_COMPLETE,
                     IMPORTANCE_LOW
                 ) {
-                    setName(context.getString(R.string.channel_complete))
+                    setName(localizeHelper.localize(MR.strings.channel_complete))
                     setGroup(GROUP_DOWNLOADER)
                     setShowBadge(false)
                 },
@@ -215,7 +213,7 @@ object Notifications {
                     CHANNEL_DOWNLOADER_ERROR,
                     IMPORTANCE_LOW
                 ) {
-                    setName(context.getString(R.string.channel_errors))
+                    setName(localizeHelper.localize(MR.strings.channel_errors))
                     setGroup(GROUP_DOWNLOADER)
                     setShowBadge(false)
                 },
@@ -223,7 +221,7 @@ object Notifications {
                     CHANNEL_BACKUP_RESTORE_PROGRESS,
                     IMPORTANCE_LOW
                 ) {
-                    setName(context.getString(R.string.channel_progress))
+                    setName(localizeHelper.localize(MR.strings.channel_progress))
                     setGroup(GROUP_BACKUP_RESTORE)
                     setShowBadge(false)
                 },
@@ -231,7 +229,7 @@ object Notifications {
                     CHANNEL_INSTALLER_PROGRESS,
                     IMPORTANCE_LOW
                 ) {
-                    setName(context.getString(R.string.channel_progress))
+                    setName(localizeHelper.localize(MR.strings.channel_progress))
                     setGroup(GROUP_INSTALLER)
                     setShowBadge(false)
                 },
@@ -239,7 +237,7 @@ object Notifications {
                     CHANNEL_INSTALLER_COMPLETE,
                     IMPORTANCE_LOW
                 ) {
-                    setName(context.getString(R.string.channel_complete))
+                    setName(localizeHelper.localize(MR.strings.channel_complete))
                     setGroup(GROUP_INSTALLER)
                     setShowBadge(false)
                 },
@@ -247,7 +245,7 @@ object Notifications {
                     CHANNEL_INSTALLER_ERROR,
                     IMPORTANCE_LOW
                 ) {
-                    setName(context.getString(R.string.channel_errors))
+                    setName(localizeHelper.localize(MR.strings.channel_errors))
                     setGroup(GROUP_INSTALLER)
                     setShowBadge(false)
                 },
@@ -255,7 +253,7 @@ object Notifications {
                     CHANNEL_BACKUP_RESTORE_PROGRESS,
                     IMPORTANCE_LOW
                 ) {
-                    setName(context.getString(R.string.channel_progress))
+                    setName(localizeHelper.localize(MR.strings.channel_progress))
                     setGroup(GROUP_BACKUP_RESTORE)
                     setShowBadge(false)
                 },
@@ -263,7 +261,7 @@ object Notifications {
                     CHANNEL_BACKUP_RESTORE_COMPLETE,
                     IMPORTANCE_HIGH
                 ) {
-                    setName(context.getString(R.string.channel_complete))
+                    setName(localizeHelper.localize(MR.strings.channel_complete))
                     setGroup(GROUP_BACKUP_RESTORE)
                     setShowBadge(false)
                     setSound(null, null)
@@ -272,21 +270,21 @@ object Notifications {
                     CHANNEL_CRASH_LOGS,
                     IMPORTANCE_HIGH
                 ) {
-                    setName(context.getString(R.string.channel_crash_logs))
+                    setName(localizeHelper.localize(MR.strings.channel_crash_logs))
                 },
                 buildNotificationChannel(
                     CHANNEL_APP_UPDATE,
                     IMPORTANCE_DEFAULT
                 ) {
                     setGroup(GROUP_APK_UPDATES)
-                    setName(context.getString(R.string.channel_app_updates))
+                    setName(localizeHelper.localize(MR.strings.channel_app_updates))
                 },
                 buildNotificationChannel(
                     CHANNEL_EXTENSIONS_UPDATE,
                     IMPORTANCE_DEFAULT
                 ) {
                     setGroup(GROUP_APK_UPDATES)
-                    setName(context.getString(R.string.channel_ext_updates))
+                    setName(localizeHelper.localize(MR.strings.channel_ext_updates))
                 },
             )
         )

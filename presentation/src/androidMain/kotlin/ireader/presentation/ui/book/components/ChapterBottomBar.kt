@@ -1,6 +1,5 @@
 package ireader.presentation.ui.book.components
 
-import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -9,21 +8,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.DoneOutline
-import androidx.compose.material.icons.filled.GetApp
-import androidx.compose.material.icons.filled.PlaylistAddCheck
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.core.theme.AppColors
@@ -60,7 +53,7 @@ fun ChapterDetailBottomBar(
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.GetApp,
-                    contentDescription = stringResource(R.string.download),
+                    contentDescription = localize(MR.strings.download),
                     onClick = {
                         vm.downloadChapters()
                         vm.selection.clear()
@@ -68,7 +61,7 @@ fun ChapterDetailBottomBar(
                 )
                 AppIconButton(
                     imageVector = Icons.Default.BookmarkBorder,
-                    contentDescription = stringResource(R.string.bookmark),
+                    contentDescription = localize(MR.strings.bookmark),
                     onClick = {
                         vm.scope.launch {
                             vm.insertUseCases.insertChapters(
@@ -85,7 +78,7 @@ fun ChapterDetailBottomBar(
                             .map { it.id }
                             .containsAll(vm.selection)
                     ) Icons.Default.DoneOutline else Icons.Default.Done,
-                    contentDescription = stringResource(R.string.mark_as_read),
+                    contentDescription = localize(MR.strings.mark_as_read),
                     onClick = {
                         vm.scope.launch {
                             vm.insertUseCases.insertChapters(
@@ -98,7 +91,7 @@ fun ChapterDetailBottomBar(
                 )
                 AppIconButton(
                     imageVector = Icons.Default.PlaylistAddCheck,
-                    contentDescription = stringResource(R.string.mark_previous_as_read),
+                    contentDescription = localize(MR.strings.mark_previous_as_read),
                     onClick = {
                         vm.scope.launch {
                             vm.insertUseCases.insertChapters(
@@ -111,7 +104,7 @@ fun ChapterDetailBottomBar(
                 )
                 AppIconButton(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.delete),
+                    contentDescription = localize(MR.strings.delete),
                     onClick = {
                         vm.deleteChapters(vm.chapters.filter { it.id in vm.selection })
                         vm.selection.clear()

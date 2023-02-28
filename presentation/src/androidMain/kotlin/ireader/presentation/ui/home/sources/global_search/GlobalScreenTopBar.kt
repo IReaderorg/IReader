@@ -10,12 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
 import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchState
-import ireader.presentation.R
 
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class,
@@ -49,7 +49,7 @@ fun GlobalScreenTopBar(
         actions = {
             AppIconButton(
                 imageVector = Icons.Default.Search,
-                contentDescription = stringResource(R.string.search),
+                contentDescription = localize(MR.strings.search),
                 onClick = {
                     state.searchMode = true
                 },
@@ -58,7 +58,7 @@ fun GlobalScreenTopBar(
         navigationIcon = {
             AppIconButton(
                 imageVector = Icons.Default.ArrowBack,
-                contentDescription = stringResource(R.string.toggle_search_mode_off),
+                contentDescription = localize(MR.strings.toggle_search_mode_off),
                 onClick = {
                     onPop()
                 }

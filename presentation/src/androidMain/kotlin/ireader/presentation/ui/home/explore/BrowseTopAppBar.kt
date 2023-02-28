@@ -13,13 +13,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.source.HttpSource
 import ireader.core.source.model.Filter
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.getLayoutName
-import ireader.presentation.R
+import ireader.i18n.localize
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
@@ -72,7 +72,7 @@ fun BrowseTopAppBar(
             if (state.isSearchModeEnable) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
-                    contentDescription = stringResource(R.string.close),
+                    contentDescription = localize(MR.strings.close),
                     onClick = {
                         onSearchDisable()
                     },
@@ -82,7 +82,7 @@ fun BrowseTopAppBar(
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.Search,
-                    contentDescription = stringResource(R.string.search),
+                    contentDescription = localize(MR.strings.search),
                     onClick = {
                         onSearchEnable()
                     },
@@ -91,7 +91,7 @@ fun BrowseTopAppBar(
             if (source is HttpSource) {
                 AppIconButton(
                     imageVector = Icons.Default.Public,
-                    contentDescription = stringResource(R.string.webView),
+                    contentDescription = localize(MR.strings.webView),
                     onClick = {
                         onWebView()
                     },
@@ -99,7 +99,7 @@ fun BrowseTopAppBar(
             }
             AppIconButton(
                 imageVector = Icons.Default.GridView,
-                contentDescription = stringResource(R.string.layout),
+                contentDescription = localize(MR.strings.layout),
                 onClick = {
                     topMenu = true
                 },

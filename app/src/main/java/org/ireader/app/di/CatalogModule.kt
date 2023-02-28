@@ -30,9 +30,9 @@ val CatalogModule = DI.Module("catalogModule") {
     bindSingleton<CoverCache> { CoverCache(instance(),instance()) }
     bindSingleton<CoilLoaderFactory> { CoilLoaderFactory(instance(),instance(),instance(),instance()) }
     bindSingleton<CatalogStore> { CatalogStore(instance(),instance(),instance(),instance()) }
-    bindSingleton<PackageInstaller> { PackageInstaller(instance()) }
+    bindSingleton<PackageInstaller> { PackageInstaller(instance(),instance()) }
     bindSingleton<WebViewCookieJar> { WebViewCookieJar(instance()) }
-    bindSingleton<HttpClients> { HttpClients(instance(),BrowserEngine(instance(), instance()),instance(),instance()) }
+    bindSingleton<HttpClients> { HttpClients(instance(),BrowserEngine(instance(), instance()),instance(),instance(),instance()) }
     bindSingleton<AndroidCatalogInstaller> { AndroidCatalogInstaller(instance(),instance(),instance(),instance(),instance(),instance()) }
     bindSingleton<GetCatalogsByType> { GetCatalogsByType(instance(),instance()) }
     bindSingleton<GetRemoteCatalogs> { GetRemoteCatalogs(instance()) }

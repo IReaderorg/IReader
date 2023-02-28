@@ -10,8 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import ireader.i18n.localize
 import ireader.i18n.resources.MR
-import ireader.presentation.R
+
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Components
@@ -111,7 +112,7 @@ class ReaderSettingSpec : VoyagerScreen() {
 
         IScaffold(topBar = { scrollBehavior ->
             TitleToolbar(
-                title = stringResource(R.string.reader),
+                title = localize(MR.strings.reader),
                 scrollBehavior = scrollBehavior,
                 popBackStack = {
                     popBackStack(navigator)
