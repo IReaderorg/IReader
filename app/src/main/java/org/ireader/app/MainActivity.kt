@@ -73,7 +73,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
             withDI(di) {
 
 
-                AppTheme {
+                AppTheme(this.lifecycleScope) {
                     Surface(
                         color = MaterialTheme.colorScheme.surface,
                         contentColor = MaterialTheme.colorScheme.onSurface,

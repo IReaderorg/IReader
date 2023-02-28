@@ -26,6 +26,7 @@ sealed class UiText {
     data class DynamicString(val text: String) : UiText()
 
     data class StringResource(val resId: Int) : UiText()
+    data class MStringResource(val res: dev.icerock.moko.resources.StringResource) : UiText()
 
     data class ExceptionString(val e: Throwable) : UiText()
 

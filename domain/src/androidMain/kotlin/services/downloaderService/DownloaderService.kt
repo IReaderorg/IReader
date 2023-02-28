@@ -20,6 +20,7 @@ import ireader.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS
 import ireader.domain.usecases.download.DownloadUseCases
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
+import ireader.i18n.LocalizeHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -32,6 +33,7 @@ import org.kodein.di.instance
 class DownloaderService  constructor(
     private val context: Context,
     params: WorkerParameters,
+    private val localizeHelper: LocalizeHelper
 ) : CoroutineWorker(context, params), DIAware {
 
     override val di: DI = (this@DownloaderService.applicationContext as DIAware).di
@@ -158,7 +160,7 @@ class DownloaderService  constructor(
                                         onError = { message ->
                                             tries++
                                             if (tries > 3) {
-                                                throw Exception(message?.asString(context))
+                                                throw Exception(message?.asString(localizeHelper))
                                             }
 
                                         }

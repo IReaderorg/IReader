@@ -16,11 +16,11 @@ imageloader = "1.2.2.1"
 materialDialogs = "0.9.1"
 
 # Android
-androidGradle = "7.3.1"
+androidGradle = "7.4.1"
 core = "1.9.0"
-appCompat = "1.6.0-rc01"
+appCompat = "1.7.0-alpha02"
 activityCompose = "1.6.1"
-work = "2.7.1"
+work = "2.8.0"
 
 # Android Lifecycle
 lifecycle = "2.6.0-alpha03"
@@ -29,7 +29,7 @@ lifecycle = "2.6.0-alpha03"
 darklaf = "3.0.2"
 
 # Ksp
-ksp = "1.7.20-1.0.8"
+ksp = "1.8.0-1.0.9"
 
 # Dependency Injection
 kodein = "7.18.0"
@@ -48,7 +48,7 @@ kmlogging = "1.2.0"
 tinylog = "2.5.0-M2.1"
 
 # Storage
-okio = "3.2.0"
+okio = "3.3.0"
 appDirs = "1.2.1"
 sqldelight = "1.5.5"
 
@@ -56,11 +56,11 @@ sqldelight = "1.5.5"
 multiplatformSettings = "1.0.0-alpha01"
 
 # Utility
-desugarJdkLibs = "1.2.2"
-aboutLibraries = "10.5.1"
+desugarJdkLibs = "2.0.2"
+aboutLibraries = "10.6.8"
 dateTime = "0.4.0"
 immutableCollections = "0.3.5"
-kds = "3.3.1"
+kds = "3.4.0"
 ideaExt = "1.1.6"
 
 # Localization

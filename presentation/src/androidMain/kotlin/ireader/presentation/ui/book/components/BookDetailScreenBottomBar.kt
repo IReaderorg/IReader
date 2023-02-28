@@ -16,11 +16,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.i18n.UiText
-import ireader.presentation.ui.core.ui.string
-import ireader.presentation.ui.core.utils.asString
+import ireader.i18n.asString
 import ireader.presentation.R
 import ireader.presentation.ui.component.ClickableTextIcon
 import ireader.presentation.ui.component.components.ShowLoading
+import ireader.presentation.ui.core.ui.string
 
 @Composable
 fun BookDetailScreenBottomBar(

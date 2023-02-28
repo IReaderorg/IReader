@@ -1,12 +1,13 @@
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
-
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
     id("org.jetbrains.compose")
     id("org.jetbrains.gradle.plugin.idea-ext")
+    id(libs.plugins.moko.gradle.get().pluginId)
 }
 kotlin {
     android()
@@ -43,10 +44,9 @@ android {
         sourceCompatibility = ProjectConfig.androidJvmTarget
         targetCompatibility = ProjectConfig.androidJvmTarget
     }
-    sourceSets {
-        named("main") {
-            res.srcDir("src/commonMain/resources")
-        }
+    sourceSets.getByName("main") {
+        assets.srcDir(File(buildDir, "generated/moko/androidMain/assets"))
+        res.srcDir(File(buildDir, "generated/moko/androidMain/res"))
     }
     defaultConfig {
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
@@ -98,4 +98,7 @@ idea {
             }
         }
     }
+}
+multiplatformResources {
+    multiplatformResourcesPackage = "ireader.i18n.resources"
 }

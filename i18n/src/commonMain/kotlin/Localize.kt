@@ -24,3 +24,18 @@ expect fun localizePlural(resource: PluralsResource, quantity: Int): String
 @Composable
 expect fun localizePlural(resource: PluralsResource, quantity: Int, vararg args: Any): String
 
+
+
+expect class LocalizeHelper {
+
+     fun localize(resId: Int): String
+     fun localize(resource: StringResource): String
+
+     fun localize(resource: StringResource, vararg args: Any): String
+
+     fun localizePlural(resource: PluralsResource, quantity: Int): String
+
+     fun localizePlural(resource: PluralsResource, quantity: Int, vararg args: Any): String
+
+
+}

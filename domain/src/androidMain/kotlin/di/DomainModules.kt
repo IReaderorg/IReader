@@ -19,6 +19,7 @@ val DomainServices = DI.Module("domainModule") {
         DownloaderService(
             instance(),
             instance(),
+            instance()
         )
     }
     bindSingleton {
@@ -96,7 +97,7 @@ val DomainServices = DI.Module("domainModule") {
     bindProvider { ireader.domain.usecases.category.ReorderCategory(instance()) }
     bindProvider { ireader.domain.usecases.download.get.SubscribeDownloadsUseCase(instance()) }
 
-    bindProvider { ireader.domain.usecases.epub.importer.ImportEpub(instance(), instance()) }
+    bindProvider { ireader.domain.usecases.epub.importer.ImportEpub(instance(), instance(), instance()) }
     bindProvider { ireader.domain.usecases.fonts.FontUseCase(instance()) }
     bindProvider { ireader.domain.usecases.history.HistoryPagingUseCase(instance()) }
 

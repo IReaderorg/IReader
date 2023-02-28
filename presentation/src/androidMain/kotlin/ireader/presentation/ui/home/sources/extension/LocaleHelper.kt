@@ -2,8 +2,10 @@ package ireader.presentation.ui.home.sources.extension
 
 import android.content.Context
 import androidx.core.os.LocaleListCompat
+import ireader.i18n.LocalizeHelper
 import ireader.presentation.R
 import java.util.Locale
+import ireader.i18n.resources.MR
 
 /**
  * Utility class to change the application's language in runtime.
@@ -13,14 +15,14 @@ object LocaleHelper {
     /**
      * Returns Display name of a string language code
      */
-    fun getSourceDisplayName(lang: String?, context: Context): String {
+    fun getSourceDisplayName(lang: String?, localizeHelper: LocalizeHelper): String {
         return when (lang) {
-            SourceKeys.LAST_USED_KEY -> context.getString(R.string.last_used_source)
-            SourceKeys.PINNED_KEY -> context.getString(R.string.pinned_sources)
-            SourceKeys.INSTALLED_KEY -> context.getString(R.string.installed)
-            SourceKeys.AVAILABLE -> context.getString(R.string.available)
-            "other" -> context.getString(R.string.other_source)
-            "all" -> context.getString(R.string.all_lang)
+            SourceKeys.LAST_USED_KEY -> localizeHelper.localize(MR.strings.last_used_source)
+            SourceKeys.PINNED_KEY -> localizeHelper.localize(MR.strings.pinned_sources)
+            SourceKeys.INSTALLED_KEY -> localizeHelper.localize(MR.strings.installed)
+            SourceKeys.AVAILABLE -> localizeHelper.localize(MR.strings.available)
+            "other" -> localizeHelper.localize(MR.strings.other_source)
+            "all" -> localizeHelper.localize(MR.strings.all_lang)
             else -> getDisplayName(lang)
         }
     }

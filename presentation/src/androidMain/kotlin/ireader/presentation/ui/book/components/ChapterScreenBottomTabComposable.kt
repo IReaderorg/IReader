@@ -6,14 +6,15 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import ireader.domain.preferences.prefs.ChapterDisplayMode
-import ireader.presentation.R
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.book.viewmodel.ChapterSort
 import ireader.presentation.ui.book.viewmodel.ChaptersFilters
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @ExperimentalMaterialApi
 @ExperimentalPagerApi
@@ -30,12 +31,12 @@ fun ChapterScreenBottomTabComposable(
     onLayoutSelected: (ChapterDisplayMode) -> Unit,
     vm: BookDetailViewModel
 ) {
-    val context = LocalContext.current
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     val tabs = remember {
         listOf(
-            context.getString(R.string.filter),
-            context.getString(R.string.sort),
-            context.getString(R.string.display),
+            localizeHelper.localize(MR.strings.filter),
+            localizeHelper.localize(MR.strings.sort),
+            localizeHelper.localize(MR.strings.display),
         )
     }
     Column(modifier = modifier.fillMaxSize()) {

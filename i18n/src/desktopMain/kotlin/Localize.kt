@@ -11,11 +11,7 @@ package ireader.i18n
 import androidx.compose.runtime.Composable
 import dev.icerock.moko.resources.PluralsResource
 import dev.icerock.moko.resources.StringResource
-import dev.icerock.moko.resources.desc.Plural
-import dev.icerock.moko.resources.desc.PluralFormatted
-import dev.icerock.moko.resources.desc.Resource
-import dev.icerock.moko.resources.desc.ResourceFormatted
-import dev.icerock.moko.resources.desc.StringDesc
+import dev.icerock.moko.resources.desc.*
 
 @Composable
 actual fun localize(resource: StringResource): String {
@@ -35,4 +31,38 @@ actual fun localizePlural(resource: PluralsResource, quantity: Int): String {
 @Composable
 actual fun localizePlural(resource: PluralsResource, quantity: Int, vararg args: Any): String {
   return StringDesc.PluralFormatted(resource, quantity, *args).localized()
+}
+
+actual class LocalizeHelper {
+    actual fun localize(resource: StringResource): String {
+        return StringDesc.Resource(resource).localized()
+    }
+
+    actual fun localize(
+        resource: StringResource,
+        vararg args: Any
+    ): String {
+        return StringDesc.ResourceFormatted(resource, *args).localized()
+    }
+
+    actual fun localizePlural(
+        resource: PluralsResource,
+        quantity: Int
+    ): String {
+        return StringDesc.Plural(resource, quantity).localized()
+    }
+
+    actual fun localizePlural(
+        resource: PluralsResource,
+        quantity: Int,
+        vararg args: Any
+    ): String {
+        return StringDesc.PluralFormatted(resource, quantity, *args).localized()
+    }
+
+    actual fun localize(resId: Int): String {
+       return "NOT SUPPORTED"
+    }
+
+
 }

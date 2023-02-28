@@ -1,24 +1,20 @@
 package ireader.presentation.ui.core.theme
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
+import ireader.i18n.LocalizeHelper
+import kotlinx.coroutines.CoroutineScope
 
 @Composable
-fun TransparentStatusBar( content: @Composable () -> Unit) {
+fun TransparentStatusBar(content: @Composable () -> Unit) {
 
-        val state = LocalTransparentStatusBar.current
-        DisposableEffect(Unit) {
-            state.enabled = true
-            onDispose {
-                state.enabled = false
-            }
+    val state = LocalTransparentStatusBar.current
+    DisposableEffect(Unit) {
+        state.enabled = true
+        onDispose {
+            state.enabled = false
         }
+    }
     content()
 }
 
@@ -48,7 +44,13 @@ fun CustomSystemColor(
 
 val LocalTransparentStatusBar = staticCompositionLocalOf { TransparentStatusBar(false) }
 val LocalCustomSystemColor = staticCompositionLocalOf { CustomStatusBar(false) }
-val LocalHideNavigator = staticCompositionLocalOf { mutableStateOf(false) }
+val LocalLocalizeHelper: ProvidableCompositionLocal<LocalizeHelper?> = staticCompositionLocalOf {
+    null
+}
+val LocalGlobalCoroutineScope: ProvidableCompositionLocal<CoroutineScope?> = staticCompositionLocalOf {
+    null
+}
+
 class TransparentStatusBar(enabled: Boolean) {
     var enabled by mutableStateOf(enabled)
 }

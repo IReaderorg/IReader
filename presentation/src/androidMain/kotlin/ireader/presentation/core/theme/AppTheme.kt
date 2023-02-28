@@ -4,9 +4,12 @@ import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.ExperimentalTextApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import ireader.i18n.LocalizeHelper
 import ireader.presentation.ui.core.theme.*
+import kotlinx.coroutines.CoroutineScope
 import org.kodein.di.compose.rememberInstance
 
 
@@ -14,9 +17,9 @@ import org.kodein.di.compose.rememberInstance
 @OptIn(ExperimentalTextApi::class)
 @Composable
 fun AppTheme(
+    scope: CoroutineScope,
     content: @Composable() () -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
     val vm: AppThemeViewModel by rememberInstance()
     val (materialColors, customColors) = vm.getColors()
     val rippleTheme = vm.getRippleTheme()
@@ -26,6 +29,8 @@ fun AppTheme(
     val status = LocalCustomSystemColor.current.enabled
     val navigation = LocalCustomSystemColor.current.enabled
     val customStatusColor = LocalCustomSystemColor.current
+    val ctx = LocalContext.current
+    val mainLocalizeHelper = remember { LocalizeHelper(ctx) }
 
     systemUiController.setSystemBarsColor(
         color = customColors.bars,
@@ -78,6 +83,8 @@ fun AppTheme(
     ) {
         CompositionLocalProvider(
             LocalRippleTheme provides rippleTheme,
+            LocalLocalizeHelper provides mainLocalizeHelper,
+            LocalGlobalCoroutineScope provides scope,
             content = content
         )
     }

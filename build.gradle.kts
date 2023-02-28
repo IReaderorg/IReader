@@ -19,6 +19,7 @@ plugins {
     alias(kotlinx.plugins.dokka) apply false
     alias(kotlinx.plugins.ksp) apply false
     alias(libs.plugins.sqldelight) apply false
+    alias(libs.plugins.moko) apply false
     id("nl.littlerobots.version-catalog-update") version "0.6.1"
 }
 

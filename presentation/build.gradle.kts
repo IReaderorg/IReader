@@ -45,6 +45,8 @@ kotlin {
                 implementation(libs.voyager.tab.navigator)
                 implementation(libs.voyager.transitions)
                 implementation(libs.voyager.kodein)
+                api(libs.kodein.core)
+                api(libs.kodein.compose)
                 implementation(composeLib.materialmotion.core)
             }
         }
@@ -85,8 +87,7 @@ kotlin {
                 api(libs.bundles.exoplayer)
                 api(androidx.emoji)
                 api(androidx.work.runtime)
-                api(libs.kodein.core)
-                api(libs.kodein.compose)
+
 
 
             }

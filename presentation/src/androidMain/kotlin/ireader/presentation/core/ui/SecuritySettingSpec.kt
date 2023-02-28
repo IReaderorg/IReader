@@ -20,6 +20,8 @@ import ireader.domain.utils.extensions.AuthenticatorUtil
 import ireader.domain.utils.extensions.AuthenticatorUtil.isAuthenticationSupported
 import ireader.domain.utils.extensions.AuthenticatorUtil.startAuthentication
 import ireader.i18n.R
+import ireader.i18n.localizePlural
+import ireader.i18n.resources.MR
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Components
@@ -99,11 +101,7 @@ class SecuritySettingSpec : VoyagerScreen() {
                                 when (text) {
                                     -1L -> -1L to context.getString(R.string.lock_never)
                                     0L -> 0L to context.getString(R.string.lock_always)
-                                    else -> text.toLong() to context.resources.getQuantityString(
-                                        R.plurals.lock_after_mins,
-                                        text.toInt(),
-                                        text
-                                    )
+                                    else -> text.toLong() to localizePlural(MR.plurals.lock_after_mins, text.toInt())
                                 }
                             },
                             onValue = { newValue ->

@@ -8,19 +8,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.log.Log
-import ireader.domain.utils.extensions.findComponentActivity
-import ireader.domain.utils.extensions.getCacheSize
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
+import ireader.i18n.resources.MR
 import ireader.presentation.R
-import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
+import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.AdvanceSettingViewModel
 import kotlinx.serialization.ExperimentalSerializationApi
 
@@ -30,14 +27,15 @@ fun AdvanceSettings(
     vm: AdvanceSettingViewModel,
     padding: PaddingValues
 ) {
-    val context = LocalContext.current
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val globalScope = LocalGlobalCoroutineScope.currentOrThrow
     val onEpub =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
             if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
                 val uri = resultIntent.data!!.data!!
-                context.findComponentActivity()?.lifecycleScope?.launchIO {
+                globalScope.launchIO {
                     try {
-                        vm.importEpub.parse(uri, context)
+                        vm.importEpub.parse(uri)
                         vm.showSnackBar(UiText.StringResource(R.string.success))
                     } catch (e: Throwable) {
                         Log.error(e, "epub parser throws an exception")
@@ -49,9 +47,9 @@ fun AdvanceSettings(
 
     val items = remember {
         listOf<Components>(
-            Components.Header(context.getString(R.string.data)),
+            Components.Header(localizeHelper.localize(MR.strings.data)),
             Components.Row(
-                title = context.getString(R.string.clear_all_database),
+                title = localizeHelper.localize(MR.strings.clear_all_database),
                 onClick = {
                     vm.deleteAllDatabase()
                     vm.showSnackBar(
@@ -60,7 +58,7 @@ fun AdvanceSettings(
                 }
             ),
             Components.Row(
-                title = context.getString(R.string.clear_not_in_library_books),
+                title = localizeHelper.localize(MR.strings.clear_not_in_library_books),
                 onClick = {
                     vm.scope.launchIO {
                         vm.deleteUseCase.deleteNotInLibraryBooks()
@@ -71,7 +69,7 @@ fun AdvanceSettings(
                 }
             ),
             Components.Row(
-                title = context.getString(R.string.clear_all_chapters),
+                title = localizeHelper.localize(MR.strings.clear_all_chapters),
                 onClick = {
                     vm.deleteAllChapters()
                     vm.showSnackBar(
@@ -80,49 +78,48 @@ fun AdvanceSettings(
                 }
             ),
             Components.Row(
-                title = context.getString(R.string.clear_all_cache),
-                subtitle = getCacheSize(context = context),
+                title = localizeHelper.localize(MR.strings.clear_all_cache),
+                subtitle = vm.importEpub.getCacheSize(),
                 onClick = {
-                    context.cacheDir.deleteRecursively()
+                    vm.importEpub.removeCache()
                     vm.showSnackBar(UiText.DynamicString("Clear was cleared."))
                 }
             ),
             Components.Row(
-                title = context.getString(R.string.clear_all_cover_cache),
+                title = localizeHelper.localize(MR.strings.clear_all_cover_cache),
                 onClick = {
                     vm.coverCache.clearMemoryCache()
                     vm.showSnackBar(UiText.DynamicString("Clear was cleared."))
                 }
             ),
-            Components.Header(context.getString(R.string.reset_setting)),
+            Components.Header(localizeHelper.localize(MR.strings.reset_setting)),
             Components.Row(
-                title = context.getString(R.string.reset_reader_screen_settings),
+                title = localizeHelper.localize(MR.strings.reset_reader_screen_settings),
                 onClick = {
                     vm.deleteDefaultSettings()
                 }
             ),
             Components.Row(
-                title = context.getString(R.string.reset_themes),
+                title = localizeHelper.localize(MR.strings.reset_themes),
                 onClick = {
                     vm.resetThemes()
                 }
             ),
             Components.Row(
-                title = context.getString(R.string.reset_categories),
+                title = localizeHelper.localize(MR.strings.reset_categories),
                 onClick = {
                     vm.resetCategories()
                 }
             ),
-            Components.Header(context.getString(R.string.epub)),
+            Components.Header(localizeHelper.localize(MR.strings.epub)),
             Components.Row(
-                title = context.getString(R.string.import_epub),
+                title = localizeHelper.localize(MR.strings.import_epub),
                 onClick = {
-                    context.findComponentActivity()
-                        ?.let { activity ->
-                            vm.onEpubImportRequested { intent: Intent ->
-                                onEpub.launch(intent)
-                            }
-                        }
+
+                    vm.onEpubImportRequested { intent: Intent ->
+                        onEpub.launch(intent)
+                    }
+
                 }
             )
 

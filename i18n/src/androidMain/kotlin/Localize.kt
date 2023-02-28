@@ -9,35 +9,69 @@
 package ireader.i18n
 
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import dev.icerock.moko.resources.PluralsResource
 import dev.icerock.moko.resources.StringResource
-import dev.icerock.moko.resources.desc.Plural
-import dev.icerock.moko.resources.desc.PluralFormatted
-import dev.icerock.moko.resources.desc.Resource
-import dev.icerock.moko.resources.desc.ResourceFormatted
-import dev.icerock.moko.resources.desc.StringDesc
+import dev.icerock.moko.resources.desc.*
 
 // don't use this functions yet because moko-resource is not configured yet.
 
 
 @Composable
 actual fun localize(resource: StringResource): String {
-  return StringDesc.Resource(resource).toString(LocalContext.current)
+    return StringDesc.Resource(resource).toString(LocalContext.current)
 }
+
 
 @Composable
 actual fun localize(resource: StringResource, vararg args: Any): String {
-  return StringDesc.ResourceFormatted(resource, *args).toString(LocalContext.current)
+    return StringDesc.ResourceFormatted(resource, *args).toString(LocalContext.current)
 }
 
 @Composable
 actual fun localizePlural(resource: PluralsResource, quantity: Int): String {
-  return StringDesc.Plural(resource, quantity).toString(LocalContext.current)
+    return StringDesc.Plural(resource, quantity).toString(LocalContext.current)
 }
 
 @Composable
 actual fun localizePlural(resource: PluralsResource, quantity: Int, vararg args: Any): String {
-  return StringDesc.PluralFormatted(resource, quantity, *args).toString(LocalContext.current)
+    return StringDesc.PluralFormatted(resource, quantity, *args).toString(LocalContext.current)
+}
+
+actual class LocalizeHelper(
+    private val context: Context
+) {
+
+    actual fun localize(resId: Int): String {
+        return context.getString(resId)
+    }
+    actual fun localize(resource: StringResource): String {
+        return StringDesc.Resource(resource).toString(context)
+    }
+
+    actual fun localize(
+        resource: StringResource,
+        vararg args: Any
+    ): String {
+        return StringDesc.ResourceFormatted(resource, *args).toString(context)
+    }
+
+    actual fun localizePlural(
+        resource: PluralsResource,
+        quantity: Int
+    ): String {
+        return StringDesc.Plural(resource, quantity).toString(context)
+    }
+
+    actual fun localizePlural(
+        resource: PluralsResource,
+        quantity: Int,
+        vararg args: Any
+    ): String {
+        return StringDesc.PluralFormatted(resource, quantity, *args).toString(context)
+    }
+
+
 }

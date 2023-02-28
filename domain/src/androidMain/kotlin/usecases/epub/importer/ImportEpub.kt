@@ -2,17 +2,16 @@ package ireader.domain.usecases.epub.importer
 
 import android.content.Context
 import android.net.Uri
-import ireader.domain.models.entities.Book
-import ireader.domain.models.entities.Chapter
 import ireader.core.source.LocalSource
 import ireader.core.source.model.MangaInfo
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
+import ireader.domain.models.entities.Book
+import ireader.domain.models.entities.Chapter
 import nl.siegmann.epublib.epub.EpubReader
 import org.jsoup.Jsoup
 import org.jsoup.nodes.TextNode
 import org.jsoup.parser.Parser
-
 import org.xml.sax.InputSource
 import java.io.File
 import java.io.InputStream
@@ -21,16 +20,18 @@ import javax.xml.parsers.DocumentBuilderFactory
 class ImportEpub(
     private val bookRepository: BookRepository,
     private val chapterRepository: ChapterRepository,
+    val context: Context,
 ) {
 
-    private fun getEpubReader(context: Context, uri: Uri): nl.siegmann.epublib.domain.Book? {
+
+    private fun getEpubReader(uri: Uri): nl.siegmann.epublib.domain.Book? {
         return context.contentResolver.openInputStream(uri)?.use {
             EpubReader().readEpub(it)
         }
     }
 
-    suspend fun parse(uri: Uri, context: Context) {
-        val epub = getEpubReader(context, uri) ?: throw Exception()
+    suspend fun parse(uri: Uri) {
+        val epub = getEpubReader(uri) ?: throw Exception()
 
         val key = epub.metadata?.titles?.firstOrNull() ?: throw Exception("Unknown novel")
         val imgFile = File(context.filesDir, "library_covers/$key")
@@ -174,5 +175,12 @@ class ImportEpub(
                 else -> getNodeTextTraverse(child)
             }
         }
+    }
+
+    fun getCacheSize() : String {
+        return ireader.domain.utils.extensions.getCacheSize(context = context)
+    }
+    fun removeCache() {
+        context.cacheDir.deleteRecursively()
     }
 }

@@ -1,10 +1,6 @@
 package ireader.presentation.ui.home.sources.extension
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.TabRowDefaults
 import androidx.compose.material.Text
@@ -12,16 +8,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
@@ -29,10 +21,11 @@ import com.google.accompanist.pager.rememberPagerState
 import ireader.domain.models.entities.Catalog
 import ireader.i18n.UiEvent
 import ireader.i18n.asString
-import ireader.presentation.R
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.component.pagerTabIndicatorOffset
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.AppColors
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.utils.horizontalPadding
 import ireader.presentation.ui.home.sources.extension.composables.RemoteSourcesScreen
 import ireader.presentation.ui.home.sources.extension.composables.UserSourcesScreen
@@ -52,14 +45,13 @@ fun ExtensionScreen(
     onCancelInstaller: ((Catalog) -> Unit)? = null,
     snackBarHostState: androidx.compose.material3.SnackbarHostState,
 ) {
-
-    val context = LocalContext.current
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     LaunchedEffect(key1 = true) {
         vm.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackbar -> {
                     snackBarHostState.showSnackbar(
-                        event.uiText.asString(context)
+                        event.uiText.asString(localizeHelper)
                     )
                 }
                 else -> {}
@@ -68,8 +60,8 @@ fun ExtensionScreen(
     }
     val pages = remember {
         listOf<String>(
-            context.getString(R.string.sources),
-            context.getString(R.string.extensions),
+            localizeHelper.localize(MR.strings.sources),
+            localizeHelper.localize(MR.strings.extensions),
         )
     }
     Column(
@@ -94,13 +86,13 @@ fun SourceHeader(
     modifier: Modifier = Modifier,
     language: String,
 ) {
-    val context = LocalContext.current
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.CenterStart
     ) {
         Text(
-            text = LocaleHelper.getSourceDisplayName(language, context),
+            text = LocaleHelper.getSourceDisplayName(language, localizeHelper),
             modifier = modifier
                 .padding(horizontal = horizontalPadding, vertical = 8.dp),
             style = MaterialTheme.typography.labelSmall,

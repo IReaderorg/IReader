@@ -24,21 +24,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
+import ireader.core.source.Source
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
-import ireader.core.source.Source
 import ireader.domain.preferences.prefs.ChapterDisplayMode
 import ireader.presentation.R
 import ireader.presentation.ui.book.components.*
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
-import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.components.ChapterRow
 import ireader.presentation.ui.component.list.scrollbars.VerticalFastScroller
 import ireader.presentation.ui.component.reusable_composable.AppTextField
@@ -76,7 +73,6 @@ fun BookDetailScreen(
     onFavorite: () -> Unit,
     onWebView: () -> Unit,
 ) {
-    val context = LocalContext.current
     val refreshing = remember {
         derivedStateOf { vm.detailIsLoading || vm.chapterIsLoading }
     }
@@ -204,7 +200,6 @@ fun BookDetailScreen(
                 Box(modifier = Modifier.fillMaxSize()) {
                     ChapterDetailBottomBar(
                         vm,
-                        context,
                         onDownload = {
                         },
                         onBookmark = {

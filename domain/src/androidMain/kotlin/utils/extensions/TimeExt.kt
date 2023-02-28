@@ -1,21 +1,10 @@
 package ireader.domain.utils.extensions
 
-import android.content.Context
-import ireader.domain.R
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant.Companion.fromEpochMilliseconds
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone.Companion.currentSystemDefault
 import kotlinx.datetime.toLocalDateTime
-import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.time.Instant
-import java.time.ZoneId
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
+import java.util.*
 
 fun convertLongToTime(time: Long): String {
     val date = Date(time)
@@ -126,29 +115,6 @@ fun Long.toLocalCalendar(): Calendar? {
 }
 
 private const val MILLISECONDS_IN_DAY = 86_400_000L
-
-fun Date.toRelativeString(
-    context: Context,
-    range: Int = 7,
-    dateFormat: DateFormat = DateFormat.getDateInstance(DateFormat.SHORT),
-): String {
-    if (range == 0) {
-        return dateFormat.format(this)
-    }
-    val now = Date()
-    val difference = now.timeWithOffset.floorNearest(MILLISECONDS_IN_DAY) - this.timeWithOffset.floorNearest(MILLISECONDS_IN_DAY)
-    val days = difference.floorDiv(MILLISECONDS_IN_DAY).toInt()
-    return when {
-        difference < 0 -> context.getString(R.string.recently)
-        difference < MILLISECONDS_IN_DAY -> context.getString(R.string.relative_time_today)
-        difference < MILLISECONDS_IN_DAY.times(range) -> context.resources.getQuantityString(
-            R.plurals.relative_time,
-            days,
-            days,
-        )
-        else -> dateFormat.format(this)
-    }
-}
 
 private val Date.timeWithOffset: Long
     get() {

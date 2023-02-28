@@ -32,7 +32,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun ChapterDetailBottomBar(
     vm: BookDetailViewModel,
-    context: Context,
     onDownload: () -> Unit,
     onBookmark: () -> Unit,
     onMarkAsRead: () -> Unit,
