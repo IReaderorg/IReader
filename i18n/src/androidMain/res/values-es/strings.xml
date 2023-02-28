@@ -3,7 +3,7 @@
     <string name="hint">…</string>
     <string name="password">Clave</string>
     <string name="history_screen_label">Historia</string>
-    <string name="permission_not_given">No se otorga suficiente permiso. Por favor revise su permiso.</string>
+    <string name="permission_not_given">Se ha concedido un permiso insuficiente. Por favor verifique su permiso</string>
     <string name="saved_local_source_location">Fuentes guardadas en caché</string>
     <string name="category_hint">Nombre…</string>
     <string name="about">Sobre</string>
@@ -404,7 +404,7 @@
     <string name="unread">No leído</string>
     <string name="completed">Terminado</string>
     <string name="unable_to_get_package_version">No se puede obtener la versión del paquete</string>
-    <string name="subtitles_encoding_key" translatable="false">subtitles_encoding_key</string>
+    <string name="subtitles_encoding_key" translatable="false">clave de codificación de los subtítulos</string>
     <string name="the_downloads_was_cancelled">Las descargas fueron canceladas</string>
     <string name="failed_to_download">Error al descargar</string>
     <string name="downloads_was_cancelled">La descarga de fue cancelada</string>
