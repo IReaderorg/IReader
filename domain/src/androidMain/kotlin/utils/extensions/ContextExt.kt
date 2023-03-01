@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.res.Configuration
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
@@ -24,7 +25,19 @@ fun Context.copyToClipboard(label: String, content: String) {
         toast(R.string.clipboard_copy_error)
     }
 }
+private const val TABLET_UI_REQUIRED_SCREEN_WIDTH_DP = 720
 
+// some tablets have screen width like 711dp = 1600px / 2.25
+private const val TABLET_UI_MIN_SCREEN_WIDTH_PORTRAIT_DP = 700
+
+// make sure icons on the nav rail fit
+private const val TABLET_UI_MIN_SCREEN_WIDTH_LANDSCAPE_DP = 600
+fun Context.isTabletUi(): Boolean {
+    return resources.configuration.isTabletUi()
+}
+fun Configuration.isTabletUi(): Boolean {
+    return smallestScreenWidthDp >= TABLET_UI_REQUIRED_SCREEN_WIDTH_DP
+}
 fun Context.toast(
     text: String?,
     duration: Int = Toast.LENGTH_SHORT,

@@ -149,6 +149,8 @@ dependencies {
 
     implementation(composeLib.compose.coil)
     implementation(composeLib.compose.googlFonts)
+    implementation(composeLib.compose.foundation)
+    implementation(composeLib.material3.windowsizeclass)
 
     implementation(project(Modules.coreApi))
     implementation(project(Modules.data))

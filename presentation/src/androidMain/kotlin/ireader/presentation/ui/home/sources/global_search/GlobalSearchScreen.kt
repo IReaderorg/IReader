@@ -36,6 +36,7 @@ fun GlobalSearchScreen(
     onGoToExplore: (SearchItem) -> Unit,
 ) {
 
+    val numberOfTries  = vm.numberOfTries
 
     IScaffold(
         topBar = { scrollBehavior ->
@@ -55,7 +56,7 @@ fun GlobalSearchScreen(
             items(
                 items = vm.withResult,
                 key = { item ->
-                    item.source.key(Types.WithResult)
+                    item.source.key(numberOfTries, Types.WithResult)
                 },
             ) { item ->
                 GlobalSearchBookInfo(
@@ -67,7 +68,7 @@ fun GlobalSearchScreen(
             }
             items(items = vm.inProgress,
                 key = { item ->
-                    item.source.key(Types.InProgress)
+                    item.source.key(numberOfTries, Types.InProgress)
                 },) { item ->
                 GlobalSearchBookInfo(
                     item,
@@ -78,7 +79,7 @@ fun GlobalSearchScreen(
             }
             items(items = vm.noResult,
                 key = { item ->
-                    item.source.key(Types.NoResult)
+                    item.source.key(numberOfTries,Types.NoResult)
                 },) { item ->
                 GlobalSearchBookInfo(
                     item,
@@ -99,11 +100,11 @@ private enum class Types {
 }
 
 
-private fun Source.key(type:Types) :String {
+private fun Source.key(numberOfTries: Int, type:Types) :String {
    return when(type) {
-        Types.InProgress -> "in_progress-${this.id}"
-        Types.NoResult -> "no_result-${this.id}"
-        Types.WithResult -> "with_result-${this.id}"
+        Types.InProgress -> "${numberOfTries}_in_progress-${this.id}"
+        Types.NoResult -> "${numberOfTries}_no_result-${this.id}"
+        Types.WithResult -> "${numberOfTries}_with_result-${this.id}"
     }
 }
 

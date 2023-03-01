@@ -67,7 +67,7 @@ fun DownloaderScreen(
     val downloads = vm.downloads
 
     androidx.compose.material3.Scaffold(
-        modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
+        modifier = Modifier,
         floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
         floatingActionButton = {
             androidx.compose.material.ExtendedFloatingActionButton(

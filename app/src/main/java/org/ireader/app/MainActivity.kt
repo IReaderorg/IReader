@@ -3,13 +3,14 @@ package org.ireader.app
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.util.Consumer
 import androidx.core.view.WindowCompat
@@ -20,11 +21,13 @@ import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.backup.AutomaticBackup
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.utils.extensions.launchIO
+import ireader.domain.utils.extensions.toast
 import ireader.i18n.Args
 import ireader.i18n.SHORTCUTS.SHORTCUT_DETAIL
 import ireader.i18n.SHORTCUTS.SHORTCUT_DOWNLOAD
 import ireader.i18n.SHORTCUTS.SHORTCUT_READER
 import ireader.i18n.SHORTCUTS.SHORTCUT_TTS
+import ireader.presentation.R
 import ireader.presentation.core.DefaultNavigatorScreenTransition
 import ireader.presentation.core.MainStarterScreen
 import ireader.presentation.core.theme.AppTheme
@@ -34,9 +37,12 @@ import ireader.presentation.core.ui.DownloaderScreenSpec
 import ireader.presentation.core.ui.ReaderScreenSpec
 import ireader.presentation.core.ui.TTSScreenSpec
 import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.core.ui.asStateIn
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.ireader.app.initiators.AppInitializers
 import org.ireader.app.initiators.GetPermissions
 import org.ireader.app.initiators.SecureActivityDelegateImpl
@@ -45,6 +51,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
 import org.kodein.di.compose.withDI
 import org.kodein.di.instance
+import kotlin.time.Duration.Companion.seconds
 
 
 class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivityDelegateImpl(),
@@ -79,6 +86,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                         contentColor = MaterialTheme.colorScheme.onSurface,
 
                         ) {
+
                         Navigator(
                             screen = MainStarterScreen,
                             disposeBehavior = NavigatorDisposeBehavior(
@@ -86,6 +94,9 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                                 disposeSteps = true
                             ),
                         ) { navigator ->
+                            if (navigator.size == 1) {
+                                ConfirmExit()
+                            }
                             LaunchedEffect(navigator) {
                                 this@MainActivity.navigator = navigator
                                 if (savedInstanceState == null) {
@@ -198,7 +209,21 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
             else -> false
         }
     }
-
+    @Composable
+    private fun ConfirmExit() {
+        val scope = rememberCoroutineScope()
+        val confirmExit by uiPreferences.confirmExit().asStateIn(scope)
+        var waitingConfirmation by remember { mutableStateOf(false) }
+        BackHandler(enabled = !waitingConfirmation && confirmExit) {
+            scope.launch {
+                waitingConfirmation = true
+                val toast = toast(R.string.confirm_exit, Toast.LENGTH_LONG)
+                delay(2.seconds)
+                toast.cancel()
+                waitingConfirmation = false
+            }
+        }
+    }
     override val di: DI by closestDI()
 
 

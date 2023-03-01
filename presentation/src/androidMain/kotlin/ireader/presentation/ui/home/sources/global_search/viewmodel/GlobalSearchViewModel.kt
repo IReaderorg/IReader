@@ -3,22 +3,16 @@ package ireader.presentation.ui.home.sources.global_search.viewmodel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.viewModelScope
-import ireader.domain.models.entities.toBook
 import ireader.core.source.CatalogSource
 import ireader.core.source.model.Filter
 import ireader.domain.catalogs.interactor.GetInstalledCatalog
 import ireader.domain.catalogs.interactor.GetLocalCatalogs
 import ireader.domain.models.entities.CatalogInstalled
+import ireader.domain.models.entities.toBook
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.utils.extensions.replace
 import ireader.presentation.ui.component.Controller
-import ireader.presentation.ui.core.viewmodel.BaseViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.*
 
 
 
@@ -36,6 +30,7 @@ class GlobalSearchViewModel(
     var inProgress by mutableStateOf(emptyList<SearchItem>())
     var noResult by mutableStateOf(emptyList<SearchItem>())
     var withResult by mutableStateOf(emptyList<SearchItem>())
+    var numberOfTries by mutableStateOf(0)
 
     companion object {
         fun createParam(controller: Controller): Param {
@@ -52,6 +47,10 @@ class GlobalSearchViewModel(
     }
 
     fun searchBooks(query: String) {
+        numberOfTries++
+        inProgress = emptyList()
+        noResult = emptyList()
+        withResult = emptyList()
         scope.launch {
             installedCatalogs = getInstalledCatalog.get()
             val catalogs =

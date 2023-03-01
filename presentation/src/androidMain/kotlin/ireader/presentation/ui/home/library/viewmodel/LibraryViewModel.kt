@@ -1,24 +1,14 @@
 package ireader.presentation.ui.home.library.viewmodel
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.state.ToggleableState
-import androidx.lifecycle.viewModelScope
+import ireader.domain.models.DisplayMode
 import ireader.domain.models.entities.BookCategory
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.Category
 import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
-import ireader.domain.models.DisplayMode
 import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.domain.usecases.category.CategoriesUseCases
 import ireader.domain.usecases.local.DeleteUseCase
@@ -29,17 +19,9 @@ import ireader.domain.usecases.local.book_usecases.GetLibraryCategory
 import ireader.domain.usecases.local.book_usecases.MarkBookAsReadOrNotUseCase
 import ireader.domain.usecases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
 import ireader.domain.usecases.services.ServiceUseCases
-import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 
@@ -76,12 +58,15 @@ class LibraryViewModel(
     val deleteQueues: SnapshotStateList<BookCategory> = mutableStateListOf()
     val addQueues: SnapshotStateList<BookCategory> = mutableStateListOf()
     var showDialog: Boolean by mutableStateOf(false)
+    var isBookRefreshing: Boolean by mutableStateOf(false)
 
     val perCategorySettings = libraryPreferences.perCategorySettings().asState()
     val layouts = libraryPreferences.categoryFlags().asState()
     var columnInPortrait = libraryPreferences.columnsInPortrait().asState()
     val columnInLandscape by libraryPreferences.columnsInLandscape().asState()
     val layout by derivedStateOf { DisplayMode.getFlag(layouts.value) ?: DisplayMode.CompactGrid }
+
+
 
     init {
         readLayoutTypeAndFilterTypeAndSortType()
@@ -157,7 +142,9 @@ fun toggleSort(type: LibrarySort.Type) {
 }
 
 fun refreshUpdate() {
+    isBookRefreshing = true
     serviceUseCases.startLibraryUpdateServicesUseCase()
+    isBookRefreshing = false
 }
 
 fun setSelectedPage(index: Int) {

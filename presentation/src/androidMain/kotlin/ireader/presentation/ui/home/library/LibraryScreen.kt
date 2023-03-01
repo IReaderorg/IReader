@@ -5,13 +5,8 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -63,14 +58,11 @@ fun LibraryScreen(
     LaunchedEffect(vm.selectionMode) {
         requestHideBottomNav(vm.selectionMode)
     }
-    val refresh = remember {
-        mutableStateOf(false)
-    }
-    val swipeRefreshState = rememberPullRefreshState(refresh.value, onRefresh = refreshUpdate)
+
+
 
     BoxWithConstraints(
         modifier = modifier
-            .pullRefresh(swipeRefreshState)
             .padding(scaffoldPadding)
             .fillMaxSize(),
     ) {
@@ -119,6 +111,6 @@ fun LibraryScreen(
             onClickMarkAsRead = onMarkAsRead,
             onClickMarkAsUnread = onMarkAsNotRead
         )
-        PullRefreshIndicator(refresh.value, swipeRefreshState, Modifier.align(Alignment.TopCenter))
+
     }
 }
