@@ -1,6 +1,5 @@
 package ireader.presentation.ui.settings
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,8 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import cafe.adriel.voyager.navigator.currentOrThrow
+import dev.icerock.moko.resources.StringResource
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
@@ -108,7 +107,7 @@ fun MoreScreen(
 }
 
 data class SettingsSection(
-    @StringRes val titleRes: Int,
+    val titleRes: StringResource,
     val icon: ImageVector? = null,
     val onClick: () -> Unit,
 )
@@ -125,7 +124,7 @@ fun SetupLayout(
         items.map {
             item {
                 PreferenceRow(
-                    title = stringResource(it.titleRes),
+                    title = localize(it.titleRes),
                     icon = it.icon,
                     onClick = it.onClick,
                 )

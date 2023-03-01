@@ -13,6 +13,7 @@ import ireader.domain.catalogs.service.CatalogInstaller
 import ireader.domain.models.entities.CatalogRemote
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.files.GetSimpleStorage
+import ireader.i18n.LocalizeHelper
 import ireader.i18n.UiText
 import ireader.i18n.asString
 import kotlinx.coroutines.flow.channelFlow
@@ -31,13 +32,13 @@ class AndroidLocalInstaller(
     private val installationChanges: AndroidCatalogInstallationChanges,
     private val getSimpleStorage: GetSimpleStorage,
     private val uiPreferences: UiPreferences,
-    private val simpleStorage: GetSimpleStorage
+    private val localizeHelper: LocalizeHelper
 ) : CatalogInstaller {
 
 
     private fun savedCatalogLocation(catalog: CatalogRemote): File {
         val savedFromCache= uiPreferences.savedLocalCatalogLocation().get()
-        val cacheLocation = File(simpleStorage.cacheExtensionDir(context), catalog.pkgName).apply { mkdirs() }
+        val cacheLocation = File(getSimpleStorage.cacheExtensionDir(context), catalog.pkgName).apply { mkdirs() }
         val primaryLocation = File(getSimpleStorage.extensionDirectory(), catalog.pkgName).apply { mkdirs() }
 
         return if (savedFromCache) cacheLocation else primaryLocation
@@ -90,7 +91,7 @@ class AndroidLocalInstaller(
             send(InstallStep.Idle)
         } catch (e: Exception) {
             Log.warn(e, "Error installing package")
-            send(InstallStep.Error(UiText.ExceptionString(e).asString(context)))
+            send(InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper)))
             send(InstallStep.Idle)
         } finally {
             tmpApkFile.delete()
@@ -113,7 +114,7 @@ class AndroidLocalInstaller(
         installationChanges.notifyAppUninstall(pkgName)
         InstallStep.Success
         } catch (e: Throwable) {
-            InstallStep.Error(UiText.ExceptionString(e).asString(context))
+            InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper))
         }
     }
 

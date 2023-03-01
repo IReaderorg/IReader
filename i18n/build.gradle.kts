@@ -85,20 +85,6 @@ fun runCommand(command: String): String {
     }
     return String(byteOut.toByteArray()).trim()
 }
-
-idea {
-    module {
-        (this as ExtensionAware).configure<org.jetbrains.gradle.ext.ModuleSettings> {
-            (this as ExtensionAware).configure<org.jetbrains.gradle.ext.PackagePrefixContainer> {
-                arrayOf(
-                    "src/commonMain/kotlin",
-                    "src/androidMain/kotlin",
-                    "src/desktopMain/kotlin",
-                ).forEach { put(it, "ireader.i18n") }
-            }
-        }
-    }
-}
 multiplatformResources {
     multiplatformResourcesPackage = "ireader.i18n.resources"
 }

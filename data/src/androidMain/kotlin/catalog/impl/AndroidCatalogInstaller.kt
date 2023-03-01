@@ -12,8 +12,8 @@ import ireader.core.os.InstallStep
 import ireader.core.os.PackageInstaller
 import ireader.domain.catalogs.service.CatalogInstaller
 import ireader.domain.models.entities.CatalogRemote
-import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.files.GetSimpleStorage
+import ireader.i18n.LocalizeHelper
 import ireader.i18n.UiText
 import ireader.i18n.asString
 import kotlinx.coroutines.flow.Flow
@@ -31,7 +31,7 @@ class AndroidCatalogInstaller(
     private val installationChanges: AndroidCatalogInstallationChanges,
     private val packageInstaller: PackageInstaller,
     private val getSimpleStorage: GetSimpleStorage,
-    private val uiPreferences: UiPreferences
+    private val localizeHelper: LocalizeHelper
 ) : CatalogInstaller {
 
     /**
@@ -73,7 +73,7 @@ class AndroidCatalogInstaller(
                 emit(result)
             } catch (e: Throwable) {
                 Log.warn(e, "Error installing package")
-                emit(InstallStep.Error(UiText.ExceptionString(e).asString(context)))
+                emit(InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper)))
             } finally {
                 tmpApkFile.delete()
             }
@@ -90,7 +90,7 @@ class AndroidCatalogInstaller(
             installationChanges.notifyAppUninstall(pkgName)
             deleted
         } catch (e: Throwable) {
-            InstallStep.Error(UiText.ExceptionString(e).asString(context))
+            InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper))
         }
     }
 }

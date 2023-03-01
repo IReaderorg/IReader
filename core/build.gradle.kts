@@ -57,7 +57,7 @@ kotlin {
             }
         }
          val androidMain by getting {
-          ///  kotlin.srcDir("./src/jvmMain/kotlin")
+             dependsOn(commonMain)
             dependencies {
                 implementation(androidx.core)
                 implementation(androidx.lifecycle.process)
@@ -69,6 +69,7 @@ kotlin {
             }
         }
         val desktopMain by getting {
+            dependsOn(commonMain)
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
                 implementation(libs.quickjs.jvm)
@@ -155,19 +156,4 @@ publishing {
 
 signing {
     sign(publishing.publications)
-}
-
-idea {
-    module {
-        (this as ExtensionAware).configure<org.jetbrains.gradle.ext.ModuleSettings> {
-            (this as ExtensionAware).configure<org.jetbrains.gradle.ext.PackagePrefixContainer> {
-                arrayOf(
-                    "src/commonMain/kotlin",
-                    "src/androidMain/kotlin",
-                    "src/desktopMain/kotlin",
-                    "src/jvmMain/kotlin"
-                ).forEach { put(it, "ireader.core") }
-            }
-        }
-    }
 }

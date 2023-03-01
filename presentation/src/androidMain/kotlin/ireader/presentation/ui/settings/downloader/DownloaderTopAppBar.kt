@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.UiText
 import ireader.i18n.asString
 import ireader.i18n.localize
@@ -18,6 +19,8 @@ import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.BuildDropDownMenu
 import ireader.presentation.ui.component.reusable_composable.DropDownMenuItem
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DownloaderTopAppBar(
@@ -70,6 +73,7 @@ private fun RegularTopBar(
     onCancelAll: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior?
 ) {
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     var isMenuExpanded by remember {
         mutableStateOf(false)
     }
@@ -77,7 +81,7 @@ private fun RegularTopBar(
         scrollBehavior = scrollBehavior,
         title = {
             Text(
-                text = UiText.MStringResource(MR.strings.downloads_queue).asString(),
+                text = UiText.MStringResource(MR.strings.downloads_queue).asString(localizeHelper),
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,

@@ -20,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -32,9 +31,7 @@ import ireader.domain.preferences.prefs.ReadingMode
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
 import ireader.i18n.localize
-
 import ireader.i18n.resources.MR
-import ireader.presentation.R
 import ireader.presentation.ui.component.components.Build
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.component.*
@@ -372,8 +369,8 @@ fun GeneralScreenTab(
             ChipChoicePreference(
                 preference = vm.translatorOriginLanguage,
                 choices = vm.translationEnginesManager.get().supportedLanguages.associate { it.first to it.second },
-                title = stringResource(
-                    id = R.string.origin_language
+                title = localize(
+                    MR.strings.origin_language
                 )
             )
         }
@@ -381,8 +378,8 @@ fun GeneralScreenTab(
             ChipChoicePreference(
                 preference = vm.translatorTargetLanguage,
                 choices = vm.translationEnginesManager.get().supportedLanguages.associate { it.first to it.second },
-                title = stringResource(
-                    id = R.string.target_language
+                title = localize(
+                    MR.strings.target_language
                 )
             )
         }

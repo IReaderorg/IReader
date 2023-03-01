@@ -11,7 +11,6 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
-import ireader.presentation.R
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Toolbar
@@ -33,40 +32,40 @@ class SettingScreenSpec : VoyagerScreen() {
         val settingItems = remember {
             listOf(
                 SettingsSection(
-                    R.string.appearance,
+                    MR.strings.appearance,
                     Icons.Default.Palette,
                 ) {
                     navigator.push(AppearanceScreenSpec())
                 },
                 SettingsSection(
-                    R.string.general,
+                    MR.strings.general,
                     Icons.Default.Tune,
                 ) {
                     navigator.push(GeneralScreenSpec())
                 },
                 SettingsSection(
-                    R.string.reader,
+                    MR.strings.reader,
                     Icons.Default.ChromeReaderMode,
                 ) {
                     navigator.push(ReaderSettingSpec())
 
                 },
                 SettingsSection(
-                    R.string.security,
+                    MR.strings.security,
                     Icons.Default.Security,
                 ) {
                     navigator.push(SecuritySettingSpec())
 
                 },
                 SettingsSection(
-                    R.string.repository,
+                    MR.strings.repository,
                     Icons.Default.Extension,
                 ) {
                     navigator.push(RepositoryScreenSpec())
 
                 },
                 SettingsSection(
-                    R.string.advance_setting,
+                    MR.strings.advance_setting,
                     Icons.Default.Code
                 ) {
                     navigator.push(AdvanceSettingSpec())

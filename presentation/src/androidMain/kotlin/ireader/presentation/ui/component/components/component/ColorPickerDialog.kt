@@ -31,12 +31,10 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import ireader.i18n.R
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
 import kotlin.math.round
@@ -81,8 +79,8 @@ fun ColorPickerDialog(
                 showPresets = !showPresets
             }) {
                 val text =
-                    if (showPresets) R.string.presents else R.string.custom
-                androidx.compose.material3.Text(stringResource(text))
+                    if (showPresets) MR.strings.presents else MR.strings.custom
+                androidx.compose.material3.Text(localize(text))
             }
         }
     )

@@ -1,7 +1,8 @@
 package ireader.domain.models.prefs
 
 import androidx.compose.ui.Alignment
-import ireader.domain.R
+import ireader.i18n.UiText
+import ireader.i18n.resources.MR
 
 /**
  * This class stores the values for the preferences in the application.
@@ -13,10 +14,10 @@ object PreferenceValues {
         Light,
     }
 
-    enum class SecureScreenMode(val titleResId: Int) {
-        ALWAYS(R.string.lock_always),
-        INCOGNITO(R.string.pref_incognito_mode),
-        NEVER(R.string.lock_never),
+    enum class SecureScreenMode(val titleResId: UiText.MStringResource) {
+        ALWAYS(UiText.MStringResource(MR.strings.lock_always)),
+        INCOGNITO(UiText.MStringResource(MR.strings.pref_incognito_mode)),
+        NEVER(UiText.MStringResource(MR.strings.lock_never)),
     }
 
     enum class RelativeTime {

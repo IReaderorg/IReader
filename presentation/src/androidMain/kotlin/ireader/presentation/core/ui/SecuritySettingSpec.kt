@@ -19,9 +19,7 @@ import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.utils.extensions.AuthenticatorUtil
 import ireader.domain.utils.extensions.AuthenticatorUtil.isAuthenticationSupported
 import ireader.domain.utils.extensions.AuthenticatorUtil.startAuthentication
-import ireader.i18n.R
-import ireader.i18n.localize
-import ireader.i18n.localizePlural
+import ireader.i18n.*
 import ireader.i18n.resources.MR
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
@@ -134,9 +132,9 @@ class SecuritySettingSpec : VoyagerScreen() {
                     ChoicePreference<PreferenceValues.SecureScreenMode>(
                         preference = vm.secureScreen,
                         choices = mapOf(
-                            PreferenceValues.SecureScreenMode.ALWAYS to stringResource(id = PreferenceValues.SecureScreenMode.ALWAYS.titleResId),
-                            PreferenceValues.SecureScreenMode.INCOGNITO to stringResource(id = PreferenceValues.SecureScreenMode.INCOGNITO.titleResId),
-                            PreferenceValues.SecureScreenMode.NEVER to stringResource(id = PreferenceValues.SecureScreenMode.NEVER.titleResId)
+                            PreferenceValues.SecureScreenMode.ALWAYS to  PreferenceValues.SecureScreenMode.ALWAYS.titleResId.asString(localizeHelper),
+                            PreferenceValues.SecureScreenMode.INCOGNITO to  PreferenceValues.SecureScreenMode.INCOGNITO.titleResId.asString(localizeHelper),
+                            PreferenceValues.SecureScreenMode.NEVER to PreferenceValues.SecureScreenMode.NEVER.titleResId.asString(localizeHelper)
                         ),
                         title = localize(
                             MR.strings.secure_screen
@@ -175,13 +173,14 @@ class UnlockActivity : FragmentActivity(),DIAware {
     override val di: DI by closestDI()
 
     val appPreferences: UiPreferences by instance()
+    val localizeHelper: LocalizeHelper by instance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val title = intent.extras?.getString(TITLE)
         val subtitle = intent.extras?.getString(SUBTITLE)
         this.startAuthentication(
-            title = title ?: getString(R.string.unlock_app),
+            title = title ?: localizeHelper.localize(MR.strings.unlock_app),
             subtitle = subtitle,
             confirmationRequired = false,
             callback = object : AuthenticatorUtil.AuthenticationCallback() {

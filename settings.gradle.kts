@@ -12,10 +12,11 @@ include(":desktop")
 
 
 pluginManagement {
-    val hostedRepository =  System.getenv("CUSTOM_HOST_REPOSITORY")
+    // this repository is for devs who want to use custom repo instead of official ones
+    val hostedRepository = System.getenv("CUSTOM_HOST_REPOSITORY")
     repositories {
-        if (hostedRepository != null) {
-            maven(hostedRepository)
+        hostedRepository?.split(",")?.forEach { host ->
+            maven(host)
         }
         gradlePluginPortal()
         mavenCentral()
@@ -25,11 +26,11 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
-    val hostedRepository =  System.getenv("CUSTOM_HOST_REPOSITORY")
+    val hostedRepository = System.getenv("CUSTOM_HOST_REPOSITORY")
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        if (hostedRepository != null) {
-            maven(hostedRepository)
+        hostedRepository?.split(",")?.forEach { host ->
+            maven(host)
         }
         mavenCentral()
         google()
@@ -37,7 +38,7 @@ dependencyResolutionManagement {
         maven("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
         maven("https://oss.sonatype.org/service/local/staging/deploy/maven2")
         maven(url = "https://jitpack.io")
-        maven(url ="https://repo1.maven.org/maven2/")
+        maven(url = "https://repo1.maven.org/maven2/")
 
     }
     versionCatalogs {
