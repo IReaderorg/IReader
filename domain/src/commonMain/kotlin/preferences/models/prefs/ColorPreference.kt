@@ -2,13 +2,9 @@ package ireader.domain.preferences.models.prefs
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import ireader.core.prefs.Preference
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.*
 
 class ThemeColorPreference(
     private val preference: Preference<Int>

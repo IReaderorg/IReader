@@ -20,10 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavDeepLink
-import androidx.navigation.navDeepLink
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -31,17 +27,12 @@ import ireader.core.log.Log
 import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.models.getDefaultFont
 import ireader.domain.preferences.prefs.ReadingMode
-import ireader.i18n.UiEvent
 import ireader.i18n.UiText
-import ireader.i18n.asString
 import ireader.presentation.R
 
 import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
-import ireader.presentation.core.ui.util.NavigationArgs
-import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
-import ireader.presentation.ui.component.Controller
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.ui.core.theme.CustomSystemColor
@@ -53,7 +44,6 @@ import ireader.presentation.ui.reader.components.ReaderSettingMainLayout
 import ireader.presentation.ui.reader.reverse_swip_refresh.rememberSwipeRefreshState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 

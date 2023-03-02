@@ -1,14 +1,18 @@
 package ireader.presentation.ui.core.viewmodel
 import androidx.compose.runtime.State
 import ireader.core.prefs.Preference
+import ireader.i18n.UiEvent
 import ireader.presentation.ui.core.ui.PreferenceMutableState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 
 expect abstract class BaseViewModel {
+
+  val eventFlow : SharedFlow<UiEvent>
 
   protected val scope: CoroutineScope
 

@@ -23,7 +23,7 @@ import ireader.presentation.ui.core.modifier.clickableNoIndication
 @Composable
 fun ThemePreference(
     modifier: Modifier = Modifier,
-    onBackgroundChange: (color:ReaderColors) -> Unit,
+    onBackgroundChange: (color: ReaderColors) -> Unit,
     themes: List<ReaderColors>,
     selected:(color: ReaderColors) -> Boolean
 ) {

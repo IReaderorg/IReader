@@ -94,7 +94,6 @@ val GreenAppleLightThemeColors = lightColorScheme(
 )
 
 val GreenAppleDarkThemeColors = darkColorScheme(
-
     primary = md_theme_dark_primary,
     onPrimary = md_theme_dark_onPrimary,
     primaryContainer = md_theme_dark_primaryContainer,

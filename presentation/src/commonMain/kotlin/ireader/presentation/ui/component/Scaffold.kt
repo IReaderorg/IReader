@@ -18,11 +18,7 @@ package ireader.presentation.ui.component
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -31,10 +27,10 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
-import androidx.compose.ui.util.fastForEach
-import androidx.compose.ui.util.fastMap
-import androidx.compose.ui.util.fastMaxBy
 import ireader.presentation.ui.component.components.ISnackBarHost
+import ireader.presentation.ui.component.utils.fastForEach
+import ireader.presentation.ui.component.utils.fastMap
+import ireader.presentation.ui.component.utils.fastMaxBy
 import kotlin.math.max
 
 /**

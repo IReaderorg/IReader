@@ -2,7 +2,6 @@ package ireader.presentation.ui.core.viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.viewModelScope
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.coroutineScope
 import ireader.core.prefs.Preference
@@ -10,23 +9,8 @@ import ireader.i18n.UiEvent
 import ireader.i18n.UiText
 import ireader.i18n.resources.MR
 import ireader.presentation.ui.core.ui.PreferenceMutableState
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 
 actual abstract class BaseViewModel : ScreenModel {
 
@@ -36,7 +20,7 @@ actual abstract class BaseViewModel : ScreenModel {
     private val activeScope = MutableStateFlow<CoroutineScope?>(null)
 
     protected val _eventFlow = MutableSharedFlow<UiEvent>()
-    open val eventFlow = _eventFlow.asSharedFlow()
+    actual open val eventFlow = _eventFlow.asSharedFlow()
 
     open fun showSnackBar(message: UiText?) {
         scope.launch {

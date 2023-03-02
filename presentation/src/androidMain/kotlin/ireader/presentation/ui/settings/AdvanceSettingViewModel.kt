@@ -4,10 +4,8 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.viewModelScope
 import ireader.domain.models.entities.Category
 import ireader.i18n.UiText
-import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.domain.data.repository.CategoryRepository
 import ireader.domain.data.repository.ThemeRepository
 import ireader.domain.image.cache.CoverCache

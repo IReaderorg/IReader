@@ -12,7 +12,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
 import ireader.domain.models.entities.Chapter
 import ireader.core.http.WebViewManger
 import ireader.core.source.model.Text
@@ -39,12 +38,9 @@ import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.NO_VALUE
 import ireader.i18n.UiText
 
-import ireader.presentation.core.ui.util.NavigationArgs
 import ireader.presentation.ui.core.theme.ReaderColors
-import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch

@@ -2,14 +2,10 @@ package ireader.domain.preferences.models.prefs
 
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.graphics.Color
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import ireader.core.prefs.Preference
 import ireader.domain.preferences.models.ReaderColors
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.*
 
 class ReaderThemePreferences(
     private val preference: Preference<Long>
