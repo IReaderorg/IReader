@@ -13,11 +13,11 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
+import ireader.presentation.ui.core.ui.PreferenceMutableState
 import kotlin.math.round
 
 @Composable
@@ -49,8 +50,7 @@ fun ColorPickerDialog(
 ) {
     var currentColor by remember { mutableStateOf(initialColor) }
     var showPresets by remember { mutableStateOf(true) }
-
-    androidx.compose.material3.AlertDialog(
+    IAlertDialog(
         onDismissRequest = onDismissRequest,
         modifier = modifier,
         title = title,
@@ -105,7 +105,7 @@ private fun ColorPresets(
 
     val shades = remember(selectedColor) { getColorShades(selectedColor) }
 
-    val borderColor = MaterialTheme.colors.onBackground.copy(alpha = 0.54f)
+    val borderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.54f)
 
     Column {
         LazyVerticalGrid(
@@ -212,7 +212,7 @@ fun ColorPalette(
 
     val hueColor = remember(hue) { hueToColor(hue) }
 
-    val cursorColor = MaterialTheme.colors.onBackground
+    val cursorColor = MaterialTheme.colorScheme.onBackground
     val cursorStroke = Stroke(4f)
     val borderStroke = BorderStroke(Dp.Hairline, Color.LightGray)
 
@@ -314,7 +314,7 @@ fun ColorPalette(
                 Modifier
                     .size(72.dp, 48.dp)
                     .background(selectedColor)
-                    .border(1.dp, MaterialTheme.colors.onBackground.copy(alpha = 0.54f))
+                    .border(1.dp, MaterialTheme.colorScheme.onBackground.copy(alpha = 0.54f))
             )
             Spacer(Modifier.requiredWidth(32.dp))
             androidx.compose.material3.OutlinedTextField(
@@ -433,4 +433,10 @@ private val presetColors = listOf(
     Color(0xFF795548), // BROWN 500
     Color(0xFF607D8B), // BLUE GREY 500
     Color(0xFF9E9E9E), // GREY 500
+)
+data class ColorPickerInfo(
+    val preference: PreferenceMutableState<Color>? = null,
+    val title: String ? = null,
+    val onChangeColor: () -> Unit = {},
+    val initialColor: Color = Color.Unspecified,
 )

@@ -3,7 +3,10 @@ package ireader.presentation.ui.component.components.component
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
@@ -58,12 +61,12 @@ fun AppBarActions(
             Icon(Icons.Default.MoreVert, contentDescription = localize(MR.strings.label_more))
         }
 
-        DropdownMenu(
+        IDropdownMenu(
             expanded = showMenu,
             onDismissRequest = { showMenu = false },
         ) {
             overflowActions.map {
-                DropdownMenuItem(
+                IDropdownMenuItem(
                     onClick = {
                         it.onClick()
                         showMenu = false

@@ -16,8 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -25,22 +23,22 @@ import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.theme.Theme
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
-
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.Build
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.LazyColumnWithInsets
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.components.component.ChoicePreference
 import ireader.presentation.ui.component.components.component.ColorPickerDialog
+import ireader.presentation.ui.component.components.component.ColorPickerInfo
 import ireader.presentation.ui.component.components.component.ColorPreference
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.theme.isLight
-import ireader.presentation.ui.core.ui.PreferenceMutableState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import ireader.i18n.resources.MR
+
 @Composable
 fun AppearanceSettingScreen(
     modifier: Modifier = Modifier,
@@ -260,12 +258,7 @@ fun AppearanceSettingScreen(
     }
 }
 
-data class ColorPickerInfo(
-    val preference: PreferenceMutableState<Color>? = null,
-    val title: String ? = null,
-    val onChangeColor: () -> Unit = {},
-    val initialColor: Color = Color.Unspecified,
-)
+
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable

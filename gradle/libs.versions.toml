@@ -7,12 +7,9 @@ json = "1.4.1"
 
 # Compose
 composeGradle = "1.3.0-rc05"
-composeCompiler = "1.3.2.1"
-composeAndroid = "1.2.1"
 voyager = "1.0.0-rc07"
 accompanist = "0.25.2"
 googleAccompanist = "0.25.1"
-imageloader = "1.2.2.1"
 materialDialogs = "0.9.1"
 
 # Android

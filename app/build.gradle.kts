@@ -142,14 +142,13 @@ dependencies {
     implementation(androidx.core)
 
     implementation(androidx.media)
-    implementation(composeLib.compose.activity)
+
     implementation("androidx.core:core-splashscreen:1.0.0")
     @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
     implementation(compose.material3)
 
     implementation(composeLib.compose.coil)
     implementation(composeLib.compose.googlFonts)
-    implementation(composeLib.compose.foundation)
     implementation(composeLib.material3.windowsizeclass)
 
     implementation(project(Modules.coreApi))
@@ -186,6 +185,7 @@ dependencies {
     testImplementation(libs.ktor.core.cio)
 
     implementation(compose.runtime)
+    implementation(compose.foundation)
 
     testImplementation(test.bundles.common)
 
@@ -195,6 +195,18 @@ dependencies {
     implementation(libs.kodein.core)
     implementation(libs.kodein.compose)
     implementation(libs.voyager.navigator)
+
+
+    implementation(compose.runtime)
+    implementation(compose.foundation)
+    implementation(compose.animation)
+    implementation(compose.animationGraphics)
+    implementation(compose.materialIconsExtended)
+    implementation(compose.preview)
+    implementation(compose.ui)
+    @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+    implementation(compose.material3)
+    implementation(compose.materialIconsExtended)
 }
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround

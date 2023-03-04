@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,9 +21,9 @@ import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.component.reusable_composable.CaptionTextComposable
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
+import ireader.presentation.ui.core.theme.ContentAlpha
 import ireader.presentation.ui.core.ui.PreferenceMutableState
 import ireader.presentation.ui.core.utils.horizontalPadding
-import ireader.presentation.ui.settings.appearance.ColorPickerInfo
 
 @Composable
 fun Divider(
@@ -169,7 +168,7 @@ fun PreferenceRow(
                             text = subtitle,
                             overflow = Ellipsis,
                             maxLines = 1,
-                            color = LocalContentColor.current.copy(alpha = ContentAlpha.medium),
+                            color = LocalContentColor.current.copy(alpha = ContentAlpha.medium()),
                             style = MaterialTheme.typography.labelMedium
                     )
                 }
@@ -359,7 +358,7 @@ fun SliderPreference(
                         text = subtitle,
                         overflow = Ellipsis,
                         maxLines = 1,
-                        color = LocalContentColor.current.copy(alpha = ContentAlpha.medium),
+                        color = LocalContentColor.current.copy(alpha = ContentAlpha.medium()),
                         style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                         softWrap = true,
                 )
