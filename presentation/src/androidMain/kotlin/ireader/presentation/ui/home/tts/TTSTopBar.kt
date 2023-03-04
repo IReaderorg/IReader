@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.Toolbar
-import ireader.presentation.ui.component.components.component.PreferenceRow
+import ireader.presentation.ui.component.components.PreferenceRow
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 

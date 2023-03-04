@@ -28,10 +28,10 @@ import ireader.presentation.ui.component.components.Build
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.LazyColumnWithInsets
 import ireader.presentation.ui.component.components.Toolbar
-import ireader.presentation.ui.component.components.component.ChoicePreference
-import ireader.presentation.ui.component.components.component.ColorPickerDialog
-import ireader.presentation.ui.component.components.component.ColorPickerInfo
-import ireader.presentation.ui.component.components.component.ColorPreference
+import ireader.presentation.ui.component.components.ChoicePreference
+import ireader.presentation.ui.component.components.ColorPickerDialog
+import ireader.presentation.ui.component.components.ColorPickerInfo
+import ireader.presentation.ui.component.components.ColorPreference
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper

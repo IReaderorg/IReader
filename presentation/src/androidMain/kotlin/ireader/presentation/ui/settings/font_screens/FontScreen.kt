@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ireader.presentation.ui.component.components.component.PreferenceRow
+import ireader.presentation.ui.component.components.PreferenceRow
 import ireader.presentation.ui.component.reusable_composable.AppIcon
 
 @Composable

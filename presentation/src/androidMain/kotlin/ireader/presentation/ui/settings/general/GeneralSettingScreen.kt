@@ -15,7 +15,7 @@ import ireader.i18n.resources.MR
 import ireader.presentation.core.theme.LocaleHelper
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
-import ireader.presentation.ui.component.components.component.ChoicePreference
+import ireader.presentation.ui.component.components.ChoicePreference
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.video.component.cores.player.SubtitleHelper
 

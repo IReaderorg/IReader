@@ -15,7 +15,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.Book
 import ireader.i18n.resources.MR
 import ireader.presentation.R
-import ireader.presentation.ui.component.components.component.ChipPreference
+import ireader.presentation.ui.component.components.ChipPreference
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 

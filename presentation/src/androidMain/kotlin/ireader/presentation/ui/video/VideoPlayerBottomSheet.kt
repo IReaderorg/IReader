@@ -22,7 +22,7 @@ import ireader.core.source.model.MovieUrl
 import ireader.core.source.model.Subtitle
 import ireader.domain.utils.extensions.*
 import ireader.i18n.UiText
-import ireader.presentation.ui.component.components.component.PreferenceRow
+import ireader.presentation.ui.component.components.PreferenceRow
 import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
 import ireader.presentation.ui.video.bottomsheet.audioTracksComposable
 import ireader.presentation.ui.video.bottomsheet.loadLocalFileComposable

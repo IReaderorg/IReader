@@ -1,7 +1,7 @@
 package ireader.presentation.ui.video.bottomsheet
 
 import androidx.compose.foundation.lazy.LazyListScope
-import ireader.presentation.ui.component.components.component.ChoicePreference
+import ireader.presentation.ui.component.components.ChoicePreference
 import ireader.presentation.ui.video.component.core.PlayerState
 import ireader.presentation.ui.video.component.cores.SubtitleData
 

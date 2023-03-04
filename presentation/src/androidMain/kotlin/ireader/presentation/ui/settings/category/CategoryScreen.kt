@@ -38,7 +38,7 @@ import ireader.domain.utils.extensions.launchIO
 import ireader.domain.models.entities.CategoryWithCount
 import ireader.i18n.R
 import ireader.i18n.localize
-import ireader.presentation.ui.component.components.component.PreferenceRow
+import ireader.presentation.ui.component.components.PreferenceRow
 import ireader.presentation.ui.component.reorderable.ReorderableLazyListState
 import ireader.presentation.ui.component.reorderable.detectReorderAfterLongPress
 import ireader.presentation.ui.component.reorderable.draggedItem

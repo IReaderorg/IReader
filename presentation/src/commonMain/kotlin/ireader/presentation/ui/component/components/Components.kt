@@ -13,10 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import ireader.presentation.ui.component.components.component.ChipPreference
-import ireader.presentation.ui.component.components.component.PreferenceRow
-import ireader.presentation.ui.component.components.component.SliderPreference
-import ireader.presentation.ui.component.components.component.SwitchPreference
+import ireader.presentation.ui.component.components.ChipPreference
+import ireader.presentation.ui.component.components.PreferenceRow
+import ireader.presentation.ui.component.components.SliderPreference
+import ireader.presentation.ui.component.components.SwitchPreference
 import ireader.presentation.ui.component.text_related.TextSection
 import ireader.presentation.ui.core.ui.PreferenceMutableState
 

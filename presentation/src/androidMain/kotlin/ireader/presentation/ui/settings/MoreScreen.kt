@@ -18,9 +18,9 @@ import ireader.i18n.localize
 import ireader.i18n.resources.MR
 import ireader.presentation.R
 import ireader.presentation.ui.component.components.LogoHeader
-import ireader.presentation.ui.component.components.component.Divider
-import ireader.presentation.ui.component.components.component.PreferenceRow
-import ireader.presentation.ui.component.components.component.SwitchPreference
+import ireader.presentation.ui.component.components.Divider
+import ireader.presentation.ui.component.components.PreferenceRow
+import ireader.presentation.ui.component.components.SwitchPreference
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 

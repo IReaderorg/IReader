@@ -33,7 +33,7 @@ import ireader.i18n.LocalizeHelper
 import ireader.i18n.asString
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
-import ireader.presentation.ui.component.components.component.pagerTabIndicatorOffset
+import ireader.presentation.ui.component.components.pagerTabIndicatorOffset
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.component.text_related.TextSection
 import ireader.presentation.ui.core.theme.AppColors

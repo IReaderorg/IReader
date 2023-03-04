@@ -22,7 +22,7 @@ import ireader.i18n.resources.MR
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Toolbar
-import ireader.presentation.ui.component.components.component.PreferenceRow
+import ireader.presentation.ui.component.components.PreferenceRow
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.ui.SnackBarListener

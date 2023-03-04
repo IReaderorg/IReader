@@ -1,4 +1,4 @@
-package ireader.presentation.ui.component.components.component
+package ireader.presentation.ui.component.components
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.ColumnScope

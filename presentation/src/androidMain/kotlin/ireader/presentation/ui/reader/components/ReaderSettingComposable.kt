@@ -34,7 +34,7 @@ import ireader.i18n.localize
 import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.Build
 import ireader.presentation.ui.component.components.Components
-import ireader.presentation.ui.component.components.component.*
+import ireader.presentation.ui.component.components.*
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper

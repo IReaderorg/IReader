@@ -1,4 +1,4 @@
-package ireader.presentation.ui.component.components.component
+package ireader.presentation.ui.component.components
 
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable

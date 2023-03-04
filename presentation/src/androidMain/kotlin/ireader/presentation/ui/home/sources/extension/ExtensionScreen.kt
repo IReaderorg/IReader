@@ -22,7 +22,7 @@ import ireader.domain.models.entities.Catalog
 import ireader.i18n.UiEvent
 import ireader.i18n.asString
 import ireader.i18n.resources.MR
-import ireader.presentation.ui.component.components.component.pagerTabIndicatorOffset
+import ireader.presentation.ui.component.components.pagerTabIndicatorOffset
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper

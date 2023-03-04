@@ -28,7 +28,7 @@ import ireader.i18n.resources.MR
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.book.viewmodel.ChapterSort
 import ireader.presentation.ui.book.viewmodel.ChaptersFilters
-import ireader.presentation.ui.component.components.component.pagerTabIndicatorOffset
+import ireader.presentation.ui.component.components.pagerTabIndicatorOffset
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.ui.Colour.contentColor

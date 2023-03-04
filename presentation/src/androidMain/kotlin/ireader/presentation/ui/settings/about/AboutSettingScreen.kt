@@ -17,8 +17,8 @@ import ireader.i18n.localize
 import ireader.i18n.resources.MR
 import ireader.presentation.R
 import ireader.presentation.ui.component.components.LogoHeader
-import ireader.presentation.ui.component.components.component.LinkIcon
-import ireader.presentation.ui.component.components.component.PreferenceRow
+import ireader.presentation.ui.component.components.LinkIcon
+import ireader.presentation.ui.component.components.PreferenceRow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

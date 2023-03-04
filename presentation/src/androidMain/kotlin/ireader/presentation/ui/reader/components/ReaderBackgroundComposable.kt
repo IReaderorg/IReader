@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.preferences.models.ReaderColors
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
-import ireader.presentation.ui.component.components.component.PreferenceRow
+import ireader.presentation.ui.component.components.PreferenceRow
 import ireader.presentation.ui.core.modifier.clickableNoIndication
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 

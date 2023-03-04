@@ -3,7 +3,7 @@ package ireader.presentation.ui.video.bottomsheet
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.rememberCoroutineScope
 import ireader.core.log.Log
-import ireader.presentation.ui.component.components.component.ChoicePreference
+import ireader.presentation.ui.component.components.ChoicePreference
 import ireader.presentation.ui.video.component.core.MediaState
 import ireader.presentation.ui.video.component.core.PlayerState
 

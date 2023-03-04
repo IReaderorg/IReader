@@ -5,17 +5,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Divider
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import ireader.i18n.R
+import ireader.i18n.Images.eternityLight
 import ireader.presentation.ui.core.theme.AppColors
-
 import ireader.presentation.ui.core.ui.Colour.Transparent
 
 @Composable
@@ -27,7 +24,7 @@ fun LogoHeader() {
             color = AppColors.current.bars
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_eternity_light),
+                imageVector = eternityLight(),
                 contentDescription = null,
                 tint = AppColors.current.onBars,
                 modifier = Modifier

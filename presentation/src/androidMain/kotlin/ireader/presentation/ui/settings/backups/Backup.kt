@@ -18,7 +18,7 @@ import ireader.i18n.UiText
 import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
-import ireader.presentation.ui.component.components.component.ChoicePreference
+import ireader.presentation.ui.component.components.ChoicePreference
 import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 

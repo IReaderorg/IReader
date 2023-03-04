@@ -47,6 +47,7 @@ android {
     sourceSets.getByName("main") {
         assets.srcDir(File(buildDir, "generated/moko/androidMain/assets"))
         res.srcDir(File(buildDir, "generated/moko/androidMain/res"))
+        res.srcDir("src/commonMain/resources")
     }
     defaultConfig {
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")

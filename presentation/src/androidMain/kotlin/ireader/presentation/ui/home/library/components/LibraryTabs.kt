@@ -12,7 +12,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import ireader.domain.models.entities.CategoryWithCount
 
-import ireader.presentation.ui.component.components.component.pagerTabIndicatorOffset
+import ireader.presentation.ui.component.components.pagerTabIndicatorOffset
 import ireader.presentation.ui.core.theme.AppColors
 
 @OptIn(ExperimentalPagerApi::class)

@@ -35,9 +35,9 @@ import ireader.presentation.ui.component.NavigationBarTokens
 import ireader.presentation.ui.component.ThemePreference
 import ireader.presentation.ui.component.components.Build
 import ireader.presentation.ui.component.components.Components
-import ireader.presentation.ui.component.components.component.ChipChoicePreference
-import ireader.presentation.ui.component.components.component.SliderPreference
-import ireader.presentation.ui.component.components.component.SwitchPreference
+import ireader.presentation.ui.component.components.ChipChoicePreference
+import ireader.presentation.ui.component.components.SliderPreference
+import ireader.presentation.ui.component.components.SwitchPreference
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.home.tts.*
 import ireader.presentation.ui.reader.ReaderScreenDrawer

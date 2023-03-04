@@ -119,19 +119,3 @@ dependencies {
 //        this.isChanging = false
 //    }
 }
-
-
-idea {
-    module {
-        (this as ExtensionAware).configure<org.jetbrains.gradle.ext.ModuleSettings> {
-            (this as ExtensionAware).configure<org.jetbrains.gradle.ext.PackagePrefixContainer> {
-                arrayOf(
-                    "src/commonMain/kotlin",
-                    "src/androidMain/kotlin",
-                    "src/desktopMain/kotlin",
-                    "src/jvmMain/kotlin"
-                ).forEach { put(it, "ireader.domain") }
-            }
-        }
-    }
-}

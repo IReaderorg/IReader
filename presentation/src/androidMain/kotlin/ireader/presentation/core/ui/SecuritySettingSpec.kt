@@ -26,7 +26,7 @@ import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.component.components.TitleToolbar
-import ireader.presentation.ui.component.components.component.ChoicePreference
+import ireader.presentation.ui.component.components.ChoicePreference
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import kotlinx.datetime.Clock
 import org.kodein.di.DI
