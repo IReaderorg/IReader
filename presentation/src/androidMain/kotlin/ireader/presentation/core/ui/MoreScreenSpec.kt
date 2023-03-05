@@ -21,7 +21,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
-import ireader.presentation.ui.component.Controller
+
 import ireader.i18n.discord
 import ireader.i18n.localize
 import ireader.presentation.ui.component.components.TitleToolbar

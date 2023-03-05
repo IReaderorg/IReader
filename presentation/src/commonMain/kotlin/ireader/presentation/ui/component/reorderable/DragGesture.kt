@@ -1,22 +1,12 @@
 package ireader.presentation.ui.component.reorderable
 
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.pointer.AwaitPointerEventScope
-import androidx.compose.ui.input.pointer.PointerEvent
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.PointerId
-import androidx.compose.ui.input.pointer.PointerInputChange
-import androidx.compose.ui.input.pointer.PointerInputScope
-import androidx.compose.ui.input.pointer.PointerType
-import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
-import androidx.compose.ui.input.pointer.isOutOfBounds
-import androidx.compose.ui.input.pointer.positionChange
-import androidx.compose.ui.input.pointer.positionChangeConsumed
+import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastAll
-import androidx.compose.ui.util.fastAny
-import androidx.compose.ui.util.fastFirstOrNull
+import ireader.presentation.ui.component.utils.fastAll
+import ireader.presentation.ui.component.utils.fastAny
+import ireader.presentation.ui.component.utils.fastFirstOrNull
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
 

@@ -4,8 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.util.fastFirstOrNull
-import androidx.compose.ui.util.fastForEach
+import ireader.presentation.ui.component.utils.fastFirstOrNull
+import ireader.presentation.ui.component.utils.fastForEach
 import kotlinx.coroutines.channels.Channel
 import kotlin.math.absoluteValue
 import kotlin.math.min

@@ -3,6 +3,7 @@ package ireader.presentation.ui.core.theme
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import ireader.i18n.LocalizeHelper
+import ireader.presentation.core.theme.IUseController
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -43,6 +44,7 @@ fun CustomSystemColor(
 }
 
 val LocalTransparentStatusBar = staticCompositionLocalOf { TransparentStatusBar(false) }
+val LocalISystemUIController: ProvidableCompositionLocal<IUseController?> = staticCompositionLocalOf { IUseController() }
 val LocalCustomSystemColor = staticCompositionLocalOf { CustomStatusBar(false) }
 val LocalLocalizeHelper: ProvidableCompositionLocal<LocalizeHelper?> = staticCompositionLocalOf {
     null

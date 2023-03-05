@@ -3,8 +3,6 @@ package ireader.presentation.ui.component.reusable_composable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -14,6 +12,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
+import ireader.presentation.ui.component.components.IDropdownMenu
+import ireader.presentation.ui.component.components.IDropdownMenuItem
 
 @Composable
 fun BuildDropDownMenu(
@@ -35,7 +35,7 @@ fun BuildDropDownMenu(
                 contentDescription = localize(MR.strings.export_book_as_epub),
             )
         }
-        DropdownMenu(
+        IDropdownMenu(
             modifier = Modifier,
             expanded = state,
             onDismissRequest = {
@@ -43,7 +43,7 @@ fun BuildDropDownMenu(
             },
         ) {
             items.forEachIndexed { _, item ->
-                DropdownMenuItem(
+                IDropdownMenuItem(
                     onClick = {
                         item.onItem()
                         setState(false)

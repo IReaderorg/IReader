@@ -20,14 +20,12 @@ import coil.request.ImageRequest
 import ireader.domain.models.BookCover
 
 @Composable
-fun BookImageComposable(
+actual fun IBookImageComposable(
     image: BookCover,
-    modifier: Modifier = Modifier,
-    alignment: Alignment = Alignment.TopCenter,
-    contentScale: ContentScale = ContentScale.FillHeight,
-    iconBadge: (@Composable () -> Unit)? = null,
-    useSavedCoverImage: Boolean = false,
-    headers: ((url: String) -> okhttp3.Headers?)? = null
+    modifier: Modifier ,
+    alignment: Alignment ,
+    contentScale: ContentScale,
+    headers: ((url: String) -> okhttp3.Headers?)?
 ) {
     val context = LocalContext.current
     AsyncImage(

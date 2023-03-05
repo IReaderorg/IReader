@@ -7,3 +7,9 @@ expect inline fun <T> List<T>.fastForEach(action: (T) -> Unit)
 
 
 expect inline fun <T, R : Comparable<R>> List<T>.fastMaxBy(selector: (T) -> R): T?
+
+expect inline fun <T> List<T>.fastFirstOrNull(predicate: (T) -> Boolean): T?
+
+expect inline fun <T> List<T>.fastAll(predicate: (T) -> Boolean): Boolean
+
+expect inline fun <T> List<T>.fastAny(predicate: (T) -> Boolean): Boolean

@@ -4,9 +4,8 @@ import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.ExperimentalTextApi
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.LocalizeHelper
 import ireader.presentation.ui.core.theme.*
 import kotlinx.coroutines.CoroutineScope
@@ -23,13 +22,13 @@ fun AppTheme(
     val vm: AppThemeViewModel by rememberInstance()
     val (materialColors, customColors) = vm.getColors()
     val rippleTheme = vm.getRippleTheme()
-    val systemUiController = rememberSystemUiController()
+    val systemUiController = LocalISystemUIController.currentOrThrow
+    systemUiController.InitController()
     val transparentStatusBar = LocalTransparentStatusBar.current.enabled
     val isCustomColorEnable = LocalCustomSystemColor.current.enabled
     val status = LocalCustomSystemColor.current.enabled
     val navigation = LocalCustomSystemColor.current.enabled
     val customStatusColor = LocalCustomSystemColor.current
-    val ctx = LocalContext.current
     val mainLocalizeHelper by rememberInstance<LocalizeHelper>()
 
     systemUiController.setSystemBarsColor(
@@ -56,6 +55,7 @@ fun AppTheme(
             systemUiController.setNavigationBarColor(
                 color = customStatusColor.navigationBar,
                 darkIcons = customStatusColor.navigationBar.luminance() > 0.5,
+                navigationBarContrastEnforced = true
             )
         } else if (transparentStatusBar) {
             systemUiController.setStatusBarColor(
@@ -65,11 +65,13 @@ fun AppTheme(
             systemUiController.setNavigationBarColor(
                 color = customColors.bars,
                 darkIcons = customColors.isBarLight,
+                navigationBarContrastEnforced = true
             )
         } else {
             systemUiController.setSystemBarsColor(
                 color = customColors.bars,
                 darkIcons = customColors.isBarLight,
+                isNavigationBarContrastEnforced = true
             )
         }
         onDispose { }

@@ -31,7 +31,7 @@ import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.services.ServiceUseCases
 import ireader.domain.utils.extensions.findComponentActivity
 import ireader.presentation.core.ui.util.NavigationArgs
-import ireader.presentation.ui.component.Controller
+
 import kotlinx.coroutines.launch
 
 
@@ -53,12 +53,7 @@ class TTSViewModel(
     TTSState by ttsState {
     data class Param(val sourceId:Long? ,val chapterId: Long?, val bookId: Long?,val readingParagraph: Int?)
 
-    companion object  {
-        fun createParam(controller: Controller) : Param {
-            return Param(controller.navBackStackEntry.arguments?.getLong("sourceId"),controller.navBackStackEntry.arguments?.getLong("chapterId"),controller.navBackStackEntry.arguments?.getLong("bookId"),controller.navBackStackEntry.arguments?.getInt(
-                NavigationArgs.readingParagraph.name))
-        }
-    }
+
     var fullScreenMode by mutableStateOf(false)
 
     val speechRate = readerPreferences.speechRate().asState()

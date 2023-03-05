@@ -19,7 +19,7 @@ import ireader.domain.utils.extensions.DefaultPaginator
 import ireader.i18n.SourceNotFoundException
 import ireader.i18n.UiText
 
-import ireader.presentation.ui.component.Controller
+
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -37,14 +37,7 @@ class ExploreViewModel(
     val booksState: BooksState
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), ExploreState by state {
     data class Param(val sourceId: Long?, val query: String?)
-    companion object {
-        fun createParam(controller: Controller): Param {
-            return Param(
-                controller.navBackStackEntry.arguments?.getLong("sourceId"),
-                controller.navBackStackEntry.arguments?.getString("query")
-            )
-        }
-    }
+
 
     init {
         booksState.empty()

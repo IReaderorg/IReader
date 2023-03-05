@@ -28,7 +28,7 @@ import ireader.domain.utils.extensions.withIOContext
 import ireader.domain.utils.extensions.withUIContext
 import ireader.i18n.UiText
 
-import ireader.presentation.ui.component.Controller
+
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.ui.home.explore.viewmodel.BooksState
 import kotlinx.coroutines.CoroutineScope
@@ -67,11 +67,6 @@ class BookDetailViewModel(
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), DetailState by state, ChapterState by chapterState {
     data class Param(val bookId: Long?)
 
-    companion object {
-        fun createParam(controller: Controller): Param {
-            return Param(controller.navBackStackEntry.arguments?.getLong("bookId"))
-        }
-    }
 
     var getBookDetailJob: Job? = null
     var getChapterDetailJob: Job? = null

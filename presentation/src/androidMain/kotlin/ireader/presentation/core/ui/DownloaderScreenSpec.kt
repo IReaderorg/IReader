@@ -10,7 +10,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.toSavedDownload
 import ireader.presentation.core.VoyagerScreen
-import ireader.presentation.ui.component.Controller
+
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.settings.downloader.DownloaderScreen

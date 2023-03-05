@@ -1,5 +1,6 @@
 package ireader.presentation.ui.web
 
+
 import android.webkit.WebView
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -7,30 +8,23 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.lifecycle.viewModelScope
 import com.google.accompanist.web.WebViewState
-import ireader.domain.models.entities.Book
 import ireader.core.http.WebViewManger
+import ireader.core.source.model.Command
+import ireader.domain.catalogs.CatalogStore
+import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
-import ireader.i18n.UiText
-import ireader.core.source.model.Command
-import ireader.presentation.ui.core.viewmodel.BaseViewModel
-import ireader.domain.catalogs.CatalogStore
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
-
-import ireader.presentation.core.ui.util.NavigationArgs
-import ireader.presentation.ui.component.Controller
+import ireader.i18n.UiText
+import ireader.i18n.resources.MR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-
-
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
-import ireader.i18n.resources.MR
 
 class WebViewPageModel(
     private val insertUseCases: LocalInsertUseCases,
@@ -51,20 +45,6 @@ class WebViewPageModel(
         val enableChaptersFetch: Boolean?,
         val enableBookFetch: Boolean?
     )
-
-    companion object {
-        fun createParam(controller: Controller): Param {
-            return Param(
-                controller.navBackStackEntry.arguments?.getString(NavigationArgs.url.name),
-                controller.navBackStackEntry.arguments?.getLong("bookId"),
-                controller.navBackStackEntry.arguments?.getLong("sourceId"),
-                controller.navBackStackEntry.arguments?.getLong(NavigationArgs.chapterId.name),
-                controller.navBackStackEntry.arguments?.getBoolean("enableChapterFetch"),
-                controller.navBackStackEntry.arguments?.getBoolean("enableChaptersFetch"),
-                controller.navBackStackEntry.arguments?.getBoolean("enableBookFetch"),
-            )
-        }
-    }
 
     init {
         val url = URLDecoder.decode(

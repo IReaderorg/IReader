@@ -1,10 +1,6 @@
 package ireader.presentation.ui.component
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,9 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import coil.compose.AsyncImage
-import ireader.domain.models.entities.Book
 import ireader.domain.models.BookCover
+import ireader.domain.models.entities.Book
+import ireader.presentation.imageloader.IImageLoader
 
 sealed class BookListItem(val name: String) {
 
@@ -40,7 +36,7 @@ fun BookListItemImage(
     modifier: Modifier = Modifier,
     mangaCover: BookCover,
 ) {
-    AsyncImage(
+    IImageLoader(
         model = mangaCover.cover,
         contentDescription = null,
         modifier = modifier,

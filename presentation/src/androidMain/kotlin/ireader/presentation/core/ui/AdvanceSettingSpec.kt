@@ -10,7 +10,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.localize
 
-import ireader.presentation.ui.component.Controller
+
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.settings.AdvanceSettingViewModel

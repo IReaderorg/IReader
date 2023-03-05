@@ -11,7 +11,7 @@ import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.toBook
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.utils.extensions.replace
-import ireader.presentation.ui.component.Controller
+
 import kotlinx.coroutines.*
 
 
@@ -32,11 +32,7 @@ class GlobalSearchViewModel(
     var withResult by mutableStateOf(emptyList<SearchItem>())
     var numberOfTries by mutableStateOf(0)
 
-    companion object {
-        fun createParam(controller: Controller): Param {
-            return Param(controller.navBackStackEntry.arguments?.getString("query"))
-        }
-    }
+
 
     init {
         val query = param.query

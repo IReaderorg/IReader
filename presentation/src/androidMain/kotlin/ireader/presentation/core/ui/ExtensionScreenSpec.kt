@@ -34,7 +34,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import ireader.i18n.localize
-import ireader.presentation.ui.component.Controller
+
 import ireader.presentation.core.ui.util.NavigationArgs
 
 import ireader.presentation.ui.component.IScaffold

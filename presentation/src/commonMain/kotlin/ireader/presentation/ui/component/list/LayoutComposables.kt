@@ -4,9 +4,9 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import ireader.domain.models.entities.BookItem
 import ireader.core.source.Source
 import ireader.domain.models.DisplayMode
+import ireader.domain.models.entities.BookItem
 import ireader.presentation.ui.component.list.layouts.ComfortableGridLayout
 import ireader.presentation.ui.component.list.layouts.CompactGridLayoutComposable
 import ireader.presentation.ui.component.list.layouts.CoverOnlyGrid

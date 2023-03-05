@@ -12,7 +12,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 
-import ireader.presentation.ui.component.Controller
+
 import ireader.i18n.R
 import ireader.i18n.localize
 import ireader.presentation.core.VoyagerScreen

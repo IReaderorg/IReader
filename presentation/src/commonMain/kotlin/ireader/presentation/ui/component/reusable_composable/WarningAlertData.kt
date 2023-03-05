@@ -1,11 +1,11 @@
 package ireader.presentation.ui.component.reusable_composable
 
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import ireader.presentation.ui.component.components.IAlertDialog
 
 class WarningAlertData {
     val enable = mutableStateOf(false)
@@ -22,7 +22,7 @@ fun WarningAlert(
     data: WarningAlertData,
 ) {
     if (data.enable.value) {
-        AlertDialog(
+        IAlertDialog(
             title = if (data.title.value != null) {
                 {
                     MidSizeTextComposable(text = data.title.value!!)
