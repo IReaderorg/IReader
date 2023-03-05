@@ -29,10 +29,10 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalCoroutinesApi::class)
 
 class LibraryViewModel(
-    private val localGetBookUseCases: LocalGetBookUseCases,
-    private val insertUseCases: LocalInsertUseCases,
-    val deleteUseCase: DeleteUseCase,
-    private val localGetChapterUseCase: LocalGetChapterUseCase,
+    private val localGetBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases,
+    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
+    val deleteUseCase: ireader.domain.usecases.local.DeleteUseCase,
+    private val localGetChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
     private val libraryScreenPrefUseCases: LibraryScreenPrefUseCases,
     private val state: LibraryStateImpl,
     private val serviceUseCases: ServiceUseCases,

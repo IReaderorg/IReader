@@ -27,9 +27,9 @@ import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
 class WebViewPageModel(
-    private val insertUseCases: LocalInsertUseCases,
+    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     private val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases,
-    private val getChapterUseCase: LocalGetChapterUseCase,
+    private val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
     private val extensions: CatalogStore,
     private val remoteUseCases: RemoteUseCases,
     private val param: Param,

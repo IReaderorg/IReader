@@ -28,10 +28,10 @@ import kotlinx.coroutines.runBlocking
 
 class VideoScreenViewModel(
     val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases,
-    val getChapterUseCase: LocalGetChapterUseCase,
+    val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
     val remoteUseCases: RemoteUseCases,
     val getLocalCatalog: GetLocalCatalog,
-    val insertUseCases: LocalInsertUseCases,
+    val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     val simpleStorage: GetSimpleStorage,
     val mediaState: MediaState,
     val param: Param

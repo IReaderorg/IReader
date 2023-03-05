@@ -9,6 +9,16 @@ import ireader.domain.services.library_update_service.LibraryUpdatesService
 import ireader.domain.services.tts_service.TTSStateImpl
 import ireader.domain.services.tts_service.media_player.TTSService
 import ireader.domain.services.update_service.UpdateService
+import ireader.domain.usecases.category.CategoriesUseCases
+import ireader.domain.usecases.category.CreateCategoryWithName
+import ireader.domain.usecases.category.ReorderCategory
+import ireader.domain.usecases.download.get.SubscribeDownloadsUseCase
+import ireader.domain.usecases.fonts.FontUseCase
+import ireader.domain.usecases.remote.GetBookDetail
+import ireader.domain.usecases.remote.GetRemoteBooksUseCase
+import ireader.domain.usecases.remote.GetRemoteChapters
+import ireader.domain.usecases.remote.GetRemoteReadingContent
+import ireader.domain.usecases.translate.TranslationEnginesManager
 import org.kodein.di.*
 
 
@@ -92,13 +102,13 @@ val DomainServices = DI.Module("domainModule") {
             instance()
         )
     }
-    bindProvider { ireader.domain.usecases.category.CategoriesUseCases(instance(), instance()) }
-    bindProvider { ireader.domain.usecases.category.CreateCategoryWithName(instance()) }
-    bindProvider { ireader.domain.usecases.category.ReorderCategory(instance()) }
-    bindProvider { ireader.domain.usecases.download.get.SubscribeDownloadsUseCase(instance()) }
+    bindProvider { CategoriesUseCases(instance(), instance()) }
+    bindProvider { CreateCategoryWithName(instance()) }
+    bindProvider { ReorderCategory(instance()) }
+    bindProvider { SubscribeDownloadsUseCase(instance()) }
 
     bindProvider { ireader.domain.usecases.epub.importer.ImportEpub(instance(), instance(), instance()) }
-    bindProvider { ireader.domain.usecases.fonts.FontUseCase(instance()) }
+    bindProvider { FontUseCase(instance()) }
     bindProvider { ireader.domain.usecases.history.HistoryPagingUseCase(instance()) }
 
     bindProvider { ireader.domain.usecases.local.FindBooksByKey(instance()) }
@@ -161,17 +171,17 @@ val DomainServices = DI.Module("domainModule") {
         )
     }
     bindProvider { ireader.domain.usecases.preferences.services.LastUpdateTime(instance()) }
-    bindProvider { ireader.domain.usecases.reader.ScreenAlwaysOn() }
-    bindProvider { ireader.domain.usecases.remote.GetBookDetail() }
-    bindProvider { ireader.domain.usecases.remote.GetRemoteBooksUseCase() }
-    bindProvider { ireader.domain.usecases.remote.GetRemoteChapters() }
-    bindProvider { ireader.domain.usecases.remote.GetRemoteReadingContent() }
+
+    bindProvider { GetBookDetail() }
+    bindProvider { GetRemoteBooksUseCase() }
+    bindProvider { GetRemoteChapters() }
+    bindProvider { GetRemoteReadingContent() }
     bindProvider { ireader.domain.usecases.services.StartDownloadServicesUseCase(instance()) }
     bindProvider { ireader.domain.usecases.services.StartLibraryUpdateServicesUseCase(instance()) }
     bindProvider { ireader.domain.usecases.services.StartTTSServicesUseCase(instance()) }
     bindProvider { ireader.domain.usecases.services.StopServiceUseCase(instance()) }
     bindProvider {
-        ireader.domain.usecases.translate.TranslationEnginesManager(
+        TranslationEnginesManager(
             instance(),
             instance()
         )

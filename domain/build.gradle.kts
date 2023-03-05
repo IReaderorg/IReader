@@ -50,6 +50,13 @@ kotlin {
                 implementation(compose.runtime)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 implementation(compose.material3)
+                compileOnly(libs.kodein.core)
+                implementation(kotlinx.coroutines.core)
+                implementation(kotlinx.coroutines.android)
+                implementation(libs.ktor.core)
+                implementation(libs.ktor.contentNegotiation)
+                implementation(libs.ktor.okhttp)
+                implementation(libs.bundles.ireader)
             }
         }
          val androidMain by getting {
@@ -71,8 +78,7 @@ kotlin {
                 //debugImplementation(composeLib.compose.uiTestManifest)
                 implementation(androidx.work.runtime)
                 /** Coroutine **/
-                implementation(kotlinx.coroutines.core)
-                implementation(kotlinx.coroutines.android)
+
                 implementation(libs.okhttp.okhttp3)
                 implementation(libs.okhttp.interceptor)
                 implementation(libs.okhttp.doh)
@@ -91,13 +97,11 @@ kotlin {
                 /** LifeCycle **/
                 implementation(androidx.lifecycle.runtime)
                 implementation(kotlinx.stdlib)
-                implementation(libs.ktor.core)
-                implementation(libs.ktor.contentNegotiation)
-                implementation(libs.ktor.okhttp)
-                implementation(libs.bundles.ireader)
+
+
 
                 //
-                compileOnly(libs.kodein.core)
+
             }
         }
         val desktopMain by getting {

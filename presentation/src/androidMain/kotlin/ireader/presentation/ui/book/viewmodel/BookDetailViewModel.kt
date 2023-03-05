@@ -9,7 +9,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.viewModelScope
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
@@ -29,7 +28,6 @@ import ireader.domain.utils.extensions.withUIContext
 import ireader.i18n.UiText
 
 
-import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.ui.home.explore.viewmodel.BooksState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -48,20 +46,20 @@ import ireader.i18n.resources.MR
 
 
 class BookDetailViewModel(
-    private val localInsertUseCases: LocalInsertUseCases,
-    private val getChapterUseCase: LocalGetChapterUseCase,
+    private val localInsertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
+    private val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
     private val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases,
     private val remoteUseCases: RemoteUseCases,
     private val getLocalCatalog: GetLocalCatalog,
     val state: DetailStateImpl,
     val chapterState: ChapterStateImpl,
     private val serviceUseCases: ServiceUseCases,
-    val deleteUseCase: DeleteUseCase,
+    val deleteUseCase: ireader.domain.usecases.local.DeleteUseCase,
     private val applicationScope: CoroutineScope,
     val createEpub: EpubCreator,
     val historyUseCase: HistoryUseCase,
     val readerPreferences: ReaderPreferences,
-    val insertUseCases: LocalInsertUseCases,
+    val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     private val param: Param,
     val booksState: BooksState
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), DetailState by state, ChapterState by chapterState {

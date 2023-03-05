@@ -7,6 +7,7 @@ import android.os.Looper
 import androidx.work.Configuration
 import coil.ImageLoader
 import coil.ImageLoaderFactory
+import ireader.domain.di.DomainModule
 import ireader.domain.di.DomainServices
 import ireader.domain.utils.WebViewUtil
 import ireader.presentation.core.di.PresentationModules
@@ -24,7 +25,7 @@ class MyApplication : Application(), ImageLoaderFactory, DIAware, Configuration.
         bindSingleton<Context> { this@MyApplication }
         bindSingleton<Application> { this@MyApplication }
         importAll(AppModule, CatalogModule, DataModule, localModule, preferencesInjectModule,
-            repositoryInjectModule, UseCasesInject, PresentationModules,DomainServices)
+            repositoryInjectModule, UseCasesInject, PresentationModules,DomainServices,DomainModule)
 
     }
 

@@ -1,7 +1,6 @@
 package ireader.presentation.ui.home.explore.viewmodel
 
 import androidx.compose.ui.util.fastMap
-import androidx.lifecycle.viewModelScope
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.toBook
@@ -20,7 +19,6 @@ import ireader.i18n.SourceNotFoundException
 import ireader.i18n.UiText
 
 
-import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import ireader.i18n.resources.MR
@@ -31,7 +29,7 @@ class ExploreViewModel(
     private val remoteUseCases: RemoteUseCases,
     private val catalogStore: GetLocalCatalogs,
     private val browseScreenPrefUseCase: BrowseScreenPrefUseCase,
-    val insertUseCases: LocalInsertUseCases,
+    val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     private val param: Param,
     private val findDuplicateBook: FindDuplicateBook,
     val booksState: BooksState

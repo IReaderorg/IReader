@@ -23,9 +23,9 @@ import java.util.*
 
 
 class BackupScreenViewModel(
-    private val booksUseCasa: LocalGetBookUseCases,
-    private val chapterUseCase: LocalGetChapterUseCase,
-    private val insertUseCases: LocalInsertUseCases,
+    private val booksUseCasa: ireader.domain.usecases.local.LocalGetBookUseCases,
+    private val chapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
+    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     val restoreBackup: RestoreBackup,
     val createBackup: CreateBackup,
     val uiPreferences: UiPreferences,

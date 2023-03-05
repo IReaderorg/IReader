@@ -19,7 +19,7 @@ import kotlinx.coroutines.*
 class GlobalSearchViewModel(
     private val state: GlobalSearchStateImpl,
     private val catalogStore: GetLocalCatalogs,
-    val insertUseCases: LocalInsertUseCases,
+    val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     val getInstalledCatalog: GetInstalledCatalog,
     val param: Param
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), GlobalSearchState by state {

@@ -10,11 +10,11 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 
-expect abstract class BaseViewModel {
+expect abstract class BaseViewModel() {
 
   val eventFlow : SharedFlow<UiEvent>
 
-  protected val scope: CoroutineScope
+  val scope: CoroutineScope
 
   open fun onDestroy()
 

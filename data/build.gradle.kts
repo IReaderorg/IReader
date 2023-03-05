@@ -2,9 +2,8 @@ plugins {
     kotlin("multiplatform")
     id("com.android.library")
     kotlin("plugin.serialization")
-    id("com.squareup.sqldelight")
+    id(libs.plugins.sqldelight.get().pluginId)
     id("com.google.devtools.ksp")
-    id("org.jetbrains.gradle.plugin.idea-ext")
 }
 
 kotlin {
@@ -102,22 +101,6 @@ android {
             version = 1
             schemaOutputDirectory = file("src/main/sqldelight/databases")
             verifyMigrations = true
-        }
-    }
-}
-
-
-idea {
-    module {
-        (this as ExtensionAware).configure<org.jetbrains.gradle.ext.ModuleSettings> {
-            (this as ExtensionAware).configure<org.jetbrains.gradle.ext.PackagePrefixContainer> {
-                arrayOf(
-                    "src/commonMain/kotlin",
-                    "src/androidMain/kotlin",
-                    "src/desktopMain/kotlin",
-                    "src/jvmMain/kotlin"
-                ).forEach { put(it, "ireader.data") }
-            }
         }
     }
 }

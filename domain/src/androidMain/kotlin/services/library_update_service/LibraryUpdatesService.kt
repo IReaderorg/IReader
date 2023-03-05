@@ -30,11 +30,11 @@ class LibraryUpdatesService(
 ) : CoroutineWorker(context, params), DIAware {
     override val di: DI = (context.applicationContext as DIAware).di
 
-    private val getBookUseCases: LocalGetBookUseCases by instance()
-    private val getChapterUseCase: LocalGetChapterUseCase by instance()
+    private val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases by instance()
+    private val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase by instance()
     private val remoteUseCases: RemoteUseCases by instance()
     private val getLocalCatalog: GetLocalCatalog by instance()
-    private val insertUseCases: LocalInsertUseCases by instance()
+    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases by instance()
 
     companion object {
         const val LibraryUpdateTag = "Library_Update_SERVICE"

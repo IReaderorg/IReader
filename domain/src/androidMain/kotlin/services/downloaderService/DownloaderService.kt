@@ -41,7 +41,7 @@ class DownloaderService  constructor(
     private val chapterRepo: ChapterRepository by instance()
     private val remoteUseCases: RemoteUseCases by instance()
     private val extensions: CatalogStore by instance()
-    private val insertUseCases: LocalInsertUseCases by instance()
+    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases by instance()
     private val defaultNotificationHelper: DefaultNotificationHelper by instance()
     private val downloadUseCases: DownloadUseCases by instance()
     private val downloadServiceState: DownloadServiceStateImpl by instance()

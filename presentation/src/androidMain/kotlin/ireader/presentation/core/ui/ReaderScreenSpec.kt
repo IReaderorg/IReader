@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -29,7 +31,6 @@ import ireader.domain.preferences.models.getDefaultFont
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.i18n.UiText
 import ireader.presentation.R
-
 import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
@@ -104,7 +105,7 @@ data class ReaderScreenSpec(
 
         LaunchedEffect(key1 = vm.screenAlwaysOn.value) {
             vm.prefFunc.apply {
-                vm.screenAlwaysOnUseCase(context, vm.screenAlwaysOn.value)
+                vm.screenAlwaysOnUseCase(vm.screenAlwaysOn.value)
             }
         }
         val bars = AppColors.current

@@ -21,7 +21,7 @@ import ireader.i18n.resources.MR
 
 
 class AdvanceSettingViewModel(
-    val deleteUseCase: DeleteUseCase,
+    val deleteUseCase: ireader.domain.usecases.local.DeleteUseCase,
     private val prefUseCases: ReaderPrefUseCases,
     val coverCache: CoverCache,
     val importEpub: ImportEpub,

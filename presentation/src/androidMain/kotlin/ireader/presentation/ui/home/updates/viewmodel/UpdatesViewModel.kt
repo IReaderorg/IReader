@@ -18,8 +18,8 @@ import kotlinx.coroutines.launch
 class UpdatesViewModel(
     private val updateStateImpl: UpdateStateImpl,
     val updateUseCases: UpdateUseCases,
-    private val getChapterUseCase: LocalGetChapterUseCase,
-    private val insertUseCases: LocalInsertUseCases,
+    private val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
+    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     private val serviceUseCases: ServiceUseCases,
     private val uiPreferences: UiPreferences
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), UpdateState by updateStateImpl {

@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.*
 
 actual abstract class BaseViewModel {
 
-    protected actual val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    actual val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private val activeScope = MutableStateFlow<CoroutineScope?>(null)
 

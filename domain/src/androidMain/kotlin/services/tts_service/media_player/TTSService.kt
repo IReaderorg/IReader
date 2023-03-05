@@ -35,7 +35,6 @@ import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.preferences.reader_preferences.TextReaderPrefUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
-import ireader.domain.utils.extensions.findComponentActivity
 import ireader.i18n.LocalizeHelper
 import kotlinx.coroutines.*
 import kotlinx.datetime.Clock
@@ -54,7 +53,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     private val localizeHelper: LocalizeHelper by instance()
 
 
-    private val chapterUseCase: LocalGetChapterUseCase by instance()
+    private val chapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase by instance()
 
 
     private val remoteUseCases: RemoteUseCases by instance()
@@ -67,7 +66,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     lateinit var state: TTSStateImpl
 
 
-    private val insertUseCases: LocalInsertUseCases by instance()
+    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases by instance()
 
 
     private val textReaderPrefUseCase: TextReaderPrefUseCase by instance()

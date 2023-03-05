@@ -12,11 +12,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.lifecycle.lifecycleScope
-import ireader.domain.models.entities.Chapter
 import ireader.core.http.WebViewManger
 import ireader.core.source.model.Text
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.data.repository.ReaderThemeRepository
+import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.models.ReaderColors
 import ireader.domain.preferences.models.prefs.readerThemes
 import ireader.domain.preferences.prefs.AndroidUiPreferences
@@ -37,7 +37,7 @@ import ireader.domain.utils.extensions.findComponentActivity
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.NO_VALUE
 import ireader.i18n.UiText
-
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.core.theme.ReaderColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -45,18 +45,17 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import ireader.i18n.resources.MR
 
 @OptIn(ExperimentalTextApi::class)
 
 class ReaderScreenViewModel(
     val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases,
-    val getChapterUseCase: LocalGetChapterUseCase,
+    val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
     val remoteUseCases: RemoteUseCases,
     val historyUseCase: HistoryUseCase,
     val getLocalCatalog: GetLocalCatalog,
     val readerUseCases: ReaderPrefUseCases,
-    val insertUseCases: LocalInsertUseCases,
+    val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     val prefState: ReaderScreenPreferencesStateImpl,
     val state: ReaderScreenStateImpl,
     val prefFunc: ReaderPrefFunctionsImpl,
@@ -66,7 +65,7 @@ class ReaderScreenViewModel(
     val screenAlwaysOnUseCase: ScreenAlwaysOn,
     val webViewManger: WebViewManger,
     val readerThemeRepository: ReaderThemeRepository,
-    val bookMarkChapterUseCase: BookMarkChapterUseCase,
+    val bookMarkChapterUseCase: ireader.domain.usecases.local.book_usecases.BookMarkChapterUseCase,
     val translationEnginesManager: TranslationEnginesManager,
     val params: Param
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(),
@@ -306,7 +305,7 @@ class ReaderScreenViewModel(
             layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             window.attributes = layoutParams
-            screenAlwaysOnUseCase(context, false)
+            screenAlwaysOnUseCase(false)
             when (readingMode.value) {
                 ReadingMode.Page -> {
                     stateChapter?.let { chapter ->

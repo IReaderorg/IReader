@@ -50,41 +50,57 @@ val UseCasesInject = DI.Module("usecaseModule") {
         getRemoteChapters = GetRemoteChapters(),
         getRemoteReadingContent = GetRemoteReadingContent(),
     ) }
-    bindSingleton<LocalInsertUseCases> { LocalInsertUseCases(
-        insertBook = InsertBook(instance()),
-        insertBookAndChapters = InsertBookAndChapters(instance()),
-        insertBooks = InsertBooks(instance()),
-        insertChapter = InsertChapter(instance()),
-        insertChapters = InsertChapters(instance()),
-        updateBook = UpdateBook(instance())
-    ) }
-    bindSingleton<LocalGetBookUseCases> { LocalGetBookUseCases(
-        findAllInLibraryBooks = FindAllInLibraryBooks(instance()),
-        findBookById = FindBookById(instance()),
-        findBookByKey = FindBookByKey(instance()),
-        findBooksByKey = FindBooksByKey(instance()),
-        subscribeBookById = SubscribeBookById(instance()),
-        subscribeBooksByKey = SubscribeBooksByKey(instance()),
-        SubscribeInLibraryBooks = SubscribeInLibraryBooks(instance()),
-    ) }
-    bindSingleton<LocalGetChapterUseCase> { LocalGetChapterUseCase(
-        findAllInLibraryChapters = FindAllInLibraryChapters(instance()),
-        findChapterById = FindChapterById(instance()),
-        findChaptersByBookId = FindChaptersByBookId(instance()),
-        subscribeChaptersByBookId = SubscribeChaptersByBookId(instance()),
-        updateLastReadTime = UpdateLastReadTime(insertUseCases = instance(), historyUseCase = instance(), uiPreferences = instance()),
-        subscribeChapterById = SubscribeChapterById(instance())
-    ) }
-    bindSingleton<DeleteUseCase> { DeleteUseCase(
-        deleteAllBook = DeleteAllBooks(instance()),
-        deleteAllChapters = DeleteAllChapters(instance()),
-        deleteBookById = DeleteBookById(instance()),
-        deleteChapterByChapter = DeleteChapterByChapter(instance()),
-        deleteChapters = DeleteChapters(instance()),
-        deleteChaptersByBookId = DeleteChaptersByBookId(instance()),
-        unFavoriteBook = UnFavoriteBook(instance(), bookCategoryRepository = instance(), instance()),
-        deleteNotInLibraryBooks = DeleteNotInLibraryBooks(instance())
-    ) }
+    bindSingleton<ireader.domain.usecases.local.LocalInsertUseCases> {
+        ireader.domain.usecases.local.LocalInsertUseCases(
+            insertBook = InsertBook(instance()),
+            insertBookAndChapters = InsertBookAndChapters(instance()),
+            insertBooks = InsertBooks(instance()),
+            insertChapter = InsertChapter(instance()),
+            insertChapters = InsertChapters(instance()),
+            updateBook = UpdateBook(instance())
+        )
+    }
+    bindSingleton<ireader.domain.usecases.local.LocalGetBookUseCases> {
+        ireader.domain.usecases.local.LocalGetBookUseCases(
+            findAllInLibraryBooks = FindAllInLibraryBooks(instance()),
+            findBookById = FindBookById(instance()),
+            findBookByKey = ireader.domain.usecases.local.FindBookByKey(instance()),
+            findBooksByKey = ireader.domain.usecases.local.FindBooksByKey(instance()),
+            subscribeBookById = SubscribeBookById(instance()),
+            subscribeBooksByKey = ireader.domain.usecases.local.SubscribeBooksByKey(instance()),
+            SubscribeInLibraryBooks = SubscribeInLibraryBooks(instance()),
+        )
+    }
+    bindSingleton<ireader.domain.usecases.local.LocalGetChapterUseCase> {
+        ireader.domain.usecases.local.LocalGetChapterUseCase(
+            findAllInLibraryChapters = FindAllInLibraryChapters(instance()),
+            findChapterById = FindChapterById(instance()),
+            findChaptersByBookId = FindChaptersByBookId(instance()),
+            subscribeChaptersByBookId = SubscribeChaptersByBookId(instance()),
+            updateLastReadTime = UpdateLastReadTime(
+                insertUseCases = instance(),
+                historyUseCase = instance(),
+                uiPreferences = instance()
+            ),
+            subscribeChapterById = SubscribeChapterById(instance())
+        )
+    }
+    bindSingleton<ireader.domain.usecases.local.DeleteUseCase> {
+        ireader.domain.usecases.local.DeleteUseCase(
+            deleteAllBook = DeleteAllBooks(instance()),
+            deleteAllChapters = DeleteAllChapters(instance()),
+            deleteBookById = DeleteBookById(instance()),
+            deleteChapterByChapter = DeleteChapterByChapter(instance()),
+            deleteChapters = DeleteChapters(instance()),
+            deleteChaptersByBookId = DeleteChaptersByBookId(instance()),
+            unFavoriteBook = UnFavoriteBook(
+                instance(),
+                bookCategoryRepository = instance(),
+                instance()
+            ),
+            deleteNotInLibraryBooks = DeleteNotInLibraryBooks(instance())
+        )
+    }
     bindSingleton<ServiceUseCases> { ServiceUseCases(
         startDownloadServicesUseCase = StartDownloadServicesUseCase(instance()),
         startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(instance()),
@@ -122,7 +138,8 @@ val UseCasesInject = DI.Module("usecaseModule") {
         deleteAllUpdates = DeleteAllUpdates(instance()),
     ) }
     bindProvider<EpubCreator> { EpubCreator(instance(), instance(),instance()) }
-    bindSingleton<DownloadUseCases> {DownloadUseCases(
+    bindSingleton<DownloadUseCases> {
+        DownloadUseCases(
         deleteAllSavedDownload = DeleteAllSavedDownload(instance()),
         deleteSavedDownload = DeleteSavedDownload(instance()),
         deleteSavedDownloadByBookId = DeleteSavedDownloadByBookId(instance()),
