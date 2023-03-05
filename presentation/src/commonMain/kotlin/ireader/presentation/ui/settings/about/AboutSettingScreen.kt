@@ -11,13 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.painterResource
-import ireader.i18n.BuildConfig
+import ireader.i18n.BuildKonfig
+import ireader.i18n.Images.discord
+import ireader.i18n.Images.github
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
-import ireader.presentation.R
-import ireader.presentation.ui.component.components.LogoHeader
 import ireader.presentation.ui.component.components.LinkIcon
+import ireader.presentation.ui.component.components.LogoHeader
 import ireader.presentation.ui.component.components.PreferenceRow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,14 +38,14 @@ fun AboutSettingScreen(
             PreferenceRow(
                 title = localize(MR.strings.version),
                 subtitle = when {
-                    BuildConfig.DEBUG -> {
-                        "Debug ${BuildConfig.COMMIT_SHA} (${getFormattedBuildTime()})"
+                    BuildKonfig.DEBUG -> {
+                        "Debug ${BuildKonfig.COMMIT_SHA} (${getFormattedBuildTime()})"
                     }
-                    BuildConfig.PREVIEW -> {
-                        "Preview r${BuildConfig.COMMIT_COUNT} (${BuildConfig.COMMIT_SHA}, ${getFormattedBuildTime()})"
+                    BuildKonfig.PREVIEW -> {
+                        "Preview r${BuildKonfig.COMMIT_COUNT} (${BuildKonfig.COMMIT_SHA}, ${getFormattedBuildTime()})"
                     }
                     else -> {
-                        "Stable ${BuildConfig.VERSION_NAME} (${getFormattedBuildTime()})"
+                        "Stable ${BuildKonfig.VERSION_NAME} (${getFormattedBuildTime()})"
                     }
                 },
             )
@@ -76,12 +76,12 @@ fun AboutSettingScreen(
                 )
                 LinkIcon(
                     label = "Discord",
-                    painter = painterResource(R.drawable.ic_discord_24dp),
+                    icon = discord(),
                     url = "https://discord.gg/HBU6zD8c5v",
                 )
                 LinkIcon(
                     label = "GitHub",
-                    painter = painterResource(R.drawable.ic_github_24dp),
+                    icon = github(),
                     url = "https://github.com/kazemcodes/IReader",
                 )
             }

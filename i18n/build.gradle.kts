@@ -1,6 +1,8 @@
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.*
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
+
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     kotlin("multiplatform")
@@ -8,12 +10,13 @@ plugins {
     id("org.jetbrains.compose")
     id("org.jetbrains.gradle.plugin.idea-ext")
     id(libs.plugins.moko.gradle.get().pluginId)
+    id(libs.plugins.buildkonfig.get().pluginId)
 }
 kotlin {
     android()
     jvm("desktop")
     sourceSets {
-       val commonMain by getting {
+        val commonMain by getting {
             dependencies {
                 api(libs.moko.core)
                 compileOnly(compose.runtime)
@@ -49,17 +52,27 @@ android {
         res.srcDir(File(buildDir, "generated/moko/androidMain/res"))
         res.srcDir("src/commonMain/resources")
     }
-    defaultConfig {
-        buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
-        buildConfigField("String", "COMMIT_SHA", "\"${getGitSha()}\"")
-        buildConfigField("String", "BUILD_TIME", "\"${getBuildTime()}\"")
-        buildConfigField("boolean", "INCLUDE_UPDATER", "false")
-        buildConfigField("boolean", "PREVIEW", "false")
-        buildConfigField("String", "VERSION_NAME", "\"${ProjectConfig.versionName}\"")
-        buildConfigField("int", "VERSION_CODE", "${ProjectConfig.versionCode}")
-    }
 }
 
+buildkonfig {
+    packageName = "ireader.i18n"
+    exposeObjectWithName = "BuildKonfig"
+    defaultConfigs {
+        buildConfigField(BOOLEAN, "DEBUG", "true")
+        buildConfigField(STRING, "COMMIT_COUNT", "\"${getCommitCount()}\"")
+        buildConfigField(STRING, "COMMIT_SHA", "\"${getGitSha()}\"")
+        buildConfigField(STRING, "BUILD_TIME", "\"${getBuildTime()}\"")
+        buildConfigField(BOOLEAN, "INCLUDE_UPDATER", "false")
+        buildConfigField(BOOLEAN, "PREVIEW", "false")
+        buildConfigField(STRING, "VERSION_NAME", "\"${ProjectConfig.versionName}\"")
+        buildConfigField(INT, "VERSION_CODE", "${ProjectConfig.versionCode}")
+    }
+    targetConfigs("release") {
+        create("release") {
+            buildConfigField(BOOLEAN, "DEBUG", "false")
+        }
+    }
+}
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround
 fun getCommitCount(): String {

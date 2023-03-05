@@ -13,7 +13,6 @@ import ireader.core.prefs.AndroidPreferenceStore
 import ireader.core.prefs.PrefixedPreferenceStore
 import ireader.core.source.Source
 import ireader.core.source.TestSource
-import ireader.domain.R
 import ireader.domain.catalogs.service.CatalogLoader
 import ireader.domain.models.entities.CatalogBundled
 import ireader.domain.models.entities.CatalogInstalled
@@ -21,13 +20,13 @@ import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.utils.extensions.withIOContext
-import ireader.i18n.BuildConfig
+import ireader.i18n.BuildKonfig
 import ireader.i18n.LocalizeHelper
+import ireader.i18n.resources.MR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import java.io.File
-import ireader.i18n.resources.MR
 /**
  * Class that handles the loading of the catalogs installed in the system and the app.
  */
@@ -50,7 +49,7 @@ class AndroidCatalogLoader(
     override suspend fun loadAll(): List<CatalogLocal> {
         val bundled = mutableListOf<CatalogLocal>()
 
-        if (BuildConfig.DEBUG) {
+        if (BuildKonfig.DEBUG) {
             val testCatalog = CatalogBundled(
                 TestSource(),
                 "Source used for testing"

@@ -38,7 +38,7 @@ class UpdateService  constructor(
         val lastCheck = Instant.fromEpochMilliseconds(appPreferences.lastUpdateCheck().get())
         val now = Clock.System.now()
 
-        if ((!ireader.i18n.BuildConfig.DEBUG || !ireader.i18n.BuildConfig.PREVIEW) && now - lastCheck < minTimeUpdateCheck) {
+        if ((!ireader.i18n.BuildKonfig.DEBUG || !ireader.i18n.BuildKonfig.PREVIEW) && now - lastCheck < minTimeUpdateCheck) {
             return Result.success()
         }
 
@@ -47,7 +47,7 @@ class UpdateService  constructor(
         val version = Version.create(release.tag_name)
 
 
-        val versionCode: String = ireader.i18n.BuildConfig.VERSION_NAME
+        val versionCode: String = ireader.i18n.BuildKonfig.VERSION_NAME
         val current = Version.create(versionCode)
 
         if (Version.isNewVersion(release.tag_name, versionCode)) {

@@ -44,4 +44,8 @@ actual object Images {
     actual fun eternityLight(): ImageVector = ImageVector.vectorResource(R.drawable.ic_eternity_light)
 
 
+    @Composable
+    actual fun discord(): ImageVector = ImageVector.vectorResource(R.drawable.ic_discord_24dp)
+    @Composable
+    actual fun github(): ImageVector = ImageVector.vectorResource(R.drawable.ic_github_24dp)
 }

@@ -45,4 +45,8 @@ expect object Images {
     fun eternityLight(): ImageVector
 
 
+    @Composable
+    fun discord(): ImageVector
+    @Composable
+    fun github(): ImageVector
 }

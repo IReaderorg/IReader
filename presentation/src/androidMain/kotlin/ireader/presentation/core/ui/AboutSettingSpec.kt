@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.utils.extensions.toDateTimestampString
-import ireader.i18n.BuildConfig
+import ireader.i18n.BuildKonfig
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
 import ireader.presentation.core.VoyagerScreen
@@ -54,7 +54,7 @@ class AboutSettingSpec : VoyagerScreen() {
         return try {
             val inputDf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'", Locale.US)
             inputDf.timeZone = TimeZone.getTimeZone("UTC")
-            val buildTime = inputDf.parse(BuildConfig.BUILD_TIME)
+            val buildTime = inputDf.parse(BuildKonfig.BUILD_TIME)
 
             val outputDf = DateFormat.getDateTimeInstance(
                 DateFormat.MEDIUM,
@@ -65,7 +65,7 @@ class AboutSettingSpec : VoyagerScreen() {
 
             buildTime!!.toDateTimestampString(DateFormat.getDateInstance())
         } catch (e: Exception) {
-            BuildConfig.BUILD_TIME
+            BuildKonfig.BUILD_TIME
         }
     }
 }

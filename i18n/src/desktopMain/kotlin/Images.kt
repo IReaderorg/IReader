@@ -56,4 +56,9 @@ actual object Images {
     @Composable
     actual fun eternityLight(): ImageVector = rememberVectorXmlResource("drawable/ic_eternity_light.xml")
 
+    @Composable
+    actual fun discord(): ImageVector = rememberVectorXmlResource("drawable/ic_discord_24dp.xml")
+    @Composable
+    actual fun github(): ImageVector = rememberVectorXmlResource("drawable/ic_github_24dp.xml")
+
 }
