@@ -72,7 +72,7 @@ val PresentationModules = DI.Module("presentationModule") {
     bindProvider  { SecuritySettingViewModel(instance()) }
     bindFactory< BookDetailViewModel.Param, BookDetailViewModel>  { BookDetailViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),it,instance()) }
     bindFactory< ExploreViewModel.Param, ExploreViewModel>  { ExploreViewModel(instance(),instance(),instance(),instance(),instance(),it,instance(),instance()) }
-    bindProvider  { HistoryViewModel(instance(),instance(),instance(),instance()) }
+    bindProvider  { HistoryViewModel(instance(),instance(),instance()) }
     bindProvider  { LibraryViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance()) }
     bindProvider  { ExtensionViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance()) }
     bindFactory< GlobalSearchViewModel.Param, GlobalSearchViewModel>  { GlobalSearchViewModel(instance(),instance(),instance(),instance(),it) }

@@ -120,12 +120,12 @@ fun ScrollableTabs(
 @ExperimentalPagerApi
 @Composable
 fun TabsContent(
-    libraryTabs: List<TabItem>,
-    pagerState: PagerState,
-    filters: List<LibraryFilter>,
-    onLayoutSelected: (DisplayMode) -> Unit,
-    vm: LibraryViewModel,
-    scaffoldPadding: PaddingValues
+        libraryTabs: List<TabItem>,
+        pagerState: PagerState,
+        filters: List<LibraryFilter>,
+        onLayoutSelected: (DisplayMode) -> Unit,
+        vm: LibraryViewModel,
+        scaffoldPadding: PaddingValues
 ) {
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     val layouts = remember {
@@ -228,9 +228,9 @@ private fun LazyListScope.SortPage(
 
 
 private fun LazyListScope.DispalyPage(
-    layouts: List<DisplayMode>,
-    vm: LibraryViewModel,
-    onLayoutSelected: (DisplayMode) -> Unit
+        layouts: List<DisplayMode>,
+        vm: LibraryViewModel,
+        onLayoutSelected: (DisplayMode) -> Unit
 ) {
     item {
         TextSection(

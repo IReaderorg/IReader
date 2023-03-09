@@ -23,15 +23,15 @@ import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 
 @Composable
 fun EditCategoriesDialog(
-    vm: LibraryViewModel,
-    modifier: Modifier = Modifier,
-    onConfirm: () -> Unit,
-    dismissDialog: () -> Unit,
-    onAddToInsertQueue: (Category) -> Unit,
-    onRemoteInInsertQueue: (Category) -> Unit,
-    onRemoteInDeleteQueue: (Category) -> Unit,
-    onAddDeleteQueue: (Category) -> Unit,
-    categories: List<CategoryWithCount>
+        vm: LibraryViewModel,
+        modifier: Modifier = Modifier,
+        onConfirm: () -> Unit,
+        dismissDialog: () -> Unit,
+        onAddToInsertQueue: (Category) -> Unit,
+        onRemoteInInsertQueue: (Category) -> Unit,
+        onRemoteInDeleteQueue: (Category) -> Unit,
+        onAddDeleteQueue: (Category) -> Unit,
+        categories: List<CategoryWithCount>
 ) {
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     if (vm.showDialog) {

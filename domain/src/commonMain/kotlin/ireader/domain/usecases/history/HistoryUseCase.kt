@@ -2,6 +2,7 @@ package ireader.domain.usecases.history
 
 import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.models.entities.History
+import ireader.domain.models.entities.HistoryWithRelations
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
@@ -23,6 +24,10 @@ class HistoryUseCase(private val historyRepository: HistoryRepository) {
 
     suspend fun findHistories(): List<History> {
         return historyRepository.findHistories()
+    }
+
+    fun findHistoriesByFlow(query:String): Flow<List<HistoryWithRelations>> {
+        return historyRepository.findHistoriesByFlow(query)
     }
 
     suspend fun insertHistory(history: History) {

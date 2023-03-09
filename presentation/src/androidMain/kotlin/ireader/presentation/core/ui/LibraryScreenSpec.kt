@@ -46,9 +46,9 @@ object LibraryScreenSpec : Tab {
             val icon = rememberVectorPainter(Icons.Filled.Book)
             return remember {
                 TabOptions(
-                    index = 0u,
-                    title = title,
-                    icon = icon,
+                        index = 0u,
+                        title = title,
+                        icon = icon,
                 )
             }
 
@@ -72,83 +72,93 @@ object LibraryScreenSpec : Tab {
         })
 
         IModalSheets(
-            bottomSheetState = sheetState,
-            sheetContent = {
-                val pagerState = rememberPagerState()
-                BottomTabComposable(
-                    pagerState = pagerState,
-                    filters = vm.filters.value,
-                    toggleFilter = {
-                        vm.toggleFilter(it.type)
-                    },
-                    onSortSelected = {
-                        vm.toggleSort(it.type)
-                    },
-                    sortType = vm.sortType,
-                    isSortDesc = vm.desc,
-                    onLayoutSelected = { layout ->
-                        vm.onLayoutTypeChange(layout)
-                    },
-                    layoutType = vm.layout,
-                    vm = vm,
-                    scaffoldPadding = PaddingValues(0.dp)
-                )
-            }
-        ) {
-            IScaffold(
-                modifier = Modifier.pullRefresh(swipeRefreshState),
-                topBar = { scrollBehavior ->
-                    LibraryScreenTopBar(
-                        state = vm,
-                        bottomSheetState = sheetState,
-                        refreshUpdate = {
-                            vm.refreshUpdate()
-                        },
-                        onClearSelection = {
-                            vm.unselectAll()
-                        },
-                        onClickInvertSelection = {
-                            vm.flipAllInCurrentCategory()
-                        },
-                        onClickSelectAll = {
-                            vm.selectAllInCurrentCategory()
-                        },
-                        scrollBehavior = scrollBehavior
+                bottomSheetState = sheetState,
+                sheetContent = {
+                    val pagerState = rememberPagerState()
+                    BottomTabComposable(
+                            pagerState = pagerState,
+                            filters = vm.filters.value,
+                            toggleFilter = {
+                                vm.toggleFilter(it.type)
+                            },
+                            onSortSelected = {
+                                vm.toggleSort(it.type)
+                            },
+                            sortType = vm.sortType,
+                            isSortDesc = vm.desc,
+                            onLayoutSelected = { layout ->
+                                vm.onLayoutTypeChange(layout)
+                            },
+                            layoutType = vm.layout,
+                            vm = vm,
+                            scaffoldPadding = PaddingValues(0.dp)
                     )
                 }
+        ) {
+            IScaffold(
+                    modifier = Modifier.pullRefresh(swipeRefreshState),
+                    topBar = { scrollBehavior ->
+                        LibraryScreenTopBar(
+                                state = vm,
+                                refreshUpdate = {
+                                    vm.refreshUpdate()
+                                },
+                                onClearSelection = {
+                                    vm.unselectAll()
+                                },
+                                onClickInvertSelection = {
+                                    vm.flipAllInCurrentCategory()
+                                },
+                                onClickSelectAll = {
+                                    vm.selectAllInCurrentCategory()
+                                },
+                                scrollBehavior = scrollBehavior,
+                                hideModalSheet = {
+                                    scope.launch {
+                                        sheetState.hide()
+                                    }
+                                },
+                                showModalSheet = {
+                                    scope.launch {
+                                        sheetState.show()
+                                    }
+                                },
+                                isModalVisible = sheetState.isVisible
+                        )
+                    }
             ) { scaffoldPadding ->
 
                 Box(Modifier) {
                     LibraryController(
-                        modifier = Modifier,
-                        vm = vm,
-                        goToReader = { book ->
-                            navigator.push(
-                                ReaderScreenSpec(
-                                    bookId = book.id,
-                                    chapterId = LAST_CHAPTER
+                            modifier = Modifier,
+                            vm = vm,
+                            goToReader = { book ->
+                                navigator.push(
+                                        ReaderScreenSpec(
+                                                bookId = book.id,
+                                                chapterId = LAST_CHAPTER
+                                        )
                                 )
-                            )
-                        },
-                        goToDetail = { book ->
-                            navigator.push(
-                                BookDetailScreenSpec(
-                                    bookId = book.id
+                            },
+                            goToDetail = { book ->
+                                navigator.push(
+                                        BookDetailScreenSpec(
+                                                bookId = book.id
+                                        )
                                 )
-                            )
-                        },
-                        scaffoldPadding = scaffoldPadding,
-                        sheetState = sheetState,
-                        requestHideNavigator = {
-                            scope.launch {
-                                MainStarterScreen.showBottomNav(!vm.selectionMode)
+                            },
+                            scaffoldPadding = scaffoldPadding,
+                            sheetState = sheetState,
+                            requestHideNavigator = {
+                                scope.launch {
+                                    MainStarterScreen.showBottomNav(!vm.selectionMode)
+                                }
                             }
-                        }
                     )
                     PullRefreshIndicator(
-                        vm.isBookRefreshing,
-                        swipeRefreshState,
-                        Modifier.align(Alignment.TopCenter)
+                            vm.isBookRefreshing,
+                            swipeRefreshState,
+                            Modifier.align(Alignment.TopCenter)
                     )
                 }
             }

@@ -13,7 +13,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.domain.models.entities.Chapter
 import ireader.domain.catalogs.interactor.GetLocalCatalog
-import ireader.domain.preferences.prefs.AndroidUiPreferences
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.PlatformUiPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences

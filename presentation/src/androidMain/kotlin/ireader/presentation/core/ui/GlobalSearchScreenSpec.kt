@@ -23,7 +23,7 @@ data class GlobalSearchScreenSpec(
     override fun Content(
 
     ) {
-        val vm: GlobalSearchViewModel= getIViewModel(parameters =
+        val vm: GlobalSearchViewModel = getIViewModel(parameters =
                 GlobalSearchViewModel.Param(query)
             )
         val navigator = LocalNavigator.currentOrThrow

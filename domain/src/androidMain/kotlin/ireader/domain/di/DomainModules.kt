@@ -26,6 +26,7 @@ import ireader.domain.usecases.remote.GetBookDetail
 import ireader.domain.usecases.remote.GetRemoteBooksUseCase
 import ireader.domain.usecases.remote.GetRemoteChapters
 import ireader.domain.usecases.remote.GetRemoteReadingContent
+import ireader.domain.usecases.services.StartExtensionManagerService
 import ireader.domain.usecases.translate.TranslationEnginesManager
 import org.kodein.di.*
 
@@ -78,7 +79,7 @@ val DomainServices = DI.Module("domainModule") {
         )
     }
     bindProvider {
-        ireader.domain.services.extensions_insstaller_service.interactor.StartExtensionManagerService(
+        StartExtensionManagerService(
             instance()
         )
     }

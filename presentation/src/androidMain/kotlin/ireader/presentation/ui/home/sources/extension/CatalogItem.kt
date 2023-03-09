@@ -2,7 +2,6 @@ package ireader.presentation.ui.home.sources.extension
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -18,7 +17,6 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import ireader.core.os.InstallStep
@@ -27,6 +25,7 @@ import ireader.i18n.localize
 import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
+import ireader.presentation.ui.core.theme.ContentAlpha
 import ireader.presentation.ui.home.sources.extension.composables.LetterIcon
 import java.util.*
 import kotlin.math.max
@@ -74,7 +73,7 @@ fun CatalogItem(
             Text(
                 text = lang?.code?.uppercase(Locale.getDefault()) ?: "",
                 style = MaterialTheme.typography.labelMedium,
-                color = LocalContentColor.current.copy(alpha = ContentAlpha.medium),
+                color = LocalContentColor.current.copy(alpha = ContentAlpha.medium()),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
@@ -157,7 +156,7 @@ private fun CatalogButtons(
     modifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier) {
-        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium()) {
             // Show either progress indicator or install button
             if (installStep != null && !installStep.isFinished()) {
                 Box {
@@ -236,28 +235,4 @@ internal fun CatalogMenuButton(
             Spacer(modifier = Modifier.padding(horizontal = 4.dp))
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun CatalogItemPreview() {
-    CatalogItem(
-        catalog = CatalogRemote(
-            name = "My Catalog",
-            description = "Some description",
-            sourceId = 0L,
-            pkgName = "my.catalog",
-            versionName = "1.0.0",
-            versionCode = 1,
-            lang = "en",
-            pkgUrl = "",
-            iconUrl = "",
-            nsfw = false,
-            source = -1
-        ),
-        onClick = {},
-        onInstall = {},
-        onUninstall = {},
-        onPinToggle = {}
-    )
 }

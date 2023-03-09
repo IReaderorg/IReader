@@ -19,6 +19,7 @@ SELECT * FROM history WHERE chapter_id IN (SELECT  chapter._id FROM chapter WHER
 findHistories:
 SELECT * FROM history;
 
+
 searchHistories:
 SELECT history.*,
 book.title,book.source, book.thumbnail_url, book.favorite,chapter.name,

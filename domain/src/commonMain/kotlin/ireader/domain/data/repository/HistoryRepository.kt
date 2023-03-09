@@ -13,6 +13,7 @@ interface HistoryRepository {
     fun subscribeHistoryByBookId(bookId: Long): Flow<History?>
 
     suspend fun findHistories(): List<History>
+    fun findHistoriesByFlow(query:String): Flow<List<HistoryWithRelations>>
 
     suspend fun insertHistory(history: History)
     suspend fun insertHistories(histories: List<History>)

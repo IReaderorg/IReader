@@ -20,13 +20,13 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
 fun LibraryController(
-    modifier: Modifier,
-    vm: LibraryViewModel,
-    goToReader: (BookItem) -> Unit,
-    goToDetail: (BookItem) -> Unit,
-    scaffoldPadding: PaddingValues,
-    sheetState: ModalBottomSheetState,
-    requestHideNavigator : (Boolean) -> Unit
+        modifier: Modifier,
+        vm: LibraryViewModel,
+        goToReader: (BookItem) -> Unit,
+        goToDetail: (BookItem) -> Unit,
+        scaffoldPadding: PaddingValues,
+        sheetState: ModalBottomSheetState,
+        requestHideNavigator : (Boolean) -> Unit
     ) {
 
     LibraryScreen(

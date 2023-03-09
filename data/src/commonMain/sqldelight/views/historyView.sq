@@ -34,6 +34,26 @@ WHERE historyView.readAt > 0
 AND maxReadAtChapterId = historyView.chapterId
 AND lower(historyView.title) LIKE ('%' || :query || '%');
 
+historyWithQuery:
+SELECT
+id,
+bookId,
+chapterId,
+title,
+thumbnailUrl,
+source,
+favorite,
+cover_last_modified,
+chapterNumber,
+readAt,
+readDuration,
+chapterName
+FROM historyView
+WHERE historyView.readAt > 0
+AND maxReadAtChapterId = historyView.chapterId
+AND lower(historyView.title) LIKE ('%' || :query || '%')
+ORDER BY readAt DESC;
+
 history:
 SELECT
 id,

@@ -19,12 +19,12 @@ import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 @OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
 @Composable
 internal fun LibraryContent(
-    vm: LibraryViewModel,
-    onBook: (book: BookItem) -> Unit,
-    onLongBook: (book: BookItem) -> Unit,
-    goToLatestChapter: (book: BookItem) -> Unit,
-    onPageChanged: (Int) -> Unit,
-    getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
+        vm: LibraryViewModel,
+        onBook: (book: BookItem) -> Unit,
+        onLongBook: (book: BookItem) -> Unit,
+        goToLatestChapter: (book: BookItem) -> Unit,
+        onPageChanged: (Int) -> Unit,
+        getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
 ) {
     if (vm.categories.isEmpty()) return
     val horizontalPager = rememberPagerState(initialPage = vm.selectedCategoryIndex)

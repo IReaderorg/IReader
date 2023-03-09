@@ -257,7 +257,8 @@ class TTSScreenSpec(
                                         )
                                     }
                                 },
-                                vm = vm,
+                                title = vm.ttsChapter?.name?:"",
+                                    subtitle = vm.ttsBook?.title?:""
                             )
                         }
                     },

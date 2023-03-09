@@ -21,17 +21,17 @@ import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 @ExperimentalPagerApi
 @Composable
 fun BottomTabComposable(
-    modifier: Modifier = Modifier,
-    pagerState: PagerState,
-    filters: List<LibraryFilter>,
-    toggleFilter: (LibraryFilter) -> Unit,
-    sortType: LibrarySort,
-    isSortDesc: Boolean,
-    onSortSelected: (LibrarySort) -> Unit,
-    layoutType: DisplayMode,
-    onLayoutSelected: (DisplayMode) -> Unit,
-    vm: LibraryViewModel,
-    scaffoldPadding: PaddingValues
+        modifier: Modifier = Modifier,
+        pagerState: PagerState,
+        filters: List<LibraryFilter>,
+        toggleFilter: (LibraryFilter) -> Unit,
+        sortType: LibrarySort,
+        isSortDesc: Boolean,
+        onSortSelected: (LibrarySort) -> Unit,
+        layoutType: DisplayMode,
+        onLayoutSelected: (DisplayMode) -> Unit,
+        vm: LibraryViewModel,
+        scaffoldPadding: PaddingValues
 ) {
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     val tabs = listOf(

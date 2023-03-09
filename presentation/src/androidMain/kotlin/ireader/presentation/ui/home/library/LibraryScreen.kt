@@ -30,30 +30,30 @@ import kotlinx.coroutines.flow.StateFlow
 )
 @Composable
 fun LibraryScreen(
-    modifier: Modifier = Modifier,
-    vm: LibraryViewModel,
-    goToLatestChapter: (book: BookItem) -> Unit = {},
-    onBook: (book: BookItem) -> Unit,
-    onLongBook: (book: BookItem) -> Unit,
-    onDownload: () -> Unit,
-    onMarkAsRead: () -> Unit,
-    onMarkAsNotRead: () -> Unit,
-    onDelete: () -> Unit,
-    refreshUpdate: () -> Unit,
-    onClickChangeCategory: () -> Unit,
-    bottomSheetState: ModalBottomSheetState,
-    scaffoldPadding: PaddingValues,
-    requestHideBottomNav: (Boolean) -> Unit,
-    getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
-    onPagerPageChange: (page: Int) -> Unit,
-    editCategoryOnConfirm: () -> Unit,
-    editCategoryDismissDialog: () -> Unit,
-    editCategoryOnAddToInsertQueue: (Category) -> Unit,
-    editCategoryOnRemoteInInsertQueue: (Category) -> Unit,
-    editCategoryOnRemoteInDeleteQueue: (Category) -> Unit,
-    editCategoryOnAddDeleteQueue: (Category) -> Unit,
+        modifier: Modifier = Modifier,
+        vm: LibraryViewModel,
+        goToLatestChapter: (book: BookItem) -> Unit = {},
+        onBook: (book: BookItem) -> Unit,
+        onLongBook: (book: BookItem) -> Unit,
+        onDownload: () -> Unit,
+        onMarkAsRead: () -> Unit,
+        onMarkAsNotRead: () -> Unit,
+        onDelete: () -> Unit,
+        refreshUpdate: () -> Unit,
+        onClickChangeCategory: () -> Unit,
+        bottomSheetState: ModalBottomSheetState,
+        scaffoldPadding: PaddingValues,
+        requestHideBottomNav: (Boolean) -> Unit,
+        getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
+        onPagerPageChange: (page: Int) -> Unit,
+        editCategoryOnConfirm: () -> Unit,
+        editCategoryDismissDialog: () -> Unit,
+        editCategoryOnAddToInsertQueue: (Category) -> Unit,
+        editCategoryOnRemoteInInsertQueue: (Category) -> Unit,
+        editCategoryOnRemoteInDeleteQueue: (Category) -> Unit,
+        editCategoryOnAddDeleteQueue: (Category) -> Unit,
 
-    ) {
+        ) {
 
     LaunchedEffect(vm.selectionMode) {
         requestHideBottomNav(vm.selectionMode)
