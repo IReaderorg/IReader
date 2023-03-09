@@ -2,11 +2,12 @@ package ireader.domain.usecases.preferences
 
 import ireader.domain.preferences.models.prefs.IReaderVoice
 import ireader.domain.preferences.prefs.AndroidUiPreferences
+import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
 
 class TextReaderPrefUseCase(
         private val prefs: ReaderPreferences,
-        private val AndroidPrefs: AndroidUiPreferences,
+        private val AndroidPrefs: AppPreferences,
 ) {
     fun savePitch(value: Float) {
         prefs.speechPitch().set(value)

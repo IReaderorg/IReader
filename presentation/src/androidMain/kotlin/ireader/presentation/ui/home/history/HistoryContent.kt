@@ -19,12 +19,12 @@ import ireader.presentation.ui.home.history.viewmodel.HistoryUiModel
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HistoryContent(
-    items: LazyPagingItems<HistoryUiModel>,
-    onBookCover: (HistoryWithRelations) -> Unit,
-    onClickItem: (HistoryWithRelations) -> Unit,
-    onClickDelete: (HistoryWithRelations) -> Unit,
-    onLongClickDelete: (HistoryWithRelations) -> Unit,
-    onClickPlay: (HistoryWithRelations) -> Unit,
+        items: LazyPagingItems<HistoryUiModel>,
+        onBookCover: (HistoryWithRelations) -> Unit,
+        onClickItem: (HistoryWithRelations) -> Unit,
+        onClickDelete: (HistoryWithRelations) -> Unit,
+        onLongClickDelete: (HistoryWithRelations) -> Unit,
+        onClickPlay: (HistoryWithRelations) -> Unit,
 ) {
     LazyColumn(
         contentPadding = PaddingValues(

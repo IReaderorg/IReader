@@ -2,6 +2,7 @@ package ireader.presentation.ui.core.viewmodel
 import androidx.compose.runtime.State
 import ireader.core.prefs.Preference
 import ireader.i18n.UiEvent
+import ireader.i18n.UiText
 import ireader.presentation.ui.core.ui.PreferenceMutableState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -26,5 +27,7 @@ expect abstract class BaseViewModel() {
   fun <T> StateFlow<T>.asState(): State<T>
 
   fun <T> Flow<T>.launchWhileActive(): Job
+
+  fun showSnackBar(message: UiText?)
 
 }

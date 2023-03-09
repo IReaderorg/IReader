@@ -277,8 +277,8 @@ private fun LazyColumnScrollbar(
                     }
                 ) {
                     indicatorContent(
-                        index = fistIndex.value,
-                        isThumbSelected = isSelected
+                         fistIndex.value,
+                        isSelected
                     )
                 }
             }

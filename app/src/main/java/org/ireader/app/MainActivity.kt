@@ -74,7 +74,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         lifecycleScope.launchIO {
             automaticBackup.initialize()
         }
-        localeHelper.setLocaleLang(this)
+        localeHelper.setLocaleLang()
         installSplashScreen()
         setContent {
             withDI(di) {

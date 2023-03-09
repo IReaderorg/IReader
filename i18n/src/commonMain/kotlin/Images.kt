@@ -49,4 +49,7 @@ expect object Images {
     fun discord(): ImageVector
     @Composable
     fun github(): ImageVector
+
+    @Composable
+    fun incognito(): ImageVector
 }

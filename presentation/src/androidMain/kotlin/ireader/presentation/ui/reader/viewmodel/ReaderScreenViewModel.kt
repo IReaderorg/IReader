@@ -19,10 +19,7 @@ import ireader.domain.data.repository.ReaderThemeRepository
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.models.ReaderColors
 import ireader.domain.preferences.models.prefs.readerThemes
-import ireader.domain.preferences.prefs.AndroidUiPreferences
-import ireader.domain.preferences.prefs.ReaderPreferences
-import ireader.domain.preferences.prefs.ReadingMode
-import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.preferences.prefs.*
 import ireader.domain.usecases.history.HistoryUseCase
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
@@ -60,7 +57,8 @@ class ReaderScreenViewModel(
         val state: ReaderScreenStateImpl,
         val prefFunc: ReaderPrefFunctionsImpl,
         val readerPreferences: ReaderPreferences,
-        val androidUiPreferences: AndroidUiPreferences,
+        val androidUiPreferences: AppPreferences,
+        val platformUiPreferences: PlatformUiPreferences,
         val uiPreferences: UiPreferences,
         val screenAlwaysOnUseCase: ScreenAlwaysOn,
         val webViewManger: WebViewManger,
@@ -117,7 +115,7 @@ class ReaderScreenViewModel(
     val brightness = readerPreferences.brightness().asState()
     var chapterNumberMode by readerPreferences.showChapterNumberPreferences().asState()
     val isScrollIndicatorDraggable = readerPreferences.scrollbarMode().asState()
-    val font = androidUiPreferences.font().asState()
+    val font = platformUiPreferences.font().asState()
     val webViewIntegration = readerPreferences.webViewIntegration().asState()
     val selectableMode = readerPreferences.selectableText().asState()
     val fontSize = readerPreferences.fontSize().asState()

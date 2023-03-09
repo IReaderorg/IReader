@@ -61,4 +61,7 @@ actual object Images {
     @Composable
     actual fun github(): ImageVector = rememberVectorXmlResource("drawable/ic_github_24dp.xml")
 
+    @Composable
+    actual fun incognito(): ImageVector  = rememberVectorXmlResource("drawable/ic_glasses_24dp.xml")
+
 }

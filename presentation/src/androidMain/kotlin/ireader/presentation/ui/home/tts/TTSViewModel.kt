@@ -14,6 +14,8 @@ import androidx.compose.runtime.setValue
 import ireader.domain.models.entities.Chapter
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.preferences.prefs.AndroidUiPreferences
+import ireader.domain.preferences.prefs.AppPreferences
+import ireader.domain.preferences.prefs.PlatformUiPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.services.tts_service.Player
 import ireader.domain.services.tts_service.TTSState
@@ -41,8 +43,9 @@ class TTSViewModel(
         val speechPrefUseCases: TextReaderPrefUseCase,
         private val readerUseCases: ReaderPrefUseCases,
         private val readerPreferences: ReaderPreferences,
-        private val androidUiPreferences: AndroidUiPreferences,
+        private val androidUiPreferences: AppPreferences,
         private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
+        private val platformUiPreferences: PlatformUiPreferences,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(),
     TTSState by ttsState {
     data class Param(val sourceId:Long? ,val chapterId: Long?, val bookId: Long?,val readingParagraph: Int?)
@@ -68,7 +71,7 @@ class TTSViewModel(
     val paragraphsIndent = readerPreferences.paragraphIndent().asState()
     val paragraphDistance = readerPreferences.paragraphDistance().asState()
     val textAlignment = readerPreferences.textAlign().asState()
-    val font = androidUiPreferences.font().asState()
+    val font = platformUiPreferences.font().asState()
     val fontSize = readerPreferences.fontSize().asState()
     val ttsIconAlignments = readerPreferences.ttsIconAlignments().asState()
 

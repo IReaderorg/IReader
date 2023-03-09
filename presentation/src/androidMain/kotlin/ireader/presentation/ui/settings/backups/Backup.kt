@@ -26,11 +26,11 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackUpAndRestoreScreen(
-    modifier: Modifier = Modifier,
-    onBackStack: () -> Unit,
-    snackbarHostState: SnackbarHostState,
-    vm: BackupScreenViewModel,
-    scaffoldPadding: PaddingValues
+        modifier: Modifier = Modifier,
+        onBackStack: () -> Unit,
+        snackbarHostState: SnackbarHostState,
+        vm: BackupScreenViewModel,
+        scaffoldPadding: PaddingValues
 ) {
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     val globalScope = LocalGlobalCoroutineScope.currentOrThrow

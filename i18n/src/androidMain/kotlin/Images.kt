@@ -48,4 +48,7 @@ actual object Images {
     actual fun discord(): ImageVector = ImageVector.vectorResource(R.drawable.ic_discord_24dp)
     @Composable
     actual fun github(): ImageVector = ImageVector.vectorResource(R.drawable.ic_github_24dp)
+
+    @Composable
+    actual fun incognito(): ImageVector = ImageVector.vectorResource(R.drawable.ic_glasses_24dp)
 }

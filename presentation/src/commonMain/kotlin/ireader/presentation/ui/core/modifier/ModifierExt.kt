@@ -22,3 +22,5 @@ fun Modifier.clickableNoIndication(
         onClick = onClick,
     )
 }
+
+expect fun Modifier.systemGestureExclusion(): Modifier

@@ -4,6 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import ireader.core.prefs.Preference
 import ireader.i18n.UiEvent
+import ireader.i18n.UiText
 import ireader.presentation.ui.core.ui.PreferenceMutableState
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -54,5 +55,7 @@ actual abstract class BaseViewModel {
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     actual open val eventFlow = _eventFlow.asSharedFlow()
+    actual fun showSnackBar(message: UiText?) {
+    }
 
 }

@@ -23,10 +23,10 @@ import ireader.presentation.ui.home.history.viewmodel.HistoryState
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryTopAppBar(
-    modifier: Modifier = Modifier,
-    vm: HistoryState,
-    onDeleteAll: () -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior? = null
+        modifier: Modifier = Modifier,
+        vm: HistoryState,
+        onDeleteAll: () -> Unit,
+        scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current

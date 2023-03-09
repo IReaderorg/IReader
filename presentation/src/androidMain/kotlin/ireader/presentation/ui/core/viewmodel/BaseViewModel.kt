@@ -22,7 +22,7 @@ actual abstract class BaseViewModel : ScreenModel {
     protected val _eventFlow = MutableSharedFlow<UiEvent>()
     actual open val eventFlow = _eventFlow.asSharedFlow()
 
-    open fun showSnackBar(message: UiText?) {
+    actual open fun showSnackBar(message: UiText?) {
         scope.launch {
             _eventFlow.showSnackBar(message ?: UiText.MStringResource(MR.strings.error_unknown))
         }

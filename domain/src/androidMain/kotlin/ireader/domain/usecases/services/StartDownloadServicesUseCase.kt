@@ -5,8 +5,11 @@ import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_BOOKS_IDS
+import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_Chapters_IDS
 import ireader.domain.services.downloaderService.DownloaderService
-import ireader.domain.services.downloaderService.DownloaderService.Companion.DOWNLOADER_MODE
+import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_MODE
+import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_SERVICE_NAME
 import ireader.domain.utils.toast
 
 
@@ -23,20 +26,20 @@ actual class StartDownloadServicesUseCase( private val context: Context) {
                 setInputData(
                     Data.Builder().apply {
                         bookIds?.let { bookIds ->
-                            putLongArray(DownloaderService.DOWNLOADER_BOOKS_IDS, bookIds)
+                            putLongArray(DOWNLOADER_BOOKS_IDS, bookIds)
                         }
                         chapterIds?.let { chapterIds ->
-                            putLongArray(DownloaderService.DOWNLOADER_Chapters_IDS, chapterIds)
+                            putLongArray(DOWNLOADER_Chapters_IDS, chapterIds)
                         }
                         if (downloadModes) {
                             putBoolean(DOWNLOADER_MODE, true)
                         }
                     }.build()
                 )
-                addTag(DownloaderService.DOWNLOADER_SERVICE_NAME)
+                addTag(DOWNLOADER_SERVICE_NAME)
             }.build()
             WorkManager.getInstance(context).enqueueUniqueWork(
-                DownloaderService.DOWNLOADER_SERVICE_NAME,
+                DOWNLOADER_SERVICE_NAME,
                 ExistingWorkPolicy.REPLACE,
                 work
             )

@@ -26,15 +26,15 @@ import ireader.presentation.ui.home.updates.viewmodel.UpdatesViewModel
 
 @Composable
 fun UpdateScreen(
-    modifier: Modifier = Modifier,
-    state: UpdatesViewModel,
-    onUpdate: (UpdatesWithRelations) -> Unit,
-    onLongUpdate: (UpdatesWithRelations) -> Unit,
-    onCoverUpdate: (UpdatesWithRelations) -> Unit,
-    onDownloadUpdate: (UpdatesWithRelations) -> Unit,
-    onBottomBarDownload: () -> Unit,
-    onBottomBarMarkAsRead: () -> Unit,
-    onBottomBookMark: () -> Unit,
+        modifier: Modifier = Modifier,
+        state: UpdatesViewModel,
+        onUpdate: (UpdatesWithRelations) -> Unit,
+        onLongUpdate: (UpdatesWithRelations) -> Unit,
+        onCoverUpdate: (UpdatesWithRelations) -> Unit,
+        onDownloadUpdate: (UpdatesWithRelations) -> Unit,
+        onBottomBarDownload: () -> Unit,
+        onBottomBarMarkAsRead: () -> Unit,
+        onBottomBookMark: () -> Unit,
 ) {
     Box(
         modifier = modifier.fillMaxSize()
@@ -68,10 +68,10 @@ fun UpdateScreen(
 
 @Composable
 private fun BoxScope.UpdateEditBar(
-    state: UpdateState,
-    onBottomBarDownload: () -> Unit,
-    onBottomBarMarkAsRead: () -> Unit,
-    onBottomBookMark: () -> Unit,
+        state: UpdateState,
+        onBottomBarDownload: () -> Unit,
+        onBottomBarMarkAsRead: () -> Unit,
+        onBottomBookMark: () -> Unit,
 ) {
     Box(
         modifier = Modifier

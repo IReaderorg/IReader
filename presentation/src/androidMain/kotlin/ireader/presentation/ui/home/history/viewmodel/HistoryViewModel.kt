@@ -26,10 +26,10 @@ import kotlinx.coroutines.flow.map
 
 
 class HistoryViewModel(
-    private val state: HistoryStateImpl,
-    val historyUseCase: HistoryUseCase,
-    val historyPagingUseCase: HistoryPagingUseCase,
-    val uiPreferences: UiPreferences,
+        private val state: HistoryStateImpl,
+        val historyUseCase: HistoryUseCase,
+        val historyPagingUseCase: HistoryPagingUseCase,
+        val uiPreferences: UiPreferences,
 ) : BaseViewModel(), HistoryState by state {
 
     val relative by uiPreferences.relativeTime().asState()

@@ -17,14 +17,13 @@ import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.presentation.ui.settings.AdvanceSettingViewModel
 import kotlinx.serialization.ExperimentalSerializationApi
 
 @OptIn(ExperimentalSerializationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AdvanceSettings(
-    vm: AdvanceSettingViewModel,
-    padding: PaddingValues
+        vm: AdvanceSettingViewModel,
+        padding: PaddingValues
 ) {
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     val globalScope = LocalGlobalCoroutineScope.currentOrThrow

@@ -17,13 +17,13 @@ import ireader.i18n.resources.MR
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
-    modifier: Modifier = Modifier,
-    vm: HistoryViewModel,
-    onHistory: (HistoryWithRelations) -> Unit,
-    onHistoryDelete: (HistoryWithRelations) -> Unit,
-    onHistoryPlay: (HistoryWithRelations) -> Unit,
-    onBookCover: (HistoryWithRelations) -> Unit,
-    onLongClickDelete: (HistoryWithRelations) -> Unit,
+        modifier: Modifier = Modifier,
+        vm: HistoryViewModel,
+        onHistory: (HistoryWithRelations) -> Unit,
+        onHistoryDelete: (HistoryWithRelations) -> Unit,
+        onHistoryPlay: (HistoryWithRelations) -> Unit,
+        onBookCover: (HistoryWithRelations) -> Unit,
+        onLongClickDelete: (HistoryWithRelations) -> Unit,
 ) {
     val items = vm.getLazyHistory()
     Box(modifier = modifier) {

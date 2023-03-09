@@ -10,7 +10,7 @@ import ireader.domain.usecases.backup.CreateBackup
 import ireader.domain.usecases.backup.RestoreBackup
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.utils.extensions.convertLongToTime
-import ireader.presentation.ui.settings.SettingState
+import ireader.presentation.ui.settings.reader.SettingState
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 

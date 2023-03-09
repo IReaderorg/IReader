@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_SERVICE_NAME
 import ireader.domain.services.downloaderService.DownloaderService
 import ireader.domain.services.extensions_insstaller_service.ExtensionManagerService
 import ireader.domain.utils.toast
@@ -18,7 +19,7 @@ class StartExtensionManagerService(
         try {
             val work = OneTimeWorkRequestBuilder<ExtensionManagerService>().build()
             WorkManager.getInstance(context).enqueueUniqueWork(
-                DownloaderService.DOWNLOADER_SERVICE_NAME,
+                DOWNLOADER_SERVICE_NAME,
                 ExistingWorkPolicy.REPLACE,
                 work
             )

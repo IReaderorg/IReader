@@ -17,6 +17,9 @@ import ireader.domain.notification.Notifications
 import ireader.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE
 import ireader.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_ERROR
 import ireader.domain.notification.Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS
+import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_BOOKS_IDS
+import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_Chapters_IDS
+import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_MODE
 import ireader.domain.usecases.download.DownloadUseCases
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
@@ -49,12 +52,7 @@ class DownloaderService  constructor(
 
     val scope = CoroutineScope(Dispatchers.Main.immediate + downloadJob)
 
-    companion object {
-        const val DOWNLOADER_SERVICE_NAME = "DOWNLOAD_SERVICE"
-        const val DOWNLOADER_Chapters_IDS = "chapterIds"
-        const val DOWNLOADER_MODE = "downloader_mode"
-        const val DOWNLOADER_BOOKS_IDS = "booksIds"
-    }
+
 
     var savedDownload: SavedDownload =
         SavedDownload(

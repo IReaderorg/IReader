@@ -18,11 +18,11 @@ import ireader.presentation.ui.home.updates.viewmodel.UpdatesViewModel
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun UpdatesContent(
-    state: UpdatesViewModel,
-    onClickItem: (UpdatesWithRelations) -> Unit,
-    onLongClickItem: (UpdatesWithRelations) -> Unit,
-    onClickCover: (UpdatesWithRelations) -> Unit,
-    onClickDownload: (UpdatesWithRelations) -> Unit,
+        state: UpdatesViewModel,
+        onClickItem: (UpdatesWithRelations) -> Unit,
+        onLongClickItem: (UpdatesWithRelations) -> Unit,
+        onClickCover: (UpdatesWithRelations) -> Unit,
+        onClickDownload: (UpdatesWithRelations) -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(

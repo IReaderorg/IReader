@@ -46,7 +46,7 @@ object HistoryScreenSpec : Tab {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
-        val vm: HistoryViewModel  = getIViewModel()
+        val vm: HistoryViewModel = getIViewModel()
         val localizeHelper = LocalLocalizeHelper.currentOrThrow
         val navigator = LocalNavigator.currentOrThrow
         WarningAlert(data = vm.warningAlert.value)

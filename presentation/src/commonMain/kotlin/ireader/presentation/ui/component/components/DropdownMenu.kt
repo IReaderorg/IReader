@@ -43,8 +43,8 @@ fun IDropdownMenu(
 }
 @Composable
 fun IDropdownMenuItem(
-    text: @Composable () -> Unit,
-    onClick: () -> Unit,
+    text: @Composable () -> Unit = {},
+    onClick: () -> Unit = {},
     modifier: Modifier = Modifier,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,

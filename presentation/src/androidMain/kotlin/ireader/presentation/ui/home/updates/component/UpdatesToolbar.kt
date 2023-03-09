@@ -22,13 +22,13 @@ import ireader.presentation.ui.home.updates.viewmodel.UpdateState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpdatesToolbar(
-    state: UpdateState,
-    onClickCancelSelection: () -> Unit,
-    onClickSelectAll: () -> Unit,
-    onClickFlipSelection: () -> Unit,
-    onClickRefresh: () -> Unit,
-    onClickDelete: () -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior? = null
+        state: UpdateState,
+        onClickCancelSelection: () -> Unit,
+        onClickSelectAll: () -> Unit,
+        onClickFlipSelection: () -> Unit,
+        onClickRefresh: () -> Unit,
+        onClickDelete: () -> Unit,
+        scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
         when {

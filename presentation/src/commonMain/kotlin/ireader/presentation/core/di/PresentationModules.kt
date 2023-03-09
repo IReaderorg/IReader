@@ -26,7 +26,7 @@ import ireader.presentation.ui.reader.viewmodel.ReaderPrefFunctionsImpl
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenPreferencesStateImpl
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenStateImpl
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
-import ireader.presentation.ui.settings.AdvanceSettingViewModel
+import ireader.presentation.ui.settings.advance.AdvanceSettingViewModel
 import ireader.presentation.ui.settings.MainSettingScreenViewModel
 import ireader.presentation.ui.settings.appearance.AppearanceViewModel
 import ireader.presentation.ui.settings.backups.BackupScreenViewModel
@@ -76,10 +76,10 @@ val PresentationModules = DI.Module("presentationModule") {
     bindProvider  { LibraryViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance()) }
     bindProvider  { ExtensionViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance()) }
     bindFactory< GlobalSearchViewModel.Param, GlobalSearchViewModel>  { GlobalSearchViewModel(instance(),instance(),instance(),instance(),it) }
-    bindFactory< TTSViewModel.Param, TTSViewModel>  { TTSViewModel(instance(),it,instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance()) }
+    bindFactory< TTSViewModel.Param, TTSViewModel>  { TTSViewModel(instance(),it,instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance()) }
     bindProvider  { UpdatesViewModel(instance(),instance(),instance(),instance(),instance(),instance()) }
-    bindFactory< ReaderScreenViewModel.Param, ReaderScreenViewModel>  { ReaderScreenViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),it,instance()) }
-    bindProvider  { AdvanceSettingViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance()) }
+    bindFactory< ReaderScreenViewModel.Param, ReaderScreenViewModel>  { ReaderScreenViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),it,instance(),) }
+    bindProvider  { AdvanceSettingViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance()) }
     bindProvider  { MainSettingScreenViewModel(instance()) }
     bindProvider  { AppearanceViewModel(instance(),instance()) }
     bindProvider  { BackupScreenViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance()) }
@@ -87,7 +87,7 @@ val PresentationModules = DI.Module("presentationModule") {
     bindProvider  { DownloaderViewModel(instance(),instance(),instance(),instance()) }
     bindProvider  { FontScreenViewModel(instance(),instance(),instance(),instance()) }
     bindProvider  { GeneralSettingScreenViewModel(instance(),instance(),instance()) }
-    bindProvider  { ReaderSettingScreenViewModel(instance(),instance()) }
+    bindProvider  { ReaderSettingScreenViewModel(instance(),instance(),instance()) }
     bindProvider  { SourceRepositoryViewModel(instance(),instance()) }
     bindFactory< VideoScreenViewModel.Param, VideoScreenViewModel>  { VideoScreenViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),it) }
     bindFactory< WebViewPageModel.Param, WebViewPageModel> { WebViewPageModel(instance(),instance(),instance(),instance(),instance(),it,instance(),instance()) }
