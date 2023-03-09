@@ -38,7 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.google.accompanist.flowlayout.FlowRow
-import ireader.domain.utils.extensions.copyToClipboard
+import ireader.domain.utils.copyToClipboard
 import ireader.i18n.resources.MR
 import ireader.presentation.ui.core.modifier.clickableNoIndication
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper

@@ -12,8 +12,8 @@ import ireader.domain.image.cache.CoverCache
 import ireader.domain.preferences.models.getDefaultFont
 import ireader.domain.preferences.prefs.AndroidUiPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
-import ireader.domain.usecases.epub.importer.ImportEpub
-import ireader.domain.usecases.local.DeleteUseCase
+import ireader.domain.usecases.epub.ImportEpub
+import ireader.domain.usecases.preferences.AndroidReaderPrefUseCases
 import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
 import ireader.domain.utils.extensions.launchIO
 
@@ -21,16 +21,17 @@ import ireader.i18n.resources.MR
 
 
 class AdvanceSettingViewModel(
-    val deleteUseCase: ireader.domain.usecases.local.DeleteUseCase,
-    private val prefUseCases: ReaderPrefUseCases,
-    val coverCache: CoverCache,
-    val importEpub: ImportEpub,
-    private val readerPreferences: ReaderPreferences,
-    private val themeRepository: ThemeRepository,
-    private val categoryRepository: CategoryRepository,
-    private val androidUiPreferences: AndroidUiPreferences,
+        val deleteUseCase: ireader.domain.usecases.local.DeleteUseCase,
+        private val prefUseCases: ReaderPrefUseCases,
+        val coverCache: CoverCache,
+        val importEpub: ImportEpub,
+        private val readerPreferences: ReaderPreferences,
+        private val androidReaderPreferences: AndroidReaderPrefUseCases,
+        private val themeRepository: ThemeRepository,
+        private val categoryRepository: CategoryRepository,
+        private val androidUiPreferences: AndroidUiPreferences,
 
-    ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
+        ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
 
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
@@ -50,7 +51,7 @@ class AdvanceSettingViewModel(
 
     fun deleteDefaultSettings() {
         scope.launchIO {
-            prefUseCases.selectedFontStateUseCase.saveFont(getDefaultFont())
+            androidReaderPreferences.selectedFontStateUseCase.saveFont(getDefaultFont())
             prefUseCases.fontHeightUseCase.save(25)
             prefUseCases.fontSizeStateUseCase.save(18)
             prefUseCases.paragraphDistanceUseCase.save(2)

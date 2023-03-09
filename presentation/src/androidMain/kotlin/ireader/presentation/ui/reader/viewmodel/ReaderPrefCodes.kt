@@ -8,10 +8,10 @@ import androidx.compose.ui.graphics.Color
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import ireader.domain.utils.extensions.brightness
-import ireader.domain.utils.extensions.findComponentActivity
 import ireader.domain.utils.extensions.hideSystemUI
 import ireader.domain.utils.extensions.isImmersiveModeEnabled
 import ireader.domain.utils.extensions.showSystemUI
+import ireader.domain.utils.findComponentActivity
 
 import kotlin.time.Duration.Companion.seconds
 
@@ -115,11 +115,11 @@ class ReaderPrefFunctionsImpl: ReaderPrefFunctions {
     }
 
     override fun ReaderScreenViewModel.setReaderBackgroundColor(color: Color) {
-        readerUseCases.backgroundColorUseCase.save(color)
+        androidReaderPreferences.backgroundColorUseCase.save(color)
     }
 
     override fun ReaderScreenViewModel.setReaderTextColor(color: Color) {
-        readerUseCases.textColorUseCase.save(color)
+        androidReaderPreferences.textColorUseCase.save(color)
     }
 
     override fun ReaderScreenViewModel.showSystemBars(context: Context) {

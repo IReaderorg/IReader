@@ -25,14 +25,14 @@ import ireader.i18n.resources.MR
 
 
 class ExploreViewModel(
-    private val state: ExploreStateImpl,
-    private val remoteUseCases: RemoteUseCases,
-    private val catalogStore: GetLocalCatalogs,
-    private val browseScreenPrefUseCase: BrowseScreenPrefUseCase,
-    val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
-    private val param: Param,
-    private val findDuplicateBook: FindDuplicateBook,
-    val booksState: BooksState
+        private val state: ExploreStateImpl,
+        private val remoteUseCases: RemoteUseCases,
+        private val catalogStore: GetLocalCatalogs,
+        private val browseScreenPrefUseCase: BrowseScreenPrefUseCase,
+        val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
+        private val param: Param,
+        private val findDuplicateBook: FindDuplicateBook,
+        val booksState: BooksState
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), ExploreState by state {
     data class Param(val sourceId: Long?, val query: String?)
 

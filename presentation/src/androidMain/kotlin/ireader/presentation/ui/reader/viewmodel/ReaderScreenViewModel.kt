@@ -27,47 +27,48 @@ import ireader.domain.usecases.history.HistoryUseCase
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.local.book_usecases.BookMarkChapterUseCase
+import ireader.domain.usecases.preferences.AndroidReaderPrefUseCases
 import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
 import ireader.domain.usecases.reader.ScreenAlwaysOn
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.domain.utils.extensions.async.nextAfter
 import ireader.domain.utils.extensions.async.prevBefore
-import ireader.domain.utils.extensions.findComponentActivity
+import ireader.domain.utils.findComponentActivity
+import ireader.domain.utils.findComponentActivity
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.NO_VALUE
 import ireader.i18n.UiText
 import ireader.i18n.resources.MR
 import ireader.presentation.ui.core.theme.ReaderColors
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 @OptIn(ExperimentalTextApi::class)
 
 class ReaderScreenViewModel(
-    val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases,
-    val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
-    val remoteUseCases: RemoteUseCases,
-    val historyUseCase: HistoryUseCase,
-    val getLocalCatalog: GetLocalCatalog,
-    val readerUseCases: ReaderPrefUseCases,
-    val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
-    val prefState: ReaderScreenPreferencesStateImpl,
-    val state: ReaderScreenStateImpl,
-    val prefFunc: ReaderPrefFunctionsImpl,
-    val readerPreferences: ReaderPreferences,
-    val androidUiPreferences: AndroidUiPreferences,
-    val uiPreferences: UiPreferences,
-    val screenAlwaysOnUseCase: ScreenAlwaysOn,
-    val webViewManger: WebViewManger,
-    val readerThemeRepository: ReaderThemeRepository,
-    val bookMarkChapterUseCase: ireader.domain.usecases.local.book_usecases.BookMarkChapterUseCase,
-    val translationEnginesManager: TranslationEnginesManager,
-    val params: Param
+        val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases,
+        val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
+        val remoteUseCases: RemoteUseCases,
+        val historyUseCase: HistoryUseCase,
+        val getLocalCatalog: GetLocalCatalog,
+        val readerUseCases: ReaderPrefUseCases,
+        val androidReaderPreferences: AndroidReaderPrefUseCases,
+        val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
+        val prefState: ReaderScreenPreferencesStateImpl,
+        val state: ReaderScreenStateImpl,
+        val prefFunc: ReaderPrefFunctionsImpl,
+        val readerPreferences: ReaderPreferences,
+        val androidUiPreferences: AndroidUiPreferences,
+        val uiPreferences: UiPreferences,
+        val screenAlwaysOnUseCase: ScreenAlwaysOn,
+        val webViewManger: WebViewManger,
+        val readerThemeRepository: ReaderThemeRepository,
+        val bookMarkChapterUseCase: ireader.domain.usecases.local.book_usecases.BookMarkChapterUseCase,
+        val translationEnginesManager: TranslationEnginesManager,
+        val params: Param,
+        val globalScope: CoroutineScope
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(),
     ReaderScreenPreferencesState by prefState,
     ReaderScreenState by state,

@@ -9,11 +9,7 @@ import ireader.domain.usecases.backup.AutomaticBackup
 import ireader.domain.usecases.backup.CreateBackup
 import ireader.domain.usecases.backup.RestoreBackup
 import ireader.domain.usecases.files.GetSimpleStorage
-import ireader.domain.usecases.local.LocalGetBookUseCases
-import ireader.domain.usecases.local.LocalGetChapterUseCase
-import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.utils.extensions.convertLongToTime
-import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.ui.settings.SettingState
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
@@ -23,14 +19,14 @@ import java.util.*
 
 
 class BackupScreenViewModel(
-    private val booksUseCasa: ireader.domain.usecases.local.LocalGetBookUseCases,
-    private val chapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
-    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
-    val restoreBackup: RestoreBackup,
-    val createBackup: CreateBackup,
-    val uiPreferences: UiPreferences,
-    val automaticBackupUseCase: AutomaticBackup,
-    val getSimpleStorage: GetSimpleStorage,
+        private val booksUseCasa: ireader.domain.usecases.local.LocalGetBookUseCases,
+        private val chapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
+        private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
+        val restoreBackup: RestoreBackup,
+        val createBackup: CreateBackup,
+        val uiPreferences: UiPreferences,
+        val automaticBackupUseCase: AutomaticBackup,
+        val getSimpleStorage: GetSimpleStorage,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state

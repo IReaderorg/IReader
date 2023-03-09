@@ -18,7 +18,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
-import ireader.domain.utils.extensions.isTabletUi
+import ireader.domain.utils.isTabletUi
 import ireader.presentation.core.ui.*
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.theme.AppColors

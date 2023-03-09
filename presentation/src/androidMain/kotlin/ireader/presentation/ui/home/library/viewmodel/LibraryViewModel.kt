@@ -29,17 +29,17 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalCoroutinesApi::class)
 
 class LibraryViewModel(
-    private val localGetBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases,
-    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
-    val deleteUseCase: ireader.domain.usecases.local.DeleteUseCase,
-    private val localGetChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
-    private val libraryScreenPrefUseCases: LibraryScreenPrefUseCases,
-    private val state: LibraryStateImpl,
-    private val serviceUseCases: ServiceUseCases,
-    private val getLibraryCategory: GetLibraryCategory,
-    private val libraryPreferences: LibraryPreferences,
-    val markBookAsReadOrNotUseCase: MarkBookAsReadOrNotUseCase,
-    val getCategory: CategoriesUseCases
+        private val localGetBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases,
+        private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
+        val deleteUseCase: ireader.domain.usecases.local.DeleteUseCase,
+        private val localGetChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
+        private val libraryScreenPrefUseCases: LibraryScreenPrefUseCases,
+        private val state: LibraryStateImpl,
+        private val serviceUseCases: ServiceUseCases,
+        private val getLibraryCategory: GetLibraryCategory,
+        private val libraryPreferences: LibraryPreferences,
+        val markBookAsReadOrNotUseCase: MarkBookAsReadOrNotUseCase,
+        val getCategory: CategoriesUseCases
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), LibraryState by state {
 
     var lastUsedCategory = libraryPreferences.lastUsedCategory().asState()

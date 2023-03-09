@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.currentOrThrow
+import ireader.domain.models.common.Uri
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
@@ -38,7 +39,7 @@ fun BackUpAndRestoreScreen(
             if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
                 val uri = resultIntent.data!!.data!!
                 globalScope.launchIO {
-                    vm.restoreBackup.restoreFrom(uri, onError = {
+                    vm.restoreBackup.restoreFrom(Uri(uri), onError = {
                         vm.showSnackBar(it)
                     }, onSuccess = {
                         vm.showSnackBar((UiText.MStringResource(MR.strings.restoredSuccessfully)))
@@ -50,9 +51,9 @@ fun BackUpAndRestoreScreen(
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
             if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
                 val uri = resultIntent.data!!.data!!
-
+                Uri(uri)
                 globalScope.launchIO {
-                    val result = vm.createBackup.saveTo(uri, onError = {
+                    val result = vm.createBackup.saveTo(Uri(uri), onError = {
                         vm.showSnackBar(it)
                     }, onSuccess = {
                         vm.showSnackBar((UiText.MStringResource(MR.strings.backup_created_successfully)))

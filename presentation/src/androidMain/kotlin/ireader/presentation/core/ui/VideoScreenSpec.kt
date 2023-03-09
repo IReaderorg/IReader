@@ -11,7 +11,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import ireader.domain.utils.extensions.findComponentActivity
+import ireader.domain.utils.findComponentActivity
 import ireader.domain.utils.extensions.hideSystemUI
 import ireader.domain.utils.extensions.showSystemUI
 import ireader.presentation.core.IModalSheets

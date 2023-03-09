@@ -20,32 +20,29 @@ import ireader.domain.services.tts_service.TTSState
 import ireader.domain.services.tts_service.TTSStateImpl
 import ireader.domain.services.tts_service.media_player.TTSService
 import ireader.domain.services.tts_service.media_player.isPlaying
-import ireader.domain.usecases.local.LocalGetBookUseCases
-import ireader.domain.usecases.local.LocalGetChapterUseCase
-import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
-import ireader.domain.usecases.preferences.reader_preferences.TextReaderPrefUseCase
+import ireader.domain.usecases.preferences.TextReaderPrefUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.services.ServiceUseCases
-import ireader.domain.utils.extensions.findComponentActivity
+import ireader.domain.utils.findComponentActivity
 
 import kotlinx.coroutines.launch
 
 
 
 class TTSViewModel(
-    val ttsState: TTSStateImpl,
-    private val param: Param,
-    private val serviceUseCases: ServiceUseCases,
-    private val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases,
-    private val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
-    private val remoteUseCases: RemoteUseCases,
-    private val getLocalCatalog: GetLocalCatalog,
-    val speechPrefUseCases: TextReaderPrefUseCase,
-    private val readerUseCases: ReaderPrefUseCases,
-    private val readerPreferences: ReaderPreferences,
-    private val androidUiPreferences: AndroidUiPreferences,
-    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
+        val ttsState: TTSStateImpl,
+        private val param: Param,
+        private val serviceUseCases: ServiceUseCases,
+        private val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases,
+        private val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
+        private val remoteUseCases: RemoteUseCases,
+        private val getLocalCatalog: GetLocalCatalog,
+        val speechPrefUseCases: TextReaderPrefUseCase,
+        private val readerUseCases: ReaderPrefUseCases,
+        private val readerPreferences: ReaderPreferences,
+        private val androidUiPreferences: AndroidUiPreferences,
+        private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(),
     TTSState by ttsState {
     data class Param(val sourceId:Long? ,val chapterId: Long?, val bookId: Long?,val readingParagraph: Int?)

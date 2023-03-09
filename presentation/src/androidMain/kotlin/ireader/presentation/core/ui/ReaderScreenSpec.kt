@@ -263,7 +263,7 @@ data class ReaderScreenSpec(
                             vm = vm,
                             onTextAlign = {
                                 vm.textAlignment.value = it
-                                vm.readerUseCases.textAlignmentUseCase.save(it)
+                                vm.androidReaderPreferences.textAlignmentUseCase.save(it)
                             },
                             onToggleAutoBrightness = {
                                 vm.autoBrightnessMode.value = !vm.autoBrightnessMode.value

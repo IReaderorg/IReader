@@ -78,8 +78,8 @@ val PresentationModules = DI.Module("presentationModule") {
     bindFactory< GlobalSearchViewModel.Param, GlobalSearchViewModel>  { GlobalSearchViewModel(instance(),instance(),instance(),instance(),it) }
     bindFactory< TTSViewModel.Param, TTSViewModel>  { TTSViewModel(instance(),it,instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance()) }
     bindProvider  { UpdatesViewModel(instance(),instance(),instance(),instance(),instance(),instance()) }
-    bindFactory< ReaderScreenViewModel.Param, ReaderScreenViewModel>  { ReaderScreenViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),it) }
-    bindProvider  { AdvanceSettingViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance()) }
+    bindFactory< ReaderScreenViewModel.Param, ReaderScreenViewModel>  { ReaderScreenViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),it,instance()) }
+    bindProvider  { AdvanceSettingViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance()) }
     bindProvider  { MainSettingScreenViewModel(instance()) }
     bindProvider  { AppearanceViewModel(instance(),instance()) }
     bindProvider  { BackupScreenViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance()) }

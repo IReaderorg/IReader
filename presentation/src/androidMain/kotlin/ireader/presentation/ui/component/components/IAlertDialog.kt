@@ -33,5 +33,6 @@ actual fun PlatformAlertDialog(
         iconContentColor = iconContentColor,
         titleContentColor = titleContentColor,
         textContentColor = textContentColor,
+
     )
 }

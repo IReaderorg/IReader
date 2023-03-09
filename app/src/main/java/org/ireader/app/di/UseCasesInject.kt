@@ -114,7 +114,6 @@ val UseCasesInject = DI.Module("usecaseModule") {
     ) }
     bindSingleton<ReaderPrefUseCases> { ReaderPrefUseCases(
         autoScrollMode = AutoScrollMode(instance()),
-        backgroundColorUseCase = BackgroundColorUseCase(instance()),
         brightnessStateUseCase = BrightnessStateUseCase(instance()),
         fontHeightUseCase = FontHeightUseCase(instance()),
         fontSizeStateUseCase = FontSizeStateUseCase(instance()),
@@ -123,9 +122,6 @@ val UseCasesInject = DI.Module("usecaseModule") {
         paragraphIndentUseCase = ParagraphIndentUseCase(instance()),
         scrollIndicatorUseCase = ScrollIndicatorUseCase(instance()),
         scrollModeUseCase = ScrollModeUseCase(instance()),
-        selectedFontStateUseCase = SelectedFontStateUseCase(instance(),instance()),
-        textAlignmentUseCase = TextAlignmentUseCase(instance()),
-        textColorUseCase = TextColorUseCase(instance())
     ) }
     bindSingleton<BrowseScreenPrefUseCase> { BrowseScreenPrefUseCase(
         browseLayoutTypeUseCase = BrowseLayoutTypeUseCase(instance())
