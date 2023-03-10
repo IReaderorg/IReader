@@ -3,12 +3,7 @@ package ireader.domain.usecases.backup.backup.legecy.twnetysep
 import ireader.core.source.model.ChapterInfo
 import ireader.core.source.model.Page
 import ireader.core.source.model.encode
-import ireader.domain.usecases.backup.backup.Backup
-import ireader.domain.usecases.backup.backup.BookProto
-import ireader.domain.usecases.backup.backup.CategoryProto
-import ireader.domain.usecases.backup.backup.ChapterProto
-import ireader.domain.usecases.backup.backup.HistoryProto
-import ireader.domain.usecases.backup.backup.TrackProto
+import ireader.domain.usecases.backup.backup.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromByteArray
@@ -84,7 +79,7 @@ internal fun ByteArray.dumpTwentySepLegacyBackup(): Backup {
 }
 
 @Serializable
-private data class LegacyBookProto(
+private data class LegacyBookProto @OptIn(ExperimentalSerializationApi::class) constructor(
     @ProtoNumber(1) val sourceId: Long,
     @ProtoNumber(2) val key: String,
     @ProtoNumber(3) val title: String,

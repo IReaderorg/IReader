@@ -1,4 +1,4 @@
-package org.ireader.app.di
+package ireader.domain.di
 
 
 
@@ -12,7 +12,6 @@ import ireader.domain.usecases.download.get.FindDownloadsUseCase
 import ireader.domain.usecases.download.get.SubscribeDownloadsUseCase
 import ireader.domain.usecases.download.insert.InsertDownload
 import ireader.domain.usecases.download.insert.InsertDownloads
-import ireader.domain.usecases.epub.EpubCreator
 import ireader.domain.usecases.history.HistoryUseCase
 import ireader.domain.usecases.local.*
 import ireader.domain.usecases.local.book_usecases.FindAllInLibraryBooks
@@ -101,12 +100,7 @@ val UseCasesInject = DI.Module("usecaseModule") {
             deleteNotInLibraryBooks = DeleteNotInLibraryBooks(instance())
         )
     }
-    bindSingleton<ServiceUseCases> { ServiceUseCases(
-        startDownloadServicesUseCase = StartDownloadServicesUseCase(instance()),
-        startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(instance()),
-        startTTSServicesUseCase = StartTTSServicesUseCase(instance()),
-        stopServicesUseCase = StopServiceUseCase(instance()),
-    ) }
+
     bindSingleton<LibraryScreenPrefUseCases> { LibraryScreenPrefUseCases(
         libraryLayoutTypeUseCase = LibraryLayoutTypeUseCase(instance(), instance()),
         sortersDescUseCase = SortersDescUseCase(instance()),
@@ -133,7 +127,7 @@ val UseCasesInject = DI.Module("usecaseModule") {
         subscribeUpdates = SubscribeUpdates(instance()),
         deleteAllUpdates = DeleteAllUpdates(instance()),
     ) }
-    bindProvider<EpubCreator> { EpubCreator(instance(), instance(),instance()) }
+
     bindSingleton<DownloadUseCases> {
         DownloadUseCases(
         deleteAllSavedDownload = DeleteAllSavedDownload(instance()),

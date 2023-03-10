@@ -1,70 +1,51 @@
 package ireader.desktop
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SmallTopAppBar
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
 import androidx.compose.ui.window.awaitApplication
 import androidx.compose.ui.window.rememberWindowState
-import kotlinx.coroutines.DelicateCoroutinesApi
-import java.lang.reflect.Modifier
+import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.NavigatorDisposeBehavior
+import ireader.data.di.dataPlatformModule
+import ireader.data.di.repositoryInjectModule
+import ireader.domain.di.*
+import ireader.presentation.core.DefaultNavigatorScreenTransition
+import ireader.presentation.core.di.PresentationModules
+import ireader.presentation.core.di.presentationPlatformModule
+import ireader.presentation.core.theme.AppTheme
+import ireader.presentation.core.ui.AboutSettingSpec
+import org.ireader.app.di.DataModule
+import org.kodein.di.DI
+import org.kodein.di.compose.withDI
 import kotlin.system.exitProcess
 
-
-@OptIn(DelicateCoroutinesApi::class, ExperimentalMaterial3Api::class)
 suspend fun main() {
+    val di = DI.lazy {
+        importAll(localModule,dataPlatformModule, CatalogModule, DataModule,preferencesInjectModule,
+                repositoryInjectModule, UseCasesInject, PresentationModules,DomainServices,DomainModule,presentationPlatformModule)
+    }
     awaitApplication {
         val state = rememberWindowState()
         Window(
-            onCloseRequest = { exitProcess(0) },
-            title = "IReader",
-            state = state
+                onCloseRequest = { exitProcess(0) },
+                title = "IReader",
+                state = state
         ) {
+            val scope = rememberCoroutineScope()
+            withDI(di) {
+                AppTheme(scope) {
+                    Navigator(
+                            screen = AboutSettingSpec(),
+                            disposeBehavior = NavigatorDisposeBehavior(
+                                    disposeNestedNavigators = false,
+                                    disposeSteps = true
+                            ),
+                    ) { navigator ->
+                        DefaultNavigatorScreenTransition(navigator = navigator)
+                    }
+                }
 
-            Scaffold(
-                topBar = {
-                    TopAppBar(title = {
-                        Text("Library")
-                    })
-                }
-            ) {
-                Box(
-                    modifier = androidx.compose.ui.Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("IReader")
-                }
             }
-
         }
     }
 }
-
-
-//fun main() = application {
-//    val state = rememberWindowState()
-//    Window(
-//        onCloseRequest = { exitProcess(0) },
-//        title = localize(MR.strings.app_name),
-//        state = state
-//    ) {
-//        val window = remember { tachiyomi.ui.core.providers.Window() }
-//        LaunchedEffect(state) {
-//            snapshotFlow { state.size }
-//                .collect { window.setSize(it.width, it.height) }
-//        }
-//        CompositionLocalProvider(LocalWindow provides window) {
-//            MainApp()
-//        }
-//    }
-//}

@@ -2,14 +2,11 @@ package ireader.domain.preferences.prefs
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import ireader.domain.models.library.LibrarySort
 import ireader.core.prefs.Preference
 import ireader.core.prefs.PreferenceStore
-import ireader.domain.preferences.models.FontType
+import ireader.domain.models.library.LibrarySort
 import ireader.domain.preferences.models.ReaderColors
-import ireader.domain.preferences.models.getDefaultFont
 import ireader.domain.preferences.models.prefs.asColor
-import ireader.domain.preferences.models.prefs.asFont
 import ireader.domain.preferences.models.prefs.asReaderTheme
 import ireader.domain.preferences.models.prefs.asVoice
 

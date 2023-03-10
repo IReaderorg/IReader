@@ -1,5 +1,4 @@
-package org.ireader.app.di
-
+package ireader.data.di
 
 import ireader.data.book.BookRepositoryImpl
 import ireader.data.catalog.CatalogRemoteRepositoryImpl
@@ -8,7 +7,6 @@ import ireader.data.category.CategoryRepositoryImpl
 import ireader.data.chapter.ChapterRepositoryImpl
 import ireader.data.downloads.DownloadRepositoryImpl
 import ireader.data.history.HistoryRepositoryImpl
-import ireader.data.pagination.PaginationRepositoryImpl
 import ireader.data.repository.LibraryRepositoryImpl
 import ireader.data.repository.ReaderThemeRepositoryImpl
 import ireader.data.repository.ThemeRepositoryImpl
@@ -22,7 +20,6 @@ import org.kodein.di.instance
 
 val repositoryInjectModule = DI.Module("repositoryModule") {
     bindSingleton<DownloadRepository> { DownloadRepositoryImpl(instance()) }
-    bindSingleton<PaginationRepository> { PaginationRepositoryImpl(instance()) }
     bindSingleton<UpdatesRepository> { UpdatesRepositoryImpl(instance()) }
     bindSingleton<LibraryRepository> { LibraryRepositoryImpl(instance()) }
     bindSingleton<CategoryRepository> { CategoryRepositoryImpl(instance()) }

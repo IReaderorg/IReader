@@ -27,7 +27,7 @@ class JvmPreferenceStore(name: String) : PreferenceStore {
   /**
    * The [Preferences] instance where they're saved.
    */
-  private val store = Preferences.userRoot().node("tachiyomi/$name")
+  private val store = Preferences.userRoot().node("ireader/$name")
 
   /**
    * Scope where the store handles IO.

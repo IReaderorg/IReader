@@ -2,10 +2,10 @@ package ireader.presentation.ui.core.ui
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import ireader.core.prefs.Preference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import ireader.core.prefs.Preference
 
 class PreferenceMutableState<T>(
     private val preference: Preference<T>,
@@ -16,7 +16,7 @@ class PreferenceMutableState<T>(
     private val lazyState = mutableStateOf(preference.get())
 
     init {
-        scope.launch(Dispatchers.Main) {
+        scope.launch(Dispatchers.IO) {
             preference.changes()
                 .collect {
                     kotlin.runCatching {

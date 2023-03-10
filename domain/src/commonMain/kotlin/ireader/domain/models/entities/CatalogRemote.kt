@@ -1,11 +1,10 @@
 
 package ireader.domain.models.entities
 
-import androidx.annotation.Keep
 import ireader.core.source.Source
 import java.io.File
 
-@Keep
+
 data class CatalogRemote(
     override val sourceId: Long,
     val source: Long,

@@ -2,7 +2,7 @@ import kotlin.collections.List;
 
 
 
-CREATE TABLE book(
+CREATE TABLE IF NOT EXISTS book(
     _id INTEGER NOT NULL PRIMARY KEY,
     source INTEGER NOT NULL,
     url TEXT NOT NULL,
@@ -24,8 +24,8 @@ CREATE TABLE book(
 );
 
 
-CREATE INDEX library_favorite_index ON book(favorite) WHERE favorite = 1;
-CREATE INDEX mangas_url_index ON book(url);
+CREATE INDEX IF NOT EXISTS library_favorite_index ON book(favorite) WHERE favorite = 1;
+CREATE INDEX IF NOT EXISTS mangas_url_index ON book(url);
 
 findAllBooks:
 SELECT * FROM book;

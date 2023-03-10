@@ -12,10 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import ireader.domain.models.entities.*
-import ireader.presentation.ui.home.sources.extension.CatalogItem
-import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
-import ireader.presentation.ui.home.sources.extension.SourceHeader
-import ireader.presentation.ui.home.sources.extension.SourceKeys
+import ireader.presentation.ui.home.sources.extension.*
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -55,19 +52,19 @@ fun RemoteSourcesScreen(
 
     val remoteSources = remember {
         derivedStateOf {
-            (installed.value + remotes.value).mapIndexed { index, sourceUiModel ->  Pair(index,sourceUiModel) }
+            (installed.value + remotes.value).mapIndexed { index, sourceUiModel -> Pair(index, sourceUiModel) }
         }
     }
     val scrollState = rememberLazyListState()
 
-        LazyColumn(
+    LazyColumn(
             modifier = Modifier.fillMaxSize(),
             state = scrollState,
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    ) {
 
-            items(
+        items(
                 items = remoteSources.value,
                 contentType = {
                     return@items when (it.second) {
@@ -76,26 +73,26 @@ fun RemoteSourcesScreen(
                     }
                 },
                 key = {
-                    when (val catalog : SourceUiModel = it.second) {
+                    when (val catalog: SourceUiModel = it.second) {
                         is SourceUiModel.Header -> it.second.hashCode()
-                        is SourceUiModel.Item -> catalog.source.key(catalog.state,it.first.toLong(),vm.defaultRepo.value)
+                        is SourceUiModel.Item -> catalog.source.key(catalog.state, it.first.toLong(), vm.defaultRepo.value)
                     }
                 },
-            ) { catalog ->
-                val catalog = remember {
-                    catalog.second
-                }
-                when (catalog) {
-                    is SourceUiModel.Header -> {
-                        SourceHeader(
+        ) { catalog ->
+            val catalog = remember {
+                catalog.second
+            }
+            when (catalog) {
+                is SourceUiModel.Header -> {
+                    SourceHeader(
                             modifier = Modifier.animateItemPlacement(),
                             language = catalog.language,
-                        )
-                    }
-                    is SourceUiModel.Item -> {
-                        when (catalog.source) {
-                            is CatalogLocal -> {
-                                CatalogItem(
+                    )
+                }
+                is SourceUiModel.Item -> {
+                    when (catalog.source) {
+                        is CatalogLocal -> {
+                            CatalogItem(
                                     catalog = catalog.source,
                                     installStep = if (catalog.source is CatalogInstalled) vm.installSteps[catalog.source.pkgName] else null,
                                     onInstall = { onClickInstall(catalog.source) }.takeIf { catalog.source.hasUpdate },
@@ -105,10 +102,10 @@ fun RemoteSourcesScreen(
                                             onCancelInstaller(it)
                                         }
                                     },
-                                )
-                            }
-                            is CatalogRemote -> {
-                                CatalogItem(
+                            )
+                        }
+                        is CatalogRemote -> {
+                            CatalogItem(
                                     catalog = catalog.source,
                                     installStep = vm.installSteps[catalog.source.pkgName],
                                     onInstall = { onClickInstall(catalog.source) },
@@ -117,12 +114,12 @@ fun RemoteSourcesScreen(
                                             onCancelInstaller(it)
                                         }
                                     },
-                                )
-                            }
+                            )
                         }
                     }
                 }
             }
         }
+    }
 
 }

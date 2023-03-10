@@ -1,4 +1,4 @@
-CREATE TABLE categories(
+CREATE TABLE IF NOT EXISTS categories(
     _id INTEGER NOT NULL PRIMARY KEY ,
     name TEXT NOT NULL,
     sort INTEGER NOT NULL,

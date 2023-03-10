@@ -5,9 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.domain.models.entities.SavedDownload
 
-
-import javax.inject.Singleton
-
 interface DownloadServiceState {
     var downloads: List<SavedDownload>
     var isEnable: Boolean

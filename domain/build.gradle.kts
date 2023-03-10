@@ -57,6 +57,11 @@ kotlin {
                 implementation(libs.ktor.contentNegotiation)
                 implementation(libs.ktor.okhttp)
                 implementation(libs.bundles.ireader)
+                implementation(kotlinx.serialization.protobuf)
+                implementation(kotlinx.datetime)
+                implementation(libs.okio)
+                implementation(libs.jsoup)
+                api(libs.kodein.core)
             }
         }
          val androidMain by getting {
@@ -68,8 +73,8 @@ kotlin {
                 implementation(androidx.lifecycle.viewmodelktx)
                 implementation(composeLib.compose.googlFonts)
                 implementation(androidx.media)
-                implementation(kotlinx.serialization.protobuf)
-                implementation(kotlinx.datetime)
+
+
 
                 implementation(libs.googleTranslator)
                 implementation(composeLib.compose.coil)
@@ -83,8 +88,7 @@ kotlin {
                 implementation(libs.okhttp.interceptor)
                 implementation(libs.okhttp.doh)
                 implementation(libs.okhttp.doh)
-                implementation(libs.okio)
-                implementation(libs.jsoup)
+
                 implementation(androidx.dataStore)
                 implementation(androidx.core)
                 implementation(androidx.appCompat)
@@ -97,11 +101,6 @@ kotlin {
                 /** LifeCycle **/
                 implementation(androidx.lifecycle.runtime)
                 implementation(kotlinx.stdlib)
-
-
-
-                //
-
             }
         }
         val desktopMain by getting {

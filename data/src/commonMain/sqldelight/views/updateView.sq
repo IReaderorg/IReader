@@ -1,4 +1,4 @@
-CREATE VIEW updatesView AS
+CREATE VIEW IF NOT EXISTS updatesView AS
 SELECT
     book._id AS mangaId,
     book.title AS mangaTitle,

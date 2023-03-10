@@ -1,6 +1,6 @@
 import java.util.Date;
 
-CREATE TABLE history(
+CREATE TABLE IF NOT EXISTS history(
     _id INTEGER NOT NULL PRIMARY KEY,
     chapter_id INTEGER NOT NULL UNIQUE,
     last_read INTEGER,
@@ -53,7 +53,7 @@ JOIN chapter ON history.chapter_id = chapter._id
 ORDER BY last_read DESC;
 
 --
-CREATE INDEX history_history_chapter_id_index ON history(chapter_id);
+CREATE INDEX IF NOT EXISTS history_history_chapter_id_index ON history(chapter_id);
 
 getHistoryByMangaId:
 SELECT

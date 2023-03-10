@@ -1,6 +1,5 @@
 package ireader.presentation.ui.core.theme
 
-import androidx.annotation.FloatRange
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.luminance
@@ -53,8 +52,8 @@ object ContentAlpha {
      */
     @Composable
     private fun contentAlpha(
-        @FloatRange(from = 0.0, to = 1.0) highContrastAlpha: Float,
-        @FloatRange(from = 0.0, to = 1.0) lowContrastAlpha: Float
+           highContrastAlpha: Float,
+            lowContrastAlpha: Float
     ): Float {
         val contentColor = MaterialTheme.colorScheme.contentColor
         val lightTheme = MaterialTheme.colorScheme.isLight()

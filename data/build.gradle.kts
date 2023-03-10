@@ -31,6 +31,7 @@ kotlin {
                 implementation(libs.sqldelight.runtime)
                 implementation(libs.sqldelight.coroutines)
                 implementation(libs.requerySqlite)
+                api(libs.kodein.core)
             }
         }
         val androidMain by getting {

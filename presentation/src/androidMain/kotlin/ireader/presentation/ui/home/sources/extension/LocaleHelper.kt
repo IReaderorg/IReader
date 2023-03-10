@@ -57,9 +57,3 @@ object LocaleHelper {
         }
     }
 }
-object SourceKeys {
-    const val PINNED_KEY = "pinned"
-    const val INSTALLED_KEY = "installed"
-    const val AVAILABLE = "available"
-    const val LAST_USED_KEY = "last_used"
-}

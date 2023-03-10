@@ -1,7 +1,7 @@
 import ireader.core.source.model.Page;
 import kotlin.collections.List;
 
-CREATE TABLE chapter(
+CREATE TABLE IF NOT EXISTS chapter(
     _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT ,
     book_id INTEGER NOT NULL,
     url TEXT NOT NULL,
@@ -20,8 +20,8 @@ CREATE TABLE chapter(
     ON DELETE CASCADE
 );
 
-CREATE INDEX chapters_manga_id_index ON chapter(book_id);
-CREATE INDEX chapters_unread_by_manga_index ON chapter(book_id, read) WHERE read = 0;
+CREATE INDEX IF NOT EXISTS chapters_manga_id_index ON chapter(book_id);
+CREATE INDEX IF NOT EXISTS chapters_unread_by_manga_index ON chapter(book_id, read) WHERE read = 0;
 
 getChapterById:
 SELECT *

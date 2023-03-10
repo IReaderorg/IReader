@@ -1,4 +1,4 @@
-CREATE VIEW historyView AS
+CREATE VIEW IF NOT EXISTS historyView AS
 SELECT
     history._id AS id,
     book._id AS bookId,

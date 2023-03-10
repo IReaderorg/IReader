@@ -5,7 +5,6 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import com.google.accompanist.pager.ExperimentalPagerApi
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.Toolbar
@@ -13,7 +12,7 @@ import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 
-@OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExtensionScreenTopAppBar(
     currentPage: Int,

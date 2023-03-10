@@ -1,4 +1,4 @@
-package org.ireader.app.di
+package ireader.domain.di
 
 
 import ireader.domain.preferences.prefs.AppPreferences

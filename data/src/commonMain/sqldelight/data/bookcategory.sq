@@ -1,4 +1,4 @@
-CREATE TABLE bookcategories(
+CREATE TABLE IF NOT EXISTS bookcategories(
     _id INTEGER PRIMARY KEY NOT NULL  ,
     book_id INTEGER NOT NULL,
     category_id INTEGER NOT NULL,

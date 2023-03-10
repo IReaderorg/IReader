@@ -13,11 +13,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import ireader.domain.models.entities.Catalog
 import ireader.domain.models.entities.CatalogInstalled
-import ireader.domain.models.entities.SourceState
 import ireader.domain.models.entities.key
 import ireader.presentation.ui.home.sources.extension.CatalogItem
 import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
 import ireader.presentation.ui.home.sources.extension.SourceHeader
+import ireader.presentation.ui.home.sources.extension.SourceUiModel
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -81,7 +81,3 @@ fun UserSourcesScreen(
     }
 }
 
-sealed class SourceUiModel {
-    data class Item(val source: Catalog, val state: SourceState) : SourceUiModel()
-    data class Header(val language: String) : SourceUiModel()
-}

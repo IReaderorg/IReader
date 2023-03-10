@@ -7,12 +7,16 @@ import android.os.Looper
 import androidx.work.Configuration
 import coil.ImageLoader
 import coil.ImageLoaderFactory
-import ireader.domain.di.DomainModule
-import ireader.domain.di.DomainServices
+import ireader.data.di.dataPlatformModule
+import ireader.data.di.repositoryInjectModule
+import ireader.domain.di.*
 import ireader.domain.utils.WebViewUtil
 import ireader.presentation.core.di.PresentationModules
+import ireader.presentation.core.di.presentationPlatformModule
 import ireader.presentation.imageloader.coil.CoilLoaderFactory
-import org.ireader.app.di.*
+import org.ireader.app.di.AppModule
+import org.ireader.app.di.DataModule
+import ireader.domain.di.localModule
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
@@ -24,8 +28,8 @@ class MyApplication : Application(), ImageLoaderFactory, DIAware, Configuration.
     override val di: DI by DI.lazy(allowSilentOverride = true) {
         bindSingleton<Context> { this@MyApplication }
         bindSingleton<Application> { this@MyApplication }
-        importAll(AppModule, CatalogModule, DataModule, localModule, preferencesInjectModule,
-            repositoryInjectModule, UseCasesInject, PresentationModules,DomainServices,DomainModule)
+        importAll(dataPlatformModule,AppModule, CatalogModule, DataModule, localModule, preferencesInjectModule,
+            repositoryInjectModule, UseCasesInject, PresentationModules,DomainServices,DomainModule,presentationPlatformModule)
 
     }
 

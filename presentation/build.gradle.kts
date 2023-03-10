@@ -47,7 +47,6 @@ kotlin {
                 implementation(libs.voyager.kodein)
                 api(libs.kodein.core)
                 api(libs.kodein.compose)
-                implementation(composeLib.materialmotion.core)
             }
         }
         val jvmMain by creating {

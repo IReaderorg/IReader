@@ -497,7 +497,7 @@ fun <Key> ChipChoicePreference(
             },
     )
     if (showDialog) {
-        AlertDialog(
+        IAlertDialog(
                 modifier = Modifier.heightIn(max = 350.dp, min = 200.dp),
                 onDismissRequest = { showDialog = false },
                 title = { Text(title) },
@@ -621,7 +621,7 @@ fun <Key> ChoicePreference(
     )
 
     if (showDialog) {
-        AlertDialog(
+        IAlertDialog(
                 onDismissRequest = {
                     showDialog = false
                     onDismiss()
@@ -695,7 +695,7 @@ fun <Key> ChoicePreference(
     )
 
     if (showDialog) {
-        AlertDialog(
+        IAlertDialog(
                 onDismissRequest = {
                     showDialog = false
                     onDismiss()
@@ -768,7 +768,7 @@ fun <Key> ChoicePreference(
     )
 
     if (showDialog) {
-        AlertDialog(
+        IAlertDialog(
                 onDismissRequest = { showDialog = false },
                 title = { Text(title) },
                 text = {

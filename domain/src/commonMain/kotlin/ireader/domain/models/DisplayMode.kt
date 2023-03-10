@@ -1,8 +1,6 @@
 package ireader.domain.models
 import ireader.i18n.resources.MR
-import android.content.Context
 import ireader.core.prefs.Preference
-import ireader.domain.R
 import ireader.domain.models.entities.Category
 import ireader.i18n.LocalizeHelper
 

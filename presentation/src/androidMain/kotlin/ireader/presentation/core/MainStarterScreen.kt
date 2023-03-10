@@ -1,7 +1,10 @@
 package ireader.presentation.core
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.*
@@ -25,8 +28,6 @@ import ireader.presentation.ui.core.theme.AppColors
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
-import soup.compose.material.motion.animation.materialFadeThroughIn
-import soup.compose.material.motion.animation.materialFadeThroughOut
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 object MainStarterScreen : VoyagerScreen() {
@@ -42,78 +43,67 @@ object MainStarterScreen : VoyagerScreen() {
         TabNavigator(LibraryScreenSpec) { tabNavigator ->
             CompositionLocalProvider(LocalNavigator provides navigator) {
                 IScaffold(
-                    startBar = {
-                        if (context.isTabletUi()) {
-                            NavigationRail {
-                                NavigationRailItem(LibraryScreenSpec)
-                                if (vm.showUpdate.value) {
-                                    NavigationRailItem(UpdateScreenSpec)
+                        startBar = {
+                            if (context.isTabletUi()) {
+                                NavigationRail {
+                                    NavigationRailItem(LibraryScreenSpec)
+                                    if (vm.showUpdate.value) {
+                                        NavigationRailItem(UpdateScreenSpec)
+                                    }
+                                    if (vm.showUpdate.value) {
+                                        NavigationRailItem(HistoryScreenSpec)
+                                    }
+                                    NavigationRailItem(ExtensionScreenSpec)
+                                    NavigationRailItem(MoreScreenSpec)
                                 }
-                                if (vm.showUpdate.value) {
-                                    NavigationRailItem(HistoryScreenSpec)
-                                }
-                                NavigationRailItem(ExtensionScreenSpec)
-                                NavigationRailItem(MoreScreenSpec)
                             }
-                        }
-                    },
-                    bottomBar = {
-                        val bottomNavVisible by produceState(initialValue = true) {
-                            showBottomNavEvent.receiveAsFlow().collectLatest { value = it }
-                        }
-                        AnimatedVisibility(
-                            visible = bottomNavVisible,
-                            enter = expandVertically(),
-                            exit = shrinkVertically(),
-                        ) {
-                            NavigationBar(
-                                modifier = Modifier,
-                                containerColor = AppColors.current.bars,
-                                contentColor = AppColors.current.onBars,
-                                tonalElevation = 0.dp,
+                        },
+                        bottomBar = {
+                            val bottomNavVisible by produceState(initialValue = true) {
+                                showBottomNavEvent.receiveAsFlow().collectLatest { value = it }
+                            }
+                            AnimatedVisibility(
+                                    visible = bottomNavVisible,
+                                    enter = expandVertically(),
+                                    exit = shrinkVertically(),
                             ) {
-                                TabNavigationItem(LibraryScreenSpec)
-                                if (vm.showUpdate.value) {
-                                    TabNavigationItem(UpdateScreenSpec)
+                                NavigationBar(
+                                        modifier = Modifier,
+                                        containerColor = AppColors.current.bars,
+                                        contentColor = AppColors.current.onBars,
+                                        tonalElevation = 0.dp,
+                                ) {
+                                    TabNavigationItem(LibraryScreenSpec)
+                                    if (vm.showUpdate.value) {
+                                        TabNavigationItem(UpdateScreenSpec)
+                                    }
+                                    if (vm.showUpdate.value) {
+                                        TabNavigationItem(HistoryScreenSpec)
+                                    }
+                                    TabNavigationItem(ExtensionScreenSpec)
+                                    TabNavigationItem(MoreScreenSpec)
                                 }
-                                if (vm.showUpdate.value) {
-                                    TabNavigationItem(HistoryScreenSpec)
-                                }
-                                TabNavigationItem(ExtensionScreenSpec)
-                                TabNavigationItem(MoreScreenSpec)
                             }
-                        }
-                    },
+                        },
 
-                    ) { contentPadding ->
+                        ) { contentPadding ->
 
                     Box(
-                        modifier = Modifier.padding(contentPadding)
-                            .consumedWindowInsets(contentPadding),
+                            modifier = Modifier.padding(contentPadding)
+                                    .consumedWindowInsets(contentPadding),
                     ) {
-                        AnimatedContent(
-                            targetState = tabNavigator.current,
-                            transitionSpec = {
-                                materialFadeThroughIn(
-                                    initialScale = 1f,
-                                    durationMillis = TabFadeDuration
-                                ) with
-                                        materialFadeThroughOut(durationMillis = TabFadeDuration)
-                            },
-                            content = {
-                                tabNavigator.saveableState(key = "currentTab", it) {
-                                    it.Content()
-                                }
-                            },
-                        )
+
+                        tabNavigator.saveableState(key = "currentTab", tabNavigator.current) {
+                            tabNavigator.current.Content()
+                        }
                     }
 
                 }
             }
             val goToLibraryTab = { tabNavigator.current = LibraryScreenSpec }
             BackHandler(
-                enabled = tabNavigator.current != LibraryScreenSpec,
-                onBack = goToLibraryTab,
+                    enabled = tabNavigator.current != LibraryScreenSpec,
+                    onBack = goToLibraryTab,
             )
         }
     }
@@ -129,26 +119,26 @@ fun NavigationRailItem(tab: Tab) {
     val tabNavigator = LocalTabNavigator.current
     val selected = tabNavigator.current::class == tab::class
     NavigationRailItem(
-        selected = selected,
-        onClick = {
-            tabNavigator.current = tab
-        },
-        icon = {
-            Icon(
-                tab.options.icon!!,
-                contentDescription = tab.options.title,
-                tint = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
-            )
-        },
-        label = {
-            Text(
-                text = tab.options.title,
-                style = MaterialTheme.typography.labelLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        },
-        alwaysShowLabel = true,
+            selected = selected,
+            onClick = {
+                tabNavigator.current = tab
+            },
+            icon = {
+                Icon(
+                        tab.options.icon!!,
+                        contentDescription = tab.options.title,
+                        tint = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
+                )
+            },
+            label = {
+                Text(
+                        text = tab.options.title,
+                        style = MaterialTheme.typography.labelLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                )
+            },
+            alwaysShowLabel = true,
     )
 }
 
@@ -158,30 +148,30 @@ private fun RowScope.TabNavigationItem(tab: Tab) {
     val navigator = LocalNavigator.currentOrThrow
     val isSelected = tabNavigator.current::class == tab::class
     NavigationBarItem(
-        selected = isSelected,
-        onClick = { tabNavigator.current = tab },
-        icon = {
-            Icon(
-                tab.options.icon!!,
-                contentDescription = tab.options.title,
-                tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
-            )
-        },
-        label = {
-            Text(
-                tab.options.title,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-        },
-        colors = NavigationBarItemDefaults.colors(
-            indicatorColor = androidx.compose.material3.MaterialTheme.colorScheme.primaryContainer,
-            unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-            selectedTextColor = MaterialTheme.colorScheme.onBackground,
-            selectedIconColor = MaterialTheme.colorScheme.onBackground,
-            unselectedIconColor = MaterialTheme.colorScheme.onBackground
-        ),
-        alwaysShowLabel = true,
+            selected = isSelected,
+            onClick = { tabNavigator.current = tab },
+            icon = {
+                Icon(
+                        tab.options.icon!!,
+                        contentDescription = tab.options.title,
+                        tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
+                )
+            },
+            label = {
+                Text(
+                        tab.options.title,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onBackground
+                )
+            },
+            colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = androidx.compose.material3.MaterialTheme.colorScheme.primaryContainer,
+                    unselectedTextColor = MaterialTheme.colorScheme.onBackground,
+                    selectedTextColor = MaterialTheme.colorScheme.onBackground,
+                    selectedIconColor = MaterialTheme.colorScheme.onBackground,
+                    unselectedIconColor = MaterialTheme.colorScheme.onBackground
+            ),
+            alwaysShowLabel = true,
     )
 }
