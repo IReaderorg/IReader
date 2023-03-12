@@ -34,9 +34,9 @@ import ireader.presentation.ui.home.library.components.BottomTabComposable
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
-@ExperimentalMaterialApi
-object LibraryScreenSpec : Tab {
+@OptIn(ExperimentalMaterial3Api::class,ExperimentalMaterialApi::class)
+
+actual object LibraryScreenSpec : Tab {
 
 
     override val options: TabOptions

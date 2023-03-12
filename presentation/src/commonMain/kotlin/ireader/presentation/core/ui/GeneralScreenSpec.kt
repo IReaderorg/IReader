@@ -1,6 +1,5 @@
 package ireader.presentation.core.ui
 
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -15,7 +14,6 @@ import ireader.presentation.ui.settings.general.GeneralSettingScreenViewModel
 
 
 @ExperimentalMaterial3Api
-@OptIn(ExperimentalMaterialApi::class)
 class GeneralScreenSpec : VoyagerScreen() {
 
     @Composable

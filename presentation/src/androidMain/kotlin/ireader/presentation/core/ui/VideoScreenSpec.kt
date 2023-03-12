@@ -11,9 +11,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import ireader.domain.utils.findComponentActivity
 import ireader.domain.utils.extensions.hideSystemUI
 import ireader.domain.utils.extensions.showSystemUI
+import ireader.domain.utils.findComponentActivity
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 
 
 
-data class VideoScreenSpec(val chapterId: Long) : VoyagerScreen() {
+actual data class VideoScreenSpec actual constructor(val chapterId: Long) : VoyagerScreen() {
 
 
     @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)

@@ -30,7 +30,7 @@ import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.models.getDefaultFont
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.i18n.UiText
-import ireader.presentation.R
+import ireader.i18n.resources.MR
 import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
@@ -50,7 +50,7 @@ import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
-data class ReaderScreenSpec(
+actual data class ReaderScreenSpec actual constructor(
     val bookId: Long,
     val chapterId: Long
 ) : VoyagerScreen() {
@@ -310,7 +310,8 @@ data class ReaderScreenSpec(
                                                         sourceId = catalog.sourceId,
                                                         chapterId = chapter?.id,
                                                         bookId = book?.id,
-                                                        enableChapterFetch = true
+                                                        enableChapterFetch = true,
+                                                            enableChaptersFetch = false, enableBookFetch = false
                                                     )
                                                 )
                                             }
@@ -371,8 +372,8 @@ data class ReaderScreenSpec(
                                 } else {
                                     scope.launch {
                                         vm.showSnackBar(
-                                            UiText.StringResource(
-                                                R.string.this_is_last_chapter
+                                            UiText.MStringResource(
+                                                MR.strings.this_is_last_chapter
                                             )
                                         )
                                     }
@@ -403,8 +404,8 @@ data class ReaderScreenSpec(
                                     } else {
                                         scope.launch {
                                             vm.showSnackBar(
-                                                UiText.StringResource(
-                                                    R.string.this_is_first_chapter
+                                                UiText.MStringResource(
+                                                    MR.strings.this_is_first_chapter
                                                 )
                                             )
                                         }
@@ -471,6 +472,7 @@ data class ReaderScreenSpec(
                                                 bookId = book.id,
                                                 sourceId = book.sourceId,
                                                 chapterId = chapter.id,
+                                                    readingParagraph = 0
                                             )
                                         )
                                     }

@@ -16,6 +16,7 @@ import ireader.i18n.localize
 import ireader.i18n.resources.MR
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.component.components.IAlertDialog
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.CaptionTextComposable
@@ -77,7 +78,7 @@ class RepositoryAddScreenSpec : VoyagerScreen() {
             }
             )
             if (showDialog.value) {
-                androidx.compose.material3.AlertDialog(onDismissRequest = { showDialog.value = false}, confirmButton = {
+                IAlertDialog(onDismissRequest = { showDialog.value = false}, confirmButton = {
                     TextButton(onClick = {
                         vm.scope.launch {
                             try {

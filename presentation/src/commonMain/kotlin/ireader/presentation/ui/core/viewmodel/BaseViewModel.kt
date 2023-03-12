@@ -1,5 +1,6 @@
 package ireader.presentation.ui.core.viewmodel
 import androidx.compose.runtime.State
+import cafe.adriel.voyager.core.model.ScreenModel
 import ireader.core.prefs.Preference
 import ireader.i18n.UiEvent
 import ireader.i18n.UiText
@@ -11,7 +12,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 
-expect abstract class BaseViewModel() {
+expect abstract class BaseViewModel() : ScreenModel {
 
   val eventFlow : SharedFlow<UiEvent>
 

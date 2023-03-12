@@ -9,7 +9,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -20,17 +19,13 @@ import ireader.domain.utils.extensions.AuthenticatorUtil
 import ireader.domain.utils.extensions.AuthenticatorUtil.isAuthenticationSupported
 import ireader.domain.utils.extensions.AuthenticatorUtil.startAuthentication
 import ireader.i18n.*
-import ireader.i18n.LocalizeHelper
-import ireader.i18n.asString
-import ireader.i18n.localize
-import ireader.i18n.localizePlural
 import ireader.i18n.resources.MR
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.component.components.ChoicePreference
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.component.components.TitleToolbar
-import ireader.presentation.ui.component.components.ChoicePreference
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import kotlinx.datetime.Clock
 import org.kodein.di.DI
@@ -38,7 +33,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.android.closestDI
 import org.kodein.di.instance
 
-class SecuritySettingSpec : VoyagerScreen() {
+actual class SecuritySettingSpec : VoyagerScreen() {
 
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -126,8 +121,8 @@ class SecuritySettingSpec : VoyagerScreen() {
                                         )
                                 )
                             },
-                            title = stringResource(
-                                id = R.string.lock_when_idle
+                            title = localize(
+                                    MR.strings.lock_when_idle
                             )
                         )
                     }

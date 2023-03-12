@@ -3,11 +3,10 @@ package ireader.presentation.ui.settings.advance
 import android.content.Intent
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import ireader.domain.models.entities.Category
-import ireader.i18n.UiText
 import ireader.domain.data.repository.CategoryRepository
 import ireader.domain.data.repository.ThemeRepository
 import ireader.domain.image.cache.CoverCache
+import ireader.domain.models.entities.Category
 import ireader.domain.preferences.models.getDefaultFont
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.PlatformUiPreferences
@@ -16,8 +15,9 @@ import ireader.domain.usecases.epub.ImportEpub
 import ireader.domain.usecases.preferences.AndroidReaderPrefUseCases
 import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
 import ireader.domain.utils.extensions.launchIO
-
+import ireader.i18n.UiText
 import ireader.i18n.resources.MR
+import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.ui.settings.reader.SettingState
 
 
@@ -33,7 +33,7 @@ class AdvanceSettingViewModel(
         private val androidUiPreferences: AndroidReaderPrefUseCases,
         private val appPreferences: AppPreferences,
 
-        ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
+        ) : BaseViewModel() {
 
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state

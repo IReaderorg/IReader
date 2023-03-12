@@ -14,7 +14,6 @@ import ireader.presentation.core.DefaultNavigatorScreenTransition
 import ireader.presentation.core.di.PresentationModules
 import ireader.presentation.core.di.presentationPlatformModule
 import ireader.presentation.core.theme.AppTheme
-import ireader.presentation.core.ui.AboutSettingSpec
 import org.ireader.app.di.DataModule
 import org.kodein.di.DI
 import org.kodein.di.compose.withDI
@@ -37,7 +36,7 @@ suspend fun main() {
             withDI(di) {
                 AppTheme(scope) {
                     Navigator(
-                            screen = AboutSettingSpec(),
+                            screen = ireader.presentation.core.MainStarterScreen,
                             disposeBehavior = NavigatorDisposeBehavior(
                                     disposeNestedNavigators = false,
                                     disposeSteps = true

@@ -3,9 +3,6 @@ package ireader.presentation.core.ui
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 
-import androidx.navigation.NavDeepLink
-import androidx.navigation.navDeepLink
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.toSavedDownload

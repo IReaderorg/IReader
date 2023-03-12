@@ -7,7 +7,7 @@ import ireader.domain.preferences.prefs.PlatformUiPreferences
 import ireader.domain.usecases.file.DesktopFileSaver
 import ireader.domain.usecases.reader.ScreenAlwaysOn
 import ireader.domain.usecases.reader.ScreenAlwaysOnImpl
-import ireader.domain.usecases.services.StartExtensionManagerService
+import ireader.domain.usecases.services.*
 import ireader.i18n.LocalizeHelper
 import org.kodein.di.DI
 import org.kodein.di.bindProvider
@@ -32,4 +32,10 @@ actual val DomainModule: DI.Module = org.kodein.di.DI.Module("domainModulePlatfo
         JvmPreferenceStore("ireader")
     }
     bindSingleton { LocalizeHelper() }
+    bindSingleton<ServiceUseCases> { ServiceUseCases(
+            startDownloadServicesUseCase = StartDownloadServicesUseCase(),
+            startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(),
+            startTTSServicesUseCase = StartTTSServicesUseCase(),
+            stopServicesUseCase = StopServiceUseCase(),
+    ) }
 }

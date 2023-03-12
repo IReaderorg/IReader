@@ -18,14 +18,14 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
     ExperimentalMaterialApi::class,
     ExperimentalCoroutinesApi::class, ExperimentalMaterial3Api::class
 )
-data class WebViewScreenSpec(
+actual data class WebViewScreenSpec actual constructor(
     val url: String?,
     val sourceId: Long?,
     val bookId: Long?,
     val chapterId: Long?,
-    val enableBookFetch: Boolean = false,
-    val enableChapterFetch: Boolean = false,
-    val enableChaptersFetch: Boolean = false,
+    val enableBookFetch: Boolean,
+    val enableChapterFetch: Boolean,
+    val enableChaptersFetch: Boolean,
 ) : VoyagerScreen() {
 
 

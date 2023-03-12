@@ -6,16 +6,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.domain.data.repository.ThemeRepository
+import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.theme.ExtraColors
 import ireader.domain.models.theme.Theme
-import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
-import ireader.presentation.ui.core.theme.CustomizableAppColorsPreferenceState
-import ireader.presentation.ui.core.theme.asState
-import ireader.presentation.ui.core.theme.getDarkColors
-import ireader.presentation.ui.core.theme.getLightColors
-import ireader.presentation.ui.core.theme.isLight
-import ireader.presentation.ui.core.theme.themes
+import ireader.presentation.ui.core.theme.*
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 
 
@@ -23,7 +18,7 @@ import ireader.presentation.ui.core.viewmodel.BaseViewModel
 class AppearanceViewModel(
     val uiPreferences: UiPreferences,
     val themeRepository: ThemeRepository
-) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
+) : BaseViewModel() {
 
     private val _state = mutableStateOf(MainScreenState())
     val state = _state

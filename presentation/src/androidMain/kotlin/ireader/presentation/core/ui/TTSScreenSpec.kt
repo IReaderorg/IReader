@@ -34,8 +34,8 @@ import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.NavigationBarTokens
 import ireader.presentation.ui.component.ThemePreference
 import ireader.presentation.ui.component.components.Build
-import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.ChipChoicePreference
+import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SliderPreference
 import ireader.presentation.ui.component.components.SwitchPreference
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -45,11 +45,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.math.RoundingMode
 
-class TTSScreenSpec(
+actual class TTSScreenSpec actual constructor(
     val bookId: Long,
     val chapterId: Long,
     val sourceId: Long,
-    val readingParagraph: Int = 0,
+    val readingParagraph: Int,
 ) : VoyagerScreen() {
 
 

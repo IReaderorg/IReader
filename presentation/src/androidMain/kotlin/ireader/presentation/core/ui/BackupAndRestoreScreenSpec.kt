@@ -17,7 +17,7 @@ import ireader.presentation.ui.settings.backups.BackUpAndRestoreScreen
 import ireader.presentation.ui.settings.backups.BackupScreenViewModel
 
 
-class BackupAndRestoreScreenSpec : VoyagerScreen() {
+actual class BackupAndRestoreScreenSpec : VoyagerScreen() {
 
 
 

@@ -10,18 +10,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-
-import ireader.presentation.ui.component.components.SearchToolbar
-import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.models.getDefaultFont
 import ireader.i18n.localize
-import ireader.presentation.ui.settings.font_screens.FontScreen
-import ireader.presentation.ui.settings.font_screens.FontScreenViewModel
-
+import ireader.i18n.resources.MR
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
-import ireader.i18n.resources.MR
+import ireader.presentation.ui.component.components.SearchToolbar
+import ireader.presentation.ui.component.reusable_composable.AppIconButton
+import ireader.presentation.ui.settings.font_screens.FontScreen
+import ireader.presentation.ui.settings.font_screens.FontScreenViewModel
 
 @ExperimentalMaterial3Api
 class FontScreenSpec : VoyagerScreen() {

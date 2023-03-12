@@ -2,6 +2,7 @@ package ireader.presentation.ui.core.viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import cafe.adriel.voyager.core.model.ScreenModel
 import ireader.core.prefs.Preference
 import ireader.i18n.UiEvent
 import ireader.i18n.UiText
@@ -9,7 +10,7 @@ import ireader.presentation.ui.core.ui.PreferenceMutableState
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
-actual abstract class BaseViewModel {
+actual abstract class BaseViewModel : ScreenModel {
 
     actual val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 

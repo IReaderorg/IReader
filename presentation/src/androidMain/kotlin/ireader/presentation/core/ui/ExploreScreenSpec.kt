@@ -40,9 +40,9 @@ import okhttp3.Headers
         ExperimentalAnimationApi::class,
         ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
 )
-data class ExploreScreenSpec(
+actual data class ExploreScreenSpec actual constructor(
         val sourceId: Long,
-        val query: String? = null
+        val query: String?
 ) : VoyagerScreen() {
     @OptIn(
             ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class,
@@ -130,7 +130,8 @@ data class ExploreScreenSpec(
                                                         chapterId = null,
                                                         bookId = null,
                                                         enableChaptersFetch = true,
-                                                        enableBookFetch = true
+                                                        enableBookFetch = true,
+                                                        enableChapterFetch = false
                                                 )
                                         )
                                     }
@@ -183,7 +184,8 @@ data class ExploreScreenSpec(
                                                 enableBookFetch = true,
                                                 enableChaptersFetch = true,
                                                 bookId = null,
-                                                chapterId = null
+                                                chapterId = null,
+                                                enableChapterFetch = false
                                         )
                                 )
                             },

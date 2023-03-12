@@ -8,10 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -21,8 +18,8 @@ import ireader.i18n.localize
 import ireader.i18n.resources.MR
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
-import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.components.PreferenceRow
+import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.ui.SnackBarListener
@@ -52,7 +49,7 @@ class RepositoryScreenSpec : VoyagerScreen() {
             snackbarHostState = host,
             floatingActionButtonPosition = ireader.presentation.ui.component.FabPosition.End,
             floatingActionButton = {
-                androidx.compose.material.ExtendedFloatingActionButton(
+                ExtendedFloatingActionButton(
                     text = {
                         MidSizeTextComposable(
                             text = localize(MR.strings.add),
@@ -71,7 +68,7 @@ class RepositoryScreenSpec : VoyagerScreen() {
                         )
                     },
                     contentColor = MaterialTheme.colorScheme.onSecondary,
-                    backgroundColor = MaterialTheme.colorScheme.secondary,
+                    containerColor = MaterialTheme.colorScheme.secondary,
                 )
             },
         ) { padding ->

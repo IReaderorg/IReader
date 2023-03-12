@@ -39,7 +39,7 @@ import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
 import ireader.presentation.ui.core.theme.TransparentStatusBar
 import ireader.presentation.ui.core.ui.SnackBarListener
 import kotlinx.coroutines.launch
-data class BookDetailScreenSpec(
+actual data class BookDetailScreenSpec actual constructor(
     val bookId: Long,
 ) : VoyagerScreen() {
 
@@ -348,7 +348,8 @@ data class BookDetailScreenSpec(
                                         bookId = book.id,
                                         chapterId = null,
                                         enableChaptersFetch = true,
-                                        enableBookFetch = true
+                                        enableBookFetch = true,
+                                            enableChapterFetch = false
                                     )
                                 )
                             }

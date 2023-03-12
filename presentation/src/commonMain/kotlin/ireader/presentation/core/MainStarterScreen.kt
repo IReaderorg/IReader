@@ -1,19 +1,15 @@
 package ireader.presentation.core
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -21,30 +17,30 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
-import ireader.domain.utils.isTabletUi
 import ireader.presentation.core.ui.*
+import ireader.presentation.ui.component.IBackHandler
 import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.component.isTableUi
 import ireader.presentation.ui.core.theme.AppColors
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 object MainStarterScreen : VoyagerScreen() {
     private const val TabFadeDuration = 200
     private val showBottomNavEvent = Channel<Boolean>()
 
-    @OptIn(ExperimentalAnimationApi::class, ExperimentalLayoutApi::class)
+    @OptIn(ExperimentalLayoutApi::class)
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val vm: ScreenContentViewModel = getIViewModel()
-        val context = LocalContext.current
         TabNavigator(LibraryScreenSpec) { tabNavigator ->
             CompositionLocalProvider(LocalNavigator provides navigator) {
                 IScaffold(
                         startBar = {
-                            if (context.isTabletUi()) {
+                            if (isTableUi()) {
                                 NavigationRail {
                                     NavigationRailItem(LibraryScreenSpec)
                                     if (vm.showUpdate.value) {
@@ -101,10 +97,11 @@ object MainStarterScreen : VoyagerScreen() {
                 }
             }
             val goToLibraryTab = { tabNavigator.current = LibraryScreenSpec }
-            BackHandler(
+            IBackHandler(
                     enabled = tabNavigator.current != LibraryScreenSpec,
                     onBack = goToLibraryTab,
             )
+
         }
     }
 
