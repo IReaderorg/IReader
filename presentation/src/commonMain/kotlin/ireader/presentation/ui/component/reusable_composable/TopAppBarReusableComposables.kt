@@ -262,14 +262,14 @@ fun TopAppBarBackButton(tint: Color = MaterialTheme.colorScheme.onSurface, onCli
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppTextField(
-    modifier: Modifier= Modifier,
-    query: String,
-    onValueChange: (value: String) -> Unit,
-    onConfirm: () -> Unit,
-    hint: String = localize(MR.strings.search_hint),
-    mode: Int = 0,
-    keyboardAction: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-    keyboardActions: KeyboardActions = KeyboardActions(onSearch = {
+        modifier: Modifier= Modifier,
+        query: String,
+        onValueChange: (value: String) -> Unit,
+        onConfirm: () -> Unit,
+        hint: String = localize(MR.strings.search_hint),
+        mode: Int = 0,
+        keyboardAction: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        keyboardActions: KeyboardActions = KeyboardActions(onSearch = {
         onConfirm()
     }, onDone = { onConfirm() }),
 ) {

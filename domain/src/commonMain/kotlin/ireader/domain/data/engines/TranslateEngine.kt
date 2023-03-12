@@ -2,6 +2,7 @@ package ireader.domain.data.engines
 
 import ireader.i18n.UiText
 
+
 abstract class TranslateEngine {
 
     open val supportedLanguages: List<Pair<String, String>> = listOf(

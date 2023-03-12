@@ -1,6 +1,5 @@
 package ireader.i18n
 
-import androidx.compose.runtime.Composable
 import ireader.i18n.resources.MR
 
 

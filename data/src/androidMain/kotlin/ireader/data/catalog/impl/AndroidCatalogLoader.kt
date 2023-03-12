@@ -31,11 +31,11 @@ import java.io.File
  * Class that handles the loading of the catalogs installed in the system and the app.
  */
 class AndroidCatalogLoader(
-    private val context: Context,
-    private val httpClients: HttpClients,
-    val uiPreferences: UiPreferences,
-    val simpleStorage: GetSimpleStorage,
-    val localizeHelper: LocalizeHelper,
+        private val context: Context,
+        private val httpClients: HttpClients,
+        val uiPreferences: UiPreferences,
+        val simpleStorage: GetSimpleStorage,
+        val localizeHelper: LocalizeHelper,
 ) : CatalogLoader {
 
     private val pkgManager = context.packageManager

@@ -1,6 +1,5 @@
 package ireader.presentation.ui.home.sources.extension
 
-import android.content.Context
 import androidx.core.os.LocaleListCompat
 import ireader.i18n.LocalizeHelper
 

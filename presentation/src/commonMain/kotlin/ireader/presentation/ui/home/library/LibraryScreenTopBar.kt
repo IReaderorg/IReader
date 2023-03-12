@@ -1,7 +1,6 @@
 package ireader.presentation.ui.home.library
 
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,7 +21,6 @@ import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposab
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.core.ui.DEFAULT_ELEVATION
 import ireader.presentation.ui.home.library.viewmodel.LibraryState
-import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)

@@ -15,7 +15,6 @@ import android.content.*
 import android.content.pm.PackageInstaller
 import android.os.Build
 import android.os.SystemClock
-import ireader.core.R
 import ireader.core.log.Log
 import ireader.core.util.calculateSizeRecursively
 import ireader.i18n.LocalizeHelper
@@ -26,7 +25,7 @@ import java.io.File
 import ireader.i18n.resources.MR
 class PackageInstaller(
   private val context: Application,
-  private val localizeHelper:LocalizeHelper
+  private val localizeHelper: LocalizeHelper
 ) {
   private val packageInstaller = context.packageManager.packageInstaller
 
@@ -106,7 +105,7 @@ class PackageInstaller(
   private class InstallResultReceiver(
     val context: Application,
     val deferred: CompletableDeferred<InstallStep>,
-    private val localizeHelper:LocalizeHelper
+    private val localizeHelper: LocalizeHelper
   ) : BroadcastReceiver() {
 
     override fun onReceive(ctx: Context?, intent: Intent?) {

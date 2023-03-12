@@ -12,7 +12,6 @@ import ireader.data.catalog.impl.CatalogGithubApi
 import ireader.domain.catalogs.interactor.SyncRemoteCatalogs
 import ireader.domain.preferences.prefs.AndroidUiPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
-import ireader.i18n.LocalizeHelper
 import ireader.i18n.ProjectConfig
 import ireader.presentation.imageloader.LibraryCovers
 import okio.FileSystem

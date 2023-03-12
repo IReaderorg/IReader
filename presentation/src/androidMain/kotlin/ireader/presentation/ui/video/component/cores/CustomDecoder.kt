@@ -1,7 +1,5 @@
 package ireader.presentation.ui.video.component.cores
 
-import android.content.Context
-import android.preference.PreferenceManager
 import android.util.Log
 import androidx.media3.common.Format
 import androidx.media3.common.MimeTypes
@@ -14,8 +12,6 @@ import androidx.media3.extractor.text.ssa.SsaDecoder
 import androidx.media3.extractor.text.subrip.SubripDecoder
 import androidx.media3.extractor.text.ttml.TtmlDecoder
 import androidx.media3.extractor.text.webvtt.WebvttDecoder
-import ireader.i18n.LocalizeHelper
-import ireader.presentation.R
 import org.mozilla.universalchardet.UniversalDetector
 import java.nio.ByteBuffer
 import java.nio.charset.Charset

@@ -21,9 +21,6 @@ import ireader.domain.preferences.models.ReaderColors
 import ireader.domain.preferences.models.prefs.readerThemes
 import ireader.domain.preferences.prefs.*
 import ireader.domain.usecases.history.HistoryUseCase
-import ireader.domain.usecases.local.LocalGetChapterUseCase
-import ireader.domain.usecases.local.LocalInsertUseCases
-import ireader.domain.usecases.local.book_usecases.BookMarkChapterUseCase
 import ireader.domain.usecases.preferences.AndroidReaderPrefUseCases
 import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
 import ireader.domain.usecases.reader.ScreenAlwaysOn
@@ -31,7 +28,6 @@ import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.domain.utils.extensions.async.nextAfter
 import ireader.domain.utils.extensions.async.prevBefore
-import ireader.domain.utils.findComponentActivity
 import ireader.domain.utils.findComponentActivity
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.NO_VALUE

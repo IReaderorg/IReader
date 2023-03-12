@@ -16,11 +16,11 @@ import kotlinx.coroutines.CancellationException
 
 class GetBookDetail() {
     suspend operator fun invoke(
-        book: Book,
-        catalog: CatalogLocal?,
-        onError: suspend (UiText?) -> Unit,
-        onSuccess: suspend (Book) -> Unit,
-        commands: CommandList = emptyList()
+            book: Book,
+            catalog: CatalogLocal?,
+            onError: suspend (UiText?) -> Unit,
+            onSuccess: suspend (Book) -> Unit,
+            commands: CommandList = emptyList()
     ) {
         val source = catalog?.source ?: throw SourceNotFoundException()
         kotlin.runCatching {

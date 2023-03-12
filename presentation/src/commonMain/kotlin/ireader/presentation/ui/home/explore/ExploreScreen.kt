@@ -1,6 +1,5 @@
 package ireader.presentation.ui.home.explore
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -52,7 +51,6 @@ import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposab
 import ireader.presentation.ui.component.reusable_composable.SmallTextComposable
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
-import kotlinx.coroutines.launch
 import ireader.i18n.resources.MR
 @OptIn(
     ExperimentalMaterial3Api::class

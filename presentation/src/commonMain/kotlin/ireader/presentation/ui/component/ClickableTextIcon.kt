@@ -20,11 +20,11 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @Composable
 fun ClickableTextIcon(
-    modifier: Modifier = Modifier,
-    icon: @Composable ColumnScope.() -> Unit,
-    text: UiText,
-    contentDescription: String = "an Icon",
-    onClick: () -> Unit,
+        modifier: Modifier = Modifier,
+        icon: @Composable ColumnScope.() -> Unit,
+        text: UiText,
+        contentDescription: String = "an Icon",
+        onClick: () -> Unit,
 ) {
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     Button(

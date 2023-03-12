@@ -117,7 +117,7 @@ object Notifications {
      *
      * @param context The application context.
      */
-    fun createChannels(context: Context,localizeHelper:LocalizeHelper) {
+    fun createChannels(context: Context,localizeHelper: LocalizeHelper) {
         val notificationService = NotificationManagerCompat.from(context)
 
         // Delete old notification channels

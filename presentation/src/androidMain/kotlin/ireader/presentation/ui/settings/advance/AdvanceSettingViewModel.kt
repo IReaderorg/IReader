@@ -1,7 +1,6 @@
 package ireader.presentation.ui.settings.advance
 
 import android.content.Intent
-import android.content.pm.ActivityInfo
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import ireader.domain.models.entities.Category

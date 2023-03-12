@@ -20,6 +20,10 @@ import ireader.domain.utils.extensions.AuthenticatorUtil
 import ireader.domain.utils.extensions.AuthenticatorUtil.isAuthenticationSupported
 import ireader.domain.utils.extensions.AuthenticatorUtil.startAuthentication
 import ireader.i18n.*
+import ireader.i18n.LocalizeHelper
+import ireader.i18n.asString
+import ireader.i18n.localize
+import ireader.i18n.localizePlural
 import ireader.i18n.resources.MR
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold

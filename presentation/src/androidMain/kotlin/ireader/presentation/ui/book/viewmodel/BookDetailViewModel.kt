@@ -18,9 +18,6 @@ import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.usecases.epub.EpubCreator
 import ireader.domain.usecases.history.HistoryUseCase
-import ireader.domain.usecases.local.DeleteUseCase
-import ireader.domain.usecases.local.LocalGetChapterUseCase
-import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.services.ServiceUseCases
 import ireader.domain.utils.extensions.withIOContext

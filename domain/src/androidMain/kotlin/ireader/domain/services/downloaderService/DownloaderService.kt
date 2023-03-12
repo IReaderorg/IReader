@@ -21,7 +21,6 @@ import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Compan
 import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_Chapters_IDS
 import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_MODE
 import ireader.domain.usecases.download.DownloadUseCases
-import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.i18n.LocalizeHelper
 import kotlinx.coroutines.CoroutineScope

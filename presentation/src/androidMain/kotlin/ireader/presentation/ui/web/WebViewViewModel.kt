@@ -15,8 +15,6 @@ import ireader.domain.catalogs.CatalogStore
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
-import ireader.domain.usecases.local.LocalGetChapterUseCase
-import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.i18n.UiText
 import ireader.i18n.resources.MR

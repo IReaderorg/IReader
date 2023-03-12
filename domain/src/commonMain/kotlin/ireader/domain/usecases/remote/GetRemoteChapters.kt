@@ -17,13 +17,13 @@ import kotlinx.coroutines.withContext
 
 class GetRemoteChapters() {
     suspend operator fun invoke(
-        book: Book,
-        catalog: CatalogLocal?,
-        commands: CommandList = emptyList(),
-        oldChapters: List<Chapter>,
-        onSuccess: suspend (List<Chapter>) -> Unit,
-        onRemoteSuccess: suspend (List<Chapter>) -> Unit = {},
-        onError: suspend (UiText?) -> Unit,
+            book: Book,
+            catalog: CatalogLocal?,
+            commands: CommandList = emptyList(),
+            oldChapters: List<Chapter>,
+            onSuccess: suspend (List<Chapter>) -> Unit,
+            onRemoteSuccess: suspend (List<Chapter>) -> Unit = {},
+            onError: suspend (UiText?) -> Unit,
     ) {
         withContext(Dispatchers.IO) {
             kotlin.runCatching {

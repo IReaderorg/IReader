@@ -7,9 +7,8 @@ import java.util.*
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
-    id("org.jetbrains.compose")
-    id("org.jetbrains.gradle.plugin.idea-ext")
     id(libs.plugins.moko.gradle.get().pluginId)
+    id("org.jetbrains.compose")
     id(libs.plugins.buildkonfig.get().pluginId)
 }
 kotlin {
@@ -30,7 +29,6 @@ kotlin {
         }
         val desktopMain by getting {
         }
-
     }
 
 }
@@ -52,6 +50,10 @@ android {
         res.srcDir(File(buildDir, "generated/moko/androidMain/res"))
         res.srcDir("src/commonMain/resources")
     }
+}
+tasks {
+    this@tasks.registerResources(project)
+
 }
 
 buildkonfig {
