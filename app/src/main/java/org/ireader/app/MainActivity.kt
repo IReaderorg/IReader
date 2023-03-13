@@ -17,6 +17,8 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.NavigatorDisposeBehavior
+import com.seiko.imageloader.ImageLoaderFactory
+import com.seiko.imageloader.LocalImageLoader
 import ireader.core.http.toast
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.backup.AutomaticBackup
@@ -78,42 +80,46 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         installSplashScreen()
         setContent {
             withDI(di) {
+                CompositionLocalProvider(
+                        LocalImageLoader provides (this@MainActivity.application as ImageLoaderFactory).newImageLoader(),
+                ) {
+                    AppTheme(this.lifecycleScope) {
+                        Surface(
+                                color = MaterialTheme.colorScheme.surface,
+                                contentColor = MaterialTheme.colorScheme.onSurface,
 
+                                ) {
 
-                AppTheme(this.lifecycleScope) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-
-                        ) {
-
-                        Navigator(
-                            screen = MainStarterScreen,
-                            disposeBehavior = NavigatorDisposeBehavior(
-                                disposeNestedNavigators = false,
-                                disposeSteps = true
-                            ),
-                        ) { navigator ->
-                            if (navigator.size == 1) {
-                                ConfirmExit()
-                            }
-                            LaunchedEffect(navigator) {
-                                this@MainActivity.navigator = navigator
-                                if (savedInstanceState == null) {
-                                    // Set start screen
-                                    handleIntentAction(intent, navigator)
+                            Navigator(
+                                    screen = MainStarterScreen,
+                                    disposeBehavior = NavigatorDisposeBehavior(
+                                            disposeNestedNavigators = false,
+                                            disposeSteps = true
+                                    ),
+                            ) { navigator ->
+                                if (navigator.size == 1) {
+                                    ConfirmExit()
                                 }
-                            }
-                            IScaffold {
-                                DefaultNavigatorScreenTransition(navigator = navigator)
-                                GetPermissions(uiPreferences)
+                                LaunchedEffect(navigator) {
+                                    this@MainActivity.navigator = navigator
+                                    if (savedInstanceState == null) {
+                                        // Set start screen
+                                        handleIntentAction(intent, navigator)
+                                    }
+                                }
+                                IScaffold {
+                                    DefaultNavigatorScreenTransition(navigator = navigator)
+                                    GetPermissions(uiPreferences)
+                                }
+
+                                HandleOnNewIntent(this, navigator)
                             }
 
-                            HandleOnNewIntent(this, navigator)
                         }
-
                     }
                 }
+
+
             }
         }
     }

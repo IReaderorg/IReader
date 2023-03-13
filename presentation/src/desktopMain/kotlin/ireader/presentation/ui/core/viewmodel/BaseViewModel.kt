@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.*
 
 actual abstract class BaseViewModel : ScreenModel {
 
-    actual val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    actual val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private val activeScope = MutableStateFlow<CoroutineScope?>(null)
 

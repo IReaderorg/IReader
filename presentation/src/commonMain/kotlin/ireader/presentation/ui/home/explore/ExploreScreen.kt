@@ -1,17 +1,6 @@
 package ireader.presentation.ui.home.explore
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,38 +9,34 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.currentOrThrow
+import ireader.core.source.HttpSource
+import ireader.core.source.Source
+import ireader.core.source.model.Filter
+import ireader.core.source.model.Listing
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.toBook
 import ireader.domain.models.entities.toBookItem
 import ireader.i18n.asString
-import ireader.core.source.HttpSource
-import ireader.core.source.Source
-import ireader.core.source.model.Filter
-import ireader.core.source.model.Listing
 import ireader.i18n.localize
-import ireader.presentation.ui.core.theme.ContentAlpha
-import ireader.presentation.ui.core.ui.kaomojis
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.ShowLoading
 import ireader.presentation.ui.component.list.LayoutComposable
 import ireader.presentation.ui.component.list.isScrolledToTheEnd
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.SmallTextComposable
+import ireader.presentation.ui.core.theme.ContentAlpha
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.core.ui.kaomojis
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
-import ireader.i18n.resources.MR
 @OptIn(
     ExperimentalMaterial3Api::class
 )
@@ -149,7 +134,6 @@ fun ExploreScreen(
     ) { paddingValue ->
         Box(
             modifier = Modifier
-                .padding(paddingValue)
                 .fillMaxSize()
         ) {
 

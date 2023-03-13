@@ -5,8 +5,8 @@ import android.content.Context
 import android.os.Build
 import android.os.Looper
 import androidx.work.Configuration
-import coil.ImageLoader
-import coil.ImageLoaderFactory
+import com.seiko.imageloader.ImageLoader
+import com.seiko.imageloader.ImageLoaderFactory
 import ireader.data.di.dataPlatformModule
 import ireader.data.di.repositoryInjectModule
 import ireader.domain.di.*
@@ -16,7 +16,6 @@ import ireader.presentation.core.di.presentationPlatformModule
 import ireader.presentation.imageloader.coil.CoilLoaderFactory
 import org.ireader.app.di.AppModule
 import org.ireader.app.di.DataModule
-import ireader.domain.di.localModule
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
@@ -40,9 +39,6 @@ class MyApplication : Application(), ImageLoaderFactory, DIAware, Configuration.
         super.onCreate()
 
     }
-
-
-
     override fun newImageLoader(): ImageLoader {
         return coil.newImageLoader()
     }

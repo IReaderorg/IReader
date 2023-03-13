@@ -18,11 +18,11 @@ import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import ireader.core.os.InstallStep
 import ireader.domain.models.entities.*
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
+import ireader.presentation.imageloader.IImageLoader
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.ContentAlpha
@@ -131,14 +131,14 @@ private fun CatalogPic(catalog: Catalog, modifier: Modifier = Modifier) {
             LetterIcon(catalog.name, modifier)
         }
         else -> {
-            AsyncImage(
+            IImageLoader(
                 model = catalog,
                 contentDescription = null,
                 modifier = modifier,
             )
         }
     }
-    AsyncImage(
+    IImageLoader(
         model = catalog,
         contentDescription = null,
         modifier = modifier,

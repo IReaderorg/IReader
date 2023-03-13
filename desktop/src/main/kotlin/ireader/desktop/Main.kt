@@ -5,6 +5,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.awaitApplication
 import androidx.compose.ui.window.rememberWindowState
+import androidx.compose.material.ProgressIndicatorDefaults
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.NavigatorDisposeBehavior
 import ireader.data.di.dataPlatformModule

@@ -147,7 +147,8 @@ dependencies {
     @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
     implementation(compose.material3)
 
-    implementation(composeLib.compose.coil)
+   // implementation(composeLib.compose.coil)
+    implementation(libs.imageLoader)
     implementation(composeLib.compose.googlFonts)
     implementation(composeLib.material3.windowsizeclass)
 

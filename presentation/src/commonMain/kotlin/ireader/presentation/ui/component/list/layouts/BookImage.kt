@@ -4,15 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,9 +18,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import ireader.domain.models.entities.BaseBook
 import ireader.domain.models.BookCover
-import ireader.presentation.ui.component.components.BookImageComposable
+import ireader.domain.models.entities.BaseBook
+import ireader.presentation.ui.component.components.IBookImageComposable
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -63,7 +55,7 @@ fun BookImage(
                     )
                 ),
         ) {
-            BookImageComposable(
+            IBookImageComposable(
                 modifier = Modifier
                     .aspectRatio(ratio)
                     .fillMaxWidth()

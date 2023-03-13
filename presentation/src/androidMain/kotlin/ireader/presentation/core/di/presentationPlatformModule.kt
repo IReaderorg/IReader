@@ -41,6 +41,6 @@ actual val presentationPlatformModule: DI.Module = DI.Module("androidPresentatio
     bindProvider  { SecuritySettingViewModel(instance()) }
     bindFactory< BookDetailViewModel.Param, BookDetailViewModel>  { BookDetailViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),it,instance()) }
     bindSingleton { LocaleHelper(instance(),instance()) }
-    bindSingleton<CoilLoaderFactory> { CoilLoaderFactory(instance(),instance(),instance(),instance()) }
+    bindSingleton<CoilLoaderFactory> { CoilLoaderFactory(instance(), instance(), instance(), instance()) }
 
 }

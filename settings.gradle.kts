@@ -15,7 +15,7 @@ pluginManagement {
     // this repository is for devs who want to use custom repo instead of official ones
     val hostedRepository = System.getenv("CUSTOM_HOST_REPOSITORY")
     repositories {
-        hostedRepository?.split(",")?.forEach { host ->
+        hostedRepository?.split(";")?.forEach { host ->
             maven(host)
         }
         gradlePluginPortal()
@@ -29,7 +29,7 @@ dependencyResolutionManagement {
     val hostedRepository = System.getenv("CUSTOM_HOST_REPOSITORY")
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        hostedRepository?.split(",")?.forEach { host ->
+        hostedRepository?.split(";")?.forEach { host ->
             maven(host)
         }
         mavenCentral()

@@ -5,14 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -38,16 +31,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import coil.request.CachePolicy
-import coil.request.ImageRequest
-import ireader.domain.models.entities.Chapter
+import com.seiko.imageloader.cache.CachePolicy
+import com.seiko.imageloader.model.ImageRequest
 import ireader.core.source.model.ImageUrl
 import ireader.core.source.model.Page
 import ireader.core.source.model.Text
+import ireader.domain.models.entities.Chapter
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.prefs.mapTextAlign
 import ireader.domain.preferences.prefs.ReadingMode
+import ireader.presentation.imageloader.IImageLoader
 import ireader.presentation.ui.component.list.scrollbars.ColumnScrollbar
 import ireader.presentation.ui.component.list.scrollbars.LazyColumnScrollbar
 import ireader.presentation.ui.reader.reverse_swip_refresh.ISwipeRefreshIndicator
@@ -272,14 +265,17 @@ private fun MainText(
 
             }
             Box(contentAlignment = Alignment.Center) {
-                AsyncImage(
+                IImageLoader(
                     modifier = Modifier
                         .fillMaxWidth()
                         .requiredHeight(500.dp),
-                    model = ImageRequest.Builder(context)
-                        .data(page.url)
-                        .diskCachePolicy(CachePolicy.DISABLED)
-                        .build(),
+                    model = ImageRequest {
+                    data(page.url)
+                        this.options {
+                            diskCachePolicy = CachePolicy.DISABLED
+                        }
+
+                    },
                     contentDescription = "image",
                     contentScale = ContentScale.FillWidth,
                     onLoading = {

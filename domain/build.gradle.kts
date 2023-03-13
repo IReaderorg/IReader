@@ -47,7 +47,8 @@ kotlin {
             dependencies {
                 implementation(project(Modules.commonResources))
                 implementation(project(Modules.coreApi))
-                implementation(compose.runtime)
+                api(compose.ui)
+                api(compose.runtime)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 implementation(compose.material3)
                 compileOnly(libs.kodein.core)
@@ -62,6 +63,7 @@ kotlin {
                 implementation(libs.okio)
                 implementation(libs.jsoup)
                 api(libs.kodein.core)
+                api(libs.imageLoader)
             }
         }
          val androidMain by getting {
@@ -71,13 +73,14 @@ kotlin {
                 implementation(libs.bundles.simplestorage)
                 implementation(androidx.biometric)
                 implementation(androidx.lifecycle.viewmodelktx)
+                implementation(androidx.lifecycle.viewmodelktx)
                 implementation(composeLib.compose.googlFonts)
                 implementation(androidx.media)
 
 
 
                 implementation(libs.googleTranslator)
-                implementation(composeLib.compose.coil)
+                //implementation(composeLib.compose.coil)
                 implementation(composeLib.compose.paging)
                 implementation(libs.gson)
                 //debugImplementation(composeLib.compose.uiTestManifest)
@@ -106,7 +109,7 @@ kotlin {
         val desktopMain by getting {
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
-
+                implementation(compose.desktop.currentOs)
             }
         }
     }

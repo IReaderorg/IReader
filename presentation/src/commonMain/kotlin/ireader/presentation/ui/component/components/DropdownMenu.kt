@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.dp
 
 @Composable
 expect fun DropdownMenu(
@@ -36,7 +37,7 @@ fun IDropdownMenu(
     expanded: Boolean = false,
     onDismissRequest: () -> Unit = {},
     modifier: Modifier = Modifier,
-    offset: DpOffset = DpOffset.Unspecified,
+    offset: DpOffset = DpOffset(0.dp, 0.dp),
     content: @Composable() (ColumnScope.() -> Unit) = {}
 ) {
     DropdownMenu(expanded, onDismissRequest, modifier, offset, content)

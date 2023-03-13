@@ -1,10 +1,8 @@
 package ireader.presentation.ui.home.sources.extension
 
-import androidx.core.os.LocaleListCompat
 import ireader.i18n.LocalizeHelper
-
-import java.util.Locale
 import ireader.i18n.resources.MR
+import java.util.*
 
 /**
  * Utility class to change the application's language in runtime.
@@ -35,13 +33,8 @@ object LocaleHelper {
         if (lang == null) {
             return ""
         }
-
-        val locale = if (lang.isEmpty()) {
-            LocaleListCompat.getAdjustedDefault()[0]
-        } else {
-            getLocale(lang)
-        }
-        return locale!!.getDisplayName(locale).replaceFirstChar { it.uppercase(locale) }
+        val locale = getLocale(lang)
+        return locale.getDisplayName(locale).replaceFirstChar { it.uppercase(locale) }
     }
 
     /**

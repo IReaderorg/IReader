@@ -10,9 +10,9 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import coil.compose.AsyncImage
-import ireader.domain.models.entities.Book
 import ireader.domain.models.BookCover
+import ireader.domain.models.entities.Book
+import ireader.presentation.imageloader.IImageLoader
 
 @Composable
 fun BoxScope.BookHeaderImage(
@@ -22,7 +22,7 @@ fun BoxScope.BookHeaderImage(
         Color.Transparent,
         MaterialTheme.colorScheme.background,
     )
-    AsyncImage(
+    IImageLoader(
         model = BookCover.from(book),
         contentDescription = null,
         contentScale = ContentScale.Crop,

@@ -1,60 +1,61 @@
 package ireader.presentation.imageloader.coil
 
-import android.app.ActivityManager
-import android.app.Application
 import android.content.Context
 import android.os.Build
-import androidx.core.content.ContextCompat.getSystemService
-import coil.ImageLoader
-import coil.ImageLoaderFactory
-import coil.decode.GifDecoder
-import coil.decode.ImageDecoderDecoder
-import coil.disk.DiskCache
+import com.seiko.imageloader.ImageLoader
+import com.seiko.imageloader.ImageLoaderFactory
+import com.seiko.imageloader.cache.disk.DiskCache
+import com.seiko.imageloader.component.decoder.GifDecoder
+import com.seiko.imageloader.component.decoder.ImageDecoderDecoder
+import com.seiko.imageloader.component.setupDefaultComponents
 import ireader.core.http.HttpClients
 import ireader.core.http.okhttp
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.image.cache.CoverCache
-import ireader.presentation.imageloader.coil.image_loaders.BookCoverFetcher
-import ireader.presentation.imageloader.coil.image_loaders.BookCoverKeyer
-import ireader.presentation.imageloader.coil.image_loaders.CatalogRemoteKeyer
-import ireader.presentation.imageloader.coil.image_loaders.InstalledCatalogKeyer
+import ireader.presentation.imageloader.PackageManager
+import ireader.presentation.imageloader.coil.image_loaders.*
+import okio.Path.Companion.toOkioPath
 
 class CoilLoaderFactory(
-    private val context: Application,
-    private val client: HttpClients,
-    private val catalogStore: CatalogStore,
-    private val coverCache: CoverCache,
+        private val context: Context,
+        private val client: HttpClients,
+        private val catalogStore: CatalogStore,
+        private val coverCache: CoverCache,
 ) : ImageLoaderFactory {
 
     override fun newImageLoader(): ImageLoader {
-        return ImageLoader.Builder(context).apply {
+        return ImageLoader {
             val diskCacheInit = { CoilDiskCache.get(context) }
             val callFactoryInit = { client.default.okhttp }
+
             components {
+                setupDefaultComponents(context)
+
                 add(
-                    BookCoverFetcher.Factory(
-                        callFactoryLazy = lazy(callFactoryInit),
-                        diskCacheLazy = lazy(diskCacheInit),
-                        coverCache,
-                        catalogStore,
-                    )
+                        BookCoverFetcher.Factory(
+                                callFactoryLazy = lazy(callFactoryInit),
+                                diskCacheLazy = lazy(diskCacheInit),
+                                coverCache,
+                                catalogStore,
+                        )
                 )
                 add(CatalogRemoteMapper())
-                add(CatalogInstalledFetcher.Factory())
+                add(BookCoverMapper())
                 add(BookCoverKeyer())
+                add(CatalogKeyer())
+                add(CatalogInstalledFetcher.Factory(PackageManager(context)))
                 add(CatalogRemoteKeyer())
                 add(InstalledCatalogKeyer())
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    add(ImageDecoderDecoder.Factory())
+                    add(ImageDecoderDecoder.Factory(context))
                 } else {
                     add(GifDecoder.Factory())
                 }
             }
-            crossfade(300)
-            diskCache(diskCacheInit)
-            allowRgb565(getSystemService<ActivityManager>(context, ActivityManager::class.java)!!.isLowRamDevice)
-            callFactory(callFactoryInit)
-        }.build()
+            interceptor {
+                diskCache(diskCacheInit)
+            }
+        }
     }
 
     /**
@@ -70,10 +71,10 @@ class CoilLoaderFactory(
             return instance ?: run {
                 val safeCacheDir = context.cacheDir.apply { mkdirs() }
                 // Create the singleton disk cache instance.
-                DiskCache.Builder()
-                    .directory(safeCacheDir.resolve(FOLDER_NAME))
-                    .build()
-                    .also { instance = it }
+                DiskCache {
+                    directory(safeCacheDir.resolve(FOLDER_NAME).toOkioPath())
+                }
+                        .also { instance = it }
             }
         }
     }

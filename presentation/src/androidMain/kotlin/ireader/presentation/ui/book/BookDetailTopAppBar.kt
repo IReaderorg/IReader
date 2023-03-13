@@ -152,7 +152,6 @@ fun RegularChapterDetailTopAppBar(
                     },
                 ) {
                     DropdownMenuItem(text = { Text(text = localizeHelper.localize(MR.strings.export_book_as_epub)) }, onClick = onShare)
-
                 }
             }
         },

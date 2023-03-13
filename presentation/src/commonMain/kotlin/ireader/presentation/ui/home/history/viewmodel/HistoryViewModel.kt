@@ -46,8 +46,8 @@ class HistoryViewModel(
             HistoryUiModel.Item(item)
         }
                 .mapIndexedNotNull { index, item ->
-                    val before = this.getOrNull(index - 1)
-                    val after = this.getOrNull(index + 1)
+                    val before = this@toHistoryUiModels.getOrNull(index - 1)
+                    val after = this@toHistoryUiModels.getOrNull(index + 1)
                     val beforeDate = before?.readAt?.toLocalDate()
                             ?.date?.asRelativeTimeString(PreferenceValues.RelativeTime.Day) ?: ""
                     val afterDate = after?.readAt?.toLocalDate()?.date?.asRelativeTimeString(

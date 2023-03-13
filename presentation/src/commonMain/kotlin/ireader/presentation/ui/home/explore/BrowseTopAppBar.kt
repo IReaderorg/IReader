@@ -1,6 +1,7 @@
 package ireader.presentation.ui.home.explore
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.GridView
@@ -95,36 +96,39 @@ fun BrowseTopAppBar(
                             },
                     )
                 }
-                AppIconButton(
-                        imageVector = Icons.Default.GridView,
-                        contentDescription = localize(MR.strings.layout),
-                        onClick = {
-                            topMenu = true
-                        },
-                )
-                IDropdownMenu(
-                        modifier = Modifier.background(MaterialTheme.colorScheme.background),
-                        expanded = topMenu,
-                        onDismissRequest = {
-                            topMenu = false
+                Box {
+                    AppIconButton(
+                            imageVector = Icons.Default.GridView,
+                            contentDescription = localize(MR.strings.layout),
+                            onClick = {
+                                topMenu = true
+                            },
+                    )
+                    IDropdownMenu(
+                            modifier = Modifier.background(MaterialTheme.colorScheme.background),
+                            expanded = topMenu,
+                            onDismissRequest = {
+                                topMenu = false
+                            }
+                    ) {
+                        layouts.forEach { layout ->
+                            IDropdownMenuItem(onClick = {
+                                onLayoutTypeSelect(layout)
+                                topMenu = false
+                            }, text = {
+                                RadioButton(
+                                        text = layout.getLayoutName(localizeHelper),
+                                        selected = currentLayout == layout,
+                                        onClick = {
+                                            onLayoutTypeSelect(layout)
+                                            topMenu = false
+                                        }
+                                )
+                            })
                         }
-                ) {
-                    layouts.forEach { layout ->
-                        IDropdownMenuItem(onClick = {
-                            onLayoutTypeSelect(layout)
-                            topMenu = false
-                        }, text = {
-                            RadioButton(
-                                    text = layout.getLayoutName(localizeHelper),
-                                    selected = currentLayout == layout,
-                                    onClick = {
-                                        onLayoutTypeSelect(layout)
-                                        topMenu = false
-                                    }
-                            )
-                        })
                     }
                 }
+
             },
             navigationIcon = {
                 TopAppBarBackButton {

@@ -1,30 +1,24 @@
 package ireader.presentation.imageloader.coil.image_loaders
 
-import coil.ImageLoader
-import coil.decode.DataSource
-import coil.decode.ImageSource
-import coil.disk.DiskCache
-import coil.fetch.FetchResult
-import coil.fetch.Fetcher
-import coil.fetch.SourceResult
-import coil.network.HttpException
-import coil.request.Options
-import coil.request.Parameters
+import com.seiko.imageloader.cache.disk.DiskCache
+import com.seiko.imageloader.component.fetcher.FetchResult
+import com.seiko.imageloader.component.fetcher.Fetcher
+import com.seiko.imageloader.option.Options
+import io.ktor.http.*
 import ireader.core.http.okhttp
 import ireader.core.log.Log
 import ireader.core.source.HttpSource
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.image.cache.CoverCache
 import ireader.domain.models.BookCover
+import ireader.presentation.imageloader.coil.image_loaders.BookCoverFetcher.Companion.USE_CUSTOM_COVER
+import okhttp3.*
 import okhttp3.CacheControl
-import okhttp3.Call
-import okhttp3.Request
-import okhttp3.Response
 import okhttp3.internal.closeQuietly
-import okio.Path.Companion.toOkioPath
 import okio.Source
 import okio.buffer
 import okio.sink
+import okio.source
 import java.io.File
 import java.net.HttpURLConnection
 
@@ -39,30 +33,21 @@ import java.net.HttpURLConnection
  * - [USE_CUSTOM_COVER]: Use custom cover if set by user, default is true
  */
 class BookCoverFetcher(
-    private val url: String?,
-    private val isLibraryManga: Boolean,
-    private val options: Options,
-    private val coverFileLazy: Lazy<File?>,
-    private val customCoverFileLazy: Lazy<File>,
-    private val diskCacheKeyLazy: Lazy<String>,
-    private val sourceLazy: Lazy<HttpSource?>,
-    private val callFactoryLazy: Lazy<Call.Factory>,
-    private val diskCacheLazy: Lazy<DiskCache>,
+        private val url: String?,
+        private val isLibraryManga: Boolean,
+        private val options: Options,
+        private val coverFileLazy: Lazy<File?>,
+        private val customCoverFileLazy: Lazy<File>,
+        private val diskCacheKeyLazy: Lazy<String>,
+        private val sourceLazy: Lazy<HttpSource?>,
+        private val callFactoryLazy: Lazy<Call.Factory>,
+        private val diskCacheLazy: Lazy<DiskCache>,
 ) : Fetcher {
 
     private val diskCacheKey: String
         get() = diskCacheKeyLazy.value
 
     override suspend fun fetch(): FetchResult {
-        // Use custom cover if exists
-        val useCustomCover = options.parameters.value(USE_CUSTOM_COVER) ?: true
-        if (useCustomCover) {
-            val customCoverFile = customCoverFileLazy.value
-            if (customCoverFile.exists()) {
-                return fileLoader(customCoverFile)
-            }
-        }
-
         // diskCacheKey is thumbnail_url
         if (url == null) error("No cover specified")
         return when (getResourceType(url)) {
@@ -73,11 +58,7 @@ class BookCoverFetcher(
     }
 
     private fun fileLoader(file: File): FetchResult {
-        return SourceResult(
-            source = ImageSource(file = file.toOkioPath(), diskCacheKey = diskCacheKey),
-            mimeType = "image/*",
-            dataSource = DataSource.DISK,
-        )
+        return FetchResult.Source(file.source().buffer())
     }
 
     private suspend fun httpLoader(): FetchResult {
@@ -102,11 +83,7 @@ class BookCoverFetcher(
                 }
 
                 // Read from snapshot
-                return SourceResult(
-                    source = snapshot.toImageSource(),
-                    mimeType = "image/*",
-                    dataSource = DataSource.DISK,
-                )
+                return snapshot.toImageSource()
             }
 
             // Fetch from network
@@ -122,19 +99,12 @@ class BookCoverFetcher(
                 // Read from disk cache
                 snapshot = writeToDiskCache(snapshot, response)
                 if (snapshot != null) {
-                    return SourceResult(
-                        source = snapshot.toImageSource(),
-                        mimeType = "image/*",
-                        dataSource = DataSource.NETWORK,
-                    )
+                    return snapshot.toImageSource()
                 }
 
                 // Read from response if cache is unused or unusable
-                return SourceResult(
-                    source = ImageSource(source = responseBody.source(), context = options.context),
-                    mimeType = "image/*",
-                    dataSource = if (response.cacheResponse != null) DataSource.DISK else DataSource.NETWORK,
-                )
+
+                return FetchResult.Source(responseBody.source().buffer)
             } catch (e: Exception) {
                 responseBody.closeQuietly()
                 throw e
@@ -155,15 +125,19 @@ class BookCoverFetcher(
         return response
     }
 
+    fun DefaultHeader() : okhttp3.Headers {
+        return okhttp3.Headers.Builder().apply {
+
+        }.build()
+    }
     private fun newRequest(): Request {
         val request = Request.Builder()
-            .url(url!!)
-            .headers(sourceLazy.value?.getCoverRequest(url)?.second?.build()?.convertToOkHttpRequest()?.headers ?: options.headers)
-            // Support attaching custom data to the network request.
-            .tag(Parameters::class.java, options.parameters)
+                .url(url!!)
+                .headers(sourceLazy.value?.getCoverRequest(url)?.second?.build()?.convertToOkHttpRequest()?.headers ?: DefaultHeader())
+
 
         val diskRead = options.diskCachePolicy.readEnabled
-        val networkRead = options.networkCachePolicy.readEnabled
+        val networkRead = options.diskCachePolicy.readEnabled
         when {
             !networkRead && diskRead -> {
                 request.cacheControl(CacheControl.FORCE_CACHE)
@@ -229,8 +203,8 @@ class BookCoverFetcher(
     }
 
     private fun writeToDiskCache(
-        snapshot: DiskCache.Snapshot?,
-        response: Response,
+            snapshot: DiskCache.Snapshot?,
+            response: Response,
     ): DiskCache.Snapshot? {
         if (!options.diskCachePolicy.writeEnabled) {
             snapshot?.closeQuietly()
@@ -255,8 +229,8 @@ class BookCoverFetcher(
         }
     }
 
-    private fun DiskCache.Snapshot.toImageSource(): ImageSource {
-        return ImageSource(file = data, diskCacheKey = diskCacheKey, closeable = this)
+    private fun DiskCache.Snapshot.toImageSource(): FetchResult.Source {
+        return FetchResult.Source(data.toFile().source().buffer())
     }
 
     private fun getResourceType(cover: String?): Type? {
@@ -273,24 +247,28 @@ class BookCoverFetcher(
     }
 
     class Factory(
-        private val callFactoryLazy: Lazy<Call.Factory>,
-        private val diskCacheLazy: Lazy<DiskCache>,
-        private val coverCache: CoverCache,
-        private val catalogStore: CatalogStore,
-    ) : Fetcher.Factory<BookCover> {
+            private val callFactoryLazy: Lazy<Call.Factory>,
+            private val diskCacheLazy: Lazy<DiskCache>,
+            private val coverCache: CoverCache,
+            private val catalogStore: CatalogStore,
+    ) : Fetcher.Factory {
 
-        override fun create(data: BookCover, options: Options, imageLoader: ImageLoader): Fetcher {
-            return BookCoverFetcher(
-                url = data.cover,
-                isLibraryManga = data.favorite,
-                options = options,
-                coverFileLazy = lazy { coverCache.getCoverFile(data) },
-                customCoverFileLazy = lazy { coverCache.getCustomCoverFile(data) },
-                diskCacheKeyLazy = lazy { BookCoverKeyer().key(data, options) },
-                sourceLazy = lazy { catalogStore.get(data.sourceId)?.source as? HttpSource },
-                callFactoryLazy = callFactoryLazy,
-                diskCacheLazy = diskCacheLazy,
-            )
+        override fun create(data: Any, options: Options): Fetcher? {
+            return if (data is BookCover) {
+                BookCoverFetcher(
+                        url = data.cover,
+                        isLibraryManga = data.favorite,
+                        options = options,
+                        coverFileLazy = lazy { coverCache.getCoverFile(data) },
+                        customCoverFileLazy = lazy { coverCache.getCustomCoverFile(data) },
+                        diskCacheKeyLazy = lazy { BookCoverKeyer().key(data, options) ?: "" },
+                        sourceLazy = lazy { catalogStore.get(data.sourceId)?.source as? HttpSource },
+                        callFactoryLazy = callFactoryLazy,
+                        diskCacheLazy = diskCacheLazy,
+                )
+            } else {
+                null
+            }
         }
     }
 

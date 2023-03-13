@@ -1,10 +1,9 @@
 package ireader.presentation.imageloader.coil.image_loaders
 
-import coil.network.HttpException
-import io.ktor.client.engine.mergeHeaders
-import io.ktor.client.request.HttpRequestData
-import io.ktor.http.HttpHeaders
-import io.ktor.util.InternalAPI
+import io.ktor.client.engine.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.util.*
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.Call
 import okhttp3.Callback
@@ -67,4 +66,8 @@ suspend fun Call.await(): Response {
             }
         }
     }
+}
+
+fun HttpException(response: Response) :Exception {
+    return Exception("HTTP ERROR: $response")
 }

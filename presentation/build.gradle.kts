@@ -30,14 +30,15 @@ kotlin {
                 implementation(project(Modules.commonResources))
 
                 api(compose.foundation)
-                implementation(compose.runtime)
+                api(compose.runtime)
                 api(compose.animation)
                 api(compose.animationGraphics)
                 api(compose.materialIconsExtended)
                 api(compose.preview)
                 api(compose.ui)
+                api(compose.material)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-                implementation(compose.material3)
+                api(compose.material3)
                 api(compose.materialIconsExtended)
 
 
@@ -47,6 +48,10 @@ kotlin {
                 implementation(libs.voyager.kodein)
                 api(libs.kodein.core)
                 api(libs.kodein.compose)
+                api(libs.imageLoader)
+                api(accompanist.gosyer.flowLayout)
+                api(accompanist.gosyer.pagerIndicators)
+                api(accompanist.gosyer.pager)
             }
         }
         val jvmMain by creating {
@@ -61,8 +66,9 @@ kotlin {
             dependencies {
 
                 api(androidx.biometric)
-                api(libs.coil.core)
-                api(libs.coil.gif)
+//                api(libs.coil.core)
+//                api(libs.coil.gif)
+//                api(composeLib.compose.coil)
                 api(libs.bundles.simplestorage)
                 api("androidx.core:core-splashscreen:1.0.0")
                 api(composeLib.compose.googlFonts)
@@ -70,15 +76,15 @@ kotlin {
                 api(composeLib.compose.paging)
                 api(composeLib.material3.windowsizeclass)
                 api(composeLib.compose.navigation)
-                api(composeLib.compose.coil)
+
                 api(composeLib.compose.lifecycle)
                 api(composeLib.compose.ui.util)
                 api(composeLib.compose.constraintlayout)
-                api(accompanist.flowlayout)
+               // api(accompanist.flowlayout)
                 api(accompanist.navAnimation)
-                api(accompanist.pagerIndicator)
+               // api(accompanist.pagerIndicator)
                 api(accompanist.systemUiController)
-                api(accompanist.pager)
+               // api(accompanist.pager)
                 api(accompanist.permissions)
                 api(accompanist.web)
                 api(androidx.appCompat)
