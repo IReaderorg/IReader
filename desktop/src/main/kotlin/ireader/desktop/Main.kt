@@ -5,7 +5,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.awaitApplication
 import androidx.compose.ui.window.rememberWindowState
-import androidx.compose.material.ProgressIndicatorDefaults
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.NavigatorDisposeBehavior
 import ireader.data.di.dataPlatformModule
@@ -15,7 +14,7 @@ import ireader.presentation.core.DefaultNavigatorScreenTransition
 import ireader.presentation.core.di.PresentationModules
 import ireader.presentation.core.di.presentationPlatformModule
 import ireader.presentation.core.theme.AppTheme
-import org.ireader.app.di.DataModule
+import ireader.data.di.DataModule
 import org.kodein.di.DI
 import org.kodein.di.compose.withDI
 import kotlin.system.exitProcess

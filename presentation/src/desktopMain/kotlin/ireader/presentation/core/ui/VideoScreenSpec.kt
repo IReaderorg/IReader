@@ -6,6 +6,6 @@ import ireader.presentation.core.VoyagerScreen
 actual class VideoScreenSpec actual constructor(chapterId: Long) : VoyagerScreen() {
     @Composable
     override fun Content() {
-
+        NotImplementedScreen("VideoScreenSpec")
     }
 }

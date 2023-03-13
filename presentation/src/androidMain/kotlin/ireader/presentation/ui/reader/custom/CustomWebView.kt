@@ -22,7 +22,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.google.accompanist.web.LoadingState
 import com.google.accompanist.web.WebContent
 import com.google.accompanist.web.WebViewError
-import com.google.accompanist.web.WebViewNavigator
+import ireader.presentation.ui.reader.custom.WebViewNavigator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -51,11 +51,11 @@ import kotlinx.coroutines.withContext
 @OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 fun WebView(
-    preconfigureWebView: WebView? = null,
-    modifier: Modifier = Modifier,
-    captureBackPresses: Boolean = true,
-    navigator: ireader.presentation.ui.reader.custom.WebViewNavigator = rememberWebViewNavigator(),
-    onCreated: (WebView) -> Unit = {},
+        preconfigureWebView: WebView? = null,
+        modifier: Modifier = Modifier,
+        captureBackPresses: Boolean = true,
+        navigator: WebViewNavigator = rememberWebViewNavigator(),
+        onCreated: (WebView) -> Unit = {},
 //    client: ireader.ui.reader.custom.AccompanistWebViewClient = remember { ireader.ui.reader.custom.AccompanistWebViewClient() },
 //    chromeClient: ireader.ui.reader.custom.AccompanistWebChromeClient = remember { ireader.ui.reader.custom.AccompanistWebChromeClient() }
 ) {
@@ -127,10 +127,10 @@ class WebViewNavigator(private val coroutineScope: CoroutineScope) {
     internal suspend fun WebView.handleNavigationEvents(): Nothing = withContext(Dispatchers.Main) {
         navigationEvents.collect { event ->
             when (event) {
-                NavigationEvent.BACK -> goBack()
-                NavigationEvent.FORWARD -> goForward()
-                NavigationEvent.RELOAD -> reload()
-                NavigationEvent.STOP_LOADING -> stopLoading()
+                ireader.presentation.ui.reader.custom.WebViewNavigator.NavigationEvent.BACK -> goBack()
+                ireader.presentation.ui.reader.custom.WebViewNavigator.NavigationEvent.FORWARD -> goForward()
+                ireader.presentation.ui.reader.custom.WebViewNavigator.NavigationEvent.RELOAD -> reload()
+                ireader.presentation.ui.reader.custom.WebViewNavigator.NavigationEvent.STOP_LOADING -> stopLoading()
             }
         }
     }
@@ -183,7 +183,7 @@ class WebViewNavigator(private val coroutineScope: CoroutineScope) {
 @Composable
 fun rememberWebViewNavigator(
     coroutineScope: CoroutineScope = rememberCoroutineScope()
-) = remember(coroutineScope) { ireader.presentation.ui.reader.custom.WebViewNavigator(coroutineScope) }
+) = remember(coroutineScope) { WebViewNavigator(coroutineScope) }
 
 open class AccompanistWebViewClient : WebViewClient() {
     open lateinit var state: WebViewState

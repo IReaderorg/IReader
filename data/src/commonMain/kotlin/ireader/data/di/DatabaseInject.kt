@@ -1,4 +1,4 @@
-package org.ireader.app.di
+package ireader.data.di
 
 
 import ir.kazemcodes.infinityreader.Database
@@ -16,6 +16,7 @@ val DataModule = DI.Module("databaseModule") {
     bindSingleton<Database> { createDatabase(instance()) }
 
     bindSingleton<FileSystem> { FileSystem.SYSTEM }
+
 
 
 

@@ -6,6 +6,6 @@ import ireader.presentation.core.VoyagerScreen
 actual class SecuritySettingSpec : VoyagerScreen() {
     @Composable
     override fun Content() {
-
+        NotImplementedScreen("SecuritySettingSpec")
     }
 }

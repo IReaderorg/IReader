@@ -6,7 +6,7 @@ import ireader.presentation.core.VoyagerScreen
 actual class AdvanceSettingSpec actual constructor() : VoyagerScreen() {
     @Composable
     override fun Content() {
-
+        NotImplementedScreen("AdvanceSettingSpec")
     }
 
 

@@ -1,6 +1,11 @@
 package ireader.i18n
 
+import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
+import androidx.compose.animation.graphics.res.animatedVectorResource
+import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
+import androidx.compose.animation.graphics.vector.AnimatedImageVector
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 
@@ -51,4 +56,8 @@ actual object Images {
 
     @Composable
     actual fun incognito(): ImageVector = ImageVector.vectorResource(R.drawable.ic_glasses_24dp)
+
+    @OptIn(ExperimentalAnimationGraphicsApi::class)
+    @Composable
+    actual fun arrowDown(atEnd: Boolean): Painter = rememberAnimatedVectorPainter(AnimatedImageVector.animatedVectorResource(R.drawable.anim_caret_down),atEnd)
 }

@@ -6,3 +6,8 @@ import androidx.compose.runtime.Composable
 actual fun isTableUi(): Boolean {
     return true
 }
+
+@Composable
+actual fun isLandscape(): Boolean {
+    return true
+}

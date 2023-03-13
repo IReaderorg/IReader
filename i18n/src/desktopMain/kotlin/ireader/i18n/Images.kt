@@ -2,8 +2,10 @@ package ireader.i18n
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.res.loadXmlImageVector
 import androidx.compose.ui.res.useResource
 import org.xml.sax.InputSource
@@ -54,6 +56,15 @@ actual object Images {
         }
     }
     @Composable
+    private fun rememberVectorAnimatedResource(resourcePath: String): Painter {
+        val density = LocalDensity.current
+        return remember(resourcePath, density) {
+            useResource(resourcePath) {
+                loadSvgPainter(it, density)
+            }
+        }
+    }
+    @Composable
     actual fun eternityLight(): ImageVector = rememberVectorXmlResource("drawable/ic_eternity_light.xml")
 
     @Composable
@@ -63,5 +74,10 @@ actual object Images {
 
     @Composable
     actual fun incognito(): ImageVector  = rememberVectorXmlResource("drawable/ic_glasses_24dp.xml")
+
+    @Composable
+    actual fun arrowDown(atEnd: Boolean): Painter {
+        return rememberVectorAnimatedResource("drawable/anim_caret_down.xml")
+    }
 
 }

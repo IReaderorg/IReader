@@ -1,6 +1,7 @@
 package ireader.domain.usecases.epub
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import ireader.core.source.model.Text
 import ireader.domain.data.repository.ChapterRepository
@@ -15,13 +16,21 @@ import nl.siegmann.epublib.service.MediatypeService
 import java.io.FileOutputStream
 
 
-class EpubCreator(
+actual class EpubCreator(
     private val coverCache: CoverCache,
     private val chapterRepository: ChapterRepository,
     private val context: Context
 ) {
 
-    suspend operator fun invoke(book: Book, uri: Uri) {
+    private fun writeToUri(uri: Uri, book: nl.siegmann.epublib.domain.Book) {
+        val contentResolver = context.contentResolver
+        val pfd = contentResolver.openFileDescriptor(uri, "w") ?: return
+        FileOutputStream(pfd.fileDescriptor).use {
+            EpubWriter().write(book, it)
+        }
+    }
+
+    actual suspend operator fun invoke(book: Book, uri: ireader.domain.models.common.Uri) {
         val epubBook = nl.siegmann.epublib.domain.Book()
         val chapters = chapterRepository.findChaptersByBookId(book.id)
         val metadata = epubBook.metadata
@@ -41,16 +50,29 @@ class EpubCreator(
                 }
             }
             val resource: Resource = Resource("$index", contents.joinToString("\n") { "<p>$it</p>" }
-                .toByteArray(), "${chapter.name}-$index.html", MediatypeService.XHTML)
+                    .toByteArray(), "${chapter.name}-$index.html", MediatypeService.XHTML)
             epubBook.addSection(chapter.name, resource)
         }
-        writeToUri(uri, epubBook)
+        writeToUri(uri.androidUri, epubBook)
     }
-    private fun writeToUri(uri: Uri, book: nl.siegmann.epublib.domain.Book) {
-        val contentResolver = context.contentResolver
-        val pfd = contentResolver.openFileDescriptor(uri, "w") ?: return
-        FileOutputStream(pfd.fileDescriptor).use {
-            EpubWriter().write(book, it)
+    private val reservedChars = "|\\?*<\":>+[]/'"
+    private fun sanitizeFilename(name: String): String {
+        var tempName = name
+        for (c in reservedChars) {
+            tempName = tempName.replace(c, ' ')
         }
+        return tempName.replace("  ", " ")
+    }
+    actual fun onEpubCreateRequested(book: Book, onStart: (Any) -> Unit) {
+        val mimeTypes = arrayOf("application/epub+zip")
+        val fn = "${sanitizeFilename(book.title)}.epub"
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+                .addCategory(Intent.CATEGORY_OPENABLE)
+                .setType("application/epub+zip")
+                .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+                .putExtra(
+                        Intent.EXTRA_TITLE, fn
+                )
+        onStart(intent)
     }
 }

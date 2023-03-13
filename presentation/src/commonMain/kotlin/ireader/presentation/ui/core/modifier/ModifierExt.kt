@@ -24,3 +24,5 @@ fun Modifier.clickableNoIndication(
 }
 
 expect fun Modifier.systemGestureExclusion(): Modifier
+expect fun Modifier.systemBarsPadding(): Modifier
+expect fun Modifier.navigationBarsPadding(): Modifier

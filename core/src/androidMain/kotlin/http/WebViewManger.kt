@@ -11,20 +11,20 @@ import org.jsoup.nodes.Document
 
 
 
-class WebViewManger(private val context: Context) {
+actual class WebViewManger(private val context: Context) {
 
-    var isInit = false
+    actual var isInit = false
     var webView: WebView? = null
 
-    var userAgent = DEFAULT_USER_AGENT
+    actual var userAgent = DEFAULT_USER_AGENT
 
-    var selector: String? = null
-    var html: org.jsoup.nodes.Document = org.jsoup.nodes.Document("")
-    var webUrl: String? = null
-    var inProgress: Boolean = false
+    actual  var selector: String? = null
+    actual var html: org.jsoup.nodes.Document = org.jsoup.nodes.Document("")
+    actual var webUrl: String? = null
+    actual var inProgress: Boolean = false
 
     val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-    fun init() : WebView {
+    actual fun init() : Any {
         if (webView == null) {
             webView = WebView(context)
             webView?.setDefaultSettings()
@@ -72,10 +72,10 @@ class WebViewManger(private val context: Context) {
         }
     }
 
-    fun update() {
+    actual fun update() {
     }
 
-    fun destroy() {
+    actual fun destroy() {
         webView?.stopLoading()
         webView?.destroy()
         isInit = false

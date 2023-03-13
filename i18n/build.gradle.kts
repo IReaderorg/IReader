@@ -20,11 +20,12 @@ kotlin {
                 api(libs.moko.core)
                 compileOnly(compose.runtime)
                 compileOnly(compose.ui)
+
             }
         }
         val androidMain by getting {
             dependencies {
-
+                compileOnly(compose.animationGraphics)
             }
         }
         val desktopMain by getting {

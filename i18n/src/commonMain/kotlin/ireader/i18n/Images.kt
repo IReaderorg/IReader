@@ -52,4 +52,6 @@ expect object Images {
 
     @Composable
     fun incognito(): ImageVector
+    @Composable
+    fun arrowDown(atEnd: Boolean): androidx.compose.ui.graphics.painter.Painter
 }

@@ -13,3 +13,10 @@ expect inline fun <T> List<T>.fastFirstOrNull(predicate: (T) -> Boolean): T?
 expect inline fun <T> List<T>.fastAll(predicate: (T) -> Boolean): Boolean
 
 expect inline fun <T> List<T>.fastAny(predicate: (T) -> Boolean): Boolean
+fun <T> MutableList<T>.removeIf(predicate: (T) -> Boolean) {
+    this.toList().fastMap {
+        if (predicate(it)) {
+            this.remove(it)
+        }
+    }
+}

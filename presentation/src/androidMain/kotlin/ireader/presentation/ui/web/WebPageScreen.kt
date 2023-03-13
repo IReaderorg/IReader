@@ -1,5 +1,6 @@
 package ireader.presentation.ui.web
 
+import android.webkit.WebView
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,7 +20,6 @@ import com.google.accompanist.web.*
 import io.ktor.http.*
 import ireader.core.http.setDefaultSettings
 import ireader.core.source.HttpSource
-import ireader.presentation.ui.core.ui.SnackBarListener
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
@@ -68,7 +68,7 @@ fun WebPageScreen(
                 chromeClient = chromeClient,
                 client = webclient,
                 factory = {
-                    viewModel.webViewManager.init()
+                    viewModel.webViewManager.init() as WebView
                 },
                 navigator = webNavigator
 

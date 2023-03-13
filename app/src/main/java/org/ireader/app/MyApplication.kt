@@ -15,7 +15,7 @@ import ireader.presentation.core.di.PresentationModules
 import ireader.presentation.core.di.presentationPlatformModule
 import ireader.presentation.imageloader.coil.CoilLoaderFactory
 import org.ireader.app.di.AppModule
-import org.ireader.app.di.DataModule
+import ireader.data.di.DataModule
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
