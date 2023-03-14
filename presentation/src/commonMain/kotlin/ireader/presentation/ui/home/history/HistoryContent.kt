@@ -4,98 +4,55 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
+import ireader.core.util.asRelativeTimeString
 import ireader.domain.models.entities.HistoryWithRelations
 import ireader.presentation.ui.component.text_related.TextSection
-import ireader.presentation.ui.core.utils.shimmerGradient
-import ireader.presentation.ui.home.history.viewmodel.HistoryUiModel
+import kotlinx.datetime.LocalDateTime
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HistoryContent(
-        items: List<HistoryUiModel>,
+        items: Map<LocalDateTime, List<HistoryWithRelations>>,
         onBookCover: (HistoryWithRelations) -> Unit,
         onClickItem: (HistoryWithRelations) -> Unit,
         onClickDelete: (HistoryWithRelations) -> Unit,
         onLongClickDelete: (HistoryWithRelations) -> Unit,
         onClickPlay: (HistoryWithRelations) -> Unit,
 ) {
+    val histories = remember {
+        mutableListOf<String>()
+    }
     LazyColumn(
         contentPadding = PaddingValues(
             bottom = 16.dp,
             top = 8.dp
         )
     ) {
-        items(items) { item ->
-            when (item) {
-                is HistoryUiModel.Header -> {
+        items.forEach { (date, items ) ->
+            val text = date.date.asRelativeTimeString()
+            if (text !in histories) {
+                histories.add(text)
+                item {
                     TextSection(
-                        text = item.date
+                            text = date.date.asRelativeTimeString()
                     )
                 }
-                is HistoryUiModel.Item -> {
-                    HistoryItem(
-                        history = item.item,
+            }
+            items(
+                    count = items.size,
+            ) { index ->
+                HistoryItem(
+                        history = items[index],
                         onClickItem = onClickItem,
                         onClickDelete = onClickDelete,
                         onClickPlay = onClickPlay,
                         onBookCover = onBookCover,
                         onLongClickDelete = onLongClickDelete
-                    )
-                }
-
-                null -> {
-                    val transition = rememberInfiniteTransition()
-                    val translateAnimation = transition.animateFloat(
-                        initialValue = 0f,
-                        targetValue = 1000f,
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(
-                                durationMillis = 1000,
-                                easing = LinearEasing,
-                            ),
-                        ),
-                    )
-
-                    val brush = remember {
-                        Brush.linearGradient(
-                            colors = shimmerGradient,
-                            start = Offset(0f, 0f),
-                            end = Offset(
-                                x = translateAnimation.value,
-                                y = 00f,
-                            ),
-                        )
-                    }
-                    HistoryItemShimmer(brush = brush)
-                }
-                else -> {}
+                )
             }
-
         }
-//        state.history.forEach { (date, history) ->
-//            item {
-//                TextSection(
-//                    text = date.asRelativeTimeString(PreferenceValues.RelativeTime.Hour)
-//                )
-//            }
-//            items(
-//                count = history.size,
-//            ) { index ->
-//                HistoryItem(
-//                    history = history[index],
-//                    onClickItem = onClickItem,
-//                    onClickDelete = onClickDelete,
-//                    onClickPlay = onClickPlay,
-//                    onBookCover = onBookCover,
-//                    onLongClickDelete = onLongClickDelete
-//                )
-//            }
-//        }
     }
 }

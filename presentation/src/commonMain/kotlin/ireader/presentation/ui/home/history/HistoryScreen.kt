@@ -2,7 +2,6 @@ package ireader.presentation.ui.home.history
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import ireader.domain.models.entities.HistoryWithRelations
 import ireader.i18n.localize
@@ -20,16 +19,16 @@ fun HistoryScreen(
         onBookCover: (HistoryWithRelations) -> Unit,
         onLongClickDelete: (HistoryWithRelations) -> Unit,
 ) {
-    val items = vm.getLazyHistory().collectAsState(emptyList())
+    val items = vm.histories
     Box(modifier = modifier) {
 
         when {
-            items.value.isEmpty() -> EmptyScreen(text = localize(
+            items.values.isEmpty() -> EmptyScreen(text = localize(
                     MR.strings.nothing_read_recently
             )
             )
             else -> HistoryContent(
-                    items = items.value,
+                    items = items,
                     onClickItem = onHistory,
                     onClickDelete = onHistoryDelete,
                     onClickPlay = onHistoryPlay,

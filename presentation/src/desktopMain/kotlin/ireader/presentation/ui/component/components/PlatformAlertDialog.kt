@@ -1,7 +1,11 @@
 package ireader.presentation.ui.component.components
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -25,12 +29,25 @@ actual fun PlatformAlertDialog(
     textContentColor: Color
 ){
     androidx.compose.material.AlertDialog(
+            text = text,
+            modifier = modifier,
+            title = title,
+            shape = shape,
+            backgroundColor = containerColor,
+            contentColor = textContentColor,
         buttons = {
-            confirmButton()
-            if (dismissButton != null) {
-                dismissButton()
+            Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                confirmButton()
+                if (dismissButton != null) {
+                    dismissButton()
+                }
             }
+
         },
-        onDismissRequest = onDismissRequest
+        onDismissRequest = onDismissRequest,
     )
 }

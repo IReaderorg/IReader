@@ -86,7 +86,7 @@ fun TTSScreen(
                                     "\n".repeat(vm.paragraphDistance.value)
                                 ) else "",
                                 fontSize = vm.fontSize.value.sp,
-                                fontFamily = vm.font.value.fontFamily,
+                                fontFamily = vm.font?.value?.fontFamily,
                                 textAlign = mapTextAlign(vm.textAlignment.value),
                                 color = vm.theme.value.onTextColor.copy(alpha = if (index == vm.currentReadingParagraph) 1f else .6f),
                                 lineHeight = vm.lineHeight.value.sp,

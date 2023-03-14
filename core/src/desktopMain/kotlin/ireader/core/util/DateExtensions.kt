@@ -11,5 +11,5 @@ package ireader.core.util
 import kotlinx.datetime.LocalDate
 
 actual fun LocalDate.asRelativeTimeString(): String {
-  TODO()
+  return this.toString()
 }

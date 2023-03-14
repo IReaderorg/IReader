@@ -11,8 +11,8 @@ import android.support.v4.media.session.PlaybackStateCompat
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import ireader.domain.models.entities.Chapter
 import ireader.domain.catalogs.interactor.GetLocalCatalog
+import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.PlatformUiPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
@@ -21,12 +21,11 @@ import ireader.domain.services.tts_service.TTSState
 import ireader.domain.services.tts_service.TTSStateImpl
 import ireader.domain.services.tts_service.media_player.TTSService
 import ireader.domain.services.tts_service.media_player.isPlaying
-import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
 import ireader.domain.usecases.preferences.TextReaderPrefUseCase
+import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.services.ServiceUseCases
 import ireader.domain.utils.findComponentActivity
-
 import kotlinx.coroutines.launch
 
 
@@ -70,7 +69,7 @@ class TTSViewModel(
     val paragraphsIndent = readerPreferences.paragraphIndent().asState()
     val paragraphDistance = readerPreferences.paragraphDistance().asState()
     val textAlignment = readerPreferences.textAlign().asState()
-    val font = platformUiPreferences.font().asState()
+    val font = platformUiPreferences.font()?.asState()
     val fontSize = readerPreferences.fontSize().asState()
     val ttsIconAlignments = readerPreferences.ttsIconAlignments().asState()
 

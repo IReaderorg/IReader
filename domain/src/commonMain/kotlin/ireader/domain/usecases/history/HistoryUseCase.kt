@@ -3,9 +3,11 @@ package ireader.domain.usecases.history
 import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.models.entities.History
 import ireader.domain.models.entities.HistoryWithRelations
+import ireader.domain.utils.extensions.toLocalDate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-
+import kotlinx.coroutines.flow.map
+import kotlinx.datetime.LocalDateTime
 
 
 class HistoryUseCase(private val historyRepository: HistoryRepository) {
@@ -26,8 +28,10 @@ class HistoryUseCase(private val historyRepository: HistoryRepository) {
         return historyRepository.findHistories()
     }
 
-    fun findHistoriesByFlow(query:String): Flow<List<HistoryWithRelations>> {
-        return historyRepository.findHistoriesByFlow(query)
+    fun findHistoriesByFlow(query:String = ""): Flow<Map<LocalDateTime, List<HistoryWithRelations>>> {
+        return historyRepository.findHistoriesByFlow(query).map { list ->
+            list.groupBy { it.readAt?.toLocalDate() ?: (0L).toLocalDate() }
+        }
     }
 
     suspend fun insertHistory(history: History) {

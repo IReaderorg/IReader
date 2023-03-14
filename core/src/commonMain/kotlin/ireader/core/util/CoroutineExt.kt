@@ -5,6 +5,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlin.coroutines.CoroutineContext
 
-expect fun createCoroutineScope(coroutineContext: CoroutineContext) : CoroutineScope
+expect fun createCoroutineScope() : CoroutineScope
 expect val DefaultDispatcher : CoroutineDispatcher
-fun createICoroutineScope(dispatcher: CoroutineContext = SupervisorJob() + DefaultDispatcher) : CoroutineScope = createCoroutineScope(dispatcher)
+fun createICoroutineScope(dispatcher: CoroutineContext = SupervisorJob() + DefaultDispatcher) : CoroutineScope = createCoroutineScope()

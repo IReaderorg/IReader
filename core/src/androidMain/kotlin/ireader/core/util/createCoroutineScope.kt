@@ -3,7 +3,7 @@ package ireader.core.util
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.SupervisorJob
 
-actual fun createCoroutineScope(coroutineContext: CoroutineContext): CoroutineScope = CoroutineScope(coroutineContext)
+actual fun createCoroutineScope(): CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 actual val DefaultDispatcher: CoroutineDispatcher = Dispatchers.Main
