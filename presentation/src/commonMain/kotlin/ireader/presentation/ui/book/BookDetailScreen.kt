@@ -37,7 +37,7 @@ import ireader.i18n.resources.MR
 import ireader.presentation.ui.book.components.*
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.components.ChapterRow
-import ireader.presentation.ui.component.list.scrollbars.VerticalFastScroller
+import ireader.presentation.ui.component.list.scrollbars.IVerticalFastScroller
 import ireader.presentation.ui.component.reusable_composable.AppTextField
 import ireader.presentation.ui.core.utils.isScrolledToEnd
 import ireader.presentation.ui.core.utils.isScrollingUp
@@ -121,7 +121,7 @@ fun BookDetailScreen(
                     }
                 })
             }
-            VerticalFastScroller(listState = scrollState) {
+            IVerticalFastScroller(listState = scrollState) {
 
                 LazyColumn(
                         modifier = Modifier,

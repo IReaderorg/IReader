@@ -7,5 +7,5 @@ actual fun LocalDate.asRelativeTimeString(
     range: PreferenceValues.RelativeTime,
     dateFormat: String
 ): String {
-    TODO("Not yet implemented")
+    return ""
 }

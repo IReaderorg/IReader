@@ -29,7 +29,7 @@ import ireader.presentation.ui.component.BookListItem
 import ireader.presentation.ui.component.BookListItemColumn
 import ireader.presentation.ui.component.BookListItemSubtitle
 import ireader.presentation.ui.component.BookListItemTitle
-import ireader.presentation.ui.component.list.scrollbars.VerticalFastScroller
+import ireader.presentation.ui.component.list.scrollbars.IVerticalFastScroller
 import ireader.presentation.ui.component.reusable_composable.BuildDropDownMenu
 import ireader.presentation.ui.component.reusable_composable.DropDownMenuItem
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
@@ -106,7 +106,7 @@ fun DownloaderScreen(
                 )
             },
     ) { padding ->
-        VerticalFastScroller(listState = scrollState) {
+        IVerticalFastScroller(listState = scrollState) {
             LazyColumn(modifier = Modifier.padding(padding), state = scrollState) {
                 items(count = downloads.size) { index ->
                     DownloadScreenItem(

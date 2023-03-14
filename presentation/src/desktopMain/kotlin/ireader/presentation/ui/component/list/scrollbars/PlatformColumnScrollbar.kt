@@ -9,4 +9,5 @@ import ireader.domain.models.prefs.PreferenceValues
 
 @Composable
 actual fun ColumnScrollbar(state: ScrollState, rightSide: Boolean, thickness: Dp, padding: Dp, thumbMinHeight: Float, thumbColor: Color, thumbSelectedColor: Color, thumbShape: Shape, enabled: Boolean, selectionMode: PreferenceValues.ScrollbarSelectionMode, indicatorContent: @Composable ((normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)?, content: @Composable () -> Unit) {
+    content()
 }

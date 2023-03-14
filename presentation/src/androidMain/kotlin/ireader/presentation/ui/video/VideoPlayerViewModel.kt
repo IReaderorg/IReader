@@ -11,8 +11,6 @@ import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
 import ireader.domain.usecases.files.GetSimpleStorage
-import ireader.domain.usecases.local.LocalGetChapterUseCase
-import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.utils.extensions.withUIContext
 import ireader.presentation.ui.video.component.core.MediaState
@@ -135,7 +133,7 @@ class VideoScreenViewModel(
                 )
             })
         }
-        val link = if (movieUrl.contains("http")) movieUrl else null
+        val link = if (movieUrl.contains("ireader/core/http")) movieUrl else null
         val data = if (link == null) movieUrl else null
         mediaState.loadPlayer(false, link = link, data = data, null, emptySet(), null, true)
 

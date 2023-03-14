@@ -6,6 +6,7 @@ import ireader.core.http.BrowserEngine
 import ireader.core.http.HttpClients
 import ireader.core.http.WebViewCookieJar
 import ireader.core.os.PackageInstaller
+import ireader.data.catalog.CatalogGithubApi
 import ireader.data.catalog.impl.AndroidCatalogInstallationChanges
 import ireader.data.catalog.impl.AndroidCatalogInstaller
 import ireader.data.catalog.impl.interactor.InstallCatalogImpl
@@ -30,7 +31,7 @@ actual val dataPlatformModule: DI.Module = DI.Module("androidDataModule") {
     bindSingleton<DatabaseHandler> { AndroidDatabaseHandler(instance(),instance()) }
     bindSingleton<SqlDriver> { DatabaseDriverFactory(instance()).create() }
     bindSingleton<CatalogLoader> { ireader.data.catalog.impl.AndroidCatalogLoader(instance(),instance(),instance(),instance(),instance()) }
-    bindSingleton<CatalogRemoteApi> { ireader.data.catalog.impl.CatalogGithubApi(instance(),instance()) }
+    bindSingleton<CatalogRemoteApi> { CatalogGithubApi(instance(),instance()) }
     bindSingleton<UninstallCatalogs> { ireader.data.catalog.impl.interactor.UninstallCatalogImpl(instance(),instance()) }
     bindSingleton<AndroidCatalogInstaller> { AndroidCatalogInstaller(instance(),instance(),instance(),instance(),instance(),instance()) }
     bindSingleton<PackageInstaller> { PackageInstaller(instance(),instance()) }

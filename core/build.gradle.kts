@@ -3,7 +3,6 @@
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
-    id("org.jetbrains.gradle.plugin.idea-ext")
     id("org.jetbrains.dokka")
     kotlin("plugin.serialization")
     id("com.google.devtools.ksp")

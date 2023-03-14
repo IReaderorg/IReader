@@ -27,14 +27,11 @@ import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.theme.ReaderTheme
 import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.prefs.AppPreferences
-import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
-import ireader.presentation.ui.component.components.Build
-import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.*
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
@@ -116,16 +113,19 @@ private fun ReaderScreenTab(
             var postion = remember {
                 0
             }
-            ChipChoicePreference(
-                preference = vm.font,
-                choices = vm.fonts.map { FontType(it, FontFamily.Default) }
-                    .associate { fontType ->
-                        postion++
-                        return@associate fontType to fontType.name
-                    },
-                title = localizeHelper.localize(MR.strings.font),
-                onFailToFindElement = vm.font.value.name
-            )
+            vm.font?.let { font ->
+                ChipChoicePreference(
+                        preference = font,
+                        choices = vm.fonts.map { FontType(it, FontFamily.Default) }
+                                .associate { fontType ->
+                                    postion++
+                                    return@associate fontType to fontType.name
+                                },
+                        title = localizeHelper.localize(MR.strings.font),
+                        onFailToFindElement = vm.font?.value?.name ?: ""
+                )
+            }
+
         }
         item {
             PreferenceRow(

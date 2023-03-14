@@ -40,7 +40,6 @@ import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.prefs.mapTextAlign
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.presentation.imageloader.IImageLoader
-import ireader.presentation.ui.component.list.scrollbars.ColumnScrollbar
 import ireader.presentation.ui.component.list.scrollbars.IColumnScrollbar
 import ireader.presentation.ui.component.list.scrollbars.ILazyColumnScrollbar
 import ireader.presentation.ui.reader.reverse_swip_refresh.ISwipeRefreshIndicator
@@ -250,7 +249,7 @@ private fun MainText(
                     bottomContentPadding = vm.bottomContentPadding.value
                 ),
                 fontSize = vm.fontSize.value.sp,
-                fontFamily = vm.font.value.fontFamily,
+                fontFamily = vm.font?.value?.fontFamily,
                 textAlign = mapTextAlign(vm.textAlignment.value),
                 color = vm.textColor.value,
                 lineHeight = vm.lineHeight.value.sp,

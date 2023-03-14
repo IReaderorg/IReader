@@ -248,7 +248,7 @@ data class ReaderScreenSpec(
                             Spacer(modifier = Modifier.height(5.dp))
                             ReaderSettingMainLayout(
                                     onFontSelected = { index ->
-                                        vm.font.value = FontType(
+                                        vm.font?.value = FontType(
                                                 vm.fonts.getOrNull(index) ?: getDefaultFont().name,
                                                 FontFamily.Default
                                         )

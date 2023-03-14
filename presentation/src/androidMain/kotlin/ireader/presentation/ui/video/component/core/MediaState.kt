@@ -37,16 +37,13 @@ import ireader.core.source.model.MovieUrl
 import ireader.core.source.model.Page
 import ireader.core.source.model.Subtitle
 import ireader.presentation.imageloader.coil.image_loaders.convertToOkHttpRequest
-import ireader.presentation.ui.component.findComponentActivity
 import ireader.presentation.ui.video.component.cores.*
 import ireader.presentation.ui.video.component.cores.PlayerSubtitleHelper.Companion.toSubtitleMimeType
 import ireader.presentation.ui.video.component.cores.player.SSLTrustManager
 import okhttp3.Request
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberDI
 import org.kodein.di.compose.rememberInstance
-import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.File
 import java.net.URI
@@ -399,7 +396,7 @@ class MediaState(
 
     private fun createOnlineSource( link: String?,extensions: HttpSource? = null): HttpDataSource.Factory? {
         // this like can prevent from crashing the app when local file was loaded.
-        if (link == null || !link.contains("http")) {
+        if (link == null || !link.contains("ireader/core/http")) {
             return null
         }
         val okhttp = extensions?.client?.okhttp ?: client.default.okhttp
@@ -724,7 +721,7 @@ private val Painter.aspectRatio
 
 
 fun Subtitle.toSubtitleData() : SubtitleData {
-    val origin = if (url.contains("http")) {
+    val origin = if (url.contains("ireader/core/http")) {
         SubtitleOrigin.URL
     } else {
         SubtitleOrigin.DOWNLOADED_FILE

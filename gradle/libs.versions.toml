@@ -192,6 +192,14 @@ exoplayer-subtitleDecoder = { module = "com.github.albfernandez:juniversalcharde
 epublib = { module = "io.github.kazemcodes:epublib-core", version = "4.0-SNAPSHOT" }
 
 imageLoader = { module = "io.github.qdsfdhvh:image-loader", version.ref = "image-loader" }
+imageLoader-io = { module = "io.github.qdsfdhvh:image-loader-extension-imageio", version.ref = "image-loader" }
+# Logging
+logging-slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+logging-slf4j-jul = { module = "org.slf4j:jul-to-slf4j", version.ref = "slf4j" }
+logging-log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
+logging-log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
+logging-log4j-slf4j = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
+logging-kmlogging = { module = "org.lighthousegames:logging", version.ref = "kmlogging" }
 
 [bundles]
 simplestorage = ["storage", "documentfile"]

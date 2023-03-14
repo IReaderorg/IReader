@@ -8,8 +8,6 @@ import ireader.core.prefs.AndroidPreferenceStore
 import ireader.core.prefs.PreferenceStore
 import ireader.data.catalog.impl.AndroidCatalogInstallationChanges
 import ireader.data.catalog.impl.AndroidLocalInstaller
-import ireader.data.catalog.impl.CatalogGithubApi
-import ireader.domain.catalogs.interactor.SyncRemoteCatalogs
 import ireader.domain.preferences.prefs.AndroidUiPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.i18n.ProjectConfig
@@ -25,11 +23,7 @@ import java.io.File
 
 @OptIn(ExperimentalTextApi::class) val AppModule = DI.Module("appModule") {
 
-    bindSingleton {
-        ReaderPreferences(
-            instance(),
-        )
-    }
+
     bindSingleton {
         GoogleFont.Provider(
             providerAuthority = "com.google.android.gms.fonts",
@@ -70,9 +64,6 @@ import java.io.File
             versionName = BuildConfig.VERSION_NAME,
             applicationId = BuildConfig.APPLICATION_ID
     ) }
-    bindSingleton<SyncRemoteCatalogs> { SyncRemoteCatalogs(instance(), CatalogGithubApi(instance(),instance()),instance()) }
-
-
     bindSingleton<AndroidCatalogInstallationChanges> { AndroidCatalogInstallationChanges(instance()) }
     bindSingleton<AndroidLocalInstaller> { AndroidLocalInstaller(instance(),instance(),instance(),instance(),instance(),instance()) }
 

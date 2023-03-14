@@ -3,7 +3,6 @@ package ireader.domain.preferences.prefs
 import ireader.core.prefs.Preference
 import ireader.core.prefs.PreferenceStore
 import ireader.domain.preferences.models.FontType
-import ireader.domain.preferences.models.getDefaultFont
 
 class DesktopUiPreferences constructor(
         private val preferenceStore: PreferenceStore,
@@ -15,7 +14,7 @@ class DesktopUiPreferences constructor(
         
     }
 
-    override fun font(): Preference<FontType> {
-        return throw Exception()
+    override fun font(): Preference<FontType>? {
+        return null
     }
 }

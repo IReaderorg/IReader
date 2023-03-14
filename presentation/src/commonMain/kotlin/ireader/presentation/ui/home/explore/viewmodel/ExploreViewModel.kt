@@ -40,7 +40,7 @@ class ExploreViewModel(
         val sourceId = param.sourceId
         val query = param.query
         val catalog =
-            catalogStore.find(sourceId)
+                catalogStore.find(sourceId)
 
         state.catalog = catalog
         val source = state.source
@@ -79,67 +79,67 @@ class ExploreViewModel(
         getBooksJob = scope.launch {
             kotlin.runCatching {
                 DefaultPaginator<Int, MangasPageInfo>(
-                    initialKey = state.page,
-                    onLoadUpdated = {
-                        isLoading = it
-                    },
-                    onRequest = { nextPage ->
-                        try {
-                            error = null
-                            Log.debug { "Explore Request was made - current page:$nextPage" }
+                        initialKey = state.page,
+                        onLoadUpdated = {
+                            isLoading = it
+                        },
+                        onRequest = { nextPage ->
+                            try {
+                                error = null
+                                Log.debug { "Explore Request was made - current page:$nextPage" }
 
-                            val query = searchQuery
-                            val filters = stateFilters
-                            val listing = stateListing
-                            val source = catalog
-                            if (source != null) {
-                                var result = MangasPageInfo(emptyList(), false)
-                                remoteUseCases.getRemoteBooks(
-                                    searchQuery,
-                                    listing,
-                                    filters,
-                                    source,
-                                    page,
-                                    onError = {
-                                        throw it
-                                    },
-                                    onSuccess = { res ->
-                                        result = res
-                                    }
-                                )
-                                Result.success(result)
-                            } else {
-                                throw SourceNotFoundException()
+                                val query = searchQuery
+                                val filters = stateFilters
+                                val listing = stateListing
+                                val source = catalog
+                                if (source != null) {
+                                    var result = MangasPageInfo(emptyList(), false)
+                                    remoteUseCases.getRemoteBooks(
+                                            searchQuery,
+                                            listing,
+                                            filters,
+                                            source,
+                                            page,
+                                            onError = {
+                                                throw it
+                                            },
+                                            onSuccess = { res ->
+                                                result = res
+                                            }
+                                    )
+                                    Result.success(result)
+                                } else {
+                                    throw SourceNotFoundException()
+                                }
+                            } catch (e: Throwable) {
+                                Result.failure(e)
                             }
-                        } catch (e: Throwable) {
-                            Result.failure(e)
-                        }
-                    },
-                    getNextKey = {
-                        state.page + 1
-                    },
-                    onError = { e ->
-                        endReached = true
-                        booksState.books = emptyList()
-                        e?.let {
-                            error = exceptionHandler(it)
-                        }
-                    },
-                    onSuccess = { items, newKey ->
-                        val books = items.mangas.map {
-                            it.toBook(
-                                sourceId = source?.id ?: -1,
-                            )
-                        }
-                        booksState.books = booksState.books + books
+                        },
+                        getNextKey = {
+                            state.page + 1
+                        },
+                        onError = { e ->
+                            endReached = true
+                            booksState.books = emptyList()
+                            e?.let {
+                                error = exceptionHandler(it)
+                            }
+                        },
+                        onSuccess = { items, newKey ->
+                            val books = items.mangas.map {
+                                it.toBook(
+                                        sourceId = source?.id ?: -1,
+                                )
+                            }
+                            booksState.books = booksState.books + books
 
-                        booksState.books = booksState.books.fastMap {  book ->
-                            findDuplicateBook(book.title,book.sourceId) ?: book
-                        }
+                            booksState.books = booksState.books.fastMap { book ->
+                                findDuplicateBook(book.title, book.sourceId) ?: book
+                            }
 
-                        page = newKey
-                        endReached = !items.hasNextPage
-                    },
+                            page = newKey
+                            endReached = !items.hasNextPage
+                        },
                 ).loadNextItems()
             }
         }
@@ -182,7 +182,7 @@ class ExploreViewModel(
     }
 
     private suspend fun readLayoutType() {
-        state.layout = browseScreenPrefUseCase.browseLayoutTypeUseCase.read()
+            state.layout = browseScreenPrefUseCase.browseLayoutTypeUseCase.read()
     }
 
     fun toggleFilterMode(enable: Boolean? = null) {

@@ -5,7 +5,9 @@ import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import kotlinx.coroutines.*
+import ireader.core.util.createCoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
@@ -23,7 +25,7 @@ actual class WebViewManger(private val context: Context) {
     actual var webUrl: String? = null
     actual var inProgress: Boolean = false
 
-    val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    val scope = createCoroutineScope()
     actual fun init() : Any {
         if (webView == null) {
             webView = WebView(context)

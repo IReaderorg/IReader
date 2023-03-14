@@ -3,6 +3,9 @@ package ireader.presentation.core.di
 
 import ireader.presentation.core.ScreenContentViewModel
 import ireader.presentation.core.theme.AppThemeViewModel
+import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
+import ireader.presentation.ui.book.viewmodel.ChapterStateImpl
+import ireader.presentation.ui.book.viewmodel.DetailStateImpl
 import ireader.presentation.ui.home.explore.viewmodel.BooksState
 import ireader.presentation.ui.home.explore.viewmodel.ExploreStateImpl
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
@@ -16,6 +19,9 @@ import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearch
 import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchViewModel
 import ireader.presentation.ui.home.updates.viewmodel.UpdateStateImpl
 import ireader.presentation.ui.home.updates.viewmodel.UpdatesViewModel
+import ireader.presentation.ui.reader.viewmodel.ReaderScreenPreferencesStateImpl
+import ireader.presentation.ui.reader.viewmodel.ReaderScreenStateImpl
+import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import ireader.presentation.ui.settings.MainSettingScreenViewModel
 import ireader.presentation.ui.settings.appearance.AppearanceViewModel
 import ireader.presentation.ui.settings.category.CategoryScreenViewModel
@@ -53,7 +59,7 @@ val PresentationModules = DI.Module("presentationModule") {
 
     bindProvider { UpdatesViewModel(instance(), instance(), instance(), instance(), instance(), instance()) }
 
-
+    bindFactory< BookDetailViewModel.Param, BookDetailViewModel>  { BookDetailViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),it,instance(),instance()) }
     bindProvider { MainSettingScreenViewModel(instance()) }
     bindProvider { AppearanceViewModel(instance(), instance()) }
 
@@ -63,5 +69,16 @@ val PresentationModules = DI.Module("presentationModule") {
     bindProvider { GeneralSettingScreenViewModel(instance(), instance(), instance()) }
     bindProvider { ReaderSettingScreenViewModel(instance(), instance(), instance()) }
     bindProvider { SourceRepositoryViewModel(instance(), instance()) }
+
+
+    bindProvider<ChapterStateImpl> { ChapterStateImpl() }
+    bindProvider<DetailStateImpl> { DetailStateImpl() }
+
+    bindProvider<ReaderScreenStateImpl> { ReaderScreenStateImpl() }
+    bindProvider<ReaderScreenPreferencesStateImpl> { ReaderScreenPreferencesStateImpl() }
+
+
+    bindFactory< ReaderScreenViewModel.Param, ReaderScreenViewModel>  { ReaderScreenViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),it,instance(),) }
+
 
 }

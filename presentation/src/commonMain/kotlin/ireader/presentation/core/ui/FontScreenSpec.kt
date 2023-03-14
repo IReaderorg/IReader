@@ -59,7 +59,7 @@ class FontScreenSpec : VoyagerScreen() {
                     vm,
                     onFont = { font ->
                         vm.androidUiPreferences.font()
-                            .set(FontType(font, getDefaultFont().fontFamily))
+                            ?.set(FontType(font, getDefaultFont().fontFamily))
                     }
                 )
             }

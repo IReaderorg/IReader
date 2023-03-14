@@ -5,6 +5,7 @@
 # Keep extension's common dependencies
 -keep class ireader.core.source.** { public protected *; }
 -keep class ireader.core.http.** { public protected *; }
+-keep class ireader.data.catalog.CatalogGithubApi { public protected *; }
 -keep,allowoptimization class ireader.** { public protected *; }
 -keep,allowoptimization class kotlinx.coroutines.** { public protected *; }
 -keep,allowoptimization class androidx.preference.** { public protected *; }

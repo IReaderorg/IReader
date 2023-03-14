@@ -103,7 +103,7 @@ class ReaderScreenViewModel(
     val brightness = readerPreferences.brightness().asState()
     var chapterNumberMode by readerPreferences.showChapterNumberPreferences().asState()
     val isScrollIndicatorDraggable = readerPreferences.scrollbarMode().asState()
-    val font = platformUiPreferences.font().asState()
+    val font = platformUiPreferences.font()?.asState()
     val webViewIntegration = readerPreferences.webViewIntegration().asState()
     val selectableMode = readerPreferences.selectableText().asState()
     val fontSize = readerPreferences.fontSize().asState()

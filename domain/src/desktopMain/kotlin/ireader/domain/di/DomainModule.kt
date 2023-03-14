@@ -1,9 +1,11 @@
 package ireader.domain.di
 
+import ireader.core.http.HttpClients
 import ireader.core.prefs.JvmPreferenceStore
 import ireader.core.prefs.PreferenceStore
 import ireader.domain.preferences.prefs.DesktopUiPreferences
 import ireader.domain.preferences.prefs.PlatformUiPreferences
+import ireader.domain.usecases.epub.EpubCreator
 import ireader.domain.usecases.file.DesktopFileSaver
 import ireader.domain.usecases.reader.ScreenAlwaysOn
 import ireader.domain.usecases.reader.ScreenAlwaysOnImpl
@@ -32,10 +34,13 @@ actual val DomainModule: DI.Module = org.kodein.di.DI.Module("domainModulePlatfo
         JvmPreferenceStore("ireader")
     }
     bindSingleton { LocalizeHelper() }
+
     bindSingleton<ServiceUseCases> { ServiceUseCases(
             startDownloadServicesUseCase = StartDownloadServicesUseCase(),
             startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(),
             startTTSServicesUseCase = StartTTSServicesUseCase(),
             stopServicesUseCase = StopServiceUseCase(),
     ) }
+    bindSingleton<HttpClients> { HttpClients() }
+    bindSingleton<EpubCreator> { EpubCreator() }
 }

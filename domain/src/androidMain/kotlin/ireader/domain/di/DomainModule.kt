@@ -31,6 +31,7 @@ actual val DomainModule: DI.Module = DI.Module("domainModulePlatform") {
                 instance()
         )
     }
+
     bindSingleton {
         ExtensionManagerService(
                 instance(),
@@ -63,12 +64,7 @@ actual val DomainModule: DI.Module = DI.Module("domainModulePlatform") {
     bindProvider { ImportEpub(instance(), instance(), instance()) }
     bindProvider<TTSStateImpl> { ireader.domain.services.tts_service.TTSStateImpl() }
     bindProvider { ireader.domain.services.update_service.UpdateApi(instance()) }
-    bindProvider {
-        ireader.domain.services.extensions_insstaller_service.GetDefaultRepo(
-                instance(),
-                instance()
-        )
-    }
+
     bindProvider { ireader.domain.usecases.services.StartDownloadServicesUseCase(instance()) }
     bindProvider { ireader.domain.usecases.services.StartLibraryUpdateServicesUseCase(instance()) }
     bindProvider { ireader.domain.usecases.services.StartTTSServicesUseCase(instance()) }

@@ -1,24 +1,23 @@
 package ireader.domain.catalogs
 
-import kotlinx.coroutines.CoroutineScope
+import ireader.core.source.LocalSource
+import ireader.core.util.createICoroutineScope
+import ireader.core.util.replace
+import ireader.domain.catalogs.service.CatalogInstallationChange
+import ireader.domain.catalogs.service.CatalogInstallationChanges
+import ireader.domain.catalogs.service.CatalogLoader
+import ireader.domain.catalogs.service.CatalogRemoteRepository
+import ireader.domain.models.entities.CatalogBundled
+import ireader.domain.models.entities.CatalogInstalled
+import ireader.domain.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogRemote
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import ireader.domain.models.entities.CatalogBundled
-import ireader.domain.models.entities.CatalogInstalled
-import ireader.domain.models.entities.CatalogLocal
-import ireader.domain.models.entities.CatalogRemote
-import ireader.core.source.LocalSource
-import ireader.core.util.replace
-import ireader.domain.catalogs.service.CatalogInstallationChange
-import ireader.domain.catalogs.service.CatalogInstallationChanges
-import ireader.domain.catalogs.service.CatalogLoader
-import ireader.domain.catalogs.service.CatalogRemoteRepository
 
 class CatalogStore(
     private val loader: CatalogLoader,
@@ -27,7 +26,7 @@ class CatalogStore(
     installationChanges: CatalogInstallationChanges,
 ) {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val scope = createICoroutineScope()
 
     var catalogs = emptyList<CatalogLocal>()
         private set(value) {

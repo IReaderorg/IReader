@@ -1,11 +1,10 @@
-package ireader.data.catalog.impl
+package ireader.data.catalog
 
-import androidx.annotation.Keep
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import ireader.domain.models.entities.CatalogRemote
 import ireader.core.http.HttpClients
 import ireader.domain.catalogs.service.CatalogRemoteApi
+import ireader.domain.models.entities.CatalogRemote
 import ireader.domain.services.extensions_insstaller_service.GetDefaultRepo
 import ireader.domain.utils.CatalogNotFoundException
 import ireader.i18n.REPO_URL
@@ -54,7 +53,7 @@ class CatalogGithubApi(
         }
     }
 
-    @Keep
+
     @Serializable
     private data class CatalogRemoteApiModel(
         val name: String,

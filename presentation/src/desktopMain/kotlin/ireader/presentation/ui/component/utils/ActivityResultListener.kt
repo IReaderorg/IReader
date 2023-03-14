@@ -13,5 +13,4 @@ actual class ActivityResultLauncher actual constructor(input: Any) {
 
 @Composable
 actual fun ActivityResultListener(onSuccess: suspend (Uri) -> Unit, onError: (Throwable) -> Unit): ActivityResultLauncher {
-    TODO("Not yet implemented")
-}
+    return ActivityResultLauncher(0)}

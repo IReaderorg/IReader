@@ -4,13 +4,13 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import ireader.domain.models.entities.Book
-import ireader.domain.models.entities.CatalogLocal
-import ireader.i18n.UiText
 import ireader.core.source.model.Filter
 import ireader.core.source.model.Listing
 import ireader.domain.models.DisplayMode
+import ireader.domain.models.entities.Book
+import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.utils.extensions.replaceFirst
+import ireader.i18n.UiText
 
 
 
@@ -39,7 +39,7 @@ interface ExploreState {
 open class ExploreStateImpl: ExploreState {
     override var isLoading by mutableStateOf<Boolean>(false)
     override var error by mutableStateOf<UiText?>(null)
-    override var layout by mutableStateOf<DisplayMode>(DisplayMode.ComfortableGrid)
+     override var layout by mutableStateOf<DisplayMode>(DisplayMode.ComfortableGrid)
     override var isSearchModeEnable by mutableStateOf<Boolean>(false)
     override var searchQuery by mutableStateOf<String?>(null)
     override val source: ireader.core.source.CatalogSource? by derivedStateOf {

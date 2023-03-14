@@ -32,7 +32,7 @@ class ReaderSettingScreenViewModel(
     val autoBrightnessMode = readerPreferences.autoBrightness().asState()
     val immersiveMode = readerPreferences.immersiveMode().asState()
     val scrollbarMode = readerPreferences.scrollbarMode().asState()
-    val font = platformUiPreferences.font().asState()
+    val font = platformUiPreferences.font()?.asState()
 
     val selectableMode = readerPreferences.selectableText().asState()
     val fontSize = readerPreferences.fontSize().asState()

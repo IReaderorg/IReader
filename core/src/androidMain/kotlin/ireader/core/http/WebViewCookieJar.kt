@@ -9,12 +9,10 @@
 package ireader.core.http
 
 import android.webkit.CookieManager
-import io.ktor.client.plugins.cookies.CookiesStorage
-import io.ktor.http.Url
-import io.ktor.util.date.GMTDate
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import io.ktor.client.plugins.cookies.*
+import io.ktor.http.*
+import io.ktor.util.date.*
+import ireader.core.util.createICoroutineScope
 import kotlinx.coroutines.launch
 import okhttp3.Cookie
 import okhttp3.CookieJar
@@ -30,7 +28,7 @@ class WebViewCookieJar(private val cookiesStorage: CookiesStorage) : CookieJar {
     return get(url)
   }
 
-  val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+  val scope = createICoroutineScope()
   override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
 
     cookies.forEach { manager.setCookie(url.toString(), it.toString()) }

@@ -5,6 +5,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import ireader.core.util.createICoroutineScope
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.Chapter
@@ -49,7 +50,7 @@ class DownloaderService  constructor(
     private val downloadServiceState: DownloadServiceStateImpl by instance()
     private val downloadJob = Job()
 
-    val scope = CoroutineScope(Dispatchers.Main.immediate + downloadJob)
+    val scope = createICoroutineScope(Dispatchers.Main.immediate + downloadJob)
 
 
 

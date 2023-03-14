@@ -16,7 +16,7 @@ import ireader.domain.models.entities.Chapter
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.ChapterRow
-import ireader.presentation.ui.component.list.scrollbars.VerticalFastScroller
+import ireader.presentation.ui.component.list.scrollbars.IVerticalFastScroller
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.component.text_related.ErrorTextWithEmojis
@@ -64,7 +64,7 @@ fun ReaderScreenDrawer(
 
         Spacer(modifier = modifier.height(5.dp))
         Divider(modifier = modifier.fillMaxWidth(), thickness = 1.dp)
-        VerticalFastScroller(listState = drawerScrollState) {
+        IVerticalFastScroller(listState = drawerScrollState) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = drawerScrollState

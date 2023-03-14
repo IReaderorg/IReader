@@ -2,20 +2,13 @@ package ireader.core.prefs
 
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.floatPreferencesKey
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.longPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.core.stringSetPreferencesKey
+import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStoreFile
-import kotlinx.coroutines.CoroutineScope
+import ireader.core.prefs.AndroidPreference.Primitive
+import ireader.core.util.createICoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import ireader.core.prefs.AndroidPreference.Primitive
 
 /**
  * An implementation of a [PreferenceStore] backed by Androidx [DataStore].
@@ -31,7 +24,7 @@ class AndroidPreferenceStore(
     /**
      * Scope where the store handles IO.
      */
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val scope = createICoroutineScope(Dispatchers.IO)
 
     /**
      * The internal [DataStore] instance.

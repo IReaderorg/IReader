@@ -49,6 +49,7 @@ kotlin {
                 api(libs.kodein.core)
                 api(libs.kodein.compose)
                 api(libs.imageLoader)
+
                 api(accompanist.gosyer.flowLayout)
                 api(accompanist.gosyer.pagerIndicators)
                 api(accompanist.gosyer.pager)
