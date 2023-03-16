@@ -36,7 +36,7 @@ import ireader.core.source.model.ImageUrl
 import ireader.core.source.model.MovieUrl
 import ireader.core.source.model.Page
 import ireader.core.source.model.Subtitle
-import ireader.presentation.imageloader.coil.image_loaders.convertToOkHttpRequest
+import ireader.presentation.imageloader.convertToOkHttpRequest
 import ireader.presentation.ui.video.component.cores.*
 import ireader.presentation.ui.video.component.cores.PlayerSubtitleHelper.Companion.toSubtitleMimeType
 import ireader.presentation.ui.video.component.cores.player.SSLTrustManager

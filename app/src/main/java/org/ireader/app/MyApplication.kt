@@ -7,15 +7,15 @@ import android.os.Looper
 import androidx.work.Configuration
 import com.seiko.imageloader.ImageLoader
 import com.seiko.imageloader.ImageLoaderFactory
+import ireader.core.http.WebViewUtil
+import ireader.data.di.DataModule
 import ireader.data.di.dataPlatformModule
 import ireader.data.di.repositoryInjectModule
 import ireader.domain.di.*
-import ireader.domain.utils.WebViewUtil
 import ireader.presentation.core.di.PresentationModules
 import ireader.presentation.core.di.presentationPlatformModule
 import ireader.presentation.imageloader.coil.CoilLoaderFactory
 import org.ireader.app.di.AppModule
-import ireader.data.di.DataModule
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
@@ -35,10 +35,6 @@ class MyApplication : Application(), ImageLoaderFactory, DIAware, Configuration.
     val coil: CoilLoaderFactory by instance()
 
 
-    override fun onCreate() {
-        super.onCreate()
-
-    }
     override fun newImageLoader(): ImageLoader {
         return coil.newImageLoader()
     }

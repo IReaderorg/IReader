@@ -2,9 +2,7 @@ package ireader.domain.utils
 
 import android.webkit.WebView
 
-object WebViewUtil {
-    const val SPOOF_PACKAGE_NAME = "org.chromium.chrome"
-}
+
 
 // Based on https://stackoverflow.com/a/29218966
 private fun WebView.getDefaultUserAgentString(): String {

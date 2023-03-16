@@ -11,7 +11,7 @@ class UserAgentInterceptor : Interceptor {
             val newRequest = originalRequest
                 .newBuilder()
                 .removeHeader("User-Agent")
-                .addHeader("User-Agent", WebViewUtil.DEFAULT_USER_AGENT)
+                .addHeader("User-Agent", DEFAULT_USER_AGENT)
                 .build()
             chain.proceed(newRequest)
         } else {

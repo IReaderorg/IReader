@@ -32,6 +32,7 @@ kotlin {
                 implementation(libs.sqldelight.coroutines)
                 implementation(libs.requerySqlite)
                 api(libs.kodein.core)
+                api(libs.jsoup)
             }
         }
         val androidMain by getting {
@@ -48,6 +49,7 @@ kotlin {
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
                 implementation(libs.sqldelight.jvm)
+                implementation("net.dongliu:apk-parser:2.6.10")
             }
         }
 

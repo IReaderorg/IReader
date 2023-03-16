@@ -176,7 +176,7 @@ dependencies {
 
 
     /** Coroutine **/
-    api(kotlinx.coroutines.core)
+    implementation(kotlinx.coroutines.core)
     implementation(kotlinx.coroutines.android)
     implementation("com.google.firebase:firebase-analytics:21.0.0")
 

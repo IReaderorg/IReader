@@ -1,4 +1,4 @@
-package ireader.presentation.imageloader.coil.image_loaders
+package ireader.presentation.imageloader
 
 import io.ktor.client.engine.*
 import io.ktor.client.request.*

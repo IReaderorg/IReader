@@ -1,4 +1,4 @@
-package ireader.presentation.imageloader.coil
+package ireader.presentation.imageloader.coil.imageloader
 
 import com.seiko.imageloader.component.keyer.Keyer
 import com.seiko.imageloader.component.mapper.Mapper

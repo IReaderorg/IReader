@@ -4,7 +4,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.awaitApplication
+import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.NavigatorDisposeBehavior
@@ -23,7 +23,12 @@ import ireader.presentation.core.MainStarterScreen
 import ireader.presentation.core.di.PresentationModules
 import ireader.presentation.core.di.presentationPlatformModule
 import ireader.presentation.core.theme.AppTheme
+import ireader.presentation.imageloader.coil.imageloader.CatalogKeyer
+import ireader.presentation.imageloader.coil.imageloader.CatalogRemoteMapper
+import ireader.presentation.imageloader.coil.imageloader.BookCoverKeyer
+import ireader.presentation.imageloader.coil.imageloader.BookCoverMapper
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import okio.Path.Companion.toOkioPath
 import org.kodein.di.DI
 import org.kodein.di.compose.withDI
@@ -31,16 +36,16 @@ import org.kodein.di.instance
 import java.io.File
 import kotlin.system.exitProcess
 
-@OptIn(ExperimentalMaterial3Api::class)
-suspend fun main() {
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalCoroutinesApi::class)
+fun main() {
     val di = DI.lazy {
         importAll(localModule,dataPlatformModule, CatalogModule, DataModule,preferencesInjectModule,
                 repositoryInjectModule, UseCasesInject, PresentationModules,DomainServices,DomainModule,presentationPlatformModule, DesktopDI)
 
     }
     val catalogStore : CatalogStoreInitializer by di.instance()
-
-    awaitApplication {
+    //Dispatchers.setMain(StandardTestDispatcher())
+    application {
         val state = rememberWindowState()
         Window(
                 onCloseRequest = { exitProcess(0) },
@@ -76,7 +81,10 @@ private  fun generateImageLoader(scope: CoroutineScope): ImageLoader {
     return ImageLoader {
         imageScope = scope
         components {
-            // add(ImageIODecoder.Factory())
+            add(CatalogRemoteMapper())
+            add(BookCoverMapper())
+            add(BookCoverKeyer())
+            add(CatalogKeyer())
             setupDefaultComponents(imageScope)
         }
         interceptor {

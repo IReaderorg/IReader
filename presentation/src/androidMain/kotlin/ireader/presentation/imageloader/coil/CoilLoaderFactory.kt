@@ -13,7 +13,7 @@ import ireader.core.http.okhttp
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.image.cache.CoverCache
 import ireader.presentation.imageloader.PackageManager
-import ireader.presentation.imageloader.coil.image_loaders.*
+import ireader.presentation.imageloader.coil.imageloader.*
 import okio.Path.Companion.toOkioPath
 
 class CoilLoaderFactory(

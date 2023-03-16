@@ -1,4 +1,4 @@
-package ireader.presentation.imageloader.coil.image_loaders
+package ireader.presentation.imageloader.coil.imageloader
 
 import com.seiko.imageloader.cache.disk.DiskCache
 import com.seiko.imageloader.component.fetcher.FetchResult
@@ -11,7 +11,10 @@ import ireader.core.source.HttpSource
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.image.cache.CoverCache
 import ireader.domain.models.BookCover
-import ireader.presentation.imageloader.coil.image_loaders.BookCoverFetcher.Companion.USE_CUSTOM_COVER
+import ireader.presentation.imageloader.HttpException
+import ireader.presentation.imageloader.await
+import ireader.presentation.imageloader.coil.imageloader.BookCoverFetcher.Companion.USE_CUSTOM_COVER
+import ireader.presentation.imageloader.convertToOkHttpRequest
 import okhttp3.*
 import okhttp3.CacheControl
 import okhttp3.internal.closeQuietly

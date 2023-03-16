@@ -23,7 +23,7 @@ import ireader.i18n.UiText
 import ireader.i18n.resources.MR
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
-import ireader.presentation.imageloader.coil.image_loaders.convertToOkHttpRequest
+import ireader.presentation.imageloader.convertToOkHttpRequest
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.EmptyScreenComposable
 import ireader.presentation.ui.component.hideKeyboard

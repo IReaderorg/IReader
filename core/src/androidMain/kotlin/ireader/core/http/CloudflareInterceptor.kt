@@ -11,9 +11,9 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import ireader.core.R
-import ireader.core.http.WebViewUtil.DEFAULT_USER_AGENT
 import ireader.core.log.Log
 import ireader.i18n.LocalizeHelper
+import ireader.i18n.resources.MR
 import kotlinx.coroutines.*
 import okhttp3.Cookie
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -23,7 +23,6 @@ import okhttp3.Response
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import ireader.i18n.resources.MR
 class CloudflareInterceptor(private val context: Context, private val webViewCookieJar: WebViewCookieJar,private val localizeHelper: LocalizeHelper) : Interceptor {
 
     private val executor = ContextCompat.getMainExecutor(context)
@@ -48,7 +47,7 @@ class CloudflareInterceptor(private val context: Context, private val webViewCoo
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
 
-        if (!WebViewUtil.supportsWebView(context)) {
+        if (!WebViewUtilLegeacy.supportsWebView(context)) {
             launchUI {
                 context.toast(R.string.information_webview_required, Toast.LENGTH_LONG)
             }
@@ -218,13 +217,7 @@ object DeviceUtil {
         }
     }
 }
-object WebViewUtil {
-    const val SPOOF_PACKAGE_NAME = "org.chromium.chrome"
-
-    const val MINIMUM_WEBVIEW_VERSION = 99
-
-    const val DEFAULT_USER_AGENT = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.5304.141 Mobile Safari/537.36"
-
+object WebViewUtilLegeacy {
     fun supportsWebView(context: Context): Boolean {
         try {
             // May throw android.webkit.WebViewFactory$MissingWebViewPackageException if WebView

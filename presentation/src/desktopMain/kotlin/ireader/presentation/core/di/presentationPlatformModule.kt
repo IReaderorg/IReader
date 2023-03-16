@@ -10,6 +10,6 @@ import org.kodein.di.bindSingleton
 actual val presentationPlatformModule: DI.Module = DI.Module("desktopPresentationModule") {
     bindSingleton { LocaleHelper() }
     bindSingleton { PlatformHelper() }
-    bindSingleton { PlatformReaderSettingReader() }
+    bindSingleton<PlatformReaderSettingReader> { PlatformReaderSettingReader() }
     bindSingleton { WebViewManger() }
 }

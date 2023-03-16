@@ -22,7 +22,7 @@ actual val dataPlatformModule: DI.Module = DI.Module("desktopDataModule") {
     bindSingleton<DatabaseHandler> { JvmDatabaseHandler(instance(),instance()) }
     bindSingleton<SqlDriver> { DatabaseDriverFactory().create() }
     bindSingleton<Transactions> { DatabaseTransactions(instance()) }
-    bindSingleton<CatalogLoader> { DesktopCatalogLoader() }
+    bindSingleton<CatalogLoader> { DesktopCatalogLoader(instance(),instance(),instance()) }
     bindSingleton<CatalogInstallationChanges> { DesktopCatalogInstallationChanges() }
     bindSingleton<InstallCatalog> { DesktopInstallCatalog() }
     bindSingleton<UninstallCatalogs> { DesktopUninstallCatalogs() }

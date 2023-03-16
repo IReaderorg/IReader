@@ -16,7 +16,6 @@ interface  BrowserEngineInterface {
 
 
 
-@Suppress("NO_ACTUAL_FOR_EXPECT")
 expect class BrowserEngine : BrowserEngineInterface {
     override suspend fun fetch(
         url: String,
