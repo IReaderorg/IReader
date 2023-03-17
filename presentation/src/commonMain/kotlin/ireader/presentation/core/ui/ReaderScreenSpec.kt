@@ -261,14 +261,12 @@ data class ReaderScreenSpec(
                                         }
                                     },
                                     onBackgroundChange = { index ->
-                                        vm.prefFunc.apply {
                                             vm.changeBackgroundColor(index)
-                                        }
                                     },
                                     vm = vm,
                                     onTextAlign = {
                                         vm.textAlignment.value = it
-                                        vm.prefFunc.saveTextAlignment(it)
+                                        vm.saveTextAlignment(it)
                                     },
                                     onToggleAutoBrightness = {
                                         vm.autoBrightnessMode.value = !vm.autoBrightnessMode.value
@@ -430,9 +428,7 @@ data class ReaderScreenSpec(
                                 onBackgroundColorAndTextColorApply = { bgColor, txtColor ->
                                     try {
                                         if (bgColor.isNotBlank()) {
-                                            vm.prefFunc.apply {
                                                 vm.setReaderBackgroundColor(vm.backgroundColor.value)
-                                            }
                                         }
                                     } catch (e: Throwable) {
                                     }

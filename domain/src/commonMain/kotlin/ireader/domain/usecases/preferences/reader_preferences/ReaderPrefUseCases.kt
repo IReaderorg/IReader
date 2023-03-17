@@ -10,4 +10,7 @@ data class ReaderPrefUseCases(
         val paragraphIndentUseCase: ParagraphIndentUseCase,
         val scrollIndicatorUseCase: ScrollIndicatorUseCase,
         val immersiveModeUseCase: ImmersiveModeUseCase,
+        val backgroundColorUseCase: BackgroundColorUseCase,
+        val textColorUseCase: TextColorUseCase,
+        val textAlignmentUseCase: TextAlignmentUseCase,
 )

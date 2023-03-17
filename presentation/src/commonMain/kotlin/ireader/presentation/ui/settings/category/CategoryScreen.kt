@@ -157,7 +157,7 @@ private fun ShowEditScreen(
                 query = ""
                 vm.showDialog = false
             },
-            title = { Text(localizeHelper.localize(MR.strings.edit_category)) },
+            title = { Text(localizeHelper.localize(MR.strings.edit_category), color = MaterialTheme.colorScheme.onBackground) },
             text = {
                 AppTextField(
                     query = query,

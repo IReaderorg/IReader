@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.lifecycleScope
 import ireader.core.http.WebViewManger
-import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.domain.usecases.preferences.AndroidReaderPrefUseCases
 import ireader.domain.utils.extensions.brightness
@@ -25,14 +24,9 @@ import kotlin.time.Duration.Companion.seconds
 
 actual class PlatformReaderSettingReader(
        private val context:Context,
-       private val androidReaderPreferences : AndroidReaderPrefUseCases,
        private val webViewManager: WebViewManger
 ) {
-    actual fun ReaderScreenViewModel.toggleReaderMode(enable: Boolean?) {
-        isReaderModeEnable = enable ?: !state.isReaderModeEnable
-        isMainBottomModeEnable = true
-        isSettingModeEnable = false
-    }
+
 
     actual fun ReaderScreenViewModel.saveBrightness(brightness: Float, ) {
         this.brightness.value = brightness
@@ -59,10 +53,6 @@ actual class PlatformReaderSettingReader(
                 showSystemBars()
             }
         }
-    }
-
-    actual fun ReaderScreenViewModel.toggleAutoScrollMode() {
-        autoScrollMode = !autoScrollMode
     }
 
     actual suspend fun ReaderScreenViewModel.readBrightness() {
@@ -96,26 +86,6 @@ actual class PlatformReaderSettingReader(
         }
     }
 
-    actual fun ReaderScreenViewModel.changeBackgroundColor(themeId:Long) {
-        readerColors.firstOrNull { it.id == themeId }?.let { theme ->
-            readerTheme.value = theme
-            val bgColor = theme.backgroundColor
-            val textColor = theme.onTextColor
-            backgroundColor.value = bgColor
-            this.textColor.value = textColor
-            setReaderBackgroundColor(bgColor)
-            setReaderTextColor(textColor)
-        }
-
-    }
-
-    actual fun ReaderScreenViewModel.setReaderBackgroundColor(color: Color) {
-        androidReaderPreferences.backgroundColorUseCase.save(color)
-    }
-
-    actual fun ReaderScreenViewModel.setReaderTextColor(color: Color) {
-        androidReaderPreferences.textColorUseCase.save(color)
-    }
 
     actual fun ReaderScreenViewModel.showSystemBars() {
         context.findComponentActivity()?.showSystemUI()
@@ -173,11 +143,6 @@ actual class PlatformReaderSettingReader(
             }
         }
     }
-
-    actual fun saveTextAlignment(textAlign: PreferenceValues.PreferenceTextAlignment) {
-        androidReaderPreferences.textAlignmentUseCase.save(textAlign)
-    }
-
     @Composable
     actual fun WebView() {
         ireader.presentation.ui.reader.custom.WebView(preconfigureWebView = webViewManager.webView)

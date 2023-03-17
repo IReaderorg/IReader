@@ -13,7 +13,6 @@ import ireader.domain.usecases.download.get.SubscribeDownloadsUseCase
 import ireader.domain.usecases.download.insert.InsertDownload
 import ireader.domain.usecases.download.insert.InsertDownloads
 import ireader.domain.usecases.history.HistoryUseCase
-import ireader.domain.usecases.local.*
 import ireader.domain.usecases.local.book_usecases.FindAllInLibraryBooks
 import ireader.domain.usecases.local.book_usecases.FindBookById
 import ireader.domain.usecases.local.book_usecases.SubscribeBookById
@@ -31,12 +30,10 @@ import ireader.domain.usecases.local.insert_usecases.*
 import ireader.domain.usecases.preferences.reader_preferences.*
 import ireader.domain.usecases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
 import ireader.domain.usecases.remote.*
-import ireader.domain.usecases.services.*
 import ireader.domain.usecases.updates.DeleteAllUpdates
 import ireader.domain.usecases.updates.SubscribeUpdates
 import ireader.domain.usecases.updates.UpdateUseCases
 import org.kodein.di.DI
-import org.kodein.di.bindProvider
 import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 
@@ -116,6 +113,9 @@ val UseCasesInject = DI.Module("usecaseModule") {
         paragraphIndentUseCase = ParagraphIndentUseCase(instance()),
         scrollIndicatorUseCase = ScrollIndicatorUseCase(instance()),
         scrollModeUseCase = ScrollModeUseCase(instance()),
+        textColorUseCase = TextColorUseCase(instance()),
+        textAlignmentUseCase = TextAlignmentUseCase(instance()),
+        backgroundColorUseCase = BackgroundColorUseCase(instance())
     ) }
     bindSingleton<BrowseScreenPrefUseCase> { BrowseScreenPrefUseCase(
         browseLayoutTypeUseCase = BrowseLayoutTypeUseCase(instance())

@@ -26,6 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -164,8 +165,11 @@ fun ReaderText(
                     toggleReaderMode = toggleReaderMode
                 )
             }
+
         }
+
     }
+
 }
 
 @Composable
@@ -433,6 +437,7 @@ private fun ReaderHorizontalScreen(
             ) {
             }
         }
+    Box(modifier = Modifier.fillMaxSize().background(Color.Red))
     }
 }
 

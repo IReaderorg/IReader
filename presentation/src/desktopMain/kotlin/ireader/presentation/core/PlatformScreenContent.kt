@@ -31,7 +31,7 @@ actual fun PlatformModalSheets(
         sheetState = bottomSheetState,
         sheetBackgroundColor = MaterialTheme.colorScheme.background,
         sheetContentColor = MaterialTheme.colorScheme.onBackground,
-        content = content
+        content = content,
     )
 
 }

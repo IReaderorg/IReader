@@ -162,6 +162,7 @@ fun PreferenceRow(
                         overflow = Ellipsis,
                         maxLines = 1,
                         style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 if (subtitle != null) {
                     Text(
@@ -351,6 +352,7 @@ fun SliderPreference(
                     style = MaterialTheme.typography.labelSmall,
                     textAlign = TextAlign.Start,
                     softWrap = true,
+                color = MaterialTheme.colorScheme.onBackground
             )
             if (subtitle != null) {
                 Text(
@@ -401,6 +403,7 @@ fun SliderPreference(
                     style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurface),
                     textAlign = TextAlign.Start,
                     softWrap = true,
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
     }
@@ -500,7 +503,7 @@ fun <Key> ChipChoicePreference(
         IAlertDialog(
                 modifier = Modifier.heightIn(max = 350.dp, min = 200.dp),
                 onDismissRequest = { showDialog = false },
-                title = { Text(title) },
+                title = { Text(title ,color = MaterialTheme.colorScheme.onBackground) },
                 text = {
                     LazyColumn {
                         items(choices.toList()) { (value, text) ->
@@ -523,7 +526,7 @@ fun <Key> ChipChoicePreference(
                                         selected = value == preference.value,
                                         onClick = null,
                                 )
-                                Text(text = text, modifier = Modifier.padding(start = 24.dp))
+                                Text(text = text, modifier = Modifier.padding(start = 24.dp), color = MaterialTheme.colorScheme.onBackground)
                             }
                         }
                     }
@@ -626,7 +629,7 @@ fun <Key> ChoicePreference(
                     showDialog = false
                     onDismiss()
                                    },
-                title = { Text(title) },
+                title = { Text(title,    color = MaterialTheme.colorScheme.onBackground,) },
                 text = {
                     LazyColumn {
                         items(choices.toList()) { (value, text) ->
@@ -763,14 +766,14 @@ fun <Key> ChoicePreference(
                 showDialog = true
                 onShowDialog()
             },
-            enable = enable
+            enable = enable,
 
     )
 
     if (showDialog) {
         IAlertDialog(
                 onDismissRequest = { showDialog = false },
-                title = { Text(title) },
+                title = { Text(title ,color = MaterialTheme.colorScheme.onBackground) },
                 text = {
                     LazyColumn {
                         items(choices.toList()) { (value, text) ->

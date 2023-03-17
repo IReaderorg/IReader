@@ -6,12 +6,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.ExperimentalTextApi
 import ireader.core.http.WebViewManger
 import ireader.core.source.model.Text
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.data.repository.ReaderThemeRepository
 import ireader.domain.models.entities.Chapter
+import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.models.ReaderColors
 import ireader.domain.preferences.models.prefs.readerThemes
 import ireader.domain.preferences.prefs.*
@@ -272,7 +274,33 @@ class ReaderScreenViewModel(
             chapterShell.clear()
         }
     }
+    fun ReaderScreenViewModel.toggleReaderMode(enable: Boolean?) {
+        isReaderModeEnable = enable ?: !state.isReaderModeEnable
+        isMainBottomModeEnable = true
+        isSettingModeEnable = false
+    }
+    fun changeBackgroundColor(themeId:Long) {
+        readerColors.firstOrNull { it.id == themeId }?.let { theme ->
+            readerTheme.value = theme
+            val bgColor = theme.backgroundColor
+            val textColor = theme.onTextColor
+            backgroundColor.value = bgColor
+            this.textColor.value = textColor
+            setReaderBackgroundColor(bgColor)
+            setReaderTextColor(textColor)
+        }
 
+    }
+     fun setReaderBackgroundColor(color: Color) {
+        readerUseCases.backgroundColorUseCase.save(color)
+    }
+
+     fun setReaderTextColor(color: Color) {
+        readerUseCases.textColorUseCase.save(color)
+    }
+    fun saveTextAlignment(textAlign: PreferenceValues.PreferenceTextAlignment) {
+        readerUseCases.textAlignmentUseCase.save(textAlign)
+    }
     suspend fun translate() {
         stateChapter?.let { chapter ->
           translationEnginesManager.get().translate(chapter.content.filterIsInstance<Text>().map { (it as Text).text },translatorOriginLanguage.value,translatorTargetLanguage.value, onSuccess = { result ->

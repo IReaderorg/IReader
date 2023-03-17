@@ -67,7 +67,7 @@ fun BigSizeTextComposable(
 fun MidSizeTextComposable(
     modifier: Modifier = Modifier,
     text: String,
-    color: Color = Color.Unspecified,
+    color: Color = MaterialTheme.colorScheme.onBackground,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
     overflow: TextOverflow? = null,
@@ -82,7 +82,7 @@ fun MidSizeTextComposable(
         fontWeight = fontWeight ?: FontWeight.SemiBold,
         overflow = overflow ?: TextOverflow.Ellipsis,
         textAlign = align ?: TextAlign.Start,
-        maxLines = maxLine
+        maxLines = maxLine,
     )
 }
 
@@ -90,7 +90,7 @@ fun MidSizeTextComposable(
 fun SmallTextComposable(
     modifier: Modifier = Modifier,
     text: String,
-    color: Color = Color.Unspecified,
+    color: Color = MaterialTheme.colorScheme.onBackground,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
     overflow: TextOverflow? = null,
@@ -113,7 +113,7 @@ fun SmallTextComposable(
 fun SuperSmallTextComposable(
     modifier: Modifier = Modifier,
     text: String,
-    color: Color = Color.Unspecified,
+    color: Color = MaterialTheme.colorScheme.onBackground,
     style: TextStyle? = null,
     fontWeight: FontWeight? = null,
     overflow: TextOverflow? = null,
@@ -148,7 +148,7 @@ fun CaptionTextComposable(
     Text(
         modifier = modifier,
         text = text,
-        color = color ?: Color.Unspecified,
+        color = color ?: MaterialTheme.colorScheme.onBackground,
         style = style ?: MaterialTheme.typography.labelSmall,
         fontWeight = fontWeight ?: FontWeight.Normal,
         overflow = overflow ?: TextOverflow.Ellipsis,

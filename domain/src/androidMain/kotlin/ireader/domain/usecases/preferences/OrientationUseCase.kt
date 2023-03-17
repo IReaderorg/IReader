@@ -9,16 +9,5 @@ import ireader.domain.preferences.models.prefs.IReaderVoice
 import ireader.domain.preferences.prefs.AndroidUiPreferences
 
 
-class TextAlignmentUseCase(
-    private val prefs: ReaderPreferences,
-) {
-    fun save(textAlign: PreferenceValues.PreferenceTextAlignment) {
-        prefs.textAlign().set(textAlign)
-    }
-
-    suspend fun read(): PreferenceValues.PreferenceTextAlignment {
-        return prefs.textAlign().get()
-    }
-}
 
 
