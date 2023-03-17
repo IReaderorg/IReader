@@ -91,9 +91,7 @@ actual val DomainModule: DI.Module = DI.Module("domainModulePlatform") {
     bindSingleton {
         AndroidReaderPrefUseCases(
                 selectedFontStateUseCase = SelectedFontStateUseCase(instance(),instance()),
-                backgroundColorUseCase = BackgroundColorUseCase(instance()),
-                textAlignmentUseCase = TextAlignmentUseCase(instance()),
-                textColorUseCase = TextColorUseCase(instance())
+
         )
     }
     bindSingleton<PlatformUiPreferences> {
