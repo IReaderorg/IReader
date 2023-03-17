@@ -13,8 +13,7 @@ actual class LocaleHelper {
     actual fun getLocales() {
     }
 
-    actual val languages: MutableList<String>
-        get() = TODO("Not yet implemented")
+    actual val languages: MutableList<String> = mutableListOf()
 
 
 }

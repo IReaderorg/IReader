@@ -13,4 +13,6 @@ val preferencesInjectModule = DI.Module("preferencesModule") {
     bindSingleton<AppPreferences> { AppPreferences(instance()) }
     bindSingleton<UiPreferences> { UiPreferences(instance()) }
     bindSingleton<LibraryPreferences> { LibraryPreferences(instance()) }
+
+
 }

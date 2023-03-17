@@ -63,7 +63,7 @@ actual val DomainModule: DI.Module = DI.Module("domainModulePlatform") {
         )
     }
     bindProvider { ireader.domain.usecases.history.HistoryPagingUseCase(instance()) }
-    bindProvider { ImportEpub(instance(), instance(), instance()) }
+    bindProvider { ImportEpub(instance(), instance(), instance(), instance()) }
     bindProvider<TTSStateImpl> { ireader.domain.services.tts_service.TTSStateImpl() }
     bindProvider { ireader.domain.services.update_service.UpdateApi(instance()) }
 
@@ -97,6 +97,7 @@ actual val DomainModule: DI.Module = DI.Module("domainModulePlatform") {
 
         )
     }
+    bindSingleton<ImportEpub> { ImportEpub(instance(), instance(),instance(),instance()) }
     bindSingleton<PlatformUiPreferences> {
         new(::AndroidUiPreferences)
     }

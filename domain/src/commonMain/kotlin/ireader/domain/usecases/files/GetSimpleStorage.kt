@@ -15,4 +15,7 @@ interface GetSimpleStorage {
     fun checkPermission(): Boolean
     fun createIReaderDir()
     fun createNoMediaFile()
+    fun clearImageCache()
+    fun clearCache()
+    fun getCacheSize() : String
 }

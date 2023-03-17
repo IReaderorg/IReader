@@ -6,6 +6,7 @@ import okio.buffer
 import okio.gzip
 import okio.sink
 import okio.source
+import java.io.InputStream
 
 class AndroidFileSaver(
         private val context: Context
@@ -27,6 +28,10 @@ class AndroidFileSaver(
         return context!!.contentResolver.openInputStream(uri.androidUri)!!.source().gzip().buffer().use {
             it.readByteArray()
         }
+    }
+
+    override fun readStream(uri: Uri): InputStream {
+        return context.contentResolver.openInputStream(uri.androidUri)!!
     }
 
 }

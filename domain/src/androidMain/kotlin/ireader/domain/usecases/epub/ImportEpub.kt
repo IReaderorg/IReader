@@ -1,13 +1,13 @@
 package ireader.domain.usecases.epub
 
-import android.content.Context
-import android.net.Uri
 import ireader.core.source.LocalSource
 import ireader.core.source.model.MangaInfo
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
+import ireader.domain.usecases.file.FileSaver
+import ireader.domain.usecases.files.GetSimpleStorage
 import nl.siegmann.epublib.epub.EpubReader
 import org.jsoup.Jsoup
 import org.jsoup.nodes.TextNode
@@ -17,24 +17,25 @@ import java.io.File
 import java.io.InputStream
 import javax.xml.parsers.DocumentBuilderFactory
 
-class ImportEpub(
+actual class ImportEpub(
     private val bookRepository: BookRepository,
     private val chapterRepository: ChapterRepository,
-    val context: Context,
+    private val fileSaver: FileSaver,
+    private val simpleStorage: GetSimpleStorage
 ) {
 
 
-    private fun getEpubReader(uri: Uri): nl.siegmann.epublib.domain.Book? {
-        return context.contentResolver.openInputStream(uri)?.use {
+    private fun getEpubReader(uri: ireader.domain.models.common.Uri): nl.siegmann.epublib.domain.Book? {
+        return fileSaver.readStream(uri) .let {
             EpubReader().readEpub(it)
         }
     }
 
-    suspend fun parse(uri: Uri) {
+    suspend fun parse(uri: ireader.domain.models.common.Uri) {
         val epub = getEpubReader(uri) ?: throw Exception()
 
         val key = epub.metadata?.titles?.firstOrNull() ?: throw Exception("Unknown novel")
-        val imgFile = File(context.filesDir, "library_covers/$key")
+        val imgFile = File(simpleStorage.ireaderCacheDir(), "library_covers/$key")
         bookRepository.delete(key)
         // Insert new book data
         val bookId = Book(
@@ -178,9 +179,9 @@ class ImportEpub(
     }
 
     fun getCacheSize() : String {
-        return ireader.domain.utils.getCacheSize(context = context)
+        return simpleStorage.getCacheSize()
     }
     fun removeCache() {
-        context.cacheDir.deleteRecursively()
+        simpleStorage.clearCache()
     }
 }

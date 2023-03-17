@@ -32,5 +32,17 @@ class DesktopGetSimpleStorage : GetSimpleStorage {
 
     }
 
+    override fun clearImageCache() {
+
+    }
+
+    override fun clearCache() {
+
+    }
+
+    override fun getCacheSize(): String {
+        return "Unknown"
+    }
+
 
 }

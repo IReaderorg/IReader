@@ -1,18 +1,17 @@
 package ireader.presentation.ui.settings.advance
 
-import android.content.Intent
+
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import ireader.domain.data.repository.CategoryRepository
 import ireader.domain.data.repository.ThemeRepository
-import ireader.domain.image.cache.CoverCache
 import ireader.domain.models.entities.Category
 import ireader.domain.preferences.models.getDefaultFont
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.PlatformUiPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.usecases.epub.ImportEpub
-import ireader.domain.usecases.preferences.AndroidReaderPrefUseCases
+import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
@@ -22,18 +21,17 @@ import ireader.presentation.ui.settings.reader.SettingState
 
 
 class AdvanceSettingViewModel(
-        val deleteUseCase: ireader.domain.usecases.local.DeleteUseCase,
-        private val prefUseCases: ReaderPrefUseCases,
-        val coverCache: CoverCache,
-        val importEpub: ImportEpub,
-        private val readerPreferences: ReaderPreferences,
-        private val androidReaderPreferences: PlatformUiPreferences,
-        private val themeRepository: ThemeRepository,
-        private val categoryRepository: CategoryRepository,
-        private val androidUiPreferences: AndroidReaderPrefUseCases,
-        private val appPreferences: AppPreferences,
+    val deleteUseCase: ireader.domain.usecases.local.DeleteUseCase,
+    private val prefUseCases: ReaderPrefUseCases,
+    val getSimpleStorage: GetSimpleStorage,
+    val importEpub: ImportEpub,
+    private val readerPreferences: ReaderPreferences,
+    private val androidReaderPreferences: PlatformUiPreferences,
+    private val themeRepository: ThemeRepository,
+    private val categoryRepository: CategoryRepository,
+    private val appPreferences: AppPreferences,
 
-        ) : BaseViewModel() {
+    ) : BaseViewModel() {
 
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
@@ -53,7 +51,7 @@ class AdvanceSettingViewModel(
 
     fun deleteDefaultSettings() {
         scope.launchIO {
-            androidUiPreferences.selectedFontStateUseCase.saveFont(getDefaultFont())
+            androidReaderPreferences.font()?.set(getDefaultFont())
             prefUseCases.fontHeightUseCase.save(25)
             prefUseCases.fontSizeStateUseCase.save(18)
             prefUseCases.paragraphDistanceUseCase.save(2)
@@ -65,17 +63,7 @@ class AdvanceSettingViewModel(
         }
     }
 
-    fun onEpubImportRequested(onStart: (Intent) -> Unit) {
-        val mimeTypes = arrayOf("application/epub+zip")
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-            .addCategory(Intent.CATEGORY_OPENABLE)
-            .setType("application/epub+zip")
-            .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
-            .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
-        onStart(intent)
-    }
 
     fun resetCategories() {
         scope.launchIO {

@@ -6,7 +6,6 @@ import ireader.presentation.core.ui.SecuritySettingViewModel
 import ireader.presentation.imageloader.coil.CoilLoaderFactory
 import ireader.presentation.ui.home.tts.TTSViewModel
 import ireader.presentation.ui.reader.viewmodel.PlatformReaderSettingReader
-import ireader.presentation.ui.settings.advance.AdvanceSettingViewModel
 import ireader.presentation.ui.video.VideoScreenViewModel
 import ireader.presentation.ui.video.component.PlayerCreator
 import ireader.presentation.ui.video.component.core.MediaState
@@ -20,7 +19,7 @@ actual val presentationPlatformModule: DI.Module = DI.Module("androidPresentatio
     bindFactory< VideoScreenViewModel.Param, VideoScreenViewModel>  { VideoScreenViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),it) }
     bindFactory< WebViewPageModel.Param, WebViewPageModel> { WebViewPageModel(instance(),instance(),instance(),instance(),instance(),it,instance(),instance()) }
 
-    bindProvider  { AdvanceSettingViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance()) }
+
 
     bindFactory< TTSViewModel.Param, TTSViewModel>  { TTSViewModel(instance(),it,instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance()) }
 

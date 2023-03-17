@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Environment
 import androidx.activity.ComponentActivity
 import androidx.documentfile.provider.DocumentFile
+import coil.imageLoader
 import com.anggrayudi.storage.SimpleStorage
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.anggrayudi.storage.file.DocumentFileCompat
@@ -97,6 +98,18 @@ class AndroidGetSimpleStorage(
                 DocumentFile.fromFile(mainIReaderDir).createFile("", ".nomedia")
             }
         }
+    }
+
+    override fun clearImageCache() {
+        context.imageLoader.memoryCache?.clear()
+    }
+
+    override fun clearCache() {
+        context.cacheDir.deleteRecursively()
+    }
+
+    override fun getCacheSize(): String {
+        return ireader.domain.utils.getCacheSize(context = context)
     }
 
     fun get(dirName: String): DocumentFile {

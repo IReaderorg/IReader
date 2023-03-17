@@ -1,12 +1,10 @@
 package ireader.presentation.ui.settings.advance
 
-import android.app.Activity
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.log.Log
@@ -18,30 +16,24 @@ import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import kotlinx.serialization.ExperimentalSerializationApi
-
 @OptIn(ExperimentalSerializationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AdvanceSettings(
-        vm: AdvanceSettingViewModel,
-        padding: PaddingValues
+    vm: AdvanceSettingViewModel,
+    padding: PaddingValues
 ) {
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     val globalScope = LocalGlobalCoroutineScope.currentOrThrow
-    val onEpub =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
-            if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
-                val uri = resultIntent.data!!.data!!
-                globalScope.launchIO {
-                    try {
-                        vm.importEpub.parse(uri)
-                        vm.showSnackBar(UiText.MStringResource(MR.strings.success))
-                    } catch (e: Throwable) {
-                        Log.error(e, "epub parser throws an exception")
-                        vm.showSnackBar(UiText.ExceptionString(e))
-                    }
-                }
-            }
+    val showImport = remember { mutableStateOf(false) }
+    OnShowImportEpub(showImport.value, onFileSelected = {
+        try {
+            vm.importEpub.parse(it)
+            vm.showSnackBar(UiText.MStringResource(MR.strings.success))
+        } catch (e: Throwable) {
+            Log.error(e, "epub parser throws an exception")
+            vm.showSnackBar(UiText.ExceptionString(e))
         }
+    })
 
     val items = remember {
         listOf<Components>(
@@ -86,7 +78,7 @@ fun AdvanceSettings(
             Components.Row(
                 title = localizeHelper.localize(MR.strings.clear_all_cover_cache),
                 onClick = {
-                    vm.coverCache.clearMemoryCache()
+                    vm.getSimpleStorage.clearImageCache()
                     vm.showSnackBar(UiText.DynamicString("Clear was cleared."))
                 }
             ),
@@ -114,9 +106,7 @@ fun AdvanceSettings(
                 title = localizeHelper.localize(MR.strings.import_epub),
                 onClick = {
 
-                    vm.onEpubImportRequested { intent: Intent ->
-                        onEpub.launch(intent)
-                    }
+                    showImport.value = true
 
                 }
             )
