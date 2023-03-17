@@ -1,15 +1,14 @@
 package ireader.presentation.ui.component.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-
+import androidx.compose.ui.unit.dp
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -27,19 +26,27 @@ actual fun PlatformAlertDialog(
     iconContentColor: Color,
     titleContentColor: Color,
     textContentColor: Color
-){
-    androidx.compose.material.AlertDialog(
-            text = text,
-            modifier = modifier,
-            title = title,
-            shape = shape,
-            backgroundColor = containerColor,
-            contentColor = textContentColor,
+) {
+
+    AlertDialog(
+        text = {
+            Box(modifier = Modifier.width(350.dp).height(300.dp)) {
+                if (text != null) {
+                    text()
+                }
+            }
+
+        },
+        modifier = modifier,
+        title = title,
+        shape = shape,
+        backgroundColor = containerColor,
+        contentColor = textContentColor,
         buttons = {
             Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier,
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 confirmButton()
                 if (dismissButton != null) {
