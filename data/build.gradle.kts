@@ -97,13 +97,13 @@ android {
             getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
         }
     }
-    sqldelight {
-        database("Database") {
-            packageName = "ir.kazemcodes.infinityreader"
-            dialect = "sqlite:3.24"
-            version = 1
-            schemaOutputDirectory = file("src/main/sqldelight/databases")
-            verifyMigrations = true
-        }
+
+}
+sqldelight {
+    database("Database") {
+        packageName = "ir.kazemcodes.infinityreader"
+        dialect = "sqlite:3.24"
+         schemaOutputDirectory = file("src/commonMain/sqldelight/databases")
+         verifyMigrations = true
     }
 }

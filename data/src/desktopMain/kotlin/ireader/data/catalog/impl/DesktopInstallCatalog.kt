@@ -6,16 +6,13 @@ import ireader.domain.catalogs.service.CatalogInstaller
 import ireader.domain.models.entities.CatalogRemote
 import ireader.domain.models.prefs.PreferenceValues
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 
-class DesktopInstallCatalog: InstallCatalog {
-    override fun await(catalog: CatalogRemote): Flow<InstallStep> {
-        return flow {
+class DesktopInstallCatalog(
+    private val installer: DesktopCatalogInstaller,
+): InstallCatalog {
+    override fun await(catalog: CatalogRemote): Flow<InstallStep> = installer.install(catalog)
 
-        }
-    }
 
-    override fun await(type: PreferenceValues.Installer): CatalogInstaller {
-        TODO("Not yet implemented")
-    }
+
+    override fun await(type: PreferenceValues.Installer): CatalogInstaller = installer
 }

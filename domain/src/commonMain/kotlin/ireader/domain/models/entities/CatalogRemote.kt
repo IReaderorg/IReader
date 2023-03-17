@@ -16,6 +16,7 @@ data class CatalogRemote(
     val lang: String,
     val pkgUrl: String,
     val iconUrl: String,
+    val jarUrl: String,
     val nsfw: Boolean,
 ) : Catalog() {
     companion object {

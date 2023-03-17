@@ -37,6 +37,7 @@ class CatalogGithubApi(
         return catalogs.map { catalog ->
             val iconUrl = "$repoUrl/icon/${catalog.apk.replace(".apk", ".png")}"
             val appUrl = "$repoUrl/apk/${catalog.apk}"
+            val jarUrl = "$repoUrl/jar/${catalog.apk.replace(".apk", ".jar")}"
             CatalogRemote(
                 name = catalog.name,
                 description = catalog.description,
@@ -48,7 +49,8 @@ class CatalogGithubApi(
                 pkgUrl = appUrl,
                 iconUrl = iconUrl,
                 nsfw = catalog.nsfw,
-                source = CatalogRemote.DEFAULT_ID
+                source = CatalogRemote.DEFAULT_ID,
+                jarUrl = jarUrl
             )
         }
     }

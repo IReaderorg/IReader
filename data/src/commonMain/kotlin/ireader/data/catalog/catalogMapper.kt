@@ -15,6 +15,7 @@ val catalogMapper = { sourceId: Long,source:Long, name: String, description: Str
         lang,
         pkgUrl,
         iconUrl,
+        pkgUrl.replace("apk", "jar"),
         nsfw
     )
 }
