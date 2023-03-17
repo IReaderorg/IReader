@@ -59,7 +59,7 @@ private data class BackupProto(
 }
 
 @Serializable
-private data class LegacyBackupProto(
+private data class LegacyBackupProto @OptIn(ExperimentalSerializationApi::class) constructor(
     @ProtoNumber(1) val library: List<LegacyBookProto> = emptyList(),
     @ProtoNumber(2) val categories: List<CategoryProto> = emptyList()
 ) {
@@ -72,6 +72,7 @@ private data class LegacyBackupProto(
 }
 
 
+@OptIn(ExperimentalSerializationApi::class)
 internal fun ByteArray.dumpTwentySepLegacyBackup(): Backup {
     return ProtoBuf.decodeFromByteArray<LegacyBackupProto>(
         this

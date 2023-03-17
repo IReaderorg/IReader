@@ -8,15 +8,12 @@ import androidx.documentfile.provider.DocumentFile
 import com.anggrayudi.storage.SimpleStorage
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.anggrayudi.storage.file.DocumentFileCompat
-import ireader.domain.preferences.prefs.UiPreferences
-
 import java.io.File
 
 
-class GetSimpleStorage(
+class AndroidGetSimpleStorage(
     private val context: Context,
-    private val uiPreferences: UiPreferences
-) {
+) : GetSimpleStorage {
 
     lateinit var storage: SimpleStorage
     lateinit var simpleStorageHelper: SimpleStorageHelper
@@ -26,31 +23,31 @@ class GetSimpleStorage(
         simpleStorageHelper = SimpleStorageHelper(activity, savedState)
     }
 
-    val mainIReaderDir: File = File(Environment.getExternalStorageDirectory(), "IReader/")
+    override val mainIReaderDir: File = File(Environment.getExternalStorageDirectory(), "IReader/")
 
 
 
-    fun ireaderDirectory(dirName: String): File =
+    override fun ireaderDirectory(dirName: String): File =
         File(Environment.getExternalStorageDirectory(), "IReader/${dirName}/")
 
-    fun extensionDirectory(): File =
+    override fun extensionDirectory(): File =
         File(Environment.getExternalStorageDirectory(), "IReader/Extensions/")
 
-    fun cacheExtensionDir(context:Context) = File(context.cacheDir,"IReader/Extensions/")
-    fun ireaderCacheDir() = File(context.cacheDir,"IReader/")
+    override fun cacheExtensionDir() = File(context.cacheDir,"IReader/Extensions/")
+    override fun ireaderCacheDir() = File(context.cacheDir,"IReader/")
 
-    val backupDirectory: File =
+    override val backupDirectory: File =
         File(Environment.getExternalStorageDirectory(), "IReader/Backups/")
-    val booksDirectory: File =
+    override val booksDirectory: File =
         File(Environment.getExternalStorageDirectory(), "IReader/Books/")
-    val automaticBackupDirectory: File =
+    override  val automaticBackupDirectory: File =
         File(Environment.getExternalStorageDirectory(), "IReader/Backups/Automatic/")
 
     init {
 
     }
 
-    fun checkPermission(): Boolean {
+    override fun checkPermission(): Boolean {
         if (!mainIReaderDir.isDirectory) {
             mainIReaderDir.deleteRecursively()
         }
@@ -83,7 +80,7 @@ class GetSimpleStorage(
         return true
     }
 
-    fun createIReaderDir() {
+    override fun createIReaderDir() {
         kotlin.runCatching {
             if (!mainIReaderDir.exists()) {
                 DocumentFile.fromFile(Environment.getExternalStorageDirectory())
@@ -92,7 +89,7 @@ class GetSimpleStorage(
         }
     }
 
-    fun createNoMediaFile() {
+    override fun createNoMediaFile() {
 
         kotlin.runCatching {
             val noMediaFile = File(mainIReaderDir, ".nomedia")

@@ -5,6 +5,7 @@ import java.io.File
 val AppDir : File = getCacheDir()
 
 val ExtensionDir = File(AppDir, "/Extensions/")
+val BackupDir = File(AppDir, "/Backup/")
 
 enum class OperatingSystem {
     Android, IOS, Windows, Linux, MacOS, Unknown

@@ -10,6 +10,7 @@ import ireader.core.source.model.Subtitle
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
+import ireader.domain.usecases.files.AndroidGetSimpleStorage
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.utils.extensions.withUIContext
@@ -30,7 +31,7 @@ class VideoScreenViewModel(
     val remoteUseCases: RemoteUseCases,
     val getLocalCatalog: GetLocalCatalog,
     val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
-    val simpleStorage: GetSimpleStorage,
+    val simpleStorage: AndroidGetSimpleStorage,
     val mediaState: MediaState,
     val param: Param
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {

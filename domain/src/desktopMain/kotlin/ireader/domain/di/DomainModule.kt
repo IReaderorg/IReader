@@ -7,6 +7,8 @@ import ireader.domain.preferences.prefs.DesktopUiPreferences
 import ireader.domain.preferences.prefs.PlatformUiPreferences
 import ireader.domain.usecases.epub.EpubCreator
 import ireader.domain.usecases.file.DesktopFileSaver
+import ireader.domain.usecases.files.DesktopGetSimpleStorage
+import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.usecases.reader.ScreenAlwaysOn
 import ireader.domain.usecases.reader.ScreenAlwaysOnImpl
 import ireader.domain.usecases.services.*
@@ -23,6 +25,12 @@ actual val DomainModule: DI.Module = org.kodein.di.DI.Module("domainModulePlatfo
     }
     bindSingleton {
        DesktopFileSaver()
+    }
+    bindSingleton {
+        DesktopGetSimpleStorage()
+    }
+    bindSingleton<GetSimpleStorage> {
+        DesktopGetSimpleStorage()
     }
     bindSingleton<PlatformUiPreferences> {
         new(::DesktopUiPreferences)

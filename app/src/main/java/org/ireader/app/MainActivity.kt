@@ -22,7 +22,7 @@ import com.seiko.imageloader.LocalImageLoader
 import ireader.core.http.toast
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.backup.AutomaticBackup
-import ireader.domain.usecases.files.GetSimpleStorage
+import ireader.domain.usecases.files.AndroidGetSimpleStorage
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.Args
 import ireader.i18n.SHORTCUTS.SHORTCUT_DETAIL
@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     DIAware {
 
 
-    private val getSimpleStorage: GetSimpleStorage by instance()
+    private val getSimpleStorage: AndroidGetSimpleStorage by instance()
     private val uiPreferences: UiPreferences by instance()
     val initializers: AppInitializers by instance<AppInitializers>()
     private val automaticBackup: AutomaticBackup by instance()

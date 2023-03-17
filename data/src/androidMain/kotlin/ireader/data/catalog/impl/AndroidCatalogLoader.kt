@@ -31,11 +31,11 @@ import java.io.File
  * Class that handles the loading of the catalogs installed in the system and the app.
  */
 class AndroidCatalogLoader(
-        private val context: Context,
-        private val httpClients: HttpClients,
-        val uiPreferences: UiPreferences,
-        val simpleStorage: GetSimpleStorage,
-        val localizeHelper: LocalizeHelper,
+    private val context: Context,
+    private val httpClients: HttpClients,
+    val uiPreferences: UiPreferences,
+    val simpleStorage: GetSimpleStorage,
+    val localizeHelper: LocalizeHelper,
 ) : CatalogLoader {
 
     private val pkgManager = context.packageManager
@@ -67,7 +67,7 @@ class AndroidCatalogLoader(
             .map { File(it, it.name + ".apk") }
             .filter { it.exists() }
 
-        val cachePkgs = simpleStorage.cacheExtensionDir(context).listFiles()
+        val cachePkgs = simpleStorage.cacheExtensionDir().listFiles()
             .orEmpty()
             .filter { it.isDirectory }
             .map { File(it, it.name + ".apk") }
@@ -110,7 +110,7 @@ class AndroidCatalogLoader(
      */
     override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? {
         val file = File(simpleStorage.extensionDirectory(), "${pkgName}/${pkgName}.apk")
-        val cacheFile = File(simpleStorage.cacheExtensionDir(context), "${pkgName}/${pkgName}.apk")
+        val cacheFile = File(simpleStorage.cacheExtensionDir(), "${pkgName}/${pkgName}.apk")
         val finalFile = if (file.canRead() && file.canRead()) {
             file
         } else {

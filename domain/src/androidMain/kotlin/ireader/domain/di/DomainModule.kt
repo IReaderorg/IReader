@@ -15,6 +15,8 @@ import ireader.domain.usecases.backup.AutomaticBackup
 import ireader.domain.usecases.epub.EpubCreator
 import ireader.domain.usecases.epub.ImportEpub
 import ireader.domain.usecases.file.AndroidFileSaver
+import ireader.domain.usecases.files.AndroidGetSimpleStorage
+import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.usecases.preferences.*
 import ireader.domain.usecases.reader.ScreenAlwaysOn
 import ireader.domain.usecases.reader.ScreenAlwaysOnImpl
@@ -80,7 +82,8 @@ actual val DomainModule: DI.Module = DI.Module("domainModulePlatform") {
                 instance()
         )
     }
-    bindSingleton { ireader.domain.usecases.files.GetSimpleStorage(instance(), instance()) }
+    bindSingleton<GetSimpleStorage>{ AndroidGetSimpleStorage(instance()) }
+    bindSingleton<AndroidGetSimpleStorage>{ AndroidGetSimpleStorage(instance()) }
     bindSingleton<DefaultNotificationHelper> { new(::DefaultNotificationHelper) }
     bindProvider<ScreenAlwaysOn> {2
         ScreenAlwaysOnImpl(instance())

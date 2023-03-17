@@ -24,6 +24,7 @@ import ireader.presentation.ui.reader.viewmodel.ReaderScreenStateImpl
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import ireader.presentation.ui.settings.MainSettingScreenViewModel
 import ireader.presentation.ui.settings.appearance.AppearanceViewModel
+import ireader.presentation.ui.settings.backups.BackupScreenViewModel
 import ireader.presentation.ui.settings.category.CategoryScreenViewModel
 import ireader.presentation.ui.settings.downloader.DownloadStateImpl
 import ireader.presentation.ui.settings.downloader.DownloaderViewModel
@@ -41,7 +42,7 @@ val PresentationModules = DI.Module("presentationModule") {
     bindSingleton<LibraryStateImpl> { LibraryStateImpl() }
     bindSingleton<CatalogsStateImpl> { CatalogsStateImpl() }
     bindSingleton<UpdateStateImpl> { UpdateStateImpl() }
-
+    bindProvider  { BackupScreenViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance()) }
     bindProvider<ExploreStateImpl> { ExploreStateImpl() }
     bindProvider<GlobalSearchStateImpl> { GlobalSearchStateImpl() }
 

@@ -24,10 +24,10 @@ import kotlin.time.Duration.Companion.hours
 
 
 class AutomaticBackup(
-        val createBackup: CreateBackup,
-        private val uiPreferences: UiPreferences,
-        val simpleStorage: GetSimpleStorage,
-        private val context: Context
+    val createBackup: CreateBackup,
+    private val uiPreferences: UiPreferences,
+    val simpleStorage: GetSimpleStorage,
+    private val context: Context
 ) {
     suspend fun initialize() {
         create(false)

@@ -1,81 +1,99 @@
 package ireader.presentation.ui.settings.backups
 
-import android.app.Activity
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.currentOrThrow
-import ireader.domain.models.common.Uri
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
-
 import ireader.i18n.resources.MR
+import ireader.presentation.ui.component.components.ChoicePreference
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
-import ireader.presentation.ui.component.components.ChoicePreference
 import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackUpAndRestoreScreen(
-        modifier: Modifier = Modifier,
-        onBackStack: () -> Unit,
-        snackbarHostState: SnackbarHostState,
-        vm: BackupScreenViewModel,
-        scaffoldPadding: PaddingValues
+    modifier: Modifier = Modifier,
+    onBackStack: () -> Unit,
+    snackbarHostState: SnackbarHostState,
+    vm: BackupScreenViewModel,
+    scaffoldPadding: PaddingValues
 ) {
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     val globalScope = LocalGlobalCoroutineScope.currentOrThrow
-    val onRestore =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
-            if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
-                val uri = resultIntent.data!!.data!!
-                globalScope.launchIO {
-                    vm.restoreBackup.restoreFrom(Uri(uri), onError = {
-                        vm.showSnackBar(it)
-                    }, onSuccess = {
-                        vm.showSnackBar((UiText.MStringResource(MR.strings.restoredSuccessfully)))
-                    })
-                }
+    val onShowRestore = remember { mutableStateOf(false) }
+    val onShowBackup = remember { mutableStateOf(false) }
+    OnShowRestore(onShowRestore.value, onFileSelected = {
+        it?.let {files ->
+            globalScope.launchIO {
+                vm.restoreBackup.restoreFrom(it, onError = {
+                    vm.showSnackBar(it)
+                }, onSuccess = {
+                    vm.showSnackBar((UiText.MStringResource(MR.strings.restoredSuccessfully)))
+                })
             }
         }
-    val onBackup =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
-            if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
-                val uri = resultIntent.data!!.data!!
-                Uri(uri)
-                globalScope.launchIO {
-                    val result = vm.createBackup.saveTo(Uri(uri), onError = {
-                        vm.showSnackBar(it)
-                    }, onSuccess = {
-                        vm.showSnackBar((UiText.MStringResource(MR.strings.backup_created_successfully)))
-                    })
-                }
+    })
+    OnShowBackup(onShowBackup.value, onFileSelected = {
+        it?.let {files ->
+            globalScope.launchIO {
+                vm.createBackup.saveTo(it, onError = {
+                    vm.showSnackBar(it)
+                }, onSuccess = {
+                    vm.showSnackBar((UiText.MStringResource(MR.strings.backup_created_successfully)))
+                })
             }
         }
+    })
+
+
+//    val onRestore =
+//        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
+//            if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
+//                val uri = resultIntent.data!!.data!!
+//                globalScope.launchIO {
+//                    vm.restoreBackup.restoreFrom(Uri(uri), onError = {
+//                        vm.showSnackBar(it)
+//                    }, onSuccess = {
+//                        vm.showSnackBar((UiText.MStringResource(MR.strings.restoredSuccessfully)))
+//                    })
+//                }
+//            }
+//        }
+//    val onBackup =
+//        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
+//            if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
+//                val uri = resultIntent.data!!.data!!
+//                Uri(uri)
+//                globalScope.launchIO {
+//                    val result = vm.createBackup.saveTo(Uri(uri), onError = {
+//                        vm.showSnackBar(it)
+//                    }, onSuccess = {
+//                        vm.showSnackBar((UiText.MStringResource(MR.strings.backup_created_successfully)))
+//                    })
+//                }
+//            }
+//        }
     val items = remember {
         listOf<Components>(
             Components.Row(
                 localizeHelper.localize(MR.strings.create_backup), onClick = {
-                    vm.onLocalBackupRequested { intent: Intent ->
-                        onBackup.launch(intent)
-                    }
+                    onShowBackup.value = true
+
                 }
             ),
             Components.Row(
                 localizeHelper.localize(MR.strings.restore), onClick = {
+                    onShowRestore.value = true
 
-                    vm.onRestoreBackupRequested { intent: Intent ->
-                        onRestore.launch(intent)
-                    }
                 }
             ),
             Components.Header(localizeHelper.localize(MR.strings.automatic_backup)),
