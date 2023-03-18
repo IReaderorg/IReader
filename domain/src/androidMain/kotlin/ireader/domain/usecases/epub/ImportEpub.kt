@@ -31,7 +31,7 @@ actual class ImportEpub(
         }
     }
 
-    suspend fun parse(uri: ireader.domain.models.common.Uri) {
+    actual suspend fun parse(uri: ireader.domain.models.common.Uri) {
         val epub = getEpubReader(uri) ?: throw Exception()
 
         val key = epub.metadata?.titles?.firstOrNull() ?: throw Exception("Unknown novel")
@@ -178,10 +178,10 @@ actual class ImportEpub(
         }
     }
 
-    fun getCacheSize() : String {
+    actual fun getCacheSize() : String {
         return simpleStorage.getCacheSize()
     }
-    fun removeCache() {
+    actual fun removeCache() {
         simpleStorage.clearCache()
     }
 }
