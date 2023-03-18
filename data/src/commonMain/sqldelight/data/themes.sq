@@ -74,4 +74,4 @@ WHERE _id = :id;
 
 
 selectLastInsertedRowId:
-SELECT last_insert_rowid();
+SELECT LAST_INSERT_ROWID();

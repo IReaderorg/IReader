@@ -1,9 +1,9 @@
 package ireader.data.chapter
 
 import ireader.data.core.DatabaseHandler
-import ireader.domain.models.entities.Chapter
 import ireader.data.util.toDB
 import ireader.domain.data.repository.ChapterRepository
+import ireader.domain.models.entities.Chapter
 import kotlinx.coroutines.flow.Flow
 
 
@@ -69,7 +69,7 @@ class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
 
 
     override suspend fun insertChapter(chapter: Chapter): Long {
-        return handler.awaitOne {
+        return handler.awaitOne(inTransaction = true) {
                 chapterQueries.upsert(
                     chapter.id.toDB(),
                     chapter.bookId,

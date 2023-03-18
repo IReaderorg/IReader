@@ -32,6 +32,6 @@ actual val presentationPlatformModule: DI.Module = DI.Module("androidPresentatio
     bindSingleton { LocaleHelper(instance(),instance()) }
     bindSingleton { PlatformHelper(instance()) }
     bindSingleton<CoilLoaderFactory> { CoilLoaderFactory(instance(), instance(), instance(), instance()) }
-    bindProvider<PlatformReaderSettingReader> { PlatformReaderSettingReader(instance(),instance()) }
+    bindSingleton<PlatformReaderSettingReader> { PlatformReaderSettingReader(instance(),instance()) }
 
 }

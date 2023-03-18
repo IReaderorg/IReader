@@ -250,4 +250,4 @@ DELETE FROM book WHERE book._id = :bookId;
 
 
 selectLastInsertedRowId:
-SELECT last_insert_rowid();
+SELECT LAST_INSERT_ROWID();

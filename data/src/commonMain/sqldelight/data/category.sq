@@ -99,4 +99,4 @@ UPDATE categories SET
 flags = coalesce(?, flags);
 
 selectLastInsertedRowId:
-SELECT last_insert_rowid();
+SELECT LAST_INSERT_ROWID();

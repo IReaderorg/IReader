@@ -8,19 +8,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -32,15 +23,11 @@ import ireader.core.source.Source
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ChapterDisplayMode
-import ireader.i18n.localize
-import ireader.i18n.resources.MR
 import ireader.presentation.ui.book.components.*
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.components.ChapterRow
 import ireader.presentation.ui.component.list.scrollbars.IVerticalFastScroller
 import ireader.presentation.ui.component.reusable_composable.AppTextField
-import ireader.presentation.ui.core.utils.isScrolledToEnd
-import ireader.presentation.ui.core.utils.isScrollingUp
 import kotlinx.coroutines.launch
 
 @OptIn(
@@ -50,20 +37,15 @@ import kotlinx.coroutines.launch
         )
 @Composable
 fun BookDetailScreen(
-        modifier: Modifier = Modifier,
         vm: BookDetailViewModel,
-        modalBottomSheetState: ModalBottomSheetState,
         onSummaryExpand: () -> Unit,
-        onSwipeRefresh: () -> Unit,
         book: Book,
         onTitle: (String) -> Unit,
-        snackBarHostState: SnackbarHostState,
         source: Source?,
         isSummaryExpanded: Boolean,
         appbarPadding: Dp,
         onItemClick: (Chapter) -> Unit,
         onLongItemClick: (Chapter) -> Unit,
-        onRead: () -> Unit,
         onSortClick: () -> Unit,
         chapters: State<List<Chapter>>,
         scrollState: LazyListState,
@@ -72,45 +54,11 @@ fun BookDetailScreen(
         onWebView: () -> Unit,
         onCopyTitle: (bookTitle: String) -> Unit,
 ) {
-    val refreshing = remember {
-        derivedStateOf { vm.detailIsLoading || vm.chapterIsLoading }
-    }
-    val swipeRefreshState =
-            rememberPullRefreshState(refreshing = refreshing.value, onRefresh = {
-                onSwipeRefresh()
-            })
+
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    Scaffold(
-            modifier = Modifier.pullRefresh(swipeRefreshState),
-            floatingActionButton = {
-                if (!vm.hasSelection) {
-                    ExtendedFloatingActionButton(
-                            text = {
-                                val id = if (chapters.value.any { it.read }) {
-                                    MR.strings.resume
-                                } else {
-                                    MR.strings.start
-                                }
-                                Text(text = localize(id))
-                            },
-                            icon = {
-                                Icon(
-                                        imageVector = Icons.Default.PlayArrow,
-                                        contentDescription = null
-                                )
-                            },
-                            onClick = onRead,
-                            expanded = scrollState.isScrollingUp() || scrollState.isScrolledToEnd(),
-                            modifier = Modifier,
-                            shape = CircleShape
 
-                    )
-                }
-            }
-    ) {
-        Box {
 
             if (vm.showDialog) {
                 EditInfoAlertDialog(onStateChange = {
@@ -213,12 +161,7 @@ fun BookDetailScreen(
                 }
 
             }
-            PullRefreshIndicator(
-                    refreshing.value,
-                    swipeRefreshState,
-                    Modifier.align(Alignment.TopCenter)
-            )
-        }
+
+
     }
-}
 

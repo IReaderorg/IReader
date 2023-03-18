@@ -1,11 +1,11 @@
 package ireader.data.repository
 
 
+import ireader.data.core.DatabaseHandler
 import ireader.domain.data.repository.ReaderThemeRepository
 import ireader.domain.data.repository.ThemeRepository
 import ireader.domain.models.theme.*
 import kotlinx.coroutines.flow.Flow
-import ireader.data.core.DatabaseHandler
 
 class ThemeRepositoryImpl(
     private val handler: DatabaseHandler,
@@ -15,7 +15,7 @@ class ThemeRepositoryImpl(
     }
 
     override suspend fun insert(theme: CustomTheme): Long {
-        return handler.awaitOne {
+        return handler.awaitOne(inTransaction = true) {
             theme.let { theme ->
                 themesQueries.upsert(
                     primary = theme.materialColor.primary,
@@ -127,7 +127,7 @@ class ReaderThemeRepositoryImpl(
     }
 
     override suspend fun insert(theme: ReaderTheme): Long {
-        return handler.awaitOne {
+        return handler.awaitOne(inTransaction = true) {
             theme.let { theme ->
                 readerThemesQueries.upsert(theme.backgroundColor, theme.onTextColor, theme.id)
             }

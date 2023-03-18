@@ -58,6 +58,7 @@ actual class LocaleHelper(
             for (i in locales.indices) {
                 languages.add(locales[i])
             }
+            languages.sort()
         }
     }
 }

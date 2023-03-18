@@ -1,14 +1,14 @@
 package ireader.data.book
 
-import ireader.domain.models.entities.Book
-import ireader.domain.models.entities.Chapter
-import ireader.domain.models.entities.LibraryBook
-import ireader.domain.models.library.LibrarySort
 import ireader.data.core.DatabaseHandler
 import ireader.data.util.BaseDao
 import ireader.data.util.toDB
 import ireader.data.util.toLong
 import ireader.domain.data.repository.BookRepository
+import ireader.domain.models.entities.Book
+import ireader.domain.models.entities.Chapter
+import ireader.domain.models.entities.LibraryBook
+import ireader.domain.models.library.LibrarySort
 import kotlinx.coroutines.flow.Flow
 import java.util.*
 
@@ -105,7 +105,7 @@ class BookRepositoryImpl(
     }
 
     override suspend fun updateBook(book: Book) {
-        return handler.await {
+        return handler.await(inTransaction = true) {
             bookQueries.update(
                 source = book.sourceId,
                 dateAdded = book.dateAdded,
@@ -162,7 +162,7 @@ class BookRepositoryImpl(
     }
 
     suspend fun insert(book: Book): Long? {
-        return handler.awaitOneOrNull {
+        return handler.awaitOneOrNull(inTransaction = true) {
             bookQueries.upsert(
                 id = book.id.toDB(),
                 source = book.sourceId,
@@ -185,6 +185,7 @@ class BookRepositoryImpl(
             )
             bookQueries.selectLastInsertedRowId()
         } ?: -1
+
     }
 
 
@@ -195,7 +196,7 @@ class BookRepositoryImpl(
             updateBook(book)
             book.id
         }
-        return handler.awaitOneOrNull {
+        return handler.awaitOneOrNull(inTransaction = true) {
             bookQueries.upsert(
                 id = book.id.toDB(),
                 source = book.sourceId,
@@ -223,7 +224,7 @@ class BookRepositoryImpl(
     }
 
     override suspend fun updatePartial(book: Book): Long {
-        return handler.awaitOneOrNull {
+        return handler.awaitOneOrNull(inTransaction = true) {
             bookQueries.upsert(
                 id = book.id.toDB(),
                 source = book.sourceId,
@@ -249,7 +250,7 @@ class BookRepositoryImpl(
     }
 
     override suspend fun insertBooks(book: List<Book>): List<Long> {
-        return handler.awaitList {
+        return handler.awaitList(inTransaction = true) {
             dbOperation(book) { book ->
                 bookQueries.upsert(
                     id = book.id.toDB(),
