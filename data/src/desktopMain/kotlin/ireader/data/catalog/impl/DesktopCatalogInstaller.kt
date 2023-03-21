@@ -40,23 +40,15 @@ class DesktopCatalogInstaller(
             if (!iconFile.exists()) {
                     iconFile.createNewFile()
             }
-            val jarFile = File(ExtensionDir, "${catalog.pkgName}/${catalog.pkgName}.jar")
-            if (!jarFile.exists()) {
-                    jarFile.createNewFile()
-            }
             try {
                 val apkResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
                     headers.append(HttpHeaders.CacheControl, "no-store")
                 }.body()
-                val jarResponse: ByteReadChannel = client.get(catalog.jarUrl) {
-                    headers.append(HttpHeaders.CacheControl, "no-store")
-                }.body()
+
                 val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
                     headers.append(HttpHeaders.CacheControl, "no-store")
                 }.body()
                 apkResponse.saveTo(apkFile)
-                jarResponse.saveTo(jarFile)
-
                 // copy installed App Icon to the storage
                 iconResponse.saveTo(iconFile)
                 emit(InstallStep.Idle)

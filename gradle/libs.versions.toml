@@ -1,59 +1,47 @@
 [versions]
 # Kotlin
 coroutines = "1.6.4"
-
 # Serialization
 json = "1.4.1"
-
 # Compose
 composeGradle = "1.3.1"
 voyager = "1.0.0-rc07"
 accompanist = "0.25.2"
 googleAccompanist = "0.25.1"
 materialDialogs = "0.9.1"
-
 # Android
 androidGradle = "7.4.1"
 core = "1.9.0"
 appCompat = "1.7.0-alpha02"
 activityCompose = "1.6.1"
 work = "2.8.0"
-
 # Android Lifecycle
 lifecycle = "2.6.0-alpha03"
-
 # Swing
 darklaf = "3.0.2"
-
 # Ksp
 ksp = "1.8.0-1.0.9"
 # Image Loader
 image-loader = "1.2.10"
-
 # Dependency Injection
 kodein = "7.18.0"
 koinAnnotation = "1.0.3"
 koin = "3.2.2"
 koinAndroid = "3.3.0"
-
 # Network
 ktor = "2.1.3"
 ktorfit = "1.0.0-beta16"
-
 # Logging
 slf4j = "2.0.3"
 log4j = "2.19.0"
 kmlogging = "1.2.0"
 tinylog = "2.5.0-M2.1"
-
 # Storage
 okio = "3.3.0"
 appDirs = "1.2.1"
 sqldelight = "1.5.5"
-
 # Preferences
 multiplatformSettings = "1.0.0-alpha01"
-
 # Utility
 desugarJdkLibs = "2.0.2"
 aboutLibraries = "10.6.8"
@@ -61,29 +49,22 @@ dateTime = "0.4.0"
 immutableCollections = "0.3.5"
 kds = "3.4.0"
 ideaExt = "1.1.6"
-
 # Localization
 moko = "0.20.1"
-
 # BuildConfigs
 buildconfig = "3.1.0"
 buildkonfig = "0.13.3"
-
 # Linter
 kotlinter = "3.12.0"
-
-
 # Version updates
 versions = "0.43.0"
-
 # Optimizer
 proguard = "7.2.2"
-
 okhttp = "5.0.0-alpha.10"
 coil_version = "2.2.1"
 jsoup = "1.15.2"
 exoplayer="1.0.0-beta03"
-
+dex2jar = "v59"
 
 [libraries]
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
@@ -164,6 +145,11 @@ koin-workManager = { module = "io.insert-koin:koin-androidx-workmanager", versio
 koin-androidCompose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinAndroid" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
+
+# Asm modificiation
+asm = "org.ow2.asm:asm:9.4" # version locked by Dex2Jar
+dex2jar-translator = { module = "com.github.ThexXTURBOXx.dex2jar:dex-translator", version.ref = "dex2jar" }
+dex2jar-tools = { module = "com.github.ThexXTURBOXx.dex2jar:dex-tools", version.ref = "dex2jar" }
 
 
 sqldelight-runtime = { module = "com.squareup.sqldelight:runtime", version.ref = "sqldelight" }

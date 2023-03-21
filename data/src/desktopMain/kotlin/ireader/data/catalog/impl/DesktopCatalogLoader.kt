@@ -1,6 +1,9 @@
 package ireader.data.catalog.impl
 
 
+import com.googlecode.d2j.dex.Dex2jar
+import com.googlecode.d2j.reader.MultiDexFileReader
+import com.googlecode.dex2jar.tools.BaksmaliBaseDexExceptionHandler
 import ireader.core.http.HttpClients
 import ireader.core.log.Log
 import ireader.core.prefs.JvmPreferenceStore
@@ -53,17 +56,24 @@ class DesktopCatalogLoader(
 
     override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? {
         val file = File(ExtensionDir, "${pkgName}/${pkgName}.apk")
-        val pkgInfo = if (file.exists() && file.canRead()) {
-            ApkFile(file)
-        } else {
-            null
-        }
-        if (pkgInfo == null) {
-            Log.warn("The requested catalog {} wasn't found", pkgName)
+        try {
+
+            val pkgInfo = if (file.exists() && file.canRead()) {
+                ApkFile(file)
+            } else {
+                null
+            }
+            if (pkgInfo == null) {
+                Log.warn("The requested catalog {} wasn't found", pkgName)
+                return null
+            }
+
+            return loadLocalCatalogs(pkgName, pkgInfo, file)
+        }catch (e:Exception) {
+            file.parentFile.deleteRecursively()
             return null
         }
 
-        return loadLocalCatalogs(pkgName, pkgInfo, file)
 
     }
 
@@ -74,8 +84,11 @@ class DesktopCatalogLoader(
     ): CatalogInstalled.Locally? {
         val data = validateMetadata(pkgName, pkgInfo) ?: return null
         val classLoader = URLClassLoader.getSystemClassLoader()
-        val jarFile = File(file.parentFile, file.name.substringBefore(".apk").plus(".jar"))
-
+        val jarFileName = file.name.substringBefore(".apk").plus(".jar")
+        val jarFile = File(file.parentFile, jarFileName)
+        if (!jarFile.exists() || jarFile.length() == 0L) {
+            dex2jar(file,jarFile,file.name)
+        }
         val loader = URLClassLoader(
             arrayOf(jarFile.toURL()),
             classLoader,
@@ -175,6 +188,30 @@ class DesktopCatalogLoader(
 
     override fun loadSystemCatalog(pkgName: String): CatalogInstalled.SystemWide? {
         return null
+    }
+    @Suppress("NewApi")
+    fun dex2jar(dexFile: File, jarFile: File, fileNameWithoutType: String) {
+        // adopted from com.googlecode.dex2jar.tools.Dex2jarCmd.doCommandLine
+        // source at: https://github.com/DexPatcher/dex2jar/tree/v2.1-20190905-lanchon/dex-tools/src/main/java/com/googlecode/dex2jar/tools/Dex2jarCmd.java
+        try {
+            val jarFilePath = jarFile.toPath()
+            val reader = MultiDexFileReader.open(dexFile.inputStream())
+            val handler = BaksmaliBaseDexExceptionHandler()
+            Dex2jar
+                    .from(reader)
+                    .withExceptionHandler(handler)
+                    .reUseReg(false)
+                    .topoLogicalSort()
+                    .skipDebug(true)
+                    .optimizeSynchronized(false)
+                    .printIR(false)
+                    .noCode(false)
+                    .skipExceptions(false)
+                    .to(jarFilePath)
+        } catch (e: Exception) {
+            Log.error(e)
+        }
+
     }
 
     private data class ValidatedData(

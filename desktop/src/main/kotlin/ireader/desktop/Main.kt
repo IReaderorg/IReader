@@ -3,6 +3,7 @@ package ireader.desktop
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
@@ -23,10 +24,10 @@ import ireader.presentation.core.MainStarterScreen
 import ireader.presentation.core.di.PresentationModules
 import ireader.presentation.core.di.presentationPlatformModule
 import ireader.presentation.core.theme.AppTheme
-import ireader.presentation.imageloader.coil.imageloader.CatalogKeyer
-import ireader.presentation.imageloader.coil.imageloader.CatalogRemoteMapper
 import ireader.presentation.imageloader.coil.imageloader.BookCoverKeyer
 import ireader.presentation.imageloader.coil.imageloader.BookCoverMapper
+import ireader.presentation.imageloader.coil.imageloader.CatalogKeyer
+import ireader.presentation.imageloader.coil.imageloader.CatalogRemoteMapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import okio.Path.Companion.toOkioPath
@@ -50,7 +51,8 @@ fun main() {
         Window(
                 onCloseRequest = { exitProcess(0) },
                 title = "IReader",
-                state = state
+                state = state,
+                icon = painterResource("icon.png")
         ) {
             val coroutineScope = rememberCoroutineScope()
             withDI(di) {

@@ -56,7 +56,7 @@ actual object Images {
         }
     }
     @Composable
-    private fun rememberVectorAnimatedResource(resourcePath: String): Painter {
+    fun rememberVectorAnimatedResource(resourcePath: String): Painter {
         val density = LocalDensity.current
         return remember(resourcePath, density) {
             useResource(resourcePath) {
@@ -66,6 +66,7 @@ actual object Images {
     }
     @Composable
     actual fun eternityLight(): ImageVector = rememberVectorXmlResource("drawable/ic_eternity_light.xml")
+
 
     @Composable
     actual fun discord(): ImageVector = rememberVectorXmlResource("drawable/ic_discord_24dp.xml")

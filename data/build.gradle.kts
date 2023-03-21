@@ -50,6 +50,9 @@ kotlin {
             dependencies {
                 implementation(libs.sqldelight.jvm)
                 implementation("net.dongliu:apk-parser:2.6.10")
+                implementation(libs.asm)
+                implementation(libs.dex2jar.translator)
+                implementation(libs.dex2jar.tools)
             }
         }
 
