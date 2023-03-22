@@ -29,7 +29,7 @@ koinAnnotation = "1.0.3"
 koin = "3.2.2"
 koinAndroid = "3.3.0"
 # Network
-ktor = "2.1.3"
+ktor = "2.2.4"
 ktorfit = "1.0.0-beta16"
 # Logging
 slf4j = "2.0.3"
@@ -126,14 +126,6 @@ tinylog-impl = { module = "org.tinylog:tinylog-impl", version.ref = "tinylog" }
 tinylog-api = { module = "org.tinylog:tinylog-api", version.ref = "tinylog" }
 
 
-ireader-ktorCore =  { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
-ireader-ktorContentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
-ireader-ktorSerialization =  { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
-ireader-ktorGson =  { module = "io.ktor:ktor-serialization-gson", version.ref = "ktor" }
-ireader-ktorOkhttp =   { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
-ireader-ktorAndroid = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
-
-
 # Inject
 kodein-core = { module = "org.kodein.di:kodein-di", version.ref = "kodein" }
 kodein-compose = { module = "org.kodein.di:kodein-di-framework-compose", version.ref = "kodein" }
@@ -192,7 +184,7 @@ logging-kmlogging = { module = "org.lighthousegames:logging", version.ref = "kml
 simplestorage = ["storage", "documentfile"]
 exoplayer = ["exoplayer-core", "exoplayer-ui", "exoplayer-dash","exoplayer-subtitleDecoder","exoplayer-rtsp","exoplayer-okhttp","exoplayer-extractor","exoplayer-transformer","exoplayer-decoder","exoplayer-datasource","exoplayer-common", ]
 tinylog = ["tinylog-impl", "tinylog-api"]
-ireader = ["ireader-ktorCore", "ireader-ktorContentNegotiation","ireader-ktorSerialization","ireader-ktorGson","ireader-ktorOkhttp","ireader-ktorAndroid"]
+ireader = ["jsoup","ktor-core","ktor-core-cio","ktor-okhttp","ktor-contentNegotiation","ktor-contentNegotiation-gson","ktor-contentNegotiation-kotlinx","ktor-contentNegotiation-jackson","ktor-core-android"]
 
 [plugins]
 

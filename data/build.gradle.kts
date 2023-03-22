@@ -33,6 +33,8 @@ kotlin {
                 implementation(libs.requerySqlite)
                 api(libs.kodein.core)
                 api(libs.jsoup)
+                api(kotlinx.datetime)
+                api(libs.bundles.ireader)
             }
         }
         val androidMain by getting {

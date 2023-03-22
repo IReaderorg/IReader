@@ -125,16 +125,16 @@ compose.desktop {
                 }
                 shortcut = true
                 menu = true
-                iconFile.set(rootProject.file("resources/icon.png"))
+                iconFile.set(rootProject.file("desktop/src/main/resources/icon.ico"))
                 menuGroup = "IReader"
             }
             macOS {
                 bundleID = "ireaderorg.ireader"
                 packageName = rootProject.name
-                iconFile.set(rootProject.file("resources/icon.png"))
+                iconFile.set(rootProject.file("desktop/src/main/resources/icon.icns"))
             }
             linux {
-                iconFile.set(rootProject.file("resources/icon.png"))
+                iconFile.set(rootProject.file("desktop/src/main/resources/icon.png"))
             }
         }
     }

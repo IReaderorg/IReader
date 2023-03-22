@@ -21,6 +21,7 @@ import ireader.domain.usecases.preferences.*
 import ireader.domain.usecases.reader.ScreenAlwaysOn
 import ireader.domain.usecases.reader.ScreenAlwaysOnImpl
 import ireader.domain.usecases.services.*
+import ireader.domain.utils.NotificationManager
 import ireader.i18n.LocalizeHelper
 import org.kodein.di.*
 
@@ -30,10 +31,13 @@ actual val DomainModule: DI.Module = DI.Module("domainModulePlatform") {
         DownloaderService(
                 instance(),
                 instance(),
-                instance()
         )
     }
-
+    bindProvider {
+        NotificationManager(
+            instance(),
+        )
+    }
     bindSingleton {
         ExtensionManagerService(
                 instance(),
