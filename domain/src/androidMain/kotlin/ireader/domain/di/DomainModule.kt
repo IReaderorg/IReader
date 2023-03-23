@@ -73,7 +73,6 @@ actual val DomainModule: DI.Module = DI.Module("domainModulePlatform") {
     bindProvider { ireader.domain.usecases.services.StartDownloadServicesUseCase(instance()) }
     bindProvider { ireader.domain.usecases.services.StartLibraryUpdateServicesUseCase(instance()) }
     bindProvider { ireader.domain.usecases.services.StartTTSServicesUseCase(instance()) }
-    bindProvider { ireader.domain.usecases.services.StopServiceUseCase(instance()) }
     bindProvider {
         TextReaderPrefUseCase(
                 instance(),
@@ -109,7 +108,6 @@ actual val DomainModule: DI.Module = DI.Module("domainModulePlatform") {
             startDownloadServicesUseCase = StartDownloadServicesUseCase(instance()),
             startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(instance()),
             startTTSServicesUseCase = StartTTSServicesUseCase(instance()),
-            stopServicesUseCase = StopServiceUseCase(instance()),
     ) }
 
     bindSingleton { LocalizeHelper(instance()) }

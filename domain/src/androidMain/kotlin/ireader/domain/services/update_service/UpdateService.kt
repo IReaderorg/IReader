@@ -16,6 +16,7 @@ import ireader.domain.notification.Notifications.ID_APP_UPDATER
 import ireader.domain.notification.flags
 import ireader.domain.notification.legacyFlags
 import ireader.domain.preferences.prefs.AppPreferences
+import ireader.domain.utils.NotificationManager
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.kodein.di.DI
@@ -32,6 +33,7 @@ class UpdateService  constructor(
     override val di: DI = (context.applicationContext as DIAware).di
     private val appPreferences: AppPreferences by instance()
     private val api: UpdateApi by instance()
+    private val notificationManager: NotificationManager by instance()
 
 
     override suspend fun doWork(): Result {
@@ -52,9 +54,8 @@ class UpdateService  constructor(
 
         if (Version.isNewVersion(release.tag_name, versionCode)) {
             appPreferences.lastUpdateCheck().set(Clock.System.now().toEpochMilliseconds())
-            with(NotificationManagerCompat.from(applicationContext)) {
-                notify(ID_APP_UPDATER, createNotification(current, version, createIntent(release)))
-            }
+            notificationManager.show(ID_APP_UPDATER, createNotification(current, version, createIntent(release)))
+
         }
 
         return Result.success()

@@ -5,7 +5,6 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_SERVICE_NAME
-import ireader.domain.services.downloaderService.DownloaderService
 import ireader.domain.services.extensions_insstaller_service.ExtensionManagerService
 import ireader.domain.utils.toast
 
@@ -13,7 +12,7 @@ import ireader.domain.utils.toast
 actual class StartExtensionManagerService(
         val context: Context
 ) {
-    actual operator fun invoke(
+    actual fun start(
     ) {
         try {
             val work = OneTimeWorkRequestBuilder<ExtensionManagerService>().build()
@@ -27,5 +26,9 @@ actual class StartExtensionManagerService(
         } catch (e: Throwable) {
             context.toast(e.localizedMessage)
         }
+    }
+
+    actual fun stop() {
+        WorkManager.getInstance(context).cancelUniqueWork(DOWNLOADER_SERVICE_NAME)
     }
 }

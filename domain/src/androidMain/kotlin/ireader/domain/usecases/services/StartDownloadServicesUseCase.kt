@@ -7,20 +7,19 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_BOOKS_IDS
 import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_Chapters_IDS
-import ireader.domain.services.downloaderService.DownloaderService
 import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_MODE
 import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_SERVICE_NAME
+import ireader.domain.services.downloaderService.DownloaderService
 import ireader.domain.utils.toast
 
 
 
 actual class StartDownloadServicesUseCase( private val context: Context) {
-    actual operator fun invoke(
+    actual fun start(
             bookIds: LongArray?,
             chapterIds: LongArray?,
             downloadModes: Boolean,
     ) {
-
         try {
             val work = OneTimeWorkRequestBuilder<DownloaderService>().apply {
                 setInputData(
@@ -49,4 +48,9 @@ actual class StartDownloadServicesUseCase( private val context: Context) {
             context.toast(e.localizedMessage)
         }
     }
+
+    actual fun stop() {
+        WorkManager.getInstance(context).cancelUniqueWork(DOWNLOADER_SERVICE_NAME)
+    }
+
 }

@@ -6,11 +6,11 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import ireader.domain.services.library_update_service.LibraryUpdatesService
-
+import ireader.domain.services.library_update_service.LibraryUpdatesService.Companion.LibraryUpdateTag
 
 
 actual class StartLibraryUpdateServicesUseCase( private val context: Context) {
-    actual operator fun invoke(
+    actual fun start(
         forceUpdate:Boolean
     ) {
         val work =
@@ -27,5 +27,9 @@ actual class StartLibraryUpdateServicesUseCase( private val context: Context) {
             ExistingWorkPolicy.REPLACE,
             work
         )
+    }
+
+    actual fun stop() {
+        WorkManager.getInstance(context).cancelUniqueWork(LibraryUpdateTag)
     }
 }

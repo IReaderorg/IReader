@@ -288,12 +288,12 @@ class BookDetailViewModel(
 
     fun downloadChapters() {
         booksState.book?.let { book ->
-            serviceUseCases.startDownloadServicesUseCase(chapterIds = this.selection.toLongArray())
+            serviceUseCases.startDownloadServicesUseCase.start(chapterIds = this.selection.toLongArray())
         }
     }
 
     fun startDownloadService(book: Book) {
-        serviceUseCases.startDownloadServicesUseCase(bookIds = longArrayOf(book.id))
+        serviceUseCases.startDownloadServicesUseCase.start(bookIds = longArrayOf(book.id))
     }
 
     fun toggleFilter(type: ChaptersFilters.Type) {

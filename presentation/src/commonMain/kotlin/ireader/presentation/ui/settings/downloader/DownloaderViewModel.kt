@@ -2,7 +2,6 @@ package ireader.presentation.ui.settings.downloader
 
 import ireader.domain.models.entities.SavedDownload
 import ireader.domain.services.downloaderService.DownloadServiceStateImpl
-import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_SERVICE_NAME
 import ireader.domain.usecases.download.DownloadUseCases
 import ireader.domain.usecases.services.ServiceUseCases
 import kotlinx.coroutines.Dispatchers
@@ -34,15 +33,13 @@ class DownloaderViewModel(
 
     fun startDownloadService(chapterIds: List<Long>) {
         if (downloads.isEmpty()) return
-        serviceUseCases.startDownloadServicesUseCase(
+        serviceUseCases.startDownloadServicesUseCase.start(
             downloadModes = true
         )
     }
 
     fun stopDownloads() {
-        serviceUseCases.stopServicesUseCase(
-            DOWNLOADER_SERVICE_NAME
-        )
+        serviceUseCases.startDownloadServicesUseCase.stop()
     }
 
     fun toggleExpandMenu(enable: Boolean = true) {

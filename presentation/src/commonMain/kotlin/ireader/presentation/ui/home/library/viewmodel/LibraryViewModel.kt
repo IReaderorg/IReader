@@ -11,10 +11,6 @@ import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
 import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.domain.usecases.category.CategoriesUseCases
-import ireader.domain.usecases.local.DeleteUseCase
-import ireader.domain.usecases.local.LocalGetBookUseCases
-import ireader.domain.usecases.local.LocalGetChapterUseCase
-import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.local.book_usecases.GetLibraryCategory
 import ireader.domain.usecases.local.book_usecases.MarkBookAsReadOrNotUseCase
 import ireader.domain.usecases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
@@ -99,7 +95,7 @@ class LibraryViewModel(
     }
 
 fun downloadChapters() {
-    serviceUseCases.startDownloadServicesUseCase(bookIds = selectedBooks.toLongArray())
+    serviceUseCases.startDownloadServicesUseCase.start(bookIds = selectedBooks.toLongArray())
     selectedBooks.clear()
 }
 
@@ -143,7 +139,7 @@ fun toggleSort(type: LibrarySort.Type) {
 
 fun refreshUpdate() {
     isBookRefreshing = true
-    serviceUseCases.startLibraryUpdateServicesUseCase()
+    serviceUseCases.startLibraryUpdateServicesUseCase.start()
     isBookRefreshing = false
 }
 

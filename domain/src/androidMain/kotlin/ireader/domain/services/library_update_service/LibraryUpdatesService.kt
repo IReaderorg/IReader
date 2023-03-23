@@ -7,15 +7,12 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import ireader.core.log.Log
-import ireader.core.os.checkNotificationPermission
 import ireader.domain.R
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.models.entities.Chapter
 import ireader.domain.notification.Notifications
-import ireader.domain.usecases.local.LocalGetBookUseCases
-import ireader.domain.usecases.local.LocalGetChapterUseCase
-import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
+import ireader.domain.utils.NotificationManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
@@ -35,7 +32,7 @@ class LibraryUpdatesService(
     private val remoteUseCases: RemoteUseCases by instance()
     private val getLocalCatalog: GetLocalCatalog by instance()
     private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases by instance()
-
+    private val notificationManager: NotificationManager by instance()
     companion object {
         const val LibraryUpdateTag = "Library_Update_SERVICE"
         const val FORCE_UPDATE = "force_update"
@@ -68,9 +65,7 @@ class LibraryUpdatesService(
         NotificationManagerCompat.from(applicationContext).apply {
 
             builder.setProgress(libraryBooks.size, 0, false)
-            checkNotificationPermission(context) {
-                notify(Notifications.ID_LIBRARY_PROGRESS, builder.build())
-            }
+            notificationManager.show(Notifications.ID_LIBRARY_PROGRESS, builder.build())
             try {
                 libraryBooks.forEachIndexed { index, book ->
                     val chapters = getChapterUseCase.findChaptersByBookId(bookId = book.id)
@@ -87,7 +82,7 @@ class LibraryUpdatesService(
                                 builder.setContentText(book.title)
                                 builder.setSubText(index.toString())
                                 builder.setProgress(libraryBooks.size, index, false)
-                                notify(Notifications.ID_LIBRARY_PROGRESS, builder.build())
+                                notificationManager.show(Notifications.ID_LIBRARY_PROGRESS, builder.build())
                                 remoteChapters.addAll(it)
                             },
                             onError = {},
@@ -122,8 +117,7 @@ class LibraryUpdatesService(
                 }
             } catch (e: Throwable) {
                 Log.error { "getNotifications: Failed to Check for Book Update" }
-                notify(
-                    Notifications.ID_LIBRARY_ERROR,
+                notificationManager.show(Notifications.ID_LIBRARY_ERROR,
                     NotificationCompat.Builder(
                         applicationContext,
                         Notifications.CHANNEL_LIBRARY_ERROR
@@ -138,8 +132,7 @@ class LibraryUpdatesService(
                         setSmallIcon(R.drawable.ic_update)
                         priority = NotificationCompat.PRIORITY_DEFAULT
                         setAutoCancel(true)
-                    }.build()
-                )
+                    }.build())
                 builder.setProgress(0, 0, false)
                 cancel(Notifications.ID_LIBRARY_PROGRESS)
                 withContext(Dispatchers.IO) {
@@ -148,11 +141,11 @@ class LibraryUpdatesService(
             }
 
             builder.setProgress(0, 0, false)
-            cancel(Notifications.ID_LIBRARY_PROGRESS)
+            notificationManager.cancel(Notifications.ID_LIBRARY_PROGRESS)
             withContext(Dispatchers.IO) {
             }
-            notify(
-                Notifications.ID_LIBRARY_PROGRESS,
+            notificationManager.cancel(Notifications.ID_LIBRARY_PROGRESS)
+            notificationManager.show(Notifications.ID_LIBRARY_PROGRESS,
                 NotificationCompat.Builder(
                     applicationContext,
                     Notifications.CHANNEL_LIBRARY_PROGRESS
@@ -165,8 +158,7 @@ class LibraryUpdatesService(
                     priority = NotificationCompat.PRIORITY_DEFAULT
                     setSubText("It was Updated Successfully")
                     setAutoCancel(true)
-                }.build()
-            )
+                }.build())
         }
 
         return Result.success()

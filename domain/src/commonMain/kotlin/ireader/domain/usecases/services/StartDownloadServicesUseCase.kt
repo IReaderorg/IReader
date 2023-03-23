@@ -2,9 +2,10 @@ package ireader.domain.usecases.services
 
 
 expect class StartDownloadServicesUseCase {
-    operator fun invoke(
+    fun start(
         bookIds: LongArray? = null,
         chapterIds: LongArray? = null,
         downloadModes: Boolean = false,
     )
+    fun stop()
 }

@@ -4,5 +4,4 @@ data class ServiceUseCases(
     val startDownloadServicesUseCase: StartDownloadServicesUseCase,
     val startLibraryUpdateServicesUseCase: StartLibraryUpdateServicesUseCase,
     val startTTSServicesUseCase: StartTTSServicesUseCase,
-    val stopServicesUseCase: StopServiceUseCase,
 )

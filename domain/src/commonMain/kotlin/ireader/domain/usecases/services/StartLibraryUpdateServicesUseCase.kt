@@ -2,7 +2,8 @@ package ireader.domain.usecases.services
 
 
 expect class StartLibraryUpdateServicesUseCase {
-    operator fun invoke(
+    fun start(
         forceUpdate:Boolean = false
     )
+    fun stop()
 }

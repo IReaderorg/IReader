@@ -1,6 +1,7 @@
 [versions]
 # Kotlin
 coroutines = "1.6.4"
+worker="0.8.3"
 # Serialization
 json = "1.4.1"
 # Compose
@@ -166,6 +167,7 @@ exoplayer-decoder = { module = "androidx.media3:media3-decoder", version.ref = "
 exoplayer-datasource = { module = "androidx.media3:media3-datasource", version.ref = "exoplayer" }
 exoplayer-common = { module = "androidx.media3:media3-common", version.ref = "exoplayer" }
 exoplayer-subtitleDecoder = { module = "com.github.albfernandez:juniversalchardet", version = "2.4.0" }
+worker = { module = "com.autodesk:coroutineworker", version.ref = "worker" }
 
 
 epublib = { module = "io.github.kazemcodes:epublib-core", version = "4.0-SNAPSHOT" }

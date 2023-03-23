@@ -172,7 +172,7 @@ class ExtensionViewModel(
             })
             state.isRefreshing = false
             if (autoInstaller.value) {
-                startExtensionManagerService()
+                startExtensionManagerService.start()
             }
         }
     }

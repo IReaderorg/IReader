@@ -35,7 +35,7 @@ actual val DomainModule: DI.Module = org.kodein.di.DI.Module("domainModulePlatfo
         new(::DesktopUiPreferences)
     }
     bindSingleton<StartExtensionManagerService> {
-        new(::StartExtensionManagerService)
+        StartExtensionManagerService(di)
     }
     bindSingleton<PreferenceStore> {
         JvmPreferenceStore("ireader")
@@ -43,10 +43,9 @@ actual val DomainModule: DI.Module = org.kodein.di.DI.Module("domainModulePlatfo
     bindSingleton { LocalizeHelper() }
 
     bindSingleton<ServiceUseCases> { ServiceUseCases(
-            startDownloadServicesUseCase = StartDownloadServicesUseCase(),
-            startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(),
+            startDownloadServicesUseCase = StartDownloadServicesUseCase(di),
+            startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(di),
             startTTSServicesUseCase = StartTTSServicesUseCase(),
-            stopServicesUseCase = StopServiceUseCase(),
     ) }
     bindSingleton<HttpClients> { HttpClients() }
     bindSingleton<EpubCreator> { EpubCreator() }

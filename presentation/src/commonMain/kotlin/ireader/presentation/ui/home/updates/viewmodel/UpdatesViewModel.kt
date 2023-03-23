@@ -58,12 +58,12 @@ class UpdatesViewModel(
         scope.launch {
             val chapterIds =
                 updates.values.flatMap { it }.filter { it.chapterId in selection }.map { it.chapterId }
-            serviceUseCases.startDownloadServicesUseCase(
+            serviceUseCases.startDownloadServicesUseCase.start(
                 chapterIds = chapterIds.toLongArray()
             )
         }
     }
     fun refreshUpdate() {
-        serviceUseCases.startLibraryUpdateServicesUseCase()
+        serviceUseCases.startLibraryUpdateServicesUseCase.start()
     }
 }
