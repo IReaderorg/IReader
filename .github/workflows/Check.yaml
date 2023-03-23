@@ -1,12 +1,9 @@
-name: PR build check
-on:
-  pull_request:
-    paths-ignore:
-      - '**.md'
-      - 'android/src/main/res/**/strings.xml'
+name: Check Build
 
-permissions:
-  contents: read
+on:
+  push:
+    branches:
+      - master
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

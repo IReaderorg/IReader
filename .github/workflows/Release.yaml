@@ -1,0 +1,135 @@
+name: CI
+
+on:
+  push:
+    tags:
+      - v*
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  BuildBinaries:
+    name: Build application packages
+    strategy:
+      matrix:
+        runtime: [ linux-x64, win-x64, android ]
+        include:
+          - runtime: linux-x64
+            arch: x64
+            os: ubuntu-latest
+            shell: bash
+            build: :desktop:packageUberJarForCurrentOS :desktop:packageDeb
+            setupCl: ./.github/scripts/SetupClUnix.sh
+
+#          - runtime: linux-fedora-x64
+#            arch: x64
+#            os: ubuntu-latest
+#            shell: bash
+#            build: :desktop:packageRpm
+#            setupCl: ./.github/scripts/SetupClUnix.sh
+
+
+
+          - runtime: win-x64
+            arch: x64
+            os: windows-latest
+            shell: powershell
+            build: :desktop:packageUberJarForCurrentOS :desktop:packageMsi
+            setupCl: ./.github/scripts/SetupClWindows.ps1
+
+          - runtime: android
+            arch: x64
+            os: ubuntu-latest
+            shell: bash
+            build: :android:assembleStandardRelease
+            setupCl: ./.github/scripts/SetupClUnix.sh
+
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v3
+        if: ${{ matrix.runtime != 'linux-fedora-x64' }}
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          architecture: ${{ matrix.arch }}
+
+      - name: Setup Cl
+        run: ${{ matrix.setupCl }}
+
+
+
+      - name: Build rpm Package
+        if: ${{ matrix.runtime == 'linux-fedora-x64' }}
+        uses: Syer10/Fedora-Java17-Action@v1
+        with:
+          command: ./gradlew ${{ matrix.build }} --stacktrace
+
+      - name: Build
+        if: ${{ matrix.runtime != 'linux-fedora-x64' }}
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: >
+            ${{ matrix.build }}
+
+      - name: Sign APK
+        uses: r0adkll/sign-android-release@v1
+        if: ${{ matrix.runtime == 'android' }}
+        with:
+          releaseDirectory: android/build/outputs/apk/standard/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      # Upload runner package tar.gz/zip as artifact
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: runner-package-${{ matrix.runtime }}
+          path: |
+            desktop/build/compose/binaries/main/*/
+            desktop/build/compose/jars/
+            !desktop/build/compose/binaries/main/app/
+            ${{ env.SIGNED_RELEASE_FILE }}
+
+        # Upload runner errors
+      - name: Upload error logs
+        uses: actions/upload-artifact@v3
+        if: ${{ failure() }}
+        with:
+          name: runner-errors-${{ matrix.runtime }}
+          path: |
+            desktop/build/compose/logs/
+  ReleaseBinaries:
+    name: Make a release
+    needs: [ BuildBinaries ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Fix deb java dependency
+        run: ./.github/scripts/DebDependencyFix.sh
+
+      - name: Fix filenames
+        run: ./.github/scripts/NamingFix.sh
+
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,*/android/build/outputs/apk/standard/release/*.apk"
+          draft: true
+          token: ${{ secrets.WINGET_PUBLISH_PAT }}
