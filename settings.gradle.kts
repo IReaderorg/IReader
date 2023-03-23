@@ -1,7 +1,7 @@
 enableFeaturePreview("VERSION_CATALOGS")
 enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 rootProject.name = "Infinity"
-include(":app")
+include(":android")
 include(":data")
 include(":domain")
 include(":presentation")

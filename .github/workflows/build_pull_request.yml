@@ -3,7 +3,7 @@ on:
   pull_request:
     paths-ignore:
       - '**.md'
-      - 'app/src/main/res/**/strings.xml'
+      - 'android/src/main/res/**/strings.xml'
 
 permissions:
   contents: read
@@ -32,4 +32,4 @@ jobs:
       - name: Build app and run unit tests
         uses: gradle/gradle-command-action@v2
         with:
-          arguments: assembleRelease testReleaseUnitTest
+          arguments: :android:assembleRelease :android:testReleaseUnitTest
