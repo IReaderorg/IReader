@@ -116,7 +116,7 @@
     <string name="by_bookmark">По закладке</string>
     <string name="by_date_fetched">По дате получения</string>
     <string name="by_date_uploaded">По дате загрузки</string>
-    <string name="by_date_read">По прочтении</string>
+    <string name="by_date_read">По прочтению</string>
     <string name="fatal_error">Фатальная ошибка для</string>
     <string name="by_chapter_number">По номеру главы</string>
     <string name="the_downloads_was_cancelled">Загрузка была отменена</string>
@@ -124,7 +124,7 @@
     <string name="minutes">Минута</string>
     <string name="book_name">Название книги</string>
     <string name="mark_previous_as_read">Отметить предыдущее как прочитанное</string>
-    <string name="date_fetched">Дата найдена</string>
+    <string name="date_fetched">По дате написания</string>
     <string name="downloads_was_cancelled">Загрузка была отменена</string>
     <string name="the_downloads_was_interrupted">Загрузка была прервана</string>
     <string name="package_manager">Менеджер пакетов</string>
@@ -366,11 +366,11 @@
     <string name="show_all_category_tab">Показать все вкладки категории</string>
     <string name="show_count_in_category_tab">Показать счетчик на вкладке \"Категория\"</string>
     <string name="scrollbar_draggable">Перетаскиваемая полоса прокрутки</string>
-    <string name="immersive_mode">Иммерсивный режим</string>
+    <string name="immersive_mode">Полноэкранный режим</string>
     <string name="show_webView_during_fetching">Интеграция WebView</string>
     <string name="landscape">Ландшафт</string>
     <string name="downloads_queue">Очередь загрузок</string>
-    <string name="read_chapters">читать главы</string>
+    <string name="read_chapters">Прочитанные главы</string>
     <string name="portrait">Портрет</string>
     <string name="vertical">Вертикальный</string>
     <string name="horizontal">Горизонтальный</string>
