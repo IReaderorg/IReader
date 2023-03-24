@@ -8,7 +8,7 @@ import java.util.*
 actual class DatabaseDriverFactory {
     actual fun create(): SqlDriver {
         val driver = JdbcSqliteDriver(
-            url = JdbcSqliteDriver.IN_MEMORY + "/tmp/tachiyomi.db",
+            url = JdbcSqliteDriver.IN_MEMORY,
             properties = Properties().apply {
                 put("foreign_keys", "true")
             }

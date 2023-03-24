@@ -36,7 +36,7 @@ dependencies {
     implementation(libs.logging.slf4j.jul)
     implementation(libs.logging.slf4j.api)
     implementation(libs.logging.log4j.api)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.1")
+    implementation(kotlinx.coroutines.core)
 }
 
 
