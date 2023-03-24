@@ -64,7 +64,7 @@ proguard = "7.2.2"
 okhttp = "5.0.0-alpha.10"
 coil_version = "2.2.1"
 jsoup = "1.15.2"
-exoplayer="1.0.0-beta03"
+exoplayer="1.0.0"
 dex2jar = "v59"
 
 [libraries]
