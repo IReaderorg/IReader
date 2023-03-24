@@ -148,3 +148,21 @@
 # antlr
 -dontwarn org.antlr.runtime.**.**
 -keep,includedescriptorclasses class org.antlr.runtime.**
+
+-allowaccessmodification
+-dontusemixedcaseclassnames
+-verbose
+
+-keepattributes *Annotation*
+
+-keepclasseswithmembernames,includedescriptorclasses class * {
+    native <methods>;
+}
+-keepclassmembers class * { public <init>(...); }
+
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+

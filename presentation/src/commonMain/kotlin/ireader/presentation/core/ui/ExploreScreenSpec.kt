@@ -197,8 +197,7 @@ data class ExploreScreenSpec(
                                     sheetState.show()
                                 }
                             },
-                            scaffoldPadding = scaffoldPadding,
-                            headers = {
+                                                        headers = {
                                 if (headers.value == null) {
                                     headers.value =
                                             (source as? HttpSource)?.getCoverRequest(it)?.second?.build()
@@ -212,7 +211,10 @@ data class ExploreScreenSpec(
                                         vm.booksState.replaceBook(book)
                                     }
                                 }
-                            }
+                            },
+                        getColumnsForOrientation = { isLandscape ->
+                            vm.getColumnsForOrientation(isLandscape, this)
+                        }
                     )
                 } else {
                     EmptyScreenComposable(

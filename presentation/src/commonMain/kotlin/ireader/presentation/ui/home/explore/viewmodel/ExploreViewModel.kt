@@ -9,6 +9,7 @@ import ireader.domain.models.DisplayMode
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.toBook
+import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.domain.usecases.local.book_usecases.FindDuplicateBook
 import ireader.domain.usecases.preferences.reader_preferences.BrowseScreenPrefUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
@@ -18,19 +19,22 @@ import ireader.i18n.SourceNotFoundException
 import ireader.i18n.UiText
 import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.utils.fastMap
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 
 class ExploreViewModel(
-        private val state: ExploreStateImpl,
-        private val remoteUseCases: RemoteUseCases,
-        private val catalogStore: GetLocalCatalogs,
-        private val browseScreenPrefUseCase: BrowseScreenPrefUseCase,
-        val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
-        private val param: Param,
-        private val findDuplicateBook: FindDuplicateBook,
-        val booksState: BooksState
+    private val state: ExploreStateImpl,
+    private val remoteUseCases: RemoteUseCases,
+    private val catalogStore: GetLocalCatalogs,
+    private val browseScreenPrefUseCase: BrowseScreenPrefUseCase,
+    val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
+    private val param: Param,
+    private val findDuplicateBook: FindDuplicateBook,
+    val booksState: BooksState,
+    private val libraryPreferences: LibraryPreferences,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), ExploreState by state {
     data class Param(val sourceId: Long?, val query: String?)
 
@@ -187,5 +191,12 @@ class ExploreViewModel(
 
     fun toggleFilterMode(enable: Boolean? = null) {
         state.isFilterEnable = enable ?: !state.isFilterEnable
+    }
+    fun getColumnsForOrientation(isLandscape: Boolean, scope: CoroutineScope): StateFlow<Int> {
+        return if (isLandscape) {
+            libraryPreferences.columnsInLandscape()
+        } else {
+            libraryPreferences.columnsInPortrait()
+        }.stateIn(scope)
     }
 }

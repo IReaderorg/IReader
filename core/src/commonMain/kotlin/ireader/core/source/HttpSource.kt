@@ -11,6 +11,7 @@ import ireader.core.source.model.ImageUrl
 import ireader.core.source.model.Listing
 import ireader.core.source.model.PageComplete
 import ireader.core.source.model.PageUrl
+import kotlinx.coroutines.flow.MutableSharedFlow
 import java.security.MessageDigest
 
 /**
@@ -31,6 +32,8 @@ abstract class HttpSource(private val dependencies: ireader.core.source.Dependen
      * incompatible, you may increase this value and it'll be considered as a new source.
      */
     open val versionId = 1
+
+    val eventFlow = MutableSharedFlow<String>()
 
     /**
      * Id of the source. By default it uses a generated id using the first 16 characters (64 bits)

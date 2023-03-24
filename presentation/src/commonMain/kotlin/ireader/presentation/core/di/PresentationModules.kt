@@ -53,7 +53,7 @@ val PresentationModules = DI.Module("presentationModule") {
     bindProvider { ScreenContentViewModel(instance()) }
     bindSingleton { AppThemeViewModel(instance(), instance(), instance()) }
 
-    bindFactory<ExploreViewModel.Param, ExploreViewModel> { ExploreViewModel(instance(), instance(), instance(), instance(), instance(), it, instance(), instance()) }
+    bindFactory<ExploreViewModel.Param, ExploreViewModel> { ExploreViewModel(instance(), instance(), instance(), instance(),instance(), it, instance(),instance(),instance()) }
     bindProvider { HistoryViewModel(instance(), instance(), instance()) }
     bindProvider { LibraryViewModel(instance(), instance(), instance(), instance(), instance(), instance(), instance(), instance(), instance(), instance(), instance()) }
     bindProvider { ExtensionViewModel(instance(), instance(), instance(), instance(), instance(), instance(), instance(), instance(), instance()) }

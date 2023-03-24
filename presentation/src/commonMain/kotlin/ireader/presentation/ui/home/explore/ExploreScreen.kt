@@ -20,6 +20,7 @@ import ireader.core.source.HttpSource
 import ireader.core.source.Source
 import ireader.core.source.model.Filter
 import ireader.core.source.model.Listing
+import ireader.domain.models.DisplayMode
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.toBook
@@ -28,6 +29,7 @@ import ireader.i18n.asString
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.ShowLoading
+import ireader.presentation.ui.component.isLandscape
 import ireader.presentation.ui.component.list.LayoutComposable
 import ireader.presentation.ui.component.list.isScrolledToTheEnd
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
@@ -37,25 +39,28 @@ import ireader.presentation.ui.core.theme.ContentAlpha
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.ui.kaomojis
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
+
 @OptIn(
     ExperimentalMaterial3Api::class
 )
 @Composable
 fun ExploreScreen(
-        modifier: Modifier = Modifier,
-        vm: ExploreViewModel,
-        source: ireader.core.source.CatalogSource,
-        onFilterClick: () -> Unit,
-        getBooks: (query: String?, listing: Listing?, filters: List<Filter<*>>) -> Unit,
-        loadItems: (Boolean) -> Unit,
-        onBook: (BookItem) -> Unit,
-        onAppbarWebView: (url: String) -> Unit,
-        onPopBackStack: () -> Unit,
-        snackBarHostState: SnackbarHostState,
-        showmodalSheet: () -> Unit,
-        onLongClick: (Book) -> Unit = {},
-        headers: ((url: String) -> okhttp3.Headers?)? = null,
-        scaffoldPadding: PaddingValues
+    modifier: Modifier = Modifier,
+    vm: ExploreViewModel,
+    source: ireader.core.source.CatalogSource,
+    onFilterClick: () -> Unit,
+    getBooks: (query: String?, listing: Listing?, filters: List<Filter<*>>) -> Unit,
+    loadItems: (Boolean) -> Unit,
+    onBook: (BookItem) -> Unit,
+    onAppbarWebView: (url: String) -> Unit,
+    onPopBackStack: () -> Unit,
+    snackBarHostState: SnackbarHostState,
+    showmodalSheet: () -> Unit,
+    onLongClick: (Book) -> Unit = {},
+    headers: ((url: String) -> okhttp3.Headers?)? = null,
+    getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
 ) {
     val scrollState = rememberLazyListState()
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
@@ -108,6 +113,16 @@ fun ExploreScreen(
         if (gridState.layoutInfo.totalItemsCount > 0 && gridState.isScrolledToTheEnd() && !vm.endReached && !vm.isLoading) {
             loadItems(false)
         }
+    }
+    val columns by if (vm.layout != DisplayMode.List) {
+
+        val isLandscape = isLandscape()
+
+        with(rememberCoroutineScope()) {
+            remember(isLandscape) { getColumnsForOrientation(isLandscape) }.collectAsState()
+        }
+    } else {
+        remember { mutableStateOf(0) }
     }
     Scaffold(
         modifier = modifier,
@@ -172,7 +187,8 @@ fun ExploreScreen(
                         headers = headers,
                         keys = {
                             it.column
-                        }
+                        },
+                        columns = columns
                     )
                 }
             }
