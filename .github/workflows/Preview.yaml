@@ -172,7 +172,15 @@ jobs:
 
       - uses: ncipollo/release-action@v1.12.0
         with:
-          artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,*/android/build/outputs/apk/standard/release/*.apk"
+          artifacts: |
+            */binaries/main/*/*.*
+            */jars/*.jar
+            */android/build/outputs/apk/standard/release/*.apk
+            */android/build/outputs/apk/standard/release/android-standard-arm64-v8a-release-*.apk
+            */android/build/outputs/apk/standard/release/android-standard-armeabi-v7a-release-*.apk
+            */android/build/outputs/apk/standard/release/android-standard-universal-release-*.apk
+            */android/build/outputs/apk/standard/release/android-standard-x86-release-*.apk
+            */android/build/outputs/apk/standard/release/android-standard-x86_64-release-*.apk
           token: ${{ secrets.WINGET_PUBLISH_PAT }}
           tag: r${{ env.COMMIT_COUNT }}
           repo: IReader-Preview

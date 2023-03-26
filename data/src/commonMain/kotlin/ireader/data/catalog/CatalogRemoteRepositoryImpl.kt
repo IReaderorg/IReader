@@ -52,6 +52,7 @@ class CatalogRemoteRepositoryImpl(
             catalogs.iconUrl,
             catalogs.nsfw,
 
+
         )
     }
 
