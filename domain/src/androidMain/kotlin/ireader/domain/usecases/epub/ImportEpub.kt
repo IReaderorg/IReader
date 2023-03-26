@@ -2,17 +2,17 @@ package ireader.domain.usecases.epub
 
 import ireader.core.source.LocalSource
 import ireader.core.source.model.MangaInfo
+import ireader.core.source.model.Text
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.usecases.file.FileSaver
 import ireader.domain.usecases.files.GetSimpleStorage
-import ireader.domain.utils.fastMap
 import nl.siegmann.epublib.epub.EpubReader
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import org.jsoup.nodes.TextNode
-import org.jsoup.parser.Parser
 import org.xml.sax.InputSource
 import java.io.File
 import java.io.InputStream
@@ -31,7 +31,24 @@ actual class ImportEpub(
             EpubReader().readEpub(it)
         }
     }
+    data class Section(val title: String, val html: Document)
+    fun getSections(book: nl.siegmann.epublib.domain.Book) : List<Section>{
+        val sections = mutableListOf<Section>()
+        book.tableOfContents.tocReferences.forEach { tocReference ->
+            val resource = tocReference.resource
+            if (resource != null) {
+                val href = resource.href
+                val data = resource.getReader().readText()
+                val contentType = resource.mediaType.toString()
+                val html = Jsoup.parse(data)
+                val title = tocReference.title
+                val section = Section(title, html)
+                sections.add(section)
+            }
+        }
 
+        return sections
+    }
     actual suspend fun parse(uris: List<ireader.domain.models.common.Uri>) {
         uris.forEach { uri ->
 
@@ -39,7 +56,7 @@ actual class ImportEpub(
         val epub = getEpubReader(uri) ?: throw Exception()
 
         val key = epub.metadata?.titles?.firstOrNull() ?: throw Exception("Unknown novel")
-        val imgFile = File(simpleStorage.ireaderCacheDir(), "library_covers/$key")
+        val imgFile = File(simpleStorage.ireaderCacheDir(), "library_covers/$key.png")
         bookRepository.delete(key)
         // Insert new book data
         val bookId = Book(
@@ -47,7 +64,7 @@ actual class ImportEpub(
             key = key ?: "",
             favorite = true,
             sourceId = LocalSource.SOURCE_ID,
-            cover = imgFile.path,
+            cover = imgFile.absolutePath,
             author = epub.metadata?.authors?.firstOrNull()?.let { it.firstname + " " + it.lastname }
                 ?: "",
             status = MangaInfo.PUBLISHING_FINISHED,
@@ -55,51 +72,23 @@ actual class ImportEpub(
                 ?: "",
         )
             .let { bookRepository.upsert(it) }
-        val chapterExtensions = listOf("xhtml", "xml", "html").map { ".$it" }
-//        val information =
-//            epub.tableOfContents?.tocReferences?.associate { it?.completeHref to it?.title }
-        var index = 0
-        var tableOfContents = mapOf<String, String>()
-
-        epub.tableOfContents.tocReferences.map { ref ->
-            tableOfContents = tableOfContents + (ref.completeHref.substringBefore("#") to ref.title)
-            tableOfContents = tableOfContents + (ref.children.map { item -> (item.completeHref.substringBefore("#") to item.title) })
-        }
-        epub.opfResource.inputStream.let { stream ->
-            Jsoup.parse(stream, "UTF-8", "", Parser.xmlParser()).select("item").eachAttr("href")
-        }.filter { item ->
-            chapterExtensions.any {
-                item.endsWith(
-                    it,
-                    ignoreCase = true
-                )
-            }
-        }.fastMap {
-            epub.resources.resourceMap[it]
-        }.fastMap { epubResourceModel ->
-            epubResourceModel?.data?.let {
-                EpubXMLFileParser(it).parse()
-            }?.let { output ->
-                val title = tableOfContents[epubResourceModel.href] ?: output.title
-
-                val content = output.body.split("\n").filter { it.isNotBlank() }.map { ireader.core.source.model.Text(text = it) }
-                index++
+            val sections = getSections(epub)
+            sections.map { section ->
                 Chapter(
-                    name = title ?: "Unknown",
-                    key = epubResourceModel.href ?: "",
+                    name = section.title ?: "Unknown",
+                    key = section.title ?: "",
                     bookId = bookId,
-                    content = content,
+                    content = section.html.select("h1,h2,h3,h4,h5,h6,p").eachText().map { Text(it) },
                 )
-            }
-        }.filterNotNull().let {
+            }.filterNotNull().let {
             chapterRepository.insertChapters(it)
         }
-
         epub.coverImage?.data?.let {
             imgFile.parentFile?.also { parent ->
                 parent.mkdirs()
-                if (parent.exists())
+                if (parent.exists()) {
                     imgFile.writeBytes(it)
+                }
             }
         }
         }

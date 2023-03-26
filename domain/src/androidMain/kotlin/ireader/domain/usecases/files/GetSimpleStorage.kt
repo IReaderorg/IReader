@@ -35,7 +35,7 @@ class AndroidGetSimpleStorage(
         File(Environment.getExternalStorageDirectory(), "IReader/Extensions/")
 
     override fun cacheExtensionDir() = File(context.cacheDir,"IReader/Extensions/")
-    override fun ireaderCacheDir() = File(context.cacheDir,"IReader/")
+    override fun ireaderCacheDir() = File(context.cacheDir,"IReader/cache/")
 
     override val backupDirectory: File =
         File(Environment.getExternalStorageDirectory(), "IReader/Backups/")

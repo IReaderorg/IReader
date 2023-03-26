@@ -51,7 +51,7 @@ immutableCollections = "0.3.5"
 kds = "3.4.0"
 ideaExt = "1.1.6"
 # Localization
-moko = "0.20.1"
+moko = "0.21.0"
 # BuildConfigs
 buildconfig = "3.1.0"
 buildkonfig = "0.13.3"

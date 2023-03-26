@@ -103,7 +103,6 @@ kotlin {
                 /** LifeCycle **/
                 implementation(androidx.lifecycle.runtime)
                 implementation(kotlinx.stdlib)
-                api(composeLib.compose.ui.util)
             }
         }
         val desktopMain by getting {
