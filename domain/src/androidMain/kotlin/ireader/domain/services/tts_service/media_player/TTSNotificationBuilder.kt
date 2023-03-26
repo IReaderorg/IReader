@@ -16,8 +16,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.media.session.MediaButtonReceiver
 import ireader.domain.R
-import ireader.domain.notification.Notifications
-import ireader.domain.notification.Notifications.CHANNEL_TTS
+import ireader.domain.notification.NotificationsIds
+import ireader.domain.notification.NotificationsIds.CHANNEL_TTS
 import ireader.domain.notification.legacyFlags
 import ireader.domain.notification.setLargeIcon
 import ireader.domain.services.tts_service.Player
@@ -220,7 +220,7 @@ class TTSNotificationBuilder constructor(
             }
         return NotificationCompat.Builder(
             context,
-            Notifications.CHANNEL_TTS
+            NotificationsIds.CHANNEL_TTS
         ).apply {
             setContentTitle(chapterTitle)
             setContentText(contentText)
@@ -274,13 +274,13 @@ class TTSNotificationBuilder constructor(
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun nowPlayingChannelExists() =
-        notificationManager.getNotificationChannel(Notifications.CHANNEL_TTS) != null
+        notificationManager.getNotificationChannel(NotificationsIds.CHANNEL_TTS) != null
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNowPlayingChannel(context: Context) {
         notificationManager.createNotificationChannel(
             NotificationChannel(
-                Notifications.CHANNEL_TTS,
+                NotificationsIds.CHANNEL_TTS,
                 CHANNEL_TTS,
                 NotificationManager.IMPORTANCE_LOW
             ).apply {

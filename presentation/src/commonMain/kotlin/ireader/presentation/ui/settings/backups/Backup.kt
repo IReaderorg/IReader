@@ -49,6 +49,8 @@ fun BackUpAndRestoreScreen(
                     vm.showSnackBar(it)
                 }, onSuccess = {
                     vm.showSnackBar((UiText.MStringResource(MR.strings.backup_created_successfully)))
+                }, currentEvent = {
+                    vm.showSnackBar(UiText.DynamicString(it))
                 })
             }
         }

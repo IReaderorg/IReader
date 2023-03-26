@@ -61,7 +61,7 @@ class AutomaticBackup(
                     allFiles?.map { it.delete() }
                 }
                 val backupFile = file!!.createBinaryFile(context, name, mode = CreateMode.CREATE_NEW)
-                createBackup.saveTo(Uri(backupFile!!.uri), onError = {}, onSuccess = {})
+                createBackup.saveTo(Uri(backupFile!!.uri), onError = {}, onSuccess = {}, currentEvent = {})
                 lastCheckPref.set(now.toEpochMilliseconds())
             } catch (e: Exception) {
                 Log.error(e, "AutomaticBackup")

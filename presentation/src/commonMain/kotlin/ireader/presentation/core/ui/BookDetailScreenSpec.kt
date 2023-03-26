@@ -152,9 +152,12 @@ data class BookDetailScreenSpec constructor(
                     snackbarHostState = snackbarHostState,
                     topBar = { scrollBehavior ->
                         val onShare = ActivityResultListener(onSuccess = { uri ->
-                            vm.booksState.book?.let {
-                                vm.createEpub(it, uri)
+                            vm.booksState.book?.let { book ->
+                                vm.createEpub(book, uri, currentEvent = {
+                                    vm.showSnackBar(UiText.DynamicString(it))
+                                })
                             }
+                            vm.showSnackBar(UiText.MStringResource(MR.strings.success))
                         }) { e ->
                             vm.showSnackBar(UiText.ExceptionString(e))
                         }

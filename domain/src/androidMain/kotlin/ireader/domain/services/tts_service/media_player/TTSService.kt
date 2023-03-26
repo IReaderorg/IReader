@@ -24,7 +24,7 @@ import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
-import ireader.domain.notification.Notifications
+import ireader.domain.notification.NotificationsIds
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.services.tts_service.Player
@@ -270,7 +270,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                 startService(Intent(applicationContext, TTSService::class.java))
                 scope.launch {
                     startForeground(
-                        Notifications.ID_TTS,
+                        NotificationsIds.ID_TTS,
                         ttsNotificationBuilder.buildNotification(mediaSession.sessionToken)
                     )
                     isNotificationForeground = true
@@ -506,7 +506,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             if (state != null && mediaSession.controller.metadata != null) {
                 scope.launch {
                     NotificationManagerCompat.from(applicationContext).notify(
-                        Notifications.ID_TTS,
+                        NotificationsIds.ID_TTS,
                         ttsNotificationBuilder.buildTTSNotification(mediaSession).build()
                     )
                 }
@@ -535,7 +535,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                     )
 
                 notify(
-                    Notifications.ID_TTS,
+                    NotificationsIds.ID_TTS,
                     builder.build()
                 )
             }
@@ -560,7 +560,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                                         when (command) {
                                             Player.CANCEL -> {
                                                 NotificationManagerCompat.from(this@TTSService)
-                                                    .cancel(Notifications.ID_TTS)
+                                                    .cancel(NotificationsIds.ID_TTS)
                                                 player?.stop()
                                                 state.utteranceId = ""
                                                 val am =

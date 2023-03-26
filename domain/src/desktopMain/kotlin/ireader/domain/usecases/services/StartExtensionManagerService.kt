@@ -1,16 +1,14 @@
 package ireader.domain.usecases.services
 
-import ireader.core.os.InstallStep
 import ireader.domain.catalogs.interactor.GetInstalledCatalog
 import ireader.domain.catalogs.interactor.InstallCatalog
 import ireader.domain.catalogs.service.CatalogRemoteRepository
-import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.services.extensions_insstaller_service.runExtensionService
 import ireader.domain.utils.NotificationManager
 import ireader.domain.utils.extensions.launchIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.first
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -29,26 +27,26 @@ actual class StartExtensionManagerService(override val di: DI): DIAware {
 
     actual fun start() {
             scope.launchIO {
-                try {
-                    val remote = repository.getRemoteCatalogs()
-                    val installed = getInstalledCatalog.get().map { Pair(it.pkgName, it.versionCode) }
-                    val notInstalled = remote
-                        .filter { catalog ->
-                            catalog.pkgName !in installed.map { it.first }
-                                    || catalog.versionCode !in installed.map { it.second }
-                        }
-                    notInstalled.forEachIndexed { index, catalogRemote ->
-                        installCatalog.await(PreferenceValues.Installer.LocalInstaller)
-                            .install(catalogRemote).first {
-                                it is InstallStep.Idle
-                            }
+                runExtensionService(
+                    repository = repository,
+                    getInstalledCatalog = getInstalledCatalog,
+                    installCatalog = installCatalog,
+                    notificationManager = notificationManager,
+                    updateProgress = { max, progress, inProgess ->
+
+                    },
+                    updateTitle = {
+                    },
+                    onCancel = {
+
+                    },
+                    updateNotification = {
+
+                    },
+                    onSuccess = { notInstalled ->
+
                     }
-
-
-
-                } catch (e: Throwable) {
-
-                }
+                )
             }
 
 

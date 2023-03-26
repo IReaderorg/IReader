@@ -103,7 +103,7 @@ kotlin {
                 /** LifeCycle **/
                 implementation(androidx.lifecycle.runtime)
                 implementation(kotlinx.stdlib)
-
+                api(composeLib.compose.ui.util)
             }
         }
         val desktopMain by getting {
@@ -119,9 +119,4 @@ kotlin {
 dependencies {
     debugImplementation(composeLib.compose.uiTestManifest)
     implementation(files("libs/epublib-core-latest.jar"))
-//    {
-//        exclude(group = "org.slf4j")
-//        exclude(group = "xmlpull")
-//        this.isChanging = false
-//    }
 }

@@ -23,8 +23,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.*
-import ireader.presentation.ui.component.utils.fastForEach
-import ireader.presentation.ui.component.utils.fastMaxBy
+import ireader.domain.utils.fastForEach
+import ireader.domain.utils.fastMaxBy
 import ireader.presentation.ui.core.modifier.systemGestureExclusion
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow

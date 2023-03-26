@@ -3,6 +3,7 @@ package ireader.domain.usecases.epub
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.ui.util.fastForEachIndexed
 import ireader.core.source.model.Text
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.image.cache.CoverCache
@@ -30,7 +31,7 @@ actual class EpubCreator(
         }
     }
 
-    actual suspend operator fun invoke(book: Book, uri: ireader.domain.models.common.Uri) {
+    actual suspend operator fun invoke(book: Book, uri: ireader.domain.models.common.Uri,currentEvent: (String) -> Unit) {
         val epubBook = nl.siegmann.epublib.domain.Book()
         val chapters = chapterRepository.findChaptersByBookId(book.id)
         val metadata = epubBook.metadata
@@ -42,7 +43,7 @@ actual class EpubCreator(
             epubBook.coverImage = Resource(cover.readBytes(), MediaType("cover", ".jpg"))
         }
 
-        chapters.forEachIndexed { index, chapter ->
+        chapters.fastForEachIndexed { index, chapter ->
             val contents = chapter.content.mapNotNull {
                 when(it) {
                     is Text -> it.text

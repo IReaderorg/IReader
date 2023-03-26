@@ -11,8 +11,8 @@ buildscript {
 plugins {
     alias(kotlinx.plugins.kotlinAndroid) apply false
     alias(libs.plugins.kotlinter) apply false
-    alias(libs.plugins.benGradleVersions)
-    alias(libs.plugins.dependencyAnalysis)
+    //alias(libs.plugins.benGradleVersions)
+    //alias(libs.plugins.dependencyAnalysis)
     alias(kotlinx.plugins.kotlinSerilization) apply false
     alias(libs.plugins.jetbrainCompose) apply false
     alias(libs.plugins.ideaExt) apply false
@@ -21,24 +21,24 @@ plugins {
     alias(libs.plugins.sqldelight) apply false
     alias(libs.plugins.moko) apply false
     alias(libs.plugins.buildkonfig) apply false
-    id("nl.littlerobots.version-catalog-update") version "0.6.1"
+   // id("nl.littlerobots.version-catalog-update") version "0.6.1"
 }
 
 
-fun isNonStable(version: String): Boolean {
-    val stableKeyword =
-        listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
-    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
-    val isStable = stableKeyword || regex.matches(version)
-    return isStable.not()
-}
-
-
-tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
-    rejectVersionIf {
-        isNonStable(candidate.version) && !isNonStable(currentVersion)
-    }
-}
+//fun isNonStable(version: String): Boolean {
+//    val stableKeyword =
+//        listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
+//    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+//    val isStable = stableKeyword || regex.matches(version)
+//    return isStable.not()
+//}
+//
+//
+//tasks.withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
+//    rejectVersionIf {
+//        isNonStable(candidate.version) && !isNonStable(currentVersion)
+//    }
+//}
 
 subprojects {
     afterEvaluate {

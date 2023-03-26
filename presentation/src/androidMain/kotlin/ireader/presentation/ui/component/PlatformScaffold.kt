@@ -11,9 +11,9 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
-import ireader.presentation.ui.component.utils.fastForEach
-import ireader.presentation.ui.component.utils.fastMap
-import ireader.presentation.ui.component.utils.fastMaxBy
+import ireader.domain.utils.fastForEach
+import ireader.domain.utils.fastMap
+import ireader.domain.utils.fastMaxBy
 import kotlin.math.max
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)

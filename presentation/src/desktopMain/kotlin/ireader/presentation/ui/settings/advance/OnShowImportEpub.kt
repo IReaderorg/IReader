@@ -8,12 +8,12 @@ import ireader.domain.utils.extensions.launchIO
 import ireader.presentation.core.util.FilePicker
 
 @Composable
-actual fun OnShowImportEpub(show:Boolean, onFileSelected: suspend (Uri) -> Unit) {
+actual fun OnShowImportEpub(show:Boolean, onFileSelected: suspend (List<Uri>) -> Unit) {
     val scope = rememberCoroutineScope()
     FilePicker(show = show, BackupDir.absolutePath, listOf("epub","zip"), onFileSelected = {
         scope.launchIO {
             if (it != null) {
-                onFileSelected(it)
+                onFileSelected(listOf(it))
             }
         }
     })

@@ -18,7 +18,7 @@ import ireader.domain.utils.extensions.DefaultPaginator
 import ireader.i18n.SourceNotFoundException
 import ireader.i18n.UiText
 import ireader.i18n.resources.MR
-import ireader.presentation.ui.component.utils.fastMap
+import ireader.domain.utils.fastMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow

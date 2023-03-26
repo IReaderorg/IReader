@@ -12,13 +12,25 @@ import ireader.domain.utils.extensions.launchIO
 import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
 
 @Composable
-actual fun OnShowImportEpub(show:Boolean, onFileSelected: suspend (Uri) -> Unit) {
+actual fun OnShowImportEpub(show:Boolean, onFileSelected: suspend (List<Uri>) -> Unit) {
     val globalScope = LocalGlobalCoroutineScope.currentOrThrow
     val onImportEpub =         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
         if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
-            val uri = resultIntent.data!!.data!!
+            val selectedFiles = mutableListOf<Uri>()
+            val clipData = resultIntent.data?.clipData
+            if (clipData != null) {
+                for (i in 0 until clipData.itemCount) {
+                    val uri = clipData.getItemAt(i).uri
+                    selectedFiles.add(Uri(uri))
+                }
+            } else {
+                resultIntent.data?.data?.let { uri ->
+                    selectedFiles.add(Uri(uri))
+                }
+
+            }
             globalScope.launchIO {
-                onFileSelected(Uri(uri))
+                onFileSelected(selectedFiles)
             }
         }
     }
@@ -31,6 +43,7 @@ actual fun OnShowImportEpub(show:Boolean, onFileSelected: suspend (Uri) -> Unit)
                 .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
                 .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
             onImportEpub.launch(intent)
         }
     }

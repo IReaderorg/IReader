@@ -10,7 +10,7 @@ import androidx.work.WorkManager
 import ireader.domain.R
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
-import ireader.domain.notification.Notifications
+import ireader.domain.notification.NotificationsIds
 import ireader.domain.notification.legacyFlags
 import ireader.domain.services.tts_service.Player
 import ireader.domain.services.tts_service.media_player.TTSService
@@ -74,7 +74,7 @@ class DefaultNotificationHelper(
             .createCancelPendingIntent(workManagerId)
         return NotificationCompat.Builder(
             context,
-            Notifications.CHANNEL_DOWNLOADER_PROGRESS
+            NotificationsIds.CHANNEL_DOWNLOADER_PROGRESS
         ).apply {
 
             setContentTitle("Installing")
@@ -102,7 +102,7 @@ class DefaultNotificationHelper(
             .createCancelPendingIntent(workManagerId)
         return NotificationCompat.Builder(
             context,
-            Notifications.CHANNEL_DOWNLOADER_PROGRESS
+            NotificationsIds.CHANNEL_DOWNLOADER_PROGRESS
         ).apply {
             chapter?.let {
                 setContentTitle("Downloading ${chapter.name}")
@@ -128,7 +128,7 @@ class DefaultNotificationHelper(
     ): NotificationCompat.Builder {
         return NotificationCompat.Builder(
             context.applicationContext,
-            Notifications.CHANNEL_DOWNLOADER_ERROR
+            NotificationsIds.CHANNEL_DOWNLOADER_ERROR
         ).apply {
             if (e.localizedMessage == localizeHelper.localize(MR.strings.the_downloads_was_interrupted)) {
                 setSubText(localizeHelper.localize(MR.strings.the_downloads_was_cancelled))
@@ -153,7 +153,7 @@ class DefaultNotificationHelper(
     ): NotificationCompat.Builder {
         return NotificationCompat.Builder(
             context,
-            Notifications.CHANNEL_DOWNLOADER_ERROR
+            NotificationsIds.CHANNEL_DOWNLOADER_ERROR
         ).apply {
             if (e.localizedMessage == localizeHelper.localize(MR.strings.the_downloads_was_interrupted)) {
                 setSubText(localizeHelper.localize(MR.strings.the_downloads_was_cancelled))

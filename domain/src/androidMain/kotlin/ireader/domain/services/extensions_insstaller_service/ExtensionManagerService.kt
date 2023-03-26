@@ -2,23 +2,18 @@ package ireader.domain.services.extensions_insstaller_service
 
 import android.content.Context
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import ireader.core.os.InstallStep
 import ireader.domain.R
 import ireader.domain.catalogs.interactor.GetInstalledCatalog
 import ireader.domain.catalogs.interactor.InstallCatalog
 import ireader.domain.catalogs.service.CatalogRemoteRepository
-import ireader.domain.models.prefs.PreferenceValues
-import ireader.domain.notification.Notifications
+import ireader.domain.notification.NotificationsIds
 import ireader.domain.services.downloaderService.DefaultNotificationHelper
 import ireader.domain.utils.NotificationManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -39,59 +34,54 @@ class ExtensionManagerService constructor(
 
 
     override suspend fun doWork(): Result {
-        NotificationManagerCompat.from(applicationContext.applicationContext).apply {
-            try {
-                val builder = defaultNotificationHelper.baseInstallerNotification(
-                    id
-                )
-                builder.setProgress(100, 0, true)
-                notificationManager.show(Notifications.ID_INSTALLER_PROGRESS, builder.build())
-                val remote = repository.getRemoteCatalogs()
-                val installed = getInstalledCatalog.get().map { Pair(it.pkgName, it.versionCode) }
-                val notInstalled = remote
-                    .filter { catalog ->
-                        catalog.pkgName !in installed.map { it.first }
-                                || catalog.versionCode !in installed.map { it.second }
-                    }
-                notInstalled.forEachIndexed { index, catalogRemote ->
-                    installCatalog.await(PreferenceValues.Installer.LocalInstaller)
-                        .install(catalogRemote).first {
-                            it is InstallStep.Idle
-                        }
-                    builder.setProgress(notInstalled.size, index, false)
-                    builder.setContentTitle("Installing ${index + 1} of ${notInstalled.size}")
-                    notificationManager.show(Notifications.ID_INSTALLER_PROGRESS, builder.build())
-                }
-                withContext(Dispatchers.Main) {
-                    notificationManager.cancel(Notifications.ID_INSTALLER_PROGRESS)
+            val builder = defaultNotificationHelper.baseInstallerNotification(
+                id
+            )
+            val result = runExtensionService(
+                repository = repository,
+                getInstalledCatalog = getInstalledCatalog,
+                installCatalog = installCatalog,
+                notificationManager = notificationManager,
+                updateProgress = { max, progress, inProgess ->
+                    builder.setProgress(max,progress,inProgess)
+                },
+                updateTitle = {
+                    builder.setContentTitle(it)
+                },
+                onCancel = {
+                    notificationManager.cancel(NotificationsIds.ID_INSTALLER_PROGRESS)
+                    notificationManager.show(NotificationsIds.ID_INSTALLER_ERROR,
+                        defaultNotificationHelper.baseInstallerNotification(
+                            id,
+                            false
+                        ).apply {
+                            setContentTitle("Installation was stopped.")
+                            setOngoing(false)
+                        }.build())
+                },
+                updateNotification = {
+                    notificationManager.show(NotificationsIds.ID_INSTALLER_COMPLETE,
+                        builder)
+                },
+                onSuccess = { notInstalled ->
+                    notificationManager.cancel(NotificationsIds.ID_INSTALLER_PROGRESS)
                     val notification = NotificationCompat.Builder(
                         applicationContext.applicationContext,
-                        Notifications.CHANNEL_INSTALLER_COMPLETE
+                        NotificationsIds.CHANNEL_INSTALLER_COMPLETE
                     ).apply {
-                        setContentTitle("${notInstalled.size} sources was Installed successfully.")
+                        setContentTitle("$notInstalled sources was Installed successfully.")
                         setSmallIcon(R.drawable.ic_downloading)
                         priority = NotificationCompat.PRIORITY_DEFAULT
                         setSubText("Installed Successfully")
                         setAutoCancel(true)
                         setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
                     }.build()
-                    notificationManager.show(Notifications.ID_INSTALLER_COMPLETE,
+                    notificationManager.show(NotificationsIds.ID_INSTALLER_COMPLETE,
                         notification)
                 }
-
-                return Result.success()
-            } catch (e: Throwable) {
-                notificationManager.cancel(Notifications.ID_INSTALLER_PROGRESS)
-               notificationManager.show(Notifications.ID_INSTALLER_ERROR,
-                   defaultNotificationHelper.baseInstallerNotification(
-                       id,
-                       false
-                   ).apply {
-                       setContentTitle("Installation was stopped.")
-                       setOngoing(false)
-                   }.build())
-                return Result.failure()
-            }
-        }
+            )
+            return if (result) Result.success() else Result.failure()
     }
 }
+
+

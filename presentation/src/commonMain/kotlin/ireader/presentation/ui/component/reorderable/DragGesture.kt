@@ -4,9 +4,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.unit.dp
-import ireader.presentation.ui.component.utils.fastAll
-import ireader.presentation.ui.component.utils.fastAny
-import ireader.presentation.ui.component.utils.fastFirstOrNull
+import ireader.domain.utils.fastAll
+import ireader.domain.utils.fastAny
+import ireader.domain.utils.fastFirstOrNull
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
 

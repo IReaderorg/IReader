@@ -8,6 +8,7 @@ import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.usecases.file.FileSaver
 import ireader.domain.usecases.files.GetSimpleStorage
+import ireader.domain.utils.fastMap
 import nl.siegmann.epublib.epub.EpubReader
 import org.jsoup.Jsoup
 import org.jsoup.nodes.TextNode
@@ -31,7 +32,10 @@ actual class ImportEpub(
         }
     }
 
-    actual suspend fun parse(uri: ireader.domain.models.common.Uri) {
+    actual suspend fun parse(uris: List<ireader.domain.models.common.Uri>) {
+        uris.forEach { uri ->
+
+
         val epub = getEpubReader(uri) ?: throw Exception()
 
         val key = epub.metadata?.titles?.firstOrNull() ?: throw Exception("Unknown novel")
@@ -70,9 +74,9 @@ actual class ImportEpub(
                     ignoreCase = true
                 )
             }
-        }.map {
+        }.fastMap {
             epub.resources.resourceMap[it]
-        }.map { epubResourceModel ->
+        }.fastMap { epubResourceModel ->
             epubResourceModel?.data?.let {
                 EpubXMLFileParser(it).parse()
             }?.let { output ->
@@ -87,7 +91,7 @@ actual class ImportEpub(
                     content = content,
                 )
             }
-        }.mapNotNull { it }.let {
+        }.filterNotNull().let {
             chapterRepository.insertChapters(it)
         }
 
@@ -97,6 +101,7 @@ actual class ImportEpub(
                 if (parent.exists())
                     imgFile.writeBytes(it)
             }
+        }
         }
     }
 

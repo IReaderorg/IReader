@@ -1,14 +1,15 @@
 package ireader.domain.usecases.backup
 
 
-import ireader.domain.models.common.Uri
 import ireader.core.db.Transactions
 import ireader.domain.data.repository.CategoryRepository
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.data.repository.LibraryRepository
+import ireader.domain.models.common.Uri
 import ireader.domain.usecases.backup.backup.*
 import ireader.domain.usecases.file.FileSaver
+import ireader.domain.utils.fastMap
 import ireader.i18n.UiText
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToByteArray
@@ -26,12 +27,13 @@ class CreateBackup  internal constructor(
 ) {
 
     suspend fun saveTo(
-            uri: Uri,
-            onError: (UiText) -> Unit,
-            onSuccess: () -> Unit
+        uri: Uri,
+        onError: (UiText) -> Unit,
+        onSuccess: () -> Unit,
+        currentEvent: (String) -> Unit
     ): Boolean {
         return try {
-            val dump = createDump()
+            val dump = createDump(currentEvent)
             fileSaver.save(uri,dump)
             val isValid = fileSaver.validate(uri)
             onSuccess()
@@ -43,10 +45,12 @@ class CreateBackup  internal constructor(
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    private suspend fun createDump(): ByteArray {
+    private suspend fun createDump(
+        currentEvent: (String) -> Unit
+    ): ByteArray {
         val backup = transactions.run {
             Backup(
-                library = dumpLibrary(),
+                library = dumpLibrary(currentEvent),
                 categories = dumpCategories()
             )
         }
@@ -54,10 +58,12 @@ class CreateBackup  internal constructor(
         return kotlinx.serialization.protobuf.ProtoBuf.encodeToByteArray(backup)
     }
 
-    private suspend fun dumpLibrary(): List<BookProto> {
+    private suspend fun dumpLibrary(
+        currentEvent: (String) -> Unit
+    ): List<BookProto> {
         return mangaRepository.findFavorites()
-            .map { book ->
-                val chapters = dumpChapters(book.id)
+            .fastMap { book ->
+                val chapters = dumpChapters(book.id,currentEvent)
                 val mangaCategories = dumpMangaCategories(book.id)
                 val tracks = dumpTracks(book.id)
                 val histories = dumpHistories(book.id)
@@ -66,20 +72,21 @@ class CreateBackup  internal constructor(
             }
     }
 
-    private suspend fun dumpChapters(bookId: Long): List<ChapterProto> {
-        return chapterRepository.findChaptersByBookId(bookId).map { chapter ->
+    private suspend fun dumpChapters(bookId: Long, currentEvent: (String) -> Unit): List<ChapterProto> {
+        return chapterRepository.findChaptersByBookId(bookId).fastMap { chapter ->
+            currentEvent(chapter.name)
             ChapterProto.fromDomain(chapter)
         }
     }
 
     private suspend fun dumpHistories(bookId: Long): List<HistoryProto> {
-        return historyRepository.findHistoriesByBookId(bookId).map { HistoryProto.fromDomain(it) }
+        return historyRepository.findHistoriesByBookId(bookId).fastMap { HistoryProto.fromDomain(it) }
     }
 
     private suspend fun dumpMangaCategories(mangaId: Long): List<Long> {
         return categoryRepository.getCategoriesByMangaId(mangaId)
             .filter { !it.isSystemCategory }
-            .map { it.order }
+            .fastMap { it.order }
     }
 
     private suspend fun dumpTracks(mangaId: Long): List<TrackProto> {
@@ -90,6 +97,6 @@ class CreateBackup  internal constructor(
     private suspend fun dumpCategories(): List<CategoryProto> {
         return categoryRepository.findAll()
             .filter { !it.category.isSystemCategory }
-            .map { cat -> CategoryProto.fromDomain(cat.category) }
+            .fastMap { cat -> CategoryProto.fromDomain(cat.category) }
     }
 }
