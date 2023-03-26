@@ -199,5 +199,3 @@ jobs:
           keep_latest: 15
           delete_tags: true
           repo: IReaderorg/IReader-Preview
-android-standard-x86_64-release-unsigned-signed:
-  apk:
