@@ -3,12 +3,12 @@ package ireader.domain.usecases.epub
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.ui.util.fastForEachIndexed
 import ireader.core.source.model.Text
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.image.cache.CoverCache
 import ireader.domain.models.BookCover
 import ireader.domain.models.entities.Book
+import ireader.domain.utils.fastForEachIndexed
 import nl.siegmann.epublib.domain.Author
 import nl.siegmann.epublib.domain.MediaType
 import nl.siegmann.epublib.domain.Resource

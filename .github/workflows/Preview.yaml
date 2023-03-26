@@ -150,9 +150,6 @@ jobs:
       - name: Fix deb java dependency
         run: ./.github/scripts/DebDependencyFix.sh
 
-      - name: Fix filenames
-        run: ./.github/scripts/NamingFix.sh preview
-
       - name: Prepare build
         run: |
           set -e
