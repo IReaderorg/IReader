@@ -92,7 +92,6 @@ jobs:
         run: |
           commit_count=$(git rev-list --count HEAD)
           echo "COMMIT_COUNT=$commit_count" >> $GITHUB_ENV
-
       - name: Build rpm Package
         if: ${{ matrix.runtime == 'linux-fedora-x64' }}
         uses: Syer10/Fedora-Java17-Action@v1
@@ -105,7 +104,6 @@ jobs:
         with:
           arguments: >
             ${{ matrix.build }}
-
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
         if: ${{ matrix.runtime == 'android' }}
@@ -115,7 +113,6 @@ jobs:
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
-
       # Upload runner package tar.gz/zip as artifact
       - name: Publish Artifact
         uses: actions/upload-artifact@v3
@@ -125,8 +122,18 @@ jobs:
             desktop/build/compose/binaries/main/*/
             desktop/build/compose/jars/
             !desktop/build/compose/binaries/main/app/
-            ${{ env.SIGNED_RELEASE_FILE }}
 
+      - name: Publish Android Artifact
+        if: ${{ matrix.runtime == 'android' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: runner-package-${{ matrix.runtime }}
+          path: |
+            android/build/outputs/apk/standard/release/android-standard-universal-release-unsigned-signed.apk
+            android/build/outputs/apk/standard/release/android-standard-arm64-v8a-release-unsigned-signed.apk
+            android/build/outputs/apk/standard/release/android-standard-armeabi-v7a-release-unsigned-signed.apk
+            android/build/outputs/apk/standard/release/android-standard-x86-release-unsigned-signed.apk
+            android/build/outputs/apk/standard/release/android-standard-x86_64-release-unsigned-signed.apk
         # Upload runner errors
       - name: Upload error logs
         uses: actions/upload-artifact@v3
@@ -169,18 +176,10 @@ jobs:
             | jq -r '.[]|"- \(.message | first) (@\(.username))"')
           {delimiter}" >> $GITHUB_ENV
           mkdir -p ~/.android/ && echo "${{ secrets.DEBUG_KEYSTORE }}" | base64 --decode > ~/.android/debug.keystore
-
       - uses: ncipollo/release-action@v1.12.0
         with:
-          artifacts: |
-            */binaries/main/*/*.*
-            */jars/*.jar
-            */android/build/outputs/apk/standard/release/*.apk
-            */android/build/outputs/apk/standard/release/android-standard-arm64-v8a-release-unsigned-signed.apk
-            */android/build/outputs/apk/standard/release/android-standard-armeabi-v7a-release-unsigned-signed.apk
-            */android/build/outputs/apk/standard/release/android-standard-universal-release-unsigned-signed.apk
-            */android/build/outputs/apk/standard/release/android-standard-x86-release-unsigned-signed.apk
-            */android/build/outputs/apk/standard/release/android-standard-x86_64-release-unsigned-signed.apk
+          artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,*/android-standard-universal-release-unsigned-signed.apk,*/android-standard-arm64-v8a-release-unsigned-signed.apk,*/android-standard-armeabi-v7a-release-unsigned-signed.apk,*/android-standard-x86-release-unsigned-signed.apk,*/android-standard-x86_64-release-unsigned-signed.apk"
+          allowUpdates: true
           token: ${{ secrets.WINGET_PUBLISH_PAT }}
           tag: r${{ env.COMMIT_COUNT }}
           repo: IReader-Preview
