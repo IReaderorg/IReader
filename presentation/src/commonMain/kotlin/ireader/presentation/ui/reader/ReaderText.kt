@@ -43,6 +43,7 @@ import ireader.domain.preferences.prefs.ReadingMode
 import ireader.presentation.imageloader.IImageLoader
 import ireader.presentation.ui.component.list.scrollbars.IColumnScrollbar
 import ireader.presentation.ui.component.list.scrollbars.ILazyColumnScrollbar
+import ireader.presentation.ui.core.modifier.supportDesktopScroll
 import ireader.presentation.ui.reader.reverse_swip_refresh.ISwipeRefreshIndicator
 import ireader.presentation.ui.reader.reverse_swip_refresh.MultiSwipeRefresh
 import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
@@ -66,7 +67,7 @@ fun ReaderText(
         onChapterShown: (chapter: Chapter) -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-
+    val scope = rememberCoroutineScope()
     BoxWithConstraints(
         modifier = Modifier
             .clickable(
@@ -75,6 +76,8 @@ fun ReaderText(
             ) {
                 toggleReaderMode()
             }
+            .supportDesktopScroll(scrollState,scope,enable = vm.readingMode.value == ReadingMode.Page)
+            .supportDesktopScroll(lazyListState,scope,enable = vm.readingMode.value == ReadingMode.Continues)
             .fillMaxSize()
             .background(vm.backgroundColor.value),
     ) {
