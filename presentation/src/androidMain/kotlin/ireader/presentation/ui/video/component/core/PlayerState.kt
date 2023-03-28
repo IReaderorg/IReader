@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.media3.common.*
 import androidx.media3.common.text.Cue
 import androidx.media3.common.text.CueGroup
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import ireader.presentation.ui.video.component.cores.*
 import ireader.presentation.ui.video.component.cores.player.SubtitleHelper.fromTwoLettersToLanguage
@@ -283,7 +284,7 @@ internal class PlayerStateImpl(
 
 
 
-    private val listener = object : Player.Listener {
+    private val listener = @UnstableApi object : Player.Listener {
 
 
         override fun onTimelineChanged(timeline: Timeline, reason: Int) {

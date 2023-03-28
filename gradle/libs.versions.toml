@@ -25,7 +25,7 @@ ksp = "1.8.0-1.0.9"
 # Image Loader
 image-loader = "1.2.10"
 # Dependency Injection
-kodein = "7.18.0"
+kodein = "7.19.0"
 koinAnnotation = "1.0.3"
 koin = "3.2.2"
 koinAndroid = "3.3.0"
@@ -64,7 +64,7 @@ proguard = "7.2.2"
 okhttp = "5.0.0-alpha.10"
 coil_version = "2.2.1"
 jsoup = "1.15.2"
-exoplayer="1.0.0"
+media3="1.0.0"
 dex2jar = "v59"
 
 [libraries]
@@ -157,17 +157,17 @@ sqldelight-android-paging = { module = "com.squareup.sqldelight:android-paging3-
 requerySqlite = "com.github.requery:sqlite-android:3.36.0"
 androidSqlite = "androidx.sqlite:sqlite-framework:2.2.0"
 
-exoplayer-core = { module = "androidx.media3:media3-exoplayer", version.ref = "exoplayer" }
-exoplayer-ui = { module = "androidx.media3:media3-ui", version.ref = "exoplayer" }
-exoplayer-dash = { module = "androidx.media3:media3-exoplayer-dash", version.ref = "exoplayer" }
-exoplayer-rtsp = { module = "androidx.media3:media3-exoplayer-rtsp", version.ref = "exoplayer" }
-exoplayer-okhttp = { module = "androidx.media3:media3-datasource-okhttp", version.ref = "exoplayer" }
-exoplayer-extractor = { module = "androidx.media3:media3-extractor", version.ref = "exoplayer" }
-exoplayer-transformer = { module = "androidx.media3:media3-transformer", version.ref = "exoplayer" }
-exoplayer-decoder = { module = "androidx.media3:media3-decoder", version.ref = "exoplayer" }
-exoplayer-datasource = { module = "androidx.media3:media3-datasource", version.ref = "exoplayer" }
-exoplayer-common = { module = "androidx.media3:media3-common", version.ref = "exoplayer" }
-exoplayer-subtitleDecoder = { module = "com.github.albfernandez:juniversalchardet", version = "2.4.0" }
+media3-core = { module = "androidx.media3:media3-exoplayer", version.ref = "media3" }
+media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3" }
+media3-dash = { module = "androidx.media3:media3-exoplayer-dash", version.ref = "media3" }
+media3-rtsp = { module = "androidx.media3:media3-exoplayer-rtsp", version.ref = "media3" }
+media3-okhttp = { module = "androidx.media3:media3-datasource-okhttp", version.ref = "media3" }
+media3-extractor = { module = "androidx.media3:media3-extractor", version.ref = "media3" }
+media3-transformer = { module = "androidx.media3:media3-transformer", version.ref = "media3" }
+media3-decoder = { module = "androidx.media3:media3-decoder", version.ref = "media3" }
+media3-datasource = { module = "androidx.media3:media3-datasource", version.ref = "media3" }
+media3-common = { module = "androidx.media3:media3-common", version.ref = "media3" }
+media3-subtitleDecoder = { module = "com.github.albfernandez:juniversalchardet", version = "2.4.0" }
 worker = { module = "com.autodesk:coroutineworker", version.ref = "worker" }
 
 
@@ -185,7 +185,7 @@ logging-kmlogging = { module = "org.lighthousegames:logging", version.ref = "kml
 
 [bundles]
 simplestorage = ["storage", "documentfile"]
-exoplayer = ["exoplayer-core", "exoplayer-ui", "exoplayer-dash","exoplayer-subtitleDecoder","exoplayer-rtsp","exoplayer-okhttp","exoplayer-extractor","exoplayer-transformer","exoplayer-decoder","exoplayer-datasource","exoplayer-common", ]
+media3 = ["media3-core", "media3-ui", "media3-dash","media3-subtitleDecoder","media3-rtsp","media3-okhttp","media3-extractor","media3-transformer","media3-decoder","media3-datasource","media3-common", ]
 tinylog = ["tinylog-impl", "tinylog-api"]
 ireader = ["jsoup","ktor-core","ktor-core-cio","ktor-okhttp","ktor-contentNegotiation","ktor-contentNegotiation-gson","ktor-contentNegotiation-kotlinx","ktor-contentNegotiation-jackson","ktor-core-android"]
 

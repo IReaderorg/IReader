@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
@@ -28,6 +29,7 @@ import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.components.ChapterRow
 import ireader.presentation.ui.component.list.scrollbars.IVerticalFastScroller
 import ireader.presentation.ui.component.reusable_composable.AppTextField
+import ireader.presentation.ui.core.modifier.clickableNoIndication
 import kotlinx.coroutines.launch
 
 @OptIn(
@@ -37,22 +39,23 @@ import kotlinx.coroutines.launch
         )
 @Composable
 fun BookDetailScreen(
-        vm: BookDetailViewModel,
-        onSummaryExpand: () -> Unit,
-        book: Book,
-        onTitle: (String) -> Unit,
-        source: Source?,
-        isSummaryExpanded: Boolean,
-        appbarPadding: Dp,
-        onItemClick: (Chapter) -> Unit,
-        onLongItemClick: (Chapter) -> Unit,
-        onSortClick: () -> Unit,
-        chapters: State<List<Chapter>>,
-        scrollState: LazyListState,
-        onMap: () -> Unit,
-        onFavorite: () -> Unit,
-        onWebView: () -> Unit,
-        onCopyTitle: (bookTitle: String) -> Unit,
+    vm: BookDetailViewModel,
+    onSummaryExpand: () -> Unit,
+    book: Book,
+    onTitle: (String) -> Unit,
+    source: Source?,
+    isSummaryExpanded: Boolean,
+    appbarPadding: Dp,
+    onItemClick: (Chapter) -> Unit,
+    onLongItemClick: (Chapter) -> Unit,
+    onSortClick: () -> Unit,
+    chapters: State<List<Chapter>>,
+    scrollState: LazyListState,
+    onMap: () -> Unit,
+    onFavorite: () -> Unit,
+    onWebView: () -> Unit,
+    onCopyTitle: (bookTitle: String) -> Unit,
+    topAppBarState: TopAppBarState,
 ) {
 
     val focusManager = LocalFocusManager.current
@@ -79,7 +82,13 @@ fun BookDetailScreen(
                     item {
                         Box {
 
-                            BookHeaderImage(book = book)
+                            Box(modifier = Modifier.matchParentSize().clickableNoIndication {
+                                topAppBarState.heightOffset =
+                                0F
+                            }) {
+                                BookHeaderImage(book = book,)
+                            }
+
                             BookHeader(
                                     book = book,
                                     onTitle = onTitle,

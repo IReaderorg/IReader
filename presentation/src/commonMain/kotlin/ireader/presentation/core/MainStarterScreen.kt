@@ -41,16 +41,25 @@ object MainStarterScreen : VoyagerScreen() {
                 IScaffold(
                         startBar = {
                             if (isTableUi()) {
-                                NavigationRail {
-                                    NavigationRailItem(LibraryScreenSpec)
-                                    if (vm.showUpdate.value) {
-                                        NavigationRailItem(UpdateScreenSpec)
+                                val bottomNavVisible by produceState(initialValue = true) {
+                                    showBottomNavEvent.receiveAsFlow().collectLatest { value = it }
+                                }
+                                AnimatedVisibility(
+                                    visible = bottomNavVisible,
+                                    enter = expandVertically(),
+                                    exit = shrinkVertically(),
+                                ) {
+                                    NavigationRail {
+                                        NavigationRailItem(LibraryScreenSpec)
+                                        if (vm.showUpdate.value) {
+                                            NavigationRailItem(UpdateScreenSpec)
+                                        }
+                                        if (vm.showUpdate.value) {
+                                            NavigationRailItem(HistoryScreenSpec)
+                                        }
+                                        NavigationRailItem(ExtensionScreenSpec)
+                                        NavigationRailItem(MoreScreenSpec)
                                     }
-                                    if (vm.showUpdate.value) {
-                                        NavigationRailItem(HistoryScreenSpec)
-                                    }
-                                    NavigationRailItem(ExtensionScreenSpec)
-                                    NavigationRailItem(MoreScreenSpec)
                                 }
                             }
                         },
@@ -58,30 +67,31 @@ object MainStarterScreen : VoyagerScreen() {
                             val bottomNavVisible by produceState(initialValue = true) {
                                 showBottomNavEvent.receiveAsFlow().collectLatest { value = it }
                             }
-                            AnimatedVisibility(
+                            if (!isTableUi()) {
+                                AnimatedVisibility(
                                     visible = bottomNavVisible,
                                     enter = expandVertically(),
                                     exit = shrinkVertically(),
-                            ) {
-                                NavigationBar(
+                                ) {
+                                    NavigationBar(
                                         modifier = Modifier,
                                         containerColor = AppColors.current.bars,
                                         contentColor = AppColors.current.onBars,
                                         tonalElevation = 0.dp,
-                                ) {
-                                    TabNavigationItem(LibraryScreenSpec)
-                                    if (vm.showUpdate.value) {
-                                        TabNavigationItem(UpdateScreenSpec)
+                                    ) {
+                                        TabNavigationItem(LibraryScreenSpec)
+                                        if (vm.showUpdate.value) {
+                                            TabNavigationItem(UpdateScreenSpec)
+                                        }
+                                        if (vm.showUpdate.value) {
+                                            TabNavigationItem(HistoryScreenSpec)
+                                        }
+                                        TabNavigationItem(ExtensionScreenSpec)
+                                        TabNavigationItem(MoreScreenSpec)
                                     }
-                                    if (vm.showUpdate.value) {
-                                        TabNavigationItem(HistoryScreenSpec)
-                                    }
-                                    TabNavigationItem(ExtensionScreenSpec)
-                                    TabNavigationItem(MoreScreenSpec)
                                 }
                             }
-                        },
-
+                        }
                         ) { contentPadding ->
 
                     Box(

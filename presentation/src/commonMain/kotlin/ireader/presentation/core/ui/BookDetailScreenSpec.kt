@@ -389,7 +389,8 @@ data class BookDetailScreenSpec constructor(
                         },
                         onCopyTitle = {
                             vm.platformHelper.copyToClipboard(it, it)
-                        }
+                        },
+                        topAppBarState = topbarState
 
                     )
 

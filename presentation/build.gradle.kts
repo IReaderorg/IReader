@@ -90,7 +90,7 @@ kotlin {
                 api(accompanist.web)
                 api(androidx.appCompat)
                 api(androidx.media)
-                api(libs.bundles.exoplayer)
+                api(libs.bundles.media3)
                 api(androidx.emoji)
                 api(androidx.work.runtime)
 
