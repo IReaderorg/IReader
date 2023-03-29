@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.TopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
@@ -29,7 +28,6 @@ import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.components.ChapterRow
 import ireader.presentation.ui.component.list.scrollbars.IVerticalFastScroller
 import ireader.presentation.ui.component.reusable_composable.AppTextField
-import ireader.presentation.ui.core.modifier.clickableNoIndication
 import kotlinx.coroutines.launch
 
 @OptIn(
@@ -55,7 +53,6 @@ fun BookDetailScreen(
     onFavorite: () -> Unit,
     onWebView: () -> Unit,
     onCopyTitle: (bookTitle: String) -> Unit,
-    topAppBarState: TopAppBarState,
 ) {
 
     val focusManager = LocalFocusManager.current
@@ -81,13 +78,7 @@ fun BookDetailScreen(
                 ) {
                     item {
                         Box {
-
-                            Box(modifier = Modifier.matchParentSize().clickableNoIndication {
-                                topAppBarState.heightOffset =
-                                0F
-                            }) {
-                                BookHeaderImage(book = book,)
-                            }
+                           BookHeaderImage(book = book,)
 
                             BookHeader(
                                     book = book,

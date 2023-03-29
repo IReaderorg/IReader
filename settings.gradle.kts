@@ -1,5 +1,5 @@
 enableFeaturePreview("VERSION_CATALOGS")
-//enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
+enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 rootProject.name = "Infinity"
 include(":android")
 include(":data")
@@ -39,6 +39,7 @@ dependencyResolutionManagement {
         maven("https://oss.sonatype.org/service/local/staging/deploy/maven2")
         maven(url = "https://jitpack.io")
         maven(url = "https://repo1.maven.org/maven2/")
+        maven("https://github.com/Suwayomi/Tachidesk-Server/raw/android-jar/")
 
     }
     versionCatalogs {
