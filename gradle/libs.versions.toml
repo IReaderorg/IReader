@@ -65,7 +65,8 @@ okhttp = "5.0.0-alpha.10"
 coil_version = "2.2.1"
 jsoup = "1.15.2"
 media3="1.0.0"
-dex2jar = "v59"
+dex2jar = "v60"
+htmlunit = "3.0.0"
 
 [libraries]
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
@@ -182,6 +183,9 @@ logging-log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref
 logging-log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
 logging-log4j-slf4j = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
 logging-kmlogging = { module = "org.lighthousegames:logging", version.ref = "kmlogging" }
+
+
+htmlunit = { module = "org.htmlunit:htmlunit", version.ref = "htmlunit" }
 
 [bundles]
 simplestorage = ["storage", "documentfile"]

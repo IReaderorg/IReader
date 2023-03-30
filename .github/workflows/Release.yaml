@@ -1,9 +1,14 @@
 name: CI
 
 on:
-  push:
-    tags:
-      - v*
+  workflow_dispatch:
+    inputs:
+      release-tag:
+        description: Tag
+        required: true
+      release-name:
+        description: The name for Release
+        required: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -144,3 +149,8 @@ jobs:
           artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,*/android-standard-universal-release-unsigned-signed.apk,*/android-standard-arm64-v8a-release-unsigned-signed.apk,*/android-standard-armeabi-v7a-release-unsigned-signed.apk,*/android-standard-x86-release-unsigned-signed.apk,*/android-standard-x86_64-release-unsigned-signed.apk"
           draft: true
           token: ${{ secrets.WINGET_PUBLISH_PAT }}
+          allowUpdates: true
+          tag: ${{ github.event.inputs.release-tag }}
+          name: ${{ github.event.inputs.release-name }}
+          body: |
+            ### Changelog
