@@ -10,10 +10,7 @@ import android.webkit.WebView
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
-import ireader.core.R
 import ireader.core.log.Log
-import ireader.i18n.LocalizeHelper
-import ireader.i18n.resources.MR
 import kotlinx.coroutines.*
 import okhttp3.Cookie
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -23,7 +20,7 @@ import okhttp3.Response
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-class CloudflareInterceptor(private val context: Context, private val webViewCookieJar: WebViewCookieJar,private val localizeHelper: LocalizeHelper) : Interceptor {
+class CloudflareInterceptor(private val context: Context, private val webViewCookieJar: WebViewCookieJar) : Interceptor {
 
     private val executor = ContextCompat.getMainExecutor(context)
 
@@ -49,7 +46,7 @@ class CloudflareInterceptor(private val context: Context, private val webViewCoo
 
         if (!WebViewUtilLegeacy.supportsWebView(context)) {
             launchUI {
-                context.toast(R.string.information_webview_required, Toast.LENGTH_LONG)
+                throw NeedWebView()
             }
             return chain.proceed(originalRequest)
         }
@@ -75,7 +72,7 @@ class CloudflareInterceptor(private val context: Context, private val webViewCoo
         // Because OkHttp's enqueue only handles IOExceptions, wrap the exception so that
         // we don't crash the entire app
         catch (e: CloudflareBypassException) {
-            throw IOException(localizeHelper.localize(MR.strings.information_cloudflare_bypass_failure))
+            throw CloudflareBypassFailed()
         } catch (e: Exception) {
             throw IOException(e)
         }
@@ -164,7 +161,7 @@ class CloudflareInterceptor(private val context: Context, private val webViewCoo
         if (!cloudflareBypassed) {
             // Prompt user to update WebView if it seems too outdated
             if (isWebViewOutdated) {
-                context.toast(R.string.information_webview_outdated, Toast.LENGTH_LONG)
+                throw OutOfDateWebView()
             }
 
             throw CloudflareBypassException()

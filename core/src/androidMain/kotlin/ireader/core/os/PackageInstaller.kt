@@ -16,6 +16,7 @@ import android.content.pm.PackageInstaller
 import android.os.Build
 import android.os.SystemClock
 import ireader.core.log.Log
+import ireader.core.os.InstallStep
 import ireader.core.util.calculateSizeRecursively
 import ireader.i18n.LocalizeHelper
 import kotlinx.coroutines.CompletableDeferred

@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStoreFile
+import ireader.core.prefs.Preference
+import ireader.core.prefs.PreferenceStore
 import ireader.core.prefs.AndroidPreference.Primitive
 import ireader.core.util.createICoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -1,5 +1,8 @@
 package ireader.domain.utils
 
+import ireader.core.http.CloudflareBypassFailed
+import ireader.core.http.NeedWebView
+import ireader.core.http.OutOfDateWebView
 import ireader.core.log.Log
 import ireader.core.source.LocalSourceException
 import ireader.i18n.EmptyQuery
@@ -39,6 +42,9 @@ fun exceptionHandler(e: Throwable): UiText? {
         }
         is EmptyQuery -> UiText.MStringResource(MR.strings.query_must_not_be_empty)
         is LocalSourceException -> null
+        is OutOfDateWebView -> UiText.MStringResource(MR.strings.query_must_not_be_empty)
+        is NeedWebView -> UiText.MStringResource(MR.strings.information_webview_required)
+        is CloudflareBypassFailed -> UiText.MStringResource(MR.strings.information_cloudflare_bypass_failure)
 
         is SourceNotFoundException -> UiText.MStringResource(MR.strings.the_source_is_not_found)
         else -> {

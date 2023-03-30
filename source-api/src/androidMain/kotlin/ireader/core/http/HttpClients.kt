@@ -15,7 +15,6 @@ import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.cookies.*
 import io.ktor.serialization.gson.*
-import ireader.i18n.LocalizeHelper
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import java.io.File
@@ -26,7 +25,6 @@ actual class HttpClients(
     browseEngine: BrowserEngine,
     cookiesStorage: CookiesStorage,
     webViewCookieJar: WebViewCookieJar,
-    localizeHelper: LocalizeHelper
 ) : HttpClientsInterface {
 
     private val cache = run {
@@ -64,8 +62,7 @@ actual class HttpClients(
             preconfigured = this@HttpClients.basicClient.addInterceptor(
                 CloudflareInterceptor(
                     context,
-                    cookieJar,
-                    localizeHelper
+                    cookieJar
                 )
             ).build()
         }

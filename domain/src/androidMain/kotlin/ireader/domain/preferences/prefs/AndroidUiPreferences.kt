@@ -1,6 +1,5 @@
 package ireader.domain.preferences.prefs
 
-import android.content.pm.ActivityInfo
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import ireader.core.prefs.Preference

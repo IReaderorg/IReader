@@ -1,7 +1,5 @@
 package ireader.domain.preferences.prefs
 
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.ExperimentalTextApi
 import ireader.core.prefs.Preference
 import ireader.core.prefs.PreferenceStore

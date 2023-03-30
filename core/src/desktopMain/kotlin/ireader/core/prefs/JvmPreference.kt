@@ -8,6 +8,7 @@
 
 package ireader.core.prefs
 
+import ireader.core.prefs.Preference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -20,11 +21,11 @@ import java.util.prefs.Preferences
  * An implementation of [Preference] backed by Java [Preferences].
  */
 class JvmPreference<T>(
-  private val preferences: Preferences,
-  private val key: String,
-  private val defaultValue: T,
-  private val adapter: Adapter<T>,
-  private val changes: Flow<String>
+    private val preferences: Preferences,
+    private val key: String,
+    private val defaultValue: T,
+    private val adapter: Adapter<T>,
+    private val changes: Flow<String>
 ) : Preference<T> {
 
   /**

@@ -8,6 +8,7 @@
 
 package ireader.core.io
 
+import ireader.core.io.ZipWriterScope
 import okio.FileSystem
 import okio.Path
 import okio.Source

@@ -25,6 +25,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(Modules.coreApi))
+                implementation(project(Modules.sourceApi))
                 implementation(project(Modules.domain))
                 implementation(project(Modules.commonResources))
                 implementation(kotlinx.serialization.json)

@@ -153,6 +153,7 @@ dependencies {
     implementation(composeLib.material3.windowsizeclass)
 
     implementation(project(Modules.coreApi))
+    implementation(project(Modules.sourceApi))
     implementation(project(Modules.data))
 
     implementation(project(Modules.domain))

@@ -6,6 +6,7 @@ import ireader.core.prefs.Preference
 import ireader.core.prefs.PreferenceStore
 import ireader.domain.models.library.LibrarySort
 import ireader.domain.preferences.models.ReaderColors
+import ireader.domain.preferences.models.prefs.IReaderVoice
 import ireader.domain.preferences.models.prefs.asColor
 import ireader.domain.preferences.models.prefs.asReaderTheme
 import ireader.domain.preferences.models.prefs.asVoice
@@ -69,7 +70,7 @@ class AppPreferences(
     fun exploreLayoutType(): Preference<Long> {
         return preferenceStore.getLong(SAVED_BROWSE_LAYOUT_KEY, 0)
     }
-    fun speechVoice(): Preference<ireader.domain.preferences.models.prefs.IReaderVoice> {
+    fun speechVoice(): Preference<IReaderVoice> {
         return preferenceStore.getString(ReaderPreferences.TEXT_READER_SPEECH_VOICE, "").asVoice()
     }
 

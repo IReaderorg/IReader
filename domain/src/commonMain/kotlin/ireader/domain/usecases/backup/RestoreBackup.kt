@@ -19,13 +19,13 @@ import kotlinx.serialization.ExperimentalSerializationApi
 
 
 class RestoreBackup internal constructor(
-        private val bookRepository: BookRepository,
-        private val categoryRepository: CategoryRepository,
-        private val chapterRepository: ChapterRepository,
-        private val mangaCategoryRepository: BookCategoryRepository,
-        private val libraryPreferences: LibraryPreferences,
-        private val transactions: Transactions,
-        private val fileSaver: FileSaver
+    private val bookRepository: BookRepository,
+    private val categoryRepository: CategoryRepository,
+    private val chapterRepository: ChapterRepository,
+    private val mangaCategoryRepository: BookCategoryRepository,
+    private val libraryPreferences: LibraryPreferences,
+    private val transactions: Transactions,
+    private val fileSaver: FileSaver
 ) {
 
     @OptIn(ExperimentalSerializationApi::class)

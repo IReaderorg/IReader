@@ -8,6 +8,7 @@ include(":presentation")
 include(":core")
 include(":i18n")
 include(":desktop")
+include(":source-api")
 
 
 

@@ -8,6 +8,8 @@
 
 package ireader.core.prefs
 
+import ireader.core.prefs.Preference
+import ireader.core.prefs.PreferenceStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

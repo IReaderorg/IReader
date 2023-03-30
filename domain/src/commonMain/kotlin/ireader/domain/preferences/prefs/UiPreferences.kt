@@ -17,7 +17,7 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun themeMode(): Preference<PreferenceValues.ThemeMode> {
         return preferenceStore.getEnum("theme_mode", PreferenceValues.ThemeMode.System)
     }
-        fun installerMode(): Preference<ireader.domain.models.prefs.PreferenceValues.Installer> {
+        fun installerMode(): Preference<PreferenceValues.Installer> {
         return preferenceStore.getEnum("installer_mode", ireader.domain.models.prefs.PreferenceValues.Installer.LocalInstaller)
     }
     fun showSystemWideCatalogs(): Preference<Boolean> {

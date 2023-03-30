@@ -27,6 +27,7 @@ kotlin {
             dependencies {
                 implementation(project(Modules.domain))
                 implementation(project(Modules.coreApi))
+                implementation(project(Modules.sourceApi))
                 implementation(project(Modules.commonResources))
 
                 api(compose.foundation)

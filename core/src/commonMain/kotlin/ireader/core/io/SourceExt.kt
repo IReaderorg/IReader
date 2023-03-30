@@ -15,7 +15,6 @@ import okio.Path
 import okio.Source
 import okio.buffer
 import okio.use
-import ireader.core.util.IO
 
 @Suppress("BlockingMethodInNonBlockingContext")
 suspend fun Source.saveTo(path: Path, fileSystem: FileSystem) {

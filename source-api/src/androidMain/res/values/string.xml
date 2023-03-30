@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="information_webview_required">need webview to view this content</string>
+    <string name="information_webview_outdated">webview is outdated.</string>
+    <string name="information_cloudflare_bypass_failure">Can\'t bypass the cloudflare</string>
+
+
+    <string name="fatal_error">Fatal error for</string>
+    <string name="installation_error">Error while (un)installing package</string>
+    <string name="installation_error_aborted">PackageManger: Cancelled</string>
+    <string name="installation_error_invalid">PackageManger: There is another apk installed with higher version than this package</string>
+    <string name="installation_error_Storage">PackageManger: InSufficient Storage</string>
+    <string name="installation_error_incompatible">PackageManger: Incompatible with installed package</string>
+    <string name="installation_error_conflicted">PackageManger: Conflicted with installed package</string>
+    <string name="installation_error_blocked">PackageManger: Installer was blocked</string>
+
+    <string name="package_installer_failed_to_install_packages">Package installer failed to install packages: STATUS_CODE: </string>
+
+    <string name="success">Success</string>
+
+</resources>
+
+

@@ -47,6 +47,7 @@ kotlin {
             dependencies {
                 implementation(project(Modules.commonResources))
                 implementation(project(Modules.coreApi))
+                implementation(project(Modules.sourceApi))
                 api(compose.ui)
                 api(compose.runtime)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)

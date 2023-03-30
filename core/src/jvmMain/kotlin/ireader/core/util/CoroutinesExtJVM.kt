@@ -8,6 +8,7 @@
 
 package ireader.core.util
 
+import ireader.core.util.ActorScope
 import kotlinx.coroutines.CompletionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
