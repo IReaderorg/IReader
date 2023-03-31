@@ -40,5 +40,5 @@ actual val dataPlatformModule: DI.Module = DI.Module("androidDataModule") {
     bindSingleton<InstallCatalog> { InstallCatalogImpl(instance(),instance(),instance()) }
     bindSingleton<CatalogInstallationChanges> { instance<AndroidCatalogInstallationChanges>() }
     bindSingleton<CatalogInstaller> { AndroidCatalogInstaller(instance(),instance(),instance(),instance(),instance(),instance()) }
-    bindSingleton<HttpClients> { HttpClients(instance(), BrowserEngine(instance(), instance()),instance(),instance(),instance()) }
+    bindSingleton<HttpClients> { HttpClients(instance(), BrowserEngine(instance(), instance()),instance(),instance()) }
 }
