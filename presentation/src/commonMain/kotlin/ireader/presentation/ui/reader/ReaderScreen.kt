@@ -77,12 +77,12 @@ fun ReadingScreen(
         when (vm.isReaderModeEnable) {
             false -> {
                 scope.launch {
-                    modalBottomSheetState.animateTo(ModalBottomSheetValue.Expanded, tween(250))
+                    modalBottomSheetState.show()
                 }
             }
             true -> {
                 scope.launch {
-                    modalBottomSheetState.snapTo(ModalBottomSheetValue.Hidden)
+                    modalBottomSheetState.hide()
                 }
             }
         }

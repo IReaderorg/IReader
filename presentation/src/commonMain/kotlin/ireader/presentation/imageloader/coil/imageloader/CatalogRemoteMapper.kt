@@ -10,12 +10,16 @@ import ireader.domain.models.entities.CatalogRemote
 
 class CatalogRemoteMapper : Mapper<Url> {
     override fun map(data: Any, options: Options): Url? {
-        return if (data is CatalogRemote) {
-            Url(data.iconUrl)
-        } else if (data is CatalogInstalled){
-            Url(data.iconUrl)
-        } else {
-            null
+        return when (data) {
+            is CatalogRemote -> {
+                Url(data.iconUrl)
+            }
+            is CatalogInstalled -> {
+                Url(data.iconUrl)
+            }
+            else -> {
+                null
+            }
         }
     }
 }
