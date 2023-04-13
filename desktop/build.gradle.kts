@@ -40,11 +40,6 @@ dependencies {
     implementation(kotlinx.coroutines.core)
 }
 
-
-java {
-    sourceCompatibility = ProjectConfig.desktopJvmTarget
-    targetCompatibility = ProjectConfig.desktopJvmTarget
-}
 kotlin {
     sourceSets.main {
         kotlin.srcDir("build/generated/ksp/main/kotlin")
