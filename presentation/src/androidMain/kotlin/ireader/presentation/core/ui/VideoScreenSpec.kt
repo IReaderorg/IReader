@@ -72,7 +72,7 @@ actual data class VideoScreenSpec actual constructor(val chapterId: Long) : Voya
             VideoPresenter(
                 vm, onShowMenu = {
                     scope.launch {
-                        sheetState.animateTo(ModalBottomSheetValue.Expanded)
+                        sheetState.show()
                     }
                 },
                 state = state,

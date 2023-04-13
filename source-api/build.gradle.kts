@@ -37,7 +37,7 @@ kotlin {
             }
         }
     }
-
+    jvmToolchain( ProjectConfig.toolChain)
     sourceSets {
          val commonMain by getting {
             dependencies {

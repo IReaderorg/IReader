@@ -52,20 +52,7 @@ kotlin {
     sourceSets.test {
         kotlin.srcDir("build/generated/ksp/test/kotlin")
     }
-}
-
-tasks {
-    withType<KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = ProjectConfig.desktopJvmTarget.toString()
-            freeCompilerArgs = listOf(
-                    "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi"
-            )
-        }
-    }
-    withType<Jar> {
-        exclude("META-INF/*.RSA", "META-INF/*.SF", "META-INF/*.DSA")
-    }
+    jvmToolchain( ProjectConfig.toolChain)
 }
 
 val isPreview: Boolean

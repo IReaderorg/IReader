@@ -60,7 +60,7 @@ jobs:
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '11'
           architecture: ${{ matrix.arch }}
 
       - name: Setup Cl

@@ -21,6 +21,7 @@ kotlin {
             }
         }
     }
+    jvmToolchain( ProjectConfig.toolChain)
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -102,6 +103,10 @@ android {
         sourceSets {
             getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
         }
+    }
+    compileOptions {
+        sourceCompatibility = ProjectConfig.androidJvmTarget
+        targetCompatibility = ProjectConfig.androidJvmTarget
     }
 
 }
