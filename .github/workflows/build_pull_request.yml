@@ -62,7 +62,7 @@ jobs:
       - uses: actions/setup-java@v3
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
         with:
-          java-version: 11
+          java-version: 17
           distribution: adopt
           architecture: ${{ matrix.arch }}
 

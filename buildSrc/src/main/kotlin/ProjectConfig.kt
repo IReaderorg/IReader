@@ -9,7 +9,7 @@ object ProjectConfig {
     const val versionCode = 41
     const val applicationId = "ir.kazemcodes.infinityreader"
 
-    val desktopJvmTarget = JavaVersion.VERSION_11
-    val androidJvmTarget = JavaVersion.VERSION_11
+    val desktopJvmTarget = JavaVersion.VERSION_17
+    val androidJvmTarget = JavaVersion.VERSION_17
     val toolChain = 11
 }
