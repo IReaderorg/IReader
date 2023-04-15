@@ -15,7 +15,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.media.session.MediaButtonReceiver
-import ireader.domain.R
+import ireader.i18n.R
 import ireader.domain.notification.NotificationsIds
 import ireader.domain.notification.NotificationsIds.CHANNEL_TTS
 import ireader.domain.notification.legacyFlags

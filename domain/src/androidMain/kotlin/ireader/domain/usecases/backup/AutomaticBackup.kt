@@ -6,7 +6,7 @@ import com.anggrayudi.storage.file.CreateMode
 import com.anggrayudi.storage.file.DocumentFileCompat
 import com.anggrayudi.storage.file.createBinaryFile
 import ireader.core.log.Log
-import ireader.domain.R
+import ireader.i18n.R
 import ireader.domain.models.common.Uri
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences

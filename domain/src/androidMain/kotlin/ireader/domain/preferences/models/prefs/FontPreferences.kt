@@ -6,7 +6,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import ireader.core.prefs.Preference
-import ireader.domain.R
+import ireader.i18n.R
 import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.models.getDefaultFont
 import kotlinx.coroutines.CoroutineScope

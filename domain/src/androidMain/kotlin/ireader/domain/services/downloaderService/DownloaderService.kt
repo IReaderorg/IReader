@@ -5,7 +5,7 @@ import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import ireader.core.util.createICoroutineScope
-import ireader.domain.R
+import ireader.i18n.R
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository

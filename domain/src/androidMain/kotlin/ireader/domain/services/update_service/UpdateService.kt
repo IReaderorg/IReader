@@ -7,7 +7,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import ireader.domain.R
+import ireader.i18n.R
 import ireader.domain.models.update_service_models.Release
 import ireader.domain.models.update_service_models.Version
 import ireader.domain.notification.NotificationsIds.CHANNEL_APP_UPDATE

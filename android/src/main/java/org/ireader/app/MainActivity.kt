@@ -29,7 +29,7 @@ import ireader.i18n.SHORTCUTS.SHORTCUT_DETAIL
 import ireader.i18n.SHORTCUTS.SHORTCUT_DOWNLOAD
 import ireader.i18n.SHORTCUTS.SHORTCUT_READER
 import ireader.i18n.SHORTCUTS.SHORTCUT_TTS
-import ireader.presentation.R
+import ireader.i18n.R
 import ireader.presentation.core.DefaultNavigatorScreenTransition
 import ireader.presentation.core.MainStarterScreen
 import ireader.presentation.core.theme.AppTheme

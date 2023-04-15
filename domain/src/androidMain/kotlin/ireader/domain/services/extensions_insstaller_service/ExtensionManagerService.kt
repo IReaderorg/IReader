@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import ireader.domain.R
+import ireader.i18n.R
 import ireader.domain.catalogs.interactor.GetInstalledCatalog
 import ireader.domain.catalogs.interactor.InstallCatalog
 import ireader.domain.catalogs.service.CatalogRemoteRepository
