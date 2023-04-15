@@ -95,35 +95,38 @@ val javadocJar: TaskProvider<Jar> by tasks.registering(Jar::class) {
     from(dokkaHtml.outputDirectory)
 }
 publishing {
-    publications.withType(MavenPublication::class) {
-        artifact(javadocJar)
-        groupId = "io.github.kazemcodes"
-        artifactId = "core-api"
-        version = packageVersion
-        pom {
-            name.set("IReader Core")
-            description.set("Common classes for IReader")
-            url.set("https://github.com/kazemcodes/IReader")
-            licenses {
-                license {
-                    name.set("Mozilla Public License 2.0")
-                    url.set("https://www.mozilla.org/en-US/MPL/2.0/")
-                }
-            }
-            developers {
-                developer {
-                    id.set("kazemcodes")
-                    name.set("kazem.codes")
-                    email.set("https://github.com/kazemcodes")
-                }
-            }
-            scm {
-                connection.set("scm:git:git:github.com:kazemcodes/IReader.git")
-                developerConnection.set("scm:git:github.com:kazemcodes/IReader.git")
+    publications {
+        create<MavenPublication>("maven") {
+            artifact(javadocJar)
+            groupId = "io.github.kazemcodes"
+            artifactId = "core-api"
+            version = packageVersion
+            pom {
+                name.set("IReader Core")
+                description.set("Common classes for IReader")
                 url.set("https://github.com/kazemcodes/IReader")
+                licenses {
+                    license {
+                        name.set("Mozilla Public License 2.0")
+                        url.set("https://www.mozilla.org/en-US/MPL/2.0/")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("kazemcodes")
+                        name.set("kazem.codes")
+                        email.set("https://github.com/kazemcodes")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git:github.com:kazemcodes/IReader.git")
+                    developerConnection.set("scm:git:github.com:kazemcodes/IReader.git")
+                    url.set("https://github.com/kazemcodes/IReader")
+                }
             }
         }
     }
+
 
     repositories {
         maven {
