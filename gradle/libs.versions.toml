@@ -11,7 +11,7 @@ accompanist = "0.25.2"
 googleAccompanist = "0.25.1"
 materialDialogs = "0.9.1"
 # Android
-androidGradle = "7.4.2"
+androidGradle = "8.0.0"
 core = "1.9.0"
 appCompat = "1.7.0-alpha02"
 activityCompose = "1.6.1"
@@ -70,7 +70,7 @@ htmlunit = "3.0.0"
 
 [libraries]
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
-gradle-tools = "com.android.tools.build:gradle:7.3.1"
+gradle-tools = "com.android.tools.build:gradle:8.0.0"
 
 gradle-google = "com.google.gms:google-services:4.3.14"
 gradle-firebaseCrashlytic = "com.google.firebase:firebase-crashlytics-gradle:2.9.1"
