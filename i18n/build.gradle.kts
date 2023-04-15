@@ -31,7 +31,7 @@ kotlin {
         val desktopMain by getting {
         }
     }
-    jvmToolchain( ProjectConfig.toolChain)
+
 }
 
 

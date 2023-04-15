@@ -1,5 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 
 plugins {
     id(kotlinx.plugins.kotlin.jvm.get().pluginId)
@@ -45,7 +45,7 @@ kotlin {
     sourceSets.test {
         kotlin.srcDir("build/generated/ksp/test/kotlin")
     }
-    jvmToolchain( ProjectConfig.toolChain)
+
 }
 
 val isPreview: Boolean
