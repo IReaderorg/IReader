@@ -169,3 +169,32 @@
 }
 
 ##---------------End: proguard configuration for kotlinx.serialization  ----------
+
+
+-keep class cafe.adriel.voyager.**
+-keepclassmembers class cafe.adriel.voyager.** {
+    <methods>;
+}
+
+-dontwarn com.oracle.svm.core.annotate.AutomaticFeature
+-dontwarn com.oracle.svm.core.annotate.Delete
+-dontwarn com.oracle.svm.core.annotate.Substitute
+-dontwarn com.oracle.svm.core.annotate.TargetClass
+-dontwarn com.oracle.svm.core.configure.ResourcesRegistry
+-dontwarn dalvik.system.VMStack
+-dontwarn java.beans.ConstructorProperties
+-dontwarn java.beans.Transient
+-dontwarn java.lang.ProcessHandle
+-dontwarn java.lang.StackWalker$StackFrame
+-dontwarn java.lang.StackWalker
+-dontwarn java.lang.management.ManagementFactory
+-dontwarn java.lang.management.RuntimeMXBean
+-dontwarn javax.naming.InitialContext
+-dontwarn javax.naming.NameNotFoundException
+-dontwarn javax.naming.NamingException
+-dontwarn javax.xml.stream.XMLStreamException
+-dontwarn javax.xml.stream.XMLStreamWriter
+-dontwarn org.graalvm.nativeimage.ImageSingletons
+-dontwarn org.graalvm.nativeimage.hosted.Feature$BeforeAnalysisAccess
+-dontwarn org.graalvm.nativeimage.hosted.Feature
+-dontwarn sun.reflect.Reflection
