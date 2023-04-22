@@ -7,28 +7,35 @@ import androidx.compose.runtime.Composable
 actual class PlatformReaderSettingReader {
 
 
-    actual fun ReaderScreenViewModel.saveBrightness(brightness: Float) {
+    actual fun ReaderScreenViewModel.saveBrightness(context: Any, brightness: Float) {
     }
 
-    actual suspend fun ReaderScreenViewModel.readBrightness() {
+    actual suspend fun ReaderScreenViewModel.readBrightness(context: Any) {
     }
 
-    actual suspend fun ReaderScreenViewModel.readOrientation() {
+    actual suspend fun ReaderScreenViewModel.readOrientation(context: Any) {
     }
 
-    actual suspend fun ReaderScreenViewModel.readImmersiveMode(onHideNav: (Boolean) -> Unit, onHideStatus: (Boolean) -> Unit) {
+    actual suspend fun ReaderScreenViewModel.readImmersiveMode(
+        context: Any,
+        onHideNav: (Boolean) -> Unit,
+        onHideStatus: (Boolean) -> Unit
+    ) {
     }
 
-    actual fun ReaderScreenViewModel.showSystemBars() {
+    actual fun ReaderScreenViewModel.restoreSetting(
+        context: Any,
+        scrollState: ScrollState,
+        lazyScrollState: LazyListState
+    ) {
     }
 
-    actual fun ReaderScreenViewModel.hideSystemBars() {
-    }
-
-    actual fun ReaderScreenViewModel.restoreSetting(scrollState: ScrollState, lazyScrollState: LazyListState) {
-    }
-
-    actual fun ReaderScreenViewModel.prepareReaderSetting(scrollState: ScrollState, onHideNav: (Boolean) -> Unit, onHideStatus: (Boolean) -> Unit) {
+    actual fun ReaderScreenViewModel.prepareReaderSetting(
+        context: Any,
+        scrollState: ScrollState,
+        onHideNav: (Boolean) -> Unit,
+        onHideStatus: (Boolean) -> Unit
+    ) {
     }
 
     @Composable

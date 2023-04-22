@@ -34,7 +34,11 @@ import ireader.presentation.ui.settings.font_screens.FontScreenViewModel
 import ireader.presentation.ui.settings.general.GeneralSettingScreenViewModel
 import ireader.presentation.ui.settings.reader.ReaderSettingScreenViewModel
 import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
-import org.kodein.di.*
+import org.kodein.di.DI
+import org.kodein.di.bindFactory
+import org.kodein.di.bindProvider
+import org.kodein.di.bindSingleton
+import org.kodein.di.instance
 
 val PresentationModules = DI.Module("presentationModule") {
 
@@ -78,7 +82,6 @@ val PresentationModules = DI.Module("presentationModule") {
 
     bindProvider<ReaderScreenStateImpl> { ReaderScreenStateImpl() }
     bindProvider<ReaderScreenPreferencesStateImpl> { ReaderScreenPreferencesStateImpl() }
-
 
     bindFactory< ReaderScreenViewModel.Param, ReaderScreenViewModel>  { ReaderScreenViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),it,instance(),) }
 

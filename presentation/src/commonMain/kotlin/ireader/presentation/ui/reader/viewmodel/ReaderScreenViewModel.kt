@@ -28,7 +28,6 @@ import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.NO_VALUE
 import ireader.i18n.UiText
 import ireader.i18n.resources.MR
-import ireader.domain.utils.removeIf
 import ireader.presentation.ui.core.theme.ReaderColors
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn

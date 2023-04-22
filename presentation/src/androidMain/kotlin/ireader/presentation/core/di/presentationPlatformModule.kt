@@ -1,6 +1,7 @@
 package ireader.presentation.core.di
 
 import ireader.presentation.core.PlatformHelper
+import ireader.presentation.core.theme.IUseController
 import ireader.presentation.core.theme.LocaleHelper
 import ireader.presentation.core.ui.SecuritySettingViewModel
 import ireader.presentation.imageloader.coil.CoilLoaderFactory
@@ -12,7 +13,12 @@ import ireader.presentation.ui.video.component.core.PlayerState
 import ireader.presentation.ui.video.component.core.PlayerStateImpl
 import ireader.presentation.ui.web.WebViewPageModel
 import ireader.presentation.ui.web.WebViewPageStateImpl
-import org.kodein.di.*
+import org.kodein.di.DI
+import org.kodein.di.bindFactory
+import org.kodein.di.bindProvider
+import org.kodein.di.bindSingleton
+import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 
 actual val presentationPlatformModule: DI.Module = DI.Module("androidPresentationModule") {
     bindFactory< VideoScreenViewModel.Param, VideoScreenViewModel>  { VideoScreenViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),it) }
@@ -28,7 +34,15 @@ actual val presentationPlatformModule: DI.Module = DI.Module("androidPresentatio
 
     bindSingleton { LocaleHelper(instance(),instance()) }
     bindSingleton { PlatformHelper(instance()) }
-    bindSingleton<CoilLoaderFactory> { CoilLoaderFactory(instance(), instance(), instance(), instance()) }
-    bindSingleton<PlatformReaderSettingReader> { PlatformReaderSettingReader(instance(),instance()) }
+    bindSingleton<IUseController> { IUseController() }
+    bindSingleton<CoilLoaderFactory> {
+        CoilLoaderFactory(
+            instance(),
+            instance(),
+            instance(),
+            instance()
+        )
+    }
+    bindSingleton<PlatformReaderSettingReader> { PlatformReaderSettingReader(instance()) }
 
 }

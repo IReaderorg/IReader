@@ -33,5 +33,11 @@ actual class IUseController {
     actual fun InitController() {
     }
 
+    actual fun enableImmersiveModel() {
+    }
+
+    actual fun disableImmersiveModel() {
+    }
+
 
 }

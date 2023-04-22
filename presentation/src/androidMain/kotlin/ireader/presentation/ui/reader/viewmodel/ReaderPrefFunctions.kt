@@ -7,11 +7,9 @@ import android.view.WindowManager
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.lifecycleScope
 import ireader.core.http.WebViewManger
 import ireader.domain.preferences.prefs.ReadingMode
-import ireader.domain.usecases.preferences.AndroidReaderPrefUseCases
 import ireader.domain.utils.extensions.brightness
 import ireader.domain.utils.extensions.hideSystemUI
 import ireader.domain.utils.extensions.isImmersiveModeEnabled
@@ -23,14 +21,13 @@ import kotlinx.datetime.Instant
 import kotlin.time.Duration.Companion.seconds
 
 actual class PlatformReaderSettingReader(
-       private val context:Context,
        private val webViewManager: WebViewManger
 ) {
 
 
-    actual fun ReaderScreenViewModel.saveBrightness(brightness: Float, ) {
+    actual fun ReaderScreenViewModel.saveBrightness(context: Any, brightness: Float) {
         this.brightness.value = brightness
-        val activity = context.findComponentActivity()
+        val activity = (context as Context).findComponentActivity()
         if (activity != null) {
             activity.brightness(brightness)
             readerUseCases.brightnessStateUseCase.saveBrightness(brightness)
@@ -38,25 +35,28 @@ actual class PlatformReaderSettingReader(
     }
 
     actual suspend fun ReaderScreenViewModel.readImmersiveMode(
-            onHideNav: (Boolean) -> Unit,
-            onHideStatus: (Boolean) -> Unit
+        context: Any,
+        onHideNav: (Boolean) -> Unit,
+        onHideStatus: (Boolean) -> Unit
     ) {
-        context.findComponentActivity()?.let { activity ->
-
-            if (immersiveMode.value) {
-                onHideNav(true)
-                onHideStatus(true)
-                hideSystemBars()
-            } else if (activity.isImmersiveModeEnabled) {
-                onHideNav(false)
-                onHideStatus(false)
-                showSystemBars()
+        (context as Context).findComponentActivity()!!
+            .let { activity ->
+                if (immersiveMode.value) {
+                    onHideNav(true)
+                    onHideStatus(true)
+                    hideSystemBars(context)
+                } else if (activity.isImmersiveModeEnabled) {
+                    onHideNav(false)
+                    onHideStatus(false)
+                    showSystemBars(context)
+                } else {
+                    print("")
+                }
             }
-        }
     }
 
-    actual suspend fun ReaderScreenViewModel.readBrightness() {
-        val activity = context.findComponentActivity()
+    actual suspend fun ReaderScreenViewModel.readBrightness(context: Any) {
+        val activity = (context as Context).findComponentActivity()
         if (activity != null) {
             val window = activity.window
             if (!autoBrightnessMode.value) {
@@ -66,7 +66,7 @@ actual class PlatformReaderSettingReader(
                 // this.brightness = brightness
             } else {
                 val layoutParams: WindowManager.LayoutParams = window.attributes
-                showSystemBars()
+                showSystemBars(context)
                 layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
                 window.attributes = layoutParams
             }
@@ -74,8 +74,8 @@ actual class PlatformReaderSettingReader(
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
-    actual suspend fun ReaderScreenViewModel.readOrientation() {
-        val activity = context.findComponentActivity()
+    actual suspend fun ReaderScreenViewModel.readOrientation(context: Any) {
+        val activity = (context as Context).findComponentActivity()
         val lastCheck = Instant.fromEpochMilliseconds(lastOrientationChangedTime.value)
         val now = Clock.System.now()
         if (activity != null && (now - lastCheck) > 1.seconds) {
@@ -87,20 +87,24 @@ actual class PlatformReaderSettingReader(
     }
 
 
-    actual fun ReaderScreenViewModel.showSystemBars() {
+    fun ReaderScreenViewModel.showSystemBars(context: Context) {
         context.findComponentActivity()?.showSystemUI()
     }
 
-    actual fun ReaderScreenViewModel.hideSystemBars() {
+    fun ReaderScreenViewModel.hideSystemBars(context: Context) {
         context.findComponentActivity()?.hideSystemUI()
     }
 
-    actual fun ReaderScreenViewModel.restoreSetting(scrollState: ScrollState, lazyScrollState: LazyListState) {
-        val activity = context.findComponentActivity()
+    actual fun ReaderScreenViewModel.restoreSetting(
+        context: Any,
+        scrollState: ScrollState,
+        lazyScrollState: LazyListState
+    ) {
+        val activity = (context as Context).findComponentActivity()
         if (activity != null) {
             val window = activity.window
             val layoutParams: WindowManager.LayoutParams = window.attributes
-            showSystemBars()
+            showSystemBars(context)
             layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             window.attributes = layoutParams
@@ -128,12 +132,17 @@ actual class PlatformReaderSettingReader(
         }
     }
 
-    actual fun ReaderScreenViewModel.prepareReaderSetting(scrollState: ScrollState, onHideNav: (Boolean) -> Unit, onHideStatus: (Boolean) -> Unit) {
+    actual fun ReaderScreenViewModel.prepareReaderSetting(
+        context: Any,
+        scrollState: ScrollState,
+        onHideNav: (Boolean) -> Unit,
+        onHideStatus: (Boolean) -> Unit
+    ) {
         scope.launch {
-            readImmersiveMode( onHideNav = onHideNav, onHideStatus = onHideStatus)
+            readImmersiveMode(onHideNav = onHideNav, onHideStatus = onHideStatus, context = context)
         }
         scope.launch {
-            readOrientation()
+            readOrientation(context)
         }
         scope.launch {
             kotlin.runCatching {

@@ -44,6 +44,7 @@ import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.statusBarsPadding
+import ireader.presentation.ui.component.getContextWrapper
 import ireader.presentation.ui.core.modifier.navigationBarsPadding
 import ireader.presentation.ui.core.modifier.systemBarsPadding
 import ireader.presentation.ui.core.theme.AppColors
@@ -79,6 +80,7 @@ data class ReaderScreenSpec(
         val chapters = vm.stateChapters
         val chapter = vm.stateChapter
 
+        val context = getContextWrapper()
         val scrollState = rememberScrollState()
         val lazyListState = rememberLazyListState()
         val navigator = LocalNavigator.currentOrThrow
@@ -92,7 +94,9 @@ data class ReaderScreenSpec(
         DisposableEffect(key1 = true) {
             onDispose {
                 vm.prefFunc.apply {
-                    vm.restoreSetting(scrollState, lazyListState)
+                    if (context != null) {
+                        vm.restoreSetting(context, scrollState, lazyListState)
+                    }
                 }
             }
         }
@@ -105,12 +109,16 @@ data class ReaderScreenSpec(
         }
         LaunchedEffect(key1 = vm.autoBrightnessMode.value) {
             vm.prefFunc.apply {
-                vm.readBrightness()
+                if (context != null) {
+                    vm.readBrightness(context)
+                }
             }
         }
         LaunchedEffect(key1 = vm.orientation.value) {
             vm.prefFunc.apply {
-                vm.readOrientation()
+                if (context != null) {
+                    vm.readOrientation(context)
+                }
             }
         }
 
@@ -149,7 +157,9 @@ data class ReaderScreenSpec(
 
         LaunchedEffect(key1 = vm.initialized) {
             vm.prefFunc.apply {
-                vm.prepareReaderSetting(
+                if (context != null) {
+                    vm.prepareReaderSetting(
+                        context = context,
                         scrollState,
                         onHideNav = {
                             hideNavBar.value = it
@@ -157,21 +167,25 @@ data class ReaderScreenSpec(
                         onHideStatus = {
                             hideSystemBar.value = it
                         }
-                )
+                    )
+                }
             }
         }
 
         LaunchedEffect(key1 = vm.immersiveMode.value) {
             vm.prefFunc.apply {
 
-                vm.readImmersiveMode(
+                if (context != null) {
+                    vm.readImmersiveMode(
+                        context = context,
                         onHideNav = {
                             hideNavBar.value = it
                         },
                         onHideStatus = {
-                            hideSystemBar.value= it
+                            hideSystemBar.value = it
                         }
-                )
+                    )
+                }
             }
         }
         val host = SnackBarListener(vm)
@@ -263,7 +277,9 @@ data class ReaderScreenSpec(
                                     onChangeBrightness = {
                                         vm.apply {
                                             vm.prefFunc.apply {
-                                                saveBrightness(it)
+                                                if (context != null) {
+                                                    saveBrightness(context, it)
+                                                }
                                             }
                                         }
                                     },

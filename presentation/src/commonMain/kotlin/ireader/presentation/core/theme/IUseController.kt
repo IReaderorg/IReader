@@ -28,5 +28,8 @@ expect class IUseController() {
         isNavigationBarContrastEnforced: Boolean,
     )
 
+    fun enableImmersiveModel()
+    fun disableImmersiveModel()
+
 
 }

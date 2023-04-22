@@ -81,6 +81,20 @@ actual class IUseController {
     actual var controller: Any? = null
 
 
+    actual fun enableImmersiveModel() {
+        val systemUiController = controller as SystemUiController
+        systemUiController.isStatusBarVisible = false
+        systemUiController.isSystemBarsVisible = false
+        systemUiController.isNavigationBarVisible = false
+    }
+
+    actual fun disableImmersiveModel() {
+        val systemUiController = controller as SystemUiController
+        systemUiController.isStatusBarVisible = true
+        systemUiController.isSystemBarsVisible = true
+        systemUiController.isNavigationBarVisible = true
+    }
+
     @Composable
     actual fun InitController() {
         if (controller == null) {
