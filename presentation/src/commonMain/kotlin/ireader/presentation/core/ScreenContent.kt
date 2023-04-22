@@ -12,7 +12,7 @@ import ireader.i18n.*
 expect fun PlatformModalSheets(
     modifier: Modifier,
     state: Any,
-    sheetContent: @Composable () -> Unit,
+    sheetContent: @Composable (modifier: Modifier) -> Unit,
     content: @Composable () -> Unit,
 )
 
@@ -20,7 +20,7 @@ expect fun PlatformModalSheets(
 fun IModalSheets(
     modifier: Modifier = Modifier,
     bottomSheetState: Any,
-    sheetContent: @Composable () -> Unit,
+    sheetContent: @Composable (modifier: Modifier) -> Unit,
     content: @Composable () -> Unit,
 ) = PlatformModalSheets(
     modifier, bottomSheetState, sheetContent, content

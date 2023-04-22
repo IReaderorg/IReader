@@ -13,7 +13,12 @@ import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -93,6 +98,7 @@ data class BookDetailScreenSpec constructor(
                     if (vm.chapterMode) {
                         val pagerState = rememberPagerState()
                         ChapterScreenBottomTabComposable(
+                            modifier = it,
                             pagerState = pagerState,
                             filters = vm.filters.value,
                             toggleFilter = {
@@ -112,6 +118,7 @@ data class BookDetailScreenSpec constructor(
                     } else {
                         if (source is CatalogSource) {
                             ChapterCommandBottomSheet(
+                                modifier = it,
                                 onFetch = {
                                     source.let { source ->
                                         vm.scope.launch {

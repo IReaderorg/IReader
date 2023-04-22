@@ -1,7 +1,6 @@
 package ireader.presentation.ui.book.components
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -39,7 +38,7 @@ fun ChapterScreenBottomTabComposable(
             localizeHelper.localize(MR.strings.display),
         )
     }
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(modifier = modifier) {
         Tabs(libraryTabs = tabs, pagerState = pagerState)
         TabsContent(
             tabs = tabs,

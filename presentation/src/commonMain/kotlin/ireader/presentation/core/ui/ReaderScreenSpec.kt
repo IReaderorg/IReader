@@ -5,7 +5,10 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.scrollBy
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -15,7 +18,13 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -48,7 +57,6 @@ import ireader.presentation.ui.reader.reverse_swip_refresh.rememberSwipeRefreshS
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
 
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
@@ -235,18 +243,17 @@ data class ReaderScreenSpec(
         ) {
             IModalSheets(
                     bottomSheetState = sheetState,
-                    sheetContent = {
-                        Column(
-                                Modifier
-                                        .fillMaxSize()
-                        ) {
-                            Divider(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = .2f),
-                                    thickness = 1.dp
-                            )
-                            Spacer(modifier = Modifier.height(5.dp))
-                            ReaderSettingMainLayout(
+                sheetContent = { modifier ->
+                    Column(
+                        modifier
+                    ) {
+                        Divider(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = .2f),
+                            thickness = 1.dp
+                        )
+                        Spacer(modifier = Modifier.height(5.dp))
+                        ReaderSettingMainLayout(
                                     onFontSelected = { index ->
                                         vm.font?.value = FontType(
                                                 vm.fonts.getOrNull(index) ?: getDefaultFont().name,

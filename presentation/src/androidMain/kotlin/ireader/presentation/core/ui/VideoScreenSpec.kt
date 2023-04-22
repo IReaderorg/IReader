@@ -56,6 +56,7 @@ actual data class VideoScreenSpec actual constructor(val chapterId: Long) : Voya
             val stateOfPlayer = state.playerState
             if (stateOfPlayer != null) {
                 VideoPlayerBottomSheet(
+                    modifier = it,
                     playerState = stateOfPlayer,
                     mediaState = state,
                     vm = vm,

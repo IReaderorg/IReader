@@ -1,7 +1,12 @@
 package ireader.presentation.core.ui
 
 import androidx.compose.animation.core.TweenSpec
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
@@ -39,7 +44,11 @@ import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SliderPreference
 import ireader.presentation.ui.component.components.SwitchPreference
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.presentation.ui.home.tts.*
+import ireader.presentation.ui.home.tts.MediaControllers
+import ireader.presentation.ui.home.tts.TTLScreenPlay
+import ireader.presentation.ui.home.tts.TTSScreen
+import ireader.presentation.ui.home.tts.TTSTopBar
+import ireader.presentation.ui.home.tts.TTSViewModel
 import ireader.presentation.ui.reader.ReaderScreenDrawer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -152,8 +161,7 @@ actual class TTSScreenSpec actual constructor(
                     }
 
                     Column(
-                        modifier = Modifier
-                            .fillMaxSize()
+                        modifier = it
                             .padding(16.dp)
                     ) {
                         ChipChoicePreference(

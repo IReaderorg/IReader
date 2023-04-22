@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
@@ -36,6 +35,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun VideoPlayerBottomSheet(
+    modifier: Modifier,
     playerState: PlayerState,
     mediaState: MediaState,
     vm: VideoScreenViewModel,
@@ -46,8 +46,7 @@ fun VideoPlayerBottomSheet(
     val globalScope = LocalGlobalCoroutineScope.currentOrThrow
     val uriHandler = LocalUriHandler.current
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = modifier
             .background(Color.White),
     ) {
         LazyColumn {

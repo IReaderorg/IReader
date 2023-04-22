@@ -69,16 +69,20 @@ data class ExploreScreenSpec(
                     val focusManager = LocalFocusManager.current
                     val keyboardController = LocalSoftwareKeyboardController.current
                     FilterBottomSheet(
-                            onApply = {
-                                val mFilters = vm.modifiedFilter.filterNot { it.isDefaultValue() }
-                                vm.stateFilters = mFilters
-                                vm.searchQuery = null
-                                vm.loadItems(reset = true)
-                                hideKeyboard(softwareKeyboardController = keyboardController, focusManager)
-                            },
-                            filters = vm.modifiedFilter,
-                            onReset = {
-                                vm.modifiedFilter = source?.getFilters() ?: emptyList()
+                        modifier = it,
+                        onApply = {
+                            val mFilters = vm.modifiedFilter.filterNot { it.isDefaultValue() }
+                            vm.stateFilters = mFilters
+                            vm.searchQuery = null
+                            vm.loadItems(reset = true)
+                            hideKeyboard(
+                                softwareKeyboardController = keyboardController,
+                                focusManager
+                            )
+                        },
+                        filters = vm.modifiedFilter,
+                        onReset = {
+                            vm.modifiedFilter = source?.getFilters() ?: emptyList()
                             },
                             onUpdate = {
                                 vm.modifiedFilter = it

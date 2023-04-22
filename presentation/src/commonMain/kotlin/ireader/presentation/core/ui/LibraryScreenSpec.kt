@@ -76,16 +76,17 @@ object LibraryScreenSpec : Tab {
                 sheetContent = {
                     val pagerState = rememberPagerState()
                     BottomTabComposable(
-                            pagerState = pagerState,
-                            filters = vm.filters.value,
-                            toggleFilter = {
-                                vm.toggleFilter(it.type)
-                            },
-                            onSortSelected = {
-                                vm.toggleSort(it.type)
-                            },
-                            sortType = vm.sortType,
-                            isSortDesc = vm.desc,
+                        modifier = it,
+                        pagerState = pagerState,
+                        filters = vm.filters.value,
+                        toggleFilter = {
+                            vm.toggleFilter(it.type)
+                        },
+                        onSortSelected = {
+                            vm.toggleSort(it.type)
+                        },
+                        sortType = vm.sortType,
+                        isSortDesc = vm.desc,
                             onLayoutSelected = { layout ->
                                 vm.onLayoutTypeChange(layout)
                             },

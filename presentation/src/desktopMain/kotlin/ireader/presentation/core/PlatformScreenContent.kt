@@ -17,7 +17,7 @@ import ireader.presentation.ui.component.components.statusBarsPadding
 actual fun PlatformModalSheets(
     modifier: Modifier,
     state: Any,
-    sheetContent: @Composable () -> Unit,
+    sheetContent: @Composable (modifier: Modifier) -> Unit,
     content: @Composable () -> Unit
 ) {
     val bottomSheetState = state as ModalBottomSheetState
@@ -25,7 +25,7 @@ actual fun PlatformModalSheets(
         modifier = if (bottomSheetState.currentValue == ModalBottomSheetValue.Expanded) Modifier.statusBarsPadding() else Modifier,
         sheetContent = {
             Box(modifier.defaultMinSize(minHeight = 1.dp)) {
-                sheetContent()
+                sheetContent(modifier)
             }
         },
         sheetState = bottomSheetState,
