@@ -21,11 +21,7 @@ IReader is a free and open source applicaiton for Android.
 - You can take a look at [here](https://github.com/IReaderorg/IReader-extensions/tree/master/sources/en), to understand how to create a source for this applicaiton 
 
 ## Sponsorship
-If you like my app, feel free to support me over here: 
-
-<a href="https://nowpayments.io/donation?api_key=YS02ZZJ-M2S4SF9-HD3AQW0-MRRV89W" target="_blank">
- <img src="https://nowpayments.io/images/embeds/donation-button-white.svg" alt="Cryptocurrency & Bitcoin donation button by NOWPayments">
-</a>
+If you like my app, feel free to support me over [here](https://reymit.ir/kazemcodes).
     
 
 
