@@ -300,7 +300,7 @@
     <string name="no_book_found_error">არ არსებობს წიგნი ამ ID-ით.</string>
     <string name="trying_to_fetch_chapters_content">თავის შიგთავსის მოპოვების მცდელობა…</string>
     <string name="this_is_last_chapter">ეს არის ბოლო თავი</string>
-    <string name="download_notifier_downloader_title">Downloader</string>
+    <string name="download_notifier_downloader_title">გადმომწერი</string>
     <string name="label_library">ბიბლიოთეკის შემოწმება</string>
     <string name="library">ბიბლიოთეკა</string>
     <string name="security">უსაფრთხოება</string>
