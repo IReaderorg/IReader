@@ -11,7 +11,7 @@ accompanist = "0.25.2"
 googleAccompanist = "0.25.1"
 materialDialogs = "0.9.1"
 # Android
-androidGradle = "8.0.0"
+androidGradle = "8.0.1"
 core = "1.9.0"
 appCompat = "1.7.0-alpha02"
 activityCompose = "1.6.1"
