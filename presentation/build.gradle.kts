@@ -72,7 +72,7 @@ kotlin {
 //                api(libs.coil.gif)
 //                api(composeLib.compose.coil)
                 api(libs.bundles.simplestorage)
-                api("androidx.core:core-splashscreen:1.0.0")
+                api("androidx.core:core-splashscreen:1.0.1")
                 api(composeLib.compose.googlFonts)
 
                 api(composeLib.compose.paging)

@@ -143,7 +143,7 @@ dependencies {
 
     implementation(androidx.media)
 
-    implementation("androidx.core:core-splashscreen:1.0.0")
+    implementation("androidx.core:core-splashscreen:1.0.1")
     @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
     implementation(compose.material3)
 
