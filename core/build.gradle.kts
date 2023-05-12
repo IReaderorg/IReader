@@ -58,7 +58,6 @@ kotlin {
              dependsOn(commonMain)
             dependencies {
                 implementation(androidx.core)
-                implementation(androidx.lifecycle.process)
                 implementation(androidx.dataStore)
                 implementation(libs.quickjs.android)
                 api(libs.ktor.okhttp)

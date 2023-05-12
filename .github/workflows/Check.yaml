@@ -43,7 +43,7 @@ jobs:
             arch: x64
             os: ubuntu-latest
             shell: bash
-            build: :android:assembleStandardDebug
+            build: :android:assembleStandardRelease
             setupCl: ./.github/scripts/SetupClUnix.sh
 
     runs-on: ${{ matrix.os }}

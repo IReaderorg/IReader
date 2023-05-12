@@ -2,10 +2,15 @@ package ireader.core.prefs
 
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
-import ireader.core.prefs.Preference
-import ireader.core.prefs.PreferenceStore
 import ireader.core.prefs.AndroidPreference.Primitive
 import ireader.core.util.createICoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -102,5 +107,11 @@ class AndroidPreferenceStore(
         return AndroidPreference.Object(
             store, scope, stringPreferencesKey(key), defaultValue, serializer, deserializer
         )
+    }
+
+    override fun deleteAllPreferences() {
+        scope.launch {
+            store.edit { it.clear() }
+        }
     }
 }

@@ -8,21 +8,21 @@
 
 package ireader.core.prefs
 
-import ireader.core.prefs.Preference
-import ireader.core.prefs.PreferenceStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.shareIn
 import java.util.prefs.PreferenceChangeListener
 import java.util.prefs.Preferences
 
 /**
  * An implementation of a [PreferenceStore] backed by Java's [Preferences].
  *
- * TODO(inorichi): this will write to the registry on Windows. Consider creating a custom
- *   implementation that writes to disk and has better support for string sets.
  */
 class JvmPreferenceStore(name: String) : PreferenceStore {
 
@@ -100,14 +100,17 @@ class JvmPreferenceStore(name: String) : PreferenceStore {
     deserializer: (String) -> T
   ): Preference<T> {
     val adapter = ObjectAdapter(serializer, deserializer)
-    return JvmPreference(store, key, defaultValue, adapter, getChanges(key))
+      return JvmPreference(store, key, defaultValue, adapter, getChanges(key))
   }
 
-  /**
-   * Returns a flow for the preference updates of the given [key].
-   */
-  private fun getChanges(key: String): Flow<String> {
-    return changedKeys.filter { it == key }
-  }
+    /**
+     * Returns a flow for the preference updates of the given [key].
+     */
+    private fun getChanges(key: String): Flow<String> {
+        return changedKeys.filter { it == key }
+    }
 
+    override fun deleteAllPreferences() {
+        store.clear()
+    }
 }

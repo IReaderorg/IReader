@@ -6,6 +6,7 @@ import ireader.core.http.BrowserEngine
 import ireader.core.http.HttpClients
 import ireader.core.http.WebViewCookieJar
 import ireader.core.os.PackageInstaller
+import ireader.core.prefs.AndroidPreferenceStore
 import ireader.data.catalog.CatalogGithubApi
 import ireader.data.catalog.impl.AndroidCatalogInstallationChanges
 import ireader.data.catalog.impl.AndroidCatalogInstaller
@@ -30,15 +31,54 @@ actual val dataPlatformModule: DI.Module = DI.Module("androidDataModule") {
     bindSingleton<Transactions> { AndroidTransaction(instance()) }
     bindSingleton<DatabaseHandler> { AndroidDatabaseHandler(instance(),instance()) }
     bindSingleton<SqlDriver> { DatabaseDriverFactory(instance()).create() }
-    bindSingleton<CatalogLoader> { ireader.data.catalog.impl.AndroidCatalogLoader(instance(),instance(),instance(),instance(),instance()) }
-    bindSingleton<CatalogRemoteApi> { CatalogGithubApi(instance(),instance()) }
-    bindSingleton<UninstallCatalogs> { ireader.data.catalog.impl.interactor.UninstallCatalogImpl(instance(),instance()) }
-    bindSingleton<AndroidCatalogInstaller> { AndroidCatalogInstaller(instance(),instance(),instance(),instance(),instance(),instance()) }
-    bindSingleton<PackageInstaller> { PackageInstaller(instance(),instance()) }
+    bindSingleton<CatalogLoader> {
+        ireader.data.catalog.impl.AndroidCatalogLoader(
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance()
+        )
+    }
+    bindSingleton<CatalogRemoteApi> { CatalogGithubApi(instance(), instance()) }
+    bindSingleton<UninstallCatalogs> {
+        ireader.data.catalog.impl.interactor.UninstallCatalogImpl(
+            instance(),
+            instance()
+        )
+    }
+    bindSingleton<AndroidCatalogInstaller> {
+        AndroidCatalogInstaller(
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance()
+        )
+    }
+    bindSingleton<PackageInstaller> { PackageInstaller(instance(), instance()) }
     bindSingleton<WebViewCookieJar> { WebViewCookieJar(instance()) }
-    bindSingleton<CoverCache> { CoverCache(instance(),instance()) }
-    bindSingleton<InstallCatalog> { InstallCatalogImpl(instance(),instance(),instance()) }
+    bindSingleton<CoverCache> { CoverCache(instance(), instance()) }
+    bindSingleton<InstallCatalog> { InstallCatalogImpl(instance(), instance(), instance()) }
     bindSingleton<CatalogInstallationChanges> { instance<AndroidCatalogInstallationChanges>() }
-    bindSingleton<CatalogInstaller> { AndroidCatalogInstaller(instance(),instance(),instance(),instance(),instance(),instance()) }
-    bindSingleton<HttpClients> { HttpClients(instance(), BrowserEngine(instance(), instance()),instance(),instance()) }
+    bindSingleton<CatalogInstaller> {
+        AndroidCatalogInstaller(
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance()
+        )
+    }
+    bindSingleton<HttpClients> {
+        HttpClients(
+            instance(),
+            BrowserEngine(instance(), instance()),
+            instance(),
+            instance(),
+            AndroidPreferenceStore(instance(), "cookies,")
+        )
+    }
 }

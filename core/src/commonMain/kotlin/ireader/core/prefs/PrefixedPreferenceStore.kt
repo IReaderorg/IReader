@@ -8,9 +8,6 @@
 
 package ireader.core.prefs
 
-import ireader.core.prefs.Preference
-import ireader.core.prefs.PreferenceStore
-
 /**
  * An implementation of a [PreferenceStore] that writes to a [prefix]ed key, allowing to share a
  * single [commonStore] with many consumers.
@@ -73,5 +70,9 @@ class PrefixedPreferenceStore(
         deserializer: (String) -> T
     ): Preference<T> {
         return commonStore.getObject(prefix + key, defaultValue, serializer, deserializer)
+    }
+
+    override fun deleteAllPreferences() {
+        commonStore.deleteAllPreferences()
     }
 }

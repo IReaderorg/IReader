@@ -1,43 +1,17 @@
 [versions]
-compose = "1.3.3"
+compose = "1.4.0"
 compiler = "1.4.4"
-runtime="1.4.0"
-ui="1.4.0"
-foundation= "1.4.0"
 activity = "1.5.1"
 lifecycle = "2.5.1"
 material3 = "1.0.1"
-material = "1.4.0"
-paging = "1.0.0-alpha16"
-navigation = "2.5.3"
 coil = "2.2.2"
+ui = "1.4.0"
 
 [libraries]
-compose-animations = { module = "androidx.compose.animation:animation", version.ref = "compose" }
-compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "foundation" }
-compose-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "runtime" }
-compose-ui-core = { module = "androidx.compose.ui:ui", version.ref = "ui" }
 compose-ui-util = { module = "androidx.compose.ui:ui-util", version.ref = "ui" }
-compose-ui-text = { module = "androidx.compose.ui:ui-text", version.ref = "ui" }
-compose-compiler = { module = "androidx.compose.compiler:compiler", version.ref = "compiler" }
-
-compose-icons = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose" }
 compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version = "1.0.1" }
-compose-uiToolingPreview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
-compose-uiTooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
-compose-paging = { module = "androidx.paging:paging-compose", version.ref = "paging" }
 compose-animations-graphics = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose" }
-compose-testing = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose" }
-compose-composeTooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
-compose-uiTestManifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "compose" }
-compose-j4Unit = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose" }
 compose-googlFonts =  { module ="androidx.compose.ui:ui-text-google-fonts", version.ref = "compose" }
-
-
-compose-navigation = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
-compose-activity = { module = "androidx.activity:activity-compose", version.ref = "activity" }
-compose-lifecycle = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
-compose-coil = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 
 material3-core = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 material3-windowsizeclass = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "material3" }
@@ -46,15 +20,6 @@ material-icons = { module = "androidx.compose.material:material-icons-extended",
 materialmotion-core = "io.github.fornewid:material-motion-compose-core:0.10.3"
 
 [bundles]
-compose-android = [
-    "compose-runtime",
-    "compose-foundation",
-    "compose-runtime",
-    "compose-ui-core",
-    "compose-ui-util",
-    "compose-ui-text",
-    "compose-icons",
-    "material3-core",
-]
+
 
 [plugins]

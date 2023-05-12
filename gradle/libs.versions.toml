@@ -1,17 +1,16 @@
 [versions]
 # Kotlin
 coroutines = "1.6.4"
-worker="0.8.3"
 # Serialization
 json = "1.4.1"
 # Compose
 composeGradle = "1.4.0"
-voyager = "1.0.0-rc04"
+voyager = "1.0.0-rc06"
 accompanist = "0.25.2"
 googleAccompanist = "0.25.1"
 materialDialogs = "0.9.1"
 # Android
-androidGradle = "8.0.0"
+androidGradle = "8.0.1"
 core = "1.9.0"
 appCompat = "1.7.0-alpha02"
 activityCompose = "1.6.1"
@@ -26,9 +25,6 @@ ksp = "1.8.0-1.0.9"
 image-loader = "1.2.10"
 # Dependency Injection
 kodein = "7.19.0"
-koinAnnotation = "1.0.3"
-koin = "3.2.2"
-koinAndroid = "3.3.0"
 # Network
 ktor = "2.2.4"
 ktorfit = "1.0.0-beta16"
@@ -49,7 +45,7 @@ aboutLibraries = "10.6.8"
 dateTime = "0.4.0"
 immutableCollections = "0.3.5"
 kds = "3.4.0"
-ideaExt = "1.1.6"
+
 # Localization
 moko = "0.21.2"
 # BuildConfigs
@@ -132,14 +128,6 @@ tinylog-api = { module = "org.tinylog:tinylog-api", version.ref = "tinylog" }
 kodein-core = { module = "org.kodein.di:kodein-di", version.ref = "kodein" }
 kodein-compose = { module = "org.kodein.di:kodein-di-framework-compose", version.ref = "kodein" }
 
-koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koinAnnotation" }
-koin-kspCompiler = { module = "io.insert-koin:koin-ksp-compiler", version.ref = "koinAnnotation" }
-koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndroid" }
-koin-workManager = { module = "io.insert-koin:koin-androidx-workmanager", version.ref = "koin" }
-koin-androidCompose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinAndroid" }
-koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
-koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
-
 # Asm modificiation
 asm = "org.ow2.asm:asm:9.4" # version locked by Dex2Jar
 dex2jar-translator = { module = "com.github.ThexXTURBOXx.dex2jar:dex-translator", version.ref = "dex2jar" }
@@ -169,21 +157,12 @@ media3-decoder = { module = "androidx.media3:media3-decoder", version.ref = "med
 media3-datasource = { module = "androidx.media3:media3-datasource", version.ref = "media3" }
 media3-common = { module = "androidx.media3:media3-common", version.ref = "media3" }
 media3-subtitleDecoder = { module = "com.github.albfernandez:juniversalchardet", version = "2.4.0" }
-worker = { module = "com.autodesk:coroutineworker", version.ref = "worker" }
 
 
 epublib = { module = "io.github.kazemcodes:epublib-core", version = "4.0-SNAPSHOT" }
 
 imageLoader = { module = "io.github.qdsfdhvh:image-loader", version.ref = "image-loader" }
 imageLoader-io = { module = "io.github.qdsfdhvh:image-loader-extension-imageio", version.ref = "image-loader" }
-# Logging
-logging-slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
-logging-slf4j-jul = { module = "org.slf4j:jul-to-slf4j", version.ref = "slf4j" }
-logging-log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
-logging-log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
-logging-log4j-slf4j = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
-logging-kmlogging = { module = "org.lighthousegames:logging", version.ref = "kmlogging" }
-
 
 htmlunit = { module = "org.htmlunit:htmlunit", version.ref = "htmlunit" }
 
@@ -194,41 +173,20 @@ tinylog = ["tinylog-impl", "tinylog-api"]
 ireader = ["jsoup","ktor-core","ktor-core-cio","ktor-okhttp","ktor-contentNegotiation","ktor-contentNegotiation-gson","ktor-contentNegotiation-kotlinx","ktor-contentNegotiation-jackson","ktor-core-android"]
 
 [plugins]
-
-
 # Android
 android-library = { id = "com.android.library", version.ref = "androidGradle"}
 android-application = { id = "com.android.application", version.ref = "androidGradle"}
-
 # Compose
 jetbrainCompose = { id = "org.jetbrains.compose", version.ref = "composeGradle" }
 # Ksp
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
-
 # Localization
 moko-gradle = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko"}
-
 # BuildConfigs
 buildconfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig"}
 buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildkonfig"}
-
-# Linter
-kotlinter = { id = "org.jmailen.kotlinter", version.ref = "kotlinter"}
-
-# Version updates
-versions = { id = "com.github.ben-manes.versions", version.ref = "versions"}
-
 # Utility
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries"}
-
-ideaExt = { id = "org.jetbrains.gradle.plugin.idea-ext", version.ref = "ideaExt" }
-
-vanniktech = { id = "com.vanniktech.maven.publish", version = "0.21.0" }
-
-dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version = "1.13.1" }
-benGradleVersions = { id = "com.github.ben-manes.versions", version = "0.42.0" }
-
 sqldelight = { id = "com.squareup.sqldelight", version.ref = "sqldelight" }
-
 google = { id = "com.google.gms.google-services", version = "4.3.14" }
 moko = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko" }

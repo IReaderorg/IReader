@@ -8,7 +8,6 @@
 
 package ireader.core.prefs
 
-import ireader.core.prefs.Preference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -97,7 +96,8 @@ class JvmPreference<T>(
     return changes.map { get() }.stateIn(scope, SharingStarted.Eagerly, get())
   }
 
-  override suspend fun read(): T {
+
+    override suspend fun read(): T {
     return if (!isSet()) {
       defaultValue
     } else {

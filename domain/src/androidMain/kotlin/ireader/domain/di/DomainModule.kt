@@ -66,7 +66,6 @@ actual val DomainModule: DI.Module = DI.Module("domainModulePlatform") {
                 instance()
         )
     }
-    bindProvider { ireader.domain.usecases.history.HistoryPagingUseCase(instance()) }
     bindProvider<TTSStateImpl> { ireader.domain.services.tts_service.TTSStateImpl() }
     bindProvider { ireader.domain.services.update_service.UpdateApi(instance()) }
 

@@ -9,12 +9,14 @@
 package ireader.core.http
 
 import android.content.Context
-import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.cookies.*
-import io.ktor.serialization.gson.*
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.BrowserUserAgent
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.cookies.CookiesStorage
+import io.ktor.client.plugins.cookies.HttpCookies
+import io.ktor.serialization.gson.gson
+import ireader.core.prefs.PreferenceStore
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import java.io.File
@@ -25,6 +27,7 @@ actual class HttpClients(
     browseEngine: BrowserEngine,
     cookiesStorage: CookiesStorage,
     webViewCookieJar: WebViewCookieJar,
+    preferencesStore: PreferenceStore
 ) : HttpClientsInterface {
 
     private val cache = run {
@@ -36,10 +39,10 @@ actual class HttpClients(
     private val cookieJar = webViewCookieJar
 
     private val basicClient = OkHttpClient.Builder()
-        .cookieJar(cookieJar)
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .callTimeout(2, TimeUnit.MINUTES)
+        .cookieJar(PersistentCookieJar(preferencesStore))
         .addInterceptor(UserAgentInterceptor())
 
     actual override val browser = browseEngine

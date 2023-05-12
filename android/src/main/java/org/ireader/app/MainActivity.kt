@@ -25,11 +25,11 @@ import ireader.domain.usecases.backup.AutomaticBackup
 import ireader.domain.usecases.files.AndroidGetSimpleStorage
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.Args
+import ireader.i18n.R
 import ireader.i18n.SHORTCUTS.SHORTCUT_DETAIL
 import ireader.i18n.SHORTCUTS.SHORTCUT_DOWNLOAD
 import ireader.i18n.SHORTCUTS.SHORTCUT_READER
 import ireader.i18n.SHORTCUTS.SHORTCUT_TTS
-import ireader.i18n.R
 import ireader.presentation.core.DefaultNavigatorScreenTransition
 import ireader.presentation.core.MainStarterScreen
 import ireader.presentation.core.theme.AppTheme
@@ -65,8 +65,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     val initializers: AppInitializers by instance<AppInitializers>()
     private val automaticBackup: AutomaticBackup by instance()
     private val localeHelper: LocaleHelper by instance()
-    private var navigator: cafe.adriel.voyager.navigator.Navigator? = null
-
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,11 +99,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                                     ConfirmExit()
                                 }
                                 LaunchedEffect(navigator) {
-                                    this@MainActivity.navigator = navigator
-                                    if (savedInstanceState == null) {
-                                        // Set start screen
-                                        handleIntentAction(intent, navigator)
-                                    }
+                                    handleIntentAction(this@MainActivity.intent, navigator)
                                 }
                                 IScaffold {
                                     DefaultNavigatorScreenTransition(navigator = navigator)
@@ -168,7 +162,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     }
 
     private fun handleIntentAction(intent: Intent, navigator: Navigator): Boolean {
-
         return when (intent.action) {
             SHORTCUT_TTS -> {
                 val bookId = intent.extras?.getLong(Args.ARG_BOOK_ID)

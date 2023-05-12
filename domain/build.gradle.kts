@@ -4,7 +4,6 @@ plugins {
     id("org.jetbrains.compose")
     id("kotlinx-serialization")
     id("com.google.devtools.ksp")
-    id("org.jetbrains.gradle.plugin.idea-ext")
 }
 
 android {
@@ -80,10 +79,8 @@ kotlin {
 
 
                 implementation(libs.googleTranslator)
-                //implementation(composeLib.compose.coil)
-                implementation(composeLib.compose.paging)
+
                 implementation(libs.gson)
-                //debugImplementation(composeLib.compose.uiTestManifest)
                 implementation(androidx.work.runtime)
                 /** Coroutine **/
 
@@ -117,6 +114,5 @@ kotlin {
 
 
 dependencies {
-    debugImplementation(composeLib.compose.uiTestManifest)
     implementation(files("libs/epublib-core-latest.jar"))
 }

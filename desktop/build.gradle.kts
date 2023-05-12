@@ -5,7 +5,6 @@ plugins {
     id(kotlinx.plugins.kotlin.jvm.get().pluginId)
     id(libs.plugins.ksp.get().pluginId)
     id(libs.plugins.jetbrainCompose.get().pluginId)
-    id(libs.plugins.kotlinter.get().pluginId)
 }
 
 dependencies {
@@ -30,11 +29,6 @@ dependencies {
     implementation(libs.kodein.core)
     implementation(libs.kodein.compose)
     implementation(libs.voyager.navigator)
-    implementation(libs.logging.log4j.slf4j)
-    implementation(libs.logging.log4j.core)
-    implementation(libs.logging.slf4j.jul)
-    implementation(libs.logging.slf4j.api)
-    implementation(libs.logging.log4j.api)
     implementation(kotlinx.coroutines.core)
 }
 

@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
+
 /**
  * A wrapper around application preferences without knowing implementation details. Instances of
  * this interface must be provided through a [PreferenceStore].

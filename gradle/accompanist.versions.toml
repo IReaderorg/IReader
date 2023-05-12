@@ -1,7 +1,7 @@
 [versions]
 accompanist = "0.28.0"
-gosyerAccompanist = "0.25.2"
-gosyerGoogleAccompanist = "0.25.1"
+gosyerAccompanist = "0.30.1"
+gosyerGoogleAccompanist = "0.30.1"
 [libraries]
 
 gosyer-pager = { module = "ca.gosyer:accompanist-pager", version.ref = "gosyerAccompanist" }
@@ -10,7 +10,7 @@ gosyer-flowLayout = { module = "ca.gosyer:accompanist-flowlayout", version.ref =
 gosyer-systemUIController = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "gosyerGoogleAccompanist" }
 
 
-pager = { module = "com.google.accompanist:accompanist-pager", version.ref ="accompanist" }
+pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanist" }
 pagerIndicator = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanist" }
 flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanist" }
 systemUiController = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }

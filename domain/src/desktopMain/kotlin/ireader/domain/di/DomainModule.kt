@@ -12,9 +12,17 @@ import ireader.domain.usecases.files.DesktopGetSimpleStorage
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.usecases.reader.ScreenAlwaysOn
 import ireader.domain.usecases.reader.ScreenAlwaysOnImpl
-import ireader.domain.usecases.services.*
+import ireader.domain.usecases.services.ServiceUseCases
+import ireader.domain.usecases.services.StartDownloadServicesUseCase
+import ireader.domain.usecases.services.StartExtensionManagerService
+import ireader.domain.usecases.services.StartLibraryUpdateServicesUseCase
+import ireader.domain.usecases.services.StartTTSServicesUseCase
 import ireader.i18n.LocalizeHelper
-import org.kodein.di.*
+import org.kodein.di.DI
+import org.kodein.di.bindProvider
+import org.kodein.di.bindSingleton
+import org.kodein.di.instance
+import org.kodein.di.new
 
 
 actual val DomainModule: DI.Module = org.kodein.di.DI.Module("domainModulePlatform") {
@@ -42,11 +50,13 @@ actual val DomainModule: DI.Module = org.kodein.di.DI.Module("domainModulePlatfo
     }
     bindSingleton { LocalizeHelper() }
 
-    bindSingleton<ServiceUseCases> { ServiceUseCases(
+    bindSingleton<ServiceUseCases> {
+        ServiceUseCases(
             startDownloadServicesUseCase = StartDownloadServicesUseCase(di),
             startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(di),
             startTTSServicesUseCase = StartTTSServicesUseCase(),
-    ) }
-    bindSingleton<HttpClients> { HttpClients() }
+        )
+    }
+    bindSingleton<HttpClients> { HttpClients(JvmPreferenceStore("cookies")) }
     bindSingleton<EpubCreator> { EpubCreator() }
 }

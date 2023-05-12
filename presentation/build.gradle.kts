@@ -68,18 +68,15 @@ kotlin {
             dependencies {
 
                 api(androidx.biometric)
-//                api(libs.coil.core)
-//                api(libs.coil.gif)
-//                api(composeLib.compose.coil)
                 api(libs.bundles.simplestorage)
                 api("androidx.core:core-splashscreen:1.0.0")
                 api(composeLib.compose.googlFonts)
 
-                api(composeLib.compose.paging)
-                api(composeLib.material3.windowsizeclass)
-                api(composeLib.compose.navigation)
 
-                api(composeLib.compose.lifecycle)
+                api(composeLib.material3.windowsizeclass)
+
+
+
                 api(composeLib.compose.ui.util)
                 api(composeLib.compose.constraintlayout)
                // api(accompanist.flowlayout)
@@ -145,11 +142,5 @@ android {
 }
 
 dependencies {
-//    debugImplementation(composeLib.compose.uiTooling)
-//    testImplementation(test.bundles.common)
-//    androidTestImplementation(test.bundles.common)
-//    androidTestImplementation(composeLib.compose.uiTestManifest)
-//    androidTestImplementation(composeLib.compose.testing)
-//    androidTestImplementation(composeLib.compose.composeTooling)
-//    detektPlugins("com.twitter.compose.rules:detekt:0.0.5")
+
 }

@@ -136,7 +136,7 @@
 
 # For using GSON @Expose annotation
 -keepattributes *Annotation*
--dontnote kotlinx.serialization.AnnotationsKt # core serialization annotations
+-dontnote kotlinx.serialization.* # core serialization annotations
 
 # Gson specific classes
 -dontwarn sun.misc.**
@@ -169,32 +169,67 @@
 }
 
 ##---------------End: proguard configuration for kotlinx.serialization  ----------
-
-
--keep class cafe.adriel.voyager.**
+-keep class cafe.adriel.voyager.*
 -keepclassmembers class cafe.adriel.voyager.** {
+
+}
+-keep class com.oracle.svm.core.annotate.*
+-keepclassmembers class com.oracle.svm.core.annotate.** {
+    <methods>;
+}
+-keep class com.oracle.svm.core.configure.*
+-keepclassmembers class com.oracle.svm.core.configure.** {
     <methods>;
 }
 
--dontwarn com.oracle.svm.core.annotate.AutomaticFeature
--dontwarn com.oracle.svm.core.annotate.Delete
--dontwarn com.oracle.svm.core.annotate.Substitute
--dontwarn com.oracle.svm.core.annotate.TargetClass
--dontwarn com.oracle.svm.core.configure.ResourcesRegistry
--dontwarn dalvik.system.VMStack
--dontwarn java.beans.ConstructorProperties
--dontwarn java.beans.Transient
--dontwarn java.lang.ProcessHandle
--dontwarn java.lang.StackWalker$StackFrame
--dontwarn java.lang.StackWalker
--dontwarn java.lang.management.ManagementFactory
--dontwarn java.lang.management.RuntimeMXBean
--dontwarn javax.naming.InitialContext
--dontwarn javax.naming.NameNotFoundException
--dontwarn javax.naming.NamingException
--dontwarn javax.xml.stream.XMLStreamException
--dontwarn javax.xml.stream.XMLStreamWriter
--dontwarn org.graalvm.nativeimage.ImageSingletons
--dontwarn org.graalvm.nativeimage.hosted.Feature$BeforeAnalysisAccess
--dontwarn org.graalvm.nativeimage.hosted.Feature
--dontwarn sun.reflect.Reflection
+-keep class dalvik.system.*
+-keepclassmembers class dalvik.system.** {
+    <methods>;
+}
+-keep class java.beans.*
+-keepclassmembers class java.beans.** {
+    <methods>;
+}
+-keep class java.lang.*
+-keepclassmembers class java.lang.** {
+    <methods>;
+}
+-keep class javax.naming.*
+-keepclassmembers class javax.naming.** {
+    <methods>;
+}
+-keep class javax.xml.stream.*
+-keepclassmembers class javax.xml.stream.** {
+    <methods>;
+}
+
+-keep class org.graalvm.nativeimage.*
+-keepclassmembers class org.graalvm.nativeimage.** {
+    <methods>;
+}
+-keep class sun.reflect.*
+-keepclassmembers class sun.reflect.** {
+    <methods>;
+}
+-dontwarn com.oracle.svm.core.annotate.**
+-dontwarn com.oracle.svm.core.annotate.**
+-dontwarn com.oracle.svm.core.annotate.**
+-dontwarn com.oracle.svm.core.annotate.**
+-dontwarn com.oracle.svm.core.configure.**
+-dontwarn dalvik.system.**
+-dontwarn java.beans.**
+-dontwarn java.beans.**
+-dontwarn java.lang.**
+-dontwarn java.lang.**
+-dontwarn java.lang.**
+-dontwarn java.lang.management.**
+-dontwarn java.lang.management.**
+-dontwarn javax.naming.**
+-dontwarn javax.naming.**
+-dontwarn javax.naming.**
+-dontwarn javax.xml.stream.**
+-dontwarn javax.xml.stream.**
+-dontwarn org.graalvm.nativeimage.**
+-dontwarn org.graalvm.nativeimage.hosted.**
+-dontwarn org.graalvm.nativeimage.hosted.**
+-dontwarn sun.reflect.**
