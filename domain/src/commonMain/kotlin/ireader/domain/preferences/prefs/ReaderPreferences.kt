@@ -99,13 +99,16 @@ class ReaderPreferences constructor(
     }
 
 
-
     fun sleepTime(): Preference<Long> {
         return preferenceStore.getLong(SLEEP_TIMER, 15)
     }
 
     fun sleepMode(): Preference<Boolean> {
         return preferenceStore.getBoolean(SLEEP_TIMER_MODE, false)
+    }
+
+    fun bionicReading(): Preference<Boolean> {
+        return preferenceStore.getBoolean("ENABLE_BIONIC_READING", false)
     }
 
     fun textAlign(): Preference<PreferenceValues.PreferenceTextAlignment> {

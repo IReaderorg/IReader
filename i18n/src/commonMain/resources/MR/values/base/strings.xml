@@ -359,6 +359,7 @@
     <string name="autoScroll">AutoScroll</string>
     <string name="reading_mode">Reading Mode</string>
     <string name="immersive_mode">Immersive mode</string>
+    <string name="bionic_reading">Bionic Reading mode</string>
     <string name="show_webView_during_fetching">WebView Integration</string>
     <string name="screen_always_on">Screen Always On</string>
     <string name="general">General</string>

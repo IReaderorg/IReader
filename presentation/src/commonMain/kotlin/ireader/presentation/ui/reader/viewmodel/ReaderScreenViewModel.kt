@@ -109,6 +109,7 @@ class ReaderScreenViewModel(
     val selectableMode = readerPreferences.selectableText().asState()
     val fontSize = readerPreferences.fontSize().asState()
     val distanceBetweenParagraphs = readerPreferences.paragraphDistance().asState()
+    val bionicReadingMode = readerPreferences.bionicReading().asState()
     val verticalScrolling = readerPreferences.scrollMode().asState()
     val readingMode = readerPreferences.readingMode().asState()
     val fonts = listOf<String>(

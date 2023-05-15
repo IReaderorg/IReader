@@ -28,7 +28,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.seiko.imageloader.cache.CachePolicy
@@ -54,17 +57,17 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ReaderText(
-        modifier: Modifier = Modifier,
-        vm: ReaderScreenViewModel,
-        uiState: ReaderScreenState,
-        onNext: () -> Unit,
-        onPrev: () -> Unit,
-        swipeState: SwipeRefreshState,
-        scrollState: ScrollState,
-        lazyListState: LazyListState,
-        modalState: ModalBottomSheetState,
-        toggleReaderMode: () -> Unit,
-        onChapterShown: (chapter: Chapter) -> Unit,
+    modifier: Modifier = Modifier,
+    vm: ReaderScreenViewModel,
+    uiState: ReaderScreenState,
+    onNext: () -> Unit,
+    onPrev: () -> Unit,
+    swipeState: SwipeRefreshState,
+    scrollState: ScrollState,
+    lazyListState: LazyListState,
+    modalState: ModalBottomSheetState,
+    toggleReaderMode: () -> Unit,
+    onChapterShown: (chapter: Chapter) -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val scope = rememberCoroutineScope()
@@ -76,8 +79,16 @@ fun ReaderText(
             ) {
                 toggleReaderMode()
             }
-            .supportDesktopScroll(scrollState,scope,enable = vm.readingMode.value == ReadingMode.Page)
-            .supportDesktopScroll(lazyListState,scope,enable = vm.readingMode.value == ReadingMode.Continues)
+            .supportDesktopScroll(
+                scrollState,
+                scope,
+                enable = vm.readingMode.value == ReadingMode.Page
+            )
+            .supportDesktopScroll(
+                lazyListState,
+                scope,
+                enable = vm.readingMode.value == ReadingMode.Continues
+            )
             .fillMaxSize()
             .background(vm.backgroundColor.value),
     ) {
@@ -85,7 +96,8 @@ fun ReaderText(
         val maxHeight = remember {
             constraints.maxHeight.toFloat()
         }
-        val firstVisibleValue =  remember { derivedStateOf { lazyListState.firstVisibleItemScrollOffset } }
+        val firstVisibleValue =
+            remember { derivedStateOf { lazyListState.firstVisibleItemScrollOffset } }
 
 
         Box(
@@ -144,6 +156,7 @@ fun ReaderText(
                                 toggleReaderMode = toggleReaderMode
                             )
                         }
+
                         ReadingMode.Continues -> {
                             ContinuesReaderPage(
                                 interactionSource = interactionSource,
@@ -185,6 +198,7 @@ private fun TextSelectionContainer(
         true -> SelectionContainer {
             content()
         }
+
         else -> {
             content()
         }
@@ -193,14 +207,14 @@ private fun TextSelectionContainer(
 
 @Composable
 private fun PagedReaderText(
-        modifier: Modifier = Modifier,
-        interactionSource: MutableInteractionSource,
-        scrollState: ScrollState,
-        vm: ReaderScreenViewModel,
-        maxHeight: Float,
-        onPrev: () -> Unit,
-        onNext: () -> Unit,
-        toggleReaderMode: () -> Unit
+    modifier: Modifier = Modifier,
+    interactionSource: MutableInteractionSource,
+    scrollState: ScrollState,
+    vm: ReaderScreenViewModel,
+    maxHeight: Float,
+    onPrev: () -> Unit,
+    onNext: () -> Unit,
+    toggleReaderMode: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -214,22 +228,22 @@ private fun PagedReaderText(
             selectionMode = vm.isScrollIndicatorDraggable.value,
             rightSide = vm.scrollIndicatorAlignment.value == PreferenceValues.PreferenceTextAlignment.Right
         ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(scrollState)
-                        .padding(top = 32.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(top = 32.dp)
 
-                ) {
-                    vm.stateContent.forEachIndexed { index, text ->
-                        MainText(
-                            modifier = modifier,
-                            index = index,
-                            page = text,
-                            vm = vm
-                        )
-                    }
+            ) {
+                vm.stateContent.forEachIndexed { index, text ->
+                    MainText(
+                        modifier = modifier,
+                        index = index,
+                        page = text,
+                        vm = vm
+                    )
                 }
+            }
         }
     }
 }
@@ -241,28 +255,10 @@ private fun MainText(
     page: Page,
     vm: ReaderScreenViewModel
 ) {
+
     when (page) {
         is Text -> {
-            Text(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = vm.paragraphsIndent.value.dp),
-                text = setText(
-                    text = page.text,
-                    index = index,
-                    isLast = index == vm.stateContent.lastIndex,
-                    topContentPadding = vm.topContentPadding.value,
-                    contentPadding = vm.distanceBetweenParagraphs.value,
-                    bottomContentPadding = vm.bottomContentPadding.value
-                ),
-                fontSize = vm.fontSize.value.sp,
-                fontFamily = vm.font?.value?.fontFamily,
-                textAlign = mapTextAlign(vm.textAlignment.value),
-                color = vm.textColor.value,
-                lineHeight = vm.lineHeight.value.sp,
-                letterSpacing = vm.betweenLetterSpaces.value.sp,
-                fontWeight = FontWeight(vm.textWeight.value),
-            )
+            StyleText(modifier, vm, index, page, vm.bionicReadingMode.value)
         }
         is ImageUrl -> {
             val isLoading = remember {
@@ -275,7 +271,7 @@ private fun MainText(
                         .fillMaxWidth()
                         .requiredHeight(500.dp),
                     model = ImageRequest {
-                    data(page.url)
+                        data(page.url)
                         this.options {
                             diskCachePolicy = CachePolicy.DISABLED
                         }
@@ -298,22 +294,106 @@ private fun MainText(
                 }
             }
         }
+
         else -> {
         }
     }
 }
 
 @Composable
+private fun StyleText(
+    modifier: Modifier,
+    vm: ReaderScreenViewModel,
+    index: Int,
+    page: Text,
+    enableBioReading: Boolean
+) {
+    if (enableBioReading) {
+        Text(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = vm.paragraphsIndent.value.dp),
+            text = buildAnnotatedString {
+                var currentCursorIndex = 0
+                setText(
+                    text = page.text,
+                    index = index,
+                    isLast = index == vm.stateContent.lastIndex,
+                    topContentPadding = vm.topContentPadding.value,
+                    contentPadding = vm.distanceBetweenParagraphs.value,
+                    bottomContentPadding = vm.bottomContentPadding.value
+                ).split(" ")
+                    .forEach { s ->
+                        s.forEachIndexed { charIndex, c ->
+                            if (charIndex <= (s.length / 2)) {
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                ) {
+
+                                    append(c)
+                                }
+                            } else {
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontWeight = FontWeight.Light
+                                    )
+                                ) {
+
+                                    append(c)
+                                }
+                            }
+
+                        }
+                        append(" ")
+
+                    }
+
+            },
+            fontSize = vm.fontSize.value.sp,
+            fontFamily = vm.font?.value?.fontFamily,
+            textAlign = mapTextAlign(vm.textAlignment.value),
+            color = vm.textColor.value,
+            lineHeight = vm.lineHeight.value.sp,
+            letterSpacing = vm.betweenLetterSpaces.value.sp,
+            fontWeight = FontWeight(vm.textWeight.value),
+        )
+    } else {
+        Text(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = vm.paragraphsIndent.value.dp),
+            text = setText(
+                text = page.text,
+                index = index,
+                isLast = index == vm.stateContent.lastIndex,
+                topContentPadding = vm.topContentPadding.value,
+                contentPadding = vm.distanceBetweenParagraphs.value,
+                bottomContentPadding = vm.bottomContentPadding.value
+            ),
+            fontSize = vm.fontSize.value.sp,
+            fontFamily = vm.font?.value?.fontFamily,
+            textAlign = mapTextAlign(vm.textAlignment.value),
+            color = vm.textColor.value,
+            lineHeight = vm.lineHeight.value.sp,
+            letterSpacing = vm.betweenLetterSpaces.value.sp,
+            fontWeight = FontWeight(vm.textWeight.value),
+        )
+    }
+
+}
+@Composable
 private fun ContinuesReaderPage(
-        modifier: Modifier = Modifier,
-        interactionSource: MutableInteractionSource,
-        scrollState: LazyListState,
-        vm: ReaderScreenViewModel,
-        maxHeight: Float,
-        onPrev: () -> Unit,
-        onNext: () -> Unit,
-        toggleReaderMode: () -> Unit,
-        onChapterShown: (chapter: Chapter) -> Unit,
+    modifier: Modifier = Modifier,
+    interactionSource: MutableInteractionSource,
+    scrollState: LazyListState,
+    vm: ReaderScreenViewModel,
+    maxHeight: Float,
+    onPrev: () -> Unit,
+    onNext: () -> Unit,
+    toggleReaderMode: () -> Unit,
+    onChapterShown: (chapter: Chapter) -> Unit,
 ) {
     var lastChapterId: Chapter? by remember {
         mutableStateOf(null)
@@ -321,7 +401,7 @@ private fun ContinuesReaderPage(
     LaunchedEffect(key1 = lastChapterId) {
         lastChapterId?.let { onChapterShown(it) }
     }
-    val visibleItemInfo =  remember { derivedStateOf { scrollState.layoutInfo } }
+    val visibleItemInfo = remember { derivedStateOf { scrollState.layoutInfo } }
     LaunchedEffect(key1 = visibleItemInfo.value.visibleItemsInfo.firstOrNull()?.key) {
         runCatching {
             vm.chapterShell.firstOrNull {
@@ -377,14 +457,14 @@ private fun ContinuesReaderPage(
 
 @Composable
 private fun ReaderHorizontalScreen(
-        modifier: Modifier = Modifier,
-        interactionSource: MutableInteractionSource,
-        scrollState: ScrollState,
-        vm: ReaderScreenViewModel,
-        maxHeight: Float,
-        onPrev: () -> Unit,
-        onNext: () -> Unit,
-        toggleReaderMode: () -> Unit
+    modifier: Modifier = Modifier,
+    interactionSource: MutableInteractionSource,
+    scrollState: ScrollState,
+    vm: ReaderScreenViewModel,
+    maxHeight: Float,
+    onPrev: () -> Unit,
+    onNext: () -> Unit,
+    toggleReaderMode: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     if (!vm.verticalScrolling.value) {
@@ -440,7 +520,7 @@ private fun ReaderHorizontalScreen(
             ) {
             }
         }
-    Box(modifier = Modifier.fillMaxSize().background(Color.Red))
+        Box(modifier = Modifier.fillMaxSize().background(Color.Red))
     }
 }
 

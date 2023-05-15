@@ -1,6 +1,12 @@
 package ireader.presentation.ui.reader.components
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.ExperimentalMaterialApi
@@ -22,7 +28,11 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.google.accompanist.pager.*
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.PagerState
+import com.google.accompanist.pager.pagerTabIndicatorOffset
+import com.google.accompanist.pager.rememberPagerState
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.theme.ReaderTheme
 import ireader.domain.preferences.models.FontType
@@ -32,7 +42,13 @@ import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
-import ireader.presentation.ui.component.components.*
+import ireader.presentation.ui.component.components.Build
+import ireader.presentation.ui.component.components.ChipChoicePreference
+import ireader.presentation.ui.component.components.ChipPreference
+import ireader.presentation.ui.component.components.ColorPreference
+import ireader.presentation.ui.component.components.Components
+import ireader.presentation.ui.component.components.PreferenceRow
+import ireader.presentation.ui.component.components.SwitchPreference
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -40,6 +56,7 @@ import ireader.presentation.ui.core.theme.ReaderTheme
 import ireader.presentation.ui.core.ui.Colour.contentColor
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.launch
+
 @OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun ReaderSettingMainLayout(
@@ -463,6 +480,12 @@ fun GeneralScreenTab(
             SwitchPreference(
                 preference = vm.immersiveMode,
                 title = localizeHelper.localize(MR.strings.immersive_mode),
+            )
+        }
+        item {
+            SwitchPreference(
+                preference = vm.bionicReadingMode,
+                title = localizeHelper.localize(MR.strings.bionic_reading),
             )
         }
         item {
