@@ -13,6 +13,8 @@ import com.seiko.imageloader.ImageLoader
 import com.seiko.imageloader.LocalImageLoader
 import com.seiko.imageloader.cache.memory.maxSizePercent
 import com.seiko.imageloader.component.setupDefaultComponents
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import ireader.data.di.DataModule
 import ireader.data.di.dataPlatformModule
 import ireader.data.di.repositoryInjectModule
@@ -49,32 +51,33 @@ fun main() {
     }
     //Dispatchers.setMain(StandardTestDispatcher())
     application {
+        Napier.base(DebugAntilog())
         val state = rememberWindowState()
         Window(
-                onCloseRequest = { exitProcess(0) },
-                title = "IReader",
-                state = state,
-                icon = painterResource("icon.png")
+            onCloseRequest = { exitProcess(0) },
+            title = "IReader",
+            state = state,
+            icon = painterResource("icon.png")
         ) {
 
             val coroutineScope = rememberCoroutineScope()
-                CompositionLocalProvider(
-                        LocalImageLoader provides generateImageLoader(coroutineScope),
-                ) {
-                    AppTheme(coroutineScope) {
-                        Navigator(
-                                screen = MainStarterScreen,
-                                disposeBehavior = NavigatorDisposeBehavior(
-                                        disposeNestedNavigators = false,
-                                        disposeSteps = true
-                                ),
-                        ) { navigator ->
+            CompositionLocalProvider(
+                LocalImageLoader provides generateImageLoader(coroutineScope),
+            ) {
+                AppTheme(coroutineScope) {
+                    Navigator(
+                        screen = MainStarterScreen,
+                        disposeBehavior = NavigatorDisposeBehavior(
+                            disposeNestedNavigators = false,
+                            disposeSteps = true
+                        ),
+                    ) { navigator ->
 
 
-                            DefaultNavigatorScreenTransition(navigator = navigator)
-                        }
+                        DefaultNavigatorScreenTransition(navigator = navigator)
                     }
                 }
+            }
         }
     }
 

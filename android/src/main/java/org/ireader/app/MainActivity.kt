@@ -19,6 +19,8 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.NavigatorDisposeBehavior
 import com.seiko.imageloader.ImageLoaderFactory
 import com.seiko.imageloader.LocalImageLoader
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import ireader.core.http.toast
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.backup.AutomaticBackup
@@ -68,6 +70,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         lifecycleScope.launchIO {
             automaticBackup.initialize()
         }
+        Napier.base(DebugAntilog())
         localeHelper.setLocaleLang()
         installSplashScreen()
         setContent {

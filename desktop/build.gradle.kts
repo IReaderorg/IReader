@@ -30,6 +30,7 @@ dependencies {
     implementation(libs.koin.compose)
     implementation(libs.voyager.navigator)
     implementation(kotlinx.coroutines.core)
+    implementation(libs.napier)
 }
 
 kotlin {
