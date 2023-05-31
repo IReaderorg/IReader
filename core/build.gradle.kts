@@ -51,7 +51,7 @@ kotlin {
                 api(libs.ktor.contentNegotiation.kotlinx)
                 api(libs.okio)
                 compileOnly(libs.jsoup)
-                compileOnly(libs.kodein.core)
+                compileOnly(libs.koin.core)
             }
         }
          val androidMain by getting {

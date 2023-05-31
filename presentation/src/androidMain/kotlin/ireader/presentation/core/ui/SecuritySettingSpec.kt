@@ -28,10 +28,7 @@ import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import kotlinx.datetime.Clock
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.android.closestDI
-import org.kodein.di.instance
+import org.koin.android.ext.android.get
 
 actual class SecuritySettingSpec : VoyagerScreen() {
 
@@ -167,12 +164,10 @@ actual class SecuritySettingSpec : VoyagerScreen() {
  * Blank activity with a BiometricPrompt.
  */
 
-class UnlockActivity : FragmentActivity(),DIAware {
+class UnlockActivity : FragmentActivity() {
 
-    override val di: DI by closestDI()
-
-    val appPreferences: UiPreferences by instance()
-    val localizeHelper: LocalizeHelper by instance()
+    val appPreferences: UiPreferences = get<UiPreferences>()
+    val localizeHelper: LocalizeHelper = get<LocalizeHelper>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -194,8 +194,7 @@ dependencies {
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
    androidTestImplementation(test.bundles.common)
 
-    implementation(libs.kodein.core)
-    implementation(libs.kodein.compose)
+    implementation(libs.koin.core)
     implementation(libs.voyager.navigator)
 
 
@@ -209,6 +208,13 @@ dependencies {
     @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
     implementation(compose.material3)
     implementation(compose.materialIconsExtended)
+
+
+    implementation(libs.koin.core)
+    implementation(libs.koin.androidCompose)
+    implementation(libs.koin.android)
+    implementation(libs.koin.compose)
+    implementation(libs.koin.workManager)
 }
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround
@@ -227,7 +233,6 @@ fun getBuildTime(): String {
     df.timeZone = TimeZone.getTimeZone("UTC")
     return df.format(Date())
 }
-
 fun runCommand(command: String): String {
     val byteOut = ByteArrayOutputStream()
     project.exec {

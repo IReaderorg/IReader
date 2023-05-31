@@ -15,6 +15,7 @@ import ireader.domain.usecases.backup.AutomaticBackup
 import ireader.domain.usecases.epub.EpubCreator
 import ireader.domain.usecases.epub.ImportEpub
 import ireader.domain.usecases.file.AndroidFileSaver
+import ireader.domain.usecases.file.FileSaver
 import ireader.domain.usecases.files.AndroidGetSimpleStorage
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.usecases.preferences.*
@@ -23,93 +24,128 @@ import ireader.domain.usecases.reader.ScreenAlwaysOnImpl
 import ireader.domain.usecases.services.*
 import ireader.domain.utils.NotificationManager
 import ireader.i18n.LocalizeHelper
-import org.kodein.di.*
+import org.koin.dsl.module
 
 @OptIn(ExperimentalTextApi::class)
-actual val DomainModule: DI.Module = DI.Module("domainModulePlatform") {
-    bindProvider {
+actual val DomainModule = module {
+    factory  {
         DownloaderService(
-                instance(),
-                instance(),
+                get(),
+                get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
         )
     }
-    bindProvider {
+    factory  {
         NotificationManager(
-            instance(),
+            get(),
         )
     }
-    bindSingleton {
+    single {
         ExtensionManagerService(
-                instance(),
-                instance(),
-
+                get(),
+                get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
                 )
     }
-    bindSingleton {
-        UpdateService(instance(), instance())
+    single {
+        UpdateService(get()  ,       get(),
+            get(),
+            get(),
+            get(),
+        )
     }
-    bindSingleton {
+    single {
         LibraryUpdatesService(
-                instance(),
-                instance(),
+                get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
         )
     }
 
-    bindProvider<Service>() {
-        TTSService()
+    factory <Service>() {
+        TTSService(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+        )
     }
-    bindSingleton {
+    single {
         AutomaticBackup(
-                instance(),
-                instance(),
-                instance(),
-                instance()
+                get(),
+                get(),
+                get(),
+                get()
         )
     }
-    bindProvider<TTSStateImpl> { ireader.domain.services.tts_service.TTSStateImpl() }
-    bindProvider { ireader.domain.services.update_service.UpdateApi(instance()) }
+    factory <TTSStateImpl> { ireader.domain.services.tts_service.TTSStateImpl() }
+    factory  { ireader.domain.services.update_service.UpdateApi(get()) }
 
-    bindProvider { ireader.domain.usecases.services.StartDownloadServicesUseCase(instance()) }
-    bindProvider { ireader.domain.usecases.services.StartLibraryUpdateServicesUseCase(instance()) }
-    bindProvider { ireader.domain.usecases.services.StartTTSServicesUseCase(instance()) }
-    bindProvider {
+    factory  { ireader.domain.usecases.services.StartDownloadServicesUseCase(get()) }
+    factory  { ireader.domain.usecases.services.StartLibraryUpdateServicesUseCase(get()) }
+    factory  { ireader.domain.usecases.services.StartTTSServicesUseCase(get()) }
+    factory  {
         TextReaderPrefUseCase(
-                instance(),
-                instance()
+                get(),
+                get()
         )
     }
-    bindProvider {
+    factory  {
         StartExtensionManagerService(
-                instance()
+                get()
         )
     }
-    bindSingleton<GetSimpleStorage>{ AndroidGetSimpleStorage(instance()) }
-    bindSingleton<AndroidGetSimpleStorage>{ AndroidGetSimpleStorage(instance()) }
-    bindSingleton<DefaultNotificationHelper> { new(::DefaultNotificationHelper) }
-    bindProvider<ScreenAlwaysOn> {
-        ScreenAlwaysOnImpl(instance())
+    single<GetSimpleStorage>{ AndroidGetSimpleStorage(get()) }
+    single<AndroidGetSimpleStorage>{ AndroidGetSimpleStorage(get()) }
+    single<DefaultNotificationHelper> { DefaultNotificationHelper(get(),get()) }
+    factory <ScreenAlwaysOn> {
+        ScreenAlwaysOnImpl(get())
     }
-    bindSingleton {
-        new(::AndroidFileSaver)
+    single<FileSaver> {
+        AndroidFileSaver(get())
     }
-    bindSingleton {
+    single {
         AndroidReaderPrefUseCases(
-                selectedFontStateUseCase = SelectedFontStateUseCase(instance(),instance()),
+                selectedFontStateUseCase = SelectedFontStateUseCase(get(),get()),
 
         )
     }
-    bindSingleton<ImportEpub> { ImportEpub(instance(), instance(),instance(),instance()) }
-    bindSingleton<PlatformUiPreferences> {
-        new(::AndroidUiPreferences)
+    single<ImportEpub> { ImportEpub(get(), get(),get(),get()) }
+    single<PlatformUiPreferences> {
+        AndroidUiPreferences(get(),get())
     }
-    bindProvider<EpubCreator> { EpubCreator(instance(), instance(),instance()) }
-    bindSingleton<ServiceUseCases> { ServiceUseCases(
-            startDownloadServicesUseCase = StartDownloadServicesUseCase(instance()),
-            startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(instance()),
-            startTTSServicesUseCase = StartTTSServicesUseCase(instance()),
+    factory <EpubCreator> { EpubCreator(get(), get(),get()) }
+    single<ServiceUseCases> { ServiceUseCases(
+            startDownloadServicesUseCase = StartDownloadServicesUseCase(get()),
+            startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(get()),
+            startTTSServicesUseCase = StartTTSServicesUseCase(get()),
     ) }
 
-    bindSingleton { LocalizeHelper(instance()) }
+    single<LocalizeHelper> { LocalizeHelper(get()) }
 
 
 

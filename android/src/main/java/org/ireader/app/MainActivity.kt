@@ -48,23 +48,17 @@ import kotlinx.coroutines.launch
 import org.ireader.app.initiators.AppInitializers
 import org.ireader.app.initiators.GetPermissions
 import org.ireader.app.initiators.SecureActivityDelegateImpl
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.android.closestDI
-import org.kodein.di.compose.withDI
-import org.kodein.di.instance
+import org.koin.android.ext.android.inject
 import kotlin.time.Duration.Companion.seconds
 
-
-class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivityDelegateImpl(),
-    DIAware {
+class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivityDelegateImpl() {
 
 
-    private val getSimpleStorage: AndroidGetSimpleStorage by instance()
-    private val uiPreferences: UiPreferences by instance()
-    val initializers: AppInitializers by instance<AppInitializers>()
-    private val automaticBackup: AutomaticBackup by instance()
-    private val localeHelper: LocaleHelper by instance()
+    private val getSimpleStorage: AndroidGetSimpleStorage by inject()
+    private val uiPreferences: UiPreferences by inject()
+    val initializers: AppInitializers by inject()
+    private val automaticBackup: AutomaticBackup by inject()
+    private val localeHelper: LocaleHelper by inject()
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,7 +71,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         localeHelper.setLocaleLang()
         installSplashScreen()
         setContent {
-            withDI(di) {
                 CompositionLocalProvider(
                         LocalImageLoader provides (this@MainActivity.application as ImageLoaderFactory).newImageLoader(),
                 ) {
@@ -112,9 +105,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                         }
                     }
                 }
-
-
-            }
         }
     }
 
@@ -223,7 +213,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
             }
         }
     }
-    override val di: DI by closestDI()
 
 
 }

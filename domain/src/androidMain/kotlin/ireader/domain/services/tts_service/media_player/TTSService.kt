@@ -17,7 +17,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import ireader.core.log.Log
-import ireader.i18n.R
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
@@ -34,49 +33,32 @@ import ireader.domain.services.tts_service.isSame
 import ireader.domain.usecases.preferences.TextReaderPrefUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.i18n.LocalizeHelper
+import ireader.i18n.R
 import kotlinx.coroutines.*
 import kotlinx.datetime.Clock
-import org.kodein.di.*
 import kotlin.time.Duration.Companion.minutes
 
-class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener, DIAware {
-
-
-    override lateinit var di: DI
-
-    private val bookRepo: BookRepository by instance()
-
-
-    private val chapterRepo: ChapterRepository by instance()
-    private val localizeHelper: LocalizeHelper by instance()
-
-
-    private val chapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase by instance()
-
-
-    private val remoteUseCases: RemoteUseCases by instance()
-
-
-    private val extensions: CatalogStore by instance()
-
+class TTSService(
+    private val bookRepo: BookRepository,
+    private val chapterRepo: ChapterRepository,
+    private val localizeHelper: LocalizeHelper,
+    private val chapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
+    private val remoteUseCases: RemoteUseCases,
+    private val extensions: CatalogStore,
+    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
+    private val textReaderPrefUseCase: TextReaderPrefUseCase,
+    private val readerPreferences: ReaderPreferences ,
+    private val appPrefs: AppPreferences,
+) : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener {
     lateinit var ttsNotificationBuilder: TTSNotificationBuilder
-
     lateinit var state: TTSStateImpl
-
-
-    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases by instance()
-
-
-    private val textReaderPrefUseCase: TextReaderPrefUseCase by instance()
-
     private val noisyReceiver = NoisyReceiver()
     private var noisyReceiverHooked = false
     private val focusLock = Any()
     private var resumeOnFocus = true
 
 
-    private val readerPreferences: ReaderPreferences  by instance()
-    private val appPrefs: AppPreferences  by instance()
+
 
     lateinit var mediaSession: MediaSessionCompat
     lateinit var stateBuilder: PlaybackStateCompat.Builder
@@ -175,7 +157,6 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
 
     var silence: MediaPlayer? = null
     override fun onCreate() {
-        di = (this@TTSService.application as DIAware).di
         super.onCreate()
         state = TTSStateImpl()
 

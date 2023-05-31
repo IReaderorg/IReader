@@ -1,11 +1,9 @@
 package ireader.desktop.di
 
 import ireader.desktop.initiators.CatalogStoreInitializer
-import org.kodein.di.DI
-import org.kodein.di.bindSingleton
-import org.kodein.di.instance
+import org.koin.dsl.module
 
-val DesktopDI = DI.Module("DesktopDI"){
+val DesktopDI = module {
 
-    bindSingleton<CatalogStoreInitializer> { CatalogStoreInitializer(instance(),instance()) }
+    single<CatalogStoreInitializer>(createdAtStart = true) { CatalogStoreInitializer(get(),get()) }
 }

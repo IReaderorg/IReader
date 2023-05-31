@@ -16,124 +16,121 @@ import ireader.domain.usecases.remote.GetRemoteBooksUseCase
 import ireader.domain.usecases.remote.GetRemoteChapters
 import ireader.domain.usecases.remote.GetRemoteReadingContent
 import ireader.domain.usecases.translate.TranslationEnginesManager
-import org.kodein.di.DI
-import org.kodein.di.bindProvider
-import org.kodein.di.bindSingleton
-import org.kodein.di.instance
+import org.koin.dsl.module
 
 
-val DomainServices = DI.Module("domainModule") {
+val DomainServices = module {
 
-    bindSingleton<DownloadServiceStateImpl> { ireader.domain.services.downloaderService.DownloadServiceStateImpl() }
+    single<DownloadServiceStateImpl> { ireader.domain.services.downloaderService.DownloadServiceStateImpl() }
 
 
-    bindSingleton { ireader.domain.preferences.prefs.PlayerPreferences(instance()) }
+    single { ireader.domain.preferences.prefs.PlayerPreferences(get()) }
 
 
 
 
-    bindProvider {
+    factory  {
         CreateBackup(
-            instance(),
-            instance(),
-            instance(),
-            instance(),
-            instance(),
-            instance(),
-            instance()
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
         )
     }
-    bindProvider {
+    factory  {
         RestoreBackup(
-            instance(),
-            instance(),
-            instance(),
-            instance(),
-            instance(),
-            instance(),
-            instance(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
         )
     }
-    bindProvider { CategoriesUseCases(instance(), instance()) }
-    bindProvider { CreateCategoryWithName(instance()) }
-    bindProvider { ReorderCategory(instance()) }
-    bindProvider { SubscribeDownloadsUseCase(instance()) }
+    factory  { CategoriesUseCases(get(), get()) }
+    factory  { CreateCategoryWithName(get()) }
+    factory  { ReorderCategory(get()) }
+    factory  { SubscribeDownloadsUseCase(get()) }
 
 
-    bindProvider { FontUseCase(instance()) }
+    factory  { FontUseCase(get()) }
 
 
-    bindProvider { ireader.domain.usecases.local.FindBooksByKey(instance()) }
-    bindProvider { ireader.domain.usecases.local.SubscribeBooksByKey(instance()) }
-    bindProvider { ireader.domain.usecases.local.FindBookByKey(instance()) }
-    bindProvider { ireader.domain.usecases.local.book_usecases.BookMarkChapterUseCase(instance()) }
-    bindProvider { ireader.domain.usecases.local.book_usecases.FindAllInLibraryBooks(instance()) }
-    bindProvider { ireader.domain.usecases.local.book_usecases.GetLibraryCategory(instance()) }
-    bindProvider {
+    factory  { ireader.domain.usecases.local.FindBooksByKey(get()) }
+    factory  { ireader.domain.usecases.local.SubscribeBooksByKey(get()) }
+    factory  { ireader.domain.usecases.local.FindBookByKey(get()) }
+    factory  { ireader.domain.usecases.local.book_usecases.BookMarkChapterUseCase(get()) }
+    factory  { ireader.domain.usecases.local.book_usecases.FindAllInLibraryBooks(get()) }
+    factory  { ireader.domain.usecases.local.book_usecases.GetLibraryCategory(get()) }
+    factory  {
         ireader.domain.usecases.local.book_usecases.MarkBookAsReadOrNotUseCase(
-            instance(),
-            instance()
+            get(),
+            get()
         )
     }
-    bindProvider { ireader.domain.usecases.local.book_usecases.SubscribeBookById(instance()) }
-    bindProvider { ireader.domain.usecases.local.book_usecases.FindBookById(instance()) }
-    bindProvider { ireader.domain.usecases.local.book_usecases.FindDuplicateBook(instance()) }
-    bindProvider { ireader.domain.usecases.local.book_usecases.SubscribeInLibraryBooks(instance()) }
-    bindProvider {
+    factory  { ireader.domain.usecases.local.book_usecases.SubscribeBookById(get()) }
+    factory  { ireader.domain.usecases.local.book_usecases.FindBookById(get()) }
+    factory  { ireader.domain.usecases.local.book_usecases.FindDuplicateBook(get()) }
+    factory  { ireader.domain.usecases.local.book_usecases.SubscribeInLibraryBooks(get()) }
+    factory  {
         ireader.domain.usecases.local.chapter_usecases.UpdateLastReadTime(
-            instance(),
-            instance(),
-            instance()
+            get(),
+            get(),
+            get()
         )
     }
-    bindProvider { ireader.domain.usecases.local.delete_usecases.book.DeleteBookById(instance()) }
-    bindProvider {
+    factory  { ireader.domain.usecases.local.delete_usecases.book.DeleteBookById(get()) }
+    factory  {
         ireader.domain.usecases.local.delete_usecases.book.UnFavoriteBook(
-            instance(),
-            instance(),
-            instance()
+            get(),
+            get(),
+            get()
         )
     }
-    bindProvider {
+    factory  {
         ireader.domain.usecases.local.delete_usecases.book.DeleteNotInLibraryBooks(
-            instance()
+            get()
         )
     }
-    bindProvider {
+    factory  {
         ireader.domain.usecases.local.delete_usecases.chapter.DeleteChaptersByBookId(
-            instance()
+            get()
         )
     }
-    bindProvider { ireader.domain.usecases.local.insert_usecases.InsertBook(instance()) }
-    bindProvider { ireader.domain.usecases.local.insert_usecases.UpdateBook(instance()) }
-    bindProvider { ireader.domain.usecases.local.insert_usecases.InsertBooks(instance()) }
-    bindProvider { ireader.domain.usecases.local.insert_usecases.InsertBookAndChapters(instance()) }
-    bindProvider { ireader.domain.usecases.local.insert_usecases.InsertChapter(instance()) }
-    bindProvider { ireader.domain.usecases.local.insert_usecases.InsertChapters(instance()) }
-    bindProvider {
+    factory  { ireader.domain.usecases.local.insert_usecases.InsertBook(get()) }
+    factory  { ireader.domain.usecases.local.insert_usecases.UpdateBook(get()) }
+    factory  { ireader.domain.usecases.local.insert_usecases.InsertBooks(get()) }
+    factory  { ireader.domain.usecases.local.insert_usecases.InsertBookAndChapters(get()) }
+    factory  { ireader.domain.usecases.local.insert_usecases.InsertChapter(get()) }
+    factory  { ireader.domain.usecases.local.insert_usecases.InsertChapters(get()) }
+    factory  {
         NightModePreferencesUseCase(
-            instance()
+            get()
         )
     }
-    bindProvider { DohPrefUseCase(instance()) }
+    factory  { DohPrefUseCase(get()) }
 
-    bindProvider { LastUpdateTime(instance()) }
+    factory  { LastUpdateTime(get()) }
 
-    bindProvider { GetBookDetail() }
-    bindProvider { GetRemoteBooksUseCase() }
-    bindProvider { GetRemoteChapters() }
-    bindProvider { GetRemoteReadingContent() }
+    factory  { GetBookDetail() }
+    factory  { GetRemoteBooksUseCase() }
+    factory  { GetRemoteChapters() }
+    factory  { GetRemoteReadingContent() }
 
-    bindProvider {
+    factory  {
         TranslationEnginesManager(
-            instance(),
-            instance()
+            get(),
+            get()
         )
     }
-    bindProvider { ireader.domain.catalogs.interactor.GetInstalledCatalog(instance()) }
+    factory  { ireader.domain.catalogs.interactor.GetInstalledCatalog(get()) }
 
-    bindProvider { ireader.domain.usecases.updates.SubscribeUpdates(instance()) }
-    bindProvider { ireader.domain.usecases.updates.DeleteAllUpdates(instance()) }
+    factory  { ireader.domain.usecases.updates.SubscribeUpdates(get()) }
+    factory  { ireader.domain.usecases.updates.DeleteAllUpdates(get()) }
 
 
 }

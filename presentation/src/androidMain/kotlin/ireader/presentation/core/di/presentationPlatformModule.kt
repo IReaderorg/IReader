@@ -13,36 +13,33 @@ import ireader.presentation.ui.video.component.core.PlayerState
 import ireader.presentation.ui.video.component.core.PlayerStateImpl
 import ireader.presentation.ui.web.WebViewPageModel
 import ireader.presentation.ui.web.WebViewPageStateImpl
-import org.kodein.di.DI
-import org.kodein.di.bindFactory
-import org.kodein.di.bindProvider
-import org.kodein.di.bindSingleton
-import org.kodein.di.instance
-import org.kodein.di.instanceOrNull
+import org.koin.dsl.module
 
-actual val presentationPlatformModule: DI.Module = DI.Module("androidPresentationModule") {
-    bindFactory< VideoScreenViewModel.Param, VideoScreenViewModel>  { VideoScreenViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),it) }
-    bindFactory< WebViewPageModel.Param, WebViewPageModel> { WebViewPageModel(instance(),instance(),instance(),instance(),instance(),it,instance(),instance()) }
+
+actual val presentationPlatformModule = module  {
+    factory<VideoScreenViewModel>  { VideoScreenViewModel(get(),get(),get(),get(),get(),get(),get(),get()) }
+    factory<WebViewPageModel> { WebViewPageModel(get(),get(),get(),get(),get(),get(),get(),get()) }
 
 
 
-    bindFactory< TTSViewModel.Param, TTSViewModel>  { TTSViewModel(instance(),it,instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance()) }
-    bindProvider { MediaState(instanceOrNull(),instance(),di) }
-    bindProvider<PlayerState> { PlayerStateImpl(instance(),instance()) }
-    bindProvider<WebViewPageStateImpl> { WebViewPageStateImpl() }
-    bindProvider  { SecuritySettingViewModel(instance()) }
+    factory<TTSViewModel>  { TTSViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
 
-    bindSingleton { LocaleHelper(instance(),instance()) }
-    bindSingleton { PlatformHelper(instance()) }
-    bindSingleton<IUseController> { IUseController() }
-    bindSingleton<CoilLoaderFactory> {
+    factory  { MediaState(getOrNull(),get(),get()) }
+    factory <PlayerState> { PlayerStateImpl(get(),get()) }
+    factory <WebViewPageStateImpl> { WebViewPageStateImpl() }
+    factory   { SecuritySettingViewModel(get()) }
+
+    single { LocaleHelper(get(),get()) }
+    single { PlatformHelper(get()) }
+    single<IUseController> { IUseController() }
+    single<CoilLoaderFactory>(createdAtStart = true) {
         CoilLoaderFactory(
-            instance(),
-            instance(),
-            instance(),
-            instance()
+            get(),
+            get(),
+            get(),
+            get()
         )
     }
-    bindSingleton<PlatformReaderSettingReader> { PlatformReaderSettingReader(instance()) }
+    single<PlatformReaderSettingReader> { PlatformReaderSettingReader(get()) }
 
 }

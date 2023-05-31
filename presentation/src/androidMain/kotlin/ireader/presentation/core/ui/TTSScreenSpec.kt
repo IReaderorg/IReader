@@ -52,6 +52,7 @@ import ireader.presentation.ui.home.tts.TTSViewModel
 import ireader.presentation.ui.reader.ReaderScreenDrawer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.core.parameter.parametersOf
 import java.math.RoundingMode
 
 actual class TTSScreenSpec actual constructor(
@@ -96,7 +97,7 @@ actual class TTSScreenSpec actual constructor(
         val localizeHelper = LocalLocalizeHelper.currentOrThrow
         val vm: TTSViewModel =
             getIViewModel(parameters =
-                    TTSViewModel.Param(sourceId,chapterId,bookId,readingParagraph)
+            { parametersOf(TTSViewModel.Param(sourceId,chapterId,bookId,readingParagraph))}
                 )
         val context = LocalContext.current
         val lazyState = rememberLazyListState()

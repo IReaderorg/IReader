@@ -17,8 +17,12 @@ import ireader.data.di.DataModule
 import ireader.data.di.dataPlatformModule
 import ireader.data.di.repositoryInjectModule
 import ireader.desktop.di.DesktopDI
-import ireader.desktop.initiators.CatalogStoreInitializer
-import ireader.domain.di.*
+import ireader.domain.di.CatalogModule
+import ireader.domain.di.DomainModule
+import ireader.domain.di.DomainServices
+import ireader.domain.di.UseCasesInject
+import ireader.domain.di.localModule
+import ireader.domain.di.preferencesInjectModule
 import ireader.presentation.core.DefaultNavigatorScreenTransition
 import ireader.presentation.core.MainStarterScreen
 import ireader.presentation.core.di.PresentationModules
@@ -31,20 +35,18 @@ import ireader.presentation.imageloader.coil.imageloader.CatalogRemoteMapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import okio.Path.Companion.toOkioPath
-import org.kodein.di.DI
-import org.kodein.di.compose.withDI
-import org.kodein.di.instance
+import org.koin.core.context.startKoin
 import java.io.File
 import kotlin.system.exitProcess
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalCoroutinesApi::class)
 fun main() {
-    val di = DI.lazy {
-        importAll(localModule,dataPlatformModule, CatalogModule, DataModule,preferencesInjectModule,
-                repositoryInjectModule, UseCasesInject, PresentationModules,DomainServices,DomainModule,presentationPlatformModule, DesktopDI)
-
+    startKoin {
+        modules(
+            localModule,dataPlatformModule, CatalogModule, DataModule,preferencesInjectModule,
+            repositoryInjectModule, UseCasesInject, PresentationModules,DomainServices,DomainModule,presentationPlatformModule, DesktopDI
+        )
     }
-    val catalogStore : CatalogStoreInitializer by di.instance()
     //Dispatchers.setMain(StandardTestDispatcher())
     application {
         val state = rememberWindowState()
@@ -54,8 +56,8 @@ fun main() {
                 state = state,
                 icon = painterResource("icon.png")
         ) {
+
             val coroutineScope = rememberCoroutineScope()
-            withDI(di) {
                 CompositionLocalProvider(
                         LocalImageLoader provides generateImageLoader(coroutineScope),
                 ) {
@@ -73,7 +75,6 @@ fun main() {
                         }
                     }
                 }
-            }
         }
     }
 

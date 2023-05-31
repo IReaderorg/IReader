@@ -5,13 +5,13 @@ import ireader.presentation.core.PlatformHelper
 import ireader.presentation.core.theme.IUseController
 import ireader.presentation.core.theme.LocaleHelper
 import ireader.presentation.ui.reader.viewmodel.PlatformReaderSettingReader
-import org.kodein.di.DI
-import org.kodein.di.bindSingleton
+import org.koin.core.module.Module
+import org.koin.dsl.module
 
-actual val presentationPlatformModule: DI.Module = DI.Module("desktopPresentationModule") {
-    bindSingleton { LocaleHelper() }
-    bindSingleton { PlatformHelper() }
-    bindSingleton<PlatformReaderSettingReader> { PlatformReaderSettingReader() }
-    bindSingleton { WebViewManger() }
-    bindSingleton<IUseController> { IUseController() }
+actual val presentationPlatformModule: Module = module {
+    single { LocaleHelper() }
+    single { PlatformHelper() }
+    single<PlatformReaderSettingReader> { PlatformReaderSettingReader() }
+    single { WebViewManger() }
+    single<IUseController> { IUseController() }
 }

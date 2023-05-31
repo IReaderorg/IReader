@@ -33,7 +33,7 @@ kotlin {
                 implementation(libs.sqldelight.runtime)
                 implementation(libs.sqldelight.coroutines)
                 implementation(libs.requerySqlite)
-                api(libs.kodein.core)
+                api(libs.koin.core)
                 api(libs.jsoup)
                 api(kotlinx.datetime)
                 api(libs.bundles.ireader)

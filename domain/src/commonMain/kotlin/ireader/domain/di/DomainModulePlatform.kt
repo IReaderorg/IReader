@@ -1,5 +1,6 @@
 package ireader.domain.di
 
-import org.kodein.di.DI
 
-expect val DomainModule : DI.Module
+import org.koin.core.module.Module
+
+expect val DomainModule : Module

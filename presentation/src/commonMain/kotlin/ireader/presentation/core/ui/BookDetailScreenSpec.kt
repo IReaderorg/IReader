@@ -52,6 +52,7 @@ import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.core.utils.isScrolledToEnd
 import ireader.presentation.ui.core.utils.isScrollingUp
 import kotlinx.coroutines.launch
+import org.koin.core.parameter.parametersOf
 
 data class BookDetailScreenSpec constructor(
     val bookId: Long,
@@ -68,7 +69,7 @@ data class BookDetailScreenSpec constructor(
     ) {
         val navigator = LocalNavigator.currentOrThrow
         val vm: BookDetailViewModel =
-            getIViewModel(parameters = BookDetailViewModel.Param(bookId))
+            getIViewModel(parameters = { parametersOf(BookDetailViewModel.Param(bookId)) })
         val snackbarHostState = SnackBarListener(vm = vm)
         val state = vm
         val book = state.booksState.book

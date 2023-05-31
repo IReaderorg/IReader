@@ -5,7 +5,6 @@ import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import ireader.core.util.createICoroutineScope
-import ireader.i18n.R
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
@@ -20,32 +19,27 @@ import ireader.domain.usecases.download.DownloadUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.utils.NotificationManager
 import ireader.i18n.LocalizeHelper
+import ireader.i18n.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.instance
 
 class DownloaderService  constructor(
     private val context: Context,
     params: WorkerParameters,
-) : CoroutineWorker(context, params), DIAware {
+    private val bookRepo: BookRepository,
+private val chapterRepo: ChapterRepository,
+private val remoteUseCases: RemoteUseCases,
+private val localizeHelper: LocalizeHelper,
+private val extensions: CatalogStore,
+private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases ,
+private val defaultNotificationHelper: DefaultNotificationHelper,
+private val downloadUseCases: DownloadUseCases,
+private val downloadServiceState: DownloadServiceStateImpl,
+private val notificationManager : NotificationManager ,
+) : CoroutineWorker(context, params) {
 
-    override val di: DI = (this@DownloaderService.applicationContext as DIAware).di
-    private val bookRepo: BookRepository by instance()
-    private val chapterRepo: ChapterRepository by instance()
-    private val remoteUseCases: RemoteUseCases by instance()
-    private val localizeHelper: LocalizeHelper by instance()
-    private val extensions: CatalogStore by instance()
-    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases by instance()
-    private val defaultNotificationHelper: DefaultNotificationHelper by instance()
-    private val downloadUseCases: DownloadUseCases by instance()
-    private val downloadServiceState: DownloadServiceStateImpl by instance()
     private val downloadJob = Job()
-    private val notificationManager : NotificationManager  by instance()
-
     val scope = createICoroutineScope(Dispatchers.Main.immediate + downloadJob)
-
 
 
     override suspend fun doWork(): Result {

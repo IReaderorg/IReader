@@ -50,6 +50,7 @@ kotlin {
                 api(libs.ktor.contentNegotiation)
                 api(libs.ktor.contentNegotiation.kotlinx)
                 compileOnly(libs.jsoup)
+                compileOnly(libs.napier)
             }
         }
          val androidMain by getting {

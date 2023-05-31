@@ -87,7 +87,6 @@
 -dontwarn org.conscrypt.**
 -dontwarn org.bouncycastle.**
 -dontwarn org.openjsse.**
-
 ##---------------End: proguard configuration for Okhttp  ----------
 ##---------------Begin: proguard configuration for okio  ----------
 
@@ -99,6 +98,7 @@
 # Ktor
 -keep class io.ktor.** { *; }
 -keep class kotlinx.coroutines.** { *; }
+-keep class com.typesafe.** { *; }
 -dontwarn kotlinx.atomicfu.**
 -dontwarn io.netty.**
 -dontwarn com.typesafe.**
@@ -181,7 +181,6 @@
 -keepclassmembers class com.oracle.svm.core.configure.** {
     <methods>;
 }
-
 -keep class dalvik.system.*
 -keepclassmembers class dalvik.system.** {
     <methods>;
@@ -203,33 +202,17 @@
     <methods>;
 }
 
--keep class org.graalvm.nativeimage.*
--keepclassmembers class org.graalvm.nativeimage.** {
-    <methods>;
-}
--keep class sun.reflect.*
--keepclassmembers class sun.reflect.** {
-    <methods>;
-}
--dontwarn com.oracle.svm.core.annotate.**
--dontwarn com.oracle.svm.core.annotate.**
--dontwarn com.oracle.svm.core.annotate.**
+-keep class com.google.gson.reflect.TypeToken
+-keep class * extends com.google.gson.reflect.TypeToken
+-keep public class * implements java.lang.reflect.Type
+
 -dontwarn com.oracle.svm.core.annotate.**
 -dontwarn com.oracle.svm.core.configure.**
 -dontwarn dalvik.system.**
 -dontwarn java.beans.**
 -dontwarn java.beans.**
 -dontwarn java.lang.**
--dontwarn java.lang.**
--dontwarn java.lang.**
--dontwarn java.lang.management.**
--dontwarn java.lang.management.**
 -dontwarn javax.naming.**
--dontwarn javax.naming.**
--dontwarn javax.naming.**
--dontwarn javax.xml.stream.**
 -dontwarn javax.xml.stream.**
 -dontwarn org.graalvm.nativeimage.**
--dontwarn org.graalvm.nativeimage.hosted.**
--dontwarn org.graalvm.nativeimage.hosted.**
 -dontwarn sun.reflect.**

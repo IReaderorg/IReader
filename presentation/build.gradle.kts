@@ -46,9 +46,8 @@ kotlin {
                 implementation(libs.voyager.navigator)
                 implementation(libs.voyager.tab.navigator)
                 implementation(libs.voyager.transitions)
-                implementation(libs.voyager.kodein)
-                api(libs.kodein.core)
-                api(libs.kodein.compose)
+                api(libs.koin.core)
+                api(libs.koin.compose)
                 api(libs.imageLoader)
 
                 api(accompanist.gosyer.flowLayout)
@@ -66,7 +65,7 @@ kotlin {
         val androidMain by getting {
             dependsOn(jvmMain)
             dependencies {
-
+                api(libs.koin.android)
                 api(androidx.biometric)
                 api(libs.bundles.simplestorage)
                 api("androidx.core:core-splashscreen:1.0.0")

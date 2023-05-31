@@ -26,8 +26,8 @@ dependencies {
     implementation(compose.animationGraphics)
     implementation(compose.runtime)
     implementation(compose.ui)
-    implementation(libs.kodein.core)
-    implementation(libs.kodein.compose)
+    implementation(libs.koin.core)
+    implementation(libs.koin.compose)
     implementation(libs.voyager.navigator)
     implementation(kotlinx.coroutines.core)
 }

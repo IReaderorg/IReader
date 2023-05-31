@@ -1,38 +1,59 @@
 package org.ireader.app
 
 import android.app.Application
-import android.content.Context
 import android.os.Build
 import android.os.Looper
-import androidx.work.Configuration
 import com.seiko.imageloader.ImageLoader
 import com.seiko.imageloader.ImageLoaderFactory
 import ireader.core.http.WebViewUtil
 import ireader.data.di.DataModule
 import ireader.data.di.dataPlatformModule
 import ireader.data.di.repositoryInjectModule
-import ireader.domain.di.*
+import ireader.domain.di.CatalogModule
+import ireader.domain.di.DomainModule
+import ireader.domain.di.DomainServices
+import ireader.domain.di.UseCasesInject
+import ireader.domain.di.localModule
+import ireader.domain.di.preferencesInjectModule
 import ireader.presentation.core.di.PresentationModules
 import ireader.presentation.core.di.presentationPlatformModule
 import ireader.presentation.imageloader.coil.CoilLoaderFactory
 import org.ireader.app.di.AppModule
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.bindSingleton
-import org.kodein.di.instance
+import org.koin.android.ext.android.inject
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.androidx.workmanager.koin.workManagerFactory
+import org.koin.core.context.startKoin
+
+class MyApplication : Application(), ImageLoaderFactory {
 
 
-class MyApplication : Application(), ImageLoaderFactory, DIAware, Configuration.Provider {
+    override fun onCreate() {
+        super.onCreate()
+        startKoin {
+            // Log Koin into Android logger
+            androidLogger()
+            // Reference Android context
+            androidContext(this@MyApplication)
+            // Load modules
+            workManagerFactory()
+            modules(dataPlatformModule)
+            modules(AppModule)
+            modules(CatalogModule)
+            modules(DataModule)
+            modules(localModule)
+            modules(preferencesInjectModule)
+            modules(repositoryInjectModule)
+            modules(UseCasesInject)
+            modules(PresentationModules)
+            modules(DomainServices)
+            modules(DomainModule)
+            modules(presentationPlatformModule)
 
-    override val di: DI by DI.lazy(allowSilentOverride = true) {
-        bindSingleton<Context> { this@MyApplication }
-        bindSingleton<Application> { this@MyApplication }
-        importAll(dataPlatformModule,AppModule, CatalogModule, DataModule, localModule, preferencesInjectModule,
-            repositoryInjectModule, UseCasesInject, PresentationModules,DomainServices,DomainModule,presentationPlatformModule)
-
+        }
     }
 
-    val coil: CoilLoaderFactory by instance()
+    val coil: CoilLoaderFactory by inject()
 
 
     override fun newImageLoader(): ImageLoader {
@@ -58,11 +79,5 @@ class MyApplication : Application(), ImageLoaderFactory, DIAware, Configuration.
             }
         }
         return super.getPackageName()
-    }
-
-    override fun getWorkManagerConfiguration(): Configuration {
-        return Configuration.Builder()
-            .setMinimumLoggingLevel(android.util.Log.ERROR)
-            .build();
     }
 }

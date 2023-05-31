@@ -9,17 +9,14 @@ import ireader.domain.utils.extensions.launchIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.instance
 
-actual class StartExtensionManagerService(override val di: DI): DIAware {
+actual class StartExtensionManagerService(
+    private val repository: CatalogRemoteRepository,
+    private val getInstalledCatalog: GetInstalledCatalog,
+    private val installCatalog: InstallCatalog,
+    private val notificationManager: NotificationManager
+) {
 
-    private val repository: CatalogRemoteRepository by instance()
-    val getInstalledCatalog: GetInstalledCatalog by instance()
-    private val installCatalog: InstallCatalog by instance()
-
-    private val notificationManager: NotificationManager by instance()
     private val workerJob = Job()
 
     val scope = CoroutineScope(Dispatchers.Main.immediate + workerJob)

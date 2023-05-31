@@ -22,11 +22,16 @@ darklaf = "3.0.2"
 # Ksp
 ksp = "1.8.0-1.0.9"
 # Image Loader
-image-loader = "1.2.10"
+image-loader = "1.4.4"
 # Dependency Injection
 kodein = "7.19.0"
+koinAnnotation = "1.2.0"
+koin = "3.4.0"
+koinAndroid = "3.4.0"
+koinAndroidCompose = "3.4.4"
+koinCompose = "1.0.1"
 # Network
-ktor = "2.2.4"
+ktor = "2.3.0"
 ktorfit = "1.0.0-beta16"
 # Logging
 slf4j = "2.0.3"
@@ -47,7 +52,7 @@ immutableCollections = "0.3.5"
 kds = "3.4.0"
 
 # Localization
-moko = "0.21.2"
+moko = "0.22.3"
 # BuildConfigs
 buildconfig = "3.1.0"
 buildkonfig = "0.13.3"
@@ -61,8 +66,9 @@ okhttp = "5.0.0-alpha.10"
 coil_version = "2.2.1"
 jsoup = "1.15.2"
 media3="1.0.0"
-dex2jar = "v60"
+dex2jar = "v63"
 htmlunit = "3.0.0"
+napier="2.6.1"
 
 [libraries]
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
@@ -85,7 +91,7 @@ htmlUnit-android = "net.sourceforge.htmlunit:htmlunit-android:2.63.0-SNAPSHOT"
 voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
 voyager-tab-navigator = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyager" }
 voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
-voyager-kodein = { module = "cafe.adriel.voyager:voyager-kodein", version.ref = "voyager" }
+voyager-koin = { module = "cafe.adriel.voyager:voyager-koin", version.ref = "voyager" }
 
 
 storage = { module = "com.anggrayudi:storage", version = "1.5.1" }
@@ -122,6 +128,7 @@ jsoup = { module =  "org.jsoup:jsoup", version.ref = "jsoup" }
 
 tinylog-impl = { module = "org.tinylog:tinylog-impl", version.ref = "tinylog" }
 tinylog-api = { module = "org.tinylog:tinylog-api", version.ref = "tinylog" }
+napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 
 
 # Inject
@@ -165,6 +172,15 @@ imageLoader = { module = "io.github.qdsfdhvh:image-loader", version.ref = "image
 imageLoader-io = { module = "io.github.qdsfdhvh:image-loader-extension-imageio", version.ref = "image-loader" }
 
 htmlunit = { module = "org.htmlunit:htmlunit", version.ref = "htmlunit" }
+
+koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koinAnnotation" }
+koin-kspCompiler = { module = "io.insert-koin:koin-ksp-compiler", version.ref = "koinAnnotation" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndroid" }
+koin-workManager = { module = "io.insert-koin:koin-androidx-workmanager", version.ref = "koin" }
+koin-androidCompose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinAndroidCompose" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koinCompose" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
 
 [bundles]
 simplestorage = ["storage", "documentfile"]

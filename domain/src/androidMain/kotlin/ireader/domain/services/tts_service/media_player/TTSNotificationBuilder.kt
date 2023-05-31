@@ -15,18 +15,18 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.media.session.MediaButtonReceiver
-import ireader.i18n.R
 import ireader.domain.notification.NotificationsIds
 import ireader.domain.notification.NotificationsIds.CHANNEL_TTS
 import ireader.domain.notification.legacyFlags
 import ireader.domain.notification.setLargeIcon
 import ireader.domain.services.tts_service.Player
-import ireader.domain.services.tts_service.media_player.TTSService.Companion.ACTION_CANCEL
 import ireader.domain.utils.extensions.launchMainActivityIntent
 import ireader.i18n.Args
 import ireader.i18n.LocalizeHelper
+import ireader.i18n.R
 import ireader.i18n.SHORTCUTS
 import ireader.i18n.resources.MR
+
 /**
  * Helper class to encapsulate code for building notifications.
  */
@@ -120,7 +120,7 @@ class TTSNotificationBuilder constructor(
                 context,
                 TTSService::class.java
             ).apply {
-                action = ACTION_CANCEL
+                action = TTSService.ACTION_CANCEL
             },
             pendingIntentFlags
         )

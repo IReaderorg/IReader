@@ -22,7 +22,7 @@ import ireader.presentation.ui.video.VideoPlayerBottomSheet
 import ireader.presentation.ui.video.VideoPresenter
 import ireader.presentation.ui.video.VideoScreenViewModel
 import kotlinx.coroutines.launch
-
+import org.koin.core.parameter.parametersOf
 
 
 actual data class VideoScreenSpec actual constructor(val chapterId: Long) : VoyagerScreen() {
@@ -36,7 +36,7 @@ actual data class VideoScreenSpec actual constructor(val chapterId: Long) : Voya
         val navigator = LocalNavigator.currentOrThrow
 
         val vm: VideoScreenViewModel =
-            getIViewModel(parameters = VideoScreenViewModel.Param(chapterId))
+            getIViewModel(parameters = { parametersOf(VideoScreenViewModel.Param(chapterId))})
 
         val state = vm.mediaState
         DisposableEffect(key1 = true) {

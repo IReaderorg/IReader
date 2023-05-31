@@ -1,5 +1,6 @@
 package ireader.data.di
 
-import org.kodein.di.DI
 
-expect val dataPlatformModule : DI.Module
+import org.koin.core.module.Module
+
+expect val dataPlatformModule : Module

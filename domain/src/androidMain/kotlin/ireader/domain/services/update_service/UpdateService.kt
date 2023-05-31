@@ -7,7 +7,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import ireader.i18n.R
 import ireader.domain.models.update_service_models.Release
 import ireader.domain.models.update_service_models.Version
 import ireader.domain.notification.NotificationsIds.CHANNEL_APP_UPDATE
@@ -15,25 +14,19 @@ import ireader.domain.notification.NotificationsIds.ID_APP_UPDATER
 import ireader.domain.notification.legacyFlags
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.utils.NotificationManager
+import ireader.i18n.R
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.instance
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 class UpdateService  constructor(
     private val context: Context,
     params: WorkerParameters,
-) : CoroutineWorker(context, params),DIAware {
-
-    override val di: DI = (context.applicationContext as DIAware).di
-    private val appPreferences: AppPreferences by instance()
-    private val api: UpdateApi by instance()
-    private val notificationManager: NotificationManager by instance()
-
-
+    private val appPreferences: AppPreferences,
+private val api: UpdateApi ,
+private val notificationManager: NotificationManager,
+) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
         val lastCheck = Instant.fromEpochMilliseconds(appPreferences.lastUpdateCheck().get())
         val now = Clock.System.now()

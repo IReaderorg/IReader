@@ -8,19 +8,18 @@ import ireader.data.core.createDatabase
 import ireader.domain.catalogs.interactor.SyncRemoteCatalogs
 import ireader.domain.data.repository.CatalogSourceRepository
 import okio.FileSystem
-import org.kodein.di.DI
-import org.kodein.di.bindSingleton
-import org.kodein.di.instance
 
-val DataModule = DI.Module("databaseModule") {
+import org.koin.dsl.module
 
-
-    bindSingleton<Database> { createDatabase(instance()) }
-
-    bindSingleton<FileSystem> { FileSystem.SYSTEM }
+val DataModule = module {
 
 
-    bindSingleton<SyncRemoteCatalogs> { SyncRemoteCatalogs(instance(), CatalogGithubApi(instance(),instance()),instance()) }
+    single<Database> { createDatabase(get()) }
 
-    bindSingleton<CatalogSourceRepository> { CatalogSourceRepositoryImpl(instance()) }
+    single<FileSystem> { FileSystem.SYSTEM }
+
+
+    single<SyncRemoteCatalogs> { SyncRemoteCatalogs(get(), CatalogGithubApi(get(),get()),get()) }
+
+    single<CatalogSourceRepository> { CatalogSourceRepositoryImpl(get()) }
 }

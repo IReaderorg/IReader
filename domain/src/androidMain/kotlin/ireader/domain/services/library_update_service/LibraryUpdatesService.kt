@@ -5,34 +5,24 @@ import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import ireader.core.log.Log
-import ireader.i18n.R
 import ireader.domain.catalogs.interactor.GetLocalCatalog
-import ireader.domain.models.entities.Chapter
 import ireader.domain.notification.NotificationsIds
-import ireader.domain.notification.NotificationsIds.ID_LIBRARY_PROGRESS
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.utils.NotificationManager
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.instance
+import ireader.i18n.R
 import kotlin.time.ExperimentalTime
 
 class LibraryUpdatesService(
     private val context: Context,
     params: WorkerParameters,
-) : CoroutineWorker(context, params), DIAware {
-    override val di: DI = (context.applicationContext as DIAware).di
+    private val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases ,
+private val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase ,
+private val remoteUseCases: RemoteUseCases,
+private val getLocalCatalog: GetLocalCatalog ,
+private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
+private val notificationManager: NotificationManager,
+) : CoroutineWorker(context, params) {
 
-    private val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases by instance()
-    private val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase by instance()
-    private val remoteUseCases: RemoteUseCases by instance()
-    private val getLocalCatalog: GetLocalCatalog by instance()
-    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases by instance()
-    private val notificationManager: NotificationManager by instance()
     companion object {
         const val LibraryUpdateTag = "Library_Update_SERVICE"
         const val FORCE_UPDATE = "force_update"

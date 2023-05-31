@@ -8,6 +8,7 @@ import ireader.domain.preferences.prefs.PlatformUiPreferences
 import ireader.domain.usecases.epub.EpubCreator
 import ireader.domain.usecases.epub.ImportEpub
 import ireader.domain.usecases.file.DesktopFileSaver
+import ireader.domain.usecases.file.FileSaver
 import ireader.domain.usecases.files.DesktopGetSimpleStorage
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.usecases.reader.ScreenAlwaysOn
@@ -17,46 +18,48 @@ import ireader.domain.usecases.services.StartDownloadServicesUseCase
 import ireader.domain.usecases.services.StartExtensionManagerService
 import ireader.domain.usecases.services.StartLibraryUpdateServicesUseCase
 import ireader.domain.usecases.services.StartTTSServicesUseCase
+import ireader.domain.utils.NotificationManager
 import ireader.i18n.LocalizeHelper
-import org.kodein.di.DI
-import org.kodein.di.bindProvider
-import org.kodein.di.bindSingleton
-import org.kodein.di.instance
-import org.kodein.di.new
+import org.koin.core.module.Module
+import org.koin.dsl.module
 
 
-actual val DomainModule: DI.Module = org.kodein.di.DI.Module("domainModulePlatform") {
-    bindProvider<ScreenAlwaysOn> {
+actual val DomainModule: Module = module {
+    factory <ScreenAlwaysOn> {
         ScreenAlwaysOnImpl()
     }
-    bindSingleton {
+    single<FileSaver> {
        DesktopFileSaver()
     }
-    bindSingleton<ImportEpub> { ImportEpub(instance(),) }
-    bindSingleton {
+    single<ImportEpub> { ImportEpub(get(),) }
+    single {
         DesktopGetSimpleStorage()
     }
-    bindSingleton<GetSimpleStorage> {
+    factory  {
+        NotificationManager(
+        )
+    }
+    single<GetSimpleStorage> {
         DesktopGetSimpleStorage()
     }
-    bindSingleton<PlatformUiPreferences> {
-        new(::DesktopUiPreferences)
+    single<PlatformUiPreferences> {
+        DesktopUiPreferences(get())
     }
-    bindSingleton<StartExtensionManagerService> {
-        StartExtensionManagerService(di)
+    single<StartExtensionManagerService> {
+        StartExtensionManagerService(get(),get(),get(),get())
     }
-    bindSingleton<PreferenceStore> {
+    single<PreferenceStore> {
         JvmPreferenceStore("ireader")
     }
-    bindSingleton { LocalizeHelper() }
+    single { LocalizeHelper() }
 
-    bindSingleton<ServiceUseCases> {
+    single<ServiceUseCases> {
         ServiceUseCases(
-            startDownloadServicesUseCase = StartDownloadServicesUseCase(di),
-            startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(di),
+            startDownloadServicesUseCase = StartDownloadServicesUseCase(get(),get(),get(),get(),get(),get(),get(),get(),get()),
+            startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(get(),get(),get(),get(),get(),get()),
             startTTSServicesUseCase = StartTTSServicesUseCase(),
         )
     }
-    bindSingleton<HttpClients> { HttpClients(JvmPreferenceStore("cookies")) }
-    bindSingleton<EpubCreator> { EpubCreator() }
+    single<HttpClients> { HttpClients(JvmPreferenceStore("cookies")) }
+    single<EpubCreator> { EpubCreator() }
 }

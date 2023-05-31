@@ -1,5 +1,3 @@
-
-
 buildscript {
     dependencies {
         classpath(libs.gradle.tools)

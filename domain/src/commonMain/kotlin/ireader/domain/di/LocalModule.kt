@@ -1,17 +1,16 @@
 package ireader.domain.di
 
 
-import io.ktor.client.plugins.cookies.*
+import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
+import io.ktor.client.plugins.cookies.CookiesStorage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import org.kodein.di.DI
-import org.kodein.di.bindProvider
-import org.kodein.di.bindSingleton
+import org.koin.dsl.module
 
-val localModule = DI.Module("localModule") {
+val localModule = module {
 
-    bindSingleton<CookiesStorage> { AcceptAllCookiesStorage() }
+    single<CookiesStorage> { AcceptAllCookiesStorage() }
 
-    bindProvider<CoroutineScope> { CoroutineScope(Dispatchers.IO + SupervisorJob()) }
+    factory <CoroutineScope> { CoroutineScope(Dispatchers.IO + SupervisorJob()) }
 }

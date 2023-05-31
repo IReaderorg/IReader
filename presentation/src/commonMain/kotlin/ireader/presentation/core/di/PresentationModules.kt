@@ -34,56 +34,52 @@ import ireader.presentation.ui.settings.font_screens.FontScreenViewModel
 import ireader.presentation.ui.settings.general.GeneralSettingScreenViewModel
 import ireader.presentation.ui.settings.reader.ReaderSettingScreenViewModel
 import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
-import org.kodein.di.DI
-import org.kodein.di.bindFactory
-import org.kodein.di.bindProvider
-import org.kodein.di.bindSingleton
-import org.kodein.di.instance
+import org.koin.dsl.module
 
-val PresentationModules = DI.Module("presentationModule") {
+val PresentationModules = module {
 
-    bindSingleton { BooksState() }
-    bindSingleton<HistoryStateImpl> { HistoryStateImpl() }
-    bindSingleton<LibraryStateImpl> { LibraryStateImpl() }
-    bindSingleton<CatalogsStateImpl> { CatalogsStateImpl() }
-    bindSingleton<UpdateStateImpl> { UpdateStateImpl() }
-    bindProvider  { BackupScreenViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance()) }
-    bindProvider<ExploreStateImpl> { ExploreStateImpl() }
-    bindProvider<GlobalSearchStateImpl> { GlobalSearchStateImpl() }
-    bindProvider  { AdvanceSettingViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance()) }
-    bindProvider<DownloadStateImpl> { DownloadStateImpl() }
-    bindProvider<FontScreenStateImpl> { FontScreenStateImpl() }
+    single { BooksState() }
+    single<HistoryStateImpl> { HistoryStateImpl() }
+    single<LibraryStateImpl> { LibraryStateImpl() }
+    single<CatalogsStateImpl> { CatalogsStateImpl() }
+    single<UpdateStateImpl> { UpdateStateImpl() }
+    factory   { BackupScreenViewModel(get(),get(),get(),get(),get(),get(),get()) }
+    factory <ExploreStateImpl> { ExploreStateImpl() }
+    factory <GlobalSearchStateImpl> { GlobalSearchStateImpl() }
+    factory   { AdvanceSettingViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get()) }
+    factory <DownloadStateImpl> { DownloadStateImpl() }
+    factory <FontScreenStateImpl> { FontScreenStateImpl() }
 
-    bindProvider { ScreenContentViewModel(instance()) }
-    bindSingleton { AppThemeViewModel(instance(), instance(), instance()) }
+    factory  { ScreenContentViewModel(get()) }
+    single<AppThemeViewModel> { AppThemeViewModel(get(), get(), get()) }
 
-    bindFactory<ExploreViewModel.Param, ExploreViewModel> { ExploreViewModel(instance(), instance(), instance(), instance(),instance(), it, instance(),instance(),instance()) }
-    bindProvider { HistoryViewModel(instance(), instance(), instance()) }
-    bindProvider { LibraryViewModel(instance(), instance(), instance(), instance(), instance(), instance(), instance(), instance(), instance(), instance(), instance()) }
-    bindProvider { ExtensionViewModel(instance(), instance(), instance(), instance(), instance(), instance(), instance(), instance(), instance()) }
-    bindFactory<GlobalSearchViewModel.Param, GlobalSearchViewModel> { GlobalSearchViewModel(instance(), instance(), instance(), instance(), it) }
+    factory<ExploreViewModel> { ExploreViewModel(get(), get(), get(), get(),get(), get(), get(),get(),get()) }
+    factory  { HistoryViewModel(get(), get(), get()) }
+    factory  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory<GlobalSearchViewModel> { GlobalSearchViewModel(get(), get(), get(), get(), get()) }
 
-    bindProvider { UpdatesViewModel(instance(), instance(), instance(), instance(), instance(), instance()) }
+    factory  { UpdatesViewModel(get(), get(), get(), get(), get(), get()) }
 
-    bindFactory< BookDetailViewModel.Param, BookDetailViewModel>  { BookDetailViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),it,instance(),instance()) }
-    bindProvider { MainSettingScreenViewModel(instance()) }
-    bindProvider { AppearanceViewModel(instance(), instance()) }
+    factory<BookDetailViewModel>  { BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
+    factory  { MainSettingScreenViewModel(get()) }
+    factory  { AppearanceViewModel(get(), get()) }
 
-    bindProvider { CategoryScreenViewModel(instance(), instance(), instance()) }
-    bindProvider { DownloaderViewModel(instance(), instance(), instance(), instance()) }
-    bindProvider { FontScreenViewModel(instance(), instance(), instance(), instance()) }
-    bindProvider { GeneralSettingScreenViewModel(instance(), instance(), instance()) }
-    bindProvider { ReaderSettingScreenViewModel(instance(), instance(), instance()) }
-    bindProvider { SourceRepositoryViewModel(instance(), instance()) }
+    factory  { CategoryScreenViewModel(get(), get(), get()) }
+    factory  { DownloaderViewModel(get(), get(), get(), get()) }
+    factory  { FontScreenViewModel(get(), get(), get(), get()) }
+    factory  { GeneralSettingScreenViewModel(get(), get(), get()) }
+    factory  { ReaderSettingScreenViewModel(get(), get(), get()) }
+    factory  { SourceRepositoryViewModel(get(), get()) }
 
 
-    bindProvider<ChapterStateImpl> { ChapterStateImpl() }
-    bindProvider<DetailStateImpl> { DetailStateImpl() }
+    factory <ChapterStateImpl> { ChapterStateImpl() }
+    factory <DetailStateImpl> { DetailStateImpl() }
 
-    bindProvider<ReaderScreenStateImpl> { ReaderScreenStateImpl() }
-    bindProvider<ReaderScreenPreferencesStateImpl> { ReaderScreenPreferencesStateImpl() }
+    factory <ReaderScreenStateImpl> { ReaderScreenStateImpl() }
+    factory <ReaderScreenPreferencesStateImpl> { ReaderScreenPreferencesStateImpl() }
 
-    bindFactory< ReaderScreenViewModel.Param, ReaderScreenViewModel>  { ReaderScreenViewModel(instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),instance(),it,instance(),) }
+    factory< ReaderScreenViewModel>  { ReaderScreenViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),) }
 
 
 }

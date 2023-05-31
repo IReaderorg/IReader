@@ -34,6 +34,7 @@ import ireader.presentation.ui.home.explore.FilterBottomSheet
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
 import kotlinx.coroutines.launch
 import okhttp3.Headers
+import org.koin.core.parameter.parametersOf
 
 
 @OptIn(
@@ -51,8 +52,8 @@ data class ExploreScreenSpec(
     @Composable
     override fun Content() {
         val vm: ExploreViewModel =
-                getIViewModel(parameters =
-                ExploreViewModel.Param(sourceId, query)
+                getIViewModel(parameters = { parametersOf(ExploreViewModel.Param(sourceId, query)) }
+
                 )
         val navigator = LocalNavigator.currentOrThrow
         val source = vm.source

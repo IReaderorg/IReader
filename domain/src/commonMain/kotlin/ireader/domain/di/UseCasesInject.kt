@@ -17,7 +17,12 @@ import ireader.domain.usecases.local.book_usecases.FindAllInLibraryBooks
 import ireader.domain.usecases.local.book_usecases.FindBookById
 import ireader.domain.usecases.local.book_usecases.SubscribeBookById
 import ireader.domain.usecases.local.book_usecases.SubscribeInLibraryBooks
-import ireader.domain.usecases.local.chapter_usecases.*
+import ireader.domain.usecases.local.chapter_usecases.FindAllInLibraryChapters
+import ireader.domain.usecases.local.chapter_usecases.FindChapterById
+import ireader.domain.usecases.local.chapter_usecases.FindChaptersByBookId
+import ireader.domain.usecases.local.chapter_usecases.SubscribeChapterById
+import ireader.domain.usecases.local.chapter_usecases.SubscribeChaptersByBookId
+import ireader.domain.usecases.local.chapter_usecases.UpdateLastReadTime
 import ireader.domain.usecases.local.delete_usecases.book.DeleteAllBooks
 import ireader.domain.usecases.local.delete_usecases.book.DeleteBookById
 import ireader.domain.usecases.local.delete_usecases.book.DeleteNotInLibraryBooks
@@ -26,118 +31,142 @@ import ireader.domain.usecases.local.delete_usecases.chapter.DeleteAllChapters
 import ireader.domain.usecases.local.delete_usecases.chapter.DeleteChapterByChapter
 import ireader.domain.usecases.local.delete_usecases.chapter.DeleteChapters
 import ireader.domain.usecases.local.delete_usecases.chapter.DeleteChaptersByBookId
-import ireader.domain.usecases.local.insert_usecases.*
-import ireader.domain.usecases.preferences.reader_preferences.*
+import ireader.domain.usecases.local.insert_usecases.InsertBook
+import ireader.domain.usecases.local.insert_usecases.InsertBookAndChapters
+import ireader.domain.usecases.local.insert_usecases.InsertBooks
+import ireader.domain.usecases.local.insert_usecases.InsertChapter
+import ireader.domain.usecases.local.insert_usecases.InsertChapters
+import ireader.domain.usecases.local.insert_usecases.UpdateBook
+import ireader.domain.usecases.preferences.reader_preferences.AutoScrollMode
+import ireader.domain.usecases.preferences.reader_preferences.BackgroundColorUseCase
+import ireader.domain.usecases.preferences.reader_preferences.BrightnessStateUseCase
+import ireader.domain.usecases.preferences.reader_preferences.BrowseLayoutTypeUseCase
+import ireader.domain.usecases.preferences.reader_preferences.BrowseScreenPrefUseCase
+import ireader.domain.usecases.preferences.reader_preferences.FontHeightUseCase
+import ireader.domain.usecases.preferences.reader_preferences.FontSizeStateUseCase
+import ireader.domain.usecases.preferences.reader_preferences.ImmersiveModeUseCase
+import ireader.domain.usecases.preferences.reader_preferences.LibraryLayoutTypeUseCase
+import ireader.domain.usecases.preferences.reader_preferences.ParagraphDistanceUseCase
+import ireader.domain.usecases.preferences.reader_preferences.ParagraphIndentUseCase
+import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
+import ireader.domain.usecases.preferences.reader_preferences.ScrollIndicatorUseCase
+import ireader.domain.usecases.preferences.reader_preferences.ScrollModeUseCase
+import ireader.domain.usecases.preferences.reader_preferences.SortersDescUseCase
+import ireader.domain.usecases.preferences.reader_preferences.SortersUseCase
+import ireader.domain.usecases.preferences.reader_preferences.TextAlignmentUseCase
+import ireader.domain.usecases.preferences.reader_preferences.TextColorUseCase
 import ireader.domain.usecases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
-import ireader.domain.usecases.remote.*
+import ireader.domain.usecases.remote.GetBookDetail
+import ireader.domain.usecases.remote.GetRemoteBooksUseCase
+import ireader.domain.usecases.remote.GetRemoteChapters
+import ireader.domain.usecases.remote.GetRemoteReadingContent
+import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.updates.DeleteAllUpdates
 import ireader.domain.usecases.updates.SubscribeUpdates
 import ireader.domain.usecases.updates.UpdateUseCases
-import org.kodein.di.DI
-import org.kodein.di.bindSingleton
-import org.kodein.di.instance
+import org.koin.dsl.module
 
 
-val UseCasesInject = DI.Module("usecaseModule") {
+val UseCasesInject = module {
 
-    bindSingleton<RemoteUseCases> { RemoteUseCases(
+    single<RemoteUseCases> { RemoteUseCases(
         getBookDetail = GetBookDetail(),
         getRemoteBooks = GetRemoteBooksUseCase(),
         getRemoteChapters = GetRemoteChapters(),
         getRemoteReadingContent = GetRemoteReadingContent(),
     ) }
-    bindSingleton<ireader.domain.usecases.local.LocalInsertUseCases> {
+    single<ireader.domain.usecases.local.LocalInsertUseCases> {
         ireader.domain.usecases.local.LocalInsertUseCases(
-            insertBook = InsertBook(instance()),
-            insertBookAndChapters = InsertBookAndChapters(instance()),
-            insertBooks = InsertBooks(instance()),
-            insertChapter = InsertChapter(instance()),
-            insertChapters = InsertChapters(instance()),
-            updateBook = UpdateBook(instance())
+            insertBook = InsertBook(get()),
+            insertBookAndChapters = InsertBookAndChapters(get()),
+            insertBooks = InsertBooks(get()),
+            insertChapter = InsertChapter(get()),
+            insertChapters = InsertChapters(get()),
+            updateBook = UpdateBook(get())
         )
     }
-    bindSingleton<ireader.domain.usecases.local.LocalGetBookUseCases> {
+    single<ireader.domain.usecases.local.LocalGetBookUseCases> {
         ireader.domain.usecases.local.LocalGetBookUseCases(
-            findAllInLibraryBooks = FindAllInLibraryBooks(instance()),
-            findBookById = FindBookById(instance()),
-            findBookByKey = ireader.domain.usecases.local.FindBookByKey(instance()),
-            findBooksByKey = ireader.domain.usecases.local.FindBooksByKey(instance()),
-            subscribeBookById = SubscribeBookById(instance()),
-            subscribeBooksByKey = ireader.domain.usecases.local.SubscribeBooksByKey(instance()),
-            SubscribeInLibraryBooks = SubscribeInLibraryBooks(instance()),
+            findAllInLibraryBooks = FindAllInLibraryBooks(get()),
+            findBookById = FindBookById(get()),
+            findBookByKey = ireader.domain.usecases.local.FindBookByKey(get()),
+            findBooksByKey = ireader.domain.usecases.local.FindBooksByKey(get()),
+            subscribeBookById = SubscribeBookById(get()),
+            subscribeBooksByKey = ireader.domain.usecases.local.SubscribeBooksByKey(get()),
+            SubscribeInLibraryBooks = SubscribeInLibraryBooks(get()),
         )
     }
-    bindSingleton<ireader.domain.usecases.local.LocalGetChapterUseCase> {
+    single<ireader.domain.usecases.local.LocalGetChapterUseCase> {
         ireader.domain.usecases.local.LocalGetChapterUseCase(
-            findAllInLibraryChapters = FindAllInLibraryChapters(instance()),
-            findChapterById = FindChapterById(instance()),
-            findChaptersByBookId = FindChaptersByBookId(instance()),
-            subscribeChaptersByBookId = SubscribeChaptersByBookId(instance()),
+            findAllInLibraryChapters = FindAllInLibraryChapters(get()),
+            findChapterById = FindChapterById(get()),
+            findChaptersByBookId = FindChaptersByBookId(get()),
+            subscribeChaptersByBookId = SubscribeChaptersByBookId(get()),
             updateLastReadTime = UpdateLastReadTime(
-                insertUseCases = instance(),
-                historyUseCase = instance(),
-                uiPreferences = instance()
+                insertUseCases = get(),
+                historyUseCase = get(),
+                uiPreferences = get()
             ),
-            subscribeChapterById = SubscribeChapterById(instance())
+            subscribeChapterById = SubscribeChapterById(get())
         )
     }
-    bindSingleton<ireader.domain.usecases.local.DeleteUseCase> {
+    single<ireader.domain.usecases.local.DeleteUseCase> {
         ireader.domain.usecases.local.DeleteUseCase(
-            deleteAllBook = DeleteAllBooks(instance()),
-            deleteAllChapters = DeleteAllChapters(instance()),
-            deleteBookById = DeleteBookById(instance()),
-            deleteChapterByChapter = DeleteChapterByChapter(instance()),
-            deleteChapters = DeleteChapters(instance()),
-            deleteChaptersByBookId = DeleteChaptersByBookId(instance()),
+            deleteAllBook = DeleteAllBooks(get()),
+            deleteAllChapters = DeleteAllChapters(get()),
+            deleteBookById = DeleteBookById(get()),
+            deleteChapterByChapter = DeleteChapterByChapter(get()),
+            deleteChapters = DeleteChapters(get()),
+            deleteChaptersByBookId = DeleteChaptersByBookId(get()),
             unFavoriteBook = UnFavoriteBook(
-                instance(),
-                bookCategoryRepository = instance(),
-                instance()
+                get(),
+                bookCategoryRepository = get(),
+                get()
             ),
-            deleteNotInLibraryBooks = DeleteNotInLibraryBooks(instance())
+            deleteNotInLibraryBooks = DeleteNotInLibraryBooks(get())
         )
     }
 
-    bindSingleton<LibraryScreenPrefUseCases> { LibraryScreenPrefUseCases(
-        libraryLayoutTypeUseCase = LibraryLayoutTypeUseCase(instance(), instance()),
-        sortersDescUseCase = SortersDescUseCase(instance()),
-        sortersUseCase = SortersUseCase(instance())
+    single<LibraryScreenPrefUseCases> { LibraryScreenPrefUseCases(
+        libraryLayoutTypeUseCase = LibraryLayoutTypeUseCase(get(), get()),
+        sortersDescUseCase = SortersDescUseCase(get()),
+        sortersUseCase = SortersUseCase(get())
     ) }
-    bindSingleton<ReaderPrefUseCases> { ReaderPrefUseCases(
-        autoScrollMode = AutoScrollMode(instance()),
-        brightnessStateUseCase = BrightnessStateUseCase(instance()),
-        fontHeightUseCase = FontHeightUseCase(instance()),
-        fontSizeStateUseCase = FontSizeStateUseCase(instance()),
-        immersiveModeUseCase = ImmersiveModeUseCase(instance()),
-        paragraphDistanceUseCase = ParagraphDistanceUseCase(instance()),
-        paragraphIndentUseCase = ParagraphIndentUseCase(instance()),
-        scrollIndicatorUseCase = ScrollIndicatorUseCase(instance()),
-        scrollModeUseCase = ScrollModeUseCase(instance()),
-        textColorUseCase = TextColorUseCase(instance()),
-        textAlignmentUseCase = TextAlignmentUseCase(instance()),
-        backgroundColorUseCase = BackgroundColorUseCase(instance())
+    single<ReaderPrefUseCases> { ReaderPrefUseCases(
+        autoScrollMode = AutoScrollMode(get()),
+        brightnessStateUseCase = BrightnessStateUseCase(get()),
+        fontHeightUseCase = FontHeightUseCase(get()),
+        fontSizeStateUseCase = FontSizeStateUseCase(get()),
+        immersiveModeUseCase = ImmersiveModeUseCase(get()),
+        paragraphDistanceUseCase = ParagraphDistanceUseCase(get()),
+        paragraphIndentUseCase = ParagraphIndentUseCase(get()),
+        scrollIndicatorUseCase = ScrollIndicatorUseCase(get()),
+        scrollModeUseCase = ScrollModeUseCase(get()),
+        textColorUseCase = TextColorUseCase(get()),
+        textAlignmentUseCase = TextAlignmentUseCase(get()),
+        backgroundColorUseCase = BackgroundColorUseCase(get())
     ) }
-    bindSingleton<BrowseScreenPrefUseCase> { BrowseScreenPrefUseCase(
-        browseLayoutTypeUseCase = BrowseLayoutTypeUseCase(instance())
+    single<BrowseScreenPrefUseCase> { BrowseScreenPrefUseCase(
+        browseLayoutTypeUseCase = BrowseLayoutTypeUseCase(get())
     ) }
-    bindSingleton<HistoryUseCase> { HistoryUseCase(
-        instance()
+    single<HistoryUseCase> { HistoryUseCase(
+        get()
     ) }
-    bindSingleton<UpdateUseCases> { UpdateUseCases(
-        subscribeUpdates = SubscribeUpdates(instance()),
-        deleteAllUpdates = DeleteAllUpdates(instance()),
+    single<UpdateUseCases> { UpdateUseCases(
+        subscribeUpdates = SubscribeUpdates(get()),
+        deleteAllUpdates = DeleteAllUpdates(get()),
     ) }
 
-    bindSingleton<DownloadUseCases> {
+    single<DownloadUseCases> {
         DownloadUseCases(
-        deleteAllSavedDownload = DeleteAllSavedDownload(instance()),
-        deleteSavedDownload = DeleteSavedDownload(instance()),
-        deleteSavedDownloadByBookId = DeleteSavedDownloadByBookId(instance()),
-        deleteSavedDownloads = DeleteSavedDownloads(instance()),
-        findAllDownloadsUseCase = FindAllDownloadsUseCase(instance()),
-        findDownloadsUseCase = FindDownloadsUseCase(instance()),
-        insertDownload = InsertDownload(instance()),
-        insertDownloads = InsertDownloads(instance()),
-        subscribeDownloadsUseCase = SubscribeDownloadsUseCase(instance()),
+        deleteAllSavedDownload = DeleteAllSavedDownload(get()),
+        deleteSavedDownload = DeleteSavedDownload(get()),
+        deleteSavedDownloadByBookId = DeleteSavedDownloadByBookId(get()),
+        deleteSavedDownloads = DeleteSavedDownloads(get()),
+        findAllDownloadsUseCase = FindAllDownloadsUseCase(get()),
+        findDownloadsUseCase = FindDownloadsUseCase(get()),
+        insertDownload = InsertDownload(get()),
+        insertDownloads = InsertDownloads(get()),
+        subscribeDownloadsUseCase = SubscribeDownloadsUseCase(get()),
     ) }
 }

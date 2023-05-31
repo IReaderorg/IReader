@@ -8,17 +8,17 @@ import ireader.domain.utils.extensions.launchIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.instance
 
-actual class StartLibraryUpdateServicesUseCase(override val di: DI) : DIAware {
-    private val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases by instance()
-    private val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase by instance()
-    private val remoteUseCases: RemoteUseCases by instance()
-    private val getLocalCatalog: GetLocalCatalog by instance()
-    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases by instance()
-    private val notificationManager: NotificationManager by instance()
+
+actual class StartLibraryUpdateServicesUseCase(
+    private val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases ,
+private val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase ,
+private val remoteUseCases: RemoteUseCases ,
+private val getLocalCatalog: GetLocalCatalog ,
+private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases ,
+private val notificationManager: NotificationManager,
+)  {
+
     private val workerJob = Job()
     val scope = CoroutineScope(Dispatchers.Main.immediate + workerJob)
     actual fun start(forceUpdate: Boolean) {

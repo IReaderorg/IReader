@@ -4,35 +4,28 @@ import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import ireader.i18n.R
 import ireader.domain.catalogs.interactor.GetInstalledCatalog
 import ireader.domain.catalogs.interactor.InstallCatalog
 import ireader.domain.catalogs.service.CatalogRemoteRepository
 import ireader.domain.notification.NotificationsIds
 import ireader.domain.services.downloaderService.DefaultNotificationHelper
 import ireader.domain.utils.NotificationManager
+import ireader.i18n.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.instance
 
 class ExtensionManagerService constructor(
     private val context: Context,
     params: WorkerParameters,
-) : CoroutineWorker(context, params),DIAware {
-    override val di: DI = (context.applicationContext as DIAware).di
-    private val repository: CatalogRemoteRepository by instance()
-    val getInstalledCatalog: GetInstalledCatalog by instance()
-    private val installCatalog: InstallCatalog by instance()
-    val defaultNotificationHelper: DefaultNotificationHelper by instance()
-    private val notificationManager: NotificationManager by instance()
+    private val repository: CatalogRemoteRepository ,
+val getInstalledCatalog: GetInstalledCatalog,
+private val installCatalog: InstallCatalog,
+val defaultNotificationHelper: DefaultNotificationHelper,
+private val notificationManager: NotificationManager,
+) : CoroutineWorker(context, params) {
     private val downloadJob = Job()
-
     val scope = CoroutineScope(Dispatchers.Main.immediate + downloadJob)
-
-
     override suspend fun doWork(): Result {
             val builder = defaultNotificationHelper.baseInstallerNotification(
                 id

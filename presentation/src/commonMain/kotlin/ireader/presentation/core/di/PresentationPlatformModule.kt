@@ -1,5 +1,5 @@
 package ireader.presentation.core.di
 
-import org.kodein.di.DI
+import org.koin.core.module.Module
 
-expect val presentationPlatformModule : DI.Module
+expect val presentationPlatformModule : Module

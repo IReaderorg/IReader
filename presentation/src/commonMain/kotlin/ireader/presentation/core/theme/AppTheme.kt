@@ -9,9 +9,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.LocalizeHelper
 import ireader.presentation.ui.core.theme.*
 import kotlinx.coroutines.CoroutineScope
-import org.kodein.di.compose.rememberInstance
-
-
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalTextApi::class)
 @Composable
@@ -19,7 +17,7 @@ fun AppTheme(
     scope: CoroutineScope,
     content: @Composable() () -> Unit,
 ) {
-    val vm: AppThemeViewModel by rememberInstance()
+    val vm = koinInject<AppThemeViewModel>()
     val (materialColors, customColors) = vm.getColors()
     val rippleTheme = vm.getRippleTheme()
     val systemUiController = LocalISystemUIController.currentOrThrow
@@ -29,7 +27,7 @@ fun AppTheme(
     val status = LocalCustomSystemColor.current.enabled
     val navigation = LocalCustomSystemColor.current.enabled
     val customStatusColor = LocalCustomSystemColor.current
-    val mainLocalizeHelper by rememberInstance<LocalizeHelper>()
+    val mainLocalizeHelper = koinInject<LocalizeHelper>()
 
     systemUiController.setSystemBarsColor(
         color = customColors.bars,

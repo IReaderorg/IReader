@@ -13,7 +13,14 @@ import ireader.core.http.okhttp
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.image.cache.CoverCache
 import ireader.presentation.imageloader.PackageManager
-import ireader.presentation.imageloader.coil.imageloader.*
+import ireader.presentation.imageloader.coil.imageloader.BookCoverFetcher
+import ireader.presentation.imageloader.coil.imageloader.BookCoverKeyer
+import ireader.presentation.imageloader.coil.imageloader.BookCoverMapper
+import ireader.presentation.imageloader.coil.imageloader.CatalogKeyer
+import ireader.presentation.imageloader.coil.imageloader.CatalogRemoteKeyer
+import ireader.presentation.imageloader.coil.imageloader.CatalogRemoteMapper
+import ireader.presentation.imageloader.coil.imageloader.InstalledCatalogKeyer
+import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 
 class CoilLoaderFactory(
@@ -71,7 +78,7 @@ class CoilLoaderFactory(
             return instance ?: run {
                 val safeCacheDir = context.cacheDir.apply { mkdirs() }
                 // Create the singleton disk cache instance.
-                DiskCache {
+                DiskCache(fileSystem = FileSystem.SYSTEM) {
                     directory(safeCacheDir.resolve(FOLDER_NAME).toOkioPath())
                 }
                         .also { instance = it }

@@ -41,10 +41,7 @@ import ireader.presentation.ui.video.component.cores.*
 import ireader.presentation.ui.video.component.cores.PlayerSubtitleHelper.Companion.toSubtitleMimeType
 import ireader.presentation.ui.video.component.cores.player.SSLTrustManager
 import okhttp3.Request
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
-import org.kodein.di.instance
+import org.koin.compose.koinInject
 import java.io.File
 import java.net.URI
 import java.security.SecureRandom
@@ -67,19 +64,19 @@ fun rememberMediaState(
         player: ExoPlayer?,
         context: Context,
 ): MediaState {
-    val di : DI by rememberInstance()
-    return remember { MediaState(initPlayer = player, context = context,di) }.apply {
+    val client :HttpClients = koinInject()
+    return remember { MediaState(initPlayer = player, client = client, context = context) }.apply {
         this.player = player
     }
 }
 
 
-@Stable
+@UnstableApi @Stable
 class MediaState(
     private val initPlayer: ExoPlayer? = null,
-    private val context: Context, override val di: DI,
-
-    ) : DIAware {
+    private val context: Context,
+    private  val client : HttpClients
+    ) {
     val subtitleHelper : PlayerSubtitleHelper = PlayerSubtitleHelper()
     internal val stateOfPlayerState = mutableStateOf(initPlayer?.state(subtitleHelper))
 
@@ -279,7 +276,7 @@ class MediaState(
          * Sets the m3u8 preferred video quality, will not force stop anything with higher quality.
          * Does not work if trackSelector is defined.
          **/
-        maxVideoHeight: Int? = null
+        maxVideoHeight: Int? = null,
     ): ExoPlayer {
         val exoPlayerBuilder =
             ExoPlayer.Builder(context)
@@ -360,6 +357,7 @@ class MediaState(
             setPlaybackSpeed(playBackSpeed)
         }
     }
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     private fun getTrackSelector(context: Context, maxVideoHeight: Int?): TrackSelector {
         val trackSelector = DefaultTrackSelector(context)
         trackSelector.parameters = DefaultTrackSelector.ParametersBuilder(context)
@@ -385,8 +383,7 @@ class MediaState(
         }
 
     }
-    val client : HttpClients by instance<HttpClients>()
-
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     private fun createOnlineSource(headers: Map<String, String>): HttpDataSource.Factory {
         val source = OkHttpDataSource.Factory(client.default.okhttp).setUserAgent(USER_AGENT)
         return source.apply {

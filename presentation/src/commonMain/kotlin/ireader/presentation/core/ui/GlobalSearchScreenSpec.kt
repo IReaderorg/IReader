@@ -10,6 +10,7 @@ import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.home.sources.global_search.GlobalSearchScreen
 import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchViewModel
 import kotlinx.coroutines.runBlocking
+import org.koin.core.parameter.parametersOf
 
 
 data class GlobalSearchScreenSpec(
@@ -24,7 +25,7 @@ data class GlobalSearchScreenSpec(
 
     ) {
         val vm: GlobalSearchViewModel = getIViewModel(parameters =
-                GlobalSearchViewModel.Param(query)
+        { parametersOf(GlobalSearchViewModel.Param(query))}
             )
         val navigator = LocalNavigator.currentOrThrow
 

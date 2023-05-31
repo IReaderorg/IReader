@@ -51,7 +51,7 @@ kotlin {
                 api(compose.runtime)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 implementation(compose.material3)
-                compileOnly(libs.kodein.core)
+                compileOnly(libs.koin.core)
                 api(kotlinx.coroutines.core)
                 implementation(libs.ktor.core)
                 implementation(libs.ktor.contentNegotiation)
@@ -61,7 +61,7 @@ kotlin {
                 implementation(kotlinx.datetime)
                 implementation(libs.okio)
                 implementation(libs.jsoup)
-                api(libs.kodein.core)
+                api(libs.koin.core)
                 api(libs.imageLoader)
             }
         }

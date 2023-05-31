@@ -58,6 +58,7 @@ import ireader.presentation.ui.reader.reverse_swip_refresh.rememberSwipeRefreshS
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.core.parameter.parametersOf
 
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
@@ -75,7 +76,7 @@ data class ReaderScreenSpec(
     override fun Content() {
         val scope = rememberCoroutineScope()
         val vm: ReaderScreenViewModel =
-                getIViewModel(parameters = ReaderScreenViewModel.Param(chapterId,bookId))
+                getIViewModel(parameters = { parametersOf(ReaderScreenViewModel.Param(chapterId,bookId))})
         val currentIndex = vm.currentChapterIndex
         val chapters = vm.stateChapters
         val chapter = vm.stateChapter
