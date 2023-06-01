@@ -4,7 +4,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import ireader.core.prefs.Preference
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 class ThemeColorPreference(
     private val preference: Preference<Int>
@@ -17,14 +21,6 @@ class ThemeColorPreference(
     override fun get(): Color {
         return if (isSet()) {
             Color(preference.get())
-        } else {
-            Color.Unspecified
-        }
-    }
-
-    override suspend fun read(): Color {
-        return if (isSet()) {
-            Color(preference.read())
         } else {
             Color.Unspecified
         }
@@ -75,14 +71,6 @@ class ColorPreference(
     override fun get(): Color {
         return if (isSet()) {
             Color(preference.get())
-        } else {
-            defaultValue()
-        }
-    }
-
-    override suspend fun read(): Color {
-        return if (isSet()) {
-            Color(preference.read())
         } else {
             defaultValue()
         }

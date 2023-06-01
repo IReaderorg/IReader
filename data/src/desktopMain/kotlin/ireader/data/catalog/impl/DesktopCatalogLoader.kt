@@ -6,7 +6,7 @@ import com.googlecode.d2j.reader.MultiDexFileReader
 import com.googlecode.dex2jar.tools.BaksmaliBaseDexExceptionHandler
 import ireader.core.http.HttpClients
 import ireader.core.log.Log
-import ireader.core.prefs.JvmPreferenceStore
+import ireader.core.prefs.PreferenceStoreFactory
 import ireader.core.prefs.PrefixedPreferenceStore
 import ireader.core.source.Source
 import ireader.core.storage.ExtensionDir
@@ -15,7 +15,6 @@ import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.utils.extensions.withIOContext
-import ireader.i18n.LocalizeHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -29,9 +28,9 @@ import java.net.URLClassLoader
 class DesktopCatalogLoader(
     private val httpClients: HttpClients,
     val uiPreferences: UiPreferences,
-    val localizeHelper: LocalizeHelper,
+    preferences: PreferenceStoreFactory
 ) : CatalogLoader {
-    private val catalogPreferences = JvmPreferenceStore("catalogs_data")
+    private val catalogPreferences = preferences.create("catalogs_data")
     override suspend fun loadAll(): List<CatalogLocal> {
         val localPkgs = ExtensionDir.listFiles()
             .orEmpty()

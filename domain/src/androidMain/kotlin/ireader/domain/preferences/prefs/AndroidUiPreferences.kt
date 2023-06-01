@@ -9,8 +9,8 @@ import ireader.domain.preferences.models.getDefaultFont
 import ireader.domain.preferences.models.prefs.asFont
 
 class AndroidUiPreferences @OptIn(ExperimentalTextApi::class) constructor(
-        private val preferenceStore: PreferenceStore,
-        private val provider: GoogleFont.Provider
+    private val preferenceStore: PreferenceStore,
+    private val provider: GoogleFont.Provider
 ) : PlatformUiPreferences {
 
     companion object PreferenceKeys {

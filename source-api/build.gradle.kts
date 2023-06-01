@@ -59,7 +59,6 @@ kotlin {
                 implementation(androidx.core)
                 implementation(libs.quickjs.android)
                 api(libs.ktor.okhttp)
-                implementation(libs.bundles.tinylog)
                 compileOnly(libs.jsoup)
             }
         }
@@ -69,7 +68,6 @@ kotlin {
             dependencies {
                 implementation(libs.quickjs.jvm)
                 api(libs.ktor.okhttp)
-                implementation(libs.bundles.tinylog)
                 compileOnly(libs.jsoup)
             }
         }

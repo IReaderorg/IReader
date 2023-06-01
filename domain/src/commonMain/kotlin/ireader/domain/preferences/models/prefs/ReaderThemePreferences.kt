@@ -5,7 +5,11 @@ import androidx.compose.ui.graphics.Color
 import ireader.core.prefs.Preference
 import ireader.domain.preferences.models.ReaderColors
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 class ReaderThemePreferences(
     private val preference: Preference<Long>
@@ -18,14 +22,6 @@ class ReaderThemePreferences(
     override fun get(): ReaderColors {
         return if (isSet()) {
             readerThemes.find { it.id ==  preference.get() } ?: readerThemes.first()
-        } else {
-            readerThemes.first()
-        }
-    }
-
-    override suspend fun read(): ReaderColors {
-        return if (isSet()) {
-            readerThemes.find { it.id ==  preference.read() } ?: readerThemes.first()
         } else {
             readerThemes.first()
         }

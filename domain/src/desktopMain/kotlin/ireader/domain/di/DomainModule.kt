@@ -1,8 +1,8 @@
 package ireader.domain.di
 
 import ireader.core.http.HttpClients
-import ireader.core.prefs.JvmPreferenceStore
 import ireader.core.prefs.PreferenceStore
+import ireader.core.prefs.PreferenceStoreFactory
 import ireader.domain.preferences.prefs.DesktopUiPreferences
 import ireader.domain.preferences.prefs.PlatformUiPreferences
 import ireader.domain.usecases.epub.EpubCreator
@@ -46,20 +46,37 @@ actual val DomainModule: Module = module {
         DesktopUiPreferences(get())
     }
     single<StartExtensionManagerService> {
-        StartExtensionManagerService(get(),get(),get(),get())
+        StartExtensionManagerService(get(), get(), get(), get())
     }
     single<PreferenceStore> {
-        JvmPreferenceStore("ireader")
+        get<PreferenceStoreFactory>().create("ireader")
     }
     single { LocalizeHelper() }
 
     single<ServiceUseCases> {
         ServiceUseCases(
-            startDownloadServicesUseCase = StartDownloadServicesUseCase(get(),get(),get(),get(),get(),get(),get(),get(),get()),
-            startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(get(),get(),get(),get(),get(),get()),
+            startDownloadServicesUseCase = StartDownloadServicesUseCase(
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get()
+            ),
+            startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get()
+            ),
             startTTSServicesUseCase = StartTTSServicesUseCase(),
         )
     }
-    single<HttpClients> { HttpClients(JvmPreferenceStore("cookies")) }
+    single<HttpClients> { HttpClients(get<PreferenceStoreFactory>().create("cookies")) }
     single<EpubCreator> { EpubCreator() }
 }

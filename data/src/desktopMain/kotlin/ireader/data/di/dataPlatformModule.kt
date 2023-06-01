@@ -2,6 +2,7 @@ package ireader.data.di
 
 import com.squareup.sqldelight.db.SqlDriver
 import ireader.core.db.Transactions
+import ireader.core.prefs.PreferenceStoreFactory
 import ireader.data.catalog.impl.DesktopCatalogInstallationChanges
 import ireader.data.catalog.impl.DesktopCatalogInstaller
 import ireader.data.catalog.impl.DesktopCatalogLoader
@@ -30,4 +31,5 @@ actual val dataPlatformModule: Module = module {
     single<CatalogInstaller> { DesktopCatalogInstaller(get(),get(),get()) }
     single<DesktopCatalogInstaller> { DesktopCatalogInstaller(get(),get(),get()) }
     single<UninstallCatalogs> { DesktopUninstallCatalogs(get()) }
+    single<PreferenceStoreFactory> { PreferenceStoreFactory() }
 }

@@ -1,12 +1,8 @@
-/*
- * Copyright (C) 2018 The Tachiyomi Open Source Project
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
-
 package ireader.core.prefs
+
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.modules.EmptySerializersModule
+import kotlinx.serialization.modules.SerializersModule
 
 /**
  * A wrapper around an application preferences store. Implementations of this interface should
@@ -15,7 +11,7 @@ package ireader.core.prefs
 interface PreferenceStore {
 
     /**
-     * Returns a [String] preference for this [key].
+     * Returns an [String] preference for this [key].
      */
     fun getString(key: String, defaultValue: String = ""): Preference<String>
 
@@ -45,7 +41,7 @@ interface PreferenceStore {
     fun getStringSet(key: String, defaultValue: Set<String> = emptySet()): Preference<Set<String>>
 
     /**
-     * Returns a preference of type [T] for this [key]. The [serializer] and [deserializer] function
+     * Returns preference of type [T] for this [key]. The [serializer] and [deserializer] function
      * must be provided.
      */
     fun <T> getObject(
@@ -55,7 +51,15 @@ interface PreferenceStore {
         deserializer: (String) -> T
     ): Preference<T>
 
-    fun deleteAllPreferences()
+    /**
+     * Returns preference of type [T] for this [key]. The [serializer] must be provided.
+     */
+    fun <T> getJsonObject(
+        key: String,
+        defaultValue: T,
+        serializer: KSerializer<T>,
+        serializersModule: SerializersModule = EmptySerializersModule()
+    ): Preference<T>
 }
 
 /**
@@ -65,11 +69,16 @@ inline fun <reified T : Enum<T>> PreferenceStore.getEnum(
     key: String,
     defaultValue: T
 ): Preference<T> {
-    return getObject(key, defaultValue, { it.name }, {
-        try {
-            enumValueOf(it)
-        } catch (e: IllegalArgumentException) {
-            defaultValue
+    return getObject(
+        key,
+        defaultValue,
+        { it.name },
+        {
+            try {
+                enumValueOf(it)
+            } catch (e: IllegalArgumentException) {
+                defaultValue
+            }
         }
-    })
+    )
 }

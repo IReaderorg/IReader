@@ -9,7 +9,7 @@ import dalvik.system.DexClassLoader
 import dalvik.system.PathClassLoader
 import ireader.core.http.HttpClients
 import ireader.core.log.Log
-import ireader.core.prefs.AndroidPreferenceStore
+import ireader.core.prefs.PreferenceStoreFactory
 import ireader.core.prefs.PrefixedPreferenceStore
 import ireader.core.source.Source
 import ireader.core.source.TestSource
@@ -36,11 +36,12 @@ class AndroidCatalogLoader(
     val uiPreferences: UiPreferences,
     val simpleStorage: GetSimpleStorage,
     val localizeHelper: LocalizeHelper,
+    private val preferenceStore: PreferenceStoreFactory
 ) : CatalogLoader {
 
     private val pkgManager = context.packageManager
 
-    private val catalogPreferences = AndroidPreferenceStore(context, "catalogs_data", false)
+    private val catalogPreferences = preferenceStore.create("catalogs_data")
 
     /**
      * Return a list of all the installed catalogs initialized concurrently.

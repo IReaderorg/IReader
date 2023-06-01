@@ -6,9 +6,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import ireader.core.prefs.Preference
-import ireader.i18n.R
 import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.models.getDefaultFont
+import ireader.i18n.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -55,14 +55,6 @@ class FontPreferences @OptIn(ExperimentalTextApi::class) constructor(
                 fontFamily
             )
         }.getOrElse {
-            FontType("Roboto", FontFamily.Default)
-        }
-    }
-
-    override suspend fun read(): FontType {
-        return if (isSet()) {
-            getFont()
-        } else {
             FontType("Roboto", FontFamily.Default)
         }
     }

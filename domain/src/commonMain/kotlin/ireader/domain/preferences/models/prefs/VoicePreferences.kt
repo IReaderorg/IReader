@@ -41,14 +41,6 @@ class IReaderVoicePreferences @OptIn(ExperimentalTextApi::class) constructor(
         }
     }
 
-    override suspend fun read(): IReaderVoice {
-        return if (isSet()) {
-            getPrefs()
-        } else {
-            this.defaultValue()
-        }
-    }
-
     override fun set(value: IReaderVoice) {
         if (value != this.defaultValue()) {
             kotlin.runCatching {

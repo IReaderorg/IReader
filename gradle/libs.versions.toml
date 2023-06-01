@@ -24,7 +24,6 @@ ksp = "1.8.0-1.0.9"
 # Image Loader
 image-loader = "1.4.4"
 # Dependency Injection
-kodein = "7.19.0"
 koinAnnotation = "1.2.0"
 koin = "3.4.0"
 koinAndroid = "3.4.0"
@@ -32,18 +31,14 @@ koinAndroidCompose = "3.4.4"
 koinCompose = "1.0.1"
 # Network
 ktor = "2.3.0"
-ktorfit = "1.0.0-beta16"
 # Logging
-slf4j = "2.0.3"
-log4j = "2.19.0"
-kmlogging = "1.2.0"
-tinylog = "2.5.0-M2.1"
+napier = "2.6.1"
 # Storage
 okio = "3.3.0"
 appDirs = "1.2.1"
 sqldelight = "1.5.5"
 # Preferences
-multiplatformSettings = "1.0.0-alpha01"
+multiplatformSettings = "1.0.0"
 # Utility
 desugarJdkLibs = "2.0.2"
 aboutLibraries = "10.6.8"
@@ -68,7 +63,7 @@ jsoup = "1.15.2"
 media3="1.0.0"
 dex2jar = "v63"
 htmlunit = "3.0.0"
-napier="2.6.1"
+
 
 [libraries]
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
@@ -124,16 +119,21 @@ multidex = "androidx.multidex:multidex:2.0.1"
 okio = "com.squareup.okio:okio:3.1.0"
 quickjs-android = "app.cash.quickjs:quickjs-android:0.9.2"
 quickjs-jvm = "app.cash.quickjs:quickjs-jvm:0.9.2"
-jsoup = { module =  "org.jsoup:jsoup", version.ref = "jsoup" }
+jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 
-tinylog-impl = { module = "org.tinylog:tinylog-impl", version.ref = "tinylog" }
-tinylog-api = { module = "org.tinylog:tinylog-api", version.ref = "tinylog" }
+
 napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 
 
 # Inject
-kodein-core = { module = "org.kodein.di:kodein-di", version.ref = "kodein" }
-kodein-compose = { module = "org.kodein.di:kodein-di-framework-compose", version.ref = "kodein" }
+koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koinAnnotation" }
+koin-kspCompiler = { module = "io.insert-koin:koin-ksp-compiler", version.ref = "koinAnnotation" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndroid" }
+koin-workManager = { module = "io.insert-koin:koin-androidx-workmanager", version.ref = "koin" }
+koin-androidCompose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinAndroidCompose" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koinCompose" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
 
 # Asm modificiation
 asm = "org.ow2.asm:asm:9.4" # version locked by Dex2Jar
@@ -142,7 +142,7 @@ dex2jar-tools = { module = "com.github.ThexXTURBOXx.dex2jar:dex-tools", version.
 
 
 sqldelight-runtime = { module = "com.squareup.sqldelight:runtime", version.ref = "sqldelight" }
-sqldelight-coroutines = { module = "com.squareup.sqldelight:coroutines-extensions", version.ref ="sqldelight" }
+sqldelight-coroutines = { module = "com.squareup.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
 sqldelight-jvm = { module = "com.squareup.sqldelight:sqlite-driver", version.ref = "sqldelight" }
 sqldelight-android = { module = "com.squareup.sqldelight:android-driver", version.ref ="sqldelight" }
 sqldelight-gradle = { module = "com.squareup.sqldelight:gradle-plugin", version.ref = "sqldelight" }
@@ -172,20 +172,15 @@ imageLoader = { module = "io.github.qdsfdhvh:image-loader", version.ref = "image
 imageLoader-io = { module = "io.github.qdsfdhvh:image-loader-extension-imageio", version.ref = "image-loader" }
 
 htmlunit = { module = "org.htmlunit:htmlunit", version.ref = "htmlunit" }
+multiplatformSettings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformSettings" }
+multiplatformSettings-coroutines = { module = "com.russhwolf:multiplatform-settings-coroutines", version.ref = "multiplatformSettings" }
+multiplatformSettings-serialization = { module = "com.russhwolf:multiplatform-settings-serialization", version.ref = "multiplatformSettings" }
 
-koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koinAnnotation" }
-koin-kspCompiler = { module = "io.insert-koin:koin-ksp-compiler", version.ref = "koinAnnotation" }
-koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndroid" }
-koin-workManager = { module = "io.insert-koin:koin-androidx-workmanager", version.ref = "koin" }
-koin-androidCompose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinAndroidCompose" }
-koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koinCompose" }
-koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
-koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
+
 
 [bundles]
 simplestorage = ["storage", "documentfile"]
 media3 = ["media3-core", "media3-ui", "media3-dash","media3-subtitleDecoder","media3-rtsp","media3-okhttp","media3-extractor","media3-transformer","media3-decoder","media3-datasource","media3-common", ]
-tinylog = ["tinylog-impl", "tinylog-api"]
 ireader = ["jsoup","ktor-core","ktor-core-cio","ktor-okhttp","ktor-contentNegotiation","ktor-contentNegotiation-gson","ktor-contentNegotiation-kotlinx","ktor-contentNegotiation-jackson","ktor-core-android"]
 
 [plugins]

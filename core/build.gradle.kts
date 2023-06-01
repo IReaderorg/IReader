@@ -51,7 +51,10 @@ kotlin {
                 api(libs.ktor.contentNegotiation.kotlinx)
                 api(libs.okio)
                 compileOnly(libs.jsoup)
-                compileOnly(libs.koin.core)
+                api(libs.koin.core)
+                api(libs.multiplatformSettings)
+                api(libs.multiplatformSettings.coroutines)
+                api(libs.multiplatformSettings.serialization)
             }
         }
          val androidMain by getting {
@@ -61,7 +64,6 @@ kotlin {
                 implementation(androidx.dataStore)
                 implementation(libs.quickjs.android)
                 api(libs.ktor.okhttp)
-                implementation(libs.bundles.tinylog)
                 compileOnly(libs.jsoup)
             }
         }
@@ -71,7 +73,6 @@ kotlin {
             dependencies {
                 implementation(libs.quickjs.jvm)
                 api(libs.ktor.okhttp)
-                implementation(libs.bundles.tinylog)
                 compileOnly(libs.jsoup)
             }
         }

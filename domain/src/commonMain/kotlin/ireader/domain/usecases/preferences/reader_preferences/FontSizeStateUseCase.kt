@@ -24,7 +24,7 @@ class SortersUseCase(
     }
 
     suspend fun read(): LibrarySort {
-        return LibrarySort.deserialize(appPreferences.sortLibraryScreen().read())
+        return LibrarySort.deserialize(appPreferences.sortLibraryScreen().get())
     }
 }
 
@@ -36,6 +36,6 @@ class SortersDescUseCase(
     }
 
     suspend fun read(): Boolean {
-        return appPreferences.sortDescLibraryScreen().read()
+        return appPreferences.sortDescLibraryScreen().get()
     }
 }

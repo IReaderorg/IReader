@@ -1,9 +1,16 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 package ireader.core.prefs
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 
 /**
  * A wrapper around application preferences without knowing implementation details. Instances of
@@ -20,11 +27,6 @@ interface Preference<T> {
      * Returns the current value of this preference.
      */
     fun get(): T
-
-    /**
-     * Returns the current value of this preference.
-     */
-    suspend fun read(): T
 
     /**
      * Sets a new [value] for this preference.
@@ -56,4 +58,14 @@ interface Preference<T> {
      * current value and receive preference updates.
      */
     fun stateIn(scope: CoroutineScope): StateFlow<T>
+}
+
+fun <T> Preference<T>.getAsFlow(action: (suspend (T) -> Unit)? = null): Flow<T> {
+    val flow = changes()
+        .onStart { emit(get()) }
+    return if (action != null) {
+        flow.onEach(action = action)
+    } else {
+        flow
+    }
 }

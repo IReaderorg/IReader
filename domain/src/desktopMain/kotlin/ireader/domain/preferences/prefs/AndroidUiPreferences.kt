@@ -5,7 +5,7 @@ import ireader.core.prefs.PreferenceStore
 import ireader.domain.preferences.models.FontType
 
 class DesktopUiPreferences constructor(
-        private val preferenceStore: PreferenceStore,
+    private val preferenceStore: PreferenceStore,
 ) : PlatformUiPreferences {
 
     companion object PreferenceKeys {

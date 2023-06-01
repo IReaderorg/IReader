@@ -6,7 +6,6 @@ import ireader.core.http.BrowserEngine
 import ireader.core.http.HttpClients
 import ireader.core.http.WebViewCookieJar
 import ireader.core.os.PackageInstaller
-import ireader.core.prefs.AndroidPreferenceStore
 import ireader.data.catalog.CatalogGithubApi
 import ireader.data.catalog.impl.AndroidCatalogInstallationChanges
 import ireader.data.catalog.impl.AndroidCatalogInstaller
@@ -31,6 +30,7 @@ actual val dataPlatformModule = module {
     single<SqlDriver> { DatabaseDriverFactory(get()).create() }
     single<CatalogLoader> {
         ireader.data.catalog.impl.AndroidCatalogLoader(
+            get(),
             get(),
             get(),
             get(),
@@ -76,7 +76,7 @@ actual val dataPlatformModule = module {
             BrowserEngine(get(), get()),
             get(),
             get(),
-            AndroidPreferenceStore(get(), "cookies,")
+            get()
         )
     }
 }

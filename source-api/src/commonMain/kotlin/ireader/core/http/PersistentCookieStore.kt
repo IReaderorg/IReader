@@ -69,7 +69,6 @@ class PersistentCookieStore(private val preferenceStore: PreferenceStore) {
 
     @Synchronized
     fun removeAll() {
-        preferenceStore.deleteAllPreferences()
         cookieMap.clear()
     }
 

@@ -3,8 +3,7 @@ package org.ireader.app.di
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import ireader.core.http.WebViewManger
-import ireader.core.prefs.AndroidPreferenceStore
-import ireader.core.prefs.PreferenceStore
+import ireader.core.prefs.PreferenceStoreFactory
 import ireader.data.catalog.impl.AndroidCatalogInstallationChanges
 import ireader.data.catalog.impl.AndroidLocalInstaller
 import ireader.domain.preferences.prefs.AndroidUiPreferences
@@ -53,7 +52,6 @@ import java.io.File
             FileSystem.SYSTEM,
             File(androidApplication().filesDir, "library_covers").toOkioPath()
     ) }
-    single<PreferenceStore> { AndroidPreferenceStore(androidContext(),"ui") }
     single<ProjectConfig> { ProjectConfig(
             buildTime = BuildConfig.BUILD_TIME,
             commitCount = BuildConfig.COMMIT_COUNT,
@@ -65,6 +63,15 @@ import java.io.File
             applicationId = BuildConfig.APPLICATION_ID
     ) }
     single<AndroidCatalogInstallationChanges> { AndroidCatalogInstallationChanges(androidApplication()) }
-    single<AndroidLocalInstaller> { AndroidLocalInstaller(androidApplication(),get(),get(),get(),get(),get()) }
-
+    single<AndroidLocalInstaller> {
+        AndroidLocalInstaller(
+            androidApplication(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
+    single<PreferenceStoreFactory> { PreferenceStoreFactory(androidContext()) }
 }

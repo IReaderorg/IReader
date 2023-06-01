@@ -2,6 +2,8 @@ package ireader.domain.di
 
 import android.app.Service
 import androidx.compose.ui.text.ExperimentalTextApi
+import ireader.core.prefs.PreferenceStore
+import ireader.core.prefs.PreferenceStoreFactory
 import ireader.domain.preferences.prefs.AndroidUiPreferences
 import ireader.domain.preferences.prefs.PlatformUiPreferences
 import ireader.domain.services.downloaderService.DefaultNotificationHelper
@@ -136,17 +138,21 @@ actual val DomainModule = module {
     }
     single<ImportEpub> { ImportEpub(get(), get(),get(),get()) }
     single<PlatformUiPreferences> {
-        AndroidUiPreferences(get(),get())
+        AndroidUiPreferences(get(), get())
     }
-    factory <EpubCreator> { EpubCreator(get(), get(),get()) }
-    single<ServiceUseCases> { ServiceUseCases(
+    factory<EpubCreator> { EpubCreator(get(), get(), get()) }
+    single<ServiceUseCases> {
+        ServiceUseCases(
             startDownloadServicesUseCase = StartDownloadServicesUseCase(get()),
             startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(get()),
             startTTSServicesUseCase = StartTTSServicesUseCase(get()),
-    ) }
+        )
+    }
 
     single<LocalizeHelper> { LocalizeHelper(get()) }
-
+    single<PreferenceStore> {
+        get<PreferenceStoreFactory>().create("ireader")
+    }
 
 
 
