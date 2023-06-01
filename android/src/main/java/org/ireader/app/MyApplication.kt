@@ -23,11 +23,10 @@ import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.workmanager.koin.workManagerFactory
+import org.koin.core.component.KoinComponent
 import org.koin.core.context.startKoin
 
-class MyApplication : Application(), ImageLoaderFactory {
-
-
+class MyApplication : Application(), ImageLoaderFactory, KoinComponent {
     override fun onCreate() {
         super.onCreate()
         startKoin {
@@ -49,12 +48,10 @@ class MyApplication : Application(), ImageLoaderFactory {
             modules(DomainServices)
             modules(DomainModule)
             modules(presentationPlatformModule)
-
         }
     }
 
     val coil: CoilLoaderFactory by inject()
-
 
     override fun newImageLoader(): ImageLoader {
         return coil.newImageLoader()

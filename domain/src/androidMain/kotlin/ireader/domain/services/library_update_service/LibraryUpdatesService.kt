@@ -10,24 +10,26 @@ import ireader.domain.notification.NotificationsIds
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.utils.NotificationManager
 import ireader.i18n.R
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import kotlin.time.ExperimentalTime
 
 class LibraryUpdatesService(
     private val context: Context,
     params: WorkerParameters,
-    private val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases ,
-private val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase ,
-private val remoteUseCases: RemoteUseCases,
-private val getLocalCatalog: GetLocalCatalog ,
-private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
-private val notificationManager: NotificationManager,
-) : CoroutineWorker(context, params) {
+
+    ) : CoroutineWorker(context, params), KoinComponent {
+    private val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases by inject()
+    private val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase by inject()
+    private val remoteUseCases: RemoteUseCases by inject()
+    private val getLocalCatalog: GetLocalCatalog by inject()
+    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases by inject()
+    private val notificationManager: NotificationManager by inject()
 
     companion object {
         const val LibraryUpdateTag = "Library_Update_SERVICE"
         const val FORCE_UPDATE = "force_update"
     }
-
 
 
     @OptIn(ExperimentalTime::class)

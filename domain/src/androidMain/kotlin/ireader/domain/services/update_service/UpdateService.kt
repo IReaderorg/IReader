@@ -17,16 +17,19 @@ import ireader.domain.utils.NotificationManager
 import ireader.i18n.R
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
-class UpdateService  constructor(
+class UpdateService constructor(
     private val context: Context,
     params: WorkerParameters,
-    private val appPreferences: AppPreferences,
-private val api: UpdateApi ,
-private val notificationManager: NotificationManager,
-) : CoroutineWorker(context, params) {
+
+    ) : CoroutineWorker(context, params), KoinComponent {
+    private val appPreferences: AppPreferences by inject()
+    private val api: UpdateApi by inject()
+    private val notificationManager: NotificationManager by inject()
     override suspend fun doWork(): Result {
         val lastCheck = Instant.fromEpochMilliseconds(appPreferences.lastUpdateCheck().get())
         val now = Clock.System.now()

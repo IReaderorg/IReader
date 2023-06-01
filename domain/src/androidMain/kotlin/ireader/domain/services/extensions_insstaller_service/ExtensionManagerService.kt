@@ -14,25 +14,29 @@ import ireader.i18n.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class ExtensionManagerService constructor(
     private val context: Context,
     params: WorkerParameters,
-    private val repository: CatalogRemoteRepository ,
-val getInstalledCatalog: GetInstalledCatalog,
-private val installCatalog: InstallCatalog,
-val defaultNotificationHelper: DefaultNotificationHelper,
-private val notificationManager: NotificationManager,
-) : CoroutineWorker(context, params) {
+) : CoroutineWorker(context, params), KoinComponent {
+
+    private val repository: CatalogRemoteRepository by inject()
+    val getInstalledCatalog: GetInstalledCatalog by inject()
+    private val installCatalog: InstallCatalog by inject()
+    val defaultNotificationHelper: DefaultNotificationHelper by inject()
+    private val notificationManager: NotificationManager by inject()
+
     private val downloadJob = Job()
     val scope = CoroutineScope(Dispatchers.Main.immediate + downloadJob)
     override suspend fun doWork(): Result {
-            val builder = defaultNotificationHelper.baseInstallerNotification(
-                id
-            )
-            val result = runExtensionService(
-                repository = repository,
-                getInstalledCatalog = getInstalledCatalog,
+        val builder = defaultNotificationHelper.baseInstallerNotification(
+            id
+        )
+        val result = runExtensionService(
+            repository = repository,
+            getInstalledCatalog = getInstalledCatalog,
                 installCatalog = installCatalog,
                 notificationManager = notificationManager,
                 updateProgress = { max, progress, inProgess ->

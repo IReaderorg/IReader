@@ -26,75 +26,43 @@ import ireader.domain.usecases.reader.ScreenAlwaysOnImpl
 import ireader.domain.usecases.services.*
 import ireader.domain.utils.NotificationManager
 import ireader.i18n.LocalizeHelper
+import org.koin.android.ext.koin.androidContext
+import org.koin.androidx.workmanager.dsl.worker
 import org.koin.dsl.module
 
 @OptIn(ExperimentalTextApi::class)
 actual val DomainModule = module {
-    factory  {
+    worker {
         DownloaderService(
-                get(),
-                get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
+            androidContext(),
             get(),
         )
     }
-    factory  {
+    factory {
         NotificationManager(
             get(),
         )
     }
-    single {
+    worker {
         ExtensionManagerService(
-                get(),
-                get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-                )
-    }
-    single {
-        UpdateService(get()  ,       get(),
-            get(),
-            get(),
+            androidContext(),
             get(),
         )
     }
-    single {
+    worker {
+        UpdateService(
+            androidContext(), get(),
+        )
+    }
+    worker {
         LibraryUpdatesService(
-                get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
+            androidContext(),
             get(),
         )
     }
 
-    factory <Service>() {
-        TTSService(
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-        )
+    factory<Service>() {
+        TTSService()
     }
     single {
         AutomaticBackup(

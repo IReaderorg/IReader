@@ -51,7 +51,6 @@ kotlin {
                 api(compose.runtime)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 implementation(compose.material3)
-                compileOnly(libs.koin.core)
                 api(kotlinx.coroutines.core)
                 implementation(libs.ktor.core)
                 implementation(libs.ktor.contentNegotiation)
@@ -101,6 +100,8 @@ kotlin {
                 /** LifeCycle **/
                 implementation(androidx.lifecycle.runtime)
                 implementation(kotlinx.stdlib)
+                api(libs.koin.android)
+                api(libs.koin.workManager)
             }
         }
         val desktopMain by getting {

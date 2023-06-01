@@ -30,26 +30,38 @@ import ireader.domain.services.tts_service.Player
 import ireader.domain.services.tts_service.TTSState
 import ireader.domain.services.tts_service.TTSStateImpl
 import ireader.domain.services.tts_service.isSame
+import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.preferences.TextReaderPrefUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.i18n.LocalizeHelper
 import ireader.i18n.R
 import kotlinx.coroutines.*
 import kotlinx.datetime.Clock
+import org.koin.android.ext.android.inject
 import kotlin.time.Duration.Companion.minutes
 
 class TTSService(
-    private val bookRepo: BookRepository,
-    private val chapterRepo: ChapterRepository,
-    private val localizeHelper: LocalizeHelper,
-    private val chapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
-    private val remoteUseCases: RemoteUseCases,
-    private val extensions: CatalogStore,
-    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
-    private val textReaderPrefUseCase: TextReaderPrefUseCase,
-    private val readerPreferences: ReaderPreferences ,
-    private val appPrefs: AppPreferences,
 ) : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener {
+    private val bookRepo: BookRepository by inject()
+
+
+    private val chapterRepo: ChapterRepository by inject()
+
+
+    private val chapterUseCase: LocalGetChapterUseCase by inject()
+
+
+    private val remoteUseCases: RemoteUseCases by inject()
+
+
+    private val extensions: CatalogStore by inject()
+
+    private val textReaderPrefUseCase: TextReaderPrefUseCase by inject()
+
+    private val readerPreferences: ReaderPreferences by inject()
+    private val appPrefs: AppPreferences by inject()
+    private val localizeHelper: LocalizeHelper by inject()
+
     lateinit var ttsNotificationBuilder: TTSNotificationBuilder
     lateinit var state: TTSStateImpl
     private val noisyReceiver = NoisyReceiver()

@@ -22,22 +22,25 @@ import ireader.i18n.LocalizeHelper
 import ireader.i18n.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class DownloaderService  constructor(
+class DownloaderService constructor(
     private val context: Context,
     params: WorkerParameters,
-    private val bookRepo: BookRepository,
-private val chapterRepo: ChapterRepository,
-private val remoteUseCases: RemoteUseCases,
-private val localizeHelper: LocalizeHelper,
-private val extensions: CatalogStore,
-private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases ,
-private val defaultNotificationHelper: DefaultNotificationHelper,
-private val downloadUseCases: DownloadUseCases,
-private val downloadServiceState: DownloadServiceStateImpl,
-private val notificationManager : NotificationManager ,
-) : CoroutineWorker(context, params) {
 
+    ) : CoroutineWorker(context, params), KoinComponent {
+
+    private val bookRepo: BookRepository by inject()
+    private val chapterRepo: ChapterRepository by inject()
+    private val remoteUseCases: RemoteUseCases by inject()
+    private val localizeHelper: LocalizeHelper by inject()
+    private val extensions: CatalogStore by inject()
+    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases by inject()
+    private val defaultNotificationHelper: DefaultNotificationHelper by inject()
+    private val downloadUseCases: DownloadUseCases by inject()
+    private val downloadServiceState: DownloadServiceStateImpl by inject()
+    private val notificationManager: NotificationManager by inject()
     private val downloadJob = Job()
     val scope = createICoroutineScope(Dispatchers.Main.immediate + downloadJob)
 
