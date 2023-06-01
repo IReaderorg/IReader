@@ -113,7 +113,7 @@
     <string name="channel_progress">Прогрес</string>
     <string name="channel_complete">Завершено</string>
     <string name="channel_new_chapters">Оновлення розділів</string>
-    <string name="channel_app_updates">Оновлення програми</string>
+    <string name="channel_app_updates">Оновлення застосунку</string>
     <string name="channel_ext_updates">Оновлення розширення</string>
     <string name="channel_crash_logs">Аварійні журнали</string>
     <string name="label_backup">відновлення з резервної копії</string>
@@ -254,7 +254,7 @@
     <string name="view_book">Переглянути книгу</string>
     <string name="show_system_catalogs">Показати розширення системи</string>
     <string name="pref_incognito_mode_summary">Призупинити історію читання</string>
-    <string name="no_app_was_found_to_lauch">Щось пішло не так. У вас немає необхідної програми.</string>
+    <string name="no_app_was_found_to_lauch">Щось пішло не так. У вас немає необхідного застосунку.</string>
     <string name="the_downloads_was_interrupted">Завантаження було перервано</string>
     <string name="the_downloads_was_cancelled">Завантаження було скасовано</string>
     <string name="failed_to_download">Не вдалося завантажити</string>
@@ -298,7 +298,7 @@
     <string name="information_webview_required">для перегляду цього вмісту потрібен веб-переглядач</string>
     <string name="information_webview_outdated">веб-перегляд застарілий.</string>
     <string name="information_cloudflare_bypass_failure">Неможливо обійти хмарний спалах</string>
-    <string name="update_notification">Оновлення програми</string>
+    <string name="update_notification">Оновлення застосунку</string>
     <string name="uninstall">Видалити</string>
     <string name="available">В наявності</string>
     <string name="extensions">Розширення</string>
