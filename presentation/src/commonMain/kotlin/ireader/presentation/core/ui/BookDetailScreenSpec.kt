@@ -186,7 +186,7 @@ data class BookDetailScreenSpec constructor(
                             },
                             source = vm.source,
                             onCommand = {
-                                globalScope.launch {
+                                scope.launch {
                                     sheetState.show()
                                 }
                             },
