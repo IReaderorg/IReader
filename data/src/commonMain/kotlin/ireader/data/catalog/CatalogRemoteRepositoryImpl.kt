@@ -1,6 +1,7 @@
 package ireader.data.catalog
 
 import ir.kazemcodes.infinityreader.Database
+import ireader.core.log.Log
 import ireader.data.core.DatabaseHandler
 import ireader.domain.catalogs.service.CatalogRemoteRepository
 import ireader.domain.models.entities.CatalogRemote
@@ -24,7 +25,12 @@ class CatalogRemoteRepositoryImpl(
     override suspend fun insertRemoteCatalogs(catalogs: List<CatalogRemote>) {
         return  handler.await(true) {
             for (i in catalogs) {
-                insertBlocking(i)
+                kotlin.runCatching {
+                    insertBlocking(i)
+                }.getOrElse {
+                    Log.error(it, "${i.name} Source has a problem")
+                }
+
             }
 
         }
