@@ -9,7 +9,11 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -86,13 +90,16 @@ fun ReaderScreenTopBar(
                                 onBookMark()
                             }
                         )
-                        AppIconButton(
-                            imageVector = Icons.Default.Public,
-                            contentDescription = localize(MR.strings.webView),
-                            onClick = {
-                                onWebView()
-                            }
-                        )
+                        if (!vm.webViewIntegration.value) {
+                            AppIconButton(
+                                imageVector = Icons.Default.Public,
+                                contentDescription = localize(MR.strings.webView),
+                                onClick = {
+                                    onWebView()
+                                }
+                            )
+                        }
+
                     }
                     AppIconButton(
                         imageVector = Icons.Default.Autorenew,
