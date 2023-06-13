@@ -61,7 +61,7 @@ okhttp = "5.0.0-alpha.10"
 coil_version = "2.2.1"
 jsoup = "1.15.2"
 media3="1.0.0"
-dex2jar = "v63"
+dex2jar = "v61"
 htmlunit = "3.0.0"
 
 
