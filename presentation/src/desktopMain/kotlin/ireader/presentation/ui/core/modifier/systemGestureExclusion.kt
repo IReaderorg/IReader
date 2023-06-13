@@ -12,9 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 actual fun Modifier.systemGestureExclusion(): Modifier = this
-actual fun Modifier.systemBarsPadding(): Modifier = this
 
-actual fun Modifier.navigationBarsPadding(): Modifier = this
 
 @Composable
 actual fun Modifier.supportDesktopScroll(

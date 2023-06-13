@@ -21,7 +21,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,10 +42,7 @@ import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
-import ireader.presentation.ui.component.components.statusBarsPadding
 import ireader.presentation.ui.component.getContextWrapper
-import ireader.presentation.ui.core.modifier.navigationBarsPadding
-import ireader.presentation.ui.core.modifier.systemBarsPadding
 import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.ui.core.theme.CustomSystemColor
 import ireader.presentation.ui.core.ui.SnackBarListener
@@ -140,21 +136,6 @@ data class ReaderScreenSpec(
         }
         val hideSystemBar = remember { mutableStateOf(false) }
         val hideNavBar = remember { mutableStateOf(false) }
-        val scaffoldModifier = remember(hideSystemBar.value, hideNavBar.value) {
-            derivedStateOf {
-                when {
-                    hideSystemBar.value && hideNavBar.value -> Modifier
-                    !hideSystemBar.value && hideNavBar.value -> Modifier.navigationBarsPadding()
-                    hideSystemBar.value && !hideNavBar.value -> Modifier.statusBarsPadding()
-                    hideSystemBar.value -> Modifier.navigationBarsPadding()
-                    hideNavBar.value -> Modifier.statusBarsPadding()
-                    else ->
-                        Modifier
-                                .navigationBarsPadding()
-                                .statusBarsPadding()
-                }
-            }
-        }
 
         LaunchedEffect(key1 = vm.initialized) {
             vm.prefFunc.apply {
@@ -217,7 +198,6 @@ data class ReaderScreenSpec(
                             exit = slideOutVertically(targetOffsetY = { -it })
                     ) {
                         ReaderScreenDrawer(
-                                modifier = if (vm.immersiveMode.value) Modifier else Modifier.systemBarsPadding(),
                                 onReverseIcon = {
                                     vm.isDrawerAsc = !vm.isDrawerAsc
                                 },
@@ -306,7 +286,7 @@ data class ReaderScreenSpec(
                         navigationBar = customColor.navigation
                 ) {
                     IScaffold(
-                            modifier = scaffoldModifier.value,
+                          //  modifier = scaffoldModifier.value,
                             topBar = {
                                 val catalog = vm.catalog
                                 val book = vm.book

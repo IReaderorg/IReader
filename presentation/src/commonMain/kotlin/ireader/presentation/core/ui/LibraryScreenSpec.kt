@@ -1,5 +1,6 @@
 package ireader.presentation.core.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.ExperimentalMaterialApi
@@ -11,7 +12,10 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -21,7 +25,6 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.rememberPagerState
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
@@ -54,7 +57,7 @@ object LibraryScreenSpec : Tab {
 
         }
 
-    @OptIn(ExperimentalPagerApi::class)
+    @OptIn(ExperimentalPagerApi::class, ExperimentalFoundationApi::class)
     @Composable
     override fun Content(
 
@@ -74,7 +77,7 @@ object LibraryScreenSpec : Tab {
         IModalSheets(
                 bottomSheetState = sheetState,
                 sheetContent = {
-                    val pagerState = rememberPagerState()
+                    val pagerState = androidx.compose.foundation.pager.rememberPagerState()
                     BottomTabComposable(
                         modifier = it,
                         pagerState = pagerState,

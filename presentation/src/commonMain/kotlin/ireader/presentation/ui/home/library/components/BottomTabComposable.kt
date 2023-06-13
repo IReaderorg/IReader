@@ -1,5 +1,6 @@
 package ireader.presentation.ui.home.library.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.PagerState
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
@@ -17,21 +17,21 @@ import ireader.i18n.resources.MR
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 
+@OptIn(ExperimentalFoundationApi::class, ExperimentalPagerApi::class)
 @ExperimentalMaterialApi
-@ExperimentalPagerApi
 @Composable
 fun BottomTabComposable(
-        modifier: Modifier = Modifier,
-        pagerState: PagerState,
-        filters: List<LibraryFilter>,
-        toggleFilter: (LibraryFilter) -> Unit,
-        sortType: LibrarySort,
-        isSortDesc: Boolean,
-        onSortSelected: (LibrarySort) -> Unit,
-        layoutType: DisplayMode,
-        onLayoutSelected: (DisplayMode) -> Unit,
-        vm: LibraryViewModel,
-        scaffoldPadding: PaddingValues
+    modifier: Modifier = Modifier,
+    pagerState: androidx.compose.foundation.pager.PagerState,
+    filters: List<LibraryFilter>,
+    toggleFilter: (LibraryFilter) -> Unit,
+    sortType: LibrarySort,
+    isSortDesc: Boolean,
+    onSortSelected: (LibrarySort) -> Unit,
+    layoutType: DisplayMode,
+    onLayoutSelected: (DisplayMode) -> Unit,
+    vm: LibraryViewModel,
+    scaffoldPadding: PaddingValues
 ) {
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     val tabs = listOf(

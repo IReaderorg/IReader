@@ -28,8 +28,7 @@ fun Modifier.clickableNoIndication(
 }
 
 expect fun Modifier.systemGestureExclusion(): Modifier
-expect fun Modifier.systemBarsPadding(): Modifier
-expect fun Modifier.navigationBarsPadding(): Modifier
+
 @Composable
 expect fun Modifier.supportDesktopScroll(scrollState: ScrollState,scope: CoroutineScope,enable:Boolean = true): Modifier
 

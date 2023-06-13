@@ -52,7 +52,6 @@ kotlin {
 
                 api(accompanist.gosyer.flowLayout)
                 api(accompanist.gosyer.pagerIndicators)
-                api(accompanist.gosyer.pager)
             }
         }
         val jvmMain by creating {

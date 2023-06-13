@@ -3,6 +3,7 @@ package ireader.presentation.ui.home.library.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,7 +25,6 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import ireader.domain.models.DisplayMode
@@ -42,10 +42,11 @@ import ireader.presentation.ui.core.ui.Colour.contentColor
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalPagerApi
 @ExperimentalMaterialApi
 @Composable
-fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
+fun Tabs(libraryTabs: List<TabItem>, pagerState: androidx.compose.foundation.pager.PagerState) {
     val scope = rememberCoroutineScope()
     // OR ScrollableTabRow()
     androidx.compose.material.TabRow(
@@ -57,7 +58,7 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
                 Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
                 color = MaterialTheme.colorScheme.primary,
 
-            )
+                )
         }
     ) {
         libraryTabs.forEachIndexed { index, tab ->
@@ -117,15 +118,15 @@ fun ScrollableTabs(
     }
 }
 
-@ExperimentalPagerApi
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TabsContent(
-        libraryTabs: List<TabItem>,
-        pagerState: PagerState,
-        filters: List<LibraryFilter>,
-        onLayoutSelected: (DisplayMode) -> Unit,
-        vm: LibraryViewModel,
-        scaffoldPadding: PaddingValues
+    libraryTabs: List<TabItem>,
+    pagerState: androidx.compose.foundation.pager.PagerState,
+    filters: List<LibraryFilter>,
+    onLayoutSelected: (DisplayMode) -> Unit,
+    vm: LibraryViewModel,
+    scaffoldPadding: PaddingValues
 ) {
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     val layouts = remember {
@@ -136,16 +137,21 @@ fun TabsContent(
             DisplayMode.OnlyCover
         )
     }
-    HorizontalPager(
-        count = libraryTabs.size,
+    androidx.compose.foundation.pager.HorizontalPager(
+        pageCount = libraryTabs.size,
         state = pagerState,
         modifier = Modifier.fillMaxSize()
     ) { page ->
-        LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top, contentPadding = scaffoldPadding) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Top,
+            contentPadding = scaffoldPadding
+        ) {
             when (page) {
                 0 -> FiltersPage(filters, onClick = {
                     vm.toggleFilter(it)
                 })
+
                 1 -> SortPage(
                     vm.sorting.value,
                     onClick = vm::toggleSort,
