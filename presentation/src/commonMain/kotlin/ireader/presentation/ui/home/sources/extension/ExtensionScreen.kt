@@ -1,8 +1,8 @@
 package ireader.presentation.ui.home.sources.extension
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.TabRowDefaults
 import androidx.compose.material.Text
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -10,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.google.accompanist.pager.*
 import ireader.domain.models.entities.Catalog
 import ireader.i18n.UiEvent
 import ireader.i18n.asString
@@ -25,7 +24,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
-@OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExtensionScreen(
         modifier: Modifier = Modifier,
@@ -73,6 +72,7 @@ fun ExtensionScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SourceHeader(
     modifier: Modifier = Modifier,
@@ -94,7 +94,7 @@ fun SourceHeader(
 }
 
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ExtensionContent(
         pages: List<String>,
@@ -108,7 +108,7 @@ private fun ExtensionContent(
         onCancelInstaller: ((Catalog) -> Unit)? = null,
 
         ) {
-    val pagerState = rememberPagerState()
+    val pagerState = androidx.compose.foundation.pager.rememberPagerState()
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect {
             vm.currentPagerPage = pagerState.currentPage
@@ -128,22 +128,22 @@ private fun ExtensionContent(
     )
 }
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ExtensionPager(
-        pagerState: PagerState,
-        pages: List<String>,
-        modifier: Modifier = Modifier,
-        state: CatalogsState,
-        onClickCatalog: (Catalog) -> Unit,
-        onClickTogglePinned: (Catalog) -> Unit,
-        vm: ExtensionViewModel,
-        onClickInstall: (Catalog) -> Unit,
-        onClickUninstall: (Catalog) -> Unit,
-        onCancelInstaller: ((Catalog) -> Unit)? = null,
+    pagerState: androidx.compose.foundation.pager.PagerState,
+    pages: List<String>,
+    modifier: Modifier = Modifier,
+    state: CatalogsState,
+    onClickCatalog: (Catalog) -> Unit,
+    onClickTogglePinned: (Catalog) -> Unit,
+    vm: ExtensionViewModel,
+    onClickInstall: (Catalog) -> Unit,
+    onClickUninstall: (Catalog) -> Unit,
+    onCancelInstaller: ((Catalog) -> Unit)? = null,
 ) {
-    HorizontalPager(
-        count = pages.size,
+    androidx.compose.foundation.pager.HorizontalPager(
+        pageCount = pages.size,
         state = pagerState,
         modifier = Modifier.fillMaxSize(),
     ) { page ->
@@ -167,30 +167,27 @@ private fun ExtensionPager(
     }
 }
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ExtensionTabs(
     modifier: Modifier = Modifier,
-    pagerState: PagerState,
+    pagerState: androidx.compose.foundation.pager.PagerState,
     pages: List<String>,
 
     ) {
     val scope = rememberCoroutineScope()
-    androidx.compose.material.TabRow(
+    TabRow(
         selectedTabIndex = pagerState.currentPage,
-        backgroundColor = AppColors.current.bars,
+        containerColor = AppColors.current.bars,
         contentColor = AppColors.current.onBars,
-        indicator = { tabPositions ->
-            TabRowDefaults.Indicator(
-                Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
-                color = MaterialTheme.colorScheme.primary,
-            )
-        },
     ) {
         pages.forEachIndexed { index, title ->
             Tab(
                 text = {
-                    MidSizeTextComposable(text = title, color = androidx.compose.ui.graphics.Color.Unspecified)
+                    MidSizeTextComposable(
+                        text = title,
+                        color = androidx.compose.ui.graphics.Color.Unspecified
+                    )
                 },
                 selected = pagerState.currentPage == index,
                 onClick = {

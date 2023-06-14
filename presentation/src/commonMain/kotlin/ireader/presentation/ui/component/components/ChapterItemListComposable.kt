@@ -20,12 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Chapter
-import ireader.presentation.ui.core.modifier.selectedBackground
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.utils.extensions.asRelativeTimeString
 import ireader.domain.utils.extensions.toLocalDate
+import ireader.presentation.ui.core.modifier.selectedBackground
 import ireader.presentation.ui.core.theme.ContentAlpha
-
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

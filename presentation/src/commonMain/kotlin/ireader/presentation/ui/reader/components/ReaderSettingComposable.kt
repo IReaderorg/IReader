@@ -1,5 +1,6 @@
 package ireader.presentation.ui.reader.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,14 +12,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Tab
-import androidx.compose.material.TabRow
-import androidx.compose.material.TabRowDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatAlignCenter
 import androidx.compose.material.icons.filled.FormatAlignJustify
 import androidx.compose.material.icons.filled.FormatAlignLeft
 import androidx.compose.material.icons.filled.FormatAlignRight
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -28,11 +28,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.PagerState
-import com.google.accompanist.pager.pagerTabIndicatorOffset
-import com.google.accompanist.pager.rememberPagerState
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.theme.ReaderTheme
 import ireader.domain.preferences.models.FontType
@@ -57,7 +52,7 @@ import ireader.presentation.ui.core.ui.Colour.contentColor
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun ReaderSettingMainLayout(
         modifier: Modifier = Modifier,
@@ -68,7 +63,7 @@ fun ReaderSettingMainLayout(
         onBackgroundChange: (themeId: Long) -> Unit,
         onTextAlign: (PreferenceValues.PreferenceTextAlignment) -> Unit
 ) {
-    val pagerState = rememberPagerState()
+    val pagerState = androidx.compose.foundation.pager.rememberPagerState()
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
 
     val readerTab: TabItem = remember {
@@ -647,22 +642,16 @@ data class TabItem(
     val screen: @Composable () -> Unit
 )
 
-@ExperimentalPagerApi
+
+@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalMaterialApi
 @Composable
-fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
+fun Tabs(libraryTabs: List<TabItem>, pagerState: androidx.compose.foundation.pager.PagerState) {
     val scope = rememberCoroutineScope()
     TabRow(
         selectedTabIndex = pagerState.currentPage,
-        backgroundColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.colorScheme.background,
         contentColor = MaterialTheme.colorScheme.contentColor,
-        indicator = { tabPositions ->
-            TabRowDefaults.Indicator(
-                Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
-                color = MaterialTheme.colorScheme.primary,
-
-                )
-        }
     ) {
         libraryTabs.forEachIndexed { index, tab ->
             Tab(
@@ -678,14 +667,14 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: PagerState) {
     }
 }
 
-@ExperimentalPagerApi
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TabsContent(
-        libraryTabs: List<TabItem>,
-        pagerState: PagerState,
+    libraryTabs: List<TabItem>,
+    pagerState: androidx.compose.foundation.pager.PagerState,
 ) {
-    HorizontalPager(
-        count = libraryTabs.size,
+    androidx.compose.foundation.pager.HorizontalPager(
+        pageCount = libraryTabs.size,
         state = pagerState,
         modifier = Modifier.fillMaxSize()
     ) { page ->

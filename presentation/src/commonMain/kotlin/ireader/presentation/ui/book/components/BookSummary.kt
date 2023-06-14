@@ -23,6 +23,7 @@ available over here:https://github.com/tachiyomiorg/tachiyomi
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
@@ -36,13 +37,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.google.accompanist.flowlayout.FlowRow
 import ireader.i18n.resources.MR
 import ireader.presentation.ui.core.modifier.clickableNoIndication
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 private val whitespaceLineRegex = Regex("[\\r\\n]{2,}", setOf(RegexOption.MULTILINE))
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BookSummary(
     onClickToggle: () -> Unit,
@@ -78,10 +79,9 @@ fun BookSummary(
         )
         if (genres.isNotEmpty()) {
             if (expanded) {
-                FlowRow(
+                androidx.compose.foundation.layout.FlowRow(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    mainAxisSpacing = 4.dp,
-                    crossAxisSpacing = 8.dp
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     genres.filter { it.isNotBlank() }.forEach { genre ->
                         TagsChip(genre) {}

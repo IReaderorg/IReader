@@ -1,5 +1,6 @@
 package ireader.presentation.core.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,8 +28,6 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.rememberPagerState
 import ireader.core.source.CatalogSource
 import ireader.core.source.HttpSource
 import ireader.core.source.model.ChapterInfo
@@ -62,7 +61,9 @@ data class BookDetailScreenSpec constructor(
     override val key: ScreenKey = "Detail_Screen#$bookId"
 
     @OptIn(
-        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class, ExperimentalPagerApi::class
+        ExperimentalMaterialApi::class,
+        ExperimentalMaterial3Api::class,
+        ExperimentalFoundationApi::class,
     )
     @Composable
     override fun Content(
@@ -97,7 +98,7 @@ data class BookDetailScreenSpec constructor(
 
                 detailState.source.let { source ->
                     if (vm.chapterMode) {
-                        val pagerState = rememberPagerState()
+                        val pagerState = androidx.compose.foundation.pager.rememberPagerState()
                         ChapterScreenBottomTabComposable(
                             modifier = it,
                             pagerState = pagerState,

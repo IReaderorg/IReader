@@ -9,7 +9,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.google.accompanist.pager.ExperimentalPagerApi
+
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
@@ -17,7 +17,7 @@ import ireader.i18n.resources.MR
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalPagerApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalMaterialApi
 @Composable
 fun BottomTabComposable(

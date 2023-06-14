@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.google.accompanist.pager.ExperimentalPagerApi
+
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.Category
 import ireader.i18n.localize
@@ -23,7 +23,7 @@ import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
-@ExperimentalPagerApi
+
 @ExperimentalAnimationApi
 @OptIn(
     ExperimentalMaterialApi::class

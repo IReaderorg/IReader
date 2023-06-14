@@ -1,5 +1,6 @@
 package ireader.presentation.ui.home.library.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
@@ -9,24 +10,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.PagerState
-import ireader.domain.models.entities.BookItem
-import ireader.domain.models.entities.CategoryWithCount
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.DisplayMode.Companion.displayMode
+import ireader.domain.models.entities.BookItem
+import ireader.domain.models.entities.CategoryWithCount
 import ireader.presentation.ui.component.isLandscape
 import ireader.presentation.ui.component.list.LayoutComposable
 import ireader.presentation.ui.component.list.scrollbars.ILazyColumnScrollbar
-import ireader.presentation.ui.component.list.scrollbars.LazyColumnScrollbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun LibraryPager(
-    pagerState: PagerState,
+    pagerState: androidx.compose.foundation.pager.PagerState,
     onClick: (book: BookItem) -> Unit,
     onLongClick: (BookItem) -> Unit = {},
     goToLatestChapter: (book: BookItem) -> Unit = {},
@@ -43,8 +40,8 @@ internal fun LibraryPager(
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
 
     ) {
-    HorizontalPager(
-        count = pageCount,
+    androidx.compose.foundation.pager.HorizontalPager(
+        pageCount = pageCount,
         state = pagerState,
     ) { page ->
         val books by onPageChange(page)

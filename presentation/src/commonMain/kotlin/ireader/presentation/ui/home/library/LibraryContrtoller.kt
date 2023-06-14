@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalPagerApi::class)
-
 package ireader.presentation.ui.home.library
 
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -8,15 +6,13 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.google.accompanist.pager.ExperimentalPagerApi
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.toBookCategory
-import ireader.domain.utils.removeIf
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun LibraryController(
         modifier: Modifier,

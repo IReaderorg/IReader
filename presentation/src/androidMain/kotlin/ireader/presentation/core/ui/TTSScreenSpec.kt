@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.google.accompanist.pager.ExperimentalPagerApi
 import ireader.core.log.Log
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.models.prefs.readerThemes
@@ -88,7 +87,7 @@ actual class TTSScreenSpec actual constructor(
 
 
     @OptIn(
-        ExperimentalMaterialApi::class, ExperimentalPagerApi::class,
+        ExperimentalMaterialApi::class,
         ExperimentalMaterial3Api::class
     )
     @Composable

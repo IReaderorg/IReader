@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.TabRowDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -24,9 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.PagerState
-import com.google.accompanist.pager.pagerTabIndicatorOffset
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
@@ -43,23 +39,16 @@ import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
-@ExperimentalPagerApi
+
 @ExperimentalMaterialApi
 @Composable
 fun Tabs(libraryTabs: List<TabItem>, pagerState: androidx.compose.foundation.pager.PagerState) {
     val scope = rememberCoroutineScope()
     // OR ScrollableTabRow()
-    androidx.compose.material.TabRow(
+    androidx.compose.material3.TabRow(
         selectedTabIndex = pagerState.currentPage,
-        backgroundColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.colorScheme.background,
         contentColor = MaterialTheme.colorScheme.contentColor,
-        indicator = { tabPositions ->
-            TabRowDefaults.Indicator(
-                Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
-                color = MaterialTheme.colorScheme.primary,
-
-                )
-        }
     ) {
         libraryTabs.forEachIndexed { index, tab ->
             Tab(
@@ -73,13 +62,13 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: androidx.compose.foundation.pag
     }
 }
 
-@ExperimentalPagerApi
+@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalMaterialApi
 @Composable
 fun ScrollableTabs(
     modifier: Modifier = Modifier,
     libraryTabs: List<String>,
-    pagerState: PagerState,
+    pagerState: androidx.compose.foundation.pager.PagerState,
     visible: Boolean = true,
 ) {
     val scope = rememberCoroutineScope()
@@ -89,21 +78,12 @@ fun ScrollableTabs(
         enter = expandVertically(),
         exit = shrinkVertically()
     ) {
-        androidx.compose.material.ScrollableTabRow(
+        androidx.compose.material3.ScrollableTabRow(
             modifier = modifier,
             selectedTabIndex = pagerState.currentPage,
-            backgroundColor = AppColors.current.bars,
+            containerColor = AppColors.current.bars,
             contentColor = AppColors.current.onBars,
             edgePadding = 0.dp,
-            indicator = { tabPositions ->
-                TabRowDefaults.Indicator(
-                    Modifier
-                        .fillMaxWidth()
-                        .pagerTabIndicatorOffset(pagerState, tabPositions),
-                    color = MaterialTheme.colorScheme.primary,
-
-                )
-            }
         ) {
             libraryTabs.forEachIndexed { index, tab ->
                 Tab(
