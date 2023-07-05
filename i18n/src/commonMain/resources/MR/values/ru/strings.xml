@@ -416,4 +416,5 @@
     <string name="owner">Владелец</string>
     <string name="repository_adding_a_new">Добавление нового репозитория</string>
     <string name="saved_local_source_location">Сохраненные источники в кэше</string>
+    <string name="bionic_reading">Bionic Reading mode</string>
 </resources>
