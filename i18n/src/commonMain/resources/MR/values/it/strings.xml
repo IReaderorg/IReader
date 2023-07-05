@@ -418,4 +418,5 @@
     <string name="exit_search_mode">Esci dalla modalità di ricerca</string>
     <string name="fetch_book">Prendi il libro</string>
     <string name="fetch_chapter">Recupera capitolo</string>
+    <string name="bionic_reading">Bionic Reading mode</string>
 </resources>
