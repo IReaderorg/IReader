@@ -418,4 +418,5 @@
     <string name="layout">Layout</string>
     <string name="retry">Prøve igen</string>
     <string name="delete_all_histories">Slet alle historier</string>
+    <string name="bionic_reading">Bionic Reading mode</string>
 </resources>
