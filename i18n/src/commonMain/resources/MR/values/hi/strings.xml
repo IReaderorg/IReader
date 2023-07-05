@@ -418,4 +418,5 @@
     <string name="pinned_sources">पिन की गई</string>
     <string name="last_used_source">आखरी इस्त्तमाल किया गया</string>
     <string name="dismiss">नकार देना</string>
+    <string name="bionic_reading">Bionic Reading mode</string>
 </resources>
