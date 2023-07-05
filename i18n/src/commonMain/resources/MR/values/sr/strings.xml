@@ -404,4 +404,17 @@
     <string name="use_default_image_loader">Use the Default Image Loader</string>
     <string name="dialog_remove_chapter_history_description">This will remove the read date of this chapter. Are you sure\?</string>
     <string name="dialog_remove_chapter_book_description">This will remove the read date of this book. Are you sure\?</string>
+    <string name="backup_created_successfully">Create Backup Successfully</string>
+    <string name="no_data_found_error">No Data was Found.</string>
+    <string name="cant_get_content">Can\'t Get The Chapter Content.</string>
+    <string name="did_not_get_anything">I did\'t get anythinh.</string>
+    <string name="this_is_last_chapter">This is the last chapter</string>
+    <string name="download_notifier_downloader_title">Downloader</string>
+    <string name="trying_to_fetch_chapters_content">Trying to fetch chapter\'s content…</string>
+    <string name="this_is_first_chapter">This is the first chapter</string>
+    <string name="download_notifier_title_error">Error</string>
+    <string name="create_backup">Create Backup</string>
+    <string name="no_chapters_found_error">There is no chapters here.</string>
+    <string name="noInternetError">Could\'t Read Server, Check Your Internet Connection.</string>
+    <string name="no_chapter_is_available">No Chapter is Available.</string>
 </resources>
