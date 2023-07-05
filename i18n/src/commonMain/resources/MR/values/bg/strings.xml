@@ -418,4 +418,5 @@
     <string name="website">IReader</string>
     <string name="more_brightness">Повече яркост</string>
     <string name="custom">Персонализиран</string>
+    <string name="bionic_reading">Bionic Reading mode</string>
 </resources>
