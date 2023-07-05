@@ -416,4 +416,5 @@
     <string name="interval">Aralık</string>
     <string name="offset">Ofset</string>
     <string name="letter">Mektup</string>
+    <string name="bionic_reading">Bionic Reading mode</string>
 </resources>
