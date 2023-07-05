@@ -416,4 +416,5 @@
     <string name="play">播放</string>
     <string name="popular_book">最受欢迎</string>
     <string name="go">进展</string>
+    <string name="bionic_reading">Bionic Reading mode</string>
 </resources>
