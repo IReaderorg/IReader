@@ -418,4 +418,5 @@
     <string name="clear_all_cache">మొత్తం కాష్‌ను క్లియర్ చేయండి</string>
     <string name="font_size">ఫాంట్ పరిమాణం</string>
     <string name="no_data_found_error">డేటా ఏదీ కనుగొనబడలేదు.</string>
+    <string name="bionic_reading">Bionic Reading mode</string>
 </resources>
