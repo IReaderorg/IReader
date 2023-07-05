@@ -418,4 +418,5 @@
     <string name="presents">presentes</string>
     <string name="uncategorized_category">Predefinição</string>
     <string name="last_used_source">Usado por último</string>
+    <string name="bionic_reading">Bionic Reading mode</string>
 </resources>
