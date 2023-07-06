@@ -418,4 +418,5 @@
     <string name="font_size">የቅርጸ ቁምፊ መጠን</string>
     <string name="font_weight">የቅርጸ ቁምፊ ክብደት</string>
     <string name="font">ቅርጸ-ቁምፊ</string>
+    <string name="bionic_reading">Bionic Reading mode</string>
 </resources>

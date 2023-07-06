@@ -418,4 +418,5 @@
     <string name="resume">ΒΙΟΓΡΑΦΙΚΟ</string>
     <string name="remove">Αφαιρώ</string>
     <string name="dialog_remove_chapter_book_description">Αυτό θα καταργήσει την ημερομηνία ανάγνωσης αυτού του βιβλίου. Είσαι σίγουρος\?</string>
+    <string name="bionic_reading">Bionic Reading mode</string>
 </resources>

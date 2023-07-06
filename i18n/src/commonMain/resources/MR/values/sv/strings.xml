@@ -416,4 +416,5 @@
     <string name="uncategorized">Okategoriserade</string>
     <string name="uncategorized_category">Standard</string>
     <string name="source">Källa</string>
+    <string name="bionic_reading">Bionic Reading mode</string>
 </resources>

@@ -418,4 +418,5 @@
     <string name="label_text_reader">Чыталка тэксту</string>
     <string name="latest_book">Апошні</string>
     <string name="source_not_available">гэтая крыніца недаступная на вашай прыладзе.</string>
+    <string name="bionic_reading">Bionic Reading mode</string>
 </resources>

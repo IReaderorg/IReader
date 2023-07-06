@@ -418,4 +418,5 @@
     <string name="restore">Obnovit</string>
     <string name="custom_brightness">Vlastní jas</string>
     <string name="history_screen_label">Dějiny</string>
+    <string name="bionic_reading">Bionic Reading mode</string>
 </resources>

@@ -418,4 +418,5 @@
     <string name="uninstalled_failed">Odinstalowanie nie powiodło się</string>
     <string name="refreshed">Odświeżony</string>
     <string name="label_more">Załaduj więcej</string>
+    <string name="bionic_reading">Bionic Reading mode</string>
 </resources>

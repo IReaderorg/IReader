@@ -418,4 +418,5 @@
     <string name="refresh">புதுப்பிப்பு</string>
     <string name="description_placeholder">விளக்கம் இல்லை</string>
     <string name="relative_time_today">இன்று</string>
+    <string name="bionic_reading">Bionic Reading mode</string>
 </resources>

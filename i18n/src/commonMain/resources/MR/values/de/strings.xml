@@ -418,4 +418,5 @@
     <string name="chapters_was_cleared">Kapitel wurde gelöscht</string>
     <string name="database_was_cleared">Datenbank wurde gelöscht.</string>
     <string name="clear_all_chapters">Schließe alle Kapitel ab</string>
+    <string name="bionic_reading">Bionic Reading mode</string>
 </resources>

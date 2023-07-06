@@ -418,4 +418,5 @@
     <string name="clear_all_cache">Barcha keshni tozalash</string>
     <string name="bottom">Pastki</string>
     <string name="weekly">Haftalik</string>
+    <string name="bionic_reading">Bionic Reading mode</string>
 </resources>
