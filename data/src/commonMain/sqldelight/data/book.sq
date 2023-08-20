@@ -35,14 +35,14 @@ findInLibraryBooks:
 SELECT  * FROM book WHERE favorite = 1;
 
 findBookById:
-SELECT  * FROM book WHERE _id = ?;
+SELECT  * FROM book WHERE _id = ?  LIMIT 1;
 
 
 findBook:
-SELECT * FROM book WHERE url = :url AND source = :sourceId;
+SELECT * FROM book WHERE url = :url AND source = :sourceId  LIMIT 1;
 
 findBookByKey:
-SELECT * FROM book WHERE url = :url;
+SELECT * FROM book WHERE url = :url LIMIT 1;
 
 searchBook:
 SELECT * FROM book WHERE title LIKE '%' || :query || '%' AND favorite = 1;

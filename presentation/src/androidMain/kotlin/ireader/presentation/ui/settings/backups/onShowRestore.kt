@@ -11,7 +11,7 @@ import ireader.domain.models.common.Uri
 import ireader.domain.utils.extensions.convertLongToTime
 import ireader.domain.utils.extensions.launchIO
 import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
-import java.util.*
+import java.util.Calendar
 
 @Composable
 actual fun OnShowRestore(show: Boolean, onFileSelected:suspend  (Uri) -> Unit) {
@@ -27,11 +27,11 @@ actual fun OnShowRestore(show: Boolean, onFileSelected:suspend  (Uri) -> Unit) {
         }
     LaunchedEffect(show) {
         if(show) {
-            val mimeTypes = arrayOf("application/gzip")
+            val mimeTypes = arrayOf("*")
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
                 .addCategory(Intent.CATEGORY_OPENABLE)
-                .setType("application/*")
-                .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+                .setType("*/*")
+                //.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
                 .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             onRestore.launch(intent)
