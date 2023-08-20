@@ -24,7 +24,7 @@
     <string name="auto">Auto</string>
     <string name="add_to_library">Add to Library</string>
     <string name="fetch">Fetch</string>
-    <string name="drawer">drawer</string>
+    <string name="drawer">Drawer</string>
     <string name="delete">Delete</string>
     <string name="theme_was_saved">Theme was saved</string>
     <string name="selected_scrollbar_color">Selected ScrollBar Color</string>
@@ -136,8 +136,8 @@
     <string name="clear_all_chapters">Clear All Chapters</string>
     <string name="content">Content</string>
     <string name="select">Select</string>
-    <string name="url">url</string>
-    <string name="data">data</string>
+    <string name="url">Url</string>
+    <string name="data">Data</string>
     <string name="saved_local_source_location">Saved Sources to Cache</string>
     <string name="category">Categories</string>
     <string name="the_downloads_was_cancelled">The Downloads was Cancelled</string>

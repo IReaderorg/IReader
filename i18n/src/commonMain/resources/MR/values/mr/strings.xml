@@ -97,7 +97,7 @@
     <string name="last_used_source">Last Used</string>
     <string name="installer_mode">Installer Mode</string>
     <string name="package_manager">Package Manager</string>
-    <string name="drawer">drawer</string>
+    <string name="drawer">Drawer</string>
     <string name="scrollbar_color">ScrollBar Color</string>
     <string name="speech_rate">Speech Rate</string>
     <string name="enable_sleep_timer">Sleep Mode</string>
@@ -228,7 +228,7 @@
     <string name="name">Name</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
-    <string name="url">url</string>
+    <string name="url">Url</string>
     <string name="owner">Owner</string>
     <string name="this_is_last_chapter">This is the last chapter</string>
     <string name="download_notifier_downloader_title">Downloader</string>
@@ -253,7 +253,7 @@
     <string name="import_epub">Import Epub</string>
     <string name="chapters_was_cleared">Chapters was cleared</string>
     <string name="database_was_cleared">Database was cleared.</string>
-    <string name="data">data</string>
+    <string name="data">Data</string>
     <string name="clear_not_in_library_books">Clear All not in library books</string>
     <string name="clear_all_cover_cache">Clear All Cover Cache</string>
     <string name="clear_all_cache">Clear All Cache</string>

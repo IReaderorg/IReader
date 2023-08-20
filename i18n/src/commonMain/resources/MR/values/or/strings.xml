@@ -102,7 +102,7 @@
     <string name="security">Security</string>
     <string name="secure_screen">Secure Screen</string>
     <string name="import_epub">Import Epub</string>
-    <string name="data">data</string>
+    <string name="data">Data</string>
     <string name="hide">Hide</string>
     <string name="bottom_left">Bottom Left</string>
     <string name="alignment">Alignment</string>
@@ -238,7 +238,7 @@
     <string name="on">On</string>
     <string name="auto">Auto</string>
     <string name="added_to_library">Added to Library</string>
-    <string name="drawer">drawer</string>
+    <string name="drawer">Drawer</string>
     <string name="toggle_in_library">toggle in library</string>
     <string name="continue_reading">Continue Reading</string>
     <string name="read">Read</string>
@@ -264,7 +264,7 @@
     <string name="installation_error_aborted">PackageManger: Cancelled</string>
     <string name="installation_error_invalid">PackageManger: There is another apk installed with higher version than this package</string>
     <string name="installation_error_Storage">PackageManger: InSufficient Storage</string>
-    <string name="url">url</string>
+    <string name="url">Url</string>
     <string name="did_not_get_anything">I did\'t get anythinh।</string>
     <string name="trying_to_fetch_chapters_content">Trying to fetch chapter\'s content…</string>
     <string name="trying_to_fetch">Trying to fetch…</string>

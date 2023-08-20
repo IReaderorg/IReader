@@ -46,7 +46,7 @@
     <string name="check_the_update">Check the Update</string>
     <string name="check_permissions">Check Permissions</string>
     <string name="selected_scrollbar_color">Selected ScrollBar Color</string>
-    <string name="url">url</string>
+    <string name="url">Url</string>
     <string name="name">Name</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
@@ -125,8 +125,8 @@
     <string name="update_notification">Application Updates</string>
     <string name="library_updates_notification">Library Updates</string>
     <string name="paragraph">Paragraph</string>
-    <string name="drawer">drawer</string>
-    <string name="data">data</string>
+    <string name="drawer">Drawer</string>
+    <string name="data">Data</string>
     <string name="menu">Menu</string>
     <string name="layout">Layout</string>
     <string name="restoredSuccessfully">The Backup Restored Successfully.</string>

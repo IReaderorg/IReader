@@ -168,7 +168,7 @@
     <string name="secure_screen">Secure Screen</string>
     <string name="tracking">Tracking</string>
     <string name="label_recent_updates">Recent Updates</string>
-    <string name="url">url</string>
+    <string name="url">Url</string>
     <string name="popular_book">Most Popular</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="update_notification">Application Updates</string>
@@ -288,7 +288,7 @@
     <string name="settings">Settings</string>
     <string name="menu">Menu</string>
     <string name="layout">Layout</string>
-    <string name="data">data</string>
+    <string name="data">Data</string>
     <string name="hour">Day</string>
     <string name="days">Hour</string>
     <string name="weeks">Week</string>
@@ -387,7 +387,7 @@
     <string name="loading">Loading</string>
     <string name="the_downloads_was_cancelled">The Downloads was Cancelled</string>
     <string name="failed_to_download">Failed to Download</string>
-    <string name="drawer">drawer</string>
+    <string name="drawer">Drawer</string>
     <string name="use_local_cache">Use Local Cache</string>
     <string name="show_history">Show History</string>
     <string name="night_mode">Night Mode</string>

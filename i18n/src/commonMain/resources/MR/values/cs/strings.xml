@@ -131,7 +131,7 @@
     <string name="installation_error_incompatible">PackageManger: Nekompatibilní s nainstalovaným balíčkem</string>
     <string name="installation_error_conflicted">PackageManger: Konflikt s nainstalovaným balíčkem</string>
     <string name="installation_error_blocked">PackageManger: Instalační program byl zablokován</string>
-    <string name="url">url </string>
+    <string name="url">Url</string>
     <string name="name">název</string>
     <string name="username">Uživatelské jméno</string>
     <string name="password">Heslo</string>
@@ -328,7 +328,8 @@
     <string name="second">Druhý</string>
     <string name="minutes">Minuta</string>
     <string name="hour">Den</string>
-    <string name="data">data </string>
+    data
+    <string name="data">Data</string>
     <string name="off">Vypnuto</string>
     <string name="on">Na</string>
     <string name="auto">Auto</string>
@@ -337,8 +338,12 @@
     <string name="theme_was_deleted">Motiv byl smazán</string>
     <string name="reverse_chapter_in_db">Reverzní kapitoly v DB</string>
     <string name="reverse">Zvrátit</string>
-    <string name="dialog_remove_chapter_book_description">Tímto odeberete datum přečtení této knihy. Jsi si jistá\?</string>
-    <string name="dialog_remove_chapter_books_description">Tím odeberete datum přečtení všech knih. Jsi si jistá\?</string>
+    <string name="dialog_remove_chapter_book_description">Tímto odeberete datum přečtení této knihy.
+        Jsi si jistá\?
+    </string>
+    <string name="dialog_remove_chapter_books_description">Tím odeberete datum přečtení všech knih.
+        Jsi si jistá\?
+    </string>
     <string name="enable_sleep_timer">Režim spánku</string>
     <string name="full">Úplný</string>
     <string name="mark_as_read">Označit jako přečtené</string>

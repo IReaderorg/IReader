@@ -8,7 +8,7 @@
     <string name="more_brightness">More Brightness</string>
     <string name="custom">Custom</string>
     <string name="open_last_chapter">Open last chapter</string>
-    <string name="url">url</string>
+    <string name="url">Url</string>
     <string name="name">Name</string>
     <string name="username">Username</string>
     <string name="channel_new_chapters">Chapter updates</string>
@@ -175,7 +175,7 @@
     <string name="show_category_tabs">Show Category Tabs</string>
     <string name="unread_chapters">Unread chapters</string>
     <string name="go_to_last_chapter">Go to last chapter</string>
-    <string name="drawer">drawer</string>
+    <string name="drawer">Drawer</string>
     <string name="something_is_wrong_with_this_chapter">Something is wrong with this chapter.</string>
     <string name="latest_book">Latest</string>
     <string name="source_not_available">this Source is not available in your device.</string>
@@ -359,7 +359,7 @@
     <string name="auto_backup">Auto backup</string>
     <string name="import_epub">Import Epub</string>
     <string name="chapters_was_cleared">Chapters was cleared</string>
-    <string name="data">data</string>
+    <string name="data">Data</string>
     <string name="database_was_cleared">Database was cleared.</string>
     <string name="clear_all_chapters">Clear All Chapters</string>
     <string name="clear_all_database">Clear All Database</string>

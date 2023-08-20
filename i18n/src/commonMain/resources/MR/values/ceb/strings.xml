@@ -22,7 +22,7 @@
     <string name="show_update">Ipakita ang Update</string>
     <string name="confirm_exit">Kumpirma ang Exit</string>
     <string name="installer_mode">Mode sa Pag-install</string>
-    <string name="drawer">drawer </string>
+    <string name="drawer">Drawer</string>
     <string name="add_to_library">Idugang sa Library</string>
     <string name="delete_custom_theme">I-delete ang custom nga tema</string>
     <string name="scrollbar_color">Kolor sa ScrollBar</string>
@@ -53,7 +53,7 @@
     <string name="by_source">Pinaagi sa Tinubdan</string>
     <string name="by_date_fetched">Pinaagi sa petsa gikuha</string>
     <string name="by_date_uploaded">Pinaagi sa petsa Gi-upload</string>
-    <string name="url">url </string>
+    <string name="url">Url</string>
     <string name="name">Ngalan</string>
     <string name="username">Username</string>
     <string name="channel_app_updates">Mga update sa app</string>
@@ -353,11 +353,13 @@
     <string name="maximum_backups">Maximum nga pag-backup</string>
     <string name="auto_backup">Auto backup</string>
     <string name="import_epub">Import nga Epub</string>
-    <string name="data">data </string>
+    data
+    <string name="data">Data</string>
     <string name="chapters_was_cleared">Ang mga kapitulo gilimpyohan</string>
     <string name="database_was_cleared">Ang database gi-clear.</string>
     <string name="clear_all_chapters">Klaroha ang Tanang Kapitulo</string>
-    <string name="clear_not_in_library_books">Klaro ang Tanan nga wala sa mga libro sa librarya</string>
+    <string name="clear_not_in_library_books">Klaro ang Tanan nga wala sa mga libro sa librarya
+    </string>
     <string name="clear_all_cover_cache">Kuhaa ang Tanan nga Cover Cache</string>
     <string name="clear_all_cache">Hawani ang Tanan nga Cache</string>
     <string name="unlock_app">Unlock</string>

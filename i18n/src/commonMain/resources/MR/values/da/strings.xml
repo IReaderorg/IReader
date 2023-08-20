@@ -29,7 +29,7 @@
     <string name="installation_error_conflicted">PackageManger: Konflikt med installeret pakke</string>
     <string name="installation_error_blocked">PackageManger: Installationsprogrammet blev blokeret</string>
     <string name="url_is_invalid">URL er ugyldig</string>
-    <string name="url">url </string>
+    <string name="url">Url</string>
     <string name="name">Navn</string>
     <string name="username">Brugernavn</string>
     <string name="password">Adgangskode</string>
@@ -391,7 +391,8 @@
     <string name="maximum_backups">Maksimal sikkerhedskopiering</string>
     <string name="auto_backup">Automatisk backup</string>
     <string name="import_epub">Importer Epub</string>
-    <string name="data">data </string>
+    data
+    <string name="data">Data</string>
     <string name="chapters_was_cleared">Kapitlerne blev ryddet</string>
     <string name="database_was_cleared">Databasen blev ryddet.</string>
     <string name="clear_all_chapters">Ryd alle kapitler</string>

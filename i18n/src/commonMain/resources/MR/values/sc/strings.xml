@@ -59,7 +59,7 @@
     <string name="installation_error_incompatible">PackageManger: Incompatible with installed package</string>
     <string name="name">Name</string>
     <string name="username">Username</string>
-    <string name="url">url</string>
+    <string name="url">Url</string>
     <string name="noInternetError">Could\'t Read Server, Check Your Internet Connection.</string>
     <string name="no_chapter_is_available">No Chapter is Available.</string>
     <string name="no_data_found_error">No Data was Found.</string>
@@ -188,7 +188,7 @@
     <string name="installer_mode">Installer Mode</string>
     <string name="local_installer">Local Installer</string>
     <string name="use_auth">Require unlock</string>
-    <string name="drawer">drawer</string>
+    <string name="drawer">Drawer</string>
     <string name="hour">Day</string>
     <string name="days">Hour</string>
     <string name="weeks">Week</string>
@@ -287,7 +287,7 @@
     <string name="origin_language">Origin Language</string>
     <string name="target_language">Target Language</string>
     <string name="query_must_not_be_empty">query must not be empty.</string>
-    <string name="data">data</string>
+    <string name="data">Data</string>
     <string name="import_epub">Import Epub</string>
     <string name="chapters_was_cleared">Chapters was cleared</string>
     <string name="uninstall">Uninstall</string>

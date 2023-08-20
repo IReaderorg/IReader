@@ -50,7 +50,7 @@
     <string name="open_tts_screen">View</string>
     <string name="update">Update</string>
     <string name="backup_and_restore">Backup and restore</string>
-    <string name="data">data</string>
+    <string name="data">Data</string>
     <string name="restore">Restore</string>
     <string name="automatic_backup">Automatic Backup</string>
     <string name="maximum_backups">Maximum backups</string>
@@ -221,7 +221,7 @@
     <string name="on">On</string>
     <string name="add_to_library">Add to Library</string>
     <string name="added_to_library">Added to Library</string>
-    <string name="drawer">drawer</string>
+    <string name="drawer">Drawer</string>
     <string name="toggle_in_library">toggle in library</string>
     <string name="continue_reading">Continue Reading</string>
     <string name="reset">Reset</string>
@@ -275,7 +275,7 @@
     <string name="name">Name</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
-    <string name="url">url</string>
+    <string name="url">Url</string>
     <string name="start">Start</string>
     <string name="error_unknown">An Unknown Error Happened.</string>
     <string name="no_error">No error</string>

@@ -126,7 +126,7 @@
     <string name="installation_error">Error while (un)installing package</string>
     <string name="installation_error_aborted">PackageManger: Cancelled</string>
     <string name="url_is_invalid">Url is invalid</string>
-    <string name="url">url</string>
+    <string name="url">Url</string>
     <string name="start">Start</string>
     <string name="error_unknown">An Unknown Error Happened.</string>
     <string name="no_error">No error</string>
@@ -157,7 +157,7 @@
     <string name="uninstall">Uninstall</string>
     <string name="auto_backup">Auto backup</string>
     <string name="import_epub">Import Epub</string>
-    <string name="data">data</string>
+    <string name="data">Data</string>
     <string name="chapters_was_cleared">Chapters was cleared</string>
     <string name="clear_all_database">Clear All Database</string>
     <string name="clear_not_in_library_books">Clear All not in library books</string>
@@ -242,7 +242,7 @@
     <string name="off">Off</string>
     <string name="on">On</string>
     <string name="auto">Auto</string>
-    <string name="drawer">drawer</string>
+    <string name="drawer">Drawer</string>
     <string name="toggle_in_library">toggle in library</string>
     <string name="continue_reading">Continue Reading</string>
     <string name="read">Read</string>

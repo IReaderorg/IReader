@@ -104,7 +104,7 @@
     <string name="channel_ext_updates">Extension updates</string>
     <string name="channel_crash_logs">Crash logs</string>
     <string name="uninstall">Uninstall</string>
-    <string name="data">data</string>
+    <string name="data">Data</string>
     <string name="maximum_backups">Maximum backups</string>
     <string name="import_epub">Import Epub</string>
     <string name="chapters_was_cleared">Chapters was cleared</string>
@@ -187,7 +187,7 @@
     <string name="selected_scrollbar_color">Selected ScrollBar Color</string>
     <string name="auto">Auto</string>
     <string name="add_to_library">Add to Library</string>
-    <string name="drawer">drawer</string>
+    <string name="drawer">Drawer</string>
     <string name="toggle_in_library">toggle in library</string>
     <string name="continue_reading">Continue Reading</string>
     <string name="reset">Reset</string>
@@ -235,7 +235,7 @@
     <string name="url_is_invalid">Url is invalid</string>
     <string name="password">Password</string>
     <string name="owner">Owner</string>
-    <string name="url">url</string>
+    <string name="url">Url</string>
     <string name="source">Source</string>
     <string name="by_name">By Name</string>
     <string name="trying_to_fetch">Trying to fetch…</string>

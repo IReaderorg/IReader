@@ -45,7 +45,7 @@
     <string name="fatal_error">Erro fatal para</string>
     <string name="installation_error_incompatible">PackageManger: incompatible co paquete instalado</string>
     <string name="installation_error_conflicted">PackageManger: en conflito co paquete instalado</string>
-    <string name="url">url </string>
+    <string name="url">Url</string>
     <string name="name">Nome</string>
     <string name="username">Nome de usuario</string>
     <string name="password">Contrasinal</string>

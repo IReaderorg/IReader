@@ -2,8 +2,8 @@
 kotlin = "1.8.20"
 gradle = "1.8.20"
 dokka = "1.7.20"
-coroutines = "1.6.4"
-serialization = "1.4.0"
+coroutines = "1.7.1"
+serialization = "1.5.0"
 datetime = "0.4.0"
 ksp = "1.8.20-1.0.10"
 

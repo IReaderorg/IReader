@@ -25,7 +25,7 @@
     <string name="daily">Daily</string>
     <string name="source">Source</string>
     <string name="by_name">By Name</string>
-    <string name="url">url</string>
+    <string name="url">Url</string>
     <string name="installation_error_Storage">PackageManger: InSufficient Storage</string>
     <string name="cant_get_content">Can\'t Get The Chapter Content.</string>
     <string name="download_notifier_download_finish">Download completed</string>
@@ -38,7 +38,7 @@
     <string name="restore">Restore</string>
     <string name="import_epub">Import Epub</string>
     <string name="chapters_was_cleared">Chapters was cleared</string>
-    <string name="data">data</string>
+    <string name="data">Data</string>
     <string name="database_was_cleared">Database was cleared.</string>
     <string name="clear_all_cache">Clear All Cache</string>
     <string name="unlock_app">Unlock</string>
@@ -96,7 +96,7 @@
     <string name="auto">Auto</string>
     <string name="add_to_library">Add to Library</string>
     <string name="added_to_library">Added to Library</string>
-    <string name="drawer">drawer</string>
+    <string name="drawer">Drawer</string>
     <string name="unknown">Unknown</string>
     <string name="no_data_found_error">No Data was Found.</string>
     <string name="security">Security</string>

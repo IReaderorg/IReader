@@ -356,7 +356,7 @@
     <string name="comfortable_layout">Kumportableng Grid</string>
     <string name="list_layout">Layout ng Listahan</string>
     <string name="cover_only_layout">Cover-only na grid</string>
-    <string name="drawer">drawer </string>
+    <string name="drawer">Drawer</string>
     <string name="added_to_library">Idinagdag sa Library</string>
     <string name="toggle_in_library">i-toggle sa library</string>
     <string name="book_name">Pangalan ng Aklat</string>
@@ -389,7 +389,8 @@
     <string name="maximum_backups">Pinakamataas na backup</string>
     <string name="auto_backup">Auto backup</string>
     <string name="import_epub">Mag-import ng Epub</string>
-    <string name="data">data </string>
+    data
+    <string name="data">Data</string>
     <string name="chapters_was_cleared">Na-clear ang mga kabanata</string>
     <string name="database_was_cleared">Na-clear ang database.</string>
     <string name="font">Font</string>

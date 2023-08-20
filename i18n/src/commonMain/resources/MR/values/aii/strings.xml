@@ -32,7 +32,7 @@
     <string name="minutes">Minute</string>
     <string name="hour">Day</string>
     <string name="days">Hour</string>
-    <string name="drawer">drawer</string>
+    <string name="drawer">Drawer</string>
     <string name="weeks">Week</string>
     <string name="weekly">Weekly</string>
     <string name="unselected_scrollbar_color">UnSelected ScrollBar Color</string>
@@ -96,7 +96,7 @@
     <string name="maximum_backups">Maximum backups</string>
     <string name="auto_backup">Auto backup</string>
     <string name="import_epub">Import Epub</string>
-    <string name="data">data</string>
+    <string name="data">Data</string>
     <string name="chapters_was_cleared">Chapters was cleared</string>
     <string name="reset_setting">Reset Setting</string>
     <string name="unlock_app">Unlock</string>
@@ -269,7 +269,7 @@
     <string name="start">Start</string>
     <string name="error_unknown">An Unknown Error Happened.</string>
     <string name="no_error">No error</string>
-    <string name="url">url</string>
+    <string name="url">Url</string>
     <string name="no_book_found_error">There is no book with this id.</string>
     <string name="no_chapters_found_error">There is no chapters here.</string>
     <string name="no_chapter_found_error">There is No chapter with this name.</string>

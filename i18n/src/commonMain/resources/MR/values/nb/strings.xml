@@ -385,7 +385,8 @@
     <string name="maximum_backups">Maksimal sikkerhetskopiering</string>
     <string name="auto_backup">Automatisk sikkerhetskopiering</string>
     <string name="import_epub">Importer Epub</string>
-    <string name="data">data </string>
+    data
+    <string name="data">Data</string>
     <string name="chapters_was_cleared">Kapitlene ble ryddet</string>
     <string name="database_was_cleared">Databasen ble tømt.</string>
     <string name="clear_all_chapters">Fjern alle kapitler</string>

@@ -146,7 +146,7 @@
     <string name="open_tts_screen">View</string>
     <string name="close">Close</string>
     <string name="update">Update</string>
-    <string name="data">data</string>
+    <string name="data">Data</string>
     <string name="offset">Offset</string>
     <string name="selectable_mode">Selectable mode</string>
     <string name="layout">Layout</string>
@@ -248,7 +248,7 @@
     <string name="by_date_fetched">By date fetched</string>
     <string name="by_date_uploaded">By date Uploaded</string>
     <string name="by_date_read">By read</string>
-    <string name="url">url</string>
+    <string name="url">Url</string>
     <string name="name">Name</string>
     <string name="username">Username</string>
     <string name="scroll_mode">Scroll Mode</string>
@@ -378,7 +378,7 @@
     <string name="read">Read</string>
     <string name="reset">Reset</string>
     <string name="fetch">Fetch</string>
-    <string name="drawer">drawer</string>
+    <string name="drawer">Drawer</string>
     <string name="epub">Epub</string>
     <string name="aborted">Success</string>
     <string name="downloading">Downloading</string>

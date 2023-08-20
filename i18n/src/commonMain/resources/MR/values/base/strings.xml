@@ -120,7 +120,7 @@
     <string name="off">Off</string>
     <string name="on">On</string>
     <string name="auto">Auto</string>
-    <string name="drawer">drawer </string>
+    <string name="drawer">Drawer</string>
     <string name="add_to_library">Add to Library</string>
     <string name="added_to_library">Added to Library</string>
     <string name="toggle_in_library">toggle in library</string>
@@ -214,7 +214,7 @@
     <string name="installation_error_conflicted">PackageManger: Conflicted with installed package</string>
     <string name="installation_error_blocked">PackageManger: Installer was blocked</string>
     <string name="url_is_invalid">Url is invalid</string>
-    <string name="url">url </string>
+    <string name="url">Url</string>
     <string name="name">Name</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
@@ -295,7 +295,8 @@
     <string name="maximum_backups">Maximum backups</string>
     <string name="auto_backup">Auto backup</string>
     <string name="import_epub">Import Epub</string>
-    <string name="data">data </string>
+    data
+    <string name="data">Data</string>
     <string name="chapters_was_cleared">Chapters was cleared</string>
     <string name="database_was_cleared">Database was cleared.</string>
     <string name="clear_all_chapters">Clear All Chapters</string>

@@ -86,7 +86,7 @@
     <string name="name">Name</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
-    <string name="url">url</string>
+    <string name="url">Url</string>
     <string name="owner">Owner</string>
     <string name="label_backup">restoring from Backup</string>
     <string name="label_library">Checking Library</string>
@@ -97,7 +97,7 @@
     <string name="label_recent_updates">Recent Updates</string>
     <string name="origin_language">Origin Language</string>
     <string name="target_language">Target Language</string>
-    <string name="data">data</string>
+    <string name="data">Data</string>
     <string name="automatic_backup">Automatic Backup</string>
     <string name="maximum_backups">Maximum backups</string>
     <string name="reset_reader_screen_settings">Reset Reader Screen Settings</string>
@@ -159,7 +159,7 @@
     <string name="retry">Retry</string>
     <string name="catalog_not_found_error">Can\'t found any Extensions.</string>
     <string name="select_between">Select Between</string>
-    <string name="drawer">drawer</string>
+    <string name="drawer">Drawer</string>
     <string name="completed">Completed</string>
     <string name="unable_to_get_package_version">Unable to get Package Version</string>
     <string name="downloaded">Downloaded</string>

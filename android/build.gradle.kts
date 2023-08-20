@@ -11,6 +11,7 @@ plugins {
     id("com.google.firebase.crashlytics")
     id("org.jetbrains.compose")
     id("com.google.devtools.ksp")
+    id("dev.icerock.mobile.multiplatform-resources")
 }
 
 val SUPPORTED_ABIS = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")

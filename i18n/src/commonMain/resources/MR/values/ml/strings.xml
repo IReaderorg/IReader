@@ -33,7 +33,7 @@
     <string name="minutes">Minute</string>
     <string name="hour">Day</string>
     <string name="on">On</string>
-    <string name="drawer">drawer</string>
+    <string name="drawer">Drawer</string>
     <string name="auto">Auto</string>
     <string name="add_to_library">Add to Library</string>
     <string name="continue_reading">Continue Reading</string>
@@ -67,7 +67,7 @@
     <string name="wait">Please Wait</string>
     <string name="success">Success</string>
     <string name="epub">Epub</string>
-    <string name="url">url</string>
+    <string name="url">Url</string>
     <string name="aborted">Success</string>
     <string name="name">Name</string>
     <string name="username">Username</string>
@@ -160,7 +160,7 @@
     <string name="label_backup">restoring from Backup</string>
     <string name="label_library">Checking Library</string>
     <string name="target_language">Target Language</string>
-    <string name="data">data</string>
+    <string name="data">Data</string>
     <string name="import_epub">Import Epub</string>
     <string name="chapters_was_cleared">Chapters was cleared</string>
     <string name="line">Line</string>

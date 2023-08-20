@@ -62,7 +62,7 @@
     <string name="channel_common">Common</string>
     <string name="channel_progress">Progress</string>
     <string name="channel_complete">Complete</string>
-    <string name="data">data</string>
+    <string name="data">Data</string>
     <string name="sources">Sources</string>
     <string name="backup">Backup</string>
     <string name="backup_and_restore">Backup and restore</string>
@@ -115,7 +115,7 @@
     <string name="restoredSuccessfully">The Backup Restored Successfully.</string>
     <string name="time_out_exception">The request was timed out.</string>
     <string name="uncategorized">Uncategorized</string>
-    <string name="drawer">drawer</string>
+    <string name="drawer">Drawer</string>
     <string name="source_not_available">this Source is not available in your device.</string>
     <string name="bionic_reading">Bionic Reading mode</string>
     <string name="selectable_mode">Selectable mode</string>
@@ -233,7 +233,7 @@
     <string name="empty_library">There is no book is Library, you can add books in the Explore screen.</string>
     <string name="installation_error_aborted">PackageManger: Cancelled</string>
     <string name="url_is_invalid">Url is invalid</string>
-    <string name="url">url</string>
+    <string name="url">Url</string>
     <string name="name">Name</string>
     <string name="username">Username</string>
     <string name="no_chapter_found_error">There is No chapter with this name.</string>

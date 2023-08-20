@@ -97,7 +97,7 @@
     <string name="installation_error_incompatible">PackageManager: Inkompatibel mit installiertem Paket</string>
     <string name="installation_error_conflicted">PackageManager: Konflikt mit installiertem Paket</string>
     <string name="installation_error_blocked">PackageManager: Installer wurde blockiert</string>
-    <string name="url">url </string>
+    <string name="url">Url</string>
     <string name="name">Name</string>
     <string name="username">Nutzername</string>
     <string name="password">Passwort</string>

@@ -13,7 +13,11 @@ plugins {
 }
 kotlin {
     android()
-    jvm("desktop")
+    jvm() {
+        compilations.all {
+            kotlinOptions.jvmTarget = "17"
+        }
+    }
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -28,12 +32,20 @@ kotlin {
                 compileOnly(compose.animationGraphics)
             }
         }
-        val desktopMain by getting {
+        val jvmMain by getting {
+            dependencies {
+                api(libs.moko.core)
+            }
         }
     }
 
 }
-
+dependencies {
+    commonMainApi("dev.icerock.moko:resources:0.23.0")
+//    commonMainApi("dev.icerock.moko:resources-compose:0.23.0") // for compose multiplatform
+//
+//    commonTestImplementation("dev.icerock.moko:resources-test:0.23.0")
+}
 
 android {
     namespace = "ireader.i18n"

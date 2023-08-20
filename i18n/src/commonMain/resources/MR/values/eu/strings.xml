@@ -117,7 +117,7 @@
     <string name="uncategorized_category">Default</string>
     <string name="pinned_sources">Pinned</string>
     <string name="package_manager">Package Manager</string>
-    <string name="drawer">drawer</string>
+    <string name="drawer">Drawer</string>
     <string name="local_installer">Local Installer</string>
     <string name="use_auth">Require unlock</string>
     <string name="landscape">Landscape</string>
@@ -180,7 +180,7 @@
     <string name="total_chapter">Total Chapters</string>
     <string name="installation_error">Error while (un)installing package</string>
     <string name="installation_error_incompatible">PackageManger: Incompatible with installed package</string>
-    <string name="url">url</string>
+    <string name="url">Url</string>
     <string name="name">Name</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
@@ -381,7 +381,7 @@
     <string name="read">Read</string>
     <string name="reset">Reset</string>
     <string name="reverse">Reverse</string>
-    <string name="data">data</string>
+    <string name="data">Data</string>
     <string name="maximum_backups">Maximum backups</string>
     <string name="auto_backup">Auto backup</string>
     <string name="import_epub">Import Epub</string>

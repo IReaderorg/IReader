@@ -9,7 +9,7 @@
     <string name="add_to_library">Add to Library</string>
     <string name="added_to_library">Added to Library</string>
     <string name="continue_reading">Continue Reading</string>
-    <string name="drawer">drawer</string>
+    <string name="drawer">Drawer</string>
     <string name="read">Read</string>
     <string name="reset">Reset</string>
     <string name="fetch">Fetch</string>
@@ -235,7 +235,7 @@
     <string name="owner">Owner</string>
     <string name="start">Start</string>
     <string name="error_unknown">An Unknown Error Happened.</string>
-    <string name="url">url</string>
+    <string name="url">Url</string>
     <string name="no_error">No error</string>
     <string name="no_book_found_error">There is no book with this id.</string>
     <string name="no_chapters_found_error">There is no chapters here.</string>
@@ -266,7 +266,7 @@
     <string name="installed">Installed</string>
     <string name="available">Available</string>
     <string name="sources">Sources</string>
-    <string name="data">data</string>
+    <string name="data">Data</string>
     <string name="clear_all_cover_cache">Clear All Cover Cache</string>
     <string name="clear_all_cache">Clear All Cache</string>
     <string name="reset_setting">Reset Setting</string>

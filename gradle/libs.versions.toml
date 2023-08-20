@@ -4,13 +4,13 @@ coroutines = "1.6.4"
 # Serialization
 json = "1.4.1"
 # Compose
-composeGradle = "1.4.0"
+composeGradle = "1.4.3"
 voyager = "1.0.0-rc06"
 accompanist = "0.25.2"
 googleAccompanist = "0.25.1"
 materialDialogs = "0.9.1"
 # Android
-androidGradle = "8.0.1"
+androidGradle = "8.1.0"
 core = "1.9.0"
 appCompat = "1.7.0-alpha02"
 activityCompose = "1.6.1"
@@ -47,7 +47,7 @@ immutableCollections = "0.3.5"
 kds = "3.4.0"
 
 # Localization
-moko = "0.22.3"
+moko = "0.23.0"
 # BuildConfigs
 buildconfig = "3.1.0"
 buildkonfig = "0.13.3"
@@ -60,8 +60,8 @@ proguard = "7.2.2"
 okhttp = "5.0.0-alpha.10"
 coil_version = "2.2.1"
 jsoup = "1.15.2"
-media3="1.0.0"
-dex2jar = "v61"
+media3 = "1.0.0"
+dex2jar = "v64"
 htmlunit = "3.0.0"
 
 
@@ -102,6 +102,7 @@ ktor-contentNegotiation-jackson = { module = "io.ktor:ktor-serialization-jackson
 
 
 moko-core = { module = "dev.icerock.moko:resources", version.ref  = "moko" }
+
 moko-gradle = { module = "dev.icerock.moko:resources-generator", version.ref  = "moko" }
 
 

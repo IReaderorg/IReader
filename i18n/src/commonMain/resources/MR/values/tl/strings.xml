@@ -254,7 +254,7 @@
     <string name="off">Naka-off</string>
     <string name="on">Naka-on</string>
     <string name="auto">Auto</string>
-    <string name="drawer">drawer </string>
+    <string name="drawer">Drawer</string>
     <string name="add_to_library">Idagdag sa Library</string>
     <string name="added_to_library">Idinagdag sa Library</string>
     <string name="toggle_in_library">i-toggle sa library</string>
@@ -410,7 +410,8 @@
     <string name="maximum_backups">Pinakamataas na backup</string>
     <string name="auto_backup">Auto backup</string>
     <string name="import_epub">Mag-import ng Epub</string>
-    <string name="data">data </string>
+    data
+    <string name="data">Data</string>
     <string name="pinned_sources">Naka-pin</string>
     <string name="last_used_source">Huling Ginamit</string>
     <string name="error">Error</string>

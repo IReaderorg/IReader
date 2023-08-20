@@ -24,7 +24,7 @@
     <string name="by_date_fetched">By date fetched</string>
     <string name="label_library">Checking Library</string>
     <string name="label_recent_updates">Recent Updates</string>
-    <string name="data">data</string>
+    <string name="data">Data</string>
     <string name="reset_reader_screen_settings">Reset Reader Screen Settings</string>
     <string name="font_size">Font Size</string>
     <string name="autoScroll">AutoScroll</string>
@@ -98,7 +98,7 @@
     <string name="immersive_mode">Immersive mode</string>
     <string name="show_webView_during_fetching">WebView Integration</string>
     <string name="label_text_reader">Text Reader</string>
-    <string name="url">url</string>
+    <string name="url">Url</string>
     <string name="bionic_reading">Bionic Reading mode</string>
     <string name="landscape">Landscape</string>
     <string name="find_current_chapter">Find Current Chapter</string>
@@ -332,7 +332,7 @@
     <string name="use_local_cache">Use Local Cache</string>
     <string name="appearance">Appearance</string>
     <string name="updater_is_enable">Updater</string>
-    <string name="drawer">drawer</string>
+    <string name="drawer">Drawer</string>
     <string name="use_auth">Require unlock</string>
     <string name="manage_notification">Manage Notification</string>
     <string name="confirm_exit_message">Press back again to exit</string>

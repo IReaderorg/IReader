@@ -5,6 +5,7 @@ plugins {
     id(kotlinx.plugins.kotlin.jvm.get().pluginId)
     id(libs.plugins.ksp.get().pluginId)
     id(libs.plugins.jetbrainCompose.get().pluginId)
+    id("dev.icerock.mobile.multiplatform-resources")
 }
 
 dependencies {
