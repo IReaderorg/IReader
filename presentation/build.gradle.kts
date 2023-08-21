@@ -49,6 +49,7 @@ kotlin {
                 api(libs.koin.core)
                 api(libs.koin.compose)
                 api(libs.imageLoader)
+                implementation(libs.lyricist.library)
             }
         }
         val jvmMain by creating {

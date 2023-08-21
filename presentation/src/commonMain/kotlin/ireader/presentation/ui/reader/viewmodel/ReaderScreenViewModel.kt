@@ -27,7 +27,7 @@ import ireader.domain.utils.extensions.async.prevBefore
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.NO_VALUE
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.core.theme.ReaderColors
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
@@ -142,7 +142,7 @@ class ReaderScreenViewModel(
                 }
         } else {
             scope.launch {
-                showSnackBar(UiText.MStringResource(MR.strings.something_is_wrong_with_this_book))
+                showSnackBar(UiText.MStringResource { it.somethingIsWrongWithThisBook })
             }
         }
     }

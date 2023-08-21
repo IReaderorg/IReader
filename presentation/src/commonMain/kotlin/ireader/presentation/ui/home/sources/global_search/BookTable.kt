@@ -8,7 +8,7 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 
@@ -17,10 +17,10 @@ import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposab
 fun BookTable() {
     Column {
         Row(modifier = Modifier.fillMaxSize()) {
-            MidSizeTextComposable(text = localize(MR.strings.book_name),)
+            MidSizeTextComposable(text = localize { xml -> xml.bookName })
             AppIconButton(
                 imageVector = Icons.Default.ArrowForward,
-                contentDescription = localize(MR.strings.open_explore),
+                contentDescription = localize { xml -> xml.openExplore },
             )
         }
     }

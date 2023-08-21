@@ -15,7 +15,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import io.ktor.http.*
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.PreferenceRow
@@ -33,15 +33,15 @@ class RepositoryScreenSpec : VoyagerScreen() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
-        val vm : SourceRepositoryViewModel =  getIViewModel()
+        val vm: SourceRepositoryViewModel = getIViewModel()
         val host = SnackBarListener(vm = vm)
         val navigator = LocalNavigator.currentOrThrow
 
         IScaffold(
             topBar = { scrollBehavior ->
                 Toolbar(
-                    title ={
-                        MidSizeTextComposable(text =  localize(MR.strings.repository))
+                    title = {
+                        MidSizeTextComposable(text = localize { xml -> xml.repository })
                     },
                     scrollBehavior = scrollBehavior
                 )
@@ -52,7 +52,9 @@ class RepositoryScreenSpec : VoyagerScreen() {
                 ExtendedFloatingActionButton(
                     text = {
                         MidSizeTextComposable(
-                            text = localize(MR.strings.add),
+                            text = localize { xml ->
+                                xml.add
+                            },
                             color = MaterialTheme.colorScheme.onSecondary
                         )
                     },
@@ -76,9 +78,9 @@ class RepositoryScreenSpec : VoyagerScreen() {
                 modifier = Modifier.padding(padding)
             ) {
                 items(vm.sources.value) { source ->
-                    PreferenceRow(title = source.visibleName(), subtitle = source.key , action = {
+                    PreferenceRow(title = source.visibleName(), subtitle = source.key, action = {
                         Row {
-                            if(source.id >= 0) {
+                            if (source.id >= 0) {
                                 AppIconButton(onClick = {
                                     vm.scope.launch {
                                         vm.catalogSourceRepository.delete(source)
@@ -95,6 +97,6 @@ class RepositoryScreenSpec : VoyagerScreen() {
 
             }
 
-    }
+        }
     }
 }

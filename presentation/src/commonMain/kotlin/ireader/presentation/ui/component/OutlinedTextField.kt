@@ -15,22 +15,24 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 
 
 @Composable
 fun CustomTextField(
-        modifier: Modifier = Modifier,
-        value: String = "",
-        onValueChange: (text: String) -> Unit,
-        onValueConfirm: (text: String) -> Unit,
-        paddingLeadingIconEnd: Dp = 0.dp,
-        paddingTrailingIconStart: Dp = 0.dp,
-        leadingIcon: (@Composable() () -> Unit)? = null,
-        trailingIcon: (@Composable() () -> Unit)? = null,
-        hint: String = localize(MR.strings.search_hint),
-        textColor: Color = MaterialTheme.colorScheme.onBackground,
+    modifier: Modifier = Modifier,
+    value: String = "",
+    onValueChange: (text: String) -> Unit,
+    onValueConfirm: (text: String) -> Unit,
+    paddingLeadingIconEnd: Dp = 0.dp,
+    paddingTrailingIconStart: Dp = 0.dp,
+    leadingIcon: (@Composable() () -> Unit)? = null,
+    trailingIcon: (@Composable() () -> Unit)? = null,
+    hint: String = localize { xml ->
+        xml.searchHint
+    },
+    textColor: Color = MaterialTheme.colorScheme.onBackground,
 ) {
 
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {

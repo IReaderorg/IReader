@@ -1,7 +1,14 @@
 package ireader.presentation.ui.book.viewmodel
 
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import ireader.core.log.Log
 import ireader.core.source.model.CommandList
 import ireader.domain.catalogs.interactor.GetLocalCatalog
@@ -16,13 +23,20 @@ import ireader.domain.usecases.services.ServiceUseCases
 import ireader.domain.utils.extensions.withIOContext
 import ireader.domain.utils.extensions.withUIContext
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
 import ireader.presentation.core.PlatformHelper
 import ireader.presentation.ui.home.explore.viewmodel.BooksState
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
-import java.util.*
+import java.util.Calendar
 
 
 class BookDetailViewModel(
@@ -81,7 +95,7 @@ class BookDetailViewModel(
 
         } else {
             scope.launch {
-                showSnackBar(UiText.MStringResource(MR.strings.something_is_wrong_with_this_book))
+                showSnackBar(UiText.MStringResource { xml -> xml.somethingIsWrongWithThisBook })
             }
         }
     }

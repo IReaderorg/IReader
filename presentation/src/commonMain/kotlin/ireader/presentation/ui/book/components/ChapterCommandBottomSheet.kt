@@ -29,7 +29,7 @@ import ireader.core.source.model.Command
 import ireader.core.source.model.CommandList
 import ireader.core.util.replace
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.reusable_composable.DropDownMenu
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.TextField
@@ -52,12 +52,18 @@ fun ChapterCommandBottomSheet(
             TextButton(onClick = {
                 onReset()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
-                MidSizeTextComposable(text = localize(MR.strings.reset), color = MaterialTheme.colorScheme.primary)
+                MidSizeTextComposable(
+                    text = localize { xml -> xml.reset },
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
             Button(onClick = {
                 onFetch()
             }, modifier = Modifier.width(92.dp), shape = RoundedCornerShape(4.dp)) {
-                MidSizeTextComposable(text = localize(MR.strings.fetch), color = MaterialTheme.colorScheme.onPrimary)
+                MidSizeTextComposable(
+                    text = localize { xml -> xml.fetch },
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
             }
         }
         Spacer(modifier = Modifier.height(16.dp))

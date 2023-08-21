@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
@@ -23,17 +23,19 @@ import ireader.presentation.ui.home.history.viewmodel.HistoryState
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryTopAppBar(
-        modifier: Modifier = Modifier,
-        vm: HistoryState,
-        onDeleteAll: () -> Unit,
-        scrollBehavior: TopAppBarScrollBehavior? = null
+    modifier: Modifier = Modifier,
+    vm: HistoryState,
+    onDeleteAll: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     Toolbar(
         title = {
             if (!vm.searchMode) {
-                BigSizeTextComposable(text = localize(MR.strings.history_screen_label))
+                BigSizeTextComposable(text = localize() { xml ->
+                    xml.historyScreenLabel
+                })
             } else {
                 AppTextField(
                     query = vm.searchQuery,
@@ -51,7 +53,9 @@ fun HistoryTopAppBar(
             if (vm.searchMode) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
-                    contentDescription = localize(MR.strings.close),
+                    contentDescription = localize() { xml ->
+                        xml.close
+                    },
                     onClick = {
                         vm.searchMode = false
                         vm.searchQuery = ""
@@ -61,14 +65,14 @@ fun HistoryTopAppBar(
             }
             AppIconButton(
                 imageVector = Icons.Default.Search,
-                contentDescription = localize(MR.strings.search),
+                contentDescription = localize { xml -> xml.search },
                 onClick = {
                     vm.searchMode = true
                 },
             )
             AppIconButton(
                 imageVector = Icons.Default.Delete,
-                contentDescription = localize(MR.strings.delete_all_histories),
+                contentDescription = localize { xml -> xml.deleteAllHistories },
                 onClick = {
                     onDeleteAll()
                 },
@@ -78,7 +82,9 @@ fun HistoryTopAppBar(
             if (vm.searchMode) {
                 AppIconButton(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = localize(MR.strings.toggle_search_mode_off),
+                    contentDescription = localize { xml ->
+                        xml.toggleSearchModeOff
+                    },
                     onClick = {
                         vm.searchMode = false
                         vm.searchQuery = ""

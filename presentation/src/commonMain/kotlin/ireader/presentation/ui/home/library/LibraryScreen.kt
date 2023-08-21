@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.Category
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.core.ui.EmptyScreen
 import ireader.presentation.ui.core.ui.LoadingScreen
 import ireader.presentation.ui.home.library.components.EditCategoriesDialog
@@ -97,7 +97,9 @@ fun LibraryScreen(
             when {
                 isLoading -> LoadingScreen()
                 isEmpty && vm.filters.value.isEmpty() -> EmptyScreen(
-                    text = localize(MR.strings.empty_library)
+                    text = localize { xml ->
+                        xml.emptyLibrary
+                    }
                 )
             }
         }

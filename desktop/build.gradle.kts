@@ -9,6 +9,7 @@ plugins {
 }
 
 dependencies {
+    implementation(libs.lyricist.library)
     implementation(project(Modules.coreApi))
     implementation(project(Modules.sourceApi))
     implementation(project(Modules.data))

@@ -17,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Chapter
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 
@@ -45,14 +45,14 @@ fun ChapterBar(
         Row {
             AppIconButton(
                 imageVector = Icons.Default.Search,
-                contentDescription = localize(MR.strings.search),
+                contentDescription = localize { xml -> xml.search },
                 onClick = {
                     vm.searchMode = !vm.searchMode
                 },
             )
             AppIconButton(
                 imageVector = Icons.Filled.Place,
-                contentDescription = localize(MR.strings.find_current_chapter),
+                contentDescription = localize { xml -> xml.findCurrentChapter },
                 onClick = onMap
             )
             AppIconButton(

@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.preferences.prefs.ChapterDisplayMode
 import ireader.i18n.asString
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.book.viewmodel.ChapterSort
 import ireader.presentation.ui.book.viewmodel.ChaptersFilters
@@ -182,10 +182,10 @@ private fun LazyListScope.DispalyPage(
 
                 when (layout) {
                     ChapterDisplayMode.SourceTitle -> {
-                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.source_title))
+                        MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.sourceTitle })
                     }
                     ChapterDisplayMode.ChapterNumber -> {
-                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.chapter_number))
+                        MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.chapterNumber })
                     }
                     else -> {}
                 }

@@ -37,7 +37,7 @@ import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.models.getDefaultFont
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+
 import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
@@ -379,10 +379,9 @@ data class ReaderScreenSpec(
                                     } else {
                                         scope.launch {
                                             vm.showSnackBar(
-                                                    UiText.MStringResource(
-                                                            MR.strings.this_is_last_chapter
-                                                    )
-                                            )
+                                                UiText.MStringResource() { xml ->
+                                                    xml.thisIsLastChapter
+                                                })
                                         }
                                     }
                                 },
@@ -411,9 +410,9 @@ data class ReaderScreenSpec(
                                         } else {
                                             scope.launch {
                                                 vm.showSnackBar(
-                                                        UiText.MStringResource(
-                                                                MR.strings.this_is_first_chapter
-                                                        )
+                                                    UiText.MStringResource() { xml ->
+                                                        xml.thisIsFirstChapter
+                                                    }
                                                 )
                                             }
                                         }

@@ -15,6 +15,8 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.util.Consumer
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
+import cafe.adriel.lyricist.ProvideStrings
+import cafe.adriel.lyricist.rememberStrings
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.NavigatorDisposeBehavior
 import com.seiko.imageloader.ImageLoaderFactory
@@ -27,11 +29,14 @@ import ireader.domain.usecases.backup.AutomaticBackup
 import ireader.domain.usecases.files.AndroidGetSimpleStorage
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.Args
+import ireader.i18n.LocalXmlStrings
+import ireader.i18n.LocalizeHelper
 import ireader.i18n.R
 import ireader.i18n.SHORTCUTS.SHORTCUT_DETAIL
 import ireader.i18n.SHORTCUTS.SHORTCUT_DOWNLOAD
 import ireader.i18n.SHORTCUTS.SHORTCUT_READER
 import ireader.i18n.SHORTCUTS.SHORTCUT_TTS
+import ireader.i18n.xmlStrings
 import ireader.presentation.core.DefaultNavigatorScreenTransition
 import ireader.presentation.core.MainStarterScreen
 import ireader.presentation.core.theme.AppTheme
@@ -61,35 +66,41 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     val initializers: AppInitializers by inject()
     private val automaticBackup: AutomaticBackup by inject()
     private val localeHelper: LocaleHelper by inject()
+    private val localizeHelper: LocalizeHelper by inject()
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        registerSecureActivity(this, uiPreferences,initializers)
+        registerSecureActivity(this, uiPreferences, initializers)
         getSimpleStorage.provideActivity(this, null)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         lifecycleScope.launchIO {
             automaticBackup.initialize()
         }
         Napier.base(DebugAntilog())
+
         localeHelper.setLocaleLang()
         installSplashScreen()
         setContent {
+            val lyricist = rememberStrings(xmlStrings)
+            ProvideStrings(lyricist, LocalXmlStrings) {
+                localizeHelper.Init()
                 CompositionLocalProvider(
-                        LocalImageLoader provides (this@MainActivity.application as ImageLoaderFactory).newImageLoader(),
+                    LocalImageLoader provides (this@MainActivity.application as ImageLoaderFactory).newImageLoader(),
                 ) {
                     AppTheme(this.lifecycleScope) {
                         Surface(
-                                color = MaterialTheme.colorScheme.surface,
-                                contentColor = MaterialTheme.colorScheme.onSurface,
+                            color = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
 
-                                ) {
+                            ) {
 
                             Navigator(
-                                    screen = MainStarterScreen,
-                                    disposeBehavior = NavigatorDisposeBehavior(
-                                            disposeNestedNavigators = false,
-                                            disposeSteps = true
-                                    ),
+                                screen = MainStarterScreen,
+                                disposeBehavior = NavigatorDisposeBehavior(
+                                    disposeNestedNavigators = false,
+                                    disposeSteps = true
+                                ),
                             ) { navigator ->
                                 if (navigator.size == 1) {
                                     ConfirmExit()
@@ -108,6 +119,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                         }
                     }
                 }
+            }
         }
     }
 
@@ -176,6 +188,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                 }
                 true
             }
+
             SHORTCUT_READER -> {
                 val bookId = intent.extras?.getLong(Args.ARG_BOOK_ID)
                 val chapterId = intent.extras?.getLong(Args.ARG_CHAPTER_ID)
@@ -185,6 +198,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                 }
                 true
             }
+
             SHORTCUT_DETAIL -> {
                 val bookId = intent.extras?.getLong(Args.ARG_BOOK_ID)
                 if (bookId != null) {
@@ -193,14 +207,17 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                 }
                 true
             }
+
             SHORTCUT_DOWNLOAD -> {
                 navigator.popUntilRoot()
                 navigator.push(DownloaderScreenSpec())
                 true
             }
+
             else -> false
         }
     }
+
     @Composable
     private fun ConfirmExit() {
         val scope = rememberCoroutineScope()
@@ -222,6 +239,10 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
 
 
 interface SecureActivityDelegate {
-    fun registerSecureActivity(activity: ComponentActivity, preferences: UiPreferences,initializers: AppInitializers)
+    fun registerSecureActivity(
+        activity: ComponentActivity,
+        preferences: UiPreferences,
+        initializers: AppInitializers
+    )
 }
 

@@ -1,4 +1,5 @@
 package ireader.presentation.ui.core.viewmodel
+
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import cafe.adriel.voyager.core.model.ScreenModel
@@ -7,10 +8,14 @@ import ireader.core.prefs.Preference
 import ireader.domain.utils.extensions.showSnackBar
 import ireader.i18n.UiEvent
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
 import ireader.presentation.ui.core.ui.PreferenceMutableState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 abstract class BaseViewModel : ScreenModel {
@@ -22,7 +27,9 @@ abstract class BaseViewModel : ScreenModel {
 
    open fun showSnackBar(message: UiText?) {
     scope.launch {
-      _eventFlow.showSnackBar(message ?: UiText.MStringResource(MR.strings.error_unknown))
+        _eventFlow.showSnackBar(message ?: UiText.MStringResource { xml ->
+            xml.errorUnknown
+        })
     }
   }
   override fun onDispose() {
@@ -61,7 +68,9 @@ abstract class BaseViewModel : ScreenModel {
 suspend fun MutableSharedFlow<UiEvent>.showSnackBar(message: UiText?) {
     this.emit(
             UiEvent.ShowSnackbar(
-                    uiText = message ?: UiText.MStringResource(MR.strings.error_unknown)
+                uiText = message ?: UiText.MStringResource { xml ->
+                    xml.errorUnknown
+                }
             )
     )
 }

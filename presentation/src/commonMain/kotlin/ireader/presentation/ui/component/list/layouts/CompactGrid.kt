@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.BookItem
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.list.isScrolledToTheEnd
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -89,7 +89,9 @@ fun CompactGridLayoutComposable(
                         }
 
                         if (showInLibraryBadge && book.favorite) {
-                            TextBadge(text = UiText.MStringResource(MR.strings.in_library))
+                            TextBadge(text = UiText.MStringResource { xml ->
+                                xml.inLibrary
+                            })
                         }
                     }
                 }

@@ -50,7 +50,7 @@ kds = "3.4.0"
 moko = "0.23.0"
 # BuildConfigs
 buildconfig = "3.1.0"
-buildkonfig = "0.13.3"
+buildkonfig = "0.14.0"
 # Linter
 kotlinter = "3.12.0"
 # Version updates
@@ -63,9 +63,15 @@ jsoup = "1.15.2"
 media3 = "1.0.0"
 dex2jar = "v64"
 htmlunit = "3.0.0"
-
+lyricist = "1.4.2"
 
 [libraries]
+
+lyricist-library = { module = "cafe.adriel.lyricist:lyricist", version.ref = "lyricist" }
+lyricist-processor = { module = "cafe.adriel.lyricist:lyricist-processor", version.ref = "lyricist" }
+lyricist-processorXml = { module = "cafe.adriel.lyricist:lyricist-processor-xml", version.ref = "lyricist" }
+
+
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
 gradle-tools = "com.android.tools.build:gradle:8.0.0"
 
@@ -101,9 +107,9 @@ ktor-contentNegotiation-kotlinx = { module = "io.ktor:ktor-serialization-kotlinx
 ktor-contentNegotiation-jackson = { module = "io.ktor:ktor-serialization-jackson", version.ref = "ktor" }
 
 
-moko-core = { module = "dev.icerock.moko:resources", version.ref  = "moko" }
+moko-core = { module = "dev.icerock.moko:resources", version.ref = "moko" }
 
-moko-gradle = { module = "dev.icerock.moko:resources-generator", version.ref  = "moko" }
+moko-gradle = { module = "dev.icerock.moko:resources-generator", version.ref = "moko" }
 
 
 okhttp-okhttp3 = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
@@ -145,10 +151,10 @@ dex2jar-tools = { module = "com.github.ThexXTURBOXx.dex2jar:dex-tools", version.
 sqldelight-runtime = { module = "com.squareup.sqldelight:runtime", version.ref = "sqldelight" }
 sqldelight-coroutines = { module = "com.squareup.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
 sqldelight-jvm = { module = "com.squareup.sqldelight:sqlite-driver", version.ref = "sqldelight" }
-sqldelight-android = { module = "com.squareup.sqldelight:android-driver", version.ref ="sqldelight" }
+sqldelight-android = { module = "com.squareup.sqldelight:android-driver", version.ref = "sqldelight" }
 sqldelight-gradle = { module = "com.squareup.sqldelight:gradle-plugin", version.ref = "sqldelight" }
-sqldelight-native = { module = "com.squareup.sqldelight:native-driver", version.ref ="sqldelight" }
-sqldelight-js = { module = "com.squareup.sqldelight:sqljs-driver", version.ref ="sqldelight" }
+sqldelight-native = { module = "com.squareup.sqldelight:native-driver", version.ref = "sqldelight" }
+sqldelight-js = { module = "com.squareup.sqldelight:sqljs-driver", version.ref = "sqldelight" }
 sqldelight-android-paging = { module = "com.squareup.sqldelight:android-paging3-extensions", version.ref = "sqldelight" }
 
 requerySqlite = "com.github.requery:sqlite-android:3.36.0"
@@ -181,24 +187,24 @@ multiplatformSettings-serialization = { module = "com.russhwolf:multiplatform-se
 
 [bundles]
 simplestorage = ["storage", "documentfile"]
-media3 = ["media3-core", "media3-ui", "media3-dash","media3-subtitleDecoder","media3-rtsp","media3-okhttp","media3-extractor","media3-transformer","media3-decoder","media3-datasource","media3-common", ]
-ireader = ["jsoup","ktor-core","ktor-core-cio","ktor-okhttp","ktor-contentNegotiation","ktor-contentNegotiation-gson","ktor-contentNegotiation-kotlinx","ktor-contentNegotiation-jackson","ktor-core-android"]
+media3 = ["media3-core", "media3-ui", "media3-dash", "media3-subtitleDecoder", "media3-rtsp", "media3-okhttp", "media3-extractor", "media3-transformer", "media3-decoder", "media3-datasource", "media3-common", ]
+ireader = ["jsoup", "ktor-core", "ktor-core-cio", "ktor-okhttp", "ktor-contentNegotiation", "ktor-contentNegotiation-gson", "ktor-contentNegotiation-kotlinx", "ktor-contentNegotiation-jackson", "ktor-core-android"]
 
 [plugins]
 # Android
-android-library = { id = "com.android.library", version.ref = "androidGradle"}
-android-application = { id = "com.android.application", version.ref = "androidGradle"}
+android-library = { id = "com.android.library", version.ref = "androidGradle" }
+android-application = { id = "com.android.application", version.ref = "androidGradle" }
 # Compose
 jetbrainCompose = { id = "org.jetbrains.compose", version.ref = "composeGradle" }
 # Ksp
-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 # Localization
-moko-gradle = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko"}
+moko-gradle = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko" }
 # BuildConfigs
-buildconfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig"}
-buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildkonfig"}
+buildconfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig" }
+buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildkonfig" }
 # Utility
-aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries"}
+aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
 sqldelight = { id = "com.squareup.sqldelight", version.ref = "sqldelight" }
 google = { id = "com.google.gms.google-services", version = "4.3.14" }
 moko = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko" }

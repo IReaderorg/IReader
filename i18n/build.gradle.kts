@@ -7,9 +7,9 @@ import java.util.*
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
-    id(libs.plugins.moko.gradle.get().pluginId)
     id("org.jetbrains.compose")
     id(libs.plugins.buildkonfig.get().pluginId)
+    id(libs.plugins.ksp.get().pluginId)
 }
 kotlin {
     android()
@@ -21,9 +21,9 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(libs.moko.core)
                 compileOnly(compose.runtime)
                 compileOnly(compose.ui)
+                implementation(libs.lyricist.library)
 
             }
         }
@@ -34,17 +34,45 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
-                api(libs.moko.core)
+
             }
         }
     }
 
 }
+
+ksp {
+    // Required
+    arg(
+        "lyricist.xml.resourcesPath",
+        kotlin.sourceSets.findByName("androidMain")!!.resources.srcDirs.first().absolutePath.replace(
+            "androidMain\\resources",
+            "androidMain\\res"
+        )
+    )
+
+    // Optional
+    arg("lyricist.packageName", "ireader.i18n")
+    arg("lyricist.xml.moduleName", "xml")
+    arg("lyricist.xml.defaultLanguageTag", "en")
+    arg("lyricist.internalVisibility", "true")
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().all {
+    if (name.startsWith("compileDebugKotlinAndroid")) { // the remaining suffix is the target eg simulator, arm64, etc
+        dependsOn("kspKotlinJvm")
+    }
+}
+kotlin.sourceSets.commonMain {
+    kotlin.srcDir("build/generated/ksp/jvm/jvmMain/kotlin")
+}
 dependencies {
-    commonMainApi("dev.icerock.moko:resources:0.23.0")
-//    commonMainApi("dev.icerock.moko:resources-compose:0.23.0") // for compose multiplatform
-//
-//    commonTestImplementation("dev.icerock.moko:resources-test:0.23.0")
+    kspCommonMainMetadata("cafe.adriel.lyricist:lyricist-processor:1.4.2")
+    kspCommonMainMetadata("cafe.adriel.lyricist:lyricist-processor-xml:1.4.2")
+    add("kspCommonMainMetadata", "cafe.adriel.lyricist:lyricist-processor:1.4.2")
+    add("kspJvm", "cafe.adriel.lyricist:lyricist-processor:1.4.2")
+    add("kspJvm", "cafe.adriel.lyricist:lyricist-processor-xml:1.4.2")
+    add("kspCommonMainMetadata", "cafe.adriel.lyricist:lyricist-processor-xml:1.4.2")
 }
 
 android {
@@ -58,14 +86,14 @@ android {
         sourceCompatibility = ProjectConfig.androidJvmTarget
         targetCompatibility = ProjectConfig.androidJvmTarget
     }
-    sourceSets.getByName("main") {
-        assets.srcDir(File(buildDir, "generated/moko/androidMain/assets"))
-        res.srcDir(File(buildDir, "generated/moko/androidMain/res"))
-        res.srcDir("src/commonMain/resources")
-    }
+//    sourceSets.getByName("main") {
+//        assets.srcDir(File(buildDir, "generated/moko/androidMain/assets"))
+//        res.srcDir(File(buildDir, "generated/moko/androidMain/res"))
+//        res.srcDir("src/commonMain/resources")
+//    }
 }
 tasks {
-    this@tasks.registerResources(project)
+    //  this@tasks.registerResources(project)
 
 }
 
@@ -113,7 +141,4 @@ fun runCommand(command: String): String {
         standardOutput = byteOut
     }
     return String(byteOut.toByteArray()).trim()
-}
-multiplatformResources {
-    multiplatformResourcesPackage = "ireader.i18n.resources"
 }

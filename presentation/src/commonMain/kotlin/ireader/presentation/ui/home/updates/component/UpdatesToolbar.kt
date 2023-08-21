@@ -13,7 +13,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIcon
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
@@ -88,7 +88,7 @@ fun UpdatesRegularToolbar(
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Toolbar(
-        title = { BigSizeTextComposable(text = localize(MR.strings.updates_screen_label)) },
+        title = { BigSizeTextComposable(text = localize { xml -> xml.updatesScreenLabel }) },
         actions = {
             IconButton(onClick = onClickRefresh) {
                 AppIcon(imageVector = Icons.Default.Refresh, contentDescription = null)

@@ -13,7 +13,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.ExtensionSource
 import ireader.i18n.UiText
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.IAlertDialog
@@ -37,7 +37,7 @@ class RepositoryAddScreenSpec : VoyagerScreen() {
             mutableStateOf("")
         }
         val localizeHelper = LocalLocalizeHelper.currentOrThrow
-        val vm : SourceRepositoryViewModel =  getIViewModel()
+        val vm: SourceRepositoryViewModel = getIViewModel()
         val host = SnackBarListener(vm = vm)
         val navigator = LocalNavigator.currentOrThrow
 
@@ -45,70 +45,79 @@ class RepositoryAddScreenSpec : VoyagerScreen() {
         IScaffold(
             snackbarHostState = host,
             topBar = { scrollBehavior ->
-                    Toolbar(
-                        title = {
-                            MidSizeTextComposable(text = localize(MR.strings.repository_adding_a_new))
-                        },
-                        scrollBehavior = scrollBehavior,
-                        actions = {
-                            AppIconButton(
-                                imageVector = Icons.Default.ContentPasteSearch,
-                                onClick = {
-                                    vm.showAutomaticSourceDialog.value = true
-                                }
+                Toolbar(
+                    title = {
+                        MidSizeTextComposable(text = localize { xml -> xml.repositoryAddingANew })
+                    },
+                    scrollBehavior = scrollBehavior,
+                    actions = {
+                        AppIconButton(
+                            imageVector = Icons.Default.ContentPasteSearch,
+                            onClick = {
+                                vm.showAutomaticSourceDialog.value = true
+                            }
 
-                            )
-                        },
-                    )
+                        )
+                    },
+                )
             }
-        ) {scaffoldPadding ->
+        ) { scaffoldPadding ->
             AddingRepositoryScreen(scaffoldPadding, onSave = {
                 scope.launch {
-                    vm.catalogSourceRepository.insert(ExtensionSource(
-                        name = it.name,
-                        key = it.key,
-                        owner = it.owner,
-                        source = it.source,
-                        username = it.username,
-                        password = it.password,
-                        id = 0,
-                    ))
+                    vm.catalogSourceRepository.insert(
+                        ExtensionSource(
+                            name = it.name,
+                            key = it.key,
+                            owner = it.owner,
+                            source = it.source,
+                            username = it.username,
+                            password = it.password,
+                            id = 0,
+                        )
+                    )
                 }
                 popBackStack(navigator)
             }
             )
             if (showDialog.value) {
-                IAlertDialog(onDismissRequest = { showDialog.value = false}, confirmButton = {
-                    TextButton(onClick = {
-                        vm.scope.launch {
-                            try {
-                                vm.catalogSourceRepository.insert(vm.parseUrl(text))
+                IAlertDialog(
+                    onDismissRequest = { showDialog.value = false },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            vm.scope.launch {
+                                try {
+                                    vm.catalogSourceRepository.insert(vm.parseUrl(text))
 
-                            }catch (e:Exception) {
-                                vm.showSnackBar(UiText.MStringResource(MR.strings.url_is_invalid))
+                                } catch (e: Exception) {
+                                    vm.showSnackBar(UiText.MStringResource { it.urlIsInvalid })
+                                }
                             }
+                            showDialog.value = false
+                        }) {
+                            MidSizeTextComposable(text = localizeHelper.localize { xml ->
+                                xml.add
+                            })
                         }
-                        showDialog.value = false
-                    }) {
-                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.add))
-                    }
-                }, title = {
-                    MidSizeTextComposable(text = localizeHelper.localize(MR.strings.add_as_new))
-                }, text = {
-                    androidx.compose.material3.OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = text,
-                        onValueChange = {
-                            text = it
-                        },
-                        label = {
-                            CaptionTextComposable(text = "please enter a valid repository URL")
-                        },
-                        maxLines = 5,
-                        singleLine = true,
-                        textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                    )
-                },)
+                    },
+                    title = {
+                        MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.addAsNew })
+                    },
+                    text = {
+                        androidx.compose.material3.OutlinedTextField(
+                            modifier = Modifier.fillMaxWidth(),
+                            value = text,
+                            onValueChange = {
+                                text = it
+                            },
+                            label = {
+                                CaptionTextComposable(text = "please enter a valid repository URL")
+                            },
+                            maxLines = 5,
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                        )
+                    },
+                )
             }
         }
 

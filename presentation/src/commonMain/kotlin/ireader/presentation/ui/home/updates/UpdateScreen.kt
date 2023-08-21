@@ -4,7 +4,14 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Done
@@ -15,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.UpdatesWithRelations
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.core.ui.EmptyScreen
 import ireader.presentation.ui.core.ui.LoadingScreen
@@ -43,7 +49,7 @@ fun UpdateScreen(
         Crossfade(targetState = Pair(state.isLoading, state.isEmpty)) { (isLoading, isEmpty) ->
             when {
                 isLoading -> LoadingScreen()
-                isEmpty -> EmptyScreen(text = localize(MR.strings.no_new_update_available))
+                isEmpty -> EmptyScreen(text = localize { xml -> xml.noNewUpdateAvailable })
                 else -> UpdatesContent(
                     state = state,
                     onClickItem = onUpdate,
@@ -99,19 +105,19 @@ private fun BoxScope.UpdateEditBar(
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.GetApp,
-                    contentDescription = localize(MR.strings.download),
+                    contentDescription = localize { xml -> xml.download },
                     onClick = onBottomBarDownload
                 )
             }
             AppIconButton(
                 imageVector = Icons.Default.BookmarkBorder,
-                contentDescription = localize(MR.strings.bookmark),
+                contentDescription = localize { xml -> xml.bookmark },
                 onClick = onBottomBookMark
             )
 
             AppIconButton(
                 imageVector = Icons.Default.Done,
-                contentDescription = localize(MR.strings.mark_as_read),
+                contentDescription = localize { xml -> xml.markAsRead },
                 onClick = onBottomBarMarkAsRead
             )
         }

@@ -15,7 +15,7 @@ import ireader.i18n.BuildKonfig
 import ireader.i18n.Images.discord
 import ireader.i18n.Images.github
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.components.LinkIcon
 import ireader.presentation.ui.component.components.LogoHeader
 import ireader.presentation.ui.component.components.PreferenceRow
@@ -36,14 +36,16 @@ fun AboutSettingScreen(
         }
         item {
             PreferenceRow(
-                title = localize(MR.strings.version),
+                title = localize { xml -> xml.version },
                 subtitle = when {
                     BuildKonfig.DEBUG -> {
                         "Debug ${BuildKonfig.COMMIT_SHA} (${getFormattedBuildTime()})"
                     }
+
                     BuildKonfig.PREVIEW -> {
                         "Preview r${BuildKonfig.COMMIT_COUNT} (${BuildKonfig.COMMIT_SHA}, ${getFormattedBuildTime()})"
                     }
+
                     else -> {
                         "Stable ${BuildKonfig.VERSION_NAME} (${getFormattedBuildTime()})"
                     }
@@ -52,7 +54,7 @@ fun AboutSettingScreen(
         }
         item {
             PreferenceRow(
-                title = localize(MR.strings.check_the_update),
+                title = localize { xml -> xml.checkTheUpdate },
                 onClick = {
                     uriHandler.openUri("https://github.com/kazemcodes/Infinity/releases")
                 },
@@ -60,7 +62,7 @@ fun AboutSettingScreen(
         }
         item {
             PreferenceRow(
-                title = localize(MR.strings.whats_new),
+                title = localize { xml -> xml.whatsNew },
                 onClick = { uriHandler.openUri("https://github.com/kazemcodes/IReader/releases/latest") },
             )
         }
@@ -70,7 +72,7 @@ fun AboutSettingScreen(
                 horizontalArrangement = Arrangement.Center,
             ) {
                 LinkIcon(
-                    label = localize(MR.strings.website),
+                    label = localize { xml -> xml.website },
                     painter = rememberVectorPainter(Icons.Outlined.Public),
                     url = "https://github.com/kazemcodes/IReader",
                 )

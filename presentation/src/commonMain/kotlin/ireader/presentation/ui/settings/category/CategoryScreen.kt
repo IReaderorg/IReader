@@ -1,7 +1,11 @@
 package ireader.presentation.ui.settings.category
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,7 +14,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.DragHandle
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,10 +33,13 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.CategoryWithCount
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.IAlertDialog
 import ireader.presentation.ui.component.components.PreferenceRow
-import ireader.presentation.ui.component.reorderable.*
+import ireader.presentation.ui.component.reorderable.ReorderableLazyListState
+import ireader.presentation.ui.component.reorderable.detectReorderAfterLongPress
+import ireader.presentation.ui.component.reorderable.draggedItem
+import ireader.presentation.ui.component.reorderable.rememberReorderLazyListState
+import ireader.presentation.ui.component.reorderable.reorderable
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
@@ -89,7 +100,9 @@ fun CategoryFloatingActionButton(
                 .padding(16.dp),
             text = {
                 MidSizeTextComposable(
-                    text = localize(MR.strings.add),
+                    text = localize { xml ->
+                        xml.add
+                    },
                     color = MaterialTheme.colorScheme.onSecondary
                 )
             },
@@ -157,15 +170,19 @@ private fun ShowEditScreen(
                 query = ""
                 vm.showDialog = false
             },
-            title = { Text(localizeHelper.localize(MR.strings.edit_category), color = MaterialTheme.colorScheme.onBackground) },
+            title = {
+                Text(localizeHelper.localize() { xml ->
+                    xml.editCategory
+                }, color = MaterialTheme.colorScheme.onBackground)
+            },
             text = {
                 AppTextField(
                     query = query,
                     onValueChange = { query = it },
                     onConfirm = {},
-                    hint = localizeHelper.localize(
-                        MR.strings.category_hint
-                    ),
+                    hint = localizeHelper.localize { xml ->
+                        xml.categoryHint
+                    },
                     mode = 1,
                     keyboardAction = KeyboardOptions(imeAction = ImeAction.Done),
                 )
@@ -176,7 +193,9 @@ private fun ShowEditScreen(
                     onConfirm(query)
                     query = ""
                 }) {
-                    MidSizeTextComposable(text = localizeHelper.localize(MR.strings.confirm))
+                    MidSizeTextComposable(text = localizeHelper.localize { xml ->
+                        xml.confirm
+                    })
                 }
             }
         )

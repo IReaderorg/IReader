@@ -21,7 +21,7 @@ import java.nio.charset.Charset
 //        fun updateForcedEncoding(context: Context) {
 //            val settingsManager = PreferenceManager.getDefaultSharedPreferences(context)
 //            val value = settingsManager.getString(
-//                localizeHelper.localize(MR.strings.subtitles_encoding_key),
+//                localizeHelper.localize{xml -> xml.subtitles_encoding_key),
 //                null
 //            )
 //            overrideEncoding = if (value.isNullOrBlank()) {

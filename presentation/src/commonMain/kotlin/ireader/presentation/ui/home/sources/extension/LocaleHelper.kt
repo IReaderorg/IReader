@@ -1,8 +1,7 @@
 package ireader.presentation.ui.home.sources.extension
 
 import ireader.i18n.LocalizeHelper
-import ireader.i18n.resources.MR
-import java.util.*
+import java.util.Locale
 
 /**
  * Utility class to change the application's language in runtime.
@@ -14,12 +13,12 @@ object LocaleHelper {
      */
     fun getSourceDisplayName(lang: String?, localizeHelper: LocalizeHelper): String {
         return when (lang) {
-            SourceKeys.LAST_USED_KEY -> localizeHelper.localize(MR.strings.last_used_source)
-            SourceKeys.PINNED_KEY -> localizeHelper.localize(MR.strings.pinned_sources)
-            SourceKeys.INSTALLED_KEY -> localizeHelper.localize(MR.strings.installed)
-            SourceKeys.AVAILABLE -> localizeHelper.localize(MR.strings.available)
-            "other" -> localizeHelper.localize(MR.strings.other_source)
-            "all" -> localizeHelper.localize(MR.strings.all_lang)
+            SourceKeys.LAST_USED_KEY -> localizeHelper.localize { xml -> xml.lastUsedSource }
+            SourceKeys.PINNED_KEY -> localizeHelper.localize { xml -> xml.pinnedSources }
+            SourceKeys.INSTALLED_KEY -> localizeHelper.localize { xml -> xml.installed }
+            SourceKeys.AVAILABLE -> localizeHelper.localize { xml -> xml.available }
+            "other" -> localizeHelper.localize { xml -> xml.otherSource }
+            "all" -> localizeHelper.localize { xml -> xml.allLang }
             else -> getDisplayName(lang)
         }
     }

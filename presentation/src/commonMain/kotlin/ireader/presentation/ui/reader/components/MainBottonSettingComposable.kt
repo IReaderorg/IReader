@@ -14,7 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import ireader.domain.models.entities.Chapter
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -23,18 +23,18 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainBottomSettingComposable(
-        modifier: Modifier = Modifier,
-        scope: CoroutineScope,
-        drawerState: DrawerState,
-        chapters: List<Chapter>,
-        chapter: Chapter?,
-        currentChapterIndex: Int,
-        onSetting: () -> Unit,
-        onNext: () -> Unit,
-        onPrev: () -> Unit,
-        onPlay: () -> Unit,
-        onSliderFinished: () -> Unit,
-        onSliderChange: (index: Float) -> Unit,
+    modifier: Modifier = Modifier,
+    scope: CoroutineScope,
+    drawerState: DrawerState,
+    chapters: List<Chapter>,
+    chapter: Chapter?,
+    currentChapterIndex: Int,
+    onSetting: () -> Unit,
+    onNext: () -> Unit,
+    onPrev: () -> Unit,
+    onPlay: () -> Unit,
+    onSliderFinished: () -> Unit,
+    onSliderChange: (index: Float) -> Unit,
 ) {
     ChaptersSliderComposable(
         onNext = {
@@ -60,17 +60,19 @@ fun MainBottomSettingComposable(
     ) {
         AppIconButton(
             imageVector = Icons.Default.Menu,
-            contentDescription = localize(MR.strings.drawer),
+            contentDescription = localize { xml -> xml.drawer },
             onClick = { scope.launch { drawerState.open() } }
         )
         AppIconButton(
             imageVector = Icons.Default.Headphones,
-            contentDescription = localize(MR.strings.play),
+            contentDescription = localize() { xml ->
+                xml.play
+            },
             onClick = { onPlay() }
         )
         AppIconButton(
             imageVector = Icons.Default.Settings,
-            contentDescription = localize(MR.strings.settings),
+            contentDescription = localize { xml -> xml.settings },
             onClick = { onSetting() }
         )
     }

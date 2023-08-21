@@ -141,6 +141,7 @@ dependencies {
     implementation(androidx.emoji)
     implementation(androidx.appCompat)
     implementation(androidx.core)
+    implementation(libs.lyricist.library)
 
     implementation(androidx.media)
 

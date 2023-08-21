@@ -10,7 +10,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.log.Log
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
@@ -28,7 +28,9 @@ fun AdvanceSettings(
     OnShowImportEpub(showImport.value, onFileSelected = {
         try {
             vm.importEpub.parse(it)
-            vm.showSnackBar(UiText.MStringResource(MR.strings.success))
+            vm.showSnackBar(UiText.MStringResource() { xml ->
+                xml.success
+            })
         } catch (e: Throwable) {
             Log.error(e, "epub parser throws an exception")
             vm.showSnackBar(UiText.ExceptionString(e))
@@ -37,38 +39,39 @@ fun AdvanceSettings(
 
     val items = remember {
         listOf<Components>(
-            Components.Header(localizeHelper.localize(MR.strings.data)),
+            Components.Header(localizeHelper.localize { xml -> xml.data }),
             Components.Row(
-                title = localizeHelper.localize(MR.strings.clear_all_database),
+                title = localizeHelper.localize { xml -> xml.clearAllDatabase },
                 onClick = {
                     vm.deleteAllDatabase()
                     vm.showSnackBar(
-                        UiText.MStringResource(MR.strings.database_was_cleared)
+                        UiText.MStringResource { it.databaseWasCleared }
                     )
                 }
             ),
             Components.Row(
-                title = localizeHelper.localize(MR.strings.clear_not_in_library_books),
+                title = localizeHelper.localize { xml -> xml.clearNotInLibraryBooks },
                 onClick = {
                     vm.scope.launchIO {
                         vm.deleteUseCase.deleteNotInLibraryBooks()
                         vm.showSnackBar(
-                            UiText.MStringResource(MR.strings.success)
-                        )
+                            UiText.MStringResource() { xml ->
+                                xml.success
+                            })
                     }
                 }
             ),
             Components.Row(
-                title = localizeHelper.localize(MR.strings.clear_all_chapters),
+                title = localizeHelper.localize { xml -> xml.clearAllChapters },
                 onClick = {
                     vm.deleteAllChapters()
                     vm.showSnackBar(
-                        UiText.MStringResource(MR.strings.chapters_was_cleared)
+                        UiText.MStringResource { it.chaptersWasCleared }
                     )
                 }
             ),
             Components.Row(
-                title = localizeHelper.localize(MR.strings.clear_all_cache),
+                title = localizeHelper.localize { xml -> xml.clearAllCache },
                 subtitle = vm.importEpub.getCacheSize(),
                 onClick = {
                     vm.importEpub.removeCache()
@@ -76,34 +79,34 @@ fun AdvanceSettings(
                 }
             ),
             Components.Row(
-                title = localizeHelper.localize(MR.strings.clear_all_cover_cache),
+                title = localizeHelper.localize { xml -> xml.clearAllCoverCache },
                 onClick = {
                     vm.getSimpleStorage.clearImageCache()
                     vm.showSnackBar(UiText.DynamicString("Clear was cleared."))
                 }
             ),
-            Components.Header(localizeHelper.localize(MR.strings.reset_setting)),
+            Components.Header(localizeHelper.localize { xml -> xml.resetSetting }),
             Components.Row(
-                title = localizeHelper.localize(MR.strings.reset_reader_screen_settings),
+                title = localizeHelper.localize { xml -> xml.resetReaderScreenSettings },
                 onClick = {
                     vm.deleteDefaultSettings()
                 }
             ),
             Components.Row(
-                title = localizeHelper.localize(MR.strings.reset_themes),
+                title = localizeHelper.localize { xml -> xml.resetThemes },
                 onClick = {
                     vm.resetThemes()
                 }
             ),
             Components.Row(
-                title = localizeHelper.localize(MR.strings.reset_categories),
+                title = localizeHelper.localize { xml -> xml.resetCategories },
                 onClick = {
                     vm.resetCategories()
                 }
             ),
-            Components.Header(localizeHelper.localize(MR.strings.epub)),
+            Components.Header(localizeHelper.localize { xml -> xml.epub }),
             Components.Row(
-                title = localizeHelper.localize(MR.strings.import_epub),
+                title = localizeHelper.localize { xml -> xml.importEpub },
                 onClick = {
 
                     showImport.value = true

@@ -1,9 +1,9 @@
 package ireader.data.catalog.impl
 
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.utils.io.*
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.http.HttpHeaders
+import io.ktor.utils.io.ByteReadChannel
 import ireader.core.http.HttpClients
 import ireader.core.io.saveTo
 import ireader.core.log.Log
@@ -14,7 +14,6 @@ import ireader.domain.models.entities.CatalogRemote
 import ireader.i18n.LocalizeHelper
 import ireader.i18n.UiText
 import ireader.i18n.asString
-import ireader.i18n.resources.MR
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.io.File
@@ -34,7 +33,7 @@ class DesktopCatalogInstaller(
             fileDir.mkdirs()
             val apkFile = File(ExtensionDir, "${catalog.pkgName}/${catalog.pkgName}.apk")
             if (!apkFile.exists()) {
-                    apkFile.createNewFile()
+                apkFile.createNewFile()
             }
             val jarFile = File(ExtensionDir, "${catalog.pkgName}/${catalog.pkgName}.jar")
             if (!jarFile.exists()) {
@@ -42,7 +41,7 @@ class DesktopCatalogInstaller(
             }
             val iconFile = File(ExtensionDir, "${catalog.pkgName}/${catalog.pkgName}.png")
             if (!iconFile.exists()) {
-                    iconFile.createNewFile()
+                iconFile.createNewFile()
             }
             try {
                 val apkResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
@@ -72,11 +71,13 @@ class DesktopCatalogInstaller(
 
     override suspend fun uninstall(pkgName: String): InstallStep {
         return try {
-            val file = File(ExtensionDir,pkgName)
+            val file = File(ExtensionDir, pkgName)
             val deleted = file.deleteRecursively()
             file.deleteOnExit()
             installationChanges.notifyAppUninstall(pkgName)
-            if (deleted ) InstallStep.Success else InstallStep.Error(localizeHelper.localize(MR.strings.failed))
+            if (deleted) InstallStep.Success else InstallStep.Error(localizeHelper.localize { xml ->
+                xml.failed
+            })
         } catch (e: Throwable) {
             InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper))
         }

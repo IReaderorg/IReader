@@ -11,7 +11,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.components.ChoicePreference
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
@@ -37,7 +37,9 @@ fun BackUpAndRestoreScreen(
                 vm.restoreBackup.restoreFrom(it, onError = {
                     vm.showSnackBar(it)
                 }, onSuccess = {
-                    vm.showSnackBar((UiText.MStringResource(MR.strings.restoredSuccessfully)))
+                    vm.showSnackBar((UiText.MStringResource { xml ->
+                        xml.restoredSuccessfully
+                    }))
                 })
             }
         }
@@ -48,7 +50,9 @@ fun BackUpAndRestoreScreen(
                 vm.createBackup.saveTo(it, onError = {
                     vm.showSnackBar(it)
                 }, onSuccess = {
-                    vm.showSnackBar((UiText.MStringResource(MR.strings.backup_created_successfully)))
+                    vm.showSnackBar((UiText.MStringResource { xml ->
+                        xml.backupCreatedSuccessfully
+                    }))
                 }, currentEvent = {
                     vm.showSnackBar(UiText.DynamicString(it))
                 })
@@ -87,42 +91,56 @@ fun BackUpAndRestoreScreen(
     val items = remember {
         listOf<Components>(
             Components.Row(
-                localizeHelper.localize(MR.strings.create_backup), onClick = {
+                localizeHelper.localize { xml ->
+                    xml.createBackup
+                }, onClick = {
                     onShowBackup.value = true
 
                 }
             ),
             Components.Row(
-                localizeHelper.localize(MR.strings.restore), onClick = {
+                localizeHelper.localize { xml ->
+                    xml.restore
+                }, onClick = {
                     onShowRestore.value = true
 
                 }
             ),
-            Components.Header(localizeHelper.localize(MR.strings.automatic_backup)),
+            Components.Header(localizeHelper.localize { xml ->
+                xml.automaticBackup
+            }),
             Components.Dynamic {
                 ChoicePreference<PreferenceValues.AutomaticBackup>(
                     preference = vm.automaticBackup,
                     choices = mapOf(
-                        PreferenceValues.AutomaticBackup.Off to localizeHelper.localize(MR.strings.off),
+                        PreferenceValues.AutomaticBackup.Off to localizeHelper.localize { xml -> xml.off },
                         PreferenceValues.AutomaticBackup.Every6Hours to localizeHelper.localizePlural(
-                            MR.plurals.every_hour,
+                            { xml ->
+                                "Every %1\$d hour"
+                            },
                             6, 6
 
                         ),
                         PreferenceValues.AutomaticBackup.Every12Hours to localizeHelper.localizePlural(
-                            MR.plurals.every_hour,
+                            { xml ->
+                                "Every %1\$d hour"
+                            },
                             12, 12
                         ),
-                        PreferenceValues.AutomaticBackup.Daily to localizeHelper.localize(MR.strings.daily),
+                        PreferenceValues.AutomaticBackup.Daily to localizeHelper.localize { xml -> xml.daily },
                         PreferenceValues.AutomaticBackup.Every2Days to localizeHelper.localizePlural(
-                            MR.plurals.every_day,
+                            { xml ->
+                                "Every %1\$d Day"
+                            },
                             2, 2
                         ),
-                        PreferenceValues.AutomaticBackup.Weekly to localizeHelper.localize(MR.strings.weekly),
+                        PreferenceValues.AutomaticBackup.Weekly to localizeHelper.localize { xml ->
+                            xml.weekly
+                        },
                     ),
-                    title = localizeHelper.localize(
-                        MR.strings.automatic_backup
-                    ),
+                    title = localizeHelper.localize { xml ->
+                        xml.automaticBackup
+                    },
                     onItemSelected = {
                         vm.getSimpleStorage.checkPermission()
                     }
@@ -138,9 +156,9 @@ fun BackUpAndRestoreScreen(
                         4 to "4",
                         5 to "5",
                     ),
-                    title = localizeHelper.localize(
-                        MR.strings.maximum_backups
-                    ),
+                    title = localizeHelper.localize { xml ->
+                        xml.maximumBackups
+                    },
                     enable = vm.automaticBackup.value != PreferenceValues.AutomaticBackup.Off
                 )
             }

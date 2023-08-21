@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 
 @Composable
 fun BigSizeTextComposable(
@@ -253,7 +253,9 @@ fun TopAppBarBackButton(tint: Color = MaterialTheme.colorScheme.onSurface, onCli
     }) {
         Icon(
             imageVector = if (isLeftToRight.value) Icons.Default.ArrowBack else Icons.Default.ArrowForward,
-            contentDescription = localize(MR.strings.return_to_previous_screen),
+            contentDescription = localize { xml ->
+                xml.returnToPreviousScreen
+            },
             tint = tint,
         )
     }
@@ -262,14 +264,16 @@ fun TopAppBarBackButton(tint: Color = MaterialTheme.colorScheme.onSurface, onCli
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppTextField(
-        modifier: Modifier= Modifier,
-        query: String,
-        onValueChange: (value: String) -> Unit,
-        onConfirm: () -> Unit,
-        hint: String = localize(MR.strings.search_hint),
-        mode: Int = 0,
-        keyboardAction: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions: KeyboardActions = KeyboardActions(onSearch = {
+    modifier: Modifier = Modifier,
+    query: String,
+    onValueChange: (value: String) -> Unit,
+    onConfirm: () -> Unit,
+    hint: String = localize { xml ->
+        xml.searchHint
+    },
+    mode: Int = 0,
+    keyboardAction: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+    keyboardActions: KeyboardActions = KeyboardActions(onSearch = {
         onConfirm()
     }, onDone = { onConfirm() }),
 ) {

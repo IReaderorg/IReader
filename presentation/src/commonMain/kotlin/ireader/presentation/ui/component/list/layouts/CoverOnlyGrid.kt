@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.BookItem
 import ireader.i18n.UiText
 import ireader.presentation.ui.component.list.isScrolledToTheEnd
-import ireader.i18n.resources.MR
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -91,7 +91,9 @@ fun CoverOnlyGrid(
                         }
 
                         if (showInLibraryBadge && book.favorite) {
-                            TextBadge(text = UiText.MStringResource(MR.strings.in_library))
+                            TextBadge(text = UiText.MStringResource { xml ->
+                                xml.inLibrary
+                            })
                         }
                     }
                 }

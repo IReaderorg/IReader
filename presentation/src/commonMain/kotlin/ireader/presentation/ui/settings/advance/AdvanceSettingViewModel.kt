@@ -15,7 +15,7 @@ import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.ui.settings.reader.SettingState
 
@@ -69,14 +69,18 @@ class AdvanceSettingViewModel(
         scope.launchIO {
             categoryRepository.deleteAll()
             categoryRepository.insert(Category.baseCategories)
-            showSnackBar(UiText.MStringResource(MR.strings.success))
+            showSnackBar(UiText.MStringResource() { xml ->
+                xml.success
+            })
         }
     }
 
     fun resetThemes() {
         scope.launchIO {
             themeRepository.deleteAll()
-            showSnackBar(UiText.MStringResource(MR.strings.success))
+            showSnackBar(UiText.MStringResource() { xml ->
+                xml.success
+            })
         }
     }
 }

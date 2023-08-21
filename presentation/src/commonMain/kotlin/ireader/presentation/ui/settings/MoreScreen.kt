@@ -11,11 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import cafe.adriel.voyager.navigator.currentOrThrow
-import dev.icerock.moko.resources.StringResource
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.i18n.Images.incognito
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.Divider
 import ireader.presentation.ui.component.components.LogoHeader
 import ireader.presentation.ui.component.components.PreferenceRow
@@ -26,29 +24,29 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreScreen(
-        modifier: Modifier = Modifier,
-        vm: MainSettingScreenViewModel,
-        onDownloadScreen: () -> Unit,
-        onBackupScreen: () -> Unit,
-        onCategory: () -> Unit,
-        onSettings: () -> Unit,
-        onAbout: () -> Unit,
-        onHelp: () -> Unit,
+    modifier: Modifier = Modifier,
+    vm: MainSettingScreenViewModel,
+    onDownloadScreen: () -> Unit,
+    onBackupScreen: () -> Unit,
+    onCategory: () -> Unit,
+    onSettings: () -> Unit,
+    onAbout: () -> Unit,
+    onHelp: () -> Unit,
 ) {
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     LazyColumn(
-            modifier = modifier,
-            state = rememberLazyListState()
+        modifier = modifier,
+        state = rememberLazyListState()
     ) {
         item {
             LogoHeader()
         }
         item {
             SwitchPreference(
-                    preference = vm.incognitoMode,
-                    title = localize(MR.strings.pref_incognito_mode),
-                    subtitle = localize(MR.strings.pref_incognito_mode_summary),
-                    icon = incognito(),
+                preference = vm.incognitoMode,
+                title = localize { xml -> xml.prefIncognitoMode },
+                subtitle = localize { xml -> xml.prefIncognitoModeSummary },
+                icon = incognito(),
             )
         }
         item {
@@ -57,23 +55,25 @@ fun MoreScreen(
 
         item {
             PreferenceRow(
-                    title = localizeHelper.localize(MR.strings.download),
-                    icon = Icons.Default.Download,
-                    onClick = onDownloadScreen
+                title = localizeHelper.localize { xml -> xml.download },
+                icon = Icons.Default.Download,
+                onClick = onDownloadScreen
             )
         }
         item {
             PreferenceRow(
-                    title = localizeHelper.localize(MR.strings.backup_and_restore),
-                    icon = Icons.Default.SettingsBackupRestore,
-                    onClick = onBackupScreen,
+                title = localizeHelper.localize() { xml ->
+                    xml.backupAndRestore
+                },
+                icon = Icons.Default.SettingsBackupRestore,
+                onClick = onBackupScreen,
             )
         }
         item {
             PreferenceRow(
-                    title = localizeHelper.localize(MR.strings.category),
-                    icon = Icons.Default.Label,
-                    onClick = onCategory,
+                title = localizeHelper.localize { xml -> xml.category },
+                icon = Icons.Default.Label,
+                onClick = onCategory,
             )
         }
 
@@ -82,50 +82,52 @@ fun MoreScreen(
         }
         item {
             PreferenceRow(
-                    title = localizeHelper.localize(MR.strings.settings),
-                    icon = Icons.Default.Settings,
-                    onClick = onSettings,
+                title = localizeHelper.localize { xml -> xml.settings },
+                icon = Icons.Default.Settings,
+                onClick = onSettings,
             )
         }
         item {
             PreferenceRow(
-                    title = localizeHelper.localize(MR.strings.about),
-                    icon = Icons.Default.Info,
-                    onClick = onAbout,
+                title = localizeHelper.localize() { xml ->
+                    xml.about
+                },
+                icon = Icons.Default.Info,
+                onClick = onAbout,
             )
         }
 
         item {
             PreferenceRow(
-                    title = localizeHelper.localize(MR.strings.help),
-                    icon = Icons.Default.Help,
-                    onClick = onHelp,
+                title = localizeHelper.localize { xml -> xml.help },
+                icon = Icons.Default.Help,
+                onClick = onHelp,
             )
         }
     }
 }
 
 data class SettingsSection(
-        val titleRes: StringResource,
-        val icon: ImageVector? = null,
-        val onClick: () -> Unit,
+    val titleRes: String,
+    val icon: ImageVector? = null,
+    val onClick: () -> Unit,
 )
 
 @Composable
 fun SetupLayout(
-        modifier: Modifier = Modifier,
-        items: List<SettingsSection>,
-        padding: PaddingValues? = null,
+    modifier: Modifier = Modifier,
+    items: List<SettingsSection>,
+    padding: PaddingValues? = null,
 ) {
     LazyColumn(
-            modifier = if (padding != null) modifier.padding(padding) else modifier,
+        modifier = if (padding != null) modifier.padding(padding) else modifier,
     ) {
         items.map {
             item {
                 PreferenceRow(
-                        title = localize(it.titleRes),
-                        icon = it.icon,
-                        onClick = it.onClick,
+                    title = localize { _ -> it.titleRes },
+                    icon = it.icon,
+                    onClick = it.onClick,
                 )
             }
         }
@@ -134,7 +136,7 @@ fun SetupLayout(
 
 
 class MainSettingScreenViewModel(
-        uiPreferences: UiPreferences
+    uiPreferences: UiPreferences
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
     val incognitoMode = uiPreferences.incognitoMode().asState()
 }

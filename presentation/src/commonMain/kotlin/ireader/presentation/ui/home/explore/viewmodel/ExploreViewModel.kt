@@ -15,10 +15,9 @@ import ireader.domain.usecases.preferences.reader_preferences.BrowseScreenPrefUs
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.utils.exceptionHandler
 import ireader.domain.utils.extensions.DefaultPaginator
+import ireader.domain.utils.fastMap
 import ireader.i18n.SourceNotFoundException
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
-import ireader.domain.utils.fastMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
@@ -63,13 +62,13 @@ class ExploreViewModel(
                     }
                 } else {
                     scope.launch {
-                        showSnackBar(UiText.MStringResource(MR.strings.the_source_is_not_found))
+                        showSnackBar(UiText.MStringResource { xml -> xml.theSourceIsNotFound })
                     }
                 }
             }
         } else {
             scope.launch {
-                showSnackBar(UiText.MStringResource(MR.strings.the_source_is_not_found))
+                showSnackBar(UiText.MStringResource { xml -> xml.theSourceIsNotFound })
             }
         }
     }

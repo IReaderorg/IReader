@@ -22,11 +22,12 @@ import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.utils.extensions.withIOContext
 import ireader.i18n.BuildKonfig
 import ireader.i18n.LocalizeHelper
-import ireader.i18n.resources.MR
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import java.io.File
+
 /**
  * Class that handles the loading of the catalogs installed in the system and the app.
  */
@@ -62,7 +63,7 @@ class AndroidCatalogLoader(
         val systemPkgs =
             pkgManager.getInstalledPackages(PACKAGE_FLAGS).filter(::isPackageAnExtension)
 
-        val localPkgs= simpleStorage.extensionDirectory().listFiles()
+        val localPkgs = simpleStorage.extensionDirectory().listFiles()
             .orEmpty()
             .filter { it.isDirectory }
             .map { File(it, it.name + ".apk") }
@@ -149,7 +150,7 @@ class AndroidCatalogLoader(
             Log.warn("Failed to load catalog: the package {} isn't installed", pkgName)
             return null
         }
-        return loadSystemCatalog(pkgName, pkgInfo,icon)
+        return loadSystemCatalog(pkgName, pkgInfo, icon)
     }
 
     /**
@@ -198,7 +199,9 @@ class AndroidCatalogLoader(
         val source = loadSource(pkgName, loader, data)
 
         return CatalogInstalled.SystemWide(
-            name = source?.name ?: localizeHelper.localize(MR.strings.unknown),
+            name = source?.name ?: localizeHelper.localize { xml ->
+                xml.unknown
+            },
             description = data.description,
             source = source,
             pkgName = pkgName,

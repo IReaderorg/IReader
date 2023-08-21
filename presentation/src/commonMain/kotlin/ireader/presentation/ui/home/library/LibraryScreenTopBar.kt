@@ -13,7 +13,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
@@ -26,16 +26,16 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryScreenTopBar(
-        state: LibraryState,
-        onSearch: (() -> Unit)? = null,
-        refreshUpdate: () -> Unit,
-        onClickSelectAll: () -> Unit,
-        onClickInvertSelection: () -> Unit,
-        onClearSelection: () -> Unit,
-        scrollBehavior: TopAppBarScrollBehavior? = null,
-        showModalSheet:() -> Unit,
-        hideModalSheet:() -> Unit,
-        isModalVisible:Boolean
+    state: LibraryState,
+    onSearch: (() -> Unit)? = null,
+    refreshUpdate: () -> Unit,
+    onClickSelectAll: () -> Unit,
+    onClickInvertSelection: () -> Unit,
+    onClearSelection: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
+    showModalSheet: () -> Unit,
+    hideModalSheet: () -> Unit,
+    isModalVisible: Boolean
 ) {
     when {
         state.selectionMode -> {
@@ -47,6 +47,7 @@ fun LibraryScreenTopBar(
                 scrollBehavior = scrollBehavior
             )
         }
+
         else -> {
             RegularTopBar(
                 state,
@@ -55,26 +56,27 @@ fun LibraryScreenTopBar(
                     onSearch?.invoke()
                 },
                 scrollBehavior = scrollBehavior,
-                    hideModalSheet = hideModalSheet,
-                    isModalVisible = isModalVisible,
-                    showModalSheet = showModalSheet
+                hideModalSheet = hideModalSheet,
+                isModalVisible = isModalVisible,
+                showModalSheet = showModalSheet
             )
         }
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class,
+@OptIn(
+    ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class,
     ExperimentalMaterial3Api::class
 )
 @Composable
 private fun RegularTopBar(
-        vm: LibraryState,
-        onSearch: () -> Unit,
-        refreshUpdate: () -> Unit,
-        scrollBehavior: TopAppBarScrollBehavior? = null,
-        showModalSheet:() -> Unit,
-        hideModalSheet:() -> Unit,
-        isModalVisible:Boolean
+    vm: LibraryState,
+    onSearch: () -> Unit,
+    refreshUpdate: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
+    showModalSheet: () -> Unit,
+    hideModalSheet: () -> Unit,
+    isModalVisible: Boolean
 ) {
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
@@ -82,7 +84,7 @@ private fun RegularTopBar(
     Toolbar(
         title = {
             if (!vm.inSearchMode) {
-                BigSizeTextComposable(text = localize(MR.strings.library))
+                BigSizeTextComposable(text = localize { xml -> xml.library })
             } else {
                 AppTextField(
                     query = vm.searchQuery ?: "",
@@ -104,7 +106,9 @@ private fun RegularTopBar(
             if (vm.inSearchMode) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
-                    contentDescription = localize(MR.strings.close),
+                    contentDescription = localize() { xml ->
+                        xml.close
+                    },
                     onClick = {
                         vm.inSearchMode = false
                         vm.searchQuery = null
@@ -114,7 +118,9 @@ private fun RegularTopBar(
             } else {
                 AppIconButton(
                     imageVector = Icons.Default.Sort,
-                    contentDescription = localize(MR.strings.filter),
+                    contentDescription = localize { xml ->
+                        xml.filter
+                    },
                     onClick = {
                         scope.launch {
                             if (isModalVisible) {
@@ -127,14 +133,14 @@ private fun RegularTopBar(
                 )
                 AppIconButton(
                     imageVector = Icons.Default.Search,
-                    contentDescription = localize(MR.strings.search),
+                    contentDescription = localize { xml -> xml.search },
                     onClick = {
                         vm.inSearchMode = true
                     },
                 )
                 AppIconButton(
                     imageVector = Icons.Default.Refresh,
-                    contentDescription = localize(MR.strings.refresh),
+                    contentDescription = localize { xml -> xml.refresh },
                     onClick = {
                         refreshUpdate()
                     },

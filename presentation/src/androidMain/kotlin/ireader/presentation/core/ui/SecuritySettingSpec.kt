@@ -19,7 +19,7 @@ import ireader.domain.utils.extensions.AuthenticatorUtil
 import ireader.domain.utils.extensions.AuthenticatorUtil.isAuthenticationSupported
 import ireader.domain.utils.extensions.AuthenticatorUtil.startAuthentication
 import ireader.i18n.*
-import ireader.i18n.resources.MR
+
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.ChoicePreference
@@ -68,7 +68,7 @@ actual class SecuritySettingSpec : VoyagerScreen() {
             listOf<Components>(
                 Components.Switch(
                     preference = vm.useAuth,
-                    title = localizeHelper.localize(MR.strings.use_auth),
+                    title = localizeHelper.localize { xml -> xml.useAuth },
                     visible = context.isAuthenticationSupported(),
                     onValue = {
                         onEnableAuthResult.launch(
@@ -79,11 +79,11 @@ actual class SecuritySettingSpec : VoyagerScreen() {
                                 .putExtra(UnlockActivity.ENABLE_AUTH, !vm.useAuth.value)
                                 .putExtra(
                                     UnlockActivity.TITLE,
-                                    localizeHelper.localize(MR.strings.authentication)
+                                    localizeHelper.localize { xml -> xml.authentication }
                                 )
                                 .putExtra(
                                     UnlockActivity.SUBTITLE,
-                                    localizeHelper.localize(MR.strings.authenticate_to_confirm_change)
+                                    localizeHelper.localize { xml -> xml.authenticateToConfirmChange }
                                 )
                         )
                     }
@@ -95,9 +95,12 @@ actual class SecuritySettingSpec : VoyagerScreen() {
                             preference = vm.lockAppAfter,
                             choices = values.associate { text ->
                                 when (text) {
-                                    -1L -> -1L to localizeHelper.localize(MR.strings.lock_never)
-                                    0L -> 0L to localizeHelper.localize(MR.strings.lock_always)
-                                    else -> text.toLong() to localizePlural(MR.plurals.lock_after_mins, text.toInt())
+                                    -1L -> -1L to localizeHelper.localize { xml -> xml.lockNever }
+                                    0L -> 0L to localizeHelper.localize { xml -> xml.lockAlways }
+                                    else -> text.toLong() to localizePlural(
+                                        { "Lock After %1\$d" },
+                                        text.toInt()
+                                    )
                                 }
                             },
                             onValue = { newValue ->
@@ -110,17 +113,15 @@ actual class SecuritySettingSpec : VoyagerScreen() {
                                         .putExtra(UnlockActivity.IDLE_AFTER, newValue)
                                         .putExtra(
                                             UnlockActivity.TITLE,
-                                            localizeHelper.localize(MR.strings.lock_when_idle)
+                                            localizeHelper.localize { xml -> xml.lockWhenIdle }
                                         )
                                         .putExtra(
                                             UnlockActivity.SUBTITLE,
-                                            localizeHelper.localize(MR.strings.authenticate_to_confirm_change)
+                                            localizeHelper.localize { xml -> xml.authenticateToConfirmChange }
                                         )
                                 )
                             },
-                            title = localize(
-                                    MR.strings.lock_when_idle
-                            )
+                            title = localize { it.lockWhenIdle }
                         )
                     }
                 },
@@ -132,9 +133,7 @@ actual class SecuritySettingSpec : VoyagerScreen() {
                             PreferenceValues.SecureScreenMode.INCOGNITO to  PreferenceValues.SecureScreenMode.INCOGNITO.titleResId.asString(localizeHelper),
                             PreferenceValues.SecureScreenMode.NEVER to PreferenceValues.SecureScreenMode.NEVER.titleResId.asString(localizeHelper)
                         ),
-                        title = localize(
-                            MR.strings.secure_screen
-                        )
+                        title = localize { it.secureScreen }
                     )
                 },
 
@@ -143,7 +142,7 @@ actual class SecuritySettingSpec : VoyagerScreen() {
         IScaffold(
             topBar = { scrollBehavior ->
                 TitleToolbar(
-                    title = localize(MR.strings.security),
+                    title = localize { xml -> xml.security },
                     scrollBehavior = scrollBehavior,
                     popBackStack = {
                         popBackStack(navigator)
@@ -174,7 +173,7 @@ class UnlockActivity : FragmentActivity() {
         val title = intent.extras?.getString(TITLE)
         val subtitle = intent.extras?.getString(SUBTITLE)
         this.startAuthentication(
-            title = title ?: localizeHelper.localize(MR.strings.unlock_app),
+            title = title ?: localizeHelper.localize { xml -> xml.unlockApp },
             subtitle = subtitle,
             confirmationRequired = false,
             callback = object : AuthenticatorUtil.AuthenticationCallback() {

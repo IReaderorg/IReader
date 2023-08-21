@@ -7,7 +7,6 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.WorkManager
-import ireader.i18n.R
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.notification.NotificationsIds
@@ -17,14 +16,14 @@ import ireader.domain.services.tts_service.media_player.TTSService
 import ireader.domain.utils.extensions.launchMainActivityIntent
 import ireader.i18n.Args
 import ireader.i18n.LocalizeHelper
+import ireader.i18n.R
 import ireader.i18n.SHORTCUTS
-import ireader.i18n.resources.MR
-import java.util.*
+import java.util.UUID
 
 
 class DefaultNotificationHelper(
-     private val context: Context,
-     private val localizeHelper: LocalizeHelper
+    private val context: Context,
+    private val localizeHelper: LocalizeHelper
 ) {
     private val notificationManager = NotificationManagerCompat.from(context)
 
@@ -41,8 +40,8 @@ class DefaultNotificationHelper(
         return launchMainActivityIntent(context)
             .apply {
                 action = SHORTCUTS.SHORTCUT_DETAIL
-                putExtra(Args.ARG_BOOK_ID,bookId)
-                putExtra(Args.ARG_SOURCE_ID,sourceId)
+                putExtra(Args.ARG_BOOK_ID, bookId)
+                putExtra(Args.ARG_SOURCE_ID, sourceId)
             }
     }
 
@@ -115,7 +114,9 @@ class DefaultNotificationHelper(
             setOngoing(true)
             addAction(
                 R.drawable.baseline_close_24,
-                localizeHelper.localize(MR.strings.cancel),
+                localizeHelper.localize() { xml ->
+                    xml.cancel
+                },
                 cancelDownloadIntent
             )
             setContentIntent(openDownloadsPendingIntent)
@@ -130,14 +131,23 @@ class DefaultNotificationHelper(
             context.applicationContext,
             NotificationsIds.CHANNEL_DOWNLOADER_ERROR
         ).apply {
-            if (e.localizedMessage == localizeHelper.localize(MR.strings.the_downloads_was_interrupted)) {
-                setSubText(localizeHelper.localize(MR.strings.the_downloads_was_cancelled))
+            if (e.localizedMessage == localizeHelper.localize() { xml ->
+                    xml.theDownloadsWasInterrupted
+                }) {
+                setSubText(localizeHelper.localize() { xml ->
+                    xml.downloadsWasCancelled
+                })
                 setContentTitle(
-                    localizeHelper.localize(MR.strings.download_of) + " $bookName" + localizeHelper.localize(MR.strings.was_cancelled
-                    )
+                    localizeHelper.localize() { xml ->
+                        xml.downloadOf
+                    } + " $bookName" + localizeHelper.localize() { xml ->
+                        xml.downloadsWasCancelled
+                    }
                 )
             } else {
-                setContentTitle(localizeHelper.localize(MR.strings.failed_to_download) + " $bookName")
+                setContentTitle(localizeHelper.localize() { xml ->
+                    xml.failedToDownload
+                } + " $bookName")
                 setSubText(e.localizedMessage)
             }
             setSmallIcon(R.drawable.ic_downloading)
@@ -155,15 +165,23 @@ class DefaultNotificationHelper(
             context,
             NotificationsIds.CHANNEL_DOWNLOADER_ERROR
         ).apply {
-            if (e.localizedMessage == localizeHelper.localize(MR.strings.the_downloads_was_interrupted)) {
-                setSubText(localizeHelper.localize(MR.strings.the_downloads_was_cancelled))
+            if (e.localizedMessage == localizeHelper.localize() { xml ->
+                    xml.theDownloadsWasInterrupted
+                }) {
+                setSubText(localizeHelper.localize() { xml ->
+                    xml.downloadsWasCancelled
+                })
                 setContentTitle(
-                    localizeHelper.localize(MR.strings.download_of) + " ${book.title}" + localizeHelper.localize(
-                        MR.strings.was_cancelled
-                    )
+                    localizeHelper.localize() { xml ->
+                        xml.downloadOf
+                    } + " ${book.title}" + localizeHelper.localize() { xml ->
+                        xml.wasCancelled
+                    }
                 )
             } else {
-                setContentTitle(localizeHelper.localize(MR.strings.failed_to_download) + " $${book.title}")
+                setContentTitle(localizeHelper.localize() { xml ->
+                    xml.failedToDownload
+                } + " $${book.title}")
                 setSubText(e.localizedMessage)
             }
             setSmallIcon(R.drawable.ic_downloading)

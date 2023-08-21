@@ -25,7 +25,6 @@ import ireader.i18n.Args
 import ireader.i18n.LocalizeHelper
 import ireader.i18n.R
 import ireader.i18n.SHORTCUTS
-import ireader.i18n.resources.MR
 
 /**
  * Helper class to encapsulate code for building notifications.
@@ -42,7 +41,9 @@ class TTSNotificationBuilder constructor(
 
     val skipPrevActionButton = NotificationCompat.Action(
         R.drawable.ic_baseline_skip_previous,
-        localizeHelper.localize(MR.strings.previous_chapter),
+        localizeHelper.localize() { xml ->
+            xml.previousChapter
+        },
         MediaButtonReceiver.buildMediaButtonPendingIntent(
             context,
             PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
@@ -50,7 +51,9 @@ class TTSNotificationBuilder constructor(
     )
     val rewindAction = NotificationCompat.Action(
         R.drawable.ic_baseline_fast_rewind,
-        localizeHelper.localize(MR.strings.previous_paragraph),
+        localizeHelper.localize() { xml ->
+            xml.previousParagraph
+        },
         MediaButtonReceiver.buildMediaButtonPendingIntent(
             context,
             PlaybackStateCompat.ACTION_REWIND
@@ -59,19 +62,25 @@ class TTSNotificationBuilder constructor(
 
     val pauseAction = NotificationCompat.Action(
         R.drawable.ic_baseline_pause,
-        localizeHelper.localize(MR.strings.pause),
+        localizeHelper.localize() { xml ->
+            xml.pause
+        },
         MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_STOP)
     )
 
     val play = NotificationCompat.Action(
         R.drawable.ic_baseline_play_arrow,
-        localizeHelper.localize(MR.strings.play),
+        localizeHelper.localize() { xml ->
+            xml.play
+        },
         MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_PLAY)
     )
 
     val next = NotificationCompat.Action(
         R.drawable.ic_baseline_fast_forward,
-        localizeHelper.localize(MR.strings.next_chapter),
+        localizeHelper.localize() { xml ->
+            xml.nextChapter
+        },
         MediaButtonReceiver.buildMediaButtonPendingIntent(
             context,
             PlaybackStateCompat.ACTION_FAST_FORWARD
@@ -81,7 +90,9 @@ class TTSNotificationBuilder constructor(
     val skipNext =
         NotificationCompat.Action(
             R.drawable.ic_baseline_skip_next,
-            localizeHelper.localize(MR.strings.next_chapter),
+            localizeHelper.localize() { xml ->
+                xml.nextChapter
+            },
             MediaButtonReceiver.buildMediaButtonPendingIntent(
                 context,
                 PlaybackStateCompat.ACTION_SKIP_TO_NEXT
@@ -96,7 +107,9 @@ class TTSNotificationBuilder constructor(
     ) =
         NotificationCompat.Action(
             R.drawable.ic_baseline_open_in_new_24,
-            localizeHelper.localize(MR.strings.next_chapter),
+            localizeHelper.localize() { xml ->
+                xml.nextChapter
+            },
             openReaderScreenIntent(
                 chapterId = chapterId,
                 bookId = bookId,
@@ -108,7 +121,9 @@ class TTSNotificationBuilder constructor(
     val close =
         NotificationCompat.Action(
             R.drawable.baseline_close_24,
-            localizeHelper.localize(MR.strings.close),
+            localizeHelper.localize() { xml ->
+                xml.close
+            },
             cancelMediaPlayer()
         )
 
@@ -179,10 +194,10 @@ class TTSNotificationBuilder constructor(
             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
             .apply {
                 action = SHORTCUTS.SHORTCUT_TTS
-                putExtra(Args.ARG_BOOK_ID,bookId)
-                putExtra(Args.ARG_CHAPTER_ID,chapterId)
-                putExtra(Args.ARG_SOURCE_ID,sourceId)
-                putExtra(Args.ARG_READING_PARAGRAPH,currentReadingParagraph.toLong())
+                putExtra(Args.ARG_BOOK_ID, bookId)
+                putExtra(Args.ARG_CHAPTER_ID, chapterId)
+                putExtra(Args.ARG_SOURCE_ID, sourceId)
+                putExtra(Args.ARG_READING_PARAGRAPH, currentReadingParagraph.toLong())
 //                data = buildReaderScreenDeepLink(
 //                    bookId = bookId,
 //                    chapterId = chapterId,

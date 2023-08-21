@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Chapter
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.components.ChapterRow
 import ireader.presentation.ui.component.list.scrollbars.IVerticalFastScroller
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
@@ -41,7 +41,10 @@ fun ReaderScreenDrawer(
     ) {
         Spacer(modifier = modifier.height(5.dp))
         Box(modifier = Modifier.fillMaxWidth()) {
-            BigSizeTextComposable(text = localize(MR.strings.content), modifier = Modifier.align(Alignment.Center))
+            BigSizeTextComposable(
+                text = localize { xml -> xml.content },
+                modifier = Modifier.align(Alignment.Center)
+            )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End,
@@ -49,12 +52,15 @@ fun ReaderScreenDrawer(
             ) {
                 Box {}
 
-                AppIconButton(imageVector = Icons.Filled.Place, contentDescription = localize(MR.strings.find_current_chapter), onClick = {
-                    onMap(drawerScrollState)
-                })
+                AppIconButton(
+                    imageVector = Icons.Filled.Place,
+                    contentDescription = localize { xml -> xml.findCurrentChapter },
+                    onClick = {
+                        onMap(drawerScrollState)
+                    })
                 AppIconButton(
                     imageVector = Icons.Default.Sort,
-                    contentDescription = localize(MR.strings.reverse),
+                    contentDescription = localize { xml -> xml.reverse },
                     onClick = {
                         onReverseIcon()
                     }

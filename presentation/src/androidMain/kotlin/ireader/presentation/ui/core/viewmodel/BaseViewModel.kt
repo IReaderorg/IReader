@@ -12,7 +12,9 @@ package ireader.presentation.ui.core.viewmodel
 //
 //    actual open fun showSnackBar(message: UiText?) {
 //        scope.launch {
-//            _eventFlow.showSnackBar(message ?: UiText.MStringResource(MR.strings.error_unknown))
+//            _eventFlow.showSnackBar(message ?: UiText.MStringResource{ xml->
+//            xml.errorUnknown
+//        })
 //        }
 //    }
 //
@@ -91,7 +93,9 @@ package ireader.presentation.ui.core.viewmodel
 //suspend fun MutableSharedFlow<UiEvent>.showSnackBar(message: UiText?) {
 //    this.emit(
 //        UiEvent.ShowSnackbar(
-//            uiText = message ?: UiText.MStringResource(MR.strings.error_unknown)
+//            uiText = message ?: UiText.MStringResource{ xml->
+//            xml.errorUnknown
+//        }
 //        )
 //    )
 //}

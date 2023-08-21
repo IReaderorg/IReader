@@ -6,7 +6,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
@@ -31,7 +31,7 @@ fun ExtensionScreenTopAppBar(
         scrollBehavior = scrollBehavior,
         title = {
             if (!searchMode) {
-                BigSizeTextComposable(text = localize(MR.strings.extensions))
+                BigSizeTextComposable(text = localize { xml -> xml.extensions })
             } else {
                 AppTextField(
                     query = query,
@@ -45,37 +45,41 @@ fun ExtensionScreenTopAppBar(
                 if (searchMode) {
                     AppIconButton(
                         imageVector = Icons.Default.Close,
-                        contentDescription = localize(MR.strings.close),
+                        contentDescription = localize() { xml ->
+                            xml.close
+                        },
                         onClick = onClose,
                     )
                 } else {
                     AppIconButton(
                         imageVector = Icons.Default.Search,
-                        contentDescription = localize(MR.strings.search),
+                        contentDescription = localize { xml -> xml.search },
                         onClick = onSearchEnable,
                     )
                 }
                 AppIconButton(
                     imageVector = Icons.Default.Refresh,
-                    contentDescription = localize(MR.strings.refresh),
+                    contentDescription = localize { xml -> xml.refresh },
                     onClick = onRefresh,
                 )
             } else {
                 if (searchMode) {
                     AppIconButton(
                         imageVector = Icons.Default.Close,
-                        contentDescription = localize(MR.strings.close),
+                        contentDescription = localize() { xml ->
+                            xml.close
+                        },
                         onClick = onSearchDisable,
                     )
                 } else {
                     AppIconButton(
                         imageVector = Icons.Default.Search,
-                        contentDescription = localize(MR.strings.search),
+                        contentDescription = localize { xml -> xml.search },
                         onClick = onSearchEnable,
                     )
                     AppIconButton(
                         imageVector = Icons.Default.TravelExplore,
-                        contentDescription = localize(MR.strings.search),
+                        contentDescription = localize { xml -> xml.search },
                         onClick = onSearchNavigate,
                     )
                 }
@@ -86,7 +90,9 @@ fun ExtensionScreenTopAppBar(
 
                 AppIconButton(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = localize(MR.strings.toggle_search_mode_off),
+                    contentDescription = localize { xml ->
+                        xml.toggleSearchModeOff
+                    },
                     onClick = onSearchDisable
                 )
             } else null

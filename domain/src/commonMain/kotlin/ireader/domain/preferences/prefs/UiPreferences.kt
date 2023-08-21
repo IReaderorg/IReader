@@ -86,7 +86,7 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     }
 
     fun language(): Preference<String> {
-        return preferenceStore.getString("language", "")
+        return preferenceStore.getString("language", "en")
     }
 
     fun dateFormat(): Preference<String> {

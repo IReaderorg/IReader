@@ -7,6 +7,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import cafe.adriel.lyricist.ProvideStrings
+import cafe.adriel.lyricist.rememberStrings
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.NavigatorDisposeBehavior
 import com.seiko.imageloader.ImageLoader
@@ -25,6 +27,9 @@ import ireader.domain.di.DomainServices
 import ireader.domain.di.UseCasesInject
 import ireader.domain.di.localModule
 import ireader.domain.di.preferencesInjectModule
+import ireader.i18n.LocalXmlStrings
+import ireader.i18n.LocalizeHelper
+import ireader.i18n.xmlStrings
 import ireader.presentation.core.DefaultNavigatorScreenTransition
 import ireader.presentation.core.MainStarterScreen
 import ireader.presentation.core.di.PresentationModules
@@ -37,12 +42,14 @@ import ireader.presentation.imageloader.coil.imageloader.CatalogRemoteMapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import okio.Path.Companion.toOkioPath
+import org.koin.compose.rememberKoinInject
 import org.koin.core.context.startKoin
 import java.io.File
 import kotlin.system.exitProcess
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalCoroutinesApi::class)
 fun main() {
+
     startKoin {
         modules(
             localModule,dataPlatformModule, CatalogModule, DataModule,preferencesInjectModule,
@@ -59,22 +66,26 @@ fun main() {
             state = state,
             icon = painterResource("icon.png")
         ) {
+            val localizeHelper: LocalizeHelper = rememberKoinInject()
+            val lyricist = rememberStrings(xmlStrings)
+            ProvideStrings(lyricist, LocalXmlStrings) {
+                localizeHelper.Init()
+                val coroutineScope = rememberCoroutineScope()
+                CompositionLocalProvider(
+                    LocalImageLoader provides generateImageLoader(coroutineScope),
+                ) {
+                    AppTheme(coroutineScope) {
+                        Navigator(
+                            screen = MainStarterScreen,
+                            disposeBehavior = NavigatorDisposeBehavior(
+                                disposeNestedNavigators = false,
+                                disposeSteps = true
+                            ),
+                        ) { navigator ->
 
-            val coroutineScope = rememberCoroutineScope()
-            CompositionLocalProvider(
-                LocalImageLoader provides generateImageLoader(coroutineScope),
-            ) {
-                AppTheme(coroutineScope) {
-                    Navigator(
-                        screen = MainStarterScreen,
-                        disposeBehavior = NavigatorDisposeBehavior(
-                            disposeNestedNavigators = false,
-                            disposeSteps = true
-                        ),
-                    ) { navigator ->
 
-
-                        DefaultNavigatorScreenTransition(navigator = navigator)
+                            DefaultNavigatorScreenTransition(navigator = navigator)
+                        }
                     }
                 }
             }

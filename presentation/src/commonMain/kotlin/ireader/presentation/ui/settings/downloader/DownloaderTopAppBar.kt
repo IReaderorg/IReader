@@ -13,7 +13,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.UiText
 import ireader.i18n.asString
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.BuildDropDownMenu
@@ -23,13 +23,13 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DownloaderTopAppBar(
-        state: DownloadState,
-        onPopBackStack: () -> Unit,
-        onCancelAll: () -> Unit,
-        onMenuIcon: () -> Unit,
-        onDeleteAllDownload: () -> Unit,
-        onDelete: () -> Unit,
-        scrollBehavior: TopAppBarScrollBehavior?
+    state: DownloadState,
+    onPopBackStack: () -> Unit,
+    onCancelAll: () -> Unit,
+    onMenuIcon: () -> Unit,
+    onDeleteAllDownload: () -> Unit,
+    onDelete: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior?
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
         when {
@@ -53,13 +53,14 @@ fun DownloaderTopAppBar(
                     scrollBehavior = scrollBehavior,
                 )
             }
+
             else -> {
                 RegularTopBar(
                     onPopBackStack = onPopBackStack,
                     onCancelAll = onCancelAll,
                     scrollBehavior = scrollBehavior,
 
-                )
+                    )
             }
         }
     }
@@ -80,7 +81,9 @@ private fun RegularTopBar(
         scrollBehavior = scrollBehavior,
         title = {
             Text(
-                text = UiText.MStringResource(MR.strings.downloads_queue).asString(localizeHelper),
+                text = UiText.MStringResource { xml ->
+                    xml.downloadsQueue
+                }.asString(localizeHelper),
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
@@ -91,7 +94,9 @@ private fun RegularTopBar(
             val list =
                 listOf<DropDownMenuItem>(
                     DropDownMenuItem(
-                        localize(MR.strings.cancel_all)
+                        localize { xml ->
+                            xml.cancelAll
+                        }
                     ) {
                         onCancelAll()
                     }
@@ -102,7 +107,9 @@ private fun RegularTopBar(
             IconButton(onClick = onPopBackStack) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = localize(MR.strings.return_to_previous_screen),
+                    contentDescription = localize { xml ->
+                        xml.returnToPreviousScreen
+                    },
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }

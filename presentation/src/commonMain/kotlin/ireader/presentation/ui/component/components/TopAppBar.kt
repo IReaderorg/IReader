@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
@@ -156,14 +156,16 @@ fun SearchToolbar(
                         focusManager.clearFocus()
                     },
 
-                )
+                    )
             }
         },
         actions = {
             if (isSearchModeEnable) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
-                    contentDescription = localize(MR.strings.close),
+                    contentDescription = localize() { xml ->
+                        xml.close
+                    },
                     onClick = {
                         isSearchModeEnable = false
                         query = ""
@@ -175,7 +177,7 @@ fun SearchToolbar(
             } else {
                 AppIconButton(
                     imageVector = Icons.Default.Search,
-                    contentDescription = localize(MR.strings.search),
+                    contentDescription = localize { xml -> xml.search },
                     onClick = {
                         isSearchModeEnable = true
                         query = ""
@@ -193,7 +195,9 @@ fun SearchToolbar(
             if (isSearchModeEnable) {
                 AppIconButton(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = localize(MR.strings.toggle_search_mode_off),
+                    contentDescription = localize { xml ->
+                        xml.toggleSearchModeOff
+                    },
                     onClick = {
                         isSearchModeEnable = false
                         query = ""
@@ -203,7 +207,9 @@ fun SearchToolbar(
                 if (onPopBackStack != null) {
                     AppIconButton(
                         imageVector = Icons.Default.ArrowBack,
-                        contentDescription = localize(MR.strings.toggle_search_mode_off),
+                        contentDescription = localize { xml ->
+                            xml.toggleSearchModeOff
+                        },
                         onClick = {
                             onPopBackStack()
                         }

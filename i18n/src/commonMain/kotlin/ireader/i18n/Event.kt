@@ -1,5 +1,3 @@
-
-
 package ireader.i18n
 
 
@@ -15,7 +13,6 @@ sealed class UiEvent : Event() {
 }
 
 
-
 data class ResourceException(
     val e: Exception,
     val resId: Int,
@@ -26,7 +23,7 @@ sealed class UiText {
     data class DynamicString(val text: String) : UiText()
 
     data class StringResource(val resId: Int) : UiText()
-    data class MStringResource(val res: dev.icerock.moko.resources.StringResource) : UiText()
+    data class MStringResource(val res: (XmlStrings) -> String) : UiText()
 
     data class ExceptionString(val e: Throwable) : UiText()
 

@@ -29,7 +29,7 @@ import ireader.domain.models.library.LibrarySort
 import ireader.i18n.LocalizeHelper
 import ireader.i18n.asString
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.component.text_related.TextSection
 import ireader.presentation.ui.core.theme.AppColors
@@ -220,7 +220,7 @@ private fun LazyListScope.DispalyPage(
 ) {
     item {
         TextSection(
-            text = localize(MR.strings.display_mode),
+            text = localize { xml -> xml.displayMode },
             padding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
             style = MaterialTheme.typography.bodyMedium,
             toUpper = false
@@ -242,16 +242,16 @@ private fun LazyListScope.DispalyPage(
 
                 when (layout) {
                     DisplayMode.CompactGrid -> {
-                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.compact_layout))
+                        MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.compactLayout })
                     }
                     DisplayMode.ComfortableGrid -> {
-                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.comfortable_layout))
+                        MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.comfortableLayout })
                     }
                     DisplayMode.List -> {
-                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.list_layout))
+                        MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.listLayout })
                     }
                     DisplayMode.OnlyCover -> {
-                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.cover_only_layout))
+                        MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.coverOnlyLayout })
                     }
                 }
             }
@@ -259,7 +259,7 @@ private fun LazyListScope.DispalyPage(
     }
     item {
         TextSection(
-            text = localize(MR.strings.columns),
+            text = localize { xml -> xml.columns },
             padding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
             style = MaterialTheme.typography.bodyMedium,
             toUpper = false
@@ -272,7 +272,7 @@ private fun LazyListScope.DispalyPage(
     }
     item {
         TextSection(
-            text = localize(MR.strings.badge),
+            text = localize { xml -> xml.badge },
             padding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
             style = MaterialTheme.typography.bodyMedium,
             toUpper = false
@@ -288,7 +288,7 @@ private fun LazyListScope.DispalyPage(
                     vm.readBadge.value = it
                 }
             )
-            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.read_chapters))
+            MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.readChapters })
         }
     }
     item {
@@ -301,7 +301,7 @@ private fun LazyListScope.DispalyPage(
                     vm.unreadBadge.value = it
                 }
             )
-            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.unread_chapters))
+            MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.unreadChapters })
         }
     }
     item {
@@ -314,12 +314,12 @@ private fun LazyListScope.DispalyPage(
                     vm.goToLastChapterBadge.value = it
                 }
             )
-            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.go_to_last_chapter))
+            MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.goToLastChapter })
         }
     }
     item {
         TextSection(
-            text = localize(MR.strings.tabs),
+            text = localize { xml -> xml.tabs },
             padding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
             style = MaterialTheme.typography.bodyMedium,
             toUpper = false
@@ -335,7 +335,7 @@ private fun LazyListScope.DispalyPage(
                     vm.showCategoryTabs.value = it
                 }
             )
-            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.show_category_tabs))
+            MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.showCategoryTabs })
         }
     }
     item {
@@ -348,7 +348,7 @@ private fun LazyListScope.DispalyPage(
                     vm.showAllCategoryTab.value = it
                 }
             )
-            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.show_all_category_tab))
+            MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.showAllCategoryTab })
         }
     }
     item {
@@ -361,7 +361,7 @@ private fun LazyListScope.DispalyPage(
                     vm.showCountInCategory.value = it
                 }
             )
-            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.show_count_in_category_tab))
+            MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.showCountInCategoryTab })
         }
     }
 }

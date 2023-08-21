@@ -1,15 +1,15 @@
 [versions]
-kotlin = "1.8.20"
-gradle = "1.8.20"
+kotlin = "1.9.0"
+gradle = "1.9.0"
 dokka = "1.7.20"
 coroutines = "1.7.1"
 serialization = "1.5.0"
 datetime = "0.4.0"
-ksp = "1.8.20-1.0.10"
+ksp = "1.9.0-1.0.13"
 
 
 [libraries]
-gradle-kotlinSerialization = { module =  "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
+gradle-kotlinSerialization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
 gradle-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "gradle" }
 stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-common", version.ref = "kotlin" }
 reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
@@ -31,7 +31,7 @@ kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
 # Kotlin
-kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin"}
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin"}
-kotlin-targetAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin"}
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin"}
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-targetAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
