@@ -261,7 +261,6 @@
     <string name="about">Om</string>
     <string name="edit_category">Rediger kategorier</string>
     <string name="cover">Dække over</string>
-    <string name="page_progress_num">Side %d</string>
     <string name="no_app_was_found_to_lauch">Noget gik galt. du har ikke den nødvendige app.</string>
     <string name="the_downloads_was_interrupted">Downloads blev afbrudt</string>
     <string name="the_downloads_was_cancelled">Downloads blev annulleret</string>

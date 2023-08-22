@@ -316,7 +316,6 @@
     <string name="category">Thể loại</string>
     <string name="help">Cứu giúp</string>
     <string name="pref_incognito_mode">Chế độ ẩn danh</string>
-    <string name="page_progress_num">Trang %d</string>
     <string name="lock_always">Luôn luôn</string>
     <string name="lock_when_idle">Khóa khi nhàn rỗi Sau</string>
     <string name="authentication">xác thực</string>

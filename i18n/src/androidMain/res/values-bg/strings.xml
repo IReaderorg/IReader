@@ -319,7 +319,6 @@
     <string name="category">Категории</string>
     <string name="help">Помогне</string>
     <string name="pref_incognito_mode">Режим инкогнито</string>
-    <string name="page_progress_num">Страница %d</string>
     <string name="authentication">Удостоверяване</string>
     <string name="authenticate_to_confirm_change">Удостоверете се, за да потвърдите промяната</string>
     <string name="export_book_as_epub">Експортиране на книга като Epub</string>

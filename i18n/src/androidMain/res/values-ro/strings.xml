@@ -299,7 +299,6 @@
     <string name="pref_relative_time_long">Lung (Scurt+, acum n zile)</string>
     <string name="authenticate_to_confirm_change">Autentificați-vă pentru a confirma modificarea</string>
     <string name="permissions">Permisiuni</string>
-    <string name="page_progress_num">Pagina %d</string>
     <string name="lock_never">Nu</string>
     <string name="lock_always">Mereu</string>
     <string name="lock_when_idle">Blocați când este inactiv După</string>

@@ -38,7 +38,6 @@
     <string name="category">Категории</string>
     <string name="help">Помощь</string>
     <string name="pref_incognito_mode">Режим инкогнито</string>
-    <string name="page_progress_num">Страница %d</string>
     <string name="lock_never">Никогда</string>
     <string name="lock_always">Всегда</string>
     <string name="lock_when_idle">Блокировка при бездействии после</string>

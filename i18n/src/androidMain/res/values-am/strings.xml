@@ -317,7 +317,6 @@
     <string name="category">ምድቦች</string>
     <string name="help">እገዛ</string>
     <string name="pref_incognito_mode">ማንነት የማያሳውቅ ሁነታ</string>
-    <string name="page_progress_num">ገጽ %d</string>
     <string name="lock_never">በጭራሽ</string>
     <string name="lock_always">ሁሌም</string>
     <string name="lock_when_idle">ስራ ሲፈታ ቆልፍ</string>

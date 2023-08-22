@@ -266,7 +266,7 @@
     <string name="permissions">Permissions</string>
     <string name="cover">Cover</string>
     <string name="pref_incognito_mode">Incognito mode</string>
-    <string name="page_progress_num">Page %d</string>
+
     <string name="authenticate_to_confirm_change">Authenticate to confirm change</string>
     <string name="decrease">Decrease</string>
     <string name="pitch">Pitch</string>

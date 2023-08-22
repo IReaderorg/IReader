@@ -337,7 +337,6 @@
     <string name="category">หมวดหมู่</string>
     <string name="help">ช่วย</string>
     <string name="pref_incognito_mode">โหมดไม่ระบุตัวตน</string>
-    <string name="page_progress_num">หน้า %d</string>
     <string name="lock_never">ไม่เคย</string>
     <string name="lock_always">เสมอ</string>
     <string name="lock_when_idle">ล็อคเมื่อไม่ได้ใช้งานหลังจาก</string>

@@ -286,7 +286,6 @@
     <string name="category">වර්ග</string>
     <string name="help">උදව්</string>
     <string name="pref_incognito_mode">අප්‍රකට මාදිලිය</string>
-    <string name="page_progress_num">පිටුව %d</string>
     <string name="lock_never">කවදාවත් නැහැ</string>
     <string name="no_app_was_found_to_lauch">මොකක්හරි වැරැද්දක් වෙලා. ඔබට අවශ්‍ය යෙදුම නොමැත.</string>
     <string name="description">විස්තර</string>

@@ -63,7 +63,6 @@
     <string name="auto_installer">Auto Installer</string>
     <string name="search_hint">Telusuri…</string>
     <string name="pref_incognito_mode">Mode incognito</string>
-    <string name="page_progress_num">Kaca %d</string>
     <string name="lock_never">ora tau</string>
     <string name="pref_incognito_mode_summary">Ngaso maca riwayat</string>
     <string name="downloads_was_cancelled">Download saka dibatalake</string>

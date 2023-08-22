@@ -290,7 +290,6 @@
     <string name="category">కేటగిరీలు</string>
     <string name="help">సహాయం</string>
     <string name="pref_incognito_mode">అజ్ఞాత మోడ్</string>
-    <string name="page_progress_num">పేజీ %d</string>
     <string name="lock_never">ఎప్పుడూ</string>
     <string name="lock_always">ఎల్లప్పుడూ</string>
     <string name="lock_when_idle">తర్వాత నిష్క్రియంగా ఉన్నప్పుడు లాక్ చేయండి</string>

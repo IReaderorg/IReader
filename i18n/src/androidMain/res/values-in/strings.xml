@@ -225,7 +225,6 @@
     <string name="category">Kategori</string>
     <string name="help">Membantu</string>
     <string name="pref_incognito_mode">Mode penyamaran</string>
-    <string name="page_progress_num">Halaman %d</string>
     <string name="lock_never">Tidak pernah</string>
     <string name="lock_when_idle">Kunci saat Menganggur Setelah</string>
     <string name="authenticate_to_confirm_change">Autentikasi untuk mengonfirmasi perubahan</string>

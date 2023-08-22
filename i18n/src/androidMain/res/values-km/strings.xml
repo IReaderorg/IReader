@@ -185,7 +185,6 @@
     <string name="category">ប្រភេទ</string>
     <string name="help">ជំនួយ</string>
     <string name="pref_incognito_mode">របៀបអនាមិក</string>
-    <string name="page_progress_num">ទំព័រ %d</string>
     <string name="failed_to_download">បរាជ័យក្នុងការទាញយក</string>
     <string name="downloads_was_cancelled">ការទាញយកត្រូវបានលុបចោល</string>
     <string name="was_cancelled">ត្រូវបានលុបចោល</string>

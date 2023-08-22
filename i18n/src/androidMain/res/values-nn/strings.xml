@@ -377,7 +377,7 @@
     <string name="saved_local_source_location">Saved Sources to Cache</string>
     <string name="edit_category">Edit Categories</string>
     <string name="confirm">Confirm</string>
-    <string name="page_progress_num">Page %d</string>
+
     <string name="lock_never">Never</string>
     <string name="lock_always">Always</string>
     <string name="downloads_was_cancelled">Download of was Cancelled</string>

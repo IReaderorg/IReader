@@ -329,7 +329,6 @@
     <string name="menu">Speisekarte</string>
     <string name="there_was_a_problem_in_getting_chapter">Beim Abrufen des Kapitels ist ein Problem aufgetreten.</string>
     <string name="error">Fehler</string>
-    <string name="page_progress_num">Seite %d</string>
     <string name="lock_never">Niemals</string>
 
     <string name="pref_incognito_mode_summary">Leseverlauf pausieren</string>

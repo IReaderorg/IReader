@@ -6,7 +6,6 @@
     <string name="category_hint">Ονομα…</string>
     <string name="help">Βοήθεια</string>
     <string name="pref_incognito_mode">Κατάσταση ανώνυμης περιήγησης</string>
-    <string name="page_progress_num">Σελίδα %d</string>
 
     <string name="was_cancelled">ακυρώθηκε</string>
     <string name="loading">Φόρτωση</string>

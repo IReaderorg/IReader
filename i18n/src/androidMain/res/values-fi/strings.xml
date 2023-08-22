@@ -371,7 +371,6 @@
     <string name="edit_category">Muokkaa luokkia</string>
     <string name="confirm">Vahvista</string>
     <string name="category">Kategoriat</string>
-    <string name="page_progress_num">Sivu %d</string>
     <string name="lock_never">Ei koskaan</string>
     <string name="pref_incognito_mode_summary">Keskeytä historian lukeminen</string>
     <string name="no_app_was_found_to_lauch">Jokin meni pieleen. sinulla ei ole tarvittavaa sovellusta.</string>

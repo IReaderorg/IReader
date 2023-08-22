@@ -354,7 +354,7 @@
     <string name="about">About</string>
     <string name="mark_as_not_read">Mark as Not read</string>
     <string name="pref_incognito_mode">Incognito mode</string>
-    <string name="page_progress_num">Page %d</string>
+
     <string name="lock_never">Never</string>
     <string name="lock_always">Always</string>
     <string name="lock_when_idle">Lock when Idle After</string>

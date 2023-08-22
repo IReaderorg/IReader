@@ -11,6 +11,7 @@
     <string name="list_layout">Layout da lista</string>
     <string name="cover_only_layout">Grade somente de cobertura</string>
     <string name="decrease">Diminuir</string>
+    <string name="confirm">Confirm</string>
     <string name="source_title">Título da Fonte</string>
     <string name="chapter_number">Número do Capítulo</string>
     <string name="hour">Dia</string>
@@ -364,8 +365,6 @@
     <string name="all_category">Tudo</string>
     <string name="saved_local_source_location">Fontes salvas no cache</string>
     <string name="edit_category">Editar categorias</string>
-    <string name="confirm">confirme</string>
-    <string name="page_progress_num">Página %d</string>
     <string name="lock_never">Nunca</string>
     <string name="weekly">Semanalmente</string>
     <string name="daily">Diário</string>

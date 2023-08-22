@@ -20,7 +20,7 @@ android {
     }
 }
 kotlin {
-    android {
+    androidTarget {
         publishLibraryVariants("release")
         compilations {
             all {

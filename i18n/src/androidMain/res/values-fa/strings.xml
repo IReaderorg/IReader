@@ -13,7 +13,6 @@
     <string name="search_hint">جستجو کردن…</string>
     <string name="nothing_read_recently">اخیراً چیزی خوانده نشده است</string>
     <string name="confirm">تایید</string>
-    <string name="page_progress_num">صفحه %d</string>
     <string name="lock_never">هرگز</string>
     <string name="lock_always">همیشه</string>
     <string name="edit_category">ویرایش دسته ها</string>

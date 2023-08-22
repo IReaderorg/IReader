@@ -186,7 +186,6 @@
     <string name="category">श्रेणियाँ</string>
     <string name="help">मदद करना</string>
     <string name="pref_incognito_mode">इंकॉग्निटो मोड</string>
-    <string name="page_progress_num">पेज %d</string>
     <string name="lock_never">कभी नहीँ</string>
     <string name="lock_always">हमेशा</string>
     <string name="lock_when_idle">निष्क्रिय होने पर लॉक करें</string>

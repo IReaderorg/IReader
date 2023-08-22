@@ -330,7 +330,6 @@
     <string name="cover">Обкладинка</string>
     <string name="help">Допомога</string>
     <string name="pref_incognito_mode">Режим інкогніто</string>
-    <string name="page_progress_num">Сторінка %d</string>
     <string name="lock_never">Ніколи</string>
     <string name="lock_always">Завжди</string>
     <string name="lock_when_idle">Блокування на холостому ходу після</string>

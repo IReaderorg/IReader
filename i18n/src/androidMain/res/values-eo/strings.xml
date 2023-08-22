@@ -228,7 +228,6 @@
     <string name="open_in_webView">Malfermu en WebView</string>
     <string name="downloads_queue">Vico de elŝutoj</string>
     <string name="all_category">Ĉiuj</string>
-    <string name="page_progress_num">Paĝo %d</string>
     <string name="lock_never">Neniam</string>
     <string name="lock_always">Ĉiam</string>
     <string name="lock_when_idle">Ŝlosu kiam Idle Post</string>

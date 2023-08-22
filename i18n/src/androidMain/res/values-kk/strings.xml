@@ -404,7 +404,7 @@
     <string name="category">Categories</string>
     <string name="help">Help</string>
     <string name="pref_incognito_mode">Incognito mode</string>
-    <string name="page_progress_num">Page %d</string>
+
     <string name="download_of">Download of</string>
     <string name="loading">Loading</string>
     <string name="go_back">Go Back</string>

@@ -213,7 +213,6 @@
     <string name="all_category">Tutto</string>
     <string name="permissions">Autorizzazioni</string>
     <string name="cover">Coperchio</string>
-    <string name="page_progress_num">Pagina %d</string>
     <string name="lock_never">Mai</string>
     <string name="lock_always">Sempre</string>
     <string name="lock_when_idle">Blocca quando inattivo dopo</string>

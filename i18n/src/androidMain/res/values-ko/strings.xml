@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="pref_incognito_mode">시크릿 모드</string>
-    <string name="page_progress_num">페이지 %d</string>
     <string name="lock_never">절대</string>
     <string name="lock_always">언제나</string>
     <string name="lock_when_idle">다음 이후에 유휴 상태일 때 잠금</string>

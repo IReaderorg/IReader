@@ -397,7 +397,6 @@
     <string name="unlock_app">解锁</string>
     <string name="permissions">许可权</string>
     <string name="pref_incognito_mode">隐姓埋名模式</string>
-    <string name="page_progress_num">页码%d</string>
     <string name="lock_never">从不</string>
     <string name="lock_always">始终如一</string>
     <string name="lock_when_idle">闲置时锁定后</string>

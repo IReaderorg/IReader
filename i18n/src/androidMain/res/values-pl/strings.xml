@@ -308,7 +308,6 @@
     <string name="category">Kategorie</string>
     <string name="help">Pomoc</string>
     <string name="pref_incognito_mode">Tryb inkognito</string>
-    <string name="page_progress_num">Strona %d</string>
     <string name="the_downloads_was_cancelled">Pobieranie zostało anulowane</string>
     <string name="downloads_was_cancelled">Pobieranie zostało anulowane</string>
     <string name="was_cancelled">zostało odwołane</string>

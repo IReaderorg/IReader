@@ -414,7 +414,6 @@
     <string name="last_used_source">בשימוש אחרון</string>
     <string name="saved_local_source_location">מקורות שמורים למטמון</string>
     <string name="status">סטָטוּס</string>
-    <string name="page_progress_num">עמוד %d</string>
     <string name="paragraph">פסקה</string>
     <string name="appearance">מראה חיצוני</string>
     <string name="bionic_reading">Bionic Reading mode</string>

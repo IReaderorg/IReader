@@ -148,7 +148,7 @@
     <string name="category_hint">Name…</string>
     <string name="status">Status</string>
     <string name="cover">Cover</string>
-    <string name="page_progress_num">Page %d</string>
+
     <string name="lock_when_idle">Lock when Idle After</string>
     <string name="go_back">Go Back</string>
     <string name="authentication">Authentication</string>

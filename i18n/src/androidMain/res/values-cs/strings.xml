@@ -27,7 +27,6 @@
     <string name="category_hint">Název…</string>
     <string name="about">O</string>
     <string name="confirm">Potvrdit</string>
-    <string name="page_progress_num">Strana %d</string>
     <string name="lock_never">Nikdy</string>
     <string name="lock_always">Vždy</string>
     <string name="no_app_was_found_to_lauch">Něco se pokazilo. nemáte požadovanou aplikaci.</string>

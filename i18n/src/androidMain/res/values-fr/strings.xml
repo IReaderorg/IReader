@@ -2,7 +2,7 @@
 <resources>
     <string name="setting_screen_label">Paramètre</string>
     <string name="delete_all_downloads">Supprimer tous les téléchargements</string>
-    <string name="page_progress_num">Page %d</string>
+
     <string name="lock_never">Jamais</string>
     <string name="lock_always">Toujours</string>
     <string name="authentication">Authentification</string>

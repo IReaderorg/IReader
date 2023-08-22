@@ -22,8 +22,6 @@
     <string name="edit_category">კატეგორიების რედაქტირება</string>
     <string name="confirm">დაადასტურეთ</string>
     <string name="pref_incognito_mode">ინკოგნიტო რეჟიმი</string>
-    <string name="page_progress_num">გვერდი %d</string>
-
     <string name="unable_to_get_package_version">პაკეტის ვერსიის მიღება შეუძლებელია</string>
     <string name="next_result">შემდეგი შედეგი</string>
     <string name="expand_menu">მენიუს გაფართოება</string>

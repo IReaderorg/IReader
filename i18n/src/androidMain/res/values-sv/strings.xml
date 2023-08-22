@@ -253,7 +253,6 @@
     <string name="pref_incognito_mode">Inkognitoläge</string>
     <string name="lock_never">Aldrig</string>
     <string name="lock_always">Alltid</string>
-    <string name="page_progress_num">Sidan %d</string>
     <string name="go">Gå till</string>
     <string name="manage_notification">Hantera meddelanden</string>
     <string name="confirm_exit_message">Tryck på tillbaka igen för att avsluta</string>

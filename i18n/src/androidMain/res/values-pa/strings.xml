@@ -204,7 +204,7 @@
     <string name="nothing_read_recently">Nothing read recently</string>
     <string name="hint">…</string>
     <string name="edit_category">Edit Categories</string>
-    <string name="page_progress_num">Page %d</string>
+
     <string name="no_app_was_found_to_lauch">Something went wrong. you don\'t have the required app.</string>
     <string name="lock_when_idle">Lock when Idle After</string>
     <string name="pref_incognito_mode_summary">Pause reading history</string>

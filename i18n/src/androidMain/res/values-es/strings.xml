@@ -267,7 +267,6 @@
     <string name="the_downloads_was_interrupted">Las Descargas fueron interrumpidas</string>
     <string name="permissions">permisos</string>
     <string name="cover">Cubrir</string>
-    <string name="page_progress_num">Página %d</string>
     <string name="lock_when_idle">Bloquear cuando está inactivo después</string>
     <string name="authentication">Autenticación</string>
     <string name="authenticate_to_confirm_change">Autenticar para confirmar el cambio</string>

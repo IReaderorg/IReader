@@ -123,7 +123,6 @@
     <string name="last_used_source">Laatst gebruikt</string>
     <string name="permissions">Machtigingen</string>
     <string name="status">Status</string>
-    <string name="page_progress_num">Pagina %d</string>
     <string name="lock_never">Nooit</string>
     <string name="lock_always">Altijd</string>
     <string name="lock_when_idle">Vergrendelen bij stationair na</string>

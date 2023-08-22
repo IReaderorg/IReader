@@ -66,7 +66,6 @@
     <string name="category">カテゴリー</string>
     <string name="help">ヘルプ</string>
     <string name="pref_incognito_mode">プライバシーモード</string>
-    <string name="page_progress_num">ページ %d</string>
     <string name="lock_never">一度もない</string>
     <string name="lock_always">いつも</string>
     <string name="lock_when_idle">アイドル時にロックする</string>

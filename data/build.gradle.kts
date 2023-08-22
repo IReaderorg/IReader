@@ -7,7 +7,7 @@ plugins {
 }
 
 kotlin {
-    android {
+    androidTarget {
         compilations {
             all {
                 kotlinOptions.jvmTarget = ProjectConfig.androidJvmTarget.toString()

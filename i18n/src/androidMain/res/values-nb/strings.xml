@@ -21,7 +21,6 @@
     <string name="lock_never">Aldri</string>
     <string name="status">Status</string>
     <string name="cover">Dekke</string>
-    <string name="page_progress_num">Side %d</string>
     <string name="permissions">Tillatelser</string>
     <string name="lock_when_idle">Lås når inaktiv etter</string>
     <string name="authentication">Godkjenning</string>

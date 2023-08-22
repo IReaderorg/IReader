@@ -166,7 +166,6 @@
     <string name="reader">Skaitytojas</string>
     <string name="status">Statusas</string>
     <string name="category">Kategorijos</string>
-    <string name="page_progress_num">Puslapis %d</string>
     <string name="lock_never">Niekada</string>
     <string name="cover">Viršelis</string>
     <string name="show_history">Rodyti istoriją</string>

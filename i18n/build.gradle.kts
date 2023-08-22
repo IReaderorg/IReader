@@ -12,7 +12,7 @@ plugins {
     id(libs.plugins.ksp.get().pluginId)
 }
 kotlin {
-    android()
+    androidTarget()
     jvm() {
         compilations.all {
             kotlinOptions.jvmTarget = "17"

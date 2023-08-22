@@ -381,7 +381,6 @@
     <string name="pinned_sources">钉住了</string>
     <string name="status">状况</string>
     <string name="cover">覆盖</string>
-    <string name="page_progress_num">页码%d</string>
     <string name="lock_never">从不</string>
     <string name="lock_always">始终如一</string>
     <string name="lock_when_idle">闲置时锁定后</string>

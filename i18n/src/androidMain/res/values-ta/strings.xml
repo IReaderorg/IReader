@@ -303,7 +303,6 @@
     <string name="category">வகைகள்</string>
     <string name="help">உதவி</string>
     <string name="pref_incognito_mode">மறைநிலைப் பயன்முறை</string>
-    <string name="page_progress_num">பக்கம் %d</string>
     <string name="lock_never">ஒருபோதும் இல்லை</string>
     <string name="lock_always">எப்போதும்</string>
     <string name="lock_when_idle">பிறகு சும்மா இருக்கும்போது பூட்டு</string>

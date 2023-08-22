@@ -154,7 +154,6 @@
     <string name="category">Categorías</string>
     <string name="help">Axuda</string>
     <string name="pref_incognito_mode">Modo de incógnito</string>
-    <string name="page_progress_num">Páxina %d</string>
     <string name="lock_never">Nunca</string>
     <string name="authentication">Autenticación</string>
     <string name="authenticate_to_confirm_change">Autenticarse para confirmar o cambio</string>

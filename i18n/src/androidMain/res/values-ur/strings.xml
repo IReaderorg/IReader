@@ -369,7 +369,6 @@
     <string name="cover">ڈھانپنا</string>
     <string name="help">مدد</string>
     <string name="pref_incognito_mode">پوشیدگی وضع</string>
-    <string name="page_progress_num">صفحہ %d</string>
     <string name="lock_never">کبھی نہیں۔</string>
     <string name="lock_always">ہمیشہ</string>
     <string name="lock_when_idle">اس کے بعد بیکار ہونے پر لاک کریں۔</string>

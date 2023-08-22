@@ -60,7 +60,6 @@
     <string name="category">Mga kategorya</string>
     <string name="help">Tulong</string>
     <string name="pref_incognito_mode">Incognito mode</string>
-    <string name="page_progress_num">Pahina %d</string>
     <string name="lock_never">Hindi kailanman</string>
     <string name="lock_always">Laging</string>
     <string name="no_app_was_found_to_lauch">Nagkaproblema. wala kang kinakailangang app.</string>

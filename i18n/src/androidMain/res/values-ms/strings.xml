@@ -153,7 +153,7 @@
     <string name="saved_local_source_location">Saved Sources to Cache</string>
     <string name="category">Categories</string>
     <string name="pref_incognito_mode">Incognito mode</string>
-    <string name="page_progress_num">Page %d</string>
+
     <string name="lock_never">Never</string>
     <string name="lock_always">Always</string>
     <string name="no_app_was_found_to_lauch">Something went wrong. you don\'t have the required app.</string>

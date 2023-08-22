@@ -311,7 +311,6 @@
     <string name="category">Kategoriyalar</string>
     <string name="help">Yordam bering</string>
     <string name="pref_incognito_mode">Inkognito rejimi</string>
-    <string name="page_progress_num">Sahifa %d</string>
     <string name="lock_never">Hech qachon</string>
     <string name="lock_always">Har doim</string>
     <string name="lock_when_idle">Boʻsh turganda qulflang</string>

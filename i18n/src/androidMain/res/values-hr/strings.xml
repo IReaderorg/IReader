@@ -238,7 +238,6 @@
     <string name="category">Kategorije</string>
     <string name="help">Pomoć</string>
     <string name="pref_incognito_mode">Anonimni način rada</string>
-    <string name="page_progress_num">Stranica %d</string>
     <string name="lock_never">Nikada</string>
     <string name="lock_always">Stalno</string>
     <string name="lock_when_idle">Zaključaj nakon mirovanja</string>

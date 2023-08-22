@@ -43,7 +43,6 @@
     <string name="category">Kategoriler</string>
     <string name="help">Yardım</string>
     <string name="pref_incognito_mode">Gizli mod</string>
-    <string name="page_progress_num">Sayfa %d</string>
     <string name="lock_never">Asla</string>
     <string name="lock_always">Her zaman</string>
     <string name="lock_when_idle">Boşta olunca kilitle</string>

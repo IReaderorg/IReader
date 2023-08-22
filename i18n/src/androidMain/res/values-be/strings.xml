@@ -354,7 +354,6 @@
     <string name="category">Катэгорыі</string>
     <string name="help">Даведка</string>
     <string name="pref_incognito_mode">Рэжым інкогніта</string>
-    <string name="page_progress_num">Старонка %d</string>
     <string name="error">Памылка</string>
     <string name="background_color">Колер фону</string>
     <string name="text_color">TextColor</string>
