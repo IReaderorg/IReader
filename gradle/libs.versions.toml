@@ -69,7 +69,7 @@ lyricist = "1.4.2"
 
 lyricist-library = { module = "cafe.adriel.lyricist:lyricist", version.ref = "lyricist" }
 lyricist-processor = { module = "cafe.adriel.lyricist:lyricist-processor", version.ref = "lyricist" }
-lyricist-processorXml = { module = "cafe.adriel.lyricist:lyricist-processor-xml", version.ref = "lyricist" }
+lyricist-processorXml = { module = "io.github.kazemcodes:lyricist-processor-xml", version = "1.4.3" }
 
 
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
