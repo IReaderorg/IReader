@@ -59,9 +59,7 @@ ksp {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().all {
-    if (name.startsWith("compileDebugKotlinAndroid") || name == "compileReleaseKotlinAndroid" || name == "extractDeepLinksDebug" || name == "extractDeepLinksRelease") { // the remaining suffix is the target eg simulator, arm64, etc
-        dependsOn("kspKotlinJvm")
-    }
+    dependsOn("kspKotlinJvm")
 }
 kotlin.sourceSets.commonMain {
     kotlin.srcDir("build/generated/ksp/jvm/jvmMain/kotlin")
