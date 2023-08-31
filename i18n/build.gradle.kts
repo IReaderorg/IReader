@@ -67,10 +67,12 @@ kotlin.sourceSets.commonMain {
     kotlin.srcDir("build/generated/ksp/jvm/jvmMain/kotlin")
 }
 dependencies {
-    add("kspJvm", libs.lyricist.processorXml)
-    add("kspCommonMainMetadata", libs.lyricist.processorXml)
-    kspCommonMainMetadata(libs.lyricist.processorXml)
-    kspCommonMainMetadata(libs.lyricist.processorXml)
+    kspCommonMainMetadata("cafe.adriel.lyricist:lyricist-processor:1.4.2")
+    kspCommonMainMetadata("io.github.kazemcodes:lyricist-processor-xml:1.4.2")
+    add("kspCommonMainMetadata", "cafe.adriel.lyricist:lyricist-processor:1.4.2")
+    add("kspJvm", "cafe.adriel.lyricist:lyricist-processor:1.4.2")
+    add("kspJvm", "io.github.kazemcodes:lyricist-processor-xml:1.4.2")
+    add("kspCommonMainMetadata", "io.github.kazemcodes:lyricist-processor-xml:1.4.2")
 }
 
 android {
