@@ -69,6 +69,8 @@ kotlin.sourceSets.commonMain {
 dependencies {
     add("kspJvm", libs.lyricist.processorXml)
     add("kspCommonMainMetadata", libs.lyricist.processorXml)
+    kspCommonMainMetadata(libs.lyricist.processorXml)
+    kspCommonMainMetadata(libs.lyricist.processorXml)
 }
 
 android {
