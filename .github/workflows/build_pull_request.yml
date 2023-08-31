@@ -23,7 +23,7 @@ jobs:
             arch: x64
             os: ubuntu-latest
             shell: bash
-            build: :desktop:packageUberJarForCurrentOS :desktop:packageDeb
+            build: :i18n:build :desktop:packageUberJarForCurrentOS :desktop:packageDeb
             setupCl: ./.github/scripts/SetupClUnix.sh
 
           #          - runtime: linux-fedora-x64
@@ -39,14 +39,14 @@ jobs:
             arch: x64
             os: windows-latest
             shell: powershell
-            build: :desktop:packageUberJarForCurrentOS :desktop:packageMsi
+            build: :i18n:build :desktop:packageUberJarForCurrentOS :desktop:packageMsi
             setupCl: ./.github/scripts/SetupClWindows.ps1
 
           - runtime: android
             arch: x64
             os: ubuntu-latest
             shell: bash
-            build: :android:assembleStandardRelease
+            build: :i18n:build :android:assembleStandardRelease
             setupCl: ./.github/scripts/SetupClUnix.sh
 
     runs-on: ${{ matrix.os }}
