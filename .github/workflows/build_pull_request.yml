@@ -81,6 +81,6 @@ jobs:
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: >
+          arguments:
             build
             ${{ matrix.build }}
