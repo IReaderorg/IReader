@@ -59,7 +59,9 @@ ksp {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().all {
-    dependsOn("kspKotlinJvm")
+    if (name != "kspKotlinJvm" ) { // the remaining suffix is the target eg simulator, arm64, etc
+        dependsOn("kspKotlinJvm")
+    }
 }
 kotlin.sourceSets.commonMain {
     kotlin.srcDir("build/generated/ksp/jvm/jvmMain/kotlin")
