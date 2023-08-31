@@ -75,7 +75,7 @@ jobs:
         if: ${{ matrix.runtime == 'linux-fedora-x64' }}
         uses: Syer10/Fedora-Java17-Action@v1
         with:
-          command: ./gradlew ${{ matrix.build }} --stacktrace
+          command: ./gradlew :i18n:kspKotlinJvm ${{ matrix.build }} --stacktrace
 
       - name: Build
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
