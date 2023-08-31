@@ -85,6 +85,7 @@ android {
     sourceSets.getByName("main") {
         res.srcDir("src/commonMain/resources")
         res.srcDir("src/androidMain/res")
+        res.srcDir("build/generated/ksp/jvm/jvmMain/kotlin")
     }
 }
 tasks {
