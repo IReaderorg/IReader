@@ -59,11 +59,8 @@ ksp {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().all {
-    if (name.startsWith("compileDebugKotlinAndroid")) { // the remaining suffix is the target eg simulator, arm64, etc
+    if (name.startsWith("compileDebugKotlinAndroid") || name == "compileReleaseKotlinAndroid") { // the remaining suffix is the target eg simulator, arm64, etc
         dependsOn("kspKotlinJvm")
-    }
-    if(name == "kspCommonMainKotlinMetadata") {
-        dependsOn("transformCommonMainDependenciesMetadata")
     }
 }
 kotlin.sourceSets.commonMain {
