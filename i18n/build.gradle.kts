@@ -63,7 +63,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().all {
         dependsOn("kspKotlinJvm")
     }
     if(name == "kspCommonMainKotlinMetadata") {
-        dependOn("transformCommonMainDependenciesMetadata")
+        dependsOn("transformCommonMainDependenciesMetadata")
     }
 }
 kotlin.sourceSets.commonMain {
