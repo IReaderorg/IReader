@@ -59,6 +59,7 @@ ksp {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().all {
+    print(name + "\n\n")
     if (name.startsWith("compileDebugKotlinAndroid") || name.startsWith("compileReleaseKotlinAndroid") ) { // the remaining suffix is the target eg simulator, arm64, etc
         dependsOn("kspKotlinJvm")
     }
@@ -82,11 +83,9 @@ android {
         sourceCompatibility = ProjectConfig.androidJvmTarget
         targetCompatibility = ProjectConfig.androidJvmTarget
     }
-//    sourceSets.getByName("main") {
-//        assets.srcDir(File(buildDir, "generated/moko/androidMain/assets"))
-//        res.srcDir(File(buildDir, "generated/moko/androidMain/res"))
-//        res.srcDir("src/commonMain/resources")
-//    }
+    sourceSets.getByName("main") {
+        res.srcDir("src/commonMain/resources")
+    }
 }
 tasks {
     //  this@tasks.registerResources(project)
