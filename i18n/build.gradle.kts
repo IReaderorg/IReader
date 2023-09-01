@@ -67,6 +67,9 @@ tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().all {
         dependsOn("kspKotlinJvm")
     }
 }
+tasks.named(":i18n:packageReleaseResources") {
+    dependsOn(":i18n:kspKotlinJvm")
+}
 kotlin.sourceSets.commonMain {
     kotlin.srcDir(File(buildDir, "generated/ksp/jvm/jvmMain/kotlin"))
 }
