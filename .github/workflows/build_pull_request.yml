@@ -75,12 +75,12 @@ jobs:
         if: ${{ matrix.runtime == 'linux-fedora-x64' }}
         uses: Syer10/Fedora-Java17-Action@v1
         with:
-          command: ./gradlew build ${{ matrix.build }} --stacktrace
+          command: ./gradlew :i18n:compileReleaseKotlinAndroid ${{ matrix.build }} --stacktrace
 
       - name: Build
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
         uses: gradle/gradle-build-action@v2
         with:
           arguments:
-            build
+            :i18n:compileReleaseKotlinAndroid
             ${{ matrix.build }}

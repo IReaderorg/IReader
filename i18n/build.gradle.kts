@@ -84,6 +84,8 @@ android {
         targetCompatibility = ProjectConfig.androidJvmTarget
     }
     sourceSets.getByName("main") {
+        assets.srcDir(File(buildDir, "build/generated/ksp/jvm/jvmMain/kotlin"))
+        res.srcDir(File(buildDir, "build/generated/ksp/jvm/jvmMain/kotlin"))
         res.srcDir("src/commonMain/resources")
     }
 }
