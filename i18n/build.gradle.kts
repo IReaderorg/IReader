@@ -63,6 +63,9 @@ tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().all {
     if (name.startsWith("compileDebugKotlinAndroid") || name.startsWith("compileReleaseKotlinAndroid") ) { // the remaining suffix is the target eg simulator, arm64, etc
         dependsOn("kspKotlinJvm")
     }
+    if (name.startsWith("compileReleaseKotlinAndroid")) { // the remaining suffix is the target eg simulator, arm64, etc
+        dependsOn("kspKotlinJvm")
+    }
 }
 kotlin.sourceSets.commonMain {
     kotlin.srcDir(File(buildDir, "generated/ksp/jvm/jvmMain/kotlin"))
