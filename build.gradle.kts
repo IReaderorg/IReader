@@ -41,7 +41,6 @@ subprojects {
     }
 }
 
-
 tasks.register("delete", Delete::class) {
     delete(rootProject.buildDir)
 }

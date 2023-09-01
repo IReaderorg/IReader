@@ -59,16 +59,16 @@ ksp {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().all {
-    if(name != "kspCommonMainKotlinMetadata") {
-        dependsOn("kspCommonMainKotlinMetadata")
+    if (name.startsWith("compileDebugKotlinAndroid") || name.startsWith("compileReleaseKotlinAndroid") ) { // the remaining suffix is the target eg simulator, arm64, etc
+        dependsOn("kspKotlinJvm")
     }
 }
 kotlin.sourceSets.commonMain {
-    kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
+    kotlin.srcDir("build/generated/ksp/jvm/jvmMain/kotlin")
 }
 dependencies {
-    add("kspCommonMainMetadata", "cafe.adriel.lyricist:lyricist-processor:1.4.2")
-    add("kspCommonMainMetadata", "io.github.kazemcodes:lyricist-processor-xml:1.4.3")
+    add("kspJvm", libs.lyricist.processorXml)
+    add("kspCommonMainMetadata", libs.lyricist.processorXml)
 }
 
 android {
@@ -82,11 +82,11 @@ android {
         sourceCompatibility = ProjectConfig.androidJvmTarget
         targetCompatibility = ProjectConfig.androidJvmTarget
     }
-    sourceSets.getByName("main") {
-        res.srcDir("src/commonMain/resources")
-        res.srcDir("src/androidMain/res")
-        res.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
-    }
+//    sourceSets.getByName("main") {
+//        assets.srcDir(File(buildDir, "generated/moko/androidMain/assets"))
+//        res.srcDir(File(buildDir, "generated/moko/androidMain/res"))
+//        res.srcDir("src/commonMain/resources")
+//    }
 }
 tasks {
     //  this@tasks.registerResources(project)
