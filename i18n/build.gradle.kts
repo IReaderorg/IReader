@@ -65,7 +65,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().all {
     }
 }
 kotlin.sourceSets.commonMain {
-    kotlin.srcDir("build/generated/ksp/jvm/jvmMain/kotlin")
+    kotlin.srcDir(File(buildDir, "generated/ksp/jvm/jvmMain/kotlin"))
 }
 dependencies {
     add("kspJvm", libs.lyricist.processorXml)
@@ -84,8 +84,8 @@ android {
         targetCompatibility = ProjectConfig.androidJvmTarget
     }
     sourceSets.getByName("main") {
-        assets.srcDir(File(buildDir, "build/generated/ksp/jvm/jvmMain/kotlin"))
-        res.srcDir(File(buildDir, "build/generated/ksp/jvm/jvmMain/kotlin"))
+        assets.srcDir(File(buildDir, "generated/ksp/jvm/jvmMain/kotlin"))
+        res.srcDir(File(buildDir, "generated/ksp/jvm/jvmMain/kotlin"))
         res.srcDir("src/commonMain/resources")
     }
 }
