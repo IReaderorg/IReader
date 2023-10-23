@@ -63,13 +63,13 @@ jsoup = "1.15.2"
 media3 = "1.0.0"
 dex2jar = "v64"
 htmlunit = "3.0.0"
-lyricist = "1.4.2"
+lyricist = "1.6.0"
 
 [libraries]
 
 lyricist-library = { module = "cafe.adriel.lyricist:lyricist", version.ref = "lyricist" }
 lyricist-processor = { module = "cafe.adriel.lyricist:lyricist-processor", version.ref = "lyricist" }
-lyricist-processorXml = { module = "io.github.kazemcodes:lyricist-processor-xml", version = "1.4.3" }
+lyricist-processorXml = { module = "cafe.adriel.lyricist:lyricist-processor-xml", version = "lyricist" }
 
 
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
