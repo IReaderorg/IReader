@@ -10,7 +10,12 @@ fun ColorScheme.isLight(): Boolean {
     }.getOrDefault(false)
     return isLight
 }
-
+fun Color.isLight(): Boolean {
+    val isLight =  kotlin.runCatching {
+        this.luminance() > 0.5
+    }.getOrDefault(false)
+    return isLight
+}
 // val ColorScheme.isLight: Boolean
 //    get() = this.background.luminance() > 0.5
 

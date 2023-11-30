@@ -96,13 +96,14 @@ jobs:
         if: ${{ matrix.runtime == 'linux-fedora-x64' }}
         uses: Syer10/Fedora-Java17-Action@v1
         with:
-          command: ./gradlew ${{ matrix.build }} -Ppreview="${{ env.COMMIT_COUNT }}" --stacktrace
+          command: ./gradlew :i18n:kspCommonMainMetadata ${{ matrix.build }} -Ppreview="${{ env.COMMIT_COUNT }}" --stacktrace
 
       - name: Build
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
         uses: gradle/gradle-build-action@v2
         with:
           arguments: >
+            :i18n:kspCommonMainMetadata
             ${{ matrix.build }}
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
