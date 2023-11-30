@@ -9,7 +9,7 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.compose")
     id(libs.plugins.buildkonfig.get().pluginId)
-    id(libs.plugins.ksp.get().pluginId)
+    id(kotlinx.plugins.ksp.get().pluginId)
 }
 kotlin {
     androidTarget()
