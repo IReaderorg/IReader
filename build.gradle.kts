@@ -1,8 +1,13 @@
 buildscript {
+    val kotlin_version by extra("1.9.20")
     dependencies {
         classpath(libs.gradle.tools)
         classpath(libs.gradle.google)
         classpath(libs.gradle.firebaseCrashlytic)
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+    }
+    repositories {
+        mavenCentral()
     }
 }
 @Suppress("DSL_SCOPE_VIOLATION")

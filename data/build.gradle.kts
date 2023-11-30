@@ -40,7 +40,6 @@ kotlin {
             }
         }
         val androidMain by getting {
-            dependsOn(commonMain)
             dependencies {
                 implementation(androidx.core)
 

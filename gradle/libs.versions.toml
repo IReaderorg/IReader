@@ -4,8 +4,8 @@ coroutines = "1.6.4"
 # Serialization
 json = "1.4.1"
 # Compose
-composeGradle = "1.4.3"
-voyager = "1.0.0-rc06"
+composeGradle = "1.5.11"
+voyager = "1.0.0-rc10"
 accompanist = "0.25.2"
 googleAccompanist = "0.25.1"
 materialDialogs = "0.9.1"
@@ -63,13 +63,13 @@ jsoup = "1.15.2"
 media3 = "1.0.0"
 dex2jar = "v64"
 htmlunit = "3.0.0"
-lyricist = "1.6.0"
+lyricist = "1.4.2"
 
 [libraries]
 
 lyricist-library = { module = "cafe.adriel.lyricist:lyricist", version.ref = "lyricist" }
 lyricist-processor = { module = "cafe.adriel.lyricist:lyricist-processor", version.ref = "lyricist" }
-lyricist-processorXml = { module = "cafe.adriel.lyricist:lyricist-processor-xml", version = "lyricist" }
+lyricist-processorXml = { module = "io.github.kazemcodes:lyricist-processor-xml", version = "1.4.3" }
 
 
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"

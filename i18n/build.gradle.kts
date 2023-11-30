@@ -21,6 +21,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                api(libs.moko.core)
                 compileOnly(compose.runtime)
                 compileOnly(compose.ui)
                 implementation(libs.lyricist.library)
@@ -34,7 +35,7 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
-
+                api(libs.moko.core)
             }
         }
     }
@@ -59,22 +60,17 @@ ksp {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().all {
-    if (name.startsWith("compileDebugKotlinAndroid") || name.startsWith("compileReleaseKotlinAndroid") ) { // the remaining suffix is the target eg simulator, arm64, etc
-        dependsOn("kspKotlinJvm")
-    }
-    if (name.startsWith("compileReleaseKotlinAndroid")) { // the remaining suffix is the target eg simulator, arm64, etc
-        dependsOn("kspKotlinJvm")
-    }
-    if (name.startsWith("packageReleaseResources")) { // the remaining suffix is the target eg simulator, arm64, etc
-        dependsOn("kspKotlinJvm")
+    if(name != "kspCommonMainKotlinMetadata") {
+        dependsOn("kspCommonMainKotlinMetadata")
     }
 }
 
+
 kotlin.sourceSets.commonMain {
-    kotlin.srcDir(File(buildDir, "generated/ksp/jvm/jvmMain/kotlin"))
+    kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
 }
 dependencies {
-    add("kspJvm", libs.lyricist.processorXml)
+    //add("kspJvm", libs.lyricist.processorXml)
     add("kspCommonMainMetadata", libs.lyricist.processorXml)
 }
 

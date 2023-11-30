@@ -58,7 +58,6 @@ kotlin {
             }
         }
          val androidMain by getting {
-             dependsOn(commonMain)
             dependencies {
                 implementation(androidx.core)
                 implementation(androidx.dataStore)
@@ -68,7 +67,6 @@ kotlin {
             }
         }
         val desktopMain by getting {
-            dependsOn(commonMain)
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
                 implementation(libs.quickjs.jvm)

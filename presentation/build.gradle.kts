@@ -53,14 +53,12 @@ kotlin {
             }
         }
         val jvmMain by creating {
-            dependsOn(commonMain)
             dependencies {
 
 
             }
         }
         val androidMain by getting {
-            dependsOn(jvmMain)
             dependencies {
                 api(libs.koin.android)
                 api(androidx.biometric)
