@@ -76,16 +76,6 @@ fun TabsContent(
     HorizontalPager(
         modifier = Modifier.fillMaxSize(),
         state = pagerState,
-        pageSpacing = 0.dp,
-        userScrollEnabled = true,
-        reverseLayout = false,
-        contentPadding = PaddingValues(0.dp),
-        beyondBoundsPageCount = 0,
-        pageSize = PageSize.Fill,
-        key = null,
-        pageNestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
-            Orientation.Horizontal
-        ),
         pageContent =  { page ->
             LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top) {
 

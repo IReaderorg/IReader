@@ -117,7 +117,7 @@ class AppThemeViewModel(
         val appbar = colorBars.takeOrElse { colors.bars }
         return ExtraColors(
             bars = appbar,
-            onBars = if (appbar.luminance() > 0.5) Color.Black else Color.White
+            onBars = if (appbar.isLight()) Color.Black else Color.White
         )
     }
 
