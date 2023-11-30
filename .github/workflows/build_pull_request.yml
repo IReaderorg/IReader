@@ -23,7 +23,7 @@ jobs:
             arch: x64
             os: ubuntu-latest
             shell: bash
-            build: :i18n:build :desktop:packageUberJarForCurrentOS :desktop:packageDeb
+            build: :desktop:packageUberJarForCurrentOS :desktop:packageDeb
             setupCl: ./.github/scripts/SetupClUnix.sh
 
           #          - runtime: linux-fedora-x64
@@ -39,14 +39,14 @@ jobs:
             arch: x64
             os: windows-latest
             shell: powershell
-            build: :i18n:build :desktop:packageUberJarForCurrentOS :desktop:packageMsi
+            build: :desktop:packageUberJarForCurrentOS :desktop:packageMsi
             setupCl: ./.github/scripts/SetupClWindows.ps1
 
           - runtime: android
             arch: x64
             os: ubuntu-latest
             shell: bash
-            build: :i18n:build :android:assembleStandardRelease
+            build: :android:assembleStandardRelease
             setupCl: ./.github/scripts/SetupClUnix.sh
 
     runs-on: ${{ matrix.os }}
@@ -75,11 +75,12 @@ jobs:
         if: ${{ matrix.runtime == 'linux-fedora-x64' }}
         uses: Syer10/Fedora-Java17-Action@v1
         with:
-          command: ./gradlew  ${{ matrix.build }} --stacktrace
+          command: ./gradlew  :i18n:kspCommonMainMetadata ${{ matrix.build }} --stacktrace
 
       - name: Build
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
         uses: gradle/gradle-build-action@v2
         with:
           arguments:
+            :i18n:kspCommonMainMetadata
             ${{ matrix.build }}

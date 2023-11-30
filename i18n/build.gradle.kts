@@ -49,6 +49,9 @@ ksp {
         kotlin.sourceSets.findByName("androidMain")!!.resources.srcDirs.first().absolutePath.replace(
             "androidMain\\resources",
             "androidMain\\res"
+        ).replace(
+            "androidMain/resources",
+            "androidMain/res"
         )
     )
 
@@ -70,7 +73,6 @@ kotlin.sourceSets.commonMain {
     kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
 }
 dependencies {
-    add("kspJvm", libs.lyricist.processorXml)
     add("kspCommonMainMetadata", libs.lyricist.processorXml)
 }
 
