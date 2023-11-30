@@ -26,7 +26,7 @@ class AppRippleTheme(
     private fun getRippleAlpha(contentColor: Color, lightTheme: Boolean): RippleAlpha {
         return when {
             lightTheme -> {
-                if (contentColor.luminance() > 0.5) {
+                if (contentColor.isLight()) {
                     LightThemeHighContrastRippleAlpha
                 } else {
                     LightThemeLowContrastRippleAlpha
