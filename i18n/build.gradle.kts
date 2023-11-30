@@ -70,7 +70,7 @@ kotlin.sourceSets.commonMain {
     kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
 }
 dependencies {
-    //add("kspJvm", libs.lyricist.processorXml)
+    add("kspJvm", libs.lyricist.processorXml)
     add("kspCommonMainMetadata", libs.lyricist.processorXml)
 }
 
