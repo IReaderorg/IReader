@@ -7,12 +7,12 @@ import java.util.*
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
-    id(libs.plugins.moko.gradle.get().pluginId)
+    id("dev.icerock.mobile.multiplatform-resources")
     id("org.jetbrains.compose")
     id(libs.plugins.buildkonfig.get().pluginId)
 }
 kotlin {
-    android()
+    androidTarget()
     jvm() {
         compilations.all {
             kotlinOptions.jvmTarget = "17"
@@ -42,9 +42,7 @@ kotlin {
 }
 dependencies {
     commonMainApi("dev.icerock.moko:resources:0.23.0")
-//    commonMainApi("dev.icerock.moko:resources-compose:0.23.0") // for compose multiplatform
-//
-//    commonTestImplementation("dev.icerock.moko:resources-test:0.23.0")
+    commonMainApi("dev.icerock.moko:resources-compose:0.23.0")
 }
 
 android {
