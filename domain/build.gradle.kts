@@ -25,7 +25,7 @@ android {
     }
 }
 kotlin {
-    android {
+    androidTarget {
         compilations {
             all {
                 kotlinOptions.jvmTarget = ProjectConfig.androidJvmTarget.toString()
@@ -65,7 +65,6 @@ kotlin {
             }
         }
          val androidMain by getting {
-             dependsOn(commonMain)
             dependencies {
                 implementation("org.slf4j:slf4j-android:1.7.25")
                 implementation(libs.bundles.simplestorage)

@@ -20,7 +20,6 @@ import ireader.core.source.HttpSource
 import ireader.domain.models.entities.toBookItem
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.imageloader.convertToOkHttpRequest
@@ -112,7 +111,9 @@ data class ExploreScreenSpec(
                                         vm.stateListing = source?.getListings()?.first()
                                         vm.loadItems()
                                         scope.launch {
-                                            vm.showSnackBar(UiText.MStringResource(MR.strings.query_must_not_be_empty))
+                                            vm.showSnackBar(UiText.MStringResource() { xml ->
+                                                xml.queryMustNotBeEmpty
+                                            })
                                         }
                                     }
                                     focusManager.clearFocus()
@@ -223,10 +224,12 @@ data class ExploreScreenSpec(
                     )
                 } else {
                     EmptyScreenComposable(
-                            UiText.MStringResource(MR.strings.source_not_available),
-                            onPopBackStack = {
-                                popBackStack(navigator)
-                            }
+                        UiText.MStringResource() { xml ->
+                            xml.sourceNotAvailable
+                        },
+                        onPopBackStack = {
+                            popBackStack(navigator)
+                        }
                     )
                 }
 

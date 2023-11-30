@@ -137,10 +137,12 @@ android {
 
 
 dependencies {
+    implementation("androidx.core:core-ktx:+")
     add("coreLibraryDesugaring", libs.desugarJdkLibs)
     implementation(androidx.emoji)
     implementation(androidx.appCompat)
     implementation(androidx.core)
+    implementation(libs.lyricist.library)
 
     implementation(androidx.media)
 

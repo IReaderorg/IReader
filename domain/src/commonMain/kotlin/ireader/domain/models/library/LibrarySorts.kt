@@ -1,7 +1,6 @@
 package ireader.domain.models.library
 
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
 
 data class LibrarySort(val type: Type, val isAscending: Boolean) {
 
@@ -18,14 +17,37 @@ data class LibrarySort(val type: Type, val isAscending: Boolean) {
         companion object {
             fun name(type: Type): UiText {
                 return when (type) {
-                    Type.DateFetched -> UiText.MStringResource(MR.strings.date_fetched)
-                    Type.DateAdded -> UiText.MStringResource(MR.strings.date_added)
-                    Type.Title -> UiText.MStringResource(MR.strings.title)
-                    Type.Unread -> UiText.MStringResource(MR.strings.unread)
-                    Type.Source -> UiText.MStringResource(MR.strings.source)
-                    Type.TotalChapters -> UiText.MStringResource(MR.strings.total_chapter)
-                    Type.LastRead -> UiText.MStringResource(MR.strings.last_read)
-                    Type.LastUpdated -> UiText.MStringResource(MR.strings.last_update)
+                    Type.DateFetched -> UiText.MStringResource() { xml ->
+                        xml.dateFetched
+                    }
+
+                    Type.DateAdded -> UiText.MStringResource() { xml ->
+                        xml.dateAdded
+                    }
+
+                    Type.Title -> UiText.MStringResource() { xml ->
+                        xml.title
+                    }
+
+                    Type.Unread -> UiText.MStringResource() { xml ->
+                        xml.unread
+                    }
+
+                    Type.Source -> UiText.MStringResource() { xml ->
+                        xml.source
+                    }
+
+                    Type.TotalChapters -> UiText.MStringResource() { xml ->
+                        xml.totalChapter
+                    }
+
+                    Type.LastRead -> UiText.MStringResource() { xml ->
+                        xml.lastRead
+                    }
+
+                    Type.LastUpdated -> UiText.MStringResource() { xml ->
+                        xml.lastUpdate
+                    }
                 }
             }
         }

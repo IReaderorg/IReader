@@ -35,8 +35,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import ireader.i18n.XmlStrings
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
 import ireader.presentation.ui.core.ui.PreferenceMutableState
 import kotlin.math.round
 
@@ -71,15 +71,16 @@ fun ColorPickerDialog(
             androidx.compose.material3.TextButton(onClick = {
                 onSelected(currentColor)
             }) {
-                androidx.compose.material3.Text(localize(MR.strings.select))
+                androidx.compose.material3.Text(localize { xml -> xml.select })
             }
         },
         dismissButton = {
             androidx.compose.material3.TextButton(onClick = {
                 showPresets = !showPresets
             }) {
-                val text =
-                    if (showPresets) MR.strings.presents else MR.strings.custom
+                val text = { xml: XmlStrings ->
+                    if (showPresets) xml.presents else xml.custom
+                }
                 androidx.compose.material3.Text(localize(text))
             }
         }
@@ -383,12 +384,12 @@ private fun Color.toHsv(): FloatArray {
 
     val sat = delta / value
     val hue = (
-        when {
-            red == value -> (green - blue) / delta
-            green == value -> 2 + (blue - red) / delta
-            else -> 4 + (red - green) / delta
-        } * 60
-        ).let { if (it < 0) it + 360 else it }
+            when {
+                red == value -> (green - blue) / delta
+                green == value -> 2 + (blue - red) / delta
+                else -> 4 + (red - green) / delta
+            } * 60
+            ).let { if (it < 0) it + 360 else it }
     return floatArrayOf(hue, sat, value)
 }
 
@@ -434,9 +435,10 @@ private val presetColors = listOf(
     Color(0xFF607D8B), // BLUE GREY 500
     Color(0xFF9E9E9E), // GREY 500
 )
+
 data class ColorPickerInfo(
     val preference: PreferenceMutableState<Color>? = null,
-    val title: String ? = null,
+    val title: String? = null,
     val onChangeColor: () -> Unit = {},
     val initialColor: Color = Color.Unspecified,
 )

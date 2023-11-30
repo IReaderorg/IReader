@@ -17,7 +17,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.source.Source
 import ireader.core.source.model.Command
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.components.*
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
@@ -45,32 +45,33 @@ fun BookDetailTopAppBar(
     onInfo: () -> Unit,
 ) {
 
-        when {
-            state.hasSelection -> {
-                EditModeChapterDetailTopAppBar(
-                    modifier = modifier.padding(paddingValues),
-                    selectionSize = state.selection.size,
-                    onClickCancelSelection = onClickCancelSelection,
-                    onClickSelectAll = onClickSelectAll,
-                    onClickInvertSelection = onClickInvertSelection,
-                    onSelectBetween = onSelectBetween,
-                    scrollBehavior = scrollBehavior,
-                    paddingValues = paddingValues
-                )
-            }
-            else -> {
-                RegularChapterDetailTopAppBar(
-                    onPopBackStack = onPopBackStack,
-                    scrollBehavior = scrollBehavior,
-                    onShare = onShare,
-                    onCommand = onCommand,
-                    onRefresh = onRefresh,
-                    source = source,
-                    onDownload = onDownload,
-                    onInfo = onInfo
-                )
-            }
+    when {
+        state.hasSelection -> {
+            EditModeChapterDetailTopAppBar(
+                modifier = modifier.padding(paddingValues),
+                selectionSize = state.selection.size,
+                onClickCancelSelection = onClickCancelSelection,
+                onClickSelectAll = onClickSelectAll,
+                onClickInvertSelection = onClickInvertSelection,
+                onSelectBetween = onSelectBetween,
+                scrollBehavior = scrollBehavior,
+                paddingValues = paddingValues
+            )
         }
+
+        else -> {
+            RegularChapterDetailTopAppBar(
+                onPopBackStack = onPopBackStack,
+                scrollBehavior = scrollBehavior,
+                onShare = onShare,
+                onCommand = onCommand,
+                onRefresh = onRefresh,
+                source = source,
+                onDownload = onDownload,
+                onInfo = onInfo
+            )
+        }
+    }
 
 }
 
@@ -104,7 +105,7 @@ fun RegularChapterDetailTopAppBar(
             }) {
                 Icon(
                     imageVector = Icons.Default.Autorenew,
-                    contentDescription = localizeHelper.localize(MR.strings.refresh),
+                    contentDescription = localizeHelper.localize { xml -> xml.refresh },
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }
@@ -113,17 +114,19 @@ fun RegularChapterDetailTopAppBar(
             }) {
                 Icon(
                     imageVector = Icons.Default.Info,
-                    contentDescription = localizeHelper.localize(MR.strings.share),
+                    contentDescription = localizeHelper.localize { xml -> xml.share },
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }
-            if (source is ireader.core.source.CatalogSource && source.getCommands().any { it !is Command.Fetchers }) {
+            if (source is ireader.core.source.CatalogSource && source.getCommands()
+                    .any { it !is Command.Fetchers }
+            ) {
                 IconButton(onClick = {
                     onCommand()
                 }) {
                     Icon(
                         imageVector = Icons.Default.Tune,
-                        contentDescription = localizeHelper.localize(MR.strings.advance_commands),
+                        contentDescription = localizeHelper.localize { xml -> xml.advanceCommands },
                         tint = MaterialTheme.colorScheme.onBackground,
                     )
                 }
@@ -141,7 +144,9 @@ fun RegularChapterDetailTopAppBar(
                 IconButton(onClick = { setDropDownState(true) }) {
                     Icon(
                         imageVector = Icons.Outlined.MoreVert,
-                        contentDescription = localize(MR.strings.export_book_as_epub),
+                        contentDescription = localize { xml ->
+                            xml.exportBookAsEpub
+                        },
                     )
                 }
                 IDropdownMenu(
@@ -151,7 +156,14 @@ fun RegularChapterDetailTopAppBar(
                         setDropDownState(false)
                     },
                 ) {
-                    IDropdownMenuItem(text = { Text(text = localizeHelper.localize(MR.strings.export_book_as_epub)) }, onClick = onShare)
+                    IDropdownMenuItem(
+                        text = {
+                            Text(text = localizeHelper.localize { xml ->
+                                xml.exportBookAsEpub
+                            })
+                        },
+                        onClick = onShare
+                    )
                 }
             }
         },
@@ -180,24 +192,26 @@ private fun EditModeChapterDetailTopAppBar(
         navigationIcon = {
             AppIconButton(
                 imageVector = Icons.Default.Close,
-                contentDescription = localize(MR.strings.close),
+                contentDescription = localize() { xml ->
+                    xml.close
+                },
                 onClick = onClickCancelSelection
             )
         },
         actions = {
             AppIconButton(
                 imageVector = Icons.Default.SelectAll,
-                contentDescription = localize(MR.strings.select_all),
+                contentDescription = localize { xml -> xml.selectAll },
                 onClick = onClickSelectAll
             )
             AppIconButton(
                 imageVector = Icons.Default.FlipToBack,
-                contentDescription = localize(MR.strings.select_inverted),
+                contentDescription = localize { xml -> xml.selectInverted },
                 onClick = onClickInvertSelection
             )
             AppIconButton(
                 imageVector = Icons.Default.SyncAlt,
-                contentDescription = localize(MR.strings.select_between),
+                contentDescription = localize { xml -> xml.selectBetween },
                 onClick = onSelectBetween
             )
         }

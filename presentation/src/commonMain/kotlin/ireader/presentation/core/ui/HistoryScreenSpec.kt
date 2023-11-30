@@ -15,7 +15,7 @@ import cafe.adriel.voyager.navigator.tab.TabOptions
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.localize
 
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.reusable_composable.WarningAlert
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -29,8 +29,10 @@ object HistoryScreenSpec : Tab {
 
     override val options: TabOptions
         @Composable
-        get()  {
-            val title = localize(MR.strings.history_screen_label)
+        get() {
+            val title = localize() { xml ->
+                xml.historyScreenLabel
+            }
             val icon = rememberVectorPainter(Icons.Filled.History)
             return remember {
                 TabOptions(
@@ -51,15 +53,17 @@ object HistoryScreenSpec : Tab {
         WarningAlert(data = vm.warningAlert.value)
         val host = SnackBarListener(vm)
         IScaffold(
-            topBar = { scrollBehavior->
+            topBar = { scrollBehavior ->
                 HistoryTopAppBar(
                     vm = vm,
                     onDeleteAll = {
                         vm.warningAlert.value.apply {
                             enable.value = true
-                            this.title.value = localizeHelper.localize(MR.strings.remove)
+                            this.title.value = localizeHelper.localize { xml ->
+                                xml.remove
+                            }
                             this.title.value =
-                                localizeHelper.localize(MR.strings.dialog_remove_chapter_books_description)
+                                localizeHelper.localize { xml -> xml.dialogRemoveChapterBookDescription }
                             this.onDismiss.value = {
                                 this.enable.value = false
                             }
@@ -71,12 +75,12 @@ object HistoryScreenSpec : Tab {
                             }
                         }
                     },
-                    scrollBehavior =scrollBehavior,
+                    scrollBehavior = scrollBehavior,
 
                     )
             },
             snackbarHostState = host
-        ) {scaffoldPadding ->
+        ) { scaffoldPadding ->
             HistoryScreen(
                 modifier = Modifier
                     .padding(scaffoldPadding),
@@ -107,9 +111,11 @@ object HistoryScreenSpec : Tab {
                 onHistoryDelete = { history ->
                     vm.warningAlert.value.apply {
                         enable.value = true
-                        this.title.value = localizeHelper.localize(MR.strings.remove)
+                        this.title.value = localizeHelper.localize { xml ->
+                            xml.remove
+                        }
                         this.title.value =
-                            localizeHelper.localize(MR.strings.dialog_remove_chapter_history_description)
+                            localizeHelper.localize { xml -> xml.dialogRemoveChapterHistoryDescription }
                         this.onDismiss.value = {
                             this.enable.value = false
                         }
@@ -124,9 +130,11 @@ object HistoryScreenSpec : Tab {
                 onLongClickDelete = { history ->
                     vm.warningAlert.value.apply {
                         enable.value = true
-                        this.title.value = localizeHelper.localize(MR.strings.remove)
+                        this.title.value = localizeHelper.localize { xml ->
+                            xml.remove
+                        }
                         this.title.value =
-                            localizeHelper.localize(MR.strings.dialog_remove_chapter_book_description)
+                            localizeHelper.localize { xml -> xml.dialogRemoveChapterBookDescription }
                         this.onDismiss.value = {
                             this.enable.value = false
                         }

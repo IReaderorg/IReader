@@ -29,7 +29,7 @@ import ireader.core.log.Log
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.models.prefs.readerThemes
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
@@ -169,16 +169,16 @@ actual class TTSScreenSpec actual constructor(
                             choices = vm.uiVoices.associate { voice ->
                                 return@associate voice to voice.localDisplayName
                             },
-                            title = localizeHelper.localize(MR.strings.voices),
-                            onFailToFindElement = localizeHelper.localize(MR.strings.system_default)
+                            title = localizeHelper.localize { xml -> xml.voices },
+                            onFailToFindElement = localizeHelper.localize { xml -> xml.systemDefault }
                         )
                         ChipChoicePreference(
                             preference = vm.language,
                             choices = vm.languages.associate { language ->
                                 return@associate language.displayName to language.displayName
                             },
-                            title = localizeHelper.localize(MR.strings.languages),
-                            onFailToFindElement = localizeHelper.localize(MR.strings.system_default)
+                            title = localizeHelper.localize { xml -> xml.languages },
+                            onFailToFindElement = localizeHelper.localize { xml -> xml.systemDefault }
                         )
                         ThemePreference(onBackgroundChange = {
                             vm.theme.value = it
@@ -187,14 +187,14 @@ actual class TTSScreenSpec actual constructor(
                         })
                         SwitchPreference(
                             preference = vm.isTtsTrackerEnable,
-                            title = localizeHelper.localize(MR.strings.tracker)
+                            title = localizeHelper.localize { xml -> xml.tracker }
                         )
                         SwitchPreference(
                             preference = vm.autoNext,
-                            title = localizeHelper.localize(MR.strings.auto_next_chapter)
+                            title = localizeHelper.localize { xml -> xml.autoNextChapter }
                         )
                         SliderPreference(
-                            title = localize(MR.strings.speech_rate),
+                            title = localize { xml -> xml.speechRate },
                             preferenceAsFloat = vm.speechRate,
                             valueRange = .5F..3F,
                             trailing = vm.speechRate.value.toBigDecimal()
@@ -202,7 +202,7 @@ actual class TTSScreenSpec actual constructor(
                                 .toString()
                         )
                         SliderPreference(
-                            title = localize(MR.strings.pitch),
+                            title = localize { xml -> xml.pitch },
                             preferenceAsFloat = vm.speechPitch,
                             valueRange = .5F..2.1F,
                             trailing = vm.speechPitch.value.toBigDecimal()
@@ -211,10 +211,10 @@ actual class TTSScreenSpec actual constructor(
                         )
                         SwitchPreference(
                             preference = vm.sleepModeUi,
-                            title = localizeHelper.localize(MR.strings.enable_sleep_timer)
+                            title = localizeHelper.localize { xml -> xml.enableSleepTimer }
                         )
                         SliderPreference(
-                            title = localize(MR.strings.sleep),
+                            title = localize { xml -> xml.sleep },
                             preferenceAsLong = vm.sleepTimeUi,
                             valueRange = 0F..60F,
                             trailing = "${vm.sleepTimeUi.value.toInt()} M",
@@ -222,17 +222,19 @@ actual class TTSScreenSpec actual constructor(
                         )
                         Components.Chip(
                             preference = listOf(
-                                localizeHelper.localize(MR.strings.top_left),
-                                localizeHelper.localize(MR.strings.bottom_left),
-                                localizeHelper.localize(MR.strings.hide),
+                                localizeHelper.localize { xml -> xml.topLeft },
+                                localizeHelper.localize { xml -> xml.bottomLeft },
+                                localizeHelper.localize { xml -> xml.hide },
                             ),
-                            title = localizeHelper.localize(MR.strings.alignment),
+                            title = localizeHelper.localize { xml -> xml.alignment },
                             onValueChange = {
                                 when (it) {
                                     0 -> vm.ttsIconAlignments.value =
                                         PreferenceValues.PreferenceAlignment.TopLeft
+
                                     1 -> vm.ttsIconAlignments.value =
                                         PreferenceValues.PreferenceAlignment.BottomLeft
+
                                     2 -> vm.ttsIconAlignments.value =
                                         PreferenceValues.PreferenceAlignment.Hide
                                 }

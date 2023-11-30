@@ -7,7 +7,7 @@ plugins {
 }
 
 kotlin {
-    android {
+    androidTarget {
         compilations {
             all {
                 kotlinOptions.jvmTarget = ProjectConfig.androidJvmTarget.toString()
@@ -49,17 +49,16 @@ kotlin {
                 api(libs.koin.core)
                 api(libs.koin.compose)
                 api(libs.imageLoader)
+                implementation(libs.lyricist.library)
             }
         }
         val jvmMain by creating {
-            dependsOn(commonMain)
             dependencies {
 
 
             }
         }
         val androidMain by getting {
-            dependsOn(jvmMain)
             dependencies {
                 api(libs.koin.android)
                 api(androidx.biometric)

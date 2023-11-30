@@ -2,6 +2,11 @@ package ireader.presentation.ui.home.sources.extension
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.PagerScope
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.material3.*
@@ -13,7 +18,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.Catalog
 import ireader.i18n.UiEvent
 import ireader.i18n.asString
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -51,8 +56,8 @@ fun ExtensionScreen(
     }
     val pages = remember {
         listOf<String>(
-            localizeHelper.localize(MR.strings.sources),
-            localizeHelper.localize(MR.strings.extensions),
+            localizeHelper.localize { xml -> xml.sources },
+            localizeHelper.localize { xml -> xml.extensions },
         )
     }
     Column(
@@ -108,7 +113,12 @@ private fun ExtensionContent(
         onCancelInstaller: ((Catalog) -> Unit)? = null,
 
         ) {
-    val pagerState = androidx.compose.foundation.pager.rememberPagerState()
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        initialPageOffsetFraction = 0f
+    ) {
+       3
+    }
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect {
             vm.currentPagerPage = pagerState.currentPage
@@ -142,29 +152,36 @@ private fun ExtensionPager(
     onClickUninstall: (Catalog) -> Unit,
     onCancelInstaller: ((Catalog) -> Unit)? = null,
 ) {
-    androidx.compose.foundation.pager.HorizontalPager(
-        pageCount = pages.size,
-        state = pagerState,
+    HorizontalPager(
         modifier = Modifier.fillMaxSize(),
-    ) { page ->
-        when (page) {
-            0 -> {
-                UserSourcesScreen(
-                    onClickCatalog = onClickCatalog,
-                    onClickTogglePinned = onClickTogglePinned,
-                    vm = vm,
-                )
-            }
-            1 -> {
-                RemoteSourcesScreen(
-                    vm = vm,
-                    onClickInstall = onClickInstall,
-                    onClickUninstall = onClickUninstall,
-                    onCancelInstaller = onCancelInstaller,
-                )
+        state = pagerState,
+        pageSpacing = 0.dp,
+        userScrollEnabled = true,
+        reverseLayout = false,
+        contentPadding = PaddingValues(0.dp),
+        beyondBoundsPageCount = 0,
+        key = null,
+        pageContent = { page ->
+            when (page) {
+                0 -> {
+                    UserSourcesScreen(
+                        onClickCatalog = onClickCatalog,
+                        onClickTogglePinned = onClickTogglePinned,
+                        vm = vm,
+                    )
+                }
+
+                1 -> {
+                    RemoteSourcesScreen(
+                        vm = vm,
+                        onClickInstall = onClickInstall,
+                        onClickUninstall = onClickUninstall,
+                        onCancelInstaller = onCancelInstaller,
+                    )
+                }
             }
         }
-    }
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)

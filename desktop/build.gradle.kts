@@ -3,12 +3,13 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
     id(kotlinx.plugins.kotlin.jvm.get().pluginId)
-    id(libs.plugins.ksp.get().pluginId)
+    id(kotlinx.plugins.ksp.get().pluginId)
     id(libs.plugins.jetbrainCompose.get().pluginId)
     id("dev.icerock.mobile.multiplatform-resources")
 }
 
 dependencies {
+    implementation(libs.lyricist.library)
     implementation(project(Modules.coreApi))
     implementation(project(Modules.sourceApi))
     implementation(project(Modules.data))

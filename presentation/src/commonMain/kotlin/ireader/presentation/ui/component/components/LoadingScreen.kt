@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import kotlin.random.Random
 
 @Composable
@@ -33,13 +33,15 @@ fun LoadingScreen() {
 
 @Composable
 fun LoadingScreen(
-        isLoading: Boolean = true,
-        modifier: Modifier = Modifier.fillMaxSize(),
-        /*@FloatRange(from = 0.0, to = 1.0)*/
-        progress: Float = 0.0F,
-        errorMessage: String? = null,
-        retryMessage: String = localize(MR.strings.retry),
-        retry: (() -> Unit)? = null
+    isLoading: Boolean = true,
+    modifier: Modifier = Modifier.fillMaxSize(),
+    /*@FloatRange(from = 0.0, to = 1.0)*/
+    progress: Float = 0.0F,
+    errorMessage: String? = null,
+    retryMessage: String = localize { xml ->
+        xml.retry
+    },
+    retry: (() -> Unit)? = null
 ) {
     Crossfade(isLoading, modifier) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -90,10 +92,12 @@ object ProgressIndicatorDefaults {
 }
 @Composable
 fun ErrorScreen(
-        errorMessage: String? = null,
-        modifier: Modifier = Modifier,
-        retryMessage: String = localize(MR.strings.retry),
-        retry: (() -> Unit)? = null
+    errorMessage: String? = null,
+    modifier: Modifier = Modifier,
+    retryMessage: String = localize { xml ->
+        xml.retry
+    },
+    retry: (() -> Unit)? = null
 ) {
     Box(modifier then Modifier.fillMaxSize()) {
         Column(modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {

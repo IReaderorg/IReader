@@ -6,7 +6,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
@@ -15,9 +15,9 @@ import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppearanceToolbar(
-        vm: AppearanceViewModel,
-        onPopBackStack: () -> Unit,
-        scrollBehavior: TopAppBarScrollBehavior? = null
+    vm: AppearanceViewModel,
+    onPopBackStack: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
 
     when (vm.themeEditMode) {
@@ -26,6 +26,7 @@ fun AppearanceToolbar(
             onPopBackStack = onPopBackStack,
             scrollBehavior = scrollBehavior
         )
+
         true -> EditToolbar(
             vm,
             scrollBehavior = scrollBehavior
@@ -36,14 +37,16 @@ fun AppearanceToolbar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MainAppearanceToolbar(
-        vm: AppearanceViewModel,
-        onPopBackStack: () -> Unit,
-        scrollBehavior: TopAppBarScrollBehavior? = null
+    vm: AppearanceViewModel,
+    onPopBackStack: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Toolbar(
         scrollBehavior = scrollBehavior,
         title = {
-            BigSizeTextComposable(text = localize(MR.strings.appearance))
+            BigSizeTextComposable(text = localize { xml ->
+                xml.appearance
+            })
         },
         navigationIcon = {
             TopAppBarBackButton() {
@@ -56,8 +59,8 @@ private fun MainAppearanceToolbar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditToolbar(
-        vm: AppearanceViewModel,
-        scrollBehavior: TopAppBarScrollBehavior? = null
+    vm: AppearanceViewModel,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Toolbar(
         scrollBehavior = scrollBehavior,

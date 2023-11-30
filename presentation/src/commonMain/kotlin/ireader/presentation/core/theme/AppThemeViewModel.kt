@@ -55,7 +55,7 @@ class AppThemeViewModel(
     @Composable
     fun getColors(): Pair<ColorScheme, ExtraColors> {
         val baseTheme = getBaseTheme(themeMode, colorTheme)
-        val isLight = baseTheme.materialColors.isLight()
+        val isLight : Boolean =  baseTheme.materialColors.isLight()
         val colors = remember(baseTheme.materialColors.isLight()) {
             baseThemeJob.cancelChildren()
             if (isLight) {
@@ -108,8 +108,8 @@ class AppThemeViewModel(
             primaryContainer = primary,
             secondary = secondary,
             secondaryContainer = secondary,
-            onPrimary = if (primary.luminance() > 0.5) Color.Black else Color.White,
-            onSecondary = if (secondary.luminance() > 0.5) Color.Black else Color.White,
+            onPrimary = if (primary.isLight()) Color.Black else Color.White,
+            onSecondary = if (secondary.isLight()) Color.Black else Color.White,
         )
     }
 

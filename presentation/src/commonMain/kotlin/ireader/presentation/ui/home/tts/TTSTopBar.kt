@@ -8,9 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
-import ireader.i18n.resources.MR
-import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.components.PreferenceRow
+import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
@@ -40,7 +39,7 @@ fun TTSTopBar(
             }) {
                 Icon(
                     imageVector = Icons.Default.List,
-                    contentDescription = localizeHelper.localize(MR.strings.content),
+                    contentDescription = localizeHelper.localize { xml -> xml.content },
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }
@@ -49,7 +48,7 @@ fun TTSTopBar(
             }) {
                 Icon(
                     imageVector = Icons.Default.Settings,
-                    contentDescription = localizeHelper.localize(MR.strings.settings),
+                    contentDescription = localizeHelper.localize { xml -> xml.settings },
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }

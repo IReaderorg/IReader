@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
@@ -34,8 +35,8 @@ import ireader.core.source.model.ChapterInfo
 import ireader.domain.models.entities.Book
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.UiText
+import ireader.i18n.XmlStrings
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.book.BookDetailScreen
@@ -90,319 +91,336 @@ data class BookDetailScreenSpec constructor(
         val topbarState = rememberTopAppBarState()
         val snackBarHostState = SnackBarListener(vm)
         Box(modifier = Modifier.fillMaxSize()) {
-        IModalSheets(
-            sheetContent = {
-                val detailState = vm.state
-                val book = vm.booksState.book
-                val catalog = vm.catalogSource
+            IModalSheets(
+                sheetContent = {
+                    val detailState = vm.state
+                    val book = vm.booksState.book
+                    val catalog = vm.catalogSource
 
-                detailState.source.let { source ->
-                    if (vm.chapterMode) {
-                        val pagerState = androidx.compose.foundation.pager.rememberPagerState()
-                        ChapterScreenBottomTabComposable(
-                            modifier = it,
-                            pagerState = pagerState,
-                            filters = vm.filters.value,
-                            toggleFilter = {
-                                vm.toggleFilter(it.type)
-                            },
-                            onSortSelected = {
-                                vm.toggleSort(it.type)
-                            },
-                            sortType = vm.sorting.value,
-                            isSortDesc = vm.isAsc,
-                            onLayoutSelected = { layout ->
-                                vm.layout = layout
-                            },
-                            layoutType = vm.layout,
-                            vm = vm
-                        )
-                    } else {
-                        if (source is CatalogSource) {
-                            ChapterCommandBottomSheet(
+                    detailState.source.let { source ->
+                        if (vm.chapterMode) {
+                            val pagerState = rememberPagerState(
+                                initialPage = 0,
+                                initialPageOffsetFraction = 0f
+                            ) {
+                                3
+                            }
+                            ChapterScreenBottomTabComposable(
                                 modifier = it,
-                                onFetch = {
-                                    source.let { source ->
-                                        vm.scope.launch {
-                                            if (book != null) {
-                                                vm.getRemoteChapterDetail(
-                                                    book,
-                                                    catalog,
-                                                    vm.modifiedCommands.filter { !it.isDefaultValue() }
-                                                )
-                                            }
-                                        }
-                                    }
+                                pagerState = pagerState,
+                                filters = vm.filters.value,
+                                toggleFilter = {
+                                    vm.toggleFilter(it.type)
                                 },
-                                onReset = {
-                                    source.let { source ->
-                                        vm.modifiedCommands = source.getCommands()
-                                    }
+                                onSortSelected = {
+                                    vm.toggleSort(it.type)
                                 },
-                                onUpdate = {
-                                    vm.modifiedCommands = it
+                                sortType = vm.sorting.value,
+                                isSortDesc = vm.isAsc,
+                                onLayoutSelected = { layout ->
+                                    vm.layout = layout
                                 },
-                                detailState.modifiedCommands
+                                layoutType = vm.layout,
+                                vm = vm
                             )
-                        }
-                    }
-
-                }
-            },
-            bottomSheetState = sheetState
-        ) {
-
-            TransparentStatusBar {
-                IScaffold(
-                    modifier = Modifier.pullRefresh(swipeRefreshState),
-                    topBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
-                        topbarState
-                    ),
-                    snackbarHostState = snackbarHostState,
-                    topBar = { scrollBehavior ->
-                        val onShare = ActivityResultListener(onSuccess = { uri ->
-                            vm.booksState.book?.let { book ->
-                                vm.createEpub(book, uri, currentEvent = {
-                                    vm.showSnackBar(UiText.DynamicString(it))
-                                })
-                            }
-                            vm.showSnackBar(UiText.MStringResource(MR.strings.success))
-                        }) { e ->
-                            vm.showSnackBar(UiText.ExceptionString(e))
-                        }
-                        val globalScope = LocalGlobalCoroutineScope.currentOrThrow
-
-                        BookDetailTopAppBar(
-                            scrollBehavior = scrollBehavior,
-                            onRefresh = {
-                                globalScope.launch {
-                                    if (book != null) {
-                                        vm.getRemoteBookDetail(book, source = catalog)
-                                        vm.getRemoteChapterDetail(book, catalog)
-                                    }
-                                }
-                            },
-                            onPopBackStack = {
-                                popBackStack(navigator)
-                            },
-                            source = vm.source,
-                            onCommand = {
-                                scope.launch {
-                                    sheetState.show()
-                                }
-                            },
-                            onShare = {
-                                book?.let { book ->
-                                    vm.createEpub.onEpubCreateRequested(book) {
-                                        onShare.launch(it)
-                                    }
-                                }
-                            },
-                            state = vm,
-                            onSelectBetween = {
-                                val ids: List<Long> =
-                                    vm.chapters.map { it.id }
-                                        .filter { it in vm.selection }.distinct().sortedBy { it }
-                                        .let {
-                                            val list = mutableListOf<Long>()
-                                            val min = it.minOrNull() ?: 0
-                                            val max = it.maxOrNull() ?: 0
-                                            for (id in min..max) {
-                                                list.add(id)
+                        } else {
+                            if (source is CatalogSource) {
+                                ChapterCommandBottomSheet(
+                                    modifier = it,
+                                    onFetch = {
+                                        source.let { source ->
+                                            vm.scope.launch {
+                                                if (book != null) {
+                                                    vm.getRemoteChapterDetail(
+                                                        book,
+                                                        catalog,
+                                                        vm.modifiedCommands.filter { !it.isDefaultValue() }
+                                                    )
+                                                }
                                             }
-                                            list
                                         }
-                                vm.selection.clear()
-                                vm.selection.addAll(ids)
-                            },
-                            onClickSelectAll = {
-                                vm.selection.clear()
-                                vm.selection.addAll(vm.chapters.map { it.id })
-                                vm.selection.distinct()
-                            },
-                            onClickInvertSelection = {
-                                val ids: List<Long> =
-                                    vm.chapters.map { it.id }
-                                        .filterNot { it in vm.selection }.distinct()
-                                vm.selection.clear()
-                                vm.selection.addAll(ids)
-                            },
-                            onClickCancelSelection = {
-                                vm.selection.clear()
-                            },
-                            paddingValues = PaddingValues(0.dp),
-                            onDownload = {
-                                if (book != null) {
-                                    vm.startDownloadService(book = book)
-                                }
-                            },
-                            onInfo = {
-                                vm.showDialog = true
+                                    },
+                                    onReset = {
+                                        source.let { source ->
+                                            vm.modifiedCommands = source.getCommands()
+                                        }
+                                    },
+                                    onUpdate = {
+                                        vm.modifiedCommands = it
+                                    },
+                                    detailState.modifiedCommands
+                                )
                             }
-                        )
-                    },
-                    floatingActionButton = {
-                        if (!vm.hasSelection) {
-                            ExtendedFloatingActionButton(
-                                text = {
-                                    val id = if (chapters.value.any { it.read }) {
-                                        MR.strings.resume
-                                    } else {
-                                        MR.strings.start
+                        }
+
+                    }
+                },
+                bottomSheetState = sheetState
+            ) {
+
+                TransparentStatusBar {
+                    IScaffold(
+                        modifier = Modifier.pullRefresh(swipeRefreshState),
+                        topBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
+                            topbarState
+                        ),
+                        snackbarHostState = snackbarHostState,
+                        topBar = { scrollBehavior ->
+                            val onShare = ActivityResultListener(onSuccess = { uri ->
+                                vm.booksState.book?.let { book ->
+                                    vm.createEpub(book, uri, currentEvent = {
+                                        vm.showSnackBar(UiText.DynamicString(it))
+                                    })
+                                }
+                                vm.showSnackBar(UiText.MStringResource { xml ->
+                                    xml.success
+                                })
+                            }) { e ->
+                                vm.showSnackBar(UiText.ExceptionString(e))
+                            }
+                            val globalScope = LocalGlobalCoroutineScope.currentOrThrow
+
+                            BookDetailTopAppBar(
+                                scrollBehavior = scrollBehavior,
+                                onRefresh = {
+                                    globalScope.launch {
+                                        if (book != null) {
+                                            vm.getRemoteBookDetail(book, source = catalog)
+                                            vm.getRemoteChapterDetail(book, catalog)
+                                        }
                                     }
-                                    Text(text = localize(id))
                                 },
-                                icon = {
-                                    Icon(
-                                        imageVector = Icons.Default.PlayArrow,
-                                        contentDescription = null
-                                    )
+                                onPopBackStack = {
+                                    popBackStack(navigator)
                                 },
-                                onClick = {
-                                    if (catalog != null && book != null) {
-                                        if (vm.chapters.any { it.read } && vm.chapters.isNotEmpty()) {
-                                            navigator.push(
-                                                ReaderScreenSpec(
-                                                    bookId = book.id,
-                                                    chapterId = LAST_CHAPTER,
+                                source = vm.source,
+                                onCommand = {
+                                    scope.launch {
+                                        sheetState.show()
+                                    }
+                                },
+                                onShare = {
+                                    book?.let { book ->
+                                        vm.createEpub.onEpubCreateRequested(book) {
+                                            onShare.launch(it)
+                                        }
+                                    }
+                                },
+                                state = vm,
+                                onSelectBetween = {
+                                    val ids: List<Long> =
+                                        vm.chapters.map { it.id }
+                                            .filter { it in vm.selection }.distinct()
+                                            .sortedBy { it }
+                                            .let {
+                                                val list = mutableListOf<Long>()
+                                                val min = it.minOrNull() ?: 0
+                                                val max = it.maxOrNull() ?: 0
+                                                for (id in min..max) {
+                                                    list.add(id)
+                                                }
+                                                list
+                                            }
+                                    vm.selection.clear()
+                                    vm.selection.addAll(ids)
+                                },
+                                onClickSelectAll = {
+                                    vm.selection.clear()
+                                    vm.selection.addAll(vm.chapters.map { it.id })
+                                    vm.selection.distinct()
+                                },
+                                onClickInvertSelection = {
+                                    val ids: List<Long> =
+                                        vm.chapters.map { it.id }
+                                            .filterNot { it in vm.selection }.distinct()
+                                    vm.selection.clear()
+                                    vm.selection.addAll(ids)
+                                },
+                                onClickCancelSelection = {
+                                    vm.selection.clear()
+                                },
+                                paddingValues = PaddingValues(0.dp),
+                                onDownload = {
+                                    if (book != null) {
+                                        vm.startDownloadService(book = book)
+                                    }
+                                },
+                                onInfo = {
+                                    vm.showDialog = true
+                                }
+                            )
+                        },
+                        floatingActionButton = {
+                            if (!vm.hasSelection) {
+                                ExtendedFloatingActionButton(
+                                    text = {
+                                        val id = { xml: XmlStrings ->
+                                            if (chapters.value.any { it.read }) {
+                                                xml.resume
+                                            } else {
+                                                xml.start
+                                            }
+                                        }
+                                        Text(text = localize(id))
+                                    },
+                                    icon = {
+                                        Icon(
+                                            imageVector = Icons.Default.PlayArrow,
+                                            contentDescription = null
+                                        )
+                                    },
+                                    onClick = {
+                                        if (catalog != null && book != null) {
+                                            if (vm.chapters.any { it.read } && vm.chapters.isNotEmpty()) {
+                                                navigator.push(
+                                                    ReaderScreenSpec(
+                                                        bookId = book.id,
+                                                        chapterId = LAST_CHAPTER,
+                                                    )
                                                 )
-                                            )
-                                        } else if (vm.chapters.isNotEmpty()) {
-                                            navigator.push(
-                                                ReaderScreenSpec(
-                                                    bookId = book.id,
-                                                    chapterId = vm.chapters.first().id,
+                                            } else if (vm.chapters.isNotEmpty()) {
+                                                navigator.push(
+                                                    ReaderScreenSpec(
+                                                        bookId = book.id,
+                                                        chapterId = vm.chapters.first().id,
+                                                    )
                                                 )
-                                            )
+                                            } else {
+                                                scope.launch {
+                                                    vm.showSnackBar(UiText.MStringResource() { xml ->
+                                                        xml.noChapterIsAvailable
+                                                    })
+                                                }
+                                            }
                                         } else {
                                             scope.launch {
-                                                vm.showSnackBar(UiText.MStringResource(MR.strings.no_chapter_is_available))
+                                                vm.showSnackBar(UiText.MStringResource() { xml ->
+                                                    xml.sourceNotAvailable
+                                                })
                                             }
                                         }
-                                    } else {
-                                        scope.launch {
-                                            vm.showSnackBar(UiText.MStringResource(MR.strings.source_not_available))
-                                        }
-                                    }
-                                },
-                                expanded = scrollState.isScrollingUp() || scrollState.isScrolledToEnd(),
-                                modifier = Modifier,
-                                shape = CircleShape
+                                    },
+                                    expanded = scrollState.isScrollingUp() || scrollState.isScrolledToEnd(),
+                                    modifier = Modifier,
+                                    shape = CircleShape
 
-                            )
-                        }
-                    }
-                ) { scaffoldPadding ->
-
-                    BookDetailScreen(
-                        onSummaryExpand = {
-                            vm.expandedSummary = !vm.expandedSummary
-                        },
-                        book = book ?: Book(key = "", sourceId = 0, title = ""),
-                        vm = vm,
-                        onTitle = {
-                            try {
-                                navigator.push(
-                                    GlobalSearchScreenSpec(
-                                        query = it
-                                    )
                                 )
-                            } catch (e: Throwable) {
                             }
-                        },
-                        isSummaryExpanded = vm.expandedSummary,
-                        source = vm.source,
-                        appbarPadding = scaffoldPadding.calculateTopPadding(),
-                        onItemClick = { chapter ->
-                            if (vm.selection.isEmpty()) {
-                                if (book != null) {
-                                    when (chapter.type) {
-                                        ChapterInfo.MOVIE -> {
-                                            navigator.push(
-                                                VideoScreenSpec(
-                                                    chapterId = chapter.id,
-                                                )
-                                            )
+                        }
+                    ) { scaffoldPadding ->
 
-                                        }
-                                        else -> {
-                                            navigator.push(
-                                                ReaderScreenSpec(
-                                                    bookId = book.id,
-                                                    chapterId = chapter.id,
+                        BookDetailScreen(
+                            onSummaryExpand = {
+                                vm.expandedSummary = !vm.expandedSummary
+                            },
+                            book = book ?: Book(key = "", sourceId = 0, title = ""),
+                            vm = vm,
+                            onTitle = {
+                                try {
+                                    navigator.push(
+                                        GlobalSearchScreenSpec(
+                                            query = it
+                                        )
+                                    )
+                                } catch (e: Throwable) {
+                                }
+                            },
+                            isSummaryExpanded = vm.expandedSummary,
+                            source = vm.source,
+                            appbarPadding = scaffoldPadding.calculateTopPadding(),
+                            onItemClick = { chapter ->
+                                if (vm.selection.isEmpty()) {
+                                    if (book != null) {
+                                        when (chapter.type) {
+                                            ChapterInfo.MOVIE -> {
+                                                navigator.push(
+                                                    VideoScreenSpec(
+                                                        chapterId = chapter.id,
+                                                    )
                                                 )
-                                            )
+
+                                            }
+
+                                            else -> {
+                                                navigator.push(
+                                                    ReaderScreenSpec(
+                                                        bookId = book.id,
+                                                        chapterId = chapter.id,
+                                                    )
+                                                )
+                                            }
+                                        }
+
+                                    }
+                                } else {
+                                    when (chapter.id) {
+                                        in vm.selection -> {
+                                            vm.selection.remove(chapter.id)
+                                        }
+
+                                        else -> {
+                                            vm.selection.add(chapter.id)
                                         }
                                     }
-
                                 }
-                            } else {
+                            },
+                            onLongItemClick = { chapter ->
                                 when (chapter.id) {
                                     in vm.selection -> {
                                         vm.selection.remove(chapter.id)
                                     }
+
                                     else -> {
                                         vm.selection.add(chapter.id)
                                     }
                                 }
-                            }
-                        },
-                        onLongItemClick = { chapter ->
-                            when (chapter.id) {
-                                in vm.selection -> {
-                                    vm.selection.remove(chapter.id)
+                            },
+                            onSortClick = {
+                                scope.launch {
+                                    vm.chapterMode = true
+                                    sheetState.show()
                                 }
-                                else -> {
-                                    vm.selection.add(chapter.id)
+                            },
+                            chapters = chapters,
+                            scrollState = scrollState,
+                            onMap = {
+                                scope.launch {
+                                    try {
+                                        scrollState?.scrollToItem(
+                                            vm.getLastChapterIndex(),
+                                            -scrollState.layoutInfo.viewportEndOffset / 2
+                                        )
+                                    } catch (e: Throwable) {
+                                    }
                                 }
-                            }
-                        },
-                        onSortClick = {
-                            scope.launch {
-                                vm.chapterMode = true
-                                sheetState.show()
-                            }
-                        },
-                        chapters = chapters,
-                        scrollState = scrollState,
-                        onMap = {
-                            scope.launch {
-                                try {
-                                    scrollState?.scrollToItem(
-                                        vm.getLastChapterIndex(),
-                                        -scrollState.layoutInfo.viewportEndOffset / 2
+                            },
+                            onWebView = {
+                                if (source != null && source is HttpSource && book != null) {
+                                    navigator.push(
+                                        WebViewScreenSpec(
+                                            url = book.key,
+                                            sourceId = book.sourceId,
+                                            bookId = book.id,
+                                            chapterId = null,
+                                            enableChaptersFetch = true,
+                                            enableBookFetch = true,
+                                            enableChapterFetch = false
+                                        )
                                     )
-                                } catch (e: Throwable) {
                                 }
-                            }
-                        },
-                        onWebView = {
-                            if (source != null && source is HttpSource && book != null) {
-                                navigator.push(
-                                    WebViewScreenSpec(
-                                        url = book.key,
-                                        sourceId = book.sourceId,
-                                        bookId = book.id,
-                                        chapterId = null,
-                                        enableChaptersFetch = true,
-                                        enableBookFetch = true,
-                                        enableChapterFetch = false
-                                    )
-                                )
-                            }
-                        },
-                        onFavorite = {
-                            if (book != null) {
-                                vm.toggleInLibrary(book = book)
-                            }
-                        },
-                        onCopyTitle = {
-                            vm.platformHelper.copyToClipboard(it, it)
-                        },
+                            },
+                            onFavorite = {
+                                if (book != null) {
+                                    vm.toggleInLibrary(book = book)
+                                }
+                            },
+                            onCopyTitle = {
+                                vm.platformHelper.copyToClipboard(it, it)
+                            },
 
-                    )
+                            )
 
-                }
+                    }
                 }
             }
             if (refreshing) {

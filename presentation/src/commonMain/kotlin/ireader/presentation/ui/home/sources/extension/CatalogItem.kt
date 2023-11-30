@@ -1,7 +1,11 @@
 package ireader.presentation.ui.home.sources.extension
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -11,7 +15,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
@@ -19,15 +28,18 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.core.os.InstallStep
-import ireader.domain.models.entities.*
+import ireader.domain.models.entities.Catalog
+import ireader.domain.models.entities.CatalogBundled
+import ireader.domain.models.entities.CatalogInstalled
+import ireader.domain.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogRemote
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
 import ireader.presentation.imageloader.IImageLoader
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.ContentAlpha
 import ireader.presentation.ui.home.sources.extension.composables.LetterIcon
-import java.util.*
+import java.util.Locale
 import kotlin.math.max
 
 @Composable
@@ -174,13 +186,13 @@ private fun CatalogButtons(
             } else if (onInstall != null) {
                 if (catalog is CatalogLocal) {
                     MidSizeTextComposable(
-                        text = localize(MR.strings.update),
+                        text = localize { xml -> xml.update },
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.clickable { onInstall() }
                     )
                 } else if (catalog is CatalogRemote) {
                     MidSizeTextComposable(
-                        text = localize(MR.strings.install),
+                        text = localize { xml -> xml.install },
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.clickable { onInstall() }
                     )
@@ -210,7 +222,7 @@ internal fun CatalogMenuButton(
                 AppIconButton(
                     imageVector = Icons.Filled.PushPin,
                     tint = androidx.compose.material3.MaterialTheme.colorScheme.primary,
-                    contentDescription = localize(MR.strings.pin),
+                    contentDescription = localize { xml -> xml.pin },
                     onClick = onPinToggle
                 )
             } else {
@@ -219,7 +231,7 @@ internal fun CatalogMenuButton(
                     tint = androidx.compose.material3.MaterialTheme.colorScheme.onBackground.copy(
                         .5f
                     ),
-                    contentDescription = localize(MR.strings.unpin),
+                    contentDescription = localize { xml -> xml.unpin },
                     onClick = onPinToggle
                 )
             }
@@ -227,7 +239,7 @@ internal fun CatalogMenuButton(
             Spacer(modifier = Modifier.padding(horizontal = 4.dp))
             if (onUninstall != null && catalog is CatalogLocal) {
                 MidSizeTextComposable(
-                    text = localize(MR.strings.uninstall),
+                    text = localize { xml -> xml.uninstall },
                     color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable { onUninstall() }
                 )

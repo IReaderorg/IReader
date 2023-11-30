@@ -11,33 +11,35 @@ package ireader.i18n
 
 import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-import dev.icerock.moko.resources.PluralsResource
-import dev.icerock.moko.resources.StringResource
-import dev.icerock.moko.resources.desc.*
-
-// don't use this functions yet because moko-resource is not configured yet.
 
 
 @Composable
-actual fun localize(resource: StringResource): String {
-    return StringDesc.Resource(resource).toString(LocalContext.current)
+actual fun localize(resource: (XmlStrings) -> String): String {
+    val lyricist = LocalXmlStrings.current
+    return resource(lyricist)
 }
 
 
 @Composable
-actual fun localize(resource: StringResource, vararg args: Any): String {
-    return StringDesc.ResourceFormatted(resource, *args).toString(LocalContext.current)
+actual fun localize(resource: (XmlStrings) -> String, vararg args: Any): String {
+    val lyricist = LocalXmlStrings.current
+    return resource(lyricist)
 }
 
 @Composable
-actual fun localizePlural(resource: PluralsResource, quantity: Int): String {
-    return StringDesc.Plural(resource, quantity).toString(LocalContext.current)
+actual fun localizePlural(resource: (XmlStrings) -> String, quantity: Int): String {
+    val lyricist = LocalXmlStrings.current
+    return resource(lyricist).replace("%1\$d", quantity.toString())
 }
 
 @Composable
-actual fun localizePlural(resource: PluralsResource, quantity: Int, vararg args: Any): String {
-    return StringDesc.PluralFormatted(resource, quantity, *args).toString(LocalContext.current)
+actual fun localizePlural(
+    resource: (XmlStrings) -> String,
+    quantity: Int,
+    vararg args: Any
+): String {
+    val lyricist = LocalXmlStrings.current
+    return resource(lyricist)
 }
 
 actual class LocalizeHelper(
@@ -47,30 +49,42 @@ actual class LocalizeHelper(
     actual fun localize(resId: Int): String {
         return context.getString(resId)
     }
-    actual fun localize(resource: StringResource): String {
-        return StringDesc.Resource(resource).toString(context)
+
+    actual fun localize(resource: (XmlStrings) -> String): String {
+        if (xml == null) return ""
+        return resource(xml!!)
     }
 
     actual fun localize(
-        resource: StringResource,
+        resource: (XmlStrings) -> String,
         vararg args: Any
     ): String {
-        return StringDesc.ResourceFormatted(resource, *args).toString(context)
+        if (xml == null) return ""
+        return resource(xml!!)
     }
 
     actual fun localizePlural(
-        resource: PluralsResource,
+        resource: (XmlStrings) -> String,
         quantity: Int
     ): String {
-        return StringDesc.Plural(resource, quantity).toString(context)
+        if (xml == null) return ""
+        return resource(xml!!)
     }
 
     actual fun localizePlural(
-        resource: PluralsResource,
+        resource: (XmlStrings) -> String,
         quantity: Int,
         vararg args: Any
     ): String {
-        return StringDesc.PluralFormatted(resource, quantity, *args).toString(context)
+        if (xml == null) return ""
+        return resource(xml!!).replace("%1\$d", quantity.toString())
+    }
+
+    actual var xml: XmlStrings? = null
+
+    @Composable
+    actual fun Init() {
+        xml = LocalXmlStrings.current
     }
 
 

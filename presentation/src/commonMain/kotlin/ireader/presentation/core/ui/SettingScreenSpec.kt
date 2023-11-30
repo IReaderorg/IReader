@@ -10,7 +10,8 @@ import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.rememberXmlStrings
+
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Toolbar
@@ -29,43 +30,44 @@ class SettingScreenSpec : VoyagerScreen() {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        val xml = rememberXmlStrings()
         val settingItems = remember {
             listOf(
                 SettingsSection(
-                    MR.strings.appearance,
+                    xml.strings.appearance,
                     Icons.Default.Palette,
                 ) {
                     navigator.push(AppearanceScreenSpec())
                 },
                 SettingsSection(
-                    MR.strings.general,
+                    xml.strings.general,
                     Icons.Default.Tune,
                 ) {
                     navigator.push(GeneralScreenSpec())
                 },
                 SettingsSection(
-                    MR.strings.reader,
+                    xml.strings.reader,
                     Icons.Default.ChromeReaderMode,
                 ) {
                     navigator.push(ReaderSettingSpec())
 
                 },
                 SettingsSection(
-                    MR.strings.security,
+                    xml.strings.security,
                     Icons.Default.Security,
                 ) {
                     navigator.push(SecuritySettingSpec())
 
                 },
                 SettingsSection(
-                    MR.strings.repository,
+                    xml.strings.repository,
                     Icons.Default.Extension,
                 ) {
                     navigator.push(RepositoryScreenSpec())
 
                 },
                 SettingsSection(
-                    MR.strings.advance_setting,
+                    xml.strings.advanceSetting,
                     Icons.Default.Code
                 ) {
                     navigator.push(AdvanceSettingSpec())
@@ -78,7 +80,7 @@ class SettingScreenSpec : VoyagerScreen() {
                 Toolbar(
                     scrollBehavior = scrollBehavior,
                     title = {
-                        BigSizeTextComposable(text = localize(MR.strings.settings))
+                        BigSizeTextComposable(text = localize { xml -> xml.settings })
                     },
                     navigationIcon = { TopAppBarBackButton(onClick = { popBackStack(navigator) }) },
                 )

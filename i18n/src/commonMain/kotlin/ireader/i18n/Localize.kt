@@ -8,34 +8,34 @@
 package ireader.i18n
 
 import androidx.compose.runtime.Composable
-import dev.icerock.moko.resources.PluralsResource
-import dev.icerock.moko.resources.StringResource
 
 
 @Composable
-expect fun localize(resource: StringResource): String
+expect fun localize(resource: (XmlStrings) -> String): String
 
 @Composable
-expect fun localize(resource: StringResource, vararg args: Any): String
+expect fun localize(resource: (XmlStrings) -> String, vararg args: Any): String
 
 @Composable
-expect fun localizePlural(resource: PluralsResource, quantity: Int): String
+expect fun localizePlural(resource: (XmlStrings) -> String, quantity: Int): String
 
 @Composable
-expect fun localizePlural(resource: PluralsResource, quantity: Int, vararg args: Any): String
-
+expect fun localizePlural(resource: (XmlStrings) -> String, quantity: Int, vararg args: Any): String
 
 
 expect class LocalizeHelper {
+    var xml: XmlStrings?
 
-     fun localize(resId: Int): String
-     fun localize(resource: StringResource): String
+    @Composable
+    fun Init()
+    fun localize(resId: Int): String
+    fun localize(resource: (XmlStrings) -> String): String
 
-     fun localize(resource: StringResource, vararg args: Any): String
+    fun localize(resource: (XmlStrings) -> String, vararg args: Any): String
 
-     fun localizePlural(resource: PluralsResource, quantity: Int): String
+    fun localizePlural(resource: (XmlStrings) -> String, quantity: Int): String
 
-     fun localizePlural(resource: PluralsResource, quantity: Int, vararg args: Any): String
+    fun localizePlural(resource: (XmlStrings) -> String, quantity: Int, vararg args: Any): String
 
 
 }

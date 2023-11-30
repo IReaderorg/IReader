@@ -10,7 +10,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
@@ -48,7 +48,7 @@ fun GlobalScreenTopBar(
         actions = {
             AppIconButton(
                 imageVector = Icons.Default.Search,
-                contentDescription = localize(MR.strings.search),
+                contentDescription = localize { xml -> xml.search },
                 onClick = {
                     state.searchMode = true
                 },
@@ -57,7 +57,9 @@ fun GlobalScreenTopBar(
         navigationIcon = {
             AppIconButton(
                 imageVector = Icons.Default.ArrowBack,
-                contentDescription = localize(MR.strings.toggle_search_mode_off),
+                contentDescription = localize { xml ->
+                    xml.toggleSearchModeOff
+                },
                 onClick = {
                     onPop()
                 }

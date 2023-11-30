@@ -7,12 +7,12 @@ import java.util.*
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
-    id(libs.plugins.moko.gradle.get().pluginId)
     id("org.jetbrains.compose")
     id(libs.plugins.buildkonfig.get().pluginId)
+    id(kotlinx.plugins.ksp.get().pluginId)
 }
 kotlin {
-    android()
+    androidTarget()
     jvm() {
         compilations.all {
             kotlinOptions.jvmTarget = "17"
@@ -24,6 +24,7 @@ kotlin {
                 api(libs.moko.core)
                 compileOnly(compose.runtime)
                 compileOnly(compose.ui)
+                implementation(libs.lyricist.library)
 
             }
         }
@@ -40,11 +41,39 @@ kotlin {
     }
 
 }
+
+ksp {
+    // Required
+    arg(
+        "lyricist.xml.resourcesPath",
+        kotlin.sourceSets.findByName("androidMain")!!.resources.srcDirs.first().absolutePath.replace(
+            "androidMain\\resources",
+            "androidMain\\res"
+        ).replace(
+            "androidMain/resources",
+            "androidMain/res"
+        )
+    )
+
+    // Optional
+    arg("lyricist.packageName", "ireader.i18n")
+    arg("lyricist.xml.moduleName", "xml")
+    arg("lyricist.xml.defaultLanguageTag", "en")
+    arg("lyricist.internalVisibility", "true")
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().all {
+    if(name != "kspCommonMainKotlinMetadata") {
+        dependsOn("kspCommonMainKotlinMetadata")
+    }
+}
+
+
+kotlin.sourceSets.commonMain {
+    kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
+}
 dependencies {
-    commonMainApi("dev.icerock.moko:resources:0.23.0")
-//    commonMainApi("dev.icerock.moko:resources-compose:0.23.0") // for compose multiplatform
-//
-//    commonTestImplementation("dev.icerock.moko:resources-test:0.23.0")
+    add("kspCommonMainMetadata", libs.lyricist.processorXml)
 }
 
 android {
@@ -59,13 +88,13 @@ android {
         targetCompatibility = ProjectConfig.androidJvmTarget
     }
     sourceSets.getByName("main") {
-        assets.srcDir(File(buildDir, "generated/moko/androidMain/assets"))
-        res.srcDir(File(buildDir, "generated/moko/androidMain/res"))
+        assets.srcDir(File(buildDir, "generated/ksp/jvm/jvmMain/kotlin"))
+        res.srcDir(File(buildDir, "generated/ksp/jvm/jvmMain/kotlin"))
         res.srcDir("src/commonMain/resources")
     }
 }
 tasks {
-    this@tasks.registerResources(project)
+    //  this@tasks.registerResources(project)
 
 }
 
@@ -113,7 +142,4 @@ fun runCommand(command: String): String {
         standardOutput = byteOut
     }
     return String(byteOut.toByteArray()).trim()
-}
-multiplatformResources {
-    multiplatformResourcesPackage = "ireader.i18n.resources"
 }

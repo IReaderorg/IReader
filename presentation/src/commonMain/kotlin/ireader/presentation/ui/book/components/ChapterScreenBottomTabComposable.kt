@@ -8,7 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.preferences.prefs.ChapterDisplayMode
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.book.viewmodel.ChapterSort
 import ireader.presentation.ui.book.viewmodel.ChaptersFilters
@@ -32,9 +32,11 @@ fun ChapterScreenBottomTabComposable(
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     val tabs = remember {
         listOf(
-            localizeHelper.localize(MR.strings.filter),
-            localizeHelper.localize(MR.strings.sort),
-            localizeHelper.localize(MR.strings.display),
+            localizeHelper.localize { xml ->
+                xml.filter
+            },
+            localizeHelper.localize { xml -> xml.sort },
+            localizeHelper.localize { xml -> xml.display },
         )
     }
     Column(modifier = modifier) {

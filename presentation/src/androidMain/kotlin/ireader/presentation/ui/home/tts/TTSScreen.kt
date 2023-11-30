@@ -43,7 +43,7 @@ import ireader.domain.models.prefs.mapAlignment
 import ireader.domain.models.prefs.mapTextAlign
 import ireader.domain.services.tts_service.TTSState
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.components.ShowLoading
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.SuperSmallTextComposable
@@ -53,16 +53,16 @@ import ireader.presentation.ui.core.modifier.clickableNoIndication
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TTSScreen(
-        modifier: Modifier = Modifier,
-        vm: TTSViewModel,
-        source: Source?,
-        drawerState: DrawerState,
-        onChapter: (Chapter) -> Unit,
-        onPopStack: () -> Unit,
-        onPlay: () -> Unit,
-        bottomSheetState: ModalBottomSheetState,
-        lazyState: LazyListState,
-        paddingValues: PaddingValues
+    modifier: Modifier = Modifier,
+    vm: TTSViewModel,
+    source: Source?,
+    drawerState: DrawerState,
+    onChapter: (Chapter) -> Unit,
+    onPopStack: () -> Unit,
+    onPlay: () -> Unit,
+    bottomSheetState: ModalBottomSheetState,
+    lazyState: LazyListState,
+    paddingValues: PaddingValues
 ) {
     val gradient = Brush.verticalGradient(
         colors = listOf(
@@ -85,7 +85,11 @@ fun TTSScreen(
                             .matchParentSize()
                             .background(gradient)
                     )
-                    LazyColumn(modifier = Modifier.matchParentSize(), state = lazyState, contentPadding = paddingValues) {
+                    LazyColumn(
+                        modifier = Modifier.matchParentSize(),
+                        state = lazyState,
+                        contentPadding = paddingValues
+                    ) {
                         items(
                             count = chapter?.content?.size ?: 0
                         ) { index ->
@@ -116,9 +120,11 @@ fun TTSScreen(
                         }
                     }
 
-                    Box(modifier = Modifier
-                        .padding(paddingValues)
-                        .fillMaxSize()) {
+                    Box(
+                        modifier = Modifier
+                            .padding(paddingValues)
+                            .fillMaxSize()
+                    ) {
                         Row(
                             horizontalArrangement = Arrangement.Center, modifier = Modifier
                                 .fillMaxWidth()
@@ -130,8 +136,10 @@ fun TTSScreen(
                             )
                         }
                         vm.ttsIconAlignments.value.mapAlignment()?.let { alignment ->
-                            Row(modifier = Modifier
-                                .align(alignment)) {
+                            Row(
+                                modifier = Modifier
+                                    .align(alignment)
+                            ) {
                                 AppIconButton(
                                     onClick = onPlay,
                                     imageVector = if (vm.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
@@ -212,14 +220,18 @@ fun MediaControllers(
         AppIconButton(
             modifier = Modifier.size(50.dp),
             imageVector = Icons.Filled.SkipPrevious,
-            contentDescription = localize(MR.strings.previous_chapter),
+            contentDescription = localize { xml ->
+                xml.previousChapter
+            },
             onClick = onPrev,
             tint = MaterialTheme.colorScheme.onBackground
         )
         AppIconButton(
             modifier = Modifier.size(50.dp),
             imageVector = Icons.Filled.FastRewind,
-            contentDescription = localize(MR.strings.previous_paragraph),
+            contentDescription = localize { xml ->
+                xml.previousParagraph
+            },
             onClick = onPrevPar,
             tint = MaterialTheme.colorScheme.onBackground
         )
@@ -232,20 +244,26 @@ fun MediaControllers(
                         ShowLoading()
                     }
                 }
+
                 vm.isPlaying -> {
                     AppIconButton(
                         modifier = Modifier.size(80.dp),
                         imageVector = Icons.Filled.PauseCircle,
-                        contentDescription = localize(MR.strings.play),
+                        contentDescription = localize() { xml ->
+                            xml.play
+                        },
                         onClick = onPlay,
                         tint = MaterialTheme.colorScheme.onBackground
                     )
                 }
+
                 else -> {
                     AppIconButton(
                         modifier = Modifier.size(80.dp),
                         imageVector = Icons.Filled.PlayCircle,
-                        contentDescription = localize(MR.strings.pause),
+                        contentDescription = localize() { xml ->
+                            xml.pause
+                        },
                         onClick = onPlay,
                         tint = MaterialTheme.colorScheme.onBackground
                     )
@@ -256,14 +274,18 @@ fun MediaControllers(
         AppIconButton(
             modifier = Modifier.size(50.dp),
             imageVector = Icons.Filled.FastForward,
-            contentDescription = localize(MR.strings.next_paragraph),
+            contentDescription = localize { xml ->
+                xml.nextParagraph
+            },
             onClick = onNextPar,
             tint = MaterialTheme.colorScheme.onBackground
         )
         AppIconButton(
             modifier = Modifier.size(50.dp),
             imageVector = Icons.Filled.SkipNext,
-            contentDescription = localize(MR.strings.next_chapter),
+            contentDescription = localize() { xml ->
+                xml.nextChapter
+            },
             onClick = onNext,
             tint = MaterialTheme.colorScheme.onBackground
         )

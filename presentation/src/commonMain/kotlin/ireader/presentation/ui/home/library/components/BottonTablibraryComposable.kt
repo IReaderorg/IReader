@@ -6,10 +6,15 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -29,7 +34,7 @@ import ireader.domain.models.library.LibrarySort
 import ireader.i18n.LocalizeHelper
 import ireader.i18n.asString
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.component.text_related.TextSection
 import ireader.presentation.ui.core.theme.AppColors
@@ -117,34 +122,45 @@ fun TabsContent(
             DisplayMode.OnlyCover
         )
     }
-    androidx.compose.foundation.pager.HorizontalPager(
-        pageCount = libraryTabs.size,
+    HorizontalPager(
+        modifier = Modifier.fillMaxSize(),
         state = pagerState,
-        modifier = Modifier.fillMaxSize()
-    ) { page ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Top,
-            contentPadding = scaffoldPadding
-        ) {
-            when (page) {
-                0 -> FiltersPage(filters, onClick = {
-                    vm.toggleFilter(it)
-                })
+        pageSpacing = 0.dp,
+        userScrollEnabled = true,
+        reverseLayout = false,
+        contentPadding = PaddingValues(0.dp),
+        beyondBoundsPageCount = 0,
+        pageSize = PageSize.Fill,
+        key = null,
+        pageNestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
+            Orientation.Horizontal
+        ),
+        pageContent = { page ->
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Top,
+                contentPadding = scaffoldPadding
+            ) {
+                when (page) {
+                    0 -> FiltersPage(filters, onClick = {
+                        vm.toggleFilter(it)
+                    })
 
-                1 -> SortPage(
-                    vm.sorting.value,
-                    onClick = vm::toggleSort,
-                    localizeHelper
-                )
-                2 -> DispalyPage(
-                    layouts = layouts,
-                    onLayoutSelected = onLayoutSelected,
-                    vm = vm
-                )
+                    1 -> SortPage(
+                        vm.sorting.value,
+                        onClick = vm::toggleSort,
+                        localizeHelper
+                    )
+
+                    2 -> DispalyPage(
+                        layouts = layouts,
+                        onLayoutSelected = onLayoutSelected,
+                        vm = vm
+                    )
+                }
             }
         }
-    }
+    )
 }
 
 private fun LazyListScope.FiltersPage(
@@ -220,7 +236,7 @@ private fun LazyListScope.DispalyPage(
 ) {
     item {
         TextSection(
-            text = localize(MR.strings.display_mode),
+            text = localize { xml -> xml.displayMode },
             padding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
             style = MaterialTheme.typography.bodyMedium,
             toUpper = false
@@ -242,16 +258,16 @@ private fun LazyListScope.DispalyPage(
 
                 when (layout) {
                     DisplayMode.CompactGrid -> {
-                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.compact_layout))
+                        MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.compactLayout })
                     }
                     DisplayMode.ComfortableGrid -> {
-                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.comfortable_layout))
+                        MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.comfortableLayout })
                     }
                     DisplayMode.List -> {
-                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.list_layout))
+                        MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.listLayout })
                     }
                     DisplayMode.OnlyCover -> {
-                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.cover_only_layout))
+                        MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.coverOnlyLayout })
                     }
                 }
             }
@@ -259,7 +275,7 @@ private fun LazyListScope.DispalyPage(
     }
     item {
         TextSection(
-            text = localize(MR.strings.columns),
+            text = localize { xml -> xml.columns },
             padding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
             style = MaterialTheme.typography.bodyMedium,
             toUpper = false
@@ -272,7 +288,7 @@ private fun LazyListScope.DispalyPage(
     }
     item {
         TextSection(
-            text = localize(MR.strings.badge),
+            text = localize { xml -> xml.badge },
             padding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
             style = MaterialTheme.typography.bodyMedium,
             toUpper = false
@@ -288,7 +304,7 @@ private fun LazyListScope.DispalyPage(
                     vm.readBadge.value = it
                 }
             )
-            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.read_chapters))
+            MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.readChapters })
         }
     }
     item {
@@ -301,7 +317,7 @@ private fun LazyListScope.DispalyPage(
                     vm.unreadBadge.value = it
                 }
             )
-            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.unread_chapters))
+            MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.unreadChapters })
         }
     }
     item {
@@ -314,12 +330,12 @@ private fun LazyListScope.DispalyPage(
                     vm.goToLastChapterBadge.value = it
                 }
             )
-            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.go_to_last_chapter))
+            MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.goToLastChapter })
         }
     }
     item {
         TextSection(
-            text = localize(MR.strings.tabs),
+            text = localize { xml -> xml.tabs },
             padding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),
             style = MaterialTheme.typography.bodyMedium,
             toUpper = false
@@ -335,7 +351,7 @@ private fun LazyListScope.DispalyPage(
                     vm.showCategoryTabs.value = it
                 }
             )
-            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.show_category_tabs))
+            MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.showCategoryTabs })
         }
     }
     item {
@@ -348,7 +364,7 @@ private fun LazyListScope.DispalyPage(
                     vm.showAllCategoryTab.value = it
                 }
             )
-            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.show_all_category_tab))
+            MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.showAllCategoryTab })
         }
     }
     item {
@@ -361,7 +377,7 @@ private fun LazyListScope.DispalyPage(
                     vm.showCountInCategory.value = it
                 }
             )
-            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.show_count_in_category_tab))
+            MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.showCountInCategoryTab })
         }
     }
 }

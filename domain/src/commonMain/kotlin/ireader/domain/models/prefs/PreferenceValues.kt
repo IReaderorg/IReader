@@ -2,7 +2,6 @@ package ireader.domain.models.prefs
 
 import androidx.compose.ui.Alignment
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
 
 /**
  * This class stores the values for the preferences in the application.
@@ -15,9 +14,15 @@ object PreferenceValues {
     }
 
     enum class SecureScreenMode(val titleResId: UiText.MStringResource) {
-        ALWAYS(UiText.MStringResource(MR.strings.lock_always)),
-        INCOGNITO(UiText.MStringResource(MR.strings.pref_incognito_mode)),
-        NEVER(UiText.MStringResource(MR.strings.lock_never)),
+        ALWAYS(UiText.MStringResource() { xml ->
+            xml.lockAlways
+        }),
+        INCOGNITO(UiText.MStringResource() { xml ->
+            xml.prefIncognitoMode
+        }),
+        NEVER(UiText.MStringResource() { xml ->
+            xml.lockNever
+        }),
     }
 
     enum class RelativeTime {
@@ -28,6 +33,7 @@ object PreferenceValues {
         Day,
         Week;
     }
+
     enum class Installer {
         AndroidPackageManager,
         LocalInstaller;
@@ -41,14 +47,17 @@ object PreferenceValues {
          * Enable selection in the whole scrollbar and thumb
          */
         Full,
+
         /**
          * Enable selection in the thumb
          */
         Thumb,
+
         /**
          * Disable selection
          */
         Disabled;
+
         companion object {
             fun valueOf(ordinal: Int): ScrollbarSelectionMode {
                 return when (ordinal) {
@@ -59,6 +68,7 @@ object PreferenceValues {
             }
         }
     }
+
     enum class PreferenceTextAlignment {
         Right,
         Left,
@@ -67,12 +77,14 @@ object PreferenceValues {
         Hide,
 
     }
+
     enum class PreferenceAlignment {
         TopLeft,
         BottomLeft,
         Hide,
 
     }
+
     enum class AutomaticBackup {
         Off,
         Every6Hours,
@@ -82,13 +94,15 @@ object PreferenceValues {
         Weekly
     }
 }
-fun PreferenceValues.PreferenceAlignment.mapAlignment() : Alignment? {
-    return when(this) {
+
+fun PreferenceValues.PreferenceAlignment.mapAlignment(): Alignment? {
+    return when (this) {
         PreferenceValues.PreferenceAlignment.TopLeft -> Alignment.TopEnd
         PreferenceValues.PreferenceAlignment.BottomLeft -> Alignment.BottomEnd
         else -> null
     }
 }
+
 fun mapTextAlign(textAlign: PreferenceValues.PreferenceTextAlignment): androidx.compose.ui.text.style.TextAlign {
     return when (textAlign) {
         PreferenceValues.PreferenceTextAlignment.Center -> androidx.compose.ui.text.style.TextAlign.Center

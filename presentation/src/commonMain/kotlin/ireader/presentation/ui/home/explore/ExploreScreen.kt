@@ -27,7 +27,7 @@ import ireader.domain.models.entities.toBook
 import ireader.domain.models.entities.toBookItem
 import ireader.i18n.asString
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.components.ShowLoading
 import ireader.presentation.ui.component.isLandscape
 import ireader.presentation.ui.component.list.LayoutComposable
@@ -131,7 +131,9 @@ fun ExploreScreen(
             androidx.compose.material3.ExtendedFloatingActionButton(
                 text = {
                     MidSizeTextComposable(
-                        text = localize(MR.strings.filter),
+                        text = localize { xml ->
+                            xml.filter
+                        },
                         color = MaterialTheme.colorScheme.onSecondary
                     )
                 },
@@ -249,12 +251,16 @@ private fun BoxScope.ExploreScreenErrorComposable(
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.Refresh,
-                    contentDescription = localize(MR.strings.retry),
+                    contentDescription = localize { xml ->
+                        xml.retry
+                    },
                     onClick = {
                         onRefresh()
                     }
                 )
-                SmallTextComposable(text = localize(MR.strings.retry))
+                SmallTextComposable(text = localize { xml ->
+                    xml.retry
+                })
             }
             Column(
                 Modifier
@@ -265,13 +271,13 @@ private fun BoxScope.ExploreScreenErrorComposable(
                 if (source is HttpSource) {
                     AppIconButton(
                         imageVector = Icons.Default.Public,
-                        contentDescription = localize(MR.strings.open_in_webView),
+                        contentDescription = localize { xml -> xml.openInWebView },
                         onClick = {
                             onWebView(source)
                         }
                     )
                 }
-                SmallTextComposable(text = localize(MR.strings.open_in_webView))
+                SmallTextComposable(text = localize { xml -> xml.openInWebView })
             }
         }
     }

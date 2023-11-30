@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import ireader.core.source.findInstance
 import ireader.core.source.model.Command
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.CustomTextField
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.BuildDropDownMenu
@@ -65,48 +65,54 @@ fun WebPageTopBar(
             val list =
                 mutableListOf<DropDownMenuItem>(
                     DropDownMenuItem(
-                        localize(MR.strings.go)
+                        localize { xml -> xml.go }
                     ) {
                         onGo()
                     },
                     DropDownMenuItem(
-                        localize(MR.strings.refresh)
+                        localize { xml -> xml.refresh }
                     ) {
                         refresh()
                     },
                     DropDownMenuItem(
-                        localize(MR.strings.go_back)
+                        localize { xml -> xml.goBack }
                     ) {
                         goBack()
                     },
                     DropDownMenuItem(
-                        localize(MR.strings.go_forward)
+                        localize { xml -> xml.goForward }
                     ) {
                         goForward()
                     },
                 )
-            if (source != null && source.getCommands().findInstance<Command.Detail.Fetch>() != null && state.enableBookFetch) {
+            if (source != null && source.getCommands()
+                    .findInstance<Command.Detail.Fetch>() != null && state.enableBookFetch
+            ) {
                 list.add(
                     DropDownMenuItem(
-                        localize(MR.strings.fetch_book)
+                        localize { xml -> xml.fetchBook }
                     ) {
                         onFetchBook()
                     }
                 )
             }
-            if (source != null && source.getCommands().findInstance<Command.Content.Fetch>() != null && state.stateChapter != null && state.enableChapterFetch) {
+            if (source != null && source.getCommands()
+                    .findInstance<Command.Content.Fetch>() != null && state.stateChapter != null && state.enableChapterFetch
+            ) {
                 list.add(
                     DropDownMenuItem(
-                        localize(MR.strings.fetch_chapter)
+                        localize { xml -> xml.fetchChapter }
                     ) {
                         onFetchChapter()
                     }
                 )
             }
-            if (source != null && source.getCommands().findInstance<Command.Chapter.Fetch>() != null && state.stateBook != null && state.enableChaptersFetch) {
+            if (source != null && source.getCommands()
+                    .findInstance<Command.Chapter.Fetch>() != null && state.stateBook != null && state.enableChaptersFetch
+            ) {
                 list.add(
                     DropDownMenuItem(
-                        localize(MR.strings.fetch_chapters)
+                        localize { xml -> xml.fetchChapters }
                     ) {
                         onFetchChapters()
                     }

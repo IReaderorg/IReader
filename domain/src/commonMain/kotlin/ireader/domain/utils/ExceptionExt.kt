@@ -8,45 +8,79 @@ import ireader.core.source.LocalSourceException
 import ireader.i18n.EmptyQuery
 import ireader.i18n.SourceNotFoundException
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.util.concurrent.TimeoutException
+
 fun exceptionHandler(e: Throwable): UiText? {
     Log.error(e, "exceptionHandler catch an exception")
 
     return when (e) {
         is IOException -> {
-            UiText.MStringResource(MR.strings.noInternetError)
+            UiText.MStringResource() { xml ->
+                xml.noInternetError
+            }
         }
+
         is SocketTimeoutException -> {
-            UiText.MStringResource(MR.strings.noInternetError)
+            UiText.MStringResource() { xml ->
+                xml.noInternetError
+            }
         }
+
         is java.util.concurrent.CancellationException -> {
             null
         }
+
         is org.jsoup.select.Selector.SelectorParseException -> {
-            UiText.MStringResource(MR.strings.cant_get_content)
+            UiText.MStringResource() { xml ->
+                xml.cantGetContent
+            }
         }
+
         is NoSuchMethodError -> {
-            UiText.MStringResource(MR.strings.library_is_out_of_date)
+            UiText.MStringResource() { xml ->
+                xml.libraryIsOutOfDate
+            }
         }
+
         is TimeoutException -> {
-            UiText.MStringResource(MR.strings.time_out_exception)
+            UiText.MStringResource() { xml ->
+                xml.timeOutException
+            }
         }
+
         is java.lang.ClassCastException -> {
             null
         }
-        is CatalogNotFoundException -> {
-            UiText.MStringResource(MR.strings.catalog_not_found_error)
-        }
-        is EmptyQuery -> UiText.MStringResource(MR.strings.query_must_not_be_empty)
-        is LocalSourceException -> null
-        is OutOfDateWebView -> UiText.MStringResource(MR.strings.query_must_not_be_empty)
-        is NeedWebView -> UiText.MStringResource(MR.strings.information_webview_required)
-        is CloudflareBypassFailed -> UiText.MStringResource(MR.strings.information_cloudflare_bypass_failure)
 
-        is SourceNotFoundException -> UiText.MStringResource(MR.strings.the_source_is_not_found)
+        is CatalogNotFoundException -> {
+            UiText.MStringResource() { xml ->
+                xml.catalogNotFoundError
+            }
+        }
+
+        is EmptyQuery -> UiText.MStringResource() { xml ->
+            xml.queryMustNotBeEmpty
+        }
+
+        is LocalSourceException -> null
+        is OutOfDateWebView -> UiText.MStringResource() { xml ->
+            xml.queryMustNotBeEmpty
+        }
+
+        is NeedWebView -> UiText.MStringResource() { xml ->
+            xml.informationWebviewRequired
+        }
+
+        is CloudflareBypassFailed -> UiText.MStringResource() { xml ->
+            xml.informationCloudflareBypassFailure
+        }
+
+        is SourceNotFoundException -> UiText.MStringResource() { xml ->
+            xml.theSourceIsNotFound
+        }
+
         else -> {
             UiText.ExceptionString(e)
         }

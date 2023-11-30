@@ -1,5 +1,5 @@
 package ireader.domain.models
-import ireader.i18n.resources.MR
+
 import ireader.core.prefs.Preference
 import ireader.domain.models.entities.Category
 import ireader.i18n.LocalizeHelper
@@ -64,16 +64,27 @@ enum class DisplayMode(override val flag: Long) : Flag {
 fun DisplayMode.getLayoutName(localizeHelper: LocalizeHelper): String {
     return when (this) {
         DisplayMode.CompactGrid -> {
-            localizeHelper.localize(MR.strings.compact_layout)
+            localizeHelper.localize() { xml ->
+                xml.compactLayout
+            }
         }
+
         DisplayMode.ComfortableGrid -> {
-            localizeHelper.localize(MR.strings.comfortable_layout)
+            localizeHelper.localize() { xml ->
+                xml.comfortableLayout
+            }
         }
+
         DisplayMode.List -> {
-            localizeHelper.localize(MR.strings.list_layout)
+            localizeHelper.localize() { xml ->
+                xml.listLayout
+            }
         }
+
         DisplayMode.OnlyCover -> {
-            localizeHelper.localize(MR.strings.cover_only_layout)
+            localizeHelper.localize() { xml ->
+                xml.coverOnlyLayout
+            }
         }
     }
 }

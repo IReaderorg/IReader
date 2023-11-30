@@ -17,7 +17,7 @@ import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -102,15 +102,21 @@ class WebViewPageModel(
                 catalog,
                 onError = {
                     showSnackBar(it)
-                    showSnackBar(UiText.MStringResource(MR.strings.failed))
+                    showSnackBar(UiText.MStringResource { xml ->
+                        xml.failed
+                    })
                 },
                 onSuccess = { result ->
                     if (result.content.isNotEmpty()) {
                         webChapter = result
                         insertChapter(result)
-                        showSnackBar(UiText.MStringResource(MR.strings.success))
+                        showSnackBar(UiText.MStringResource() { xml ->
+                            xml.success
+                        })
                     } else {
-                        showSnackBar(UiText.MStringResource(MR.strings.failed))
+                        showSnackBar(UiText.MStringResource { xml ->
+                            xml.failed
+                        })
                     }
                 },
                 commands = listOf(Command.Content.Fetch(url = url, pageSource))
@@ -137,10 +143,14 @@ class WebViewPageModel(
 
                     webChapters = result
                     if (result.isNotEmpty()) {
-                        showSnackBar(UiText.MStringResource(MR.strings.success))
+                        showSnackBar(UiText.MStringResource() { xml ->
+                            xml.success
+                        })
                         insertChapters(result.map { it.copy(bookId = book.id) })
                     } else {
-                        showSnackBar(UiText.MStringResource(MR.strings.failed))
+                        showSnackBar(UiText.MStringResource { xml ->
+                            xml.failed
+                        })
                     }
                 },
                 commands = listOf(Command.Chapter.Fetch(url = url, pageSource)),
@@ -161,15 +171,21 @@ class WebViewPageModel(
                 book ?: Book(key = "", title = "", sourceId = source?.id ?: 0),
                 catalog,
                 onError = {
-                    showSnackBar(UiText.MStringResource(MR.strings.failed))
+                    showSnackBar(UiText.MStringResource { xml ->
+                        xml.failed
+                    })
                 },
                 onSuccess = { result ->
                     if (result.title.isNotBlank()) {
                         webBook = result
                         insertBook(result.copy(favorite = true))
-                        showSnackBar(UiText.MStringResource(MR.strings.success))
+                        showSnackBar(UiText.MStringResource() { xml ->
+                            xml.success
+                        })
                     } else {
-                        showSnackBar(UiText.MStringResource(MR.strings.failed))
+                        showSnackBar(UiText.MStringResource { xml ->
+                            xml.failed
+                        })
                     }
                 },
                 commands = listOf(Command.Detail.Fetch(url = url, pageSource))

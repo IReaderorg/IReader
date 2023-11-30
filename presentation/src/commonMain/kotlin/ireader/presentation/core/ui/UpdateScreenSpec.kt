@@ -13,7 +13,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.home.updates.UpdateScreen
 import ireader.presentation.ui.home.updates.component.UpdatesToolbar
@@ -27,7 +27,7 @@ object UpdateScreenSpec : Tab {
     override val options: TabOptions
         @Composable
         get() {
-            val title = localize(MR.strings.updates_screen_label)
+            val title = localize { xml -> xml.updatesScreenLabel }
             val icon = rememberVectorPainter(Icons.Filled.NewReleases)
             return remember {
                 TabOptions(

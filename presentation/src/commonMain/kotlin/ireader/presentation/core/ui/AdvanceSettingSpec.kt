@@ -6,13 +6,13 @@ import androidx.compose.runtime.Composable
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.settings.advance.AdvanceSettingViewModel
 import ireader.presentation.ui.settings.advance.AdvanceSettings
+
 class AdvanceSettingSpec : VoyagerScreen() {
 
 
@@ -23,16 +23,18 @@ class AdvanceSettingSpec : VoyagerScreen() {
         val host = SnackBarListener(vm = vm)
         val navigator = LocalNavigator.currentOrThrow
         IScaffold(
-            topBar = {scrollBehavior ->
+            topBar = { scrollBehavior ->
                 TitleToolbar(
-                    title = localize(MR.strings.advance_setting),
+                    title = localize() { xml ->
+                        xml.advanceSetting
+                    },
                     scrollBehavior = scrollBehavior,
                     popBackStack = {
                         navigator.pop()
                     }
                 )
             }, snackbarHostState = host
-        ) {padding ->
+        ) { padding ->
             AdvanceSettings(vm = vm, padding = padding)
         }
     }

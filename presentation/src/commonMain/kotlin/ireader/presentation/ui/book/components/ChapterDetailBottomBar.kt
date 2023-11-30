@@ -3,10 +3,15 @@ package ireader.presentation.ui.book.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -21,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.preferences.prefs.ChapterDisplayMode
 import ireader.i18n.asString
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.book.viewmodel.ChapterSort
 import ireader.presentation.ui.book.viewmodel.ChaptersFilters
@@ -68,33 +73,44 @@ fun TabsContent(
     onLayoutSelected: (ChapterDisplayMode) -> Unit,
     vm: BookDetailViewModel
 ) {
-    androidx.compose.foundation.pager.HorizontalPager(
-        pageCount = tabs.size,
+    HorizontalPager(
+        modifier = Modifier.fillMaxSize(),
         state = pagerState,
-        modifier = Modifier.fillMaxSize()
-    ) { page ->
-        LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top) {
+        pageSpacing = 0.dp,
+        userScrollEnabled = true,
+        reverseLayout = false,
+        contentPadding = PaddingValues(0.dp),
+        beyondBoundsPageCount = 0,
+        pageSize = PageSize.Fill,
+        key = null,
+        pageNestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
+            Orientation.Horizontal
+        ),
+        pageContent =  { page ->
+            LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top) {
 
-            when (page) {
-                0 -> FiltersPage(filters = filters, onClick = {
-                    vm.toggleFilter(it)
-                })
+                when (page) {
+                    0 -> FiltersPage(filters = filters, onClick = {
+                        vm.toggleFilter(it)
+                    })
 
-                1 -> SortPage(
-                    vm.sorting.value,
-                    onClick = vm::toggleSort
-                )
-                2 -> DispalyPage(
-                    layouts = listOf(
-                        ChapterDisplayMode.SourceTitle,
-                        ChapterDisplayMode.ChapterNumber,
-                    ),
-                    onLayoutSelected = onLayoutSelected,
-                    selectedLayout = layoutType
-                )
+                    1 -> SortPage(
+                        vm.sorting.value,
+                        onClick = vm::toggleSort
+                    )
+
+                    2 -> DispalyPage(
+                        layouts = listOf(
+                            ChapterDisplayMode.SourceTitle,
+                            ChapterDisplayMode.ChapterNumber,
+                        ),
+                        onLayoutSelected = onLayoutSelected,
+                        selectedLayout = layoutType
+                    )
+                }
             }
         }
-    }
+    )
 }
 
 private fun LazyListScope.FiltersPage(
@@ -182,10 +198,10 @@ private fun LazyListScope.DispalyPage(
 
                 when (layout) {
                     ChapterDisplayMode.SourceTitle -> {
-                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.source_title))
+                        MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.sourceTitle })
                     }
                     ChapterDisplayMode.ChapterNumber -> {
-                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.chapter_number))
+                        MidSizeTextComposable(text = localizeHelper.localize { xml -> xml.chapterNumber })
                     }
                     else -> {}
                 }

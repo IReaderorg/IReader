@@ -2,7 +2,11 @@ package ireader.presentation.ui.component.list.layouts
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ImportContacts
@@ -19,7 +23,6 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.UiText
 import ireader.i18n.asString
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.SuperSmallTextComposable
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -45,7 +48,9 @@ fun GoToLastReadComposable(modifier: Modifier = Modifier, size: Dp = 40.dp, onCl
         ) {
             AppIconButton(
                 imageVector = Icons.Default.ImportContacts,
-                contentDescription = localize(MR.strings.open_last_chapter),
+                contentDescription = localize { xml ->
+                    xml.openLastChapter
+                },
                 onClick = {
                     onClick()
                 },

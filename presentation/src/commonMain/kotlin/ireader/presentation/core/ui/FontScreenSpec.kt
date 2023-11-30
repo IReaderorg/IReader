@@ -13,7 +13,6 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.models.getDefaultFont
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.SearchToolbar
@@ -31,7 +30,9 @@ class FontScreenSpec : VoyagerScreen() {
         IScaffold(
             topBar = { scrollBehavior ->
                 SearchToolbar(
-                    title = localize(MR.strings.font),
+                    title = localize() { xml ->
+                        xml.font
+                    },
                     actions = {
                         AppIconButton(
                             imageVector = Icons.Default.Preview,
@@ -42,7 +43,7 @@ class FontScreenSpec : VoyagerScreen() {
                         )
                     },
                     onPopBackStack = {
-                       popBackStack(navigator)
+                        popBackStack(navigator)
                     },
                     onValueChange = {
                         vm.searchQuery = it

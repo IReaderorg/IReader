@@ -23,7 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Chapter
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
@@ -33,17 +33,17 @@ import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ReaderScreenTopBar(
-        modifier: Modifier,
-        isReaderModeEnable: Boolean,
-        vm: ReaderScreenViewModel,
-        state: ReaderScreenState,
-        modalBottomSheetValue: ModalBottomSheetValue,
-        chapter: Chapter?,
-        onRefresh: () -> Unit,
-        onWebView: () -> Unit,
-        onBookMark: () -> Unit,
-        onPopBackStack: () -> Unit,
-        isLoaded: Boolean = false,
+    modifier: Modifier,
+    isReaderModeEnable: Boolean,
+    vm: ReaderScreenViewModel,
+    state: ReaderScreenState,
+    modalBottomSheetValue: ModalBottomSheetValue,
+    chapter: Chapter?,
+    onRefresh: () -> Unit,
+    onWebView: () -> Unit,
+    onBookMark: () -> Unit,
+    onPopBackStack: () -> Unit,
+    isLoaded: Boolean = false,
 ) {
 
     AnimatedVisibility(
@@ -76,7 +76,7 @@ fun ReaderScreenTopBar(
                 if (chapter != null) {
                     AppIconButton(
                         imageVector = if (vm.expandTopMenu) Icons.Default.ChevronRight else Icons.Default.ChevronLeft,
-                        contentDescription = localize(MR.strings.expand_menu),
+                        contentDescription = localize { xml -> xml.expandMenu },
                         onClick = {
                             vm.expandTopMenu = !vm.expandTopMenu
                         }
@@ -84,7 +84,7 @@ fun ReaderScreenTopBar(
                     if (vm.expandTopMenu) {
                         AppIconButton(
                             imageVector = if (chapter.bookmark) Icons.Filled.Bookmark else Icons.Default.Bookmark,
-                            contentDescription = localize(MR.strings.bookmark),
+                            contentDescription = localize { xml -> xml.bookmark },
                             tint = if (chapter.bookmark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
                             onClick = {
                                 onBookMark()
@@ -93,7 +93,9 @@ fun ReaderScreenTopBar(
                         if (!vm.webViewIntegration.value) {
                             AppIconButton(
                                 imageVector = Icons.Default.Public,
-                                contentDescription = localize(MR.strings.webView),
+                                contentDescription = localize { xml ->
+                                    xml.webView
+                                },
                                 onClick = {
                                     onWebView()
                                 }
@@ -103,7 +105,7 @@ fun ReaderScreenTopBar(
                     }
                     AppIconButton(
                         imageVector = Icons.Default.Autorenew,
-                        contentDescription = localize(MR.strings.refresh),
+                        contentDescription = localize { xml -> xml.refresh },
                         onClick = {
                             onRefresh()
                         }
@@ -122,7 +124,7 @@ fun ReaderScreenTopBar(
                 if (chapter != null) {
                     AppIconButton(
                         imageVector = Icons.Default.Autorenew,
-                        contentDescription = localize(MR.strings.refresh),
+                        contentDescription = localize { xml -> xml.refresh },
                         onClick = {
                             onRefresh()
                         },
@@ -130,7 +132,9 @@ fun ReaderScreenTopBar(
                     )
                     AppIconButton(
                         imageVector = Icons.Default.Public,
-                        contentDescription = localize(MR.strings.webView),
+                        contentDescription = localize { xml ->
+                            xml.webView
+                        },
                         onClick = {
                             onWebView()
                         },

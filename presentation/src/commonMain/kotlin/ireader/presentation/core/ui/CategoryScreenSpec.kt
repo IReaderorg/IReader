@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
@@ -32,12 +32,14 @@ class CategoryScreenSpec : VoyagerScreen() {
         IScaffold(
             topBar = {scrollBehavior ->
             TitleToolbar(
-                    title = localize(MR.strings.edit_category),
-                    scrollBehavior = scrollBehavior,
+                title = localize() { xml ->
+                    xml.editCategory
+                },
+                scrollBehavior = scrollBehavior,
                 popBackStack = {
                     popBackStack(navigator)
                 }
-                )
+            )
             }
         ) { padding ->
             Box(modifier = Modifier.padding(padding)) {

@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ireader.domain.models.entities.HistoryWithRelations
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+
 import ireader.presentation.ui.core.ui.EmptyScreen
 import ireader.presentation.ui.home.history.viewmodel.HistoryViewModel
 
@@ -23,17 +23,18 @@ fun HistoryScreen(
     Box(modifier = modifier) {
 
         when {
-            items.values.isEmpty() -> EmptyScreen(text = localize(
-                    MR.strings.nothing_read_recently
+            items.values.isEmpty() -> EmptyScreen(text = localize {
+                it.nothingReadRecently
+            }
             )
-            )
+
             else -> HistoryContent(
-                    items = items,
-                    onClickItem = onHistory,
-                    onClickDelete = onHistoryDelete,
-                    onClickPlay = onHistoryPlay,
-                    onBookCover = onBookCover,
-                    onLongClickDelete = onLongClickDelete
+                items = items,
+                onClickItem = onHistory,
+                onClickDelete = onHistoryDelete,
+                onClickPlay = onHistoryPlay,
+                onBookCover = onBookCover,
+                onLongClickDelete = onLongClickDelete
             )
         }
     }

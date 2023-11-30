@@ -1,11 +1,11 @@
 [versions]
-compose = "1.4.3"
+compose = "1.5.4"
 compiler = "1.4.4"
 activity = "1.5.1"
 lifecycle = "2.5.1"
-material3 = "1.0.1"
+material3 = "1.1.2"
 coil = "2.2.2"
-ui = "1.4.3"
+ui = "1.5.4"
 
 [libraries]
 compose-ui-util = { module = "androidx.compose.ui:ui-util", version.ref = "ui" }

@@ -9,7 +9,6 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.utils.extensions.toDateTimestampString
 import ireader.i18n.BuildKonfig
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
@@ -29,7 +28,9 @@ class AboutSettingSpec : VoyagerScreen() {
         IScaffold(
             topBar = { scrollBehavior ->
                 TitleToolbar(
-                    title = localize(MR.strings.about),
+                    title = localize() { xml ->
+                        xml.about
+                    },
                     scrollBehavior = scrollBehavior,
                     popBackStack = {
                         navigator.pop()
@@ -47,6 +48,7 @@ class AboutSettingSpec : VoyagerScreen() {
         }
 
     }
+
     private fun getFormattedBuildTime(): String {
         return try {
             val inputDf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'", Locale.US)
