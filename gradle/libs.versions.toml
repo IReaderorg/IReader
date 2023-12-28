@@ -56,7 +56,7 @@ lyricist-processorXml = { module = "io.github.kazemcodes:lyricist-processor-xml"
 
 
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
-gradle-tools = "com.android.tools.build:gradle:8.0.2"
+gradle-tools = "com.android.tools.build:gradle:8.2.0"
 
 gradle-google = "com.google.gms:google-services:4.4.0"
 gradle-firebaseCrashlytic = "com.google.firebase:firebase-crashlytics-gradle:2.9.9"
