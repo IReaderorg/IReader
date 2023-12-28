@@ -1,17 +1,18 @@
 [versions]
-compose = "1.5.4"
+compose = "1.5.11"
 compiler = "1.4.4"
 activity = "1.5.1"
 lifecycle = "2.5.1"
 material3 = "1.1.2"
 coil = "2.2.2"
 ui = "1.5.4"
+font = "1.5.4"
 
 [libraries]
 compose-ui-util = { module = "androidx.compose.ui:ui-util", version.ref = "ui" }
 compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version = "1.0.1" }
 compose-animations-graphics = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose" }
-compose-googlFonts =  { module ="androidx.compose.ui:ui-text-google-fonts", version.ref = "compose" }
+compose-googlFonts =  { module ="androidx.compose.ui:ui-text-google-fonts", version.ref = "font" }
 
 material3-core = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 material3-windowsizeclass = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "material3" }

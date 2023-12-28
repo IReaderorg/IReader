@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteForever
@@ -22,6 +23,7 @@ import ireader.presentation.ui.component.components.PreferenceRow
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
+import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
 import kotlinx.coroutines.launch
@@ -43,7 +45,8 @@ class RepositoryScreenSpec : VoyagerScreen() {
                     title = {
                         MidSizeTextComposable(text = localize { xml -> xml.repository })
                     },
-                    scrollBehavior = scrollBehavior
+                    scrollBehavior = scrollBehavior,
+            navigationIcon = { TopAppBarBackButton(onClick = { popBackStack(navigator) }) },
                 )
             },
             snackbarHostState = host,
@@ -71,6 +74,7 @@ class RepositoryScreenSpec : VoyagerScreen() {
                     },
                     contentColor = MaterialTheme.colorScheme.onSecondary,
                     containerColor = MaterialTheme.colorScheme.secondary,
+                    shape = CircleShape
                 )
             },
         ) { padding ->

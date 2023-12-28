@@ -21,6 +21,7 @@ import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.CaptionTextComposable
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
+import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.settings.repository.AddingRepositoryScreen
@@ -50,6 +51,7 @@ class RepositoryAddScreenSpec : VoyagerScreen() {
                         MidSizeTextComposable(text = localize { xml -> xml.repositoryAddingANew })
                     },
                     scrollBehavior = scrollBehavior,
+                    navigationIcon = { TopAppBarBackButton(onClick = { popBackStack(navigator) }) },
                     actions = {
                         AppIconButton(
                             imageVector = Icons.Default.ContentPasteSearch,
