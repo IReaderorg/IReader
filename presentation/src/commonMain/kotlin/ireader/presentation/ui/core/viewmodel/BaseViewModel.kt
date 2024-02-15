@@ -2,7 +2,7 @@ package ireader.presentation.ui.core.viewmodel
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.core.model.coroutineScope
+import cafe.adriel.voyager.core.model.screenModelScope
 import ireader.core.prefs.Preference
 import ireader.domain.utils.extensions.showSnackBar
 import ireader.i18n.UiEvent
@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 
 abstract class BaseViewModel : ScreenModel {
 
- val scope: CoroutineScope = coroutineScope
+ val scope: CoroutineScope = screenModelScope
 
   protected val _eventFlow = MutableSharedFlow<UiEvent>()
   open val eventFlow = _eventFlow.asSharedFlow()
