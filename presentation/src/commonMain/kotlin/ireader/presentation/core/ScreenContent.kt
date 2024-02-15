@@ -12,6 +12,8 @@ import ireader.i18n.*
 expect fun PlatformModalSheets(
     modifier: Modifier,
     state: Any,
+    backgroundColor: Color = MaterialTheme.colorScheme.background,
+    contentColor: Color = MaterialTheme.colorScheme.onBackground,
     sheetContent: @Composable (modifier: Modifier) -> Unit,
     content: @Composable () -> Unit,
 )
@@ -20,10 +22,12 @@ expect fun PlatformModalSheets(
 fun IModalSheets(
     modifier: Modifier = Modifier,
     bottomSheetState: Any,
+    backgroundColor: Color = MaterialTheme.colorScheme.background,
+    contentColor: Color = MaterialTheme.colorScheme.onBackground,
     sheetContent: @Composable (modifier: Modifier) -> Unit,
     content: @Composable () -> Unit,
 ) = PlatformModalSheets(
-    modifier, bottomSheetState, sheetContent, content
+    modifier, bottomSheetState,backgroundColor,contentColor, sheetContent, content
 )
 
 

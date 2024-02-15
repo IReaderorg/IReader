@@ -199,6 +199,9 @@ private fun ReaderScreenTab(
                 title = localizeHelper.localize(MR.strings.font_size),
                 trailing = vm.fontSize.value.toInt().toString(),
                 valueRange = 8.0F..32.0F,
+                onValueChange = {
+                    vm.makeSettingTransparent()
+                }
             ).Build()
         }
         item {
@@ -206,7 +209,9 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.textWeight,
                 title = localizeHelper.localize(MR.strings.font_weight),
                 trailing = vm.textWeight.value.toInt().toString(),
-                valueRange = 1f..900F,
+                valueRange = 1f..900F,onValueChange = {
+                    vm.makeSettingTransparent()
+                }
             ).Build()
         }
         item {
@@ -219,7 +224,9 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.paragraphsIndent,
                 title = localizeHelper.localize(MR.strings.paragraph_indent),
                 trailing = vm.paragraphsIndent.value.toInt().toString(),
-                valueRange = 0.0F..32.0F,
+                valueRange = 0.0F..32.0F,onValueChange = {
+                    vm.makeSettingTransparent()
+                }
             ).Build()
         }
         item {
@@ -227,7 +234,9 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.distanceBetweenParagraphs,
                 title = localizeHelper.localize(MR.strings.paragraph_distance),
                 trailing = vm.distanceBetweenParagraphs.value.toInt().toString(),
-                valueRange = 0.0F..8.0F,
+                valueRange = 0.0F..8.0F,onValueChange = {
+                    vm.makeSettingTransparent()
+                }
             ).Build()
         }
         item {
@@ -240,7 +249,9 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.lineHeight,
                 title = localizeHelper.localize(MR.strings.line_height),
                 trailing = vm.lineHeight.value.toInt().toString(),
-                valueRange = 22.0F..48.0F,
+                valueRange = 22.0F..48.0F,onValueChange = {
+                    vm.makeSettingTransparent()
+                }
             ).Build()
         }
         item {
@@ -253,7 +264,9 @@ private fun ReaderScreenTab(
                 preferenceAsLong = vm.autoScrollInterval,
                 title = localizeHelper.localize(MR.strings.interval),
                 trailing = (vm.autoScrollInterval.value / 1000).toInt().toString(),
-                valueRange = 500.0F..10000.0F,
+                valueRange = 500.0F..10000.0F,onValueChange = {
+                    vm.makeSettingTransparent()
+                }
             ).Build()
         }
         item {
@@ -261,7 +274,9 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.autoScrollOffset,
                 title = localizeHelper.localize(MR.strings.offset),
                 trailing = (vm.autoScrollOffset.value / 1000).toInt().toString(),
-                valueRange = 500.0F..10000F,
+                valueRange = 500.0F..10000F,onValueChange = {
+                    vm.makeSettingTransparent()
+                }
             ).Build()
 
         }
@@ -275,7 +290,9 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.scrollIndicatorPadding,
                 title = localizeHelper.localize(MR.strings.padding),
                 trailing = vm.scrollIndicatorPadding.value.toString(),
-                valueRange = 0F..32F,
+                valueRange = 0F..32F,onValueChange = {
+                    vm.makeSettingTransparent()
+                }
             ).Build()
         }
         item {
@@ -283,7 +300,9 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.scrollIndicatorWith,
                 title = localizeHelper.localize(MR.strings.width),
                 trailing = vm.scrollIndicatorWith.value.toString(),
-                valueRange = 0F..32F,
+                valueRange = 0F..32F,onValueChange = {
+                    vm.makeSettingTransparent()
+                }
             ).Build()
         }
         item {
@@ -314,7 +333,9 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.topMargin,
                 title = localizeHelper.localize(MR.strings.top),
                 trailing = vm.topMargin.value.toString(),
-                valueRange = 0F..200F,
+                valueRange = 0F..200F,onValueChange = {
+                    vm.makeSettingTransparent()
+                }
             ).Build()
         }
         item {
@@ -322,7 +343,9 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.bottomMargin,
                 title = localizeHelper.localize(MR.strings.bottom),
                 trailing = vm.bottomMargin.value.toString(),
-                valueRange = 0F..200F,
+                valueRange = 0F..200F,onValueChange = {
+                    vm.makeSettingTransparent()
+                }
             ).Build()
         }
         item {
@@ -330,7 +353,9 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.leftMargin,
                 title = localizeHelper.localize(MR.strings.left),
                 trailing = vm.leftMargin.value.toString(),
-                valueRange = 0F..200F,
+                valueRange = 0F..200F,onValueChange = {
+                    vm.makeSettingTransparent()
+                }
             ).Build()
         }
         item {
@@ -338,7 +363,9 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.rightMargin,
                 title = localizeHelper.localize(MR.strings.right),
                 trailing = vm.rightMargin.value.toString(),
-                valueRange = 0F..200F,
+                valueRange = 0F..200F,onValueChange = {
+                    vm.makeSettingTransparent()
+                }
             ).Build()
         }
         item {
@@ -351,7 +378,9 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.topContentPadding,
                 title = localizeHelper.localize(MR.strings.top),
                 trailing = vm.topContentPadding.value.toString(),
-                valueRange = 0F..32F,
+                valueRange = 0F..32F,onValueChange = {
+                    vm.makeSettingTransparent()
+                }
             ).Build()
         }
         item {
@@ -359,7 +388,9 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.bottomContentPadding,
                 title = localizeHelper.localize(MR.strings.bottom),
                 trailing = vm.bottomContentPadding.value.toString(),
-                valueRange = 0F..32F,
+                valueRange = 0F..32F,onValueChange = {
+                    vm.makeSettingTransparent()
+                }
             ).Build()
         }
         item {
@@ -367,7 +398,9 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.betweenLetterSpaces,
                 title = localizeHelper.localize(MR.strings.letter),
                 trailing = vm.betweenLetterSpaces.value.toString(),
-                valueRange = 0F..32F,
+                valueRange = 0F..32F,onValueChange = {
+                    vm.makeSettingTransparent()
+                }
             ).Build()
         }
         item {
@@ -661,15 +694,11 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: androidx.compose.foundation.pag
     val scope = rememberCoroutineScope()
     TabRow(
         selectedTabIndex = pagerState.currentPage,
-        containerColor = MaterialTheme.colorScheme.background,
-        contentColor = MaterialTheme.colorScheme.contentColor,
     ) {
         libraryTabs.forEachIndexed { index, tab ->
             Tab(
                 text = { MidSizeTextComposable(text = tab.name) },
                 selected = pagerState.currentPage == index,
-                unselectedContentColor = MaterialTheme.colorScheme.onBackground,
-                selectedContentColor = MaterialTheme.colorScheme.primary,
                 onClick = {
                     scope.launch { pagerState.animateScrollToPage(index) }
                 },

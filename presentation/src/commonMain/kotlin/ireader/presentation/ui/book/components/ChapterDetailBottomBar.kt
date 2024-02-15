@@ -3,11 +3,14 @@ package ireader.presentation.ui.book.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
@@ -73,12 +76,6 @@ fun TabsContent(
     HorizontalPager(
         modifier = Modifier.fillMaxSize(),
         state = pagerState,
-        pageSpacing = 0.dp,
-        userScrollEnabled = true,
-        reverseLayout = false,
-        contentPadding = PaddingValues(0.dp),
-        beyondBoundsPageCount = 0,
-        key = null,
         pageContent =  { page ->
             LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top) {
 

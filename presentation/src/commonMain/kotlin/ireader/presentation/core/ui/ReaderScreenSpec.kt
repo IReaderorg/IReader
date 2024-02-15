@@ -45,6 +45,7 @@ import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.getContextWrapper
 import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.ui.core.theme.CustomSystemColor
+import ireader.presentation.ui.core.ui.Colour.Transparent
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.reader.ReaderScreenDrawer
 import ireader.presentation.ui.reader.ReaderScreenTopBar
@@ -238,13 +239,15 @@ data class ReaderScreenSpec(
         ) {
             IModalSheets(
                     bottomSheetState = sheetState,
+                backgroundColor = if(vm.isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(0f) else MaterialTheme.colorScheme.background,
+                contentColor = if(vm.isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(0f) else MaterialTheme.colorScheme.onBackground,
                 sheetContent = { modifier ->
                     Column(
                         modifier
                     ) {
                         Divider(
                             modifier = Modifier.fillMaxWidth(),
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = .2f),
+                            color = if(vm.isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(0f) else MaterialTheme.colorScheme.onBackground.copy(.2f),
                             thickness = 1.dp
                         )
                         Spacer(modifier = Modifier.height(5.dp))
@@ -254,6 +257,7 @@ data class ReaderScreenSpec(
                                                 vm.fonts.getOrNull(index) ?: getDefaultFont().name,
                                                 FontFamily.Default
                                         )
+                                        vm.makeSettingTransparent()
                                     },
                                     onChangeBrightness = {
                                         vm.apply {
@@ -266,14 +270,17 @@ data class ReaderScreenSpec(
                                     },
                                     onBackgroundChange = { index ->
                                             vm.changeBackgroundColor(index)
+                                        vm.makeSettingTransparent()
                                     },
                                     vm = vm,
                                     onTextAlign = {
                                         vm.textAlignment.value = it
                                         vm.saveTextAlignment(it)
+                                        vm.makeSettingTransparent()
                                     },
                                     onToggleAutoBrightness = {
                                         vm.autoBrightnessMode.value = !vm.autoBrightnessMode.value
+                                        vm.makeSettingTransparent()
                                     }
                             )
                         }

@@ -9,6 +9,7 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.component.components.statusBarsPadding
 
@@ -17,6 +18,8 @@ import ireader.presentation.ui.component.components.statusBarsPadding
 actual fun PlatformModalSheets(
     modifier: Modifier,
     state: Any,
+    backgroundColor: Color ,
+    contentColor: Color,
     sheetContent: @Composable (modifier: Modifier) -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -29,8 +32,8 @@ actual fun PlatformModalSheets(
             }
         },
         sheetState = bottomSheetState,
-        sheetBackgroundColor = MaterialTheme.colorScheme.background,
-        sheetContentColor = MaterialTheme.colorScheme.onBackground,
+        sheetBackgroundColor = backgroundColor,
+        sheetContentColor = contentColor,
         content = content,
     )
 

@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ReadingMode
+import ireader.presentation.ui.core.ui.Colour.Transparent
 import ireader.presentation.ui.reader.components.MainBottomSettingComposable
 import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
@@ -117,8 +118,8 @@ fun ReadingScreen(
                     ModalBottomSheetLayout(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        sheetBackgroundColor = MaterialTheme.colorScheme.surface.copy(ContentAlpha.high),
-                        sheetContentColor = MaterialTheme.colorScheme.onSurface,
+                        sheetBackgroundColor = if(vm.isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(0f) else MaterialTheme.colorScheme.surface.copy(ContentAlpha.high),
+                        sheetContentColor = if(vm.isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(0f) else MaterialTheme.colorScheme.onSurface,
                         scrimColor = Color.Transparent,
                         sheetElevation = 0.dp,
                         sheetState = modalBottomSheetState,

@@ -67,6 +67,17 @@ class ReaderScreenViewModel(
 
     val readerColors: SnapshotStateList<ReaderColors> = readerThemes
 
+    var isSettingChanging by mutableStateOf(false)
+
+    var isSettingChangingJob : Job? = null
+    fun makeSettingTransparent() {
+        isSettingChangingJob?.cancel()
+        isSettingChangingJob = scope.launch {
+            isSettingChanging = true
+            delay(3000)
+            isSettingChanging = false
+        }
+    }
     val dateFormat by uiPreferences.dateFormat().asState()
     val relativeTime by uiPreferences.relativeTime().asState()
     val translatorOriginLanguage = readerPreferences.translatorOriginLanguage().asState()
