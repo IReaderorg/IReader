@@ -58,7 +58,8 @@ internal fun LibraryPager(
         beyondBoundsPageCount = 0,
         key = null,
         pageNestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
-            Orientation.Horizontal
+            state = pagerState,
+            orientation = Orientation.Horizontal
         ),
         pageContent = { page ->
             val books by onPageChange(page)

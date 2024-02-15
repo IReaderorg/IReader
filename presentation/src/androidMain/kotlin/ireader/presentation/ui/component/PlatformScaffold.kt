@@ -34,13 +34,16 @@ actual fun PlatformScaffold(
         content: @Composable (PaddingValues) -> Unit,
 ) {
     // Tachiyomi: Handle consumed window insets
-    val remainingWindowInsets = remember { MutableWindowInsets() }
+    val safeInsets = remember(contentWindowInsets) {
+        MutableWindowInsets(contentWindowInsets)
+    }
     androidx.compose.material3.Surface(
             modifier = Modifier
                     .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
-                    .withConsumedWindowInsets {
-                        remainingWindowInsets.insets = contentWindowInsets.exclude(it)
-                    }
+                    .onConsumedWindowInsetsChanged { consumedWindowInsets ->
+                    // Exclude currently consumed window insets from user provided contentWindowInsets
+                    safeInsets.insets = contentWindowInsets.exclude(consumedWindowInsets)
+                }
                     .then(modifier),
             color = containerColor,
             contentColor = contentColor,
@@ -52,7 +55,7 @@ actual fun PlatformScaffold(
                 bottomBar = bottomBar,
                 content = content,
                 snackbar = snackbarHost,
-                contentWindowInsets = remainingWindowInsets,
+                contentWindowInsets = safeInsets,
                 fab = floatingActionButton,
         )
     }

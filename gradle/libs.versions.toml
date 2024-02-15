@@ -1,6 +1,6 @@
 [versions]
 # Compose
-composeGradle = "1.5.11"
+composeGradle = "1.6.0-rc01"
 voyager = "1.0.0-rc10"
 # Android
 androidGradle = "8.2.0"

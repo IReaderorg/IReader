@@ -21,6 +21,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import ireader.presentation.ui.component.components.ISnackBarHost
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -142,4 +144,20 @@ value class FabPosition internal constructor(@Suppress("unused") private val val
             else -> "FabPosition.End"
         }
     }
+}
+class MutableWindowInsets(
+    initialInsets: WindowInsets = WindowInsets(0, 0, 0, 0)
+) : WindowInsets {
+    /**
+     * The [WindowInsets] that are used for [left][getLeft], [top][getTop], [right][getRight],
+     * and [bottom][getBottom] values.
+     */
+    var insets by mutableStateOf(initialInsets)
+
+    override fun getLeft(density: Density, layoutDirection: LayoutDirection): Int =
+        insets.getLeft(density, layoutDirection)
+    override fun getTop(density: Density): Int = insets.getTop(density)
+    override fun getRight(density: Density, layoutDirection: LayoutDirection): Int =
+        insets.getRight(density, layoutDirection)
+    override fun getBottom(density: Density): Int = insets.getBottom(density)
 }

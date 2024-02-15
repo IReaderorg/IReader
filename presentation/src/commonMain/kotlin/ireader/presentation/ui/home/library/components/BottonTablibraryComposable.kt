@@ -133,7 +133,8 @@ fun TabsContent(
         pageSize = PageSize.Fill,
         key = null,
         pageNestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
-            Orientation.Horizontal
+            state = pagerState,
+            orientation = Orientation.Horizontal
         ),
         pageContent = { page ->
             LazyColumn(
