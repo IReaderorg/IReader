@@ -66,7 +66,7 @@ android {
     }
 }
 tasks {
- //   this@tasks.registerResources(project)
+    this@tasks.registerResources(project)
 
 }
 

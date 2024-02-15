@@ -7,8 +7,8 @@ fun TaskContainerScope.registerResources(project: Project) {
         register(runResourceTasks) {
             this.mustRunAfter("generateMRjvmMain")
             val parentFile = project.parent!!.projectDir
-            val desktopRes = File(parentFile, "i18n/build/generated/moko/jvmMain/ireaderi18nresources/res/")
-            val commonRes = File(parentFile, "i18n/src/commonMain/resources/drawable/")
+            val desktopRes = File(parentFile, "i18n/build/generated/moko-resources/jvmMain/res/")
+            val commonRes = File(parentFile, "i18n/src/commonMain/moko-resources/drawable/")
             val dest = File(parentFile, "desktop/build/resources/main/")
 
                 commonRes.copyRecursively(File(dest, "drawable/"), true)

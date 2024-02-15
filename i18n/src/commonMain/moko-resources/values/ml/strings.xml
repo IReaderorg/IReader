@@ -285,7 +285,7 @@
     <string name="text_color">TextColor</string>
     <string name="enable_sleep_timer">Sleep Mode</string>
     <string name="pref_incognito_mode">Incognito mode</string>
-    <string name="page_progress_num">Page %d</string>
+
     <string name="lock_never">Never</string>
     <string name="lock_always">Always</string>
     <string name="lock_when_idle">Lock when Idle After</string>

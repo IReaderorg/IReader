@@ -272,7 +272,7 @@
     <string name="there_is_no_chapter">There is no chapter.</string>
     <string name="reverse_chapter_in_db">Reverse Chapters in DB</string>
     <string name="pref_incognito_mode">Incognito mode</string>
-    <string name="page_progress_num">Page %d</string>
+
     <string name="lock_never">Never</string>
     <string name="lock_when_idle">Lock when Idle After</string>
     <string name="search">Search</string>

@@ -125,7 +125,7 @@
     <string name="category">Categories</string>
     <string name="help">Help</string>
     <string name="pref_incognito_mode">Incognito mode</string>
-    <string name="page_progress_num">Page %d</string>
+
     <string name="downloaded">Downloaded</string>
     <string name="exit_search_mode">Exit search mode</string>
     <string name="previous_result">Previous result</string>

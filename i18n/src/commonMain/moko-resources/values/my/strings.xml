@@ -241,7 +241,7 @@
     <string name="resume">Resume</string>
     <string name="library_is_out_of_date">Library is Out of date.</string>
     <string name="follow_system_settings">Follow system settings</string>
-    <string name="page_progress_num">Page %d</string>
+
     <string name="lock_never">Never</string>
     <string name="lock_always">Always</string>
     <string name="lock_when_idle">Lock when Idle After</string>
