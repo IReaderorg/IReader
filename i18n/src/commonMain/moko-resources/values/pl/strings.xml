@@ -8,8 +8,8 @@
     <string name="display">Wyświetlacz</string>
     <string name="unread">nieprzeczytane</string>
     <string name="auto_sort_chapters_in_db">Automatyczne sortowanie rozdziałów w DB</string>
-    <string name="dialog_remove_chapter_history_description">Spowoduje to usunięcie daty przeczytania tego rozdziału. Jesteś pewny\?</string>
-    <string name="dialog_remove_chapter_books_description">Spowoduje to usunięcie daty przeczytania wszystkich książek. Jesteś pewny\?</string>
+    <string name="dialog_remove_chapter_history_description">Spowoduje to usunięcie daty przeczytania tego rozdziału. Jesteś pewny?</string>
+    <string name="dialog_remove_chapter_books_description">Spowoduje to usunięcie daty przeczytania wszystkich książek. Jesteś pewny?</string>
     <string name="create_backup">Utwórz kopię zapasową</string>
     <string name="bookmark">Zakładka</string>
     <string name="wait">Proszę czekać</string>
@@ -143,7 +143,7 @@
     <string name="time_out_exception">Upłynął limit czasu żądania.</string>
     <string name="more">Więcej</string>
     <string name="horizontal">Poziomy</string>
-    <string name="app_name">IReader</string>
+
     <string name="library_screen_label">Biblioteka</string>
     <string name="explore_screen_label">Badać</string>
     <string name="setting_screen_label">Ustawienie</string>
@@ -206,7 +206,7 @@
     <string name="updates_screen_label">Aktualizacje</string>
     <string name="content">Zawartość</string>
     <string name="find_current_chapter">Znajdź bieżący rozdział</string>
-    <string name="dialog_remove_chapter_book_description">Spowoduje to usunięcie daty przeczytania tej książki. Jesteś pewny\?</string>
+    <string name="dialog_remove_chapter_book_description">Spowoduje to usunięcie daty przeczytania tej książki. Jesteś pewny?</string>
     <string name="complete">Kompletny</string>
     <string name="failed">Przegrany</string>
     <string name="return_to_previous_screen">Powrót do poprzedniego ekranu</string>
@@ -308,8 +308,6 @@
     <string name="category">Kategorie</string>
     <string name="help">Pomoc</string>
     <string name="pref_incognito_mode">Tryb inkognito</string>
-    <string name="page_progress_num">Strona %d</string>
-    <string name="subtitles_encoding_key" translatable="false">klucz_kodowania_napisów</string>
     <string name="the_downloads_was_cancelled">Pobieranie zostało anulowane</string>
     <string name="downloads_was_cancelled">Pobieranie zostało anulowane</string>
     <string name="was_cancelled">zostało odwołane</string>

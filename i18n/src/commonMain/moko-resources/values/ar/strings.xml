@@ -9,7 +9,6 @@
     <string name="about">حول</string>
     <string name="edit_category">تحرير الفئات</string>
     <string name="confirm">يتأكد</string>
-    <string name="page_progress_num">الصفحة %d</string>
     <string name="lock_never">أبداً</string>
     <string name="fetch_book">إحضار الكتاب</string>
     <string name="browse">تصفح</string>
@@ -401,7 +400,7 @@
     <string name="maximum_backups">أقصى عدد من النسخ الاحتياطية</string>
     <string name="status">حالة</string>
     <string name="cover">التغطية</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="url">عنوان Url</string>
     <string name="name">اسم</string>
     <string name="username">اسم المستخدم</string>
@@ -410,7 +409,7 @@
     <string name="automatic_backup">النسخ الاحتياطي التلقائي</string>
     <string name="repository_adding_a_new">إضافة مستودع جديد</string>
     <string name="auto_installer">المثبت التلقائي</string>
-    <string name="app_name">IReader</string>
+
     <string name="show_system_catalogs">عرض ملحقات النظام</string>
     <string name="show_local_catalogs">إظهار الامتدادات المحلية</string>
     <string name="tags">العلامات</string>

@@ -6,8 +6,7 @@
     <string name="category_hint">Ονομα…</string>
     <string name="help">Βοήθεια</string>
     <string name="pref_incognito_mode">Κατάσταση ανώνυμης περιήγησης</string>
-    <string name="page_progress_num">Σελίδα %d</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="was_cancelled">ακυρώθηκε</string>
     <string name="loading">Φόρτωση</string>
     <string name="refresh">Φρεσκάρω</string>
@@ -194,8 +193,8 @@
     <string name="font_weight">Βάρος γραμματοσειράς</string>
     <string name="time_out_exception">Το αίτημα έληξε.</string>
     <string name="select_all">Επιλογή όλων</string>
-    <string name="dialog_remove_chapter_history_description">Αυτό θα αφαιρέσει την ημερομηνία ανάγνωσης αυτού του κεφαλαίου. Είσαι σίγουρος\?</string>
-    <string name="app_name">IReader</string>
+    <string name="dialog_remove_chapter_history_description">Αυτό θα αφαιρέσει την ημερομηνία ανάγνωσης αυτού του κεφαλαίου. Είσαι σίγουρος?</string>
+
     <string name="library_screen_label">Βιβλιοθήκη</string>
     <string name="explore_screen_label">Εξερευνώ</string>
     <string name="setting_screen_label">Σύνθεση</string>
@@ -269,7 +268,7 @@
     <string name="reverse_chapter_in_db">Αντίστροφα κεφάλαια στο DB</string>
     <string name="reverse">ΑΝΤΙΣΤΡΟΦΗ</string>
     <string name="background_color">Χρώμα του φόντου</string>
-    <string name="dialog_remove_chapter_books_description">Αυτό θα καταργήσει την ημερομηνία ανάγνωσης όλων των βιβλίων. Είσαι σίγουρος\?</string>
+    <string name="dialog_remove_chapter_books_description">Αυτό θα καταργήσει την ημερομηνία ανάγνωσης όλων των βιβλίων. Είσαι σίγουρος?</string>
     <string name="create_backup">Δημιουργία αντιγράφων ασφαλείας</string>
     <string name="backup_created_successfully">Δημιουργία αντιγράφων ασφαλείας με επιτυχία</string>
     <string name="aborted">Επιτυχία</string>
@@ -417,6 +416,6 @@
     <string name="pause">Παύση</string>
     <string name="resume">ΒΙΟΓΡΑΦΙΚΟ</string>
     <string name="remove">Αφαιρώ</string>
-    <string name="dialog_remove_chapter_book_description">Αυτό θα καταργήσει την ημερομηνία ανάγνωσης αυτού του βιβλίου. Είσαι σίγουρος\?</string>
+    <string name="dialog_remove_chapter_book_description">Αυτό θα καταργήσει την ημερομηνία ανάγνωσης αυτού του βιβλίου. Είσαι σίγουρος?</string>
     <string name="bionic_reading">Bionic Reading mode</string>
 </resources>

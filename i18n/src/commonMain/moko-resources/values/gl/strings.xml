@@ -9,7 +9,6 @@
     <string name="edit_category">Editar categorías</string>
     <string name="confirm">Confirmar</string>
     <string name="status">Estado</string>
-    <string name="subtitles_encoding_key" translatable="false">clave_de_codificación_de_subtítulos</string>
     <string name="use_local_cache">Usa a caché local</string>
     <string name="dark_mode">Modo escuro</string>
     <string name="second">Segundo</string>
@@ -36,8 +35,8 @@
     <string name="resume">Currículo</string>
     <string name="unknown">Descoñecido</string>
     <string name="remove">Quitar</string>
-    <string name="dialog_remove_chapter_history_description">Isto eliminará a data de lectura deste capítulo. Estás seguro\?</string>
-    <string name="dialog_remove_chapter_book_description">Isto eliminará a data de lectura deste libro. Estás seguro\?</string>
+    <string name="dialog_remove_chapter_history_description">Isto eliminará a data de lectura deste capítulo. Estás seguro?</string>
+    <string name="dialog_remove_chapter_book_description">Isto eliminará a data de lectura deste libro. Estás seguro?</string>
     <string name="bookmark">Marcador</string>
     <string name="wait">Agarde por favor</string>
     <string name="date_fetched">Data de obtención</string>
@@ -64,7 +63,7 @@
     <string name="colors">Cores</string>
     <string name="update_notification">Actualizacións da aplicación</string>
     <string name="apply">Solicitar</string>
-    <string name="app_name">IReader</string>
+
     <string name="library_screen_label">Biblioteca</string>
     <string name="explore_screen_label">Explora</string>
     <string name="setting_screen_label">Configuración</string>
@@ -116,7 +115,7 @@
     <string name="fetch">Busca</string>
     <string name="delete">Eliminar</string>
     <string name="theme_was_saved">Gardouse o tema</string>
-    <string name="dialog_remove_chapter_books_description">Isto eliminará a data de lectura de todos os libros. Estás seguro\?</string>
+    <string name="dialog_remove_chapter_books_description">Isto eliminará a data de lectura de todos os libros. Estás seguro?</string>
     <string name="create_backup">Crear copia de seguranza</string>
     <string name="backup_created_successfully">Crear copia de seguranza correctamente</string>
     <string name="restore_backup">Restaurar copia de seguranza</string>
@@ -155,7 +154,6 @@
     <string name="category">Categorías</string>
     <string name="help">Axuda</string>
     <string name="pref_incognito_mode">Modo de incógnito</string>
-    <string name="page_progress_num">Páxina %d</string>
     <string name="lock_never">Nunca</string>
     <string name="authentication">Autenticación</string>
     <string name="authenticate_to_confirm_change">Autenticarse para confirmar o cambio</string>

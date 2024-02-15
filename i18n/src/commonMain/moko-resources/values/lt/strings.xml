@@ -63,7 +63,7 @@
     <string name="pause">Pauzė</string>
     <string name="unknown">Nežinomas</string>
     <string name="remove">Pašalinti</string>
-    <string name="dialog_remove_chapter_history_description">Taip bus pašalinta šio skyriaus skaitymo data. Ar tikrai\?</string>
+    <string name="dialog_remove_chapter_history_description">Taip bus pašalinta šio skyriaus skaitymo data. Ar tikrai?</string>
     <string name="failed">Nepavyko</string>
     <string name="voices">Balsai</string>
     <string name="languages">Kalbos</string>
@@ -166,7 +166,6 @@
     <string name="reader">Skaitytojas</string>
     <string name="status">Statusas</string>
     <string name="category">Kategorijos</string>
-    <string name="page_progress_num">Puslapis %d</string>
     <string name="lock_never">Niekada</string>
     <string name="cover">Viršelis</string>
     <string name="show_history">Rodyti istoriją</string>
@@ -182,7 +181,7 @@
     <string name="more">Daugiau</string>
     <string name="repository">Saugykla</string>
     <string name="resume">CV</string>
-    <string name="dialog_remove_chapter_books_description">Taip bus pašalinta visų knygų skaitymo data. Ar esate tikri\?</string>
+    <string name="dialog_remove_chapter_books_description">Taip bus pašalinta visų knygų skaitymo data. Ar esate tikri?</string>
     <string name="create_backup">Sukurti atsarginę kopiją</string>
     <string name="backup_created_successfully">Sėkmingai sukurti atsarginę kopiją</string>
     <string name="wait">Prašome palaukti</string>
@@ -258,7 +257,7 @@
     <string name="unselected_scrollbar_color">Nepasirinkta slinkties juostos spalva</string>
     <string name="open_explore">Atviras tyrinėti</string>
     <string name="bookmark">Žymė</string>
-    <string name="dialog_remove_chapter_book_description">Taip bus pašalinta šios knygos skaitymo data. Ar tikrai\?</string>
+    <string name="dialog_remove_chapter_book_description">Taip bus pašalinta šios knygos skaitymo data. Ar tikrai?</string>
     <string name="restore_backup">Atkurti atsarginę kopiją</string>
     <string name="author">Autorius</string>
     <string name="download">Atsisiųsti</string>

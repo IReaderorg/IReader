@@ -20,7 +20,7 @@
     <string name="show_local_catalogs">Показване на локални разширения</string>
     <string name="saved_local_source_location">Запазени източници в кеша</string>
     <string name="status">Статус</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="pref_incognito_mode_summary">Поставяне на пауза в историята на четене</string>
     <string name="no_app_was_found_to_lauch">Нещо се обърка. нямате необходимото приложение.</string>
     <string name="the_downloads_was_interrupted">Изтеглянията бяха прекъснати</string>
@@ -224,7 +224,7 @@
     <string name="other_source">други</string>
     <string name="all_lang">всичко</string>
     <string name="all_category">всичко</string>
-    <string name="app_name">IReader</string>
+
     <string name="library_screen_label">Библиотека</string>
     <string name="explore_screen_label">Разгледайте</string>
     <string name="setting_screen_label">Настройка</string>
@@ -319,7 +319,6 @@
     <string name="category">Категории</string>
     <string name="help">Помогне</string>
     <string name="pref_incognito_mode">Режим инкогнито</string>
-    <string name="page_progress_num">Страница %d</string>
     <string name="authentication">Удостоверяване</string>
     <string name="authenticate_to_confirm_change">Удостоверете се, за да потвърдите промяната</string>
     <string name="export_book_as_epub">Експортиране на книга като Epub</string>
@@ -330,9 +329,9 @@
     <string name="added_to_library">Добавено към библиотеката</string>
     <string name="toggle_in_library">превключване в библиотеката</string>
     <string name="remove">Премахване</string>
-    <string name="dialog_remove_chapter_history_description">Това ще премахне датата на четене на тази глава. Сигурен ли си\?</string>
-    <string name="dialog_remove_chapter_book_description">Това ще премахне датата на четене на тази книга. Сигурен ли си\?</string>
-    <string name="dialog_remove_chapter_books_description">Това ще премахне датата на четене на всички книги. Сигурен ли си\?</string>
+    <string name="dialog_remove_chapter_history_description">Това ще премахне датата на четене на тази глава. Сигурен ли си?</string>
+    <string name="dialog_remove_chapter_book_description">Това ще премахне датата на четене на тази книга. Сигурен ли си?</string>
+    <string name="dialog_remove_chapter_books_description">Това ще премахне датата на четене на всички книги. Сигурен ли си?</string>
     <string name="create_backup">Създайте резервно копие</string>
     <string name="backup_created_successfully">Създаване на резервно копие успешно</string>
     <string name="restore_backup">Възстанови архива</string>

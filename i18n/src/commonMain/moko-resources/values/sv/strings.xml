@@ -42,7 +42,7 @@
     <string name="search">Sök på</string>
     <string name="increase">Öka</string>
     <string name="version">Version</string>
-    <string name="whats_new">Vad är nytt\?</string>
+    <string name="whats_new">Vad är nytt?</string>
     <string name="discord">Discord</string>
     <string name="github">Github</string>
     <string name="check_the_update">Kontrollera uppdateringen</string>
@@ -82,9 +82,9 @@
     <string name="resume">Återuppta</string>
     <string name="unknown">Okänd</string>
     <string name="remove">Ta bort</string>
-    <string name="dialog_remove_chapter_history_description">Detta kommer att ta bort läsdatumet för detta kapitel. Är du säker\?</string>
-    <string name="dialog_remove_chapter_book_description">Detta kommer att ta bort läsdatumet för denna bok. Är du säker\?</string>
-    <string name="dialog_remove_chapter_books_description">Detta tar bort läsdatumet för alla böcker. Är du säker\?</string>
+    <string name="dialog_remove_chapter_history_description">Detta kommer att ta bort läsdatumet för detta kapitel. Är du säker?</string>
+    <string name="dialog_remove_chapter_book_description">Detta kommer att ta bort läsdatumet för denna bok. Är du säker?</string>
+    <string name="dialog_remove_chapter_books_description">Detta tar bort läsdatumet för alla böcker. Är du säker?</string>
     <string name="create_backup">Skapa en säkerhetskopia</string>
     <string name="backup_created_successfully">Skapa en säkerhetskopia med framgång</string>
     <string name="restore_backup">Återställa säkerhetskopiering</string>
@@ -253,7 +253,6 @@
     <string name="pref_incognito_mode">Inkognitoläge</string>
     <string name="lock_never">Aldrig</string>
     <string name="lock_always">Alltid</string>
-    <string name="page_progress_num">Sidan %d</string>
     <string name="go">Gå till</string>
     <string name="manage_notification">Hantera meddelanden</string>
     <string name="confirm_exit_message">Tryck på tillbaka igen för att avsluta</string>

@@ -75,7 +75,7 @@
     <string name="theme">chủ đề</string>
     <string name="light">Chế độ sáng</string>
     <string name="other_source">Khác</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="refresh">Làm mới</string>
     <string name="description_placeholder">Không có mô tả</string>
     <string name="description">Sự mô tả</string>
@@ -146,9 +146,9 @@
     <string name="pause">Tạm ngừng</string>
     <string name="resume">Sơ yếu lý lịch</string>
     <string name="unknown">không xác định</string>
-    <string name="dialog_remove_chapter_history_description">Thao tác này sẽ xóa ngày đọc của chương này. Bạn có chắc không\?</string>
-    <string name="dialog_remove_chapter_book_description">Điều này sẽ xóa ngày đọc của cuốn sách này. Bạn có chắc không\?</string>
-    <string name="dialog_remove_chapter_books_description">Thao tác này sẽ xóa ngày đọc của tất cả sách. Bạn có chắc không\?</string>
+    <string name="dialog_remove_chapter_history_description">Thao tác này sẽ xóa ngày đọc của chương này. Bạn có chắc không?</string>
+    <string name="dialog_remove_chapter_book_description">Điều này sẽ xóa ngày đọc của cuốn sách này. Bạn có chắc không?</string>
+    <string name="dialog_remove_chapter_books_description">Thao tác này sẽ xóa ngày đọc của tất cả sách. Bạn có chắc không?</string>
     <string name="create_backup">Tạo bản sao</string>
     <string name="backup_created_successfully">Tạo sao lưu thành công</string>
     <string name="restore_backup">Khôi phục lại bản sao lưu</string>
@@ -292,7 +292,7 @@
     <string name="pinned_sources">Đã ghim</string>
     <string name="last_used_source">Sử dụng lần cuối</string>
     <string name="lock_never">Không bao giờ</string>
-    <string name="app_name">iReader</string>
+
     <string name="library_screen_label">Thư viện</string>
     <string name="explore_screen_label">Khám phá</string>
     <string name="setting_screen_label">Cài đặt</string>
@@ -316,7 +316,6 @@
     <string name="category">Thể loại</string>
     <string name="help">Cứu giúp</string>
     <string name="pref_incognito_mode">Chế độ ẩn danh</string>
-    <string name="page_progress_num">Trang %d</string>
     <string name="lock_always">Luôn luôn</string>
     <string name="lock_when_idle">Khóa khi nhàn rỗi Sau</string>
     <string name="authentication">xác thực</string>

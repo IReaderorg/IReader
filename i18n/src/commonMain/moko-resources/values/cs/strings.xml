@@ -27,10 +27,8 @@
     <string name="category_hint">Název…</string>
     <string name="about">O</string>
     <string name="confirm">Potvrdit</string>
-    <string name="page_progress_num">Strana %d</string>
     <string name="lock_never">Nikdy</string>
     <string name="lock_always">Vždy</string>
-    <string name="subtitles_encoding_key" translatable="false">Titulky_kódování_klíč</string>
     <string name="no_app_was_found_to_lauch">Něco se pokazilo. nemáte požadovanou aplikaci.</string>
     <string name="downloads_was_cancelled">Stahování bylo zrušeno</string>
     <string name="was_cancelled">bylo zrušeno</string>
@@ -285,7 +283,7 @@
     <string name="add_as_new">Nový</string>
     <string name="add">Přidat</string>
     <string name="remove">Odstranit</string>
-    <string name="app_name">IReader</string>
+
     <string name="view_book">Zobrazit knihu</string>
     <string name="show_system_catalogs">Zobrazit rozšíření systému</string>
     <string name="show_local_catalogs">Zobrazit místní rozšíření</string>
@@ -328,7 +326,6 @@
     <string name="second">Druhý</string>
     <string name="minutes">Minuta</string>
     <string name="hour">Den</string>
-    data
     <string name="data">Data</string>
     <string name="off">Vypnuto</string>
     <string name="on">Na</string>
@@ -339,10 +336,10 @@
     <string name="reverse_chapter_in_db">Reverzní kapitoly v DB</string>
     <string name="reverse">Zvrátit</string>
     <string name="dialog_remove_chapter_book_description">Tímto odeberete datum přečtení této knihy.
-        Jsi si jistá\?
+        Jsi si jistá?
     </string>
     <string name="dialog_remove_chapter_books_description">Tím odeberete datum přečtení všech knih.
-        Jsi si jistá\?
+        Jsi si jistá?
     </string>
     <string name="enable_sleep_timer">Režim spánku</string>
     <string name="full">Úplný</string>
@@ -414,7 +411,7 @@
     <string name="pause">Pauza</string>
     <string name="resume">Životopis</string>
     <string name="unknown">Neznámý</string>
-    <string name="dialog_remove_chapter_history_description">Tím se odstraní datum přečtení této kapitoly. Jsi si jistá\?</string>
+    <string name="dialog_remove_chapter_history_description">Tím se odstraní datum přečtení této kapitoly. Jsi si jistá?</string>
     <string name="create_backup">Vytvořit zálohu</string>
     <string name="author">Autor</string>
     <string name="bookmark">Záložka do knihy</string>

@@ -45,7 +45,7 @@
     <string name="theme">தீம்</string>
     <string name="date_format">தேதி வடிவம்</string>
     <string name="pref_relative_format">தொடர்புடைய நேர முத்திரைகள்</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="pref_incognito_mode_summary">வரலாற்றைப் படிப்பதை இடைநிறுத்துங்கள்</string>
     <string name="no_app_was_found_to_lauch">ஏதோ தவறு நடைபெற்றிருக்கிறது. உங்களிடம் தேவையான பயன்பாடு இல்லை.</string>
     <string name="recently">சமீபத்தில்</string>
@@ -245,9 +245,9 @@
     <string name="pause">இடைநிறுத்தம்</string>
     <string name="resume">தற்குறிப்பு</string>
     <string name="unknown">தெரியவில்லை</string>
-    <string name="dialog_remove_chapter_history_description">இது இந்த அத்தியாயத்தின் படித்த தேதியை அகற்றும். நீ சொல்வது உறுதியா\?</string>
-    <string name="dialog_remove_chapter_book_description">இது இந்தப் புத்தகத்தைப் படித்த தேதியை நீக்கிவிடும். நீ சொல்வது உறுதியா\?</string>
-    <string name="dialog_remove_chapter_books_description">இது அனைத்து புத்தகங்களையும் படித்த தேதியை நீக்கிவிடும். நீ சொல்வது உறுதியா\?</string>
+    <string name="dialog_remove_chapter_history_description">இது இந்த அத்தியாயத்தின் படித்த தேதியை அகற்றும். நீ சொல்வது உறுதியா?</string>
+    <string name="dialog_remove_chapter_book_description">இது இந்தப் புத்தகத்தைப் படித்த தேதியை நீக்கிவிடும். நீ சொல்வது உறுதியா?</string>
+    <string name="dialog_remove_chapter_books_description">இது அனைத்து புத்தகங்களையும் படித்த தேதியை நீக்கிவிடும். நீ சொல்வது உறுதியா?</string>
     <string name="create_backup">காப்புப்பிரதியை உருவாக்கவும்</string>
     <string name="mark_previous_as_read">முந்தையதை படித்ததாகக் குறி</string>
     <string name="return_to_previous_screen">முந்தைய திரைக்குத் திரும்பு</string>
@@ -279,7 +279,6 @@
     <string name="mark_as_not_read">படிக்கவில்லை எனக் குறிக்கவும்</string>
     <string name="description">விளக்கம்</string>
     <string name="tags">குறிச்சொற்கள்</string>
-    <string name="app_name">ஐ.ரீடர்</string>
     <string name="library_screen_label">நூலகம்</string>
     <string name="explore_screen_label">ஆராயுங்கள்</string>
     <string name="setting_screen_label">அமைத்தல்</string>
@@ -304,7 +303,6 @@
     <string name="category">வகைகள்</string>
     <string name="help">உதவி</string>
     <string name="pref_incognito_mode">மறைநிலைப் பயன்முறை</string>
-    <string name="page_progress_num">பக்கம் %d</string>
     <string name="lock_never">ஒருபோதும் இல்லை</string>
     <string name="lock_always">எப்போதும்</string>
     <string name="lock_when_idle">பிறகு சும்மா இருக்கும்போது பூட்டு</string>

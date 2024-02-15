@@ -14,7 +14,7 @@
     <string name="about">約</string>
     <string name="status">状態</string>
     <string name="cover">カバー</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="increase">増加</string>
     <string name="version">バージョン</string>
     <string name="whats_new">新着情報</string>
@@ -57,7 +57,6 @@
     <string name="data">データ</string>
     <string name="total_chapter">総チャプター</string>
     <string name="no_error">エラーなし</string>
-    <string name="app_name">Iリーダー</string>
     <string name="cancel">キャンセル</string>
     <string name="apply">申し込み</string>
     <string name="add_as_new">新しい</string>
@@ -67,7 +66,6 @@
     <string name="category">カテゴリー</string>
     <string name="help">ヘルプ</string>
     <string name="pref_incognito_mode">プライバシーモード</string>
-    <string name="page_progress_num">ページ %d</string>
     <string name="lock_never">一度もない</string>
     <string name="lock_always">いつも</string>
     <string name="lock_when_idle">アイドル時にロックする</string>

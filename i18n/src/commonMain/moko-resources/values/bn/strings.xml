@@ -110,8 +110,8 @@
     <string name="webView">WebView</string>
     <string name="scrollbar_color">ScrollBar Color</string>
     <string name="selected_scrollbar_color">Selected ScrollBar Color</string>
-    <string name="dialog_remove_chapter_history_description">This will remove the read date of this chapter. Are you sure\?</string>
-    <string name="dialog_remove_chapter_books_description">This will remove the read date of all books. Are you sure\?</string>
+    <string name="dialog_remove_chapter_history_description">This will remove the read date of this chapter. Are you sure?</string>
+    <string name="dialog_remove_chapter_books_description">This will remove the read date of all books. Are you sure?</string>
     <string name="full">Full</string>
     <string name="no_new_update_available">No New Updates is Available।</string>
     <string name="installation_error_blocked">PackageManger: Installer was blocked</string>
@@ -288,7 +288,7 @@
     <string name="text_align_left">Text Align Left</string>
     <string name="advance_commands">Advance Commands</string>
     <string name="no_error">No error</string>
-    <string name="dialog_remove_chapter_book_description">This will remove the read date of this book. Are you sure\?</string>
+    <string name="dialog_remove_chapter_book_description">This will remove the read date of this book. Are you sure?</string>
     <string name="mark_as_not_read">Mark as Not read</string>
     <string name="installation_error_conflicted">PackageManger: Conflicted with installed package</string>
     <string name="reset_themes">Reset themes</string>
@@ -312,7 +312,7 @@
     <string name="permissions">Permissions</string>
     <string name="help">Help</string>
     <string name="pref_incognito_mode">Incognito mode</string>
-    <string name="page_progress_num">Page %d</string>
+
     <string name="lock_never">Never</string>
     <string name="lock_always">Always</string>
     <string name="lock_when_idle">Lock when Idle After</string>

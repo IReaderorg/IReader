@@ -13,7 +13,6 @@
     <string name="search_hint">جستجو کردن…</string>
     <string name="nothing_read_recently">اخیراً چیزی خوانده نشده است</string>
     <string name="confirm">تایید</string>
-    <string name="page_progress_num">صفحه %d</string>
     <string name="lock_never">هرگز</string>
     <string name="lock_always">همیشه</string>
     <string name="edit_category">ویرایش دسته ها</string>
@@ -405,7 +404,6 @@
     <string name="password">کلمه عبور</string>
     <string name="owner">مالک</string>
     <string name="repository_adding_a_new">افزودن یک مخزن جدید</string>
-    <string name="app_name">آی ریدر</string>
     <string name="show_system_catalogs">نمایش برنامه های افزودنی سیستم</string>
     <string name="show_local_catalogs">نمایش برنامه های افزودنی محلی</string>
     <string name="no_error">بدون خطا</string>
@@ -417,6 +415,6 @@
     <string name="check_permissions">مجوزها را بررسی کنید</string>
     <string name="use_local_cache">از کش محلی استفاده کنید</string>
     <string name="tags">برچسب ها</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="bionic_reading">Bionic Reading mode</string>
 </resources>

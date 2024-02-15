@@ -53,8 +53,8 @@
     <string name="pause">Pausa</string>
     <string name="unknown">Desconocido</string>
     <string name="remove">Remover</string>
-    <string name="dialog_remove_chapter_book_description">Esto eliminará la fecha de lectura de este libro. ¿Está seguro\?</string>
-    <string name="dialog_remove_chapter_books_description">Esto eliminará la fecha de lectura de todos los libros. ¿Está seguro\?</string>
+    <string name="dialog_remove_chapter_book_description">Esto eliminará la fecha de lectura de este libro. ¿Está seguro?</string>
+    <string name="dialog_remove_chapter_books_description">Esto eliminará la fecha de lectura de todos los libros. ¿Está seguro?</string>
     <string name="download">Descargar</string>
     <string name="bookmark">Marcador</string>
     <string name="wait">Espere por favor</string>
@@ -219,7 +219,6 @@
     <string name="nothing_read_recently">Nada leído recientemente</string>
     <string name="installation_error_incompatible">PackageManger: incompatible con el paquete instalado</string>
     <string name="hide">Ocultar</string>
-    <string name="app_name">Lector</string>
     <string name="library_screen_label">Biblioteca</string>
     <string name="explore_screen_label">Explorar</string>
     <string name="setting_screen_label">Ajuste</string>
@@ -247,7 +246,7 @@
     <string name="by_date_read">por leer</string>
     <string name="off">Apagado</string>
     <string name="auto">Auto</string>
-    <string name="dialog_remove_chapter_history_description">Esto eliminará la fecha de lectura de este capítulo. ¿Está seguro\?</string>
+    <string name="dialog_remove_chapter_history_description">Esto eliminará la fecha de lectura de este capítulo. ¿Está seguro?</string>
     <string name="failed">Ha fallado</string>
     <string name="enable_sleep_timer">Modo de sueño</string>
     <string name="full">Completo</string>
@@ -268,7 +267,6 @@
     <string name="the_downloads_was_interrupted">Las Descargas fueron interrumpidas</string>
     <string name="permissions">permisos</string>
     <string name="cover">Cubrir</string>
-    <string name="page_progress_num">Página %d</string>
     <string name="lock_when_idle">Bloquear cuando está inactivo después</string>
     <string name="authentication">Autenticación</string>
     <string name="authenticate_to_confirm_change">Autenticar para confirmar el cambio</string>
@@ -404,7 +402,6 @@
     <string name="unread">No leído</string>
     <string name="completed">Terminado</string>
     <string name="unable_to_get_package_version">No se puede obtener la versión del paquete</string>
-    <string name="subtitles_encoding_key" translatable="false">clave de codificación de los subtítulos</string>
     <string name="the_downloads_was_cancelled">Las descargas fueron canceladas</string>
     <string name="failed_to_download">Error al descargar</string>
     <string name="downloads_was_cancelled">La descarga de fue cancelada</string>

@@ -2,7 +2,7 @@
 <resources>
     <string name="permission_not_given">کافی اجازت نہیں دی گئی، براہ کرم اپنی اجازت چیک کریں۔</string>
     <string name="saved_local_source_location">کیشے میں ذرائع کو محفوظ کیا گیا۔</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="no_app_was_found_to_lauch">کچھ غلط ہو گیا. آپ کے پاس مطلوبہ ایپ نہیں ہے۔</string>
     <string name="the_downloads_was_interrupted">ڈاؤن لوڈز میں خلل پڑا</string>
     <string name="the_downloads_was_cancelled">ڈاؤن لوڈز کو منسوخ کر دیا گیا تھا۔</string>
@@ -236,7 +236,6 @@
     <string name="show_system_catalogs">سسٹم ایکسٹینشن دکھائیں۔</string>
     <string name="days">گھنٹہ</string>
     <string name="information_webview_outdated">ویب ویو پرانا ہے۔</string>
-    <string name="app_name">IRreader</string>
     <string name="library_screen_label">کتب خانہ</string>
     <string name="explore_screen_label">دریافت کریں۔</string>
     <string name="setting_screen_label">ترتیب</string>
@@ -370,7 +369,6 @@
     <string name="cover">ڈھانپنا</string>
     <string name="help">مدد</string>
     <string name="pref_incognito_mode">پوشیدگی وضع</string>
-    <string name="page_progress_num">صفحہ %d</string>
     <string name="lock_never">کبھی نہیں۔</string>
     <string name="lock_always">ہمیشہ</string>
     <string name="lock_when_idle">اس کے بعد بیکار ہونے پر لاک کریں۔</string>

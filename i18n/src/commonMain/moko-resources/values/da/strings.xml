@@ -77,7 +77,7 @@
     <string name="pinned_sources">Fastgjort</string>
     <string name="last_used_source">Sidst brugt</string>
     <string name="create_backup">Opret sikkerhedskopi</string>
-    <string name="app_name">IReader</string>
+
     <string name="library_screen_label">Bibliotek</string>
     <string name="explore_screen_label">Udforske</string>
     <string name="setting_screen_label">Indstilling</string>
@@ -261,8 +261,6 @@
     <string name="about">Om</string>
     <string name="edit_category">Rediger kategorier</string>
     <string name="cover">Dække over</string>
-    <string name="page_progress_num">Side %d</string>
-    <string name="subtitles_encoding_key" translatable="false">undertekster_encoding_key</string>
     <string name="no_app_was_found_to_lauch">Noget gik galt. du har ikke den nødvendige app.</string>
     <string name="the_downloads_was_interrupted">Downloads blev afbrudt</string>
     <string name="the_downloads_was_cancelled">Downloads blev annulleret</string>
@@ -343,9 +341,9 @@
     <string name="resume">Genoptag</string>
     <string name="unknown">Ukendt</string>
     <string name="remove">Fjerne</string>
-    <string name="dialog_remove_chapter_history_description">Dette fjerner læsedatoen for dette kapitel. Er du sikker\?</string>
-    <string name="dialog_remove_chapter_book_description">Dette fjerner læsedatoen for denne bog. Er du sikker\?</string>
-    <string name="dialog_remove_chapter_books_description">Dette fjerner læsedatoen for alle bøger. Er du sikker\?</string>
+    <string name="dialog_remove_chapter_history_description">Dette fjerner læsedatoen for dette kapitel. Er du sikker?</string>
+    <string name="dialog_remove_chapter_book_description">Dette fjerner læsedatoen for denne bog. Er du sikker?</string>
+    <string name="dialog_remove_chapter_books_description">Dette fjerner læsedatoen for alle bøger. Er du sikker?</string>
     <string name="backup_created_successfully">Opret sikkerhedskopi med succes</string>
     <string name="restore_backup">Gendan sikkerhedskopi</string>
     <string name="author">Forfatter</string>
@@ -391,7 +389,6 @@
     <string name="maximum_backups">Maksimal sikkerhedskopiering</string>
     <string name="auto_backup">Automatisk backup</string>
     <string name="import_epub">Importer Epub</string>
-    data
     <string name="data">Data</string>
     <string name="chapters_was_cleared">Kapitlerne blev ryddet</string>
     <string name="database_was_cleared">Databasen blev ryddet.</string>

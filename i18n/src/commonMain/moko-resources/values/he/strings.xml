@@ -50,7 +50,7 @@
     <string name="fetch_chapter">פרק אחזר</string>
     <string name="search">לחפש</string>
     <string name="theme_was_deleted">ערכת הנושא נמחקה</string>
-    <string name="dialog_remove_chapter_book_description">פעולה זו תסיר את תאריך הקריאה של הספר הזה. האם אתה בטוח\?</string>
+    <string name="dialog_remove_chapter_book_description">פעולה זו תסיר את תאריך הקריאה של הספר הזה. האם אתה בטוח?</string>
     <string name="create_backup">צור גיבוי</string>
     <string name="disable">השבת</string>
     <string name="cant_get_content">לא מצליח לקבל את תוכן הפרק.</string>
@@ -59,7 +59,7 @@
     <string name="channel_app_updates">עדכוני אפליקציה</string>
     <string name="backup_and_restore">גיבוי ושחזור</string>
     <string name="reader">קוֹרֵא</string>
-    <string name="app_name">IReader</string>
+
     <string name="library_screen_label">סִפְרִיָה</string>
     <string name="explore_screen_label">לַחקוֹר</string>
     <string name="setting_screen_label">הגדרה</string>
@@ -87,7 +87,7 @@
     <string name="pause">הַפסָקָה</string>
     <string name="remove">לְהַסִיר</string>
     <string name="github">Github</string>
-    <string name="dialog_remove_chapter_books_description">פעולה זו תסיר את תאריך הקריאה של כל הספרים. האם אתה בטוח\?</string>
+    <string name="dialog_remove_chapter_books_description">פעולה זו תסיר את תאריך הקריאה של כל הספרים. האם אתה בטוח?</string>
     <string name="backup_created_successfully">צור גיבוי בהצלחה</string>
     <string name="restore_backup">שחזור גיבוי</string>
     <string name="author">מְחַבֵּר</string>
@@ -258,7 +258,7 @@
     <string name="scrollbar_color">צבע סרגל גלילה</string>
     <string name="selected_scrollbar_color">צבע סרגל גלילה נבחר</string>
     <string name="unselected_scrollbar_color">צבע פס גלילה לא נבחר</string>
-    <string name="dialog_remove_chapter_history_description">פעולה זו תסיר את תאריך הקריאה של פרק זה. האם אתה בטוח\?</string>
+    <string name="dialog_remove_chapter_history_description">פעולה זו תסיר את תאריך הקריאה של פרק זה. האם אתה בטוח?</string>
     <string name="bookmark">סימניה</string>
     <string name="wait">המתן בבקשה</string>
     <string name="success">הַצלָחָה</string>
@@ -414,9 +414,7 @@
     <string name="last_used_source">בשימוש אחרון</string>
     <string name="saved_local_source_location">מקורות שמורים למטמון</string>
     <string name="status">סטָטוּס</string>
-    <string name="page_progress_num">עמוד %d</string>
     <string name="paragraph">פסקה</string>
-    <string name="subtitles_encoding_key" translatable="false">key_encoding_subtitles</string>
     <string name="appearance">מראה חיצוני</string>
     <string name="bionic_reading">Bionic Reading mode</string>
 </resources>

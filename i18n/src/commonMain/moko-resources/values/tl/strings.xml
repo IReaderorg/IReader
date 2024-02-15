@@ -4,7 +4,7 @@
     <string name="saved_local_source_location">Naka-save na Mga Pinagmulan sa Cache</string>
     <string name="nothing_read_recently">Walang nabasa kamakailan</string>
     <string name="lock_when_idle">I-lock kapag Idle After</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="pref_incognito_mode_summary">I-pause ang pagbabasa ng history</string>
     <string name="the_downloads_was_cancelled">Ang Mga Pag-download ay Kinansela</string>
     <string name="failed_to_download">Nabigong i-download</string>
@@ -60,7 +60,6 @@
     <string name="category">Mga kategorya</string>
     <string name="help">Tulong</string>
     <string name="pref_incognito_mode">Incognito mode</string>
-    <string name="page_progress_num">Pahina %d</string>
     <string name="lock_never">Hindi kailanman</string>
     <string name="lock_always">Laging</string>
     <string name="no_app_was_found_to_lauch">Nagkaproblema. wala kang kinakailangang app.</string>
@@ -78,8 +77,8 @@
     <string name="text_color">Kulay ng teksto</string>
     <string name="save_custom_theme">I-save ang custom na tema</string>
     <string name="delete_custom_theme">Tanggalin ang custom na tema</string>
-    <string name="dialog_remove_chapter_book_description">Aalisin nito ang petsa ng pagbasa ng aklat na ito. Sigurado ka ba\?</string>
-    <string name="dialog_remove_chapter_books_description">Aalisin nito ang petsa ng pagbasa ng lahat ng aklat. Sigurado ka ba\?</string>
+    <string name="dialog_remove_chapter_book_description">Aalisin nito ang petsa ng pagbasa ng aklat na ito. Sigurado ka ba?</string>
+    <string name="dialog_remove_chapter_books_description">Aalisin nito ang petsa ng pagbasa ng lahat ng aklat. Sigurado ka ba?</string>
     <string name="create_backup">Gumawa ng backup</string>
     <string name="backup_created_successfully">Matagumpay na Gumawa ng Backup</string>
     <string name="restore_backup">Ibalik ang Backup</string>
@@ -210,7 +209,7 @@
     <string name="search_hint">Maghanap…</string>
     <string name="compact_layout">Compact na Layout</string>
     <string name="next_paragraph">Susunod na Talata</string>
-    <string name="app_name">IReader</string>
+
     <string name="library_screen_label">Aklatan</string>
     <string name="explore_screen_label">Galugarin</string>
     <string name="setting_screen_label">Setting</string>
@@ -273,7 +272,7 @@
     <string name="resume">Ipagpatuloy</string>
     <string name="unknown">Hindi kilala</string>
     <string name="remove">Alisin</string>
-    <string name="dialog_remove_chapter_history_description">Aalisin nito ang petsa ng pagbasa ng kabanatang ito. Sigurado ka ba\?</string>
+    <string name="dialog_remove_chapter_history_description">Aalisin nito ang petsa ng pagbasa ng kabanatang ito. Sigurado ka ba?</string>
     <string name="reading_mode">Reading Mode</string>
     <string name="immersive_mode">Immersive mode</string>
     <string name="show_webView_during_fetching">Pagsasama ng WebView</string>
@@ -410,7 +409,6 @@
     <string name="maximum_backups">Pinakamataas na backup</string>
     <string name="auto_backup">Auto backup</string>
     <string name="import_epub">Mag-import ng Epub</string>
-    data
     <string name="data">Data</string>
     <string name="pinned_sources">Naka-pin</string>
     <string name="last_used_source">Huling Ginamit</string>

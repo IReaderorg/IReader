@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="pref_incognito_mode">시크릿 모드</string>
-    <string name="page_progress_num">페이지 %d</string>
     <string name="lock_never">절대</string>
     <string name="lock_always">언제나</string>
     <string name="lock_when_idle">다음 이후에 유휴 상태일 때 잠금</string>
@@ -81,8 +80,8 @@
     <string name="resume">이력서</string>
     <string name="unknown">알려지지 않은</string>
     <string name="remove">제거하다</string>
-    <string name="dialog_remove_chapter_history_description">이렇게 하면 이 장의 읽은 날짜가 제거됩니다. 확실합니까\?</string>
-    <string name="dialog_remove_chapter_book_description">이렇게 하면 이 책의 읽은 날짜가 제거됩니다. 확실합니까\?</string>
+    <string name="dialog_remove_chapter_history_description">이렇게 하면 이 장의 읽은 날짜가 제거됩니다. 확실합니까?</string>
+    <string name="dialog_remove_chapter_book_description">이렇게 하면 이 책의 읽은 날짜가 제거됩니다. 확실합니까?</string>
     <string name="bookmark">서표</string>
     <string name="failed">실패한</string>
     <string name="voices">목소리</string>
@@ -203,7 +202,6 @@
     <string name="auto_installer">자동 설치 프로그램</string>
     <string name="mark_as_not_read">읽지 않음으로 표시</string>
     <string name="pref_relative_time_long">Long (Short+, n일 전)</string>
-    <string name="app_name">아이리더</string>
     <string name="library_screen_label">도서관</string>
     <string name="explore_screen_label">탐구하다</string>
     <string name="setting_screen_label">환경</string>
@@ -332,7 +330,7 @@
     <string name="uncategorized_category">기본</string>
     <string name="pinned_sources">고정됨</string>
     <string name="saved_local_source_location">캐시에 저장된 소스</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="no_app_was_found_to_lauch">문제가 발생했습니다. 필요한 앱이 없습니다.</string>
     <string name="the_downloads_was_interrupted">다운로드가 중단되었습니다</string>
     <string name="failed_to_download">다운로드 실패</string>
@@ -359,7 +357,7 @@
     <string name="auto_sort_chapters_in_db">DB의 장 자동 정렬</string>
     <string name="advance_setting">고급 설정</string>
     <string name="advance_commands">고급 명령</string>
-    <string name="dialog_remove_chapter_books_description">이렇게 하면 모든 책의 읽은 날짜가 제거됩니다. 확실합니까\?</string>
+    <string name="dialog_remove_chapter_books_description">이렇게 하면 모든 책의 읽은 날짜가 제거됩니다. 확실합니까?</string>
     <string name="backup_created_successfully">백업 생성 성공</string>
     <string name="restore_backup">백업 복원</string>
     <string name="author">작가</string>

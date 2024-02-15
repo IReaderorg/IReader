@@ -112,7 +112,6 @@
     <string name="download_notifier_unknown_error">Impossibile scaricare il capitolo a causa di un errore imprevisto</string>
     <string name="select_between">Seleziona Tra</string>
     <string name="by_date_uploaded">Per data di caricamento</string>
-    <string name="app_name">Lettore</string>
     <string name="library_screen_label">Biblioteca</string>
     <string name="explore_screen_label">Esplorare</string>
     <string name="setting_screen_label">Ambientazione</string>
@@ -132,9 +131,9 @@
     <string name="book_name">Nome del libro</string>
     <string name="auto_sort_chapters_in_db">Capitoli di ordinamento automatico in DB</string>
     <string name="advance_setting">Impostazioni avanzate</string>
-    <string name="dialog_remove_chapter_history_description">Questo rimuoverà la data di lettura di questo capitolo. Sei sicuro\?</string>
-    <string name="dialog_remove_chapter_book_description">Questo rimuoverà la data di lettura di questo libro. Sei sicuro\?</string>
-    <string name="dialog_remove_chapter_books_description">Questo rimuoverà la data di lettura di tutti i libri. Sei sicuro\?</string>
+    <string name="dialog_remove_chapter_history_description">Questo rimuoverà la data di lettura di questo capitolo. Sei sicuro?</string>
+    <string name="dialog_remove_chapter_book_description">Questo rimuoverà la data di lettura di questo libro. Sei sicuro?</string>
+    <string name="dialog_remove_chapter_books_description">Questo rimuoverà la data di lettura di tutti i libri. Sei sicuro?</string>
     <string name="restore_backup">Ripristinare il backup</string>
     <string name="download">Scarica</string>
     <string name="bookmark">Segnalibro</string>
@@ -214,7 +213,6 @@
     <string name="all_category">Tutto</string>
     <string name="permissions">Autorizzazioni</string>
     <string name="cover">Coperchio</string>
-    <string name="page_progress_num">Pagina %d</string>
     <string name="lock_never">Mai</string>
     <string name="lock_always">Sempre</string>
     <string name="lock_when_idle">Blocca quando inattivo dopo</string>
@@ -348,7 +346,6 @@
     <string name="pinned_sources">Appuntato</string>
     <string name="category">Categorie</string>
     <string name="help">Aiuto</string>
-    <string name="subtitles_encoding_key" translatable="false">sottotitoli_encoding_key</string>
     <string name="pref_incognito_mode_summary">Metti in pausa la cronologia di lettura</string>
     <string name="no_app_was_found_to_lauch">Qualcosa è andato storto. non hai l\'app richiesta.</string>
     <string name="downloads_was_cancelled">Il download di è stato annullato</string>

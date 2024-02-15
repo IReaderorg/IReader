@@ -35,7 +35,6 @@
     <string name="category_hint">Імя…</string>
     <string name="about">Аб</string>
     <string name="confirm">Пацвердзіць</string>
-    <string name="subtitles_encoding_key" translatable="false">ключ_кадавання субтытраў</string>
     <string name="pref_incognito_mode_summary">Прыпыніць гісторыю чытання</string>
     <string name="no_app_was_found_to_lauch">Нешта пайшло не так. у вас няма неабходнага прыкладання.</string>
     <string name="the_downloads_was_interrupted">Спампоўкі былі перапыненыя</string>
@@ -123,9 +122,9 @@
     <string name="pause">Паўза</string>
     <string name="resume">Рэзюмэ</string>
     <string name="remove">Выдаліць</string>
-    <string name="dialog_remove_chapter_history_description">Гэта прывядзе да выдалення даты чытання гэтай главы. Вы ўпэўнены\?</string>
-    <string name="dialog_remove_chapter_book_description">Гэта выдаліць дату чытання гэтай кнігі. Вы ўпэўнены\?</string>
-    <string name="dialog_remove_chapter_books_description">Гэта выдаліць дату чытання ўсіх кніг. Вы ўпэўнены\?</string>
+    <string name="dialog_remove_chapter_history_description">Гэта прывядзе да выдалення даты чытання гэтай главы. Вы ўпэўнены?</string>
+    <string name="dialog_remove_chapter_book_description">Гэта выдаліць дату чытання гэтай кнігі. Вы ўпэўнены?</string>
+    <string name="dialog_remove_chapter_books_description">Гэта выдаліць дату чытання ўсіх кніг. Вы ўпэўнены?</string>
     <string name="create_backup">Стварыць рэзервовую копію</string>
     <string name="backup_created_successfully">Паспяховае стварэнне рэзервовай копіі</string>
     <string name="restore_backup">Аднавіць рэзервовую копію</string>
@@ -290,7 +289,7 @@
     <string name="refresh">Абнавіць</string>
     <string name="scrollbar_color">Колер паласы пракруткі</string>
     <string name="there_was_a_problem_in_getting_chapter">Узнікла праблема з атрыманнем раздзела.</string>
-    <string name="app_name">IReader</string>
+
     <string name="library_screen_label">Бібліятэка</string>
     <string name="cancel">Адмяніць</string>
     <string name="apply">Ужыць</string>
@@ -355,7 +354,6 @@
     <string name="category">Катэгорыі</string>
     <string name="help">Даведка</string>
     <string name="pref_incognito_mode">Рэжым інкогніта</string>
-    <string name="page_progress_num">Старонка %d</string>
     <string name="error">Памылка</string>
     <string name="background_color">Колер фону</string>
     <string name="text_color">TextColor</string>

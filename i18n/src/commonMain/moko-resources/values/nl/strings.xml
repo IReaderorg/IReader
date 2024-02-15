@@ -123,7 +123,6 @@
     <string name="last_used_source">Laatst gebruikt</string>
     <string name="permissions">Machtigingen</string>
     <string name="status">Status</string>
-    <string name="page_progress_num">Pagina %d</string>
     <string name="lock_never">Nooit</string>
     <string name="lock_always">Altijd</string>
     <string name="lock_when_idle">Vergrendelen bij stationair na</string>
@@ -186,9 +185,9 @@
     <string name="delete">Verwijder</string>
     <string name="auto_sort_chapters_in_db">Hoofdstukken automatisch sorteren in DB</string>
     <string name="advance_setting">Geavanceerde instelling</string>
-    <string name="dialog_remove_chapter_history_description">Dit zal de leesdatum van dit hoofdstuk verwijderen. Weet je het zeker\?</string>
-    <string name="dialog_remove_chapter_book_description">Dit zal de leesdatum van dit boek verwijderen. Weet je het zeker\?</string>
-    <string name="dialog_remove_chapter_books_description">Dit zal de leesdatum van alle boeken verwijderen. Weet je het zeker\?</string>
+    <string name="dialog_remove_chapter_history_description">Dit zal de leesdatum van dit hoofdstuk verwijderen. Weet je het zeker?</string>
+    <string name="dialog_remove_chapter_book_description">Dit zal de leesdatum van dit boek verwijderen. Weet je het zeker?</string>
+    <string name="dialog_remove_chapter_books_description">Dit zal de leesdatum van alle boeken verwijderen. Weet je het zeker?</string>
     <string name="restore_backup">Back-up herstellen</string>
     <string name="author">Auteur</string>
     <string name="download">Download</string>

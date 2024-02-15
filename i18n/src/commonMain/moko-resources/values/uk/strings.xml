@@ -73,7 +73,7 @@
     <string name="off">Вимкнено</string>
     <string name="on">На</string>
     <string name="auto">Авто</string>
-    <string name="dialog_remove_chapter_books_description">Це видалить дату прочитання всіх книг. Ти впевнений\?</string>
+    <string name="dialog_remove_chapter_books_description">Це видалить дату прочитання всіх книг. Ти впевнений?</string>
     <string name="backup_created_successfully">Успішне створення резервної копії</string>
     <string name="restore_backup">Відновлення резервної копії</string>
     <string name="author">Автор</string>
@@ -191,7 +191,7 @@
     <string name="there_is_no_chapter">Глави немає.</string>
     <string name="reverse_chapter_in_db">Зворотні розділи в БД</string>
     <string name="reverse">Реверс</string>
-    <string name="dialog_remove_chapter_book_description">Це видалить дату прочитання цієї книги. Ви впевнені\?</string>
+    <string name="dialog_remove_chapter_book_description">Це видалить дату прочитання цієї книги. Ви впевнені?</string>
     <string name="pitch">Пітч</string>
     <string name="sleep">Сон</string>
     <string name="speech_rate">Швидкість мовлення</string>
@@ -238,7 +238,7 @@
     <string name="show_local_catalogs">Показати локальні розширення</string>
     <string name="auto_installer">Автоінсталятор</string>
     <string name="search_hint">Обшук…</string>
-    <string name="dialog_remove_chapter_history_description">Це призведе до видалення дати прочитання цього розділу. Ви впевнені\?</string>
+    <string name="dialog_remove_chapter_history_description">Це призведе до видалення дати прочитання цього розділу. Ви впевнені?</string>
     <string name="create_backup">Створити резервну копію</string>
     <string name="padding">Набивка</string>
     <string name="hint">…</string>
@@ -330,7 +330,6 @@
     <string name="cover">Обкладинка</string>
     <string name="help">Допомога</string>
     <string name="pref_incognito_mode">Режим інкогніто</string>
-    <string name="page_progress_num">Сторінка %d</string>
     <string name="lock_never">Ніколи</string>
     <string name="lock_always">Завжди</string>
     <string name="lock_when_idle">Блокування на холостому ходу після</string>

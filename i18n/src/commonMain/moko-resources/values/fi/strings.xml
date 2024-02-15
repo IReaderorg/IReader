@@ -68,7 +68,7 @@
     <string name="pause">Tauko</string>
     <string name="resume">Yhteenveto</string>
     <string name="remove">Poista</string>
-    <string name="dialog_remove_chapter_history_description">Tämä poistaa tämän luvun lukupäivämäärän. Oletko varma\?</string>
+    <string name="dialog_remove_chapter_history_description">Tämä poistaa tämän luvun lukupäivämäärän. Oletko varma?</string>
     <string name="create_backup">Luo varmuuskopio</string>
     <string name="wait">Odottakaa, olkaa hyvä ja odottakaa</string>
     <string name="success">Menestys</string>
@@ -239,8 +239,8 @@
     <string name="fetch_chapters">Hae luvut</string>
     <string name="go">Mene</string>
     <string name="second">Toinen</string>
-    <string name="dialog_remove_chapter_book_description">Tämä poistaa kirjan lukupäivän. Oletko varma\?</string>
-    <string name="dialog_remove_chapter_books_description">Tämä poistaa kaikkien kirjojen lukupäivämäärän. Oletko varma\?</string>
+    <string name="dialog_remove_chapter_book_description">Tämä poistaa kirjan lukupäivän. Oletko varma?</string>
+    <string name="dialog_remove_chapter_books_description">Tämä poistaa kaikkien kirjojen lukupäivämäärän. Oletko varma?</string>
     <string name="label_recent_updates">Viimeaikaiset päivitykset</string>
     <string name="popular_book">Suosituimmat</string>
     <string name="copied_to_clipboard">Kopioitu leikepöydälle</string>
@@ -371,7 +371,6 @@
     <string name="edit_category">Muokkaa luokkia</string>
     <string name="confirm">Vahvista</string>
     <string name="category">Kategoriat</string>
-    <string name="page_progress_num">Sivu %d</string>
     <string name="lock_never">Ei koskaan</string>
     <string name="pref_incognito_mode_summary">Keskeytä historian lukeminen</string>
     <string name="no_app_was_found_to_lauch">Jokin meni pieleen. sinulla ei ole tarvittavaa sovellusta.</string>

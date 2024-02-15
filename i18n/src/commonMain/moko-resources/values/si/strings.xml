@@ -59,7 +59,7 @@
     <string name="pause">නවත්වන්න</string>
     <string name="resume">අරඹන්න</string>
     <string name="unknown">නොදන්නා</string>
-    <string name="dialog_remove_chapter_history_description">මෙය මෙම පරිච්ඡේදයේ කියවන දිනය ඉවත් කරයි. ඔබට විශ්වාසද\?</string>
+    <string name="dialog_remove_chapter_history_description">මෙය මෙම පරිච්ඡේදයේ කියවන දිනය ඉවත් කරයි. ඔබට විශ්වාසද?</string>
     <string name="delete_update">යාවත්කාලීනය මකන්න</string>
     <string name="no_new_update_available">නව යාවත්කාලීන නොමැත.</string>
     <string name="mark_as_not_read">කියවා නැති ලෙස ලකුණු කරන්න</string>
@@ -128,7 +128,7 @@
     <string name="auto_sort_chapters_in_db">DB හි පරිච්ඡේද ස්වයංක්‍රීයව වර්ග කරන්න</string>
     <string name="advance_setting">අත්තිකාරම් සැකසීම</string>
     <string name="advance_commands">අත්තිකාරම් විධාන</string>
-    <string name="dialog_remove_chapter_book_description">මෙය මෙම පොත කියවූ දිනය ඉවත් කරයි. ඔබට විශ්වාසද\?</string>
+    <string name="dialog_remove_chapter_book_description">මෙය මෙම පොත කියවූ දිනය ඉවත් කරයි. ඔබට විශ්වාසද?</string>
     <string name="package_installer_failed_to_install_packages">පැකේජ ස්ථාපකය පැකේජ ස්ථාපනය කිරීමට අසමත් විය: STATUS_CODE:</string>
     <string name="date_added">එකතු කළ දිනය</string>
     <string name="installation_error">පැකේජය ස්ථාපනය කිරීමේදී දෝෂයකි</string>
@@ -259,7 +259,7 @@
     <string name="confirm_exit">පිටවීම තහවුරු කරන්න</string>
     <string name="download_notifier_text_only_wifi">Wi-Fi සම්බන්ධතාවක් නොමැත</string>
     <string name="clear_all_cache">සියලුම හැඹිලිය හිස් කරන්න</string>
-    <string name="app_name">Ireader</string>
+
     <string name="library_screen_label">පුස්තකාලය</string>
     <string name="explore_screen_label">ගවේෂණය කරන්න</string>
     <string name="setting_screen_label">සැකසීම</string>
@@ -286,7 +286,6 @@
     <string name="category">වර්ග</string>
     <string name="help">උදව්</string>
     <string name="pref_incognito_mode">අප්‍රකට මාදිලිය</string>
-    <string name="page_progress_num">පිටුව %d</string>
     <string name="lock_never">කවදාවත් නැහැ</string>
     <string name="no_app_was_found_to_lauch">මොකක්හරි වැරැද්දක් වෙලා. ඔබට අවශ්‍ය යෙදුම නොමැත.</string>
     <string name="description">විස්තර</string>
@@ -359,11 +358,10 @@
     <string name="lock_when_idle">පසුව Idle වූ විට අගුළු දමන්න</string>
     <string name="authentication">සත්යාපනය</string>
     <string name="authenticate_to_confirm_change">වෙනස් කිරීම තහවුරු කිරීමට සත්‍යාපනය කරන්න</string>
-    <string name="subtitles_encoding_key" translatable="false">උපසිරැසි_කේතන_යතුර</string>
     <string name="failed_to_download">බාගැනීම අසාර්ථක විය</string>
     <string name="use_local_cache">දේශීය හැඹිලි භාවිතා කරන්න</string>
     <string name="installer_mode">ස්ථාපක මාදිලිය</string>
-    <string name="dialog_remove_chapter_books_description">මෙය සියලුම පොත් කියවූ දිනය ඉවත් කරයි. ඔබට විශ්වාසද\?</string>
+    <string name="dialog_remove_chapter_books_description">මෙය සියලුම පොත් කියවූ දිනය ඉවත් කරයි. ඔබට විශ්වාසද?</string>
     <string name="backup_created_successfully">උපස්ථය සාර්ථකව සාදන්න</string>
     <string name="restore_backup">දත්ත නැවත ස්තාපනය</string>
     <string name="complete">සම්පූර්ණයි</string>

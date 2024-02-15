@@ -34,7 +34,7 @@
     <string name="there_is_no_chapter">Hech qanday bo\'lim yo\'q.</string>
     <string name="save_custom_theme">Maxsus mavzuni saqlang</string>
     <string name="scrollbar_color">Scrollbar rangi</string>
-    <string name="dialog_remove_chapter_history_description">Bu ushbu bobni o\'qish sanasini olib tashlaydi. Ishonchingiz komilmi\?</string>
+    <string name="dialog_remove_chapter_history_description">Bu ushbu bobni o\'qish sanasini olib tashlaydi. Ishonchingiz komilmi?</string>
     <string name="restore_backup">Zaxira nusxasini tiklash</string>
     <string name="total_chapter">Jami bo\'limlar</string>
     <string name="source">Manba</string>
@@ -152,7 +152,6 @@
     <string name="website">IReader</string>
     <string name="last_used_source">Oxirgi ishlatilgan</string>
     <string name="saved_local_source_location">Keshga saqlangan manbalar</string>
-    <string name="subtitles_encoding_key" translatable="false">subtitrlarni_kodlash_kalit</string>
     <string name="description_placeholder">Ta\'rif yo\'q</string>
     <string name="description">Tavsif</string>
     <string name="toggle_search_mode_off">Qidiruv rejimini oʻchirish</string>
@@ -185,8 +184,8 @@
     <string name="pause">Pauza</string>
     <string name="resume">Rezyume; qayta boshlash</string>
     <string name="unknown">Noma\'lum</string>
-    <string name="dialog_remove_chapter_book_description">Bu kitobning oʻqilgan sanasini olib tashlaydi. Ishonchingiz komilmi\?</string>
-    <string name="dialog_remove_chapter_books_description">Bu barcha kitoblarning o\'qilgan sanasini olib tashlaydi. Ishonchingiz komilmi\?</string>
+    <string name="dialog_remove_chapter_book_description">Bu kitobning oʻqilgan sanasini olib tashlaydi. Ishonchingiz komilmi?</string>
+    <string name="dialog_remove_chapter_books_description">Bu barcha kitoblarning o\'qilgan sanasini olib tashlaydi. Ishonchingiz komilmi?</string>
     <string name="create_backup">Zaxira nusxasini yaratish</string>
     <string name="author">Muallif</string>
     <string name="download">Yuklab olish</string>
@@ -288,7 +287,7 @@
     <string name="pinned_sources">Qadalgan</string>
     <string name="authenticate_to_confirm_change">O\'zgartirishni tasdiqlash uchun autentifikatsiya qiling</string>
     <string name="download_notifier_unknown_error">Kutilmagan xato tufayli bo\'limni yuklab bo\'lmadi</string>
-    <string name="app_name">IReader</string>
+
     <string name="library_screen_label">Kutubxona</string>
     <string name="delete_all_downloads">Barcha yuklab olinganlarni o\'chiring</string>
     <string name="cancel_all">Hammasini bekor qilish</string>
@@ -312,7 +311,6 @@
     <string name="category">Kategoriyalar</string>
     <string name="help">Yordam bering</string>
     <string name="pref_incognito_mode">Inkognito rejimi</string>
-    <string name="page_progress_num">Sahifa %d</string>
     <string name="lock_never">Hech qachon</string>
     <string name="lock_always">Har doim</string>
     <string name="lock_when_idle">Boʻsh turganda qulflang</string>

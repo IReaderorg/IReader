@@ -13,8 +13,8 @@
     <string name="chapter_number">Numărul capitolului</string>
     <string name="unselected_scrollbar_color">Culoarea barei de derulare neselectată</string>
     <string name="pause">Pauză</string>
-    <string name="dialog_remove_chapter_history_description">Aceasta va elimina data de citire a acestui capitol. Esti sigur\?</string>
-    <string name="dialog_remove_chapter_book_description">Aceasta va elimina data de citire a acestei cărți. Esti sigur\?</string>
+    <string name="dialog_remove_chapter_history_description">Aceasta va elimina data de citire a acestui capitol. Esti sigur?</string>
+    <string name="dialog_remove_chapter_book_description">Aceasta va elimina data de citire a acestei cărți. Esti sigur?</string>
     <string name="complete">Complet</string>
     <string name="failed">A eșuat</string>
     <string name="voices">Voci</string>
@@ -76,7 +76,7 @@
     <string name="resume">Relua</string>
     <string name="unknown">Necunoscut</string>
     <string name="remove">Elimina</string>
-    <string name="dialog_remove_chapter_books_description">Aceasta va elimina data de citire a tuturor cărților. Esti sigur\?</string>
+    <string name="dialog_remove_chapter_books_description">Aceasta va elimina data de citire a tuturor cărților. Esti sigur?</string>
     <string name="restore_backup">Restaurați copierea de rezervă</string>
     <string name="author">Autor</string>
     <string name="download">Descarca</string>
@@ -209,7 +209,7 @@
     <string name="hint">…</string>
     <string name="category_hint">Nume…</string>
     <string name="error_unknown">S-a întâmplat o eroare necunoscută.</string>
-    <string name="app_name">IReader</string>
+
     <string name="library_screen_label">Bibliotecă</string>
     <string name="explore_screen_label">Explora</string>
     <string name="setting_screen_label">Setare</string>
@@ -299,7 +299,6 @@
     <string name="pref_relative_time_long">Lung (Scurt+, acum n zile)</string>
     <string name="authenticate_to_confirm_change">Autentificați-vă pentru a confirma modificarea</string>
     <string name="permissions">Permisiuni</string>
-    <string name="page_progress_num">Pagina %d</string>
     <string name="lock_never">Nu</string>
     <string name="lock_always">Mereu</string>
     <string name="lock_when_idle">Blocați când este inactiv După</string>
@@ -311,7 +310,7 @@
     <string name="no_error">Nicio eroare</string>
     <string name="downloads_was_cancelled">Descărcarea a fost anulată</string>
     <string name="saved_local_source_location">Surse salvate în cache</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="pref_incognito_mode_summary">Întrerupeți citirea istoricului</string>
     <string name="no_app_was_found_to_lauch">Ceva n-a mers bine. nu aveți aplicația necesară.</string>
     <string name="the_downloads_was_interrupted">Descărcările au fost întrerupte</string>

@@ -6,7 +6,6 @@
     <string name="edit_category">Usba ang mga Kategorya</string>
     <string name="confirm">Sa pagmatuod sa</string>
     <string name="cover">Pagtabon</string>
-    <string name="page_progress_num">Panid %d</string>
     <string name="lock_never">Dili gayud</string>
     <string name="tabs">Mga tab</string>
     <string name="columns">Mga kolum</string>
@@ -133,9 +132,9 @@
     <string name="open_explore">bukas nga eksplorasyon</string>
     <string name="dismiss">Isalikway</string>
     <string name="book_name">Ngalan sa Libro</string>
-    <string name="dialog_remove_chapter_history_description">Kini magtangtang sa petsa sa pagbasa niini nga kapitulo. Sigurado ka\?</string>
-    <string name="dialog_remove_chapter_book_description">Kini magtangtang sa petsa sa pagbasa niini nga libro. Sigurado ka\?</string>
-    <string name="dialog_remove_chapter_books_description">Kini magtangtang sa petsa sa pagbasa sa tanang libro. Sigurado ka\?</string>
+    <string name="dialog_remove_chapter_history_description">Kini magtangtang sa petsa sa pagbasa niini nga kapitulo. Sigurado ka?</string>
+    <string name="dialog_remove_chapter_book_description">Kini magtangtang sa petsa sa pagbasa niini nga libro. Sigurado ka?</string>
+    <string name="dialog_remove_chapter_books_description">Kini magtangtang sa petsa sa pagbasa sa tanang libro. Sigurado ka?</string>
     <string name="create_backup">Paghimo og Backup</string>
     <string name="wait">Palihog hulat</string>
     <string name="epub">Epub </string>
@@ -203,7 +202,7 @@
     <string name="other_source">Ang uban</string>
     <string name="all_lang">Tanan</string>
     <string name="all_category">Tanan</string>
-    <string name="app_name">IReader</string>
+
     <string name="library_screen_label">Library</string>
     <string name="explore_screen_label">Susihon</string>
     <string name="setting_screen_label">Setting</string>
@@ -353,7 +352,6 @@
     <string name="maximum_backups">Maximum nga pag-backup</string>
     <string name="auto_backup">Auto backup</string>
     <string name="import_epub">Import nga Epub</string>
-    data
     <string name="data">Data</string>
     <string name="chapters_was_cleared">Ang mga kapitulo gilimpyohan</string>
     <string name="database_was_cleared">Ang database gi-clear.</string>
@@ -406,7 +404,7 @@
     <string name="pref_relative_time_short">Mubo (Karon, Kagahapon)</string>
     <string name="pref_relative_time_long">Dugay (Mubo+, n adlaw ang milabay)</string>
     <string name="follow_system_settings">Sunda ang mga setting sa sistema</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="export_book_as_epub">I-export ang Libro Ingon Epub</string>
     <string name="description_placeholder">Walay deskripsyon</string>
     <string name="display_mode">Mode sa Pagpakita</string>

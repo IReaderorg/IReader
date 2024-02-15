@@ -2,7 +2,6 @@
 <resources>
     <string name="permission_not_given">እኹል ፍቓድ ኣይተዋህበን፣ በጃኹም ፍቓድኩም ርኣዩ።</string>
     <string name="saved_local_source_location">ኣብ መኽዘን ዝተቐመጡ ምንጭታት</string>
-    <string name="subtitles_encoding_key" translatable="false">ንኡስ ኣርእስታት_ኢንኮዲንግ_ቁልፊ</string>
     <string name="no_app_was_found_to_lauch">ገለ ነገር ተጋግዩ። እቲ ዝድለ ኣፕ የብልካን።</string>
     <string name="the_downloads_was_interrupted">እቲ Downloads ተቛሪጹ</string>
     <string name="previous_result">ቅድሚ ሕጂ ዝነበረ ውጽኢት</string>
@@ -168,9 +167,9 @@
     <string name="advance_commands">ቅድመ ትእዛዛት።</string>
     <string name="unknown">ዘይፍለጥ</string>
     <string name="remove">ኣወግድ</string>
-    <string name="dialog_remove_chapter_history_description">እዚ ድማ ነቲ ናይዚ ምዕራፍ ዝተነበበሉ ዕለት ከወግድ እዩ። ርግጸኛ ዲኻ\?</string>
-    <string name="dialog_remove_chapter_book_description">እዚ ድማ ነዛ መጽሓፍ ዝተነበበትሉ ዕለት ከወግድ እዩ። ርግጸኛ ዲኻ\?</string>
-    <string name="dialog_remove_chapter_books_description">እዚ ድማ ናይ ኩሎም መጻሕፍቲ ዝተነበበሉ ዕለት ከወግድ እዩ። ርግጸኛ ዲኻ\?</string>
+    <string name="dialog_remove_chapter_history_description">እዚ ድማ ነቲ ናይዚ ምዕራፍ ዝተነበበሉ ዕለት ከወግድ እዩ። ርግጸኛ ዲኻ?</string>
+    <string name="dialog_remove_chapter_book_description">እዚ ድማ ነዛ መጽሓፍ ዝተነበበትሉ ዕለት ከወግድ እዩ። ርግጸኛ ዲኻ?</string>
+    <string name="dialog_remove_chapter_books_description">እዚ ድማ ናይ ኩሎም መጻሕፍቲ ዝተነበበሉ ዕለት ከወግድ እዩ። ርግጸኛ ዲኻ?</string>
     <string name="backup_created_successfully">Backup ብዓወት ምፍጣር</string>
     <string name="restore_backup">Backup ምምላስ</string>
     <string name="author">ጸሓፊ</string>
@@ -282,7 +281,6 @@
     <string name="pref_incognito_mode_summary">ታሪኽ ምንባብ ደው ኣቢልኩም</string>
     <string name="cover_only_layout">ሽፋን ጥራይ ዝሽፍን ሽቦ</string>
     <string name="screen_always_on">ስክሪን ኩሉ ግዜ On</string>
-    <string name="app_name">ኣይሪደር</string>
     <string name="library_screen_label">ቤተ ንባበ</string>
     <string name="explore_screen_label">ዳህሰሳ</string>
     <string name="setting_screen_label">ምምላእ</string>
@@ -302,7 +300,6 @@
     <string name="category">ምድባት</string>
     <string name="help">ሓገዝ</string>
     <string name="pref_incognito_mode">ኢንኮግኒቶ ሞድ</string>
-    <string name="page_progress_num">ገጽ %d።</string>
     <string name="lock_never">ፍፁም</string>
     <string name="lock_always">ወትሪ</string>
     <string name="lock_when_idle">Idle After ኣብ ዝህልወሉ እዋን ምዕጻው</string>

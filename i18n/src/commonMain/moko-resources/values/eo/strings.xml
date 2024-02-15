@@ -16,8 +16,6 @@
     <string name="about">Pri</string>
     <string name="edit_category">Redaktu Kategoriojn</string>
     <string name="confirm">Konfirmu</string>
-    <string name="authenticate_to_confirm_change">Aŭtentikigi por konfirmi ŝanĝon</string>
-    <string name="subtitles_encoding_key" translatable="false">subtitoloj_kodado_ŝlosilo</string>
     <string name="pref_incognito_mode_summary">Paŭzi legadon de historio</string>
     <string name="badge">Insigno</string>
     <string name="columns">Kolumnoj</string>
@@ -67,7 +65,7 @@
     <string name="advance_commands">Antaŭaj Komandoj</string>
     <string name="unknown">Nekonata</string>
     <string name="remove">Forigi</string>
-    <string name="dialog_remove_chapter_history_description">Ĉi tio forigos la legan daton de ĉi tiu ĉapitro. Ĉu vi certas\?</string>
+    <string name="dialog_remove_chapter_history_description">Ĉi tio forigos la legan daton de ĉi tiu ĉapitro. Ĉu vi certas?</string>
     <string name="auto_next_chapter">Aŭtomata Sekva Ĉapitro</string>
     <string name="tracker">Spuristo</string>
     <string name="enable_book_cover">Ebligu Librokovrilon</string>
@@ -88,6 +86,7 @@
     <string name="username">Uzantnomo</string>
     <string name="password">Pasvorto</string>
     <string name="owner">Posedanto</string>
+    <string name="authenticate_to_confirm_change">Authenticate to confirm change</string>
     <string name="error_unknown">Nekonata Eraro Okazis.</string>
     <string name="no_book_found_error">Ne ekzistas libro kun ĉi tiu identigilo.</string>
     <string name="no_chapters_found_error">Ne estas ĉapitroj ĉi tie.</string>
@@ -184,7 +183,7 @@
     <string name="follow_system_settings">Sekvu sistemajn agordojn</string>
     <string name="dark">Malhela Reĝimo</string>
     <string name="light">Luma reĝimo</string>
-    <string name="app_name">IReader</string>
+
     <string name="library_screen_label">Biblioteko</string>
     <string name="explore_screen_label">Esploru</string>
     <string name="setting_screen_label">Agordo</string>
@@ -206,8 +205,8 @@
     <string name="open_explore">malfermu esplori</string>
     <string name="pause">Paŭzo</string>
     <string name="resume">Rekomenci</string>
-    <string name="dialog_remove_chapter_book_description">Ĉi tio forigos la legitan daton de ĉi tiu libro. Ĉu vi certas\?</string>
-    <string name="dialog_remove_chapter_books_description">Ĉi tio forigos la legitan daton de ĉiuj libroj. Ĉu vi certas\?</string>
+    <string name="dialog_remove_chapter_book_description">Ĉi tio forigos la legitan daton de ĉi tiu libro. Ĉu vi certas?</string>
+    <string name="dialog_remove_chapter_books_description">Ĉi tio forigos la legitan daton de ĉiuj libroj. Ĉu vi certas?</string>
     <string name="create_backup">Krei Rezervon</string>
     <string name="author">Aŭtoro</string>
     <string name="download">Elŝutu</string>
@@ -229,7 +228,6 @@
     <string name="open_in_webView">Malfermu en WebView</string>
     <string name="downloads_queue">Vico de elŝutoj</string>
     <string name="all_category">Ĉiuj</string>
-    <string name="page_progress_num">Paĝo %d</string>
     <string name="lock_never">Neniam</string>
     <string name="lock_always">Ĉiam</string>
     <string name="lock_when_idle">Ŝlosu kiam Idle Post</string>

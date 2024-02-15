@@ -69,8 +69,8 @@
     <string name="selected_scrollbar_color">Ausgewählte ScrollBar-Farbe</string>
     <string name="unknown">Unbekannt</string>
     <string name="remove">Entfernen</string>
-    <string name="dialog_remove_chapter_history_description">Dadurch wird das Lesedatum dieses Kapitels entfernt. Bist du dir sicher\?</string>
-    <string name="dialog_remove_chapter_book_description">Dadurch wird das Lesedatum dieses Buchs entfernt. Bist du dir sicher\?</string>
+    <string name="dialog_remove_chapter_history_description">Dadurch wird das Lesedatum dieses Kapitels entfernt. Bist du dir sicher?</string>
+    <string name="dialog_remove_chapter_book_description">Dadurch wird das Lesedatum dieses Buchs entfernt. Bist du dir sicher?</string>
     <string name="restore_backup">Backup wiederherstellen</string>
     <string name="author">Autor</string>
     <string name="download">Download</string>
@@ -164,7 +164,7 @@
     <string name="follow_system_settings">Befolgen Sie die Systemeinstellungen</string>
     <string name="pinned_sources">Gepinnt</string>
     <string name="last_used_source">Zuletzt verwendeten</string>
-    <string name="app_name">IReader</string>
+
     <string name="library_screen_label">Bibliothek</string>
     <string name="explore_screen_label">Entdecken</string>
     <string name="delete_all_downloads">Alle Downloads löschen</string>
@@ -213,7 +213,7 @@
     <string name="reverse_chapter_in_db">Kapitel in DB umkehren</string>
     <string name="reverse">Umkehren</string>
     <string name="background_color">Hintergrundfarbe</string>
-    <string name="dialog_remove_chapter_books_description">Dadurch wird das Lesedatum aller Bücher entfernt. Bist du dir sicher\?</string>
+    <string name="dialog_remove_chapter_books_description">Dadurch wird das Lesedatum aller Bücher entfernt. Bist du dir sicher?</string>
     <string name="create_backup">Ein Backup erstellen</string>
     <string name="pitch">Tonhöhe</string>
     <string name="sleep">Schlafen</string>
@@ -329,9 +329,8 @@
     <string name="menu">Speisekarte</string>
     <string name="there_was_a_problem_in_getting_chapter">Beim Abrufen des Kapitels ist ein Problem aufgetreten.</string>
     <string name="error">Fehler</string>
-    <string name="page_progress_num">Seite %d</string>
     <string name="lock_never">Niemals</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="pref_incognito_mode_summary">Leseverlauf pausieren</string>
     <string name="no_app_was_found_to_lauch">Etwas ist schief gelaufen. Sie haben nicht die erforderliche App.</string>
     <string name="the_downloads_was_interrupted">Der Download wurde unterbrochen</string>

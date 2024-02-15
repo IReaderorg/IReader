@@ -4,7 +4,6 @@
     <string name="saved_local_source_location">कैश में सहेजे गए स्रोत</string>
     <string name="status">दर्जा</string>
     <string name="authentication">प्रमाणीकरण</string>
-    <string name="subtitles_encoding_key" translatable="false">उपशीर्षक_एन्कोडिंग_की</string>
     <string name="display_mode">प्रदर्शन प्रणाली</string>
     <string name="compact_layout">कॉम्पैक्ट लेआउट</string>
     <string name="list_layout">सूची लेआउट</string>
@@ -84,7 +83,6 @@
     <string name="delete">मिटाना</string>
     <string name="background_color">पीछे का रंग</string>
     <string name="text_color">लिखावट का रंग</string>
-    <string name="app_name">आईरीडर</string>
     <string name="library_screen_label">पुस्तकालय</string>
     <string name="explore_screen_label">अन्वेषण करना</string>
     <string name="setting_screen_label">स्थापना</string>
@@ -123,8 +121,8 @@
     <string name="added_to_library">पुस्तकालय में जोड़ा गया</string>
     <string name="unknown">अनजान</string>
     <string name="remove">हटाना</string>
-    <string name="dialog_remove_chapter_book_description">यह इस पुस्तक की पढ़ने की तिथि को निकाल देगा। क्या आपको यकीन है\?</string>
-    <string name="dialog_remove_chapter_books_description">यह सभी पुस्तकों की पढ़ने की तिथि निकाल देगा। क्या आपको यकीन है\?</string>
+    <string name="dialog_remove_chapter_book_description">यह इस पुस्तक की पढ़ने की तिथि को निकाल देगा। क्या आपको यकीन है?</string>
+    <string name="dialog_remove_chapter_books_description">यह सभी पुस्तकों की पढ़ने की तिथि निकाल देगा। क्या आपको यकीन है?</string>
     <string name="bookmark">बुकमार्क</string>
     <string name="wait">कृपया प्रतीक्षा करें</string>
     <string name="success">सफलता</string>
@@ -188,7 +186,6 @@
     <string name="category">श्रेणियाँ</string>
     <string name="help">मदद करना</string>
     <string name="pref_incognito_mode">इंकॉग्निटो मोड</string>
-    <string name="page_progress_num">पेज %d</string>
     <string name="lock_never">कभी नहीँ</string>
     <string name="lock_always">हमेशा</string>
     <string name="lock_when_idle">निष्क्रिय होने पर लॉक करें</string>
@@ -256,7 +253,7 @@
     <string name="dark_mode">डार्क मोड</string>
     <string name="second">दूसरा</string>
     <string name="resume">फिर शुरू करना</string>
-    <string name="dialog_remove_chapter_history_description">यह इस अध्याय की पढ़ने की तारीख को हटा देगा। क्या आपको यकीन है\?</string>
+    <string name="dialog_remove_chapter_history_description">यह इस अध्याय की पढ़ने की तारीख को हटा देगा। क्या आपको यकीन है?</string>
     <string name="create_backup">बैकअप बनाना</string>
     <string name="backup_created_successfully">बैकअप सफलतापूर्वक बनाएँ</string>
     <string name="restore_backup">बैकअप बहाल</string>

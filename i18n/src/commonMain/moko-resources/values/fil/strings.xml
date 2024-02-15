@@ -36,7 +36,7 @@
     <string name="hint">…</string>
     <string name="category_hint">Pangalan…</string>
     <string name="confirm">Kumpirmahin</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="no_app_was_found_to_lauch">Nagkaproblema. wala kang kinakailangang app.</string>
     <string name="refresh">Refresh</string>
     <string name="share">Ibahagi</string>
@@ -103,7 +103,7 @@
     <string name="complete">Kumpleto</string>
     <string name="no_filter_applied">Walang Inilapat na Filter.</string>
     <string name="previous_chapter">Nakaraang kabanata</string>
-    <string name="app_name">IReader</string>
+
     <string name="library_screen_label">Aklatan</string>
     <string name="explore_screen_label">Galugarin</string>
     <string name="setting_screen_label">Setting</string>
@@ -154,7 +154,6 @@
     <string name="cover">Takpan</string>
     <string name="category">Mga kategorya</string>
     <string name="pref_incognito_mode">Incognito mode</string>
-    <string name="page_progress_num">Pahina %d</string>
     <string name="downloads_was_cancelled">Ang pag-download ng ay Kinansela</string>
     <string name="was_cancelled">Kinansela</string>
     <string name="download_of">I-download ng</string>
@@ -214,9 +213,9 @@
     <string name="resume">Ipagpatuloy</string>
     <string name="unknown">Hindi kilala</string>
     <string name="remove">Alisin</string>
-    <string name="dialog_remove_chapter_history_description">Aalisin nito ang petsa ng pagbasa ng kabanatang ito. Sigurado ka ba\?</string>
-    <string name="dialog_remove_chapter_book_description">Aalisin nito ang petsa ng pagbasa ng aklat na ito. Sigurado ka ba\?</string>
-    <string name="dialog_remove_chapter_books_description">Aalisin nito ang petsa ng pagbasa ng lahat ng aklat. Sigurado ka ba\?</string>
+    <string name="dialog_remove_chapter_history_description">Aalisin nito ang petsa ng pagbasa ng kabanatang ito. Sigurado ka ba?</string>
+    <string name="dialog_remove_chapter_book_description">Aalisin nito ang petsa ng pagbasa ng aklat na ito. Sigurado ka ba?</string>
+    <string name="dialog_remove_chapter_books_description">Aalisin nito ang petsa ng pagbasa ng lahat ng aklat. Sigurado ka ba?</string>
     <string name="create_backup">Gumawa ng backup</string>
     <string name="backup_created_successfully">Matagumpay na Gumawa ng Backup</string>
     <string name="restore_backup">Ibalik ang Backup</string>
@@ -389,7 +388,6 @@
     <string name="maximum_backups">Pinakamataas na backup</string>
     <string name="auto_backup">Auto backup</string>
     <string name="import_epub">Mag-import ng Epub</string>
-    data
     <string name="data">Data</string>
     <string name="chapters_was_cleared">Na-clear ang mga kabanata</string>
     <string name="database_was_cleared">Na-clear ang database.</string>

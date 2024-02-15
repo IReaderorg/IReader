@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">IReader</string>
     <string name="library_screen_label">Library</string>
     <string name="explore_screen_label">Explore</string>
     <string name="setting_screen_label">Setting</string>
@@ -29,13 +28,13 @@
     <string name="category">Categories</string>
     <string name="help">Help</string>
     <string name="pref_incognito_mode">Incognito mode</string>
-    <string name="page_progress_num">Page %d</string>
+
     <string name="lock_never">Never</string>
     <string name="lock_always">Always</string>
     <string name="lock_when_idle">Lock when Idle After</string>
     <string name="authentication">Authentication</string>
     <string name="authenticate_to_confirm_change">Authenticate to confirm change</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="pref_incognito_mode_summary">Pause reading history</string>
     <string name="no_app_was_found_to_lauch">Something went wrong. you don\'t have the required app.</string>
     <string name="the_downloads_was_interrupted">The Downloads was interrupted</string>
@@ -295,7 +294,6 @@
     <string name="maximum_backups">Maximum backups</string>
     <string name="auto_backup">Auto backup</string>
     <string name="import_epub">Import Epub</string>
-    data
     <string name="data">Data</string>
     <string name="chapters_was_cleared">Chapters was cleared</string>
     <string name="database_was_cleared">Database was cleared.</string>

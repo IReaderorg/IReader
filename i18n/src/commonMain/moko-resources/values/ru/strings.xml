@@ -38,7 +38,6 @@
     <string name="category">Категории</string>
     <string name="help">Помощь</string>
     <string name="pref_incognito_mode">Режим инкогнито</string>
-    <string name="page_progress_num">Страница %d</string>
     <string name="lock_never">Никогда</string>
     <string name="lock_always">Всегда</string>
     <string name="lock_when_idle">Блокировка при бездействии после</string>
@@ -78,7 +77,7 @@
     <string name="chapter_number">Номер главы</string>
     <string name="increase">Увеличить</string>
     <string name="version">Версия</string>
-    <string name="whats_new">Что нового\?</string>
+    <string name="whats_new">Что нового?</string>
     <string name="discord">Discord</string>
     <string name="github">Github</string>
     <string name="check_the_update">Проверить обновления</string>
@@ -101,7 +100,7 @@
     <string name="daily">Ежедневно</string>
     <string name="drawer">Рисунок</string>
     <string name="add_to_library">Добавить в библиотеку</string>
-    <string name="dialog_remove_chapter_books_description">Это удалит дату прочтения всех книг. Вы уверены\?</string>
+    <string name="dialog_remove_chapter_books_description">Это удалит дату прочтения всех книг. Вы уверены?</string>
     <string name="bookmark">Закладка</string>
     <string name="wait">Пожалуйста, подождите</string>
     <string name="success">Успех</string>
@@ -183,8 +182,8 @@
     <string name="package_installer_failed_to_install_packages">Программе установки пакетов не удалось установить пакеты: STATUS_CODE:</string>
     <string name="return_to_previous_screen">Возврат к предыдущему экрану</string>
     <string name="remove">Удалить</string>
-    <string name="dialog_remove_chapter_history_description">Это удалит дату прочтения этой главы. Вы уверены\?</string>
-    <string name="dialog_remove_chapter_book_description">Это удалит дату прочтения этой книги. Вы уверены\?</string>
+    <string name="dialog_remove_chapter_history_description">Это удалит дату прочтения этой главы. Вы уверены?</string>
+    <string name="dialog_remove_chapter_book_description">Это удалит дату прочтения этой книги. Вы уверены?</string>
     <string name="create_backup">Создание резервной копии</string>
     <string name="author">Автор</string>
     <string name="download">Скачать</string>

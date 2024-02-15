@@ -42,7 +42,6 @@
     <string name="category_hint">ስም…</string>
     <string name="edit_category">ምድቦችን ያርትዑ</string>
     <string name="confirm">አረጋግጥ</string>
-    <string name="subtitles_encoding_key" translatable="false">የትርጉም ጽሑፎች_ኢንኮዲንግ_ቁልፍ</string>
     <string name="pref_incognito_mode_summary">ታሪክ ማንበብ ለአፍታ አቁም</string>
     <string name="no_app_was_found_to_lauch">የሆነ ስህተት ተከስቷል. የሚፈለገው መተግበሪያ የለዎትም።</string>
     <string name="the_downloads_was_interrupted">ማውረዶች ተቋርጠዋል</string>
@@ -103,9 +102,9 @@
     <string name="advance_commands">የቅድሚያ ትዕዛዞች</string>
     <string name="resume">የራስ መግለጫ</string>
     <string name="unknown">ያልታወቀ</string>
-    <string name="dialog_remove_chapter_history_description">ይህ የዚህ ምዕራፍ የተነበበበትን ቀን ያስወግዳል። እርግጠኛ ነህ\?</string>
-    <string name="dialog_remove_chapter_book_description">ይህ የዚህ መጽሐፍ የተነበበበትን ቀን ያስወግዳል። እርግጠኛ ነህ\?</string>
-    <string name="dialog_remove_chapter_books_description">ይህ የሁሉንም መጽሐፍት የተነበበበትን ቀን ያስወግዳል። እርግጠኛ ነህ\?</string>
+    <string name="dialog_remove_chapter_history_description">ይህ የዚህ ምዕራፍ የተነበበበትን ቀን ያስወግዳል። እርግጠኛ ነህ?</string>
+    <string name="dialog_remove_chapter_book_description">ይህ የዚህ መጽሐፍ የተነበበበትን ቀን ያስወግዳል። እርግጠኛ ነህ?</string>
+    <string name="dialog_remove_chapter_books_description">ይህ የሁሉንም መጽሐፍት የተነበበበትን ቀን ያስወግዳል። እርግጠኛ ነህ?</string>
     <string name="author">ደራሲ</string>
     <string name="download">አውርድ</string>
     <string name="bookmark">ዕልባት</string>
@@ -245,7 +244,7 @@
     <string name="nothing_read_recently">በቅርብ ጊዜ የተነበበ ነገር የለም።</string>
     <string name="hint">…</string>
     <string name="empty_library">ቤተ መፃህፍት የሚባል መጽሐፍ የለም፣ በአሰሳ ስክሪኑ ላይ መጽሐፍትን ማከል ትችላለህ።</string>
-    <string name="app_name">IReader</string>
+
     <string name="library_screen_label">ቤተ መፃህፍት</string>
     <string name="explore_screen_label">ያስሱ</string>
     <string name="setting_screen_label">በማቀናበር ላይ</string>
@@ -318,7 +317,6 @@
     <string name="category">ምድቦች</string>
     <string name="help">እገዛ</string>
     <string name="pref_incognito_mode">ማንነት የማያሳውቅ ሁነታ</string>
-    <string name="page_progress_num">ገጽ %d</string>
     <string name="lock_never">በጭራሽ</string>
     <string name="lock_always">ሁሌም</string>
     <string name="lock_when_idle">ስራ ሲፈታ ቆልፍ</string>

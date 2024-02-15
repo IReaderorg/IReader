@@ -7,7 +7,7 @@
     <string name="nothing_read_recently">Nothing read recently</string>
     <string name="selected_scrollbar_color">Selected ScrollBar Color</string>
     <string name="unselected_scrollbar_color">UnSelected ScrollBar Color</string>
-    <string name="dialog_remove_chapter_book_description">This will remove the read date of this book. Are you sure\?</string>
+    <string name="dialog_remove_chapter_book_description">This will remove the read date of this book. Are you sure?</string>
     <string name="backup_created_successfully">Create Backup Successfully</string>
     <string name="owner">Owner</string>
     <string name="unlock_app">Unlock</string>
@@ -173,8 +173,8 @@
     <string name="delete_custom_theme">Delete custom theme</string>
     <string name="scrollbar_color">ScrollBar Color</string>
     <string name="resume">Resume</string>
-    <string name="dialog_remove_chapter_history_description">This will remove the read date of this chapter. Are you sure\?</string>
-    <string name="dialog_remove_chapter_books_description">This will remove the read date of all books. Are you sure\?</string>
+    <string name="dialog_remove_chapter_history_description">This will remove the read date of this chapter. Are you sure?</string>
+    <string name="dialog_remove_chapter_books_description">This will remove the read date of all books. Are you sure?</string>
     <string name="enable_sleep_timer">Sleep Mode</string>
     <string name="no_new_update_available">No New Updates is Available.</string>
     <string name="total_chapter">Total Chapters</string>
@@ -261,7 +261,7 @@
     <string name="enable_book_cover">Enable Book Cover</string>
     <string name="cover">Cover</string>
     <string name="category">Categories</string>
-    <string name="page_progress_num">Page %d</string>
+
     <string name="authentication">Authentication</string>
     <string name="authenticate_to_confirm_change">Authenticate to confirm change</string>
     <string name="pref_incognito_mode_summary">Pause reading history</string>

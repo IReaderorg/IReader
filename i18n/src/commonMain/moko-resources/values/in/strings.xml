@@ -15,7 +15,7 @@
     <string name="edit_category">Sunting Kategori</string>
     <string name="confirm">Mengonfirmasi</string>
     <string name="authentication">Autentikasi</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="pref_incognito_mode_summary">Jeda riwayat membaca</string>
     <string name="no_app_was_found_to_lauch">Ada yang salah. Anda tidak memiliki aplikasi yang diperlukan.</string>
     <string name="the_downloads_was_interrupted">Unduhan terputus</string>
@@ -77,9 +77,9 @@
     <string name="resume">Melanjutkan</string>
     <string name="unknown">Tidak dikenal</string>
     <string name="remove">Menghapus</string>
-    <string name="dialog_remove_chapter_history_description">Ini akan menghapus tanggal baca bab ini. Apa kamu yakin\?</string>
-    <string name="dialog_remove_chapter_book_description">Tindakan ini akan menghapus tanggal baca buku ini. Apa kamu yakin\?</string>
-    <string name="dialog_remove_chapter_books_description">Ini akan menghapus tanggal baca semua buku. Apa kamu yakin\?</string>
+    <string name="dialog_remove_chapter_history_description">Ini akan menghapus tanggal baca bab ini. Apa kamu yakin?</string>
+    <string name="dialog_remove_chapter_book_description">Tindakan ini akan menghapus tanggal baca buku ini. Apa kamu yakin?</string>
+    <string name="dialog_remove_chapter_books_description">Ini akan menghapus tanggal baca semua buku. Apa kamu yakin?</string>
     <string name="create_backup">Membuat backup</string>
     <string name="backup_created_successfully">Buat Cadangan Berhasil</string>
     <string name="restore_backup">Pulihkan Cadangan</string>
@@ -139,7 +139,7 @@
     <string name="label_more">Muat lebih banyak</string>
     <string name="repository">Gudang</string>
     <string name="repository_adding_a_new">Menambahkan Repositori baru</string>
-    <string name="app_name">iReader</string>
+
     <string name="library_screen_label">Perpustakaan</string>
     <string name="explore_screen_label">Mengeksplorasi</string>
     <string name="setting_screen_label">Pengaturan</string>
@@ -225,7 +225,6 @@
     <string name="category">Kategori</string>
     <string name="help">Membantu</string>
     <string name="pref_incognito_mode">Mode penyamaran</string>
-    <string name="page_progress_num">Halaman %d</string>
     <string name="lock_never">Tidak pernah</string>
     <string name="lock_when_idle">Kunci saat Menganggur Setelah</string>
     <string name="authenticate_to_confirm_change">Autentikasi untuk mengonfirmasi perubahan</string>
@@ -261,7 +260,6 @@
     <string name="backup_and_restore">Cadangkan dan pulihkan</string>
     <string name="maximum_backups">Cadangan maksimum</string>
     <string name="auto_backup">Pencadangan otomatis</string>
-    data
     <string name="data">Data</string>
     <string name="chapters_was_cleared">Bab telah dihapus</string>
     <string name="database_was_cleared">Basis data telah dihapus.</string>

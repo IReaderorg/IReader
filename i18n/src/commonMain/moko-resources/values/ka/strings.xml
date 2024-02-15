@@ -22,8 +22,6 @@
     <string name="edit_category">კატეგორიების რედაქტირება</string>
     <string name="confirm">დაადასტურეთ</string>
     <string name="pref_incognito_mode">ინკოგნიტო რეჟიმი</string>
-    <string name="page_progress_num">გვერდი %d</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
     <string name="unable_to_get_package_version">პაკეტის ვერსიის მიღება შეუძლებელია</string>
     <string name="next_result">შემდეგი შედეგი</string>
     <string name="expand_menu">მენიუს გაფართოება</string>
@@ -63,8 +61,8 @@
     <string name="resume">Გაგრძელება</string>
     <string name="unknown">უცნობი</string>
     <string name="remove">ამოღება</string>
-    <string name="dialog_remove_chapter_history_description">ეს წაშლის ამ თავის წაკითხვის თარიღს. Დარწმუნებული ხარ\?</string>
-    <string name="dialog_remove_chapter_books_description">ეს წაშლის ყველა წიგნის წაკითხვის თარიღს. Დარწმუნებული ხარ\?</string>
+    <string name="dialog_remove_chapter_history_description">ეს წაშლის ამ თავის წაკითხვის თარიღს. Დარწმუნებული ხარ?</string>
+    <string name="dialog_remove_chapter_books_description">ეს წაშლის ყველა წიგნის წაკითხვის თარიღს. Დარწმუნებული ხარ?</string>
     <string name="create_backup">სარეზერვო ასლის შექმნა</string>
     <string name="author">ავტორი</string>
     <string name="wait">Გთხოვთ მოიცადოთ</string>
@@ -125,7 +123,7 @@
     <string name="cancel_all">გააუქმეთ ყველა</string>
     <string name="apply">მიმართეთ</string>
     <string name="add_as_new">ახალი</string>
-    <string name="dialog_remove_chapter_book_description">ეს წაშლის ამ წიგნის წაკითხვის თარიღს. Დარწმუნებული ხარ\?</string>
+    <string name="dialog_remove_chapter_book_description">ეს წაშლის ამ წიგნის წაკითხვის თარიღს. Დარწმუნებული ხარ?</string>
     <string name="download">ჩამოტვირთვა</string>
     <string name="download_notifier_download_paused">ჩამოტვირთვა შეჩერებულია</string>
     <string name="font">შრიფტი</string>
@@ -138,7 +136,6 @@
     <string name="read_chapters">წაიკითხეთ თავები</string>
     <string name="text_align_left">ტექსტის გასწორება მარცხნივ</string>
     <string name="library_screen_label">ბიბლიოთეკა</string>
-    <string name="app_name">აირეიდერი</string>
     <string name="explore_screen_label">Გამოკვლევა</string>
     <string name="setting_screen_label">დაყენება</string>
     <string name="delete_all_downloads">წაშალეთ ყველა ჩამოტვირთვა</string>

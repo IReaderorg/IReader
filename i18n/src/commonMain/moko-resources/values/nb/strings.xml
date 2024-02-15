@@ -21,7 +21,6 @@
     <string name="lock_never">Aldri</string>
     <string name="status">Status</string>
     <string name="cover">Dekke</string>
-    <string name="page_progress_num">Side %d</string>
     <string name="permissions">Tillatelser</string>
     <string name="lock_when_idle">Lås når inaktiv etter</string>
     <string name="authentication">Godkjenning</string>
@@ -247,7 +246,7 @@
     <string name="date_format">Datoformat</string>
     <string name="pref_relative_format">Relative tidsstempler</string>
     <string name="pref_relative_time_short">Kort (i dag, i går)</string>
-    <string name="app_name">IReader</string>
+
     <string name="whats_new">Hva er nytt</string>
     <string name="discord">Uenighet</string>
     <string name="theme_was_not_valid">Tema er ikke en del av basistemaer</string>
@@ -305,7 +304,7 @@
     <string name="target_language">Målspråk</string>
     <string name="font_size">Skriftstørrelse</string>
     <string name="font_weight">Skriftvekt</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="saved_local_source_location">Lagrede kilder til buffer</string>
     <string name="chapter_number">Kapittelnummer</string>
     <string name="increase">Øke</string>
@@ -341,9 +340,9 @@
     <string name="resume">Gjenoppta</string>
     <string name="unknown">Ukjent</string>
     <string name="remove">Fjerne</string>
-    <string name="dialog_remove_chapter_history_description">Dette vil fjerne lesedatoen for dette kapittelet. Er du sikker\?</string>
-    <string name="dialog_remove_chapter_book_description">Dette fjerner lesedatoen for denne boken. Er du sikker\?</string>
-    <string name="dialog_remove_chapter_books_description">Dette vil fjerne lesedatoen for alle bøkene. Er du sikker\?</string>
+    <string name="dialog_remove_chapter_history_description">Dette vil fjerne lesedatoen for dette kapittelet. Er du sikker?</string>
+    <string name="dialog_remove_chapter_book_description">Dette fjerner lesedatoen for denne boken. Er du sikker?</string>
+    <string name="dialog_remove_chapter_books_description">Dette vil fjerne lesedatoen for alle bøkene. Er du sikker?</string>
     <string name="create_backup">Lag sikkerhetskopi</string>
     <string name="backup_created_successfully">Lag sikkerhetskopi vellykket</string>
     <string name="restore_backup">Gjennopprett backup</string>
@@ -385,7 +384,6 @@
     <string name="maximum_backups">Maksimal sikkerhetskopiering</string>
     <string name="auto_backup">Automatisk sikkerhetskopiering</string>
     <string name="import_epub">Importer Epub</string>
-    data
     <string name="data">Data</string>
     <string name="chapters_was_cleared">Kapitlene ble ryddet</string>
     <string name="database_was_cleared">Databasen ble tømt.</string>

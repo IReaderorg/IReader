@@ -18,11 +18,11 @@
     <string name="edit_category">Kategorileri Düzenle</string>
     <string name="confirm">Onayla</string>
     <string name="on">Açık</string>
-    <string name="dialog_remove_chapter_books_description">Bu işlem tüm kitapların okunma tarihini kaldıracaktır. Emin misiniz\?</string>
+    <string name="dialog_remove_chapter_books_description">Bu işlem tüm kitapların okunma tarihini kaldıracaktır. Emin misiniz?</string>
     <string name="unknown">Bilinmeyen</string>
     <string name="remove">Kaldır</string>
-    <string name="dialog_remove_chapter_history_description">Bu işlem bu bölümün okunma tarihini kaldıracaktır. Emin misiniz\?</string>
-    <string name="dialog_remove_chapter_book_description">Bu işlem bu kitabın okunma tarihini kaldıracaktır. Emin misiniz\?</string>
+    <string name="dialog_remove_chapter_history_description">Bu işlem bu bölümün okunma tarihini kaldıracaktır. Emin misiniz?</string>
+    <string name="dialog_remove_chapter_book_description">Bu işlem bu kitabın okunma tarihini kaldıracaktır. Emin misiniz?</string>
     <string name="no_new_update_available">Yeni Güncelleme Yok.</string>
     <string name="channel_errors">Hatalar</string>
     <string name="clear_all_database">Tüm Veritabanını Temizle</string>
@@ -43,7 +43,6 @@
     <string name="category">Kategoriler</string>
     <string name="help">Yardım</string>
     <string name="pref_incognito_mode">Gizli mod</string>
-    <string name="page_progress_num">Sayfa %d</string>
     <string name="lock_never">Asla</string>
     <string name="lock_always">Her zaman</string>
     <string name="lock_when_idle">Boşta olunca kilitle</string>

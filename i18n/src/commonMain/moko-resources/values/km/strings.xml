@@ -17,7 +17,7 @@
     <string name="confirm">បញ្ជាក់</string>
     <string name="lock_never">មិនដែល</string>
     <string name="lock_always">ជានិច្ច</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="pref_incognito_mode_summary">ផ្អាកការអានប្រវត្តិ</string>
     <string name="the_downloads_was_interrupted">ការទាញយកត្រូវបានរំខាន</string>
     <string name="the_downloads_was_cancelled">ការទាញយកត្រូវបានលុបចោល</string>
@@ -38,8 +38,8 @@
     <string name="advance_commands">ពាក្យបញ្ជាជាមុន</string>
     <string name="resume">ប្រវត្តិរូប</string>
     <string name="remove">ដកចេញ</string>
-    <string name="dialog_remove_chapter_history_description">វា​នឹង​លុប​កាលបរិច្ឆេទ​អាន​ជំពូក​នេះ​ចេញ។ តើ​អ្នក​ប្រាកដ​ឬ​អត់\?</string>
-    <string name="dialog_remove_chapter_book_description">វានឹងលុបកាលបរិច្ឆេទអានសៀវភៅនេះចេញ។ តើ​អ្នក​ប្រាកដ​ឬ​អត់\?</string>
+    <string name="dialog_remove_chapter_history_description">វា​នឹង​លុប​កាលបរិច្ឆេទ​អាន​ជំពូក​នេះ​ចេញ។ តើ​អ្នក​ប្រាកដ​ឬ​អត់?</string>
+    <string name="dialog_remove_chapter_book_description">វានឹងលុបកាលបរិច្ឆេទអានសៀវភៅនេះចេញ។ តើ​អ្នក​ប្រាកដ​ឬ​អត់?</string>
     <string name="download">ទាញយក</string>
     <string name="sleep">គេង</string>
     <string name="speech_rate">អត្រាការនិយាយ</string>
@@ -141,7 +141,6 @@
     <string name="installation_error_incompatible">PackageManger៖ មិនឆបគ្នាជាមួយកញ្ចប់ដែលបានដំឡើង</string>
     <string name="available">មាន</string>
     <string name="auto_backup">បម្រុង​ទុក​ដោយ​ស្វ័យ​ប្រវត្តិ</string>
-    <string name="app_name">អ្នកអាន</string>
     <string name="library_screen_label">បណ្ណាល័យ</string>
     <string name="explore_screen_label">រុករក</string>
     <string name="setting_screen_label">ការកំណត់</string>
@@ -186,7 +185,6 @@
     <string name="category">ប្រភេទ</string>
     <string name="help">ជំនួយ</string>
     <string name="pref_incognito_mode">របៀបអនាមិក</string>
-    <string name="page_progress_num">ទំព័រ %d</string>
     <string name="failed_to_download">បរាជ័យក្នុងការទាញយក</string>
     <string name="downloads_was_cancelled">ការទាញយកត្រូវបានលុបចោល</string>
     <string name="was_cancelled">ត្រូវបានលុបចោល</string>
@@ -201,7 +199,7 @@
     <string name="there_is_no_chapter">មិនមានជំពូកទេ។</string>
     <string name="reverse_chapter_in_db">ជំពូកបញ្ច្រាសនៅក្នុង DB</string>
     <string name="reverse">បញ្ច្រាស</string>
-    <string name="dialog_remove_chapter_books_description">វានឹងលុបកាលបរិច្ឆេទអានសៀវភៅទាំងអស់ចេញ។ តើ​អ្នក​ប្រាកដ​ឬ​អត់\?</string>
+    <string name="dialog_remove_chapter_books_description">វានឹងលុបកាលបរិច្ឆេទអានសៀវភៅទាំងអស់ចេញ។ តើ​អ្នក​ប្រាកដ​ឬ​អត់?</string>
     <string name="create_backup">បង្កើតការបម្រុងទុក</string>
     <string name="backup_created_successfully">បង្កើតការបម្រុងទុកដោយជោគជ័យ</string>
     <string name="restore_backup">ស្តារការបម្រុងទុក</string>

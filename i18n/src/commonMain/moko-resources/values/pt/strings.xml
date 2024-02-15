@@ -11,6 +11,7 @@
     <string name="list_layout">Layout da lista</string>
     <string name="cover_only_layout">Grade somente de cobertura</string>
     <string name="decrease">Diminuir</string>
+    <string name="confirm">Confirm</string>
     <string name="source_title">Título da Fonte</string>
     <string name="chapter_number">Número do Capítulo</string>
     <string name="hour">Dia</string>
@@ -25,7 +26,6 @@
     <string name="lock_when_idle">Bloquear quando ocioso Depois</string>
     <string name="authentication">Autenticação</string>
     <string name="authenticate_to_confirm_change">Autenticar para confirmar a alteração</string>
-    <string name="subtitles_encoding_key" translatable="false">legendas_codificação_chave</string>
     <string name="refresh">Atualizar</string>
     <string name="share">Compartilhar</string>
     <string name="export_book_as_epub">Exportar livro como Epub</string>
@@ -69,7 +69,7 @@
     <string name="auto_sort_chapters_in_db">Capítulos de classificação automática no banco de dados</string>
     <string name="unknown">Desconhecido</string>
     <string name="remove">Remover</string>
-    <string name="dialog_remove_chapter_history_description">Isso removerá a data de leitura deste capítulo. Tem certeza\?</string>
+    <string name="dialog_remove_chapter_history_description">Isso removerá a data de leitura deste capítulo. Tem certeza?</string>
     <string name="create_backup">Criar backup</string>
     <string name="author">Autor</string>
     <string name="download">Download</string>
@@ -212,7 +212,6 @@
     <string name="book_name">Nome do livro</string>
     <string name="pinned_sources">Fixado</string>
     <string name="delete_all_downloads">Excluir todos os downloads</string>
-    <string name="app_name">Leitor</string>
     <string name="library_screen_label">Biblioteca</string>
     <string name="explore_screen_label">Explorar</string>
     <string name="setting_screen_label">Contexto</string>
@@ -227,8 +226,8 @@
     <string name="the_downloads_was_interrupted">Os downloads foram interrompidos</string>
     <string name="the_downloads_was_cancelled">Os downloads foram cancelados</string>
     <string name="failed_to_download">Falhou o download</string>
-    <string name="dialog_remove_chapter_book_description">Isso removerá a data de leitura deste livro. Tem certeza\?</string>
-    <string name="dialog_remove_chapter_books_description">Isso removerá a data de leitura de todos os livros. Tem certeza\?</string>
+    <string name="dialog_remove_chapter_book_description">Isso removerá a data de leitura deste livro. Tem certeza?</string>
+    <string name="dialog_remove_chapter_books_description">Isso removerá a data de leitura de todos os livros. Tem certeza?</string>
     <string name="installation_error_aborted">Gerenciador de Pacotes: Cancelado</string>
     <string name="installation_error_invalid">PackageManger: Existe outro apk instalado com versão superior a este pacote</string>
     <string name="installation_error_Storage">Gerenciador de Pacotes: Armazenamento insuficiente</string>
@@ -366,8 +365,6 @@
     <string name="all_category">Tudo</string>
     <string name="saved_local_source_location">Fontes salvas no cache</string>
     <string name="edit_category">Editar categorias</string>
-    <string name="confirm">confirme</string>
-    <string name="page_progress_num">Página %d</string>
     <string name="lock_never">Nunca</string>
     <string name="weekly">Semanalmente</string>
     <string name="daily">Diário</string>

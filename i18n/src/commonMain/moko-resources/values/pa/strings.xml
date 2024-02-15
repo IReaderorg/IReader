@@ -97,7 +97,7 @@
     <string name="resume">Resume</string>
     <string name="unknown">Unknown</string>
     <string name="remove">Remove</string>
-    <string name="dialog_remove_chapter_history_description">This will remove the read date of this chapter. Are you sure\?</string>
+    <string name="dialog_remove_chapter_history_description">This will remove the read date of this chapter. Are you sure?</string>
     <string name="create_backup">Create Backup</string>
     <string name="restore_backup">Restore Backup</string>
     <string name="author">Author</string>
@@ -204,7 +204,7 @@
     <string name="nothing_read_recently">Nothing read recently</string>
     <string name="hint">…</string>
     <string name="edit_category">Edit Categories</string>
-    <string name="page_progress_num">Page %d</string>
+
     <string name="no_app_was_found_to_lauch">Something went wrong. you don\'t have the required app.</string>
     <string name="lock_when_idle">Lock when Idle After</string>
     <string name="pref_incognito_mode_summary">Pause reading history</string>
@@ -256,8 +256,8 @@
     <string name="book_name">Book Name</string>
     <string name="auto_sort_chapters_in_db">Auto Sort Chapters in DB</string>
     <string name="advance_setting">Advance Setting</string>
-    <string name="dialog_remove_chapter_book_description">This will remove the read date of this book. Are you sure\?</string>
-    <string name="dialog_remove_chapter_books_description">This will remove the read date of all books. Are you sure\?</string>
+    <string name="dialog_remove_chapter_book_description">This will remove the read date of this book. Are you sure?</string>
+    <string name="dialog_remove_chapter_books_description">This will remove the read date of all books. Are you sure?</string>
     <string name="backup_created_successfully">Create Backup Successfully</string>
     <string name="speech_rate">Speech Rate</string>
     <string name="auto_next_chapter">Auto Next Chapter</string>

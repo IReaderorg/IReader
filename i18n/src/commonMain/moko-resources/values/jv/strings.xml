@@ -5,7 +5,7 @@
     <string name="about">Babagan</string>
     <string name="edit_category">Sunting Kategori</string>
     <string name="confirm">Konfirmasi</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="tabs">Tab</string>
     <string name="fetch_chapters">Njupuk Bab</string>
     <string name="go">Tindak</string>
@@ -19,7 +19,7 @@
     <string name="appearance">Penampilan</string>
     <string name="show_update">Tampilake Update</string>
     <string name="minutes">menit</string>
-    <string name="dialog_remove_chapter_history_description">Iki bakal mbusak tanggal maca bab iki. Apa sampeyan yakin\?</string>
+    <string name="dialog_remove_chapter_history_description">Iki bakal mbusak tanggal maca bab iki. Apa sampeyan yakin?</string>
     <string name="pitch">Pitch</string>
     <string name="enable_book_cover">Aktifake Cover Buku</string>
     <string name="enable_sleep_timer">Mode Turu</string>
@@ -53,7 +53,7 @@
     <string name="there_was_a_problem_in_getting_chapter">Ana masalah nalika njupuk bab.</string>
     <string name="something_is_wrong_with_this_book">Ana sing salah karo buku iki.</string>
     <string name="less_brightness">Kurang Padhang</string>
-    <string name="app_name">IReader</string>
+
     <string name="library_screen_label">Pustaka</string>
     <string name="explore_screen_label">Jelajahi</string>
     <string name="add">Tambah</string>
@@ -63,7 +63,6 @@
     <string name="auto_installer">Auto Installer</string>
     <string name="search_hint">Telusuri…</string>
     <string name="pref_incognito_mode">Mode incognito</string>
-    <string name="page_progress_num">Kaca %d</string>
     <string name="lock_never">ora tau</string>
     <string name="pref_incognito_mode_summary">Ngaso maca riwayat</string>
     <string name="downloads_was_cancelled">Download saka dibatalake</string>
@@ -151,7 +150,6 @@
     <string name="automatic_backup">Gawe serep otomatis</string>
     <string name="maximum_backups">Gawe serep maksimal</string>
     <string name="import_epub">Impor Epub</string>
-    data
     <string name="data">Data</string>
     <string name="chapters_was_cleared">Bab diresiki</string>
     <string name="continues">Terusake</string>
@@ -250,8 +248,8 @@
     <string name="dismiss">Ngilangi</string>
     <string name="book_name">Jeneng Buku</string>
     <string name="auto_sort_chapters_in_db">Bab Urut Otomatis ing DB</string>
-    <string name="dialog_remove_chapter_book_description">Iki bakal mbusak tanggal maca buku iki. Apa sampeyan yakin\?</string>
-    <string name="dialog_remove_chapter_books_description">Iki bakal mbusak tanggal maca kabeh buku. Apa sampeyan yakin\?</string>
+    <string name="dialog_remove_chapter_book_description">Iki bakal mbusak tanggal maca buku iki. Apa sampeyan yakin?</string>
+    <string name="dialog_remove_chapter_books_description">Iki bakal mbusak tanggal maca kabeh buku. Apa sampeyan yakin?</string>
     <string name="create_backup">Nggawe Serep</string>
     <string name="backup_created_successfully">Nggawe Serep Kasil</string>
     <string name="restore_backup">Mulihake Serep</string>

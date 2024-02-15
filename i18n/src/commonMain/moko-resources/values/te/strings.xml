@@ -49,7 +49,7 @@
     <string name="repository_adding_a_new">కొత్త రిపోజిటరీని జోడిస్తోంది</string>
     <string name="dark">డార్క్ మోడ్</string>
     <string name="permission_not_given">తగినంత అనుమతి ఇవ్వబడలేదు, దయచేసి మీ అనుమతిని తనిఖీ చేయండి</string>
-    <string name="subtitles_encoding_key" translatable="false">Subtitle Encoding Key</string>
+
     <string name="pref_incognito_mode_summary">చరిత్ర చదవడాన్ని పాజ్ చేయండి</string>
     <string name="no_app_was_found_to_lauch">ఏదో తప్పు జరిగింది. మీకు అవసరమైన యాప్ లేదు.</string>
     <string name="the_downloads_was_interrupted">డౌన్‌లోడ్‌లకు అంతరాయం ఏర్పడింది</string>
@@ -87,7 +87,7 @@
     <string name="dismiss">రద్దుచేసే</string>
     <string name="book_name">పుస్తకం పేరు</string>
     <string name="auto_sort_chapters_in_db">DBలో చాప్టర్‌లను స్వయంచాలకంగా క్రమబద్ధీకరించండి</string>
-    <string name="dialog_remove_chapter_books_description">ఇది అన్ని పుస్తకాల చదివిన తేదీని తీసివేస్తుంది. మీరు చెప్పేది నిజమా\?</string>
+    <string name="dialog_remove_chapter_books_description">ఇది అన్ని పుస్తకాల చదివిన తేదీని తీసివేస్తుంది. మీరు చెప్పేది నిజమా?</string>
     <string name="create_backup">బ్యాకప్ సృష్టించండి</string>
     <string name="backup_created_successfully">బ్యాకప్‌ని విజయవంతంగా సృష్టించండి</string>
     <string name="restore_backup">బ్యాకప్‌ని పునరుద్ధరించండి</string>
@@ -216,7 +216,6 @@
     <string name="unpin">అన్‌పిన్ చేయండి</string>
     <string name="text_align">టెక్స్ట్ సమలేఖనం</string>
     <string name="text_align_left">టెక్స్ట్ ఎడమకు సమలేఖనం చేయండి</string>
-    <string name="app_name">ఐఆర్ రీడర్</string>
     <string name="library_screen_label">గ్రంధాలయం</string>
     <string name="explore_screen_label">అన్వేషించండి</string>
     <string name="setting_screen_label">అమరిక</string>
@@ -291,7 +290,6 @@
     <string name="category">కేటగిరీలు</string>
     <string name="help">సహాయం</string>
     <string name="pref_incognito_mode">అజ్ఞాత మోడ్</string>
-    <string name="page_progress_num">పేజీ %d</string>
     <string name="lock_never">ఎప్పుడూ</string>
     <string name="lock_always">ఎల్లప్పుడూ</string>
     <string name="lock_when_idle">తర్వాత నిష్క్రియంగా ఉన్నప్పుడు లాక్ చేయండి</string>
@@ -406,8 +404,8 @@
     <string name="local_installer">స్థానిక ఇన్‌స్టాలర్</string>
     <string name="use_auth">అన్‌లాక్ అవసరం</string>
     <string name="advance_setting">అడ్వాన్స్ సెట్టింగ్</string>
-    <string name="dialog_remove_chapter_history_description">ఇది ఈ అధ్యాయం చదివిన తేదీని తీసివేస్తుంది. మీరు చెప్పేది నిజమా\?</string>
-    <string name="dialog_remove_chapter_book_description">ఇది ఈ పుస్తకం చదివిన తేదీని తీసివేస్తుంది. మీరు చెప్పేది నిజమా\?</string>
+    <string name="dialog_remove_chapter_history_description">ఇది ఈ అధ్యాయం చదివిన తేదీని తీసివేస్తుంది. మీరు చెప్పేది నిజమా?</string>
+    <string name="dialog_remove_chapter_book_description">ఇది ఈ పుస్తకం చదివిన తేదీని తీసివేస్తుంది. మీరు చెప్పేది నిజమా?</string>
     <string name="download_notifier_text_only_wifi">Wi-Fi కనెక్షన్ అందుబాటులో లేదు</string>
     <string name="download_notifier_download_finish">డౌన్‌లోడ్ పూర్తయింది</string>
     <string name="channel_common">సాధారణ</string>

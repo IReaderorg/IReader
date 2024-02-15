@@ -73,8 +73,8 @@
     <string name="auto_sort_chapters_in_db">Automatsko sortiranje poglavlja u DB-u</string>
     <string name="advance_setting">Napredna postavka</string>
     <string name="advance_commands">Napredne naredbe</string>
-    <string name="dialog_remove_chapter_book_description">Ovo će ukloniti datum čitanja ove knjige. Jesi li siguran\?</string>
-    <string name="dialog_remove_chapter_books_description">Ovo će ukloniti datum čitanja svih knjiga. Jesi li siguran\?</string>
+    <string name="dialog_remove_chapter_book_description">Ovo će ukloniti datum čitanja ove knjige. Jesi li siguran?</string>
+    <string name="dialog_remove_chapter_books_description">Ovo će ukloniti datum čitanja svih knjiga. Jesi li siguran?</string>
     <string name="sleep">Spavati</string>
     <string name="empty_library">Ne postoji knjiga u Knjižnici, možete dodati knjige na ekranu Istraži.</string>
     <string name="fatal_error">Kobna pogreška za</string>
@@ -156,10 +156,10 @@
     <string name="apply">primijeniti</string>
     <string name="browse">Pretraži</string>
     <string name="refresh">Osvježiti</string>
-    <string name="dialog_remove_chapter_history_description">Ovo će ukloniti datum čitanja ovog poglavlja. Jesi li siguran\?</string>
+    <string name="dialog_remove_chapter_history_description">Ovo će ukloniti datum čitanja ovog poglavlja. Jesi li siguran?</string>
     <string name="voices">Glasovi</string>
     <string name="light">Svjetlosni način rada</string>
-    <string name="app_name">IReader</string>
+
     <string name="cancel_all">Otkaži sve</string>
     <string name="cancel">Otkazati</string>
     <string name="auto_installer">Automatski instalacijski program</string>
@@ -238,7 +238,6 @@
     <string name="category">Kategorije</string>
     <string name="help">Pomoć</string>
     <string name="pref_incognito_mode">Anonimni način rada</string>
-    <string name="page_progress_num">Stranica %d</string>
     <string name="lock_never">Nikada</string>
     <string name="lock_always">Stalno</string>
     <string name="lock_when_idle">Zaključaj nakon mirovanja</string>
@@ -311,7 +310,6 @@
     <string name="about">Oko</string>
     <string name="edit_category">Uredite kategorije</string>
     <string name="confirm">Potvrdi</string>
-    <string name="subtitles_encoding_key" translatable="false">titlovi_kodiranje_ključ</string>
     <string name="pref_incognito_mode_summary">Pauziraj povijest čitanja</string>
     <string name="failed_to_download">Preuzimanje nije uspjelo</string>
     <string name="no_app_was_found_to_lauch">Nešto je pošlo po zlu. nemate potrebnu aplikaciju.</string>
