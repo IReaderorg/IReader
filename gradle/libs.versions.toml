@@ -4,13 +4,13 @@ coroutines = "1.6.4"
 # Serialization
 json = "1.4.1"
 # Compose
-composeGradle = "1.4.3"
-voyager = "1.0.0-rc06"
+composeGradle = "1.5.11"
+voyager = "1.1.0-alpha02"
 accompanist = "0.25.2"
 googleAccompanist = "0.25.1"
 materialDialogs = "0.9.1"
 # Android
-androidGradle = "8.1.0"
+androidGradle = "8.2.2"
 core = "1.9.0"
 appCompat = "1.7.0-alpha02"
 activityCompose = "1.6.1"
@@ -47,10 +47,10 @@ immutableCollections = "0.3.5"
 kds = "3.4.0"
 
 # Localization
-moko = "0.23.0"
+moko = "0.24.0-alpha-4"
 # BuildConfigs
 buildconfig = "3.1.0"
-buildkonfig = "0.13.3"
+buildkonfig = "0.15.1"
 # Linter
 kotlinter = "3.12.0"
 # Version updates
@@ -67,7 +67,7 @@ htmlunit = "3.0.0"
 
 [libraries]
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
-gradle-tools = "com.android.tools.build:gradle:8.0.0"
+gradle-tools = "com.android.tools.build:gradle:8.2.2"
 
 gradle-google = "com.google.gms:google-services:4.3.14"
 gradle-firebaseCrashlytic = "com.google.firebase:firebase-crashlytics-gradle:2.9.1"

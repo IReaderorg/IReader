@@ -1,8 +1,13 @@
 package ireader.presentation.ui.home.library.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -10,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.unit.dp
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.DisplayMode.Companion.displayMode
 import ireader.domain.models.entities.BookItem
@@ -40,42 +46,49 @@ internal fun LibraryPager(
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
 
     ) {
-    androidx.compose.foundation.pager.HorizontalPager(
-        pageCount = pageCount,
+    HorizontalPager(
         state = pagerState,
-    ) { page ->
-        val books by onPageChange(page)
-        val gridState = rememberLazyGridState()
-        val lazyListState = rememberLazyListState()
-        val displayMode = categories[page].category.displayMode
-        val columns by if (displayMode != DisplayMode.List) {
+        pageSpacing = 0.dp,
+        userScrollEnabled = true,
+        reverseLayout = false,
+        contentPadding = PaddingValues(0.dp),
+        beyondBoundsPageCount = 0,
+        pageSize = PageSize.Fill,
+        key = null,
+        pageContent = { page ->
+            val books by onPageChange(page)
+            val gridState = rememberLazyGridState()
+            val lazyListState = rememberLazyListState()
+            val displayMode = categories[page].category.displayMode
+            val columns by if (displayMode != DisplayMode.List) {
 
-            val isLandscape = isLandscape()
+                val isLandscape = isLandscape()
 
-            with(rememberCoroutineScope()) {
-                remember(isLandscape) { getColumnsForOrientation(isLandscape) }.collectAsState()
+                with(rememberCoroutineScope()) {
+                    remember(isLandscape) { getColumnsForOrientation(isLandscape) }.collectAsState()
+                }
+            } else {
+                remember { mutableStateOf(0) }
             }
-        } else {
-            remember { mutableStateOf(0) }
+            ILazyColumnScrollbar(
+                listState = lazyListState,
+            ) {
+                LayoutComposable(
+                    books = books,
+                    layout = layout,
+                    isLocal = true,
+                    gridState = gridState,
+                    scrollState = lazyListState,
+                    selection = selection,
+                    goToLatestChapter = goToLatestChapter,
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                    showGoToLastChapterBadge = showGoToLastChapterBadge,
+                    showReadBadge = showReadBadge,
+                    showUnreadBadge = showUnreadBadge,
+                    columns = columns,
+                )
+            }
         }
-        ILazyColumnScrollbar(
-            listState = lazyListState,
-        ) {
-            LayoutComposable(
-                books = books,
-                layout = layout,
-                isLocal = true,
-                gridState = gridState,
-                scrollState = lazyListState,
-                selection = selection,
-                goToLatestChapter = goToLatestChapter,
-                onClick = onClick,
-                onLongClick = onLongClick,
-                showGoToLastChapterBadge = showGoToLastChapterBadge,
-                showReadBadge = showReadBadge,
-                showUnreadBadge = showUnreadBadge,
-                columns = columns,
-            )
-        }
-    }
+    )
 }

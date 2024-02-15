@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
@@ -98,7 +99,13 @@ data class BookDetailScreenSpec constructor(
 
                 detailState.source.let { source ->
                     if (vm.chapterMode) {
-                        val pagerState = androidx.compose.foundation.pager.rememberPagerState()
+                        val pagerState = rememberPagerState(
+                            initialPage = 0,
+                            initialPageOffsetFraction = 0f,
+                            pageCount = {
+                                3
+                            }
+                        )
                         ChapterScreenBottomTabComposable(
                             modifier = it,
                             pagerState = pagerState,

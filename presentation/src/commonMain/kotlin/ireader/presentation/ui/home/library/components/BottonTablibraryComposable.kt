@@ -10,6 +10,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -117,34 +121,42 @@ fun TabsContent(
             DisplayMode.OnlyCover
         )
     }
-    androidx.compose.foundation.pager.HorizontalPager(
-        pageCount = libraryTabs.size,
+    HorizontalPager(
+        modifier = Modifier.fillMaxSize(),
         state = pagerState,
-        modifier = Modifier.fillMaxSize()
-    ) { page ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Top,
-            contentPadding = scaffoldPadding
-        ) {
-            when (page) {
-                0 -> FiltersPage(filters, onClick = {
-                    vm.toggleFilter(it)
-                })
+        pageSpacing = 0.dp,
+        userScrollEnabled = true,
+        reverseLayout = false,
+        contentPadding = PaddingValues(0.dp),
+        beyondBoundsPageCount = 0,
+        pageSize = PageSize.Fill,
+        key = null,
+        pageContent =  { page->
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Top,
+                contentPadding = scaffoldPadding
+            ) {
+                when (page) {
+                    0 -> FiltersPage(filters, onClick = {
+                        vm.toggleFilter(it)
+                    })
 
-                1 -> SortPage(
-                    vm.sorting.value,
-                    onClick = vm::toggleSort,
-                    localizeHelper
-                )
-                2 -> DispalyPage(
-                    layouts = layouts,
-                    onLayoutSelected = onLayoutSelected,
-                    vm = vm
-                )
+                    1 -> SortPage(
+                        vm.sorting.value,
+                        onClick = vm::toggleSort,
+                        localizeHelper
+                    )
+
+                    2 -> DispalyPage(
+                        layouts = layouts,
+                        onLayoutSelected = onLayoutSelected,
+                        vm = vm
+                    )
+                }
             }
         }
-    }
+    )
 }
 
 private fun LazyListScope.FiltersPage(

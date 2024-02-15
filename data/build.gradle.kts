@@ -108,6 +108,9 @@ android {
         sourceCompatibility = ProjectConfig.androidJvmTarget
         targetCompatibility = ProjectConfig.androidJvmTarget
     }
+    buildFeatures {
+        buildConfig = true
+    }
 
 }
 sqldelight {

@@ -2,6 +2,7 @@ package ireader.presentation.ui.home.library.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,7 +28,12 @@ internal fun LibraryContent(
 ) {
     if (vm.categories.isEmpty()) return
     val horizontalPager =
-        androidx.compose.foundation.pager.rememberPagerState(initialPage = vm.selectedCategoryIndex)
+        rememberPagerState(
+            initialPage = vm.selectedCategoryIndex,
+            initialPageOffsetFraction = 0f
+        ) {
+           3
+        }
     LaunchedEffect(horizontalPager) {
         snapshotFlow { horizontalPager.currentPage }.collect {
             onPageChanged(it)

@@ -49,6 +49,7 @@ android {
         aidl = false
         renderScript = false
         shaders = false
+        buildConfig = true
     }
     splits {
         abi {

@@ -26,6 +26,7 @@ kotlin {
                 compileOnly(compose.ui)
 
             }
+            this.kotlin.srcDirs(File(layout.buildDirectory.orNull!!.asFile, "generated/moko-resources/commonMain/src"))
         }
         val androidMain by getting {
             dependencies {
@@ -59,13 +60,13 @@ android {
         targetCompatibility = ProjectConfig.androidJvmTarget
     }
     sourceSets.getByName("main") {
-        assets.srcDir(File(buildDir, "generated/moko/androidMain/assets"))
-        res.srcDir(File(buildDir, "generated/moko/androidMain/res"))
-        res.srcDir("src/commonMain/resources")
+        assets.srcDir(File(buildDir, "generated/moko-resources/commonMain/assets"))
+        res.srcDir(File(buildDir, "generated/moko-resources/commonMain/res"))
+        res.srcDir("src/commonMain/moko-resources")
     }
 }
 tasks {
-    this@tasks.registerResources(project)
+ //   this@tasks.registerResources(project)
 
 }
 
@@ -115,5 +116,5 @@ fun runCommand(command: String): String {
     return String(byteOut.toByteArray()).trim()
 }
 multiplatformResources {
-    multiplatformResourcesPackage = "ireader.i18n.resources"
+    this.resourcesPackage = "ireader.i18n.resources"
 }

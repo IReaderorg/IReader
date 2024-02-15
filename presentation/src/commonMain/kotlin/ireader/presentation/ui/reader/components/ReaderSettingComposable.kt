@@ -3,6 +3,7 @@ package ireader.presentation.ui.reader.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +11,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.PagerScope
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Tab
 import androidx.compose.material.icons.Icons
@@ -63,7 +69,12 @@ fun ReaderSettingMainLayout(
         onBackgroundChange: (themeId: Long) -> Unit,
         onTextAlign: (PreferenceValues.PreferenceTextAlignment) -> Unit
 ) {
-    val pagerState = androidx.compose.foundation.pager.rememberPagerState()
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        initialPageOffsetFraction = 0f
+    ) {
+      3
+    }
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
 
     val readerTab: TabItem = remember {
@@ -673,13 +684,21 @@ fun TabsContent(
     libraryTabs: List<TabItem>,
     pagerState: androidx.compose.foundation.pager.PagerState,
 ) {
-    androidx.compose.foundation.pager.HorizontalPager(
-        pageCount = libraryTabs.size,
+    HorizontalPager(
+        modifier = Modifier.fillMaxSize(),
         state = pagerState,
-        modifier = Modifier.fillMaxSize()
-    ) { page ->
-        libraryTabs[page].screen()
-    }
+        pageSpacing = 0.dp,
+        userScrollEnabled = true,
+        reverseLayout = false,
+        contentPadding = PaddingValues(0.dp),
+        beyondBoundsPageCount = 0,
+        pageSize = PageSize.Fill,
+        key = null,
+
+        pageContent =  { page ->
+            libraryTabs[page].screen()
+        }
+    )
 }
 
 fun Boolean.isTrue(): Int {

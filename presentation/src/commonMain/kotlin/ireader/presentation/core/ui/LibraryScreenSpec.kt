@@ -3,6 +3,7 @@ package ireader.presentation.core.ui
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
@@ -75,7 +76,12 @@ object LibraryScreenSpec : Tab {
         IModalSheets(
                 bottomSheetState = sheetState,
                 sheetContent = {
-                    val pagerState = androidx.compose.foundation.pager.rememberPagerState()
+                    val pagerState = rememberPagerState(
+                        initialPage = 0,
+                        initialPageOffsetFraction = 0f
+                    ) {
+                       3
+                    }
                     BottomTabComposable(
                         modifier = it,
                         pagerState = pagerState,

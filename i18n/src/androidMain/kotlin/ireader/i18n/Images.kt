@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-
+import ireader.i18n.resources.MR
 actual object Images {
     @Composable
     actual fun downloading(): ImageVector = ImageVector.vectorResource(R.drawable.ic_downloading)
