@@ -92,7 +92,7 @@
     <string name="installation_error_incompatible">PackageManger: Несумісний зі встановленим пакетом</string>
     <string name="installation_error_conflicted">PackageManger: Конфлікт зі встановленим пакунком</string>
     <string name="installation_error_blocked">PackageManger: Інсталятор заблоковано</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">Ім\'я та прізвище</string>
     <string name="no_chapter_found_error">Розділу з такою назвою немає.</string>
     <string name="trying_in_few_second">Спробуйте ще раз через кілька секунд.</string>
