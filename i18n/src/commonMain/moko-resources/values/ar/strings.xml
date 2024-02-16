@@ -400,7 +400,6 @@
     <string name="maximum_backups">أقصى عدد من النسخ الاحتياطية</string>
     <string name="status">حالة</string>
     <string name="cover">التغطية</string>
-
     <string name="url">عنوان Url</string>
     <string name="name">اسم</string>
     <string name="username">اسم المستخدم</string>
@@ -409,7 +408,6 @@
     <string name="automatic_backup">النسخ الاحتياطي التلقائي</string>
     <string name="repository_adding_a_new">إضافة مستودع جديد</string>
     <string name="auto_installer">المثبت التلقائي</string>
-
     <string name="show_system_catalogs">عرض ملحقات النظام</string>
     <string name="show_local_catalogs">إظهار الامتدادات المحلية</string>
     <string name="tags">العلامات</string>
