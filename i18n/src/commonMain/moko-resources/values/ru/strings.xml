@@ -408,7 +408,7 @@
     <string name="no_error">Без ошибок</string>
     <string name="permission_not_given">Даны не все разрешения, Пожалуйста, проверьте ваше разрешение</string>
     <string name="use_local_cache">Использовать локальный кэш</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">Имя</string>
     <string name="username">Имя пользователя</string>
     <string name="password">Пароль</string>
