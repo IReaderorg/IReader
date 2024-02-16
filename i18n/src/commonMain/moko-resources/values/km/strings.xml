@@ -17,7 +17,6 @@
     <string name="confirm">បញ្ជាក់</string>
     <string name="lock_never">មិនដែល</string>
     <string name="lock_always">ជានិច្ច</string>
-
     <string name="pref_incognito_mode_summary">ផ្អាកការអានប្រវត្តិ</string>
     <string name="the_downloads_was_interrupted">ការទាញយកត្រូវបានរំខាន</string>
     <string name="the_downloads_was_cancelled">ការទាញយកត្រូវបានលុបចោល</string>
@@ -55,7 +54,7 @@
     <string name="by_date_uploaded">តាមកាលបរិច្ឆេទដែលបានបង្ហោះ</string>
     <string name="fatal_error">កំហុសធ្ងន់ធ្ងរសម្រាប់</string>
     <string name="installation_error">កំហុសខណៈពេល (មិន) ដំឡើងកញ្ចប់</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">ឈ្មោះ</string>
     <string name="username">ឈ្មោះ​អ្នកប្រើប្រាស់</string>
     <string name="password">ពាក្យសម្ងាត់</string>
