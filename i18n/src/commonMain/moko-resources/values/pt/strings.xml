@@ -92,7 +92,7 @@
     <string name="installation_error_conflicted">PackageManger: em conflito com o pacote instalado</string>
     <string name="installation_error_blocked">PackageManger: o instalador foi bloqueado</string>
     <string name="url_is_invalid">URL é inválido</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">Nome</string>
     <string name="username">Nome de usuário</string>
     <string name="password">Senha</string>
