@@ -37,6 +37,7 @@ subprojects {
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
         kotlinOptions {
             jvmTarget = ProjectConfig.desktopJvmTarget.toString()
+            kotlinOptions.freeCompilerArgs += "-Xexpect-actual-classes"
         }
     }
 }

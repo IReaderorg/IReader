@@ -2,28 +2,18 @@
 kotlin = "1.9.21"
 gradle = "1.9.21"
 dokka = "1.7.20"
-coroutines = "1.7.1"
-serialization = "1.5.0"
-datetime = "0.4.0"
+coroutines = "1.7.3"
+serialization = "1.6.1"
+datetime = "0.5.0"
 ksp = "1.9.21-1.0.16"
-
-
 [libraries]
-gradle-kotlinSerialization = { module =  "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
-gradle-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "gradle" }
 stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-common", version.ref = "kotlin" }
 reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
-dokka = { module = "org.jetbrains.dokka:kotlin-as-java-plugin", version.ref = "dokka" }
-
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
-
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 serialization-protobuf = { module = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf", version.ref = "serialization" }
-
 datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
-ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
-ksp-gradle = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 kotlinSerilization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
@@ -33,5 +23,3 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 # Kotlin
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin"}
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin"}
-kotlin-targetAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin"}
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin"}

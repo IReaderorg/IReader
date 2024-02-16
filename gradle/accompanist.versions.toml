@@ -1,16 +1,9 @@
 [versions]
 accompanist = "0.28.0"
 [libraries]
-
-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanist" }
-pagerIndicator = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanist" }
-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanist" }
 systemUiController = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
 navAnimation = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "accompanist" }
-navMaterial = { module = "com.google.accompanist:accompanist-navigation-material", version.ref = "accompanist" }
 web = { module = "com.google.accompanist:accompanist-webview", version.ref = "accompanist" }
 permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
-
-
 [bundles]
-accompanist = ["pager", "pagerIndicator","flowlayout","systemUiController","permissions","navAnimation","navMaterial","web"]
+accompanist = ["systemUiController","permissions","navAnimation","web"]

@@ -22,6 +22,7 @@ android {
         buildConfig = true
     }
 }
+
 kotlin {
     androidTarget {
         publishLibraryVariants("release")

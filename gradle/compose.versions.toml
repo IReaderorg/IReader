@@ -10,15 +10,8 @@ ui = "1.4.3"
 [libraries]
 compose-ui-util = { module = "androidx.compose.ui:ui-util", version.ref = "ui" }
 compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version = "1.0.1" }
-compose-animations-graphics = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose" }
 compose-googlFonts =  { module ="androidx.compose.ui:ui-text-google-fonts", version = "1.4.3" }
-
-material3-core = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 material3-windowsizeclass = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "material3" }
-material3-adapter = { module = "com.google.android.material:compose-theme-adapter-3", version.ref = "material3" }
-material-icons = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose" }
-materialmotion-core = "io.github.fornewid:material-motion-compose-core:0.10.3"
-
 [bundles]
 
 
