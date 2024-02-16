@@ -79,7 +79,7 @@
     <string name="empty_library">Ne postoji knjiga u Knjižnici, možete dodati knjige na ekranu Istraži.</string>
     <string name="fatal_error">Kobna pogreška za</string>
     <string name="installation_error">Greška prilikom (de)instalacije paketa</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">Ime</string>
     <string name="username">Korisničko ime</string>
     <string name="password">Zaporka</string>
@@ -159,7 +159,6 @@
     <string name="dialog_remove_chapter_history_description">Ovo će ukloniti datum čitanja ovog poglavlja. Jesi li siguran?</string>
     <string name="voices">Glasovi</string>
     <string name="light">Svjetlosni način rada</string>
-
     <string name="cancel_all">Otkaži sve</string>
     <string name="cancel">Otkazati</string>
     <string name="auto_installer">Automatski instalacijski program</string>
