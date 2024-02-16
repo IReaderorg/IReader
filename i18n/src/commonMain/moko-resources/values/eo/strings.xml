@@ -81,7 +81,7 @@
     <string name="installation_error">Eraro dum (mal)instalado de pakaĵo</string>
     <string name="installation_error_aborted">PackageManger: Nuligite</string>
     <string name="installation_error_conflicted">PackageManger: Konfliktas kun instalita pako</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">Nomo</string>
     <string name="username">Uzantnomo</string>
     <string name="password">Pasvorto</string>
@@ -183,7 +183,6 @@
     <string name="follow_system_settings">Sekvu sistemajn agordojn</string>
     <string name="dark">Malhela Reĝimo</string>
     <string name="light">Luma reĝimo</string>
-
     <string name="library_screen_label">Biblioteko</string>
     <string name="explore_screen_label">Esploru</string>
     <string name="setting_screen_label">Agordo</string>
