@@ -133,6 +133,7 @@ android {
 
     kotlinOptions {
         jvmTarget = ProjectConfig.androidJvmTarget.toString()
+        kotlinOptions.freeCompilerArgs += "-Xexpect-actual-classes"
     }
 }
 
