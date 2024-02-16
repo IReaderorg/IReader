@@ -65,7 +65,7 @@
     <string name="installation_error_incompatible">PackageManger: Onverenigbaar met geïnstalleerd pakket</string>
     <string name="installation_error_conflicted">PackageManger: Conflict met geïnstalleerd pakket</string>
     <string name="installation_error_blocked">PackageManger: Installateur werd geblokkeerd</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">Naam</string>
     <string name="username">Gebruikersnaam</string>
     <string name="password">Wachtwoord</string>
