@@ -37,6 +37,8 @@ dependencies {
 kotlin {
     sourceSets.main {
         kotlin.srcDir("build/generated/ksp/main/kotlin")
+        kotlin.srcDir(File(project.rootDir.toString(),"\\i18n\\build\\generated\\moko-resources\\jvmMain\\res\\"))
+        kotlin.srcDir(File(project.rootDir.toString(),"/i18n/build/generated/moko-resources/jvmMain/res/"))
     }
     sourceSets.test {
         kotlin.srcDir("build/generated/ksp/test/kotlin")
