@@ -45,7 +45,6 @@
     <string name="theme">தீம்</string>
     <string name="date_format">தேதி வடிவம்</string>
     <string name="pref_relative_format">தொடர்புடைய நேர முத்திரைகள்</string>
-
     <string name="pref_incognito_mode_summary">வரலாற்றைப் படிப்பதை இடைநிறுத்துங்கள்</string>
     <string name="no_app_was_found_to_lauch">ஏதோ தவறு நடைபெற்றிருக்கிறது. உங்களிடம் தேவையான பயன்பாடு இல்லை.</string>
     <string name="recently">சமீபத்தில்</string>
@@ -257,7 +256,7 @@
     <string name="date_fetched">பெறப்பட்ட தேதி</string>
     <string name="installation_error">தொகுப்பை நிறுவுவதில் பிழை</string>
     <string name="installation_error_invalid">PackageManger: இந்த தொகுப்பை விட உயர் பதிப்பில் மற்றொரு apk நிறுவப்பட்டுள்ளது</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">பெயர்</string>
     <string name="username">பயனர் பெயர்</string>
     <string name="trying_in_few_second">சில நொடிகளில் மீண்டும் முயற்சிக்கவும்.</string>
