@@ -6,7 +6,6 @@
     <string name="category_hint">Ονομα…</string>
     <string name="help">Βοήθεια</string>
     <string name="pref_incognito_mode">Κατάσταση ανώνυμης περιήγησης</string>
-
     <string name="was_cancelled">ακυρώθηκε</string>
     <string name="loading">Φόρτωση</string>
     <string name="refresh">Φρεσκάρω</string>
@@ -95,7 +94,7 @@
     <string name="installation_error_invalid">PackageManger: Υπάρχει ένα άλλο apk εγκατεστημένο με υψηλότερη έκδοση από αυτό το πακέτο</string>
     <string name="installation_error_incompatible">PackageManger: Μη συμβατό με το εγκατεστημένο πακέτο</string>
     <string name="url_is_invalid">Η διεύθυνση URL δεν είναι έγκυρη</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">Ονομα</string>
     <string name="username">Όνομα χρήστη</string>
     <string name="password">Κωδικός πρόσβασης</string>
@@ -194,7 +193,6 @@
     <string name="time_out_exception">Το αίτημα έληξε.</string>
     <string name="select_all">Επιλογή όλων</string>
     <string name="dialog_remove_chapter_history_description">Αυτό θα αφαιρέσει την ημερομηνία ανάγνωσης αυτού του κεφαλαίου. Είσαι σίγουρος?</string>
-
     <string name="library_screen_label">Βιβλιοθήκη</string>
     <string name="explore_screen_label">Εξερευνώ</string>
     <string name="setting_screen_label">Σύνθεση</string>
