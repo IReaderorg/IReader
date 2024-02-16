@@ -244,7 +244,6 @@
     <string name="nothing_read_recently">በቅርብ ጊዜ የተነበበ ነገር የለም።</string>
     <string name="hint">…</string>
     <string name="empty_library">ቤተ መፃህፍት የሚባል መጽሐፍ የለም፣ በአሰሳ ስክሪኑ ላይ መጽሐፍትን ማከል ትችላለህ።</string>
-
     <string name="library_screen_label">ቤተ መፃህፍት</string>
     <string name="explore_screen_label">ያስሱ</string>
     <string name="setting_screen_label">በማቀናበር ላይ</string>
