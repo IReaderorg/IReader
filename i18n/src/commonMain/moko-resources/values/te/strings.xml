@@ -49,7 +49,6 @@
     <string name="repository_adding_a_new">కొత్త రిపోజిటరీని జోడిస్తోంది</string>
     <string name="dark">డార్క్ మోడ్</string>
     <string name="permission_not_given">తగినంత అనుమతి ఇవ్వబడలేదు, దయచేసి మీ అనుమతిని తనిఖీ చేయండి</string>
-
     <string name="pref_incognito_mode_summary">చరిత్ర చదవడాన్ని పాజ్ చేయండి</string>
     <string name="no_app_was_found_to_lauch">ఏదో తప్పు జరిగింది. మీకు అవసరమైన యాప్ లేదు.</string>
     <string name="the_downloads_was_interrupted">డౌన్‌లోడ్‌లకు అంతరాయం ఏర్పడింది</string>
@@ -136,7 +135,7 @@
     <string name="installation_error_incompatible">PackageManger: ఇన్‌స్టాల్ చేయబడిన ప్యాకేజీకి అనుకూలం కాదు</string>
     <string name="installation_error_conflicted">PackageManger: ఇన్‌స్టాల్ చేయబడిన ప్యాకేజీతో వైరుధ్యం</string>
     <string name="installation_error_blocked">PackageManger: ఇన్‌స్టాలర్ బ్లాక్ చేయబడింది</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">పేరు</string>
     <string name="username">వినియోగదారు పేరు</string>
     <string name="password">పాస్వర్డ్</string>
