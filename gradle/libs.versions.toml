@@ -1,26 +1,9 @@
 [versions]
-# Kotlin
-coroutines = "1.6.4"
-# Serialization
-json = "1.4.1"
 # Compose
 composeGradle = "1.5.11"
 voyager = "1.1.0-alpha02"
-accompanist = "0.25.2"
-googleAccompanist = "0.25.1"
-materialDialogs = "0.9.1"
 # Android
-androidGradle = "8.2.2"
-core = "1.9.0"
-appCompat = "1.7.0-alpha02"
-activityCompose = "1.6.1"
-work = "2.8.0"
-# Android Lifecycle
-lifecycle = "2.6.0-alpha03"
-# Swing
-darklaf = "3.0.2"
-# Ksp
-ksp = "1.8.0-1.0.9"
+proguard = "7.2.2"
 # Image Loader
 image-loader = "1.4.4"
 # Dependency Injection
@@ -34,29 +17,14 @@ ktor = "2.3.0"
 # Logging
 napier = "2.6.1"
 # Storage
-okio = "3.3.0"
-appDirs = "1.2.1"
 sqldelight = "1.5.5"
 # Preferences
 multiplatformSettings = "1.0.0"
-# Utility
-desugarJdkLibs = "2.0.2"
-aboutLibraries = "10.6.8"
-dateTime = "0.4.0"
-immutableCollections = "0.3.5"
-kds = "3.4.0"
 
 # Localization
 moko = "0.24.0-alpha-4"
 # BuildConfigs
-buildconfig = "3.1.0"
 buildkonfig = "0.15.1"
-# Linter
-kotlinter = "3.12.0"
-# Version updates
-versions = "0.43.0"
-# Optimizer
-proguard = "7.2.2"
 okhttp = "5.0.0-alpha.10"
 coil_version = "2.2.1"
 jsoup = "1.15.2"
@@ -68,13 +36,8 @@ htmlunit = "3.0.0"
 [libraries]
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
 gradle-tools = "com.android.tools.build:gradle:8.2.2"
-
 gradle-google = "com.google.gms:google-services:4.3.14"
 gradle-firebaseCrashlytic = "com.google.firebase:firebase-crashlytics-gradle:2.9.1"
-gradle-benmanes = "com.github.ben-manes:gradle-versions-plugin:0.42.0"
-gradle-idea-ext = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.5"
-gradle-publish = "com.vanniktech:gradle-maven-publish-plugin:0.21.0"
-
 coil-core = { module = "io.coil-kt:coil", version.ref = "coil_version" }
 coil-gif = { module = "io.coil-kt:coil-gif", version.ref = "coil_version" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil_version" }
@@ -103,7 +66,6 @@ ktor-contentNegotiation-jackson = { module = "io.ktor:ktor-serialization-jackson
 
 
 moko-core = { module = "dev.icerock.moko:resources", version.ref  = "moko" }
-
 moko-gradle = { module = "dev.icerock.moko:resources-generator", version.ref  = "moko" }
 
 
@@ -186,20 +148,10 @@ media3 = ["media3-core", "media3-ui", "media3-dash","media3-subtitleDecoder","me
 ireader = ["jsoup","ktor-core","ktor-core-cio","ktor-okhttp","ktor-contentNegotiation","ktor-contentNegotiation-gson","ktor-contentNegotiation-kotlinx","ktor-contentNegotiation-jackson","ktor-core-android"]
 
 [plugins]
-# Android
-android-library = { id = "com.android.library", version.ref = "androidGradle"}
-android-application = { id = "com.android.application", version.ref = "androidGradle"}
 # Compose
 jetbrainCompose = { id = "org.jetbrains.compose", version.ref = "composeGradle" }
-# Ksp
-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
-# Localization
-moko-gradle = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko"}
 # BuildConfigs
-buildconfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig"}
 buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildkonfig"}
 # Utility
-aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries"}
 sqldelight = { id = "com.squareup.sqldelight", version.ref = "sqldelight" }
-google = { id = "com.google.gms.google-services", version = "4.3.14" }
 moko = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko" }

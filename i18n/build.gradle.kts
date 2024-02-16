@@ -7,7 +7,7 @@ import java.util.*
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
-    id(libs.plugins.moko.gradle.get().pluginId)
+    id(libs.plugins.moko.get().pluginId)
     id("org.jetbrains.compose")
     id(libs.plugins.buildkonfig.get().pluginId)
 }
