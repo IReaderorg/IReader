@@ -5,7 +5,6 @@
     <string name="about">Babagan</string>
     <string name="edit_category">Sunting Kategori</string>
     <string name="confirm">Konfirmasi</string>
-
     <string name="tabs">Tab</string>
     <string name="fetch_chapters">Njupuk Bab</string>
     <string name="go">Tindak</string>
@@ -26,7 +25,7 @@
     <string name="full">kebak</string>
     <string name="partial">Sebagean</string>
     <string name="disable">Pateni</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">jeneng</string>
     <string name="username">Jeneng panganggo</string>
     <string name="password">Sandi</string>
@@ -53,7 +52,6 @@
     <string name="there_was_a_problem_in_getting_chapter">Ana masalah nalika njupuk bab.</string>
     <string name="something_is_wrong_with_this_book">Ana sing salah karo buku iki.</string>
     <string name="less_brightness">Kurang Padhang</string>
-
     <string name="library_screen_label">Pustaka</string>
     <string name="explore_screen_label">Jelajahi</string>
     <string name="add">Tambah</string>
