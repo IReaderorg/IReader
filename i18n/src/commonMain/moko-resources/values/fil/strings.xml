@@ -36,7 +36,6 @@
     <string name="hint">…</string>
     <string name="category_hint">Pangalan…</string>
     <string name="confirm">Kumpirmahin</string>
-
     <string name="no_app_was_found_to_lauch">Nagkaproblema. wala kang kinakailangang app.</string>
     <string name="refresh">Refresh</string>
     <string name="share">Ibahagi</string>
@@ -69,7 +68,7 @@
     <string name="in_library">sa Library</string>
     <string name="compact_layout">Compact na Layout</string>
     <string name="installation_error_aborted">PackageManger: Kinansela</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">Pangalan</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
@@ -103,7 +102,6 @@
     <string name="complete">Kumpleto</string>
     <string name="no_filter_applied">Walang Inilapat na Filter.</string>
     <string name="previous_chapter">Nakaraang kabanata</string>
-
     <string name="library_screen_label">Aklatan</string>
     <string name="explore_screen_label">Galugarin</string>
     <string name="setting_screen_label">Setting</string>
