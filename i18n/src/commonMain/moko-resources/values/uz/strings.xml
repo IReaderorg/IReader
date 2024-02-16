@@ -54,7 +54,7 @@
     <string name="installation_error_incompatible">PackageManger: Oʻrnatilgan paketga mos kelmaydi</string>
     <string name="installation_error_conflicted">PackageManger: o\'rnatilgan paket bilan ziddiyat bor</string>
     <string name="url_is_invalid">Url yaroqsiz</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">Ism</string>
     <string name="username">Foydalanuvchi nomi</string>
     <string name="trying_in_few_second">Bir necha soniyadan keyin qayta urinib ko\'ring.</string>
@@ -287,7 +287,6 @@
     <string name="pinned_sources">Qadalgan</string>
     <string name="authenticate_to_confirm_change">O\'zgartirishni tasdiqlash uchun autentifikatsiya qiling</string>
     <string name="download_notifier_unknown_error">Kutilmagan xato tufayli bo\'limni yuklab bo\'lmadi</string>
-
     <string name="library_screen_label">Kutubxona</string>
     <string name="delete_all_downloads">Barcha yuklab olinganlarni o\'chiring</string>
     <string name="cancel_all">Hammasini bekor qilish</string>
