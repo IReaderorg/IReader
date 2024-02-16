@@ -22,7 +22,7 @@ android {
     }
 }
 kotlin {
-    android {
+    androidTarget {
         publishLibraryVariants("release")
         compilations {
             all {
@@ -39,7 +39,7 @@ kotlin {
     }
 
     sourceSets {
-         val commonMain by getting {
+         commonMain {
             dependencies {
                 api(kotlinx.coroutines.core)
                 api(kotlinx.stdlib)
@@ -53,8 +53,7 @@ kotlin {
                 compileOnly(libs.napier)
             }
         }
-         val androidMain by getting {
-             dependsOn(commonMain)
+         androidMain {
             dependencies {
                 implementation(androidx.core)
                 implementation(libs.quickjs.android)
@@ -63,7 +62,6 @@ kotlin {
             }
         }
         val desktopMain by getting {
-            dependsOn(commonMain)
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
                 implementation(libs.quickjs.jvm)

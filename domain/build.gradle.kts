@@ -25,7 +25,7 @@ android {
     }
 }
 kotlin {
-    android {
+    androidTarget {
         compilations {
             all {
                 kotlinOptions.jvmTarget = ProjectConfig.androidJvmTarget.toString()
@@ -42,7 +42,7 @@ kotlin {
 
 
     sourceSets {
-         val commonMain by getting {
+         commonMain {
             dependencies {
                 implementation(project(Modules.commonResources))
                 implementation(project(Modules.coreApi))
@@ -64,8 +64,7 @@ kotlin {
                 api(libs.imageLoader)
             }
         }
-         val androidMain by getting {
-             dependsOn(commonMain)
+         androidMain {
             dependencies {
                 implementation("org.slf4j:slf4j-android:1.7.25")
                 implementation(libs.bundles.simplestorage)

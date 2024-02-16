@@ -23,7 +23,7 @@ android {
     }
 }
 kotlin {
-    android {
+    androidTarget {
         publishLibraryVariants("release")
         compilations {
             all {
@@ -40,7 +40,7 @@ kotlin {
     }
 
     sourceSets {
-         val commonMain by getting {
+         commonMain {
             dependencies {
                 api(project(Modules.commonResources))
                 api(project(Modules.sourceApi))
@@ -60,8 +60,7 @@ kotlin {
                 api(libs.multiplatformSettings.serialization)
             }
         }
-         val androidMain by getting {
-             dependsOn(commonMain)
+         androidMain {
             dependencies {
                 implementation(androidx.core)
                 implementation(androidx.dataStore)
@@ -71,7 +70,6 @@ kotlin {
             }
         }
         val desktopMain by getting {
-            dependsOn(commonMain)
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
                 implementation(libs.quickjs.jvm)

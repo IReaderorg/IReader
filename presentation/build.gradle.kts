@@ -7,7 +7,7 @@ plugins {
 }
 
 kotlin {
-    android {
+    androidTarget {
         compilations {
             all {
                 kotlinOptions.jvmTarget = ProjectConfig.androidJvmTarget.toString()
@@ -23,7 +23,7 @@ kotlin {
     }
 
     sourceSets {
-         val commonMain by getting {
+         commonMain {
             dependencies {
                 implementation(project(Modules.domain))
                 implementation(project(Modules.coreApi))
@@ -52,15 +52,7 @@ kotlin {
                 api(libs.imageLoader)
             }
         }
-        val jvmMain by creating {
-            dependsOn(commonMain)
-            dependencies {
-
-
-            }
-        }
-        val androidMain by getting {
-            dependsOn(jvmMain)
+        androidMain {
             dependencies {
                 api(libs.koin.android)
                 api(androidx.biometric)

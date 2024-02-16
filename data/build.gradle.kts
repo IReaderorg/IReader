@@ -7,7 +7,7 @@ plugins {
 }
 
 kotlin {
-    android {
+    androidTarget {
         compilations {
             all {
                 kotlinOptions.jvmTarget = ProjectConfig.androidJvmTarget.toString()
@@ -23,7 +23,7 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 implementation(project(Modules.coreApi))
                 implementation(project(Modules.sourceApi))
@@ -39,8 +39,7 @@ kotlin {
                 api(libs.bundles.ireader)
             }
         }
-        val androidMain by getting {
-            dependsOn(commonMain)
+        androidMain {
             dependencies {
                 implementation(androidx.core)
 

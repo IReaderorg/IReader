@@ -12,14 +12,14 @@ plugins {
     id(libs.plugins.buildkonfig.get().pluginId)
 }
 kotlin {
-    android()
+    androidTarget()
     jvm() {
         compilations.all {
             kotlinOptions.jvmTarget = "17"
         }
     }
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 api(libs.moko.core)
                 compileOnly(compose.runtime)
@@ -28,12 +28,12 @@ kotlin {
             }
             this.kotlin.srcDirs(File(layout.buildDirectory.orNull!!.asFile, "generated/moko-resources/commonMain/src"))
         }
-        val androidMain by getting {
+        androidMain {
             dependencies {
                 compileOnly(compose.animationGraphics)
             }
         }
-        val jvmMain by getting {
+        jvmMain {
             dependencies {
                 api(libs.moko.core)
             }
