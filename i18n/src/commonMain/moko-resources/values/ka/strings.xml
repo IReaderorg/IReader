@@ -53,7 +53,7 @@
     <string name="night_mode">Ღამის რეჟიმი</string>
     <string name="dark_mode">მუქი რეჟიმი</string>
     <string name="open_explore">გახსენით გამოკვლევა</string>
-    <string name="dismiss">გაუქმება</string>
+    <string name="dismiss">მოცილება</string>
     <string name="book_name">წიგნის სახელი</string>
     <string name="auto_sort_chapters_in_db">თავების ავტომატური დახარისხება DB-ში</string>
     <string name="advance_commands">წინასწარი ბრძანებები</string>
@@ -235,7 +235,7 @@
     <string name="origin_language">წარმოშობის ენა</string>
     <string name="orientation">ორიენტაცია</string>
     <string name="scrollbar_mode">გადახვევის ზოლის რეჟიმი</string>
-    <string name="autoScroll">ავტომატური გადახვევა</string>
+    <string name="autoScroll">ავტოგადახვევა</string>
     <string name="content">შინაარსი</string>
     <string name="find_current_chapter">იპოვნეთ მიმდინარე თავი</string>
     <string name="downloads_queue">ჩამოტვირთვების რიგი</string>
