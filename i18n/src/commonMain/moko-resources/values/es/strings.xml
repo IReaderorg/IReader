@@ -93,7 +93,7 @@
     <string name="installation_error_conflicted">PackageManger: conflicto con el paquete instalado</string>
     <string name="installation_error_blocked">PackageManger: el instalador fue bloqueado</string>
     <string name="url_is_invalid">La URL no es válida</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">Nombre</string>
     <string name="username">Nombre de usuario</string>
     <string name="owner">Dueño</string>

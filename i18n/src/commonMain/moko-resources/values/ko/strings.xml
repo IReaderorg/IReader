@@ -98,7 +98,7 @@
     <string name="installation_error_incompatible">PackageManger: 설치된 패키지와 호환되지 않음</string>
     <string name="installation_error_conflicted">PackageManger: 설치된 패키지와 충돌합니다.</string>
     <string name="installation_error_blocked">PackageManger: 설치 프로그램이 차단되었습니다.</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">이름</string>
     <string name="username">사용자 이름</string>
     <string name="password">비밀번호</string>
@@ -330,7 +330,6 @@
     <string name="uncategorized_category">기본</string>
     <string name="pinned_sources">고정됨</string>
     <string name="saved_local_source_location">캐시에 저장된 소스</string>
-
     <string name="no_app_was_found_to_lauch">문제가 발생했습니다. 필요한 앱이 없습니다.</string>
     <string name="the_downloads_was_interrupted">다운로드가 중단되었습니다</string>
     <string name="failed_to_download">다운로드 실패</string>

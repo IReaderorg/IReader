@@ -20,7 +20,7 @@
     <string name="mark_as_read">đánh dấu là đã đọc</string>
     <string name="delete_update">Xóa cập nhật</string>
     <string name="title">Tiêu đề</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="channel_common">Phổ thông</string>
     <string name="label_backup">khôi phục từ Sao lưu</string>
     <string name="label_library">Kiểm tra thư viện</string>
@@ -75,7 +75,6 @@
     <string name="theme">chủ đề</string>
     <string name="light">Chế độ sáng</string>
     <string name="other_source">Khác</string>
-
     <string name="refresh">Làm mới</string>
     <string name="description_placeholder">Không có mô tả</string>
     <string name="description">Sự mô tả</string>
@@ -292,7 +291,6 @@
     <string name="pinned_sources">Đã ghim</string>
     <string name="last_used_source">Sử dụng lần cuối</string>
     <string name="lock_never">Không bao giờ</string>
-
     <string name="library_screen_label">Thư viện</string>
     <string name="explore_screen_label">Khám phá</string>
     <string name="setting_screen_label">Cài đặt</string>

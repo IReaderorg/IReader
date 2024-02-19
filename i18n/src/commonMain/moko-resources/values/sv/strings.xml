@@ -116,7 +116,7 @@
     <string name="installation_error_Storage">PackageManger: otillräcklig lagring</string>
     <string name="installation_error_conflicted">Paketansvarig: Konflikt med installerat paket</string>
     <string name="url_is_invalid">Url är ogiltig</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">Namn</string>
     <string name="username">Användarnamn</string>
     <string name="password">Lösenord</string>

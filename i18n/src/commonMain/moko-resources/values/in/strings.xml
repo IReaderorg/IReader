@@ -15,7 +15,6 @@
     <string name="edit_category">Sunting Kategori</string>
     <string name="confirm">Mengonfirmasi</string>
     <string name="authentication">Autentikasi</string>
-
     <string name="pref_incognito_mode_summary">Jeda riwayat membaca</string>
     <string name="no_app_was_found_to_lauch">Ada yang salah. Anda tidak memiliki aplikasi yang diperlukan.</string>
     <string name="the_downloads_was_interrupted">Unduhan terputus</string>
@@ -110,7 +109,7 @@
     <string name="last_read">Bacaan Terakhir</string>
     <string name="last_update">Terakhir Diperbarui</string>
     <string name="date_added">Tanggal Ditambahkan</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">Nama</string>
     <string name="password">Kata sandi</string>
     <string name="owner">Pemilik</string>
@@ -139,7 +138,6 @@
     <string name="label_more">Muat lebih banyak</string>
     <string name="repository">Gudang</string>
     <string name="repository_adding_a_new">Menambahkan Repositori baru</string>
-
     <string name="library_screen_label">Perpustakaan</string>
     <string name="explore_screen_label">Mengeksplorasi</string>
     <string name="setting_screen_label">Pengaturan</string>
