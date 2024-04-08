@@ -9,8 +9,10 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.NotificationManagerCompat.*
 import androidx.core.graphics.drawable.toBitmap
-import coil.ImageLoader
-import coil.request.ImageRequest
+import coil3.ImageLoader
+import coil3.annotation.ExperimentalCoilApi
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
 import ireader.domain.notification.NotificationsIds.CHANNEL_APP_UPDATE
 import ireader.domain.notification.NotificationsIds.CHANNEL_BACKUP_RESTORE_COMPLETE
 import ireader.domain.notification.NotificationsIds.CHANNEL_BACKUP_RESTORE_PROGRESS
@@ -256,6 +258,7 @@ fun createChannel(context: Context, channel: Channel) {
     }
 }
 
+@OptIn(ExperimentalCoilApi::class)
 suspend fun NotificationCompat.Builder.setLargeIcon(
     context: Context,
     data: Any?,
@@ -265,7 +268,7 @@ suspend fun NotificationCompat.Builder.setLargeIcon(
             val request = ImageRequest.Builder(context)
                 .data(data)
                 .allowHardware(true)
-                .target { setLargeIcon(it.toBitmap()) }
+                .target { setLargeIcon(it.asDrawable(context.resources).toBitmap()) }
                 .size(512)
                 .build()
             ImageLoader(context).execute(request)

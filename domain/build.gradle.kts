@@ -62,6 +62,7 @@ kotlin {
                 implementation(libs.jsoup)
                 api(libs.koin.core)
                 api(libs.imageLoader)
+                api(libs.coil.core)
             }
         }
          androidMain {

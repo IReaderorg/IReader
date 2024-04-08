@@ -50,6 +50,9 @@ kotlin {
                 api(libs.koin.core)
                 api(libs.koin.compose)
                 api(libs.imageLoader)
+                api(libs.coil.core)
+                api(libs.coil.compose)
+                api(libs.coil.network.okhttp)
             }
         }
         androidMain {

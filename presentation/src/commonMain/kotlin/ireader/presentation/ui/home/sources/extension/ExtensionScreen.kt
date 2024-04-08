@@ -164,6 +164,7 @@ private fun ExtensionPager(
         pageSize = PageSize.Fill,
         key = null,
         pageNestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
+            state=pagerState ,
             Orientation.Horizontal
         ),
         pageContent = {page ->

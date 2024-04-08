@@ -152,6 +152,7 @@ dependencies {
 
 
     implementation(libs.imageLoader)
+    implementation(libs.coil.core)
     implementation(composeLib.compose.googlFonts)
     implementation(composeLib.material3.windowsizeclass)
 

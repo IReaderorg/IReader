@@ -32,6 +32,7 @@ dependencies {
     implementation(libs.voyager.navigator)
     implementation(kotlinx.coroutines.core)
     implementation(libs.napier)
+
 }
 
 kotlin {

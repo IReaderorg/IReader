@@ -1,7 +1,7 @@
 package ireader.domain.image.cache
 
 import android.content.Context
-import coil.imageLoader
+import coil3.imageLoader
 import ireader.domain.models.BookCover
 import ireader.domain.usecases.files.GetSimpleStorage
 import java.io.File

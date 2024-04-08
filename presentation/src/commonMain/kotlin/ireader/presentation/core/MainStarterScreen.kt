@@ -96,7 +96,7 @@ object MainStarterScreen : VoyagerScreen() {
 
                     Box(
                             modifier = Modifier.padding(contentPadding)
-                                    .consumedWindowInsets(contentPadding),
+                                    .consumeWindowInsets(contentPadding),
                     ) {
 
                         tabNavigator.saveableState(key = "currentTab", tabNavigator.current) {

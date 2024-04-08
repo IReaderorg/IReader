@@ -1,6 +1,6 @@
 [versions]
 # Compose
-composeGradle = "1.5.11"
+composeGradle = "1.6.1"
 voyager = "1.1.0-alpha02"
 # Android
 proguard = "7.2.2"
@@ -26,10 +26,11 @@ moko = "0.24.0-alpha-4"
 # BuildConfigs
 buildkonfig = "0.15.1"
 okhttp = "5.0.0-alpha.10"
-coil_version = "2.2.1"
+
 jsoup = "1.15.2"
 media3 = "1.0.0"
 dex2jar = "v63"
+coil = "3.0.0-alpha06"
 
 
 
@@ -38,9 +39,12 @@ desugarJdkLibs = "com.android.tools:desugar_jdk_libs:2.0.4"
 gradle-tools = "com.android.tools.build:gradle:8.2.2"
 gradle-google = "com.google.gms:google-services:4.4.1"
 gradle-firebaseCrashlytic = "com.google.firebase:firebase-crashlytics-gradle:2.9.9"
-coil-core = { module = "io.coil-kt:coil", version.ref = "coil_version" }
-coil-gif = { module = "io.coil-kt:coil-gif", version.ref = "coil_version" }
-coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil_version" }
+
+
+coil-core = { module = "io.coil-kt.coil3:coil" , version.ref = "coil"}
+coil-gif = { module = "io.coil-kt.coil3:coil-gif" , version.ref = "coil"}
+coil-compose = { module = "io.coil-kt.coil3:coil-compose" , version.ref = "coil"}
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp" , version.ref = "coil"}
 
 gson = "com.google.code.gson:gson:2.10.1"
 googleTranslator = "com.google.mlkit:translate:17.0.2"

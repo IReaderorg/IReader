@@ -4,7 +4,6 @@ compiler = "1.4.4"
 activity = "1.5.1"
 lifecycle = "2.5.1"
 material3 = "1.0.1"
-coil = "2.2.2"
 ui = "1.4.3"
 
 [libraries]
