@@ -29,7 +29,7 @@ okhttp = "5.0.0-alpha.10"
 
 jsoup = "1.15.2"
 media3 = "1.0.0"
-dex2jar = "v63"
+dex2jar = "2.4.17"
 coil = "3.0.0-alpha06"
 
 
@@ -45,6 +45,7 @@ coil-core = { module = "io.coil-kt.coil3:coil" , version.ref = "coil"}
 coil-gif = { module = "io.coil-kt.coil3:coil-gif" , version.ref = "coil"}
 coil-compose = { module = "io.coil-kt.coil3:coil-compose" , version.ref = "coil"}
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp" , version.ref = "coil"}
+coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor" , version.ref = "coil"}
 
 gson = "com.google.code.gson:gson:2.10.1"
 googleTranslator = "com.google.mlkit:translate:17.0.2"
@@ -100,8 +101,8 @@ koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koinComp
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 
 # Asm modificiation
-dex2jar-translator = { module = "com.github.ThexXTURBOXx.dex2jar:dex-translator", version.ref = "dex2jar" }
-dex2jar-tools = { module = "com.github.ThexXTURBOXx.dex2jar:dex-tools", version.ref = "dex2jar" }
+dex2jar-translator = { module = "de.femtopedia.dex2jar:dex-translator", version.ref = "dex2jar" }
+dex2jar-tools = { module = "de.femtopedia.dex2jar:dex-tools", version.ref = "dex2jar" }
 
 
 sqldelight-runtime = { module = "com.squareup.sqldelight:runtime", version.ref = "sqldelight" }

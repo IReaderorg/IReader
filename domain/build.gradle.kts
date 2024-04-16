@@ -61,7 +61,7 @@ kotlin {
                 implementation(libs.okio)
                 implementation(libs.jsoup)
                 api(libs.koin.core)
-                api(libs.imageLoader)
+
                 api(libs.coil.core)
             }
         }

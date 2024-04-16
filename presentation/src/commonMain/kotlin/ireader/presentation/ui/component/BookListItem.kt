@@ -37,7 +37,7 @@ fun BookListItemImage(
     mangaCover: BookCover,
 ) {
     IImageLoader(
-        model = mangaCover.cover,
+        model = mangaCover,
         contentDescription = null,
         modifier = modifier,
         contentScale = ContentScale.Crop

@@ -1,57 +1,40 @@
 package ireader.presentation.imageloader.coil.imageloader
 
-import com.seiko.imageloader.component.keyer.Keyer
-import com.seiko.imageloader.component.mapper.Mapper
-import com.seiko.imageloader.option.Options
+import coil3.Uri
+import coil3.key.Keyer
+import coil3.map.Mapper
+import coil3.request.Options
+import coil3.toUri
 import io.ktor.http.*
 import ireader.domain.models.BookCover
 import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogRemote
 
-class BookCoverKeyer : Keyer {
-    override fun key(data: Any, options: Options): String? {
-        return when (data) {
-            is BookCover -> {
-                return "${data.cover};${data.lastModified}"
-            }
-            else -> null
-        }
+class BookCoverKeyer : Keyer<BookCover> {
+    override fun key(data: BookCover, options: Options): String? {
+        return "${data.cover};${data.lastModified}"
     }
 }
-class BookCoverMapper : Mapper<Url> {
+// There is no need for this mapper as we have custom fetcher for book covers
+class BookCoverMapper : Mapper<BookCover, Uri> {
 
-    override fun map(data: Any, options: Options): Url? {
-        return when (data) {
-            is BookCover -> {
-                return Url(data.cover ?: "")
-            }
-            else -> {
-                null
-            }
-        }
+    override fun map(data: BookCover, options: Options): Uri? {
+        return data.cover?.toUri()
     }
 }
-class InstalledCatalogKeyer : Keyer {
-    override fun key(data: Any, options: Options): String? {
-        return if (data is CatalogInstalled) {
-            data.iconUrl.ifBlank {
-                data.pkgName
-            }
-        } else {
-            null
+class InstalledCatalogKeyer : Keyer<CatalogInstalled> {
+    override fun key(data: CatalogInstalled, options: Options): String? {
+        return data.iconUrl.ifBlank {
+            data.pkgName
         }
 
     }
 }
 
-class CatalogRemoteKeyer : Keyer {
-    override fun key(data: Any, options: Options): String? {
-        return if (data is CatalogRemote) {
-            return data.iconUrl.ifBlank {
-                data.pkgName
-            }
-        } else {
-            null
+class CatalogRemoteKeyer : Keyer<CatalogRemote> {
+    override fun key(data: CatalogRemote, options: Options): String? {
+        return data.iconUrl.ifBlank {
+            data.pkgName
         }
 
     }

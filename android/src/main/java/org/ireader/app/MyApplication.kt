@@ -3,8 +3,9 @@ package org.ireader.app
 import android.app.Application
 import android.os.Build
 import android.os.Looper
-import com.seiko.imageloader.ImageLoader
-import com.seiko.imageloader.ImageLoaderFactory
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.SingletonImageLoader
 import ireader.core.http.WebViewUtil
 import ireader.data.di.DataModule
 import ireader.data.di.dataPlatformModule
@@ -15,9 +16,10 @@ import ireader.domain.di.DomainServices
 import ireader.domain.di.UseCasesInject
 import ireader.domain.di.localModule
 import ireader.domain.di.preferencesInjectModule
+import ireader.domain.image.CoverCache
 import ireader.presentation.core.di.PresentationModules
 import ireader.presentation.core.di.presentationPlatformModule
-import ireader.presentation.imageloader.coil.CoilLoaderFactory
+import ireader.presentation.imageloader.CoilLoaderFactory
 import org.ireader.app.di.AppModule
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
@@ -25,8 +27,9 @@ import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.core.component.KoinComponent
 import org.koin.core.context.startKoin
+import org.koin.dsl.module
 
-class MyApplication : Application(), ImageLoaderFactory, KoinComponent {
+class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent {
     override fun onCreate() {
         super.onCreate()
         startKoin {
@@ -48,14 +51,11 @@ class MyApplication : Application(), ImageLoaderFactory, KoinComponent {
             modules(DomainServices)
             modules(DomainModule)
             modules(presentationPlatformModule)
+
         }
     }
 
     val coil: CoilLoaderFactory by inject()
-
-    override fun newImageLoader(): ImageLoader {
-        return coil.newImageLoader()
-    }
 
     override fun getPackageName(): String {
         // This causes freezes in Android 6/7 for some reason
@@ -76,5 +76,9 @@ class MyApplication : Application(), ImageLoaderFactory, KoinComponent {
             }
         }
         return super.getPackageName()
+    }
+
+    override fun newImageLoader(context: PlatformContext): ImageLoader {
+        return coil.newImageLoader(this)
     }
 }

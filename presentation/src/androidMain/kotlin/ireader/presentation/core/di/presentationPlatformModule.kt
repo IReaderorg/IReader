@@ -1,10 +1,12 @@
 package ireader.presentation.core.di
 
+import android.content.Context
+import ireader.domain.image.CoverCache
 import ireader.presentation.core.PlatformHelper
 import ireader.presentation.core.theme.IUseController
 import ireader.presentation.core.theme.LocaleHelper
 import ireader.presentation.core.ui.SecuritySettingViewModel
-import ireader.presentation.imageloader.coil.CoilLoaderFactory
+import ireader.presentation.imageloader.CoilLoaderFactory
 import ireader.presentation.ui.home.tts.TTSViewModel
 import ireader.presentation.ui.reader.viewmodel.PlatformReaderSettingReader
 import ireader.presentation.ui.video.VideoScreenViewModel
@@ -37,9 +39,9 @@ actual val presentationPlatformModule = module  {
             get(),
             get(),
             get(),
-            get()
         )
     }
+    single<CoverCache> { CoverCache(get<Context>(), get())}
     single<PlatformReaderSettingReader> { PlatformReaderSettingReader(get()) }
 
 }

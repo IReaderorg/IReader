@@ -17,8 +17,9 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.NavigatorDisposeBehavior
-import com.seiko.imageloader.ImageLoaderFactory
-import com.seiko.imageloader.LocalImageLoader
+import coil3.SingletonImageLoader
+import coil3.annotation.ExperimentalCoilApi
+import coil3.compose.setSingletonImageLoaderFactory
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import ireader.core.http.toast
@@ -61,7 +62,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     val initializers: AppInitializers by inject()
     private val automaticBackup: AutomaticBackup by inject()
     private val localeHelper: LocaleHelper by inject()
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         registerSecureActivity(this, uiPreferences,initializers)
@@ -74,10 +75,11 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         localeHelper.setLocaleLang()
         installSplashScreen()
         setContent {
-                CompositionLocalProvider(
-                        LocalImageLoader provides (this@MainActivity.application as ImageLoaderFactory).newImageLoader(),
-                ) {
+            setSingletonImageLoaderFactory { context ->
+                (this@MainActivity.application as SingletonImageLoader.Factory).newImageLoader(context = context)
+            }
                     AppTheme(this.lifecycleScope) {
+
                         Surface(
                                 color = MaterialTheme.colorScheme.surface,
                                 contentColor = MaterialTheme.colorScheme.onSurface,
@@ -107,7 +109,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
 
                         }
                     }
-                }
         }
     }
 

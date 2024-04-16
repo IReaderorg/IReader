@@ -20,7 +20,6 @@ import ireader.domain.catalogs.service.CatalogInstallationChanges
 import ireader.domain.catalogs.service.CatalogInstaller
 import ireader.domain.catalogs.service.CatalogLoader
 import ireader.domain.catalogs.service.CatalogRemoteApi
-import ireader.domain.image.cache.CoverCache
 import org.koin.dsl.module
 
 actual val dataPlatformModule = module {
@@ -57,7 +56,6 @@ actual val dataPlatformModule = module {
     }
     single<PackageInstaller> { PackageInstaller(get(), get()) }
     single<WebViewCookieJar> { WebViewCookieJar(get()) }
-    single<CoverCache> { CoverCache(get(), get()) }
     single<InstallCatalog> { InstallCatalogImpl(get(), get(), get()) }
     single<CatalogInstallationChanges> { get<AndroidCatalogInstallationChanges>() }
     single<CatalogInstaller> {

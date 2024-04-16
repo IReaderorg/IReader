@@ -138,11 +138,6 @@ private fun CatalogPic(catalog: Catalog, modifier: Modifier = Modifier) {
             )
         }
     }
-    IImageLoader(
-        model = catalog,
-        contentDescription = null,
-        modifier = modifier,
-    )
 }
 
 @Composable

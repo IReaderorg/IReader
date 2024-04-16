@@ -15,7 +15,7 @@ import ireader.domain.utils.fastForEach
 import ireader.domain.utils.fastMap
 import ireader.domain.utils.fastMaxBy
 import kotlin.math.max
-
+import androidx.compose.foundation.layout.MutableWindowInsets
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 actual fun PlatformScaffold(modifier: Modifier,
@@ -35,7 +35,7 @@ actual fun PlatformScaffold(modifier: Modifier,
     androidx.compose.material3.Surface(
         modifier = Modifier
             .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
-            .withConsumedWindowInsets {
+            .onConsumedWindowInsetsChanged {
                 remainingWindowInsets.insets = contentWindowInsets.exclude(it)
             }
             .then(modifier),

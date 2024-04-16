@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import ireader.core.source.model.Text
 import ireader.domain.data.repository.ChapterRepository
-import ireader.domain.image.cache.CoverCache
+import ireader.domain.image.CoverCache
 import ireader.domain.models.BookCover
 import ireader.domain.models.entities.Book
 import ireader.domain.utils.fastForEachIndexed

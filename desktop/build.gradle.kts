@@ -32,6 +32,8 @@ dependencies {
     implementation(libs.voyager.navigator)
     implementation(kotlinx.coroutines.core)
     implementation(libs.napier)
+    implementation(libs.coil.network.ktor)
+    implementation(libs.coil.compose)
 
 }
 

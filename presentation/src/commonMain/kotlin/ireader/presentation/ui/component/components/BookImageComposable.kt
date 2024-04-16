@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import coil3.toUri
 import io.ktor.http.*
 import ireader.domain.models.BookCover
 import ireader.presentation.imageloader.IImageLoader
@@ -29,7 +30,7 @@ fun IBookImageComposable(
     IImageLoader(
             modifier = modifier.fillMaxSize(),
             contentScale = contentScale,
-            model =  Url(image.cover?:""),
+            model =  image.cover?.toUri(), // coil3 only supports Uri data type right now
             contentDescription = "an image",
             alignment = alignment,
     )

@@ -49,10 +49,12 @@ kotlin {
                 implementation(libs.voyager.screenmodel)
                 api(libs.koin.core)
                 api(libs.koin.compose)
-                api(libs.imageLoader)
+
                 api(libs.coil.core)
                 api(libs.coil.compose)
-                api(libs.coil.network.okhttp)
+                api(libs.coil.network.ktor)
+
+
             }
         }
         androidMain {
@@ -62,7 +64,7 @@ kotlin {
                 api(libs.bundles.simplestorage)
                 api("androidx.core:core-splashscreen:1.0.0")
                 api(composeLib.compose.googlFonts)
-
+                api(libs.ktor.core.android)
 
                 api(composeLib.material3.windowsizeclass)
 

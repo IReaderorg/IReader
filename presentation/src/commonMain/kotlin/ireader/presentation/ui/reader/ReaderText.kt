@@ -34,8 +34,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.seiko.imageloader.cache.CachePolicy
-import com.seiko.imageloader.model.ImageRequest
+import coil3.compose.LocalPlatformContext
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
+import coil3.toUri
 import ireader.core.source.model.ImageUrl
 import ireader.core.source.model.Page
 import ireader.core.source.model.Text
@@ -256,6 +258,7 @@ private fun MainText(
     vm: ReaderScreenViewModel
 ) {
 
+    val context = LocalPlatformContext.current
     when (page) {
         is Text -> {
             StyleText(modifier, vm, index, page, vm.bionicReadingMode.value)
@@ -270,13 +273,7 @@ private fun MainText(
                     modifier = Modifier
                         .fillMaxWidth()
                         .requiredHeight(500.dp),
-                    model = ImageRequest {
-                        data(page.url)
-                        this.options {
-                            diskCachePolicy = CachePolicy.DISABLED
-                        }
-
-                    },
+                    model = ImageRequest.Builder(context=context).data(page.url.toUri()).diskCachePolicy(CachePolicy.DISABLED).build(),
                     contentDescription = "image",
                     contentScale = ContentScale.FillWidth,
                     onLoading = {
