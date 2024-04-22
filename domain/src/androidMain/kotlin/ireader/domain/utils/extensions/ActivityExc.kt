@@ -143,13 +143,4 @@ fun Activity.hideSystemUI() {
     windowInsetsController.systemBarsBehavior =
         WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
     windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
-}
-
-var Activity.brightness: Float?
-    get() = this.window?.attributes?.screenBrightness
-    set(value) {
-        val window = this.window
-        val layoutParams = window.attributes
-        layoutParams?.screenBrightness = value // 0 is turned off, 1 is full brightness
-        window?.attributes = layoutParams
     }

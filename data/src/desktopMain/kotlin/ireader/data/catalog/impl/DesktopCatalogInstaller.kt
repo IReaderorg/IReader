@@ -60,9 +60,7 @@ class DesktopCatalogInstaller(
                 iconResponse.saveTo(iconFile)
                 emit(InstallStep.Idle)
                 val result = InstallStep.Success
-                if (result is InstallStep.Success) {
-                    installationChanges.notifyAppInstall(catalog.pkgName)
-                }
+                installationChanges.notifyAppInstall(catalog.pkgName)
                 emit(result)
             } catch (e: Throwable) {
                 Log.warn(e, "Error installing package")

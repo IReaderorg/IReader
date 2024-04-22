@@ -1,11 +1,9 @@
 [versions]
 # Compose
-composeGradle = "1.6.1"
+composeGradle = "1.6.2"
 voyager = "1.1.0-alpha02"
 # Android
 proguard = "7.2.2"
-# Image Loader
-image-loader = "1.4.4"
 # Dependency Injection
 koinAnnotation = "1.2.0"
 koin = "3.5.0"
@@ -128,9 +126,6 @@ media3-subtitleDecoder = { module = "com.github.albfernandez:juniversalchardet",
 
 
 epublib = { module = "io.github.kazemcodes:epublib-core", version = "4.0-SNAPSHOT" }
-
-imageLoader = { module = "io.github.qdsfdhvh:image-loader", version.ref = "image-loader" }
-imageLoader-io = { module = "io.github.qdsfdhvh:image-loader-extension-imageio", version.ref = "image-loader" }
 
 
 multiplatformSettings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformSettings" }

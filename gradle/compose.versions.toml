@@ -3,13 +3,13 @@ compose = "1.5.11"
 compiler = "1.4.4"
 activity = "1.5.1"
 lifecycle = "2.5.1"
-material3 = "1.0.1"
-ui = "1.4.3"
+material3 = "1.2.1"
+ui = "1.6.6"
 
 [libraries]
 compose-ui-util = { module = "androidx.compose.ui:ui-util", version.ref = "ui" }
 compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version = "1.0.1" }
-compose-googlFonts =  { module ="androidx.compose.ui:ui-text-google-fonts", version = "1.4.3" }
+compose-googlFonts =  { module ="androidx.compose.ui:ui-text-google-fonts", version = "1.6.5" }
 material3-windowsizeclass = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "material3" }
 [bundles]
 
