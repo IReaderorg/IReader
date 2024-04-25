@@ -11,7 +11,7 @@ import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogRemote
 
 class BookCoverKeyer : Keyer<BookCover> {
-    override fun key(data: BookCover, options: Options): String? {
+    override fun key(data: BookCover, options: Options): String {
         return "${data.cover};${data.lastModified}"
     }
 }

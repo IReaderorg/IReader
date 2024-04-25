@@ -119,11 +119,11 @@ fun newImageLoader(context: PlatformContext, simpleStorage: GetSimpleStorage, cl
             add(CatalogRemoteKeyer())
             add(InstalledCatalogKeyer())
             add(
-                BookCoverFetcher.Factory(
+                BookCoverFetcher.BookCoverFactory(
                     callFactoryLazy = lazy(callFactoryInit),
                     diskCacheLazy = lazy(diskCacheInit),
-                    coverCache,
                     catalogStore,
+                    coverCache,
                 )
             )
         }

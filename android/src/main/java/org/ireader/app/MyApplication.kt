@@ -25,7 +25,9 @@ import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.workmanager.koin.workManagerFactory
+import org.koin.core.KoinApplication
 import org.koin.core.component.KoinComponent
+import org.koin.core.context.KoinContext
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
@@ -39,6 +41,7 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
             androidContext(this@MyApplication)
             // Load modules
             workManagerFactory()
+            KoinApplication.init()
             modules(dataPlatformModule)
             modules(AppModule)
             modules(CatalogModule)
@@ -51,7 +54,6 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
             modules(DomainServices)
             modules(DomainModule)
             modules(presentationPlatformModule)
-
         }
     }
 

@@ -11,7 +11,6 @@ import ireader.core.http.okhttp
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.image.CoverCache
 import ireader.presentation.imageloader.coil.imageloader.BookCoverKeyer
-import ireader.presentation.imageloader.coil.imageloader.BookCoverMapper
 import ireader.presentation.imageloader.coil.imageloader.CatalogRemoteKeyer
 import ireader.presentation.imageloader.coil.imageloader.CatalogRemoteMapper
 import ireader.presentation.imageloader.coil.imageloader.InstalledCatalogKeyer
@@ -38,11 +37,19 @@ class CoilLoaderFactory(
                 add(CatalogRemoteKeyer())
                 add(InstalledCatalogKeyer())
                 add(
-                    BookCoverFetcher.Factory(
+                    BookCoverFetcher.BookCoverFactory(
                         callFactoryLazy = lazy(callFactoryInit),
                         diskCacheLazy = lazy(diskCacheInit),
-                        coverCache,
                         catalogStore,
+                        coverCache,
+                    )
+                )
+                add(
+                    BookCoverFetcher.BookFactory(
+                        callFactoryLazy = lazy(callFactoryInit),
+                        diskCacheLazy = lazy(diskCacheInit),
+                        catalogStore,
+                        coverCache,
                     )
                 )
             }
