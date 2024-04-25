@@ -52,6 +52,7 @@ import org.ireader.app.initiators.AppInitializers
 import org.ireader.app.initiators.GetPermissions
 import org.ireader.app.initiators.SecureActivityDelegateImpl
 import org.koin.android.ext.android.inject
+import org.koin.compose.KoinContext
 import kotlin.time.Duration.Companion.seconds
 
 class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivityDelegateImpl() {
@@ -75,40 +76,45 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         localeHelper.setLocaleLang()
         installSplashScreen()
         setContent {
-            setSingletonImageLoaderFactory { context ->
-                (this@MainActivity.application as SingletonImageLoader.Factory).newImageLoader(context = context)
-            }
-                    AppTheme(this.lifecycleScope) {
+            KoinContext {
+                setSingletonImageLoaderFactory { context ->
+                    (this@MainActivity.application as SingletonImageLoader.Factory).newImageLoader(
+                        context = context
+                    )
+                }
+                AppTheme(this.lifecycleScope) {
 
-                        Surface(
-                                color = MaterialTheme.colorScheme.surface,
-                                contentColor = MaterialTheme.colorScheme.onSurface,
+                    Surface(
+                        color = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
 
-                                ) {
+                        ) {
 
-                            Navigator(
-                                    screen = MainStarterScreen,
-                                    disposeBehavior = NavigatorDisposeBehavior(
-                                            disposeNestedNavigators = false,
-                                            disposeSteps = true
-                                    ),
-                            ) { navigator ->
-                                if (navigator.size == 1) {
-                                    ConfirmExit()
-                                }
-                                LaunchedEffect(navigator) {
-                                    handleIntentAction(this@MainActivity.intent, navigator)
-                                }
-                                IScaffold {
-                                    DefaultNavigatorScreenTransition(navigator = navigator)
-                                    GetPermissions(uiPreferences)
-                                }
-
-                                HandleOnNewIntent(this, navigator)
+                        Navigator(
+                            screen = MainStarterScreen,
+                            disposeBehavior = NavigatorDisposeBehavior(
+                                disposeNestedNavigators = false,
+                                disposeSteps = true
+                            ),
+                        ) { navigator ->
+                            if (navigator.size == 1) {
+                                ConfirmExit()
+                            }
+                            LaunchedEffect(navigator) {
+                                handleIntentAction(this@MainActivity.intent, navigator)
+                            }
+                            IScaffold {
+                                DefaultNavigatorScreenTransition(navigator = navigator)
+                                GetPermissions(uiPreferences)
                             }
 
+                            HandleOnNewIntent(this, navigator)
                         }
+
                     }
+                }
+
+            }
         }
     }
 

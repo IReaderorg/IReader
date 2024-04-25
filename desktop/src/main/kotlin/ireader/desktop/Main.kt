@@ -52,6 +52,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
+import org.koin.compose.KoinContext
 import org.koin.compose.koinInject
 import org.koin.compose.rememberKoinInject
 import org.koin.core.context.startKoin
@@ -82,15 +83,22 @@ fun main() {
             state = state,
             icon = painterResource("icon.png")
         ) {
-            val context =  LocalPlatformContext.current
-            val catalogStore : CatalogStore = koinInject()
-            val getSimpleStorage : GetSimpleStorage = koinInject()
-            val coverCache : CoverCache = CoverCache(context,getSimpleStorage)
-            val httpClients : HttpClients = koinInject()
-            setSingletonImageLoaderFactory { context ->
-                newImageLoader(catalogStore = catalogStore, simpleStorage = getSimpleStorage, client =httpClients , coverCache =coverCache , context = context)
-            }
-            val coroutineScope = rememberCoroutineScope()
+            KoinContext {
+                val context = LocalPlatformContext.current
+                val catalogStore: CatalogStore = koinInject()
+                val getSimpleStorage: GetSimpleStorage = koinInject()
+                val coverCache: CoverCache = CoverCache(context, getSimpleStorage)
+                val httpClients: HttpClients = koinInject()
+                setSingletonImageLoaderFactory { context ->
+                    newImageLoader(
+                        catalogStore = catalogStore,
+                        simpleStorage = getSimpleStorage,
+                        client = httpClients,
+                        coverCache = coverCache,
+                        context = context
+                    )
+                }
+                val coroutineScope = rememberCoroutineScope()
                 AppTheme(coroutineScope) {
                     Navigator(
                         screen = MainStarterScreen,
@@ -104,6 +112,7 @@ fun main() {
                         DefaultNavigatorScreenTransition(navigator = navigator)
                     }
                 }
+            }
             }
         }
     }
