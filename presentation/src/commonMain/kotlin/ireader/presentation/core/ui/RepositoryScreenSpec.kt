@@ -50,7 +50,7 @@ class RepositoryScreenSpec : VoyagerScreen() {
                 )
             },
             snackbarHostState = host,
-            floatingActionButtonPosition = ireader.presentation.ui.component.FabPosition.End,
+            floatingActionButtonPosition = FabPosition.End,
             floatingActionButton = {
                 ExtendedFloatingActionButton(
                     text = {

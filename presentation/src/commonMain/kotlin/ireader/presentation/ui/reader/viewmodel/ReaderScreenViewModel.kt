@@ -74,7 +74,7 @@ class ReaderScreenViewModel(
         isSettingChangingJob?.cancel()
         isSettingChangingJob = scope.launch {
             isSettingChanging = true
-            delay(3000)
+            delay(500)
             isSettingChanging = false
         }
     }

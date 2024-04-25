@@ -21,26 +21,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import ireader.presentation.ui.component.components.ISnackBarHost
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-expect fun PlatformScaffold(
-        modifier: Modifier = Modifier,
-        topBarScrollBehavior: TopAppBarScrollBehavior,
-        snackbarHostState: SnackbarHostState,
-        topBar: @Composable (TopAppBarScrollBehavior) -> Unit,
-        bottomBar: @Composable () -> Unit,
-        startBar: @Composable () -> Unit,
-        snackbarHost: @Composable () -> Unit,
-        floatingActionButton: @Composable () -> Unit,
-        floatingActionButtonPosition: FabPosition,
-        containerColor: Color,
-        contentColor: Color,
-        contentWindowInsets: WindowInsets,
-        content: @Composable (PaddingValues) -> Unit,
-)
-
+import androidx.compose.foundation.layout.MutableWindowInsets
 
 /**
  * <a href="https://material.io/design/layout/understanding-layout.html" class="external" target="_blank">Material Design layout</a>.
@@ -92,54 +75,39 @@ expect fun PlatformScaffold(
 
 @Composable
 fun IScaffold(
-        modifier: Modifier = Modifier,
-        topBarScrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(
-                rememberTopAppBarState()
-        ),
-        snackbarHostState: SnackbarHostState = SnackbarHostState(),
-        topBar: @Composable (TopAppBarScrollBehavior) -> Unit = {},
-        bottomBar: @Composable () -> Unit = {},
-        startBar: @Composable () -> Unit = {},
-        snackbarHost: @Composable () -> Unit = {
-            ISnackBarHost(snackbarHostState)
-        },
-        floatingActionButton: @Composable () -> Unit = {},
-        floatingActionButtonPosition: FabPosition = FabPosition.End,
-        containerColor: Color = MaterialTheme.colorScheme.background,
-        contentColor: Color = contentColorFor(containerColor),
-        contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
-        content: @Composable (PaddingValues) -> Unit,
+    modifier: Modifier = Modifier,
+    topBarScrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(
+        rememberTopAppBarState()
+    ),
+    snackbarHostState: SnackbarHostState = SnackbarHostState(),
+    topBar: @Composable (TopAppBarScrollBehavior) -> Unit = {},
+    bottomBar: @Composable () -> Unit = {},
+    startBar: @Composable () -> Unit = {},
+    snackbarHost: @Composable () -> Unit = {
+        ISnackBarHost(snackbarHostState)
+    },
+    floatingActionButton: @Composable () -> Unit = {},
+    floatingActionButtonPosition: FabPosition = FabPosition.End,
+    containerColor: Color = MaterialTheme.colorScheme.background,
+    contentColor: Color = contentColorFor(containerColor),
+    contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
+    content: @Composable (PaddingValues) -> Unit,
 ) {
-    return PlatformScaffold(
-            modifier, topBarScrollBehavior, snackbarHostState, topBar, bottomBar, startBar, snackbarHost, floatingActionButton, floatingActionButtonPosition, containerColor, contentColor, contentWindowInsets, content
-    )
-}
-
-
-/**
- * The possible positions for a [FloatingActionButton] attached to a [Scaffold].
- */
-@ExperimentalMaterial3Api
-@JvmInline
-value class FabPosition internal constructor(@Suppress("unused") private val value: Int) {
-    companion object {
-        /**
-         * Position FAB at the bottom of the screen in the center, above the [NavigationBar] (if it
-         * exists)
-         */
-        val Center = FabPosition(0)
-
-        /**
-         * Position FAB at the bottom of the screen at the end, above the [NavigationBar] (if it
-         * exists)
-         */
-        val End = FabPosition(1)
-    }
-
-    override fun toString(): String {
-        return when (this) {
-            Center -> "FabPosition.Center"
-            else -> "FabPosition.End"
+    val remainingWindowInsets = remember { MutableWindowInsets() }
+    return Scaffold(modifier = Modifier
+        .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
+        .onConsumedWindowInsetsChanged {
+            remainingWindowInsets.insets = contentWindowInsets.exclude(it)
         }
-    }
+        .then(modifier),
+        topBar = { topBar(topBarScrollBehavior) },
+        bottomBar = bottomBar,
+        snackbarHost = snackbarHost,
+        floatingActionButton = floatingActionButton,
+        floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
+        containerColor = containerColor,
+        contentColor = contentColor,
+        contentWindowInsets = contentWindowInsets,
+        content
+    )
 }
