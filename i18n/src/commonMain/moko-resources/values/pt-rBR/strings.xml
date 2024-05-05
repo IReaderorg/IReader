@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="cancel_all">Cancel all</string>
-    <string name="apply">Apply</string>
-    <string name="library_screen_label">Library</string>
+    <string name="cancel_all">Cancelar tudo</string>
+    <string name="apply">Aplicar</string>
+    <string name="library_screen_label">Biblioteca</string>
     <string name="full">Full</string>
     <string name="immersive_mode">Immersive mode</string>
     <string name="all_category">All</string>
@@ -35,7 +35,7 @@
     <string name="filter">Filter</string>
     <string name="hint">…</string>
     <string name="something_is_wrong_with_this_book">Something is wrong with this book.</string>
-    <string name="view_book">View Book</string>
+    <string name="view_book">Ver livro</string>
     <string name="reset">Reset</string>
     <string name="tracker">Tracker</string>
     <string name="exit_search_mode">Exit search mode</string>
@@ -79,7 +79,7 @@
     <string name="scroll_mode">Scroll Mode</string>
     <string name="website">IReader</string>
     <string name="create_backup">Create Backup</string>
-    <string name="add_as_new">New</string>
+    <string name="add_as_new">Novo</string>
     <string name="last_update">Last Updated</string>
     <string name="restore_backup">Restore Backup</string>
     <string name="use_auth">Require unlock</string>
@@ -137,13 +137,13 @@
     <string name="appearance">Appearance</string>
     <string name="delete_all_histories">Delete All Histories</string>
     <string name="downloads_was_cancelled">Download of was Cancelled</string>
-    <string name="search_hint">Search…</string>
+    <string name="search_hint">Procurar…</string>
     <string name="description">Description</string>
     <string name="reading_mode">Reading Mode</string>
     <string name="background_color">Background Color</string>
     <string name="installed">Installed</string>
     <string name="name">Name</string>
-    <string name="edit_category">Edit Categories</string>
+    <string name="edit_category">Editar Categorias</string>
     <string name="installation_error_Storage">PackageManger: InSufficient Storage</string>
     <string name="find_current_chapter">Find Current Chapter</string>
     <string name="resume">Resume</string>
@@ -151,7 +151,7 @@
     <string name="display">Display</string>
     <string name="bottom_content_padding">Bottom content padding</string>
     <string name="trying_to_fetch_chapters_content">Trying to fetch chapter\'s content…</string>
-    <string name="show_system_catalogs">Show System Extensions</string>
+    <string name="show_system_catalogs">Mostrar extensões do sistema</string>
     <string name="username">Username</string>
     <string name="off">Off</string>
     <string name="light">Light mode</string>
@@ -190,7 +190,7 @@
     <string name="url">Url</string>
     <string name="failed_to_get_content">Failed to to get the content.</string>
     <string name="package_manager">Package Manager</string>
-    <string name="nothing_read_recently">Nothing read recently</string>
+    <string name="nothing_read_recently">Nada lido recentemente</string>
     <string name="retry">Retry</string>
     <string name="fetch_chapters">Fetch Chapters</string>
     <string name="installation_error_conflicted">PackageManger: Conflicted with installed package</string>
@@ -198,7 +198,7 @@
     <string name="line_height">Height</string>
     <string name="information_cloudflare_bypass_failure">Can\'t bypass the cloudflare</string>
     <string name="installation_error_aborted">PackageManger: Cancelled</string>
-    <string name="saved_local_source_location">Saved Sources to Cache</string>
+    <string name="saved_local_source_location">Fontes salvas no cache</string>
     <string name="fetch">Fetch</string>
     <string name="display_mode">Display Mode</string>
     <string name="latest_book">Latest</string>
@@ -229,7 +229,7 @@
     <string name="daily">Daily</string>
     <string name="time_out_exception">The request was timed out.</string>
     <string name="downloaded">Downloaded</string>
-    <string name="about">About</string>
+    <string name="about">Sobre</string>
     <string name="lock_never">Never</string>
     <string name="by_bookmark">By bookmark</string>
     <string name="use_local_cache">Use Local Cache</string>
@@ -250,7 +250,7 @@
     <string name="downloads_queue">Downloads queue</string>
     <string name="left">Left</string>
     <string name="save_custom_theme">Save custom theme</string>
-    <string name="delete_all_downloads">Delete all downloads</string>
+    <string name="delete_all_downloads">Excluir todos baixados</string>
     <string name="continues">Continue</string>
     <string name="more">More</string>
     <string name="select">Select</string>
@@ -267,9 +267,9 @@
     <string name="whats_new">Whats New</string>
     <string name="by_name">By Name</string>
     <string name="width">Width</string>
-    <string name="cancel">Cancel</string>
+    <string name="cancel">Cancelar</string>
     <string name="clear_all_database">Clear All Database</string>
-    <string name="setting_screen_label">Setting</string>
+    <string name="setting_screen_label">Configuração</string>
     <string name="installation_error_blocked">PackageManger: Installer was blocked</string>
     <string name="noInternetError">Could\'t Read Server, Check Your Internet Connection.</string>
     <string name="bionic_reading">Bionic Reading mode</string>
@@ -292,12 +292,12 @@
     <string name="select_inverted">Select Inverted</string>
     <string name="there_was_a_problem_in_getting_chapter">There was a problem in getting the chapter.</string>
     <string name="unselected_scrollbar_color">UnSelected ScrollBar Color</string>
-    <string name="confirm">Confirm</string>
+    <string name="confirm">Confirmar</string>
     <string name="selectable_mode">Selectable mode</string>
     <string name="open_explore">open explore</string>
     <string name="no_chapter_found_error">There is No chapter with this name.</string>
     <string name="content">Content</string>
-    <string name="category_hint">Name…</string>
+    <string name="category_hint">Nome…</string>
     <string name="go_back">Go Back</string>
     <string name="disable">Disable</string>
     <string name="vertical">Vertical</string>
@@ -353,7 +353,7 @@
     <string name="date_format">Date Format</string>
     <string name="less_brightness">Less Brightness</string>
     <string name="security">Security</string>
-    <string name="explore_screen_label">Explore</string>
+    <string name="explore_screen_label">Explorar</string>
     <string name="check_the_update">Check the Update</string>
     <string name="history_screen_label">History</string>
     <string name="go">Go</string>
@@ -370,12 +370,12 @@
     <string name="install">Install</string>
     <string name="margins">Margin</string>
     <string name="category">Categories</string>
-    <string name="show_local_catalogs">Show Local Extensions</string>
+    <string name="show_local_catalogs">Mostrar extensões locais</string>
     <string name="mark_previous_as_read">Mark Previous as read</string>
     <string name="source">Source</string>
     <string name="read_chapters">read chapters</string>
     <string name="share">Share</string>
-    <string name="add">Add</string>
+    <string name="add">Adicionar</string>
     <string name="unlock_app">Unlock</string>
     <string name="all_lang">All</string>
     <string name="delete_custom_theme">Delete custom theme</string>
@@ -386,7 +386,7 @@
     <string name="clipboard_copy_error">can\'t copy this text</string>
     <string name="no_book_found_error">There is no book with this id.</string>
     <string name="custom">Custom</string>
-    <string name="permission_not_given">Enough permission is not given, Please check out your permission</string>
+    <string name="permission_not_given">Não foi concedida permissão suficiente. Verifique sua permissão</string>
     <string name="automatic_backup">Automatic Backup</string>
     <string name="mark_as_read">Mark as read</string>
     <string name="use_default_image_loader">Use the Default Image Loader</string>
@@ -414,6 +414,6 @@
     <string name="installer_mode">Installer Mode</string>
     <string name="failed">Failed</string>
     <string name="screen_always_on">Screen Always On</string>
-    <string name="auto_installer">Auto Installer</string>
+    <string name="auto_installer">Instalar automaticamente</string>
     <string name="speech_rate">Speech Rate</string>
 </resources>
