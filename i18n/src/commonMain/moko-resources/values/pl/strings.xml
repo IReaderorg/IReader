@@ -143,7 +143,6 @@
     <string name="time_out_exception">Upłynął limit czasu żądania.</string>
     <string name="more">Więcej</string>
     <string name="horizontal">Poziomy</string>
-
     <string name="library_screen_label">Biblioteka</string>
     <string name="explore_screen_label">Badać</string>
     <string name="setting_screen_label">Ustawienie</string>

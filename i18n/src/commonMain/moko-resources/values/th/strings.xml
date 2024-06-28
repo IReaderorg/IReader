@@ -114,7 +114,6 @@
     <string name="advance_setting">การตั้งค่าล่วงหน้า</string>
     <string name="advance_commands">คำสั่งล่วงหน้า</string>
     <string name="permission_not_given">ไม่ได้รับอนุญาตเพียงพอ โปรดตรวจสอบการอนุญาตของคุณ</string>
-
     <string name="the_downloads_was_interrupted">การดาวน์โหลดถูกขัดจังหวะ</string>
     <string name="refresh">รีเฟรช</string>
     <string name="share">แบ่งปัน</string>
@@ -179,7 +178,7 @@
     <string name="installation_error_aborted">PackageManger: ยกเลิก</string>
     <string name="installation_error_blocked">PackageManger: โปรแกรมติดตั้งถูกบล็อก</string>
     <string name="url_is_invalid">URL ไม่ถูกต้อง</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">ชื่อ</string>
     <string name="username">ชื่อผู้ใช้</string>
     <string name="password">รหัสผ่าน</string>

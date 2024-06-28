@@ -14,7 +14,6 @@
     <string name="about">約</string>
     <string name="status">状態</string>
     <string name="cover">カバー</string>
-
     <string name="increase">増加</string>
     <string name="version">バージョン</string>
     <string name="whats_new">新着情報</string>
@@ -27,7 +26,7 @@
     <string name="auto">自動</string>
     <string name="delete_update">アップデートを削除</string>
     <string name="installation_error_aborted">パッケージマネージャー: キャンセル</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">名前</string>
     <string name="username">ユーザー名</string>
     <string name="password">パスワード</string>

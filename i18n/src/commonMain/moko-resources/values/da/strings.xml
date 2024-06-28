@@ -77,7 +77,6 @@
     <string name="pinned_sources">Fastgjort</string>
     <string name="last_used_source">Sidst brugt</string>
     <string name="create_backup">Opret sikkerhedskopi</string>
-
     <string name="library_screen_label">Bibliotek</string>
     <string name="explore_screen_label">Udforske</string>
     <string name="setting_screen_label">Indstilling</string>

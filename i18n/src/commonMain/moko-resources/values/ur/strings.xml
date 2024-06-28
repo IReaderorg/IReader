@@ -2,7 +2,6 @@
 <resources>
     <string name="permission_not_given">کافی اجازت نہیں دی گئی، براہ کرم اپنی اجازت چیک کریں۔</string>
     <string name="saved_local_source_location">کیشے میں ذرائع کو محفوظ کیا گیا۔</string>
-
     <string name="no_app_was_found_to_lauch">کچھ غلط ہو گیا. آپ کے پاس مطلوبہ ایپ نہیں ہے۔</string>
     <string name="the_downloads_was_interrupted">ڈاؤن لوڈز میں خلل پڑا</string>
     <string name="the_downloads_was_cancelled">ڈاؤن لوڈز کو منسوخ کر دیا گیا تھا۔</string>

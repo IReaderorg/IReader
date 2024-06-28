@@ -34,8 +34,8 @@
     <string name="previous_result">Попередній результат</string>
     <string name="next_result">Наступний результат</string>
     <string name="expand_menu">Розгорнути меню</string>
-    <string name="go_forward">Вперед!</string>
-    <string name="fetch_book">Fetch Book</string>
+    <string name="go_forward">Вперед</string>
+    <string name="fetch_book">Отримати книгу</string>
     <string name="fetch_chapter">Витягнути розділ</string>
     <string name="fetch_chapters">Витягнути розділи</string>
     <string name="go">Іди.</string>
@@ -92,7 +92,7 @@
     <string name="installation_error_incompatible">PackageManger: Несумісний зі встановленим пакетом</string>
     <string name="installation_error_conflicted">PackageManger: Конфлікт зі встановленим пакунком</string>
     <string name="installation_error_blocked">PackageManger: Інсталятор заблоковано</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">Ім\'я та прізвище</string>
     <string name="no_chapter_found_error">Розділу з такою назвою немає.</string>
     <string name="trying_in_few_second">Спробуйте ще раз через кілька секунд.</string>
@@ -111,7 +111,7 @@
     <string name="download_notifier_unknown_error">Не вдалося завантажити розділ через несподівану помилку</string>
     <string name="channel_common">Звичайний</string>
     <string name="channel_progress">Прогрес</string>
-    <string name="channel_complete">Завершено</string>
+    <string name="channel_complete">Закінчено</string>
     <string name="channel_new_chapters">Оновлення розділів</string>
     <string name="channel_app_updates">Оновлення застосунку</string>
     <string name="channel_ext_updates">Оновлення розширення</string>
@@ -229,7 +229,7 @@
     <string name="font">Шрифт</string>
     <string name="page">Сторінка</string>
     <string name="continues">Продовження</string>
-    <string name="right">Так.</string>
+    <string name="right">Справа</string>
     <string name="read_chapters">читати розділи</string>
     <string name="selectable_mode">Вибір режиму</string>
     <string name="select_inverted">Виберіть Інвертований</string>
@@ -261,14 +261,14 @@
     <string name="browse">Переглянути</string>
     <string name="second">Другий</string>
     <string name="background_color">Колір фону</string>
-    <string name="text_color">TextColor</string>
+    <string name="text_color">Колір тексту</string>
     <string name="save_custom_theme">Зберегти власну тему</string>
     <string name="delete_custom_theme">Видалення користувацької теми</string>
     <string name="scrollbar_color">Колір смуги прокрутки</string>
     <string name="selected_scrollbar_color">Вибраний колір смуги прокрутки</string>
     <string name="unselected_scrollbar_color">Невибраний колір смуги прокрутки</string>
     <string name="open_explore">відкрита розвідка</string>
-    <string name="dismiss">Звільнити.</string>
+    <string name="dismiss">Відхилити</string>
     <string name="book_name">Назва книги</string>
     <string name="auto_sort_chapters_in_db">Автоматичне сортування розділів в БД</string>
     <string name="advance_setting">Попереднє налаштування</string>
@@ -278,13 +278,13 @@
     <string name="unknown">Невідомо</string>
     <string name="remove">Видалити</string>
     <string name="bookmark">Закладка</string>
-    <string name="wait">Будь ласка, зачекайте.</string>
+    <string name="wait">Будь ласка, зачекайте</string>
     <string name="success">Успіх</string>
     <string name="epub">Epub </string>
     <string name="aborted">Успіх</string>
     <string name="downloading">Завантаження</string>
     <string name="installing">Установка</string>
-    <string name="complete">Завершено</string>
+    <string name="complete">Закінчено</string>
     <string name="failed">Не вдалося</string>
     <string name="voices">Голоси</string>
     <string name="languages">Мови</string>
@@ -415,5 +415,5 @@
     <string name="show_category_tabs">Показати вкладки категорій</string>
     <string name="unread_chapters">Непрочитані розділи</string>
     <string name="go_to_last_chapter">Перейти до попереднього розділу</string>
-    <string name="bionic_reading">Bionic Reading mode</string>
+    <string name="bionic_reading">Режим біонічного читання</string>
 </resources>

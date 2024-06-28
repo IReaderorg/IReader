@@ -287,7 +287,7 @@
     <string name="permission_not_given">Yeterli izin verilmemiş, Lütfen izninizi kontrol edin</string>
     <string name="saved_local_source_location">Önbelleğe Kaydedilen Kaynaklar</string>
     <string name="use_local_cache">Yerel Önbellek Kullanın</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="password">Şifre</string>
     <string name="owner">Sahibi</string>
     <string name="top_content_padding">Üst içerik dolgusu</string>
