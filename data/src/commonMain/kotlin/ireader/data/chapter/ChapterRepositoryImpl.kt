@@ -1,5 +1,6 @@
 package ireader.data.chapter
 
+import app.cash.sqldelight.Query
 import ireader.data.core.DatabaseHandler
 import ireader.data.util.toDB
 import ireader.domain.data.repository.ChapterRepository
@@ -69,7 +70,7 @@ class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
 
 
     override suspend fun insertChapter(chapter: Chapter): Long {
-        return handler.awaitOne(inTransaction = true) {
+        return handler.awaitOneAsync(inTransaction = true) {
                 chapterQueries.upsert(
                     chapter.id.toDB(),
                     chapter.bookId,
@@ -91,7 +92,7 @@ class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
     }
 
     override suspend fun insertChapters(chapters: List<Chapter>): List<Long> {
-        return handler.awaitList(true) {
+        return handler.awaitListAsync(true) {
             chapters.forEach { chapter ->
             chapterQueries.upsert(
                 chapter.id.toDB(),

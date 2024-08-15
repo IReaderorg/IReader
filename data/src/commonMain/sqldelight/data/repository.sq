@@ -1,4 +1,8 @@
-import java.lang.Boolean;
+import kotlin.Boolean;
+import kotlin.Long;
+import kotlin.String;
+import kotlin.Int;
+import kotlin.Float;
 
 CREATE TABLE IF NOT EXISTS repository (
 _id INTEGER NOT NULL PRIMARY KEY,

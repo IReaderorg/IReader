@@ -37,7 +37,6 @@ actual class HttpClients(
         .readTimeout(30, TimeUnit.SECONDS)
         .callTimeout(2, TimeUnit.MINUTES)
         .cookieJar(PersistentCookieJar(store))
-    .addInterceptor(UserAgentInterceptor())
 
 
   actual override val default = HttpClient(OkHttp) {

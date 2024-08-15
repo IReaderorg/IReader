@@ -1,3 +1,9 @@
+import kotlin.Boolean;
+import kotlin.Long;
+import kotlin.String;
+import kotlin.Int;
+import kotlin.Float;
+
 CREATE TABLE IF NOT EXISTS categories(
     _id INTEGER NOT NULL PRIMARY KEY ,
     name TEXT NOT NULL,

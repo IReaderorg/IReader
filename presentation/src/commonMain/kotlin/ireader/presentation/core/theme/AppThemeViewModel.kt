@@ -106,7 +106,10 @@ class AppThemeViewModel(
     }
 
     private fun getExtraColors(colors: ExtraColors, colorBars: Color): ExtraColors {
-        val appbar = colorBars.takeOrElse { colors.bars }
+        val appbar = kotlin.runCatching {
+         colorBars.takeOrElse { colors.bars }
+
+        }.getOrNull() ?:  Color.White
         return ExtraColors(
             bars = appbar,
             onBars = if (appbar.isLight()) Color.Black else Color.White

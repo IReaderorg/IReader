@@ -1,6 +1,7 @@
 package ireader.data.core
 
 import androidx.paging.PagingSource
+import app.cash.sqldelight.ExecutableQuery
 import app.cash.sqldelight.Query
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
@@ -33,6 +34,13 @@ class AndroidDatabaseHandler(
         return dispatch(inTransaction) { block(db).executeAsList() }
     }
 
+    override suspend fun <T : Any> awaitListAsync(
+        inTransaction: Boolean,
+        block: suspend Database.() -> ExecutableQuery<T>
+    ): List<T> {
+        return dispatch(inTransaction) { block(db).executeAsList() }
+    }
+
     override suspend fun <T : Any> awaitOne(
         inTransaction: Boolean,
         block: suspend Database.() -> Query<T>,
@@ -40,9 +48,23 @@ class AndroidDatabaseHandler(
         return dispatch(inTransaction) { block(db).executeAsOne() }
     }
 
+    override suspend fun <T : Any> awaitOneAsync(
+        inTransaction: Boolean,
+        block: suspend Database.() -> ExecutableQuery<T>
+    ): T {
+        return dispatch(inTransaction) { block(db).executeAsOne() }
+    }
+
     override suspend fun <T : Any> awaitOneOrNull(
         inTransaction: Boolean,
         block: suspend Database.() -> Query<T>,
+    ): T? {
+        return dispatch(inTransaction) { block(db).executeAsOneOrNull() }
+    }
+
+    override suspend fun <T : Any> awaitOneOrNullAsync(
+        inTransaction: Boolean,
+        block: suspend Database.() -> ExecutableQuery<T>
     ): T? {
         return dispatch(inTransaction) { block(db).executeAsOneOrNull() }
     }

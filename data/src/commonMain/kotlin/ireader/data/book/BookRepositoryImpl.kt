@@ -1,5 +1,8 @@
 package ireader.data.book
 
+import app.cash.sqldelight.Query
+import app.cash.sqldelight.TransactionWithReturn
+import ir.kazemcodes.infinityreader.Database
 import ireader.data.core.DatabaseHandler
 import ireader.data.util.BaseDao
 import ireader.data.util.toDB
@@ -120,8 +123,8 @@ class BookRepositoryImpl(
                 thumbnailUrl = book.cover,
                 viewer = book.viewer,
                 id = book.id,
-                initialized = book.initialized.toLong(),
-                favorite = book.favorite.toLong(),
+                initialized = book.initialized,
+                favorite = book.favorite,
                 genre = book.genres.let(bookGenresConverter::encode),
             )
 
@@ -152,17 +155,17 @@ class BookRepositoryImpl(
                     thumbnailUrl = book.cover,
                     viewer = book.viewer,
                     id = book.id,
-                    initialized = book.initialized.toLong(),
-                    favorite = book.favorite.toLong(),
+                    initialized = book.initialized,
+                    favorite = book.favorite,
                     genre = book.genres.let(bookGenresConverter::encode)
                 )
             }
 
         }
     }
-
     suspend fun insert(book: Book): Long? {
-        return handler.awaitOneOrNull(inTransaction = true) {
+        return handler.awaitOneOrNullAsync(inTransaction = true) {
+
             bookQueries.upsert(
                 id = book.id.toDB(),
                 source = book.sourceId,
@@ -196,7 +199,7 @@ class BookRepositoryImpl(
             updateBook(book)
             book.id
         }
-        return handler.awaitOneOrNull(inTransaction = true) {
+        return handler.awaitOneOrNullAsync(inTransaction = true) {
             bookQueries.upsert(
                 id = book.id.toDB(),
                 source = book.sourceId,
@@ -224,7 +227,7 @@ class BookRepositoryImpl(
     }
 
     override suspend fun updatePartial(book: Book): Long {
-        return handler.awaitOneOrNull(inTransaction = true) {
+        return handler.awaitOneOrNullAsync(inTransaction = true) {
             bookQueries.upsert(
                 id = book.id.toDB(),
                 source = book.sourceId,
@@ -250,7 +253,7 @@ class BookRepositoryImpl(
     }
 
     override suspend fun insertBooks(book: List<Book>): List<Long> {
-        return handler.awaitList(inTransaction = true) {
+        return handler.awaitListAsync(inTransaction = true) {
             dbOperation(book) { book ->
                 bookQueries.upsert(
                     id = book.id.toDB(),
@@ -362,8 +365,8 @@ class BookRepositoryImpl(
                     thumbnailUrl = book.cover,
                     viewer = book.viewer,
                     id = book.id,
-                    initialized = book.initialized.toLong(),
-                    favorite = book.favorite.toLong(),
+                    initialized = book.initialized,
+                    favorite = book.favorite,
                     genre = book.genres.let(bookGenresConverter::encode),
                 )
             }
@@ -388,8 +391,8 @@ class BookRepositoryImpl(
                     thumbnailUrl = book.cover,
                     viewer = book.viewer,
                     id = book.id,
-                    initialized = book.initialized.toLong(),
-                    favorite = book.favorite.toLong(),
+                    initialized = book.initialized,
+                    favorite = book.favorite,
                     genre = book.genres.let(bookGenresConverter::encode)
                 )
             }

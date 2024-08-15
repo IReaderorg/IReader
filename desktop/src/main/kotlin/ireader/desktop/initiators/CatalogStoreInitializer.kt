@@ -8,7 +8,6 @@ import ireader.domain.utils.extensions.launchIO
 
 class CatalogStoreInitializer(
     syncRemoteCatalogs: SyncRemoteCatalogs,
-    catalogStore: CatalogStore
 ) {
 
     init {

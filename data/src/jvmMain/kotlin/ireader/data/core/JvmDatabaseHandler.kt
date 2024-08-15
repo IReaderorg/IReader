@@ -8,9 +8,13 @@
 
 package ireader.data.core
 
+import app.cash.sqldelight.ExecutableQuery
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.Query
 import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOne
+import app.cash.sqldelight.coroutines.mapToOneOrNull
 import ir.kazemcodes.infinityreader.Database
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -38,6 +42,13 @@ internal class JvmDatabaseHandler constructor(
     return dispatch(inTransaction) { block(db).executeAsList() }
   }
 
+  override suspend fun <T : Any> awaitListAsync(
+    inTransaction: Boolean,
+    block: suspend Database.() -> ExecutableQuery<T>
+  ): List<T> {
+    return dispatch(inTransaction) { block(db).executeAsList() }
+  }
+
   override suspend fun <T : Any> awaitOne(
     inTransaction: Boolean, block:
     suspend Database.() -> Query<T>
@@ -45,9 +56,23 @@ internal class JvmDatabaseHandler constructor(
     return dispatch(inTransaction) { block(db).executeAsOne() }
   }
 
+  override suspend fun <T : Any> awaitOneAsync(
+    inTransaction: Boolean,
+    block: suspend Database.() -> ExecutableQuery<T>
+  ): T {
+    return dispatch(inTransaction) { block(db).executeAsOne() }
+  }
+
   override suspend fun <T : Any> awaitOneOrNull(
     inTransaction: Boolean, block:
     suspend Database.() -> Query<T>
+  ): T? {
+    return dispatch(inTransaction) { block(db).executeAsOneOrNull() }
+  }
+
+  override suspend fun <T : Any> awaitOneOrNullAsync(
+    inTransaction: Boolean,
+    block: suspend Database.() -> ExecutableQuery<T>
   ): T? {
     return dispatch(inTransaction) { block(db).executeAsOneOrNull() }
   }

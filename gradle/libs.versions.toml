@@ -40,7 +40,7 @@ apk-parser = { module = "net.dongliu:apk-parser", version.ref = "apkParser" }
 core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:2.0.4"
 firebase-analytics = { module = "com.google.firebase:firebase-analytics", version.ref = "firebaseAnalytics" }
-gradle-tools = "com.android.tools.build:gradle:8.2.2"
+gradle-tools = "com.android.tools.build:gradle:8.5.2"
 gradle-google = "com.google.gms:google-services:4.4.2"
 gradle-firebaseCrashlytic = "com.google.firebase:firebase-crashlytics-gradle:3.0.2"
 

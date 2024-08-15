@@ -13,7 +13,12 @@ actual class DatabaseDriverFactory {
         if (!dbDir.exists()) {
             AppDir.mkdirs()
         }
-        val dbFile = File(dbDir, "ireader.db")
+        val dbFile = File(dbDir, "/ireader.db")
+        print(dbFile.absolutePath)
+        if (!dbDir.exists()) {
+            dbDir.mkdirs()
+        }
+
         val driver = JdbcSqliteDriver(
             url = JdbcSqliteDriver.IN_MEMORY.plus(dbFile.absolutePath),
             properties = Properties().apply {

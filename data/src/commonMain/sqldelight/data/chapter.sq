@@ -1,3 +1,9 @@
+import kotlin.Boolean;
+import kotlin.Long;
+import kotlin.String;
+import kotlin.Int;
+import kotlin.Float;
+
 import ireader.core.source.model.Page;
 import kotlin.collections.List;
 
@@ -110,7 +116,7 @@ SET
 WHERE _id = :id;
 
 selectLastInsertedRowId:
-SELECT LAST_INSERT_ROWID();
+SELECT LAST_INSERT_ROWID() AS Long;
 
 
 

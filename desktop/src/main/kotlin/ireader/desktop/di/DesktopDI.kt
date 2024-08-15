@@ -5,5 +5,5 @@ import org.koin.dsl.module
 
 val DesktopDI = module {
 
-    single<CatalogStoreInitializer>(createdAtStart = true) { CatalogStoreInitializer(get(),get()) }
+    single<CatalogStoreInitializer>(createdAtStart = true) { CatalogStoreInitializer(get()) }
 }

@@ -1,6 +1,7 @@
 package ireader.data.repository
 
 
+import app.cash.sqldelight.Query
 import ireader.data.core.DatabaseHandler
 import ireader.domain.data.repository.ReaderThemeRepository
 import ireader.domain.data.repository.ThemeRepository
@@ -15,7 +16,7 @@ class ThemeRepositoryImpl(
     }
 
     override suspend fun insert(theme: CustomTheme): Long {
-        return handler.awaitOne(inTransaction = true) {
+        return handler.awaitOneAsync(inTransaction = true) {
             theme.let { theme ->
                 themesQueries.upsert(
                     primary = theme.materialColor.primary,
@@ -127,7 +128,7 @@ class ReaderThemeRepositoryImpl(
     }
 
     override suspend fun insert(theme: ReaderTheme): Long {
-        return handler.awaitOne(inTransaction = true) {
+        return handler.awaitOneAsync(inTransaction = true) {
             theme.let { theme ->
                 readerThemesQueries.upsert(theme.backgroundColor, theme.onTextColor, theme.id)
             }
