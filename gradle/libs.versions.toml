@@ -1,5 +1,6 @@
 [versions]
 # Compose
+apkParser = "2.6.10"
 composeGradle = "1.7.0-alpha02"
 coreSplashscreen = "1.0.1"
 firebaseAnalytics = "22.0.2"
@@ -18,7 +19,7 @@ ktor = "3.0.0-beta-2"
 # Logging
 napier = "2.6.1"
 # Storage
-sqldelight = "1.5.5"
+sqldelight = "2.0.2"
 # Preferences
 multiplatformSettings = "1.0.0"
 
@@ -35,6 +36,7 @@ coil = "3.0.0-alpha10"
 
 
 [libraries]
+apk-parser = { module = "net.dongliu:apk-parser", version.ref = "apkParser" }
 core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:2.0.4"
 firebase-analytics = { module = "com.google.firebase:firebase-analytics", version.ref = "firebaseAnalytics" }
@@ -105,11 +107,11 @@ dex2jar-translator = { module = "de.femtopedia.dex2jar:dex-translator", version.
 dex2jar-tools = { module = "de.femtopedia.dex2jar:dex-tools", version.ref = "dex2jar" }
 
 
-sqldelight-runtime = { module = "com.squareup.sqldelight:runtime", version.ref = "sqldelight" }
-sqldelight-coroutines = { module = "com.squareup.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
-sqldelight-jvm = { module = "com.squareup.sqldelight:sqlite-driver", version.ref = "sqldelight" }
-sqldelight-android = { module = "com.squareup.sqldelight:android-driver", version.ref ="sqldelight" }
-sqldelight-android-paging = { module = "com.squareup.sqldelight:android-paging3-extensions", version.ref = "sqldelight" }
+sqldelight-runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqldelight" }
+sqldelight-coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
+sqldelight-jvm = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqldelight" }
+sqldelight-android = { module = "app.cash.sqldelight:android-driver", version.ref ="sqldelight" }
+sqldelight-android-paging = { module = "app.cash.sqldelight:androidx-paging3-extensions", version.ref = "sqldelight" }
 
 requerySqlite = "com.github.requery:sqlite-android:3.36.0"
 androidSqlite = "androidx.sqlite:sqlite-framework:2.4.0"
@@ -133,5 +135,5 @@ jetbrainCompose = { id = "org.jetbrains.compose", version.ref = "composeGradle" 
 # BuildConfigs
 buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildkonfig"}
 # Utility
-sqldelight = { id = "com.squareup.sqldelight", version.ref = "sqldelight" }
+sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 moko = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko" }

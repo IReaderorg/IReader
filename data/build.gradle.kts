@@ -45,7 +45,7 @@ kotlin {
                 implementation(androidx.core)
 
                 implementation(libs.sqldelight.android)
-                compileOnly(libs.androidSqlite)
+                implementation(libs.androidSqlite)
             }
         }
 
@@ -53,7 +53,7 @@ kotlin {
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
                 implementation(libs.sqldelight.jvm)
-                implementation("net.dongliu:apk-parser:2.6.10")
+                implementation(libs.apk.parser)
 
                 implementation(libs.dex2jar.translator)
                 implementation(libs.dex2jar.tools)
@@ -114,10 +114,11 @@ android {
 
 }
 sqldelight {
-    database("Database") {
-        packageName = "ir.kazemcodes.infinityreader"
-        dialect = "sqlite:3.24"
-         schemaOutputDirectory = file("src/commonMain/sqldelight/databases")
-         verifyMigrations = true
+    databases {
+        create("Database") {
+            packageName.set("ir.kazemcodes.infinityreader")
+            schemaOutputDirectory = file("src/commonMain/sqldelight/databases")
+            verifyMigrations = true
+        }
     }
 }
