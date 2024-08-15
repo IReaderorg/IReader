@@ -128,7 +128,6 @@ fun TabsContent(
         userScrollEnabled = true,
         reverseLayout = false,
         contentPadding = PaddingValues(0.dp),
-        beyondBoundsPageCount = 0,
         pageSize = PageSize.Fill,
         key = null,
         pageContent =  { page->

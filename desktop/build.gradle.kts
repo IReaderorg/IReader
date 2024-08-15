@@ -6,6 +6,7 @@ plugins {
     id(kotlinx.plugins.ksp.get().pluginId)
     id(libs.plugins.jetbrainCompose.get().pluginId)
     id("dev.icerock.mobile.multiplatform-resources")
+    alias(kotlinx.plugins.compose.compiler)
 }
 
 dependencies {

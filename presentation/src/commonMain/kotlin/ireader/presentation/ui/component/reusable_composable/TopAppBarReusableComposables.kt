@@ -192,11 +192,6 @@ fun AppIconButton(
                 onLongClick = onLongClick,
                 enabled = enabled,
                 role = Role.Button,
-                interactionSource = interactionSource,
-                indication = rememberRipple(
-                    bounded = false,
-                    radius = 40.0.dp / 2
-                )
             ),
         contentAlignment = Alignment.Center
     ) {

@@ -1,9 +1,10 @@
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
-    id("org.jetbrains.compose")
+    alias(libs.plugins.jetbrainCompose)
     id("kotlinx-serialization")
     id("com.google.devtools.ksp")
+    alias(kotlinx.plugins.compose.compiler)
 }
 
 kotlin {
@@ -62,7 +63,7 @@ kotlin {
                 api(libs.koin.android)
                 api(androidx.biometric)
                 api(libs.bundles.simplestorage)
-                api("androidx.core:core-splashscreen:1.0.0")
+                api("androidx.core:core-splashscreen:1.0.1")
                 api(composeLib.compose.googlFonts)
                 api(libs.ktor.core.android)
 
@@ -81,7 +82,6 @@ kotlin {
                 api(accompanist.web)
                 api(androidx.appCompat)
                 api(androidx.media)
-                api(libs.bundles.media3)
                 api(androidx.emoji)
                 api(androidx.work.runtime)
 
@@ -93,7 +93,7 @@ kotlin {
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
                 api(compose.desktop.currentOs)
-                api("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.6.4")
+                api("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.8.0")
 
                 val lwjglVersion = "3.3.1"
                 listOf("lwjgl", "lwjgl-nfd").forEach { lwjglDep ->

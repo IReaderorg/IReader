@@ -323,24 +323,12 @@ data class BookDetailScreenSpec constructor(
                         onItemClick = { chapter ->
                             if (vm.selection.isEmpty()) {
                                 if (book != null) {
-                                    when (chapter.type) {
-                                        ChapterInfo.MOVIE -> {
-                                            navigator.push(
-                                                VideoScreenSpec(
-                                                    chapterId = chapter.id,
-                                                )
-                                            )
-
-                                        }
-                                        else -> {
                                             navigator.push(
                                                 ReaderScreenSpec(
                                                     bookId = book.id,
                                                     chapterId = chapter.id,
                                                 )
                                             )
-                                        }
-                                    }
 
                                 }
                             } else {

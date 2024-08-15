@@ -3,6 +3,7 @@ package ireader.domain.usecases.translate
 import ireader.core.http.HttpClients
 import ireader.domain.data.engines.TranslateEngine
 import ireader.domain.preferences.prefs.ReaderPreferences
+import ireader.domain.usecases.translate.GoogleTranslateML
 
 
 

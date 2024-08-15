@@ -48,7 +48,7 @@ fun Toolbar(
             modifier = if (applyInsets) modifier.statusBarsPadding() else modifier,
             navigationIcon = navigationIcon,
             actions = actions,
-            colors = TopAppBarDefaults.smallTopAppBarColors(
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = backgroundColor,
                 titleContentColor = contentColor,
                 scrolledContainerColor = backgroundColor,

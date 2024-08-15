@@ -9,8 +9,9 @@ plugins {
     id("com.google.gms.google-services")
     kotlin("plugin.serialization")
     id("com.google.firebase.crashlytics")
-    id("org.jetbrains.compose")
     id("com.google.devtools.ksp")
+    alias(kotlinx.plugins.compose.compiler)
+    alias(libs.plugins.jetbrainCompose)
     id("dev.icerock.mobile.multiplatform-resources")
 }
 
@@ -146,7 +147,7 @@ dependencies {
 
     implementation(androidx.media)
 
-    implementation("androidx.core:core-splashscreen:1.0.0")
+    implementation(libs.core.splashscreen)
     @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
     implementation(compose.material3)
 
@@ -181,19 +182,20 @@ dependencies {
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.coroutines.android)
-    implementation("com.google.firebase:firebase-analytics:21.0.0")
+    implementation(libs.firebase.analytics)
 
 
 
     implementation(libs.jsoup)
     testImplementation(libs.ktor.core.cio)
 
+//    implementation(compose.compiler.auto)
     implementation(compose.runtime)
     implementation(compose.foundation)
 
     testImplementation(test.bundles.common)
 
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
+    testRuntimeOnly(libs.junit.vintage.engine)
    androidTestImplementation(test.bundles.common)
 
     implementation(libs.koin.core)
@@ -218,6 +220,12 @@ dependencies {
     implementation(libs.koin.compose)
     implementation(libs.koin.workManager)
     implementation(libs.napier)
+}
+composeCompiler {
+    enableStrongSkippingMode = true
+}
+compose {
+    kotlinCompilerPlugin = "org.jetbrains.kotlin:kotlin-compose-compiler-plugin-embeddable:2.0.10"
 }
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround

@@ -3,7 +3,7 @@ package ireader.presentation.imageloader
 import android.graphics.drawable.Drawable
 import coil3.ImageLoader
 import coil3.annotation.ExperimentalCoilApi
-import coil3.asCoilImage
+import coil3.asImage
 import coil3.decode.DataSource
 import coil3.decode.ImageSource
 import coil3.fetch.FetchResult
@@ -40,7 +40,7 @@ class CatalogInstalledFetcher(
                     )
                 } else {
                     val icon = packageManger.getApplicationIcon(data.pkgName) as Drawable
-                    ImageFetchResult(image = icon.asCoilImage(),isSampled = true,DataSource.DISK)
+                    ImageFetchResult(image = icon.asImage(),isSampled = true,DataSource.DISK)
                 }
             }
 

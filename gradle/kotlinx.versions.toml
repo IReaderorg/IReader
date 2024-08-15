@@ -1,10 +1,10 @@
 [versions]
-kotlin = "1.9.23"
+kotlin = "2.0.10"
 dokka = "1.7.20"
-coroutines = "1.8.0"
-serialization = "1.6.1"
-datetime = "0.5.0"
-ksp = "1.9.23-1.0.20"
+coroutines = "1.8.1"
+serialization = "1.6.3"
+datetime = "0.6.0"
+ksp = "2.0.10-1.0.24"
 [libraries]
 stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-common", version.ref = "kotlin" }
 reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
@@ -20,5 +20,6 @@ kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
 # Kotlin
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin"}
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin"}

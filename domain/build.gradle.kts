@@ -1,9 +1,10 @@
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
-    id("org.jetbrains.compose")
+    alias(libs.plugins.jetbrainCompose)
     id("kotlinx-serialization")
     id("com.google.devtools.ksp")
+    alias(kotlinx.plugins.compose.compiler)
 }
 
 android {

@@ -150,7 +150,6 @@ data class ExploreScreenSpec(
             ) { scaffoldPadding ->
                 if (source != null) {
                     ExploreScreen(
-                            modifier = Modifier.padding(scaffoldPadding),
                             vm = vm,
                             onFilterClick = {
                                 vm.toggleFilterMode()

@@ -4,6 +4,7 @@ plugins {
     kotlin("plugin.serialization")
     id(libs.plugins.sqldelight.get().pluginId)
     id("com.google.devtools.ksp")
+    alias(kotlinx.plugins.compose.compiler)
 }
 
 kotlin {

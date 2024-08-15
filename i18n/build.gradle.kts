@@ -8,8 +8,9 @@ plugins {
     kotlin("multiplatform")
     id("com.android.library")
     id(libs.plugins.moko.get().pluginId)
-    id("org.jetbrains.compose")
+    alias(libs.plugins.jetbrainCompose)
     id(libs.plugins.buildkonfig.get().pluginId)
+    alias(kotlinx.plugins.compose.compiler)
 }
 kotlin {
     androidTarget()
@@ -42,7 +43,7 @@ kotlin {
 
 }
 dependencies {
-    commonMainApi("dev.icerock.moko:resources:0.23.0")
+    commonMainApi(libs.resources.v0230)
 //    commonMainApi("dev.icerock.moko:resources-compose:0.23.0") // for compose multiplatform
 //
 //    commonTestImplementation("dev.icerock.moko:resources-test:0.23.0")

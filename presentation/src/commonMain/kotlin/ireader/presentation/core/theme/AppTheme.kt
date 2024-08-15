@@ -19,7 +19,6 @@ fun AppTheme(
 ) {
     val vm = koinInject<AppThemeViewModel>()
     val (materialColors, customColors) = vm.getColors()
-    val rippleTheme = vm.getRippleTheme()
     val systemUiController = LocalISystemUIController.currentOrThrow
     systemUiController.InitController()
     val transparentStatusBar = LocalTransparentStatusBar.current.enabled
@@ -82,7 +81,6 @@ fun AppTheme(
         shape = Shapes
     ) {
         CompositionLocalProvider(
-            LocalRippleTheme provides rippleTheme,
             LocalLocalizeHelper provides mainLocalizeHelper,
             LocalGlobalCoroutineScope provides scope,
             content = content

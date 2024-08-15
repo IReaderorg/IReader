@@ -1,7 +1,7 @@
 package ireader.presentation.core.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.ripple.RippleTheme
+
 import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
@@ -43,14 +43,6 @@ class AppThemeViewModel(
         }.launchIn(scope)
     }
 
-    @Composable
-    fun getRippleTheme(): RippleTheme {
-        return when (themeMode) {
-            PreferenceValues.ThemeMode.System -> AppRippleTheme(!isSystemInDarkTheme())
-            PreferenceValues.ThemeMode.Light -> AppRippleTheme(true)
-            PreferenceValues.ThemeMode.Dark -> AppRippleTheme(false)
-        }
-    }
 
     @Composable
     fun getColors(): Pair<ColorScheme, ExtraColors> {

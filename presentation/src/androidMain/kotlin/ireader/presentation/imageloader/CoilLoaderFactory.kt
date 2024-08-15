@@ -55,9 +55,6 @@ class CoilLoaderFactory(
             }
             diskCache(diskCacheInit)
             crossfade((300).toInt())
-            // Coil spawns a new thread for every image load by default
-            fetcherDispatcher(Dispatchers.IO.limitedParallelism(8))
-            decoderDispatcher(Dispatchers.IO.limitedParallelism(2))
 
         }.build()
     }

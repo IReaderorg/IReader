@@ -3,7 +3,7 @@ package ireader.domain.usecases.translate
 import ireader.domain.data.engines.TranslateEngine
 import ireader.i18n.UiText
 
-expect class GoogleTranslateML : TranslateEngine {
+expect class GoogleTranslateML() : TranslateEngine {
      override suspend fun translate(
         texts: List<String>,
         source: String,
