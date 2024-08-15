@@ -1,7 +1,7 @@
 package ireader.data.core
 
 
-import com.squareup.sqldelight.Query
+import app.cash.sqldelight.Query
 import ir.kazemcodes.infinityreader.Database
 import kotlinx.coroutines.flow.Flow
 

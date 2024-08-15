@@ -1,6 +1,6 @@
 package ireader.data.chapter
 
-import com.squareup.sqldelight.ColumnAdapter
+import app.cash.sqldelight.ColumnAdapter
 import ireader.core.source.model.Page
 import ireader.core.source.model.decode
 import ireader.core.source.model.encode

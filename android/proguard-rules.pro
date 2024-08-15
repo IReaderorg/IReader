@@ -29,7 +29,7 @@
 -keep,allowoptimization class org.slf4j.** { public protected *; }
 -keep class org.xmlpull.** { public protected *; }
 -keep,allowoptimization class org.koin.** { public protected *; }
--keep,allowoptimization class com.squareup.sqldelight.** { public protected *; }
+-keep,allowoptimization class app.cash.sqldelight.** { public protected *; }
 
 
 -dontwarn android.support.**

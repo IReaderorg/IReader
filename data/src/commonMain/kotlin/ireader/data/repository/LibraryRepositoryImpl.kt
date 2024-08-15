@@ -1,6 +1,6 @@
 package ireader.data.repository
 
-import com.squareup.sqldelight.Query
+import app.cash.sqldelight.Query
 import ir.kazemcodes.infinityreader.Database
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.LibraryBook

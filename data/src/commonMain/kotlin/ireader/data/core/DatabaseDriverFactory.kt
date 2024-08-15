@@ -1,6 +1,6 @@
 package ireader.data.core
 
-import com.squareup.sqldelight.db.SqlDriver
+import app.cash.sqldelight.db.SqlDriver
 import data.Book
 import data.Chapter
 import ir.kazemcodes.infinityreader.Database

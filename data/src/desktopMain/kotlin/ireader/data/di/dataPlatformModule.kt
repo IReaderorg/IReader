@@ -1,6 +1,6 @@
 package ireader.data.di
 
-import com.squareup.sqldelight.db.SqlDriver
+import app.cash.sqldelight.db.SqlDriver
 import ireader.core.db.Transactions
 import ireader.core.prefs.PreferenceStoreFactory
 import ireader.data.catalog.impl.DesktopCatalogInstallationChanges

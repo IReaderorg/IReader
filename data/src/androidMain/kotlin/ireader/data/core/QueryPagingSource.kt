@@ -2,7 +2,7 @@ package ireader.data.core
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.squareup.sqldelight.Query
+import app.cash.sqldelight.Query
 import ir.kazemcodes.infinityreader.Database
 import kotlin.properties.Delegates
 

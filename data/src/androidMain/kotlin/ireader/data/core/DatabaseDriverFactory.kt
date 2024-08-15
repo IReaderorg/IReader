@@ -4,8 +4,8 @@ import android.app.Application
 import android.os.Build
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
-import com.squareup.sqldelight.android.AndroidSqliteDriver
-import com.squareup.sqldelight.db.SqlDriver
+import app.cash.sqldelight.db.SqlDriver
+import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
 import ir.kazemcodes.infinityreader.Database
 import ireader.data.BuildConfig

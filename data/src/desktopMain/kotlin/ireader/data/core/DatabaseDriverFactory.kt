@@ -1,7 +1,7 @@
 package ireader.data.core
 
-import com.squareup.sqldelight.db.SqlDriver
-import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
+import app.cash.sqldelight.db.SqlDriver
+import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import ir.kazemcodes.infinityreader.Database
 import ireader.core.storage.AppDir
 import java.io.File
