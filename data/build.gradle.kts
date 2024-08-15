@@ -118,6 +118,7 @@ sqldelight {
         create("Database") {
             packageName.set("ir.kazemcodes.infinityreader")
             schemaOutputDirectory = file("src/commonMain/sqldelight/databases")
+            dialect("app.cash.sqldelight:sqlite-3-24-dialect:2.0.2")
             verifyMigrations = true
         }
     }
