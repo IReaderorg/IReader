@@ -30,7 +30,8 @@
 -keep class org.xmlpull.** { public protected *; }
 -keep,allowoptimization class org.koin.** { public protected *; }
 -keep,allowoptimization class app.cash.sqldelight.** { public protected *; }
-
+-keep,allowoptimization class okhttp3.** { public protected *; }
+-dontwarn okhttp3.internal.Util
 
 -dontwarn android.support.**
 -dontwarn androidx.**
