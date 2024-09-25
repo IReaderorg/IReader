@@ -67,7 +67,7 @@ object MainStarterScreen : VoyagerScreen() {
                             val bottomNavVisible by produceState(initialValue = true) {
                                 showBottomNavEvent.receiveAsFlow().collectLatest { value = it }
                             }
-                            if (isTableUi()) {
+                            if (!isTableUi()) {
                                 AnimatedVisibility(
                                     visible = bottomNavVisible,
                                     enter = expandVertically(),
