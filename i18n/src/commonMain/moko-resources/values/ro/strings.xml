@@ -106,7 +106,7 @@
     <string name="by_date_uploaded">După data încărcării</string>
     <string name="by_date_read">Prin citire</string>
     <string name="empty_library">Nu există nicio carte în bibliotecă, puteți adăuga cărți în ecranul Explorare.</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">Nume</string>
     <string name="username">Nume de utilizator</string>
     <string name="password">Parola</string>
@@ -209,7 +209,6 @@
     <string name="hint">…</string>
     <string name="category_hint">Nume…</string>
     <string name="error_unknown">S-a întâmplat o eroare necunoscută.</string>
-
     <string name="library_screen_label">Bibliotecă</string>
     <string name="explore_screen_label">Explora</string>
     <string name="setting_screen_label">Setare</string>
@@ -310,7 +309,6 @@
     <string name="no_error">Nicio eroare</string>
     <string name="downloads_was_cancelled">Descărcarea a fost anulată</string>
     <string name="saved_local_source_location">Surse salvate în cache</string>
-
     <string name="pref_incognito_mode_summary">Întrerupeți citirea istoricului</string>
     <string name="no_app_was_found_to_lauch">Ceva n-a mers bine. nu aveți aplicația necesară.</string>
     <string name="the_downloads_was_interrupted">Descărcările au fost întrerupte</string>

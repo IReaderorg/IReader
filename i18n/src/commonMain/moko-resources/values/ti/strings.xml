@@ -213,7 +213,7 @@
     <string name="installation_error_incompatible">PackageManger: ምስ ዝተተኽለ ፓኬጅ ዘይቃዶ</string>
     <string name="installation_error_conflicted">PackageManger: ምስ ዝተተኽለ ፓኬጅ ዝጋጮ እዩ።</string>
     <string name="url_is_invalid">Url ቅኑዕ ኣይኮነን።</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">ሽም</string>
     <string name="username">ስም ተጠቃሚ</string>
     <string name="password">መሕለፊ ቓል</string>
