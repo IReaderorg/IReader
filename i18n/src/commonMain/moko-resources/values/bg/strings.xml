@@ -20,7 +20,6 @@
     <string name="show_local_catalogs">Показване на локални разширения</string>
     <string name="saved_local_source_location">Запазени източници в кеша</string>
     <string name="status">Статус</string>
-
     <string name="pref_incognito_mode_summary">Поставяне на пауза в историята на четене</string>
     <string name="no_app_was_found_to_lauch">Нещо се обърка. нямате необходимото приложение.</string>
     <string name="the_downloads_was_interrupted">Изтеглянията бяха прекъснати</string>
@@ -224,7 +223,6 @@
     <string name="other_source">други</string>
     <string name="all_lang">всичко</string>
     <string name="all_category">всичко</string>
-
     <string name="library_screen_label">Библиотека</string>
     <string name="explore_screen_label">Разгледайте</string>
     <string name="setting_screen_label">Настройка</string>

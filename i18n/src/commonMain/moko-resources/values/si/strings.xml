@@ -78,7 +78,7 @@
     <string name="installation_error_conflicted">PackageManger: ස්ථාපිත පැකේජය සමඟ ගැටී ඇත</string>
     <string name="installation_error_blocked">PackageManger: ස්ථාපකය අවහිර කර ඇත</string>
     <string name="url_is_invalid">Url වලංගු නොවේ</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="name">නම</string>
     <string name="username">පරිශීලක නාමය</string>
     <string name="password">මුරපදය</string>
@@ -259,7 +259,6 @@
     <string name="confirm_exit">පිටවීම තහවුරු කරන්න</string>
     <string name="download_notifier_text_only_wifi">Wi-Fi සම්බන්ධතාවක් නොමැත</string>
     <string name="clear_all_cache">සියලුම හැඹිලිය හිස් කරන්න</string>
-
     <string name="library_screen_label">පුස්තකාලය</string>
     <string name="explore_screen_label">ගවේෂණය කරන්න</string>
     <string name="setting_screen_label">සැකසීම</string>

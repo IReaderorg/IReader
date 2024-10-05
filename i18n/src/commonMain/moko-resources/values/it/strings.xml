@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="source">Fonte</string>
-    <string name="url">Url </string>
+    <string name="url">Url</string>
     <string name="permission_not_given">Non è stata concessa un\'autorizzazione sufficiente, controlla la tua autorizzazione</string>
     <string name="show_local_catalogs">Mostra estensioni locali</string>
     <string name="auto_installer">Installatore automatico</string>
