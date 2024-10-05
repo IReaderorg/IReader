@@ -61,6 +61,7 @@ fun ExploreScreen(
     onLongClick: (Book) -> Unit = {},
     headers: ((url: String) -> okhttp3.Headers?)? = null,
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
+    prevPaddingValues: PaddingValues
 ) {
     val scrollState = rememberLazyListState()
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
@@ -150,6 +151,7 @@ fun ExploreScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(prevPaddingValues)
         ) {
 
             when {

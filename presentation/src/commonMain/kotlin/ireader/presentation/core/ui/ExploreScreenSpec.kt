@@ -154,6 +154,7 @@ data class ExploreScreenSpec(
                             onFilterClick = {
                                 vm.toggleFilterMode()
                             },
+                        prevPaddingValues = scaffoldPadding,
                             source = source,
                             getBooks = { query, listing, filters ->
                                 vm.searchQuery = query
