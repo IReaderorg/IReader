@@ -1,9 +1,9 @@
 [versions]
 # Compose
 apkParser = "2.6.10"
-composeGradle = "1.7.0-alpha02"
+composeGradle = "1.7.0-rc01"
 coreSplashscreen = "1.0.1"
-firebaseAnalytics = "22.0.2"
+firebaseAnalytics = "22.1.2"
 junitVintageEngine = "5.8.2"
 resources = "0.24.1"
 voyager = "1.1.0-beta02"
