@@ -11,6 +11,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
@@ -154,13 +155,10 @@ private fun CatalogButtons(
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium()) {
             // Show either progress indicator or install button
             if (installStep != null && !installStep.isFinished()) {
-                Box {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .padding(12.dp)
-                    )
-                    AppIconButton(imageVector = Icons.Default.Close, onClick = {
+                Box(contentAlignment = androidx.compose.ui.Alignment.Center) {
+                    CircularProgressIndicator()
+                    AppIconButton(
+                        imageVector = Icons.Default.Close, onClick = {
                         if (onCancelInstaller != null) {
                             onCancelInstaller(catalog)
                         }
@@ -204,14 +202,14 @@ internal fun CatalogMenuButton(
             if (catalog.isPinned) {
                 AppIconButton(
                     imageVector = Icons.Filled.PushPin,
-                    tint = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+                    tint = MaterialTheme.colorScheme.primary,
                     contentDescription = localize(MR.strings.pin),
                     onClick = onPinToggle
                 )
             } else {
                 AppIconButton(
                     imageVector = Icons.Outlined.PushPin,
-                    tint = androidx.compose.material3.MaterialTheme.colorScheme.onBackground.copy(
+                    tint = MaterialTheme.colorScheme.onBackground.copy(
                         .5f
                     ),
                     contentDescription = localize(MR.strings.unpin),
@@ -223,7 +221,7 @@ internal fun CatalogMenuButton(
             if (onUninstall != null && catalog is CatalogLocal) {
                 MidSizeTextComposable(
                     text = localize(MR.strings.uninstall),
-                    color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable { onUninstall() }
                 )
             }
