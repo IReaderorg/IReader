@@ -109,6 +109,7 @@ fun RemoteSourcesScreen(
                                     catalog = catalog.source,
                                     installStep = vm.installSteps[catalog.source.pkgName],
                                     onInstall = { onClickInstall(catalog.source) },
+                                    onClick = { onClickInstall(catalog.source) },
                                     onCancelInstaller = {
                                         if (onCancelInstaller != null) {
                                             onCancelInstaller(it)
