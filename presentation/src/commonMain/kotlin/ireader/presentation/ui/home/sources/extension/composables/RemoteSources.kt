@@ -93,6 +93,7 @@ fun RemoteSourcesScreen(
                     when (catalog.source) {
                         is CatalogLocal -> {
                             CatalogItem(
+                                    modifier = Modifier.fillMaxSize(),
                                     catalog = catalog.source,
                                     installStep = if (catalog.source is CatalogInstalled) vm.installSteps[catalog.source.pkgName] else null,
                                     onInstall = { onClickInstall(catalog.source) }.takeIf { catalog.source.hasUpdate },
@@ -106,6 +107,7 @@ fun RemoteSourcesScreen(
                         }
                         is CatalogRemote -> {
                             CatalogItem(
+                                    modifier = Modifier.fillMaxSize(),
                                     catalog = catalog.source,
                                     installStep = vm.installSteps[catalog.source.pkgName],
                                     onInstall = { onClickInstall(catalog.source) },
