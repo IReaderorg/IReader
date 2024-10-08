@@ -118,7 +118,7 @@ private fun ExtensionContent(
         initialPage = 0,
         initialPageOffsetFraction = 0f
     ) {
-        3
+        pages.size
     }
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect {

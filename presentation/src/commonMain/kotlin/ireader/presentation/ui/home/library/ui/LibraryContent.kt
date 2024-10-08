@@ -32,7 +32,7 @@ internal fun LibraryContent(
             initialPage = vm.selectedCategoryIndex,
             initialPageOffsetFraction = 0f
         ) {
-           3
+            vm.categories.size
         }
     LaunchedEffect(horizontalPager) {
         snapshotFlow { horizontalPager.currentPage }.collect {
