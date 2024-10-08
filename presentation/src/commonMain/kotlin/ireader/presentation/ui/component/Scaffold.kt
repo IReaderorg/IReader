@@ -95,19 +95,29 @@ fun IScaffold(
 ) {
     val remainingWindowInsets = remember { MutableWindowInsets() }
     return Scaffold(modifier = Modifier
-        .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
-        .onConsumedWindowInsetsChanged {
-            remainingWindowInsets.insets = contentWindowInsets.exclude(it)
-        }
-        .then(modifier),
-        topBar = { topBar(topBarScrollBehavior) },
-        bottomBar = bottomBar,
-        snackbarHost = snackbarHost,
-        floatingActionButton = floatingActionButton,
-        floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
-        containerColor = containerColor,
-        contentColor = contentColor,
-        contentWindowInsets = contentWindowInsets,
-        content
-    )
+                .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
+                .onConsumedWindowInsetsChanged {
+                    remainingWindowInsets.insets = contentWindowInsets.exclude(it)
+                }
+                .then(modifier),
+                topBar = { topBar(topBarScrollBehavior) },
+                bottomBar = bottomBar,
+                snackbarHost = snackbarHost,
+                floatingActionButton = floatingActionButton,
+                floatingActionButtonPosition = floatingActionButtonPosition,
+                containerColor = containerColor,
+                contentColor = contentColor,
+                contentWindowInsets = contentWindowInsets,
+                content = { paddingValues ->
+                    Row(modifier = Modifier.fillMaxSize()) {
+                        startBar()
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                        ) {
+                            content(paddingValues)
+                        }
+                    }
+                }
+            )
 }

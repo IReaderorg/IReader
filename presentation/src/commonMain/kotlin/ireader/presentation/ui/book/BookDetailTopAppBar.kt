@@ -20,6 +20,7 @@ import ireader.i18n.localize
 import ireader.i18n.resources.MR
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.components.*
+import ireader.presentation.ui.component.isTableUi
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton

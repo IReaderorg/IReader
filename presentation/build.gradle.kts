@@ -63,7 +63,7 @@ kotlin {
                 api(libs.koin.android)
                 api(androidx.biometric)
                 api(libs.bundles.simplestorage)
-                api("androidx.core:core-splashscreen:1.0.1")
+                api(libs.core.splashscreen)
                 api(composeLib.compose.googlFonts)
                 api(libs.ktor.core.android)
 
@@ -93,7 +93,7 @@ kotlin {
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
                 api(compose.desktop.currentOs)
-                api("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.8.0")
+                api(libs.kotlinx.coroutines.swing)
 
                 val lwjglVersion = "3.3.1"
                 listOf("lwjgl", "lwjgl-nfd").forEach { lwjglDep ->

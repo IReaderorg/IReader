@@ -20,6 +20,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -45,6 +46,7 @@ import ireader.presentation.ui.book.components.ChapterCommandBottomSheet
 import ireader.presentation.ui.book.components.ChapterScreenBottomTabComposable
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.component.isTableUi
 import ireader.presentation.ui.component.utils.ActivityResultListener
 import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
 import ireader.presentation.ui.core.theme.TransparentStatusBar
@@ -158,13 +160,13 @@ data class BookDetailScreenSpec constructor(
             },
             bottomSheetState = sheetState
         ) {
-
+            val scrollBehavior = if (isTableUi()) TopAppBarDefaults.pinnedScrollBehavior() else TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
+                topbarState
+            )
             TransparentStatusBar {
                 IScaffold(
                     modifier = Modifier.pullRefresh(swipeRefreshState),
-                    topBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
-                        topbarState
-                    ),
+                    topBarScrollBehavior = scrollBehavior,
                     snackbarHostState = snackbarHostState,
                     topBar = { scrollBehavior ->
                         val onShare = ActivityResultListener(onSuccess = { uri ->
