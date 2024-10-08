@@ -12,9 +12,8 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -28,7 +27,6 @@ import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposab
 import ireader.presentation.ui.core.theme.ContentAlpha
 import ireader.presentation.ui.home.sources.extension.composables.LetterIcon
 import java.util.*
-import kotlin.math.max
 
 @Composable
 fun CatalogItem(
@@ -50,23 +48,26 @@ fun CatalogItem(
         is CatalogRemote -> catalog.lang
     }?.let { Language(it) }
 
-    Layout(
-        modifier = onClick?.let { modifier.clickable(onClick = it) } ?: modifier,
-        content = {
-            CatalogPic(
-                catalog = catalog,
-                modifier = Modifier
-                    .layoutId("pic")
-                    .padding(12.dp)
-                    .size(48.dp)
-            )
+    Row(
+        modifier = onClick?.let { modifier.clickable(onClick = it) } ?: modifier
+    ) {
+        CatalogPic(
+            catalog = catalog,
+            modifier = Modifier
+                .padding(12.dp)
+                .size(48.dp)
+        )
+        Column(
+            modifier = Modifier.weight(1f)
+                .fillMaxHeight()
+                .align(Alignment.CenterVertically)
+        ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
-                    .layoutId("title")
                     .padding(top = 12.dp)
             )
 
@@ -77,51 +78,23 @@ fun CatalogItem(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
-                    .layoutId("desc")
                     .padding(bottom = 12.dp, end = 12.dp)
             )
-            CatalogButtons(
-                catalog = catalog,
-                installStep = installStep,
-                onInstall = onInstall,
-                onUninstall = onUninstall,
-                onPinToggle = onPinToggle,
-                modifier = Modifier
-                    .layoutId("icons")
-                    .padding(end = 4.dp),
-                onCancelInstaller = onCancelInstaller,
-            )
-        },
-        measurePolicy = { measurables, fullConstraints ->
-            val picPlaceable = measurables.first { it.layoutId == "pic" }.measure(fullConstraints)
-            val langPlaceable = measurables.find { it.layoutId == "lang" }?.measure(fullConstraints)
-
-            val constraints = fullConstraints.copy(
-                maxWidth = fullConstraints.maxWidth - picPlaceable.width
-            )
-
-            val iconsPlaceable = measurables.first { it.layoutId == "icons" }.measure(constraints)
-            val titlePlaceable = measurables.first { it.layoutId == "title" }
-                .measure(constraints.copy(maxWidth = constraints.maxWidth - iconsPlaceable.width))
-            val descPlaceable = measurables.first { it.layoutId == "desc" }.measure(constraints)
-
-            val height = max(picPlaceable.height, titlePlaceable.height + descPlaceable.height)
-
-            layout(fullConstraints.maxWidth, height) {
-                picPlaceable.placeRelative(0, 0)
-                langPlaceable?.placeRelative(
-                    x = picPlaceable.width - langPlaceable.width,
-                    y = picPlaceable.height - langPlaceable.height
-                )
-                titlePlaceable.placeRelative(picPlaceable.width, 0)
-                descPlaceable.placeRelative(picPlaceable.width, titlePlaceable.height)
-                iconsPlaceable.placeRelative(
-                    x = constraints.maxWidth - iconsPlaceable.width + picPlaceable.width,
-                    y = 0
-                )
-            }
         }
-    )
+
+        CatalogButtons(
+            catalog = catalog,
+            installStep = installStep,
+            onInstall = onInstall,
+            onUninstall = onUninstall,
+            onPinToggle = onPinToggle,
+            modifier = Modifier
+                .fillMaxHeight()
+                .align(Alignment.CenterVertically)
+                .padding(end = 4.dp),
+            onCancelInstaller = onCancelInstaller,
+        )
+    }
 }
 
 @Composable
@@ -154,13 +127,10 @@ private fun CatalogButtons(
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium()) {
             // Show either progress indicator or install button
             if (installStep != null && !installStep.isFinished()) {
-                Box {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .padding(12.dp)
-                    )
-                    AppIconButton(imageVector = Icons.Default.Close, onClick = {
+                Box(contentAlignment = androidx.compose.ui.Alignment.Center) {
+                    CircularProgressIndicator()
+                    AppIconButton(
+                        imageVector = Icons.Default.Close, onClick = {
                         if (onCancelInstaller != null) {
                             onCancelInstaller(catalog)
                         }
@@ -204,14 +174,14 @@ internal fun CatalogMenuButton(
             if (catalog.isPinned) {
                 AppIconButton(
                     imageVector = Icons.Filled.PushPin,
-                    tint = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+                    tint = MaterialTheme.colorScheme.primary,
                     contentDescription = localize(MR.strings.pin),
                     onClick = onPinToggle
                 )
             } else {
                 AppIconButton(
                     imageVector = Icons.Outlined.PushPin,
-                    tint = androidx.compose.material3.MaterialTheme.colorScheme.onBackground.copy(
+                    tint = MaterialTheme.colorScheme.onBackground.copy(
                         .5f
                     ),
                     contentDescription = localize(MR.strings.unpin),
@@ -223,7 +193,7 @@ internal fun CatalogMenuButton(
             if (onUninstall != null && catalog is CatalogLocal) {
                 MidSizeTextComposable(
                     text = localize(MR.strings.uninstall),
-                    color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable { onUninstall() }
                 )
             }
