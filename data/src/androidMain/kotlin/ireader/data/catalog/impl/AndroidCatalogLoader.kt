@@ -194,7 +194,7 @@ class AndroidCatalogLoader(
     ): CatalogInstalled.SystemWide? {
         val data = validateMetadata(pkgName, pkgInfo) ?: return null
 
-        val loader = PathClassLoader(pkgInfo.applicationInfo.sourceDir, null, context.classLoader)
+        val loader = PathClassLoader(pkgInfo.applicationInfo!!.sourceDir, null, context.classLoader)
         val source = loadSource(pkgName, loader, data)
 
         return CatalogInstalled.SystemWide(
@@ -238,7 +238,7 @@ class AndroidCatalogLoader(
         val versionName = pkgInfo.versionName
 
         // Validate lib version
-        val majorLibVersion = versionName.substringBefore('.').toInt()
+        val majorLibVersion = versionName!!.substringBefore('.').toInt()
         if (majorLibVersion < LIB_VERSION_MIN || majorLibVersion > LIB_VERSION_MAX) {
             val exception = "Failed to load catalog, the package {} lib version is {}," +
                     "while only versions {} to {} are allowed"
@@ -248,7 +248,7 @@ class AndroidCatalogLoader(
 
         val appInfo = pkgInfo.applicationInfo
 
-        val metadata = appInfo.metaData
+        val metadata = appInfo!!.metaData
         val sourceClassName = metadata.getString(METADATA_SOURCE_CLASS)?.trim()
         if (sourceClassName == null) {
             Log.warn("Failed to load catalog, the package {} didn't define source class", pkgName)
