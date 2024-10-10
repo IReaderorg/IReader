@@ -1,8 +1,6 @@
 package ireader.data.chapter
 
-import app.cash.sqldelight.Query
 import ireader.data.core.DatabaseHandler
-import ireader.data.util.toDB
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.Chapter
 import kotlinx.coroutines.flow.Flow
@@ -71,8 +69,7 @@ class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
 
     override suspend fun insertChapter(chapter: Chapter): Long {
         return handler.awaitOneAsync(inTransaction = true) {
-                chapterQueries.upsert(
-                    chapter.id.toDB(),
+                chapterQueries.insert(
                     chapter.bookId,
                     chapter.key,
                     chapter.name,
@@ -94,8 +91,7 @@ class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
     override suspend fun insertChapters(chapters: List<Chapter>): List<Long> {
         return handler.awaitListAsync(true) {
             chapters.forEach { chapter ->
-            chapterQueries.upsert(
-                chapter.id.toDB(),
+            chapterQueries.insert(
                 chapter.bookId,
                 chapter.key,
                 chapter.name,
@@ -107,8 +103,8 @@ class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
                 chapter.sourceOrder,
                 chapter.dateFetch,
                 chapter.dateUpload,
-                content = chapter.content,
-                chapter.type
+                chapter.content,
+                chapter.type,
             )
             }
      chapterQueries.selectLastInsertedRowId()
