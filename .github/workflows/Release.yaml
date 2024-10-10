@@ -61,11 +61,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
         with:
           java-version: 21
-          distribution: adopt
+          distribution: temurin
           architecture: ${{ matrix.arch }}
 
       - name: Setup Cl
