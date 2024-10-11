@@ -101,19 +101,8 @@ SELECT chapter._id,book_id,url,name,scanlator,read,bookmark, last_page_read,chap
         LIMIT 1;
 
 upsert:
-INSERT INTO chapter(_id,book_id,url,name,scanlator,read,bookmark, last_page_read,chapter_number,source_order,date_fetch,date_upload,content,type)
-VALUES (:id, :bookId, :key,:name,:translator,:read,:bookmark,:last_page_read,:chapter_number,:source_order,:date_fetch,:date_upload,:content,:type)
-ON CONFLICT(_id)
-DO UPDATE
-SET
-    url = :key,
-    read = :read,
-    bookmark = :bookmark,
-    last_page_read = :last_page_read,
-    content = :content,
-    type = :type
-
-WHERE _id = :id;
+INSERT OR REPLACE INTO chapter(_id, book_id, url, name, scanlator, read, bookmark, last_page_read, chapter_number, source_order, date_fetch, date_upload, content, type)
+VALUES (:id, :bookId, :key, :name, :translator, :read, :bookmark, :last_page_read, :chapter_number, :source_order, :date_fetch, :date_upload, :content, :type);
 
 selectLastInsertedRowId:
 SELECT LAST_INSERT_ROWID() AS Long;
