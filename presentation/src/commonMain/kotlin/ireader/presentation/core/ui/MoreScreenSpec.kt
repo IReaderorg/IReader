@@ -47,12 +47,11 @@ object MoreScreenSpec : Tab {
         val navigator = LocalNavigator.currentOrThrow
         IScaffold(
             topBar = { scrollBehavior ->
+                // check if navigator backstack is empty
                 TitleToolbar(
                     title = localize(MR.strings.more),
                     scrollBehavior = scrollBehavior,
-                    popBackStack  = {
-                        popBackStack(navigator)
-                    },
+                    popBackStack = null,
                 )
             }
         ) { padding ->
