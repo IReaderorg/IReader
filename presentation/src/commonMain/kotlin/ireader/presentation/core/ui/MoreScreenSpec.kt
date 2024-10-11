@@ -50,9 +50,7 @@ object MoreScreenSpec : Tab {
                 TitleToolbar(
                     title = localize(MR.strings.more),
                     scrollBehavior = scrollBehavior,
-                    popBackStack  = {
-                        popBackStack(navigator)
-                    },
+                    popBackStack = null,
                 )
             }
         ) { padding ->
