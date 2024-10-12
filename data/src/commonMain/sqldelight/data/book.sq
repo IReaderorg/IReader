@@ -205,7 +205,7 @@ DELETE FROM book
 WHERE favorite = 0 AND source IN :sourceIds;
 
 upsert:
-INSERT OR REPLACE INTO book(
+INSERT OR IGNORE INTO book(
 _id,source,url,
 artist,author,description,
 genre,title,status,

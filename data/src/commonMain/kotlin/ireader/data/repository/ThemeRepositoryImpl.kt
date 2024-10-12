@@ -1,14 +1,11 @@
 package ireader.data.repository
 
 
+import app.cash.sqldelight.Query
 import ireader.data.core.DatabaseHandler
 import ireader.domain.data.repository.ReaderThemeRepository
 import ireader.domain.data.repository.ThemeRepository
-import ireader.domain.models.theme.CustomTheme
-import ireader.domain.models.theme.ReaderTheme
-import ireader.domain.models.theme.Theme
-import ireader.domain.models.theme.appThemeMapper
-import ireader.domain.models.theme.readerMapper
+import ireader.domain.models.theme.*
 import kotlinx.coroutines.flow.Flow
 
 class ThemeRepositoryImpl(
@@ -133,7 +130,7 @@ class ReaderThemeRepositoryImpl(
     override suspend fun insert(theme: ReaderTheme): Long {
         return handler.awaitOneAsync(inTransaction = true) {
             theme.let { theme ->
-                readerThemesQueries.upsert(theme.id, theme.backgroundColor, theme.onTextColor)
+                readerThemesQueries.upsert(theme.backgroundColor, theme.onTextColor, theme.id)
             }
        readerThemesQueries.selectLastInsertedRowId()
         }
@@ -142,7 +139,7 @@ class ReaderThemeRepositoryImpl(
     override suspend fun insert(theme: List<ReaderTheme>) {
         handler.await(true) {
             theme.forEach { theme ->
-                readerThemesQueries.upsert(theme.id, theme.backgroundColor, theme.onTextColor)
+                readerThemesQueries.upsert(theme.backgroundColor, theme.onTextColor, theme.id)
             }
 
         }

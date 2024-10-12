@@ -51,7 +51,7 @@ deleteAll:
 DELETE FROM theme;
 
 upsert:
-INSERT OR REPLACE INTO theme(
+INSERT INTO theme(
 _id,isDark,`primary`,onPrimary,primaryContainer,
 onPrimaryContainer,inversePrimary,secondary,onSecondary,
 secondaryContainer,onSecondaryContainer,tertiary,`onTertiary`,
@@ -68,7 +68,14 @@ VALUES (:id,:isDark,:primary,:onPrimary,
 :surface,:onSurface,:surfaceTint,:inverseSurface,:inverseOnSurface,
 :error,:onError,:errorContainer,:onErrorContainer,
 :outline,:outlineVariant,:scrim,:bars,:onBars,
-:isBarLight,:surfaceVariant,:onSurfaceVariant,:onTertiaryContainer);
+:isBarLight,:surfaceVariant,:onSurfaceVariant,:onTertiaryContainer)
+ON CONFLICT(_id)
+DO UPDATE
+SET
+    `primary` = :primary,
+    secondary = :secondary,
+    bars = :bars
+WHERE _id = :id;
 
 
 selectLastInsertedRowId:
