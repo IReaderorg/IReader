@@ -21,15 +21,20 @@ DELETE FROM reader_theme WHERE _id =:id;
 deleteAll:
 DELETE FROM reader_theme;
 
-upsert:
-INSERT INTO reader_theme(background_color,on_textcolor)
-VALUES (:backgroundColor, :onTextColor)
-ON CONFLICT(_id)
-DO UPDATE
+update:
+UPDATE reader_theme
 SET
     background_color = :backgroundColor,
     on_textcolor = :onTextColor
 WHERE _id = :id;
+
+selectChanges:
+SELECT changes();
+
+insert:
+INSERT INTO reader_theme(_id, background_color, on_textcolor)
+SELECT :id, :backgroundColor, :onTextColor
+WHERE (SELECT changes() = 0);
 
 selectLastInsertedRowId:
 SELECT LAST_INSERT_ROWID();

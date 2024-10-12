@@ -107,11 +107,15 @@ removeResettedHistory:
 DELETE FROM history
 WHERE last_read = 0;
 
-upsert:
+insert:
 INSERT INTO history(chapter_id, last_read, time_read)
-VALUES (:chapterId, :readAt, :time_read)
-ON CONFLICT(chapter_id)
-DO UPDATE
+VALUES (:chapterId, :readAt, :time_read);
+
+selectChanges:
+SELECT changes();
+
+updateInsert:
+UPDATE history
 SET
     last_read = :readAt,
     time_read = time_read + :time_read

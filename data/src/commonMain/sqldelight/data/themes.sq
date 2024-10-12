@@ -50,7 +50,7 @@ DELETE FROM theme WHERE theme._id = :id;
 deleteAll:
 DELETE FROM theme;
 
-upsert:
+insert:
 INSERT INTO theme(
 _id,isDark,`primary`,onPrimary,primaryContainer,
 onPrimaryContainer,inversePrimary,secondary,onSecondary,
@@ -68,9 +68,13 @@ VALUES (:id,:isDark,:primary,:onPrimary,
 :surface,:onSurface,:surfaceTint,:inverseSurface,:inverseOnSurface,
 :error,:onError,:errorContainer,:onErrorContainer,
 :outline,:outlineVariant,:scrim,:bars,:onBars,
-:isBarLight,:surfaceVariant,:onSurfaceVariant,:onTertiaryContainer)
-ON CONFLICT(_id)
-DO UPDATE
+:isBarLight,:surfaceVariant,:onSurfaceVariant,:onTertiaryContainer);
+
+selectChanges:
+SELECT changes();
+
+update:
+UPDATE theme
 SET
     `primary` = :primary,
     secondary = :secondary,
