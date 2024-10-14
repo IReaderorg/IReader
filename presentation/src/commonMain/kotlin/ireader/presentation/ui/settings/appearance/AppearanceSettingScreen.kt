@@ -108,19 +108,11 @@ fun AppearanceSettingScreen(
                         ThemeItem(
                                 theme,
                                 onClick = { theme ->
-                                    scope.launch {
-                                        vm.colorTheme.value = theme.id
-                                        repeat(3) { _ ->
-                                            customizedColors.primaryState.value = theme.materialColors.primary
-                                            customizedColors.secondaryState.value =
-                                                    theme.materialColors.secondary
-                                            customizedColors.barsState.value = theme.extraColors.bars
-                                            delay(1000)
-                                        }
-
-
-                                        vm.isSavable = false
-                                    }
+                                    vm.colorTheme.value = theme.id
+                                    customizedColors.primaryState.value = theme.materialColors.primary
+                                    customizedColors.secondaryState.value = theme.materialColors.secondary
+                                    customizedColors.barsState.value = theme.extraColors.bars
+                                    vm.isSavable = false
                                 },
                                 isSelected = vm.colorTheme.value == theme.id,
                         )
