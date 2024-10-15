@@ -7,10 +7,17 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.util.Consumer
 import androidx.core.view.WindowCompat
@@ -23,6 +30,7 @@ import coil3.compose.setSingletonImageLoaderFactory
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 import ireader.core.http.toast
+import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.backup.AutomaticBackup
 import ireader.domain.usecases.files.AndroidGetSimpleStorage
@@ -42,6 +50,7 @@ import ireader.presentation.core.ui.DownloaderScreenSpec
 import ireader.presentation.core.ui.ReaderScreenSpec
 import ireader.presentation.core.ui.TTSScreenSpec
 import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.core.theme.themes
 import ireader.presentation.ui.core.ui.asStateIn
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
@@ -75,7 +84,9 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         Napier.base(DebugAntilog())
         localeHelper.setLocaleLang()
         installSplashScreen()
+
         setContent {
+            SetDefaultTheme()
             KoinContext {
                 setSingletonImageLoaderFactory { context ->
                     (this@MainActivity.application as SingletonImageLoader.Factory).newImageLoader(
@@ -114,6 +125,15 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                     }
                 }
 
+            }
+        }
+    }
+
+    @Composable
+    private fun SetDefaultTheme() {
+        if (uiPreferences.themeMode().get() == PreferenceValues.ThemeMode.System) {
+            themes.find { it.isDark == isSystemInDarkTheme() }?.let { theme ->
+                uiPreferences.colorTheme().set(theme.id)
             }
         }
     }
