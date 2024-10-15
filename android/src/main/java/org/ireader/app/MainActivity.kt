@@ -131,9 +131,27 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
 
     @Composable
     private fun SetDefaultTheme() {
-        if (uiPreferences.themeMode().get() == PreferenceValues.ThemeMode.System) {
-            themes.find { it.isDark == isSystemInDarkTheme() }?.let { theme ->
-                uiPreferences.colorTheme().set(theme.id)
+        val themeMode by uiPreferences.themeMode().asStateIn(rememberCoroutineScope())
+        val isSystemDarkMode = isSystemInDarkTheme()
+        LaunchedEffect(themeMode) {
+            when (themeMode) {
+                PreferenceValues.ThemeMode.System -> {
+                    themes.find { it.isDark == isSystemDarkMode }?.let { theme ->
+                        uiPreferences.colorTheme().set(theme.id)
+                    }
+                }
+
+                PreferenceValues.ThemeMode.Dark -> {
+                    themes.find { it.isDark }?.let { theme ->
+                        uiPreferences.colorTheme().set(theme.id)
+                    }
+                }
+
+                PreferenceValues.ThemeMode.Light -> {
+                    themes.find { !it.isDark }?.let { theme ->
+                        uiPreferences.colorTheme().set(theme.id)
+                    }
+                }
             }
         }
     }
