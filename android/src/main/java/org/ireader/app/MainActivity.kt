@@ -134,6 +134,11 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         val themeMode by uiPreferences.themeMode().asStateIn(rememberCoroutineScope())
         val isSystemDarkMode = isSystemInDarkTheme()
         LaunchedEffect(themeMode) {
+            if (themes.firstOrNull { it.id == uiPreferences.colorTheme().get() } != null) {
+                return@LaunchedEffect
+            }
+
+
             when (themeMode) {
                 PreferenceValues.ThemeMode.System -> {
                     themes.find { it.isDark == isSystemDarkMode }?.let { theme ->
