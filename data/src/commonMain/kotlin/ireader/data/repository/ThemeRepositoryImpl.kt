@@ -1,11 +1,14 @@
 package ireader.data.repository
 
 
-import app.cash.sqldelight.Query
 import ireader.data.core.DatabaseHandler
 import ireader.domain.data.repository.ReaderThemeRepository
 import ireader.domain.data.repository.ThemeRepository
-import ireader.domain.models.theme.*
+import ireader.domain.models.theme.CustomTheme
+import ireader.domain.models.theme.ReaderTheme
+import ireader.domain.models.theme.Theme
+import ireader.domain.models.theme.appThemeMapper
+import ireader.domain.models.theme.readerMapper
 import kotlinx.coroutines.flow.Flow
 
 class ThemeRepositoryImpl(
@@ -18,43 +21,49 @@ class ThemeRepositoryImpl(
     override suspend fun insert(theme: CustomTheme): Long {
         return handler.awaitOneAsync(inTransaction = true) {
             theme.let { theme ->
-                themesQueries.upsert(
+                themesQueries.update(
                     primary = theme.materialColor.primary,
-                    primaryContainer = theme.materialColor.primaryContainer,
-                    onPrimary = theme.materialColor.onPrimary,
                     secondary = theme.materialColor.secondary,
-                    onSecondary = theme.materialColor.onSecondary,
-                    background = theme.materialColor.background,
-                    surface = theme.materialColor.surface,
-                    onBackground = theme.materialColor.onBackground,
-                    onSurface = theme.materialColor.onSurface,
-                    error = theme.materialColor.error,
-                    onError = theme.materialColor.onError,
-                    surfaceTint = theme.materialColor.surfaceTint,
-                    secondaryContainer = theme.materialColor.secondaryContainer,
-                    errorContainer = theme.materialColor.errorContainer,
-                    inverseOnSurface = theme.materialColor.inverseOnSurface,
-                    inversePrimary = theme.materialColor.inversePrimary,
-                    inverseSurface = theme.materialColor.inverseSurface,
-                    onErrorContainer = theme.materialColor.onErrorContainer,
-                    onPrimaryContainer = theme.materialColor.onPrimaryContainer,
-                    onSecondaryContainer = theme.materialColor.onSecondaryContainer,
-                    outline = theme.materialColor.outline,
-                    tertiary = theme.materialColor.tertiary,
-                    tertiaryContainer = theme.materialColor.tertiaryContainer,
-                    scrim = theme.materialColor.scrim,
-                    outlineVariant = theme.materialColor.outlineVariant,
-                    isDark = theme.dark,
-                    onBars = theme.extraColors.onBars,
                     bars = theme.extraColors.bars,
-                    isBarLight = theme.dark,
-                    setOnTertiary = theme.materialColor.onTertiary,
-                    id = null,
-                    surfaceVariant = theme.materialColor.surfaceVariant,
-                    onTertiaryContainer = theme.materialColor.onTertiaryContainer,
-                    onSurfaceVariant = theme.materialColor.onSurfaceVariant
-
+                    id = theme.id,
                 )
+                if (themesQueries.selectChanges().executeAsOne() == 0L)
+                    themesQueries.insert(
+                        primary = theme.materialColor.primary,
+                        primaryContainer = theme.materialColor.primaryContainer,
+                        onPrimary = theme.materialColor.onPrimary,
+                        secondary = theme.materialColor.secondary,
+                        onSecondary = theme.materialColor.onSecondary,
+                        background = theme.materialColor.background,
+                        surface = theme.materialColor.surface,
+                        onBackground = theme.materialColor.onBackground,
+                        onSurface = theme.materialColor.onSurface,
+                        error = theme.materialColor.error,
+                        onError = theme.materialColor.onError,
+                        surfaceTint = theme.materialColor.surfaceTint,
+                        secondaryContainer = theme.materialColor.secondaryContainer,
+                        errorContainer = theme.materialColor.errorContainer,
+                        inverseOnSurface = theme.materialColor.inverseOnSurface,
+                        inversePrimary = theme.materialColor.inversePrimary,
+                        inverseSurface = theme.materialColor.inverseSurface,
+                        onErrorContainer = theme.materialColor.onErrorContainer,
+                        onPrimaryContainer = theme.materialColor.onPrimaryContainer,
+                        onSecondaryContainer = theme.materialColor.onSecondaryContainer,
+                        outline = theme.materialColor.outline,
+                        tertiary = theme.materialColor.tertiary,
+                        tertiaryContainer = theme.materialColor.tertiaryContainer,
+                        scrim = theme.materialColor.scrim,
+                        outlineVariant = theme.materialColor.outlineVariant,
+                        isDark = theme.dark,
+                        onBars = theme.extraColors.onBars,
+                        bars = theme.extraColors.bars,
+                        isBarLight = theme.dark,
+                        setOnTertiary = theme.materialColor.onTertiary,
+                        id = null,
+                        surfaceVariant = theme.materialColor.surfaceVariant,
+                        onTertiaryContainer = theme.materialColor.onTertiaryContainer,
+                        onSurfaceVariant = theme.materialColor.onSurfaceVariant
+                    )
             }
            themesQueries.selectLastInsertedRowId()
         }
@@ -63,42 +72,49 @@ class ThemeRepositoryImpl(
     override suspend fun insert(theme: List<CustomTheme>) {
         handler.await {
             theme.forEach { theme ->
-                themesQueries.upsert(
+                themesQueries.update(
                     primary = theme.materialColor.primary,
-                    primaryContainer = theme.materialColor.primaryContainer,
-                    onPrimary = theme.materialColor.onPrimary,
                     secondary = theme.materialColor.secondary,
-                    onSecondary = theme.materialColor.onSecondary,
-                    background = theme.materialColor.background,
-                    surface = theme.materialColor.surface,
-                    onBackground = theme.materialColor.onBackground,
-                    onSurface = theme.materialColor.onSurface,
-                    error = theme.materialColor.error,
-                    onError = theme.materialColor.onError,
-                    surfaceTint = theme.materialColor.surfaceTint,
-                    secondaryContainer = theme.materialColor.secondaryContainer,
-                    errorContainer = theme.materialColor.errorContainer,
-                    inverseOnSurface = theme.materialColor.inverseOnSurface,
-                    inversePrimary = theme.materialColor.inversePrimary,
-                    inverseSurface = theme.materialColor.inverseSurface,
-                    onErrorContainer = theme.materialColor.onErrorContainer,
-                    onPrimaryContainer = theme.materialColor.onPrimaryContainer,
-                    onSecondaryContainer = theme.materialColor.onSecondaryContainer,
-                    outline = theme.materialColor.outline,
-                    tertiary = theme.materialColor.tertiary,
-                    tertiaryContainer = theme.materialColor.tertiaryContainer,
-                    scrim = theme.materialColor.scrim,
-                    outlineVariant = theme.materialColor.outlineVariant,
-                    isDark = theme.dark,
-                    onBars = theme.extraColors.onBars,
                     bars = theme.extraColors.bars,
-                    isBarLight = theme.dark,
-                    setOnTertiary = theme.materialColor.onTertiary,
-                    id = null,
-                    surfaceVariant = theme.materialColor.surfaceVariant,
-                    onTertiaryContainer = theme.materialColor.onTertiaryContainer,
-                    onSurfaceVariant = theme.materialColor.onSurfaceVariant
+                    id = theme.id,
                 )
+                if (themesQueries.selectChanges().executeAsOne() == 0L)
+                    themesQueries.insert(
+                        primary = theme.materialColor.primary,
+                        primaryContainer = theme.materialColor.primaryContainer,
+                        onPrimary = theme.materialColor.onPrimary,
+                        secondary = theme.materialColor.secondary,
+                        onSecondary = theme.materialColor.onSecondary,
+                        background = theme.materialColor.background,
+                        surface = theme.materialColor.surface,
+                        onBackground = theme.materialColor.onBackground,
+                        onSurface = theme.materialColor.onSurface,
+                        error = theme.materialColor.error,
+                        onError = theme.materialColor.onError,
+                        surfaceTint = theme.materialColor.surfaceTint,
+                        secondaryContainer = theme.materialColor.secondaryContainer,
+                        errorContainer = theme.materialColor.errorContainer,
+                        inverseOnSurface = theme.materialColor.inverseOnSurface,
+                        inversePrimary = theme.materialColor.inversePrimary,
+                        inverseSurface = theme.materialColor.inverseSurface,
+                        onErrorContainer = theme.materialColor.onErrorContainer,
+                        onPrimaryContainer = theme.materialColor.onPrimaryContainer,
+                        onSecondaryContainer = theme.materialColor.onSecondaryContainer,
+                        outline = theme.materialColor.outline,
+                        tertiary = theme.materialColor.tertiary,
+                        tertiaryContainer = theme.materialColor.tertiaryContainer,
+                        scrim = theme.materialColor.scrim,
+                        outlineVariant = theme.materialColor.outlineVariant,
+                        isDark = theme.dark,
+                        onBars = theme.extraColors.onBars,
+                        bars = theme.extraColors.bars,
+                        isBarLight = theme.dark,
+                        setOnTertiary = theme.materialColor.onTertiary,
+                        id = null,
+                        surfaceVariant = theme.materialColor.surfaceVariant,
+                        onTertiaryContainer = theme.materialColor.onTertiaryContainer,
+                        onSurfaceVariant = theme.materialColor.onSurfaceVariant
+                    )
             }
         }
     }
@@ -129,17 +145,41 @@ class ReaderThemeRepositoryImpl(
 
     override suspend fun insert(theme: ReaderTheme): Long {
         return handler.awaitOneAsync(inTransaction = true) {
-            theme.let { theme ->
-                readerThemesQueries.upsert(theme.backgroundColor, theme.onTextColor, theme.id)
+
+            readerThemesQueries.update(
+                id = theme.id,
+                backgroundColor = theme.backgroundColor,
+                onTextColor = theme.onTextColor
+            )
+
+            if (readerThemesQueries.selectChanges().executeAsOne() == 0L){
+                readerThemesQueries.insert(
+                    id = theme.id,
+                    backgroundColor = theme.backgroundColor,
+                    onTextColor = theme.onTextColor
+                )
             }
-       readerThemesQueries.selectLastInsertedRowId()
+
+            readerThemesQueries.selectLastInsertedRowId()
         }
     }
 
     override suspend fun insert(theme: List<ReaderTheme>) {
         handler.await(true) {
             theme.forEach { theme ->
-                readerThemesQueries.upsert(theme.backgroundColor, theme.onTextColor, theme.id)
+                readerThemesQueries.update(
+                    id = theme.id,
+                    backgroundColor = theme.backgroundColor,
+                    onTextColor = theme.onTextColor
+                )
+
+                if (readerThemesQueries.selectChanges().executeAsOne() == 0L){
+                    readerThemesQueries.insert(
+                        id = theme.id,
+                        backgroundColor = theme.backgroundColor,
+                        onTextColor = theme.onTextColor
+                    )
+                }
             }
 
         }

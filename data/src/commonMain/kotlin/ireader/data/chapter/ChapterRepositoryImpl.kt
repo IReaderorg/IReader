@@ -1,14 +1,12 @@
 package ireader.data.chapter
 
-import app.cash.sqldelight.Query
 import ireader.data.core.DatabaseHandler
-import ireader.data.util.toDB
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.Chapter
 import kotlinx.coroutines.flow.Flow
 
 
-class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
+class ChapterRepositoryImpl(private val handler: DatabaseHandler) :
     ChapterRepository {
     override fun subscribeChapterById(chapterId: Long): Flow<Chapter?> {
         return handler.subscribeToOneOrNull {
@@ -61,8 +59,8 @@ class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
     override suspend fun subscribeLastReadChapter(bookId: Long): Flow<Chapter?> {
         return handler.subscribeToOneOrNull {
             chapterQueries.getLastChapter(
-                    bookId,
-                    chapterMapper
+                bookId,
+                chapterMapper
             )
 
         }
@@ -71,8 +69,22 @@ class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
 
     override suspend fun insertChapter(chapter: Chapter): Long {
         return handler.awaitOneAsync(inTransaction = true) {
-                chapterQueries.upsert(
-                    chapter.id.toDB(),
+            chapterQueries.update(
+                chapter.bookId,
+                chapter.key,
+                chapter.name,
+                chapter.translator,
+                chapter.read,
+                chapter.bookmark,
+                chapter.lastPageRead,
+                chapter.number.toDouble(),
+                chapter.sourceOrder,
+                chapter.dateFetch,
+                chapter.dateUpload,
+                chapter.id
+            )
+            if (chapterQueries.selectChanges().executeAsOne() == 0L) {
+                chapterQueries.insert(
                     chapter.bookId,
                     chapter.key,
                     chapter.name,
@@ -85,33 +97,19 @@ class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
                     chapter.dateFetch,
                     chapter.dateUpload,
                     chapter.content,
-                    chapter.type,
+                    chapter.type
                 )
-             chapterQueries.selectLastInsertedRowId()
+            }
+            chapterQueries.selectLastInsertedRowId()
         }
     }
 
     override suspend fun insertChapters(chapters: List<Chapter>): List<Long> {
         return handler.awaitListAsync(true) {
             chapters.forEach { chapter ->
-            chapterQueries.upsert(
-                chapter.id.toDB(),
-                chapter.bookId,
-                chapter.key,
-                chapter.name,
-                chapter.translator,
-                chapter.read,
-                chapter.bookmark,
-                chapter.lastPageRead,
-                chapter.number,
-                chapter.sourceOrder,
-                chapter.dateFetch,
-                chapter.dateUpload,
-                content = chapter.content,
-                chapter.type
-            )
+                insertChapter(chapter)
             }
-     chapterQueries.selectLastInsertedRowId()
+            chapterQueries.selectLastInsertedRowId()
         }
     }
 
