@@ -1,17 +1,17 @@
 package ireader.data.downloads
 
+import ireader.data.core.DatabaseHandler
+import ireader.data.util.BaseDao
 import ireader.domain.data.repository.DownloadRepository
-import kotlinx.coroutines.flow.Flow
 import ireader.domain.models.entities.Download
 import ireader.domain.models.entities.SavedDownloadWithInfo
-import ireader.data.util.BaseDao
-import ireader.data.core.DatabaseHandler
+import kotlinx.coroutines.flow.Flow
 
 
-class DownloadRepositoryImpl(private val handler: DatabaseHandler,) :
+class DownloadRepositoryImpl(private val handler: DatabaseHandler) :
     DownloadRepository, BaseDao<Download>() {
     override fun subscribeAllDownloads(): Flow<List<SavedDownloadWithInfo>> {
-       return handler.subscribeToList {
+        return handler.subscribeToList {
             downloadQueries.findAll(downloadMapper)
         }
     }
@@ -24,14 +24,27 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler,) :
 
     override suspend fun insertDownload(savedDownload: Download) {
         handler.await {
-                downloadQueries.upsert(savedDownload.chapterId,savedDownload.bookId,savedDownload.priority)
+            downloadQueries.updatePriority(
+                savedDownload.priority,
+                savedDownload.chapterId,
+                savedDownload.bookId
+            )
+            if (downloadQueries.selectChanges().executeAsOne() == 0L)
+                downloadQueries.insert(
+                    savedDownload.chapterId,
+                    savedDownload.bookId,
+                    savedDownload.priority
+                )
+
         }
     }
 
     override suspend fun insertDownloads(savedDownloads: List<Download>) {
         handler.await {
             dbOperation(savedDownloads) {
-                downloadQueries.upsert(it.chapterId,it.bookId,it.priority)
+                downloadQueries.updatePriority(it.priority, it.chapterId, it.bookId)
+                if (downloadQueries.selectChanges().executeAsOne() == 0L)
+                    downloadQueries.insert(it.chapterId, it.bookId, it.priority)
             }
         }
     }
@@ -44,7 +57,7 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler,) :
 
     override suspend fun deleteSavedDownload(savedDownloads: List<Download>) {
         handler.await(true) {
-            savedDownloads.forEach {  savedDownload ->
+            savedDownloads.forEach { savedDownload ->
                 downloadQueries.deleteByChapterId(savedDownload.chapterId)
             }
         }
@@ -58,7 +71,7 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler,) :
 
     override suspend fun deleteAllSavedDownload() {
         handler.await {
-           downloadQueries.deleteAll()
+            downloadQueries.deleteAll()
         }
     }
 

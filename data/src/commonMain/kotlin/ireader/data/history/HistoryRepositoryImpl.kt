@@ -78,11 +78,17 @@ class HistoryRepositoryImpl constructor(
     }
 
     private fun Database.insertBlocking(history: History) {
-        historyQueries.upsert(
-            chapterId = history.chapterId.toDB()?:0,
+        historyQueries.updateInsert(
+            chapterId = history.chapterId.toDB() ?: 0,
             readAt = history.readAt,
             time_read = history.readDuration,
         )
+        if (historyQueries.selectChanges().executeAsOne() == 0L)
+            historyQueries.insert(
+                chapterId = history.chapterId.toDB() ?: 0,
+                readAt = history.readAt,
+                time_read = history.readDuration,
+            )
     }
 
     private fun Database.updateBlocking(history: History) {
