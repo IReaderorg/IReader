@@ -176,7 +176,7 @@ private fun ShowEditScreen(
                     onConfirm(query)
                     query = ""
                 }) {
-                    MidSizeTextComposable(text = localizeHelper.localize(MR.strings.confirm))
+                    MidSizeTextComposable(text = localizeHelper.localize(MR.strings.confirm), color = MaterialTheme.colorScheme.onSecondary)
                 }
             }
         )
