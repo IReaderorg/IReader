@@ -1,14 +1,14 @@
 [versions]
-lifecycle = "2.8.4"
-work = "2.9.1"
+lifecycle = "2.8.7"
+work = "2.10.0"
 [libraries]
-core = "androidx.core:core-ktx:1.13.1"
+core = "androidx.core:core-ktx:1.15.0"
 media = "androidx.media:media:1.7.0"
 appCompat = "androidx.appcompat:appcompat:1.7.0"
 browser = "androidx.browser:browser:1.8.0"
-webkit = "androidx.webkit:webkit:1.11.0"
-dataStore = "androidx.datastore:datastore-preferences:1.1.1"
-emoji = "androidx.emoji2:emoji2-views:1.4.0"
+webkit = "androidx.webkit:webkit:1.13.0"
+dataStore = "androidx.datastore:datastore-preferences:1.1.4"
+emoji = "androidx.emoji2:emoji2-views:1.5.0"
 biometric = "androidx.biometric:biometric-ktx:1.2.0-alpha05"
 lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 lifecycle-viewmodelktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
