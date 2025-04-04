@@ -1,5 +1,6 @@
 package org.ireader.app.initiators
 
+import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -24,10 +25,18 @@ fun GetPermissions(uiPreferences: UiPreferences) {
     ) {
         uiPreferences.savedLocalCatalogLocation().set(!it)
     }
+    val allFileAccessPermission = rememberPermissionState(
+        android.Manifest.permission.MANAGE_EXTERNAL_STORAGE,
+    ) {
+        uiPreferences.savedLocalCatalogLocation().set(!it)
+    }
     LaunchedEffect(key1 = true) {
         if (!useLocalCache) {
             readStoragePermission.launchPermissionRequest()
             writeStoragePermission.launchPermissionRequest()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                allFileAccessPermission.launchPermissionRequest()
+            }
         }
     }
 }
