@@ -1,5 +1,5 @@
 [versions]
-compose = "1.7.0-rc01"
+compose = "1.7.3"
 compiler = "1.4.4"
 activity = "1.5.1"
 lifecycle = "2.5.1"

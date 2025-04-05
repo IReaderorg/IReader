@@ -198,7 +198,7 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.fontSize,
                 title = localizeHelper.localize(MR.strings.font_size),
                 trailing = vm.fontSize.value.toInt().toString(),
-                valueRange = 8.0F..32.0F,
+                valueRange = 8.0F..72.0F,
                 onValueChange = {
                     vm.makeSettingTransparent()
                 }
@@ -224,7 +224,7 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.paragraphsIndent,
                 title = localizeHelper.localize(MR.strings.paragraph_indent),
                 trailing = vm.paragraphsIndent.value.toInt().toString(),
-                valueRange = 0.0F..32.0F,onValueChange = {
+                valueRange = 0.0F..92.0F,onValueChange = {
                     vm.makeSettingTransparent()
                 }
             ).Build()
