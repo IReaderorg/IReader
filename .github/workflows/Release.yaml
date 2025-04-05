@@ -99,7 +99,7 @@ jobs:
           BUILD_TOOLS_VERSION: "34.0.0"
       # Upload runner package tar.gz/zip as artifact
       - name: Publish Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: runner-package-${{ matrix.runtime }}
           path: |
@@ -109,7 +109,7 @@ jobs:
 
       - name: Publish Android Artifact
         if: ${{ matrix.runtime == 'android' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: runner-package-${{ matrix.runtime }}
           path: |
@@ -121,7 +121,7 @@ jobs:
 
         # Upload runner errors
       - name: Upload error logs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
           name: runner-errors-${{ matrix.runtime }}
