@@ -11,35 +11,9 @@
       "type": "UNIVERSAL",
       "filters": [],
       "attributes": [],
-      "versionCode": 41,
-      "versionName": "0.1.34",
+      "versionCode": 46,
+      "versionName": "0.1.40",
       "outputFile": "android-standard-universal-release.apk"
-    },
-    {
-      "type": "ONE_OF_MANY",
-      "filters": [
-        {
-          "filterType": "ABI",
-          "value": "x86"
-        }
-      ],
-      "attributes": [],
-      "versionCode": 41,
-      "versionName": "0.1.34",
-      "outputFile": "android-standard-x86-release.apk"
-    },
-    {
-      "type": "ONE_OF_MANY",
-      "filters": [
-        {
-          "filterType": "ABI",
-          "value": "armeabi-v7a"
-        }
-      ],
-      "attributes": [],
-      "versionCode": 41,
-      "versionName": "0.1.34",
-      "outputFile": "android-standard-armeabi-v7a-release.apk"
     },
     {
       "type": "ONE_OF_MANY",
@@ -50,9 +24,22 @@
         }
       ],
       "attributes": [],
-      "versionCode": 41,
-      "versionName": "0.1.34",
+      "versionCode": 46,
+      "versionName": "0.1.40",
       "outputFile": "android-standard-x86_64-release.apk"
+    },
+    {
+      "type": "ONE_OF_MANY",
+      "filters": [
+        {
+          "filterType": "ABI",
+          "value": "armeabi-v7a"
+        }
+      ],
+      "attributes": [],
+      "versionCode": 46,
+      "versionName": "0.1.40",
+      "outputFile": "android-standard-armeabi-v7a-release.apk"
     },
     {
       "type": "ONE_OF_MANY",
@@ -63,10 +50,48 @@
         }
       ],
       "attributes": [],
-      "versionCode": 41,
-      "versionName": "0.1.34",
+      "versionCode": 46,
+      "versionName": "0.1.40",
       "outputFile": "android-standard-arm64-v8a-release.apk"
+    },
+    {
+      "type": "ONE_OF_MANY",
+      "filters": [
+        {
+          "filterType": "ABI",
+          "value": "x86"
+        }
+      ],
+      "attributes": [],
+      "versionCode": 46,
+      "versionName": "0.1.40",
+      "outputFile": "android-standard-x86-release.apk"
     }
   ],
-  "elementType": "File"
+  "elementType": "File",
+  "baselineProfiles": [
+    {
+      "minApi": 28,
+      "maxApi": 30,
+      "baselineProfiles": [
+        "baselineProfiles/1/android-standard-universal-release.dm",
+        "baselineProfiles/1/android-standard-x86_64-release.dm",
+        "baselineProfiles/1/android-standard-armeabi-v7a-release.dm",
+        "baselineProfiles/1/android-standard-arm64-v8a-release.dm",
+        "baselineProfiles/1/android-standard-x86-release.dm"
+      ]
+    },
+    {
+      "minApi": 31,
+      "maxApi": 2147483647,
+      "baselineProfiles": [
+        "baselineProfiles/0/android-standard-universal-release.dm",
+        "baselineProfiles/0/android-standard-x86_64-release.dm",
+        "baselineProfiles/0/android-standard-armeabi-v7a-release.dm",
+        "baselineProfiles/0/android-standard-arm64-v8a-release.dm",
+        "baselineProfiles/0/android-standard-x86-release.dm"
+      ]
+    }
+  ],
+  "minSdkVersionForDexing": 21
 }

@@ -2,14 +2,15 @@
 
 package ireader.domain.utils.extensions
 
+
 class DefaultPaginator<Key, Item>(
     private val initialKey: Key,
-    private inline val onInit: suspend () -> Unit = {},
-    private inline val onLoadUpdated: (Boolean) -> Unit,
-    private inline val onRequest: suspend (nextKey: Key) -> Result<Item>,
-    private inline val getNextKey: suspend (Item) -> Key,
-    private inline val onError: suspend (Throwable?) -> Unit,
-    private inline val onSuccess: suspend (items: Item, newKey: Key) -> Unit,
+    private val onInit: suspend () -> Unit = {}, //  Fixed: Removed 'inline'
+    private  val onLoadUpdated: (Boolean) -> Unit,
+    private  val onRequest: suspend (nextKey: Key) -> Result<Item>,
+    private  val getNextKey: suspend (Item) -> Key,
+    private  val onError: suspend (Throwable?) -> Unit,
+    private  val onSuccess: suspend (items: Item, newKey: Key) -> Unit,
 ) : Paginator<Key, Item> {
 
     private var currentKey = initialKey

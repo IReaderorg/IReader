@@ -43,7 +43,7 @@ kotlin {
 
 }
 dependencies {
-    commonMainApi(libs.resources.v0230)
+    commonMainApi(libs.moko.core)
 //    commonMainApi("dev.icerock.moko:resources-compose:0.23.0") // for compose multiplatform
 //
 //    commonTestImplementation("dev.icerock.moko:resources-test:0.23.0")

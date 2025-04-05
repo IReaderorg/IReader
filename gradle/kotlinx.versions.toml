@@ -1,10 +1,10 @@
 [versions]
-kotlin = "2.0.10"
+kotlin = "2.1.20"
 dokka = "1.7.20"
-coroutines = "1.8.1"
-serialization = "1.6.3"
+coroutines = "1.10.1"
+serialization = "1.8.0"
 datetime = "0.6.0"
-ksp = "2.0.10-1.0.24"
+ksp = "2.1.20-1.0.32"
 [libraries]
 stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-common", version.ref = "kotlin" }
 reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }

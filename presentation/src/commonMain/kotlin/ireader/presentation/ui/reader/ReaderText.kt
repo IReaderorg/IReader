@@ -263,7 +263,6 @@ private fun MainText(
         is Text -> {
             StyleText(modifier, vm, index, page, vm.bionicReadingMode.value)
         }
-
         is ImageUrl -> {
             val isLoading = remember {
                 mutableStateOf(false)
@@ -274,8 +273,7 @@ private fun MainText(
                     modifier = Modifier
                         .fillMaxWidth()
                         .requiredHeight(500.dp),
-                    model = ImageRequest.Builder(context = context).data(page.url.toUri())
-                        .diskCachePolicy(CachePolicy.DISABLED).build(),
+                    model = ImageRequest.Builder(context=context).data(page.url.toUri()).diskCachePolicy(CachePolicy.DISABLED).build(),
                     contentDescription = "image",
                     contentScale = ContentScale.FillWidth,
                     onLoading = {
@@ -382,7 +380,6 @@ private fun StyleText(
     }
 
 }
-
 @Composable
 private fun ContinuesReaderPage(
     modifier: Modifier = Modifier,
@@ -467,57 +464,58 @@ private fun ReaderHorizontalScreen(
     toggleReaderMode: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    if (!vm.verticalScrolling.value) {
+        Row(modifier = Modifier.fillMaxSize()) {
 
-    Row(modifier = Modifier.fillMaxSize()) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null
+                    ) {
+                        scope.launch {
 
-        Box(
-            Modifier
-                .fillMaxSize()
-                .weight(1f)
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null
-                ) {
-                    scope.launch {
-
-                        if (scrollState.value != 0) {
-                            scrollState.scrollBy(-maxHeight)
-                        } else {
-                            onPrev()
+                            if (scrollState.value != 0) {
+                                scrollState.scrollBy(-maxHeight)
+                            } else {
+                                onPrev()
+                            }
                         }
                     }
-                }
-        ) {
-        }
-        Box(
-            Modifier
-                .fillMaxSize()
-                .weight(1f)
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null
-                ) {
-                    toggleReaderMode()
-                }
-        ) {
-        }
-        Box(
-            Modifier
-                .fillMaxSize()
-                .weight(1f)
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null
-                ) {
-                    scope.launch {
-                        if (scrollState.value != scrollState.maxValue) {
-                            scrollState.scrollBy(maxHeight)
-                        } else {
-                            onNext()
+            ) {
+            }
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null
+                    ) {
+                        toggleReaderMode()
+                    }
+            ) {
+            }
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null
+                    ) {
+                        scope.launch {
+                            if (scrollState.value != scrollState.maxValue) {
+                                scrollState.scrollBy(maxHeight)
+                            } else {
+                                onNext()
+                            }
                         }
                     }
-                }
-        ) {
+            ) {
+            }
         }
     }
 }

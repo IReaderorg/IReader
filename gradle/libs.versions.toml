@@ -1,22 +1,21 @@
 [versions]
 # Compose
 apkParser = "2.6.10"
-composeGradle = "1.7.0-rc01"
+composeGradle = "1.7.3"
 coreSplashscreen = "1.0.1"
 firebaseAnalytics = "22.4.0"
 junitVintageEngine = "5.8.2"
 kotlinxCoroutinesSwing = "1.8.1"
-resources = "0.24.1"
-voyager = "1.1.0-beta02"
+voyager = "1.0.1"
 # Android
 proguard = "7.2.2"
 # Dependency Injection
-koin = "3.5.0"
-koinAndroid = "3.5.0"
-koinAndroidCompose = "3.5.0"
-koinCompose = "1.1.0"
+koin = "4.0.3"
+koinAndroid = "4.0.3"
+koinAndroidCompose = "4.0.3"
+koinCompose = "4.0.3"
 # Network
-ktor = "3.0.0-beta-2"
+ktor = "3.1.2"
 # Logging
 napier = "2.6.1"
 # Storage
@@ -25,7 +24,7 @@ sqldelight = "2.0.2"
 multiplatformSettings = "1.0.0"
 
 # Localization
-moko = "0.24.1"
+moko = "0.24.5"
 # BuildConfigs
 buildkonfig = "0.15.1"
 okhttp = "5.0.0-alpha.10"
@@ -57,7 +56,6 @@ googleTranslator = "com.google.mlkit:translate:17.0.3"
 
 junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junitVintageEngine" }
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinxCoroutinesSwing" }
-resources-v0230 = { module = "dev.icerock.moko:resources", version.ref = "resources" }
 voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
 voyager-tab-navigator = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyager" }
 voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
