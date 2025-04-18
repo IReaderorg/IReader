@@ -73,13 +73,28 @@ fun ReaderText(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val scope = rememberCoroutineScope()
+    
+    // Add debounce mechanism for toggleReaderMode
+    var lastToggleTime by remember { mutableStateOf(0L) }
+    val debounceInterval = 500L // 500ms debounce
+    
+    val debouncedToggleReaderMode = remember {
+        {
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastToggleTime > debounceInterval) {
+                lastToggleTime = currentTime
+                toggleReaderMode()
+            }
+        }
+    }
+    
     BoxWithConstraints(
         modifier = Modifier
             .clickable(
                 interactionSource = interactionSource,
                 indication = null
             ) {
-                toggleReaderMode()
+                debouncedToggleReaderMode()
             }
             .supportDesktopScroll(
                 scrollState,
@@ -155,7 +170,7 @@ fun ReaderText(
                                 maxHeight = maxHeight,
                                 onNext = onNext,
                                 onPrev = onPrev,
-                                toggleReaderMode = toggleReaderMode
+                                toggleReaderMode = debouncedToggleReaderMode
                             )
                         }
 
@@ -167,7 +182,7 @@ fun ReaderText(
                                 maxHeight = maxHeight,
                                 onNext = onNext,
                                 onPrev = onPrev,
-                                toggleReaderMode = toggleReaderMode,
+                                toggleReaderMode = debouncedToggleReaderMode,
                                 onChapterShown = onChapterShown
                             )
                         }
@@ -180,7 +195,7 @@ fun ReaderText(
                     maxHeight = maxHeight,
                     onNext = onNext,
                     onPrev = onPrev,
-                    toggleReaderMode = toggleReaderMode
+                    toggleReaderMode = debouncedToggleReaderMode
                 )
             }
 
@@ -476,7 +491,6 @@ private fun ReaderHorizontalScreen(
                         indication = null
                     ) {
                         scope.launch {
-
                             if (scrollState.value != 0) {
                                 scrollState.scrollBy(-maxHeight)
                             } else {
@@ -528,19 +542,33 @@ private fun setText(
     bottomContentPadding: Int,
     contentPadding: Int,
 ): String {
-    return text.let {
-        if (index == 0) {
-            "\n".repeat(topContentPadding) + it
-        } else {
-            it
-        }
-    }.let {
-        if (isLast) {
-            it + "\n".repeat(bottomContentPadding)
-        } else {
-            it
-        }
-    }.let {
-        it + "\n".repeat(contentPadding)
+    val stringBuilder = StringBuilder()
+    
+    // Add top padding only if this is the first chunk (index 0)
+    if (index == 0) {
+        stringBuilder.append("\n".repeat(topContentPadding))
     }
+    
+    // Add the text content without any leading newlines for the first paragraph
+    val cleanedText = if (index == 0) {
+        // For the first paragraph, remove any leading newlines
+        text.trimStart()
+    } else {
+        // For other paragraphs, keep as is
+        text
+    }
+    
+    stringBuilder.append(cleanedText)
+    
+    // Add bottom padding if this is the last chunk
+    if (isLast) {
+        stringBuilder.append("\n".repeat(bottomContentPadding))
+    }
+    
+    // Add spacing between paragraphs only for non-first paragraphs
+    if (index > 0) {
+        stringBuilder.append("\n".repeat(contentPadding))
+    }
+    
+    return stringBuilder.toString()
 }

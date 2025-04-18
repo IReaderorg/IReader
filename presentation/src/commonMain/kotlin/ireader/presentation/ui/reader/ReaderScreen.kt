@@ -7,6 +7,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
@@ -18,6 +19,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -25,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Chapter
@@ -61,36 +64,60 @@ fun ReadingScreen(
         paddingValues: PaddingValues
 ) {
 
-    val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val modalBottomSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        animationSpec = tween(durationMillis = 250)
+    )
+
     DisposableEffect(key1 = modalBottomSheetState.hashCode()) {
         vm.modalBottomSheetState = modalBottomSheetState
-
-        onDispose {  }
+        onDispose { }
     }
+    
     val scope = rememberCoroutineScope()
     val chapter = vm.stateChapter
 
-    LaunchedEffect(key1 = modalBottomSheetState.targetValue) {
-        when (modalBottomSheetState.targetValue) {
-            ModalBottomSheetValue.Expanded -> vm.isReaderModeEnable = false
-            ModalBottomSheetValue.Hidden -> vm.isReaderModeEnable = true
+    // Initialize the modal sheet state based on reader mode
+    LaunchedEffect(Unit) {
+        // Ensure that on initialization, the bottom sheet state is set correctly
+        if (!vm.isReaderModeEnable) {
+            modalBottomSheetState.show()
+        }
+    }
+    
+    // Handle changes from modal sheet to reader mode
+    LaunchedEffect(key1 = modalBottomSheetState.currentValue) {
+        when (modalBottomSheetState.currentValue) {
+            ModalBottomSheetValue.Expanded -> {
+                if (vm.isReaderModeEnable) vm.isReaderModeEnable = false
+            }
+            ModalBottomSheetValue.Hidden -> {
+                if (!vm.isReaderModeEnable) vm.isReaderModeEnable = true
+            }
             else -> {}
         }
     }
+    
+    // Handle changes from reader mode to modal sheet
     LaunchedEffect(key1 = vm.isReaderModeEnable) {
         when (vm.isReaderModeEnable) {
             false -> {
-                scope.launch {
-                    modalBottomSheetState.show()
+                if (modalBottomSheetState.currentValue != ModalBottomSheetValue.Expanded) {
+                    scope.launch {
+                        modalBottomSheetState.show()
+                    }
                 }
             }
             true -> {
-                scope.launch {
-                    modalBottomSheetState.hide()
+                if (modalBottomSheetState.currentValue != ModalBottomSheetValue.Hidden) {
+                    scope.launch {
+                        modalBottomSheetState.hide()
+                    }
                 }
             }
         }
     }
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -100,37 +127,66 @@ fun ReadingScreen(
         if (vm.webViewManger.inProgress && vm.webViewIntegration.value) {
             vm.prefFunc.WebView()
         }
+        
         Crossfade(
             modifier = Modifier.fillMaxSize(),
-            targetState = vm.isLoading && if (vm.readingMode.value == ReadingMode.Continues) vm.chapterShell.isEmpty() else true
+            targetState = vm.isLoading && if (vm.readingMode.value == ReadingMode.Continues) vm.chapterShell.isEmpty() else true,
+            animationSpec = tween(durationMillis = 300)
         ) { isLoading ->
 
             when (isLoading) {
                 true -> {
-                    Box(
+                    Surface(
                         modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                        color = vm.backgroundColor.value
                     ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center),
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .align(Alignment.Center),
+                                color = MaterialTheme.colorScheme.primary,
+                                strokeWidth = 3.dp
+                            )
+                        }
                     }
                 }
                 else -> {
                     ModalBottomSheetLayout(
-                        modifier =  Modifier.padding(if (vm.immersiveMode.value) PaddingValues() else paddingValues)
+                        modifier = Modifier
+                            .padding(if (vm.immersiveMode.value) PaddingValues() else paddingValues)
                             .fillMaxWidth(),
-                        sheetBackgroundColor = if(vm.isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(0f) else MaterialTheme.colorScheme.surface.copy(ContentAlpha.high),
-                        sheetContentColor = if(vm.isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(0f) else MaterialTheme.colorScheme.onSurface,
-                        scrimColor = Color.Transparent,
-                        sheetElevation = 0.dp,
+                        sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+                        sheetBackgroundColor = if(vm.isSettingChanging) 
+                            MaterialTheme.colorScheme.Transparent.copy(0f) 
+                        else 
+                            MaterialTheme.colorScheme.surface.copy(ContentAlpha.high),
+                        sheetContentColor = if(vm.isSettingChanging) 
+                            MaterialTheme.colorScheme.Transparent.copy(0f) 
+                        else 
+                            MaterialTheme.colorScheme.onSurface,
+                        scrimColor = Color.Black.copy(alpha = 0.32f),
+                        sheetElevation = 8.dp,
                         sheetState = modalBottomSheetState,
                         sheetContent = {
                             Column(
-                                Modifier.height(130.dp),
+                                modifier = Modifier
+                                    .height(140.dp)
+                                    .padding(horizontal = 16.dp)
                             ) {
-                                Spacer(modifier = Modifier.height(5.dp))
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .width(40.dp)
+                                        .height(4.dp)
+                                        .clip(RoundedCornerShape(2.dp))
+                                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                                        .align(Alignment.CenterHorizontally)
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
                                 MainBottomSettingComposable(
                                     scope = scope,
                                     drawerState = drawerState,
@@ -138,12 +194,8 @@ fun ReadingScreen(
                                     chapters = vm.stateChapters,
                                     currentChapterIndex = vm.currentChapterIndex,
                                     onSetting = onReaderBottomOnSetting,
-                                    onNext = {
-                                        onNext(true)
-                                    },
-                                    onPrev = {
-                                        onPrev(true)
-                                    },
+                                    onNext = { onNext(true) },
+                                    onPrev = { onPrev(true) },
                                     onSliderChange = onSliderChange,
                                     onSliderFinished = onSliderFinished,
                                     onPlay = onReaderPlay
@@ -151,12 +203,9 @@ fun ReadingScreen(
                             }
                         },
                     ) {
-
                         ReaderText(
                             vm = readerScreenPreferencesState,
-                            onNext = {
-                                onNext(false)
-                            },
+                            onNext = { onNext(false) },
                             swipeState = swipeState,
                             onPrev = { onPrev(false) },
                             scrollState = scrollState,
@@ -165,7 +214,6 @@ fun ReadingScreen(
                             uiState = vm,
                             lazyListState = lazyListState,
                             onChapterShown = onChapterShown
-
                         )
                     }
                 }

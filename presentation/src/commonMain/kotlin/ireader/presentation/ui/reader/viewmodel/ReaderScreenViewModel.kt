@@ -132,6 +132,8 @@ class ReaderScreenViewModel(
         "Cooper Arabic"
     )
 
+    var isToggleInProgress by mutableStateOf(false)
+
     init {
         val chapterId = globalChapterId.value
         val bookId = globalBookId.value
@@ -286,9 +288,22 @@ class ReaderScreenViewModel(
         }
     }
     fun ReaderScreenViewModel.toggleReaderMode(enable: Boolean?) {
+        // Prevent rapid toggling with debounce
+        if (isToggleInProgress) return
+        isToggleInProgress = true
+        
+        // Set the reader mode state - this will trigger the LaunchedEffect in ReaderScreen
         isReaderModeEnable = enable ?: !state.isReaderModeEnable
-        isMainBottomModeEnable = true
+        
+        // Make sure the bottom content is accessible when reader mode is off
+        isMainBottomModeEnable = !isReaderModeEnable
         isSettingModeEnable = false
+        
+        // Release the toggle lock after a delay
+        scope.launch {
+            delay(500)
+            isToggleInProgress = false
+        }
     }
     fun changeBackgroundColor(themeId:Long) {
         readerColors.firstOrNull { it.id == themeId }?.let { theme ->
