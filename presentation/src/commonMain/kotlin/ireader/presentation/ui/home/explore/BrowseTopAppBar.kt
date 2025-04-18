@@ -103,9 +103,10 @@ fun BrowseTopAppBar(
                             onClick = {
                                 topMenu = true
                             },
+                            tint = MaterialTheme.colorScheme.onSurface
                     )
                     IDropdownMenu(
-                            modifier = Modifier.background(MaterialTheme.colorScheme.background),
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surface),
                             expanded = topMenu,
                             onDismissRequest = {
                                 topMenu = false
@@ -116,9 +117,20 @@ fun BrowseTopAppBar(
                                 onLayoutTypeSelect(layout)
                                 topMenu = false
                             }, text = {
+                                val layoutName = layout.getLayoutName(localizeHelper)
+                                val description = when (layout) {
+                                    DisplayMode.ComfortableGrid -> localize(MR.strings.comfortable_grid_layout_description)
+                                    DisplayMode.CompactGrid -> localize(MR.strings.compact_grid_layout_description)
+                                    DisplayMode.List -> localize(MR.strings.list_layout_description) 
+                                    DisplayMode.OnlyCover -> localize(MR.strings.cover_only_layout_description)
+                                }
+                                
                                 RadioButton(
-                                        text = layout.getLayoutName(localizeHelper),
+                                        text = layoutName,
+                                        description = description,
                                         selected = currentLayout == layout,
+                                        textColor = MaterialTheme.colorScheme.onSurface,
+                                        selectedColor = MaterialTheme.colorScheme.primary,
                                         onClick = {
                                             onLayoutTypeSelect(layout)
                                             topMenu = false

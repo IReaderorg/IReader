@@ -39,7 +39,7 @@ interface ExploreState {
 open class ExploreStateImpl: ExploreState {
     override var isLoading by mutableStateOf<Boolean>(false)
     override var error by mutableStateOf<UiText?>(null)
-     override var layout by mutableStateOf<DisplayMode>(DisplayMode.ComfortableGrid)
+     override var layout by mutableStateOf<DisplayMode>(DisplayMode.CompactGrid)
     override var isSearchModeEnable by mutableStateOf<Boolean>(false)
     override var searchQuery by mutableStateOf<String?>(null)
     override val source: ireader.core.source.CatalogSource? by derivedStateOf {

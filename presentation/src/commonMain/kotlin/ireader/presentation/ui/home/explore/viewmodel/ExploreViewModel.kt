@@ -20,9 +20,15 @@ import ireader.i18n.UiText
 import ireader.i18n.resources.MR
 import ireader.domain.utils.fastMap
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
+import kotlin.math.min
 
 
 class ExploreViewModel(
@@ -182,21 +188,46 @@ class ExploreViewModel(
 
     fun saveLayoutType(layoutType: DisplayMode) {
         state.layout = layoutType
-        browseScreenPrefUseCase.browseLayoutTypeUseCase.save(layoutType)
+        scope.launch {
+            browseScreenPrefUseCase.browseLayoutTypeUseCase.save(layoutType)
+        }
     }
 
     private suspend fun readLayoutType() {
-            state.layout = browseScreenPrefUseCase.browseLayoutTypeUseCase.read()
+        state.layout = browseScreenPrefUseCase.browseLayoutTypeUseCase.read()
     }
 
     fun toggleFilterMode(enable: Boolean? = null) {
         state.isFilterEnable = enable ?: !state.isFilterEnable
     }
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun getColumnsForOrientation(isLandscape: Boolean, scope: CoroutineScope): StateFlow<Int> {
-        return if (isLandscape) {
+        // Default columns should always be 2 in portrait for all grid layouts
+        val defaultColumns = if (isLandscape) {
+            // In landscape, we can allow more columns
+            if (layout == DisplayMode.ComfortableGrid) 3 else 2
+        } else {
+            // In portrait, always use 2 columns for any grid layout
+            2
+        }
+        
+        // Use user preferences, but ensure we're not using too many columns for non-ComfortableGrid layouts
+        val columns = if (isLandscape) {
             libraryPreferences.columnsInLandscape()
         } else {
-            libraryPreferences.columnsInPortrait()
+            if (layout == DisplayMode.ComfortableGrid) {
+                libraryPreferences.columnsInPortrait()
+            } else {
+                libraryPreferences.columnsInPortraitCompact()
+            }
         }.stateIn(scope)
+        
+        return if (layout != DisplayMode.ComfortableGrid) {
+            // For non-comfortable layouts, ensure maximum column count is restricted
+            val maxColumns = if (isLandscape) 3 else 2
+            columns.mapLatest { min(it, maxColumns) }.stateIn(scope, SharingStarted.Eagerly, defaultColumns)
+        } else {
+            columns
+        }
     }
 }

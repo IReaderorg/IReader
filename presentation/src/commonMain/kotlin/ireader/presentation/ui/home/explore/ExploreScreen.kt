@@ -3,6 +3,7 @@ package ireader.presentation.ui.home.explore
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -12,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,9 +30,9 @@ import ireader.domain.models.entities.toBookItem
 import ireader.i18n.asString
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
-import ireader.presentation.ui.component.components.ShowLoading
+import ireader.presentation.ui.component.ModernLayoutComposable
+import ireader.presentation.ui.component.components.BookShimmerLoading
 import ireader.presentation.ui.component.isLandscape
-import ireader.presentation.ui.component.list.LayoutComposable
 import ireader.presentation.ui.component.list.isScrolledToTheEnd
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
@@ -116,11 +118,14 @@ fun ExploreScreen(
         }
     }
     val columns by if (vm.layout != DisplayMode.List) {
-
         val isLandscape = isLandscape()
 
         with(rememberCoroutineScope()) {
-            remember(isLandscape) { getColumnsForOrientation(isLandscape) }.collectAsState()
+            remember(isLandscape, vm.layout) {
+                getColumnsForOrientation(isLandscape)
+            }.collectAsState(
+                initial = 2
+            )
         }
     } else {
         remember { mutableStateOf(0) }
@@ -129,9 +134,9 @@ fun ExploreScreen(
         modifier = modifier,
         floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
         floatingActionButton = {
-            androidx.compose.material3.ExtendedFloatingActionButton(
+            ExtendedFloatingActionButton(
                 text = {
-                    MidSizeTextComposable(
+                    Text(
                         text = localize(MR.strings.filter),
                         color = MaterialTheme.colorScheme.onSecondary
                     )
@@ -142,9 +147,8 @@ fun ExploreScreen(
                 icon = {
                     Icon(Icons.Filled.Add, "", tint = MaterialTheme.colorScheme.onSecondary)
                 },
-                contentColor = MaterialTheme.colorScheme.onSecondary,
-                containerColor = MaterialTheme.colorScheme.secondary,
-                shape = RoundedCornerShape(32.dp)
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                shape = CircleShape
             )
         },
     ) { paddingValue ->
@@ -153,13 +157,12 @@ fun ExploreScreen(
                 .fillMaxSize()
                 .padding(prevPaddingValues)
         ) {
-
             when {
                 vm.isLoading && vm.page == 1 -> {
-                    ShowLoading()
+                    BookShimmerLoading(columns = columns)
                 }
                 vm.error != null && vm.page == 1 -> {
-                    ExploreScreenErrorComposable(
+                    ExploreScreenError(
                         error = vm.error!!.asString(localizeHelper),
                         source = source,
                         onRefresh = { getBooks(null, null, emptyList()) },
@@ -169,14 +172,12 @@ fun ExploreScreen(
                     )
                 }
                 else -> {
-                    LayoutComposable(
+                    ModernLayoutComposable(
                         books = vm.booksState.books
                             .mapIndexed { index, book ->  book.toBookItem()
-                                .copy(column= index.toLong())},
+                                .copy(column = index.toLong())},
                         layout = vm.layout,
                         scrollState = scrollState,
-                        source = source,
-                        isLocal = false,
                         gridState = gridState,
                         onClick = { book ->
                             onBook(book)
@@ -193,87 +194,6 @@ fun ExploreScreen(
                         columns = columns
                     )
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun BoxScope.ExploreScreenErrorComposable(
-    modifier: Modifier = Modifier,
-    error: String,
-    onRefresh: () -> Unit,
-    source: Source,
-    onWebView: (HttpSource) -> Unit,
-) {
-    val kaomoji = remember { kaomojis.random() }
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .align(Alignment.Center)
-            .padding(bottom = 30.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-
-        androidx.compose.material3.Text(
-            text = kaomoji,
-            style = MaterialTheme.typography.bodyMedium.copy(
-                color = LocalContentColor.current.copy(alpha = ContentAlpha.medium()),
-                fontSize = 48.sp
-            ),
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        androidx.compose.material3.Text(
-            text = error,
-            style = MaterialTheme.typography.bodyMedium.copy(
-                color = LocalContentColor.current.copy(alpha = ContentAlpha.medium())
-            ),
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .padding(top = 16.dp)
-                .padding(horizontal = 16.dp),
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Row(
-            Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                Modifier
-                    .weight(.5f)
-                    .wrapContentSize(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                AppIconButton(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = localize(MR.strings.retry),
-                    onClick = {
-                        onRefresh()
-                    }
-                )
-                SmallTextComposable(text = localize(MR.strings.retry))
-            }
-            Column(
-                Modifier
-                    .weight(.5f)
-                    .wrapContentSize(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                if (source is HttpSource) {
-                    AppIconButton(
-                        imageVector = Icons.Default.Public,
-                        contentDescription = localize(MR.strings.open_in_webView),
-                        onClick = {
-                            onWebView(source)
-                        }
-                    )
-                }
-                SmallTextComposable(text = localize(MR.strings.open_in_webView))
             }
         }
     }

@@ -226,6 +226,7 @@ data class BookItem(
     val key: String = "",
     val unread: Int? = null,
     val downloaded: Int? = null,
+    val author: String = ""
 ) : BaseBook
 
 
@@ -238,6 +239,7 @@ fun BookItem.toBook() : Book {
         sourceId = this.sourceId,
         cover = this.cover,
         customCover = this.customCover,
+        author = this.author
 
 
     )
@@ -252,7 +254,7 @@ fun Book.toBookItem() : BookItem {
         sourceId = this.sourceId,
         customCover = this.customCover,
         cover = this.cover,
-
+        author = this.author
     )
 }
 

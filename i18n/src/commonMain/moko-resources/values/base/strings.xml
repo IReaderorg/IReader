@@ -429,5 +429,16 @@
     <string name="last_used_source">Last Used</string>
     <string name="invert_selection">Invert Selection</string>
     <string name="selected">Selected</string>
-
+    <string name="source_browse_latest">Browse Latest</string>
+    <string name="all">All</string>
+    <string name="no_results_found">No result Found</string>
+    <string name="try_another_search">Try another search</string>
+    <string name="layout_description_comfortable">3 columns in grid with larger cover images</string>
+    <string name="layout_description_compact">2 columns in grid with smaller cover images</string>
+    <string name="layout_description_list">Books displayed in a vertical list</string>
+    <string name="layout_description_cover_only">2 columns of cover images only (no text)</string>
+    <string name="comfortable_grid_layout_description">3 columns in grid with larger cover images</string>
+    <string name="compact_grid_layout_description">2 columns in grid with smaller cover images</string>
+    <string name="list_layout_description">Books displayed in a vertical list</string>
+    <string name="cover_only_layout_description">2 columns of cover images only (no text)</string>
 </resources>
