@@ -48,6 +48,21 @@
 
 ---
 
+## 📖 Documentation
+
+Check out our comprehensive wiki for detailed guides:
+
+- [Getting Started](docs/wiki/Getting-Started.md) - Quick setup guide for new users
+- [Installing Extensions](docs/wiki/Installing-Extensions.md) - How to add new sources
+- [Adding Books](docs/wiki/Adding-Books.md) - Finding and adding books to your library
+- [Categories](docs/wiki/Categories.md) - Organizing your book collection
+- [Reading Books](docs/wiki/Reading-Books.md) - Customize your reading experience
+- [Backup and Restore](docs/wiki/Backup-and-Restore.md) - Protecting your library data
+- [Troubleshooting](docs/wiki/Troubleshooting.md) - Solutions to common issues
+- [FAQ](docs/wiki/FAQ.md) - Frequently asked questions
+
+---
+
 ## 🌍 Contributing
 
 ### 🌐 Translations
