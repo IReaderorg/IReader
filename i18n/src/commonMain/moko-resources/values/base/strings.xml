@@ -427,4 +427,7 @@
     <string name="uncategorized_category">Default</string>
     <string name="pinned_sources">Pinned</string>
     <string name="last_used_source">Last Used</string>
+    <string name="invert_selection">Invert Selection</string>
+    <string name="selected">Selected</string>
+
 </resources>

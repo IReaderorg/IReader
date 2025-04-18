@@ -4,6 +4,7 @@ package ireader.presentation.ui.book
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -146,7 +147,7 @@ fun BookDetailScreen(
                     }
                 }
 
-                Box(modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier.fillMaxSize().navigationBarsPadding()) {
                     ChapterDetailBottomBar(
                             vm,
                             onDownload = {

@@ -16,12 +16,25 @@
 
 package ireader.presentation.ui.component
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.component.components.ISnackBarHost
 import androidx.compose.foundation.layout.MutableWindowInsets
 
@@ -50,6 +63,12 @@ import androidx.compose.foundation.layout.MutableWindowInsets
  * * Handle consumed window insets
  * * Add startBar slot for Navigation Rail
  *
+ * IReader changes:
+ * * Add animated visibility transitions for topBar and bottomBar
+ * * Add shadow elevation for better visual hierarchy
+ * * Improve content padding handling for better UX
+ * * Apply Material You design principles
+ *
  * @param modifier the [Modifier] to be applied to this scaffold
  * @param topBar top app bar of the screen, typically a [SmallTopAppBar]
  * @param startBar side bar on the start of the screen, typically a [NavigationRail]
@@ -66,20 +85,22 @@ import androidx.compose.foundation.layout.MutableWindowInsets
  * @param contentWindowInsets window insets to be passed to content slot via PaddingValues params.
  * Scaffold will take the insets into account from the top/bottom only if the topBar/ bottomBar
  * are not present, as the scaffold expect topBar/bottomBar to handle insets instead
+ * @param showTopBar whether to show the top bar
+ * @param showBottomBar whether to show the bottom bar
+ * @param topBarElevation whether to apply shadow elevation to the top bar
  * @param content content of the screen. The lambda receives a [PaddingValues] that should be
  * applied to the content root via [Modifier.padding] and [Modifier.consumeWindowInsets] to
  * properly offset top and bottom bars. If using [Modifier.verticalScroll], apply this modifier to
  * the child of the scroll, and not on the scroll itself.
  */
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
-
 @Composable
 fun IScaffold(
     modifier: Modifier = Modifier,
     topBarScrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(
         rememberTopAppBarState()
     ),
-    snackbarHostState: SnackbarHostState = SnackbarHostState(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     topBar: @Composable (TopAppBarScrollBehavior) -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
     startBar: @Composable () -> Unit = {},
@@ -91,33 +112,98 @@ fun IScaffold(
     containerColor: Color = MaterialTheme.colorScheme.background,
     contentColor: Color = contentColorFor(containerColor),
     contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
+    showTopBar: Boolean = true,
+    showBottomBar: Boolean = true,
+    topBarElevation: Boolean = false,
     content: @Composable (PaddingValues) -> Unit,
 ) {
     val remainingWindowInsets = remember { MutableWindowInsets() }
-    return Scaffold(modifier = Modifier
-                .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
-                .onConsumedWindowInsetsChanged {
-                    remainingWindowInsets.insets = contentWindowInsets.exclude(it)
-                }
-                .then(modifier),
-                topBar = { topBar(topBarScrollBehavior) },
-                bottomBar = bottomBar,
-                snackbarHost = snackbarHost,
-                floatingActionButton = floatingActionButton,
-                floatingActionButtonPosition = floatingActionButtonPosition,
-                containerColor = containerColor,
-                contentColor = contentColor,
-                contentWindowInsets = contentWindowInsets,
-                content = { paddingValues ->
-                    Row(modifier = Modifier.fillMaxSize()) {
-                        startBar()
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize(),
-                        ) {
-                            content(paddingValues)
+    val topAppBarState = LocalState.current
+    
+    Scaffold(
+        modifier = Modifier
+            .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
+            .onConsumedWindowInsetsChanged {
+                remainingWindowInsets.insets = contentWindowInsets.exclude(it)
+            }
+            .then(modifier),
+        topBar = {
+            AnimatedVisibility(
+                visible = showTopBar,
+                enter = fadeIn(animationSpec = tween(150)) + expandVertically(
+                    animationSpec = tween(250),
+                    expandFrom = Alignment.Top
+                ),
+                exit = fadeOut(animationSpec = tween(150)) + shrinkVertically(
+                    animationSpec = tween(250),
+                    shrinkTowards = Alignment.Top
+                )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .graphicsLayer {
+                            if (topBarElevation) {
+                                shadowElevation = 4f
+                            }
                         }
-                    }
+                ) {
+                    topBar(topBarScrollBehavior)
                 }
-            )
+            }
+        },
+        bottomBar = {
+            AnimatedVisibility(
+                visible = showBottomBar,
+                enter = fadeIn(animationSpec = tween(150)) + expandVertically(
+                    animationSpec = tween(250),
+                    expandFrom = Alignment.Bottom
+                ),
+                exit = fadeOut(animationSpec = tween(150)) + shrinkVertically(
+                    animationSpec = tween(250),
+                    shrinkTowards = Alignment.Bottom
+                )
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth().navigationBarsPadding(),
+                    tonalElevation = 3.dp,
+                    shadowElevation = 6.dp
+                ) {
+                    bottomBar()
+                }
+            }
+        },
+        snackbarHost = {
+            Box(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .imePadding()
+            ) {
+                snackbarHost()
+            }
+        },
+        floatingActionButton = {
+            floatingActionButton()
+        },
+        floatingActionButtonPosition = floatingActionButtonPosition,
+        containerColor = containerColor,
+        contentColor = contentColor,
+        contentWindowInsets = contentWindowInsets,
+        content = { paddingValues ->
+            Row(modifier = Modifier.fillMaxSize()) {
+                startBar()
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(containerColor),
+                ) {
+                    content(paddingValues)
+                }
+            }
+        }
+    )
+}
+
+private object LocalState {
+    val current: androidx.compose.runtime.State<Float> = mutableStateOf(0f)
 }
