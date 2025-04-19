@@ -54,7 +54,7 @@ class WebViewPageModel(
         val chapterId = param.chapterId
         enableChapterFetch = param.enableChapterFetch == true
         enableChaptersFetch = param.enableChaptersFetch == true
-        enableBookFetch =param.enableChaptersFetch == true
+        enableBookFetch = param.enableBookFetch == true
         bookId?.let {
             scope.launch {
                 stateBook = getBookUseCases.findBookById(bookId)
@@ -102,15 +102,15 @@ class WebViewPageModel(
                 catalog,
                 onError = {
                     showSnackBar(it)
-                    showSnackBar(UiText.MStringResource(MR.strings.failed))
+                    showSnackBar(UiText.MStringResource(MR.strings.failed_to_get_content))
                 },
                 onSuccess = { result ->
                     if (result.content.isNotEmpty()) {
                         webChapter = result
                         insertChapter(result)
-                        showSnackBar(UiText.MStringResource(MR.strings.success))
+                        showSnackBar(UiText.MStringResource(MR.strings.download_notifier_download_finish))
                     } else {
-                        showSnackBar(UiText.MStringResource(MR.strings.failed))
+                        showSnackBar(UiText.MStringResource(MR.strings.failed_to_get_content))
                     }
                 },
                 commands = listOf(Command.Content.Fetch(url = url, pageSource))
@@ -132,15 +132,19 @@ class WebViewPageModel(
                 catalog,
                 onError = {
                     showSnackBar(it)
+                    showSnackBar(UiText.MStringResource(MR.strings.no_chapters_found_error))
                 },
                 onSuccess = { result ->
-
                     webChapters = result
                     if (result.isNotEmpty()) {
-                        showSnackBar(UiText.MStringResource(MR.strings.success))
                         insertChapters(result.map { it.copy(bookId = book.id) })
+                        val message = if (result.size == 1) 
+                            UiText.MStringResource(MR.strings.download_notifier_download_finish) 
+                        else 
+                            UiText.DynamicString("${result.size} chapters have been downloaded")
+                        showSnackBar(message)
                     } else {
-                        showSnackBar(UiText.MStringResource(MR.strings.failed))
+                        showSnackBar(UiText.MStringResource(MR.strings.no_chapters_found_error))
                     }
                 },
                 commands = listOf(Command.Chapter.Fetch(url = url, pageSource)),
@@ -161,15 +165,16 @@ class WebViewPageModel(
                 book ?: Book(key = "", title = "", sourceId = source?.id ?: 0),
                 catalog,
                 onError = {
-                    showSnackBar(UiText.MStringResource(MR.strings.failed))
+                    showSnackBar(it)
+                    showSnackBar(UiText.MStringResource(MR.strings.something_is_wrong_with_this_book))
                 },
                 onSuccess = { result ->
                     if (result.title.isNotBlank()) {
                         webBook = result
                         insertBook(result.copy(favorite = true))
-                        showSnackBar(UiText.MStringResource(MR.strings.success))
+                        showSnackBar(UiText.DynamicString("Book '${result.title}' added to library"))
                     } else {
-                        showSnackBar(UiText.MStringResource(MR.strings.failed))
+                        showSnackBar(UiText.MStringResource(MR.strings.something_is_wrong_with_this_book))
                     }
                 },
                 commands = listOf(Command.Detail.Fetch(url = url, pageSource))
