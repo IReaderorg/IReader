@@ -32,6 +32,14 @@ object DatabaseMigrations {
     }
     
     /**
+     * Public method to directly initialize views without requiring a migration
+     * This can be called during database creation to ensure views exist
+     */
+    fun initializeViewsDirectly(driver: SqlDriver) {
+        initializeViews(driver)
+    }
+    
+    /**
      * Applies a specific migration script for the given [fromVersion]
      * 
      * @param driver The SqlDriver instance to execute migrations on
@@ -67,72 +75,82 @@ object DatabaseMigrations {
      * This should be called after running all migrations to ensure views are properly set up
      */
     private fun initializeViews(driver: SqlDriver) {
-        // Read the view creation SQL from resources
-        val viewSql = """
-            -- Drop existing views if they exist (for recreation)
-            DROP VIEW IF EXISTS historyView;
-            DROP VIEW IF EXISTS updatesView;
+        try {
+            // Drop existing views if they exist (for recreation)
+            driver.execute(null, "DROP VIEW IF EXISTS historyView;", 0)
+            driver.execute(null, "DROP VIEW IF EXISTS updatesView;", 0)
             
-            -- Create historyView with progress column
-            CREATE VIEW IF NOT EXISTS historyView AS
-            SELECT
-                history._id AS id,
-                book._id AS bookId,
-                chapter._id AS chapterId,
-                chapter.name AS chapterName,
-                book.title,
-                book.thumbnail_url AS thumbnailUrl,
-                book.source,
-                book.favorite,
-                book.cover_last_modified,
-                chapter.chapter_number AS chapterNumber,
-                history.last_read AS readAt,
-                history.time_read AS readDuration,
-                history.progress,
-                max_last_read.last_read AS maxReadAt,
-                max_last_read.chapter_id AS maxReadAtChapterId
-            FROM book
-            JOIN chapter
-            ON book._id = chapter.book_id
-            JOIN history
-            ON chapter._id = history.chapter_id
-            JOIN (
-                SELECT chapter.book_id, chapter._id AS chapter_id, MAX(history.last_read) AS last_read
-                FROM chapter JOIN history
+            // Create historyView with progress column
+            val historyViewSql = """
+                CREATE VIEW IF NOT EXISTS historyView AS
+                SELECT
+                    history._id AS id,
+                    book._id AS bookId,
+                    chapter._id AS chapterId,
+                    chapter.name AS chapterName,
+                    book.title,
+                    book.thumbnail_url AS thumbnailUrl,
+                    book.source,
+                    book.favorite,
+                    book.cover_last_modified,
+                    chapter.chapter_number AS chapterNumber,
+                    history.last_read AS readAt,
+                    history.time_read AS readDuration,
+                    history.progress,
+                    max_last_read.last_read AS maxReadAt,
+                    max_last_read.chapter_id AS maxReadAtChapterId
+                FROM book
+                JOIN chapter
+                ON book._id = chapter.book_id
+                JOIN history
                 ON chapter._id = history.chapter_id
-                GROUP BY chapter.book_id
-            ) AS max_last_read
-            ON chapter.book_id = max_last_read.book_id;
+                JOIN (
+                    SELECT chapter.book_id, chapter._id AS chapter_id, MAX(history.last_read) AS last_read
+                    FROM chapter JOIN history
+                    ON chapter._id = history.chapter_id
+                    GROUP BY chapter.book_id
+                ) AS max_last_read
+                ON chapter.book_id = max_last_read.book_id;
+            """.trimIndent()
             
-            -- Create updatesView with progress information
-            CREATE VIEW IF NOT EXISTS updatesView AS
-            SELECT
-                book._id AS mangaId,
-                book.title AS mangaTitle,
-                chapter._id AS chapterId,
-                chapter.name AS chapterName,
-                chapter.scanlator,
-                chapter.read,
-                chapter.bookmark,
-                book.source,
-                book.favorite,
-                book.thumbnail_url AS thumbnailUrl,
-                book.cover_last_modified AS coverLastModified,
-                chapter.date_upload AS dateUpload,
-                chapter.date_fetch AS datefetch,
-                chapter.content IS NOT "" AS downlaoded,
-                history.progress AS readingProgress,
-                history.last_read AS lastReadAt
-            FROM book JOIN chapter
-            ON book._id = chapter.book_id
-            LEFT JOIN history
-            ON chapter._id = history.chapter_id
-            WHERE favorite = 1
-            AND date_fetch > date_added
-            ORDER BY date_fetch DESC;
-        """.trimIndent()
-        
-        // Execute the SQL to create views
-        driver.execute(null, viewSql, 0)
+            // Execute historyView creation separately
+            driver.execute(null, historyViewSql, 0)
+            
+            // Create updatesView with progress information
+            val updatesViewSql = """
+                CREATE VIEW IF NOT EXISTS updatesView AS
+                SELECT
+                    book._id AS mangaId,
+                    book.title AS mangaTitle,
+                    chapter._id AS chapterId,
+                    chapter.name AS chapterName,
+                    chapter.scanlator,
+                    chapter.read,
+                    chapter.bookmark,
+                    book.source,
+                    book.favorite,
+                    book.thumbnail_url AS thumbnailUrl,
+                    book.cover_last_modified AS coverLastModified,
+                    chapter.date_upload AS dateUpload,
+                    chapter.date_fetch AS datefetch,
+                    chapter.content IS NOT "" AS downlaoded,
+                    history.progress AS readingProgress,
+                    history.last_read AS lastReadAt
+                FROM book JOIN chapter
+                ON book._id = chapter.book_id
+                LEFT JOIN history
+                ON chapter._id = history.chapter_id
+                WHERE favorite = 1
+                AND date_fetch > date_added
+                ORDER BY date_fetch DESC;
+            """.trimIndent()
+            
+            // Execute updatesView creation separately
+            driver.execute(null, updatesViewSql, 0)
+        } catch (e: Exception) {
+            // Log the error but don't crash - this will help with debugging
+            println("Error creating database views: ${e.message}")
+            e.printStackTrace()
+        }
     }
 } 

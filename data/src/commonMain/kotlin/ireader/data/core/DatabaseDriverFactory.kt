@@ -2,6 +2,7 @@ package ireader.data.core
 
 import app.cash.sqldelight.db.SqlDriver
 import data.Catalog
+import data.DatabaseMigrations
 import data.Download
 import data.Reader_theme
 import data.Theme
@@ -16,7 +17,7 @@ import migrations.Chapter
 import java.io.Reader
 
 fun createDatabase(driver: SqlDriver): Database {
-    return Database(
+    val database = Database(
         driver = driver,
         bookAdapter = Book.Adapter(
             cover_last_modifiedAdapter = longConverter,
@@ -53,14 +54,22 @@ fun createDatabase(driver: SqlDriver): Database {
             inverseOnSurfaceAdapter = intLongColumnAdapter,
             onSurfaceVariantAdapter = intLongColumnAdapter, tertiaryContainerAdapter = intLongColumnAdapter, onTertiaryContainerAdapter = intLongColumnAdapter, onPrimaryContainerAdapter = intLongColumnAdapter, secondaryContainerAdapter = intLongColumnAdapter,
             onSecondaryContainerAdapter = intLongColumnAdapter,
-
-
-
         ),
         downloadAdapter = Download.Adapter(
             priorityAdapter = intLongColumnAdapter
         )
     )
+    
+    // Explicitly initialize views every time the database is created
+    // This ensures views exist even if migrations aren't triggered
+    try {
+        DatabaseMigrations.initializeViewsDirectly(driver)
+    } catch (e: Exception) {
+        println("Error initializing views directly: ${e.message}")
+        e.printStackTrace()
+    }
+    
+    return database
 }
 
 expect class DatabaseDriverFactory {
