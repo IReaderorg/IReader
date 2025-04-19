@@ -11,8 +11,9 @@ data class HistoryWithRelations(
     val title: String,
     val chapterName:String,
     val chapterNumber: Float,
-    val readAt: Long?,
+    val readAt: Long = -1,
     val readDuration: Long,
     val coverData: BookCover,
+    val progress: Float? = null
 )
 

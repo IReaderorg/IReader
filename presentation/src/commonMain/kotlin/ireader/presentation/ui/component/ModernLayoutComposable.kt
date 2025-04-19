@@ -5,6 +5,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -14,6 +15,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Divider
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -38,6 +40,8 @@ import ireader.presentation.ui.component.components.BookShimmerLoading
 import ireader.presentation.ui.component.list.isScrolledToTheEnd
 import kotlinx.coroutines.delay
 import ireader.i18n.resources.MR
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -210,7 +214,7 @@ private fun ModernListLayout(
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun ModernListItem(
     book: BookItem,
@@ -241,67 +245,255 @@ fun ModernListItem(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 6.dp)
-                .clickable { onClick(book) },
-            shape = RoundedCornerShape(12.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .combinedClickable(
+                    onClick = { onClick(book) },
+                    onLongClick = { onLongClick(book) }
+                ),
+            shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Cover image
-                Box(
+                Row(
                     modifier = Modifier
-                        .height(100.dp)
-                        .width(70.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.Top
                 ) {
-                    BookCoverImage(
-                        book = book,
-                        headers = headers
-                    )
-                    
-                    // In library badge if the book is a favorite
-                    if (book.favorite) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(4.dp)
-                                .size(8.dp)
-                                .background(
-                                    color = MaterialTheme.colorScheme.primary,
-                                    shape = RoundedCornerShape(4.dp)
-                                )
+                    // Cover image
+                    Box(
+                        modifier = Modifier
+                            .height(120.dp)
+                            .width(80.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                    ) {
+                        BookCoverImage(
+                            book = book,
+                            headers = headers
                         )
+                        
+                        // Reading progress overlay at the bottom of the cover
+                        // First try to use the dedicated progress field, then fallback to calculating from unread
+                        val progress = book.progress ?: run {
+                            book.unread?.let { unreadCount ->
+                                val totalChapters = book.totalChapters ?: 0
+                                if (totalChapters > 0) (totalChapters - unreadCount.toFloat()) / totalChapters else 0f
+                            } ?: 0f
+                        }
+                        
+                        if (progress > 0) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .fillMaxWidth()
+                                    .height(24.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+                                    )
+                                    .padding(horizontal = 4.dp, vertical = 2.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    // Progress bar
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(4.dp)
+                                            .background(
+                                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                                shape = RoundedCornerShape(2.dp)
+                                            )
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth(progress)
+                                                .height(4.dp)
+                                                .background(
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    shape = RoundedCornerShape(2.dp)
+                                                )
+                                        )
+                                    }
+                                    
+                                    // Percentage text
+                                    Text(
+                                        text = "${(progress * 100).toInt()}%",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                                        fontSize = 10.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.width(16.dp))
+                    
+                    // Book details column
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 2.dp)
+                    ) {
+                        // Title
+                        Text(
+                            text = book.title,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 2,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        
+                        Spacer(modifier = Modifier.height(4.dp))
+                        
+                        // Author
+                        if (book.author.isNotBlank()) {
+                            Text(
+                                text = book.author,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            
+                            Spacer(modifier = Modifier.height(6.dp))
+                        }
+                        
+                        // Description if available
+                        book.description?.let { description ->
+                            if (description.isNotBlank()) {
+                                Text(
+                                    text = description,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                        }
+                        
+                        // Status chips row
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Show favorite indicator
+                            if (book.favorite) {
+                                ChipIndicator(
+                                    text = localize(MR.strings.in_library),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                
+                                Spacer(modifier = Modifier.width(8.dp))
+                            }
+                            
+                            // Unread chapters indicator
+                            book.unread?.let { unreadCount ->
+                                if (unreadCount > 0) {
+                                    ChipIndicator(
+                                        text = "$unreadCount ${localize(MR.strings.unread_chapters)}",
+                                        color = MaterialTheme.colorScheme.tertiary
+                                    )
+                                }
+                            }
+                            
+                            // Source name indicator, if space permits
+                            Spacer(modifier = Modifier.weight(1f))
+                            
+                            Text(
+                                text = book.sourceId.toString(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
                 }
                 
-                Spacer(modifier = Modifier.width(16.dp))
-                
-                // Title and details
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = book.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 2,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                // Bottom action bar with metadata
+                book.lastRead?.let { lastRead ->
+                    if (lastRead > 0) {
+                        Divider(
+                            color = MaterialTheme.colorScheme.outlineVariant,
+                            thickness = 0.5.dp,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                        
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Last read date
+                            Text(
+                                text = "${localize(MR.strings.last_read)}: ${formatRelativeTime(lastRead)}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            )
+                            
+                            // Total chapters
+                            book.totalChapters?.let { total ->
+                                Text(
+                                    text = "$total ${localize(MR.strings.total_chapter)}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ChipIndicator(
+    text: String,
+    color: Color
+) {
+    Box(
+        modifier = Modifier
+            .background(
+                color = color.copy(alpha = 0.15f),
+                shape = RoundedCornerShape(12.dp)
+            )
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            color = color,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+// Simple relative time formatter - you might want to replace this with a more sophisticated implementation
+private fun formatRelativeTime(timestamp: Long): String {
+    val current = System.currentTimeMillis()
+    val diff = current - timestamp
+    
+    return when {
+        diff < 60 * 60 * 1000 -> "< 1 hour ago"
+        diff < 24 * 60 * 60 * 1000 -> "${diff / (60 * 60 * 1000)} hours ago"
+        diff < 48 * 60 * 60 * 1000 -> "Yesterday"
+        else -> "${diff / (24 * 60 * 60 * 1000)} days ago"
     }
 }
 

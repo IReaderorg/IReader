@@ -1,0 +1,27 @@
+-- SQLDelight migrations need to use a different approach than direct ALTER TABLE
+
+-- Create a temporary table with the new structure
+CREATE TABLE history_new(
+    _id INTEGER NOT NULL PRIMARY KEY,
+    chapter_id INTEGER NOT NULL UNIQUE,
+    last_read INTEGER,
+    time_read INTEGER NOT NULL,
+    progress REAL DEFAULT 0.0,
+    FOREIGN KEY(chapter_id) REFERENCES chapter (_id)
+    ON DELETE CASCADE
+);
+
+-- Copy data from the old table to the new one
+INSERT INTO history_new (_id, chapter_id, last_read, time_read, progress)
+SELECT _id, chapter_id, last_read, time_read, 0.0 FROM history;
+
+-- Drop the old table
+DROP TABLE history;
+
+-- Rename the new table to the original name
+ALTER TABLE history_new RENAME TO history;
+
+-- Create indices
+CREATE INDEX IF NOT EXISTS history_history_chapter_id_index ON history(chapter_id);
+CREATE INDEX IF NOT EXISTS idx_history_last_read ON history(last_read);
+CREATE INDEX IF NOT EXISTS idx_history_progress ON history(progress); 

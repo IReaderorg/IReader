@@ -6,5 +6,6 @@ data class History(
     val chapterId: Long,
     val readAt: Long?,
     val readDuration: Long,
+    val progress: Float = 0f,
 )
 

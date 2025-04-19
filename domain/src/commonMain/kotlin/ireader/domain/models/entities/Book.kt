@@ -193,6 +193,9 @@ data class LibraryBook(
             downloaded = readCount,
             key = key,
             customCover = cover,
+            lastRead = lastRead,
+            totalChapters = totalChapters,
+            favorite = hasStarted,
         )
     }
 
@@ -226,7 +229,11 @@ data class BookItem(
     val key: String = "",
     val unread: Int? = null,
     val downloaded: Int? = null,
-    val author: String = ""
+    val author: String = "",
+    val totalChapters : Int = 0,
+    val lastRead: Long = 0,
+    val description: String = "",
+    val progress: Float? = 0.0f
 ) : BaseBook
 
 
@@ -254,7 +261,9 @@ fun Book.toBookItem() : BookItem {
         sourceId = this.sourceId,
         customCover = this.customCover,
         cover = this.cover,
-        author = this.author
+        author = this.author,
+        description = this.description,
+
     )
 }
 

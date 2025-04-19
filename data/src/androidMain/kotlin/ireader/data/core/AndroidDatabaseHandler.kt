@@ -8,7 +8,9 @@ import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.coroutines.mapToOneOrNull
+import data.DatabaseMigrations
 import ir.kazemcodes.infinityreader.Database
+import ireader.domain.preferences.prefs.AppPreferences
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -19,9 +21,22 @@ class AndroidDatabaseHandler(
     private val driver: SqlDriver,
     val queryDispatcher: CoroutineDispatcher = Dispatchers.IO,
     val transactionDispatcher: CoroutineDispatcher = queryDispatcher,
+    val preferencesHelper: AppPreferences
 ) : DatabaseHandler {
 
     val suspendingTransactionId = ThreadLocal<Int>()
+    override fun initialize() {
+        // Get current version from preferences
+        val oldVersion = preferencesHelper.database_version().get()
+
+        // Apply migrations if needed
+        if (oldVersion < DatabaseMigrations.CURRENT_VERSION) {
+            DatabaseMigrations.migrate(driver, oldVersion)
+
+            // Update the stored version
+            preferencesHelper.database_version().set(DatabaseMigrations.CURRENT_VERSION)
+        }
+    }
 
     override suspend fun <T> await(inTransaction: Boolean, block: suspend Database.() -> T): T {
         return dispatch(inTransaction, block)

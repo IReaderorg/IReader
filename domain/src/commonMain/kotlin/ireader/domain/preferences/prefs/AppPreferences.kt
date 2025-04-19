@@ -15,7 +15,7 @@ class AppPreferences(
     private val preferenceStore: PreferenceStore,
 ) {
     companion object PreferenceKeys {
-
+        val DEFAULT_VERSION = 1
         const val SAVED_LIBRARY_LAYOUT_KEY = "library_layout_type"
         const val SAVED_BROWSE_LAYOUT_KEY = "browser_layout_type"
 
@@ -30,6 +30,7 @@ class AppPreferences(
         const val DEFAULT_IMAGE_LOADER = "default_image_loader"
         const val SAVED_BACKGROUND_COLOR = "background_color"
         const val SAVED_FONT_PREFERENCES = "reader_font_family"
+        const val DATABASE_VERSION = "database_version"
 
         enum class Orientation {
             Portrait,
@@ -80,6 +81,9 @@ class AppPreferences(
 
     fun appUpdater(): Preference<Boolean> {
         return preferenceStore.getBoolean("app_updater", true)
+    }
+    fun database_version(): Preference<Int> {
+        return preferenceStore.getInt(DATABASE_VERSION, DEFAULT_VERSION)
     }
 
     fun sortLibraryScreen(): Preference<String> {

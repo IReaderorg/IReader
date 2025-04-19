@@ -441,4 +441,5 @@
     <string name="compact_grid_layout_description">2 columns in grid with smaller cover images</string>
     <string name="list_layout_description">Books displayed in a vertical list</string>
     <string name="cover_only_layout_description">2 columns of cover images only (no text)</string>
+    <string name="yesterday">Yesterday</string>
 </resources>

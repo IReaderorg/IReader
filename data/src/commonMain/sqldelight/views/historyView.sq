@@ -18,6 +18,7 @@ SELECT
     chapter.chapter_number AS chapterNumber,
     history.last_read AS readAt,
     history.time_read AS readDuration,
+    history.progress,
     max_last_read.last_read AS maxReadAt,
     max_last_read.chapter_id AS maxReadAtChapterId
 FROM book
@@ -26,12 +27,16 @@ ON book._id = chapter.book_id
 JOIN history
 ON chapter._id = history.chapter_id
 JOIN (
-    SELECT chapter.book_id,chapter._id AS chapter_id, MAX(history.last_read) AS last_read
+    SELECT chapter.book_id, chapter._id AS chapter_id, MAX(history.last_read) AS last_read
     FROM chapter JOIN history
     ON chapter._id = history.chapter_id
     GROUP BY chapter.book_id
 ) AS max_last_read
 ON chapter.book_id = max_last_read.book_id;
+
+-- Create index to improve query performance
+CREATE INDEX IF NOT EXISTS idx_history_last_read ON history(last_read);
+CREATE INDEX IF NOT EXISTS idx_history_progress ON history(progress);
 
 countHistory:
 SELECT count(*)
@@ -53,6 +58,7 @@ cover_last_modified,
 chapterNumber,
 readAt,
 readDuration,
+progress,
 chapterName
 FROM historyView
 WHERE historyView.readAt > 0
@@ -73,6 +79,7 @@ cover_last_modified,
 chapterNumber,
 readAt,
 readDuration,
+progress,
 chapterName
 FROM historyView
 WHERE historyView.readAt > 0
@@ -81,6 +88,50 @@ AND lower(historyView.title) LIKE ('%' || :query || '%')
 ORDER BY readAt DESC
 LIMIT :limit OFFSET :offset;
 
+-- New query to get books sorted by reading progress
+historyByProgress:
+SELECT
+id,
+bookId,
+chapterId,
+title,
+thumbnailUrl,
+source,
+favorite,
+cover_last_modified,
+chapterNumber,
+readAt,
+readDuration,
+progress,
+chapterName
+FROM historyView
+WHERE historyView.readAt > 0
+AND maxReadAtChapterId = historyView.chapterId
+ORDER BY progress DESC, readAt DESC
+LIMIT :limit OFFSET :offset;
+
+-- New query to get recently active books with non-zero progress
+recentlyActiveBooks:
+SELECT
+id,
+bookId,
+chapterId,
+title,
+thumbnailUrl,
+source,
+favorite,
+cover_last_modified,
+chapterNumber,
+readAt,
+readDuration,
+progress,
+chapterName
+FROM historyView
+WHERE historyView.readAt > :cutoffTime
+AND progress > 0
+AND maxReadAtChapterId = historyView.chapterId
+ORDER BY readAt DESC
+LIMIT :limit;
 
 findAll:
 SELECT
@@ -95,6 +146,7 @@ cover_last_modified,
 chapterNumber,
 readAt,
 readDuration,
+progress,
 chapterName
 FROM historyView
 WHERE historyView.readAt > 0
@@ -113,6 +165,7 @@ cover_last_modified,
 chapterNumber,
 readAt,
 readDuration,
+progress,
 chapterName
 FROM historyView
 WHERE historyView.readAt > 0

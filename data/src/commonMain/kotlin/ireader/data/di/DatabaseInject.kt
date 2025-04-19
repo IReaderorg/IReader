@@ -4,6 +4,7 @@ package ireader.data.di
 import ir.kazemcodes.infinityreader.Database
 import ireader.data.catalog.CatalogGithubApi
 import ireader.data.catalogrepository.CatalogSourceRepositoryImpl
+import ireader.data.core.DatabaseVersionManager
 import ireader.data.core.createDatabase
 import ireader.domain.catalogs.interactor.SyncRemoteCatalogs
 import ireader.domain.data.repository.CatalogSourceRepository
@@ -13,8 +14,15 @@ import org.koin.dsl.module
 
 val DataModule = module {
 
-
-    single<Database> { createDatabase(get()) }
+    single {
+        DatabaseVersionManager(get(), get())
+    }
+    single<Database> {
+        // Apply migrations if needed
+        val versionManager = get<DatabaseVersionManager>()
+        versionManager.upgrade()
+        createDatabase(get())
+    }
 
     single<FileSystem> { FileSystem.SYSTEM }
 

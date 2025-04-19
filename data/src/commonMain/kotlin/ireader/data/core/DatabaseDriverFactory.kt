@@ -1,9 +1,7 @@
 package ireader.data.core
 
 import app.cash.sqldelight.db.SqlDriver
-import data.Book
 import data.Catalog
-import data.Chapter
 import data.Download
 import data.Reader_theme
 import data.Theme
@@ -13,18 +11,18 @@ import ireader.data.book.floatDoubleColumnAdapter
 import ireader.data.book.intLongColumnAdapter
 import ireader.data.book.longConverter
 import ireader.data.chapter.chapterContentConvertor
+import migrations.Book
+import migrations.Chapter
 import java.io.Reader
 
 fun createDatabase(driver: SqlDriver): Database {
     return Database(
         driver = driver,
         bookAdapter = Book.Adapter(
-            genreAdapter = bookGenresConverter,
             cover_last_modifiedAdapter = longConverter,
             date_addedAdapter = longConverter
         ),
         chapterAdapter = Chapter.Adapter(
-            contentAdapter = chapterContentConvertor,
             date_fetchAdapter = longConverter,
             date_uploadAdapter = longConverter,
             typeAdapter = longConverter,

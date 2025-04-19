@@ -1,0 +1,66 @@
+-- Initial schema file (Version 0 to 1 migration)
+-- This defines the initial database schema before any migrations are applied
+
+-- Define the chapter table first (since it's referenced by history)
+-- Define the book table (since it's referenced by chapter)
+import kotlin.collections.List;
+import kotlin.Boolean;
+import kotlin.Long;
+import kotlin.Float;
+
+CREATE TABLE IF NOT EXISTS book(
+    _id INTEGER NOT NULL PRIMARY KEY,
+    source INTEGER NOT NULL,
+    url TEXT NOT NULL,
+    artist TEXT,
+    author TEXT,
+    description TEXT,
+    genre TEXT,
+    title TEXT NOT NULL,
+    status INTEGER NOT NULL,
+    thumbnail_url TEXT,
+    favorite INTEGER AS Boolean NOT NULL,
+    last_update INTEGER AS Long,
+    next_update INTEGER AS Long,
+    initialized INTEGER AS Boolean NOT NULL,
+    viewer INTEGER NOT NULL,
+    chapter_flags INTEGER NOT NULL,
+    cover_last_modified INTEGER AS Long NOT NULL,
+    date_added INTEGER AS Long NOT NULL
+);
+
+
+CREATE TABLE IF NOT EXISTS chapter(
+    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    book_id INTEGER NOT NULL,
+    url TEXT NOT NULL,
+    name TEXT NOT NULL,
+    scanlator TEXT,
+    read INTEGER AS Boolean NOT NULL,
+    bookmark INTEGER AS Boolean NOT NULL,
+    last_page_read INTEGER NOT NULL,
+    chapter_number REAL AS Float NOT NULL,
+    source_order INTEGER NOT NULL,
+    date_fetch INTEGER AS Long NOT NULL,
+    date_upload INTEGER AS Long NOT NULL,
+    content TEXT NOT NULL,
+    type INTEGER AS Long NOT NULL,
+    FOREIGN KEY(book_id) REFERENCES book (_id)
+    ON DELETE CASCADE
+);
+
+
+
+-- Now define the history table with its foreign keys
+CREATE TABLE IF NOT EXISTS history(
+    _id INTEGER NOT NULL PRIMARY KEY,
+    chapter_id INTEGER NOT NULL UNIQUE,
+    last_read INTEGER,
+    time_read INTEGER NOT NULL,
+    FOREIGN KEY(chapter_id) REFERENCES chapter (_id)
+    ON DELETE CASCADE
+);
+
+-- Create indices
+CREATE INDEX IF NOT EXISTS chapters_manga_id_index ON chapter(book_id);
+CREATE INDEX IF NOT EXISTS history_history_chapter_id_index ON history(chapter_id); 

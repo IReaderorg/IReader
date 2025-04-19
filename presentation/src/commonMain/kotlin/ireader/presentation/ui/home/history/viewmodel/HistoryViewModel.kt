@@ -29,6 +29,11 @@ class HistoryViewModel(
 
         }
     }
+    fun deleteAllHistories() {
+        scope.launch {
+            historyUseCase.deleteAllHistories()
+        }
+    }
 //    @Composable
 //    fun getLazyHistory(): Flow<List<HistoryUiModel>> {
 //        val scope = rememberCoroutineScope()

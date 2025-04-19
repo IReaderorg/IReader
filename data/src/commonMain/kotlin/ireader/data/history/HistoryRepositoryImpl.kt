@@ -13,11 +13,18 @@ import kotlinx.coroutines.flow.Flow
 
 class HistoryRepositoryImpl constructor(
     private val handler: DatabaseHandler,
-
-    ) :
-    HistoryRepository {
+) : HistoryRepository {
+    
     override suspend fun findHistory(id: Long): History? {
         return handler.awaitOneOrNull { historyQueries.findHistoryByBookId(id, historyMapper) }
+    }
+
+    override suspend fun findHistoryByChapterId(chapterId: Long): History? {
+        return handler.awaitOneOrNull { historyQueries.findHistoryByChapterId(chapterId, historyMapper) }
+    }
+
+    override suspend fun findHistoryByChapterUrl(chapterUrl: String): History? {
+        return handler.awaitOneOrNull { historyQueries.getHistoryByChapterUrl(chapterUrl, historyMapper) }
     }
 
     override suspend fun findHistoryByBookId(bookId: Long): History? {
@@ -31,7 +38,6 @@ class HistoryRepositoryImpl constructor(
     override fun subscribeHistoryByBookId(bookId: Long): Flow<History?> {
         return handler.subscribeToOneOrNull { historyQueries.findHistoryByBookId(bookId, historyMapper) }
     }
-
 
     override suspend fun findHistories(): List<History> {
         return handler
@@ -77,19 +83,61 @@ class HistoryRepositoryImpl constructor(
         return handler.await { historyQueries.deleteAllHistories() }
     }
 
+    override suspend fun resetHistoryById(historyId: Long) {
+        return handler.await { historyQueries.resetHistoryById(historyId) }
+    }
+
+    override suspend fun resetHistoryByBookId(historyId: Long) {
+        return handler.await { historyQueries.resetHistoryByMangaId(historyId) }
+    }
+
+    override suspend fun upsert(
+        chapterId: Long,
+        readAt: Long,
+        readDuration: Long,
+        progress: Float
+    ) {
+        return handler.await {
+            historyQueries.upsert(
+                chapterId = chapterId,
+                readAt = readAt,
+                time_read = readDuration,
+                reading_progress = progress.toDouble()
+            )
+        }
+    }
+    
+    override suspend fun updateHistory(
+        chapterId: Long,
+        readAt: Long?,
+        readDuration: Long?,
+        progress: Float?
+    ) {
+        return handler.await {
+            historyQueries.update(
+                chapter_id = chapterId,
+                readAt = readDuration,
+                progress = readAt,
+                reading_progress = progress?.toDouble()
+            )
+        }
+    }
+
     private fun Database.insertBlocking(history: History) {
         historyQueries.upsert(
-            chapterId = history.chapterId.toDB()?:0,
+            chapterId = history.chapterId.toDB() ?: 0,
             readAt = history.readAt,
             time_read = history.readDuration,
+            reading_progress = history.progress.toDouble()
         )
     }
 
     private fun Database.updateBlocking(history: History) {
         historyQueries.update(
             chapter_id = history.chapterId,
-            readAt = history.readAt,
-            progress = history.readDuration.toLong(),
+            readAt = history.readDuration,
+            progress = history.readAt,
+            reading_progress = history.progress.toDouble()
         )
     }
 }

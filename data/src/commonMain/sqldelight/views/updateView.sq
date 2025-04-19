@@ -18,9 +18,13 @@ SELECT
     book.cover_last_modified AS coverLastModified,
     chapter.date_upload AS dateUpload,
     chapter.date_fetch AS datefetch,
-    chapter.content IS NOT "" AS downlaoded
+    chapter.content IS NOT "" AS downlaoded,
+    history.progress AS readingProgress,
+    history.last_read AS lastReadAt
 FROM book JOIN chapter
 ON book._id = chapter.book_id
+LEFT JOIN history
+ON chapter._id = history.chapter_id
 WHERE favorite = 1
 AND date_fetch > date_added
 ORDER BY date_fetch DESC;
@@ -29,3 +33,10 @@ updates:
 SELECT *
 FROM updatesView
 WHERE dateUpload > :after;
+
+-- Get updates with reading progress
+updatesWithProgress:
+SELECT *
+FROM updatesView
+WHERE readingProgress > 0
+ORDER BY lastReadAt DESC;

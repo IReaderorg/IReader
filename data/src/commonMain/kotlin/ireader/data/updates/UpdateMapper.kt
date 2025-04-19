@@ -5,7 +5,22 @@ import ireader.domain.models.entities.UpdatesWithRelations
 import ireader.domain.models.BookCover
 
 val updatesMapper = {
-        mangaId: Long, mangaTitle: String, chapterId: Long, chapterName: String, scanlator: String?, read: Boolean, bookmark: Boolean, source: Long, favorite: Boolean, thumbnailUrl: String?, coverLastModified: Long, dateUpload: Long, datefetch: Long,downloaded:Boolean ->
+        mangaId: Long,
+        mangaTitle: String,
+        chapterId: Long,
+        chapterName: String,
+        scanlator: String?,
+        read: Boolean,
+        bookmark: Boolean,
+        source: Long,
+        favorite: Boolean,
+        thumbnailUrl: String?,
+        coverLastModified: Long,
+        dateUpload: Long,
+        datefetch: Long,
+        downlaoded: Boolean,
+        readingProgress: Double?,
+        lastReadAt: Long?, ->
 
     UpdatesWithRelations(
         bookId = mangaId,
@@ -24,6 +39,6 @@ val updatesMapper = {
             cover = thumbnailUrl,
             lastModified = coverLastModified,
         ),
-         downloaded = downloaded
+         downloaded = downlaoded
     )
 }
