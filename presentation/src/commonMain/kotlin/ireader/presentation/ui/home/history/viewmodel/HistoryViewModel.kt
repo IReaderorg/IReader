@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import ireader.domain.models.entities.HistoryWithRelations
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.history.HistoryUseCase
+import ireader.i18n.LocalizeHelper
 import ireader.i18n.UiText
 import ireader.presentation.ui.component.reusable_composable.WarningAlertData
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
@@ -81,19 +82,28 @@ class HistoryViewModel(
     /**
      * Delete a specific history item with confirmation
      */
-    fun deleteHistory(history: HistoryWithRelations) {
-        // Clear any existing alerts first
+    fun deleteHistory(history: HistoryWithRelations,localizeHelper: LocalizeHelper) {
+        // Reset any existing alert dialog first
+        warningAlert = WarningAlertData()
+
+        // Now create a new alert dialog
         warningAlert = WarningAlertData().copy(
             enable = true,
-            title = UiText.MStringResource(MR.strings.remove).toString(),
-            text = UiText.MStringResource(MR.strings.dialog_remove_chapter_history_description).toString(),
+            title = localizeHelper.localize(MR.strings.remove),
+            text = localizeHelper.localize(MR.strings.dialog_remove_chapter_history_description),
             onDismiss = {
+                // Just dismiss the alert without deleting when cancel is pressed
                 warningAlert = warningAlert.copy(enable = false)
+                // Trigger UI refresh to reset the swipe state
+                refreshTrigger++
             },
             onConfirm = {
+                // Close the alert and proceed with deletion when confirm is pressed
                 warningAlert = warningAlert.copy(enable = false)
                 scope.launch {
                     historyUseCase.deleteHistory(history.chapterId)
+                    // Trigger UI refresh after deletion
+                    refreshTrigger++
                 }
             }
         )
@@ -103,19 +113,28 @@ class HistoryViewModel(
     /**
      * Delete all history entries with a confirmation dialog
      */
-    fun deleteAllHistories() {
-        // Clear any existing alerts first
+    fun deleteAllHistories(localizeHelper: LocalizeHelper) {
+        // Reset any existing alert dialog first
+        warningAlert = WarningAlertData()
+        
+        // Now create a new alert dialog
         warningAlert = WarningAlertData().copy(
             enable = true,
-            title = UiText.MStringResource(MR.strings.delete_all_histories).toString(),
-            text = UiText.MStringResource(MR.strings.dialog_remove_chapter_books_description).toString(),
+            title = localizeHelper.localize(MR.strings.delete_all_histories),
+            text = localizeHelper.localize(MR.strings.dialog_remove_chapter_books_description),
             onDismiss = {
+                // Just dismiss the alert without deleting when cancel is pressed
                 warningAlert = warningAlert.copy(enable = false)
+                // Trigger UI refresh to ensure UI consistency
+                refreshTrigger++
             },
             onConfirm = {
+                // Close the alert and proceed with deletion when confirm is pressed
                 warningAlert = warningAlert.copy(enable = false)
                 scope.launch {
                     historyUseCase.deleteAllHistories()
+                    // Trigger UI refresh after deletion
+                    refreshTrigger++
                 }
             }
         )

@@ -13,6 +13,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import ireader.domain.utils.extensions.launchIO
+import ireader.i18n.UiText
 import ireader.i18n.localize
 
 import ireader.i18n.resources.MR
@@ -56,15 +57,15 @@ object HistoryScreenSpec : Tab {
                     vm = vm,
                     onDeleteAll = {
                         vm.warningAlert.apply {
-                            enable.value = true
+                            enable = true
                             this.title.value = localizeHelper.localize(MR.strings.remove)
                             this.title.value =
                                 localizeHelper.localize(MR.strings.dialog_remove_chapter_books_description)
                             this.onDismiss.value = {
-                                this.enable.value = false
+                                this.enable = false
                             }
                             this.onConfirm.value = {
-                                this.enable.value = false
+                                this.enable = false
                                 vm.scope.launch {
                                     vm.historyUseCase.deleteAllHistories()
                                 }
@@ -106,15 +107,15 @@ object HistoryScreenSpec : Tab {
                 },
                 onHistoryDelete = { history ->
                     vm.warningAlert.apply {
-                        enable.value = true
+                        enable = true
                         this.title.value = localizeHelper.localize(MR.strings.remove)
                         this.title.value =
                             localizeHelper.localize(MR.strings.dialog_remove_chapter_history_description)
                         this.onDismiss.value = {
-                            this.enable.value = false
+                            this.enable = false
                         }
                         this.onConfirm.value = {
-                            this.enable.value = false
+                            this.enable = false
                             vm.scope.launchIO {
                                 vm.historyUseCase.deleteHistory(history.chapterId)
                             }
@@ -123,15 +124,15 @@ object HistoryScreenSpec : Tab {
                 },
                 onLongClickDelete = { history ->
                     vm.warningAlert.apply {
-                        enable.value = true
+                        enable = true
                         this.title.value = localizeHelper.localize(MR.strings.remove)
                         this.title.value =
                             localizeHelper.localize(MR.strings.dialog_remove_chapter_book_description)
                         this.onDismiss.value = {
-                            this.enable.value = false
+                            this.enable = false
                         }
                         this.onConfirm.value = {
-                            this.enable.value = false
+                            this.enable = false
                             vm.scope.launchIO {
                                 vm.historyUseCase.deleteHistoryByBookId(history.bookId)
                             }

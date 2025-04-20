@@ -7,27 +7,33 @@ import ireader.presentation.ui.core.theme.isLight
 
 
 object Colour {
+    // Blues
     val blue_200 = Color(0xFF90CAF9)
-    val blue_500 = Color(0xFF2196f3)
-    val blue_600 = Color(0xFF2196f3)
-    val blue_700 = Color(0xFF2196f3)
-
-    val blue_accent = Color(0xFF2979FF)
-
-    val light_blue_a_200 = Color(0xFF40c4ff)
-
-    val light_blue_a_400 = Color(0xFF00b0ff)
-
-    val red_200 = Color(0xFFcf6679)
-
-    val red_600 = Color(0xFFb00020)
-
-    val white_50 = Color(0xFFffffff)
-
+    val blue_400 = Color(0xFF42A5F5)
+    val blue_500 = Color(0xFF2196F3)
+    val blue_600 = Color(0xFF1E88E5)
+    val blue_700 = Color(0xFF1976D2)
+    val blue_accent = Color(0xFF448AFF)
+    
+    // Light Blues
+    val light_blue_a_200 = Color(0xFF40C4FF)
+    val light_blue_a_400 = Color(0xFF00B0FF)
+    
+    // Reds
+    val red_200 = Color(0xFFEF9A9A)
+    val red_400 = Color(0xFFEF5350)
+    val red_600 = Color(0xFFE53935)
+    
+    // Greens
+    val green_500 = Color(0xFF4CAF50)
+    val green_700 = Color(0xFF388E3C)
+    
+    // Neutrals
+    val white_50 = Color(0xFFFFFFFF)
     val black_800 = Color(0xFF121212)
-
     val black_900 = Color(0xFF000000)
-
+    
+    // Transparent
     val transparent = Color(0x00FFFFFF)
 
     val ColorScheme.topBarColor
@@ -43,7 +49,7 @@ object Colour {
 
     val ColorScheme.iconColor
         @Composable
-        get() = if (isLight()) blue_500 else blue_500
+        get() = if (isLight()) blue_500 else blue_400
 
     val ColorScheme.scrollingThumbColor
         @Composable

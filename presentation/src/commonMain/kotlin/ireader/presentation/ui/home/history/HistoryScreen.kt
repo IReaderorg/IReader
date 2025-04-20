@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.HistoryWithRelations
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
@@ -44,6 +45,7 @@ import ireader.presentation.ui.component.components.BookImageCover
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.reusable_composable.WarningAlertData
 import ireader.presentation.ui.core.coil.rememberBookCover
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.ui.EmptyScreen
 import ireader.presentation.ui.home.history.viewmodel.HistoryViewModel
 import kotlinx.coroutines.delay
@@ -66,7 +68,7 @@ fun HistoryScreen(
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     val searchFocusRequester = remember { FocusRequester() }
-    
+    val localizeHelper = _root_ide_package_.ireader.presentation.ui.core.theme.LocalLocalizeHelper.currentOrThrow
     // Observe when back in history
     LaunchedEffect(vm.searchQuery) {
         vm.applySearchFilter()
@@ -89,7 +91,7 @@ fun HistoryScreen(
         floatingActionButton = {
             if (items.values.isNotEmpty()) {
                 FloatingActionButton(
-                    onClick = { vm.deleteAllHistories() },
+                    onClick = { vm.deleteAllHistories(localizeHelper) },
                     containerColor = MaterialTheme.colorScheme.errorContainer,
                     shape = CircleShape,
                 ) {
@@ -120,15 +122,16 @@ fun HistoryScreen(
                     items = items,
                     listState = listState,
                     onClickItem = onHistory,
-                    onClickDelete = { history -> vm.deleteHistory(history) },
+                    onClickDelete = { history -> vm.deleteHistory(history,localizeHelper) },
                     onClickPlay = onHistoryPlay,
                     onBookCover = onBookCover,
-                    onLongClickDelete = { history -> vm.deleteHistory(history) },
+                    onLongClickDelete = { history -> vm.deleteHistory(history,localizeHelper) },
+                    vm = vm
                 )
             }
             
             // Only show warning alert if enabled
-            if (vm.warningAlert.enable.value) {
+            if (vm.warningAlert.enable) {
                 WarningAlertDialog(data = vm.warningAlert)
             }
         }
@@ -218,7 +221,8 @@ fun HistoryContent(
     onClickDelete: (HistoryWithRelations) -> Unit,
     onClickPlay: (HistoryWithRelations) -> Unit,
     onBookCover: (HistoryWithRelations) -> Unit,
-    onLongClickDelete: (HistoryWithRelations) -> Unit
+    onLongClickDelete: (HistoryWithRelations) -> Unit,
+    vm: HistoryViewModel
 ) {
     // Group history items by time period
     val now = System.currentTimeMillis()
@@ -281,7 +285,8 @@ fun HistoryContent(
                         onClickPlay = onClickPlay,
                         onBookCover = onBookCover,
                         onLongClickDelete = onLongClickDelete,
-                        onHistoryDelete = onClickDelete
+                        onHistoryDelete = onClickDelete,
+                        vm = vm
                     )
                 }
             }
@@ -301,7 +306,8 @@ fun HistoryContent(
                         onClickPlay = onClickPlay,
                         onBookCover = onBookCover,
                         onLongClickDelete = onLongClickDelete,
-                        onHistoryDelete = onClickDelete
+                        onHistoryDelete = onClickDelete,
+                        vm = vm
                     )
                 }
             }
@@ -321,7 +327,8 @@ fun HistoryContent(
                         onClickPlay = onClickPlay,
                         onBookCover = onBookCover,
                         onLongClickDelete = onLongClickDelete,
-                        onHistoryDelete = onClickDelete
+                        onHistoryDelete = onClickDelete,
+                        vm = vm
                     )
                 }
             }
@@ -341,7 +348,8 @@ fun HistoryContent(
                         onClickPlay = onClickPlay,
                         onBookCover = onBookCover,
                         onLongClickDelete = onLongClickDelete,
-                        onHistoryDelete = onClickDelete
+                        onHistoryDelete = onClickDelete,
+                        vm = vm
                     )
                 }
             }
@@ -361,7 +369,7 @@ fun HistoryTimeHeader(title: String) {
             modifier = Modifier
                 .weight(0.15f)
                 .padding(end = 8.dp),
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+            color = MaterialTheme.colorScheme.primary
         )
         
         Text(
@@ -375,7 +383,7 @@ fun HistoryTimeHeader(title: String) {
             modifier = Modifier
                 .weight(1f)
                 .padding(start = 8.dp),
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+            color = MaterialTheme.colorScheme.primary
         )
     }
 }
@@ -391,17 +399,38 @@ fun HistoryItem(
     onBookCover: (HistoryWithRelations) -> Unit,
     onLongClickDelete: (HistoryWithRelations) -> Unit,
     onHistoryDelete: (HistoryWithRelations) -> Unit,
+    vm: HistoryViewModel
 ) {
     val scope = rememberCoroutineScope()
+    
+    // Keep track of whether an alert is active to prevent multiple dismisses
+    val alertShowing = remember { mutableStateOf(false) }
+    
     val dismissState = rememberDismissState(
         confirmStateChange = {
-            if (it == DismissValue.DismissedToStart) {
-                onHistoryDelete(history)
-                return@rememberDismissState true
+            if (it == DismissValue.DismissedToStart && !alertShowing.value) {
+                alertShowing.value = true
+                // Reset the alertShowing state after a short delay to allow for another swipe
+                scope.launch {
+                    onHistoryDelete(history)
+                    // Allow some time for the alert to be shown and handled
+                    delay(300)
+                    alertShowing.value = false
+                }
+                // Don't confirm the state change yet - we'll wait for the alert dialog response
+                false
+            } else {
+                false
             }
-            false
         }
     )
+    
+    // Reset the dismiss state when the alert dialog is closed
+    LaunchedEffect(key1 = dismissState.currentValue) {
+        if (dismissState.currentValue != DismissValue.Default) {
+            dismissState.reset()
+        }
+    }
     
     val interactionSource = remember { MutableInteractionSource() }
     var isPressed by remember { mutableStateOf(false) }
@@ -424,6 +453,15 @@ fun HistoryItem(
     
     val scale by animatedProgress.asState()
     val alpha by animatedProgress.asState()
+    
+    // Observe refreshTrigger from ViewModel to reset alertShowing if needed
+    val refreshTrigger = vm.refreshTrigger
+    LaunchedEffect(refreshTrigger) {
+        if (!vm.warningAlert.enable) {
+            alertShowing.value = false
+            dismissState.reset()
+        }
+    }
     
     SwipeToDismiss(
         state = dismissState,
@@ -452,7 +490,11 @@ fun HistoryItem(
                         this.alpha = alpha
                     },
                 shape = RoundedCornerShape(12.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = elevation)
+                elevation = CardDefaults.cardElevation(defaultElevation = elevation),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
             ) {
                 Row(
                     modifier = Modifier
@@ -481,7 +523,7 @@ fun HistoryItem(
                                     .fillMaxWidth()
                                     .height(4.dp)
                                     .align(Alignment.BottomCenter),
-                                color = MaterialTheme.colorScheme.primary,
+                                color = MaterialTheme.colorScheme.secondary,
                                 trackColor = MaterialTheme.colorScheme.surfaceVariant
                             )
                         }
@@ -505,7 +547,7 @@ fun HistoryItem(
                             style = MaterialTheme.typography.bodyMedium,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.alpha(0.7f)
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                         )
                         
                         Row(
@@ -516,14 +558,14 @@ fun HistoryItem(
                                 imageVector = Icons.Default.Schedule,
                                 contentDescription = null,
                                 modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                tint = MaterialTheme.colorScheme.primary
                             )
                             Text(
                                 text = timeString,
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier
-                                    .padding(start = 4.dp)
-                                    .alpha(0.6f)
+                                    .padding(start = 4.dp),
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
@@ -534,12 +576,12 @@ fun HistoryItem(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .background(MaterialTheme.colorScheme.secondaryContainer)
                     ) {
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
                             contentDescription = localize(MR.strings.resume),
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            tint = MaterialTheme.colorScheme.onSecondary
                         )
                     }
                 }
@@ -608,7 +650,7 @@ fun WarningAlertDialog(data: WarningAlertData) {
         onDismissRequest = { 
             data.onDismiss.value?.invoke() ?: run {
                 // Provide a default dismiss behavior
-                data.enable.value = false
+                data.enable = false
             }
         },
         title = { 
@@ -622,7 +664,7 @@ fun WarningAlertDialog(data: WarningAlertData) {
                 onClick = {
                     data.onConfirm.value?.invoke() ?: run {
                         // Provide a default confirm behavior
-                        data.enable.value = false
+                        data.enable = false
                     }
                 }
             ) {
@@ -637,7 +679,7 @@ fun WarningAlertDialog(data: WarningAlertData) {
                 onClick = {
                     data.onDismiss.value?.invoke() ?: run {
                         // Provide a default dismiss behavior
-                        data.enable.value = false
+                        data.enable = false
                     }
                 }
             ) {
