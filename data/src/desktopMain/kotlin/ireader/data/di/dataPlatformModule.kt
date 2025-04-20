@@ -21,7 +21,7 @@ import org.koin.core.module.Module
 import org.koin.dsl.module
 
 actual val dataPlatformModule: Module = module {
-    single<DatabaseHandler> { JvmDatabaseHandler(get(),get()) }
+    single<DatabaseHandler> { JvmDatabaseHandler(get(),get(), preferencesHelper = get(),) }
     single<SqlDriver> { DatabaseDriverFactory().create() }
     single<Transactions> { DatabaseTransactions(get()) }
     single<CatalogLoader> { DesktopCatalogLoader(get(),get(),get()) }
