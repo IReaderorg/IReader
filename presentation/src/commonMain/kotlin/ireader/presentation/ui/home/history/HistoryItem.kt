@@ -37,73 +37,73 @@ import ireader.presentation.ui.component.reusable_composable.AppIconButton
 
 val HISTORY_ITEM_HEIGHT = 96.dp
 
-@Composable
-fun HistoryItem(
-    history: HistoryWithRelations,
-    onBookCover: (HistoryWithRelations) -> Unit,
-    onClickItem: (HistoryWithRelations) -> Unit,
-    onClickDelete: (HistoryWithRelations) -> Unit,
-    onLongClickDelete: (HistoryWithRelations) -> Unit,
-    onClickPlay: (HistoryWithRelations) -> Unit,
-) {
-    BookListItem(
-        modifier = Modifier
-            .clickable { onClickItem(history) }
-            .height(HISTORY_ITEM_HEIGHT)
-            .fillMaxWidth()
-            .padding(end = 4.dp),
-    ) {
-        BookListItemImage(
-            modifier = Modifier
-                .fillMaxHeight()
-                .aspectRatio(3f / 4f)
-                .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
-                .clip(MaterialTheme.shapes.medium)
-                .clickable { onBookCover(history) },
-            mangaCover = rememberBookCover(history)
-        )
-        BookListItemColumn(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 16.dp, end = 8.dp)
-        ) {
-            BookListItemTitle(
-                text = history.title,
-                maxLines = 2,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            BookListItemSubtitle(
-                text = if (history.chapterNumber != -1f) {
-                    "Ch. ${history.chapterNumber}"
-                } else {
-                    history.chapterName
-                }
-            )
-        }
-        AppIconButton(
-            onClick = {
-                onClickDelete(history)
-            },
-            onLongClick = {
-                onLongClickDelete(history)
-            }
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Delete,
-                contentDescription = "",
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-        }
-        IconButton(onClick = { onClickPlay(history) }) {
-            Icon(
-                imageVector = Icons.Filled.PlayArrow,
-                contentDescription = "",
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-        }
-    }
-}
+//@Composable
+//fun HistoryItem(
+//    history: HistoryWithRelations,
+//    onBookCover: (HistoryWithRelations) -> Unit,
+//    onClickItem: (HistoryWithRelations) -> Unit,
+//    onClickDelete: (HistoryWithRelations) -> Unit,
+//    onLongClickDelete: (HistoryWithRelations) -> Unit,
+//    onClickPlay: (HistoryWithRelations) -> Unit,
+//) {
+//    BookListItem(
+//        modifier = Modifier
+//            .clickable { onClickItem(history) }
+//            .height(HISTORY_ITEM_HEIGHT)
+//            .fillMaxWidth()
+//            .padding(end = 4.dp),
+//    ) {
+//        BookListItemImage(
+//            modifier = Modifier
+//                .fillMaxHeight()
+//                .aspectRatio(3f / 4f)
+//                .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
+//                .clip(MaterialTheme.shapes.medium)
+//                .clickable { onBookCover(history) },
+//            mangaCover = rememberBookCover(history)
+//        )
+//        BookListItemColumn(
+//            modifier = Modifier
+//                .weight(1f)
+//                .padding(start = 16.dp, end = 8.dp)
+//        ) {
+//            BookListItemTitle(
+//                text = history.title,
+//                maxLines = 2,
+//                fontWeight = FontWeight.SemiBold
+//            )
+//
+//            BookListItemSubtitle(
+//                text = if (history.chapterNumber != -1f) {
+//                    "Ch. ${history.chapterNumber}"
+//                } else {
+//                    history.chapterName
+//                }
+//            )
+//        }
+//        AppIconButton(
+//            onClick = {
+//                onClickDelete(history)
+//            },
+//            onLongClick = {
+//                onLongClickDelete(history)
+//            }
+//        ) {
+//            Icon(
+//                imageVector = Icons.Filled.Delete,
+//                contentDescription = "",
+//                tint = MaterialTheme.colorScheme.onSurface
+//            )
+//        }
+//        IconButton(onClick = { onClickPlay(history) }) {
+//            Icon(
+//                imageVector = Icons.Filled.PlayArrow,
+//                contentDescription = "",
+//                tint = MaterialTheme.colorScheme.onSurface
+//            )
+//        }
+//    }
+//}
 
 @Composable
 fun HistoryItemShimmer(brush: Brush) {

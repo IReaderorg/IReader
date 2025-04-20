@@ -14,6 +14,6 @@ data class HistoryWithRelations(
     val readAt: Long = -1,
     val readDuration: Long,
     val coverData: BookCover,
-    val progress: Float? = null
+    val progress: Float = 0.0F
 )
 

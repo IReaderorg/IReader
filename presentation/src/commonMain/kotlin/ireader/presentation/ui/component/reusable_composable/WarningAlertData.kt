@@ -8,13 +8,34 @@ import androidx.compose.runtime.mutableStateOf
 import ireader.presentation.ui.component.components.IAlertDialog
 
 class WarningAlertData {
-    val enable = mutableStateOf(false)
-    val title: MutableState<String?> = mutableStateOf(null)
-    val text: MutableState<String?> = mutableStateOf(null)
-    val onConfirm: MutableState<(() -> Unit)?> = mutableStateOf(null)
-    val onDismiss: MutableState<(() -> Unit)?> = mutableStateOf(null)
+    var enable = mutableStateOf(false)
+    var title: MutableState<String?> = mutableStateOf(null)
+    var text: MutableState<String?> = mutableStateOf(null)
+    var onConfirm: MutableState<(() -> Unit)?> = mutableStateOf(null)
+    var onDismiss: MutableState<(() -> Unit)?> = mutableStateOf(null)
     val confirmText: MutableState<String> = mutableStateOf("Confirm")
     val dismissText: MutableState<String> = mutableStateOf("Cancel")
+
+    fun copy(
+        enable: Boolean, title: String? = this.title.value,
+        text: String? = this.text.value,
+        onConfirm: (() -> Unit)? = this.onConfirm.value,
+        onDismiss: (() -> Unit)? = this.onDismiss.value,
+        confirmText: String = this.confirmText.value,
+        dismissText: String = this.dismissText.value,
+    ): WarningAlertData {
+        val copy = WarningAlertData()
+        copy.enable.value = enable
+        copy.title.value = title
+        copy.text.value = text
+        copy.onConfirm.value = onConfirm
+        copy.onDismiss.value = onDismiss
+        copy.confirmText.value = confirmText
+        copy.dismissText.value = dismissText
+        return copy
+    }
+
+
 }
 
 @Composable

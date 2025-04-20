@@ -33,6 +33,11 @@ class HistoryUseCase(private val historyRepository: HistoryRepository) {
             list.groupBy { it.readAt?.toLocalDate() ?: (0L).toLocalDate() }
         }
     }
+    fun findHistoriesByFlowLongType(query:String = ""): Flow<Map<Long, List<HistoryWithRelations>>> {
+        return historyRepository.findHistoriesByFlow(query).map { list ->
+            list.groupBy { it.readAt ?: 0L }
+        }
+    }
 
     suspend fun insertHistory(history: History) {
         return historyRepository.insertHistory(history)

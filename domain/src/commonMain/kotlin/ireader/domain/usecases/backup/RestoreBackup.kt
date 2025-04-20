@@ -30,9 +30,9 @@ class RestoreBackup internal constructor(
 
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun restoreFrom(
-            uri: Uri,
-            onError: (UiText) -> Unit,
-            onSuccess: () -> Unit
+        uri: Uri,
+        onError: (UiText) -> Unit,
+        onSuccess: () -> Unit
     ): Result {
         return try {
 
@@ -47,10 +47,27 @@ class RestoreBackup internal constructor(
                 for (manga in backup.library) {
                     val mangaId = restoreManga(manga)
                     val categoryIdsOfManga =
-                            manga.categories.mapNotNull(backupCategoriesWithId::get)
-                    restoreChapters(manga)
-                    restoreCategoriesOfBook(mangaId, categoryIdsOfManga)
-                    restoreTracks(manga, mangaId)
+                        manga.categories.mapNotNull(backupCategoriesWithId::get)
+                    try {
+                        restoreChapters(manga)
+
+                    } catch (_: Exception) {
+
+                    }
+                    try {
+                        restoreCategoriesOfBook(mangaId, categoryIdsOfManga)
+
+                    } catch (_: Exception) {
+
+                    }
+                    try {
+                        restoreTracks(manga, mangaId)
+
+                    } catch (_: Exception) {
+
+                    }
+
+
                     // restoreHistories(manga, mangaId)
                 }
             }
@@ -86,22 +103,22 @@ class RestoreBackup internal constructor(
         }
         if (manga.initialized != dbManga.initialized || !dbManga.favorite) {
             val update = Book(
-                    dbManga.id,
-                    title = manga.title,
-                    author = manga.author,
-                    description = manga.description,
-                    genres = manga.genres,
-                    status = manga.status,
-                    cover = manga.cover,
-                    customCover = manga.customCover,
-                    favorite = true,
-                    lastUpdate = manga.lastUpdate,
-                    initialized = manga.initialized,
-                    dateAdded = manga.dateAdded,
-                    viewer = manga.viewer,
-                    flags = manga.flags,
-                    key = manga.key,
-                    sourceId = manga.sourceId,
+                dbManga.id,
+                title = manga.title,
+                author = manga.author,
+                description = manga.description,
+                genres = manga.genres,
+                status = manga.status,
+                cover = manga.cover,
+                customCover = manga.customCover,
+                favorite = true,
+                lastUpdate = manga.lastUpdate,
+                initialized = manga.initialized,
+                dateAdded = manga.dateAdded,
+                viewer = manga.viewer,
+                flags = manga.flags,
+                key = manga.key,
+                sourceId = manga.sourceId,
             )
             bookRepository.updateBook(update)
         }
@@ -130,8 +147,8 @@ class RestoreBackup internal constructor(
                 val newChapter = if (dbChapter != null) {
                     kotlin.runCatching {
                         backupChapter.toDomain(dbManga.id).copy(
-                                read = backupChapter.read || dbChapter.read,
-                                bookmark = backupChapter.bookmark || dbChapter.bookmark,
+                            read = backupChapter.read || dbChapter.read,
+                            bookmark = backupChapter.bookmark || dbChapter.bookmark,
                         )
                     }.getOrNull()
                 } else {
@@ -154,9 +171,9 @@ class RestoreBackup internal constructor(
                 val backupChapter = backupChaptersMap[dbChapter.key]
                 if (backupChapter != null) {
                     val update = dbChapter.copy(
-                            id = dbChapter.id,
-                            read = dbChapter.read || backupChapter.read,
-                            bookmark = dbChapter.bookmark || backupChapter.bookmark,
+                        id = dbChapter.id,
+                        read = dbChapter.read || backupChapter.read,
+                        bookmark = dbChapter.bookmark || backupChapter.bookmark,
                     )
                     chaptersToUpdate.add(update)
                 }
@@ -173,12 +190,12 @@ class RestoreBackup internal constructor(
         val dbCategories = categoryRepository.findAll()
         val dbCategoryNames = dbCategories.map { it.name }
         val categoriesToAdd = categories
-                .filter { category -> dbCategoryNames.none { category.name.equals(it, true) } }
-                .mapIndexed { index, category ->
-                    category.toDomain().copy(
-                            order = (dbCategories.size + index).toLong()
-                    )
-                }
+            .filter { category -> dbCategoryNames.none { category.name.equals(it, true) } }
+            .mapIndexed { index, category ->
+                category.toDomain().copy(
+                    order = (dbCategories.size + index).toLong()
+                )
+            }
 
         if (categoriesToAdd.isNotEmpty()) {
             categoryRepository.insert(categoriesToAdd)
@@ -186,9 +203,9 @@ class RestoreBackup internal constructor(
 
         // Turn on per category settings if not all flags match
         libraryPreferences.perCategorySettings().set(
-                (dbCategories.map { it.category } + categoriesToAdd)
-                        .distinctBy { it.flags }
-                        .size > 1
+            (dbCategories.map { it.category } + categoriesToAdd)
+                .distinctBy { it.flags }
+                .size > 1
         )
     }
 

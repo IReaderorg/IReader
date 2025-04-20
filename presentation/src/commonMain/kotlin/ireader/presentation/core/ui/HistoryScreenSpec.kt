@@ -48,14 +48,14 @@ object HistoryScreenSpec : Tab {
         val vm: HistoryViewModel = getIViewModel()
         val localizeHelper = LocalLocalizeHelper.currentOrThrow
         val navigator = LocalNavigator.currentOrThrow
-        WarningAlert(data = vm.warningAlert.value)
+
         val host = SnackBarListener(vm)
         IScaffold(
             topBar = { scrollBehavior->
                 HistoryTopAppBar(
                     vm = vm,
                     onDeleteAll = {
-                        vm.warningAlert.value.apply {
+                        vm.warningAlert.apply {
                             enable.value = true
                             this.title.value = localizeHelper.localize(MR.strings.remove)
                             this.title.value =
@@ -105,7 +105,7 @@ object HistoryScreenSpec : Tab {
                     )
                 },
                 onHistoryDelete = { history ->
-                    vm.warningAlert.value.apply {
+                    vm.warningAlert.apply {
                         enable.value = true
                         this.title.value = localizeHelper.localize(MR.strings.remove)
                         this.title.value =
@@ -122,7 +122,7 @@ object HistoryScreenSpec : Tab {
                     }
                 },
                 onLongClickDelete = { history ->
-                    vm.warningAlert.value.apply {
+                    vm.warningAlert.apply {
                         enable.value = true
                         this.title.value = localizeHelper.localize(MR.strings.remove)
                         this.title.value =
@@ -141,5 +141,6 @@ object HistoryScreenSpec : Tab {
             )
 
         }
+        WarningAlert(data = vm.warningAlert)
     }
 }

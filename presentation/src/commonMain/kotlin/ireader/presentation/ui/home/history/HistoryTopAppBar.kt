@@ -66,13 +66,14 @@ fun HistoryTopAppBar(
                     vm.searchMode = true
                 },
             )
-            AppIconButton(
-                imageVector = Icons.Default.Delete,
-                contentDescription = localize(MR.strings.delete_all_histories),
-                onClick = {
-                    onDeleteAll()
-                },
-            )
+            // Delete this action bar
+//            AppIconButton(
+//                imageVector = Icons.Default.Delete,
+//                contentDescription = localize(MR.strings.delete_all_histories),
+//                onClick = {
+//                    onDeleteAll()
+//                },
+//            )
         },
         navigationIcon = {
             if (vm.searchMode) {
