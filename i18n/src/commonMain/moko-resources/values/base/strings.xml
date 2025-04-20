@@ -442,4 +442,7 @@
     <string name="list_layout_description">Books displayed in a vertical list</string>
     <string name="cover_only_layout_description">2 columns of cover images only (no text)</string>
     <string name="yesterday">Yesterday</string>
+    <string name="delete_all_database">Delete All Databases</string>
+    <string name="repair_database">Repair Database</string>
+    <string name="repair_categories">Repair Categories</string>
 </resources>

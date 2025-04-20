@@ -7,6 +7,7 @@ import kotlin.collections.List;
 import kotlin.Boolean;
 import kotlin.Long;
 import kotlin.Float;
+import kotlin.Int;
 
 CREATE TABLE IF NOT EXISTS book(
     _id INTEGER NOT NULL PRIMARY KEY,
@@ -28,6 +29,45 @@ CREATE TABLE IF NOT EXISTS book(
     cover_last_modified INTEGER AS Long NOT NULL,
     date_added INTEGER AS Long NOT NULL
 );
+CREATE TABLE
+IF NOT EXISTS theme
+(
+_id INTEGER NOT NULL PRIMARY KEY,
+isDark INTEGER AS Boolean NOT NULL,
+`primary` INTEGER AS Int NOT NULL,
+onPrimary INTEGER AS Int NOT NULL,
+primaryContainer INTEGER AS Int NOT NULL,
+onPrimaryContainer INTEGER AS Int NOT NULL,
+inversePrimary INTEGER AS Int NOT NULL,
+secondary INTEGER AS Int NOT NULL,
+onSecondary INTEGER AS Int NOT NULL,
+secondaryContainer INTEGER AS Int NOT NULL,
+onSecondaryContainer INTEGER AS Int NOT NULL,
+tertiary INTEGER AS Int NOT NULL,
+onTertiary INTEGER AS Int NOT NULL,
+tertiaryContainer INTEGER AS Int NOT NULL,
+onTertiaryContainer INTEGER AS Int NOT NULL,
+background INTEGER AS Int NOT NULL,
+onBackground INTEGER AS Int NOT NULL,
+surface INTEGER AS Int NOT NULL,
+onSurface INTEGER AS Int NOT NULL,
+surfaceVariant INTEGER AS Int NOT NULL,
+onSurfaceVariant INTEGER AS Int NOT NULL,
+surfaceTint INTEGER AS Int NOT NULL,
+inverseSurface INTEGER AS Int NOT NULL,
+inverseOnSurface INTEGER AS Int NOT NULL,
+error INTEGER AS Int NOT NULL,
+onError INTEGER AS Int NOT NULL,
+errorContainer INTEGER AS Int NOT NULL,
+onErrorContainer INTEGER AS Int NOT NULL,
+outline INTEGER AS Int NOT NULL,
+outlineVariant INTEGER AS Int NOT NULL,
+scrim INTEGER AS Int NOT NULL,
+bars INTEGER AS Int NOT NULL,
+onBars INTEGER AS Int NOT NULL,
+isBarLight INTEGER AS Boolean NOT NULL
+);
+
 
 
 CREATE TABLE IF NOT EXISTS chapter(
@@ -61,6 +101,77 @@ CREATE TABLE IF NOT EXISTS history(
     ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS repository (
+_id INTEGER NOT NULL PRIMARY KEY,
+name TEXT NOT NULL,
+key TEXT NOT NULL,
+owner TEXT NOT NULL,
+source TEXT NOT NULL,
+last_update INTEGER NOT NULL,
+is_enable INTEGER AS Boolean NOT NULL DEFAULT 1
+);
+CREATE TABLE
+IF NOT EXISTS `reader_theme`
+(`_id` INTEGER NOT NULL PRIMARY KEY,
+`background_color` INTEGER AS Int NOT NULL,
+`on_textcolor` INTEGER AS Int NOT NULL);
+
+
+CREATE TABLE
+IF NOT EXISTS download(
+chapter_id INTEGER NOT NULL PRIMARY KEY,
+book_id INTEGER NOT NULL,
+priority INTEGER AS Int NOT NULL,
+FOREIGN KEY(chapter_id)
+REFERENCES chapter(_id) ON UPDATE NO ACTION ON DELETE CASCADE );
+
+
+CREATE TABLE IF NOT EXISTS categories(
+    _id INTEGER NOT NULL PRIMARY KEY ,
+    name TEXT NOT NULL,
+    sort INTEGER NOT NULL,
+    flags INTEGER NOT NULL
+);
+
+CREATE TABLE
+IF NOT EXISTS `catalog`
+(
+sourceId INTEGER NOT NULL,
+source INTEGER NOT NULL,
+name TEXT NOT NULL,
+description TEXT NOT NULL,
+pkgName TEXT NOT NULL,
+versionName TEXT NOT NULL,
+versionCode INTEGER AS Int NOT NULL,
+lang TEXT NOT NULL,
+pkgUrl TEXT NOT NULL,
+iconUrl TEXT NOT NULL,
+nsfw INTEGER AS Boolean NOT NULL,
+PRIMARY KEY(sourceId));
+
+
+CREATE TABLE IF NOT EXISTS bookcategories(
+    _id INTEGER PRIMARY KEY NOT NULL  ,
+    book_id INTEGER NOT NULL,
+    category_id INTEGER NOT NULL,
+    FOREIGN KEY(category_id) REFERENCES categories (_id)
+    ON DELETE CASCADE,
+    FOREIGN KEY(book_id) REFERENCES book (_id)
+    ON DELETE CASCADE
+);
+
+-- Insert system category
+INSERT OR IGNORE INTO categories(_id, name, sort, flags) VALUES (0, "", -1, 0);
+INSERT OR IGNORE INTO categories(_id, name, sort, flags) VALUES (-1, "", -1, 0);
+-- Disallow deletion of default category
+CREATE TRIGGER IF NOT EXISTS system_category_delete_trigger BEFORE DELETE
+ON categories
+BEGIN SELECT CASE
+    WHEN old._id <= 0 THEN
+        RAISE(ABORT, "System category can't be deleted")
+    END;
+END;
+
 -- Create indices
 CREATE INDEX IF NOT EXISTS chapters_manga_id_index ON chapter(book_id);
-CREATE INDEX IF NOT EXISTS history_history_chapter_id_index ON history(chapter_id); 
+CREATE INDEX IF NOT EXISTS history_history_chapter_id_index ON history(chapter_id);

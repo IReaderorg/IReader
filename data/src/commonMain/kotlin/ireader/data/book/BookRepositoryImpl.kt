@@ -7,8 +7,11 @@ import ireader.data.core.DatabaseHandler
 import ireader.data.util.BaseDao
 import ireader.data.util.toDB
 import ireader.data.util.toLong
+import ireader.domain.data.repository.BookCategoryRepository
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.models.entities.Book
+import ireader.domain.models.entities.BookCategory
+import ireader.domain.models.entities.Category
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.entities.LibraryBook
 import ireader.domain.models.library.LibrarySort
@@ -17,6 +20,7 @@ import java.util.*
 
 class BookRepositoryImpl(
     private val handler: DatabaseHandler,
+    private val bookCategoryRepository: BookCategoryRepository
 ) : BookRepository, BaseDao<Book>() {
     override suspend fun findAllBooks(): List<Book> {
         return handler.awaitList {
@@ -91,7 +95,11 @@ class BookRepositoryImpl(
 
     override suspend fun findDuplicateBook(title: String, sourceId: Long): Book? {
         return handler.awaitOneOrNull() {
-            bookQueries.getDuplicateLibraryManga(title.lowercase(Locale.getDefault()),sourceId, booksMapper)
+            bookQueries.getDuplicateLibraryManga(
+                title.lowercase(Locale.getDefault()),
+                sourceId,
+                booksMapper
+            )
         }
     }
 
@@ -163,6 +171,7 @@ class BookRepositoryImpl(
 
         }
     }
+
     suspend fun insert(book: Book): Long? {
         return handler.awaitOneOrNullAsync(inTransaction = true) {
 
@@ -253,31 +262,23 @@ class BookRepositoryImpl(
     }
 
     override suspend fun insertBooks(book: List<Book>): List<Long> {
-        return handler.awaitListAsync(inTransaction = true) {
-            dbOperation(book) { book ->
-                bookQueries.upsert(
-                    id = book.id.toDB(),
-                    source = book.sourceId,
-                    dateAdded = book.dateAdded,
-                    lastUpdate = book.lastUpdate,
-                    favorite = book.favorite,
-                    title = book.title,
-                    status = book.status,
-                    genre = book.genres.let(bookGenresConverter::encode),
-                    description = book.description,
-                    author = book.author,
-                    initialized = book.initialized,
-                    url = book.key,
-                    artist = book.author,
-                    chapterFlags = book.flags,
-                    coverLastModified = 0,
-                    nextUpdate = 0,
-                    thumbnailUrl = book.cover,
-                    viewerFlags = book.viewer,
-                )
-            }
-            bookQueries.selectLastInsertedRowId()
+        val ids = insertBooksOperation(book)
+
+        // Add all books to default category
+        val bookCategories = ids.map { bookId ->
+            BookCategory(bookId = bookId, categoryId = Category.ALL_ID)
         }
+
+        try {
+            // Insert categories for books
+            bookCategoryRepository.insertAll(bookCategories)
+            println("Added ${ids.size} books to default category")
+        } catch (e: Exception) {
+            println("Failed to add books to default category: ${e.message}")
+            e.printStackTrace()
+        }
+
+        return ids
     }
 
     override suspend fun delete(key: String) {
@@ -292,10 +293,19 @@ class BookRepositoryImpl(
         }
     }
 
-    private suspend fun insertBooksOperation(value: List<Book>) {
+    override suspend fun repairCategoryAssignments() {
+        handler.await {
+            categoryQueries.repair()
+
+        }
+    }
+
+    private suspend fun insertBooksOperation(value: List<Book>): List<Long> {
+        val list = mutableListOf<Long>()
         handler.await {
             value.forEach { book ->
-                bookQueries.upsert(
+                list.add(book.id)
+                return@await bookQueries.upsert(
                     id = book.id.toDB(),
                     source = book.sourceId,
                     dateAdded = book.dateAdded,
@@ -315,9 +325,11 @@ class BookRepositoryImpl(
                     nextUpdate = null,
                     artist = null,
                 )
+
             }
 
         }
+        return list
     }
 
     suspend fun insertBookOperation(vararg value: Book) {

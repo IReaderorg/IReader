@@ -28,6 +28,7 @@ object DatabaseMigrations {
             
             // Initialize views after all migrations
             initializeViews(driver)
+
         }
     }
     
@@ -76,13 +77,39 @@ object DatabaseMigrations {
      */
     private fun initializeViews(driver: SqlDriver) {
         try {
-            // Drop existing views if they exist (for recreation)
+            // First check if the views already exist
+            val viewCheckQuery = "SELECT name FROM sqlite_master WHERE type='view' AND name='historyView'"
+            var historyViewExists = false
+            driver.executeQuery(
+                identifier = null,
+                sql = viewCheckQuery,
+                mapper = { cursor ->
+                    cursor.next()
+                },
+                parameters = 0
+            )
+            
+            // Always drop views to recreate them with latest schema
             driver.execute(null, "DROP VIEW IF EXISTS historyView;", 0)
             driver.execute(null, "DROP VIEW IF EXISTS updatesView;", 0)
             
+            println("Creating views - historyView existed before: $historyViewExists")
+            val categoryInitSql ="""
+                -- Insert system category
+                INSERT OR IGNORE INTO categories(_id, name, sort, flags) VALUES (0, "", -1, 0);
+                INSERT OR IGNORE INTO categories(_id, name, sort, flags) VALUES (-1, "", -1, 0);
+                -- Disallow deletion of default category
+                CREATE TRIGGER IF NOT EXISTS system_category_delete_trigger BEFORE DELETE
+                ON categories
+                BEGIN SELECT CASE
+                    WHEN old._id <= 0 THEN
+                        RAISE(ABORT, "System category can't be deleted")
+                    END;
+                END;
+            """.trimIndent()
             // Create historyView with progress column
             val historyViewSql = """
-                CREATE VIEW IF NOT EXISTS historyView AS
+                CREATE VIEW historyView AS
                 SELECT
                     history._id AS id,
                     book._id AS bookId,
@@ -113,12 +140,27 @@ object DatabaseMigrations {
                 ON chapter.book_id = max_last_read.book_id;
             """.trimIndent()
             
-            // Execute historyView creation separately
-            driver.execute(null, historyViewSql, 0)
+            println("Creating historyView...")
+            try {
+                // Execute historyView creation separately
+                driver.execute(null, historyViewSql, 0)
+                println("historyView created successfully")
+            } catch (e: Exception) {
+                println("Error creating historyView: ${e.message}")
+                e.printStackTrace()
+            }
+            try {
+                // Execute historyView creation separately
+                driver.execute(null, categoryInitSql, 0)
+                println("categoryInitSql created successfully")
+            } catch (e: Exception) {
+                println("Error creating historyView: ${e.message}")
+                e.printStackTrace()
+            }
             
             // Create updatesView with progress information
             val updatesViewSql = """
-                CREATE VIEW IF NOT EXISTS updatesView AS
+                CREATE VIEW updatesView AS
                 SELECT
                     book._id AS mangaId,
                     book.title AS mangaTitle,
@@ -145,11 +187,49 @@ object DatabaseMigrations {
                 ORDER BY date_fetch DESC;
             """.trimIndent()
             
-            // Execute updatesView creation separately
-            driver.execute(null, updatesViewSql, 0)
+            println("Creating updatesView...")
+            try {
+                // Execute updatesView creation separately
+                driver.execute(null, updatesViewSql, 0)
+                println("updatesView created successfully")
+            } catch (e: Exception) {
+                println("Error creating updatesView: ${e.message}")
+                e.printStackTrace()
+            }
+            
+            // Verify the views were created successfully
+            driver.executeQuery(
+                identifier = null,
+                sql = "SELECT name FROM sqlite_master WHERE type='view'",
+                mapper = { cursor ->
+                    cursor.next()
+                },
+                parameters = 0
+            )
         } catch (e: Exception) {
             // Log the error but don't crash - this will help with debugging
             println("Error creating database views: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * A recovery method to force reinitialization of database views.
+     * This can be called when an app update needs to fix database issues.
+     */
+    fun forceViewReinit(driver: SqlDriver) {
+        println("Forcing view reinitialization...")
+        try {
+            // First drop any existing views
+            driver.execute(null, "DROP VIEW IF EXISTS historyView;", 0)
+            driver.execute(null, "DROP VIEW IF EXISTS updatesView;", 0)
+            
+            // Now recreate the views
+            initializeViews(driver)
+            
+            println("View reinitialization completed successfully")
+        } catch (e: Exception) {
+            println("Error during forced view reinitialization: ${e.message}")
             e.printStackTrace()
         }
     }

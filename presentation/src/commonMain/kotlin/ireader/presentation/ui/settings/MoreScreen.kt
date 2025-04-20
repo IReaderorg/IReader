@@ -123,7 +123,7 @@ fun MoreScreen(
                         Icon(
                             imageVector = incognito(),
                             contentDescription = null,
-                            tint = if (vm.incognitoMode.value) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = if (vm.incognitoMode.value) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSecondary
                         )
                     }
                     

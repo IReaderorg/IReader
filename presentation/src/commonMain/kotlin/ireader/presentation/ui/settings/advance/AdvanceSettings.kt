@@ -16,7 +16,9 @@ import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import kotlinx.serialization.ExperimentalSerializationApi
-@OptIn(ExperimentalSerializationApi::class, ExperimentalMaterial3Api::class)
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+
 @Composable
 fun AdvanceSettings(
     vm: AdvanceSettingViewModel,
@@ -25,6 +27,7 @@ fun AdvanceSettings(
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     val globalScope = LocalGlobalCoroutineScope.currentOrThrow
     val showImport = remember { mutableStateOf(false) }
+    var showDeleteAllDb by remember { mutableStateOf(false) }
     OnShowImportEpub(showImport.value, onFileSelected = {
         try {
             vm.importEpub.parse(it)
@@ -109,8 +112,25 @@ fun AdvanceSettings(
                     showImport.value = true
 
                 }
-            )
-
+            ),
+            Components.Row(
+                title = localizeHelper.localize(MR.strings.delete_all_database),
+                onClick = {
+                    showDeleteAllDb = true
+                }
+            ),
+            Components.Row(
+                title = localizeHelper.localize(MR.strings.repair_database),
+                onClick = {
+                    vm.repairDatabase()
+                }
+            ),
+            Components.Row(
+                title = localizeHelper.localize(MR.strings.repair_categories),
+                onClick = {
+                    vm.repairBookCategories()
+                }
+            ),
         )
     }
 

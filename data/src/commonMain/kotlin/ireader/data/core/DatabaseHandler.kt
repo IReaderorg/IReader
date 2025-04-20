@@ -24,6 +24,12 @@ import kotlin.coroutines.CoroutineContext
      */
     fun initialize()
 
+    /**
+     * Attempt to repair database issues.
+     * This should be called when data loading problems are detected.
+     */
+    fun repairDatabase()
+
     suspend fun <T> await(inTransaction: Boolean = false, block: suspend Database.() -> T): T
 
     suspend fun <T : Any> awaitList(

@@ -3,6 +3,8 @@ package ireader.presentation.ui.settings.advance
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import ireader.data.core.DatabaseHandler
+import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.CategoryRepository
 import ireader.domain.data.repository.ThemeRepository
 import ireader.domain.models.entities.Category
@@ -30,7 +32,8 @@ class AdvanceSettingViewModel(
     private val themeRepository: ThemeRepository,
     private val categoryRepository: CategoryRepository,
     private val appPreferences: AppPreferences,
-
+    private val databaseHandler: DatabaseHandler,
+    private val bookRepository: BookRepository,
     ) : BaseViewModel() {
 
     private val _state = mutableStateOf(SettingState())
@@ -62,8 +65,20 @@ class AdvanceSettingViewModel(
             readerPreferences.textWeight().set(400)
         }
     }
-
-
+    
+    /**
+     * Repairs database issues by recreating views and validating structure
+     */
+    fun repairDatabase() {
+        scope.launchIO {
+            try {
+                databaseHandler.repairDatabase()
+                showSnackBar(UiText.MStringResource(MR.strings.success))
+            } catch (e: Exception) {
+                showSnackBar(UiText.DynamicString("Database repair failed: ${e.message}"))
+            }
+        }
+    }
 
     fun resetCategories() {
         scope.launchIO {
@@ -77,6 +92,20 @@ class AdvanceSettingViewModel(
         scope.launchIO {
             themeRepository.deleteAll()
             showSnackBar(UiText.MStringResource(MR.strings.success))
+        }
+    }
+
+    /**
+     * Repairs the book category assignments by ensuring all books have the default category
+     */
+    fun repairBookCategories() {
+        scope.launchIO {
+            try {
+                bookRepository.repairCategoryAssignments()
+                showSnackBar(UiText.MStringResource(MR.strings.success))
+            } catch (e: Exception) {
+                showSnackBar(UiText.DynamicString("Failed to repair categories: ${e.message}"))
+            }
         }
     }
 }

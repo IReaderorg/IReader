@@ -50,4 +50,9 @@ interface BookRepository {
 
 
     suspend fun findFavoriteSourceIds(): List<Long>
+    
+    /**
+     * Ensures all books have the default category assigned
+     */
+    suspend fun repairCategoryAssignments()
 }

@@ -45,6 +45,28 @@ internal class JvmDatabaseHandler constructor(
       preferencesHelper.database_version().set(DatabaseMigrations.CURRENT_VERSION)
     }
   }
+
+  override fun repairDatabase() {
+    println("Repairing database from AndroidDatabaseHandler")
+    try {
+      // Force create views
+      DatabaseMigrations.forceViewReinit(driver)
+
+      // Verify library data is accessible
+      driver.executeQuery(
+        identifier = null,
+        sql = "SELECT COUNT(*) FROM book WHERE favorite = 1",
+        mapper = { cursor ->
+          cursor.next()
+        },
+        parameters = 0
+      )
+    } catch (e: Exception) {
+      println("Error during database repair: ${e.message}")
+      e.printStackTrace()
+    }
+  }
+
   override suspend fun <T> await(inTransaction: Boolean, block: suspend Database.() -> T): T {
     return dispatch(inTransaction, block)
   }

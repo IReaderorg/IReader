@@ -23,9 +23,13 @@ import ireader.domain.catalogs.service.CatalogRemoteApi
 import org.koin.dsl.module
 
 actual val dataPlatformModule = module {
-    single<AndroidDatabaseHandler> { AndroidDatabaseHandler(get(), get() ,preferencesHelper = get()) }
+    single<AndroidDatabaseHandler> { 
+        val handler = AndroidDatabaseHandler(get(), get(), preferencesHelper = get())
+        handler.initialize()
+        handler
+    }
     single<Transactions> { AndroidTransaction(get()) }
-    single<DatabaseHandler> { AndroidDatabaseHandler(get(),get(), preferencesHelper = get()) }
+    single<DatabaseHandler> { get<AndroidDatabaseHandler>() }
     single<SqlDriver> { DatabaseDriverFactory(get()).create() }
     single<CatalogLoader> {
         ireader.data.catalog.impl.AndroidCatalogLoader(

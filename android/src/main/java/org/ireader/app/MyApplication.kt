@@ -7,6 +7,7 @@ import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import ireader.core.http.WebViewUtil
+import ireader.data.core.DatabaseHandler
 import ireader.data.di.DataModule
 import ireader.data.di.dataPlatformModule
 import ireader.data.di.repositoryInjectModule
@@ -54,6 +55,15 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
             modules(DomainServices)
             modules(DomainModule)
             modules(presentationPlatformModule)
+        }
+        
+        // Ensure database is initialized
+        try {
+            val databaseHandler: DatabaseHandler by inject()
+            databaseHandler.initialize()
+        } catch (e: Exception) {
+            println("Failed to initialize database: ${e.message}")
+            e.printStackTrace()
         }
     }
 

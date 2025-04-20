@@ -32,7 +32,7 @@ val repositoryInjectModule = module {
     single<CategoryRepository> { CategoryRepositoryImpl(get()) }
     single<CatalogRemoteRepository> { CatalogRemoteRepositoryImpl(get()) }
     single<ChapterRepository> { ChapterRepositoryImpl(get()) }
-    single<BookRepository> { BookRepositoryImpl(get()) }
+    single<BookRepository> { BookRepositoryImpl(get(), get<BookCategoryRepository>()) }
     single<HistoryRepository> { HistoryRepositoryImpl(get()) }
     single<BookCategoryRepository> { BookCategoryRepositoryImpl(get()) }
     single<ThemeRepository> { ThemeRepositoryImpl(get()) }

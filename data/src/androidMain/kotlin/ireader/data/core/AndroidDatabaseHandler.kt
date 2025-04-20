@@ -26,15 +26,68 @@ class AndroidDatabaseHandler(
 
     val suspendingTransactionId = ThreadLocal<Int>()
     override fun initialize() {
-        // Get current version from preferences
-        val oldVersion = preferencesHelper.database_version().get()
+        println("Database initialization started")
+        try {
+            // Get current version from preferences
+            val oldVersion = preferencesHelper.database_version().get()
+            val currentVersion = DatabaseMigrations.CURRENT_VERSION
+            
+            println("Database version: Current=$oldVersion, Target=$currentVersion")
 
-        // Apply migrations if needed
-        if (oldVersion < DatabaseMigrations.CURRENT_VERSION) {
-            DatabaseMigrations.migrate(driver, oldVersion)
+            // Apply migrations if needed
+            if (oldVersion < currentVersion) {
+                println("Database upgrade needed from $oldVersion to $currentVersion")
+                try {
+                    DatabaseMigrations.migrate(driver, oldVersion)
+                    println("Database migration successfully completed")
+                    
+                    // Update the stored version
+                    preferencesHelper.database_version().set(currentVersion)
+                    println("Database version updated to $currentVersion")
+                } catch (e: Exception) {
+                    println("ERROR during database migration: ${e.message}")
+                    e.printStackTrace()
+                    
+                    // Try to recover by forcing view creation
+                    try {
+                        println("Attempting recovery by reinitializing views...")
+                        DatabaseMigrations.forceViewReinit(driver)
+                    } catch (e2: Exception) {
+                        println("Recovery attempt also failed: ${e2.message}")
+                        e2.printStackTrace()
+                    }
+                }
+            } else {
+                println("No database upgrade needed, ensuring views exist...")
+                // Even if no migration is needed, ensure views are initialized
+                DatabaseMigrations.initializeViewsDirectly(driver)
+            }
+            
+            println("Database initialization completed successfully")
+        } catch (e: Exception) {
+            println("CRITICAL ERROR during database initialization: ${e.message}")
+            e.printStackTrace()
+        }
+    }
 
-            // Update the stored version
-            preferencesHelper.database_version().set(DatabaseMigrations.CURRENT_VERSION)
+    override fun repairDatabase() {
+        println("Repairing database from AndroidDatabaseHandler")
+        try {
+            // Force create views
+            DatabaseMigrations.forceViewReinit(driver)
+            
+            // Verify library data is accessible
+            driver.executeQuery(
+                identifier = null,
+                sql = "SELECT COUNT(*) FROM book WHERE favorite = 1",
+                mapper = { cursor ->
+                    cursor.next()
+                },
+                parameters = 0
+            )
+        } catch (e: Exception) {
+            println("Error during database repair: ${e.message}")
+            e.printStackTrace()
         }
     }
 

@@ -1,11 +1,11 @@
 package ireader.data.core
 
 import app.cash.sqldelight.db.SqlDriver
-import data.Catalog
+import migrations.Catalog
 import data.DatabaseMigrations
-import data.Download
-import data.Reader_theme
-import data.Theme
+import migrations.Download
+import migrations.Reader_theme
+import migrations.Theme
 import ir.kazemcodes.infinityreader.Database
 import ireader.data.book.bookGenresConverter
 import ireader.data.book.floatDoubleColumnAdapter
@@ -57,7 +57,7 @@ fun createDatabase(driver: SqlDriver): Database {
         ),
         downloadAdapter = Download.Adapter(
             priorityAdapter = intLongColumnAdapter
-        )
+        ),
     )
     
     // Explicitly initialize views every time the database is created
