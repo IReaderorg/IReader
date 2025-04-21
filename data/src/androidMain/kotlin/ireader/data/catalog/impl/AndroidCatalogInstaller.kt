@@ -58,15 +58,32 @@ class AndroidCatalogInstaller(
                     headers.append(HttpHeaders.CacheControl, "no-store")
                 }.body()
                 apkResponse.saveTo(tmpApkFile)
-
-                // copy installed App Icon to the storage
+                
+                // Save the icon to storage
                 iconResponse.saveTo(tmpIconFile)
                 val extDir = File(context.cacheDir, catalog.pkgName).apply { mkdirs() }
                 val iconFile = File(extDir, tmpIconFile.name)
-                tmpIconFile.copyRecursively(iconFile,true)
-
+                tmpIconFile.copyRecursively(iconFile, true)
+                
+                // Create a secure directory in the code cache directory for installation
+                val secureApkDir = File(context.codeCacheDir, "secure_installations")
+                secureApkDir.mkdirs()
+                val secureApkFile = File(secureApkDir, "${catalog.pkgName}.apk")
+                
+                // Copy the APK to the secure location
+                if (secureApkFile.exists()) {
+                    secureApkFile.delete()
+                }
+                tmpApkFile.copyTo(secureApkFile, overwrite = true)
+                
+                // Make sure the file is readable but not set to read-only
+                // Android 14 (API 34) needs the file to be writable
+                secureApkFile.setReadable(true)
+                secureApkFile.setWritable(true)
+                
                 emit(InstallStep.Idle)
-                val result = packageInstaller.install(tmpApkFile, catalog.pkgName)
+                // Use the secure file for installation
+                val result = packageInstaller.install(secureApkFile, catalog.pkgName)
                 if (result is InstallStep.Success) {
                     installationChanges.notifyAppInstall(catalog.pkgName)
                 }

@@ -106,7 +106,7 @@ fun MoreScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(24.dp))
-                        .background(if (vm.incognitoMode.value) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)
+                        .background(if (vm.incognitoMode.value) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.surface)
                         .clickable { vm.incognitoMode.value = !vm.incognitoMode.value }
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -123,7 +123,7 @@ fun MoreScreen(
                         Icon(
                             imageVector = incognito(),
                             contentDescription = null,
-                            tint = if (vm.incognitoMode.value) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSecondary
+                            tint = if (vm.incognitoMode.value) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary
                         )
                     }
                     
@@ -204,47 +204,47 @@ fun MoreScreen(
             )
         }
         
-        // Theme selector item
-        item {
-            SettingsItemWithAction(
-                title = "Theme",
-                description = "Choose app theme and appearance",
-                icon = Icons.Outlined.DarkMode,
-                onClick = { showThemeOptions = !showThemeOptions },
-                endContent = {
-                    ThemeChip(
-                        text = "System default",
-                        onClick = { showThemeOptions = !showThemeOptions }
-                    )
-                },
-                isExpanded = showThemeOptions,
-                expandedContent = {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                    ) {
-                        ThemeOption(
-                            text = "Light",
-                            isSelected = false,
-                            onClick = { /* Handle light theme selection */ }
-                        )
-                        
-                        ThemeOption(
-                            text = "Dark",
-                            isSelected = true,
-                            onClick = { /* Handle dark theme selection */ }
-                        )
-                        
-                        ThemeOption(
-                            text = "System default",
-                            isSelected = false,
-                            onClick = { /* Handle system theme selection */ }
-                        )
-                    }
-                }
-            )
-        }
+//        // Theme selector item
+//        item {
+//            SettingsItemWithAction(
+//                title = "Theme",
+//                description = "Choose app theme and appearance",
+//                icon = Icons.Outlined.DarkMode,
+//                onClick = { showThemeOptions = !showThemeOptions },
+//                endContent = {
+//                    ThemeChip(
+//                        text = "System default",
+//                        onClick = { showThemeOptions = !showThemeOptions }
+//                    )
+//                },
+//                isExpanded = showThemeOptions,
+//                expandedContent = {
+//                    Column(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .padding(horizontal = 16.dp)
+//                    ) {
+//                        ThemeOption(
+//                            text = "Light",
+//                            isSelected = false,
+//                            onClick = { /* Handle light theme selection */ }
+//                        )
+//
+//                        ThemeOption(
+//                            text = "Dark",
+//                            isSelected = true,
+//                            onClick = { /* Handle dark theme selection */ }
+//                        )
+//
+//                        ThemeOption(
+//                            text = "System default",
+//                            isSelected = false,
+//                            onClick = { /* Handle system theme selection */ }
+//                        )
+//                    }
+//                }
+//            )
+//        }
         
         item {
             SettingsItem(

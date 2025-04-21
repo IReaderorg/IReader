@@ -9,6 +9,12 @@
     <external-cache-path
         name="ext_cache_files"
         path="." />
+    <external-files-path
+        name="external_files"
+        path="downloads" />
+    <external-files-path
+        name="all_external_files"
+        path="." />
     <!--suppress AndroidElementNotAllowed -->
     <root-path
         name="ext_storage"

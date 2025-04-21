@@ -40,8 +40,40 @@ class AndroidCatalogLoader(
 ) : CatalogLoader {
 
     private val pkgManager = context.packageManager
-
     private val catalogPreferences = preferenceStore.create("catalogs_data")
+    
+    // Create secure directories for extension loading
+    private val secureExtensionsDir = File(context.codeCacheDir, "secure_extensions").apply { mkdirs() }
+    private val secureDexCacheDir = File(context.codeCacheDir, "dex-cache").apply { mkdirs() }
+    
+    init {
+        // Initialize secure directories at startup
+        createSecureDirectories()
+    }
+    
+    /**
+     * Creates secure directories for extension loading
+     */
+    private fun createSecureDirectories() {
+        try {
+            // Ensure secure directories exist
+            secureExtensionsDir.mkdirs()
+            secureDexCacheDir.mkdirs()
+            
+            // Clean any stale extension files
+            secureExtensionsDir.listFiles()?.forEach { file ->
+                if (file.isFile && file.name.endsWith(".apk")) {
+                    try {
+                        file.delete()
+                    } catch (e: Exception) {
+                        Log.warn("Failed to delete stale extension file: ${file.name}")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.error("Failed to create secure directories", e)
+        }
+    }
 
     /**
      * Return a list of all the installed catalogs initialized concurrently.
@@ -164,21 +196,42 @@ class AndroidCatalogLoader(
         file: File,
     ): CatalogInstalled.Locally? {
         val data = validateMetadata(pkgName, pkgInfo) ?: return null
-        val dexOutputDir = context.codeCacheDir.absolutePath
-        val loader = DexClassLoader(file.absolutePath, dexOutputDir, null, context.classLoader)
-        val source = loadSource(pkgName, loader, data) ?: return null
-
-        return CatalogInstalled.Locally(
-            name = source.name,
-            description = data.description,
-            source = source,
-            pkgName = pkgName,
-            versionName = data.versionName,
-            versionCode = data.versionCode,
-            nsfw = data.nsfw,
-            installDir = file.parentFile!!,
-            iconUrl = data.icon
-        )
+        
+        try {
+            // Create a fresh copy to avoid any "writable dex file" issues
+            val secureApkFile = File(secureExtensionsDir, "${pkgName}.apk")
+            if (secureApkFile.exists()) {
+                secureApkFile.delete()
+            }
+            
+            // Copy the APK to the code cache directory which is allowed for DEX loading
+            file.copyTo(secureApkFile, overwrite = true)
+            
+            // Make sure the permissions are correct (readable but not writable)
+            secureApkFile.setReadOnly()
+            
+            // Use the code cache directory for dex output
+            val dexOutputDir = File(secureDexCacheDir, pkgName).apply { mkdirs() }.absolutePath
+            
+            // Now load from the secure location
+            val loader = DexClassLoader(secureApkFile.absolutePath, dexOutputDir, null, context.classLoader)
+            val source = loadSource(pkgName, loader, data) ?: return null
+            
+            return CatalogInstalled.Locally(
+                name = source.name,
+                description = data.description,
+                source = source,
+                pkgName = pkgName,
+                versionName = data.versionName,
+                versionCode = data.versionCode,
+                nsfw = data.nsfw,
+                installDir = file.parentFile!!,
+                iconUrl = data.icon
+            )
+        } catch (e: Exception) {
+            Log.warn(e, "Failed to load local catalog $pkgName")
+            return null
+        }
     }
 
     /**

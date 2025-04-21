@@ -449,4 +449,8 @@
     <string name="clear">clear</string>
     <string name="history">History</string>
     <string name="no_matches_found_in_search">No match found</string>
+    <string name="permission_required">Permission Required</string>
+    <string name="storage_permission_required_explanation">Storage Permission Required Explanation</string>
+    <string name="file_not_found_error">File Not Found Exception</string>
+    <string name="installation_successful">Installation was successful.</string>
 </resources>

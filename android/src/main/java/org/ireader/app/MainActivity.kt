@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.util.Consumer
 import androidx.core.view.WindowCompat
@@ -75,17 +76,38 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        registerSecureActivity(this, uiPreferences,initializers)
+        registerSecureActivity(this, uiPreferences, initializers)
+        
+        // Provide activity to storage helper
         getSimpleStorage.provideActivity(this, null)
+        
+        // Set up window to handle gesture navigation
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        
+        // Initialize automatic backup in the background
         lifecycleScope.launchIO {
             automaticBackup.initialize()
         }
+        
+        // Set up logging
         Napier.base(DebugAntilog())
+        
+        // Set locale
         localeHelper.setLocaleLang()
+        
+        // Install splash screen
         installSplashScreen()
 
+        // Request all necessary permissions early
+        lifecycleScope.launch {
+            // Delay slightly to let the UI initialize
+            delay(500)
+            // Request important storage permissions based on Android version
+            requestNecessaryPermissions()
+        }
+
         setContent {
+            val context = LocalContext.current
             SetDefaultTheme()
             KoinContext {
                 setSingletonImageLoaderFactory { context ->
@@ -94,13 +116,10 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                     )
                 }
                 AppTheme(this.lifecycleScope) {
-
                     Surface(
                         color = MaterialTheme.colorScheme.surface,
                         contentColor = MaterialTheme.colorScheme.onSurface,
-
-                        ) {
-
+                    ) {
                         Navigator(
                             screen = MainStarterScreen,
                             disposeBehavior = NavigatorDisposeBehavior(
@@ -116,16 +135,27 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                             }
                             IScaffold {
                                 DefaultNavigatorScreenTransition(navigator = navigator)
-                                GetPermissions(uiPreferences)
+                                // Pass the application context to GetPermissions
+                                GetPermissions(uiPreferences, context = this@MainActivity)
                             }
 
                             HandleOnNewIntent(this, navigator)
                         }
-
                     }
                 }
-
             }
+        }
+    }
+
+    /**
+     * Request necessary permissions based on Android version
+     */
+    private fun requestNecessaryPermissions() {
+        // Handled by GetPermissions composable, but we want to 
+        // trigger system dialogs as early as possible
+        if (!uiPreferences.savedLocalCatalogLocation().get()) {
+            // Let the GetPermissions composable handle the actual permission requests
+            // as it has proper UI feedback
         }
     }
 
