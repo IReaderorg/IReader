@@ -175,3 +175,15 @@ END;
 -- Create indices
 CREATE INDEX IF NOT EXISTS chapters_manga_id_index ON chapter(book_id);
 CREATE INDEX IF NOT EXISTS history_history_chapter_id_index ON history(chapter_id);
+INSERT OR IGNORE INTO repository(_id,name,key,owner,source,last_update,is_enable) VALUES (-1,"","","","","",1);
+-- Disallow deletion of default category
+CREATE TRIGGER IF NOT EXISTS system_repository_delete_trigger BEFORE DELETE
+ON repository
+BEGIN SELECT CASE
+    WHEN old._id < 0 THEN
+        RAISE(ABORT, "System Repository can't be deleted")
+    END;
+END;
+
+CREATE INDEX IF NOT EXISTS library_favorite_index ON book(favorite) WHERE favorite = 1;
+CREATE INDEX IF NOT EXISTS mangas_url_index ON book(url);
