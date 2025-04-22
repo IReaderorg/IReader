@@ -82,9 +82,14 @@ class ReaderScreenViewModel(
     val relativeTime by uiPreferences.relativeTime().asState()
     val translatorOriginLanguage = readerPreferences.translatorOriginLanguage().asState()
     val translatorTargetLanguage = readerPreferences.translatorTargetLanguage().asState()
+    val translatorEngine = readerPreferences.translatorEngine().asState()
+    val translatorContentType = readerPreferences.translatorContentType().asState()
+    val translatorToneType = readerPreferences.translatorToneType().asState()
+    val translatorPreserveStyle = readerPreferences.translatorPreserveStyle().asState()
     val readerTheme = androidUiPreferences.readerTheme().asState()
     val backgroundColor = androidUiPreferences.backgroundColorReader().asState()
-
+    val openAIApiKey = readerPreferences.openAIApiKey().asState()
+    val deepSeekApiKey = readerPreferences.deepSeekApiKey().asState()
     val topContentPadding = readerPreferences.topContentPadding().asState()
     val screenAlwaysOn = readerPreferences.screenAlwaysOn().asState()
     val bottomContentPadding = readerPreferences.bottomContentPadding().asState()
@@ -133,6 +138,12 @@ class ReaderScreenViewModel(
     )
 
     var isToggleInProgress by mutableStateOf(false)
+
+    // Translation progress states
+    var isTranslating by mutableStateOf(false)
+    var translationProgress by mutableStateOf(0f)
+    var translationTotal by mutableStateOf(0)
+    var translationCompleted by mutableStateOf(0)
 
     init {
         val chapterId = globalChapterId.value
@@ -329,11 +340,149 @@ class ReaderScreenViewModel(
     }
     suspend fun translate() {
         stateChapter?.let { chapter ->
-          translationEnginesManager.get().translate(chapter.content.filterIsInstance<Text>().map { (it as Text).text },translatorOriginLanguage.value,translatorTargetLanguage.value, onSuccess = { result ->
-                stateChapter = stateChapter!!.copy(content = result.map { Text(it) })
-            }, onError = {
-                showSnackBar(it)
-          })
+            // Reset translation progress
+            isTranslating = true
+            translationProgress = 0f
+            translationCompleted = 0
+            
+            try {
+                showSnackBar(UiText.MStringResource(MR.strings.translating))
+                
+                val contentType = ireader.domain.data.engines.ContentType.values().getOrElse(translatorContentType.value) { 
+                    ireader.domain.data.engines.ContentType.GENERAL 
+                }
+                
+                val toneType = ireader.domain.data.engines.ToneType.values().getOrElse(translatorToneType.value) { 
+                    ireader.domain.data.engines.ToneType.NEUTRAL 
+                }
+                
+                val preserveStyle = translatorPreserveStyle.value
+                
+                // Get the active translation engine
+                val engine = translationEnginesManager.get()
+                
+                // Extract text content with null safety
+                val content = chapter.content ?: emptyList()
+                val texts = content.filterIsInstance<ireader.core.source.model.Text>().map { it.text }
+                
+                if (texts.isEmpty()) {
+                    showSnackBar(UiText.MStringResource(MR.strings.no_text_to_translate))
+                    isTranslating = false
+                    return
+                }
+                
+                translationTotal = texts.size
+                
+                // Log which engine is being used
+                println("Using translation engine: ${engine.engineName} (ID: ${engine.id})")
+                
+                if (engine.supportsContextAwareTranslation) {
+                    // Use advanced translation with context for AI-powered engines
+                    translationEnginesManager.translateWithContext(
+                        texts = texts,
+                        source = translatorOriginLanguage.value,
+                        target = translatorTargetLanguage.value,
+                        contentType = contentType,
+                        toneType = toneType,
+                        preserveStyle = preserveStyle,
+                        onProgress = { completed ->
+                            translationCompleted = completed
+                            translationProgress = completed.toFloat() / translationTotal.toFloat()
+                            // Ensure isTranslating stays true during the process
+                            if (completed < 100) isTranslating = true
+                        },
+                        onSuccess = { result ->
+                            stateChapter = stateChapter!!.copy(content = result.map { ireader.core.source.model.Text(it) })
+                            showSnackBar(UiText.MStringResource(MR.strings.translation_complete))
+                            translationProgress = 1f
+                            isTranslating = false
+                        },
+                        onError = { errorMessage ->
+                            // Show error message and log detailed info
+                            showSnackBar(errorMessage)
+                            
+                            // Log the error in a readable format - convert MR strings if needed
+                            if (errorMessage is UiText.MStringResource) {
+                                val stringRes = when (errorMessage.res) {
+                                    MR.strings.no_text_to_translate -> "No text to translate"
+                                    MR.strings.empty_response -> "Empty response from translation service"
+                                    MR.strings.api_response_error -> "Error processing API response"
+                                    MR.strings.deepseek_api_key_not_set -> "DeepSeek API key not set"
+                                    MR.strings.deepseek_api_key_invalid -> "DeepSeek API key invalid or quota exceeded"
+                                    MR.strings.openai_api_key_not_set -> "OpenAI API key not set"
+                                    MR.strings.openai_api_key_invalid -> "OpenAI API key invalid"
+                                    MR.strings.api_rate_limit_exceeded -> "API rate limit exceeded"
+                                    MR.strings.openai_quota_exceeded -> "OpenAI quota exceeded"
+                                    else -> "Translation error: ${errorMessage.res}"
+                                }
+                                println("Translation error: $stringRes")
+                            } else {
+                                println("Translation error: $errorMessage")
+                            }
+                            
+                            // Reset progress on error
+                            translationProgress = 0f
+                            translationCompleted = 0
+                            isTranslating = false
+                        }
+                    )
+                } else {
+                    // Fall back to standard translation for basic engines
+                    engine.translate(
+                        texts = texts,
+                        source = translatorOriginLanguage.value,
+                        target = translatorTargetLanguage.value,
+                        onProgress = { completed ->
+                            translationCompleted = completed
+                            translationProgress = completed.toFloat() / translationTotal.toFloat()
+                            // Ensure isTranslating stays true during the process
+                            if (completed < 100) isTranslating = true
+                        },
+                        onSuccess = { result ->
+                            stateChapter = stateChapter!!.copy(content = result.map { ireader.core.source.model.Text(it) })
+                            showSnackBar(UiText.MStringResource(MR.strings.translation_complete))
+                            translationProgress = 1f
+                            isTranslating = false
+                        },
+                        onError = { errorMessage ->
+                            // Show error message and log detailed info
+                            showSnackBar(errorMessage)
+                            
+                            // Log the error in a readable format - convert MR strings if needed
+                            if (errorMessage is UiText.MStringResource) {
+                                val stringRes = when (errorMessage.res) {
+                                    MR.strings.no_text_to_translate -> "No text to translate"
+                                    MR.strings.empty_response -> "Empty response from translation service"
+                                    MR.strings.api_response_error -> "Error processing API response"
+                                    MR.strings.deepseek_api_key_not_set -> "DeepSeek API key not set"
+                                    MR.strings.deepseek_api_key_invalid -> "DeepSeek API key invalid"
+                                    MR.strings.openai_api_key_not_set -> "OpenAI API key not set"
+                                    MR.strings.openai_api_key_invalid -> "OpenAI API key invalid"
+                                    MR.strings.api_rate_limit_exceeded -> "API rate limit exceeded"
+                                    MR.strings.openai_quota_exceeded -> "OpenAI quota exceeded"
+                                    else -> "Translation error: ${errorMessage.res}"
+                                }
+                                println("Translation error: $stringRes")
+                            } else {
+                                println("Translation error: $errorMessage")
+                            }
+                            
+                            // Reset progress on error
+                            translationProgress = 0f
+                            translationCompleted = 0
+                            isTranslating = false
+                        }
+                    )
+                }
+            } catch (e: Exception) {
+                showSnackBar(UiText.ExceptionString(e))
+                // Also reset translation state if an error occurs
+                translationProgress = 0f
+                translationCompleted = 0
+                isTranslating = false
+                println("Translation error: $e")
+                e.printStackTrace()
+            }
         }
     }
 

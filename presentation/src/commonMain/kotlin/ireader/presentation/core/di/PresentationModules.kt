@@ -32,6 +32,7 @@ import ireader.presentation.ui.settings.downloader.DownloaderViewModel
 import ireader.presentation.ui.settings.font_screens.FontScreenStateImpl
 import ireader.presentation.ui.settings.font_screens.FontScreenViewModel
 import ireader.presentation.ui.settings.general.GeneralSettingScreenViewModel
+import ireader.presentation.ui.settings.general.TranslationSettingsViewModel
 import ireader.presentation.ui.settings.reader.ReaderSettingScreenViewModel
 import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
 import org.koin.dsl.module
@@ -69,6 +70,7 @@ val PresentationModules = module {
     factory  { DownloaderViewModel(get(), get(), get(), get()) }
     factory  { FontScreenViewModel(get(), get(), get(), get()) }
     factory  { GeneralSettingScreenViewModel(get(), get(), get()) }
+    factory  { TranslationSettingsViewModel(get(), get()) }
     factory  { ReaderSettingScreenViewModel(get(), get(), get()) }
     factory  { SourceRepositoryViewModel(get(), get()) }
 

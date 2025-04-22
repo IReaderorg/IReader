@@ -35,6 +35,9 @@ class GeneralScreenSpec : VoyagerScreen() {
             GeneralSettingScreen(
                 scaffoldPadding = scaffoldPadding,
                 vm = vm,
+                onTranslationSettingsClick = {
+                    navigator.push(TranslationScreenSpec())
+                },
             )
         }
 

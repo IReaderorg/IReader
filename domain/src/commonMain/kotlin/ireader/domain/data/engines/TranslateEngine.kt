@@ -1,7 +1,7 @@
 package ireader.domain.data.engines
 
+import ireader.domain.usecases.translate.OpenAITranslateEngine
 import ireader.i18n.UiText
-
 
 abstract class TranslateEngine {
 
@@ -70,12 +70,98 @@ abstract class TranslateEngine {
     )
 
     open val id: Long = -1
+    
+    open val engineName: String = "Default"
+    
+    open val supportsAI: Boolean = false
+    
+    open val supportsContextAwareTranslation: Boolean = false
+    
+    open val supportsStylePreservation: Boolean = false
+    
+    open val requiresApiKey: Boolean = false
 
     abstract suspend fun translate(
         texts: List<String>,
         source: String,
         target: String,
+        onProgress: (Int) -> Unit = {},
         onSuccess: (List<String>) -> Unit,
         onError:(UiText) -> Unit
     )
+    
+    /**
+     * Enhanced version of translate for AI-powered engines that can preserve style, tone, and context
+     */
+    open suspend fun translateWithContext(
+        texts: List<String>,
+        source: String,
+        target: String,
+        context: TranslationContext,
+        onProgress: (Int) -> Unit = {},
+        onSuccess: (List<String>) -> Unit,
+        onError:(UiText) -> Unit
+    ) {
+        // Default implementation falls back to regular translation
+        translate(texts, source, target, onProgress, onSuccess, onError)
+    }
+    
+    companion object {
+        // Define engine IDs as constants for easier reference
+        const val BUILT_IN = 0L
+        const val GOOGLE = 1L
+        const val BING = 2L
+        const val OPENAI = 3L
+        const val DEEPSEEK = 4L
+        const val OLLAMA = 5L
+        
+        // Add Ollama to the values() method
+        fun values(): Array<Long> {
+            return arrayOf(BUILT_IN, GOOGLE, BING, OPENAI, DEEPSEEK, OLLAMA)
+        }
+        
+        // Map engine ID to name for display
+        fun valueOf(id: Long): String {
+            return when (id) {
+                BUILT_IN -> "BuiltIn"
+                GOOGLE -> "Google"
+                BING -> "Bing"
+                OPENAI -> "OpenAI"
+                DEEPSEEK -> "DeepSeek"
+                OLLAMA -> "Ollama"
+                else -> "Unknown"
+            }
+        }
+    }
+}
+
+/**
+ * Context information for enhanced AI translation
+ */
+data class TranslationContext(
+    val contentType: ContentType = ContentType.GENERAL,
+    val preserveStyle: Boolean = false,
+    val preserveFormatting: Boolean = true,
+    val toneType: ToneType = ToneType.NEUTRAL
+)
+
+enum class ContentType {
+    GENERAL,
+    LITERARY,
+    TECHNICAL,
+    CONVERSATION,
+    POETRY,
+    ACADEMIC,
+    BUSINESS,
+    CREATIVE
+}
+
+enum class ToneType {
+    NEUTRAL,
+    FORMAL,
+    CASUAL,
+    PROFESSIONAL,
+    HUMOROUS,
+    FRIENDLY,
+    INFORMAL
 }

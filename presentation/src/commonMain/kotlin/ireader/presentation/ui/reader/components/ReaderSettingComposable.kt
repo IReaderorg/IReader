@@ -1,7 +1,9 @@
 package ireader.presentation.ui.reader.components
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -9,6 +11,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.HorizontalPager
@@ -16,24 +21,33 @@ import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Tab
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatAlignCenter
 import androidx.compose.material.icons.filled.FormatAlignJustify
 import androidx.compose.material.icons.filled.FormatAlignLeft
 import androidx.compose.material.icons.filled.FormatAlignRight
+import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
+import ireader.domain.data.engines.TranslateEngine
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.theme.ReaderTheme
 import ireader.domain.preferences.models.FontType
@@ -56,6 +70,7 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.theme.ReaderTheme
 import ireader.presentation.ui.core.ui.Colour.contentColor
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
@@ -424,6 +439,15 @@ fun GeneralScreenTab(
     ) {
         item {
             ChipChoicePreference(
+                preference = vm.translatorEngine,
+                choices = vm.translationEnginesManager.getAvailableEngines().associate { it.id to it.engineName },
+                title = localize(
+                    MR.strings.translation_engine
+                )
+            )
+        }
+        item {
+            ChipChoicePreference(
                 preference = vm.translatorOriginLanguage,
                 choices = vm.translationEnginesManager.get().supportedLanguages.associate { it.first to it.second },
                 title = localize(
@@ -440,12 +464,50 @@ fun GeneralScreenTab(
                 )
             )
         }
+        
+        // Show advanced options only for AI-powered engines
+        if (vm.translationEnginesManager.get().supportsContextAwareTranslation) {
+            item {
+                ChipChoicePreference(
+                    preference = vm.translatorContentType,
+                    choices = ireader.domain.data.engines.ContentType.values().mapIndexed { index, contentType -> 
+                        index to contentType.name.lowercase().replaceFirstChar { it.uppercase() }
+                    }.toMap(),
+                    title = localize(
+                        MR.strings.content_type
+                    )
+                )
+            }
+            item {
+                ChipChoicePreference(
+                    preference = vm.translatorToneType,
+                    choices = ireader.domain.data.engines.ToneType.values().mapIndexed { index, toneType -> 
+                        index to toneType.name.lowercase().replaceFirstChar { it.uppercase() }
+                    }.toMap(),
+                    title = localize(
+                        MR.strings.tone_type
+                    )
+                )
+            }
+            item {
+                SwitchPreference(
+                    preference = vm.translatorPreserveStyle,
+                    title = localizeHelper.localize(MR.strings.preserve_style),
+                )
+            }
+        }
+        
         item {
-            PreferenceRow(title = "translate", onClick = {
-                scope.launch {
-                    vm.translate()
-                }
-            })
+            TranslateButton(
+                onClick = {
+                    scope.launch {
+                        vm.translate()
+                    }
+                },
+                isTranslating = vm.isTranslating,
+                engine = vm.translationEnginesManager.get(),
+                vm = vm
+            )
         }
         item {
             ChipPreference(
@@ -734,5 +796,93 @@ fun Boolean.isTrue(): Int {
         1
     } else {
         0
+    }
+}
+
+@Composable
+fun TranslateButton(
+    onClick: () -> Unit,
+    isTranslating: Boolean,
+    engine: TranslateEngine,
+    vm: ReaderScreenViewModel,
+) {
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Button(
+                onClick = { if (!isTranslating) onClick() },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isTranslating,
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Translate,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                    
+                    Spacer(modifier = Modifier.width(8.dp))
+                    
+                    Text(
+                        text = if (isTranslating) 
+                            localizeHelper.localize(MR.strings.translating) 
+                        else 
+                            try {
+                                localizeHelper.localize(MR.strings.translate_now)
+                            } catch (e: Exception) {
+                                "Translate Now"
+                            },
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+            }
+            
+            // Show current engine
+            Text(
+                text = engine.engineName,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+            
+            if (engine.requiresApiKey) {
+                val apiStatus = when (engine.id) {
+                    2L -> if (vm.openAIApiKey.value.isBlank()) "API key required" else "API key set"  
+                    3L -> if (vm.deepSeekApiKey.value.isBlank()) "API key required" else "API key set"
+                    else -> null
+                }
+                
+                if (apiStatus != null) {
+                    Text(
+                        text = apiStatus,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (apiStatus.contains("required")) 
+                            MaterialTheme.colorScheme.error
+                        else 
+                            MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
+            }
+        }
     }
 }

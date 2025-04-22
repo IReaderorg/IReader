@@ -224,6 +224,30 @@ class ReaderPreferences constructor(
     fun translatorTargetLanguage(): Preference<String> {
         return preferenceStore.getString("translator_target_language", "en")
     }
+    fun translatorContentType(): Preference<Int> {
+        return preferenceStore.getInt("translator_content_type", 0)
+    }
+    fun translatorToneType(): Preference<Int> {
+        return preferenceStore.getInt("translator_tone_type", 0)
+    }
+    fun translatorPreserveStyle(): Preference<Boolean> {
+        return preferenceStore.getBoolean("translator_preserve_style", true)
+    }
+    fun openAIApiKey(): Preference<String> {
+        return preferenceStore.getString("openai_api_key", "")
+    }
+    fun deepSeekApiKey(): Preference<String> {
+        return preferenceStore.getString("deepseek_api_key", "")
+    }
+    fun ollamaServerUrl(): Preference<String> {
+        return preferenceStore.getString("ollama_server_url", "http://localhost:11434/api/generate")
+    }
+    fun ollamaModel(): Preference<String> {
+        return preferenceStore.getString("ollama_model", "llama2")
+    }
+    fun ollamaUrl(): Preference<String> {
+        return preferenceStore.getString("ollamaUrl", "ollamaUrl")
+    }
 }
 
 enum class ReadingMode {

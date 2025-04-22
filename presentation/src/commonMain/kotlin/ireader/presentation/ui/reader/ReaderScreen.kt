@@ -34,6 +34,7 @@ import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.presentation.ui.core.ui.Colour.Transparent
 import ireader.presentation.ui.reader.components.MainBottomSettingComposable
+import ireader.presentation.ui.reader.components.TranslationProgressIndicator
 import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.launch
@@ -203,18 +204,38 @@ fun ReadingScreen(
                             }
                         },
                     ) {
-                        ReaderText(
-                            vm = readerScreenPreferencesState,
-                            onNext = { onNext(false) },
-                            swipeState = swipeState,
-                            onPrev = { onPrev(false) },
-                            scrollState = scrollState,
-                            modalState = modalBottomSheetState,
-                            toggleReaderMode = toggleReaderMode,
-                            uiState = vm,
-                            lazyListState = lazyListState,
-                            onChapterShown = onChapterShown
-                        )
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            ReaderText(
+                                vm = readerScreenPreferencesState,
+                                onNext = { onNext(false) },
+                                swipeState = swipeState,
+                                onPrev = { onPrev(false) },
+                                scrollState = scrollState,
+                                modalState = modalBottomSheetState,
+                                toggleReaderMode = toggleReaderMode,
+                                uiState = vm,
+                                lazyListState = lazyListState,
+                                onChapterShown = onChapterShown
+                            )
+                            
+                            // Add translation progress indicator
+                            TranslationProgressIndicator(
+                                isVisible = vm.isTranslating,
+                                progress = vm.translationProgress,
+                                completedItems = vm.translationCompleted,
+                                totalItems = vm.translationTotal,
+                                engine = vm.translationEnginesManager.get(),
+                                textColor = vm.textColor.value,
+                                onCancel = { 
+                                    scope.launch {
+                                        vm.isTranslating = false
+                                    }
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .padding(horizontal = 16.dp)
+                            )
+                        }
                     }
                 }
             }

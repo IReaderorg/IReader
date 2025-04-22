@@ -29,20 +29,23 @@ class SettingScreenSpec : VoyagerScreen() {
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val localizeHelper = LocalLocalizeHelper.currentOrThrow
-        val settingItems = remember {
+        val sections = remember {
             listOf(
                 SettingsSection(
-                    MR.strings.appearance,
-                    Icons.Default.Palette,
-                ) {
-                    navigator.push(AppearanceScreenSpec())
-                },
+                    icon = Icons.Default.Palette,
+                    titleRes = MR.strings.appearance,
+                    onClick = { navigator.push(AppearanceScreenSpec()) },
+                ),
                 SettingsSection(
-                    MR.strings.general,
-                    Icons.Default.Tune,
-                ) {
-                    navigator.push(GeneralScreenSpec())
-                },
+                    icon = Icons.Default.Tune,
+                    titleRes = MR.strings.general,
+                    onClick = { navigator.push(GeneralScreenSpec()) },
+                ),
+                SettingsSection(
+                    icon = Icons.Default.Translate,
+                    titleRes = MR.strings.translation_settings,
+                    onClick = { navigator.push(TranslationScreenSpec()) },
+                ),
                 SettingsSection(
                     MR.strings.reader,
                     Icons.Default.ChromeReaderMode,
@@ -84,7 +87,7 @@ class SettingScreenSpec : VoyagerScreen() {
                 )
             }
         ) { padding ->
-            SetupLayout(modifier = Modifier.padding(padding), items = settingItems)
+            SetupLayout(modifier = Modifier.padding(padding), items = sections)
         }
 
     }

@@ -77,6 +77,7 @@ data class ReaderScreenSpec(
     @Composable
     override fun Content() {
         val scope = rememberCoroutineScope()
+
         val vm: ReaderScreenViewModel =
             getIViewModel(parameters = {
                 parametersOf(

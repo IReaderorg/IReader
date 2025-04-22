@@ -5,6 +5,7 @@ import io.ktor.client.statement.*
 import ireader.core.http.HttpClients
 import ireader.domain.data.engines.TranslateEngine
 import ireader.i18n.UiText
+import ireader.i18n.resources.MR
 import kotlinx.coroutines.delay
 import java.net.URLEncoder
 
@@ -120,20 +121,47 @@ class TranslateDictUseCase(
     )
 
     override val id: Long
-        get() = -2
+        get() = 1
+
+    override val engineName: String = "TranslateDict"
 
     override suspend fun translate(
      texts: List<String>,
      source: String,
      target: String,
+     onProgress: (Int) -> Unit,
      onSuccess: (List<String>) -> Unit,
      onError: (UiText) -> Unit
     ) {
-        val result = texts.joinToString("\n").chunked(1000).map { text ->
-            val url = "https://t2.translatedict.com/1.php?p1=$source&p2=$target&p3=${URLEncoder.encode(text,"utf-8")}"
-            delay(1000)
-            client.default.get(urlString = url) {}.bodyAsText()
-        }.joinToString().split("\n")
-        onSuccess(result)
+        // Validate inputs
+        if (texts.isNullOrEmpty()) {
+            onError(UiText.MStringResource(MR.strings.no_text_to_translate))
+            return
+        }
+        
+        try {
+            onProgress(0)
+            val result = texts.joinToString("\n").chunked(1000).mapIndexed { index, text ->
+                val progress = 10 + (index * 80 / texts.size.coerceAtLeast(1))
+                onProgress(progress)
+                
+                val url = "https://t2.translatedict.com/1.php?p1=$source&p2=$target&p3=${URLEncoder.encode(text,"utf-8")}"
+                delay(1000)
+                client.default.get(urlString = url) {}.bodyAsText()
+            }.joinToString().split("\n")
+            
+            if (result.isEmpty()) {
+                onError(UiText.MStringResource(MR.strings.empty_response))
+                return
+            }
+            
+            onProgress(100)
+            onSuccess(result)
+        } catch (e: Exception) {
+            println("TranslateDict error: ${e.message}")
+            e.printStackTrace()
+            onProgress(0) // Reset progress on error
+            onError(UiText.ExceptionString(e))
+        }
     }
 }

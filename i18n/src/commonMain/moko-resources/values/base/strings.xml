@@ -7,7 +7,9 @@
     <string name="cancel_all">Cancel all</string>
     <string name="cancel">Cancel</string>
     <string name="apply">Apply</string>
-    <string name="permission_not_given">Enough permission is not given, Please check out your permission</string>
+    <string name="permission_not_given">Enough permission is not given, Please check out your
+        permission
+    </string>
     <string name="add_as_new">New</string>
     <string name="add">Add</string>
     <string name="view_book">View Book</string>
@@ -36,7 +38,9 @@
     <string name="authenticate_to_confirm_change">Authenticate to confirm change</string>
 
     <string name="pref_incognito_mode_summary">Pause reading history</string>
-    <string name="no_app_was_found_to_lauch">Something went wrong. you don\'t have the required app.</string>
+    <string name="no_app_was_found_to_lauch">Something went wrong. you don\'t have the required
+        app.
+    </string>
     <string name="the_downloads_was_interrupted">The Downloads was interrupted</string>
     <string name="the_downloads_was_cancelled">The Downloads was Cancelled</string>
     <string name="failed_to_download">Failed to Download</string>
@@ -151,9 +155,15 @@
     <string name="resume">Resume</string>
     <string name="unknown">Unknown</string>
     <string name="remove">Remove</string>
-    <string name="dialog_remove_chapter_history_description">This will remove the read date of this chapter. Are you sure?</string>
-    <string name="dialog_remove_chapter_book_description">This will remove the read date of this book. Are you sure?</string>
-    <string name="dialog_remove_chapter_books_description">This will remove the read date of all books. Are you sure?</string>
+    <string name="dialog_remove_chapter_history_description">This will remove the read date of this
+        chapter. Are you sure?
+    </string>
+    <string name="dialog_remove_chapter_book_description">This will remove the read date of this
+        book. Are you sure?
+    </string>
+    <string name="dialog_remove_chapter_books_description">This will remove the read date of all
+        books. Are you sure?
+    </string>
     <string name="create_backup">Create Backup</string>
     <string name="backup_created_successfully">Create Backup Successfully</string>
     <string name="restore_backup">Restore Backup</string>
@@ -162,7 +172,7 @@
     <string name="bookmark">Bookmark</string>
     <string name="wait">Please Wait</string>
     <string name="success">Success</string>
-    <string name="epub">Epub </string>
+    <string name="epub">Epub</string>
     <string name="aborted">Success</string>
     <string name="downloading">Downloading</string>
     <string name="installing">Installing</string>
@@ -178,12 +188,14 @@
     <string name="enable_book_cover">Enable Book Cover</string>
     <string name="enable_sleep_timer">Sleep Mode</string>
     <string name="full">Full</string>
-    <string name="partial">Partial </string>
+    <string name="partial">Partial</string>
     <string name="disable">Disable</string>
     <string name="mark_as_read">Mark as read</string>
     <string name="delete_update">Delete Update</string>
     <string name="no_new_update_available">No New Updates is Available.</string>
-    <string name="package_installer_failed_to_install_packages">Package installer failed to install packages: STATUS_CODE: </string>
+    <string name="package_installer_failed_to_install_packages">Package installer failed to install
+        packages: STATUS_CODE:
+    </string>
     <string name="mark_as_not_read">Mark as Not read</string>
     <string name="mark_previous_as_read">Mark Previous as read</string>
     <string name="return_to_previous_screen">Return to previous screen</string>
@@ -202,15 +214,22 @@
     <string name="by_date_uploaded">By date Uploaded</string>
     <string name="by_date_read">By read</string>
     <!--- UiText -->
-    <string name="empty_library">There is no book is Library, you can add books in the Explore screen.</string>
+    <string name="empty_library">There is no book is Library, you can add books in the Explore
+        screen.
+    </string>
     <!--- install steps -->
     <string name="fatal_error">Fatal error for</string>
     <string name="installation_error">Error while (un)installing package</string>
     <string name="installation_error_aborted">PackageManger: Cancelled</string>
-    <string name="installation_error_invalid">PackageManger: There is another apk installed with higher version than this package</string>
+    <string name="installation_error_invalid">PackageManger: There is another apk installed with
+        higher version than this package
+    </string>
     <string name="installation_error_Storage">PackageManger: InSufficient Storage</string>
-    <string name="installation_error_incompatible">PackageManger: Incompatible with installed package</string>
-    <string name="installation_error_conflicted">PackageManger: Conflicted with installed package</string>
+    <string name="installation_error_incompatible">PackageManger: Incompatible with installed
+        package
+    </string>
+    <string name="installation_error_conflicted">PackageManger: Conflicted with installed package
+    </string>
     <string name="installation_error_blocked">PackageManger: Installer was blocked</string>
     <string name="url_is_invalid">Url is invalid</string>
     <string name="url">Url</string>
@@ -220,7 +239,7 @@
     <string name="owner">Owner</string>
     <!-- IReader-->
     <!-- Detail-->
-    <string name="start">Start </string>
+    <string name="start">Start</string>
     <string name="error_unknown">An Unknown Error Happened.</string>
     <string name="no_error">No error</string>
     <string name="no_book_found_error">There is no book with this id.</string>
@@ -240,7 +259,9 @@
     <!-- Download Notification -->
     <string name="download_notifier_downloader_title">Downloader</string>
     <string name="download_notifier_title_error">Error</string>
-    <string name="download_notifier_unknown_error">Could not download chapter due to unexpected error</string>
+    <string name="download_notifier_unknown_error">Could not download chapter due to unexpected
+        error
+    </string>
     <string name="download_notifier_text_only_wifi">No Wi-Fi connection available</string>
     <string name="download_notifier_no_network">No network connection available</string>
     <string name="download_notifier_download_paused">Download paused</string>
@@ -386,8 +407,11 @@
     <string name="cancel_all_for_this_series">"Cancel all for this series</string>
     <!-- IReader-->
     <string name="catalog_not_found_error">Can\'t found any Extensions.</string>
-    <string name="there_was_a_problem_in_getting_chapter">There was a problem in getting the chapter.</string>
-    <string name="something_is_wrong_with_this_chapter">Something is wrong with this chapter.</string>
+    <string name="there_was_a_problem_in_getting_chapter">There was a problem in getting the
+        chapter.
+    </string>
+    <string name="something_is_wrong_with_this_chapter">Something is wrong with this chapter.
+    </string>
     <string name="restoredSuccessfully">The Backup Restored Successfully.</string>
     <string name="library_is_out_of_date">Library is Out of date.</string>
     <string name="time_out_exception">The request was timed out.</string>
@@ -433,12 +457,15 @@
     <string name="all">All</string>
     <string name="no_results_found">No result Found</string>
     <string name="try_another_search">Try another search</string>
-    <string name="layout_description_comfortable">3 columns in grid with larger cover images</string>
+    <string name="layout_description_comfortable">3 columns in grid with larger cover images
+    </string>
     <string name="layout_description_compact">2 columns in grid with smaller cover images</string>
     <string name="layout_description_list">Books displayed in a vertical list</string>
     <string name="layout_description_cover_only">2 columns of cover images only (no text)</string>
-    <string name="comfortable_grid_layout_description">3 columns in grid with larger cover images</string>
-    <string name="compact_grid_layout_description">2 columns in grid with smaller cover images</string>
+    <string name="comfortable_grid_layout_description">3 columns in grid with larger cover images
+    </string>
+    <string name="compact_grid_layout_description">2 columns in grid with smaller cover images
+    </string>
     <string name="list_layout_description">Books displayed in a vertical list</string>
     <string name="cover_only_layout_description">2 columns of cover images only (no text)</string>
     <string name="yesterday">Yesterday</string>
@@ -450,7 +477,101 @@
     <string name="history">History</string>
     <string name="no_matches_found_in_search">No match found</string>
     <string name="permission_required">Permission Required</string>
-    <string name="storage_permission_required_explanation">Storage Permission Required Explanation</string>
+    <string name="storage_permission_required_explanation">Storage Permission Required Explanation
+    </string>
     <string name="file_not_found_error">File Not Found Exception</string>
     <string name="installation_successful">Installation was successful.</string>
+    <string name="openai_api_key_not_set">OpenAI API key is not set. Please configure it in the
+        settings.
+    </string>
+    <string name="deepseek_api_key_not_set">DeepSeek API key is not set. Please configure it in the
+        settings.
+    </string>
+    <string name="empty_response">Received an empty response from the translation service.</string>
+    <string name="translating">Translating... This may take a moment.</string>
+    <string name="translation_complete">Translation complete.</string>
+    <string name="translation_settings">Translation Settings</string>
+    <string name="translation_engine">Translation Engine</string>
+    <string name="content_type">Content Type</string>
+    <string name="tone_type">Tone</string>
+    <string name="preserve_style">Preserve Style</string>
+    <string name="api_settings">API Settings</string>
+    <string name="openai_api_key">OpenAI API Key</string>
+    <string name="deepseek_api_key">DeepSeek API Key</string>
+    <string name="libretranslate_api_key">LibreTranslate API Key</string>
+    <string name="deepseek_api_key_invalid">DeepSeek api key is invalid</string>
+    <string name="openai_api_key_invalid">Openai api key is invalid</string>
+    <string name="openai_quota_exceeded">Openai quota exceeded</string>
+    <string name="api_rate_limit_exceeded">API rate limit exceeded</string>
+    <string name="openai_api_key_not_set">Openai api key not set</string>
+    <string name="deepseek_api_key_not_set">Deepseek api key not set</string>
+    <string name="api_response_error">Api Response was not successful</string>
+    <string name="deepseek_payment_required">DeepSeek payment required or API quota exceeded</string>
+    <string name="translations">translation</string>
+    <string name="ollama_server_url_not_set">OOllama server url not set</string>
+    <string name="literary">Literary</string>
+    <string name="technical">Technical</string>
+    <string name="conversation">Conversation</string>
+    <string name="poetry">Poetry</string>
+    <string name="academic">Academic</string>
+    <string name="neutral">Neutral</string>
+    <string name="formal">Formal</string>
+    <string name="casual">Casual</string>
+    <string name="professional">Professional</string>
+    <string name="humorous">Humorous</string>
+    <string name="enabled">Enable</string>
+    <string name="disabled">Disable</string>
+    <string name="origin_language">Origin Language</string>
+    <string name="target_language">Target Language</string>
+    <string name="translating">Translating...</string>
+    <string name="translation_complete">Translation Complete</string>
+    <string name="translation_settings">Translation Settings</string>
+    <string name="translate_action">Translate</string>
+    <string name="content_type">Content Type</string>
+    <string name="tone_type">Tone Type</string>
+    <string name="preserve_style">Preserve Original Style</string>
+    <string name="translation_error">Translation Error</string>
+    <string name="cancel_translation">Cancel Translation</string>
+    <string name="translation_progress">Translation Progress</string>
+    <string name="translation_engine">Translation Engine</string>
+    <string name="translate_now">Translate now</string>
+    <string name="api_keys">API Keys</string>
+    <string name="advanced_settings">Advance settings</string>
+    <string name="no_app_was_found_to_lauch">Something went wrong. you don\'t have the required
+        app.
+    </string>
+    <string name="the_downloads_was_interrupted">The Downloads was interrupted</string>
+    <string name="the_downloads_was_cancelled">The Downloads was Cancelled</string>
+    <string name="failed_to_download">Failed to Download</string>
+    <string name="downloads_was_cancelled">Download of was Cancelled</string>
+    <string name="was_cancelled">was Cancelled</string>
+    <string name="download_of">Download of</string>
+    <string name="error">Error</string>
+    <string name="refresh">Refresh</string>
+    <string name="share">Share</string>
+    <string name="export_book_as_epub">Export Book As Epub</string>
+    <string name="description_placeholder">No description</string>
+    <string name="description">Description</string>
+    <string name="tags">Tags</string>
+    <string name="toggle_search_mode_off">Toggle search mode off</string>
+    <string name="recently">Recently</string>
+    <string name="relative_time_today">Today</string>
+    <string name="display_mode">Display Mode</string>
+    <string name="tabs">Tabs</string>
+    <string name="badge">Badge</string>
+    <string name="columns">Columns</string>
+    <string name="unread">Unread</string>
+    <string name="completed">Completed</string>
+    <string name="unable_to_get_package_version">Unable to get Package Version</string>
+    <string name="downloaded">Downloaded</string>
+    <string name="go_back">Go Back</string>
+    <string name="exit_search_mode">Exit search mode</string>
+    <string name="previous_result">Previous result</string>
+    <string name="no_text_to_translate">No text available to translate</string>
+    <string name="go_forward">Go Forward</string>
+    <string name="fetch_chapter">Fetch Chapter</string>
+    <string name="fetch_chapters">Fetch Chapters</string>
+    <string name="fetch_chapters">Fetch Chapters</string>
+    <string name="libretranslate_api_key_invalid">LibreTranslate api key is invalid</string>
+    <string name="libretranslate_info">Free and open-source machine translation. No API key needed.</string>
 </resources>
