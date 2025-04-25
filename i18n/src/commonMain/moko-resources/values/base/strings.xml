@@ -491,7 +491,7 @@
     <string name="gemini_api_key_not_set">Gemini API key is not set. Please configure it in the
         settings.
     </string>
-    <string name="gemini_payment_required">You exceeded your current quota for Gemini API. Please check your plan and billing details.</string>
+    <string name="gemini_payment_required">You exceeded your current quota for Gemini API. Please check your plan and billing details at https://ai.google.dev/gemini-api/docs/rate-limits</string>
     <string name="empty_response">Received an empty response from the translation service.</string>
     <string name="translating">Translating... This may take a moment.</string>
     <string name="translation_complete">Translation complete.</string>
@@ -585,4 +585,5 @@
     <string name="logout">Logout</string>
     <string name="ollama_url">Ollama URL</string>
     <string name="ollama_model">Ollama Model</string>
+    <string name="database_error">Database error detected. Please try one of the following: 1) Restart the app 2) Delete database files at %LOCALAPPDATA%\\IReader\\cache 3) Launch with --repair-database parameter</string>
 </resources>

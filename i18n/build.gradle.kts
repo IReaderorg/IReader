@@ -119,3 +119,17 @@ fun runCommand(command: String): String {
 multiplatformResources {
     this.resourcesPackage = "ireader.i18n.resources"
 }
+
+// Add a custom task to ensure MOKO resources are generated for desktop
+tasks.register("generateMokoResources") {
+    dependsOn("generateMRjvmMain")
+    group = "build"
+    description = "Generate MOKO resources for desktop"
+    
+    doLast {
+        logger.lifecycle("MOKO resources generated for desktop")
+    }
+}
+
+// Make sure the resource generation happens before compilation
+tasks.getByName("jvmMainClasses").dependsOn("generateMokoResources")

@@ -1,5 +1,8 @@
 -- SQLDelight migrations need to use a different approach than direct ALTER TABLE
 
+-- Drop history_new if it exists from a previous interrupted migration
+DROP TABLE IF EXISTS history_new;
+
 -- Create a temporary table with the new structure
 CREATE TABLE history_new(
     _id INTEGER NOT NULL PRIMARY KEY,
