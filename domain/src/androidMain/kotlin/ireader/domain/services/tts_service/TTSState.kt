@@ -25,7 +25,7 @@ interface TTSState {
     var ttsContent: State<List<String>?>?
 
     var currentReadingParagraph: Int
-    var prevPar: Int
+    var previousReadingParagraph: Int
     var autoNextChapter: Boolean
     var languages: List<Locale>
     var voices: List<Voice>
@@ -67,7 +67,7 @@ class TTSStateImpl() : TTSState {
 
 
     override var currentReadingParagraph: Int by mutableStateOf<Int>(0)
-    override var prevPar: Int by mutableStateOf<Int>(0)
+    override var previousReadingParagraph: Int by mutableStateOf<Int>(0)
     override var languages by mutableStateOf<List<Locale>>(emptyList())
     override var voices by mutableStateOf<List<Voice>>(emptyList())
     override val uiVoices by derivedStateOf { voices.map { it.toIReaderVoice() } }

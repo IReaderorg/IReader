@@ -337,7 +337,7 @@ actual class TTSScreenSpec actual constructor(
 
             LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph) {
                 try {
-                    if (vm.currentReadingParagraph != vm.prevPar && vm.ttsState.currentReadingParagraph < lazyState.layoutInfo.totalItemsCount) {
+                    if (vm.currentReadingParagraph != vm.previousReadingParagraph && vm.ttsState.currentReadingParagraph < lazyState.layoutInfo.totalItemsCount) {
                         if (vm.currentReadingParagraph !in lazyState.layoutInfo.visibleItemsInfo.map { it.index }
                                 .dropLast(2) || vm.isTtsTrackerEnable.value) {
                             lazyState.scrollToItem(

@@ -262,10 +262,27 @@ class TTSService(
             kotlin.runCatching {
                 startService(Intent(applicationContext, TTSService::class.java))
                 scope.launch {
-                    startForeground(
-                        NotificationsIds.ID_TTS,
-                        ttsNotificationBuilder.buildNotification(mediaSession.sessionToken)
-                    )
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        // For Android 15+ (API 35+), need to specify foreground service type
+                        startForeground(
+                            NotificationsIds.ID_TTS,
+                            ttsNotificationBuilder.buildNotification(mediaSession.sessionToken),
+                            android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+                        )
+                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        // For Android 13+ (API 33+), need to specify foreground service type
+                        startForeground(
+                            NotificationsIds.ID_TTS,
+                            ttsNotificationBuilder.buildNotification(mediaSession.sessionToken),
+                            android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+                        )
+                    } else {
+                        // For older Android versions
+                        startForeground(
+                            NotificationsIds.ID_TTS,
+                            ttsNotificationBuilder.buildNotification(mediaSession.sessionToken)
+                        )
+                    }
                     isNotificationForeground = true
                 }
             }
