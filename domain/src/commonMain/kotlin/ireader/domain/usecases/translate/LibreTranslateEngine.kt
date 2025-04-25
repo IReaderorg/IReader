@@ -112,54 +112,138 @@ class LibreTranslateEngine(
         try {
             onProgress(0)
             val results = mutableListOf<String>()
-            val total = texts.size
             
-            // LibreTranslate doesn't support batch translation,
-            // so we need to translate each text individually
-            texts.forEachIndexed { index, text ->
+            // Combine shorter texts to minimize API calls
+            // LibreTranslate has a character limit, so we batch texts together
+            // while keeping the total under a reasonable limit (around 1000 chars)
+            val batches = mutableListOf<List<String>>()
+            val currentBatch = mutableListOf<String>()
+            var currentBatchLength = 0
+            val BATCH_CHAR_LIMIT = 1000
+            
+            for (text in texts) {
+                if (text.length > BATCH_CHAR_LIMIT) {
+                    // If text is already too long, send it as its own batch
+                    if (currentBatch.isNotEmpty()) {
+                        batches.add(currentBatch.toList())
+                        currentBatch.clear()
+                        currentBatchLength = 0
+                    }
+                    batches.add(listOf(text))
+                } else if (currentBatchLength + text.length > BATCH_CHAR_LIMIT) {
+                    // Current batch would exceed limit, finalize it and start new one
+                    batches.add(currentBatch.toList())
+                    currentBatch.clear()
+                    currentBatch.add(text)
+                    currentBatchLength = text.length
+                } else {
+                    // Add to current batch
+                    currentBatch.add(text)
+                    currentBatchLength += text.length
+                }
+            }
+            
+            // Add any remaining texts
+            if (currentBatch.isNotEmpty()) {
+                batches.add(currentBatch.toList())
+            }
+            
+            println("LibreTranslate: Created ${batches.size} batches from ${texts.size} texts")
+            
+            // Process each batch
+            batches.forEachIndexed { batchIndex, batch ->
                 try {
-                    val progress = ((index + 1) * 100) / total
+                    val progress = ((batchIndex + 1) * 100) / batches.size
                     onProgress(progress)
                     
-                    // Skip empty text
-                    if (text.isBlank()) {
-                        results.add(text)
-                        return@forEachIndexed
-                    }
-                    
-                    // Fix source language code if "auto"
-                    val sourceCode = if (source == "auto") "auto" else source
-                    
-                    println("LibreTranslate: Translating from $sourceCode to $target")
-                    
-                    val response = client.default.post(apiUrl) {
-                        contentType(ContentType.Application.Json)
-                        setBody(TranslateRequest(
-                            q = text,
-                            source = sourceCode,
-                            target = target
-                        ))
-                    }
-                    
-                    // Check response status
-                    if (response.status.value >= 400) {
-                        try {
-                            val errorBody = response.body<ErrorResponse>()
-                            println("LibreTranslate API error: ${errorBody.error}")
-                            throw Exception(errorBody.error)
-                        } catch (e: Exception) {
-                            println("LibreTranslate error parsing error response: ${e.message}")
-                            throw Exception("HTTP Error ${response.status.value}")
+                    if (batch.size == 1) {
+                        // Single text in batch
+                        val text = batch[0]
+                        
+                        // Skip empty text
+                        if (text.isBlank()) {
+                            results.add(text)
+                            return@forEachIndexed
                         }
+                        
+                        // Fix source language code if "auto"
+                        val sourceCode = if (source == "auto") "auto" else source
+                        
+                        println("LibreTranslate: Translating from $sourceCode to $target")
+                        
+                        val response = client.default.post(apiUrl) {
+                            contentType(ContentType.Application.Json)
+                            setBody(TranslateRequest(
+                                q = text,
+                                source = sourceCode,
+                                target = target
+                            ))
+                        }
+                        
+                        // Check response status
+                        if (response.status.value >= 400) {
+                            try {
+                                val errorBody = response.body<ErrorResponse>()
+                                println("LibreTranslate API error: ${errorBody.error}")
+                                throw Exception(errorBody.error)
+                            } catch (e: Exception) {
+                                println("LibreTranslate error parsing error response: ${e.message}")
+                                throw Exception("HTTP Error ${response.status.value}")
+                            }
+                        }
+                        
+                        val result = response.body<TranslateResponse>()
+                        results.add(result.translatedText)
+                    } else {
+                        // Multiple texts in batch
+                        val combinedText = batch.joinToString("\n---PARAGRAPH_BREAK---\n")
+                        
+                        // Fix source language code if "auto"
+                        val sourceCode = if (source == "auto") "auto" else source
+                        
+                        println("LibreTranslate: Translating batch from $sourceCode to $target")
+                        
+                        val response = client.default.post(apiUrl) {
+                            contentType(ContentType.Application.Json)
+                            setBody(TranslateRequest(
+                                q = combinedText,
+                                source = sourceCode,
+                                target = target
+                            ))
+                        }
+                        
+                        // Check response status
+                        if (response.status.value >= 400) {
+                            try {
+                                val errorBody = response.body<ErrorResponse>()
+                                println("LibreTranslate API error: ${errorBody.error}")
+                                throw Exception(errorBody.error)
+                            } catch (e: Exception) {
+                                println("LibreTranslate error parsing error response: ${e.message}")
+                                throw Exception("HTTP Error ${response.status.value}")
+                            }
+                        }
+                        
+                        val result = response.body<TranslateResponse>()
+                        // Split result back into separate paragraphs
+                        val splitTexts = result.translatedText.split("\n---PARAGRAPH_BREAK---\n")
+                        
+                        // Ensure we have the correct number of paragraphs
+                        val finalTexts = if (splitTexts.size == batch.size) {
+                            splitTexts
+                        } else {
+                            // If we didn't get the right number of paragraphs back,
+                            // adjust count to match the original
+                            adjustParagraphCount(splitTexts, batch)
+                        }
+                        
+                        results.addAll(finalTexts)
                     }
-                    
-                    val result = response.body<TranslateResponse>()
-                    results.add(result.translatedText)
                     
                 } catch (e: Exception) {
-                    println("LibreTranslate error for text at index $index: ${e.message}")
-                    // Add original text as fallback
-                    results.add(text)
+                    println("LibreTranslate error for batch $batchIndex: ${e.message}")
+                    // Add original texts as fallback
+                    results.addAll(batch)
                 }
             }
             
@@ -187,5 +271,22 @@ class LibreTranslateEngine(
             onProgress(0)
             onError(errorMessage)
         }
+    }
+    
+    // Helper function to adjust paragraph count to match input
+    private fun adjustParagraphCount(translatedParagraphs: List<String>, originalTexts: List<String>): List<String> {
+        val result = translatedParagraphs.toMutableList()
+        
+        // If we have too few paragraphs, add original ones
+        while (result.size < originalTexts.size) {
+            result.add(originalTexts[result.size])
+        }
+        
+        // If we have too many paragraphs, remove extras
+        if (result.size > originalTexts.size) {
+            result.subList(originalTexts.size, result.size).clear()
+        }
+        
+        return result
     }
 } 

@@ -9,6 +9,7 @@
 package ireader.core.http
 
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.http
 import io.ktor.client.engine.okhttp.OkHttpConfig
 import okhttp3.OkHttpClient
 

@@ -49,6 +49,7 @@ kotlin {
                 api(kotlinx.serialization.json)
                 implementation(libs.ktor.contentNegotiation.gson)
                 api(libs.ktor.core)
+                api(libs.ktor.okhttp)
                 api(libs.ktor.contentNegotiation)
                 api(libs.ktor.contentNegotiation.kotlinx)
                 compileOnly(libs.jsoup)
@@ -59,7 +60,7 @@ kotlin {
             dependencies {
                 implementation(androidx.core)
                 implementation(libs.quickjs.android)
-                api(libs.ktor.okhttp)
+                api(libs.ktor.core.android)
                 compileOnly(libs.jsoup)
             }
         }

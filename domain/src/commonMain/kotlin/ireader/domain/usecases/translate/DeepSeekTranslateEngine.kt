@@ -118,6 +118,7 @@ class DeepSeekTranslateEngine(
         
         try {
             onProgress(0)
+            // Combine all paragraphs into a single request
             val combinedText = texts.joinToString("\n---PARAGRAPH_BREAK---\n")
             val sourceLanguage = if (source == "auto") "the source language" else getLanguageName(source)
             val targetLanguage = getLanguageName(target)
@@ -167,10 +168,19 @@ class DeepSeekTranslateEngine(
                     
                     if (messageContent != null && messageContent.isNotEmpty()) {
                         val translatedText = messageContent.trim()
+                        // Split response back into individual paragraphs
                         val splitTexts = translatedText.split("\n---PARAGRAPH_BREAK---\n")
                         
+                        // Ensure we have the right number of paragraphs to match input
+                        val finalTexts = if (splitTexts.size == texts.size) {
+                            splitTexts
+                        } else {
+                            // Adjust the paragraph count to match input
+                            adjustParagraphCount(splitTexts, texts)
+                        }
+                        
                         onProgress(100)
-                        onSuccess(splitTexts)
+                        onSuccess(finalTexts)
                     } else {
                         println("DeepSeek API returned empty message content")
                         onError(UiText.MStringResource(MR.strings.empty_response))
@@ -211,6 +221,23 @@ class DeepSeekTranslateEngine(
             e.printStackTrace()
             onError(UiText.ExceptionString(e))
         }
+    }
+    
+    // Helper function to adjust paragraph count to match input
+    private fun adjustParagraphCount(translatedParagraphs: List<String>, originalTexts: List<String>): List<String> {
+        val result = translatedParagraphs.toMutableList()
+        
+        // If we have too few paragraphs, add original ones
+        while (result.size < originalTexts.size) {
+            result.add(originalTexts[result.size])
+        }
+        
+        // If we have too many paragraphs, remove extras
+        if (result.size > originalTexts.size) {
+            result.subList(originalTexts.size, result.size).clear()
+        }
+        
+        return result
     }
     
     private fun buildPrompt(

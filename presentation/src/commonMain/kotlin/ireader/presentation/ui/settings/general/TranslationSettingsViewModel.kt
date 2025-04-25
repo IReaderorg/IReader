@@ -14,6 +14,8 @@ class TranslationSettingsViewModel(
     val translatorEngine = readerPreferences.translatorEngine().asState()
     val openAIApiKey = readerPreferences.openAIApiKey().asState()
     val deepSeekApiKey = readerPreferences.deepSeekApiKey().asState()
+    val geminiApiKey = readerPreferences.geminiApiKey().asState()
+    val geminiModel = readerPreferences.geminiModel().asState()
     val translatorContentType = readerPreferences.translatorContentType().asState()
     val translatorToneType = readerPreferences.translatorToneType().asState()
     val translatorPreserveStyle = readerPreferences.translatorPreserveStyle().asState()
@@ -30,6 +32,14 @@ class TranslationSettingsViewModel(
     
     fun updateDeepSeekApiKey(value: String) {
         deepSeekApiKey.value = value
+    }
+    
+    fun updateGeminiApiKey(value: String) {
+        geminiApiKey.value = value
+    }
+    
+    fun updateGeminiModel(value: String) {
+        geminiModel.value = value
     }
     
     fun updateTranslatorContentType(value: Int) {

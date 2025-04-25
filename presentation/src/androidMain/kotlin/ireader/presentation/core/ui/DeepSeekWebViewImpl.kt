@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
@@ -44,12 +43,12 @@ import ireader.i18n.localize
 import ireader.i18n.resources.MR
 import kotlinx.coroutines.delay
 
-private const val TAG = "ChatGptWebViewImpl"
-private const val CHATGPT_URL = "https://chat.openai.com"
+private const val TAG = "DeepSeekWebViewImpl"
+private const val DEEPSEEK_URL = "https://chat.deepseek.com"
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-actual fun ChatGptWebViewImpl(
+actual fun DeepSeekWebViewImpl(
     engine: WebscrapingTranslateEngine,
     onTranslationDone: () -> Unit,
     onClose: () -> Unit
@@ -60,7 +59,7 @@ actual fun ChatGptWebViewImpl(
     var isLoading by remember { mutableStateOf(true) }
     var isLoggedIn by remember { mutableStateOf(false) }
     var isCaptchaRequired = remember { mutableStateOf(false) }
-    var currentUrl by remember { mutableStateOf(CHATGPT_URL) }
+    var currentUrl by remember { mutableStateOf(DEEPSEEK_URL) }
     var messageToSend by remember { mutableStateOf<String?>(null) }
     var progress by remember { mutableStateOf(0f) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -129,9 +128,9 @@ actual fun ChatGptWebViewImpl(
                     text = if (isCaptchaRequired.value)
                         localize(MR.strings.complete_captcha) 
                     else if (isLoggedIn) 
-                        localize(MR.strings.chatgpt_translation) 
+                        "DeepSeek Translation" 
                     else 
-                        localize(MR.strings.sign_in_to_chatgpt),
+                        "Sign in to DeepSeek",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -140,8 +139,8 @@ actual fun ChatGptWebViewImpl(
                 IconButton(
                     onClick = { 
                         if (isCaptchaRequired.value && webView != null) {
-                            // Try to automatically bypass Cloudflare
-                            injectCloudflareHelper(webView!!)
+                            // Just reload the page for manual verification
+                            webView?.reload()
                         } else {
                             webView?.reload() 
                         }
@@ -213,14 +212,11 @@ actual fun ChatGptWebViewImpl(
                             // Performance improvements
                             setRenderPriority(android.webkit.WebSettings.RenderPriority.HIGH)
                             
-                            // Additional browser settings for Cloudflare bypass
+                            // Additional browser settings for better website compatibility
                             javaScriptCanOpenWindowsAutomatically = true
                             // Accept all content types
                             blockNetworkImage = false
                             mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-                            
-                            // Force desktop mode
-                            setDesktopMode(webView!!)
                             
                             // Enable debugging
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
@@ -235,6 +231,9 @@ actual fun ChatGptWebViewImpl(
                         // Set hardware acceleration
                         setLayerType(WebView.LAYER_TYPE_HARDWARE, null)
                         
+                        // Force desktop mode
+                        setDesktopMode(webView!!)
+                        
                         // Set client
                         webViewClient = object : WebViewClient() {
                             override fun onPageStarted(view: WebView, url: String, favicon: android.graphics.Bitmap?) {
@@ -244,7 +243,7 @@ actual fun ChatGptWebViewImpl(
                                 currentUrl = url
                                 
                                 // Check for Cloudflare challenge right away
-                                checkForCloudflare(url, view,isCaptchaRequired,engine)
+                                checkForCloudflare(url, view, isCaptchaRequired, engine)
                                 
                                 canGoBack = view.canGoBack()
                                 
@@ -313,7 +312,7 @@ actual fun ChatGptWebViewImpl(
                                 checkForCloudflare(url, view, isCaptchaRequired, engine)
                                 
                                 // Check for login state based on URL
-                                if (url.contains("chat.openai.com/c/") || url.contains("chat.openai.com/?model=")) {
+                                if (url.contains("chat.deepseek.com") && !url.contains("/login")) {
                                     android.util.Log.d(TAG, "Detected login success based on URL")
                                     if (!isLoggedIn) {
                                         isLoggedIn = true
@@ -324,15 +323,15 @@ actual fun ChatGptWebViewImpl(
                                     // Also handle skip to content button here
                                     handleSkipToContentButton(view)
                                     
-                                    // Send message to ChatGPT if needed
+                                    // Send message to DeepSeek if needed
                                     messageToSend?.let { message ->
-                                        android.util.Log.d(TAG, "Sending message to ChatGPT")
-                                        sendMessageToChatGPT(view, message)
+                                        android.util.Log.d(TAG, "Sending message to DeepSeek")
+                                        sendMessageToDeepSeek(view, message)
                                         messageToSend = null
                                     }
                                 }
                                 
-                                // Inject JavaScript to detect ChatGPT responses
+                                // Inject JavaScript to detect DeepSeek responses
                                 injectResponseListener(view, engine, onTranslationDone)
                             }
                             
@@ -347,7 +346,7 @@ actual fun ChatGptWebViewImpl(
                                 } else {
                                     "Error loading page"
                                 }
-                                android.util.Log.e(TAG, "onReceivedError: $errorDescription")
+                                android.util.Log.d(TAG, "onReceivedError: $errorDescription")
                                 errorMessage = errorDescription
                                 isLoading = false
                             }
@@ -387,15 +386,15 @@ actual fun ChatGptWebViewImpl(
                         }
                         
                         // Load the URL
-                        loadUrl(CHATGPT_URL)
+                        loadUrl(DEEPSEEK_URL)
                     }
                 },
                 update = { view ->
                     // Update WebView if needed
                     messageToSend?.let { message ->
-                        if (isLoggedIn && currentUrl.contains("chat.openai.com")) {
-                            android.util.Log.d(TAG, "Update: Sending message to ChatGPT")
-                            sendMessageToChatGPT(view, message)
+                        if (isLoggedIn && currentUrl.contains("chat.deepseek.com")) {
+                            android.util.Log.d(TAG, "Update: Sending message to DeepSeek")
+                            sendMessageToDeepSeek(view, message)
                             messageToSend = null
                         }
                     }
@@ -418,8 +417,8 @@ actual fun ChatGptWebViewImpl(
     }
 }
 
-// JavaScript interface to capture ChatGPT responses
-private class ChatGptJavaScriptInterface(
+// JavaScript interface to capture DeepSeek responses
+private class DeepSeekJavaScriptInterface(
     private val engine: WebscrapingTranslateEngine,
     private val onTranslationDone: () -> Unit
 ) {
@@ -441,11 +440,11 @@ private class ChatGptJavaScriptInterface(
 private fun createJavaScriptInterface(
     engine: WebscrapingTranslateEngine,
     onTranslationDone: () -> Unit
-): ChatGptJavaScriptInterface {
-    return ChatGptJavaScriptInterface(engine, onTranslationDone)
+): DeepSeekJavaScriptInterface {
+    return DeepSeekJavaScriptInterface(engine, onTranslationDone)
 }
 
-// Inject JavaScript to listen for ChatGPT responses
+// Inject JavaScript to listen for DeepSeek responses
 private fun injectResponseListener(
     webView: WebView, 
     engine: WebscrapingTranslateEngine,
@@ -453,24 +452,28 @@ private fun injectResponseListener(
 ) {
     val js = """
         (function() {
-            console.log('Injecting observer script');
+            console.log('Injecting observer script for DeepSeek');
             // Monitor for changes to the DOM
             const observer = new MutationObserver(function(mutations) {
                 // Look for new messages from the assistant
                 for (let mutation of mutations) {
                     if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                        const messages = document.querySelectorAll('[data-message-author-role="assistant"]');
+                        // DeepSeek uses different selectors than ChatGPT
+                        const messages = document.querySelectorAll('.message-virtual-list .message-item.assistant');
                         if (messages && messages.length > 0) {
                             console.log('Found assistant messages: ' + messages.length);
                             // Get the last message from the assistant
                             const lastMessage = messages[messages.length - 1];
                             if (lastMessage) {
-                                const messageText = lastMessage.innerText;
-                                console.log('Processing assistant message');
-                                // Send the message to Android
-                                if (messageText && messageText.trim() !== '') {
-                                    console.log('Sending message to Android interface');
-                                    Android.processResponse(messageText);
+                                const messageContainer = lastMessage.querySelector('.message-content');
+                                if (messageContainer) {
+                                    const messageText = messageContainer.innerText;
+                                    console.log('Processing assistant message');
+                                    // Send the message to Android
+                                    if (messageText && messageText.trim() !== '') {
+                                        console.log('Sending message to Android interface');
+                                        Android.processResponse(messageText);
+                                    }
                                 }
                             }
                         }
@@ -480,7 +483,7 @@ private fun injectResponseListener(
             
             // Start observing the entire document for changes
             observer.observe(document.body, { childList: true, subtree: true });
-            console.log('Observer script installed');
+            console.log('Observer script installed for DeepSeek');
         })();
     """.trimIndent()
     
@@ -489,15 +492,17 @@ private fun injectResponseListener(
     }
 }
 
-// Send a message to ChatGPT via JavaScript
-private fun sendMessageToChatGPT(webView: WebView, message: String) {
+// Send a message to DeepSeek via JavaScript
+private fun sendMessageToDeepSeek(webView: WebView, message: String) {
     val escapedMessage = message.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
-    android.util.Log.d(TAG, "sendMessageToChatGPT: Preparing to send message")
+    android.util.Log.d(TAG, "sendMessageToDeepSeek: Preparing to send message")
     val js = """
         (function() {
-            console.log('Starting to send message to ChatGPT');
-            // Find the textarea
-            const textarea = document.querySelector('textarea[placeholder="Message ChatGPT…"]');
+            console.log('Starting to send message to DeepSeek');
+            
+            // DeepSeek has a different UI than ChatGPT
+            // First, try to find the textarea
+            const textarea = document.querySelector('.chat-input textarea');
             if (textarea) {
                 console.log('Found textarea, setting value');
                 // Set the value
@@ -509,7 +514,11 @@ private fun sendMessageToChatGPT(webView: WebView, message: String) {
                 
                 // Find and click the send button
                 setTimeout(function() {
-                    const sendButton = document.querySelector('button[data-testid="send-button"]');
+                    // DeepSeek has different button selectors
+                    const sendButton = document.querySelector('.chat-input button.send-button') || 
+                                      document.querySelector('.chat-input-actions button[type="submit"]') ||
+                                      document.querySelector('.chat-input-container button:last-child');
+                    
                     if (sendButton) {
                         console.log('Found send button, clicking it');
                         sendButton.click();
@@ -524,48 +533,8 @@ private fun sendMessageToChatGPT(webView: WebView, message: String) {
     """.trimIndent()
     
     webView.evaluateJavascript(js) { result ->
-        android.util.Log.d(TAG, "sendMessageToChatGPT: JavaScript result: $result")
+        android.util.Log.d(TAG, "sendMessageToDeepSeek: JavaScript result: $result")
     }
-}
-
-// Save cookies from the WebView
-private fun saveCookies(webView: WebView, engine: WebscrapingTranslateEngine) {
-    val cookieManager = android.webkit.CookieManager.getInstance()
-    val cookies = cookieManager.getCookie("https://chat.openai.com")
-    if (!cookies.isNullOrEmpty()) {
-        android.util.Log.d(TAG, "saveCookies: Saving cookies")
-        engine.saveCookies(cookies)
-    } else {
-        android.util.Log.w(TAG, "saveCookies: No cookies found to save")
-    }
-}
-
-// Save cookies from context
-private fun saveCookies(context: android.content.Context, engine: WebscrapingTranslateEngine) {
-    val cookieManager = android.webkit.CookieManager.getInstance()
-    val cookies = cookieManager.getCookie("https://chat.openai.com")
-    if (!cookies.isNullOrEmpty()) {
-        android.util.Log.d(TAG, "saveCookies: Saving cookies from context")
-        engine.saveCookies(cookies)
-    } else {
-        android.util.Log.w(TAG, "saveCookies: No cookies found to save from context")
-    }
-}
-
-// Load cookies into WebView
-private fun loadCookies(webView: WebView, engine: WebscrapingTranslateEngine) {
-    val cookieManager = android.webkit.CookieManager.getInstance()
-    cookieManager.removeAllCookies(null)
-    
-    val cookiePairs = engine.getCookies().split(";")
-    android.util.Log.d(TAG, "loadCookies: Loading ${cookiePairs.size} cookie pairs")
-    for (cookiePair in cookiePairs) {
-        val cookieString = cookiePair.trim()
-        if (cookieString.isNotEmpty()) {
-            cookieManager.setCookie("https://chat.openai.com", cookieString)
-        }
-    }
-    cookieManager.flush()
 }
 
 // Helper function to check for Cloudflare challenges
@@ -576,7 +545,7 @@ private fun checkForCloudflare(url: String, view: WebView, isCaptchaRequired: Mu
     )
     
     val isCloudflare = cloudflareIndicators.any { url.contains(it, ignoreCase = true) } || 
-                      url.contains("cdn-cgi", ignoreCase = true)
+                       url.contains("cdn-cgi", ignoreCase = true)
     
     if (isCloudflare) {
         android.util.Log.d(TAG, "Detected Cloudflare challenge page: $url")
@@ -618,12 +587,6 @@ private fun checkForCloudflare(url: String, view: WebView, isCaptchaRequired: Mu
         // Check for "Skip to content" button and handle it
         handleSkipToContentButton(view)
     }
-}
-
-// Helper function to assist with Cloudflare challenges
-private fun injectCloudflareHelper(webView: WebView) {
-    // Do nothing - let the user complete the verification manually
-    android.util.Log.d(TAG, "Letting user complete Cloudflare verification manually")
 }
 
 // Function to handle "Skip to content" button
@@ -695,6 +658,12 @@ private fun handleSkipToContentButton(webView: WebView) {
     }
 }
 
+// Helper function to assist with Cloudflare challenges
+private fun injectCloudflareHelper(webView: WebView) {
+    // Do nothing - let the user complete the verification manually
+    android.util.Log.d(TAG, "Letting user complete Cloudflare verification manually")
+}
+
 // Set desktop mode for the WebView
 private fun setDesktopMode(webView: WebView) {
     val settings = webView.settings
@@ -744,4 +713,44 @@ private fun setDesktopMode(webView: WebView) {
     webView.evaluateJavascript(cssInjection) { result ->
         android.util.Log.d(TAG, "CSS injection result: $result")
     }
+}
+
+// Save cookies from the WebView
+private fun saveCookies(webView: WebView, engine: WebscrapingTranslateEngine) {
+    val cookieManager = android.webkit.CookieManager.getInstance()
+    val cookies = cookieManager.getCookie(DEEPSEEK_URL)
+    if (!cookies.isNullOrEmpty()) {
+        android.util.Log.d(TAG, "saveCookies: Saving cookies")
+        engine.saveCookies(cookies)
+    } else {
+        android.util.Log.w(TAG, "saveCookies: No cookies found to save")
+    }
+}
+
+// Save cookies from context
+private fun saveCookies(context: android.content.Context, engine: WebscrapingTranslateEngine) {
+    val cookieManager = android.webkit.CookieManager.getInstance()
+    val cookies = cookieManager.getCookie(DEEPSEEK_URL)
+    if (!cookies.isNullOrEmpty()) {
+        android.util.Log.d(TAG, "saveCookies: Saving cookies from context")
+        engine.saveCookies(cookies)
+    } else {
+        android.util.Log.w(TAG, "saveCookies: No cookies found to save from context")
+    }
+}
+
+// Load cookies into WebView
+private fun loadCookies(webView: WebView, engine: WebscrapingTranslateEngine) {
+    val cookieManager = android.webkit.CookieManager.getInstance()
+    cookieManager.removeAllCookies(null)
+    
+    val cookiePairs = engine.getCookies().split(";")
+    android.util.Log.d(TAG, "loadCookies: Loading ${cookiePairs.size} cookie pairs")
+    for (cookiePair in cookiePairs) {
+        val cookieString = cookiePair.trim()
+        if (cookieString.isNotEmpty()) {
+            cookieManager.setCookie(DEEPSEEK_URL, cookieString)
+        }
+    }
+    cookieManager.flush()
 } 

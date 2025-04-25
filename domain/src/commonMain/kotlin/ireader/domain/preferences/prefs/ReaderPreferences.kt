@@ -239,6 +239,10 @@ class ReaderPreferences constructor(
     fun deepSeekApiKey(): Preference<String> {
         return preferenceStore.getString("deepseek_api_key", "")
     }
+    fun geminiApiKey(): Preference<String> {
+        return preferenceStore.getString("gemini_api_key", "")
+    }
+
     fun ollamaServerUrl(): Preference<String> {
         return preferenceStore.getString("ollama_server_url", "http://localhost:11434/api/generate")
     }
@@ -252,8 +256,17 @@ class ReaderPreferences constructor(
         return preferenceStore.getString("chatgpt_cookies", "")
     }
     
+    fun deepSeekCookies(): Preference<String> {
+        return preferenceStore.getString("deepseek_cookies", "")
+    }
+    
     fun chatGptPrompt(): Preference<String> {
         return preferenceStore.getString("chatgpt_prompt", "")
+    }
+
+    // User-selected Gemini model preference
+    fun geminiModel(): Preference<String> {
+        return preferenceStore.getString("gemini_model", "")
     }
 }
 

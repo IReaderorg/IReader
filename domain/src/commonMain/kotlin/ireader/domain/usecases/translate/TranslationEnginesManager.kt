@@ -21,7 +21,10 @@ class TranslationEnginesManager(
         DeepSeekTranslateEngine(httpClients, readerPreferences),
         LibreTranslateEngine(httpClients),
         FreeAITranslateEngine(httpClients),
-        WebscrapingTranslateEngine(httpClients, readerPreferences)
+        WebscrapingTranslateEngine(httpClients, readerPreferences),
+        DeepSeekWebViewTranslateEngine(httpClients, readerPreferences),
+        // Create a WebscrapingTranslateEngine configured for Gemini
+        GeminiTranslateEngine(httpClients, readerPreferences)
     )
 
     fun get(): TranslateEngine {

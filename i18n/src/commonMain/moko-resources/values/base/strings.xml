@@ -487,6 +487,11 @@
     <string name="deepseek_api_key_not_set">DeepSeek API key is not set. Please configure it in the
         settings.
     </string>
+    <string name="gemini_api_key">Gemini API Key</string>
+    <string name="gemini_api_key_not_set">Gemini API key is not set. Please configure it in the
+        settings.
+    </string>
+    <string name="gemini_payment_required">You exceeded your current quota for Gemini API. Please check your plan and billing details.</string>
     <string name="empty_response">Received an empty response from the translation service.</string>
     <string name="translating">Translating... This may take a moment.</string>
     <string name="translation_complete">Translation complete.</string>

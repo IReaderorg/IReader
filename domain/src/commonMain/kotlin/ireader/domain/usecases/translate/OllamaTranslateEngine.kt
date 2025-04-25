@@ -195,33 +195,105 @@ class OllamaTranslateEngine(
             
             onProgress(20)
             
-            // Process each text chunk
+            // Batch texts together instead of processing individually
+            // For Ollama, we need to be careful with context window limits
+            // Let's set a reasonable batch size based on token count
             val results = mutableListOf<String>()
-            val totalTexts = texts.size
+            val MAX_TOKENS_PER_BATCH = 2000 // Estimate for context window safety
+            val TOKENS_PER_CHAR_ESTIMATE = 0.25 // Rough estimate of tokens per character
             
-            for ((index, text) in texts.withIndex()) {
-                // Generate the appropriate prompt based on context
-                val prompt = buildPrompt(text, sourceLang, targetLang, context)
+            // Create batches based on estimated token count
+            val batches = mutableListOf<List<String>>()
+            val currentBatch = mutableListOf<String>()
+            var currentBatchTokens = 0
+            
+            for (text in texts) {
+                val estimatedTokens = (text.length * TOKENS_PER_CHAR_ESTIMATE).toInt()
                 
-                val request = OllamaRequest(
-                    model = model,
-                    prompt = prompt,
-                    options = OllamaOptions(temperature = 0.1f)
-                )
-                
-                // Calculate progress percentage
-                val progressStart = 20 + (index * 70 / totalTexts)
-                val progressEnd = 20 + ((index + 1) * 70 / totalTexts)
+                if (estimatedTokens > MAX_TOKENS_PER_BATCH) {
+                    // Text is too long for a batch, process individually
+                    if (currentBatch.isNotEmpty()) {
+                        batches.add(currentBatch.toList())
+                        currentBatch.clear()
+                        currentBatchTokens = 0
+                    }
+                    batches.add(listOf(text))
+                } else if (currentBatchTokens + estimatedTokens > MAX_TOKENS_PER_BATCH) {
+                    // Current batch would exceed token limit, start new batch
+                    batches.add(currentBatch.toList())
+                    currentBatch.clear()
+                    currentBatch.add(text)
+                    currentBatchTokens = estimatedTokens
+                } else {
+                    // Add to current batch
+                    currentBatch.add(text)
+                    currentBatchTokens += estimatedTokens
+                }
+            }
+            
+            // Add any remaining texts
+            if (currentBatch.isNotEmpty()) {
+                batches.add(currentBatch.toList())
+            }
+            
+            println("Ollama: Created ${batches.size} batches from ${texts.size} texts")
+            
+            // Process each batch
+            for ((batchIndex, batch) in batches.withIndex()) {
+                val progressStart = 20 + (batchIndex * 70 / batches.size)
+                val progressEnd = 20 + ((batchIndex + 1) * 70 / batches.size)
                 onProgress(progressStart)
                 
-                // Make the API request
-                val response = client.default.post(url) {
-                    contentType(ContentType.Application.Json)
-                    setBody(request)
-                }.body<OllamaResponse>()
-                
-                // Add the response to results
-                results.add(response.response.trim())
+                if (batch.size == 1) {
+                    // Single text in batch
+                    val text = batch[0]
+                    val prompt = buildPrompt(text, sourceLang, targetLang, context)
+                    
+                    val request = OllamaRequest(
+                        model = model,
+                        prompt = prompt,
+                        options = OllamaOptions(temperature = 0.1f)
+                    )
+                    
+                    // Make the API request
+                    val response = client.default.post(url) {
+                        contentType(ContentType.Application.Json)
+                        setBody(request)
+                    }.body<OllamaResponse>()
+                    
+                    // Add the response to results
+                    results.add(response.response.trim())
+                } else {
+                    // Multiple texts in batch
+                    val combinedText = batch.joinToString("\n---PARAGRAPH_BREAK---\n")
+                    val prompt = buildPrompt(combinedText, sourceLang, targetLang, context)
+                    
+                    val request = OllamaRequest(
+                        model = model,
+                        prompt = prompt,
+                        options = OllamaOptions(temperature = 0.1f)
+                    )
+                    
+                    // Make the API request
+                    val response = client.default.post(url) {
+                        contentType(ContentType.Application.Json)
+                        setBody(request)
+                    }.body<OllamaResponse>()
+                    
+                    // Split the response into paragraphs
+                    val responseText = response.response.trim()
+                    val splitTexts = responseText.split("\n---PARAGRAPH_BREAK---\n")
+                    
+                    // Ensure we have the correct number of paragraphs
+                    val finalTexts = if (splitTexts.size == batch.size) {
+                        splitTexts
+                    } else {
+                        // If we didn't get the right number back, adjust
+                        adjustParagraphCount(splitTexts, batch)
+                    }
+                    
+                    results.addAll(finalTexts)
+                }
                 
                 onProgress(progressEnd)
             }
@@ -235,6 +307,23 @@ class OllamaTranslateEngine(
             e.printStackTrace()
             onError(UiText.ExceptionString(e))
         }
+    }
+    
+    // Helper function to adjust paragraph count to match input
+    private fun adjustParagraphCount(translatedParagraphs: List<String>, originalTexts: List<String>): List<String> {
+        val result = translatedParagraphs.toMutableList()
+        
+        // If we have too few paragraphs, add original ones
+        while (result.size < originalTexts.size) {
+            result.add(originalTexts[result.size])
+        }
+        
+        // If we have too many paragraphs, remove extras
+        if (result.size > originalTexts.size) {
+            result.subList(originalTexts.size, result.size).clear()
+        }
+        
+        return result
     }
     
     /**
