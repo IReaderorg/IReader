@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import com.google.accompanist.web.WebViewState
 import ireader.core.http.WebViewManger
 import ireader.core.source.model.Command
 import ireader.domain.catalogs.CatalogStore
@@ -23,6 +22,44 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+
+/**
+ * Custom WebViewState class to replace the one from Accompanist
+ */
+class WebViewState(url: String) {
+    var content by mutableStateOf<WebContent>(WebContent.Url(url))
+    var loadingState by mutableStateOf<LoadingState>(LoadingState.Initializing)
+    var pageTitle by mutableStateOf<String>("")
+    var lastLoadedUrl by mutableStateOf<String?>(null)
+    var canGoBack by mutableStateOf(false)
+    var canGoForward by mutableStateOf(false)
+    
+    /**
+     * Content type for WebView
+     */
+    sealed class WebContent {
+        data class Url(val url: String) : WebContent()
+        data class Data(val data: String, val baseUrl: String, val mimeType: String = "text/html") : WebContent()
+    }
+    
+    /**
+     * Loading state for WebView
+     */
+    sealed class LoadingState {
+        object Initializing : LoadingState()
+        data class Loading(val progress: Float) : LoadingState()
+        data class Finished(val success: Boolean = true) : LoadingState()
+        data class Error(val error: WebViewError) : LoadingState()
+    }
+    
+    /**
+     * Error information from WebView
+     */
+    data class WebViewError(
+        val errorCode: Int,
+        val description: String?
+    )
+}
 
 class WebViewPageModel(
     private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,

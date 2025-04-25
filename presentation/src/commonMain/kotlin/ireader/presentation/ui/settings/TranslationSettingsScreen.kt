@@ -23,12 +23,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -73,7 +75,7 @@ fun TranslationSettingsScreen(
     // This state is used to force recomposition
     var recomposeCounter by remember { mutableStateOf(0) }
     val forceRecompose = { recomposeCounter += 1 }
-    
+    val navigator = cafe.adriel.voyager.navigator.LocalNavigator.currentOrThrow
     val scrollState = rememberScrollState()
     val engines = translationEnginesManager.getAvailableEngines()
     val options = engines.map { it.id to it.engineName }
@@ -223,7 +225,7 @@ fun TranslationSettingsScreen(
         )
         
         items.add(Components.Row(
-            title = "Ollama API URL",
+            title = localizeHelper.localize(MR.strings.ollama_url),
             icon = Icons.Default.Api,
             subtitle = "URL of your Ollama API server",
             onClick = {},
@@ -234,7 +236,7 @@ fun TranslationSettingsScreen(
                         onOllamaUrlChange(it)
                         forceRecompose()
                     },
-                    label = { Text("Ollama API URL") },
+                    label = { Text(localizeHelper.localize(MR.strings.ollama_url)) },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Uri
@@ -244,7 +246,7 @@ fun TranslationSettingsScreen(
         ))
         
         items.add(Components.Row(
-            title = "Ollama Model",
+            title = localizeHelper.localize(MR.strings.ollama_model),
             icon = Icons.Default.Settings,
             subtitle = "Model to use for translation (e.g., mistral, llama2)",
             onClick = {},
@@ -255,7 +257,7 @@ fun TranslationSettingsScreen(
                         onOllamaModelChange(it)
                         forceRecompose()
                     },
-                    label = { Text("Ollama Model") },
+                    label = { Text(localizeHelper.localize(MR.strings.ollama_model)) },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text
@@ -319,6 +321,61 @@ fun TranslationSettingsScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                         modifier = Modifier.padding(top = 8.dp)
                     )
+                }
+            }
+        })
+        
+        items.add(Components.Space)
+    }
+
+    
+    // Add Webscraping AI translation section if that engine is selected
+    if (translatorEngine == 6L) { // WebscrapingTranslateEngine
+        items.add(Components.Header(
+            "ChatGPT WebView Translation")
+        )
+        
+        items.add(Components.Dynamic {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                ),
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "ChatGPT Login Required",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "This translation engine uses a WebView to access ChatGPT directly. You need to sign in to ChatGPT with your account to use this feature. The app will save your cookies for future translations.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    Text(
+                        text = "If a CAPTCHA appears, you will need to complete it manually.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    
+                    Button(
+                        onClick = {
+                            // Navigate to ChatGpt login screen
+                            navigator.push(
+                                ireader.presentation.core.ui.ChatGptLoginScreenSpec()
+                            )
+                        },
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .padding(top = 16.dp)
+                    ) {
+                        Text("Sign in to ChatGPT")
+                    }
                 }
             }
         })

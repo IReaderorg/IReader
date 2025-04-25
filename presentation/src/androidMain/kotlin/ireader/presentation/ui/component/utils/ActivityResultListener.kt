@@ -12,6 +12,9 @@ import ireader.domain.models.common.Uri
 import ireader.domain.utils.extensions.launchIO
 import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
 
+/**
+ * A utility to listen for activity results in Compose.
+ */
 @Composable
 actual fun ActivityResultListener(
         onSuccess: suspend (Uri) -> Unit,
@@ -23,7 +26,7 @@ actual fun ActivityResultListener(
             val uri = resultIntent.data!!.data!!
             globalScope.launchIO {
                 try {
-                    onSuccess(Uri(uri))
+                    onSuccess(Uri(uri!!))
                 } catch (e: Throwable) {
                     onError(e)
                 }

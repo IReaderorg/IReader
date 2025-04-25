@@ -66,6 +66,7 @@ kotlin {
                 api(libs.bundles.simplestorage)
                 api(libs.core.splashscreen)
                 api(composeLib.compose.googlFonts)
+                api(composeLib.compose.activity)
                 api(libs.ktor.core.android)
 
                 api(composeLib.material3.windowsizeclass)
@@ -74,14 +75,10 @@ kotlin {
 
                 api(composeLib.compose.ui.util)
                 api(composeLib.compose.constraintlayout)
-               // api(accompanist.flowlayout)
-                api(accompanist.navAnimation)
-               // api(accompanist.pagerIndicator)
-                api(accompanist.systemUiController)
-               // api(accompanist.pager)
                 api(accompanist.permissions)
-                api(accompanist.web)
                 api(androidx.appCompat)
+                api(androidx.activity)
+                api(androidx.webkit)
                 api(androidx.media)
                 api(androidx.emoji)
                 api(androidx.work.runtime)
@@ -133,8 +130,4 @@ android {
 
         }
     }
-}
-
-dependencies {
-
 }

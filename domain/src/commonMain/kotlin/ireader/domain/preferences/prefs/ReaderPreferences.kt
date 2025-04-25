@@ -248,6 +248,13 @@ class ReaderPreferences constructor(
     fun ollamaUrl(): Preference<String> {
         return preferenceStore.getString("ollamaUrl", "ollamaUrl")
     }
+    fun chatGptCookies(): Preference<String> {
+        return preferenceStore.getString("chatgpt_cookies", "")
+    }
+    
+    fun chatGptPrompt(): Preference<String> {
+        return preferenceStore.getString("chatgpt_prompt", "")
+    }
 }
 
 enum class ReadingMode {

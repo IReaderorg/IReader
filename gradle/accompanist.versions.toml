@@ -1,9 +1,6 @@
 [versions]
-accompanist = "0.28.0"
+accompanist = "0.37.2"
 [libraries]
-systemUiController = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
-navAnimation = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "accompanist" }
-web = { module = "com.google.accompanist:accompanist-webview", version.ref = "accompanist" }
 permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 [bundles]
-accompanist = ["systemUiController","permissions","navAnimation","web"]
+accompanist = ["permissions"]

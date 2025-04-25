@@ -574,4 +574,10 @@
     <string name="fetch_chapters">Fetch Chapters</string>
     <string name="libretranslate_api_key_invalid">LibreTranslate api key is invalid</string>
     <string name="libretranslate_info">Free and open-source machine translation. No API key needed.</string>
+    <string name="sign_in_to_chatgpt">Sign in to ChatGPT</string>
+    <string name="complete_captcha">Complete CAPTCHA to continue</string>
+    <string name="chatgpt_translation">ChatGPT Translation</string>
+    <string name="logout">Logout</string>
+    <string name="ollama_url">Ollama URL</string>
+    <string name="ollama_model">Ollama Model</string>
 </resources>

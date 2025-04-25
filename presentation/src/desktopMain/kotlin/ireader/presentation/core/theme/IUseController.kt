@@ -29,15 +29,30 @@ actual class IUseController {
 
     actual var controller: Any? = null
 
-    @Composable
-    actual fun InitController() {
-    }
+
 
     actual fun enableImmersiveModel() {
     }
 
     actual fun disableImmersiveModel() {
     }
+    @Composable
+    actual fun InitController() {
+    }
 
 
 }
+@Composable
+actual fun StatusBarColorController(
+    statusBarColor: Color,
+    isDark: Boolean
+){}
+
+/**
+ * Set the system bars color
+ */
+@Composable
+actual fun SystemBarColorController(
+    systemBarColor: Color,
+    isDark: Boolean
+) {}

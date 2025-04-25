@@ -114,10 +114,11 @@ abstract class TranslateEngine {
         const val OPENAI = 3L
         const val DEEPSEEK = 4L
         const val OLLAMA = 5L
+        const val WEBSCRAPING = 6L
         
-        // Add Ollama to the values() method
+        // Add new engines to the values() method
         fun values(): Array<Long> {
-            return arrayOf(BUILT_IN, GOOGLE, BING, OPENAI, DEEPSEEK, OLLAMA)
+            return arrayOf(BUILT_IN, GOOGLE, BING, OPENAI, DEEPSEEK, OLLAMA, WEBSCRAPING)
         }
         
         // Map engine ID to name for display
@@ -129,6 +130,7 @@ abstract class TranslateEngine {
                 OPENAI -> "OpenAI"
                 DEEPSEEK -> "DeepSeek"
                 OLLAMA -> "Ollama"
+                WEBSCRAPING -> "AI Translation (No API Key)"
                 else -> "Unknown"
             }
         }

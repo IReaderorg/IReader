@@ -12,12 +12,14 @@ import ireader.presentation.ui.reader.viewmodel.PlatformReaderSettingReader
 import ireader.presentation.ui.web.WebViewPageModel
 import ireader.presentation.ui.web.WebViewPageStateImpl
 import org.koin.dsl.module
+import ireader.domain.usecases.translate.WebscrapingTranslateEngine
 
 
 actual val presentationPlatformModule = module  {
     factory<WebViewPageModel> { WebViewPageModel(get(),get(),get(),get(),get(),get(),get(),get()) }
 
-
+    // Register WebscrapingTranslateEngine for Android platform
+    factory { WebscrapingTranslateEngine(get(), get()) }
 
     factory<TTSViewModel>  { TTSViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
 

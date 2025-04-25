@@ -20,7 +20,8 @@ class TranslationEnginesManager(
         OpenAITranslateEngine(httpClients, readerPreferences),
         DeepSeekTranslateEngine(httpClients, readerPreferences),
         LibreTranslateEngine(httpClients),
-        FreeAITranslateEngine(httpClients)
+        FreeAITranslateEngine(httpClients),
+        WebscrapingTranslateEngine(httpClients, readerPreferences)
     )
 
     fun get(): TranslateEngine {

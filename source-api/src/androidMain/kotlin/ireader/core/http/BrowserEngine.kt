@@ -22,18 +22,38 @@ import ireader.core.http.Result
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.util.concurrent.TimeoutException
+import android.os.Handler
+import android.os.Looper
+import android.webkit.CookieManager
+import android.webkit.JavascriptInterface
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import java.util.UUID
+import kotlin.coroutines.resumeWithException
 
 actual class BrowserEngine(private val webViewManger: WebViewManger, private val webViewCookieJar: WebViewCookieJar) :
     BrowserEngineInterface {
+
+    private val cloudflareBypassDetected = MutableStateFlow(false)
+    private val ajaxCompleted = MutableStateFlow(false)
+    private val pageLoadComplete = MutableStateFlow(false)
+    private val contentExtracted = MutableStateFlow(false)
+    
     /**
-     * this function
-     * @param url  the url of page
-     * @param selector  the selector of first element should appear before fetching the html content
-     * @param headers  the header of request
-     * @param timeout  the timeout of request
-     * @param userAgent  the userAgent of request
-     * @return [Result]
+     * Enhanced fetch implementation that:
+     * 1. Better handles Cloudflare protection
+     * 2. Waits for AJAX content to load
+     * 3. Uses advanced browser fingerprinting evasion
+     * 4. Extracts content based on selectors or waits for dynamic content
+     *
+     * @param url The url of page
+     * @param selector CSS selector for element(s) that must be present before fetching content
+     * @param headers Custom headers for the request
+     * @param timeout Maximum time in milliseconds to wait for page load
+     * @param userAgent Custom user agent or default modern Chrome
+     * @return [Result] with page content and cookies
      */
+    @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
     actual override suspend fun fetch(
         url: String,
         selector: String?,
@@ -41,52 +61,220 @@ actual class BrowserEngine(private val webViewManger: WebViewManger, private val
         timeout: Long,
         userAgent: String,
     ): Result {
-        var currentTime = 0L
+        // Reset state flows
+        cloudflareBypassDetected.value = false
+        ajaxCompleted.value = false
+        pageLoadComplete.value = false
+        contentExtracted.value = false
+        
         var html: Document = Document("No Data was Found")
+        val uniqueId = UUID.randomUUID().toString()
+        
         withContext(Dispatchers.Main) {
+            // Initialize or reuse WebView
             webViewManger.init()
-            val client = webViewManger.webView!!
-            if (userAgent != webViewManger.userAgent) {
-                webViewManger.userAgent = userAgent
-                try {
-                    client.settings.userAgentString = userAgent
-                } catch (e: Throwable) {
-                    Log.error(exception = e, "failed to set user agent")
+            val webView = webViewManger.webView ?: throw IllegalStateException("WebView initialization failed")
+            
+            // Configure WebView
+            configureWebView(webView, userAgent, uniqueId)
+            
+            // Set up javascript interface for AJAX detection
+            webView.addJavascriptInterface(object : Any() {
+                @JavascriptInterface
+                fun onAjaxComplete() {
+                    ajaxCompleted.value = true
+                }
+                
+                @JavascriptInterface
+                fun onCloudflareBypass() {
+                    cloudflareBypassDetected.value = true
+                }
+                
+                @JavascriptInterface
+                fun contentReady() {
+                    contentExtracted.value = true
+                }
+            }, "AndroidInterface")
+            
+            // Set up WebViewClient
+            webView.webViewClient = object : WebViewClientCompat() {
+                override fun onPageFinished(view: WebView, loadedUrl: String) {
+                    super.onPageFinished(view, loadedUrl)
+                    pageLoadComplete.value = true
+                    
+                    // Inject scripts to detect AJAX completion and Cloudflare
+                    val ajaxDetectionScript = """
+                        (function() {
+                            // Record original XHR methods
+                            var originalOpen = XMLHttpRequest.prototype.open;
+                            var originalSend = XMLHttpRequest.prototype.send;
+                            var activeRequests = 0;
+                            
+                            // Override open method
+                            XMLHttpRequest.prototype.open = function() {
+                                this._url = arguments[1];
+                                return originalOpen.apply(this, arguments);
+                            };
+                            
+                            // Override send method
+                            XMLHttpRequest.prototype.send = function() {
+                                activeRequests++;
+                                
+                                // Add load event listener
+                                this.addEventListener('loadend', function() {
+                                    activeRequests--;
+                                    if (activeRequests === 0) {
+                                        // All AJAX requests completed
+                                        setTimeout(function() {
+                                            AndroidInterface.onAjaxComplete();
+                                        }, 500); // Wait a bit for DOM updates
+                                    }
+                                });
+                                
+                                return originalSend.apply(this, arguments);
+                            };
+                            
+                            // Check for Cloudflare bypass
+                            if (!document.getElementById('challenge-form') && 
+                                !document.querySelector('.cf-browser-verification') &&
+                                document.cookie.indexOf('cf_clearance') >= 0) {
+                                AndroidInterface.onCloudflareBypass();
+                            }
+                            
+                            // Wait for any elements matching selector
+                            function checkForSelector() {
+                                if ('${selector ?: ""}') {
+                                    if (document.querySelector('${selector}')) {
+                                        AndroidInterface.contentReady();
+                                    } else {
+                                        setTimeout(checkForSelector, 200);
+                                    }
+                                } else {
+                                    AndroidInterface.contentReady();
+                                }
+                            }
+                            
+                            setTimeout(checkForSelector, 300);
+                        })();
+                    """.trimIndent()
+                    
+                    view.evaluateJavascript(ajaxDetectionScript, null)
+                }
+                
+                override fun onReceivedErrorCompat(
+                    view: WebView,
+                    errorCode: Int,
+                    description: String?,
+                    failingUrl: String,
+                    isMainFrame: Boolean,
+                ) {
+                    super.onReceivedErrorCompat(view, errorCode, description, failingUrl, isMainFrame)
+                    Log.error("WebView error: $errorCode $description")
                 }
             }
+            
+            // Load the URL
             if (headers != null) {
-                client.loadUrl(
+                webView.loadUrl(
                     url,
                     headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }.toMutableMap()
                 )
             } else {
-                client.loadUrl(url)
+                webView.loadUrl(url)
             }
-
+            
             webViewManger.selector = selector
             webViewManger.inProgress = true
             webViewManger.webUrl = url
-
+            
+            // Wait for page to load and conditions to be met
+            var currentTime = 0L
+            val checkInterval = 100L
+            
             while (currentTime < timeout && webViewManger.inProgress) {
-                delay(1000)
-                currentTime += 1000
+                if (pageLoadComplete.value && (
+                    (selector == null && ajaxCompleted.value) ||
+                    contentExtracted.value || 
+                    cloudflareBypassDetected.value
+                )) {
+                    // Extract content after brief delay to ensure everything is loaded
+                    delay(500)
+                    break
+                }
+                
+                delay(checkInterval)
+                currentTime += checkInterval
             }
+            
             if (currentTime >= timeout) {
                 webViewManger.inProgress = false
-                throw TimeoutException()
+                throw TimeoutException("Page load timed out after ${timeout}ms")
             }
+            
+            // Get HTML content
+            html = Jsoup.parse(webView.getHtml())
             webViewManger.inProgress = false
-            html = Jsoup.parse(client.getHtml())
         }
+        
+        // Get cookies
         val cookies = webViewCookieJar.get(url.toHttpUrl())
-        webViewManger.webView
-        return ireader.core.http.Result(
+        
+        return Result(
             responseBody = html.html(),
             cookies = cookies,
         )
     }
-
-
+    
+    /**
+     * Configure WebView with optimal settings for Cloudflare bypass and browser detection evasion
+     */
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun configureWebView(webView: WebView, userAgent: String, uniqueId: String) {
+        // Update user agent if needed
+        if (userAgent != webViewManger.userAgent) {
+            webViewManger.userAgent = userAgent
+            try {
+                webView.settings.userAgentString = userAgent
+            } catch (e: Throwable) {
+                Log.error(exception = e, "failed to set user agent")
+            }
+        }
+        
+        // Enable advanced features
+        with(webView.settings) {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            databaseEnabled = true
+            useWideViewPort = true
+            loadWithOverviewMode = true
+            
+            // Bypass detection mitigations
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                safeBrowsingEnabled = false
+            }
+            
+            // Improve page loading
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                offscreenPreRaster = true
+            }
+            
+            // Prevent WebView from being identified by canvas fingerprinting
+            // by setting a unique client identifier
+            userAgentString = userAgent + " ($uniqueId)"
+            
+            // Enable media playback for sites that require it
+            mediaPlaybackRequiresUserGesture = false
+            
+            // Maximize compatibility
+            mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+            
+            // Set cache mode
+            cacheMode = WebSettings.LOAD_DEFAULT
+        }
+        
+        // Enable third-party cookies (needed for Cloudflare)
+        CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
+    }
 }
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -95,12 +283,22 @@ fun WebView.setDefaultSettings() {
         javaScriptEnabled = true
         domStorageEnabled = true
         databaseEnabled = true
-        // https://stackoverflow.com/questions/9128952/caching-in-android-webview
-        // setAppCacheEnabled(true)
         useWideViewPort = true
         loadWithOverviewMode = true
         cacheMode = WebSettings.LOAD_DEFAULT
+        
+        // Additional settings for better compatibility
+        setSupportMultipleWindows(false)
+        blockNetworkImage = false
+        loadsImagesAutomatically = true
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+        }
     }
+    
+    // Enable cookie support
+    CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
 }
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -110,16 +308,31 @@ suspend fun WebView.getHtml(): String = suspendCancellableCoroutine { continuati
     if (!settings.javaScriptEnabled)
         throw IllegalStateException("Javascript is disabled")
 
-    evaluateJavascript(
-        "(function() { return ('<html>'+document.getElementsByTagName('html')[0].innerHTML+'</html>'); })();"
-    ) {
-        continuation.resume(
-            it!!.replace("\\u003C", "<")
-                .replace("\\n", "")
-                .replace("\\t", "")
-                .replace("\\\"", "\"")
-                .replace("<hr />", "")
-        ) {
+    // Enhanced JS to get entire page HTML including dynamic content
+    val script = """
+        (function() {
+            let html = document.documentElement.outerHTML;
+            // Clean up any script injections we might have added
+            html = html.replace(/<script data-injected-by-app.*?<\/script>/g, '');
+            return html;
+        })();
+    """.trimIndent()
+
+    evaluateJavascript(script) { result ->
+        if (result != null) {
+            continuation.resume(
+                result.replace("\\u003C", "<")
+                    .replace("\\n", "")
+                    .replace("\\t", "")
+                    .replace("\\\"", "\"")
+                    .replace("\\\\", "\\")
+                    .replace("<hr />", "")
+                    // Remove quotes wrapping the entire result
+                    .let { if (it.startsWith("\"") && it.endsWith("\"")) it.substring(1, it.length - 1) else it }
+            ) {
+            }
+        } else {
+            continuation.resumeWithException(RuntimeException("Failed to get HTML content"))
         }
     }
 }

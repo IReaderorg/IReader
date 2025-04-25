@@ -78,15 +78,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.google.accompanist.web.WebContent
-import com.google.accompanist.web.WebView
-import com.google.accompanist.web.WebViewState
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.web.WebPageScreen
 import ireader.presentation.ui.web.WebPageTopBar
 import ireader.presentation.ui.web.WebViewPageModel
+import ireader.presentation.ui.web.WebViewState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -144,7 +142,7 @@ actual data class WebViewScreenSpec actual constructor(
                     onShowUrlBarChange = { showUrlBar = it },
                     onUrlChange = { vm.webUrl = it },
                     onGoToUrl = {
-                        vm.webViewState?.content = WebContent.Url(vm.webUrl)
+                        vm.webViewState?.content = WebViewState.WebContent.Url(vm.webUrl)
                         vm.updateWebUrl(vm.url)
                         showUrlBar = false
                         focusManager.clearFocus()
