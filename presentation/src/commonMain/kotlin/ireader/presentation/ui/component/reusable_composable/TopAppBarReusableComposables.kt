@@ -12,7 +12,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
@@ -247,7 +247,7 @@ fun TopAppBarBackButton(tint: Color = MaterialTheme.colorScheme.onSurface, onCli
         onClick()
     }) {
         Icon(
-            imageVector = if (isLeftToRight.value) Icons.Default.ArrowBack else Icons.Default.ArrowForward,
+            imageVector = if (isLeftToRight.value) Icons.AutoMirrored.Filled.ArrowBack else Icons.Default.ArrowForward,
             contentDescription = localize(MR.strings.return_to_previous_screen),
             tint = tint,
         )

@@ -1,6 +1,7 @@
 package ireader.presentation.ui.home.sources.extension
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -85,7 +86,7 @@ fun ExtensionScreenTopAppBar(
             if (searchMode) {
 
                 AppIconButton(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = localize(MR.strings.toggle_search_mode_off),
                     onClick = onSearchDisable
                 )

@@ -1,7 +1,7 @@
 package ireader.presentation.ui.home.history
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
@@ -78,7 +78,7 @@ fun HistoryTopAppBar(
         navigationIcon = {
             if (vm.searchMode) {
                 AppIconButton(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = localize(MR.strings.toggle_search_mode_off),
                     onClick = {
                         vm.searchMode = false

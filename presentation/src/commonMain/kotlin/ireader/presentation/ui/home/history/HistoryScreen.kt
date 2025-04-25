@@ -18,6 +18,7 @@ import androidx.compose.material.DismissValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Search
@@ -170,7 +171,7 @@ fun HistoryTopAppBar(
             leadingIcon = { 
                 IconButton(onClick = onSearchModeChange) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = localize(MR.strings.close)
                     )
                 }

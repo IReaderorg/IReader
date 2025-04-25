@@ -3,7 +3,7 @@ package ireader.presentation.ui.component.components
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -193,7 +193,7 @@ fun SearchToolbar(
         navigationIcon = {
             if (isSearchModeEnable) {
                 AppIconButton(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = localize(MR.strings.toggle_search_mode_off),
                     onClick = {
                         isSearchModeEnable = false
@@ -203,7 +203,7 @@ fun SearchToolbar(
             } else {
                 if (onPopBackStack != null) {
                     AppIconButton(
-                        imageVector = Icons.Default.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = localize(MR.strings.toggle_search_mode_off),
                         onClick = {
                             onPopBackStack()

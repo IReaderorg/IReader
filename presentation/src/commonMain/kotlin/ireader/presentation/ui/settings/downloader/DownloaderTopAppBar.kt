@@ -3,6 +3,7 @@ package ireader.presentation.ui.settings.downloader
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -101,7 +102,7 @@ private fun RegularTopBar(
         navigationIcon = {
             IconButton(onClick = onPopBackStack) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = localize(MR.strings.return_to_previous_screen),
                     tint = MaterialTheme.colorScheme.onBackground,
                 )

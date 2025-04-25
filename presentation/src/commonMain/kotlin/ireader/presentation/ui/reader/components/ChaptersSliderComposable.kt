@@ -8,7 +8,7 @@ import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,7 +46,7 @@ fun ChaptersSliderComposable(
                     onPrev()
                 },
             ) {
-                AppIcon(imageVector = Icons.Default.ArrowBack, contentDescription = "Previous Chapter")
+                AppIcon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous Chapter")
             }
             Slider(
                 modifier = Modifier
