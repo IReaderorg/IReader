@@ -1,6 +1,6 @@
 [versions]
 lifecycle = "2.8.7"
-work = "2.10.0"
+work = "2.10.1"
 [libraries]
 core = "androidx.core:core-ktx:1.16.0"
 media = "androidx.media:media:1.7.0"

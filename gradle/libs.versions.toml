@@ -3,7 +3,7 @@
 apkParser = "2.6.10"
 composeGradle = "1.7.3"
 coreSplashscreen = "1.0.1"
-firebaseAnalytics = "22.4.0"
+firebaseAnalytics = "23.0.0"
 junitVintageEngine = "5.8.2"
 kotlinxCoroutinesSwing = "1.10.1"
 voyager = "1.0.1"
@@ -41,8 +41,8 @@ core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = 
 desugarJdkLibs = "com.android.tools:desugar_jdk_libs:2.1.5"
 firebase-analytics = { module = "com.google.firebase:firebase-analytics", version.ref = "firebaseAnalytics" }
 gradle-tools = "com.android.tools.build:gradle:8.7.3"
-gradle-google = "com.google.gms:google-services:4.4.2"
-gradle-firebaseCrashlytic = "com.google.firebase:firebase-crashlytics-gradle:3.0.3"
+gradle-google = "com.google.gms:google-services:4.4.3"
+gradle-firebaseCrashlytic = "com.google.firebase:firebase-crashlytics-gradle:3.0.5"
 
 
 coil-core = { module = "io.coil-kt.coil3:coil" , version.ref = "coil"}
@@ -62,7 +62,7 @@ voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", vers
 voyager-screenmodel = { module = "cafe.adriel.voyager:voyager-screenmodel", version.ref = "voyager" }
 
 storage = { module = "com.anggrayudi:storage", version = "1.5.1" }
-documentfile = { module = "androidx.documentfile:documentfile", version = "1.0.1" }
+documentfile = { module = "androidx.documentfile:documentfile", version = "1.1.0" }
 ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-core-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 ktor-core-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
@@ -113,8 +113,8 @@ sqldelight-jvm = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "
 sqldelight-android = { module = "app.cash.sqldelight:android-driver", version.ref ="sqldelight" }
 sqldelight-android-paging = { module = "app.cash.sqldelight:androidx-paging3-extensions", version.ref = "sqldelight" }
 
-requerySqlite = "com.github.requery:sqlite-android:3.36.0"
-androidSqlite = "androidx.sqlite:sqlite-framework:2.5.0"
+requerySqlite = "com.github.requery:sqlite-android:3.49.0"
+androidSqlite = "androidx.sqlite:sqlite-framework:2.5.2"
 
 epublib = { module = "io.github.kazemcodes:epublib-core", version = "4.0-SNAPSHOT" }
 

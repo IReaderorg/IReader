@@ -33,7 +33,7 @@ kotlin {
                 implementation(kotlinx.serialization.json)
                 implementation(libs.sqldelight.runtime)
                 implementation(libs.sqldelight.coroutines)
-                implementation(libs.requerySqlite)
+
                 api(libs.koin.core)
                 api(libs.jsoup)
                 api(kotlinx.datetime)
@@ -43,7 +43,7 @@ kotlin {
         androidMain {
             dependencies {
                 implementation(androidx.core)
-
+                implementation(libs.requerySqlite)
                 implementation(libs.sqldelight.android)
                 implementation(libs.androidSqlite)
             }
