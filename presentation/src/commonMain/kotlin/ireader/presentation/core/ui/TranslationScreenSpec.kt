@@ -3,18 +3,16 @@ package ireader.presentation.core.ui
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.geometry.Size
-import cafe.adriel.voyager.core.model.rememberScreenModel
+import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import ireader.presentation.core.VoyagerScreen
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.TranslationSettingsScreen
 import ireader.presentation.ui.settings.general.TranslationSettingsViewModel
-import ireader.i18n.resources.MR
 
 class TranslationScreenSpec : Screen {
 
@@ -34,7 +32,7 @@ class TranslationScreenSpec : Screen {
                 )
             }
         ) { padding ->
-            TranslationSettingsScreen(
+            TranslationSettingsScreen(modifier = Modifier.padding(padding),
                 translatorEngine = viewModel.translatorEngine.value,
                 onTranslatorEngineChange = { viewModel.updateTranslatorEngine(it) },
                 openAIApiKey = viewModel.openAIApiKey,
