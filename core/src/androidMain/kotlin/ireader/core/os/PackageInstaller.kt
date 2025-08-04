@@ -11,24 +11,24 @@ package ireader.core.os
 
 import android.app.Application
 import android.app.PendingIntent
-import android.content.*
+import android.content.BroadcastReceiver
 import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.IntentSender
 import android.content.pm.PackageInstaller
-import android.net.Uri
 import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.os.SystemClock
+import android.widget.Toast
 import ireader.core.log.Log
-import ireader.core.os.InstallStep
-import ireader.core.util.calculateSizeRecursively
 import ireader.i18n.LocalizeHelper
+import ireader.i18n.resources.MR
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import ireader.i18n.resources.MR
-import android.widget.Toast
-import androidx.core.content.FileProvider
 
 class PackageInstaller(
   private val context: Application,
@@ -246,12 +246,10 @@ class PackageInstaller(
     }
     
     // For Android 14 (UPSIDE_DOWN_CAKE), we need FLAG_MUTABLE for commit() to work
-    val flags = if (Build.VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
-      PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-    } else if (Build.VERSION.SDK_INT >= VERSION_CODES.S) {
-      PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+    val flags = if (Build.VERSION.SDK_INT >= VERSION_CODES.S) {
+      PendingIntent.FLAG_MUTABLE
     } else {
-      PendingIntent.FLAG_UPDATE_CURRENT
+     0
     }
     
     val broadcast = PendingIntent.getBroadcast(
