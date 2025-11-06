@@ -19,7 +19,7 @@ jobs:
     name: Build application packages
     strategy:
       matrix:
-        runtime: [ linux-x64, win-x64, android ]
+        runtime: [ linux-x64, linux-fedora-x64, win-x64, android ]
         include:
           - runtime: linux-x64
             arch: x64
@@ -28,14 +28,12 @@ jobs:
             build: :desktop:packageUberJarForCurrentOS :desktop:packageDeb
             setupCl: ./.github/scripts/SetupClUnix.sh
 
-#          - runtime: linux-fedora-x64
-#            arch: x64
-#            os: ubuntu-latest
-#            shell: bash
-#            build: :desktop:packageRpm
-#            setupCl: ./.github/scripts/SetupClUnix.sh
-
-
+          - runtime: linux-fedora-x64
+            arch: x64
+            os: ubuntu-latest
+            shell: bash
+            build: :desktop:packageRpm
+            setupCl: ./.github/scripts/SetupClUnix.sh
 
           - runtime: win-x64
             arch: x64
