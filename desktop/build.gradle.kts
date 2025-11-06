@@ -9,6 +9,12 @@ plugins {
     alias(kotlinx.plugins.compose.compiler)
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
 dependencies {
     implementation(project(Modules.coreApi))
     implementation(project(Modules.sourceApi))
