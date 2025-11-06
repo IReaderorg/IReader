@@ -54,6 +54,8 @@ android {
     compileSdk = ProjectConfig.compileSdk
     defaultConfig {
         minSdk = ProjectConfig.minSdk
+    }
+    lint {
         targetSdk = ProjectConfig.targetSdk
     }
     compileOptions {
@@ -61,8 +63,8 @@ android {
         targetCompatibility = ProjectConfig.androidJvmTarget
     }
     sourceSets.getByName("main") {
-        assets.srcDir(File(buildDir, "generated/moko-resources/commonMain/assets"))
-        res.srcDir(File(buildDir, "generated/moko-resources/commonMain/res"))
+        assets.srcDir(File(layout.buildDirectory.get().asFile, "generated/moko-resources/commonMain/assets"))
+        res.srcDir(File(layout.buildDirectory.get().asFile, "generated/moko-resources/commonMain/res"))
         res.srcDir("src/commonMain/moko-resources")
     }
 }
@@ -84,11 +86,6 @@ buildkonfig {
         buildConfigField(STRING, "VERSION_NAME", "\"${ProjectConfig.versionName}\"")
         buildConfigField(INT, "VERSION_CODE", "${ProjectConfig.versionCode}")
     }
-    targetConfigs("release") {
-        create("release") {
-            buildConfigField(BOOLEAN, "DEBUG", "false")
-        }
-    }
 }
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround
@@ -109,12 +106,12 @@ fun getBuildTime(): String {
 }
 
 fun runCommand(command: String): String {
-    val byteOut: java.io.ByteArrayOutputStream = ByteArrayOutputStream()
-    project.exec {
-        commandLine = command.split(" ")
-        standardOutput = byteOut
+    return try {
+        val process = Runtime.getRuntime().exec(command.split(" ").toTypedArray())
+        process.inputStream.bufferedReader().readText().trim()
+    } catch (e: Exception) {
+        "unknown"
     }
-    return String(byteOut.toByteArray()).trim()
 }
 multiplatformResources {
     this.resourcesPackage = "ireader.i18n.resources"

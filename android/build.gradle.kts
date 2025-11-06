@@ -28,7 +28,7 @@ android {
         versionName = ProjectConfig.versionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-    packagingOptions {
+    packaging {
         resources.excludes.addAll(
             listOf(
                 "META-INF/DEPENDENCIES",
@@ -123,7 +123,7 @@ android {
     androidComponents.onVariants { variant ->
         val name = variant.name
         sourceSets {
-            getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
+            getByName(name).kotlin.srcDir("${layout.buildDirectory.get().asFile.absolutePath}/generated/ksp/${name}/kotlin")
         }
     }
     compileOptions {
@@ -132,9 +132,11 @@ android {
         targetCompatibility(ProjectConfig.androidJvmTarget)
     }
 
-    kotlinOptions {
-        jvmTarget = ProjectConfig.androidJvmTarget.toString()
-        kotlinOptions.freeCompilerArgs += "-Xexpect-actual-classes"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
+            freeCompilerArgs.add("-Xexpect-actual-classes")
+        }
     }
 }
 
@@ -222,10 +224,9 @@ dependencies {
     implementation(libs.napier)
 }
 composeCompiler {
-    enableStrongSkippingMode = true
-}
-compose {
-    kotlinCompilerPlugin = "org.jetbrains.kotlin:kotlin-compose-compiler-plugin-embeddable:2.0.10"
+    featureFlags.set(setOf(
+        org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag.StrongSkipping
+    ))
 }
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround
@@ -245,10 +246,10 @@ fun getBuildTime(): String {
     return df.format(Date())
 }
 fun runCommand(command: String): String {
-    val byteOut = ByteArrayOutputStream()
-    project.exec {
-        commandLine = command.split(" ")
-        standardOutput = byteOut
+    return try {
+        val process = Runtime.getRuntime().exec(command.split(" ").toTypedArray())
+        process.inputStream.bufferedReader().readText().trim()
+    } catch (e: Exception) {
+        "unknown"
     }
-    return String(byteOut.toByteArray()).trim()
 }

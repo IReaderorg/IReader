@@ -18,6 +18,7 @@ pluginManagement {
 //        hostedRepository?.split(";")?.forEach { host ->
 //            maven(host)
 //        }
+        maven(url = "https://fmah.ir/mirror")
         gradlePluginPortal()
         mavenCentral()
         google()
@@ -32,6 +33,7 @@ dependencyResolutionManagement {
 //        hostedRepository?.split(";")?.forEach { host ->
 //            maven(host)
 //        }
+        maven(url = "https://fmah.ir/mirror")
         mavenCentral()
         google()
         maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/")

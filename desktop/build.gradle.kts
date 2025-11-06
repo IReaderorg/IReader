@@ -62,12 +62,12 @@ tasks.register<Copy>("copyIconResources") {
     
     // Source directories
     from(project.rootProject.file("i18n/src/commonMain/moko-resources/drawable"))
-    into(project.buildDir.resolve("resources/main/drawable"))
+    into(project.layout.buildDirectory.get().asFile.resolve("resources/main/drawable"))
     
     doLast {
         logger.lifecycle("Copied drawable resources to desktop build")
         // List all copied files to verify
-        project.buildDir.resolve("resources/main/drawable").listFiles()?.forEach {
+        project.layout.buildDirectory.get().asFile.resolve("resources/main/drawable").listFiles()?.forEach {
             logger.lifecycle("  - ${it.name}")
         }
     }
@@ -205,7 +205,7 @@ tasks.register<Copy>("createWindowsLauncher") {
     description = "Creates a Windows batch file to check Java installation and launch the app"
     
     from(project.projectDir.resolve("src/main/resources/launch_template.bat"))
-    into(project.buildDir.resolve("compose/binaries/main"))
+    into(project.layout.buildDirectory.get().asFile.resolve("compose/binaries/main"))
     rename { "IReader_launcher.bat" }
     
     // Create batch file content with Java checks
@@ -227,8 +227,8 @@ exit /b 0
 """
     
     doFirst {
-        project.buildDir.resolve("compose/binaries/main").mkdirs()
-        project.buildDir.resolve("compose/binaries/main/IReader_launcher.bat").writeText(content)
+        project.layout.buildDirectory.get().asFile.resolve("compose/binaries/main").mkdirs()
+        project.layout.buildDirectory.get().asFile.resolve("compose/binaries/main/IReader_launcher.bat").writeText(content)
     }
 }
 

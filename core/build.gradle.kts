@@ -12,6 +12,8 @@ android {
     compileSdk = ProjectConfig.compileSdk
     defaultConfig {
         minSdk = ProjectConfig.minSdk
+    }
+    lint {
         targetSdk = ProjectConfig.targetSdk
     }
     compileOptions {

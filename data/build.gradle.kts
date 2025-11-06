@@ -82,7 +82,7 @@ android {
     sourceSets {
         getByName("androidTest").assets.srcDir("$projectDir/schemas")
     }
-    packagingOptions {
+    packaging {
         resources.excludes.addAll(
             listOf(
                 "LICENSE.txt",
@@ -101,7 +101,7 @@ android {
     androidComponents.onVariants { variant ->
         val name = variant.name
         sourceSets {
-            getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
+            getByName(name).kotlin.srcDir("${layout.buildDirectory.get().asFile.absolutePath}/generated/ksp/${name}/kotlin")
         }
     }
     compileOptions {

@@ -12,6 +12,8 @@ android {
     compileSdk = ProjectConfig.compileSdk
     defaultConfig {
         minSdk = ProjectConfig.minSdk
+    }
+    lint {
         targetSdk = ProjectConfig.targetSdk
     }
     compileOptions {
@@ -21,7 +23,7 @@ android {
     androidComponents.onVariants { variant ->
         val name = variant.name
         sourceSets {
-            getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
+            getByName(name).kotlin.srcDir("${layout.buildDirectory.get().asFile.absolutePath}/generated/ksp/${name}/kotlin")
         }
     }
 }
