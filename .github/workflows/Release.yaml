@@ -75,7 +75,7 @@ jobs:
         if: ${{ matrix.runtime == 'linux-fedora-x64' }}
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace fedora:latest bash -c "
-            dnf install -y java-21-openjdk-devel rpm-build &&
+            dnf install -y java-21-openjdk-devel java-21-openjdk-jmods rpm-build findutils &&
             export JAVA_HOME=/usr/lib/jvm/java-21-openjdk &&
             export PATH=\$JAVA_HOME/bin:\$PATH &&
             ./gradlew ${{ matrix.build }} --stacktrace
