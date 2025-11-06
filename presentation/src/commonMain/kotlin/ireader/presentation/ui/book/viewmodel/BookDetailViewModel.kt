@@ -51,8 +51,24 @@ class BookDetailViewModel(
     var getChapterDetailJob: Job? = null
     var initBooks = false
     var filters = mutableStateOf<List<ChaptersFilters>>(ChaptersFilters.getDefault(true))
-    var sorting = mutableStateOf<ChapterSort>(ChapterSort.default)
+    var sorting = mutableStateOf<ChapterSort>(loadSortingPreference())
     var layout by readerPreferences.showChapterNumberPreferences().asState()
+
+    private fun loadSortingPreference(): ChapterSort {
+        val sortTypeName = readerPreferences.chapterSortType().get()
+        val isAscending = readerPreferences.chapterSortAscending().get()
+        return try {
+            val type = ChapterSort.Type.valueOf(sortTypeName)
+            ChapterSort(type, isAscending)
+        } catch (e: Exception) {
+            ChapterSort.default
+        }
+    }
+
+    private fun saveSortingPreference(sort: ChapterSort) {
+        readerPreferences.chapterSortType().set(sort.type.name)
+        readerPreferences.chapterSortAscending().set(sort.isAscending)
+    }
 
     var launcher : () -> Any = {}
     init {
@@ -321,10 +337,12 @@ class BookDetailViewModel(
 
     fun toggleSort(type: ChapterSort.Type) {
         val currentSort = sorting
-        sorting.value = if (type == currentSort.value.type) {
+        val newSort = if (type == currentSort.value.type) {
             currentSort.value.copy(isAscending = !currentSort.value.isAscending)
         } else {
             currentSort.value.copy(type = type)
         }
+        sorting.value = newSort
+        saveSortingPreference(newSort)
     }
 }

@@ -268,6 +268,14 @@ class ReaderPreferences constructor(
     fun geminiModel(): Preference<String> {
         return preferenceStore.getString("gemini_model", "")
     }
+
+    fun chapterSortType(): Preference<String> {
+        return preferenceStore.getString("chapter_sort_type", "Default")
+    }
+
+    fun chapterSortAscending(): Preference<Boolean> {
+        return preferenceStore.getBoolean("chapter_sort_ascending", true)
+    }
 }
 
 enum class ReadingMode {
