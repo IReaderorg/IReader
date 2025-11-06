@@ -64,6 +64,7 @@ actual val DomainModule: Module = module {
                 get(),
                 get(),
                 get(),
+                get(),
                 get()
             ),
             startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(
