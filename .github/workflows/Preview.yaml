@@ -104,6 +104,8 @@ jobs:
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace fedora:latest bash -c "
             dnf install -y java-21-openjdk-devel rpm-build &&
+            export JAVA_HOME=/usr/lib/jvm/java-21-openjdk &&
+            export PATH=\$JAVA_HOME/bin:\$PATH &&
             ./gradlew ${{ matrix.build }} -Ppreview=\"${{ env.COMMIT_COUNT }}\" --stacktrace
           "
 
