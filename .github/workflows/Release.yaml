@@ -73,7 +73,7 @@ jobs:
 
       - name: Build rpm Package
         if: ${{ matrix.runtime == 'linux-fedora-x64' }}
-        uses: Syer10/Fedora-Java17-Action@v1
+        uses: Syer10/Fedora-Java21-Action@v1
         with:
           command: ./gradlew ${{ matrix.build }} --stacktrace
 
