@@ -38,4 +38,6 @@ class ReaderSettingScreenViewModel(
     val fontSize = readerPreferences.fontSize().asState()
     val distanceBetweenParagraphs = readerPreferences.paragraphDistance().asState()
     val verticalScrolling = readerPreferences.scrollMode().asState()
+    val autoPreloadNextChapter = readerPreferences.autoPreloadNextChapter().asState()
+    val preloadOnlyOnWifi = readerPreferences.preloadOnlyOnWifi().asState()
 }

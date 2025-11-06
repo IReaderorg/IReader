@@ -106,6 +106,19 @@ class ReaderSettingSpec : VoyagerScreen() {
                     trailing = vm.scrollIndicatorWith.value.toString(),
                     valueRange = 0F..32F,
                 ),
+                Components.Header(
+                    localizeHelper.localize(MR.strings.preload_settings)
+                ),
+                Components.Switch(
+                    preference = vm.autoPreloadNextChapter,
+                    title = localizeHelper.localize(MR.strings.auto_preload_next_chapter),
+                    subtitle = localizeHelper.localize(MR.strings.auto_preload_next_chapter_summary)
+                ),
+                Components.Switch(
+                    preference = vm.preloadOnlyOnWifi,
+                    title = localizeHelper.localize(MR.strings.preload_only_on_wifi),
+                    subtitle = localizeHelper.localize(MR.strings.preload_only_on_wifi_summary),
+                ),
             )
         }
 

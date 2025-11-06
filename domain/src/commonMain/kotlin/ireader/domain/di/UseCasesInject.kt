@@ -75,6 +75,7 @@ val UseCasesInject = module {
         getRemoteChapters = GetRemoteChapters(),
         getRemoteReadingContent = GetRemoteReadingContent(),
     ) }
+    single<ireader.domain.usecases.reader.PreloadChapterUseCase> { ireader.domain.usecases.reader.PreloadChapterUseCase() }
     single<ireader.domain.usecases.local.LocalInsertUseCases> {
         ireader.domain.usecases.local.LocalInsertUseCases(
             insertBook = InsertBook(get()),

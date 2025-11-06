@@ -392,6 +392,11 @@
     <string name="horizontal">Horizontal</string>
     <string name="selectable_mode">Selectable mode</string>
     <string name="custom_brightness">Custom Brightness</string>
+    <string name="preload_settings">Chapter Preloading</string>
+    <string name="auto_preload_next_chapter">Auto-preload next chapter</string>
+    <string name="auto_preload_next_chapter_summary">Automatically download the next chapter in the background for instant reading</string>
+    <string name="preload_only_on_wifi">Preload only on WiFi</string>
+    <string name="preload_only_on_wifi_summary">Restrict automatic preloading to WiFi connections only</string>
     <!--- core -->
     <string name="history_screen_label">History</string>
     <string name="updates_screen_label">Updates</string>

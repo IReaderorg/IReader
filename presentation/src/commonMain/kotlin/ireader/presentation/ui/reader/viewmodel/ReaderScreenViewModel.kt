@@ -55,6 +55,7 @@ class ReaderScreenViewModel(
         val readerThemeRepository: ReaderThemeRepository,
         val bookMarkChapterUseCase: ireader.domain.usecases.local.book_usecases.BookMarkChapterUseCase,
         val translationEnginesManager: TranslationEnginesManager,
+        val preloadChapterUseCase: ireader.domain.usecases.reader.PreloadChapterUseCase,
         val params: Param,
         val globalScope: CoroutineScope
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(),
@@ -92,6 +93,8 @@ class ReaderScreenViewModel(
     val deepSeekApiKey = readerPreferences.deepSeekApiKey().asState()
     val topContentPadding = readerPreferences.topContentPadding().asState()
     val screenAlwaysOn = readerPreferences.screenAlwaysOn().asState()
+    val autoPreloadNextChapter = readerPreferences.autoPreloadNextChapter().asState()
+    val preloadOnlyOnWifi = readerPreferences.preloadOnlyOnWifi().asState()
     val bottomContentPadding = readerPreferences.bottomContentPadding().asState()
     val topMargin = readerPreferences.topMargin().asState()
     val leftMargin = readerPreferences.leftMargin().asState()
@@ -200,7 +203,17 @@ class ReaderScreenViewModel(
         if (chapterId == null) return null
 
         isLoading = true
-        val chapter = getChapterUseCase.findChapterById(chapterId)
+        
+        // Check if chapter is already preloaded
+        val preloadedChapter = preloadedChapters[chapterId]
+        val chapter = if (preloadedChapter != null && !preloadedChapter.isEmpty()) {
+            ireader.core.log.Log.debug("Using preloaded chapter: ${preloadedChapter.name}")
+            preloadedChapters.remove(chapterId) // Remove from cache after use
+            preloadedChapter
+        } else {
+            getChapterUseCase.findChapterById(chapterId)
+        }
+        
         chapter.let {
             stateChapter = it
         }
@@ -223,6 +236,10 @@ class ReaderScreenViewModel(
                 chapterShell.add(0, it)
             }
         }
+        
+        // Trigger preload of next chapter
+        triggerPreloadNextChapter()
+        
         return stateChapter
     }
 
@@ -259,6 +276,11 @@ class ReaderScreenViewModel(
 
     var getContentJob: Job? = null
     var getChapterJob: Job? = null
+    var preloadJob: Job? = null
+    
+    // Preload state
+    var isPreloading by mutableStateOf(false)
+    private val preloadedChapters = mutableMapOf<Long, Chapter>()
 
     fun nextChapter(): Chapter {
         val chapter =
@@ -486,9 +508,96 @@ class ReaderScreenViewModel(
         }
     }
 
+    /**
+     * Trigger preloading of the next chapter in background
+     */
+    private fun triggerPreloadNextChapter() {
+        // Check if auto-preload is enabled
+        if (!autoPreloadNextChapter.value) {
+            ireader.core.log.Log.debug("Auto-preload is disabled")
+            return
+        }
+        
+        preloadJob?.cancel()
+        preloadJob = scope.launch {
+            try {
+                val nextChapter = kotlin.runCatching { nextChapter() }.getOrNull()
+                if (nextChapter != null && !preloadedChapters.containsKey(nextChapter.id)) {
+                    preloadChapter(nextChapter)
+                }
+            } catch (e: Exception) {
+                ireader.core.log.Log.debug("No next chapter to preload: ${e.message}")
+            }
+        }
+    }
+    
+    /**
+     * Preload a specific chapter in the background
+     */
+    private suspend fun preloadChapter(chapter: Chapter) {
+        if (chapter.isEmpty() && state.catalog != null) {
+            isPreloading = true
+            ireader.core.log.Log.debug("Preloading chapter: ${chapter.name}")
+            
+            preloadChapterUseCase(
+                chapter = chapter,
+                catalog = state.catalog,
+                onSuccess = { preloadedChapter ->
+                    preloadedChapters[chapter.id] = preloadedChapter
+                    // Save to database for offline access
+                    scope.launch {
+                        insertUseCases.insertChapter(preloadedChapter)
+                    }
+                    ireader.core.log.Log.debug("Successfully preloaded and cached chapter: ${chapter.name}")
+                    isPreloading = false
+                },
+                onError = { error ->
+                    ireader.core.log.Log.error("Failed to preload chapter: ${chapter.name} - $error")
+                    isPreloading = false
+                }
+            )
+        } else if (!chapter.isEmpty()) {
+            // Chapter already has content, just cache it
+            preloadedChapters[chapter.id] = chapter
+            ireader.core.log.Log.debug("Chapter already loaded, added to cache: ${chapter.name}")
+        }
+    }
+    
+    /**
+     * Manually preload next N chapters (for user-triggered preload)
+     */
+    fun preloadNextChapters(count: Int = 3) {
+        scope.launch {
+            try {
+                val currentIndex = stateChapters.indexOfFirst { it.id == stateChapter?.id }
+                if (currentIndex != -1) {
+                    val chaptersToPreload = stateChapters.drop(currentIndex + 1).take(count)
+                    chaptersToPreload.forEach { chapter ->
+                        if (!preloadedChapters.containsKey(chapter.id)) {
+                            preloadChapter(chapter)
+                            delay(500) // Small delay between preloads to avoid overwhelming the source
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                ireader.core.log.Log.error("Error preloading multiple chapters: ${e.message}")
+            }
+        }
+    }
+    
+    /**
+     * Clear preloaded chapters cache
+     */
+    fun clearPreloadCache() {
+        preloadedChapters.clear()
+        ireader.core.log.Log.debug("Preload cache cleared")
+    }
+
     override fun onDestroy() {
         getChapterJob?.cancel()
         getContentJob?.cancel()
+        preloadJob?.cancel()
+        clearPreloadCache()
         webViewManger.destroy()
         super.onDestroy()
     }

@@ -260,6 +260,14 @@ class ReaderPreferences constructor(
         return preferenceStore.getString("deepseek_cookies", "")
     }
     
+    fun autoPreloadNextChapter(): Preference<Boolean> {
+        return preferenceStore.getBoolean("auto_preload_next_chapter", true)
+    }
+    
+    fun preloadOnlyOnWifi(): Preference<Boolean> {
+        return preferenceStore.getBoolean("preload_only_on_wifi", true)
+    }
+    
     fun chatGptPrompt(): Preference<String> {
         return preferenceStore.getString("chatgpt_prompt", "")
     }

@@ -34,6 +34,7 @@ import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.presentation.ui.core.ui.Colour.Transparent
 import ireader.presentation.ui.reader.components.MainBottomSettingComposable
+import ireader.presentation.ui.reader.components.PreloadIndicator
 import ireader.presentation.ui.reader.components.TranslationProgressIndicator
 import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
@@ -234,6 +235,14 @@ fun ReadingScreen(
                                 modifier = Modifier
                                     .align(Alignment.Center)
                                     .padding(horizontal = 16.dp)
+                            )
+                            
+                            // Add preload indicator
+                            PreloadIndicator(
+                                isVisible = vm.isPreloading,
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = 16.dp)
                             )
                         }
                     }
