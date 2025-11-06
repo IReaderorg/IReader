@@ -44,8 +44,17 @@ fun RemoteSourcesScreen(
     }
     val remotes = remember {
         derivedStateOf {
-            listOf(SourceUiModel.Header(SourceKeys.AVAILABLE)) + remotesCatalogs.value.map {
-                SourceUiModel.Item(it, SourceState.Remote)
+            // Group remote catalogs by language and sort
+            val groupedByLanguage = remotesCatalogs.value.groupBy { it.lang }
+            
+            val sortedGroups = groupedByLanguage.entries.sortedBy { it.key }
+            
+            // Build the list with headers for each language
+            buildList {
+                sortedGroups.forEach { (lang, catalogs) ->
+                    add(SourceUiModel.Header(lang))
+                    addAll(catalogs.sortedBy { it.name }.map { SourceUiModel.Item(it, SourceState.Remote) })
+                }
             }
         }
     }
