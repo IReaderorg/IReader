@@ -25,6 +25,7 @@ val DomainServices = module {
 
 
     single { ireader.domain.preferences.prefs.PlayerPreferences(get()) }
+    single { ireader.domain.preferences.prefs.DownloadPreferences(get()) }
 
 
 

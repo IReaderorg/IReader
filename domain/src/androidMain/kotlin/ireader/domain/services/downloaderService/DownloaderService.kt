@@ -9,8 +9,6 @@ import ireader.domain.catalogs.CatalogStore
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.notification.NotificationsIds.CHANNEL_DOWNLOADER_COMPLETE
-import ireader.domain.notification.NotificationsIds.ID_DOWNLOAD_CHAPTER_COMPLETE
-import ireader.domain.notification.NotificationsIds.ID_DOWNLOAD_CHAPTER_ERROR
 import ireader.domain.notification.NotificationsIds.ID_DOWNLOAD_CHAPTER_PROGRESS
 import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_BOOKS_IDS
 import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_Chapters_IDS
@@ -41,18 +39,30 @@ class DownloaderService constructor(
     private val downloadUseCases: DownloadUseCases by inject()
     private val downloadServiceState: DownloadServiceStateImpl by inject()
     private val notificationManager: NotificationManager by inject()
+    private val downloadPreferences: ireader.domain.preferences.prefs.DownloadPreferences by inject()
     private val downloadJob = Job()
     val scope = createICoroutineScope(Dispatchers.Main.immediate + downloadJob)
 
 
     override suspend fun doWork(): Result {
-        val builder = defaultNotificationHelper.baseNotificationDownloader(
-            chapter = null,
-            id
-        )
+        // Create unique notification ID for this download batch
         val inputtedChapterIds = inputData.getLongArray(DOWNLOADER_Chapters_IDS)?.distinct()
         val inputtedBooksIds = inputData.getLongArray(DOWNLOADER_BOOKS_IDS)?.distinct()
         val inputtedDownloaderMode = inputData.getBoolean(DOWNLOADER_MODE, false)
+        
+        // Generate unique notification ID based on work ID
+        val notificationId = if (inputtedDownloaderMode) {
+            ID_DOWNLOAD_CHAPTER_PROGRESS
+        } else {
+            // Use hashCode to generate unique notification ID for each work
+            ID_DOWNLOAD_CHAPTER_PROGRESS + (id.hashCode() and 0x7FFFFFFF) % 1000
+        }
+        
+        val builder = defaultNotificationHelper.baseNotificationDownloader(
+            chapter = null,
+            id  // Use the actual work UUID
+        )
+        
         val result = runDownloadService(
             inputtedBooksIds = inputtedBooksIds?.toLongArray(),
             inputtedChapterIds = inputtedChapterIds?.toLongArray(),
@@ -66,9 +76,9 @@ class DownloaderService constructor(
             localizeHelper = localizeHelper,
             notificationManager = notificationManager,
             onCancel = { error, bookName->
-                notificationManager.cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
+                notificationManager.cancel(notificationId)
                 notificationManager.show(
-                    ID_DOWNLOAD_CHAPTER_ERROR,
+                    notificationId + 1,
                     defaultNotificationHelper.baseCancelledNotificationDownloader(
                         bookName = bookName,
                         error
@@ -76,6 +86,9 @@ class DownloaderService constructor(
                 )
             },
             onSuccess = {
+                // Cancel progress notification first
+                notificationManager.cancel(notificationId)
+                
                 val notification = NotificationCompat.Builder(
                     applicationContext.applicationContext,
                     CHANNEL_DOWNLOADER_COMPLETE
@@ -88,7 +101,7 @@ class DownloaderService constructor(
                     setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
                 }.build()
                 notificationManager.show(
-                    ID_DOWNLOAD_CHAPTER_COMPLETE,
+                    notificationId + 2,
                     notification
                 )
             },
@@ -104,8 +117,10 @@ class DownloaderService constructor(
                 builder.setContentText(it)
             },
             updateNotification = {
-                notificationManager.show(it, builder.build())
-            }
+                notificationManager.show(notificationId, builder.build())
+            },
+            downloadDelayMs = downloadPreferences.downloadDelayMs().get(),
+            concurrentLimit = downloadPreferences.concurrentDownloadsLimit().get()
         )
         return if (result) Result.success() else Result.failure()
     }

@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.AppPreferences
-import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.i18n.resources.MR
 import ireader.presentation.core.theme.LocaleHelper
@@ -65,6 +64,22 @@ fun GeneralSettingScreen(
                         onClick = onTranslationSettingsClick
                     )
                 },
+                Components.Slider(
+                    preferenceAsLong = vm.downloadDelayMs,
+                    title = "Download Delay (milliseconds)",
+                    subtitle = "Delay between chapter downloads to avoid IP blocking",
+                    valueRange = 0f..10000f,
+                    steps = 19,
+                    trailing = "${vm.downloadDelayMs.value}ms"
+                ),
+                Components.Slider(
+                    preferenceAsInt = vm.concurrentDownloads,
+                    title = "Concurrent Downloads",
+                    subtitle = "Maximum number of simultaneous downloads",
+                    valueRange = 1f..10f,
+                    steps = 8,
+                    trailing = vm.concurrentDownloads.value.toString()
+                ),
                 Components.Dynamic {
                     ChoicePreference<PreferenceValues.Installer>(
                             preference = vm.installer,
@@ -159,6 +174,7 @@ fun NavigationPreferenceCustom(
 class GeneralSettingScreenViewModel(
         private val appPreferences: AppPreferences,
         private val uiPreferences: UiPreferences,
+        private val downloadPreferences: ireader.domain.preferences.prefs.DownloadPreferences,
         val localeHelper: LocaleHelper
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
 
@@ -173,6 +189,10 @@ class GeneralSettingScreenViewModel(
     var showLocalCatalogs = uiPreferences.showLocalCatalogs().asState()
     var autoInstaller = uiPreferences.autoCatalogUpdater().asState()
     var localSourceLocation = uiPreferences.savedLocalCatalogLocation().asState()
+    
+    // Download preferences
+    val downloadDelayMs = downloadPreferences.downloadDelayMs().asState()
+    val concurrentDownloads = downloadPreferences.concurrentDownloadsLimit().asState()
 
     @Composable
     fun getLanguageChoices(): Map<String, String> {

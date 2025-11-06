@@ -21,6 +21,14 @@ actual class StartDownloadServicesUseCase( private val context: Context) {
             downloadModes: Boolean,
     ) {
         try {
+            // Create unique work name based on content to allow concurrent downloads
+            val workName = if (downloadModes) {
+                DOWNLOADER_SERVICE_NAME
+            } else {
+                val ids = (bookIds?.joinToString(",") ?: "") + (chapterIds?.joinToString(",") ?: "")
+                "${DOWNLOADER_SERVICE_NAME}_${ids.hashCode()}"
+            }
+            
             val work = OneTimeWorkRequestBuilder<DownloaderService>().apply {
                 setInputData(
                     Data.Builder().apply {
@@ -37,9 +45,11 @@ actual class StartDownloadServicesUseCase( private val context: Context) {
                 )
                 addTag(DOWNLOADER_SERVICE_NAME)
             }.build()
+            
+            // Use KEEP to allow multiple concurrent downloads
             WorkManager.getInstance(context).enqueueUniqueWork(
-                DOWNLOADER_SERVICE_NAME,
-                ExistingWorkPolicy.REPLACE,
+                workName,
+                ExistingWorkPolicy.KEEP,
                 work
             )
         } catch (e: IllegalStateException) {

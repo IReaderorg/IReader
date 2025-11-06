@@ -15,7 +15,7 @@ REFERENCES chapter(_id) ON UPDATE NO ACTION ON DELETE CASCADE );
 
 
 findAll:
-SELECT download.*, book._id, book.title, chapter.url, chapter.name, chapter.scanlator,book.source, chapter.content IS NOT "" AS is_downloaded
+SELECT download.*, book._id, book.title, chapter.url, chapter.name, chapter.scanlator,book.source, download.priority = 1 AS is_downloaded
 FROM download
 JOIN book ON download.book_id = book._id
 JOIN chapter ON download.chapter_id = chapter._id;

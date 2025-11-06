@@ -65,7 +65,7 @@ fun SavedDownloadWithInfo.toSavedDownload(): SavedDownload {
 fun buildSavedDownload(book: Book, chapter: Chapter): SavedDownload {
     return SavedDownload(
         bookId = book.id,
-        priority = 1,
+        priority = 0,  // 0 = pending download, 1 = downloaded
         chapterName = chapter.name,
         chapterKey = chapter.key,
         translator = chapter.translator,

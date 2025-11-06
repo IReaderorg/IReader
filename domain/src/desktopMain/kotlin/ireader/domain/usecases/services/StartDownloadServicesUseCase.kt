@@ -24,10 +24,13 @@ actual class StartDownloadServicesUseCase(
     private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     private val downloadUseCases: DownloadUseCases,
     private val downloadServiceState: DownloadServiceStateImpl,
-    private val notificationManager: NotificationManager
+    private val notificationManager: NotificationManager,
+    private val downloadPreferences: ireader.domain.preferences.prefs.DownloadPreferences
 ) {
-    val workerJob = Job()
-    val scope = createICoroutineScope(Dispatchers.Main.immediate + workerJob)
+    private val parentJob = Job()
+    private val scope = createICoroutineScope(Dispatchers.Main.immediate + parentJob)
+    private val activeJobs = mutableListOf<Job>()
+    
     var savedDownload: SavedDownload =
         SavedDownload(
             bookId = 0,
@@ -40,7 +43,7 @@ actual class StartDownloadServicesUseCase(
         )
 
     actual fun start(bookIds: LongArray?, chapterIds: LongArray?, downloadModes: Boolean) {
-        scope.launchIO {
+        val job = scope.launchIO {
             val result = runDownloadService(
                 inputtedBooksIds = bookIds,
                 inputtedChapterIds = chapterIds,
@@ -69,13 +72,28 @@ actual class StartDownloadServicesUseCase(
                 },
                 updateTitle = {
 
-                }, updateNotification = {}
+                }, updateNotification = {},
+                downloadDelayMs = downloadPreferences.downloadDelayMs().get(),
+                concurrentLimit = downloadPreferences.concurrentDownloadsLimit().get()
             )
+        }
+        
+        synchronized(activeJobs) {
+            activeJobs.add(job)
+            job.invokeOnCompletion {
+                synchronized(activeJobs) {
+                    activeJobs.remove(job)
+                }
+            }
         }
     }
 
     actual fun stop() {
-        workerJob.cancel()
+        synchronized(activeJobs) {
+            activeJobs.forEach { it.cancel() }
+            activeJobs.clear()
+        }
+        parentJob.cancel()
     }
 
 }
