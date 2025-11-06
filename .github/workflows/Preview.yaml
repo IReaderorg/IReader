@@ -101,9 +101,11 @@ jobs:
           echo "COMMIT_COUNT=$commit_count" >> $GITHUB_ENV
       - name: Build rpm Package
         if: ${{ matrix.runtime == 'linux-fedora-x64' }}
-        uses: Syer10/Fedora-Java21-Action@v1
-        with:
-          command: ./gradlew ${{ matrix.build }} -Ppreview="${{ env.COMMIT_COUNT }}" --stacktrace
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace fedora:latest bash -c "
+            dnf install -y java-21-openjdk-devel rpm-build &&
+            ./gradlew ${{ matrix.build }} -Ppreview=\"${{ env.COMMIT_COUNT }}\" --stacktrace
+          "
 
       - name: Build
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}

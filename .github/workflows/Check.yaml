@@ -68,9 +68,11 @@ jobs:
 
       - name: Build rpm Package
         if: ${{ matrix.runtime == 'linux-fedora-x64' }}
-        uses: Syer10/Fedora-Java21-Action@v1
-        with:
-          command: ./gradlew ${{ matrix.build }} --stacktrace
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace fedora:latest bash -c "
+            dnf install -y java-21-openjdk-devel rpm-build &&
+            ./gradlew ${{ matrix.build }} --stacktrace
+          "
 
       - name: Build
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
