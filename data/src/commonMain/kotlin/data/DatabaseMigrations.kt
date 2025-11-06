@@ -11,7 +11,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 2
+    const val CURRENT_VERSION = 3
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -27,11 +27,8 @@ object DatabaseMigrations {
                     try {
                         applyMigration(driver, version)
                     } catch (e: Exception) {
-                        println("Error during migration from version $version: ${e.message}")
-                        
                         // For specific errors, try to recover
                         if (e.message?.contains("table history_new already exists") == true) {
-                            println("Attempting to recover from interrupted migration...")
                             cleanupInterruptedMigration(driver, version)
                             // Try again after cleanup
                             applyMigration(driver, version)
@@ -44,22 +41,17 @@ object DatabaseMigrations {
                 // Initialize views after all migrations
                 initializeViews(driver)
             } catch (e: Exception) {
-                println("Failed to complete migrations: ${e.message}")
                 // Try to at least initialize views even if migrations failed
                 try {
                     initializeViews(driver)
                 } catch (viewErr: Exception) {
-                    println("Could not initialize views after migration failure: ${viewErr.message}")
+                    // Ignore view errors
                 }
                 throw e
             }
         }
     }
     
-    /**
-     * Public method to directly initialize views without requiring a migration
-     * This can be called during database creation to ensure views exist
-     */
     fun initializeViewsDirectly(driver: SqlDriver) {
         initializeViews(driver)
     }
@@ -73,8 +65,9 @@ object DatabaseMigrations {
     private fun applyMigration(driver: SqlDriver, fromVersion: Int) {
         when (fromVersion) {
             1 -> migrateV1toV2(driver)
+            2 -> migrateV2toV3(driver)
             // Add more migration cases as the database evolves
-            // 2 -> migrateV2toV3(driver)
+            // 3 -> migrateV3toV4(driver)
             // etc.
         }
     }
@@ -96,12 +89,63 @@ object DatabaseMigrations {
     }
     
     /**
-     * Verify that all required tables exist in the database
-     * If any table is missing, create it or throw a specific error
+     * Migration from version 2 to version 3
+     * Ensures book table has all required columns
+     * This fixes "no such column" errors for last_update, next_update, initialized, etc.
      */
+    private fun migrateV2toV3(driver: SqlDriver) {
+        try {
+            // Get all existing columns
+            val existingColumns = mutableSetOf<String>()
+            
+            driver.executeQuery(
+                identifier = null,
+                sql = "PRAGMA table_info(book)",
+                mapper = { cursor ->
+                    var result = cursor.next()
+                    while (result.value) {
+                        val columnName = cursor.getString(1)
+                        if (columnName != null) {
+                            existingColumns.add(columnName)
+                        }
+                        result = cursor.next()
+                    }
+                    result
+                },
+                parameters = 0
+            )
+            
+            // Define all columns that should exist with their types and defaults
+            val requiredColumns = mapOf(
+                "last_update" to "INTEGER",
+                "next_update" to "INTEGER",
+                "initialized" to "INTEGER NOT NULL DEFAULT 0",
+                "viewer" to "INTEGER NOT NULL DEFAULT 0",
+                "chapter_flags" to "INTEGER NOT NULL DEFAULT 0",
+                "cover_last_modified" to "INTEGER NOT NULL DEFAULT 0",
+                "date_added" to "INTEGER NOT NULL DEFAULT 0"
+            )
+            
+            // Add any missing columns
+            requiredColumns.forEach { (columnName, columnType) ->
+                if (!existingColumns.contains(columnName)) {
+                    try {
+                        val sql = "ALTER TABLE book ADD COLUMN $columnName $columnType"
+                        driver.execute(null, sql, 0)
+                    } catch (e: Exception) {
+                        // Column may already exist, ignore
+                    }
+                }
+            }
+            
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Don't throw - the columns might already exist which is fine
+        }
+    }
+    
     private fun verifyRequiredTables(driver: SqlDriver) {
         try {
-            // Check if history table exists
             val historyTableCheck = "SELECT name FROM sqlite_master WHERE type='table' AND name='history'"
             var historyTableExists = false
             driver.executeQuery(
@@ -116,9 +160,6 @@ object DatabaseMigrations {
             )
             
             if (!historyTableExists) {
-                println("WARNING: History table does not exist. Attempting to create it.")
-                
-                // First verify that the chapter table exists since history depends on it
                 val chapterTableCheck = "SELECT name FROM sqlite_master WHERE type='table' AND name='chapter'"
                 var chapterTableExists = false
                 driver.executeQuery(
@@ -133,8 +174,6 @@ object DatabaseMigrations {
                 )
                 
                 if (!chapterTableExists) {
-                    println("ERROR: Chapter table missing but required by history table. Creating it...")
-                    
                     val createChapterTableSql = """
                         CREATE TABLE IF NOT EXISTS chapter(
                             _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
@@ -155,10 +194,8 @@ object DatabaseMigrations {
                     """.trimIndent()
                     
                     driver.execute(null, createChapterTableSql, 0)
-                    println("Chapter table created successfully.")
                 }
                 
-                // Create the history table if it doesn't exist
                 val createHistoryTableSql = """
                     CREATE TABLE IF NOT EXISTS history(
                         _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -173,12 +210,7 @@ object DatabaseMigrations {
                 
                 try {
                     driver.execute(null, createHistoryTableSql, 0)
-                    println("History table created successfully.")
                 } catch (e: Exception) {
-                    println("Error creating history table: ${e.message}")
-                    println("Attempting with different schema...")
-                    
-                    // Try again without AUTOINCREMENT as it might be an issue in some SQLite versions
                     val alternativeHistoryTableSql = """
                         CREATE TABLE IF NOT EXISTS history(
                             _id INTEGER NOT NULL PRIMARY KEY,
@@ -192,22 +224,15 @@ object DatabaseMigrations {
                     """.trimIndent()
                     
                     driver.execute(null, alternativeHistoryTableSql, 0)
-                    println("History table created with alternative schema.")
                 }
                 
-                // Create necessary indices
                 driver.execute(null, "CREATE INDEX IF NOT EXISTS history_history_chapter_id_index ON history(chapter_id);", 0)
                 driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_history_last_read ON history(last_read);", 0)
                 driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_history_progress ON history(progress);", 0)
-            } else {
-                println("History table exists.")
             }
             
         } catch (e: Exception) {
-            println("Error verifying required tables: ${e.message}")
             e.printStackTrace()
-            // We don't want to throw here, as we want to continue with view creation even if table creation fails
-            // The view creation will fail more gracefully with a specific error about the missing table
         }
     }
 
@@ -217,10 +242,8 @@ object DatabaseMigrations {
      */
     private fun initializeViews(driver: SqlDriver) {
         try {
-            // First verify that required tables exist
             verifyRequiredTables(driver)
             
-            // First check if the views already exist
             val viewCheckQuery = "SELECT name FROM sqlite_master WHERE type='view' AND name='historyView'"
             var historyViewExists = false
             driver.executeQuery(
@@ -234,24 +257,17 @@ object DatabaseMigrations {
                 parameters = 0
             )
             
-            // Always drop views to recreate them with latest schema
             driver.execute(null, "DROP VIEW IF EXISTS historyView;", 0)
             driver.execute(null, "DROP VIEW IF EXISTS updatesView;", 0)
             
-            println("Creating views - historyView existed before: $historyViewExists")
-            
-            // Double-check that history table exists before creating the view
             val historyTableExists = checkTableExists(driver, "history")
             if (!historyTableExists) {
-                println("ERROR: Cannot create historyView because history table is missing.")
                 return
             }
             
             val categoryInitSql ="""
-                -- Insert system category
                 INSERT OR IGNORE INTO categories(_id, name, sort, flags) VALUES (0, "", -1, 0);
                 INSERT OR IGNORE INTO categories(_id, name, sort, flags) VALUES (-1, "", -1, 0);
-                -- Disallow deletion of default category
                 CREATE TRIGGER IF NOT EXISTS system_category_delete_trigger BEFORE DELETE
                 ON categories
                 BEGIN SELECT CASE
@@ -261,12 +277,10 @@ object DatabaseMigrations {
                 END;
             """.trimIndent()
             
-            // Try creating the trigger and categories - but don't fail if this doesn't work
             try {
                 driver.execute(null, categoryInitSql, 0)
-                println("Category initialization completed successfully")
             } catch (e: Exception) {
-                println("Error initializing categories (non-fatal): ${e.message}")
+                // Ignore
             }
             
             // Create historyView with progress column
@@ -302,13 +316,9 @@ object DatabaseMigrations {
                 ON chapter.book_id = max_last_read.book_id;
             """.trimIndent()
             
-            println("Creating historyView...")
             try {
-                // Execute historyView creation separately
                 driver.execute(null, historyViewSql, 0)
-                println("historyView created successfully")
             } catch (e: Exception) {
-                println("Error creating historyView: ${e.message}")
                 e.printStackTrace()
             }
             
@@ -341,17 +351,12 @@ object DatabaseMigrations {
                 ORDER BY date_fetch DESC;
             """.trimIndent()
             
-            println("Creating updatesView...")
             try {
-                // Execute updatesView creation separately
                 driver.execute(null, updatesViewSql, 0)
-                println("updatesView created successfully")
             } catch (e: Exception) {
-                println("Error creating updatesView: ${e.message}")
                 e.printStackTrace()
             }
             
-            // Verify the views were created successfully
             driver.executeQuery(
                 identifier = null,
                 sql = "SELECT name FROM sqlite_master WHERE type='view'",
@@ -361,15 +366,10 @@ object DatabaseMigrations {
                 parameters = 0
             )
         } catch (e: Exception) {
-            // Log the error but don't crash - this will help with debugging
-            println("Error creating database views: ${e.message}")
             e.printStackTrace()
         }
     }
     
-    /**
-     * Helper function to check if a table exists
-     */
     private fun checkTableExists(driver: SqlDriver, tableName: String): Boolean {
         var exists = false
         try {
@@ -385,46 +385,28 @@ object DatabaseMigrations {
                 parameters = 0
             )
         } catch (e: Exception) {
-            println("Error checking if table $tableName exists: ${e.message}")
+            // Ignore
         }
         return exists
     }
 
-    /**
-     * A recovery method to force reinitialization of database views.
-     * This can be called when an app update needs to fix database issues.
-     */
     fun forceViewReinit(driver: SqlDriver) {
-        println("Forcing view reinitialization...")
         try {
-            // First drop any existing views
             driver.execute(null, "DROP VIEW IF EXISTS historyView;", 0)
             driver.execute(null, "DROP VIEW IF EXISTS updatesView;", 0)
-            
-            // Now recreate the views
             initializeViews(driver)
-            
-            println("View reinitialization completed successfully")
         } catch (e: Exception) {
-            println("Error during forced view reinitialization: ${e.message}")
             e.printStackTrace()
         }
     }
 
-    /**
-     * Cleans up after an interrupted migration to allow migration to be retried
-     */
     private fun cleanupInterruptedMigration(driver: SqlDriver, version: Int) {
         when (version) {
             1 -> {
-                // Clean up history_new table from interrupted v1 to v2 migration
                 try {
-                    println("Dropping leftover history_new table...")
                     driver.execute(null, "DROP TABLE IF EXISTS history_new;", 0)
                     
-                    // Check if history table exists and is in the correct format
                     val columnsCheck = "PRAGMA table_info(history)"
-                    
                     var hasProgressColumn = false
                     driver.executeQuery(
                         identifier = null,
@@ -441,18 +423,20 @@ object DatabaseMigrations {
                         parameters = 0
                     )
                     
-                    // If history table already has the progress column, the migration was partially successful
                     if (hasProgressColumn) {
-                        println("The history table already has the progress column. Marking migration as complete.")
-                        // Skip the migration by updating the version
                         return
                     }
                 } catch (e: Exception) {
-                    println("Error cleaning up interrupted migration: ${e.message}")
                     throw e
                 }
             }
-            // Add more cases for other migrations as needed
+            2 -> {
+                try {
+                    driver.execute(null, "DROP TABLE IF EXISTS book_backup;", 0)
+                } catch (e: Exception) {
+                    throw e
+                }
+            }
         }
     }
 } 

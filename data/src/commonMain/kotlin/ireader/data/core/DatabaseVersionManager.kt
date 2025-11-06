@@ -33,10 +33,61 @@ class DatabaseVersionManager(
             // Even if no migration is needed, always ensure views are initialized
             println("No database upgrade needed, but ensuring views are initialized")
             DatabaseMigrations.initializeViewsDirectly(driver)
+            
+            // Check if the database structure is actually correct
+            // If not, force a repair
+            if (!validateDatabaseColumns()) {
+                println("Database structure validation failed. Running repair...")
+                repairDatabase()
+            }
         }
         
         // Validate database structure
         validateDatabaseStructure()
+    }
+    
+    /**
+     * Validates that the book table has all required columns
+     * Returns true if valid, false if columns are missing
+     */
+    private fun validateDatabaseColumns(): Boolean {
+        try {
+            val existingColumns = mutableSetOf<String>()
+            
+            driver.executeQuery(
+                identifier = null,
+                sql = "PRAGMA table_info(book)",
+                mapper = { cursor ->
+                    var result = cursor.next()
+                    while (result.value) {
+                        val columnName = cursor.getString(1)
+                        if (columnName != null) {
+                            existingColumns.add(columnName)
+                        }
+                        result = cursor.next()
+                    }
+                    result
+                },
+                parameters = 0
+            )
+            
+            val requiredColumns = setOf(
+                "_id", "source", "url", "title", "status", "favorite",
+                "initialized", "viewer", "chapter_flags", "cover_last_modified", 
+                "date_added", "last_update", "next_update"
+            )
+            
+            val missingColumns = requiredColumns - existingColumns
+            if (missingColumns.isNotEmpty()) {
+                println("Missing columns in book table: $missingColumns")
+                return false
+            }
+            
+            return true
+        } catch (e: Exception) {
+            println("Error validating database columns: ${e.message}")
+            return false
+        }
     }
     
     /**
@@ -86,6 +137,9 @@ class DatabaseVersionManager(
     fun repairDatabase() {
         println("Attempting database repair...")
         try {
+            // First, try to add any missing columns
+            addMissingColumns()
+            
             // Force view reinitialization
             DatabaseMigrations.forceViewReinit(driver)
             
@@ -95,6 +149,61 @@ class DatabaseVersionManager(
             println("Database repair completed")
         } catch (e: Exception) {
             println("Error during database repair: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+    
+    /**
+     * Adds any missing columns to the book table
+     */
+    private fun addMissingColumns() {
+        try {
+            val existingColumns = mutableSetOf<String>()
+            
+            driver.executeQuery(
+                identifier = null,
+                sql = "PRAGMA table_info(book)",
+                mapper = { cursor ->
+                    var result = cursor.next()
+                    while (result.value) {
+                        val columnName = cursor.getString(1)
+                        if (columnName != null) {
+                            existingColumns.add(columnName)
+                        }
+                        result = cursor.next()
+                    }
+                    result
+                },
+                parameters = 0
+            )
+            
+            println("Current columns in book table: $existingColumns")
+            
+            // Define all columns that should exist
+            val requiredColumns = mapOf(
+                "last_update" to "INTEGER",
+                "next_update" to "INTEGER",
+                "initialized" to "INTEGER NOT NULL DEFAULT 0",
+                "viewer" to "INTEGER NOT NULL DEFAULT 0",
+                "chapter_flags" to "INTEGER NOT NULL DEFAULT 0",
+                "cover_last_modified" to "INTEGER NOT NULL DEFAULT 0",
+                "date_added" to "INTEGER NOT NULL DEFAULT 0"
+            )
+            
+            // Add missing columns
+            requiredColumns.forEach { (columnName, columnType) ->
+                if (!existingColumns.contains(columnName)) {
+                    try {
+                        val sql = "ALTER TABLE book ADD COLUMN $columnName $columnType"
+                        driver.execute(null, sql, 0)
+                        println("Added missing column: $columnName")
+                    } catch (e: Exception) {
+                        println("Could not add column $columnName: ${e.message}")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            println("Error adding missing columns: ${e.message}")
             e.printStackTrace()
         }
     }
