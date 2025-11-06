@@ -139,4 +139,8 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun showHistoryInButtonBar(): Preference<Boolean> {
         return preferenceStore.getBoolean("show_history_in_bottom_bar", true)
     }
+
+    fun showLanguageFilter(): Preference<Boolean> {
+        return preferenceStore.getBoolean("show_language_filter", true)
+    }
 }

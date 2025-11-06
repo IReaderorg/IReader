@@ -41,6 +41,17 @@ fun UserSourcesScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
 
             ) {
+        item(key = "language_filter") {
+            LanguageChipGroup(
+                choices = vm.languageChoices,
+                selected = vm.selectedUserSourceLanguage,
+                onClick = { vm.selectedUserSourceLanguage = it },
+                isVisible = vm.showLanguageFilter.value,
+                onToggleVisibility = { visible ->
+                    vm.uiPreferences.showLanguageFilter().set(visible)
+                }
+            )
+        }
 
         items(
                 items = usersSources.value,

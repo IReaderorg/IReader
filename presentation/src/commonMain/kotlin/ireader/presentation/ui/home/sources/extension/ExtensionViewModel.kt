@@ -33,7 +33,10 @@ class ExtensionViewModel(
     val lastUsedSource = uiPreferences.lastUsedSource().asState()
     val defaultRepo = uiPreferences.defaultRepository().asState()
     val autoInstaller = uiPreferences.autoCatalogUpdater().asState()
+    val showLanguageFilter = uiPreferences.showLanguageFilter().asState()
     val userSources: List<SourceUiModel> by derivedStateOf {
+        val filteredPinned = pinnedCatalogs.filteredByLanguageChoice(selectedUserSourceLanguage)
+        val filteredUnpinned = unpinnedCatalogs.filteredByLanguageChoice(selectedUserSourceLanguage)
 
         val list = mutableListOf<SourceUiModel>()
         if (lastUsedSource.value != -1L) {
@@ -41,29 +44,31 @@ class ExtensionViewModel(
             (pinnedCatalogs + unpinnedCatalogs).firstOrNull {
                 it.sourceId == lastUsedSource.value
             }?.let { c ->
-                list.addAll(
-                        listOf<SourceUiModel>(
-                                SourceUiModel.Header(SourceKeys.LAST_USED_KEY),
-                                SourceUiModel.Item(c, SourceState.LastUsed)
+                if (c.matchesLanguageChoice(selectedUserSourceLanguage)) {
+                    list.addAll(
+                            listOf<SourceUiModel>(
+                                    SourceUiModel.Header(SourceKeys.LAST_USED_KEY),
+                                    SourceUiModel.Item(c, SourceState.LastUsed)
 
-                        )
-                )
+                            )
+                    )
+                }
             }
         }
 
-        if (pinnedCatalogs.isNotEmpty()) {
+        if (filteredPinned.isNotEmpty()) {
             list.addAll(
                     listOf<SourceUiModel>(
                             SourceUiModel.Header(SourceKeys.PINNED_KEY),
-                            *pinnedCatalogs.map { source ->
+                            *filteredPinned.map { source ->
                                 SourceUiModel.Item(source, SourceState.Pinned)
                             }.toTypedArray()
                     )
             )
         }
-        if (unpinnedCatalogs.isNotEmpty()) {
+        if (filteredUnpinned.isNotEmpty()) {
             list.addAll(
-                    unpinnedCatalogs.groupBy {
+                    filteredUnpinned.groupBy {
                         it.source?.lang ?: "others"
                     }.flatMap {
                         listOf<SourceUiModel>(
@@ -225,6 +230,28 @@ class ExtensionViewModel(
             is LanguageChoice.Others -> {
                 val codes = choice.languages.map { it.code }
                 filter { it.lang in codes }
+            }
+        }
+    }
+
+    private fun List<CatalogLocal>.filteredByLanguageChoice(choice: LanguageChoice): List<CatalogLocal> {
+        return when (choice) {
+            LanguageChoice.All -> this
+            is LanguageChoice.One -> filter { it.source?.lang == choice.language.code }
+            is LanguageChoice.Others -> {
+                val codes = choice.languages.map { it.code }
+                filter { it.source?.lang in codes }
+            }
+        }
+    }
+
+    private fun CatalogLocal.matchesLanguageChoice(choice: LanguageChoice): Boolean {
+        return when (choice) {
+            LanguageChoice.All -> true
+            is LanguageChoice.One -> source?.lang == choice.language.code
+            is LanguageChoice.Others -> {
+                val codes = choice.languages.map { it.code }
+                source?.lang in codes
             }
         }
     }

@@ -63,6 +63,17 @@ fun RemoteSourcesScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        item(key = "language_filter") {
+            LanguageChipGroup(
+                choices = vm.languageChoices,
+                selected = vm.selectedLanguage,
+                onClick = { vm.selectedLanguage = it },
+                isVisible = vm.showLanguageFilter.value,
+                onToggleVisibility = { visible ->
+                    vm.uiPreferences.showLanguageFilter().set(visible)
+                }
+            )
+        }
 
         items(
                 items = remoteSources.value,
