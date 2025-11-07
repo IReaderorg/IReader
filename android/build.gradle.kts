@@ -6,9 +6,9 @@ import java.util.*
 plugins {
     id("com.android.application")
     kotlin("android")
-    id("com.google.gms.google-services")
+    id("com.google.gms.google-services") apply false
     kotlin("plugin.serialization")
-    id("com.google.firebase.crashlytics")
+    id("com.google.firebase.crashlytics") apply false
     id("com.google.devtools.ksp")
     alias(kotlinx.plugins.compose.compiler)
     alias(libs.plugins.jetbrainCompose)
@@ -111,6 +111,10 @@ android {
             buildConfigField("boolean", "INCLUDE_UPDATER", "true")
             dimension = "default"
         }
+        create("fdroid") {
+            buildConfigField("boolean", "INCLUDE_UPDATER", "false")
+            dimension = "default"
+        }
         create("dev") {
             resourceConfigurations += listOf("en", "xxhdpi")
             dimension = "default"
@@ -173,10 +177,15 @@ dependencies {
 
 
     /** Firebase **/
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.analyticKtx)
-    implementation(libs.firebase.analytic)
-    implementation(libs.firebase.crashlytics)
+    "standardImplementation"(platform(libs.firebase.bom))
+    "standardImplementation"(libs.firebase.analyticKtx)
+    "standardImplementation"(libs.firebase.analytic)
+    "standardImplementation"(libs.firebase.crashlytics)
+    "devImplementation"(platform(libs.firebase.bom))
+    "devImplementation"(libs.firebase.analyticKtx)
+    "devImplementation"(libs.firebase.analytic)
+    "devImplementation"(libs.firebase.crashlytics)
+    
     implementation(libs.bundles.simplestorage)
     implementation(accompanist.permissions)
 
@@ -184,7 +193,8 @@ dependencies {
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.coroutines.android)
-    implementation(libs.firebase.analytics)
+    "standardImplementation"(libs.firebase.analytics)
+    "devImplementation"(libs.firebase.analytics)
 
 
 
@@ -227,6 +237,13 @@ composeCompiler {
     featureFlags.set(setOf(
         org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag.StrongSkipping
     ))
+}
+
+// Apply Google Services plugin only for non-fdroid flavors
+val taskRequests = gradle.startParameter.taskRequests.toString()
+if (!taskRequests.contains("Fdroid", ignoreCase = true)) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
 }
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround
