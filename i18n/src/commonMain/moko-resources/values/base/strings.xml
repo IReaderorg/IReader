@@ -595,4 +595,7 @@
     <string name="ollama_url">Ollama URL</string>
     <string name="ollama_model">Ollama Model</string>
     <string name="database_error">Database error detected. Please try one of the following: 1) Restart the app 2) Delete database files at %LOCALAPPDATA%\\IReader\\cache 3) Launch with --repair-database parameter</string>
+    <string name="show_original">Show Original</string>
+    <string name="show_translation">Show Translation</string>
+    <string name="translated">Translated</string>
 </resources>
