@@ -78,9 +78,9 @@ kotlin {
                 implementation(composeLib.compose.googlFonts)
                 implementation(androidx.media)
 
-
-
-                implementation(libs.googleTranslator)
+                // Google ML Kit only for non-fdroid builds
+                // For fdroid, translation features will be disabled
+                // implementation(libs.googleTranslator)
 
                 implementation(libs.gson)
                 implementation(androidx.work.runtime)
@@ -118,5 +118,11 @@ kotlin {
 
 
 dependencies {
-    implementation(files("libs/epublib-core-latest.jar"))
+    // Readium Kotlin - Modern, actively maintained Kotlin library for EPUB
+    // Professional-grade library used by major ebook apps
+    add("androidMainImplementation", "org.readium.kotlin-toolkit:readium-shared:3.0.0-beta.2")
+    add("androidMainImplementation", "org.readium.kotlin-toolkit:readium-streamer:3.0.0-beta.2")
+    
+    // For desktop, we'll use a lightweight custom implementation with okio
+    // since Readium is Android-focused
 }

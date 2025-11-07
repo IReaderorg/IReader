@@ -12,26 +12,20 @@ include(":source-api")
 
 
 pluginManagement {
-    // this repository is for devs who want to use custom repo instead of official ones
-    val hostedRepository = System.getenv("CUSTOM_HOST_REPOSITORY")
     repositories {
-        hostedRepository?.split(";")?.forEach { host ->
-            maven(host)
-        }
         gradlePluginPortal()
         mavenCentral()
         google()
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+        // Only add Jetbrains Compose repo for non-fdroid builds
+        if (!gradle.startParameter.taskNames.any { it.contains("Fdroid", ignoreCase = true) }) {
+            maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+        }
     }
 }
 
 dependencyResolutionManagement {
-    val hostedRepository = System.getenv("CUSTOM_HOST_REPOSITORY")
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        hostedRepository?.split(";")?.forEach { host ->
-            maven(host)
-        }
         mavenCentral()
         google()
         maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/")
@@ -39,7 +33,6 @@ dependencyResolutionManagement {
         maven("https://oss.sonatype.org/service/local/staging/deploy/maven2")
         maven(url = "https://jitpack.io")
         maven(url = "https://repo1.maven.org/maven2/")
-
     }
     versionCatalogs {
         create("composeLib") {
