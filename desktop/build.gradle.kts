@@ -123,8 +123,12 @@ compose.desktop {
             description = "IReader"
             copyright = "Mozilla Public License v2.0"
             vendor = "kazemcodes"
-            if (isPreview) {
-                packageVersion = "${version.toString().substringBeforeLast('.')}.$previewCode"
+            
+            // Set proper package version
+            packageVersion = if (isPreview) {
+                "${ProjectConfig.versionName}.$previewCode"
+            } else {
+                ProjectConfig.versionName
             }
 
             args(project.projectDir.absolutePath)
