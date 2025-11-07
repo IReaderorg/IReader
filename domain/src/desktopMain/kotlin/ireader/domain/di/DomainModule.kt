@@ -31,7 +31,7 @@ actual val DomainModule: Module = module {
     single<FileSaver> {
        DesktopFileSaver()
     }
-    single<ImportEpub> { ImportEpub(get(),) }
+    single<ImportEpub> { ImportEpub(get(), get(), get()) }
     single {
         DesktopGetSimpleStorage()
     }
@@ -79,5 +79,5 @@ actual val DomainModule: Module = module {
         )
     }
     single<HttpClients> { HttpClients(get<PreferenceStoreFactory>().create("cookies")) }
-    single<EpubCreator> { EpubCreator() }
+    single<EpubCreator> { EpubCreator(get()) }
 }

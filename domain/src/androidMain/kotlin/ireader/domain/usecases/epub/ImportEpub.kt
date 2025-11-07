@@ -1,5 +1,6 @@
 package ireader.domain.usecases.epub
 
+import android.content.Context
 import ireader.core.source.LocalSource
 import ireader.core.source.model.MangaInfo
 import ireader.core.source.model.Text
@@ -9,172 +10,246 @@ import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.usecases.file.FileSaver
 import ireader.domain.usecases.files.GetSimpleStorage
-import nl.siegmann.epublib.epub.EpubReader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.jsoup.nodes.TextNode
-import org.xml.sax.InputSource
 import java.io.File
-import java.io.InputStream
-import javax.xml.parsers.DocumentBuilderFactory
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.zip.ZipFile
 
+/**
+ * Android EPUB import using pure Kotlin with ZipFile and Jsoup
+ * Handles content:// URIs by copying to temp file first
+ */
 actual class ImportEpub(
     private val bookRepository: BookRepository,
     private val chapterRepository: ChapterRepository,
     private val fileSaver: FileSaver,
-    private val simpleStorage: GetSimpleStorage
+    private val simpleStorage: GetSimpleStorage,
+    context: Context  // Use application context to avoid memory leaks
 ) {
+    // Store application context which is safe to hold
+    private val appContext: Context = context.applicationContext
 
-
-    private fun getEpubReader(uri: ireader.domain.models.common.Uri): nl.siegmann.epublib.domain.Book? {
-        return fileSaver.readStream(uri) .let {
-            EpubReader().readEpub(it)
-        }
-    }
-    data class Section(val title: String, val html: Document)
-    fun getSections(book: nl.siegmann.epublib.domain.Book) : List<Section>{
-        val sections = mutableListOf<Section>()
-        book.tableOfContents.tocReferences.forEach { tocReference ->
-            val resource = tocReference.resource
-            if (resource != null) {
-                val href = resource.href
-                val data = resource.getReader().readText()
-                val contentType = resource.mediaType.toString()
-                val html = Jsoup.parse(data)
-                val title = tocReference.title
-                val section = Section(title, html)
-                sections.add(section)
-            }
-        }
-
-        return sections
-    }
-    actual suspend fun parse(uris: List<ireader.domain.models.common.Uri>) {
+    actual suspend fun parse(uris: List<ireader.domain.models.common.Uri>) = withContext(Dispatchers.IO) {
+        val errors = mutableListOf<Pair<String, String>>()
+        
         uris.forEach { uri ->
-
-
-        val epub = getEpubReader(uri) ?: throw Exception()
-
-        val key = epub.metadata?.titles?.firstOrNull() ?: throw Exception("Unknown novel")
-        val imgFile = File(simpleStorage.ireaderCacheDir(), "library_covers/$key.png")
-        bookRepository.delete(key)
-        // Insert new book data
-        val bookId = Book(
-            title = epub.metadata.titles.firstOrNull() ?: "",
-            key = key ?: "",
-            favorite = true,
-            sourceId = LocalSource.SOURCE_ID,
-            cover = imgFile.absolutePath,
-            author = epub.metadata?.authors?.firstOrNull()?.let { it.firstname + " " + it.lastname }
-                ?: "",
-            status = MangaInfo.PUBLISHING_FINISHED,
-            description = epub.metadata?.descriptions?.firstOrNull()?.let { Jsoup.parse(it).text() }
-                ?: "",
-        )
-            .let { bookRepository.upsert(it) }
-            val sections = getSections(epub)
-            sections.map { section ->
-                Chapter(
-                    name = section.title ?: "Unknown",
-                    key = section.title ?: "",
-                    bookId = bookId,
-                    content = section.html.select("h1,h2,h3,h4,h5,h6,p").eachText().map { Text(it) },
-                )
-            }.filterNotNull().let {
-            chapterRepository.insertChapters(it)
+            try {
+                importEpub(uri)
+            } catch (e: Exception) {
+                val filePath = uri.androidUri.path ?: uri.toString()
+                errors.add(filePath to (e.message ?: "Unknown error"))
+                println("Failed to import $filePath: ${e.message}")
+            }
         }
-        epub.coverImage?.data?.let {
-            imgFile.parentFile?.also { parent ->
-                parent.mkdirs()
-                if (parent.exists()) {
-                    imgFile.writeBytes(it)
+        
+        if (errors.isNotEmpty()) {
+            val errorMessage = errors.joinToString("\n") { (path, error) ->
+                "${File(path).name}: $error"
+            }
+            throw Exception("Failed to import ${errors.size} file(s):\n$errorMessage")
+        }
+    }
+    
+    private suspend fun importEpub(uri: ireader.domain.models.common.Uri) {
+        // For content:// URIs, we need to copy to a temp file first
+        val tempFile = File(appContext.cacheDir, "temp_epub_${System.currentTimeMillis()}.epub")
+        
+        try {
+            // Copy content to temp file
+            fileSaver.readStream(uri).use { inputStream ->
+                tempFile.outputStream().use { outputStream ->
+                    inputStream.copyTo(outputStream)
                 }
             }
-        }
+            
+            if (!tempFile.exists() || tempFile.length() == 0L) {
+                throw Exception("Failed to read EPUB file")
+            }
+            
+            ZipFile(tempFile).use { zip ->
+                // Parse OPF file to get metadata and spine
+                val opfEntry = findOpfFile(zip) ?: throw Exception("No OPF file found in EPUB")
+                val opfContent = zip.getInputStream(opfEntry).bufferedReader().readText()
+                val opfDoc = Jsoup.parse(opfContent, "", org.jsoup.parser.Parser.xmlParser())
+                
+                // Extract metadata
+                val metadata = extractMetadata(opfDoc)
+                val title = metadata["title"] ?: tempFile.nameWithoutExtension
+                val author = metadata["author"] ?: "Unknown"
+                val description = metadata["description"] ?: ""
+                
+                // Generate unique key
+                val key = generateBookKey(title, author)
+                bookRepository.delete(key)
+                
+                // Extract cover
+                val coverPath = extractCover(zip, opfDoc, key)
+                
+                // Create book
+                val bookId = Book(
+                    title = title,
+                    key = key,
+                    favorite = true,
+                    sourceId = LocalSource.SOURCE_ID,
+                    cover = coverPath,
+                    author = author,
+                    status = MangaInfo.PUBLISHING_FINISHED,
+                    description = description,
+                    lastUpdate = System.currentTimeMillis()
+                ).let { bookRepository.upsert(it) }
+                
+                // Extract chapters
+                val chapters = extractChapters(zip, opfDoc, bookId, key)
+                if (chapters.isEmpty()) {
+                    throw Exception("No readable content found in EPUB")
+                }
+                
+                chapterRepository.insertChapters(chapters)
+                println("Successfully imported: $title (${chapters.size} chapters)")
+            }
+        } finally {
+            // Clean up temp file
+            if (tempFile.exists()) {
+                tempFile.delete()
+            }
         }
     }
-
-    private inner class EpubXMLFileParser(
-        val data: ByteArray,
-    ) {
-
-        // Make all local references absolute to the root of the epub for consistent references
-        val absBasePath: String = File("").canonicalPath
-        fun parse(): Output {
-            val body = Jsoup.parse(data.inputStream(), "UTF-8", "").body()
-            val title = body.selectFirst("h1, h2, h3, h4, h5, h6")?.text()
-            body.selectFirst("h1, h2, h3, h4, h5, h6")?.remove()
-
-            val content = getNodeStructuredText(body)
-            return Output(
-                title = title,
-                body = content
-            )
+    
+    private fun findOpfFile(zip: ZipFile): java.util.zip.ZipEntry? {
+        // Read container.xml to find OPF location
+        val containerEntry = zip.getEntry("META-INF/container.xml")
+        if (containerEntry != null) {
+            val containerXml = zip.getInputStream(containerEntry).bufferedReader().readText()
+            val doc = Jsoup.parse(containerXml, "", org.jsoup.parser.Parser.xmlParser())
+            val rootfile = doc.selectFirst("rootfile[full-path]")
+            val opfPath = rootfile?.attr("full-path")
+            if (opfPath != null) {
+                return zip.getEntry(opfPath)
+            }
         }
+        
+        // Fallback: search for .opf files
+        return zip.entries().asSequence().find { it.name.endsWith(".opf") }
     }
-
-    private data class Output(val title: String?, val body: String)
-    internal fun parseXMLFile(inputSteam: InputStream): org.w3c.dom.Document? =
-        DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputSteam)
-
-    internal fun parseXMLFile(byteArray: ByteArray): org.w3c.dom.Document? = parseXMLFile(byteArray.inputStream())
-    private fun parseXMLText(text: String): org.w3c.dom.Document? = text.reader().runCatching {
-        DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(InputSource(this))
-    }.getOrNull()
-
-    private fun getPTraverse(node: org.jsoup.nodes.Node): String {
-        fun innerTraverse(node: org.jsoup.nodes.Node): String =
-            node.childNodes().joinToString("") { child ->
-                when {
-                    child.nodeName() == "br" -> "\n"
-                    child.nodeName() == "img" -> ""
-                    child is TextNode -> child.text()
-                    else -> innerTraverse(child)
+    
+    private fun extractMetadata(opfDoc: Document): Map<String, String> {
+        val metadata = mutableMapOf<String, String>()
+        
+        opfDoc.selectFirst("metadata")?.let { meta ->
+            meta.selectFirst("dc|title, title")?.text()?.let { metadata["title"] = it }
+            meta.selectFirst("dc|creator, creator")?.text()?.let { metadata["author"] = it }
+            meta.selectFirst("dc|description, description")?.text()?.let { metadata["description"] = it }
+        }
+        
+        return metadata
+    }
+    
+    private fun extractCover(zip: ZipFile, opfDoc: Document, key: String): String {
+        val cacheDir = File(simpleStorage.ireaderCacheDir(), "library_covers")
+        cacheDir.mkdirs()
+        val coverFile = File(cacheDir, "$key.jpg")
+        
+        try {
+            // Try to find cover image reference
+            val coverItem = opfDoc.select("item[properties*=cover-image], item[id=cover], item[id=cover-image]").firstOrNull()
+            val coverHref = coverItem?.attr("href")
+            
+            if (coverHref != null) {
+                val opfPath = findOpfFile(zip)?.name ?: ""
+                val basePath = if (opfPath.contains("/")) opfPath.substringBeforeLast("/") + "/" else ""
+                val fullPath = basePath + coverHref
+                
+                zip.getEntry(fullPath)?.let { entry ->
+                    zip.getInputStream(entry).use { input ->
+                        coverFile.writeBytes(input.readBytes())
+                    }
                 }
             }
-
-        val paragraph = innerTraverse(node).trim()
-        return if (paragraph.isEmpty()) "" else innerTraverse(node).trim() + "\n\n"
+        } catch (e: Exception) {
+            println("Failed to extract cover: ${e.message}")
+        }
+        
+        return coverFile.absolutePath
     }
-
-    private fun getNodeTextTraverse(node: org.jsoup.nodes.Node): String {
-        val children = node.childNodes()
-        if (children.isEmpty())
-            return ""
-        return children.joinToString("") { child ->
-            when {
-                child.nodeName() == "p" -> getPTraverse(child)
-                child.nodeName() == "br" -> "\n"
-                child.nodeName() == "hr" -> "\n\n"
-                child.nodeName() == "img" -> ""
-                child is TextNode -> {
-                    val text = child.text().trim()
-                    if (text.isEmpty()) "" else text + "\n\n"
+    
+    private fun extractChapters(zip: ZipFile, opfDoc: Document, bookId: Long, key: String): List<Chapter> {
+        val chapters = mutableListOf<Chapter>()
+        val opfPath = findOpfFile(zip)?.name ?: ""
+        val basePath = if (opfPath.contains("/")) opfPath.substringBeforeLast("/") + "/" else ""
+        
+        // Get spine items
+        val spineItems = opfDoc.select("spine itemref")
+        val manifestItems = opfDoc.select("manifest item").associateBy { it.attr("id") }
+        
+        spineItems.forEachIndexed { index, itemref ->
+            val idref = itemref.attr("idref")
+            val manifestItem = manifestItems[idref]
+            val href = manifestItem?.attr("href") ?: return@forEachIndexed
+            
+            val fullPath = basePath + href
+            val entry = zip.getEntry(fullPath) ?: return@forEachIndexed
+            
+            try {
+                val html = zip.getInputStream(entry).bufferedReader().readText()
+                val doc = Jsoup.parse(html)
+                
+                // Extract title
+                val title = doc.selectFirst("h1, h2, h3, title")?.text()?.trim()
+                    ?: "Chapter ${index + 1}"
+                
+                // Extract content
+                val content = extractTextContent(doc)
+                
+                if (content.isNotEmpty()) {
+                    chapters.add(
+                        Chapter(
+                            name = title,
+                            key = "${key}_chapter_$index",
+                            bookId = bookId,
+                            content = content,
+                            number = index.toFloat(),
+                            dateUpload = System.currentTimeMillis()
+                        )
+                    )
                 }
-                else -> getNodeTextTraverse(child)
+            } catch (e: Exception) {
+                println("Failed to extract chapter $index: ${e.message}")
             }
         }
+        
+        return chapters
     }
-
-    private fun getNodeStructuredText(node: org.jsoup.nodes.Node): String {
-        val children = node.childNodes()
-        if (children.isEmpty())
-            return ""
-        return children.joinToString("") { child ->
-            when {
-                child.nodeName() == "p" -> getPTraverse(child)
-                child.nodeName() == "br" -> "\n"
-                child.nodeName() == "hr" -> "\n\n"
-                child.nodeName() == "img" -> ""
-                child is TextNode -> child.text().trim()
-                else -> getNodeTextTraverse(child)
+    
+    private fun extractTextContent(doc: Document): List<Text> {
+        val textList = mutableListOf<Text>()
+        
+        doc.select("h1, h2, h3, h4, h5, h6, p, blockquote, pre, li").forEach { element ->
+            val text = element.text().trim()
+            if (text.isNotBlank()) {
+                textList.add(Text(text))
             }
         }
+        
+        return textList.ifEmpty {
+            listOf(Text(doc.body().text()))
+        }
+    }
+    
+    private fun generateBookKey(title: String, author: String): String {
+        val sanitized = "${title}_${author}".replace(Regex("[^a-zA-Z0-9]"), "_")
+        val timestamp = SimpleDateFormat("yyyyMMddHHmmss", Locale.US).format(Date())
+        return "${sanitized}_$timestamp"
     }
 
-    actual fun getCacheSize() : String {
+    actual fun getCacheSize(): String {
         return simpleStorage.getCacheSize()
     }
+
     actual fun removeCache() {
         simpleStorage.clearCache()
     }

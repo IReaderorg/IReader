@@ -25,9 +25,6 @@
 -keep,allowoptimization class com.google.accompanist.** { public protected *; }
 -keep,allowoptimization class androidx.compose.** { public protected *; }
 -keep,allowoptimization class org.tinylog.** { public protected *; }
--keep,allowoptimization class nl.siegmann.epublib.** { public protected *; }
--keep,allowoptimization class org.slf4j.** { public protected *; }
--keep class org.xmlpull.** { public protected *; }
 -keep,allowoptimization class org.koin.** { public protected *; }
 -keep,allowoptimization class app.cash.sqldelight.** { public protected *; }
 -keep,allowoptimization class okhttp3.** { public protected *; }

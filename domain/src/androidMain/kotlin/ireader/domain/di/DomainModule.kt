@@ -20,10 +20,16 @@ import ireader.domain.usecases.file.AndroidFileSaver
 import ireader.domain.usecases.file.FileSaver
 import ireader.domain.usecases.files.AndroidGetSimpleStorage
 import ireader.domain.usecases.files.GetSimpleStorage
-import ireader.domain.usecases.preferences.*
+import ireader.domain.usecases.preferences.AndroidReaderPrefUseCases
+import ireader.domain.usecases.preferences.SelectedFontStateUseCase
+import ireader.domain.usecases.preferences.TextReaderPrefUseCase
 import ireader.domain.usecases.reader.ScreenAlwaysOn
 import ireader.domain.usecases.reader.ScreenAlwaysOnImpl
-import ireader.domain.usecases.services.*
+import ireader.domain.usecases.services.ServiceUseCases
+import ireader.domain.usecases.services.StartDownloadServicesUseCase
+import ireader.domain.usecases.services.StartExtensionManagerService
+import ireader.domain.usecases.services.StartLibraryUpdateServicesUseCase
+import ireader.domain.usecases.services.StartTTSServicesUseCase
 import ireader.domain.utils.NotificationManager
 import ireader.i18n.LocalizeHelper
 import org.koin.android.ext.koin.androidContext
@@ -104,7 +110,7 @@ actual val DomainModule = module {
 
         )
     }
-    single<ImportEpub> { ImportEpub(get(), get(),get(),get()) }
+    single<ImportEpub> { ImportEpub(get(), get(),get(),get(),get()) }
     single<PlatformUiPreferences> {
         AndroidUiPreferences(get(), get())
     }
