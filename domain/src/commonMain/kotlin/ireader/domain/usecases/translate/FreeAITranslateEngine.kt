@@ -68,7 +68,9 @@ class FreeAITranslateEngine(
     @Serializable
     private data class TranslationResponse(
         @SerialName("translation_text")
-        val translationText: String
+        val translationText: String? = null,
+        @SerialName("generated_text")
+        val generatedText: String? = null
     )
 
     override suspend fun translate(
@@ -128,11 +130,25 @@ class FreeAITranslateEngine(
                         setBody(TranslationRequest(inputs = text))
                     }
                     
-                    // The response is a list with one item for this model
-                    val result = response.body<List<TranslationResponse>>().firstOrNull()
+                    // Try to parse as array first, then as single object
+                    val translatedText = try {
+                        val resultList = response.body<List<TranslationResponse>>()
+                        resultList.firstOrNull()?.let { 
+                            it.translationText ?: it.generatedText 
+                        }
+                    } catch (e: Exception) {
+                        // If array parsing fails, try single object
+                        try {
+                            val result = response.body<TranslationResponse>()
+                            result.translationText ?: result.generatedText
+                        } catch (e2: Exception) {
+                            println("Failed to parse response: ${e2.message}")
+                            null
+                        }
+                    }
                     
-                    if (result != null) {
-                        results.add(result.translationText)
+                    if (translatedText != null && translatedText.isNotBlank()) {
+                        results.add(translatedText)
                     } else {
                         // If response parsing fails, fall back to original text
                         results.add(text)

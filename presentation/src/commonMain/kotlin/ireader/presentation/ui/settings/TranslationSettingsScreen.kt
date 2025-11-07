@@ -37,7 +37,9 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
@@ -648,6 +650,49 @@ fun TranslationSettingsScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
+                
+                // Refresh models button
+                var isRefreshing by remember { mutableStateOf(false) }
+                var refreshMessage by remember { mutableStateOf<String?>(null) }
+                val coroutineScope = rememberCoroutineScope()
+                
+                Button(
+                    onClick = {
+                        isRefreshing = true
+                        refreshMessage = null
+                        coroutineScope.launch {
+                            val engines = translationEnginesManager.getAvailableEngines()
+                            val engine = engines.find { it.id == 8L } as? ireader.domain.usecases.translate.GeminiTranslateEngine
+                            if (engine != null && geminiApiKey.value.isNotBlank()) {
+                                val result = engine.fetchAvailableGeminiModels(geminiApiKey.value)
+                                refreshMessage = if (result.isSuccess) {
+                                    "Successfully loaded ${result.getOrNull()?.size ?: 0} models"
+                                } else {
+                                    "Failed to load models: ${result.exceptionOrNull()?.message}"
+                                }
+                            } else {
+                                refreshMessage = "Please enter your Gemini API key first"
+                            }
+                            isRefreshing = false
+                        }
+                    },
+                    enabled = !isRefreshing && geminiApiKey.value.isNotBlank(),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                ) {
+                    Text(if (isRefreshing) "Refreshing..." else "Refresh Available Models")
+                }
+                
+                refreshMessage?.let { message ->
+                    Text(
+                        text = message,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (message.startsWith("Successfully")) 
+                            MaterialTheme.colorScheme.primary 
+                        else 
+                            MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
 
                 val geminiModels =
                     ireader.domain.usecases.translate.WebscrapingTranslateEngine.AVAILABLE_GEMINI_MODELS
@@ -659,24 +704,50 @@ fun TranslationSettingsScreen(
                         .padding(vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    geminiModels.forEachIndexed { index, model ->
-                        Button(
-                            onClick = { onGeminiModelChange(model.first) },
+                    if (geminiModels.isEmpty()) {
+                        // Show message when no models are available
+                        Card(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                                containerColor = if (geminiModel.value == model.first)
-                                    MaterialTheme.colorScheme.primary
-                                else
-                                    MaterialTheme.colorScheme.surfaceVariant
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer
                             )
                         ) {
-                            Text(
-                                text = model.second,
-                                color = if (geminiModel.value == model.first)
-                                    MaterialTheme.colorScheme.onPrimary
-                                else
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Column(
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Text(
+                                    text = "No models available",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                                Text(
+                                    text = "Please click 'Refresh Available Models' above to load models from the Gemini API.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+                            }
+                        }
+                    } else {
+                        geminiModels.forEachIndexed { index, model ->
+                            Button(
+                                onClick = { onGeminiModelChange(model.first) },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                    containerColor = if (geminiModel.value == model.first)
+                                        MaterialTheme.colorScheme.primary
+                                    else
+                                        MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            ) {
+                                Text(
+                                    text = model.second,
+                                    color = if (geminiModel.value == model.first)
+                                        MaterialTheme.colorScheme.onPrimary
+                                    else
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
                 }

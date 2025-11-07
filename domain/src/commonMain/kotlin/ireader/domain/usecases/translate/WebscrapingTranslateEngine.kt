@@ -1,6 +1,8 @@
 package ireader.domain.usecases.translate
 
 import io.ktor.client.call.body
+import io.ktor.client.plugins.timeout
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
@@ -278,14 +280,26 @@ open class WebscrapingTranslateEngine(
             
             onProgress(20)
             
-            // For Gemini API, send all content in one request instead of batches
+            // For Gemini API, chunk texts to avoid token limits
             if (currentService == AI_SERVICE.GEMINI) {
-                val combinedText = texts.joinToString("\n---PARAGRAPH_BREAK---\n")
-                val prompt = buildPrompt(combinedText, sourceLang, targetLang, context)
+                val maxChunkSize = 20 // Process max 20 paragraphs at a time
+                val chunks = texts.chunked(maxChunkSize)
+                val allResults = mutableListOf<String>()
                 
-                onProgress(30)
-                val translationResult = sendMessageToChatGPT(prompt)
+                chunks.forEachIndexed { chunkIndex, chunk ->
+                    val chunkProgress = 30 + (chunkIndex * 60 / chunks.size)
+                    onProgress(chunkProgress)
+                    
+                    val combinedText = chunk.joinToString("\n---PARAGRAPH_BREAK---\n")
+                    val prompt = buildPrompt(combinedText, sourceLang, targetLang, context)
+                    
+                    val translationResult = sendMessageToChatGPT(prompt)
+                    val splitResults = splitResponse(translationResult, chunk.size)
+                    allResults.addAll(splitResults)
+                }
+                
                 onProgress(90)
+                val translationResult = allResults.joinToString("\n---PARAGRAPH_BREAK---\n")
                 
                 if (translationResult.isNullOrEmpty()) {
                     throw Exception("Empty response from API")
@@ -353,8 +367,6 @@ open class WebscrapingTranslateEngine(
             
         } catch (e: Exception) {
             _translationInProgress.value = false
-            println("Translation error: ${e.message}")
-            e.printStackTrace()
             onError(UiText.ExceptionString(e))
         }
     }
@@ -448,7 +460,16 @@ open class WebscrapingTranslateEngine(
         else 
             ""
         
-        return """
+        // Simplified prompt for Gemini to reduce token usage
+        return if (currentService == AI_SERVICE.GEMINI) {
+            """
+            Translate from $sourceLang to $targetLang. Return only the translation, no explanations.
+            Preserve ---PARAGRAPH_BREAK--- markers.
+            
+            $text
+            """.trimIndent()
+        } else {
+            """
             Translate the following $contentTypeStr from $sourceLang to $targetLang.
             Use a $toneStr tone.
             $stylePreservation
@@ -459,7 +480,8 @@ open class WebscrapingTranslateEngine(
             
             Text to translate:
             $text
-        """.trimIndent()
+            """.trimIndent()
+        }
     }
     
     /**
@@ -513,47 +535,130 @@ open class WebscrapingTranslateEngine(
     
     @Serializable
     private data class GeminiContent(
-        val parts: List<GeminiPart>
+        val parts: List<GeminiPart>? = null,
+        val role: String? = null // Added to handle "model" role in response
     )
     
     @Serializable
     private data class GeminiPart(
-        val text: String
+        val text: String? = null
     )
     
     @Serializable
     private data class GeminiGenerationConfig(
-        val temperature: Float = 0.2f,
+        val temperature: Float = 0.3f,
         val topK: Int = 40,
         val topP: Float = 0.95f,
-        val maxOutputTokens: Int = 8192
+        val maxOutputTokens: Int = 16384 // Increased to handle longer translations
     )
     
     // Data class for Gemini API response
     @Serializable
     private data class GeminiResponse(
-        val candidates: List<GeminiCandidate> = emptyList()
+        val candidates: List<GeminiCandidate>? = null
     )
     
     @Serializable
     private data class GeminiCandidate(
-        val content: GeminiContent
+        val content: GeminiContent? = null,
+        val finishReason: String? = null,
+        val index: Int? = null,
+        val citationMetadata: CitationMetadata? = null
+    )
+    
+    @Serializable
+    private data class CitationMetadata(
+        val citationSources: List<CitationSource>? = null
+    )
+    
+    @Serializable
+    private data class CitationSource(
+        val startIndex: Int? = null,
+        val endIndex: Int? = null,
+        val uri: String? = null,
+        val license: String? = null
     )
     
     // Define available Gemini models
     companion object {
-        // List of available Gemini models with display names
-        val AVAILABLE_GEMINI_MODELS = listOf(
-            "gemini-2.0-flash" to "Gemini 2.0 Flash (Recommended)",
-            "gemini-2.5-pro-exp-03-25" to "Gemini 2.5 Pro (Experimental)",
-            "gemini-2.5-flash-preview-04-17" to "Gemini 2.5 Flash (Preview)",
-            "gemini-2.0-flash-lite" to "Gemini 2.0 Flash Lite",
-            "gemini-1.5-pro" to "Gemini 1.5 Pro",
-            "gemini-1.5-flash" to "Gemini 1.5 Flash"
-        )
+        // No default models - users must fetch from API
+        private val DEFAULT_GEMINI_MODELS = emptyList<Pair<String, String>>()
         
-        // Default model to use if none is selected
-        const val DEFAULT_GEMINI_MODEL = "gemini-2.0-flash"
+        // Mutable list that can be updated from API
+        private val _availableGeminiModels = MutableStateFlow(DEFAULT_GEMINI_MODELS)
+        val availableGeminiModels: StateFlow<List<Pair<String, String>>> = _availableGeminiModels.asStateFlow()
+        
+        // List of available Gemini models (for backward compatibility)
+        val AVAILABLE_GEMINI_MODELS: List<Pair<String, String>>
+            get() = _availableGeminiModels.value
+            
+        // Update the available models list
+        fun updateAvailableModels(models: List<Pair<String, String>>) {
+            _availableGeminiModels.value = models
+        }
+    }
+    
+    // Data classes for Gemini models API response
+    @Serializable
+    private data class GeminiModelsResponse(
+        val models: List<GeminiModelInfo> = emptyList()
+    )
+    
+    @Serializable
+    private data class GeminiModelInfo(
+        val name: String,
+        val displayName: String? = null,
+        val description: String? = null,
+        val supportedGenerationMethods: List<String> = emptyList()
+    )
+    
+    /**
+     * Fetch available Gemini models from the API
+     * This should be called manually by the user to refresh the model list
+     */
+    suspend fun fetchAvailableGeminiModels(apiKey: String): Result<List<Pair<String, String>>> {
+        return try {
+            val endpoint = "https://generativelanguage.googleapis.com/v1beta/models?key=$apiKey"
+            
+            val response = client.default.get(endpoint) {
+                timeout {
+                    requestTimeoutMillis = 30000 // 30 seconds
+                    connectTimeoutMillis = 10000 // 10 seconds
+                    socketTimeoutMillis = 30000 // 30 seconds
+                }
+            }
+            
+            if (response.status.value in 200..299) {
+                val modelsResponse = response.body<GeminiModelsResponse>()
+                
+                // Filter models that support generateContent
+                val availableModels = modelsResponse.models
+                    .filter { model ->
+                        model.supportedGenerationMethods.contains("generateContent") &&
+                        model.name.contains("gemini", ignoreCase = true)
+                    }
+                    .map { model ->
+                        // Extract model ID from full name (e.g., "models/gemini-1.5-flash" -> "gemini-1.5-flash")
+                        val modelId = model.name.substringAfterLast("/")
+                        val displayName = model.displayName ?: modelId.replace("-", " ").split(" ")
+                            .joinToString(" ") { it.replaceFirstChar { c -> c.uppercase() } }
+                        modelId to displayName
+                    }
+                
+                if (availableModels.isNotEmpty()) {
+                    // Update the companion object's model list
+                    updateAvailableModels(availableModels)
+                    Result.success(availableModels)
+                } else {
+                    Result.failure(Exception("No compatible models found"))
+                }
+            } else {
+                val errorBody = response.bodyAsText()
+                Result.failure(Exception("API error: ${response.status.value}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     // Function to send text to Gemini API and get response
@@ -563,23 +668,23 @@ open class WebscrapingTranslateEngine(
             throw Exception(MR.strings.gemini_api_key_not_set.toString())
         }
         
-        // Get user-selected model or use fallback sequence
+        // Get user-selected model or use available models
         val userSelectedModel = readerPreferences.geminiModel().get()
+        
+        // Check if models have been loaded
+        if (AVAILABLE_GEMINI_MODELS.isEmpty() && userSelectedModel.isBlank()) {
+            throw Exception("No Gemini models available. Please refresh the model list in settings first.")
+        }
         
         // Create a prioritized list starting with user selection if available
         val geminiModels = if (userSelectedModel.isNotBlank()) {
             // Start with user's preferred model, then fallback to others
             listOf(userSelectedModel) + AVAILABLE_GEMINI_MODELS.map { it.first }.filter { it != userSelectedModel }
+        } else if (AVAILABLE_GEMINI_MODELS.isNotEmpty()) {
+            // Use all available models in order
+            AVAILABLE_GEMINI_MODELS.map { it.first }
         } else {
-            // Default order if no user preference
-            listOf(
-                "gemini-2.0-flash", // Latest stable, versatile model
-                "gemini-2.5-pro-exp-03-25", // Newest with enhanced thinking and reasoning (experimental version with free quota)
-                "gemini-2.5-flash-preview-04-17", // Best price-performance model
-                "gemini-2.0-flash-lite", // Cost efficient model
-                "gemini-1.5-pro", // Older model for complex reasoning
-                "gemini-1.5-flash" // Older versatile model
-            )
+            throw Exception("No Gemini models configured. Please refresh the model list in settings.")
         }
         
         // Try each model until one succeeds or all fail
@@ -589,13 +694,11 @@ open class WebscrapingTranslateEngine(
             try {
                 return tryGeminiModel(apiKey, modelName, prompt)
             } catch (e: Exception) {
-                println("Failed with model $modelName: ${e.message}")
                 lastException = e
                 
                 // Special error handling for model-specific issues
                 if (e.message.toString().contains("doesn't have a free quota tier")) {
                     // This model requires payment, try the next one
-                    println("Model $modelName doesn't have a free quota tier, trying next model")
                     continue
                 }
                 
@@ -608,7 +711,6 @@ open class WebscrapingTranslateEngine(
                 }
                 
                 // If it's a quota issue, continue to the next model
-                println("Quota exceeded for $modelName, trying next model")
             }
         }
         
@@ -639,28 +741,65 @@ open class WebscrapingTranslateEngine(
         
         while (retryCount < maxRetries) {
             try {
-                println("Sending request to Gemini API with model: $modelName (attempt ${retryCount + 1}/$maxRetries)")
                 val response = client.default.post(endpoint) {
                     contentType(io.ktor.http.ContentType.Application.Json)
                     setBody(requestBody)
+                    timeout {
+                        requestTimeoutMillis = 60000 // 60 seconds
+                        connectTimeoutMillis = 15000 // 15 seconds
+                        socketTimeoutMillis = 60000 // 60 seconds
+                    }
                 }
                 
-                println("Gemini API response status: ${response.status.value}")
-                
                 if (response.status.value in 200..299) {
-                    val geminiResponse = response.body<GeminiResponse>()
-                    if (geminiResponse.candidates.isNotEmpty()) {
-                        // Extract text from the first candidate's content
-                        val textParts = geminiResponse.candidates[0].content.parts
-                            .mapNotNull { it.text }
-                        
-                        return textParts.joinToString("")
+                    val responseText = response.bodyAsText()
+                    
+                    val geminiResponse = try {
+                        val json = Json { 
+                            ignoreUnknownKeys = true
+                            isLenient = true
+                        }
+                        json.decodeFromString<GeminiResponse>(responseText)
+                    } catch (e: Exception) {
+                        throw Exception("Failed to parse Gemini API response: ${e.message}")
                     }
-                    println("Gemini API returned empty candidates list")
-                    throw Exception(MR.strings.empty_response.toString())
+                    
+                    // Add comprehensive null checks
+                    if (geminiResponse.candidates.isNullOrEmpty()) {
+                        throw Exception("Empty response from Gemini API")
+                    }
+                    
+                    val firstCandidate = geminiResponse.candidates.firstOrNull()
+                    if (firstCandidate == null) {
+                        throw Exception("Invalid response structure from Gemini API")
+                    }
+                    
+                    val content = firstCandidate.content
+                    if (content == null) {
+                        throw Exception("No content in Gemini API response")
+                    }
+                    
+                    if (content.parts.isNullOrEmpty()) {
+                        val finishReason = firstCandidate.finishReason
+                        
+                        if (finishReason == "MAX_TOKENS") {
+                            // The model used all tokens on reasoning, no output generated
+                            throw Exception("Translation failed: The text is too long for the model to process. Try translating smaller sections or use a different model.")
+                        } else {
+                            throw Exception("No content in Gemini API response. Finish reason: $finishReason")
+                        }
+                    }
+                    
+                    // Extract text from the first candidate's content
+                    val textParts = content.parts.mapNotNull { it.text }
+                    
+                    if (textParts.isEmpty()) {
+                        throw Exception("No text in Gemini API response parts")
+                    }
+                    
+                    return textParts.joinToString("")
                 } else {
                     val errorBody = response.bodyAsText()
-                    println("Gemini API error: Status ${response.status.value}, Body: $errorBody")
                     
                     // Check for specific error codes
                     when (response.status.value) {
@@ -688,24 +827,24 @@ open class WebscrapingTranslateEngine(
                     }
                 }
             } catch (e: Exception) {
-                println("Gemini API exception with model $modelName: ${e.message}")
-                
                 // Check for network-related errors that can be retried
-                if (e.message?.contains("stream was reset") == true || 
+                val isRetryableError = e.message?.contains("stream was reset") == true || 
                     e.message?.contains("CANCEL") == true ||
                     e.message?.contains("connection") == true ||
-                    e.message?.contains("timeout") == true) {
-                    
+                    e.message?.contains("timeout") == true ||
+                    e.message?.contains("Socket timeout") == true ||
+                    e.message?.contains("SocketTimeoutException") == true
+                
+                if (isRetryableError) {
                     retryCount++
                     lastException = e
                     
                     if (retryCount < maxRetries) {
-                        println("Network error, retrying (attempt ${retryCount+1}/$maxRetries)")
-                        // Add a delay before retrying
-                        delay((1000 * retryCount).toLong()) // Exponential backoff
+                        val delayMs = (2000 * retryCount).toLong() // Exponential backoff: 2s, 4s, 6s
+                        delay(delayMs)
                         continue
                     } else {
-                        throw Exception("Network error during translation after $maxRetries attempts. Please try again later.")
+                        throw Exception("Network timeout after $maxRetries attempts. The API may be slow or unavailable. Please try again later or select a different model.")
                     }
                 }
                 
