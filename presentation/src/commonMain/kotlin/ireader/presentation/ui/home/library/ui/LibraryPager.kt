@@ -43,6 +43,10 @@ internal fun LibraryPager(
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
     showInLibraryBadge: Boolean = false,
+    showDownloadedChaptersBadge: Boolean = false,
+    showUnreadChaptersBadge: Boolean = false,
+    showLocalMangaBadge: Boolean = false,
+    showLanguageBadge: Boolean = false,
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
 
     ) {
@@ -85,6 +89,10 @@ internal fun LibraryPager(
                     showGoToLastChapterBadge = showGoToLastChapterBadge,
                     showReadBadge = showReadBadge,
                     showUnreadBadge = showUnreadBadge,
+                    showDownloadedChaptersBadge = showDownloadedChaptersBadge,
+                    showUnreadChaptersBadge = showUnreadChaptersBadge,
+                    showLocalMangaBadge = showLocalMangaBadge,
+                    showLanguageBadge = showLanguageBadge,
                     columns = columns,
                 )
             }

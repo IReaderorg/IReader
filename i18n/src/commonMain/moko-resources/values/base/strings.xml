@@ -373,6 +373,10 @@
     <string name="read_chapters">read chapters</string>
     <string name="show_all_category_tab">Show "All" Category Tab</string>
     <string name="show_count_in_category_tab">Show Count in Category Tab</string>
+    <string name="badges">Badges</string>
+    <string name="downloaded_chapters">Downloaded chapters</string>
+    <string name="local_manga">Local manga</string>
+    <string name="language">Language</string>
     <string name="scrollbar_draggable">ScrollBar Draggable</string>
     <string name="orientation">Orientation</string>
     <string name="scrollbar_mode">ScrollBar Mode</string>

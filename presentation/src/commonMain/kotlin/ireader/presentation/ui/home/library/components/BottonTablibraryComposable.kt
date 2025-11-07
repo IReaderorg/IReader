@@ -329,6 +329,58 @@ private fun LazyListScope.DispalyPage(
         }
     }
     item {
+        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        ClickableRow(onClick = { vm.showDownloadedChaptersBadge.value = !vm.showDownloadedChaptersBadge.value }) {
+            Checkbox(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                checked = vm.showDownloadedChaptersBadge.value,
+                onCheckedChange = {
+                    vm.showDownloadedChaptersBadge.value = it
+                }
+            )
+            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.downloaded_chapters))
+        }
+    }
+    item {
+        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        ClickableRow(onClick = { vm.showUnreadChaptersBadge.value = !vm.showUnreadChaptersBadge.value }) {
+            Checkbox(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                checked = vm.showUnreadChaptersBadge.value,
+                onCheckedChange = {
+                    vm.showUnreadChaptersBadge.value = it
+                }
+            )
+            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.unread_chapters))
+        }
+    }
+    item {
+        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        ClickableRow(onClick = { vm.showLocalMangaBadge.value = !vm.showLocalMangaBadge.value }) {
+            Checkbox(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                checked = vm.showLocalMangaBadge.value,
+                onCheckedChange = {
+                    vm.showLocalMangaBadge.value = it
+                }
+            )
+            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.local_manga))
+        }
+    }
+    item {
+        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        ClickableRow(onClick = { vm.showLanguageBadge.value = !vm.showLanguageBadge.value }) {
+            Checkbox(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                checked = vm.showLanguageBadge.value,
+                onCheckedChange = {
+                    vm.showLanguageBadge.value = it
+                }
+            )
+            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.language))
+        }
+    }
+    item {
         TextSection(
             text = localize(MR.strings.tabs),
             padding = PaddingValues(vertical = 12.dp, horizontal = 20.dp),

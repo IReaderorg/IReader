@@ -63,6 +63,10 @@ internal fun LibraryContent(
         showUnreadBadge = vm.unreadBadge.value,
         showReadBadge = vm.readBadge.value,
         showGoToLastChapterBadge = vm.goToLastChapterBadge.value,
+        showDownloadedChaptersBadge = vm.showDownloadedChaptersBadge.value,
+        showUnreadChaptersBadge = vm.showUnreadChaptersBadge.value,
+        showLocalMangaBadge = vm.showLocalMangaBadge.value,
+        showLanguageBadge = vm.showLanguageBadge.value,
         getColumnsForOrientation = getColumnsForOrientation,
 
     )

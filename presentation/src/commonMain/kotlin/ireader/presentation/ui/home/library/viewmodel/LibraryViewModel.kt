@@ -49,6 +49,12 @@ class LibraryViewModel(
     val readBadge = libraryPreferences.downloadBadges().asState()
     val unreadBadge = libraryPreferences.unreadBadges().asState()
     val goToLastChapterBadge = libraryPreferences.goToLastChapterBadges().asState()
+    
+    // New badge preferences
+    val showDownloadedChaptersBadge = libraryPreferences.showDownloadedChaptersBadge().asState()
+    val showUnreadChaptersBadge = libraryPreferences.showUnreadChaptersBadge().asState()
+    val showLocalMangaBadge = libraryPreferences.showLocalMangaBadge().asState()
+    val showLanguageBadge = libraryPreferences.showLanguageBadge().asState()
 
     val bookCategories = getCategory.subscribeBookCategories().asState(emptyList())
     val deleteQueues: SnapshotStateList<BookCategory> = mutableStateListOf()

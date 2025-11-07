@@ -30,6 +30,10 @@ fun LayoutComposable(
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
     showInLibraryBadge: Boolean = false,
+    showDownloadedChaptersBadge: Boolean = false,
+    showUnreadChaptersBadge: Boolean = false,
+    showLocalMangaBadge: Boolean = false,
+    showLanguageBadge: Boolean = false,
     columns: Int? = null,
     headers: ((url: String) -> okhttp3.Headers?)? = null,
     keys: ((item: BookItem) -> Any) = {
@@ -54,6 +58,10 @@ fun LayoutComposable(
                 showInLibraryBadge = showInLibraryBadge,
                 showReadBadge = showReadBadge,
                 showUnreadBadge = showUnreadBadge,
+                showDownloadedChaptersBadge = showDownloadedChaptersBadge,
+                showUnreadChaptersBadge = showUnreadChaptersBadge,
+                showLocalMangaBadge = showLocalMangaBadge,
+                showLanguageBadge = showLanguageBadge,
                 headers = headers,
                 columns = columns ?: 3,
                 keys = keys

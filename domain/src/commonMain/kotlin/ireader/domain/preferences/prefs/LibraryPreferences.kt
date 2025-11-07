@@ -79,4 +79,21 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     fun columnsInPortraitCompact(): Preference<Int> {
         return preferenceStore.getInt("columns_portrait_compact", 2)
     }
+
+    // Badge preferences
+    fun showDownloadedChaptersBadge(): Preference<Boolean> {
+        return preferenceStore.getBoolean("show_downloaded_chapters_badge", true)
+    }
+
+    fun showUnreadChaptersBadge(): Preference<Boolean> {
+        return preferenceStore.getBoolean("show_unread_chapters_badge", true)
+    }
+
+    fun showLocalMangaBadge(): Preference<Boolean> {
+        return preferenceStore.getBoolean("show_local_manga_badge", false)
+    }
+
+    fun showLanguageBadge(): Preference<Boolean> {
+        return preferenceStore.getBoolean("show_language_badge", false)
+    }
 }

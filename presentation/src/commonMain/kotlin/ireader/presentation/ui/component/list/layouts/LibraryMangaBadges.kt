@@ -2,12 +2,16 @@ package ireader.presentation.ui.component.list.layouts
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -15,27 +19,67 @@ fun LibraryBadges(
     unread: Int?,
     downloaded: Int?,
     modifier: Modifier = Modifier,
+    isLocal: Boolean = false,
+    sourceId: Long? = null,
+    showLanguage: Boolean = false,
 ) {
-    if (unread == null && downloaded == null) return
+    // Get language from catalog if needed
+    val language = if (showLanguage && sourceId != null) {
+        val catalogStore = org.koin.compose.koinInject<ireader.domain.catalogs.CatalogStore>()
+        catalogStore.get(sourceId)?.source?.lang
+    } else null
 
-    Row(modifier = modifier.clip(androidx.compose.material3.MaterialTheme.shapes.medium)) {
-        if (unread != null) {
-            Text(
-                text = (unread ?: 0).toString(),
-                modifier = Modifier.background(androidx.compose.material3.MaterialTheme.colorScheme.primary).then(BadgesInnerPadding),
-                style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
-                color = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
+    if (unread == null && downloaded == null && !isLocal && language == null) return
+
+    Row(modifier = modifier) {
+        if (unread != null && unread > 0) {
+            BadgeItem(
+                text = unread.toString(),
+                backgroundColor = MaterialTheme.colorScheme.primary,
+                textColor = MaterialTheme.colorScheme.onPrimary
             )
+            Spacer(modifier = Modifier.width(2.dp))
         }
-        if (downloaded != null) {
-            Text(
-                text = (downloaded ?: 0).toString(),
-                modifier = Modifier.background(MaterialTheme.colorScheme.tertiary).then(BadgesInnerPadding),
-                style = MaterialTheme.typography.labelSmall,
-                color = androidx.compose.material3.MaterialTheme.colorScheme.onTertiary
+        if (downloaded != null && downloaded > 0) {
+            BadgeItem(
+                text = downloaded.toString(),
+                backgroundColor = MaterialTheme.colorScheme.tertiary,
+                textColor = MaterialTheme.colorScheme.onTertiary
+            )
+            Spacer(modifier = Modifier.width(2.dp))
+        }
+        if (isLocal) {
+            BadgeItem(
+                text = "LOCAL",
+                backgroundColor = MaterialTheme.colorScheme.secondary,
+                textColor = MaterialTheme.colorScheme.onSecondary
+            )
+            Spacer(modifier = Modifier.width(2.dp))
+        }
+        if (language != null && language.isNotEmpty()) {
+            BadgeItem(
+                text = language.take(2).uppercase(),
+                backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                textColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
 }
 
-private val BadgesInnerPadding = Modifier.padding(horizontal = 3.dp, vertical = 1.dp)
+@Composable
+private fun BadgeItem(
+    text: String,
+    backgroundColor: androidx.compose.ui.graphics.Color,
+    textColor: androidx.compose.ui.graphics.Color,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = text,
+        modifier = modifier
+            .clip(RoundedCornerShape(4.dp))
+            .background(backgroundColor)
+            .padding(horizontal = 4.dp, vertical = 2.dp),
+        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+        color = textColor
+    )
+}

@@ -37,6 +37,10 @@ fun ComfortableGridLayout(
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
     showInLibraryBadge: Boolean = false,
+    showDownloadedChaptersBadge: Boolean = false,
+    showUnreadChaptersBadge: Boolean = false,
+    showLocalMangaBadge: Boolean = false,
+    showLanguageBadge: Boolean = false,
     headers: ((url: String) -> okhttp3.Headers?)? = null,
     columns: Int = 3,
     keys: ((item: BookItem) -> Any)
@@ -81,10 +85,13 @@ fun ComfortableGridLayout(
                                 size = (height.value.height / 20).dp
                             )
                         }
-                        if (showUnreadBadge || showUnreadBadge) {
+                        if (showUnreadBadge || showReadBadge || showDownloadedChaptersBadge || showUnreadChaptersBadge || showLocalMangaBadge || showLanguageBadge) {
                             LibraryBadges(
-                                unread = if (showUnreadBadge) book.unread else null,
-                                downloaded = if (showReadBadge) book.downloaded else null
+                                unread = if (showUnreadBadge || showUnreadChaptersBadge) book.unread else null,
+                                downloaded = if (showReadBadge || showDownloadedChaptersBadge) book.downloaded else null,
+                                isLocal = showLocalMangaBadge && book.sourceId == -1L,
+                                sourceId = book.sourceId,
+                                showLanguage = showLanguageBadge
                             )
                         }
 
