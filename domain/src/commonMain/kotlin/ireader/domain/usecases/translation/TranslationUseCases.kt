@@ -74,12 +74,27 @@ class ApplyGlossaryToTextUseCase {
         if (glossaryMap.isEmpty()) return text
         
         var result = text
-        // Sort by length descending to replace longer terms first
+        
+        // Sort by length descending to replace longer terms first (prevents partial replacements)
         val sortedEntries = glossaryMap.entries.sortedByDescending { it.key.length }
         
         for ((source, target) in sortedEntries) {
-            // Use word boundaries to avoid partial replacements
-            result = result.replace(Regex("\\b${Regex.escape(source)}\\b"), target)
+            if (source.isBlank()) continue
+            
+            try {
+                // Try with word boundaries first (works for Latin scripts)
+                val withBoundaries = Regex("\\b${Regex.escape(source)}\\b", RegexOption.IGNORE_CASE)
+                if (withBoundaries.containsMatchIn(result)) {
+                    result = withBoundaries.replace(result, target)
+                } else {
+                    // Fallback: simple case-insensitive replacement (works for all scripts)
+                    // This is useful for Asian languages where word boundaries don't work
+                    result = result.replace(source, target, ignoreCase = true)
+                }
+            } catch (e: Exception) {
+                // If regex fails, use simple replacement
+                result = result.replace(source, target, ignoreCase = true)
+            }
         }
         
         return result

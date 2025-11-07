@@ -46,16 +46,18 @@ class SaveGlossaryEntryUseCase(
         sourceTerm: String,
         targetTerm: String,
         termType: GlossaryTermType,
-        notes: String? = null
+        notes: String? = null,
+        entryId: Long? = null
     ): Long {
         val now = Clock.System.now().toEpochMilliseconds()
         val glossary = Glossary(
+            id = entryId ?: 0,
             bookId = bookId,
             sourceTerm = sourceTerm,
             targetTerm = targetTerm,
             termType = termType,
             notes = notes,
-            createdAt = now,
+            createdAt = if (entryId != null) 0 else now, // Will be preserved by upsert if updating
             updatedAt = now
         )
         

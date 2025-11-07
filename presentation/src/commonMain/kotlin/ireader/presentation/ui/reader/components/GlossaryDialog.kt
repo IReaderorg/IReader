@@ -59,6 +59,7 @@ fun GlossaryDialog(
     modifier: Modifier = Modifier
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
+    var editingEntry by remember { mutableStateOf<Glossary?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     
     val filteredEntries = remember(glossaryEntries, searchQuery) {
@@ -135,7 +136,7 @@ fun GlossaryDialog(
                     items(filteredEntries, key = { it.id }) { entry ->
                         GlossaryEntryItem(
                             entry = entry,
-                            onEdit = { onEditEntry(entry) },
+                            onEdit = { editingEntry = entry },
                             onDelete = { onDeleteEntry(entry.id) }
                         )
                     }
@@ -162,6 +163,17 @@ fun GlossaryDialog(
             onConfirm = { source, target, type, notes ->
                 onAddEntry(source, target, type, notes)
                 showAddDialog = false
+            }
+        )
+    }
+    
+    editingEntry?.let { entry ->
+        EditGlossaryEntryDialog(
+            entry = entry,
+            onDismiss = { editingEntry = null },
+            onConfirm = { updatedEntry ->
+                onEditEntry(updatedEntry)
+                editingEntry = null
             }
         )
     }
@@ -301,6 +313,108 @@ fun AddGlossaryEntryDialog(
                 enabled = sourceTerm.isNotBlank() && targetTerm.isNotBlank()
             ) {
                 Text("Add")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditGlossaryEntryDialog(
+    entry: Glossary,
+    onDismiss: () -> Unit,
+    onConfirm: (Glossary) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var sourceTerm by remember { mutableStateOf(entry.sourceTerm) }
+    var targetTerm by remember { mutableStateOf(entry.targetTerm) }
+    var selectedType by remember { mutableStateOf(entry.termType) }
+    var notes by remember { mutableStateOf(entry.notes ?: "") }
+    var expanded by remember { mutableStateOf(false) }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Edit Glossary Entry") },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedTextField(
+                    value = sourceTerm,
+                    onValueChange = { sourceTerm = it },
+                    label = { Text("Original Term") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                
+                OutlinedTextField(
+                    value = targetTerm,
+                    onValueChange = { targetTerm = it },
+                    label = { Text("Translation") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = it }
+                ) {
+                    OutlinedTextField(
+                        value = selectedType.toString().lowercase().replaceFirstChar { it.uppercase() },
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Type") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                        modifier = Modifier.fillMaxWidth().menuAnchor()
+                    )
+                    
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        GlossaryTermType.values().forEach { type ->
+                            DropdownMenuItem(
+                                text = { Text(type.toString().lowercase().replaceFirstChar { it.uppercase() }) },
+                                onClick = {
+                                    selectedType = type
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+                
+                OutlinedTextField(
+                    value = notes,
+                    onValueChange = { notes = it },
+                    label = { Text("Notes (optional)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLines = 3
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    if (sourceTerm.isNotBlank() && targetTerm.isNotBlank()) {
+                        onConfirm(
+                            entry.copy(
+                                sourceTerm = sourceTerm,
+                                targetTerm = targetTerm,
+                                termType = selectedType,
+                                notes = notes.takeIf { it.isNotBlank() }
+                            )
+                        )
+                    }
+                },
+                enabled = sourceTerm.isNotBlank() && targetTerm.isNotBlank()
+            ) {
+                Text("Save")
             }
         },
         dismissButton = {

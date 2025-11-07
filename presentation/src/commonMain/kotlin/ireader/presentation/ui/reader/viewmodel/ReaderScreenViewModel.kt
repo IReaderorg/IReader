@@ -193,6 +193,7 @@ class ReaderScreenViewModel(
                 scope.launch {
                     state.book = getBookUseCases.findBookById(bookId)
                     setupChapters(bookId, chapterId)
+                    loadGlossary()
                 }
         } else {
             scope.launch {
@@ -640,6 +641,8 @@ class ReaderScreenViewModel(
                 engineId = translatorEngine.value
             )
             
+            // Note: Glossary is applied during translation, not when loading saved translations
+            // If you want to see glossary changes, you need to re-translate the chapter
             translationState.translatedChapter = translation
             translationState.hasTranslation = translation != null
             translationState.isShowingTranslation = 
@@ -675,6 +678,14 @@ class ReaderScreenViewModel(
         } else {
             stateChapter?.content ?: emptyList()
         }
+    }
+    
+    /**
+     * Re-translate the current chapter with current glossary
+     * This will force a new translation with the latest glossary entries
+     */
+    fun retranslateWithGlossary() {
+        translateCurrentChapter(forceRetranslate = true)
     }
     
     /**
@@ -764,6 +775,24 @@ class ReaderScreenViewModel(
     }
     
     /**
+     * Update an existing glossary entry
+     */
+    fun updateGlossaryEntry(entry: ireader.domain.models.entities.Glossary) {
+        scope.launch {
+            saveGlossaryEntryUseCase.execute(
+                bookId = entry.bookId,
+                sourceTerm = entry.sourceTerm,
+                targetTerm = entry.targetTerm,
+                termType = entry.termType,
+                notes = entry.notes,
+                entryId = entry.id
+            )
+            loadGlossary()
+            showSnackBar(UiText.MStringResource(MR.strings.success))
+        }
+    }
+    
+    /**
      * Delete a glossary entry
      */
     fun deleteGlossaryEntry(id: Long) {
@@ -773,6 +802,7 @@ class ReaderScreenViewModel(
             showSnackBar(UiText.MStringResource(MR.strings.success))
         }
     }
+
     
     /**
      * Export glossary as JSON

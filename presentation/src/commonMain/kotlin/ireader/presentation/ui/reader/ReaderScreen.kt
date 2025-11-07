@@ -5,7 +5,16 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ContentAlpha
@@ -17,13 +26,11 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,12 +40,12 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.presentation.ui.core.ui.Colour.Transparent
+import ireader.presentation.ui.reader.components.GlossaryDialog
 import ireader.presentation.ui.reader.components.MainBottomSettingComposable
 import ireader.presentation.ui.reader.components.PreloadIndicator
+import ireader.presentation.ui.reader.components.TranslationBadge
 import ireader.presentation.ui.reader.components.TranslationProgressIndicator
 import ireader.presentation.ui.reader.components.TranslationToggleButton
-import ireader.presentation.ui.reader.components.TranslationBadge
-import ireader.presentation.ui.reader.components.GlossaryDialog
 import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.launch
@@ -279,18 +286,39 @@ fun ReadingScreen(
                                     vm.addGlossaryEntry(source, target, type, notes)
                                 },
                                 onEditEntry = { entry ->
-                                    // TODO: Implement edit functionality
+                                    vm.updateGlossaryEntry(entry)
                                 },
                                 onDeleteEntry = { id ->
                                     vm.deleteGlossaryEntry(id)
                                 },
                                 onExport = {
                                     vm.exportGlossary { json ->
-                                        // TODO: Save to file
+                                        ireader.presentation.ui.util.FilePicker.pickFileForSave(
+                                            title = "Export Glossary",
+                                            defaultFileName = "${vm.book?.title ?: "glossary"}_glossary.json",
+                                            onFileSelected = { path, _ ->
+                                                try {
+                                                    java.io.File(path).writeText(json)
+                                                    vm.showSnackBar(ireader.i18n.UiText.DynamicString("Glossary exported successfully"))
+                                                } catch (e: Exception) {
+                                                    vm.showSnackBar(ireader.i18n.UiText.ExceptionString(e))
+                                                }
+                                            }
+                                        )
                                     }
                                 },
                                 onImport = {
-                                    // TODO: Load file and call vm.importGlossary(json)
+                                    ireader.presentation.ui.util.FilePicker.pickFileForLoad(
+                                        title = "Import Glossary",
+                                        onFileSelected = { _, content ->
+                                            try {
+                                                val json = content.decodeToString()
+                                                vm.importGlossary(json)
+                                            } catch (e: Exception) {
+                                                vm.showSnackBar(ireader.i18n.UiText.ExceptionString(e))
+                                            }
+                                        }
+                                    )
                                 }
                             )
                         }

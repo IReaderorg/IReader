@@ -61,7 +61,15 @@ class TranslateChapterWithStorageUseCase(
                 return@launch
             }
             
-            val textsToTranslate = textPages.map { it.text }
+            // Apply glossary BEFORE translation if enabled
+            val textsToTranslate = if (applyGlossary) {
+                val glossaryMap = getGlossaryAsMapUseCase.execute(chapter.bookId)
+                textPages.map { page ->
+                    applyGlossaryToTextUseCase.execute(page.text, glossaryMap)
+                }
+            } else {
+                textPages.map { it.text }
+            }
             
             // Perform translation using the manager
             translationEnginesManager.translateWithContext(
@@ -103,16 +111,7 @@ class TranslateChapterWithStorageUseCase(
         onError: (UiText) -> Unit
     ) {
         try {
-            // Apply glossary if enabled
-            val finalTexts = if (applyGlossary) {
-                val glossaryMap = getGlossaryAsMapUseCase.execute(chapter.bookId)
-                translatedTexts.map { text ->
-                    applyGlossaryToTextUseCase.execute(text, glossaryMap)
-                }
-            } else {
-                translatedTexts
-            }
-            
+            // Glossary was already applied before translation
             // Reconstruct pages with translated text
             val translatedPages = mutableListOf<Page>()
             var textIndex = 0
@@ -120,8 +119,8 @@ class TranslateChapterWithStorageUseCase(
             chapter.content.forEach { page ->
                 when (page) {
                     is Text -> {
-                        if (textIndex < finalTexts.size) {
-                            translatedPages.add(Text(finalTexts[textIndex]))
+                        if (textIndex < translatedTexts.size) {
+                            translatedPages.add(Text(translatedTexts[textIndex]))
                             textIndex++
                         } else {
                             translatedPages.add(page)
