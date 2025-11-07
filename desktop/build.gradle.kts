@@ -124,12 +124,8 @@ compose.desktop {
             copyright = "Mozilla Public License v2.0"
             vendor = "kazemcodes"
             
-            // Set proper package version
-            packageVersion = if (isPreview) {
-                "${ProjectConfig.versionName}.$previewCode"
-            } else {
-                ProjectConfig.versionName
-            }
+            // Set proper package version (max 3 components for native distributions)
+            packageVersion = ProjectConfig.versionName
 
             args(project.projectDir.absolutePath)
             buildTypes.release.proguard {
