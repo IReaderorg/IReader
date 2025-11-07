@@ -1,0 +1,23 @@
+# Fastlane configuration for IReader
+
+default_platform(:android)
+
+platform :android do
+  desc "Build F-Droid release"
+  lane :fdroid do
+    gradle(
+      task: "assemble",
+      flavor: "Fdroid",
+      build_type: "Release"
+    )
+  end
+
+  desc "Build standard release"
+  lane :release do
+    gradle(
+      task: "assemble",
+      flavor: "Standard",
+      build_type: "Release"
+    )
+  end
+end

@@ -1,0 +1,11 @@
+IReader is a modern, feature-rich ebook reader application for Android that provides a seamless reading experience.
+
+Features:
+• Support for multiple ebook formats
+• Customizable reading experience
+• Library management
+• Offline reading support
+• Clean and intuitive interface
+• Material Design 3
+
+This F-Droid version is built without proprietary dependencies (no Firebase Analytics or Crashlytics), ensuring your privacy and freedom.

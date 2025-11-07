@@ -1,0 +1,3 @@
+• Initial F-Droid release
+• No proprietary dependencies
+• Privacy-focused build
