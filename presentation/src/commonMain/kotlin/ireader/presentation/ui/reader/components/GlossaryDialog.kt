@@ -45,6 +45,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Glossary
 import ireader.domain.models.entities.GlossaryTermType
+import ireader.i18n.UiText
+
+/**
+ * Wrapper composable that handles file picking for glossary import/export
+ */
+@Composable
+expect fun GlossaryDialogWithFilePickers(
+    glossaryEntries: List<Glossary>,
+    bookTitle: String?,
+    onDismiss: () -> Unit,
+    onAddEntry: (String, String, GlossaryTermType, String?) -> Unit,
+    onEditEntry: (Glossary) -> Unit,
+    onDeleteEntry: (Long) -> Unit,
+    onExportGlossary: ((String) -> Unit) -> Unit,
+    onImportGlossary: (String) -> Unit,
+    onShowSnackBar: (UiText) -> Unit,
+    modifier: Modifier = Modifier
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

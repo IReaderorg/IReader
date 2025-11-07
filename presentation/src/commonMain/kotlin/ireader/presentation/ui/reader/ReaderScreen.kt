@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.presentation.ui.core.ui.Colour.Transparent
-import ireader.presentation.ui.reader.components.GlossaryDialog
+import ireader.presentation.ui.reader.components.GlossaryDialogWithFilePickers
 import ireader.presentation.ui.reader.components.MainBottomSettingComposable
 import ireader.presentation.ui.reader.components.PreloadIndicator
 import ireader.presentation.ui.reader.components.TranslationBadge
@@ -279,8 +279,9 @@ fun ReadingScreen(
                         
                         // Glossary dialog
                         if (vm.translationState.showGlossaryDialog) {
-                            GlossaryDialog(
+                            GlossaryDialogWithFilePickers(
                                 glossaryEntries = vm.translationState.glossaryEntries,
+                                bookTitle = vm.book?.title,
                                 onDismiss = { vm.translationState.showGlossaryDialog = false },
                                 onAddEntry = { source, target, type, notes ->
                                     vm.addGlossaryEntry(source, target, type, notes)
@@ -291,34 +292,14 @@ fun ReadingScreen(
                                 onDeleteEntry = { id ->
                                     vm.deleteGlossaryEntry(id)
                                 },
-                                onExport = {
-                                    vm.exportGlossary { json ->
-                                        ireader.presentation.ui.util.FilePicker.pickFileForSave(
-                                            title = "Export Glossary",
-                                            defaultFileName = "${vm.book?.title ?: "glossary"}_glossary.json",
-                                            onFileSelected = { path, _ ->
-                                                try {
-                                                    java.io.File(path).writeText(json)
-                                                    vm.showSnackBar(ireader.i18n.UiText.DynamicString("Glossary exported successfully"))
-                                                } catch (e: Exception) {
-                                                    vm.showSnackBar(ireader.i18n.UiText.ExceptionString(e))
-                                                }
-                                            }
-                                        )
-                                    }
+                                onExportGlossary = { onSuccess ->
+                                    vm.exportGlossary(onSuccess)
                                 },
-                                onImport = {
-                                    ireader.presentation.ui.util.FilePicker.pickFileForLoad(
-                                        title = "Import Glossary",
-                                        onFileSelected = { _, content ->
-                                            try {
-                                                val json = content.decodeToString()
-                                                vm.importGlossary(json)
-                                            } catch (e: Exception) {
-                                                vm.showSnackBar(ireader.i18n.UiText.ExceptionString(e))
-                                            }
-                                        }
-                                    )
+                                onImportGlossary = { json ->
+                                    vm.importGlossary(json)
+                                },
+                                onShowSnackBar = { message ->
+                                    vm.showSnackBar(message)
                                 }
                             )
                         }
