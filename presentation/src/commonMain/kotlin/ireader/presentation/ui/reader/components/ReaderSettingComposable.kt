@@ -1,6 +1,5 @@
 package ireader.presentation.ui.reader.components
 
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,14 +11,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
-import androidx.compose.foundation.pager.PagerDefaults
-import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
@@ -33,7 +29,6 @@ import androidx.compose.material.icons.filled.FormatAlignRight
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TabRow
@@ -68,9 +63,7 @@ import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.theme.ReaderTheme
-import ireader.presentation.ui.core.ui.Colour.contentColor
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
@@ -500,15 +493,25 @@ fun GeneralScreenTab(
         item {
             TranslateButton(
                 onClick = {
-                    scope.launch {
-                        vm.translate()
-                    }
+                    vm.translateCurrentChapter()
                 },
-                isTranslating = vm.isTranslating,
+                isTranslating = vm.translationState.isTranslating,
                 engine = vm.translationEnginesManager.get(),
                 vm = vm
             )
         }
+        
+        // Glossary button
+        item {
+            PreferenceRow(
+                onClick = {
+                    vm.loadGlossary()
+                    vm.translationState.showGlossaryDialog = true
+                },
+                title = "Manage Glossary"
+            )
+        }
+        
         item {
             ChipPreference(
                 preference = listOf(
@@ -886,3 +889,5 @@ fun TranslateButton(
         }
     }
 }
+
+

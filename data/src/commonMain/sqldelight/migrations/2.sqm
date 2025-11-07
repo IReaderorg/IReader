@@ -1,0 +1,37 @@
+-- Migration to add translation and glossary tables
+
+-- Create translated_chapter table
+CREATE TABLE IF NOT EXISTS translated_chapter(
+    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    chapter_id INTEGER NOT NULL,
+    book_id INTEGER NOT NULL,
+    source_language TEXT NOT NULL,
+    target_language TEXT NOT NULL,
+    translator_engine_id INTEGER NOT NULL,
+    translated_content TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    FOREIGN KEY(chapter_id) REFERENCES chapter (_id) ON DELETE CASCADE,
+    FOREIGN KEY(book_id) REFERENCES book (_id) ON DELETE CASCADE,
+    UNIQUE(chapter_id, target_language, translator_engine_id)
+);
+
+CREATE INDEX IF NOT EXISTS translated_chapter_chapter_id_index ON translated_chapter(chapter_id);
+CREATE INDEX IF NOT EXISTS translated_chapter_book_id_index ON translated_chapter(book_id);
+
+-- Create glossary table
+CREATE TABLE IF NOT EXISTS glossary(
+    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    book_id INTEGER NOT NULL,
+    source_term TEXT NOT NULL,
+    target_term TEXT NOT NULL,
+    term_type TEXT NOT NULL,
+    notes TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    FOREIGN KEY(book_id) REFERENCES book (_id) ON DELETE CASCADE,
+    UNIQUE(book_id, source_term)
+);
+
+CREATE INDEX IF NOT EXISTS glossary_book_id_index ON glossary(book_id);
+CREATE INDEX IF NOT EXISTS glossary_source_term_index ON glossary(source_term);

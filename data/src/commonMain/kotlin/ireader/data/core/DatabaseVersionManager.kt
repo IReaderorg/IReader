@@ -36,99 +36,63 @@ class DatabaseVersionManager(
             
             // Check if the database structure is actually correct
             // If not, force a repair
-            if (!validateDatabaseColumns()) {
+            if (!validateDatabaseStructure()) {
                 println("Database structure validation failed. Running repair...")
                 repairDatabase()
             }
         }
-        
-        // Validate database structure
-        validateDatabaseStructure()
     }
     
     /**
-     * Validates that the book table has all required columns
-     * Returns true if valid, false if columns are missing
+     * Validates that required tables and columns exist
+     * Returns true if valid, false if tables/columns are missing
      */
-    private fun validateDatabaseColumns(): Boolean {
+    private fun validateDatabaseStructure(): Boolean {
         try {
-            val existingColumns = mutableSetOf<String>()
-            
+            // Check if translated_chapter table exists
+            var translatedChapterExists = false
             driver.executeQuery(
                 identifier = null,
-                sql = "PRAGMA table_info(book)",
+                sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='translated_chapter'",
                 mapper = { cursor ->
-                    var result = cursor.next()
-                    while (result.value) {
-                        val columnName = cursor.getString(1)
-                        if (columnName != null) {
-                            existingColumns.add(columnName)
-                        }
-                        result = cursor.next()
-                    }
+                    val result = cursor.next()
+                    translatedChapterExists = result.value
                     result
                 },
                 parameters = 0
             )
             
-            val requiredColumns = setOf(
-                "_id", "source", "url", "title", "status", "favorite",
-                "initialized", "viewer", "chapter_flags", "cover_last_modified", 
-                "date_added", "last_update", "next_update"
+            if (!translatedChapterExists) {
+                println("translated_chapter table is missing")
+                return false
+            }
+            
+            // Check if glossary table exists
+            var glossaryExists = false
+            driver.executeQuery(
+                identifier = null,
+                sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='glossary'",
+                mapper = { cursor ->
+                    val result = cursor.next()
+                    glossaryExists = result.value
+                    result
+                },
+                parameters = 0
             )
             
-            val missingColumns = requiredColumns - existingColumns
-            if (missingColumns.isNotEmpty()) {
-                println("Missing columns in book table: $missingColumns")
+            if (!glossaryExists) {
+                println("glossary table is missing")
                 return false
             }
             
             return true
         } catch (e: Exception) {
-            println("Error validating database columns: ${e.message}")
+            println("Error validating database structure: ${e.message}")
             return false
         }
     }
     
-    /**
-     * Validates that essential database components exist
-     */
-    private fun validateDatabaseStructure() {
-        try {
-            // Check if views exist
-            driver.executeQuery(
-                identifier = null,
-                sql = "SELECT name FROM sqlite_master WHERE type='view'",
-                mapper = { cursor ->
-                    cursor.next()
-                },
-                parameters = 0
-            )
-            
-            // Check that book table has expected data
-            driver.executeQuery(
-                identifier = null,
-                sql = "SELECT COUNT(*) FROM book",
-                mapper = { cursor ->
-                    cursor.next()
-                },
-                parameters = 0
-            )
-            
-            // Check favorite books count
-            driver.executeQuery(
-                identifier = null,
-                sql = "SELECT COUNT(*) FROM book WHERE favorite = 1",
-                mapper = { cursor ->
-                    cursor.next()
-                },
-                parameters = 0
-            )
-        } catch (e: Exception) {
-            println("Error validating database structure: ${e.message}")
-            e.printStackTrace()
-        }
-    }
+
     
     /**
      * Force a database repair if issues are detected.
@@ -137,14 +101,14 @@ class DatabaseVersionManager(
     fun repairDatabase() {
         println("Attempting database repair...")
         try {
-            // First, try to add any missing columns
-            addMissingColumns()
+            // Force migration to current version to ensure all tables exist
+            DatabaseMigrations.migrate(driver, 2)
             
             // Force view reinitialization
             DatabaseMigrations.forceViewReinit(driver)
             
-            // Validate the structure again
-            validateDatabaseStructure()
+            // Update version
+            preferences.database_version().set(DatabaseMigrations.CURRENT_VERSION)
             
             println("Database repair completed")
         } catch (e: Exception) {
@@ -153,58 +117,5 @@ class DatabaseVersionManager(
         }
     }
     
-    /**
-     * Adds any missing columns to the book table
-     */
-    private fun addMissingColumns() {
-        try {
-            val existingColumns = mutableSetOf<String>()
-            
-            driver.executeQuery(
-                identifier = null,
-                sql = "PRAGMA table_info(book)",
-                mapper = { cursor ->
-                    var result = cursor.next()
-                    while (result.value) {
-                        val columnName = cursor.getString(1)
-                        if (columnName != null) {
-                            existingColumns.add(columnName)
-                        }
-                        result = cursor.next()
-                    }
-                    result
-                },
-                parameters = 0
-            )
-            
-            println("Current columns in book table: $existingColumns")
-            
-            // Define all columns that should exist
-            val requiredColumns = mapOf(
-                "last_update" to "INTEGER",
-                "next_update" to "INTEGER",
-                "initialized" to "INTEGER NOT NULL DEFAULT 0",
-                "viewer" to "INTEGER NOT NULL DEFAULT 0",
-                "chapter_flags" to "INTEGER NOT NULL DEFAULT 0",
-                "cover_last_modified" to "INTEGER NOT NULL DEFAULT 0",
-                "date_added" to "INTEGER NOT NULL DEFAULT 0"
-            )
-            
-            // Add missing columns
-            requiredColumns.forEach { (columnName, columnType) ->
-                if (!existingColumns.contains(columnName)) {
-                    try {
-                        val sql = "ALTER TABLE book ADD COLUMN $columnName $columnType"
-                        driver.execute(null, sql, 0)
-                        println("Added missing column: $columnName")
-                    } catch (e: Exception) {
-                        println("Could not add column $columnName: ${e.message}")
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            println("Error adding missing columns: ${e.message}")
-            e.printStackTrace()
-        }
-    }
+
 }

@@ -1,0 +1,83 @@
+import kotlin.Boolean;
+import kotlin.Long;
+import kotlin.String;
+import kotlin.Int;
+
+import ireader.core.source.model.Page;
+import kotlin.collections.List;
+
+CREATE TABLE IF NOT EXISTS translated_chapter(
+    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    chapter_id INTEGER NOT NULL,
+    book_id INTEGER NOT NULL,
+    source_language TEXT NOT NULL,
+    target_language TEXT NOT NULL,
+    translator_engine_id INTEGER NOT NULL,
+    translated_content TEXT AS List<Page> NOT NULL,
+    created_at INTEGER AS Long NOT NULL,
+    updated_at INTEGER AS Long NOT NULL,
+    FOREIGN KEY(chapter_id) REFERENCES chapter (_id) ON DELETE CASCADE,
+    FOREIGN KEY(book_id) REFERENCES book (_id) ON DELETE CASCADE,
+    UNIQUE(chapter_id, target_language, translator_engine_id)
+);
+
+CREATE INDEX IF NOT EXISTS translated_chapter_chapter_id_index ON translated_chapter(chapter_id);
+CREATE INDEX IF NOT EXISTS translated_chapter_book_id_index ON translated_chapter(book_id);
+
+getTranslatedChapterById:
+SELECT * FROM translated_chapter WHERE _id = :id;
+
+getTranslatedChapterByChapterId:
+SELECT * FROM translated_chapter 
+WHERE chapter_id = :chapterId 
+AND target_language = :targetLanguage
+AND translator_engine_id = :engineId
+LIMIT 1;
+
+getTranslatedChaptersByBookId:
+SELECT * FROM translated_chapter WHERE book_id = :bookId;
+
+getAllTranslatedChaptersForChapter:
+SELECT * FROM translated_chapter WHERE chapter_id = :chapterId;
+
+deleteTranslatedChapter:
+DELETE FROM translated_chapter WHERE _id = :id;
+
+deleteTranslatedChaptersByChapterId:
+DELETE FROM translated_chapter WHERE chapter_id = :chapterId;
+
+deleteTranslatedChaptersByBookId:
+DELETE FROM translated_chapter WHERE book_id = :bookId;
+
+insert:
+INSERT INTO translated_chapter(
+    chapter_id, book_id, source_language, target_language, 
+    translator_engine_id, translated_content, created_at, updated_at
+)
+VALUES (
+    :chapterId, :bookId, :sourceLanguage, :targetLanguage,
+    :translatorEngineId, :translatedContent, :createdAt, :updatedAt
+);
+
+update:
+UPDATE translated_chapter
+SET translated_content = :translatedContent,
+    updated_at = :updatedAt
+WHERE _id = :id;
+
+upsert:
+INSERT INTO translated_chapter(
+    chapter_id, book_id, source_language, target_language,
+    translator_engine_id, translated_content, created_at, updated_at
+)
+VALUES (
+    :chapterId, :bookId, :sourceLanguage, :targetLanguage,
+    :translatorEngineId, :translatedContent, :createdAt, :updatedAt
+)
+ON CONFLICT(chapter_id, target_language, translator_engine_id)
+DO UPDATE SET
+    translated_content = :translatedContent,
+    updated_at = :updatedAt;
+
+selectLastInsertedRowId:
+SELECT LAST_INSERT_ROWID() AS Long;

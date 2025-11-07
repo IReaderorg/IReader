@@ -170,4 +170,31 @@ val UseCasesInject = module {
         insertDownloads = InsertDownloads(get()),
         subscribeDownloadsUseCase = SubscribeDownloadsUseCase(get()),
     ) }
+    
+    // Translation use cases
+    single { ireader.domain.usecases.translation.SaveTranslatedChapterUseCase(get()) }
+    single { ireader.domain.usecases.translation.GetTranslatedChapterUseCase(get()) }
+    single { ireader.domain.usecases.translation.DeleteTranslatedChapterUseCase(get()) }
+    single { ireader.domain.usecases.translation.GetAllTranslationsForChapterUseCase(get()) }
+    single { ireader.domain.usecases.translation.ApplyGlossaryToTextUseCase() }
+    single { 
+        ireader.domain.usecases.translate.TranslateChapterWithStorageUseCase(
+            translationEnginesManager = get(),
+            saveTranslatedChapterUseCase = get(),
+            getTranslatedChapterUseCase = get(),
+            getGlossaryAsMapUseCase = get(),
+            applyGlossaryToTextUseCase = get()
+        ) 
+    }
+    
+    // Glossary use cases
+    single { ireader.domain.usecases.glossary.GetGlossaryByBookIdUseCase(get()) }
+    single { ireader.domain.usecases.glossary.GetGlossaryByTypeUseCase(get()) }
+    single { ireader.domain.usecases.glossary.SearchGlossaryUseCase(get()) }
+    single { ireader.domain.usecases.glossary.SaveGlossaryEntryUseCase(get()) }
+    single { ireader.domain.usecases.glossary.UpdateGlossaryEntryUseCase(get()) }
+    single { ireader.domain.usecases.glossary.DeleteGlossaryEntryUseCase(get()) }
+    single { ireader.domain.usecases.glossary.ExportGlossaryUseCase(get()) }
+    single { ireader.domain.usecases.glossary.ImportGlossaryUseCase(get()) }
+    single { ireader.domain.usecases.glossary.GetGlossaryAsMapUseCase(get()) }
 }

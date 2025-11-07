@@ -40,6 +40,9 @@ open class ReaderScreenStateImpl: ReaderScreenState {
 
     override val chapterShell: SnapshotStateList<Chapter> = mutableStateListOf()
     override val stateContent: List<Page> by derivedStateOf { stateChapter?.content  ?: emptyList() }
+    
+    // Function to get content (will be overridden in ViewModel to support translation)
+    override fun getCurrentContent(): List<Page> = stateContent
 }
 
 interface ReaderScreenState {
@@ -62,6 +65,9 @@ interface ReaderScreenState {
     var book: Book?
     val stateContent: List<Page>
     val chapterShell: SnapshotStateList<Chapter>
+    
+    // Function to get content (can be overridden to support translation)
+    fun getCurrentContent(): List<Page>
 
     var readerScrollState: ScrollState?
     @OptIn(ExperimentalMaterialApi::class) var modalBottomSheetState: ModalBottomSheetState?

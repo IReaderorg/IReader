@@ -284,6 +284,19 @@ class ReaderPreferences constructor(
     fun chapterSortAscending(): Preference<Boolean> {
         return preferenceStore.getBoolean("chapter_sort_ascending", true)
     }
+    
+    // Translation mode preferences
+    fun showTranslatedContent(): Preference<Boolean> {
+        return preferenceStore.getBoolean("show_translated_content", false)
+    }
+    
+    fun autoSaveTranslations(): Preference<Boolean> {
+        return preferenceStore.getBoolean("auto_save_translations", true)
+    }
+    
+    fun applyGlossaryToTranslations(): Preference<Boolean> {
+        return preferenceStore.getBoolean("apply_glossary_to_translations", true)
+    }
 }
 
 enum class ReadingMode {

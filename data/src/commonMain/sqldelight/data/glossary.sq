@@ -1,0 +1,74 @@
+import kotlin.Long;
+import kotlin.String;
+
+CREATE TABLE IF NOT EXISTS glossary(
+    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    book_id INTEGER NOT NULL,
+    source_term TEXT NOT NULL,
+    target_term TEXT NOT NULL,
+    term_type TEXT NOT NULL, -- 'character', 'place', 'item', 'custom'
+    notes TEXT,
+    created_at INTEGER AS Long NOT NULL,
+    updated_at INTEGER AS Long NOT NULL,
+    FOREIGN KEY(book_id) REFERENCES book (_id) ON DELETE CASCADE,
+    UNIQUE(book_id, source_term)
+);
+
+CREATE INDEX IF NOT EXISTS glossary_book_id_index ON glossary(book_id);
+CREATE INDEX IF NOT EXISTS glossary_source_term_index ON glossary(source_term);
+
+getGlossaryById:
+SELECT * FROM glossary WHERE _id = :id;
+
+getGlossaryByBookId:
+SELECT * FROM glossary WHERE book_id = :bookId ORDER BY source_term ASC;
+
+getGlossaryByBookIdAndType:
+SELECT * FROM glossary 
+WHERE book_id = :bookId AND term_type = :termType 
+ORDER BY source_term ASC;
+
+searchGlossary:
+SELECT * FROM glossary 
+WHERE book_id = :bookId 
+AND (source_term LIKE '%' || :query || '%' OR target_term LIKE '%' || :query || '%')
+ORDER BY source_term ASC;
+
+deleteGlossary:
+DELETE FROM glossary WHERE _id = :id;
+
+deleteGlossaryByBookId:
+DELETE FROM glossary WHERE book_id = :bookId;
+
+insert:
+INSERT INTO glossary(
+    book_id, source_term, target_term, term_type, notes, created_at, updated_at
+)
+VALUES (
+    :bookId, :sourceTerm, :targetTerm, :termType, :notes, :createdAt, :updatedAt
+);
+
+update:
+UPDATE glossary
+SET target_term = :targetTerm,
+    term_type = :termType,
+    notes = :notes,
+    updated_at = :updatedAt
+WHERE _id = :id;
+
+upsert:
+INSERT INTO glossary(
+    book_id, source_term, target_term, term_type, notes, created_at, updated_at
+)
+VALUES (
+    :bookId, :sourceTerm, :targetTerm, :termType, :notes, :createdAt, :updatedAt
+)
+ON CONFLICT(book_id, source_term)
+DO UPDATE SET
+    target_term = :targetTerm,
+    term_type = :termType,
+    notes = :notes,
+    updated_at = :updatedAt;
+
+selectLastInsertedRowId:
+SELECT LAST_INSERT_ROWID() AS Long;

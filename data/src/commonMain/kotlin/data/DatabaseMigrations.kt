@@ -90,57 +90,63 @@ object DatabaseMigrations {
     
     /**
      * Migration from version 2 to version 3
-     * Ensures book table has all required columns
-     * This fixes "no such column" errors for last_update, next_update, initialized, etc.
+     * Adds translation and glossary tables
+     * This migration applies the SQL from 2.sqm migration file
      */
     private fun migrateV2toV3(driver: SqlDriver) {
         try {
-            // Get all existing columns
-            val existingColumns = mutableSetOf<String>()
+            // Create translated_chapter table
+            val createTranslatedChapterSql = """
+                CREATE TABLE IF NOT EXISTS translated_chapter(
+                    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    chapter_id INTEGER NOT NULL,
+                    book_id INTEGER NOT NULL,
+                    source_language TEXT NOT NULL,
+                    target_language TEXT NOT NULL,
+                    translator_engine_id INTEGER NOT NULL,
+                    translated_content TEXT NOT NULL,
+                    created_at INTEGER NOT NULL,
+                    updated_at INTEGER NOT NULL,
+                    FOREIGN KEY(chapter_id) REFERENCES chapter (_id) ON DELETE CASCADE,
+                    FOREIGN KEY(book_id) REFERENCES book (_id) ON DELETE CASCADE,
+                    UNIQUE(chapter_id, target_language, translator_engine_id)
+                );
+            """.trimIndent()
             
-            driver.executeQuery(
-                identifier = null,
-                sql = "PRAGMA table_info(book)",
-                mapper = { cursor ->
-                    var result = cursor.next()
-                    while (result.value) {
-                        val columnName = cursor.getString(1)
-                        if (columnName != null) {
-                            existingColumns.add(columnName)
-                        }
-                        result = cursor.next()
-                    }
-                    result
-                },
-                parameters = 0
-            )
+            driver.execute(null, createTranslatedChapterSql, 0)
             
-            // Define all columns that should exist with their types and defaults
-            val requiredColumns = mapOf(
-                "last_update" to "INTEGER",
-                "next_update" to "INTEGER",
-                "initialized" to "INTEGER NOT NULL DEFAULT 0",
-                "viewer" to "INTEGER NOT NULL DEFAULT 0",
-                "chapter_flags" to "INTEGER NOT NULL DEFAULT 0",
-                "cover_last_modified" to "INTEGER NOT NULL DEFAULT 0",
-                "date_added" to "INTEGER NOT NULL DEFAULT 0"
-            )
+            // Create indices for translated_chapter
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS translated_chapter_chapter_id_index ON translated_chapter(chapter_id);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS translated_chapter_book_id_index ON translated_chapter(book_id);", 0)
             
-            // Add any missing columns
-            requiredColumns.forEach { (columnName, columnType) ->
-                if (!existingColumns.contains(columnName)) {
-                    try {
-                        val sql = "ALTER TABLE book ADD COLUMN $columnName $columnType"
-                        driver.execute(null, sql, 0)
-                    } catch (e: Exception) {
-                        // Column may already exist, ignore
-                    }
-                }
-            }
+            // Create glossary table
+            val createGlossarySql = """
+                CREATE TABLE IF NOT EXISTS glossary(
+                    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    book_id INTEGER NOT NULL,
+                    source_term TEXT NOT NULL,
+                    target_term TEXT NOT NULL,
+                    term_type TEXT NOT NULL,
+                    notes TEXT,
+                    created_at INTEGER NOT NULL,
+                    updated_at INTEGER NOT NULL,
+                    FOREIGN KEY(book_id) REFERENCES book (_id) ON DELETE CASCADE,
+                    UNIQUE(book_id, source_term)
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createGlossarySql, 0)
+            
+            // Create indices for glossary
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS glossary_book_id_index ON glossary(book_id);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS glossary_source_term_index ON glossary(source_term);", 0)
+            
+            println("Successfully created translation tables")
             
         } catch (e: Exception) {
+            println("Error creating translation tables: ${e.message}")
             e.printStackTrace()
-            // Don't throw - the columns might already exist which is fine
+            // Don't throw - the tables might already exist which is fine
         }
     }
     

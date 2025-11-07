@@ -36,6 +36,9 @@ import ireader.presentation.ui.core.ui.Colour.Transparent
 import ireader.presentation.ui.reader.components.MainBottomSettingComposable
 import ireader.presentation.ui.reader.components.PreloadIndicator
 import ireader.presentation.ui.reader.components.TranslationProgressIndicator
+import ireader.presentation.ui.reader.components.TranslationToggleButton
+import ireader.presentation.ui.reader.components.TranslationBadge
+import ireader.presentation.ui.reader.components.GlossaryDialog
 import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.launch
@@ -219,17 +222,38 @@ fun ReadingScreen(
                                 onChapterShown = onChapterShown
                             )
                             
-                            // Add translation progress indicator
+                            // Translation toggle button
+                            TranslationToggleButton(
+                                isTranslated = vm.translationState.isShowingTranslation,
+                                hasTranslation = vm.translationState.hasTranslation,
+                                onToggle = { vm.toggleTranslation() },
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(16.dp)
+                            )
+                            
+                            // Translation badge
+                            if (vm.translationState.isShowingTranslation) {
+                                TranslationBadge(
+                                    isTranslated = true,
+                                    textColor = vm.textColor.value,
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(16.dp)
+                                )
+                            }
+                            
+                            // Translation progress indicator
                             TranslationProgressIndicator(
-                                isVisible = vm.isTranslating,
-                                progress = vm.translationProgress,
-                                completedItems = vm.translationCompleted,
-                                totalItems = vm.translationTotal,
+                                isVisible = vm.translationState.isTranslating,
+                                progress = vm.translationState.translationProgress,
+                                completedItems = (vm.translationState.translationProgress * 100).toInt(),
+                                totalItems = 100,
                                 engine = vm.translationEnginesManager.get(),
                                 textColor = vm.textColor.value,
                                 onCancel = { 
                                     scope.launch {
-                                        vm.isTranslating = false
+                                        vm.translationState.isTranslating = false
                                     }
                                 },
                                 modifier = Modifier
@@ -237,12 +261,37 @@ fun ReadingScreen(
                                     .padding(horizontal = 16.dp)
                             )
                             
-                            // Add preload indicator
+                            // Preload indicator
                             PreloadIndicator(
                                 isVisible = vm.isPreloading,
                                 modifier = Modifier
                                     .align(Alignment.BottomCenter)
                                     .padding(bottom = 16.dp)
+                            )
+                        }
+                        
+                        // Glossary dialog
+                        if (vm.translationState.showGlossaryDialog) {
+                            GlossaryDialog(
+                                glossaryEntries = vm.translationState.glossaryEntries,
+                                onDismiss = { vm.translationState.showGlossaryDialog = false },
+                                onAddEntry = { source, target, type, notes ->
+                                    vm.addGlossaryEntry(source, target, type, notes)
+                                },
+                                onEditEntry = { entry ->
+                                    // TODO: Implement edit functionality
+                                },
+                                onDeleteEntry = { id ->
+                                    vm.deleteGlossaryEntry(id)
+                                },
+                                onExport = {
+                                    vm.exportGlossary { json ->
+                                        // TODO: Save to file
+                                    }
+                                },
+                                onImport = {
+                                    // TODO: Load file and call vm.importGlossary(json)
+                                }
                             )
                         }
                     }

@@ -81,7 +81,14 @@ val PresentationModules = module {
     factory <ReaderScreenStateImpl> { ReaderScreenStateImpl() }
     factory <ReaderScreenPreferencesStateImpl> { ReaderScreenPreferencesStateImpl() }
 
-    factory< ReaderScreenViewModel>  { ReaderScreenViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),) }
+    factory< ReaderScreenViewModel>  { ReaderScreenViewModel(
+        get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),
+        get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),
+        // Translation use cases
+        get(),get(),get(),get(),get(),get(),get(),
+        // Params and scope
+        get(),get()
+    ) }
 
 
 }

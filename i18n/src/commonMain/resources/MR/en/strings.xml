@@ -22,4 +22,7 @@
     <string name="content_type">Content Type</string>
     <string name="tone_type">Tone Type</string>
     <string name="preserve_style">Preserve Style</string>
-    <string name="libretranslate_info">LibreTranslate is a free and open-source machine translation API. No API key required.</string> 
+    <string name="libretranslate_info">LibreTranslate is a free and open-source machine translation API. No API key required.</string>
+    <string name="show_original">Show Original</string>
+    <string name="show_translation">Show Translation</string>
+    <string name="translated">Translated</string> 

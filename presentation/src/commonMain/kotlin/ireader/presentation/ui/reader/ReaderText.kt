@@ -252,7 +252,7 @@ private fun PagedReaderText(
                     .padding(top = 32.dp)
 
             ) {
-                vm.stateContent.forEachIndexed { index, text ->
+                vm.getCurrentContent().forEachIndexed { index, text ->
                     MainText(
                         modifier = modifier,
                         index = index,
@@ -330,7 +330,7 @@ private fun StyleText(
                 setText(
                     text = page.text,
                     index = index,
-                    isLast = index == vm.stateContent.lastIndex,
+                    isLast = index == vm.getCurrentContent().lastIndex,
                     topContentPadding = vm.topContentPadding.value,
                     contentPadding = vm.distanceBetweenParagraphs.value,
                     bottomContentPadding = vm.bottomContentPadding.value

@@ -9,14 +9,17 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.ExperimentalTextApi
 import ireader.core.http.WebViewManger
-import ireader.core.source.model.Text
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.data.repository.ReaderThemeRepository
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.models.ReaderColors
 import ireader.domain.preferences.models.prefs.readerThemes
-import ireader.domain.preferences.prefs.*
+import ireader.domain.preferences.prefs.AppPreferences
+import ireader.domain.preferences.prefs.PlatformUiPreferences
+import ireader.domain.preferences.prefs.ReaderPreferences
+import ireader.domain.preferences.prefs.ReadingMode
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.history.HistoryUseCase
 import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
 import ireader.domain.usecases.reader.ScreenAlwaysOn
@@ -29,9 +32,14 @@ import ireader.i18n.NO_VALUE
 import ireader.i18n.UiText
 import ireader.i18n.resources.MR
 import ireader.presentation.ui.core.theme.ReaderColors
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 @OptIn(ExperimentalTextApi::class)
 
@@ -56,6 +64,14 @@ class ReaderScreenViewModel(
         val bookMarkChapterUseCase: ireader.domain.usecases.local.book_usecases.BookMarkChapterUseCase,
         val translationEnginesManager: TranslationEnginesManager,
         val preloadChapterUseCase: ireader.domain.usecases.reader.PreloadChapterUseCase,
+        // Translation use cases
+        val translateChapterWithStorageUseCase: ireader.domain.usecases.translate.TranslateChapterWithStorageUseCase,
+        val getTranslatedChapterUseCase: ireader.domain.usecases.translation.GetTranslatedChapterUseCase,
+        val getGlossaryByBookIdUseCase: ireader.domain.usecases.glossary.GetGlossaryByBookIdUseCase,
+        val saveGlossaryEntryUseCase: ireader.domain.usecases.glossary.SaveGlossaryEntryUseCase,
+        val deleteGlossaryEntryUseCase: ireader.domain.usecases.glossary.DeleteGlossaryEntryUseCase,
+        val exportGlossaryUseCase: ireader.domain.usecases.glossary.ExportGlossaryUseCase,
+        val importGlossaryUseCase: ireader.domain.usecases.glossary.ImportGlossaryUseCase,
         val params: Param,
         val globalScope: CoroutineScope
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(),
@@ -139,6 +155,17 @@ class ReaderScreenViewModel(
         "Roboto Serif",
         "Cooper Arabic"
     )
+
+    // Translation state and preferences
+    val translationState = TranslationStateImpl()
+    val showTranslatedContent = readerPreferences.showTranslatedContent().asState()
+    val autoSaveTranslations = readerPreferences.autoSaveTranslations().asState()
+    val applyGlossaryToTranslations = readerPreferences.applyGlossaryToTranslations().asState()
+    
+    // Override to provide translation-aware content
+    override fun getCurrentContent(): List<ireader.core.source.model.Page> {
+        return getCurrentChapterContent()
+    }
 
     var isToggleInProgress by mutableStateOf(false)
 
@@ -239,6 +266,11 @@ class ReaderScreenViewModel(
         
         // Trigger preload of next chapter
         triggerPreloadNextChapter()
+        
+        // Load translation if available
+        chapterId?.let { id ->
+            loadTranslationForChapter(id)
+        }
         
         return stateChapter
     }
@@ -591,6 +623,194 @@ class ReaderScreenViewModel(
     fun clearPreloadCache() {
         preloadedChapters.clear()
         ireader.core.log.Log.debug("Preload cache cleared")
+    }
+
+    // ==================== Translation Methods ====================
+    
+    /**
+     * Load translation for the current chapter if available
+     */
+    suspend fun loadTranslationForChapter(chapterId: Long) {
+        translationState.reset()
+        
+        try {
+            val translation = getTranslatedChapterUseCase.execute(
+                chapterId = chapterId,
+                targetLanguage = translatorTargetLanguage.value,
+                engineId = translatorEngine.value
+            )
+            
+            translationState.translatedChapter = translation
+            translationState.hasTranslation = translation != null
+            translationState.isShowingTranslation = 
+                showTranslatedContent.value && translation != null
+        } catch (e: Exception) {
+            // Silently fail if table doesn't exist yet (migration not run)
+            if (e.message?.contains("no such table") == true) {
+                ireader.core.log.Log.debug("Translation table not yet created, skipping translation load")
+            } else {
+                ireader.core.log.Log.error("Error loading translation: ${e.message}")
+            }
+            translationState.hasTranslation = false
+        }
+    }
+    
+    /**
+     * Toggle between original and translated content
+     */
+    fun toggleTranslation() {
+        if (translationState.hasTranslation) {
+            translationState.isShowingTranslation = !translationState.isShowingTranslation
+            readerPreferences.showTranslatedContent().set(translationState.isShowingTranslation)
+        }
+    }
+    
+    /**
+     * Get current chapter content (original or translated)
+     */
+    fun getCurrentChapterContent(): List<ireader.core.source.model.Page> {
+        return if (translationState.isShowingTranslation && 
+                   translationState.translatedChapter != null) {
+            translationState.translatedChapter!!.translatedContent
+        } else {
+            stateChapter?.content ?: emptyList()
+        }
+    }
+    
+    /**
+     * Translate the current chapter
+     */
+    fun translateCurrentChapter(forceRetranslate: Boolean = false) {
+        val chapter = stateChapter ?: return
+        
+        translationState.isTranslating = true
+        translationState.translationError = null
+        
+        try {
+            translateChapterWithStorageUseCase.execute(
+                chapter = chapter,
+                sourceLanguage = translatorOriginLanguage.value,
+                targetLanguage = translatorTargetLanguage.value,
+                contentType = ireader.domain.data.engines.ContentType.values()[translatorContentType.value],
+                toneType = ireader.domain.data.engines.ToneType.values()[translatorToneType.value],
+                preserveStyle = translatorPreserveStyle.value,
+                applyGlossary = applyGlossaryToTranslations.value,
+                forceRetranslate = forceRetranslate,
+                scope = scope,
+                onProgress = { progress ->
+                    translationState.translationProgress = progress / 100f
+                },
+                onSuccess = { translatedChapter ->
+                    translationState.translatedChapter = translatedChapter
+                    translationState.hasTranslation = true
+                    translationState.isTranslating = false
+                    translationState.isShowingTranslation = true
+                    
+                    showSnackBar(UiText.MStringResource(MR.strings.success))
+                },
+                onError = { error ->
+                    translationState.translationError = error.toString()
+                    translationState.isTranslating = false
+                    
+                    // Check if it's a database error
+                    if (error.toString().contains("no such table")) {
+                        showSnackBar(UiText.DynamicString("Database migration needed. Please restart the app."))
+                    } else {
+                        showSnackBar(error)
+                    }
+                }
+            )
+        } catch (e: Exception) {
+            translationState.isTranslating = false
+            translationState.translationError = e.message
+            showSnackBar(UiText.ExceptionString(e))
+        }
+    }
+    
+    /**
+     * Load glossary for the current book
+     */
+    fun loadGlossary() {
+        val bookId = book?.id ?: return
+        
+        scope.launch {
+            val entries = getGlossaryByBookIdUseCase.execute(bookId)
+            translationState.glossaryEntries = entries
+        }
+    }
+    
+    /**
+     * Add a new glossary entry
+     */
+    fun addGlossaryEntry(
+        sourceTerm: String,
+        targetTerm: String,
+        termType: ireader.domain.models.entities.GlossaryTermType,
+        notes: String?
+    ) {
+        val bookId = book?.id ?: return
+        
+        scope.launch {
+            saveGlossaryEntryUseCase.execute(
+                bookId = bookId,
+                sourceTerm = sourceTerm,
+                targetTerm = targetTerm,
+                termType = termType,
+                notes = notes
+            )
+            loadGlossary()
+            showSnackBar(UiText.MStringResource(MR.strings.success))
+        }
+    }
+    
+    /**
+     * Delete a glossary entry
+     */
+    fun deleteGlossaryEntry(id: Long) {
+        scope.launch {
+            deleteGlossaryEntryUseCase.execute(id)
+            loadGlossary()
+            showSnackBar(UiText.MStringResource(MR.strings.success))
+        }
+    }
+    
+    /**
+     * Export glossary as JSON
+     */
+    fun exportGlossary(onSuccess: (String) -> Unit) {
+        val book = book ?: return
+        
+        scope.launch {
+            try {
+                val json = exportGlossaryUseCase.execute(
+                    bookId = book.id,
+                    bookTitle = book.title
+                )
+                onSuccess(json)
+            } catch (e: Exception) {
+                showSnackBar(UiText.ExceptionString(e))
+            }
+        }
+    }
+    
+    /**
+     * Import glossary from JSON
+     */
+    fun importGlossary(jsonString: String) {
+        val bookId = book?.id ?: return
+        
+        scope.launch {
+            try {
+                val count = importGlossaryUseCase.execute(
+                    jsonString = jsonString,
+                    targetBookId = bookId
+                )
+                loadGlossary()
+                showSnackBar(UiText.MStringResource(MR.strings.success))
+            } catch (e: Exception) {
+                showSnackBar(UiText.ExceptionString(e))
+            }
+        }
     }
 
     override fun onDestroy() {
