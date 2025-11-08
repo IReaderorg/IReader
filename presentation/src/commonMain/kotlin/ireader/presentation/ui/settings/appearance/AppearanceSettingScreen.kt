@@ -56,7 +56,6 @@ import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposab
 import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.theme.isLight
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -118,13 +117,14 @@ fun AppearanceSettingScreen(
             }.Build()
         }
         item {
-            Components.Dynamic {
-                Components.SwitchPreference(
-                        preference = vm.dynamicColorMode,
-                        title = "Material You (Dynamic Colors)",
-                        subtitle = "Adapt colors from your wallpaper (Android 12+)",
-                )
-            }.Build()
+            Components.Switch(
+                preference = vm.dynamicColorMode,
+                title = "Material You (Dynamic Colors)",
+                subtitle = "Adapt colors from your wallpaper (Android 12+)",
+                onValue = {
+
+                }
+            ).Build()
         }
         item {
             Components.Header(
