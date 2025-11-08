@@ -1,8 +1,19 @@
 package ireader.core.source
 
-import ireader.core.source.model.*
+import ireader.core.source.model.ChapterInfo
+import ireader.core.source.model.Command
+import ireader.core.source.model.CommandList
+import ireader.core.source.model.Filter
+import ireader.core.source.model.FilterList
+import ireader.core.source.model.ImageUrl
+import ireader.core.source.model.Listing
+import ireader.core.source.model.MangaInfo
+import ireader.core.source.model.MangasPageInfo
+import ireader.core.source.model.MovieUrl
+import ireader.core.source.model.Page
+import ireader.core.source.model.Text
 import kotlinx.coroutines.delay
-import kotlinx.datetime.Clock
+import kotlin.time.ExperimentalTime
 
 class TestSource : ireader.core.source.CatalogSource {
     override val id = 1L
@@ -146,6 +157,7 @@ class TestSource : ireader.core.source.CatalogSource {
 
         return list
     }
+    @OptIn(ExperimentalTime::class)
     private fun getTestChapters(commands: List<Command<*>>): List<ChapterInfo> {
         val chapters = mutableListOf<ChapterInfo>()
 
@@ -153,9 +165,9 @@ class TestSource : ireader.core.source.CatalogSource {
             is Command.Chapter.Text -> {
                 chapters.add(
                     ChapterInfo(
-                        Clock.System.now().toEpochMilliseconds().toString(),
+                        kotlin.time.Clock.System.now().toEpochMilliseconds().toString(),
                         cmd.value,
-                        Clock.System.now().toEpochMilliseconds()
+                        kotlin.time.Clock.System.now().toEpochMilliseconds()
                     )
                 )
                 chapters
@@ -164,9 +176,9 @@ class TestSource : ireader.core.source.CatalogSource {
 
                 chapters.add(
                     ChapterInfo(
-                        Clock.System.now().toEpochMilliseconds().toString(),
+                        kotlin.time.Clock.System.now().toEpochMilliseconds().toString(),
                         "Chapter ${cmd.options[cmd.value]}",
-                        Clock.System.now().toEpochMilliseconds()
+                        kotlin.time.Clock.System.now().toEpochMilliseconds()
                     )
                 )
                 chapters
@@ -175,7 +187,7 @@ class TestSource : ireader.core.source.CatalogSource {
                 val chapter1 = ChapterInfo(
                     "1",
                     "Chapter 1",
-                    Clock.System.now().toEpochMilliseconds()
+                    kotlin.time.Clock.System.now().toEpochMilliseconds()
                 )
                 val chapter2 = chapter1.copy(key = "2", name = "Chapter2")
                 val chapter3 = chapter1.copy(key = "3", name = "Chapter3")
@@ -185,11 +197,12 @@ class TestSource : ireader.core.source.CatalogSource {
         }
     }
 
+    @OptIn(ExperimentalTime::class)
     private fun getTestChapters(): List<ChapterInfo> {
         val chapter1 = ChapterInfo(
             "1",
             "Chapter 1",
-            Clock.System.now().toEpochMilliseconds()
+            kotlin.time.Clock.System.now().toEpochMilliseconds()
         )
         val chapter2 = chapter1.copy(key = "2", name = "Chapter2")
         val chapter3 = chapter1.copy(key = "3", name = "Chapter3")

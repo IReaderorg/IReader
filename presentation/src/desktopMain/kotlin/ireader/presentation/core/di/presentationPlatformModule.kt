@@ -14,4 +14,9 @@ actual val presentationPlatformModule: Module = module {
     single<PlatformReaderSettingReader> { PlatformReaderSettingReader() }
     single { WebViewManger() }
     single<IUseController> { IUseController() }
+    
+    // Dynamic colors not supported on desktop
+    single<ireader.presentation.core.theme.DynamicColorScheme> { 
+        ireader.presentation.core.theme.DesktopDynamicColorScheme() 
+    }
 }

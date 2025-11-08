@@ -1,13 +1,13 @@
 package ireader.domain.usecases.updates
 
+import ireader.domain.data.repository.UpdatesRepository
 import ireader.domain.models.entities.UpdatesWithRelations
 import ireader.domain.preferences.prefs.UiPreferences
-import ireader.domain.data.repository.UpdatesRepository
 import ireader.domain.utils.extensions.toLocalDate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
+import kotlin.time.ExperimentalTime
 
 
 data class UpdateUseCases(
@@ -25,8 +25,9 @@ class SubscribeUpdates(private val updatesRepository: UpdatesRepository) {
 
 
 class DeleteAllUpdates(private val prefs: UiPreferences) {
+    @OptIn(ExperimentalTime::class)
     operator fun invoke() {
-        return prefs.showUpdatesAfter().set(Clock.System.now().toEpochMilliseconds())
+        return prefs.showUpdatesAfter().set(kotlin.time.Clock.System.now().toEpochMilliseconds())
     }
 }
 

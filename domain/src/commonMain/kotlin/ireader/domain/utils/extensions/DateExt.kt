@@ -5,6 +5,7 @@ import kotlinx.datetime.*
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.time.ExperimentalTime
 
 fun Date.toDateTimestampString(dateFormatter: DateFormat): String {
     val date = dateFormatter.format(this)
@@ -32,10 +33,12 @@ fun convertLongToTime(time: Long): String {
 }
 
 
+@OptIn(ExperimentalTime::class)
 fun currentTimeToLong(): Long {
-    return Clock.System.now().toEpochMilliseconds()
+    return kotlin.time.Clock.System.now().toEpochMilliseconds()
 }
 
+@OptIn(ExperimentalTime::class)
 fun Long.toLocalDate() : LocalDateTime {
     return kotlinx.datetime.Instant
         .fromEpochMilliseconds(this)

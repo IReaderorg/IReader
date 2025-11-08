@@ -1,6 +1,7 @@
 package ireader.domain.models.entities
 
 import ireader.domain.models.BookCover
+import kotlin.time.ExperimentalTime
 
 
 data class UpdatesWithRelations(
@@ -17,12 +18,13 @@ data class UpdatesWithRelations(
     val downloaded: Boolean
 ) {
     companion object {
+        @OptIn(ExperimentalTime::class)
         fun UpdatesWithRelations.toUpdate(): Update {
             return Update(
                 id = this.chapterId,
                 bookId = this.bookId,
                 chapterId = this.chapterId,
-                date = kotlinx.datetime.Clock.System.now().toEpochMilliseconds(),
+                date = kotlin.time.Clock.System.now().toEpochMilliseconds(),
             )
         }
     }

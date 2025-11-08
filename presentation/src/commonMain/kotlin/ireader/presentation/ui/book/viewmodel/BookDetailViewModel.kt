@@ -23,6 +23,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Clock
 import java.util.*
+import kotlin.time.ExperimentalTime
 
 
 class BookDetailViewModel(
@@ -103,6 +104,7 @@ class BookDetailViewModel(
     }
 
 
+    @OptIn(ExperimentalTime::class)
     private suspend fun initBook(bookId: Long) {
         var book = getBookUseCases.findBookById(bookId)
 
@@ -110,7 +112,7 @@ class BookDetailViewModel(
             book = book?.copy(
                 id = bookId,
                 initialized = true,
-                lastUpdate = Clock.System.now().toEpochMilliseconds(),
+                lastUpdate = kotlin.time.Clock.System.now().toEpochMilliseconds(),
 
                 )
             booksState.replaceBook(book)

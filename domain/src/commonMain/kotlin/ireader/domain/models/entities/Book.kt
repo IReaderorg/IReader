@@ -2,8 +2,8 @@ package ireader.domain.models.entities
 
 
 import ireader.core.source.model.MangaInfo
-import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
+import kotlin.time.ExperimentalTime
 
 @Serializable
 data class Book(
@@ -72,6 +72,7 @@ fun String.takeIf(statement: () -> Boolean, defaultValue: String): String {
     }
 }
 
+@OptIn(ExperimentalTime::class)
 fun MangaInfo.toBook(sourceId: Long, bookId: Long = 0, lastUpdated: Long = 0): Book {
     return Book(
         id = bookId,
@@ -80,7 +81,7 @@ fun MangaInfo.toBook(sourceId: Long, bookId: Long = 0, lastUpdated: Long = 0): B
         cover = this.cover,
         flags = 0,
         key = this.key,
-        dateAdded = Clock.System.now().toEpochMilliseconds(),
+        dateAdded = kotlin.time.Clock.System.now().toEpochMilliseconds(),
         lastUpdate = lastUpdated,
         favorite = false,
         title = this.title,

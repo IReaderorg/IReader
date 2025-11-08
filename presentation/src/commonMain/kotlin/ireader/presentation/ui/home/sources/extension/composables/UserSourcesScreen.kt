@@ -11,7 +11,9 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import ireader.domain.models.entities.*
+import ireader.domain.models.entities.Catalog
+import ireader.domain.models.entities.CatalogInstalled
+import ireader.domain.models.entities.key
 import ireader.presentation.ui.home.sources.extension.CatalogItem
 import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
 import ireader.presentation.ui.home.sources.extension.SourceHeader
@@ -74,12 +76,12 @@ fun UserSourcesScreen(
             when (catalogItem) {
                 is SourceUiModel.Header -> {
                     SourceHeader(
-                            modifier = Modifier.animateItemPlacement(),
+                            modifier = Modifier.animateItem(),
                             language = catalogItem.language,
                     )
                 }
                 is SourceUiModel.Item -> CatalogItem(
-                        modifier = Modifier.animateItemPlacement(),
+                        modifier = Modifier.animateItem(),
                         catalog = catalogItem.source,
                         installStep = if (catalogItem.source is CatalogInstalled) vm.installSteps[catalogItem.source.pkgName] else null,
                         onClick = { onClickCatalog(catalogItem.source) },

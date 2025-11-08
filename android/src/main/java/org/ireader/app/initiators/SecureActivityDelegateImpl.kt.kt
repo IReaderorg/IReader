@@ -13,9 +13,8 @@ import ireader.presentation.core.ui.UnlockActivity
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.datetime.Clock
 import org.ireader.app.SecureActivityDelegate
-
+import kotlin.time.ExperimentalTime
 
 
 class SecureActivityDelegateImpl : SecureActivityDelegate, DefaultLifecycleObserver {
@@ -59,9 +58,10 @@ class SecureActivityDelegateImpl : SecureActivityDelegate, DefaultLifecycleObser
         }
     }
 
+    @OptIn(ExperimentalTime::class)
     private fun isAppLocked(): Boolean {
         if (!preferences.isAppLocked) return false
         return (preferences.lockAppAfter().get() <= 0) ||
-            Clock.System.now().toEpochMilliseconds() >= (preferences.lastAppUnlock().get() + 60 * 1000 * preferences.lockAppAfter().get())
+            kotlin.time.Clock.System.now().toEpochMilliseconds() >= (preferences.lastAppUnlock().get() + 60 * 1000 * preferences.lockAppAfter().get())
     }
 }

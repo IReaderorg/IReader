@@ -18,7 +18,10 @@ import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.utils.extensions.AuthenticatorUtil
 import ireader.domain.utils.extensions.AuthenticatorUtil.isAuthenticationSupported
 import ireader.domain.utils.extensions.AuthenticatorUtil.startAuthentication
-import ireader.i18n.*
+import ireader.i18n.LocalizeHelper
+import ireader.i18n.asString
+import ireader.i18n.localize
+import ireader.i18n.localizePlural
 import ireader.i18n.resources.MR
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
@@ -27,8 +30,8 @@ import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import kotlinx.datetime.Clock
 import org.koin.android.ext.android.get
+import kotlin.time.ExperimentalTime
 
 actual class SecuritySettingSpec : VoyagerScreen() {
 
@@ -169,6 +172,7 @@ class UnlockActivity : FragmentActivity() {
     val appPreferences: UiPreferences = get<UiPreferences>()
     val localizeHelper: LocalizeHelper = get<LocalizeHelper>()
 
+    @OptIn(ExperimentalTime::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val title = intent.extras?.getString(TITLE)
@@ -196,7 +200,7 @@ class UnlockActivity : FragmentActivity() {
                     super.onAuthenticationSucceeded(activity, result)
                     kotlin.runCatching {
                         appPreferences.isAppLocked = false
-                        appPreferences.lastAppUnlock().set(Clock.System.now().toEpochMilliseconds())
+                        appPreferences.lastAppUnlock().set(kotlin.time.Clock.System.now().toEpochMilliseconds())
                     }
                     setResult(SUCCESS, intent)
                     finish()

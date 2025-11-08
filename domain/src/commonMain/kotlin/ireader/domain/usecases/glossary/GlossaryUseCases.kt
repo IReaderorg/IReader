@@ -5,10 +5,8 @@ import ireader.domain.models.entities.Glossary
 import ireader.domain.models.entities.GlossaryExport
 import ireader.domain.models.entities.GlossaryTermType
 import kotlinx.coroutines.flow.Flow
-import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.decodeFromString
+import kotlin.time.ExperimentalTime
 
 class GetGlossaryByBookIdUseCase(
     private val repository: GlossaryRepository
@@ -41,6 +39,7 @@ class SearchGlossaryUseCase(
 class SaveGlossaryEntryUseCase(
     private val repository: GlossaryRepository
 ) {
+    @OptIn(ExperimentalTime::class)
     suspend fun execute(
         bookId: Long,
         sourceTerm: String,
@@ -49,7 +48,7 @@ class SaveGlossaryEntryUseCase(
         notes: String? = null,
         entryId: Long? = null
     ): Long {
-        val now = Clock.System.now().toEpochMilliseconds()
+        val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
         val glossary = Glossary(
             id = entryId ?: 0,
             bookId = bookId,
@@ -69,9 +68,10 @@ class SaveGlossaryEntryUseCase(
 class UpdateGlossaryEntryUseCase(
     private val repository: GlossaryRepository
 ) {
+    @OptIn(ExperimentalTime::class)
     suspend fun execute(glossary: Glossary) {
         val updated = glossary.copy(
-            updatedAt = Clock.System.now().toEpochMilliseconds()
+            updatedAt = kotlin.time.Clock.System.now().toEpochMilliseconds()
         )
         repository.updateGlossary(updated)
     }
@@ -92,13 +92,14 @@ class DeleteGlossaryEntryUseCase(
 class ExportGlossaryUseCase(
     private val repository: GlossaryRepository
 ) {
+    @OptIn(ExperimentalTime::class)
     suspend fun execute(bookId: Long, bookTitle: String): String {
         val entries = repository.getGlossaryByBookId(bookId)
         val export = GlossaryExport(
             bookId = bookId,
             bookTitle = bookTitle,
             entries = entries,
-            exportedAt = Clock.System.now().toEpochMilliseconds()
+            exportedAt = kotlin.time.Clock.System.now().toEpochMilliseconds()
         )
         
         return Json.encodeToString(export)

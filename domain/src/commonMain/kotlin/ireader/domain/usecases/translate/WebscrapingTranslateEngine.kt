@@ -629,7 +629,13 @@ open class WebscrapingTranslateEngine(
             }
             
             if (response.status.value in 200..299) {
-                val modelsResponse = response.body<GeminiModelsResponse>()
+                // Manually parse JSON using kotlinx.serialization to avoid Gson LinkedTreeMap issue
+                val responseText = response.bodyAsText()
+                val json = Json { 
+                    ignoreUnknownKeys = true
+                    isLenient = true
+                }
+                val modelsResponse = json.decodeFromString<GeminiModelsResponse>(responseText)
                 
                 // Filter models that support generateContent
                 val availableModels = modelsResponse.models

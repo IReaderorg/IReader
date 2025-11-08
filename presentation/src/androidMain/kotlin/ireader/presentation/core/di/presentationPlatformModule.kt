@@ -38,5 +38,10 @@ actual val presentationPlatformModule = module  {
     }
     single<CoverCache> { CoverCache(get<Context>(), get())}
     single<PlatformReaderSettingReader> { PlatformReaderSettingReader(get()) }
+    
+    // Material You dynamic colors support
+    single<ireader.presentation.core.theme.DynamicColorScheme> { 
+        ireader.presentation.core.theme.AndroidDynamicColorScheme(get()) 
+    }
 
 }

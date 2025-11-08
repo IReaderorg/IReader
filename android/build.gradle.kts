@@ -193,8 +193,8 @@ dependencies {
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.coroutines.android)
-    "standardImplementation"(libs.firebase.analyticKtx)
-    "devImplementation"(libs.firebase.analyticKtx)
+    "standardImplementation"(libs.firebase.analytic)
+    "devImplementation"(libs.firebase.analytic)
 
 
 

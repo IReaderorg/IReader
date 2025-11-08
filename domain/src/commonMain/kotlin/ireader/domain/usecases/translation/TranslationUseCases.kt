@@ -5,11 +5,12 @@ import ireader.core.source.model.Text
 import ireader.domain.data.repository.TranslatedChapterRepository
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.entities.TranslatedChapter
-import kotlinx.datetime.Clock
+import kotlin.time.ExperimentalTime
 
 class SaveTranslatedChapterUseCase(
     private val repository: TranslatedChapterRepository
 ) {
+    @OptIn(ExperimentalTime::class)
     suspend fun execute(
         chapter: Chapter,
         translatedContent: List<Page>,
@@ -17,7 +18,7 @@ class SaveTranslatedChapterUseCase(
         targetLanguage: String,
         engineId: Long
     ): Long {
-        val now = Clock.System.now().toEpochMilliseconds()
+        val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
         val translatedChapter = TranslatedChapter(
             chapterId = chapter.id,
             bookId = chapter.bookId,

@@ -4,7 +4,7 @@ import ireader.domain.data.repository.HistoryRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Service class that manages reading progress tracking and history updates.
@@ -21,9 +21,10 @@ class ReadingProgressManager(
      * @param progress The reading progress as a value between 0.0 and 1.0
      * @param readDuration The time spent reading in milliseconds (optional)
      */
+    @OptIn(ExperimentalTime::class)
     fun updateReadingProgress(chapterId: Long, progress: Float, readDuration: Long = 0) {
         coroutineScope.launch {
-            val currentTimeMillis = Clock.System.now().toEpochMilliseconds()
+            val currentTimeMillis = kotlin.time.Clock.System.now().toEpochMilliseconds()
             
             // Save history with the current timestamp and progress
             historyRepository.upsert(

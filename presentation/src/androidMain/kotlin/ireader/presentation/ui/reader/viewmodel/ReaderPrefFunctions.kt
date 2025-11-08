@@ -16,9 +16,9 @@ import ireader.domain.utils.extensions.isImmersiveModeEnabled
 import ireader.domain.utils.extensions.showSystemUI
 import ireader.presentation.ui.component.findComponentActivity
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
 
 actual class PlatformReaderSettingReader(
        private val webViewManager: WebViewManger
@@ -73,14 +73,15 @@ actual class PlatformReaderSettingReader(
         }
     }
 
+    @OptIn(ExperimentalTime::class)
     @SuppressLint("SourceLockedOrientationActivity")
     actual suspend fun ReaderScreenViewModel.readOrientation(context: Any) {
         val activity = (context as Context).findComponentActivity()
         val lastCheck = Instant.fromEpochMilliseconds(lastOrientationChangedTime.value)
-        val now = Clock.System.now()
+        val now = kotlin.time.Clock.System.now()
         if (activity != null && (now - lastCheck) > 1.seconds) {
             activity.requestedOrientation = orientation.value
-            lastOrientationChangedTime.value = Clock.System.now().toEpochMilliseconds()
+            lastOrientationChangedTime.value = kotlin.time.Clock.System.now().toEpochMilliseconds()
         } else {
             activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }

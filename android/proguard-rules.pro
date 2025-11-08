@@ -166,6 +166,18 @@
     <methods>;
 }
 
+# Keep Gemini API model classes for proper serialization
+-keep class ireader.domain.usecases.translate.WebscrapingTranslateEngine$GeminiRequest { *; }
+-keep class ireader.domain.usecases.translate.WebscrapingTranslateEngine$GeminiContent { *; }
+-keep class ireader.domain.usecases.translate.WebscrapingTranslateEngine$GeminiPart { *; }
+-keep class ireader.domain.usecases.translate.WebscrapingTranslateEngine$GeminiGenerationConfig { *; }
+-keep class ireader.domain.usecases.translate.WebscrapingTranslateEngine$GeminiResponse { *; }
+-keep class ireader.domain.usecases.translate.WebscrapingTranslateEngine$GeminiCandidate { *; }
+-keep class ireader.domain.usecases.translate.WebscrapingTranslateEngine$CitationMetadata { *; }
+-keep class ireader.domain.usecases.translate.WebscrapingTranslateEngine$CitationSource { *; }
+-keep class ireader.domain.usecases.translate.WebscrapingTranslateEngine$GeminiModelsResponse { *; }
+-keep class ireader.domain.usecases.translate.WebscrapingTranslateEngine$GeminiModelInfo { *; }
+
 ##---------------End: proguard configuration for kotlinx.serialization  ----------
 -keep class cafe.adriel.voyager.*
 -keepclassmembers class cafe.adriel.voyager.** {

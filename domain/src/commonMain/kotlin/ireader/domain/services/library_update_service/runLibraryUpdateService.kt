@@ -9,8 +9,9 @@ import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.utils.NotificationManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 suspend fun runLibraryUpdateService(
     getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases,
     getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
@@ -69,13 +70,13 @@ suspend fun runLibraryUpdateService(
                             newChapters.map {
                                 it.copy(
                                     bookId = book.id,
-                                    dateFetch = Clock.System.now().toEpochMilliseconds(),
+                                    dateFetch = kotlin.time.Clock.System.now().toEpochMilliseconds(),
                                 )
                             }
                         )
                         insertUseCases.updateBook.update(
                             book.copy(
-                                lastUpdate = Clock.System.now()
+                                lastUpdate = kotlin.time.Clock.System.now()
                                     .toEpochMilliseconds()
                             )
                         )

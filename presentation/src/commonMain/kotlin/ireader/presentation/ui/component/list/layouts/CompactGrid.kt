@@ -68,7 +68,7 @@ fun CompactGridLayoutComposable(
                     }
 
                     BookImage(
-                        modifier = Modifier.animateItemPlacement().onGloballyPositioned {
+                        modifier = Modifier.animateItem().onGloballyPositioned {
                             height.value = it.size
                         },
                         onClick = { onClick(book) },

@@ -15,11 +15,11 @@ import ireader.domain.notification.legacyFlags
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.utils.NotificationManager
 import ireader.i18n.R
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.DurationUnit
+import kotlin.time.ExperimentalTime
 import kotlin.time.toDuration
 
 class UpdateService constructor(
@@ -30,9 +30,10 @@ class UpdateService constructor(
     private val appPreferences: AppPreferences by inject()
     private val api: UpdateApi by inject()
     private val notificationManager: NotificationManager by inject()
+    @OptIn(ExperimentalTime::class)
     override suspend fun doWork(): Result {
         val lastCheck = Instant.fromEpochMilliseconds(appPreferences.lastUpdateCheck().get())
-        val now = Clock.System.now()
+        val now = kotlin.time.Clock.System.now()
 
         if ((!ireader.i18n.BuildKonfig.DEBUG || !ireader.i18n.BuildKonfig.PREVIEW) && now - lastCheck < minTimeUpdateCheck) {
             return Result.success()
@@ -47,7 +48,7 @@ class UpdateService constructor(
         val current = Version.create(versionCode)
 
         if (Version.isNewVersion(release.tag_name, versionCode)) {
-            appPreferences.lastUpdateCheck().set(Clock.System.now().toEpochMilliseconds())
+            appPreferences.lastUpdateCheck().set(kotlin.time.Clock.System.now().toEpochMilliseconds())
             notificationManager.show(ID_APP_UPDATER, createNotification(current, version, createIntent(release)))
 
         }

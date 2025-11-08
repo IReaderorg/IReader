@@ -6,9 +6,9 @@ import ireader.domain.catalogs.service.CatalogRemoteApi
 import ireader.domain.catalogs.service.CatalogRemoteRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.ExperimentalTime
 
 class SyncRemoteCatalogs(
     private val catalogRemoteRepository: CatalogRemoteRepository,
@@ -16,10 +16,11 @@ class SyncRemoteCatalogs(
     private val catalogPreferences: CatalogPreferences,
 ) {
 
+    @OptIn(ExperimentalTime::class)
     suspend fun await(forceRefresh: Boolean, onError: (Throwable) -> Unit = {}): Boolean {
         val lastCheckPref = catalogPreferences.lastRemoteCheck()
         val lastCheck = Instant.fromEpochMilliseconds(lastCheckPref.get())
-        val now = Clock.System.now()
+        val now = kotlin.time.Clock.System.now()
 
         if (forceRefresh || now - lastCheck > minTimeApiCheck) {
             try {
@@ -27,7 +28,7 @@ class SyncRemoteCatalogs(
                     val newCatalogs = catalogRemoteApi.fetchCatalogs()
                     catalogRemoteRepository.deleteAllRemoteCatalogs()
                     catalogRemoteRepository.insertRemoteCatalogs(newCatalogs)
-                    lastCheckPref.set(Clock.System.now().toEpochMilliseconds())
+                    lastCheckPref.set(kotlin.time.Clock.System.now().toEpochMilliseconds())
                 }
                 return true
             } catch (e: Throwable) {

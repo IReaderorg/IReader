@@ -5,7 +5,9 @@ import ireader.domain.models.prefs.PreferenceValues
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 actual fun LocalDate.asRelativeTimeString(
     range: PreferenceValues.RelativeTime,
     dateFormat: String

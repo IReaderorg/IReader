@@ -236,7 +236,8 @@ fun ReadingScreen(
                                 onToggle = { vm.toggleTranslation() },
                                 modifier = Modifier
                                     .align(Alignment.BottomEnd)
-                                    .padding(16.dp)
+                                    .padding(paddingValues)
+
                             )
                             
                             // Translation badge
@@ -246,7 +247,8 @@ fun ReadingScreen(
                                     textColor = vm.textColor.value,
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
-                                        .padding(16.dp)
+                                        .padding(paddingValues)
+
                                 )
                             }
                             

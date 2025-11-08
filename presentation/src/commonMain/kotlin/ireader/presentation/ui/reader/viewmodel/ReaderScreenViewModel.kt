@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTextApi::class)
 
@@ -127,8 +128,9 @@ class ReaderScreenViewModel(
     val showScrollIndicator = readerPreferences.showScrollIndicator().asState()
     val textAlignment = readerPreferences.textAlign().asState()
     val orientation = androidUiPreferences.orientation().asState()
+    @OptIn(ExperimentalTime::class)
     var lastOrientationChangedTime =
-        mutableStateOf(kotlinx.datetime.Clock.System.now().toEpochMilliseconds())
+        mutableStateOf(kotlin.time.Clock.System.now().toEpochMilliseconds())
     val scrollIndicatorWith = readerPreferences.scrollIndicatorWith().asState()
     val scrollIndicatorPadding = readerPreferences.scrollIndicatorPadding().asState()
     val scrollIndicatorAlignment = readerPreferences.scrollBarAlignment().asState()
@@ -153,7 +155,8 @@ class ReaderScreenViewModel(
         "Noto",
         "Open Sans",
         "Roboto Serif",
-        "Cooper Arabic"
+        "Cooper Arabic",
+        "Lora"
     )
 
     // Translation state and preferences

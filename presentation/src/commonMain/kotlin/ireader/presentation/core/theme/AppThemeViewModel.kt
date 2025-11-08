@@ -26,12 +26,14 @@ import kotlinx.coroutines.flow.onEach
 class AppThemeViewModel(
     private val uiPreferences: UiPreferences,
     private val themeRepository: ThemeRepository,
+    private val dynamicColorScheme: DynamicColorScheme,
     val scope: CoroutineScope
 ) {
     fun <T> Preference<T>.asState() = PreferenceMutableState(this, scope)
 
     private val themeMode by uiPreferences.themeMode().asState()
     private val colorTheme by uiPreferences.colorTheme().asState()
+    private val dynamicColorMode by uiPreferences.dynamicColorMode().asState()
 
     private val baseThemeJob = SupervisorJob()
     private val baseThemeScope = CoroutineScope(baseThemeJob)
@@ -48,6 +50,7 @@ class AppThemeViewModel(
     fun getColors(): Pair<ColorScheme, ExtraColors> {
         val baseTheme = getBaseTheme(themeMode, colorTheme)
         val isLight = baseTheme.materialColors.isLight()
+        
         val colors = remember(baseTheme.materialColors.isLight()) {
             baseThemeJob.cancelChildren()
             if (isLight) {
@@ -57,11 +60,39 @@ class AppThemeViewModel(
             }
         }
 
-        val material = getMaterialColors(
-            baseTheme.materialColors,
-            colors.primary.value,
-            colors.secondary.value
-        )
+        // Check if dynamic colors should be used
+        val useDynamicColors = dynamicColorMode == PreferenceValues.DynamicColorMode.On 
+            && dynamicColorScheme.isSupported()
+
+        val material = if (useDynamicColors) {
+            // Use dynamic color scheme from system
+            try {
+                val dynamicScheme = if (isLight) {
+                    dynamicColorScheme.lightColorScheme()
+                } else {
+                    dynamicColorScheme.darkColorScheme()
+                }
+                dynamicScheme ?: getMaterialColors(
+                    baseTheme.materialColors,
+                    colors.primary.value,
+                    colors.secondary.value
+                )
+            } catch (e: Exception) {
+                // Fallback to regular colors if dynamic colors fail
+                getMaterialColors(
+                    baseTheme.materialColors,
+                    colors.primary.value,
+                    colors.secondary.value
+                )
+            }
+        } else {
+            getMaterialColors(
+                baseTheme.materialColors,
+                colors.primary.value,
+                colors.secondary.value
+            )
+        }
+        
         val custom = getExtraColors(baseTheme.extraColors, colors.bars.value)
         return material to custom
     }

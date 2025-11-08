@@ -118,6 +118,15 @@ fun AppearanceSettingScreen(
             }.Build()
         }
         item {
+            Components.Dynamic {
+                Components.SwitchPreference(
+                        preference = vm.dynamicColorMode,
+                        title = "Material You (Dynamic Colors)",
+                        subtitle = "Adapt colors from your wallpaper (Android 12+)",
+                )
+            }.Build()
+        }
+        item {
             Components.Header(
                     text = "Preset themes",
             ).Build()

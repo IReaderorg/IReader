@@ -39,6 +39,7 @@ import kotlinx.coroutines.*
 import kotlinx.datetime.Clock
 import org.koin.android.ext.android.inject
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.ExperimentalTime
 
 class TTSService(
 ) : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener {
@@ -453,11 +454,12 @@ class TTSService(
 
     private inner class TTSSessionCallback : MediaSessionCompat.Callback() {
 
+        @OptIn(ExperimentalTime::class)
         override fun onPlay() {
             if (isPlayerDispose) {
                 initPlayer()
             }
-            state.startTime = Clock.System.now()
+            state.startTime = kotlin.time.Clock.System.now()
             startService(Player.PLAY)
         }
 
@@ -887,10 +889,11 @@ class TTSService(
         }
     }
 
+    @OptIn(ExperimentalTime::class)
     fun checkSleepTime() {
         val lastCheckPref = state.startTime
         val currentSleepTime = state.sleepTime.minutes
-        val now = Clock.System.now()
+        val now = kotlin.time.Clock.System.now()
         if (lastCheckPref != null && now - lastCheckPref > currentSleepTime && state.sleepMode) {
             startService(Player.CANCEL)
         }

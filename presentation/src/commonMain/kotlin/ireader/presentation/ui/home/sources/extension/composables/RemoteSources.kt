@@ -11,8 +11,17 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import ireader.domain.models.entities.*
-import ireader.presentation.ui.home.sources.extension.*
+import ireader.domain.models.entities.Catalog
+import ireader.domain.models.entities.CatalogInstalled
+import ireader.domain.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogRemote
+import ireader.domain.models.entities.SourceState
+import ireader.domain.models.entities.key
+import ireader.presentation.ui.home.sources.extension.CatalogItem
+import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
+import ireader.presentation.ui.home.sources.extension.SourceHeader
+import ireader.presentation.ui.home.sources.extension.SourceKeys
+import ireader.presentation.ui.home.sources.extension.SourceUiModel
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -105,7 +114,7 @@ fun RemoteSourcesScreen(
             when (catalog) {
                 is SourceUiModel.Header -> {
                     SourceHeader(
-                            modifier = Modifier.animateItemPlacement(),
+                            modifier = Modifier.animateItem(),
                             language = catalog.language,
                     )
                 }

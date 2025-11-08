@@ -14,6 +14,11 @@ object PreferenceValues {
         Light,
     }
 
+    enum class DynamicColorMode {
+        Off,
+        On,
+    }
+
     enum class SecureScreenMode(val titleResId: UiText.MStringResource) {
         ALWAYS(UiText.MStringResource(MR.strings.lock_always)),
         INCOGNITO(UiText.MStringResource(MR.strings.pref_incognito_mode)),

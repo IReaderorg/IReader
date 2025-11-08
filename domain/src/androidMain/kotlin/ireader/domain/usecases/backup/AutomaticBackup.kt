@@ -6,7 +6,6 @@ import com.anggrayudi.storage.file.CreateMode
 import com.anggrayudi.storage.file.DocumentFileCompat
 import com.anggrayudi.storage.file.createBinaryFile
 import ireader.core.log.Log
-import ireader.i18n.R
 import ireader.domain.models.common.Uri
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
@@ -14,13 +13,13 @@ import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.utils.extensions.convertLongToTime
 import ireader.domain.utils.extensions.withUIContext
 import ireader.domain.utils.toast
-import kotlinx.datetime.Clock
+import ireader.i18n.R
 import kotlinx.datetime.Instant
-
 import java.io.File
 import java.util.*
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.ExperimentalTime
 
 
 class AutomaticBackup(
@@ -33,13 +32,14 @@ class AutomaticBackup(
         create(false)
     }
 
+    @OptIn(ExperimentalTime::class)
     private suspend fun create(force: Boolean = false) {
         val lastCheckPref = uiPreferences.lastBackUpTime()
         val maxFiles = uiPreferences.maxAutomaticBackupFiles().get()
         val automaticBackupPref = uiPreferences.automaticBackupTime().get()
         val backupEveryXTime = automaticBackupTime(automaticBackupPref) ?: return
         val lastCheck = Instant.fromEpochMilliseconds(lastCheckPref.get())
-        val now = Clock.System.now()
+        val now = kotlin.time.Clock.System.now()
         if (force || now - lastCheck > backupEveryXTime) {
             try {
                 simpleStorage.checkPermission()

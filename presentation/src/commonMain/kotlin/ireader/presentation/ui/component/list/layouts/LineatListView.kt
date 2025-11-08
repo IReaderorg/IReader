@@ -95,7 +95,7 @@ fun LinearListDisplay(
                 modifier = Modifier.combinedClickable(
                     onClick = { onClick(book) },
                     onLongClick = { onClick(book) },
-                ).animateItemPlacement(),
+                ).animateItem(),
                 selected = book.id in selection,
                 headers = headers
             )

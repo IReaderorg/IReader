@@ -17,6 +17,7 @@ import ireader.domain.preferences.models.prefs.IReaderVoice
 import ireader.domain.services.tts_service.media_player.TTSService
 
 import java.util.Locale
+import kotlin.time.ExperimentalTime
 
 
 interface TTSState {
@@ -56,6 +57,7 @@ interface TTSState {
 
     val uiChapters: State<List<Chapter>>
     var isDrawerAsc: Boolean
+    @OptIn(ExperimentalTime::class)
     var startTime: Instant?
     var sleepMode: Boolean
 }
@@ -84,6 +86,7 @@ class TTSStateImpl() : TTSState {
     override var prevPitch by mutableStateOf<Float>(.8f)
     override var speechSpeed by mutableStateOf<Float>(.8f)
     override var sleepTime by mutableStateOf<Long>(0)
+    @OptIn(ExperimentalTime::class)
     override var startTime by mutableStateOf<Instant?>(null)
     override var sleepMode by mutableStateOf<Boolean>(false)
     override var prevSpeechSpeed by mutableStateOf<Float>(.8f)

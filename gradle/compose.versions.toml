@@ -6,7 +6,7 @@ material3 = "1.4.0"
 ui = "1.9.4"
 
 [libraries]
-compose-activity = { module = "androidx.activity:activity-compose", version = "1.11.0" }
+compose-activity = { module = "androidx.activity:activity-compose", version = "1.10.1" }
 compose-ui-util = { module = "androidx.compose.ui:ui-util", version.ref = "ui" }
 compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version = "1.1.1" }
 compose-googlFonts =  { module ="androidx.compose.ui:ui-text-google-fonts", version = "1.9.4" }

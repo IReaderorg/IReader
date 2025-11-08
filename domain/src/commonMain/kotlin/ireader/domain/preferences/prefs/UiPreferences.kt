@@ -17,6 +17,10 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun themeMode(): Preference<PreferenceValues.ThemeMode> {
         return preferenceStore.getEnum("theme_mode", PreferenceValues.ThemeMode.System)
     }
+
+    fun dynamicColorMode(): Preference<PreferenceValues.DynamicColorMode> {
+        return preferenceStore.getEnum("dynamic_color_mode", PreferenceValues.DynamicColorMode.Off)
+    }
         fun installerMode(): Preference<PreferenceValues.Installer> {
         return preferenceStore.getEnum("installer_mode", ireader.domain.models.prefs.PreferenceValues.Installer.AndroidPackageManager)
     }

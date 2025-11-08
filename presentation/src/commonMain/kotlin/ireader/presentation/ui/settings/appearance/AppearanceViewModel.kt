@@ -29,6 +29,7 @@ class AppearanceViewModel(
 
     val themeMode = uiPreferences.themeMode().asState()
     val colorTheme = uiPreferences.colorTheme().asState()
+    val dynamicColorMode = uiPreferences.dynamicColorMode().asState()
     val dateFormat = uiPreferences.dateFormat().asState()
     val relativeTime = uiPreferences.relativeTime().asState()
     val lightColors = uiPreferences.getLightColors().asState(scope)
