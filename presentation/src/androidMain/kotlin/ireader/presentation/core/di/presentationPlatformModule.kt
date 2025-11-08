@@ -2,6 +2,7 @@ package ireader.presentation.core.di
 
 import android.content.Context
 import ireader.domain.image.CoverCache
+import ireader.domain.usecases.translate.WebscrapingTranslateEngine
 import ireader.presentation.core.PlatformHelper
 import ireader.presentation.core.theme.IUseController
 import ireader.presentation.core.theme.LocaleHelper
@@ -12,11 +13,27 @@ import ireader.presentation.ui.reader.viewmodel.PlatformReaderSettingReader
 import ireader.presentation.ui.web.WebViewPageModel
 import ireader.presentation.ui.web.WebViewPageStateImpl
 import org.koin.dsl.module
-import ireader.domain.usecases.translate.WebscrapingTranslateEngine
 
 
 actual val presentationPlatformModule = module  {
-    factory<WebViewPageModel> { WebViewPageModel(get(),get(),get(),get(),get(),get(),get(),get()) }
+    factory<ireader.presentation.ui.web.AutoFetchDetector> { 
+        ireader.presentation.ui.web.DefaultAutoFetchDetector() 
+    }
+    
+    factory<WebViewPageModel> { params ->
+        WebViewPageModel(
+            insertUseCases = get(),
+            getBookUseCases = get(),
+            getChapterUseCase = get(),
+            extensions = get(),
+            remoteUseCases = get(),
+            param = params.get(),
+            webpageImpl = get(),
+            webViewManager = get(),
+            autoFetchDetector = get(),
+            localizeHelper = get()
+        )
+    }
 
     // Register WebscrapingTranslateEngine for Android platform
     factory { WebscrapingTranslateEngine(get(), get()) }

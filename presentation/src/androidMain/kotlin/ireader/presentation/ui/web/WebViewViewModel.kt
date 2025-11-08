@@ -15,7 +15,9 @@ import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
 import ireader.domain.usecases.remote.RemoteUseCases
+import ireader.i18n.LocalizeHelper
 import ireader.i18n.UiText
+import ireader.i18n.asString
 import ireader.i18n.resources.MR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -104,7 +106,8 @@ class WebViewPageModel(
     private val param: Param,
     private val webpageImpl: WebViewPageStateImpl,
     val webViewManager : WebViewManger,
-    val autoFetchDetector: AutoFetchDetector = DefaultAutoFetchDetector()
+    val autoFetchDetector: AutoFetchDetector = DefaultAutoFetchDetector(),
+    private val localizeHelper: LocalizeHelper
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), WebViewPageState by webpageImpl {
     data class Param(
         val url: String?,
@@ -175,7 +178,7 @@ class WebViewPageModel(
                     chapter,
                     catalog,
                     onError = {
-                        fetchChapterState = FetchButtonState.Error(it.asString())
+                        fetchChapterState = FetchButtonState.Error(it?.asString(localizeHelper =localizeHelper ) ?:"Unknown error")
                         showSnackBar(it)
                         showSnackBar(UiText.MStringResource(MR.strings.failed_to_get_content))
                     },
@@ -215,7 +218,7 @@ class WebViewPageModel(
                     book,
                     catalog,
                     onError = {
-                        fetchChaptersState = FetchButtonState.Error(it.asString())
+                        fetchChaptersState = FetchButtonState.Error(it?.asString(localizeHelper =localizeHelper ) ?:"Unknown error")
                         showSnackBar(it)
                         showSnackBar(UiText.DynamicString("Failed to fetch chapters. Please ensure you're on the correct page and try again."))
                     },
@@ -258,7 +261,7 @@ class WebViewPageModel(
                     book ?: Book(key = url, title = "", sourceId = source?.id ?: 0),
                     catalog,
                     onError = {
-                        fetchBookState = FetchButtonState.Error(it.asString())
+                        fetchBookState = FetchButtonState.Error(it?.asString(localizeHelper =localizeHelper ) ?:"Unknown error")
                         showSnackBar(it)
                         showSnackBar(UiText.DynamicString("Failed to fetch book details. Please ensure you're on the book's detail page and try again."))
                     },
