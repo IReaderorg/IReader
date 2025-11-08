@@ -121,9 +121,6 @@ fun AppearanceSettingScreen(
                 preference = vm.dynamicColorMode,
                 title = "Material You (Dynamic Colors)",
                 subtitle = "Adapt colors from your wallpaper (Android 12+)",
-                onValue = {
-
-                }
             ).Build()
         }
         item {
