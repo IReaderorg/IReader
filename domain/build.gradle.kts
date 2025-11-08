@@ -31,14 +31,18 @@ kotlin {
     androidTarget {
         compilations {
             all {
-                kotlinOptions.jvmTarget = ProjectConfig.androidJvmTarget.toString()
+                compilerOptions.configure {
+                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
+                }
             }
         }
     }
     jvm("desktop") {
         compilations {
             all {
-                kotlinOptions.jvmTarget = ProjectConfig.desktopJvmTarget.toString()
+                compilerOptions.configure {
+                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.desktopJvmTarget.toString()))
+                }
             }
         }
     }

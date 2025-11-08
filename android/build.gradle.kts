@@ -1,7 +1,7 @@
 
-import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.TimeZone
 
 plugins {
     id("com.android.application")
@@ -193,8 +193,8 @@ dependencies {
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.coroutines.android)
-    "standardImplementation"(libs.firebase.analytics)
-    "devImplementation"(libs.firebase.analytics)
+    "standardImplementation"(libs.firebase.analyticKtx)
+    "devImplementation"(libs.firebase.analyticKtx)
 
 
 

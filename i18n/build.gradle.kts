@@ -16,7 +16,9 @@ kotlin {
     androidTarget()
     jvm() {
         compilations.all {
-            kotlinOptions.jvmTarget = "17"
+            compilerOptions.configure {
+                jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+            }
         }
     }
     sourceSets {

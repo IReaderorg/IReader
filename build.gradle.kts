@@ -42,14 +42,14 @@ subprojects {
     }
 
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = ProjectConfig.desktopJvmTarget.toString()
-            kotlinOptions.freeCompilerArgs += "-Xexpect-actual-classes"
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.desktopJvmTarget.toString()))
+            freeCompilerArgs.add("-Xexpect-actual-classes")
         }
     }
 }
 
 
 tasks.register("delete", Delete::class) {
-    delete(rootProject.buildDir)
+    delete(rootProject.layout.buildDirectory)
 }
