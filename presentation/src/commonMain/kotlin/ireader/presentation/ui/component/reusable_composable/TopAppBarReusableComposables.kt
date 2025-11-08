@@ -185,7 +185,7 @@ fun AppIconButton(
     Box(
         modifier =
         modifier
-            .size(40.0.dp)
+            .size(48.dp) // Increased from 40dp to meet 48dp minimum touch target for accessibility
             .background(color = MaterialTheme.colorScheme.background)
             .combinedClickable(
                 onClick = onClick,
@@ -211,7 +211,8 @@ fun AppIconButton(
     tint: Color = MaterialTheme.colorScheme.onSurface,
 ) {
     IconButton(
-        modifier = modifier,
+        modifier = modifier
+            .size(48.dp), // Ensure minimum 48dp touch target for accessibility
         onClick = {
             onClick()
         },
@@ -219,7 +220,7 @@ fun AppIconButton(
         when {
             painter != null -> {
                 Icon(
-                    modifier = modifier,
+                    modifier = Modifier.size(24.dp), // Icon size separate from touch target
                     painter = painter,
                     contentDescription = contentDescription,
                     tint = tint
@@ -227,7 +228,7 @@ fun AppIconButton(
             }
             imageVector != null -> {
                 Icon(
-                    modifier = modifier,
+                    modifier = Modifier.size(24.dp), // Icon size separate from touch target
                     imageVector = imageVector,
                     contentDescription = contentDescription,
                     tint = tint

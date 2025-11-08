@@ -53,6 +53,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,6 +72,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.SubcomposeAsyncImage
+import coil3.request.crossfade
 import coil3.toUri
 import ireader.core.source.Source
 import ireader.domain.models.BookCover
@@ -175,16 +177,24 @@ private fun ModernGridLayout(
     showTitle: Boolean = true,
     compactMode: Boolean = false
 ) {
-    // Adaptive column count based on screen size
-    val cells = when {
-        columns > 1 -> GridCells.Fixed(columns)
-        else -> GridCells.Adaptive(minSize = 140.dp) // Adaptive sizing for better responsiveness
+    // Use remember to avoid recalculating on every recomposition
+    val cells = remember(columns) {
+        when {
+            columns > 1 -> GridCells.Fixed(columns)
+            else -> GridCells.Adaptive(minSize = 140.dp) // Adaptive sizing for better responsiveness
+        }
     }
     
-    // Improved spacing for compact mode
-    val horizontalSpacing = if (compactMode) 6.dp else 12.dp
-    val verticalSpacing = if (compactMode) 6.dp else 12.dp
-    val contentPadding = if (compactMode) 8.dp else 12.dp
+    // Use remember for spacing values to avoid recalculation
+    val horizontalSpacing = remember(compactMode) { if (compactMode) 6.dp else 12.dp }
+    val verticalSpacing = remember(compactMode) { if (compactMode) 6.dp else 12.dp }
+    val contentPadding = remember(compactMode) { if (compactMode) 8.dp else 12.dp }
+    val elevation = remember(compactMode) { if (compactMode) 2.dp else 4.dp }
+    
+    // Use derivedStateOf for computed values that depend on state
+    val shouldShowLoadingSpace by remember {
+        derivedStateOf { isLoading && books.isNotEmpty() }
+    }
     
     LazyVerticalGrid(
         columns = cells,
@@ -203,22 +213,28 @@ private fun ModernGridLayout(
     ) {
         items(
             items = books,
-            key = { keys(it) }
+            key = { keys(it) },
+            contentType = { "book_item" } // Add contentType for better recycling
         ) { book ->
+            // Use itemsIndexed alternative - pass index directly to avoid indexOf lookup
+            val index = remember(book, books) { books.indexOf(book) }
             AnimatedBookItem(
                 book = book,
-                index = books.indexOf(book),
+                index = index,
                 onClick = onClick,
                 onLongClick = onLongClick,
                 headers = headers,
                 showTitle = showTitle,
-                elevation = if (compactMode) 2.dp else 4.dp
+                elevation = elevation
             )
         }
         
         // Add empty item at the bottom for loading indicator space
-        if (isLoading && books.isNotEmpty()) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
+        if (shouldShowLoadingSpace) {
+            item(
+                span = { GridItemSpan(maxLineSpan) },
+                contentType = "loading_spacer"
+            ) {
                 Spacer(modifier = Modifier.height(60.dp))
             }
         }
@@ -236,6 +252,11 @@ private fun ModernListLayout(
     headers: ((url: String) -> okhttp3.Headers?)?,
     keys: ((item: BookItem) -> Any)
 ) {
+    // Use derivedStateOf for computed values
+    val shouldShowLoadingSpace by remember {
+        derivedStateOf { isLoading && books.isNotEmpty() }
+    }
+    
     LazyColumn(
         state = scrollState,
         contentPadding = PaddingValues(8.dp),
@@ -243,11 +264,14 @@ private fun ModernListLayout(
     ) {
         items(
             items = books,
-            key = { keys(it) }
+            key = { keys(it) },
+            contentType = { "book_list_item" } // Add contentType for better recycling
         ) { book ->
+            // Pass index directly to avoid indexOf lookup
+            val index = remember(book, books) { books.indexOf(book) }
             ModernListItem(
                 book = book,
-                index = books.indexOf(book),
+                index = index,
                 onClick = onClick,
                 onLongClick = onLongClick,
                 headers = headers
@@ -255,8 +279,8 @@ private fun ModernListLayout(
         }
         
         // Add empty item at the bottom for loading indicator space
-        if (isLoading && books.isNotEmpty()) {
-            item {
+        if (shouldShowLoadingSpace) {
+            item(contentType = "loading_spacer") {
                 Spacer(modifier = Modifier.height(60.dp))
             }
         }
@@ -274,8 +298,15 @@ fun ModernListItem(
 ) {
     var visible by remember { mutableStateOf(false) }
     
+    // Limit animation delay to first 15 items for better scroll performance
+    val animationDelay = remember(index) {
+        if (index < 15) index * 30L else 0L
+    }
+    
     LaunchedEffect(key1 = Unit) {
-        delay(index * 30L) // Stagger animation based on index
+        if (animationDelay > 0) {
+            delay(animationDelay)
+        }
         visible = true
     }
     
@@ -315,25 +346,58 @@ fun ModernListItem(
                         .padding(16.dp),
                     verticalAlignment = Alignment.Top
                 ) {
-                    // Cover image
+                    // Cover image with optimized sizing
                     Box(
                         modifier = Modifier
                             .height(120.dp)
                             .width(80.dp)
                             .clip(RoundedCornerShape(8.dp))
                     ) {
-                        BookCoverImage(
+                        // Use optimized image request with proper sizing
+                        val imageRequest = rememberOptimizedBookCoverRequest(
                             book = book,
-                            headers = headers
+                            targetWidth = 80.dp,
+                            targetHeight = 120.dp
+                        )
+                        
+                        val bookCover = remember(book.id, book.cover, book.lastRead) {
+                            BookCover.from(book)
+                        }
+                        
+                        SubcomposeAsyncImage(
+                            model = imageRequest,
+                            contentDescription = book.title,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop,
+                            loading = {
+                                ShimmerLoadingEffect()
+                            },
+                            error = {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.MenuBook,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(32.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                    )
+                                }
+                            }
                         )
                         
                         // Reading progress overlay at the bottom of the cover
-                        // First try to use the dedicated progress field, then fallback to calculating from unread
-                        val progress = book.progress ?: run {
-                            book.unread?.let { unreadCount ->
-                                val totalChapters = book.totalChapters ?: 0
-                                if (totalChapters > 0) (totalChapters - unreadCount.toFloat()) / totalChapters else 0f
-                            } ?: 0f
+                        // Use remember to cache progress calculation
+                        val progress = remember(book.progress, book.unread, book.totalChapters) {
+                            book.progress ?: run {
+                                book.unread?.let { unreadCount ->
+                                    val totalChapters = book.totalChapters ?: 0
+                                    if (totalChapters > 0) (totalChapters - unreadCount.toFloat()) / totalChapters else 0f
+                                } ?: 0f
+                            }
                         }
                         
                         if (progress > 0) {
@@ -546,8 +610,15 @@ fun AnimatedBookItem(
 ) {
     var visible by remember { mutableStateOf(false) }
     
+    // Limit animation delay to first 20 items for better performance
+    val animationDelay = remember(index) { 
+        if (index < 20) index * 20L else 0L 
+    }
+    
     LaunchedEffect(key1 = Unit) {
-        delay(index * 20L) // Stagger animation based on index
+        if (animationDelay > 0) {
+            delay(animationDelay)
+        }
         visible = true
     }
     
@@ -584,6 +655,24 @@ fun EnhancedNovelCard(
     showTitle: Boolean = true,
     elevation: Dp = 4.dp
 ) {
+    // Use remember for computed values to minimize recomposition
+    val progress = remember(book.progress, book.unread, book.totalChapters) {
+        book.progress ?: run {
+            book.unread?.let { unreadCount ->
+                val totalChapters = book.totalChapters ?: 0
+                if (totalChapters > 0) (totalChapters - unreadCount.toFloat()) / totalChapters else 0f
+            } ?: 0f
+        }
+    }
+    
+    val hasUnreadChapters = remember(book.unread) { 
+        (book.unread ?: 0) > 0 
+    }
+    
+    val hasAuthor = remember(book.author) { 
+        book.author.isNotBlank() 
+    }
+    
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -612,24 +701,24 @@ fun EnhancedNovelCard(
                 )
                 
                 // Status badges overlay at top
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    // In library badge
-                    if (book.favorite) {
-                        StatusBadge(
-                            icon = Icons.Default.Check,
-                            backgroundColor = MaterialTheme.colorScheme.primary,
-                            contentDescription = "In Library"
-                        )
-                    }
-                    
-                    // Download status badge
-                    book.unread?.let { unreadCount ->
-                        if (unreadCount > 0) {
+                if (book.favorite || hasUnreadChapters) {
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        // In library badge
+                        if (book.favorite) {
+                            StatusBadge(
+                                icon = Icons.Default.Check,
+                                backgroundColor = MaterialTheme.colorScheme.primary,
+                                contentDescription = "In Library"
+                            )
+                        }
+                        
+                        // Download status badge
+                        if (hasUnreadChapters) {
                             StatusBadge(
                                 icon = Icons.Default.Download,
                                 backgroundColor = MaterialTheme.colorScheme.tertiary,
@@ -672,7 +761,7 @@ fun EnhancedNovelCard(
                                 overflow = TextOverflow.Ellipsis
                             )
                             
-                            if (book.author.isNotBlank()) {
+                            if (hasAuthor) {
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = book.author,
@@ -687,13 +776,6 @@ fun EnhancedNovelCard(
                 }
                 
                 // Reading progress indicator at the very bottom
-                val progress = book.progress ?: run {
-                    book.unread?.let { unreadCount ->
-                        val totalChapters = book.totalChapters ?: 0
-                        if (totalChapters > 0) (totalChapters - unreadCount.toFloat()) / totalChapters else 0f
-                    } ?: 0f
-                }
-                
                 if (progress > 0) {
                     Box(
                         modifier = Modifier
@@ -748,10 +830,30 @@ fun BookCoverImage(
     book: BookItem,
     headers: ((url: String) -> okhttp3.Headers?)? = null
 ) {
-    val coverUrl = BookCover.from(book).cover
+    // Use remember to cache the BookCover object
+    val bookCover = remember(book.id, book.cover, ) {
+        BookCover.from(book) 
+    }
+    
+    val coverUrl = remember(bookCover.cover) { 
+        bookCover.cover?.toUri() 
+    }
+    
+    // Use the platform context for image requests
+    val context = coil3.compose.LocalPlatformContext.current
+    
+    // Create optimized image request with proper sizing and caching
+    val imageRequest = remember(coverUrl, context) {
+        coil3.request.ImageRequest.Builder(context)
+            .data(bookCover) // Use BookCover directly for better caching
+            .memoryCacheKey(bookCover.cover) // Explicit memory cache key
+            .diskCacheKey("${bookCover.cover};${bookCover.lastModified}") // Explicit disk cache key
+            .crossfade(true) // Smooth transition
+            .build()
+    }
     
     SubcomposeAsyncImage(
-        model = coverUrl?.toUri(),
+        model = imageRequest,
         contentDescription = book.title,
         modifier = Modifier.fillMaxSize(),
         contentScale = ContentScale.Crop,

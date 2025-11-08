@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -16,7 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.BottomAppBar
@@ -37,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -402,7 +404,7 @@ fun AppearanceSettingScreen(
                                     vm.importExportResult = exported
                                     vm.showExportDialog = true
                                 } else {
-                                    vm.showSnackBar(UiText.StringResource("No custom theme selected"))
+                                    vm.showSnackBar(UiText.DynamicString("No custom theme selected"))
                                 }
                             },
                             modifier = Modifier.weight(1f),
@@ -496,15 +498,19 @@ fun AppearanceSettingScreen(
                         shape = MaterialTheme.shapes.small,
                         color = MaterialTheme.colorScheme.surfaceVariant
                     ) {
-                        androidx.compose.foundation.verticalScroll(androidx.compose.foundation.rememberScrollState()) {
-                            androidx.compose.foundation.layout.Box(modifier = Modifier.padding(8.dp)) {
-                                androidx.compose.foundation.text.selection.SelectionContainer {
-                                    Text(
-                                        vm.importExportResult ?: "",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
-                                    )
-                                }
+                        val scrollState = androidx.compose.foundation.rememberScrollState()
+                        androidx.compose.foundation.layout.Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(scrollState)
+                                .padding(8.dp)
+                        ) {
+                            androidx.compose.foundation.text.selection.SelectionContainer {
+                                Text(
+                                    vm.importExportResult ?: "",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                                )
                             }
                         }
                     }
@@ -547,10 +553,10 @@ fun AppearanceSettingScreen(
                         scope.launchIO {
                             val result = vm.importTheme(importText)
                             if (result.isSuccess) {
-                                vm.showSnackBar(UiText.StringResource("Theme imported successfully"))
+                                vm.showSnackBar(UiText.DynamicString("Theme imported successfully"))
                                 vm.showImportDialog = false
                             } else {
-                                vm.showSnackBar(UiText.StringResource("Failed to import theme: ${result.exceptionOrNull()?.message}"))
+                                vm.showSnackBar(UiText.DynamicString("Failed to import theme: ${result.exceptionOrNull()?.message}"))
                             }
                         }
                     },

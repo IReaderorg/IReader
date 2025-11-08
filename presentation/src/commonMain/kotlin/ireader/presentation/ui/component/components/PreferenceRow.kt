@@ -16,6 +16,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.dp
@@ -115,6 +118,7 @@ fun PreferenceRow(
         action: @Composable (() -> Unit)? = null,
 ) {
     if (enable) {
+        // Ensure minimum touch target height of 48dp for accessibility
         val height = if (subtitle != null) 72.dp else 56.dp
 
         val titleTextStyle = androidx.compose.material3.MaterialTheme.typography.bodyLarge
@@ -122,10 +126,23 @@ fun PreferenceRow(
                 color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
         )
 
+        // Build content description for accessibility
+        val contentDesc = buildString {
+            append(title)
+            if (subtitle != null) {
+                append(". ")
+                append(subtitle)
+            }
+        }
+
         Row(
                 modifier = modifier
                         .fillMaxWidth()
                         .heightIn(min = height)
+                        .semantics {
+                            contentDescription = contentDesc
+                            role = androidx.compose.ui.semantics.Role.Button
+                        }
                         .combinedClickable(
                                 onLongClick = onLongClick,
                                 onClick = onClick,
@@ -195,7 +212,22 @@ fun SwitchPreference(
         painter: Painter? = null,
         icon: ImageVector? = null,
 ) {
+    // Build content description for accessibility
+    val contentDesc = buildString {
+        append(title)
+        if (subtitle != null) {
+            append(". ")
+            append(subtitle)
+        }
+        append(". ")
+        append(if (preference.value) "Enabled" else "Disabled")
+    }
+    
     PreferenceRow(
+            modifier = modifier.semantics(mergeDescendants = true) {
+                contentDescription = contentDesc
+                role = androidx.compose.ui.semantics.Role.Switch
+            },
             title = title,
             subtitle = subtitle,
             painter = painter,
@@ -318,17 +350,37 @@ fun SliderPreference(
         steps: Int = 0,
         isEnable: Boolean = true
 ) {
-    // Calculate minimum height based on subtitle presence
+    // Calculate minimum height based on subtitle presence (ensure 48dp minimum for accessibility)
     val minHeight = if (subtitle != null) 96.dp else 80.dp
     
     // Track if slider is being actively dragged for enhanced visual feedback
     var isInteracting by remember { mutableStateOf(false) }
+    
+    // Get current value for accessibility
+    val currentValue = preferenceAsFloat?.lazyValue ?: preferenceAsInt?.lazyValue?.toFloat()
+        ?: preferenceAsLong?.lazyValue?.toFloat() ?: mutablePreferences?.value ?: 0F
+    
+    // Build content description for accessibility
+    val contentDesc = buildString {
+        append(title)
+        if (subtitle != null) {
+            append(". ")
+            append(subtitle)
+        }
+        if (trailing != null) {
+            append(". Current value: ")
+            append(trailing)
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = minHeight)
             .padding(vertical = 12.dp)
+            .semantics(mergeDescendants = true) {
+                contentDescription = contentDesc
+            }
     ) {
         // Header row with icon, title, subtitle, and value
         Row(
@@ -477,7 +529,21 @@ fun ChipPreference(
         selectedContainerColor: Color = MaterialTheme.colorScheme.primary,
         onValueChange: ((Int) -> Unit)?
 ) {
+    // Build content description for accessibility
+    val contentDesc = buildString {
+        append(title)
+        if (subtitle != null) {
+            append(". ")
+            append(subtitle)
+        }
+        append(". Selected: ")
+        append(preference.getOrNull(selected) ?: "None")
+    }
+    
     PreferenceRow(
+            modifier = Modifier.semantics(mergeDescendants = true) {
+                contentDescription = contentDesc
+            },
             title = title,
             subtitle = subtitle,
             icon = icon,
@@ -485,6 +551,10 @@ fun ChipPreference(
                 LazyRow {
                     items(count = preference.size) { index ->
                         FilterChip(
+                                modifier = Modifier.semantics {
+                                    contentDescription = "${preference[index]}. ${if (index == selected) "Selected" else "Not selected"}"
+                                    role = androidx.compose.ui.semantics.Role.RadioButton
+                                },
                                 selected = index == selected,
                                 onClick = {
                                     if (onValueChange != null) {
@@ -525,7 +595,24 @@ fun <Key> ChipChoicePreference(
         onFailToFindElement: String = ""
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    val selectedValue = choices[preference.value] ?: onFailToFindElement
+    
+    // Build content description for accessibility
+    val contentDesc = buildString {
+        append(title)
+        if (subtitle != null) {
+            append(". ")
+            append(subtitle)
+        }
+        append(". Current selection: ")
+        append(selectedValue)
+    }
+    
     PreferenceRow(
+            modifier = Modifier.semantics(mergeDescendants = true) {
+                contentDescription = contentDesc
+                role = androidx.compose.ui.semantics.Role.DropdownList
+            },
             title = title,
             subtitle = subtitle,
             icon = icon,
@@ -533,7 +620,11 @@ fun <Key> ChipChoicePreference(
                 Button(
                         modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(end = 2.dp, top = 4.dp, bottom = 4.dp),
+                                .heightIn(min = 48.dp)
+                                .padding(end = 2.dp, top = 4.dp, bottom = 4.dp)
+                                .semantics {
+                                    contentDescription = "Select $title. Current: $selectedValue"
+                                },
                         onClick = {
                             showDialog = true
                         },
@@ -544,7 +635,7 @@ fun <Key> ChipChoicePreference(
                         shape = RoundedCornerShape(4.dp),
                         content = {
                             CaptionTextComposable(
-                                    text = choices[preference.value] ?: onFailToFindElement,
+                                    text = selectedValue,
                                     maxLine = 1,
                                     align = TextAlign.Center,
                                     modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
@@ -562,10 +653,15 @@ fun <Key> ChipChoicePreference(
                 text = {
                     LazyColumn {
                         items(choices.toList()) { (value, text) ->
+                            val isSelected = value == preference.value
                             Row(
                                     modifier = Modifier
-                                            .requiredHeight(48.dp)
+                                            .heightIn(min = 48.dp)
                                             .fillMaxWidth()
+                                            .semantics(mergeDescendants = true) {
+                                                contentDescription = "$text. ${if (isSelected) "Selected" else "Not selected"}"
+                                                role = androidx.compose.ui.semantics.Role.RadioButton
+                                            }
                                             .clickable(onClick = {
                                                 if (onValue != null) {
                                                     onValue(value)
@@ -578,7 +674,7 @@ fun <Key> ChipChoicePreference(
                                     verticalAlignment = Alignment.CenterVertically
                             ) {
                                 RadioButton(
-                                        selected = value == preference.value,
+                                        selected = isSelected,
                                         onClick = null,
                                 )
                                 Text(text = text, modifier = Modifier.padding(start = 24.dp), color = MaterialTheme.colorScheme.onBackground)
@@ -599,7 +695,22 @@ fun SwitchPreference(
         icon: ImageVector? = null,
         onValueChange: ((Boolean) -> Unit)?
 ) {
+    // Build content description for accessibility
+    val contentDesc = buildString {
+        append(title)
+        if (subtitle != null) {
+            append(". ")
+            append(subtitle)
+        }
+        append(". ")
+        append(if (preference) "Enabled" else "Disabled")
+    }
+    
     PreferenceRow(
+            modifier = Modifier.semantics(mergeDescendants = true) {
+                contentDescription = contentDesc
+                role = androidx.compose.ui.semantics.Role.Switch
+            },
             title = title,
             subtitle = subtitle,
             icon = icon,
@@ -620,7 +731,22 @@ fun SwitchPreference(
         icon: ImageVector? = null,
         onValue: ((Boolean) -> Unit)? = null
 ) {
+    // Build content description for accessibility
+    val contentDesc = buildString {
+        append(title)
+        if (subtitle != null) {
+            append(". ")
+            append(subtitle)
+        }
+        append(". ")
+        append(if (preference.value) "Enabled" else "Disabled")
+    }
+    
     PreferenceRow(
+            modifier = Modifier.semantics(mergeDescendants = true) {
+                contentDescription = contentDesc
+                role = androidx.compose.ui.semantics.Role.Switch
+            },
             title = title,
             subtitle = subtitle,
             icon = icon,
@@ -642,7 +768,22 @@ fun SwitchPreference(
         subtitle: String? = null,
         icon: ImageVector? = null,
 ) {
+    // Build content description for accessibility
+    val contentDesc = buildString {
+        append(title)
+        if (subtitle != null) {
+            append(". ")
+            append(subtitle)
+        }
+        append(". ")
+        append(if (preference.value) "Enabled" else "Disabled")
+    }
+    
     PreferenceRow(
+            modifier = Modifier.semantics(mergeDescendants = true) {
+                contentDescription = contentDesc
+                role = androidx.compose.ui.semantics.Role.Switch
+            },
             title = title,
             subtitle = subtitle,
             icon = icon,
@@ -666,10 +807,27 @@ fun <Key> ChoicePreference(
         onDismiss: () -> Unit = {}
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    val selectedValue = choices[preference.value]
+    
+    // Build content description for accessibility
+    val contentDesc = buildString {
+        append(title)
+        if (subtitle != null) {
+            append(". ")
+            append(subtitle)
+        } else if (selectedValue != null) {
+            append(". Current selection: ")
+            append(selectedValue)
+        }
+    }
 
     PreferenceRow(
+            modifier = Modifier.semantics(mergeDescendants = true) {
+                contentDescription = contentDesc
+                role = androidx.compose.ui.semantics.Role.DropdownList
+            },
             title = title,
-            subtitle = if (subtitle == null) choices[preference.value] else null,
+            subtitle = if (subtitle == null) selectedValue else null,
             onClick = {
                 onShowDialog()
                 showDialog = true
@@ -688,10 +846,15 @@ fun <Key> ChoicePreference(
                 text = {
                     LazyColumn {
                         items(choices.toList()) { (value, text) ->
+                            val isSelected = value == preference.value
                             Row(
                                     modifier = Modifier
-                                            .requiredHeight(48.dp)
+                                            .heightIn(min = 48.dp)
                                             .fillMaxWidth()
+                                            .semantics(mergeDescendants = true) {
+                                                contentDescription = "$text. ${if (isSelected) "Selected" else "Not selected"}"
+                                                role = androidx.compose.ui.semantics.Role.RadioButton
+                                            }
                                             .clickable(onClick = {
                                                 if (onValue != null) {
                                                     onValue(value)
@@ -707,7 +870,7 @@ fun <Key> ChoicePreference(
                                     verticalAlignment = Alignment.CenterVertically
                             ) {
                                 RadioButton(
-                                        selected = value == preference.value,
+                                        selected = isSelected,
                                         onClick = null,
                                 )
                                 Text(text = text, modifier = Modifier.padding(start = 24.dp))
@@ -741,9 +904,27 @@ fun <Key> ChoicePreference(
         onDismiss: () -> Unit = {}
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    val selectedValue = choices[preference]
+    
+    // Build content description for accessibility
+    val contentDesc = buildString {
+        append(title)
+        if (subtitle != null) {
+            append(". ")
+            append(subtitle)
+        } else if (selectedValue != null) {
+            append(". Current selection: ")
+            append(selectedValue)
+        }
+    }
+    
     PreferenceRow(
+            modifier = Modifier.semantics(mergeDescendants = true) {
+                contentDescription = contentDesc
+                role = androidx.compose.ui.semantics.Role.DropdownList
+            },
             title = title,
-            subtitle = if (subtitle == null) choices[preference] else null,
+            subtitle = if (subtitle == null) selectedValue else null,
             onClick = {
                 showDialog = true
                 onShowDialog()
@@ -762,10 +943,15 @@ fun <Key> ChoicePreference(
                 text = {
                     LazyColumn {
                         items(choices.toList()) { (value, text) ->
+                            val isSelected = value == preference
                             Row(
                                     modifier = Modifier
-                                            .requiredHeight(48.dp)
+                                            .heightIn(min = 48.dp)
                                             .fillMaxWidth()
+                                            .semantics(mergeDescendants = true) {
+                                                contentDescription = "$text. ${if (isSelected) "Selected" else "Not selected"}"
+                                                role = androidx.compose.ui.semantics.Role.RadioButton
+                                            }
                                             .clickable(onClick = {
                                                 if (onValue != null) {
                                                     onValue(value)
@@ -779,7 +965,7 @@ fun <Key> ChoicePreference(
                                     verticalAlignment = Alignment.CenterVertically
                             ) {
                                 RadioButton(
-                                        selected = value == preference,
+                                        selected = isSelected,
                                         onClick = null,
                                 )
                                 Text(text = text, modifier = Modifier.padding(start = 24.dp))
@@ -813,10 +999,27 @@ fun <Key> ChoicePreference(
         onDismiss: () -> Unit = {}
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    val selectedValue = choices[preference.value]
+    
+    // Build content description for accessibility
+    val contentDesc = buildString {
+        append(title)
+        if (subtitle != null) {
+            append(". ")
+            append(subtitle)
+        } else if (selectedValue != null) {
+            append(". Current selection: ")
+            append(selectedValue)
+        }
+    }
 
     PreferenceRow(
+            modifier = Modifier.semantics(mergeDescendants = true) {
+                contentDescription = contentDesc
+                role = androidx.compose.ui.semantics.Role.DropdownList
+            },
             title = title,
-            subtitle = if (subtitle == null) choices[preference.value] else null,
+            subtitle = if (subtitle == null) selectedValue else null,
             onClick = {
                 showDialog = true
                 onShowDialog()
@@ -832,10 +1035,15 @@ fun <Key> ChoicePreference(
                 text = {
                     LazyColumn {
                         items(choices.toList()) { (value, text) ->
+                            val isSelected = value == preference.value
                             Row(
                                     modifier = Modifier
-                                            .requiredHeight(48.dp)
+                                            .heightIn(min = 48.dp)
                                             .fillMaxWidth()
+                                            .semantics(mergeDescendants = true) {
+                                                contentDescription = "$text. ${if (isSelected) "Selected" else "Not selected"}"
+                                                role = androidx.compose.ui.semantics.Role.RadioButton
+                                            }
                                             .clickable(onClick = {
                                                 if (onValue != null) {
                                                     onValue(value)
@@ -851,7 +1059,7 @@ fun <Key> ChoicePreference(
                                     verticalAlignment = Alignment.CenterVertically
                             ) {
                                 RadioButton(
-                                        selected = value == preference.value,
+                                        selected = isSelected,
                                         onClick = null,
                                 )
                                 Text(text = text, modifier = Modifier.padding(start = 24.dp))
@@ -883,12 +1091,31 @@ fun ColorPreference(
 ) {
     var showDialog by remember { mutableStateOf(false) }
     val initialColor = preference.value.takeOrElse { unsetColor }
+    val hexColor = "#${initialColor.value.toString(16).substring(2, 8).uppercase()}"
+    
+    // Build content description for accessibility
+    val contentDesc = buildString {
+        append(title)
+        if (subtitle != null) {
+            append(". ")
+            append(subtitle)
+        }
+        if (initialColor != Color.Unspecified) {
+            append(". Current color: ")
+            append(hexColor)
+        }
+        append(". Long press to reset to default")
+    }
     
     // Enhanced layout with card-like appearance
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .semantics(mergeDescendants = true) {
+                contentDescription = contentDesc
+                role = androidx.compose.ui.semantics.Role.Button
+            },
         shape = MaterialTheme.shapes.medium,
         tonalElevation = 1.dp
     ) {

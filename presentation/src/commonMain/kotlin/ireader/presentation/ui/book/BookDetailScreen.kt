@@ -143,7 +143,8 @@ fun BookDetailScreen(
                     }
                     items(
                         items = vm.chapters.reversed(),
-                        key = { chapter -> chapter.id }
+                        key = { chapter -> chapter.id },
+                        contentType = { "chapter_item" } // Add contentType for better recycling
                     ) { chapter ->
                         ChapterRow(
                                 modifier = Modifier.animateItem(),
