@@ -24,6 +24,40 @@ import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
 /**
+ * Fetch button state for WebView operations
+ */
+sealed class FetchButtonState {
+    /**
+     * Button is enabled and ready for user interaction
+     */
+    object Enabled : FetchButtonState()
+    
+    /**
+     * Fetch operation is in progress
+     */
+    data class Fetching(val type: FetchType) : FetchButtonState()
+    
+    /**
+     * Fetch operation completed successfully
+     */
+    data class Success(val message: String) : FetchButtonState()
+    
+    /**
+     * Fetch operation failed with an error
+     */
+    data class Error(val message: String) : FetchButtonState()
+    
+    /**
+     * Type of fetch operation
+     */
+    enum class FetchType {
+        BOOK,
+        CHAPTER,
+        CHAPTERS
+    }
+}
+
+/**
  * Custom WebViewState class to replace the one from Accompanist
  */
 class WebViewState(url: String) {
@@ -69,7 +103,8 @@ class WebViewPageModel(
     private val remoteUseCases: RemoteUseCases,
     private val param: Param,
     private val webpageImpl: WebViewPageStateImpl,
-    val webViewManager : WebViewManger
+    val webViewManager : WebViewManger,
+    val autoFetchDetector: AutoFetchDetector = DefaultAutoFetchDetector()
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), WebViewPageState by webpageImpl {
     data class Param(
         val url: String?,
@@ -131,27 +166,37 @@ class WebViewPageModel(
             webView: WebView,
     ) {
         val catalog = catalog
+        fetchChapterState = FetchButtonState.Fetching(FetchButtonState.FetchType.CHAPTER)
         scope.launch {
-            val pageSource = webView.getHtml()
-            val url = webView.url ?: ""
-            remoteUseCases.getRemoteReadingContent(
-                chapter,
-                catalog,
-                onError = {
-                    showSnackBar(it)
-                    showSnackBar(UiText.MStringResource(MR.strings.failed_to_get_content))
-                },
-                onSuccess = { result ->
-                    if (result.content.isNotEmpty()) {
-                        webChapter = result
-                        insertChapter(result)
-                        showSnackBar(UiText.MStringResource(MR.strings.download_notifier_download_finish))
-                    } else {
+            try {
+                val pageSource = webView.getHtml()
+                val url = webView.url ?: ""
+                remoteUseCases.getRemoteReadingContent(
+                    chapter,
+                    catalog,
+                    onError = {
+                        fetchChapterState = FetchButtonState.Error(it.asString())
+                        showSnackBar(it)
                         showSnackBar(UiText.MStringResource(MR.strings.failed_to_get_content))
-                    }
-                },
-                commands = listOf(Command.Content.Fetch(url = url, pageSource))
-            )
+                    },
+                    onSuccess = { result ->
+                        if (result.content.isNotEmpty()) {
+                            webChapter = result
+                            insertChapter(result)
+                            fetchChapterState = FetchButtonState.Success("Chapter fetched successfully")
+                            showSnackBar(UiText.MStringResource(MR.strings.download_notifier_download_finish))
+                        } else {
+                            // Retry with fallback parsing if content is empty
+                            fetchChapterState = FetchButtonState.Error("No content found. Please try again.")
+                            showSnackBar(UiText.DynamicString("No content found. The page may not have loaded completely."))
+                        }
+                    },
+                    commands = listOf(Command.Content.Fetch(url = url, pageSource))
+                )
+            } catch (e: Exception) {
+                fetchChapterState = FetchButtonState.Error(e.message ?: "Unknown error")
+                showSnackBar(UiText.DynamicString("Error: ${e.message ?: "Failed to fetch chapter"}"))
+            }
         }
     }
 
@@ -160,33 +205,42 @@ class WebViewPageModel(
         book: Book,
         webView: WebView,
     ) {
+        fetchChaptersState = FetchButtonState.Fetching(FetchButtonState.FetchType.CHAPTERS)
         scope.launch {
-            val pageSource = webView.getHtml()
-            val url = webView.url ?: ""
-            val localChapters = getChapterUseCase.findChaptersByBookId(book.id)
-            remoteUseCases.getRemoteChapters(
-                book,
-                catalog,
-                onError = {
-                    showSnackBar(it)
-                    showSnackBar(UiText.MStringResource(MR.strings.no_chapters_found_error))
-                },
-                onSuccess = { result ->
-                    webChapters = result
-                    if (result.isNotEmpty()) {
-                        insertChapters(result.map { it.copy(bookId = book.id) })
-                        val message = if (result.size == 1) 
-                            UiText.MStringResource(MR.strings.download_notifier_download_finish) 
-                        else 
-                            UiText.DynamicString("${result.size} chapters have been downloaded")
-                        showSnackBar(message)
-                    } else {
-                        showSnackBar(UiText.MStringResource(MR.strings.no_chapters_found_error))
-                    }
-                },
-                commands = listOf(Command.Chapter.Fetch(url = url, pageSource)),
-                oldChapters = localChapters
-            )
+            try {
+                val pageSource = webView.getHtml()
+                val url = webView.url ?: ""
+                val localChapters = getChapterUseCase.findChaptersByBookId(book.id)
+                remoteUseCases.getRemoteChapters(
+                    book,
+                    catalog,
+                    onError = {
+                        fetchChaptersState = FetchButtonState.Error(it.asString())
+                        showSnackBar(it)
+                        showSnackBar(UiText.DynamicString("Failed to fetch chapters. Please ensure you're on the correct page and try again."))
+                    },
+                    onSuccess = { result ->
+                        webChapters = result
+                        if (result.isNotEmpty()) {
+                            insertChapters(result.map { it.copy(bookId = book.id) })
+                            val message = if (result.size == 1) 
+                                UiText.MStringResource(MR.strings.download_notifier_download_finish) 
+                            else 
+                                UiText.DynamicString("${result.size} chapters have been downloaded")
+                            fetchChaptersState = FetchButtonState.Success("${result.size} chapters fetched")
+                            showSnackBar(message)
+                        } else {
+                            fetchChaptersState = FetchButtonState.Error("No chapters found. Try navigating to the chapter list page.")
+                            showSnackBar(UiText.DynamicString("No chapters found. Make sure you're on the chapter list page."))
+                        }
+                    },
+                    commands = listOf(Command.Chapter.Fetch(url = url, pageSource)),
+                    oldChapters = localChapters
+                )
+            } catch (e: Exception) {
+                fetchChaptersState = FetchButtonState.Error(e.message ?: "Unknown error")
+                showSnackBar(UiText.DynamicString("Error: ${e.message ?: "Failed to fetch chapters"}"))
+            }
         }
     }
 
@@ -195,27 +249,36 @@ class WebViewPageModel(
         webView: WebView,
         book: Book? = null,
     ) {
+        fetchBookState = FetchButtonState.Fetching(FetchButtonState.FetchType.BOOK)
         scope.launch {
-            val pageSource = webView.getHtml()
-            val url = webView.originalUrl ?: ""
-            remoteUseCases.getBookDetail(
-                book ?: Book(key = "", title = "", sourceId = source?.id ?: 0),
-                catalog,
-                onError = {
-                    showSnackBar(it)
-                    showSnackBar(UiText.MStringResource(MR.strings.something_is_wrong_with_this_book))
-                },
-                onSuccess = { result ->
-                    if (result.title.isNotBlank()) {
-                        webBook = result
-                        insertBook(result.copy(favorite = true))
-                        showSnackBar(UiText.DynamicString("Book '${result.title}' added to library"))
-                    } else {
-                        showSnackBar(UiText.MStringResource(MR.strings.something_is_wrong_with_this_book))
-                    }
-                },
-                commands = listOf(Command.Detail.Fetch(url = url, pageSource))
-            )
+            try {
+                val pageSource = webView.getHtml()
+                val url = webView.originalUrl ?: webView.url ?: ""
+                remoteUseCases.getBookDetail(
+                    book ?: Book(key = url, title = "", sourceId = source?.id ?: 0),
+                    catalog,
+                    onError = {
+                        fetchBookState = FetchButtonState.Error(it.asString())
+                        showSnackBar(it)
+                        showSnackBar(UiText.DynamicString("Failed to fetch book details. Please ensure you're on the book's detail page and try again."))
+                    },
+                    onSuccess = { result ->
+                        if (result.title.isNotBlank()) {
+                            webBook = result
+                            insertBook(result.copy(favorite = true))
+                            fetchBookState = FetchButtonState.Success("Book '${result.title}' added")
+                            showSnackBar(UiText.DynamicString("Book '${result.title}' added to library"))
+                        } else {
+                            fetchBookState = FetchButtonState.Error("Could not extract book information. Try a different page.")
+                            showSnackBar(UiText.DynamicString("Could not extract book information from this page."))
+                        }
+                    },
+                    commands = listOf(Command.Detail.Fetch(url = url, pageSource))
+                )
+            } catch (e: Exception) {
+                fetchBookState = FetchButtonState.Error(e.message ?: "Unknown error")
+                showSnackBar(UiText.DynamicString("Error: ${e.message ?: "Failed to fetch book details"}"))
+            }
         }
     }
 
@@ -241,6 +304,47 @@ class WebViewPageModel(
         scope.launch(Dispatchers.IO) {
             insertUseCases.insertChapters(chapter)
         }
+    }
+    
+    /**
+     * Trigger automatic novel fetching based on page content detection
+     */
+    fun triggerAutoFetch(webView: WebView) {
+        scope.launch {
+            try {
+                val result = autoFetchDetector.autoFetch(
+                    url = webView.url ?: "",
+                    webView = webView,
+                    source = source,
+                    viewModel = this@WebViewPageModel
+                )
+                
+                when (result) {
+                    is FetchResult.Success -> {
+                        // Success message is already shown by individual fetch methods
+                    }
+                    is FetchResult.Error -> {
+                        showSnackBar(UiText.DynamicString(result.message))
+                    }
+                    FetchResult.Skipped -> {
+                        // Do nothing, auto-fetch was skipped
+                    }
+                }
+            } catch (e: Exception) {
+                // Silently fail auto-fetch to not disrupt user experience
+            }
+        }
+    }
+    
+    /**
+     * Detect novel content on the current page
+     */
+    suspend fun detectNovelContent(webView: WebView): NovelDetectionResult {
+        return autoFetchDetector.detectNovelContent(
+            url = webView.url ?: "",
+            webView = webView,
+            source = source
+        )
     }
 }
 
@@ -272,6 +376,12 @@ interface WebViewPageState {
     var enableChapterFetch: Boolean
     var enableChaptersFetch: Boolean
     var enableBookFetch: Boolean
+    
+    var fetchBookState: FetchButtonState
+    var fetchChapterState: FetchButtonState
+    var fetchChaptersState: FetchButtonState
+    
+    var autoFetchEnabled: Boolean
 }
 
 open class WebViewPageStateImpl() : WebViewPageState {
@@ -304,4 +414,10 @@ open class WebViewPageStateImpl() : WebViewPageState {
     override var enableChapterFetch: Boolean by mutableStateOf(false)
     override var enableChaptersFetch: Boolean by mutableStateOf(false)
     override var enableBookFetch: Boolean by mutableStateOf(false)
+    
+    override var fetchBookState: FetchButtonState by mutableStateOf(FetchButtonState.Enabled)
+    override var fetchChapterState: FetchButtonState by mutableStateOf(FetchButtonState.Enabled)
+    override var fetchChaptersState: FetchButtonState by mutableStateOf(FetchButtonState.Enabled)
+    
+    override var autoFetchEnabled: Boolean by mutableStateOf(false)
 }

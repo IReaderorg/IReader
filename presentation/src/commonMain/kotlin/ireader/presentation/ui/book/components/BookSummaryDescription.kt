@@ -1,9 +1,12 @@
 package ireader.presentation.ui.book.components
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -13,14 +16,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ireader.presentation.ui.core.modifier.secondaryItemAlpha
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalAnimationGraphicsApi::class)
@@ -34,14 +39,17 @@ fun BookSummaryDescription(
     var expandedHeight by remember { mutableStateOf(0) }
     var shrunkHeight by remember { mutableStateOf(0) }
     val heightDelta = remember(expandedHeight, shrunkHeight) { expandedHeight - shrunkHeight }
-    val animProgress by animateFloatAsState(if (expanded) 1f else 0f)
-    val scrimHeight = with(LocalDensity.current) { remember { 24.sp.roundToPx() } }
+    val animProgress by animateFloatAsState(
+        targetValue = if (expanded) 1f else 0f,
+        animationSpec = spring(dampingRatio = 0.8f, stiffness = 300f)
+    )
+    val scrimHeight = with(LocalDensity.current) { remember { 32.dp.roundToPx() } }
 
     SubcomposeLayout(modifier = modifier.clipToBounds()) { constraints ->
         val shrunkPlaceable = subcompose("description-s") {
             Text(
-                text = "\n\n", // Shows at least 3 lines
-                style = MaterialTheme.typography.bodyMedium,
+                text = "\n\n\n", // Shows at least 4 lines
+                style = MaterialTheme.typography.bodyLarge,
             )
         }.map { it.measure(constraints) }
         shrunkHeight = shrunkPlaceable.maxByOrNull { it.height }?.height ?: 0
@@ -49,7 +57,7 @@ fun BookSummaryDescription(
         val expandedPlaceable = subcompose("description-l") {
             Text(
                 text = expandedDescription,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge,
             )
         }.map { it.measure(constraints) }
         expandedHeight = expandedPlaceable.maxByOrNull { it.height }?.height?.coerceAtLeast(shrunkHeight) ?: 0
@@ -58,24 +66,43 @@ fun BookSummaryDescription(
             Text(
                 text = if (expanded) expandedDescription else shrunkDescription,
                 maxLines = Int.MAX_VALUE,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.secondaryItemAlpha(),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    lineHeight = 24.sp,
+                    fontWeight = FontWeight.Normal
+                ),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f),
             )
         }.map { it.measure(constraints) }
 
         val scrimPlaceable = subcompose("scrim") {
-            val colors = listOf(Color.Transparent, MaterialTheme.colorScheme.background)
+            val colors = listOf(
+                Color.Transparent,
+                MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
+                MaterialTheme.colorScheme.background
+            )
             Box(
-                modifier = Modifier.background(Brush.verticalGradient(colors = colors)),
+                modifier = Modifier.background(
+                    Brush.verticalGradient(
+                        colors = colors,
+                        startY = 0f,
+                        endY = scrimHeight.toFloat()
+                    )
+                ),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(
-                    imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.background(Brush.radialGradient(colors = colors.asReversed())),
-                )
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f))
+                        .padding(6.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = if (expanded) "Collapse" else "Expand",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }.map { it.measure(Constraints.fixed(width = constraints.maxWidth, height = scrimHeight)) }
 

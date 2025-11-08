@@ -30,8 +30,11 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
-import androidx.compose.material.LocalMinimumTouchTargetEnforcement
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.SuggestionChipDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
@@ -73,7 +76,7 @@ fun BookSummary(
             shrunkDescription = trimmedDescription,
             expanded = expanded,
             modifier = Modifier
-                .padding(top = 8.dp)
+                .padding(top = 12.dp, bottom = 8.dp)
                 .padding(horizontal = 16.dp)
                 .clickableNoIndication(
                     onLongClick = { onCopy(desc) },
@@ -83,8 +86,11 @@ fun BookSummary(
         if (genres.isNotEmpty()) {
             if (expanded) {
                 androidx.compose.foundation.layout.FlowRow(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 12.dp, bottom = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     genres.filter { it.isNotBlank() }.forEach { genre ->
                         TagsChip(genre) {}
@@ -92,8 +98,8 @@ fun BookSummary(
                 }
             } else {
                 LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(genres.filter { it.isNotBlank() }) { genre ->
                         TagsChip(genre) {}
@@ -113,11 +119,18 @@ private fun TagsChip(
     CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
         SuggestionChip(
             onClick = onClick,
-            label = { Text(text = text, style = MaterialTheme.typography.bodySmall) },
-            border = null,
+            label = { 
+                Text(
+                    text = text, 
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                ) 
+            },
+            border = SuggestionChipDefaults.suggestionChipBorder(enabled = true, borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                borderWidth = 1.dp),
             colors = SuggestionChipDefaults.suggestionChipColors(
-                containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                labelColor = MaterialTheme.colorScheme.onSurface,
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
             ),
         )
     }

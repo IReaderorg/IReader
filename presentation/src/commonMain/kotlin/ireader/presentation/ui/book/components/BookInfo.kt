@@ -27,10 +27,11 @@ internal fun RowScope.BookInfo(
 ) {
     Column(
         modifier = Modifier
-            .padding(bottom = 16.dp)
-            .weight(0.60f)
-            .align(Alignment.Bottom)
+            .weight(1f)
+            .align(Alignment.CenterVertically),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        // Enhanced title with better typography
         Text(
             modifier = Modifier
                 .clickableNoIndication(
@@ -46,56 +47,80 @@ internal fun RowScope.BookInfo(
                     }
                 ),
             text = book.title,
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 3,
             overflow = TextOverflow.Ellipsis
         )
+        
+        // Author with improved styling
         if (book.author.isNotBlank()) {
-            Text(
-                text = "Author: ${book.author}",
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.secondaryItemAlpha(),
-                color = MaterialTheme.colorScheme.onBackground,
-                overflow = TextOverflow.Ellipsis
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                )
+                Text(
+                    text = book.author,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
+        
+        // Status and source with improved layout
         Row(
-            modifier = Modifier
-                .secondaryItemAlpha()
-                .padding(top = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(2.dp)
+            modifier = Modifier.padding(top = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = when (book.status) {
-                    MangaInfo.ONGOING -> Icons.Default.Schedule
-                    MangaInfo.COMPLETED -> Icons.Default.DoneAll
-                    MangaInfo.LICENSED -> Icons.Default.AttachMoney
-                    MangaInfo.PUBLISHING_FINISHED -> Icons.Default.Done
-                    MangaInfo.CANCELLED -> Icons.Default.Close
-                    MangaInfo.ON_HIATUS -> Icons.Default.Pause
-                    else -> Icons.Default.Block
-                },
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(end = 4.dp)
-                    .size(16.dp),
-            )
-            Text(
-                text = book.getStatusByName(),
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = .5f),
-                overflow = TextOverflow.Ellipsis
-            )
-            Text("•")
+            // Status chip
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = when (book.status) {
+                        MangaInfo.ONGOING -> Icons.Default.Schedule
+                        MangaInfo.COMPLETED -> Icons.Default.DoneAll
+                        MangaInfo.LICENSED -> Icons.Default.AttachMoney
+                        MangaInfo.PUBLISHING_FINISHED -> Icons.Default.Done
+                        MangaInfo.CANCELLED -> Icons.Default.Close
+                        MangaInfo.ON_HIATUS -> Icons.Default.Pause
+                        else -> Icons.Default.Block
+                    },
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = book.getStatusByName(),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                )
+            }
+            
             if (source != null) {
                 Text(
+                    text = "•",
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
+                )
+                Text(
                     text = source.name,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = .5f),
-                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                    fontWeight = FontWeight.Medium,
                     style = MaterialTheme.typography.labelMedium,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }

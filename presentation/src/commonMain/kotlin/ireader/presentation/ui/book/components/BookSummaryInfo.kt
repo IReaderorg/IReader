@@ -20,17 +20,16 @@ internal fun BookSummaryInfo(
 ) {
     Column(
         modifier = modifier
-            .padding(horizontal = 4.dp)
+            .padding(horizontal = 8.dp, vertical = 12.dp)
             .background(MaterialTheme.colorScheme.background)
             .fillMaxSize()
-
     ) {
         BookSummary(
             onClickToggle = { onSummaryExpand() },
             description = book.description,
             genres = book.genres,
             expandedSummary = isSummaryExpanded,
-                onCopy = onCopy
+            onCopy = onCopy
         )
     }
 }

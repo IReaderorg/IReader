@@ -10,7 +10,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
@@ -79,7 +81,12 @@ fun BookDetailScreen(
                 ) {
                     item {
                         Box {
-                           BookHeaderImage(book = book,)
+                           // Pass scroll progress for parallax effect
+                           val scrollProgress = scrollState.firstVisibleItemScrollOffset.toFloat()
+                           BookHeaderImage(
+                               book = book,
+                               scrollProgress = scrollProgress
+                           )
 
                             BookHeader(
                                     book = book,
@@ -134,15 +141,23 @@ fun BookDetailScreen(
                             )
                         }
                     }
-                    items(items = vm.chapters.reversed()) { chapter ->
+                    items(
+                        items = vm.chapters.reversed(),
+                        key = { chapter -> chapter.id }
+                    ) { chapter ->
                         ChapterRow(
-                                modifier = Modifier,
+                                modifier = Modifier.animateItem(),
                                 chapter = chapter,
                                 onItemClick = { onItemClick(chapter) },
                                 isLastRead = chapter.id == vm.lastRead,
                                 isSelected = chapter.id in vm.selection,
                                 onLongClick = { onLongItemClick(chapter) },
                                 showNumber = vm.layout == ChapterDisplayMode.ChapterNumber || vm.layout == ChapterDisplayMode.Default
+                        )
+                        Divider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                            thickness = 0.5.dp
                         )
                     }
                 }

@@ -8,6 +8,9 @@ import ireader.core.source.model.*
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.security.MessageDigest
+import ireader.core.source.ParsingUtils.extractCleanText
+import ireader.core.source.ParsingUtils.extractTextWithParagraphs
+import ireader.core.source.ParsingUtils.cleanContent
 
 /** Taken from https://tachiyomi.org/ **/
 @Keep
@@ -102,4 +105,43 @@ abstract class ParsedHttpSource(private val dependencies: ireader.core.source.De
     ): List<String>
 
     abstract fun detailParse(document: Document): MangaInfo
+    
+    /**
+     * Enhanced content parsing with error recovery
+     * Override this method to use improved parsing with fallback strategies
+     */
+    open fun pageContentParseEnhanced(document: Document): List<String> {
+        return try {
+            // Clean the document first
+            val cleanedDoc = document.cleanContent()
+            
+            // Try the standard parsing first
+            val content = pageContentParse(cleanedDoc)
+            
+            // Validate content
+            if (content.isEmpty() || content.all { it.trim().isEmpty() }) {
+                // Fallback to error recovery parsing
+                val fallbackContent = ParsingErrorRecovery.extractContentWithFallback(cleanedDoc)
+                if (fallbackContent.isNotEmpty()) {
+                    listOf(fallbackContent)
+                } else {
+                    content
+                }
+            } else {
+                content
+            }
+        } catch (e: Exception) {
+            // Last resort: try error recovery
+            try {
+                val fallbackContent = ParsingErrorRecovery.extractContentWithFallback(document)
+                if (fallbackContent.isNotEmpty()) {
+                    listOf(fallbackContent)
+                } else {
+                    emptyList()
+                }
+            } catch (e: Exception) {
+                emptyList()
+            }
+        }
+    }
 }

@@ -1,47 +1,85 @@
 package ireader.presentation.ui.component
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material3.Icon
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil3.compose.SubcomposeAsyncImage
+import coil3.toUri
 import ireader.core.source.Source
+import ireader.domain.models.BookCover
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.entities.BookItem
 import ireader.i18n.localize
-import ireader.presentation.ui.component.components.BookShimmerLoading
-import ireader.presentation.ui.component.list.isScrolledToTheEnd
-import kotlinx.coroutines.delay
 import ireader.i18n.resources.MR
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.sp
+import ireader.presentation.ui.component.components.BookShimmerLoading
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -137,20 +175,31 @@ private fun ModernGridLayout(
     showTitle: Boolean = true,
     compactMode: Boolean = false
 ) {
-    val cells = if (columns > 1) {
-        GridCells.Fixed(columns)
-    } else {
-        GridCells.Adaptive(130.dp)
+    // Adaptive column count based on screen size
+    val cells = when {
+        columns > 1 -> GridCells.Fixed(columns)
+        else -> GridCells.Adaptive(minSize = 140.dp) // Adaptive sizing for better responsiveness
     }
     
-    // Adjust padding for compact mode
-    val itemPadding = if (compactMode) 4.dp else 8.dp
+    // Improved spacing for compact mode
+    val horizontalSpacing = if (compactMode) 6.dp else 12.dp
+    val verticalSpacing = if (compactMode) 6.dp else 12.dp
+    val contentPadding = if (compactMode) 8.dp else 12.dp
     
     LazyVerticalGrid(
         columns = cells,
         state = gridState,
-        contentPadding = PaddingValues(8.dp),
-        modifier = Modifier.fillMaxSize()
+        contentPadding = PaddingValues(contentPadding),
+        horizontalArrangement = Arrangement.spacedBy(horizontalSpacing),
+        verticalArrangement = Arrangement.spacedBy(verticalSpacing),
+        modifier = Modifier
+            .fillMaxSize()
+            .animateContentSize( // Smooth animations for layout changes
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessMedium
+                )
+            )
     ) {
         items(
             items = books,
@@ -169,7 +218,7 @@ private fun ModernGridLayout(
         
         // Add empty item at the bottom for loading indicator space
         if (isLoading && books.isNotEmpty()) {
-            item {
+            item(span = { GridItemSpan(maxLineSpan) }) {
                 Spacer(modifier = Modifier.height(60.dp))
             }
         }
@@ -482,6 +531,281 @@ private fun ChipIndicator(
             fontWeight = FontWeight.Medium
         )
     }
+}
+
+@OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
+@Composable
+fun AnimatedBookItem(
+    book: BookItem,
+    index: Int,
+    onClick: (BookItem) -> Unit,
+    onLongClick: (BookItem) -> Unit = {},
+    headers: ((url: String) -> okhttp3.Headers?)? = null,
+    showTitle: Boolean = true,
+    elevation: Dp = 4.dp
+) {
+    var visible by remember { mutableStateOf(false) }
+    
+    LaunchedEffect(key1 = Unit) {
+        delay(index * 20L) // Stagger animation based on index
+        visible = true
+    }
+    
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(animationSpec = tween(durationMillis = 300)) +
+                scaleIn(
+                    initialScale = 0.8f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
+                ),
+        modifier = Modifier.padding(4.dp)
+    ) {
+        EnhancedNovelCard(
+            book = book,
+            onClick = onClick,
+            onLongClick = onLongClick,
+            headers = headers,
+            showTitle = showTitle,
+            elevation = elevation
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun EnhancedNovelCard(
+    book: BookItem,
+    onClick: (BookItem) -> Unit,
+    onLongClick: (BookItem) -> Unit = {},
+    headers: ((url: String) -> okhttp3.Headers?)? = null,
+    showTitle: Boolean = true,
+    elevation: Dp = 4.dp
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = { onClick(book) },
+                onLongClick = { onLongClick(book) }
+            ),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = elevation)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // Cover image with proper aspect ratio (3:4)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(3f / 4f)
+            ) {
+                BookCoverImage(
+                    book = book,
+                    headers = headers
+                )
+                
+                // Status badges overlay at top
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    // In library badge
+                    if (book.favorite) {
+                        StatusBadge(
+                            icon = Icons.Default.Check,
+                            backgroundColor = MaterialTheme.colorScheme.primary,
+                            contentDescription = "In Library"
+                        )
+                    }
+                    
+                    // Download status badge
+                    book.unread?.let { unreadCount ->
+                        if (unreadCount > 0) {
+                            StatusBadge(
+                                icon = Icons.Default.Download,
+                                backgroundColor = MaterialTheme.colorScheme.tertiary,
+                                contentDescription = "Has unread chapters"
+                            )
+                        }
+                    }
+                }
+                
+                // Text overlay at bottom with gradient
+                if (showTitle) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .height(80.dp)
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        Color.Black.copy(alpha = 0.8f)
+                                    ),
+                                    startY = 0f,
+                                    endY = 200f
+                                )
+                            )
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(12.dp)
+                                .fillMaxWidth()
+                        ) {
+                            Text(
+                                text = book.title,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            
+                            if (book.author.isNotBlank()) {
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = book.author,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color.White.copy(alpha = 0.9f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                // Reading progress indicator at the very bottom
+                val progress = book.progress ?: run {
+                    book.unread?.let { unreadCount ->
+                        val totalChapters = book.totalChapters ?: 0
+                        if (totalChapters > 0) (totalChapters - unreadCount.toFloat()) / totalChapters else 0f
+                    } ?: 0f
+                }
+                
+                if (progress > 0) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .height(4.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            )
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(progress)
+                                .height(4.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun StatusBadge(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    backgroundColor: Color,
+    contentDescription: String?
+) {
+    Box(
+        modifier = Modifier
+            .size(28.dp)
+            .background(
+                color = backgroundColor.copy(alpha = 0.9f),
+                shape = CircleShape
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = Color.White,
+            modifier = Modifier.size(16.dp)
+        )
+    }
+}
+
+@Composable
+fun BookCoverImage(
+    book: BookItem,
+    headers: ((url: String) -> okhttp3.Headers?)? = null
+) {
+    val coverUrl = BookCover.from(book).cover
+    
+    SubcomposeAsyncImage(
+        model = coverUrl?.toUri(),
+        contentDescription = book.title,
+        modifier = Modifier.fillMaxSize(),
+        contentScale = ContentScale.Crop,
+        loading = {
+            ShimmerLoadingEffect()
+        },
+        error = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.MenuBook,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                )
+            }
+        }
+    )
+}
+
+@Composable
+fun ShimmerLoadingEffect() {
+    val shimmerColors = listOf(
+        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+    )
+    
+    val transition = rememberInfiniteTransition(label = "shimmer")
+    val translateAnim by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmer"
+    )
+    
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.linearGradient(
+                    colors = shimmerColors,
+                    start = Offset(translateAnim - 1000f, translateAnim - 1000f),
+                    end = Offset(translateAnim, translateAnim)
+                )
+            )
+    )
 }
 
 // Simple relative time formatter - you might want to replace this with a more sophisticated implementation

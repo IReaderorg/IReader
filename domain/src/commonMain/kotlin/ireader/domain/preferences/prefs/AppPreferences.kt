@@ -31,6 +31,12 @@ class AppPreferences(
         const val SAVED_BACKGROUND_COLOR = "background_color"
         const val SAVED_FONT_PREFERENCES = "reader_font_family"
         const val DATABASE_VERSION = "database_version"
+        
+        /** WebView Auto-Fetch Preferences **/
+        const val AUTO_FETCH_ENABLED = "auto_fetch_enabled"
+        const val AUTO_FETCH_BOOK_ENABLED = "auto_fetch_book_enabled"
+        const val AUTO_FETCH_CHAPTERS_ENABLED = "auto_fetch_chapters_enabled"
+        const val AUTO_FETCH_CHAPTER_CONTENT_ENABLED = "auto_fetch_chapter_content_enabled"
 
         enum class Orientation {
             Portrait,
@@ -96,5 +102,33 @@ class AppPreferences(
 
     fun lastUpdateCheck(): Preference<Long> {
         return preferenceStore.getLong(Last_UPDATE_CHECK, 0)
+    }
+    
+    /**
+     * Master toggle for auto-fetch functionality
+     */
+    fun autoFetchEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean(AUTO_FETCH_ENABLED, false)
+    }
+    
+    /**
+     * Enable auto-fetch for book details
+     */
+    fun autoFetchBookEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean(AUTO_FETCH_BOOK_ENABLED, true)
+    }
+    
+    /**
+     * Enable auto-fetch for chapter lists
+     */
+    fun autoFetchChaptersEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean(AUTO_FETCH_CHAPTERS_ENABLED, true)
+    }
+    
+    /**
+     * Enable auto-fetch for chapter content
+     */
+    fun autoFetchChapterContentEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean(AUTO_FETCH_CHAPTER_CONTENT_ENABLED, false)
     }
 }

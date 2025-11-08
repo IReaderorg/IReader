@@ -205,13 +205,18 @@ actual data class WebViewScreenSpec actual constructor(
                                     showFetchFeedback = true
                                     fetchFeedbackMessage = "Fetching book details..."
                                     scope.launch {
-                                        vm.getDetails(book = book, webView = it)
-                                        delay(500) // Brief delay to ensure feedback is shown
-                                        showFetchFeedback = false
+                                        try {
+                                            vm.getDetails(book = book, webView = it)
+                                            delay(500)
+                                        } catch (e: Exception) {
+                                            host.showSnackbar("Error: ${e.message}. Tap to retry.")
+                                        } finally {
+                                            showFetchFeedback = false
+                                        }
                                     }
                                 } else {
                                     scope.launch {
-                                        host.showSnackbar("Source not available")
+                                        host.showSnackbar("Source not available. Please select a source first.")
                                     }
                                 }
                             }
@@ -224,13 +229,18 @@ actual data class WebViewScreenSpec actual constructor(
                                     showFetchFeedback = true
                                     fetchFeedbackMessage = "Fetching chapter content..."
                                     scope.launch {
-                                        vm.getContentFromWebView(chapter = chapter, webView = it)
-                                        delay(500) // Brief delay to ensure feedback is shown
-                                        showFetchFeedback = false
+                                        try {
+                                            vm.getContentFromWebView(chapter = chapter, webView = it)
+                                            delay(500)
+                                        } catch (e: Exception) {
+                                            host.showSnackbar("Error: ${e.message}. Tap to retry.")
+                                        } finally {
+                                            showFetchFeedback = false
+                                        }
                                     }
                                 } else {
                                     scope.launch {
-                                        host.showSnackbar("Chapter not available")
+                                        host.showSnackbar("Chapter not available. Navigate to a chapter page first.")
                                     }
                                 }
                             }
@@ -244,13 +254,18 @@ actual data class WebViewScreenSpec actual constructor(
                                     showFetchFeedback = true
                                     fetchFeedbackMessage = "Fetching all chapters..."
                                     scope.launch {
-                                        vm.getChapters(book = book, webView = it)
-                                        delay(500) // Brief delay to ensure feedback is shown
-                                        showFetchFeedback = false
+                                        try {
+                                            vm.getChapters(book = book, webView = it)
+                                            delay(500)
+                                        } catch (e: Exception) {
+                                            host.showSnackbar("Error: ${e.message}. Tap to retry.")
+                                        } finally {
+                                            showFetchFeedback = false
+                                        }
                                     }
                                 } else {
                                     scope.launch {
-                                        host.showSnackbar("Book not available")
+                                        host.showSnackbar("Book not available. Navigate to the book's page first.")
                                     }
                                 }
                             }

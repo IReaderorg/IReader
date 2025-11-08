@@ -1,19 +1,24 @@
 package ireader.presentation.ui.book.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Public
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,6 +26,7 @@ import ireader.core.source.HttpSource
 import ireader.core.source.Source
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
+
 @Composable
 fun ActionHeader(
     modifier: Modifier = Modifier,
@@ -29,8 +35,13 @@ fun ActionHeader(
     onWebView: () -> Unit,
     onFavorite:() -> Unit
 ) {
-    Row(modifier = modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp))  {
-        val defaultActionButtonColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .38f)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Favorite button with enhanced styling
         ActionButton(
             title = if (favorite) {
                 localize(MR.strings.in_library)
@@ -38,48 +49,94 @@ fun ActionHeader(
                 localize(MR.strings.add_to_library)
             },
             icon = if (favorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-            color = if (favorite) MaterialTheme.colorScheme.primary else defaultActionButtonColor,
+            isActive = favorite,
             onClick = onFavorite,
-            onLongClick = {},
+            modifier = Modifier.weight(1f)
         )
+        
+        // WebView button
         if (source is HttpSource) {
             ActionButton(
                 title = localize(MR.strings.webView),
                 icon = Icons.Default.Public,
-                color = defaultActionButtonColor,
+                isActive = false,
                 onClick = onWebView,
+                modifier = Modifier.weight(1f)
             )
         }
-
     }
 }
 
-
 @Composable
-private fun RowScope.ActionButton(
+private fun ActionButton(
     title: String,
     icon: ImageVector,
-    color: Color,
+    isActive: Boolean,
     onClick: () -> Unit,
-    onLongClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier
 ) {
-    TextButton(
+    // Animated colors and scale
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isActive) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else {
+            MaterialTheme.colorScheme.surface
+        },
+        animationSpec = spring()
+    )
+    
+    val contentColor by animateColorAsState(
+        targetValue = if (isActive) {
+            MaterialTheme.colorScheme.onPrimaryContainer
+        } else {
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        },
+        animationSpec = spring()
+    )
+    
+    val borderColor by animateColorAsState(
+        targetValue = if (isActive) {
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+        } else {
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+        },
+        animationSpec = spring()
+    )
+    
+    OutlinedButton(
         onClick = onClick,
-        modifier = Modifier.weight(1f),
+        modifier = modifier
+            .height(56.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = backgroundColor,
+            contentColor = contentColor
+        ),
+        border = BorderStroke(
+            width = if (isActive) 2.dp else 1.dp,
+            color = borderColor
+        ),
+        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 16.dp)
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(20.dp),
+                tint = contentColor,
+                modifier = Modifier.size(24.dp),
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(6.dp))
             Text(
                 text = title,
-                color = color,
-                fontSize = 12.sp,
+                color = contentColor,
+                fontSize = 13.sp,
+                fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Medium,
                 textAlign = TextAlign.Center,
+                maxLines = 1
             )
         }
     }

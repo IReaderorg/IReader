@@ -182,12 +182,83 @@ fun AppearanceSettingScreen(
         }
         item {
             Components.Dynamic {
-                Text(
-                    text = "Customize individual colors to create your own theme",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                )
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Text(
+                        text = "Customize individual colors to create your own theme",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    
+                    // Real-time color preview card
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp),
+                        shape = MaterialTheme.shapes.medium,
+                        tonalElevation = 4.dp,
+                        color = MaterialTheme.colorScheme.surfaceVariant
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Primary color preview
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Surface(
+                                    modifier = Modifier.size(48.dp),
+                                    shape = MaterialTheme.shapes.small,
+                                    color = customizedColors.primaryState.value,
+                                    tonalElevation = 2.dp
+                                ) {}
+                                Text(
+                                    text = "Primary",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+                            }
+                            
+                            // Secondary color preview
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Surface(
+                                    modifier = Modifier.size(48.dp),
+                                    shape = MaterialTheme.shapes.small,
+                                    color = customizedColors.secondaryState.value,
+                                    tonalElevation = 2.dp
+                                ) {}
+                                Text(
+                                    text = "Secondary",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+                            }
+                            
+                            // Bars color preview
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Surface(
+                                    modifier = Modifier.size(48.dp),
+                                    shape = MaterialTheme.shapes.small,
+                                    color = customizedColors.barsState.value,
+                                    tonalElevation = 2.dp
+                                ) {}
+                                Text(
+                                    text = "Toolbar",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+                            }
+                        }
+                    }
+                }
             }.Build()
         }
         item {
@@ -299,6 +370,77 @@ fun AppearanceSettingScreen(
             Divider(modifier = Modifier.padding(vertical = 16.dp))
         }
         
+        // Theme Management Section
+        item {
+            Components.Header(
+                    text = "Theme Management",
+            ).Build()
+        }
+        item {
+            Components.Dynamic {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Backup and restore your custom themes",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Export current theme button
+                        Button(
+                            onClick = {
+                                val exported = vm.exportCurrentTheme()
+                                if (exported != null) {
+                                    vm.importExportResult = exported
+                                    vm.showExportDialog = true
+                                } else {
+                                    vm.showSnackBar(UiText.StringResource("No custom theme selected"))
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            enabled = vm.colorTheme.value > 0
+                        ) {
+                            Text("Export Theme")
+                        }
+                        
+                        // Export all themes button
+                        Button(
+                            onClick = {
+                                vm.importExportResult = vm.exportAllCustomThemes()
+                                vm.showExportDialog = true
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Backup All")
+                        }
+                    }
+                    
+                    // Import theme button
+                    Button(
+                        onClick = {
+                            vm.showImportDialog = true
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Import Theme")
+                    }
+                }
+            }.Build()
+        }
+        
+        // Section Divider
+        item {
+            Divider(modifier = Modifier.padding(vertical = 16.dp))
+        }
+        
         // Timestamp Section
         item {
             Components.Header(
@@ -335,6 +477,93 @@ fun AppearanceSettingScreen(
                     colorPickerInfo.onChangeColor()
                 },
                 initialColor = colorPickerInfo.initialColor,
+        )
+    }
+    
+    // Export dialog
+    if (vm.showExportDialog) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { vm.showExportDialog = false },
+            title = { Text("Export Theme") },
+            text = {
+                Column {
+                    Text("Copy the JSON below to backup your theme:")
+                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.requiredHeight(8.dp))
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .requiredHeight(200.dp),
+                        shape = MaterialTheme.shapes.small,
+                        color = MaterialTheme.colorScheme.surfaceVariant
+                    ) {
+                        androidx.compose.foundation.verticalScroll(androidx.compose.foundation.rememberScrollState()) {
+                            androidx.compose.foundation.layout.Box(modifier = Modifier.padding(8.dp)) {
+                                androidx.compose.foundation.text.selection.SelectionContainer {
+                                    Text(
+                                        vm.importExportResult ?: "",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { vm.showExportDialog = false }) {
+                    Text("Close")
+                }
+            }
+        )
+    }
+    
+    // Import dialog
+    if (vm.showImportDialog) {
+        var importText by remember { mutableStateOf("") }
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { vm.showImportDialog = false },
+            title = { Text("Import Theme") },
+            text = {
+                Column {
+                    Text("Paste the theme JSON below:")
+                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.requiredHeight(8.dp))
+                    androidx.compose.material3.OutlinedTextField(
+                        value = importText,
+                        onValueChange = { importText = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .requiredHeight(200.dp),
+                        textStyle = MaterialTheme.typography.bodySmall.copy(
+                            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                        ),
+                        placeholder = { Text("Paste JSON here...") }
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        scope.launchIO {
+                            val result = vm.importTheme(importText)
+                            if (result.isSuccess) {
+                                vm.showSnackBar(UiText.StringResource("Theme imported successfully"))
+                                vm.showImportDialog = false
+                            } else {
+                                vm.showSnackBar(UiText.StringResource("Failed to import theme: ${result.exceptionOrNull()?.message}"))
+                            }
+                        }
+                    },
+                    enabled = importText.isNotBlank()
+                ) {
+                    Text("Import")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { vm.showImportDialog = false }) {
+                    Text("Cancel")
+                }
+            }
         )
     }
 }
@@ -407,20 +636,45 @@ private fun ThemeItem(
                         backgroundColor = theme.extraColors.bars
                 )
                 
-                // Content area with better spacing
+                // Content area with better spacing and more preview elements
                 Box(
                         Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
                                 .padding(8.dp)
                 ) {
-                    // Sample text
-                    Text(
-                        "Aa",
-                        fontSize = 14.sp,
-                        color = theme.materialColors.onBackground,
-                        modifier = Modifier.align(Alignment.TopStart)
-                    )
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        // Sample text with better typography
+                        Text(
+                            "Aa",
+                            fontSize = 16.sp,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                            color = theme.materialColors.onBackground,
+                        )
+                        
+                        // Surface variant preview
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 4.dp)
+                                .requiredHeight(20.dp),
+                            shape = MaterialTheme.shapes.extraSmall,
+                            color = theme.materialColors.surfaceVariant,
+                            tonalElevation = 1.dp
+                        ) {
+                            Box(
+                                modifier = Modifier.padding(4.dp)
+                            ) {
+                                Text(
+                                    "Text",
+                                    fontSize = 8.sp,
+                                    color = theme.materialColors.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
                     
                     // Primary color button preview
                     Button(

@@ -25,6 +25,16 @@ import ireader.presentation.ui.core.theme.themes.ForestGreenLightThemeColors
 import ireader.presentation.ui.core.theme.themes.ForestGreenDarkThemeColors
 import ireader.presentation.ui.core.theme.themes.MonochromeMinimalLightThemeColors
 import ireader.presentation.ui.core.theme.themes.MonochromeMinimalDarkThemeColors
+import ireader.presentation.ui.core.theme.themes.CherryBlossomLightThemeColors
+import ireader.presentation.ui.core.theme.themes.CherryBlossomDarkThemeColors
+import ireader.presentation.ui.core.theme.themes.MidnightSkyLightThemeColors
+import ireader.presentation.ui.core.theme.themes.MidnightSkyDarkThemeColors
+import ireader.presentation.ui.core.theme.themes.AutumnHarvestLightThemeColors
+import ireader.presentation.ui.core.theme.themes.AutumnHarvestDarkThemeColors
+import ireader.presentation.ui.core.theme.themes.EmeraldForestLightThemeColors
+import ireader.presentation.ui.core.theme.themes.EmeraldForestDarkThemeColors
+import ireader.presentation.ui.core.theme.themes.RoseGoldLightThemeColors
+import ireader.presentation.ui.core.theme.themes.RoseGoldDarkThemeColors
 import ireader.presentation.ui.core.ui.Colour
 
 
@@ -158,5 +168,45 @@ val themes = listOf<Theme>(
     Theme(id =-22, materialColors =MonochromeMinimalDarkThemeColors, extraColors = ExtraColors(
         bars = MonochromeMinimalDarkThemeColors.surface,
         onBars = MonochromeMinimalDarkThemeColors.onSurface
+    ), isDark = true),
+    Theme(id =-23, materialColors =CherryBlossomLightThemeColors, extraColors = ExtraColors(
+        bars = CherryBlossomLightThemeColors.surface,
+        onBars = CherryBlossomLightThemeColors.onSurface
+    ), isDark = false),
+    Theme(id =-24, materialColors =CherryBlossomDarkThemeColors, extraColors = ExtraColors(
+        bars = CherryBlossomDarkThemeColors.surface,
+        onBars = CherryBlossomDarkThemeColors.onSurface
+    ), isDark = true),
+    Theme(id =-25, materialColors =MidnightSkyLightThemeColors, extraColors = ExtraColors(
+        bars = MidnightSkyLightThemeColors.surface,
+        onBars = MidnightSkyLightThemeColors.onSurface
+    ), isDark = false),
+    Theme(id =-26, materialColors =MidnightSkyDarkThemeColors, extraColors = ExtraColors(
+        bars = MidnightSkyDarkThemeColors.surface,
+        onBars = MidnightSkyDarkThemeColors.onSurface
+    ), isDark = true),
+    Theme(id =-27, materialColors =AutumnHarvestLightThemeColors, extraColors = ExtraColors(
+        bars = AutumnHarvestLightThemeColors.surface,
+        onBars = AutumnHarvestLightThemeColors.onSurface
+    ), isDark = false),
+    Theme(id =-28, materialColors =AutumnHarvestDarkThemeColors, extraColors = ExtraColors(
+        bars = AutumnHarvestDarkThemeColors.surface,
+        onBars = AutumnHarvestDarkThemeColors.onSurface
+    ), isDark = true),
+    Theme(id =-29, materialColors =EmeraldForestLightThemeColors, extraColors = ExtraColors(
+        bars = EmeraldForestLightThemeColors.surface,
+        onBars = EmeraldForestLightThemeColors.onSurface
+    ), isDark = false),
+    Theme(id =-30, materialColors =EmeraldForestDarkThemeColors, extraColors = ExtraColors(
+        bars = EmeraldForestDarkThemeColors.surface,
+        onBars = EmeraldForestDarkThemeColors.onSurface
+    ), isDark = true),
+    Theme(id =-31, materialColors =RoseGoldLightThemeColors, extraColors = ExtraColors(
+        bars = RoseGoldLightThemeColors.surface,
+        onBars = RoseGoldLightThemeColors.onSurface
+    ), isDark = false),
+    Theme(id =-32, materialColors =RoseGoldDarkThemeColors, extraColors = ExtraColors(
+        bars = RoseGoldDarkThemeColors.surface,
+        onBars = RoseGoldDarkThemeColors.onSurface
     ), isDark = true),
 ).toMutableList()

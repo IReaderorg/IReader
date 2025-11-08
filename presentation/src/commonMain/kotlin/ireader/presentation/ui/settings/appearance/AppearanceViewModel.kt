@@ -26,6 +26,11 @@ class AppearanceViewModel(
     val vmThemes = themes
     var themeEditMode by mutableStateOf(false)
     var isSavable by mutableStateOf(false)
+    
+    // Theme import/export state
+    var showImportDialog by mutableStateOf(false)
+    var showExportDialog by mutableStateOf(false)
+    var importExportResult by mutableStateOf<String?>(null)
 
     val themeMode = uiPreferences.themeMode().asState()
     val colorTheme = uiPreferences.colorTheme().asState()
@@ -78,6 +83,76 @@ class AppearanceViewModel(
             extraColors = ExtraColors(bars = bars.value),
             isDark = !isLight
         )
+    }
+    
+    /**
+     * Export current custom theme to JSON string
+     */
+    fun exportCurrentTheme(): String? {
+        val currentTheme = vmThemes.firstOrNull { it.id == colorTheme.value }
+        return if (currentTheme != null && currentTheme.id > 0) {
+            ThemeImportExport.exportTheme(currentTheme.toCustomTheme())
+        } else {
+            null
+        }
+    }
+    
+    /**
+     * Export all custom themes to JSON string
+     */
+    fun exportAllCustomThemes(): String {
+        val customThemes = vmThemes.filter { it.id > 0 }.map { it.toCustomTheme() }
+        return ThemeImportExport.exportThemes(customThemes)
+    }
+    
+    /**
+     * Import theme from JSON string
+     */
+    suspend fun importTheme(jsonString: String): Result<Long> {
+        return try {
+            val result = ThemeImportExport.importTheme(jsonString)
+            if (result.isSuccess) {
+                val theme = result.getOrThrow()
+                val themeId = themeRepository.insert(theme)
+                Result.success(themeId)
+            } else {
+                Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Import multiple themes from JSON string
+     */
+    suspend fun importThemes(jsonString: String): Result<Int> {
+        return try {
+            val result = ThemeImportExport.importThemes(jsonString)
+            if (result.isSuccess) {
+                val themes = result.getOrThrow()
+                themeRepository.insert(themes)
+                Result.success(themes.size)
+            } else {
+                Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Create a backup of all custom themes
+     */
+    fun backupCustomThemes(): String {
+        return exportAllCustomThemes()
+    }
+    
+    /**
+     * Restore themes from backup
+     */
+    suspend fun restoreThemesFromBackup(backupJson: String): Result<Int> {
+        return importThemes(backupJson)
     }
 }
 

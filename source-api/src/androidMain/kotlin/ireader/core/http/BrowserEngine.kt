@@ -161,6 +161,11 @@ actual class BrowserEngine(private val webViewManger: WebViewManger, private val
                     view.evaluateJavascript(ajaxDetectionScript, null)
                 }
                 
+                override fun shouldInterceptRequestCompat(view: WebView, url: String): WebResourceResponse? {
+                    // Intercept and block ads/trackers for faster loading
+                    return interceptResourceForOptimization(url)
+                }
+                
                 override fun onReceivedErrorCompat(
                     view: WebView,
                     errorCode: Int,
@@ -223,6 +228,44 @@ actual class BrowserEngine(private val webViewManger: WebViewManger, private val
             responseBody = html.html(),
             cookies = cookies,
         )
+    }
+    
+    /**
+     * Intercept resources to block ads and trackers for faster page loading
+     */
+    private fun interceptResourceForOptimization(url: String): WebResourceResponse? {
+        // List of patterns to block
+        val blockedPatterns = listOf(
+            "doubleclick.net",
+            "googlesyndication.com",
+            "googleadservices.com",
+            "google-analytics.com",
+            "googletagmanager.com",
+            "facebook.com/tr",
+            "facebook.net",
+            "adservice",
+            "advertising",
+            "ads.",
+            "/ads/",
+            "banner",
+            "popup",
+            "analytics",
+            "tracking",
+            "tracker",
+            "pixel"
+        )
+        
+        val urlLower = url.lowercase()
+        if (blockedPatterns.any { urlLower.contains(it) }) {
+            // Return empty response for blocked resources
+            return WebResourceResponse(
+                "text/plain",
+                "utf-8",
+                java.io.ByteArrayInputStream("".toByteArray())
+            )
+        }
+        
+        return null
     }
     
     /**

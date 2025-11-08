@@ -17,8 +17,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Download
@@ -33,6 +36,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -94,42 +100,109 @@ fun DownloaderScreen(
 
     Scaffold(
             modifier = Modifier,
+            topBar = {
+                if (vm.hasSelection) {
+                    TopAppBar(
+                            title = {
+                                Text(
+                                        text = "${vm.selection.size} ${localize(MR.strings.selected)}",
+                                        style = MaterialTheme.typography.titleLarge
+                                )
+                            },
+                            navigationIcon = {
+                                IconButton(onClick = { vm.selection.clear() }) {
+                                    Icon(
+                                            imageVector = Icons.Filled.Close,
+                                            contentDescription = localize(MR.strings.cancel)
+                                    )
+                                }
+                            },
+                            actions = {
+                                // Select all button
+                                IconButton(
+                                        onClick = {
+                                            if (vm.selection.size == downloads.size) {
+                                                vm.selection.clear()
+                                            } else {
+                                                vm.selection.clear()
+                                                vm.selection.addAll(downloads.map { it.chapterId })
+                                            }
+                                        }
+                                ) {
+                                    Icon(
+                                            imageVector = Icons.Filled.SelectAll,
+                                            contentDescription = localize(MR.strings.select_all),
+                                            tint = if (vm.selection.size == downloads.size) {
+                                                MaterialTheme.colorScheme.primary
+                                            } else {
+                                                MaterialTheme.colorScheme.onSurface
+                                            }
+                                    )
+                                }
+                                
+                                // Delete selected button
+                                IconButton(
+                                        onClick = {
+                                            val selectedDownloads = downloads
+                                                    .filter { it.chapterId in vm.selection }
+                                                    .map { it.toSavedDownload() }
+                                            vm.deleteSelectedDownloads(selectedDownloads)
+                                            vm.selection.clear()
+                                        }
+                                ) {
+                                    Icon(
+                                            imageVector = Icons.Filled.Delete,
+                                            contentDescription = localize(MR.strings.delete),
+                                            tint = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                    )
+                }
+            },
             floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
             floatingActionButton = {
-                ExtendedFloatingActionButton(
-                        text = {
-                            MidSizeTextComposable(
-                                    text = when (vm.downloadServiceStateImpl.isEnable) {
-                                        true -> localize(MR.strings.pause)
-                                        else -> localize(MR.strings.resume)
-                                    },
-                                    color = MaterialTheme.colorScheme.onSecondary
-                            )
-                        },
-                        onClick = {
-                            when (vm.downloadServiceStateImpl.isEnable) {
-                                false -> vm.startDownloadService(vm.downloads.map { it.chapterId })
-                                else -> vm.stopDownloads()
-                            }
-                        },
-                        icon = {
-                            when (vm.downloadServiceStateImpl.isEnable) {
-                                true -> Icon(
-                                        Icons.Filled.Pause,
-                                        "",
-                                        tint = MaterialTheme.colorScheme.onSecondary
+                val isDownloading = vm.downloadServiceStateImpl.isEnable
+                val hasDownloads = downloads.isNotEmpty()
+                
+                if (hasDownloads && !vm.hasSelection) {
+                    ExtendedFloatingActionButton(
+                            text = {
+                                MidSizeTextComposable(
+                                        text = when (isDownloading) {
+                                            true -> localize(MR.strings.pause)
+                                            else -> localize(MR.strings.resume)
+                                        },
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
-                                else -> Icon(
-                                        Icons.Filled.PlayArrow,
-                                        "",
-                                        tint = MaterialTheme.colorScheme.onSecondary
+                            },
+                            onClick = {
+                                when (isDownloading) {
+                                    false -> vm.startDownloadService(vm.downloads.map { it.chapterId })
+                                    else -> vm.stopDownloads()
+                                }
+                            },
+                            icon = {
+                                Icon(
+                                        imageVector = when (isDownloading) {
+                                            true -> Icons.Filled.Pause
+                                            else -> Icons.Filled.PlayArrow
+                                        },
+                                        contentDescription = when (isDownloading) {
+                                            true -> localize(MR.strings.pause)
+                                            else -> localize(MR.strings.resume)
+                                        },
+                                        tint = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
-                            }
-                        },
-                        contentColor = MaterialTheme.colorScheme.onSecondary,
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        shape = CircleShape
-                )
+                            },
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            expanded = scrollState.firstVisibleItemIndex == 0
+                    )
+                }
             },
     ) { padding ->
         IVerticalFastScroller(listState = scrollState) {
@@ -193,8 +266,13 @@ fun DownloadScreenItem(
             modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp, vertical = 4.dp),
-            tonalElevation = if (isSelected) 8.dp else 0.dp,
-            shape = MaterialTheme.shapes.medium
+            tonalElevation = if (isSelected) 12.dp else 2.dp,
+            shape = MaterialTheme.shapes.medium,
+            color = if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surface
+            }
     ) {
         BookListItem(
                 modifier = Modifier
@@ -261,7 +339,7 @@ fun DownloadScreenItem(
                     else -> {
                         Icon(
                                 imageVector = Icons.Outlined.Download,
-                                contentDescription = localize(MR.strings.pending),
+                                contentDescription = localize(MR.strings.loading),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(24.dp)
                         )
@@ -270,36 +348,38 @@ fun DownloadScreenItem(
 
                 Spacer(modifier = Modifier.width(4.dp))
 
-                // Action button
+                // Action button with menu
                 Box {
                     IconButton(
-                            onClick = { isMenuExpanded = true },
+                            onClick = { isMenuExpanded = !isMenuExpanded },
                             modifier = Modifier.size(48.dp)
                     ) {
                         Icon(
                                 imageVector = Icons.Outlined.MoreVert,
-                                contentDescription = localize(MR.strings.more_options),
+                                contentDescription = localize(MR.strings.hint),
                                 tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
-                    val list =
-                            listOf<DropDownMenuItem>(
-                                    DropDownMenuItem(
-                                            localize(MR.strings.cancel)
-                                    ) {
-                                        onCancelDownload(item)
-                                        isMenuExpanded = false
-                                    },
-                                    DropDownMenuItem(
-                                            localize(MR.strings.cancel_all_for_this_series)
-                                    ) {
-                                        onCancelAllFromThisSeries(item)
-                                        isMenuExpanded = false
-                                    }
-                            )
-                    BuildDropDownMenu(list, onExpand = {
-                        isMenuExpanded
-                    })
+                    
+                    ireader.presentation.ui.component.components.IDropdownMenu(
+                            expanded = isMenuExpanded,
+                            onDismissRequest = { isMenuExpanded = false }
+                    ) {
+                        ireader.presentation.ui.component.components.IDropdownMenuItem(
+                                onClick = {
+                                    onCancelDownload(item)
+                                    isMenuExpanded = false
+                                },
+                                text = { MidSizeTextComposable(text = localize(MR.strings.cancel)) }
+                        )
+                        ireader.presentation.ui.component.components.IDropdownMenuItem(
+                                onClick = {
+                                    onCancelAllFromThisSeries(item)
+                                    isMenuExpanded = false
+                                },
+                                text = { MidSizeTextComposable(text = localize(MR.strings.cancel_all_for_this_series)) }
+                        )
+                    }
                 }
             }
         }

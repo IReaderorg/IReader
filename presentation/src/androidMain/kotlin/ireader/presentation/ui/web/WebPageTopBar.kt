@@ -47,7 +47,7 @@ fun WebPageTopBar(
                     .fillMaxHeight(.7f)
                     .fillMaxWidth()
                     .background(
-                        color = MaterialTheme.colorScheme.onBackground.copy(.2f),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
                         shape = CircleShape
                     ),
                 value = urlToRender,
@@ -55,6 +55,7 @@ fun WebPageTopBar(
                     onValueChange(it)
                 },
                 onValueConfirm = {
+                    onGo()
                 }
             )
         },
@@ -85,29 +86,42 @@ fun WebPageTopBar(
                         goForward()
                     },
                 )
+            // Fetch buttons are always enabled regardless of page load state
             if (source != null && source.getCommands().findInstance<Command.Detail.Fetch>() != null && state.enableBookFetch) {
+                val fetchBookLabel = when (state.fetchBookState) {
+                    is FetchButtonState.Fetching -> "${localize(MR.strings.fetch_book)} (Loading...)"
+                    is FetchButtonState.Success -> "${localize(MR.strings.fetch_book)} ✓"
+                    is FetchButtonState.Error -> "${localize(MR.strings.fetch_book)} ✗"
+                    else -> localize(MR.strings.fetch_book)
+                }
                 list.add(
-                    DropDownMenuItem(
-                        localize(MR.strings.fetch_book)
-                    ) {
+                    DropDownMenuItem(fetchBookLabel) {
                         onFetchBook()
                     }
                 )
             }
             if (source != null && source.getCommands().findInstance<Command.Content.Fetch>() != null && state.stateChapter != null && state.enableChapterFetch) {
+                val fetchChapterLabel = when (state.fetchChapterState) {
+                    is FetchButtonState.Fetching -> "${localize(MR.strings.fetch_chapter)} (Loading...)"
+                    is FetchButtonState.Success -> "${localize(MR.strings.fetch_chapter)} ✓"
+                    is FetchButtonState.Error -> "${localize(MR.strings.fetch_chapter)} ✗"
+                    else -> localize(MR.strings.fetch_chapter)
+                }
                 list.add(
-                    DropDownMenuItem(
-                        localize(MR.strings.fetch_chapter)
-                    ) {
+                    DropDownMenuItem(fetchChapterLabel) {
                         onFetchChapter()
                     }
                 )
             }
             if (source != null && source.getCommands().findInstance<Command.Chapter.Fetch>() != null && state.stateBook != null && state.enableChaptersFetch) {
+                val fetchChaptersLabel = when (state.fetchChaptersState) {
+                    is FetchButtonState.Fetching -> "${localize(MR.strings.fetch_chapters)} (Loading...)"
+                    is FetchButtonState.Success -> "${localize(MR.strings.fetch_chapters)} ✓"
+                    is FetchButtonState.Error -> "${localize(MR.strings.fetch_chapters)} ✗"
+                    else -> localize(MR.strings.fetch_chapters)
+                }
                 list.add(
-                    DropDownMenuItem(
-                        localize(MR.strings.fetch_chapters)
-                    ) {
+                    DropDownMenuItem(fetchChaptersLabel) {
                         onFetchChapters()
                     }
                 )
