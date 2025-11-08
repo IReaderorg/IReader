@@ -6,7 +6,22 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.forEachGesture
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -18,7 +33,12 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,8 +46,15 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
@@ -50,36 +77,77 @@ fun ColorPickerDialog(
 ) {
     var currentColor by remember { mutableStateOf(initialColor) }
     var showPresets by remember { mutableStateOf(true) }
+    
+    // Enhanced dialog with better styling
     IAlertDialog(
         onDismissRequest = onDismissRequest,
         modifier = modifier,
         title = title,
         text = {
-            if (showPresets) {
-                ColorPresets(
-                    initialColor = currentColor,
-                    onColorChanged = { currentColor = it }
-                )
-            } else {
-                ColorPalette(
-                    initialColor = currentColor,
-                    onColorChanged = { currentColor = it }
-                )
+            Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                // Real-time color preview at the top
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp)
+                        .padding(bottom = 16.dp),
+                    shape = MaterialTheme.shapes.medium,
+                    tonalElevation = 2.dp
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(currentColor)
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
+                                MaterialTheme.shapes.medium
+                            )
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        androidx.compose.material3.Text(
+                            text = "Preview",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = if (currentColor.luminance() > 0.5) Color.Black else Color.White
+                        )
+                        androidx.compose.material3.Text(
+                            text = "#${currentColor.value.toString(16).substring(2, 8).uppercase()}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (currentColor.luminance() > 0.5) Color.Black else Color.White
+                        )
+                    }
+                }
+                
+                // Color picker content
+                if (showPresets) {
+                    ColorPresets(
+                        initialColor = currentColor,
+                        onColorChanged = { currentColor = it }
+                    )
+                } else {
+                    ColorPalette(
+                        initialColor = currentColor,
+                        onColorChanged = { currentColor = it }
+                    )
+                }
             }
         },
         confirmButton = {
-            androidx.compose.material3.TextButton(onClick = {
-                onSelected(currentColor)
-            }) {
+            androidx.compose.material3.Button(
+                onClick = { onSelected(currentColor) },
+                shape = MaterialTheme.shapes.medium
+            ) {
                 androidx.compose.material3.Text(localize(MR.strings.select))
             }
         },
         dismissButton = {
-            androidx.compose.material3.TextButton(onClick = {
-                showPresets = !showPresets
-            }) {
-                val text =
-                    if (showPresets) MR.strings.presents else MR.strings.custom
+            androidx.compose.material3.OutlinedButton(
+                onClick = { showPresets = !showPresets },
+                shape = MaterialTheme.shapes.medium
+            ) {
+                val text = if (showPresets) MR.strings.custom else MR.strings.presents
                 androidx.compose.material3.Text(localize(text))
             }
         }
@@ -148,17 +216,36 @@ private fun ColorPresetItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
+    // Enhanced preset item with better visual feedback
+    val scale by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (isSelected) 1.1f else 1f,
+        animationSpec = androidx.compose.animation.core.spring(
+            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy
+        )
+    )
+    
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .padding(4.dp)
-            .requiredSize(48.dp)
+            .padding(6.dp)
+            .requiredSize(52.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
             .clip(CircleShape)
             .background(color)
-            .border(BorderStroke(1.dp, borderColor), CircleShape)
+            .border(
+                BorderStroke(if (isSelected) 3.dp else 1.dp, borderColor),
+                CircleShape
+            )
             .clickable(onClick = onClick)
     ) {
-        if (isSelected) {
+        androidx.compose.animation.AnimatedVisibility(
+            visible = isSelected,
+            enter = androidx.compose.animation.scaleIn() + androidx.compose.animation.fadeIn(),
+            exit = androidx.compose.animation.scaleOut() + androidx.compose.animation.fadeOut()
+        ) {
             Icon(
                 imageVector = Icons.Default.Check,
                 tint = if (color.luminance() > 0.5) Color.Black else Color.White,

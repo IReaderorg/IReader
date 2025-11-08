@@ -6,18 +6,24 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.outlined.CheckCircleOutline
+import androidx.compose.material.icons.outlined.Cancel
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -26,6 +32,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -182,74 +189,118 @@ fun DownloadScreenItem(
         mutableStateOf(false)
     }
 
-    BookListItem(
+    Surface(
             modifier = Modifier
-                    .combinedClickable(
-                            onClick = {
-                                onClickItem(item)
-                            },
-                            onLongClick = {
-                                onLongClickItem(item)
-                            }
-                    )
-                    .selectedBackground(isSelected)
-                    .height(80.dp)
                     .fillMaxWidth()
-                    .padding(end = 4.dp),
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+            tonalElevation = if (isSelected) 8.dp else 0.dp,
+            shape = MaterialTheme.shapes.medium
     ) {
-        BookListItemColumn(
+        BookListItem(
                 modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 16.dp, end = 8.dp),
-                verticalArrangement = Arrangement.SpaceEvenly
+                        .combinedClickable(
+                                onClick = {
+                                    onClickItem(item)
+                                },
+                                onLongClick = {
+                                    onLongClickItem(item)
+                                }
+                        )
+                        .selectedBackground(isSelected)
+                        .fillMaxWidth()
+                        .padding(16.dp),
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
-            BookListItemTitle(
-                    text = item.bookName,
-                    maxLines = 2,
-                    fontWeight = FontWeight.SemiBold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.Start
+            BookListItemColumn(
+                    modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                BookListItemTitle(
+                        text = item.bookName,
+                        maxLines = 2,
+                        fontWeight = FontWeight.SemiBold
+                )
                 BookListItemSubtitle(
                         text = item.chapterName
                 )
-                Spacer(modifier = Modifier.height(8.dp))
 
                 if (inProgress && !isDownloaded) {
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    LinearProgressIndicator(
+                            modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(6.dp),
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                            color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
-        }
-        if (isDownloaded) {
-            IconButton(onClick = { isMenuExpanded = true }) {
-                Icon(imageVector = Icons.Outlined.CheckCircleOutline, contentDescription = "")
-            }
-        } else {
-            Box {
-                IconButton(onClick = { isMenuExpanded = true }) {
-                    Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = "")
-                }
-                val list =
-                        listOf<DropDownMenuItem>(
-                                DropDownMenuItem(
-                                        localize(MR.strings.cancel)
-                                ) {
-                                    onCancelDownload(item)
-                                },
-                                DropDownMenuItem(
-                                        localize(MR.strings.cancel_all_for_this_series)
-                                ) {
-                                    onCancelAllFromThisSeries(item)
-                                }
+
+            // Status indicator and actions
+            Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Status icon
+                when {
+                    isDownloaded -> {
+                        Icon(
+                                imageVector = Icons.Outlined.CheckCircle,
+                                contentDescription = localize(MR.strings.downloaded),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
                         )
-                BuildDropDownMenu(list, onExpand = {
-                    isMenuExpanded
-                })
+                    }
+                    inProgress -> {
+                        CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    else -> {
+                        Icon(
+                                imageVector = Icons.Outlined.Download,
+                                contentDescription = localize(MR.strings.pending),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                // Action button
+                Box {
+                    IconButton(
+                            onClick = { isMenuExpanded = true },
+                            modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                                imageVector = Icons.Outlined.MoreVert,
+                                contentDescription = localize(MR.strings.more_options),
+                                tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    val list =
+                            listOf<DropDownMenuItem>(
+                                    DropDownMenuItem(
+                                            localize(MR.strings.cancel)
+                                    ) {
+                                        onCancelDownload(item)
+                                        isMenuExpanded = false
+                                    },
+                                    DropDownMenuItem(
+                                            localize(MR.strings.cancel_all_for_this_series)
+                                    ) {
+                                        onCancelAllFromThisSeries(item)
+                                        isMenuExpanded = false
+                                    }
+                            )
+                    BuildDropDownMenu(list, onExpand = {
+                        isMenuExpanded
+                    })
+                }
             }
         }
     }

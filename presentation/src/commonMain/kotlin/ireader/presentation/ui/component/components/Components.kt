@@ -33,9 +33,8 @@ sealed class Components(
         val text: String,
         val toUpper: Boolean = false,
         val padding: PaddingValues = PaddingValues(16.dp),
+        val icon: ImageVector? = null,
         override val visible: Boolean = true,
-
-
         ) : Components()
 
     data class Slider(
@@ -171,13 +170,12 @@ fun Components.Build() {
     when (this) {
         is Components.Header -> {
             if (this.visible) {
-                if (this.visible) {
-                    TextSection(
-                        text = this.text,
-                        padding = this.padding,
-                        toUpper = this.toUpper
-                    )
-                }
+                TextSection(
+                    text = this.text,
+                    padding = this.padding,
+                    toUpper = this.toUpper,
+                    icon = this.icon
+                )
             }
         }
         is Components.Slider -> {

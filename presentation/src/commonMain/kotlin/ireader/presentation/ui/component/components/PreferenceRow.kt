@@ -318,94 +318,149 @@ fun SliderPreference(
         steps: Int = 0,
         isEnable: Boolean = true
 ) {
+    // Calculate minimum height based on subtitle presence
+    val minHeight = if (subtitle != null) 96.dp else 80.dp
+    
+    // Track if slider is being actively dragged for enhanced visual feedback
+    var isInteracting by remember { mutableStateOf(false) }
 
-    val height = if (subtitle != null) 72.dp else 56.dp
-
-    Row(
-            modifier = Modifier
-                    .fillMaxWidth()
-                    .requiredHeight(height),
-            verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = minHeight)
+            .padding(vertical = 12.dp)
     ) {
-        if (icon != null) {
-            Icon(
+        // Header row with icon, title, subtitle, and value
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Icon
+            if (icon != null) {
+                Icon(
                     modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .size(24.dp),
+                        .size(24.dp),
                     contentDescription = null,
                     imageVector = icon,
-                    tint = MaterialTheme.colorScheme.primary,
-            )
-        }
-        Column(
-                Modifier
-                        .padding(horizontal = 16.dp)
-                        .weight(3f),
-                horizontalAlignment = Alignment.Start,
+                    tint = if (isEnable) {
+                        if (isInteracting) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                        }
+                    } else {
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    }
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+            }
+            
+            // Title and subtitle
+            Column(
+                modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                    modifier = Modifier,
+            ) {
+                Text(
                     text = title,
                     overflow = Ellipsis,
                     maxLines = 1,
-                    style = MaterialTheme.typography.labelSmall,
-                    textAlign = TextAlign.Start,
-                    softWrap = true,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            if (subtitle != null) {
-                Text(
-                        modifier = Modifier,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (isEnable) {
+                        MaterialTheme.colorScheme.onSurface
+                    } else {
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    }
+                )
+                if (subtitle != null) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
                         text = subtitle,
                         overflow = Ellipsis,
-                        maxLines = 1,
-                        color = LocalContentColor.current.copy(alpha = ContentAlpha.medium()),
-                        style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                        softWrap = true,
-                )
+                        maxLines = 2,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (isEnable) {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        }
+                    )
+                }
+            }
+            
+            // Value display with enhanced styling
+            if (trailing != null) {
+                Surface(
+                    modifier = Modifier.padding(start = 12.dp),
+                    color = if (isInteracting && isEnable) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    },
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        text = trailing,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = if (isEnable) {
+                            if (isInteracting) {
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            }
+                        } else {
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        },
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        // Slider with enhanced visual feedback
         Slider(
-                modifier = Modifier
-                        .widthIn(max = 200.dp),
-                value = preferenceAsFloat?.lazyValue ?: preferenceAsInt?.lazyValue?.toFloat()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = if (icon != null) 56.dp else 16.dp),
+            value = preferenceAsFloat?.lazyValue ?: preferenceAsInt?.lazyValue?.toFloat()
                 ?: preferenceAsLong?.lazyValue?.toFloat() ?: mutablePreferences?.value ?: 0F,
-                onValueChange = {
-                    preferenceAsFloat?.lazyValue = it
-                    preferenceAsInt?.lazyValue = it.toInt()
-                    preferenceAsLong?.lazyValue = it.toLong()
-                    mutablePreferences?.value = it
-                    onValueChange(it)
-                },
-                valueRange = valueRange,
-                onValueChangeFinished = {
-                    if (onValueChangeFinished != null) {
-                        onValueChangeFinished(
-                                preferenceAsFloat?.value?.toFloat()
-                                        ?: preferenceAsInt?.value?.toFloat()
-                                        ?: preferenceAsLong?.value?.toFloat()
-                                        ?: mutablePreferences?.value ?: 0F
-                        )
-                    }
-                },
-                steps = steps,
-                enabled = isEnable
-        )
-        if (trailing != null) {
-            Text(
-                    modifier = Modifier
-                            .weight(.7f)
-                            .padding(horizontal = 0.dp),
-                    text = trailing,
-                    overflow = Ellipsis,
-                    maxLines = 1,
-                    style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurface),
-                    textAlign = TextAlign.Start,
-                    softWrap = true,
-                color = MaterialTheme.colorScheme.onBackground
+            onValueChange = {
+                isInteracting = true
+                preferenceAsFloat?.lazyValue = it
+                preferenceAsInt?.lazyValue = it.toInt()
+                preferenceAsLong?.lazyValue = it.toLong()
+                mutablePreferences?.value = it
+                onValueChange(it)
+            },
+            valueRange = valueRange,
+            onValueChangeFinished = {
+                isInteracting = false
+                if (onValueChangeFinished != null) {
+                    onValueChangeFinished(
+                        preferenceAsFloat?.value?.toFloat()
+                            ?: preferenceAsInt?.value?.toFloat()
+                            ?: preferenceAsLong?.value?.toFloat()
+                            ?: mutablePreferences?.value ?: 0F
+                    )
+                }
+            },
+            steps = steps,
+            enabled = isEnable,
+            colors = SliderDefaults.colors(
+                thumbColor = MaterialTheme.colorScheme.primary,
+                activeTrackColor = MaterialTheme.colorScheme.primary,
+                inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                activeTickColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.38f),
+                inactiveTickColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
+                disabledThumbColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                disabledActiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.32f),
+                disabledInactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
             )
-        }
+        )
     }
 }
 
@@ -828,35 +883,61 @@ fun ColorPreference(
 ) {
     var showDialog by remember { mutableStateOf(false) }
     val initialColor = preference.value.takeOrElse { unsetColor }
-    PreferenceRow(
-            title = title,
-            subtitle = subtitle,
-            onClick = {
-                if (showColorDialog == null) {
-                    showDialog = true
-                } else {
-                    showColorDialog.value = true
-                    onShow(ColorPickerInfo(preference, title, onChangeColor, initialColor))
+    
+    // Enhanced layout with card-like appearance
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        shape = MaterialTheme.shapes.medium,
+        tonalElevation = 1.dp
+    ) {
+        PreferenceRow(
+                title = title,
+                subtitle = subtitle,
+                onClick = {
+                    if (showColorDialog == null) {
+                        showDialog = true
+                    } else {
+                        showColorDialog.value = true
+                        onShow(ColorPickerInfo(preference, title, onChangeColor, initialColor))
+                    }
+                },
+                onLongClick = {
+                    preference.value = Color.Unspecified
+                    onRestToDefault()
+                },
+                action = {
+                    if (preference.value != Color.Unspecified || unsetColor != Color.Unspecified) {
+                        // Enhanced color preview with better visual design
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(end = 8.dp)
+                        ) {
+                            // Color preview circle with enhanced styling
+                            val borderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
+                            Box(
+                                    modifier = Modifier
+                                            .size(40.dp)
+                                            .clip(CircleShape)
+                                            .background(color = initialColor)
+                                            .border(BorderStroke(2.dp, borderColor), CircleShape)
+                            )
+                            
+                            // Color hex value display for real-time preview
+                            Text(
+                                text = "#${initialColor.value.toString(16).substring(2, 8).uppercase()}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(end = 4.dp)
+                            )
+                        }
+                    }
                 }
-            },
-            onLongClick = {
-                preference.value = Color.Unspecified
-                onRestToDefault()
-            },
-            action = {
-                if (preference.value != Color.Unspecified || unsetColor != Color.Unspecified) {
-                    val borderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.54f)
-                    Box(
-                            modifier = Modifier
-                                    .padding(4.dp)
-                                    .size(32.dp)
-                                    .clip(CircleShape)
-                                    .background(color = initialColor)
-                                    .border(BorderStroke(1.dp, borderColor), CircleShape)
-                    )
-                }
-            }
-    )
+        )
+    }
+    
     if (showDialog) {
         ColorPickerDialog(
                 title = { Text(title) },

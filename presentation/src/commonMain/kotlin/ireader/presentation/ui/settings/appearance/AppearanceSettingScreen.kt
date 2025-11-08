@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.BottomAppBar
@@ -50,6 +51,7 @@ import ireader.presentation.ui.component.components.ColorPickerDialog
 import ireader.presentation.ui.component.components.ColorPickerInfo
 import ireader.presentation.ui.component.components.ColorPreference
 import ireader.presentation.ui.component.components.Components
+import ireader.presentation.ui.component.components.Divider
 import ireader.presentation.ui.component.components.LazyColumnWithInsets
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
@@ -94,9 +96,10 @@ fun AppearanceSettingScreen(
     }
 
     LazyColumnWithInsets(scaffoldPaddingValues) {
+        // Theme Mode Section
         item {
             Components.Header(
-                    text = "Theme",
+                    text = "Theme Mode",
             ).Build()
         }
         item {
@@ -123,28 +126,68 @@ fun AppearanceSettingScreen(
                 subtitle = "Adapt colors from your wallpaper (Android 12+)",
             ).Build()
         }
+        
+        // Section Divider
+        item {
+            Divider(modifier = Modifier.padding(vertical = 16.dp))
+        }
+        
+        // Preset Themes Section with enhanced header
         item {
             Components.Header(
-                    text = "Preset themes",
+                    text = "Preset Themes",
             ).Build()
         }
         item {
             Components.Dynamic {
-                LazyRow(modifier = Modifier.padding(horizontal = 8.dp)) {
-                    items(items = themesForCurrentMode) { theme ->
-                        ThemeItem(
-                                theme,
-                                onClick = { theme ->
-                                    vm.colorTheme.value = theme.id
-                                    customizedColors.primaryState.value = theme.materialColors.primary
-                                    customizedColors.secondaryState.value = theme.materialColors.secondary
-                                    customizedColors.barsState.value = theme.extraColors.bars
-                                    vm.isSavable = false
-                                },
-                                isSelected = vm.colorTheme.value == theme.id,
-                        )
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text(
+                        text = "Choose from ${themesForCurrentMode.size} available themes",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                    LazyRow(
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        items(items = themesForCurrentMode) { theme ->
+                            ThemeItem(
+                                    theme,
+                                    onClick = { theme ->
+                                        vm.colorTheme.value = theme.id
+                                        customizedColors.primaryState.value = theme.materialColors.primary
+                                        customizedColors.secondaryState.value = theme.materialColors.secondary
+                                        customizedColors.barsState.value = theme.extraColors.bars
+                                        vm.isSavable = false
+                                    },
+                                    isSelected = vm.colorTheme.value == theme.id,
+                            )
+                        }
                     }
                 }
+            }.Build()
+        }
+        
+        // Section Divider
+        item {
+            Divider(modifier = Modifier.padding(vertical = 16.dp))
+        }
+        
+        // Color Customization Section
+        item {
+            Components.Header(
+                    text = "Color Customization",
+            ).Build()
+        }
+        item {
+            Components.Dynamic {
+                Text(
+                    text = "Customize individual colors to create your own theme",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
             }.Build()
         }
         item {
@@ -196,50 +239,70 @@ fun AppearanceSettingScreen(
         }
         item {
             Components.Dynamic {
-                Row(
-                        horizontalArrangement = Arrangement.End,
-                        modifier = Modifier.fillMaxWidth()
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    shape = MaterialTheme.shapes.medium,
+                    tonalElevation = 2.dp
                 ) {
-                    if (vm.isSavable) {
-                        TextButton(onClick = {
-                            vm.isSavable = false
-                            scope.launchIO {
-                                val theme = vm.getThemes(vm.colorTheme.value, isLight)
-                                if (theme != null) {
+                    Row(
+                            horizontalArrangement = Arrangement.End,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                    ) {
+                        if (vm.isSavable) {
+                            Button(
+                                onClick = {
+                                    vm.isSavable = false
                                     scope.launchIO {
-                                        val themeId =
-                                                vm.themeRepository.insert(theme.toCustomTheme())
-                                        vm.colorTheme.value = themeId
-                                        vm.showSnackBar(UiText.MStringResource(MR.strings.theme_was_saved))
+                                        val theme = vm.getThemes(vm.colorTheme.value, isLight)
+                                        if (theme != null) {
+                                            scope.launchIO {
+                                                val themeId =
+                                                        vm.themeRepository.insert(theme.toCustomTheme())
+                                                vm.colorTheme.value = themeId
+                                                vm.showSnackBar(UiText.MStringResource(MR.strings.theme_was_saved))
+                                            }
+                                        } else {
+                                            vm.showSnackBar(UiText.MStringResource(MR.strings.theme_was_not_valid))
+                                        }
+                                        vm.isSavable = false
                                     }
-                                } else {
-                                    vm.showSnackBar(UiText.MStringResource(MR.strings.theme_was_not_valid))
-                                }
-                                vm.isSavable = false
+                                },
+                                shape = MaterialTheme.shapes.medium
+                            ) {
+                                MidSizeTextComposable(text = localizeHelper.localize(MR.strings.save_custom_theme))
                             }
-                        }) {
-                            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.save_custom_theme))
-                        }
-                    } else if (vm.colorTheme.value > 0) {
-                        TextButton(onClick = {
-                            scope.launchIO {
-                                scope.launch {
-                                    vm.vmThemes.find { it.id == vm.colorTheme.value }
-                                            ?.toCustomTheme()
-                                            ?.let { vm.themeRepository.delete(it) }
+                        } else if (vm.colorTheme.value > 0) {
+                            TextButton(onClick = {
+                                scope.launchIO {
+                                    scope.launch {
+                                        vm.vmThemes.find { it.id == vm.colorTheme.value }
+                                                ?.toCustomTheme()
+                                                ?.let { vm.themeRepository.delete(it) }
+                                    }
+                                    vm.showSnackBar(UiText.MStringResource(MR.strings.theme_was_deleted))
                                 }
-                                vm.showSnackBar(UiText.MStringResource(MR.strings.theme_was_deleted))
+                            }) {
+                                MidSizeTextComposable(text = localizeHelper.localize(MR.strings.delete_custom_theme))
                             }
-                        }) {
-                            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.delete_custom_theme))
                         }
                     }
                 }
             }.Build()
         }
+        
+        // Section Divider
+        item {
+            Divider(modifier = Modifier.padding(vertical = 16.dp))
+        }
+        
+        // Timestamp Section
         item {
             Components.Header(
-                    text = "Timestamp",
+                    text = "Date & Time",
             ).Build()
         }
         item {
@@ -285,7 +348,7 @@ private fun ThemeItem(
         onLongClick: (Theme) -> Unit = {},
         isSelected: Boolean = false,
 ) {
-    val borders = MaterialTheme.shapes.small
+    val borders = MaterialTheme.shapes.medium
     val borderColor = remember {
         if (theme.materialColors.isLight()) {
             Color.Black.copy(alpha = 0.25f)
@@ -293,67 +356,138 @@ private fun ThemeItem(
             Color.White.copy(alpha = 0.15f)
         }
     }
+    
+    // Enhanced elevation and scale animation for selected state
+    val elevation by androidx.compose.animation.core.animateDpAsState(
+        targetValue = if (isSelected) 8.dp else 2.dp,
+        animationSpec = androidx.compose.animation.core.spring(
+            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+            stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+        )
+    )
+    
+    val scale by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (isSelected) 1.05f else 1f,
+        animationSpec = androidx.compose.animation.core.spring(
+            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+            stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+        )
+    )
+    
     Surface(
-            tonalElevation = 4.dp, color = theme.materialColors.background, shape = borders,
+            tonalElevation = elevation,
+            shadowElevation = elevation,
+            color = theme.materialColors.background,
+            shape = borders,
             modifier = Modifier
-                    .size(100.dp, 160.dp)
-                    .padding(8.dp)
-                    .border(1.dp, borderColor, borders)
-                    .combinedClickable(onClick = { onClick(theme) }, onLongClick = { onLongClick(theme) })
+                    .size(110.dp, 170.dp)
+                    .padding(12.dp)
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                    }
+                    .border(
+                        width = if (isSelected) 2.dp else 1.dp,
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else borderColor,
+                        shape = borders
+                    )
+                    .combinedClickable(
+                        onClick = { onClick(theme) },
+                        onLongClick = { onLongClick(theme) }
+                    )
     ) {
         Box {
             Column(
-                    modifier = Modifier.border(1.dp, borderColor, borders)
+                    modifier = Modifier.padding(2.dp)
             ) {
+                // Enhanced toolbar preview
                 Toolbar(
-                        modifier = Modifier.requiredHeight(24.dp), title = {},
+                        modifier = Modifier.requiredHeight(28.dp),
+                        title = {},
                         backgroundColor = theme.extraColors.bars
                 )
+                
+                // Content area with better spacing
                 Box(
                         Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
-                                .padding(6.dp)
+                                .padding(8.dp)
                 ) {
-                    Text("Text", fontSize = 11.sp, color = theme.materialColors.onBackground)
+                    // Sample text
+                    Text(
+                        "Aa",
+                        fontSize = 14.sp,
+                        color = theme.materialColors.onBackground,
+                        modifier = Modifier.align(Alignment.TopStart)
+                    )
+                    
+                    // Primary color button preview
                     Button(
                             onClick = { onClick(theme) },
                             enabled = true,
                             contentPadding = PaddingValues(),
                             modifier = Modifier
                                     .align(Alignment.BottomStart)
-                                    .size(40.dp, 20.dp),
+                                    .size(44.dp, 22.dp),
                             content = {},
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = theme.materialColors.primary
                             )
                     )
+                    
+                    // Secondary color FAB preview
                     Surface(
                             modifier = Modifier
-                                    .size(24.dp)
+                                    .size(28.dp)
                                     .align(Alignment.BottomEnd),
                             shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
                             color = theme.materialColors.secondary,
-                            tonalElevation = 6.dp,
+                            tonalElevation = 4.dp,
                             content = { }
                     )
                 }
+                
+                // Bottom bar preview
                 BottomAppBar(
-                        modifier = Modifier.requiredHeight(24.dp),
+                        modifier = Modifier.requiredHeight(28.dp),
                         containerColor = theme.extraColors.bars
                 ) {
                 }
             }
-            if (isSelected) {
-                Icon(
-                        modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .size(30.dp)
-                                .padding(2.dp),
-                        imageVector = Icons.Filled.CheckCircle,
-                        contentDescription = "theme is selected",
-                        tint = MaterialTheme.colorScheme.primary
-                )
+            
+            // Enhanced selection indicator with animation
+            androidx.compose.animation.AnimatedVisibility(
+                visible = isSelected,
+                enter = androidx.compose.animation.scaleIn(
+                    animationSpec = androidx.compose.animation.core.spring(
+                        dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy
+                    )
+                ) + androidx.compose.animation.fadeIn(),
+                exit = androidx.compose.animation.scaleOut() + androidx.compose.animation.fadeOut()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(6.dp)
+                ) {
+                    // Background circle for better visibility
+                    Surface(
+                        modifier = Modifier.size(32.dp),
+                        shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        tonalElevation = 2.dp
+                    ) {}
+                    
+                    Icon(
+                            modifier = Modifier
+                                    .size(32.dp)
+                                    .padding(4.dp),
+                            imageVector = Icons.Filled.CheckCircle,
+                            contentDescription = "theme is selected",
+                            tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }

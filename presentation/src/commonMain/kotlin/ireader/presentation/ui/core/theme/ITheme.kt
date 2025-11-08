@@ -15,6 +15,16 @@ import ireader.presentation.ui.core.theme.themes.LightThemeColorsTachiyomi
 import ireader.presentation.ui.core.theme.themes.LightThemeColorsTako
 import ireader.presentation.ui.core.theme.themes.MidNightDarkColorScheme
 import ireader.presentation.ui.core.theme.themes.MidNightLightColorScheme
+import ireader.presentation.ui.core.theme.themes.OceanBlueLightThemeColors
+import ireader.presentation.ui.core.theme.themes.OceanBlueDarkThemeColors
+import ireader.presentation.ui.core.theme.themes.SunsetOrangeLightThemeColors
+import ireader.presentation.ui.core.theme.themes.SunsetOrangeDarkThemeColors
+import ireader.presentation.ui.core.theme.themes.LavenderPurpleLightThemeColors
+import ireader.presentation.ui.core.theme.themes.LavenderPurpleDarkThemeColors
+import ireader.presentation.ui.core.theme.themes.ForestGreenLightThemeColors
+import ireader.presentation.ui.core.theme.themes.ForestGreenDarkThemeColors
+import ireader.presentation.ui.core.theme.themes.MonochromeMinimalLightThemeColors
+import ireader.presentation.ui.core.theme.themes.MonochromeMinimalDarkThemeColors
 import ireader.presentation.ui.core.ui.Colour
 
 
@@ -108,5 +118,45 @@ val themes = listOf<Theme>(
     Theme(id =-12, materialColors =DarkThemeColorsTako, extraColors = ExtraColors(
         bars = DarkThemeColorsTako.surface,
         onBars = DarkThemeColorsTako.onSurface
+    ), isDark = true),
+    Theme(id =-13, materialColors =OceanBlueLightThemeColors, extraColors = ExtraColors(
+        bars = OceanBlueLightThemeColors.surface,
+        onBars = OceanBlueLightThemeColors.onSurface
+    ), isDark = false),
+    Theme(id =-14, materialColors =OceanBlueDarkThemeColors, extraColors = ExtraColors(
+        bars = OceanBlueDarkThemeColors.surface,
+        onBars = OceanBlueDarkThemeColors.onSurface
+    ), isDark = true),
+    Theme(id =-15, materialColors =SunsetOrangeLightThemeColors, extraColors = ExtraColors(
+        bars = SunsetOrangeLightThemeColors.surface,
+        onBars = SunsetOrangeLightThemeColors.onSurface
+    ), isDark = false),
+    Theme(id =-16, materialColors =SunsetOrangeDarkThemeColors, extraColors = ExtraColors(
+        bars = SunsetOrangeDarkThemeColors.surface,
+        onBars = SunsetOrangeDarkThemeColors.onSurface
+    ), isDark = true),
+    Theme(id =-17, materialColors =LavenderPurpleLightThemeColors, extraColors = ExtraColors(
+        bars = LavenderPurpleLightThemeColors.surface,
+        onBars = LavenderPurpleLightThemeColors.onSurface
+    ), isDark = false),
+    Theme(id =-18, materialColors =LavenderPurpleDarkThemeColors, extraColors = ExtraColors(
+        bars = LavenderPurpleDarkThemeColors.surface,
+        onBars = LavenderPurpleDarkThemeColors.onSurface
+    ), isDark = true),
+    Theme(id =-19, materialColors =ForestGreenLightThemeColors, extraColors = ExtraColors(
+        bars = ForestGreenLightThemeColors.surface,
+        onBars = ForestGreenLightThemeColors.onSurface
+    ), isDark = false),
+    Theme(id =-20, materialColors =ForestGreenDarkThemeColors, extraColors = ExtraColors(
+        bars = ForestGreenDarkThemeColors.surface,
+        onBars = ForestGreenDarkThemeColors.onSurface
+    ), isDark = true),
+    Theme(id =-21, materialColors =MonochromeMinimalLightThemeColors, extraColors = ExtraColors(
+        bars = MonochromeMinimalLightThemeColors.surface,
+        onBars = MonochromeMinimalLightThemeColors.onSurface
+    ), isDark = false),
+    Theme(id =-22, materialColors =MonochromeMinimalDarkThemeColors, extraColors = ExtraColors(
+        bars = MonochromeMinimalDarkThemeColors.surface,
+        onBars = MonochromeMinimalDarkThemeColors.onSurface
     ), isDark = true),
 ).toMutableList()
