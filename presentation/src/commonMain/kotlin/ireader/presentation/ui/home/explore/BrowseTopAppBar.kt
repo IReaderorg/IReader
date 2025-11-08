@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Search
@@ -14,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.source.HttpSource
+import ireader.core.source.LocalSource
 import ireader.core.source.model.Filter
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.getLayoutName
@@ -41,7 +43,8 @@ fun BrowseTopAppBar(
         onPop: () -> Unit,
         onLayoutTypeSelect: (DisplayMode) -> Unit,
         currentLayout: DisplayMode,
-        scrollBehavior: TopAppBarScrollBehavior?
+        scrollBehavior: TopAppBarScrollBehavior?,
+        onOpenLocalFolder: (() -> Unit)? = null
 ) {
     var topMenu by remember {
         mutableStateOf(false)
@@ -93,6 +96,16 @@ fun BrowseTopAppBar(
                             contentDescription = localize(MR.strings.webView),
                             onClick = {
                                 onWebView()
+                            },
+                    )
+                }
+                // Local Source - Open Folder Button
+                if (source?.id == LocalSource.SOURCE_ID && onOpenLocalFolder != null) {
+                    AppIconButton(
+                            imageVector = Icons.Default.FolderOpen,
+                            contentDescription = "Open Local Folder",
+                            onClick = {
+                                onOpenLocalFolder()
                             },
                     )
                 }

@@ -9,6 +9,10 @@ import ireader.domain.usecases.epub.EpubCreator
 import ireader.domain.usecases.epub.ImportEpub
 import ireader.domain.usecases.file.DesktopFileSaver
 import ireader.domain.usecases.file.FileSaver
+import ireader.domain.usecases.local.LocalSourceImpl
+import ireader.domain.usecases.local.RefreshLocalLibrary
+import ireader.core.source.LocalCatalogSource
+import java.io.File
 import ireader.domain.usecases.files.DesktopGetSimpleStorage
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.usecases.reader.ScreenAlwaysOn
@@ -80,4 +84,24 @@ actual val DomainModule: Module = module {
     }
     single<HttpClients> { HttpClients(get<PreferenceStoreFactory>().create("cookies")) }
     single<EpubCreator> { EpubCreator(get()) }
+    
+    // Local Library Source
+    single<LocalCatalogSource> {
+        val appDataDir = File(System.getProperty("user.home"), ".ireader")
+        LocalSourceImpl(appDataDir)
+    }
+    
+    factory {
+        RefreshLocalLibrary(
+            localSource = get(),
+            bookRepository = get(),
+            chapterRepository = get()
+        )
+    }
+    
+    factory {
+        ireader.domain.usecases.local.OpenLocalFolder(
+            localSource = get()
+        )
+    }
 }

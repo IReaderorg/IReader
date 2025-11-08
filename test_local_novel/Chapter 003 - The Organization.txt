@@ -1,0 +1,28 @@
+Chapter 3: The Organization
+
+As Alex explored the Local Library further, the importance of organization became clear. The folder structure was simple but powerful:
+
+local/
+├── Novel Series 1/
+│   ├── cover.jpg
+│   ├── details.json
+│   ├── Chapter 001.txt
+│   └── Chapter 002.txt
+└── Novel Series 2/
+    └── ...
+
+Each series had its own folder. Each chapter was its own file. Clean, simple, effective.
+
+"I should organize my collection better," Alex thought, already planning how to structure the library. "Maybe group by genre? Or by author? The possibilities are endless."
+
+The key was the naming convention. Files sorted alphabetically, so using leading zeros was important:
+- 001, 002, 003... not 1, 2, 3...
+- Otherwise, Chapter 10 would appear before Chapter 2!
+
+Alex made a mental note: "Always use leading zeros. Always."
+
+The Local Library wasn't just a feature - it was a philosophy. Keep things local, keep things organized, keep things simple. In a world of cloud services and streaming, sometimes the best solution was the one right in front of you.
+
+---
+
+To be continued in Chapter 4...

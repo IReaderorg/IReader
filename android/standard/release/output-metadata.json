@@ -11,48 +11,9 @@
       "type": "UNIVERSAL",
       "filters": [],
       "attributes": [],
-      "versionCode": 46,
-      "versionName": "0.1.40",
+      "versionCode": 51,
+      "versionName": "1.0.45",
       "outputFile": "android-standard-universal-release.apk"
-    },
-    {
-      "type": "ONE_OF_MANY",
-      "filters": [
-        {
-          "filterType": "ABI",
-          "value": "x86_64"
-        }
-      ],
-      "attributes": [],
-      "versionCode": 46,
-      "versionName": "0.1.40",
-      "outputFile": "android-standard-x86_64-release.apk"
-    },
-    {
-      "type": "ONE_OF_MANY",
-      "filters": [
-        {
-          "filterType": "ABI",
-          "value": "armeabi-v7a"
-        }
-      ],
-      "attributes": [],
-      "versionCode": 46,
-      "versionName": "0.1.40",
-      "outputFile": "android-standard-armeabi-v7a-release.apk"
-    },
-    {
-      "type": "ONE_OF_MANY",
-      "filters": [
-        {
-          "filterType": "ABI",
-          "value": "arm64-v8a"
-        }
-      ],
-      "attributes": [],
-      "versionCode": 46,
-      "versionName": "0.1.40",
-      "outputFile": "android-standard-arm64-v8a-release.apk"
     },
     {
       "type": "ONE_OF_MANY",
@@ -63,9 +24,48 @@
         }
       ],
       "attributes": [],
-      "versionCode": 46,
-      "versionName": "0.1.40",
+      "versionCode": 51,
+      "versionName": "1.0.45",
       "outputFile": "android-standard-x86-release.apk"
+    },
+    {
+      "type": "ONE_OF_MANY",
+      "filters": [
+        {
+          "filterType": "ABI",
+          "value": "x86_64"
+        }
+      ],
+      "attributes": [],
+      "versionCode": 51,
+      "versionName": "1.0.45",
+      "outputFile": "android-standard-x86_64-release.apk"
+    },
+    {
+      "type": "ONE_OF_MANY",
+      "filters": [
+        {
+          "filterType": "ABI",
+          "value": "arm64-v8a"
+        }
+      ],
+      "attributes": [],
+      "versionCode": 51,
+      "versionName": "1.0.45",
+      "outputFile": "android-standard-arm64-v8a-release.apk"
+    },
+    {
+      "type": "ONE_OF_MANY",
+      "filters": [
+        {
+          "filterType": "ABI",
+          "value": "armeabi-v7a"
+        }
+      ],
+      "attributes": [],
+      "versionCode": 51,
+      "versionName": "1.0.45",
+      "outputFile": "android-standard-armeabi-v7a-release.apk"
     }
   ],
   "elementType": "File",
@@ -75,10 +75,10 @@
       "maxApi": 30,
       "baselineProfiles": [
         "baselineProfiles/1/android-standard-universal-release.dm",
+        "baselineProfiles/1/android-standard-x86-release.dm",
         "baselineProfiles/1/android-standard-x86_64-release.dm",
-        "baselineProfiles/1/android-standard-armeabi-v7a-release.dm",
         "baselineProfiles/1/android-standard-arm64-v8a-release.dm",
-        "baselineProfiles/1/android-standard-x86-release.dm"
+        "baselineProfiles/1/android-standard-armeabi-v7a-release.dm"
       ]
     },
     {
@@ -86,12 +86,12 @@
       "maxApi": 2147483647,
       "baselineProfiles": [
         "baselineProfiles/0/android-standard-universal-release.dm",
+        "baselineProfiles/0/android-standard-x86-release.dm",
         "baselineProfiles/0/android-standard-x86_64-release.dm",
-        "baselineProfiles/0/android-standard-armeabi-v7a-release.dm",
         "baselineProfiles/0/android-standard-arm64-v8a-release.dm",
-        "baselineProfiles/0/android-standard-x86-release.dm"
+        "baselineProfiles/0/android-standard-armeabi-v7a-release.dm"
       ]
     }
   ],
-  "minSdkVersionForDexing": 21
+  "minSdkVersionForDexing": 26
 }

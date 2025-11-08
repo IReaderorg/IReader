@@ -19,7 +19,7 @@ val CatalogModule = module {
 
     single<CatalogPreferences> { CatalogPreferences(get()) }
 
-    single<CatalogStore> { CatalogStore(get(),get(),get(),get()) }
+    single<CatalogStore> { CatalogStore(get(),get(),get(),get(),get()) }
 
     single {
         ReaderPreferences(

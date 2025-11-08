@@ -1,0 +1,21 @@
+Chapter 2: The Discovery
+
+Alex scrolled through the chapter, marveling at how smoothly everything worked. The text flowed naturally, paragraph by paragraph, just as it should.
+
+"The Local Source really does work," Alex thought, excitement building. "No lag, no loading screens, just pure reading."
+
+The beauty of the Local Library wasn't just in its simplicity, but in its flexibility. Want to add a new chapter? Just drop a file in the folder. Want to update the cover? Replace cover.jpg. Want to change the description? Edit details.json.
+
+It was that simple.
+
+Alex navigated back to the novel list and saw "The Adventures of Test Novel" sitting there with its custom cover and metadata. The title, author, description, genres - everything was displayed perfectly.
+
+"This is exactly what I needed," Alex said. "A way to read my own collection without relying on online sources."
+
+The Local Library had opened up new possibilities. Personal notes, fan fiction, web novels downloaded for offline reading, even original works - all could live here, organized and accessible.
+
+Alex tapped on Chapter 3, eager to continue the journey.
+
+---
+
+To be continued in Chapter 3...

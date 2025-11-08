@@ -32,6 +32,16 @@ class DesktopCatalogLoader(
 ) : CatalogLoader {
     private val catalogPreferences = preferences.create("catalogs_data")
     override suspend fun loadAll(): List<CatalogLocal> {
+        val bundled = mutableListOf<ireader.domain.models.entities.CatalogBundled>()
+        
+        // Add Local Source for reading local novels
+        val localSourceCatalog = ireader.domain.models.entities.CatalogBundled(
+            source = ireader.core.source.LocalSource(),
+            description = "Read novels from local storage",
+            name = "Local Source"
+        )
+        bundled.add(localSourceCatalog)
+        
         val localPkgs = ExtensionDir.listFiles()
             .orEmpty()
             .filter { it.isDirectory }
@@ -50,7 +60,7 @@ class DesktopCatalogLoader(
             deferred.awaitAll()
         }.filterNotNull()
 
-        return (installedCatalogs).distinctBy { it.sourceId }.toSet().toList()
+        return (bundled + installedCatalogs).distinctBy { it.sourceId }.toSet().toList()
     }
 
     override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? {

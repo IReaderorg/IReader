@@ -15,19 +15,18 @@ import ireader.domain.usecases.preferences.reader_preferences.BrowseScreenPrefUs
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.utils.exceptionHandler
 import ireader.domain.utils.extensions.DefaultPaginator
+import ireader.domain.utils.fastMap
 import ireader.i18n.SourceNotFoundException
 import ireader.i18n.UiText
 import ireader.i18n.resources.MR
-import ireader.domain.utils.fastMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlin.math.min
 
 
@@ -41,6 +40,7 @@ class ExploreViewModel(
     private val findDuplicateBook: FindDuplicateBook,
     val booksState: BooksState,
     private val libraryPreferences: LibraryPreferences,
+    private val openLocalFolder: ireader.domain.usecases.local.OpenLocalFolder,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), ExploreState by state {
     data class Param(val sourceId: Long?, val query: String?)
 
@@ -229,5 +229,18 @@ class ExploreViewModel(
         } else {
             columns
         }
+    }
+    
+    fun openLocalFolderAction(): Boolean {
+        return try {
+            openLocalFolder.open()
+        } catch (e: Exception) {
+            Log.error { "Failed to open local folder" }
+            false
+        }
+    }
+    
+    fun getLocalFolderPath(): String {
+        return openLocalFolder.getPath()
     }
 }

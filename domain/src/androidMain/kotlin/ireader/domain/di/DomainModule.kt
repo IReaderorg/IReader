@@ -18,6 +18,9 @@ import ireader.domain.usecases.epub.EpubCreator
 import ireader.domain.usecases.epub.ImportEpub
 import ireader.domain.usecases.file.AndroidFileSaver
 import ireader.domain.usecases.file.FileSaver
+import ireader.domain.usecases.local.LocalSourceImpl
+import ireader.domain.usecases.local.RefreshLocalLibrary
+import ireader.core.source.LocalCatalogSource
 import ireader.domain.usecases.files.AndroidGetSimpleStorage
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.usecases.preferences.AndroidReaderPrefUseCases
@@ -128,8 +131,23 @@ actual val DomainModule = module {
         get<PreferenceStoreFactory>().create("ireader")
     }
 
-
-
-
-
+    // Local Library Source
+    single<LocalCatalogSource> {
+        LocalSourceImpl(androidContext())
+    }
+    
+    factory {
+        RefreshLocalLibrary(
+            localSource = get(),
+            bookRepository = get(),
+            chapterRepository = get()
+        )
+    }
+    
+    factory {
+        ireader.domain.usecases.local.OpenLocalFolder(
+            localSource = get(),
+            context = androidContext()
+        )
+    }
 }

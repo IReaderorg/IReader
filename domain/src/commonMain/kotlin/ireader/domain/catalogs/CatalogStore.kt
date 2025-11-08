@@ -1,6 +1,7 @@
 package ireader.domain.catalogs
 
 import ireader.core.source.LocalSource
+import ireader.core.source.LocalCatalogSource
 import ireader.core.util.createICoroutineScope
 import ireader.core.util.replace
 import ireader.domain.catalogs.service.CatalogInstallationChange
@@ -24,6 +25,7 @@ class CatalogStore(
     catalogPreferences: CatalogPreferences,
     catalogRemoteRepository: CatalogRemoteRepository,
     installationChanges: CatalogInstallationChanges,
+    private val localCatalogSource: LocalCatalogSource,
 ) {
 
     private val scope = createICoroutineScope()
@@ -108,7 +110,7 @@ class CatalogStore(
 
     fun get(sourceId: Long?): CatalogLocal? {
         if (sourceId == -200L) {
-            return CatalogBundled(source = LocalSource())
+            return CatalogBundled(source = localCatalogSource)
         }
         return catalogsBySource[sourceId]
     }

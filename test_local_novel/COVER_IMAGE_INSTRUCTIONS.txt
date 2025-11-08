@@ -1,0 +1,34 @@
+COVER IMAGE INSTRUCTIONS
+========================
+
+Since I cannot create actual image files, you'll need to add your own cover image.
+
+Option 1: Use a placeholder image
+----------------------------------
+1. Go to https://placeholder.com or https://via.placeholder.com
+2. Generate a 300x450 image with text "Test Novel"
+3. Save it as "cover.jpg"
+4. Place it in this folder
+
+Option 2: Use an existing image
+--------------------------------
+1. Find any JPG or PNG image you like
+2. Rename it to "cover.jpg" or "cover.png"
+3. Place it in this folder
+
+Option 3: Create your own
+--------------------------
+1. Use any image editor (Paint, GIMP, Photoshop, etc.)
+2. Create a 300x450 pixel image
+3. Add text: "The Adventures of Test Novel"
+4. Save as "cover.jpg"
+5. Place it in this folder
+
+Option 4: Skip the cover
+-------------------------
+The novel will work fine without a cover image.
+The app will use a default placeholder.
+
+Recommended dimensions: 300x450 pixels (2:3 ratio)
+Supported formats: .jpg, .png
+File name must be exactly: cover.jpg or cover.png (lowercase)

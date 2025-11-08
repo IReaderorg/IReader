@@ -1,0 +1,59 @@
+Example Local Library Folder Structure
+======================================
+
+This is an example of how to organize your local novels.
+Place this structure in your app's local folder.
+
+local/
+│
+├── The Wandering Inn/
+│   ├── cover.jpg
+│   ├── details.json
+│   ├── 1.01 - The First Day.epub
+│   ├── 1.02 - The Second Day.epub
+│   ├── 1.03 - The Third Day.epub
+│   └── 1.04 - The Fourth Day.epub
+│
+├── Mother of Learning/
+│   ├── cover.png
+│   ├── details.json
+│   ├── Chapter 001.txt
+│   ├── Chapter 002.txt
+│   ├── Chapter 003.txt
+│   └── Chapter 004.txt
+│
+└── Worth the Candle/
+    ├── cover.jpg
+    ├── details.json
+    ├── Arc 01 - Chapter 01.epub
+    ├── Arc 01 - Chapter 02.epub
+    └── Arc 01 - Chapter 03.epub
+
+
+Example details.json for "The Wandering Inn":
+{
+  "title": "The Wandering Inn",
+  "author": "pirateaba",
+  "description": "An inn is a place to rest, a place to talk and share stories, or a place to find adventures, a starting ground for quests and legends. In this world, at least. To Erin Solstice, an inn seems like a medieval relic from the past. But here she is, running from Goblins and trying to survive in a world full of monsters and magic. She'd be more excited about all of this if everything wasn't trying to kill her.",
+  "genre": ["Fantasy", "Adventure", "Slice of Life", "Comedy"],
+  "status": "Ongoing"
+}
+
+Example details.json for "Mother of Learning":
+{
+  "title": "Mother of Learning",
+  "author": "nobody103",
+  "description": "Zorian is a teenage mage of humble birth and slightly above-average skill, attending his third year of education at Cyoria's magical academy. He is a driven and irritable young man, consumed by a desire to ensure his own future and free himself of the influence of his family, whom he resents for favoring his brothers over him. Consequently, he has no time for pointless distractions or paying attention to other people's problems.",
+  "genre": ["Fantasy", "Time Loop", "Magic", "Adventure"],
+  "status": "Completed"
+}
+
+Notes:
+------
+1. Each folder under "local/" represents one novel series
+2. Each file inside a folder represents one chapter
+3. Files are sorted alphabetically - use numbered prefixes for proper ordering
+4. Supported formats: .epub and .txt
+5. Optional: Add cover.jpg/cover.png for custom cover art
+6. Optional: Add details.json for rich metadata
+7. After adding files, pull-to-refresh in the Local Source to scan for new content

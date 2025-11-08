@@ -1,0 +1,8 @@
+{
+  "title": "The Adventures of Test Novel",
+  "author": "Test Author",
+  "artist": "Test Artist",
+  "description": "This is a test novel to demonstrate the Local Library feature. Follow the protagonist as they navigate through various test scenarios and discover the power of local reading!",
+  "genre": ["Fantasy", "Adventure", "Testing"],
+  "status": "Ongoing"
+}

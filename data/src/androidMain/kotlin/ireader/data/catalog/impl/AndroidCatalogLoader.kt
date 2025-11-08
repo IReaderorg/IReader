@@ -82,6 +82,14 @@ class AndroidCatalogLoader(
     override suspend fun loadAll(): List<CatalogLocal> {
         val bundled = mutableListOf<CatalogLocal>()
 
+        // Add Local Source for reading local novels
+        val localSourceCatalog = CatalogBundled(
+            source = ireader.core.source.LocalSource(),
+            description = "Read novels from local storage",
+            name = "Local Source"
+        )
+        bundled.add(localSourceCatalog)
+
         if (BuildKonfig.DEBUG) {
             val testCatalog = CatalogBundled(
                 TestSource(),

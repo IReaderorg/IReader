@@ -1,0 +1,17 @@
+Chapter 1: The Beginning
+
+The sun rose over the digital horizon, casting its warm glow across the landscape of code and data. Our protagonist, Alex, stood at the edge of the Local Library, a place where stories lived not in distant servers, but right here, close to home.
+
+"This is it," Alex whispered, clutching a folder full of EPUB files. "Time to test the Local Source feature."
+
+The Local Library was unlike any other source Alex had encountered. No internet connection required, no waiting for downloads, no worrying about server downtime. Everything was right here, organized in neat folders, each one a gateway to a different world.
+
+Alex opened the first folder, labeled "Test Novel," and smiled. Inside were chapters, each one a separate file, numbered and ready to be read. There was even a cover.jpg file and a details.json with all the metadata.
+
+"Perfect," Alex said, feeling a sense of accomplishment. "Let's see how this works."
+
+With a tap, the first chapter opened, and the adventure began.
+
+---
+
+To be continued in Chapter 2...

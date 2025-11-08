@@ -1,7 +1,6 @@
 package ireader.presentation.core.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
@@ -11,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -144,7 +142,17 @@ data class ExploreScreenSpec(
                                 onLayoutTypeSelect = { layout ->
                                     vm.saveLayoutType(layout)
                                 },
-                                currentLayout = vm.layout
+                                currentLayout = vm.layout,
+                                onOpenLocalFolder = {
+                                    val success = vm.openLocalFolderAction()
+                                    scope.launch {
+                                        if (success) {
+                                            vm.showSnackBar(UiText.DynamicString("Opening local folder..."))
+                                        } else {
+                                            vm.showSnackBar(UiText.DynamicString("Could not open folder: ${vm.getLocalFolderPath()}"))
+                                        }
+                                    }
+                                }
                         )
                     }
             ) { scaffoldPadding ->
