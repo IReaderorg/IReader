@@ -1,7 +1,6 @@
 package ireader.desktop
 
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.Window
@@ -11,7 +10,6 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.NavigatorDisposeBehavior
 import coil3.ImageLoader
 import coil3.PlatformContext
-import coil3.SingletonImageLoader
 import coil3.annotation.ExperimentalCoilApi
 import coil3.compose.LocalPlatformContext
 import coil3.compose.setSingletonImageLoaderFactory
@@ -34,37 +32,26 @@ import ireader.domain.di.localModule
 import ireader.domain.di.preferencesInjectModule
 import ireader.domain.image.CoverCache
 import ireader.domain.usecases.files.GetSimpleStorage
-import ireader.i18n.resources.MR
 import ireader.presentation.core.DefaultNavigatorScreenTransition
 import ireader.presentation.core.MainStarterScreen
 import ireader.presentation.core.di.PresentationModules
 import ireader.presentation.core.di.presentationPlatformModule
 import ireader.presentation.core.theme.AppTheme
 import ireader.presentation.imageloader.BookCoverFetcher
-import ireader.presentation.imageloader.PackageManager
 import ireader.presentation.imageloader.coil.imageloader.BookCoverKeyer
-import ireader.presentation.imageloader.coil.imageloader.BookCoverMapper
-import ireader.presentation.imageloader.coil.imageloader.CatalogKeyer
 import ireader.presentation.imageloader.coil.imageloader.CatalogRemoteKeyer
 import ireader.presentation.imageloader.coil.imageloader.CatalogRemoteMapper
 import ireader.presentation.imageloader.coil.imageloader.InstalledCatalogKeyer
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import org.koin.compose.KoinContext
 import org.koin.compose.koinInject
-import org.koin.compose.rememberKoinInject
 import org.koin.core.context.startKoin
-import org.koin.java.KoinJavaComponent.inject
 import java.io.File
 import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 import kotlin.system.exitProcess
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalCoroutinesApi::class,
