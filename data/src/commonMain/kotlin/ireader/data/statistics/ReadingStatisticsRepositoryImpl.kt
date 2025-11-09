@@ -11,36 +11,67 @@ class ReadingStatisticsRepositoryImpl(
     private val handler: DatabaseHandler,
 ) : ReadingStatisticsRepository {
 
+    /**
+     * Ensures the reading_statistics table has the required row initialized
+     */
+    private suspend fun ensureInitialized() {
+        handler.await {
+            readingStatisticsQueries.initializeIfNeeded()
+        }
+    }
+
     override fun getStatisticsFlow(): Flow<ReadingStatistics> {
         return handler.subscribeToOne { 
-            readingStatisticsQueries.getStatistics(statisticsMapper) 
+            // Ensure initialized before querying
+            readingStatisticsQueries.initializeIfNeeded()
+            readingStatisticsQueries.getStatistics() 
         }.map { dbStats ->
             ReadingStatistics(
-                totalChaptersRead = dbStats.totalChaptersRead.toInt(),
-                totalReadingTimeMinutes = dbStats.totalReadingTimeMinutes,
-                averageReadingSpeedWPM = calculateWPM(dbStats.totalWordsRead.toInt(), dbStats.totalReadingTimeMinutes),
+                totalChaptersRead = dbStats.total_chapters_read.toInt(),
+                totalReadingTimeMinutes = dbStats.total_reading_time_minutes,
+                averageReadingSpeedWPM = calculateWPM(dbStats.total_words_read.toInt(), dbStats.total_reading_time_minutes),
                 favoriteGenres = getFavoriteGenres(),
-                readingStreak = dbStats.readingStreak.toInt(),
-                booksCompleted = getBooksCompleted(),
+                readingStreak = dbStats.reading_streak.toInt(),
+                booksCompleted = dbStats.books_completed.toInt(),
                 currentlyReading = getCurrentlyReading()
             )
         }
     }
 
     override suspend fun getStatistics(): ReadingStatistics {
+        ensureInitialized()
+        
         val dbStats = handler.awaitOne { 
-            readingStatisticsQueries.getStatistics(statisticsMapper) 
+            readingStatisticsQueries.getStatistics() 
         }
         
         return ReadingStatistics(
-            totalChaptersRead = dbStats.totalChaptersRead.toInt(),
-            totalReadingTimeMinutes = dbStats.totalReadingTimeMinutes,
-            averageReadingSpeedWPM = calculateWPM(dbStats.totalWordsRead.toInt(), dbStats.totalReadingTimeMinutes),
+            totalChaptersRead = dbStats.total_chapters_read.toInt(),
+            totalReadingTimeMinutes = dbStats.total_reading_time_minutes,
+            averageReadingSpeedWPM = calculateWPM(dbStats.total_words_read.toInt(), dbStats.total_reading_time_minutes),
             favoriteGenres = getFavoriteGenres(),
-            readingStreak = dbStats.readingStreak.toInt(),
-            booksCompleted = getBooksCompleted(),
+            readingStreak = dbStats.reading_streak.toInt(),
+            booksCompleted = dbStats.books_completed.toInt(),
             currentlyReading = getCurrentlyReading()
         )
+    }
+
+    override suspend fun getLastReadDate(): Long? {
+        ensureInitialized()
+        
+        val dbStats = handler.awaitOne { 
+            readingStatisticsQueries.getStatistics() 
+        }
+        return dbStats.last_read_date
+    }
+
+    override suspend fun getCurrentStreak(): Int {
+        ensureInitialized()
+        
+        val dbStats = handler.awaitOne { 
+            readingStatisticsQueries.getStatistics() 
+        }
+        return dbStats.reading_streak.toInt()
     }
 
     override suspend fun incrementChaptersRead() {
@@ -70,15 +101,19 @@ class ReadingStatisticsRepositoryImpl(
         }
     }
 
-    override suspend fun getBooksCompleted(): Int {
-        return handler.await {
-            // Count books where all chapters are read
-            bookQueries.findAllBooks().executeAsList().count { book ->
-                val totalChapters = chapterQueries.getChaptersByMangaId(book._id).executeAsList().size
-                val readChapters = chapterQueries.getChaptersByMangaId(book._id).executeAsList().count { it.read }
-                totalChapters > 0 && totalChapters == readChapters
-            }
+    override suspend fun incrementBooksCompleted() {
+        handler.await {
+            readingStatisticsQueries.incrementBooksCompleted()
         }
+    }
+
+    override suspend fun getBooksCompleted(): Int {
+        ensureInitialized()
+        
+        val dbStats = handler.awaitOne { 
+            readingStatisticsQueries.getStatistics() 
+        }
+        return dbStats.books_completed.toInt()
     }
 
     override suspend fun getCurrentlyReading(): Int {

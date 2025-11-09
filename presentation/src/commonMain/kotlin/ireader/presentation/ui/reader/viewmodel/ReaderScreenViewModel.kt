@@ -73,6 +73,8 @@ class ReaderScreenViewModel(
         val deleteGlossaryEntryUseCase: ireader.domain.usecases.glossary.DeleteGlossaryEntryUseCase,
         val exportGlossaryUseCase: ireader.domain.usecases.glossary.ExportGlossaryUseCase,
         val importGlossaryUseCase: ireader.domain.usecases.glossary.ImportGlossaryUseCase,
+        // Statistics use case
+        val trackReadingProgressUseCase: ireader.domain.usecases.statistics.TrackReadingProgressUseCase,
         val params: Param,
         val globalScope: CoroutineScope
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(),
@@ -91,6 +93,9 @@ class ReaderScreenViewModel(
     
     var showBrightnessControl by mutableStateOf(false)
     var showFontSizeAdjuster by mutableStateOf(false)
+    
+    // Reading statistics tracking
+    private var chapterOpenTimestamp: Long? = null
     
     // Autoscroll speed control
     fun increaseAutoScrollSpeed() {
@@ -266,6 +271,9 @@ class ReaderScreenViewModel(
 
         isLoading = true
         
+        // Track chapter close before loading new chapter
+        onChapterClosed()
+        
         // Check if chapter is already preloaded
         val preloadedChapter = preloadedChapters[chapterId]
         val chapter = if (preloadedChapter != null && !preloadedChapter.isEmpty()) {
@@ -298,6 +306,9 @@ class ReaderScreenViewModel(
                 chapterShell.add(0, it)
             }
         }
+        
+        // Track chapter open
+        onChapterOpened()
         
         // Trigger preload of next chapter
         triggerPreloadNextChapter()
@@ -1224,7 +1235,93 @@ class ReaderScreenViewModel(
         }
     }
 
+    // ==================== Reading Statistics Tracking Methods ====================
+    
+    /**
+     * Track when a chapter is opened
+     */
+    private fun onChapterOpened() {
+        chapterOpenTimestamp = System.currentTimeMillis()
+        
+        // Update reading streak when opening a chapter
+        scope.launch {
+            try {
+                trackReadingProgressUseCase.updateReadingStreak(System.currentTimeMillis())
+            } catch (e: Exception) {
+                ireader.core.log.Log.error("Failed to update reading streak", e)
+            }
+        }
+    }
+    
+    /**
+     * Track when a chapter is closed
+     * Calculates reading duration and updates statistics if duration exceeds threshold
+     */
+    private fun onChapterClosed() {
+        val openTimestamp = chapterOpenTimestamp ?: return
+        val closeTimestamp = System.currentTimeMillis()
+        val durationMillis = closeTimestamp - openTimestamp
+        val currentChapter = stateChapter
+        
+        // Only track if reading duration exceeds 10 seconds
+        if (durationMillis > 10_000) {
+            scope.launch(Dispatchers.IO) {
+                try {
+                    // Track reading time
+                    trackReadingProgressUseCase.trackReadingTime(durationMillis)
+                    trackReadingProgressUseCase.updateReadingStreak(closeTimestamp)
+                    
+                    // Track chapter progress if we have chapter content
+                    currentChapter?.let { chapter ->
+                        val content = getCurrentChapterContent()
+                        val fullText = content.joinToString("\n") { page ->
+                            when (page) {
+                                is ireader.core.source.model.Text -> page.text
+                                else -> ""
+                            }
+                        }
+                        val wordCount = trackReadingProgressUseCase.estimateWordCount(fullText)
+                        
+                        // Track progress (assuming 80% read if chapter was open for significant time)
+                        trackReadingProgressUseCase.onChapterProgressUpdate(0.8f, wordCount)
+                        
+                        // Check if this is the last chapter and it's been read
+                        if (chapter.read) {
+                            checkAndTrackBookCompletion(chapter.bookId)
+                        }
+                    }
+                } catch (e: Exception) {
+                    ireader.core.log.Log.error("Failed to track reading progress", e)
+                }
+            }
+        }
+        
+        // Reset timestamp
+        chapterOpenTimestamp = null
+    }
+    
+    /**
+     * Check if all chapters of a book are read and track book completion
+     */
+    private suspend fun checkAndTrackBookCompletion(bookId: Long) {
+        try {
+            val chapters = getChapterUseCase.findChaptersByBookId(bookId)
+            if (chapters.isNotEmpty()) {
+                val allChaptersRead = chapters.all { it.read }
+                if (allChaptersRead) {
+                    trackReadingProgressUseCase.trackBookCompletion()
+                    ireader.core.log.Log.debug("Book completed! Total books completed counter incremented.")
+                }
+            }
+        } catch (e: Exception) {
+            ireader.core.log.Log.error("Failed to check book completion", e)
+        }
+    }
+
     override fun onDestroy() {
+        // Track chapter close on destroy
+        onChapterClosed()
+        
         getChapterJob?.cancel()
         getContentJob?.cancel()
         preloadJob?.cancel()

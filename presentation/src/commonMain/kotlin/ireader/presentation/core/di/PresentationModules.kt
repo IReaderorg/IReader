@@ -88,6 +88,8 @@ val PresentationModules = module {
         get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),
         // Translation use cases
         get(),get(),get(),get(),get(),get(),get(),
+        // Statistics use case
+        get(),
         // Params and scope
         get(),get()
     ) }

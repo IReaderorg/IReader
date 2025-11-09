@@ -29,25 +29,42 @@ class TrackReadingProgressUseCase(
 
     /**
      * Update reading streak based on last read date
+     * Checks if user read on consecutive days and updates streak accordingly
      */
-    suspend fun updateReadingStreak(currentDate: Long) {
-        val stats = statisticsRepository.getStatistics()
-        val lastReadDate = stats.readingStreak // This should be fetched from DB
+    suspend fun updateReadingStreak(currentDateMillis: Long) {
+        val lastReadDate = statisticsRepository.getLastReadDate()
+        val currentStreak = statisticsRepository.getCurrentStreak()
         
-        val daysSinceLastRead = calculateDaysDifference(lastReadDate.toLong(), currentDate)
-        
-        val newStreak = when {
-            daysSinceLastRead == 0L -> stats.readingStreak // Same day
-            daysSinceLastRead == 1L -> stats.readingStreak + 1 // Next day, increment
-            else -> 1 // Streak broken, reset to 1
+        // If this is the first time reading, set streak to 1
+        if (lastReadDate == null || lastReadDate == 0L) {
+            statisticsRepository.updateStreak(1, currentDateMillis)
+            return
         }
         
-        statisticsRepository.updateStreak(newStreak, currentDate)
+        val daysSinceLastRead = calculateDaysDifference(lastReadDate, currentDateMillis)
+        
+        val newStreak = when {
+            daysSinceLastRead == 0L -> currentStreak // Same day, keep current streak
+            daysSinceLastRead == 1L -> currentStreak + 1 // Next day, increment streak
+            else -> 1 // Streak broken (more than 1 day gap), reset to 1
+        }
+        
+        statisticsRepository.updateStreak(newStreak, currentDateMillis)
     }
 
-    private fun calculateDaysDifference(date1: Long, date2: Long): Long {
-        val millisInDay = 24 * 60 * 60 * 1000
-        return kotlin.math.abs(date2 - date1) / millisInDay
+    /**
+     * Calculate the difference in days between two timestamps
+     * Normalizes timestamps to start of day (midnight) for accurate day comparison
+     */
+    private fun calculateDaysDifference(date1Millis: Long, date2Millis: Long): Long {
+        val millisInDay = 24 * 60 * 60 * 1000L
+        
+        // Normalize both dates to start of day (midnight)
+        val date1StartOfDay = (date1Millis / millisInDay) * millisInDay
+        val date2StartOfDay = (date2Millis / millisInDay) * millisInDay
+        
+        // Calculate difference in days
+        return kotlin.math.abs(date2StartOfDay - date1StartOfDay) / millisInDay
     }
 
     /**
@@ -55,5 +72,12 @@ class TrackReadingProgressUseCase(
      */
     fun estimateWordCount(content: String): Int {
         return content.split(Regex("\\s+")).filter { it.isNotBlank() }.size
+    }
+
+    /**
+     * Track book completion when user finishes the last chapter
+     */
+    suspend fun trackBookCompletion() {
+        statisticsRepository.incrementBooksCompleted()
     }
 }

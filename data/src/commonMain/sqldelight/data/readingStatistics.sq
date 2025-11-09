@@ -47,3 +47,12 @@ addWordsRead:
 UPDATE reading_statistics SET
     total_words_read = total_words_read + :words
 WHERE _id = 1;
+
+incrementBooksCompleted:
+UPDATE reading_statistics SET
+    books_completed = books_completed + 1
+WHERE _id = 1;
+
+initializeIfNeeded:
+INSERT OR IGNORE INTO reading_statistics(_id, total_chapters_read, total_reading_time_minutes, reading_streak, last_read_date, total_words_read, books_completed)
+VALUES (1, 0, 0, 0, 0, 0, 0);

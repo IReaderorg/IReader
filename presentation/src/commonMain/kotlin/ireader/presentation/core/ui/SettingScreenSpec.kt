@@ -54,6 +54,13 @@ class SettingScreenSpec : VoyagerScreen() {
 
                 },
                 SettingsSection(
+                    MR.strings.statistics,
+                    Icons.Default.BarChart,
+                ) {
+                    navigator.push(StatisticsScreenSpec())
+
+                },
+                SettingsSection(
                     MR.strings.security,
                     Icons.Default.Security,
                 ) {

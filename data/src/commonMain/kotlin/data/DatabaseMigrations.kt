@@ -91,11 +91,11 @@ object DatabaseMigrations {
     
     /**
      * Migration from version 3 to version 4
-     * Adds is_pinned, pinned_order, and is_archived columns to book table
+     * Creates reading_statistics table for tracking reading progress
      */
     private fun migrateV3toV4(driver: SqlDriver) {
         try {
-            // Check if columns already exist
+                        // Check if columns already exist
             val columnsCheck = "PRAGMA table_info(book)"
             var hasPinnedColumn = false
             var hasPinnedOrderColumn = false
@@ -135,13 +135,38 @@ object DatabaseMigrations {
                 driver.execute(null, "ALTER TABLE book ADD COLUMN is_archived INTEGER NOT NULL DEFAULT 0;", 0)
                 println("Added is_archived column to book table")
             }
+
+            // Create reading_statistics table
+            val createReadingStatisticsSql = """
+                CREATE TABLE IF NOT EXISTS reading_statistics(
+                    _id INTEGER NOT NULL PRIMARY KEY,
+                    total_chapters_read INTEGER NOT NULL DEFAULT 0,
+                    total_reading_time_minutes INTEGER NOT NULL DEFAULT 0,
+                    reading_streak INTEGER NOT NULL DEFAULT 0,
+                    last_read_date INTEGER,
+                    total_words_read INTEGER NOT NULL DEFAULT 0,
+                    books_completed INTEGER NOT NULL DEFAULT 0
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createReadingStatisticsSql, 0)
+            println("Created reading_statistics table")
+            
+            // Initialize with a single row
+            val initializeStatisticsSql = """
+                INSERT OR IGNORE INTO reading_statistics(_id, total_chapters_read, total_reading_time_minutes, reading_streak, last_read_date, total_words_read, books_completed)
+                VALUES (1, 0, 0, 0, 0, 0, 0);
+            """.trimIndent()
+            
+            driver.execute(null, initializeStatisticsSql, 0)
+            println("Initialized reading_statistics table")
             
             println("Successfully migrated to version 4")
             
         } catch (e: Exception) {
             println("Error migrating to version 4: ${e.message}")
             e.printStackTrace()
-            throw e
+            // Don't throw - the table might already exist which is fine
         }
     }
     

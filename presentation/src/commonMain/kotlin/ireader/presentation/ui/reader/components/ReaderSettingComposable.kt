@@ -631,6 +631,13 @@ fun GeneralScreenTab(
             )
         }
         item {
+            SwitchPreference(
+                preference = vm.showReadingTime,
+                title = "Show Reading Time",
+                onValueChange = { vm.showReadingTime = it }
+            )
+        }
+        item {
             Spacer(modifier = Modifier.height(100.dp))
         }
     }

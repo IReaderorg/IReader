@@ -235,6 +235,14 @@ private fun PagedReaderText(
     onNext: () -> Unit,
     toggleReaderMode: () -> Unit
 ) {
+    // Track scroll progress for reading time estimation in Page mode
+    LaunchedEffect(key1 = scrollState.value, key2 = scrollState.maxValue) {
+        if (scrollState.maxValue > 0) {
+            val scrollProgress = scrollState.value.toFloat() / scrollState.maxValue.toFloat()
+            vm.updateReadingTimeEstimation(scrollProgress)
+        }
+    }
+    
     Box(modifier = Modifier.fillMaxSize()) {
 
         IColumnScrollbar(
@@ -427,6 +435,18 @@ private fun ContinuesReaderPage(
                         lastChapterId = chapter
                     }
                 }
+        }
+    }
+    
+    // Track scroll progress for reading time estimation
+    LaunchedEffect(key1 = visibleItemInfo.value) {
+        val layoutInfo = scrollState.layoutInfo
+        val totalItems = layoutInfo.totalItemsCount
+        val firstVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull()?.index ?: 0
+        
+        if (totalItems > 0) {
+            val scrollProgress = firstVisibleItem.toFloat() / totalItems.toFloat()
+            vm.updateReadingTimeEstimation(scrollProgress)
         }
     }
     val items by remember {
