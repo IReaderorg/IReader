@@ -233,4 +233,20 @@ val UseCasesInject = module {
     
     // Font management use cases
     single { ireader.domain.usecases.fonts.SystemFontsInitializer(get()) }
+    
+    // Donation use cases
+    single { ireader.domain.usecases.donation.DonationTriggerManager(get(), get()) }
+    single { ireader.domain.usecases.donation.OpenWalletUseCase(get()) }
+    single { ireader.domain.usecases.donation.CheckWalletInstalledUseCase(get()) }
+    single { ireader.domain.usecases.donation.CopyAddressUseCase(get()) }
+    single { ireader.domain.usecases.donation.GeneratePaymentUriUseCase(get()) }
+    single { ireader.domain.usecases.donation.GetFundingGoalsUseCase(get()) }
+    single { ireader.domain.usecases.donation.UpdateFundingGoalUseCase(get()) }
+    single { ireader.domain.usecases.donation.DonationUseCases(
+        donationTriggerManager = get(),
+        openWallet = get(),
+        checkWalletInstalled = get(),
+        copyAddress = get(),
+        generatePaymentUri = get()
+    ) }
 }

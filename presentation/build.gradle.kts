@@ -60,6 +60,8 @@ kotlin {
                 api(libs.coil.compose)
                 api(libs.coil.network.ktor)
 
+                implementation(libs.zxing.core)
+
 
             }
         }

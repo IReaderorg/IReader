@@ -131,4 +131,28 @@ class AppPreferences(
     fun autoFetchChapterContentEnabled(): Preference<Boolean> {
         return preferenceStore.getBoolean(AUTO_FETCH_CHAPTER_CONTENT_ENABLED, false)
     }
+    
+    /**
+     * Last time a donation prompt was shown (in milliseconds)
+     * Used to enforce 30-day cooldown between prompts
+     */
+    fun lastDonationPromptTime(): Preference<Long> {
+        return preferenceStore.getLong("last_donation_prompt_time", 0L)
+    }
+    
+    /**
+     * Whether user has completed their first source migration
+     * Used to trigger first migration donation prompt
+     */
+    fun hasCompletedMigration(): Preference<Boolean> {
+        return preferenceStore.getBoolean("has_completed_migration", false)
+    }
+    
+    /**
+     * Last chapter milestone for which donation prompt was shown
+     * Used to avoid showing the same milestone prompt multiple times
+     */
+    fun lastDonationMilestone(): Preference<Int> {
+        return preferenceStore.getInt("last_donation_milestone", 0)
+    }
 }

@@ -9,11 +9,12 @@ import ireader.data.chapterreport.ChapterReportRepositoryImpl
 import ireader.data.downloads.DownloadRepositoryImpl
 import ireader.data.font.FontRepositoryImpl
 import ireader.data.history.HistoryRepositoryImpl
+import ireader.data.repository.FundingGoalRepositoryImpl
 import ireader.data.repository.LibraryRepositoryImpl
 import ireader.data.repository.ReaderThemeRepositoryImpl
+import ireader.data.repository.SourceCredentialsRepositoryImpl
 import ireader.data.repository.ThemeRepositoryImpl
 import ireader.data.repository.UpdatesRepositoryImpl
-import ireader.data.repository.SourceCredentialsRepositoryImpl
 import ireader.data.security.SecurityRepositoryImpl
 import ireader.data.services.SourceHealthCheckerImpl
 import ireader.data.sourcereport.SourceReportRepositoryImpl
@@ -21,8 +22,6 @@ import ireader.data.statistics.ReadingStatisticsRepositoryImpl
 import ireader.data.translation.GlossaryRepositoryImpl
 import ireader.data.translation.TranslatedChapterRepositoryImpl
 import ireader.domain.catalogs.service.CatalogRemoteRepository
-import ireader.domain.data.repository.SourceCredentialsRepository
-import ireader.domain.services.SourceHealthChecker
 import ireader.domain.data.repository.BookCategoryRepository
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.CategoryRepository
@@ -33,13 +32,15 @@ import ireader.domain.data.repository.FontRepository
 import ireader.domain.data.repository.GlossaryRepository
 import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.data.repository.LibraryRepository
-import ireader.domain.data.repository.ReadingStatisticsRepository
 import ireader.domain.data.repository.ReaderThemeRepository
+import ireader.domain.data.repository.ReadingStatisticsRepository
 import ireader.domain.data.repository.SecurityRepository
+import ireader.domain.data.repository.SourceCredentialsRepository
 import ireader.domain.data.repository.SourceReportRepository
 import ireader.domain.data.repository.ThemeRepository
 import ireader.domain.data.repository.TranslatedChapterRepository
 import ireader.domain.data.repository.UpdatesRepository
+import ireader.domain.services.SourceHealthChecker
 import org.koin.dsl.module
 
 
@@ -80,4 +81,8 @@ val repositoryInjectModule = module {
     
     // Font repository
     single<FontRepository> { FontRepositoryImpl(get(), get()) }
+
+    single<ireader.domain.data.repository.FundingGoalRepository> {
+        FundingGoalRepositoryImpl()
+    }
 }

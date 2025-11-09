@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,6 +50,7 @@ fun MoreScreen(
     onSettings: () -> Unit,
     onAbout: () -> Unit,
     onHelp: () -> Unit,
+    onDonation: () -> Unit = {},
 ) {
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     
@@ -278,6 +280,15 @@ fun MoreScreen(
                 description = "Get help with the app",
                 icon = Icons.Outlined.Help,
                 onClick = onHelp
+            )
+        }
+        
+        item {
+            SettingsItem(
+                title = "Support Development",
+                description = "Help keep IReader free and ad-free",
+                icon = Icons.Outlined.Favorite,
+                onClick = onDonation
             )
         }
     }

@@ -6,6 +6,7 @@ import ireader.data.catalog.CatalogGithubApi
 import ireader.data.catalogrepository.CatalogSourceRepositoryImpl
 import ireader.data.core.DatabaseVersionManager
 import ireader.data.core.createDatabase
+import ireader.data.repository.FundingGoalRepositoryImpl
 import ireader.domain.catalogs.interactor.SyncRemoteCatalogs
 import ireader.domain.data.repository.CatalogSourceRepository
 import okio.FileSystem
@@ -27,6 +28,9 @@ val DataModule = module {
     single<FileSystem> { FileSystem.SYSTEM }
 
 
+    single<ireader.domain.data.repository.FundingGoalRepository> {
+        FundingGoalRepositoryImpl()
+    }
     single<SyncRemoteCatalogs> { SyncRemoteCatalogs(get(), CatalogGithubApi(get(),get()),get()) }
 
     single<CatalogSourceRepository> { CatalogSourceRepositoryImpl(get()) }

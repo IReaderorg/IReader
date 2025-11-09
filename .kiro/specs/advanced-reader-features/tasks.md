@@ -83,7 +83,12 @@ This implementation plan breaks down the advanced reader features into discrete,
   - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5, 15.6, 15.7, 15.8, 15.9, 15.10_
 
 
-- [ ] 11. Implement Cryptocurrency Donation Page
+- [x] 11. Implement Cryptocurrency Donation Page
+
+
+
+
+
   - Create `DonationScreen` composable with wallet addresses for Bitcoin, Ethereum, Litecoin
   - Add QR code generation for each wallet address using ZXing library
   - Implement copy-to-clipboard functionality with toast confirmation
@@ -93,8 +98,12 @@ This implementation plan breaks down the advanced reader features into discrete,
   - Implement QR code enlargement on tap for easier scanning
   - Add cryptocurrency disclaimer about non-refundable donations
   - _Requirements: 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 18.7, 18.8_
+-
 
-- [ ] 12. Implement Donation Trigger System
+- [x] 12. Implement Donation Trigger System
+
+
+
   - Create `DonationTrigger` sealed class for different trigger events
   - Implement `DonationTriggerManager` to check for trigger conditions
   - Add trigger detection for book completion (500+ chapters)
@@ -106,18 +115,27 @@ This implementation plan breaks down the advanced reader features into discrete,
   - Store last prompt time in preferences to enforce cooldown
   - _Requirements: 19.1, 19.2, 19.3, 19.4, 19.5, 19.6, 19.7, 19.8, 19.9_
 
+
+
+
+
 - [ ] 13. Implement Cryptocurrency Wallet Integration
+
   - Create `WalletIntegrationManager` class for deep link handling
   - Implement deep links for Trust Wallet, MetaMask, and Coinbase Wallet
   - Add "Pay with [Wallet]" buttons to donation screen for each supported wallet
   - Implement wallet app detection and "not installed" error handling
   - Create payment URI generation for cryptocurrency addresses
   - Add QR code display for desktop users to scan with mobile wallets
+
+
   - Implement hover tooltips with scanning instructions
   - Handle ActivityNotFoundException gracefully with user-friendly messages
   - _Requirements: 20.1, 20.2, 20.3, 20.4, 20.5, 20.6, 20.7_
 
-- [ ] 14. Implement Fund-a-Feature Progress System
+- [x] 14. Implement Fund-a-Feature Progress System
+
+
   - Create `FundingGoal` data model with title, description, target, and current amount
   - Build `FundaFeatureSection` composable with progress bar and goal description
   - Add funding goal configuration (monthly server costs, feature-specific goals)

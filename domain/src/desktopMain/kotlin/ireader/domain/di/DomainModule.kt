@@ -120,4 +120,9 @@ actual val DomainModule: Module = module {
             localSource = get()
         )
     }
+    
+    // Wallet Integration
+    single<ireader.domain.services.WalletIntegrationManager> {
+        ireader.domain.services.DesktopWalletIntegrationManager()
+    }
 }

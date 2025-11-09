@@ -163,4 +163,9 @@ actual val DomainModule = module {
             context = androidContext()
         )
     }
+    
+    // Wallet Integration
+    single<ireader.domain.services.WalletIntegrationManager> {
+        ireader.domain.services.AndroidWalletIntegrationManager(androidContext())
+    }
 }

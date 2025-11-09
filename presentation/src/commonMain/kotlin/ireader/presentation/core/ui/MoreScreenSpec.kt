@@ -74,6 +74,9 @@ object MoreScreenSpec : Tab {
                 },
                 onCategory = {
                     navigator.push(CategoryScreenSpec())
+                },
+                onDonation = {
+                    navigator.push(DonationScreenSpec())
                 }
             )
         }

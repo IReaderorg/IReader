@@ -79,6 +79,8 @@ val PresentationModules = module {
     factory  { SourceRepositoryViewModel(get(), get()) }
     factory  { SecuritySettingsViewModel(get(), get()) }
     factory  { StatisticsViewModel(get()) }
+    factory  { ireader.presentation.ui.settings.donation.DonationViewModel(get(), get()) }
+    factory  { ireader.presentation.ui.settings.donation.DonationTriggerViewModel(get()) }
 
 
     factory <ChapterStateImpl> { ChapterStateImpl() }
