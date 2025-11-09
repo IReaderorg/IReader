@@ -1285,10 +1285,15 @@ class ReaderScreenViewModel(
                         // Track progress (assuming 80% read if chapter was open for significant time)
                         trackReadingProgressUseCase.onChapterProgressUpdate(0.8f, wordCount)
                         
-                        // Check if this is the last chapter and it's been read
-                        if (chapter.read) {
-                            checkAndTrackBookCompletion(chapter.bookId)
+                        // Mark chapter as read if not already marked
+                        if (!chapter.read) {
+                            val updatedChapter = chapter.copy(read = true)
+                            insertUseCases.insertChapter(updatedChapter)
+                            ireader.core.log.Log.debug("Chapter marked as read: ${chapter.name}")
                         }
+                        
+                        // Check if all chapters in the book are now read
+                        checkAndTrackBookCompletion(chapter.bookId)
                     }
                 } catch (e: Exception) {
                     ireader.core.log.Log.error("Failed to track reading progress", e)

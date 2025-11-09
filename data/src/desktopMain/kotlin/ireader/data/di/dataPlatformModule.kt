@@ -12,6 +12,8 @@ import ireader.data.core.DatabaseDriverFactory
 import ireader.data.core.DatabaseHandler
 import ireader.data.core.DatabaseTransactions
 import ireader.data.core.JvmDatabaseHandler
+import ireader.data.security.BiometricAuthenticator
+import ireader.data.security.BiometricAuthenticatorImpl
 import ireader.domain.catalogs.interactor.InstallCatalog
 import ireader.domain.catalogs.interactor.UninstallCatalogs
 import ireader.domain.catalogs.service.CatalogInstallationChanges
@@ -32,4 +34,5 @@ actual val dataPlatformModule: Module = module {
     single<DesktopCatalogInstaller> { DesktopCatalogInstaller(get(),get(),get()) }
     single<UninstallCatalogs> { DesktopUninstallCatalogs(get()) }
     single<PreferenceStoreFactory> { PreferenceStoreFactory() }
+    single<BiometricAuthenticator> { BiometricAuthenticatorImpl() }
 }

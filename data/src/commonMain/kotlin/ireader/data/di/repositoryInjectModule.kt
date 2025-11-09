@@ -12,6 +12,7 @@ import ireader.data.repository.ReaderThemeRepositoryImpl
 import ireader.data.repository.ThemeRepositoryImpl
 import ireader.data.repository.UpdatesRepositoryImpl
 import ireader.data.repository.SourceCredentialsRepositoryImpl
+import ireader.data.security.SecurityRepositoryImpl
 import ireader.data.services.SourceHealthCheckerImpl
 import ireader.data.statistics.ReadingStatisticsRepositoryImpl
 import ireader.data.translation.GlossaryRepositoryImpl
@@ -29,6 +30,7 @@ import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.data.repository.LibraryRepository
 import ireader.domain.data.repository.ReadingStatisticsRepository
 import ireader.domain.data.repository.ReaderThemeRepository
+import ireader.domain.data.repository.SecurityRepository
 import ireader.domain.data.repository.ThemeRepository
 import ireader.domain.data.repository.TranslatedChapterRepository
 import ireader.domain.data.repository.UpdatesRepository
@@ -60,4 +62,7 @@ val repositoryInjectModule = module {
     
     // Reading statistics repository
     single<ReadingStatisticsRepository> { ReadingStatisticsRepositoryImpl(get()) }
+    
+    // Security repository
+    single<SecurityRepository> { SecurityRepositoryImpl(get(), get()) }
 }

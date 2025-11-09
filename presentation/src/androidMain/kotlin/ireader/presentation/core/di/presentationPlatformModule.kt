@@ -6,7 +6,7 @@ import ireader.domain.usecases.translate.WebscrapingTranslateEngine
 import ireader.presentation.core.PlatformHelper
 import ireader.presentation.core.theme.IUseController
 import ireader.presentation.core.theme.LocaleHelper
-import ireader.presentation.core.ui.SecuritySettingViewModel
+
 import ireader.presentation.imageloader.CoilLoaderFactory
 import ireader.presentation.ui.home.tts.TTSViewModel
 import ireader.presentation.ui.reader.viewmodel.PlatformReaderSettingReader
@@ -41,7 +41,6 @@ actual val presentationPlatformModule = module  {
     factory<TTSViewModel>  { TTSViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
 
     factory <WebViewPageStateImpl> { WebViewPageStateImpl() }
-    factory   { SecuritySettingViewModel(get()) }
 
     single { LocaleHelper(get(),get()) }
     single { PlatformHelper(get()) }
