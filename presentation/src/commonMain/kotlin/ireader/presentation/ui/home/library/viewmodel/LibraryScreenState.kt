@@ -9,9 +9,24 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import ireader.domain.models.entities.CategoryWithCount
 import ireader.domain.models.entities.History
 import ireader.domain.models.entities.LibraryBook
+import ireader.domain.models.entities.Chapter
 import ireader.domain.models.library.LibrarySort
 import ireader.i18n.UiText
 import ireader.i18n.resources.MR
+
+/**
+ * State for undo operations
+ */
+data class UndoState(
+    val previousChapterStates: Map<Long, List<Chapter>>,
+    val operationType: UndoOperationType,
+    val timestamp: Long
+)
+
+enum class UndoOperationType {
+    MARK_AS_READ,
+    MARK_AS_UNREAD
+}
 
 
 interface LibraryState {
@@ -34,6 +49,9 @@ interface LibraryState {
     val inititialized: Boolean
     val categories: List<CategoryWithCount>
     val selectedCategory: CategoryWithCount?
+    var batchOperationInProgress: Boolean
+    var batchOperationMessage: String?
+    var lastUndoState: UndoState?
 }
 
 
@@ -62,4 +80,7 @@ open class LibraryStateImpl : LibraryState {
     override var selectedBooks: SnapshotStateList<Long> = mutableStateListOf()
     override val selectionMode: Boolean by derivedStateOf { selectedBooks.isNotEmpty() }
     override var categories: List<CategoryWithCount> by mutableStateOf(emptyList())
+    override var batchOperationInProgress by mutableStateOf<Boolean>(false)
+    override var batchOperationMessage by mutableStateOf<String?>(null)
+    override var lastUndoState by mutableStateOf<UndoState?>(null)
 }

@@ -1,0 +1,42 @@
+import kotlin.Boolean;
+
+CREATE TABLE IF NOT EXISTS chapterReport (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    chapterId INTEGER NOT NULL,
+    bookId INTEGER NOT NULL,
+    issueCategory TEXT NOT NULL,
+    description TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,
+    resolved INTEGER AS Boolean NOT NULL DEFAULT 0,
+    FOREIGN KEY (chapterId) REFERENCES chapter(_id) ON DELETE CASCADE,
+    FOREIGN KEY (bookId) REFERENCES book(_id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS chapterReport_chapterId_index ON chapterReport(chapterId);
+CREATE INDEX IF NOT EXISTS chapterReport_bookId_index ON chapterReport(bookId);
+CREATE INDEX IF NOT EXISTS chapterReport_resolved_index ON chapterReport(resolved);
+
+insert:
+INSERT INTO chapterReport(chapterId, bookId, issueCategory, description, timestamp, resolved)
+VALUES (?, ?, ?, ?, ?, ?);
+
+selectAll:
+SELECT * FROM chapterReport;
+
+selectByChapterId:
+SELECT * FROM chapterReport WHERE chapterId = ?;
+
+selectByBookId:
+SELECT * FROM chapterReport WHERE bookId = ?;
+
+selectUnresolved:
+SELECT * FROM chapterReport WHERE resolved = 0;
+
+markAsResolved:
+UPDATE chapterReport SET resolved = 1 WHERE id = ?;
+
+deleteById:
+DELETE FROM chapterReport WHERE id = ?;
+
+deleteByChapterId:
+DELETE FROM chapterReport WHERE chapterId = ?;

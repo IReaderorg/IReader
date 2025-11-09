@@ -26,6 +26,7 @@ fun ExtensionScreenTopAppBar(
     onSearchEnable: () -> Unit,
     onRefresh: () -> Unit,
     onSearchNavigate: () -> Unit,
+    onAddRepository: (() -> Unit)? = null,
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Toolbar(
@@ -61,6 +62,13 @@ fun ExtensionScreenTopAppBar(
                     contentDescription = localize(MR.strings.refresh),
                     onClick = onRefresh,
                 )
+                if (onAddRepository != null) {
+                    AppIconButton(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add Repository",
+                        onClick = onAddRepository,
+                    )
+                }
             } else {
                 if (searchMode) {
                     AppIconButton(

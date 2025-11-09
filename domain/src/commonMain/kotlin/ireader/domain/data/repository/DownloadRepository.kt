@@ -20,4 +20,10 @@ interface DownloadRepository {
     suspend fun deleteSavedDownloadByBookId(bookId: Long)
 
     suspend fun deleteAllSavedDownload()
+    
+    suspend fun updateDownloadPriority(chapterId: Long, priority: Int)
+    
+    suspend fun markDownloadAsFailed(chapterId: Long, errorMessage: String)
+    
+    suspend fun retryFailedDownload(chapterId: Long)
 }

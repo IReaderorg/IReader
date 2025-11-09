@@ -46,7 +46,6 @@ import ireader.domain.data.engines.TranslateEngine
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.theme.ReaderTheme
 import ireader.domain.preferences.models.FontType
-import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
@@ -127,7 +126,7 @@ fun ReaderSettingMainLayout(
 
 
 @Composable
-private fun ReaderScreenTab(
+fun ReaderScreenTab(
         vm: ReaderScreenViewModel,
         onTextAlign: (PreferenceValues.PreferenceTextAlignment) -> Unit
 ) {
@@ -208,7 +207,8 @@ private fun ReaderScreenTab(
                 trailing = vm.fontSize.value.toInt().toString(),
                 valueRange = 8.0F..180.0F,
                 onValueChange = {
-                    vm.makeSettingTransparent()
+                    // Real-time update - no need to make transparent
+                    // The change is immediately reflected in the reader
                 }
             ).Build()
         }
@@ -217,8 +217,9 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.textWeight,
                 title = localizeHelper.localize(MR.strings.font_weight),
                 trailing = vm.textWeight.value.toInt().toString(),
-                valueRange = 1f..900F,onValueChange = {
-                    vm.makeSettingTransparent()
+                valueRange = 1f..900F,
+                onValueChange = {
+                    // Real-time update - no need to make transparent
                 }
             ).Build()
         }
@@ -232,8 +233,9 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.paragraphsIndent,
                 title = localizeHelper.localize(MR.strings.paragraph_indent),
                 trailing = vm.paragraphsIndent.value.toInt().toString(),
-                valueRange = 0.0F..100.0F,onValueChange = {
-                    vm.makeSettingTransparent()
+                valueRange = 0.0F..100.0F,
+                onValueChange = {
+                    // Real-time update
                 }
             ).Build()
         }
@@ -242,8 +244,9 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.distanceBetweenParagraphs,
                 title = localizeHelper.localize(MR.strings.paragraph_distance),
                 trailing = vm.distanceBetweenParagraphs.value.toInt().toString(),
-                valueRange = 0.0F..10.0F,onValueChange = {
-                    vm.makeSettingTransparent()
+                valueRange = 0.0F..10.0F,
+                onValueChange = {
+                    // Real-time update
                 }
             ).Build()
         }
@@ -257,8 +260,9 @@ private fun ReaderScreenTab(
                 preferenceAsInt = vm.lineHeight,
                 title = localizeHelper.localize(MR.strings.line_height),
                 trailing = vm.lineHeight.value.toInt().toString(),
-                valueRange = 22.0F..100.0F,onValueChange = {
-                    vm.makeSettingTransparent()
+                valueRange = 22.0F..100.0F,
+                onValueChange = {
+                    // Real-time update with smooth transition
                 }
             ).Build()
         }
@@ -431,6 +435,11 @@ fun GeneralScreenTab(
         modifier = Modifier.fillMaxSize()
     ) {
         item {
+            Components.Header(
+                localizeHelper.localize(MR.strings.translation_settings)
+            ).Build()
+        }
+        item {
             ChipChoicePreference(
                 preference = vm.translatorEngine,
                 choices = vm.translationEnginesManager.getAvailableEngines().associate { it.id to it.engineName },
@@ -513,6 +522,11 @@ fun GeneralScreenTab(
         }
         
         item {
+            Components.Header(
+                "Reading Settings"
+            ).Build()
+        }
+        item {
             ChipPreference(
                 preference = listOf(
                     localizeHelper.localize(MR.strings.page),
@@ -528,6 +542,19 @@ fun GeneralScreenTab(
         item {
             ChipPreference(
                 preference = listOf(
+                    localizeHelper.localize(MR.strings.page),
+                    localizeHelper.localize(MR.strings.continues),
+                ),
+                selected = vm.readerPreferences.defaultReadingMode().get().ordinal,
+                onValueChange = {
+                    vm.readerPreferences.defaultReadingMode().set(ReadingMode.valueOf(it))
+                },
+                title = "Default Reading Mode for New Books"
+            )
+        }
+        item {
+            ChipPreference(
+                preference = listOf(
                     localizeHelper.localize(MR.strings.horizontal),
                     localizeHelper.localize(MR.strings.vertical),
                 ),
@@ -538,25 +565,12 @@ fun GeneralScreenTab(
                 title = localizeHelper.localize(MR.strings.reading_mode)
             )
         }
+        // Orientation is a global app setting, moved to app settings
+        // Keeping only chapter/book-specific settings here
         item {
-            ChipPreference(
-                preference = listOf(
-                    localizeHelper.localize(MR.strings.landscape),
-                    localizeHelper.localize(MR.strings.portrait),
-                ),
-                selected = vm.orientation.value,
-                onValueChange = {
-                    when (it) {
-                        0 ->
-                            vm.orientation.value =
-                                    AppPreferences.PreferenceKeys.Orientation.Landscape.ordinal
-                        1 ->
-                            vm.orientation.value =
-                                    AppPreferences.PreferenceKeys.Orientation.Portrait.ordinal
-                    }
-                },
-                title = localizeHelper.localize(MR.strings.orientation)
-            )
+            Components.Header(
+                "Display Settings"
+            ).Build()
         }
         item {
             ChipPreference(
@@ -623,7 +637,7 @@ fun GeneralScreenTab(
 }
 
 @Composable
-private fun ColorScreenTab(
+fun ColorScreenTab(
         vm: ReaderScreenViewModel,
         onChangeBrightness: (Float) -> Unit,
         onBackgroundChange: (themeId: Long) -> Unit,
@@ -671,6 +685,7 @@ private fun ColorScreenTab(
                     preference = vm.backgroundColor,
                     title = localizeHelper.localize(MR.strings.background_color),
                     onChangeColor = {
+                        // Real-time color update - changes are immediately visible
                         vm.readerThemeSavable = true
                     }
                 )
@@ -682,6 +697,7 @@ private fun ColorScreenTab(
                     preference = vm.textColor,
                     title = localizeHelper.localize(MR.strings.text_color),
                     onChangeColor = {
+                        // Real-time color update - changes are immediately visible
                         vm.readerThemeSavable = true
                     }
                 )

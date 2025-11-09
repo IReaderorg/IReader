@@ -163,13 +163,18 @@ private fun LazyListScope.FiltersPage(
     onClick: (LibraryFilter.Type) -> Unit
 ) {
     items(filters) { (filter, state) ->
+        val isActive = state == LibraryFilter.Value.Included
         ClickableRow(onClick = { onClick(filter) }) {
             TriStateCheckbox(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 state = state.asToggleableState(),
                 onClick = { onClick(filter) }
             )
-            Text(filter.name)
+            Text(
+                text = filter.name,
+                color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                style = if (isActive) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }
@@ -201,9 +206,10 @@ private fun LazyListScope.SortPage(
 ) {
 
     items(LibrarySort.types) { type ->
+        val isSelected = sorting.type == type
         ClickableRow(onClick = { onClick(type) }) {
             val iconModifier = Modifier.requiredWidth(56.dp)
-            if (sorting.type == type) {
+            if (isSelected) {
                 val icon = if (sorting.isAscending) {
                     Icons.Default.KeyboardArrowUp
                 } else {
@@ -211,14 +217,18 @@ private fun LazyListScope.SortPage(
                 }
                 Icon(
                     icon,
-                    null,
-                    iconModifier,
-                    MaterialTheme.colorScheme.primary
+                    contentDescription = if (sorting.isAscending) "Ascending" else "Descending",
+                    modifier = iconModifier,
+                    tint = MaterialTheme.colorScheme.primary
                 )
             } else {
                 Spacer(iconModifier)
             }
-            Text(LibrarySort.Type.name(type).asString(localizeHelper))
+            Text(
+                text = LibrarySort.Type.name(type).asString(localizeHelper),
+                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                style = if (isSelected) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }

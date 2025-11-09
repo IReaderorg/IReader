@@ -76,25 +76,30 @@ internal fun LibraryPager(
             ILazyColumnScrollbar(
                 listState = lazyListState,
             ) {
-                LayoutComposable(
-                    books = books,
-                    layout = layout,
-                    isLocal = true,
-                    gridState = gridState,
-                    scrollState = lazyListState,
-                    selection = selection,
-                    goToLatestChapter = goToLatestChapter,
-                    onClick = onClick,
-                    onLongClick = onLongClick,
-                    showGoToLastChapterBadge = showGoToLastChapterBadge,
-                    showReadBadge = showReadBadge,
-                    showUnreadBadge = showUnreadBadge,
-                    showDownloadedChaptersBadge = showDownloadedChaptersBadge,
-                    showUnreadChaptersBadge = showUnreadChaptersBadge,
-                    showLocalMangaBadge = showLocalMangaBadge,
-                    showLanguageBadge = showLanguageBadge,
-                    columns = columns,
-                )
+                androidx.compose.animation.Crossfade(
+                    targetState = displayMode,
+                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
+                ) { currentDisplayMode ->
+                    LayoutComposable(
+                        books = books,
+                        layout = currentDisplayMode,
+                        isLocal = true,
+                        gridState = gridState,
+                        scrollState = lazyListState,
+                        selection = selection,
+                        goToLatestChapter = goToLatestChapter,
+                        onClick = onClick,
+                        onLongClick = onLongClick,
+                        showGoToLastChapterBadge = showGoToLastChapterBadge,
+                        showReadBadge = showReadBadge,
+                        showUnreadBadge = showUnreadBadge,
+                        showDownloadedChaptersBadge = showDownloadedChaptersBadge,
+                        showUnreadChaptersBadge = showUnreadChaptersBadge,
+                        showLocalMangaBadge = showLocalMangaBadge,
+                        showLanguageBadge = showLanguageBadge,
+                        columns = columns,
+                    )
+                }
             }
         }
     )

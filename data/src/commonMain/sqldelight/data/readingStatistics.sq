@@ -1,0 +1,49 @@
+import kotlin.Boolean;
+import kotlin.Long;
+import kotlin.Int;
+
+CREATE TABLE IF NOT EXISTS reading_statistics(
+    _id INTEGER NOT NULL PRIMARY KEY,
+    total_chapters_read INTEGER NOT NULL DEFAULT 0,
+    total_reading_time_minutes INTEGER NOT NULL DEFAULT 0,
+    reading_streak INTEGER NOT NULL DEFAULT 0,
+    last_read_date INTEGER,
+    total_words_read INTEGER NOT NULL DEFAULT 0
+);
+
+-- Initialize with a single row if not exists
+INSERT OR IGNORE INTO reading_statistics(_id, total_chapters_read, total_reading_time_minutes, reading_streak, last_read_date, total_words_read)
+VALUES (1, 0, 0, 0, 0, 0);
+
+getStatistics:
+SELECT * FROM reading_statistics WHERE _id = 1;
+
+updateStatistics:
+UPDATE reading_statistics SET
+    total_chapters_read = :totalChaptersRead,
+    total_reading_time_minutes = :totalReadingTimeMinutes,
+    reading_streak = :readingStreak,
+    last_read_date = :lastReadDate,
+    total_words_read = :totalWordsRead
+WHERE _id = 1;
+
+incrementChaptersRead:
+UPDATE reading_statistics SET
+    total_chapters_read = total_chapters_read + 1
+WHERE _id = 1;
+
+addReadingTime:
+UPDATE reading_statistics SET
+    total_reading_time_minutes = total_reading_time_minutes + :minutes
+WHERE _id = 1;
+
+updateStreak:
+UPDATE reading_statistics SET
+    reading_streak = :streak,
+    last_read_date = :lastReadDate
+WHERE _id = 1;
+
+addWordsRead:
+UPDATE reading_statistics SET
+    total_words_read = total_words_read + :words
+WHERE _id = 1;

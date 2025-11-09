@@ -7,13 +7,10 @@ import ireader.domain.models.entities.HistoryWithRelations
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.history.HistoryUseCase
 import ireader.i18n.LocalizeHelper
-import ireader.i18n.UiText
+import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.reusable_composable.WarningAlertData
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
-import ireader.i18n.localize
-import ireader.i18n.resources.MR
 import kotlinx.coroutines.launch
-import kotlinx.datetime.LocalDateTime
 
 
 class HistoryViewModel(
@@ -28,6 +25,23 @@ class HistoryViewModel(
 
     // Track all history items to support filtering
     private var allHistories: Map<Long, List<HistoryWithRelations>> = emptyMap()
+    
+    init {
+        // Load groupByNovel preference
+        scope.launch {
+            groupByNovel = uiPreferences.groupHistoryByNovel().get()
+        }
+        
+        // When ViewModel is created or re-initialized, refresh the data
+        scope.launch {
+            historyUseCase.findHistoriesByFlowLongType().collect {
+                allHistories = it
+                applySearchFilter()
+                // Force refresh to ensure UI updates
+                refreshTrigger++
+            }
+        }
+    }
     /**
      * Update search query and filter results
      */
@@ -57,6 +71,25 @@ class HistoryViewModel(
             applySearchFilter()
         }
         // Force refresh to update UI
+        refreshTrigger++
+    }
+    
+    /**
+     * Toggle group by novel mode
+     */
+    fun toggleGroupByNovel() {
+        groupByNovel = !groupByNovel
+        scope.launch {
+            uiPreferences.groupHistoryByNovel().set(groupByNovel)
+        }
+        refreshTrigger++
+    }
+    
+    /**
+     * Set date filter
+     */
+    fun setDateFilterHistory(filter: DateFilter?) {
+        dateFilter = filter
         refreshTrigger++
     }
     /**
@@ -118,10 +151,13 @@ class HistoryViewModel(
         warningAlert = WarningAlertData()
         
         // Now create a new alert dialog
+        val warningMessage = localizeHelper.localize(MR.strings.dialog_remove_chapter_books_description) + 
+            " " + localizeHelper.localize(MR.strings.action_cannot_be_undone)
+        
         warningAlert = WarningAlertData().copy(
             enable = true,
             title = localizeHelper.localize(MR.strings.delete_all_histories),
-            text = localizeHelper.localize(MR.strings.dialog_remove_chapter_books_description),
+            text = warningMessage,
             onDismiss = {
                 // Just dismiss the alert without deleting when cancel is pressed
                 warningAlert = warningAlert.copy(enable = false)
@@ -140,17 +176,7 @@ class HistoryViewModel(
         )
     }
 
-    init {
-        // When ViewModel is created or re-initialized, refresh the data
-        scope.launch {
-            historyUseCase.findHistoriesByFlowLongType().collect {
-                allHistories = it
-                applySearchFilter()
-                // Force refresh to ensure UI updates
-                refreshTrigger++
-            }
-        }
-    }
+
 
 
 

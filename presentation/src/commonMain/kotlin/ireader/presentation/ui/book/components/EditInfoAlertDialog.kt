@@ -25,26 +25,26 @@ fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm:
         mutableStateOf(false)
     }
     var title by remember {
-        mutableStateOf("")
+        mutableStateOf(book.title)
     }
     var author by remember {
-        mutableStateOf("")
+        mutableStateOf(book.author)
     }
     var description by remember {
-        mutableStateOf("")
+        mutableStateOf(book.description)
     }
     var cover by remember {
-        mutableStateOf("")
-    }
-    var tags by remember {
-        mutableStateOf("")
-    }
-    var editedTags by remember {
-        mutableStateOf(book.genres)
+        mutableStateOf(book.cover)
     }
     var status by remember {
         mutableStateOf(book.status)
     }
+    
+    // Validation state
+    val isTitleValid = title.isNotBlank()
+    val isCoverUrlValid = cover.isBlank() || cover.startsWith("http://") || cover.startsWith("https://") || cover.startsWith("file://")
+    val canSave = isTitleValid && isCoverUrlValid
+    
     IAlertDialog(
         onDismissRequest = {
             onStateChange(state)
@@ -58,64 +58,92 @@ fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm:
                 }) {
                     MidSizeTextComposable(text = localizeHelper.localize(MR.strings.cancel))
                 }
-                TextButton(onClick = {
-                    onStateChange(state)
-                    state = false
-                    onConfirm(book.copy(description = description.ifBlank { book.description }, title = title.ifBlank { book.title }, cover = cover.ifBlank { book.cover }, author = author.ifBlank { book.author }, status = status))
-                }) {
+                TextButton(
+                    onClick = {
+                        if (canSave) {
+                            onStateChange(state)
+                            state = false
+                            onConfirm(
+                                book.copy(
+                                    title = title.trim(),
+                                    author = author.trim(),
+                                    description = description.trim(),
+                                    cover = cover.trim(),
+                                    status = status
+                                )
+                            )
+                        }
+                    },
+                    enabled = canSave
+                ) {
                     MidSizeTextComposable(text = localizeHelper.localize(MR.strings.confirm))
                 }
-
             }
         },
-
         title = {
             MidSizeTextComposable(text = "Edit Info")
         },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
-                Row(verticalAlignment = Alignment.CenterVertically,) {
-                    MidSizeTextComposable(text = "Status")
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    MidSizeTextComposable(text = localizeHelper.localize(MR.strings.status))
                     Spacer(modifier = Modifier.width(8.dp))
-                    ChipPreference(preference = book.allStatus(), selected = status.toInt(), title = localizeHelper.localize(
-                        MR.strings.status
-                    ), onValueChange = {
-                        status = it.toLong()
-                    } )
+                    ChipPreference(
+                        preference = book.allStatus(),
+                        selected = status.toInt(),
+                        title = localizeHelper.localize(MR.strings.status),
+                        onValueChange = {
+                            status = it.toLong()
+                        }
+                    )
                 }
+                
                 SimpleTextField(
                     query = title,
                     onValueChange = { title = it },
                     onConfirm = {},
-                    hint = localizeHelper.localize(MR.strings.title) + ": " + book.title
+                    hint = localizeHelper.localize(MR.strings.title),
+                    isError = !isTitleValid
                 )
+                if (!isTitleValid) {
+                    Text(
+                        text = "Title cannot be empty",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                    )
+                }
+                
                 SimpleTextField(
                     query = author,
                     onValueChange = { author = it },
                     onConfirm = {},
-                    hint = localizeHelper.localize(MR.strings.author) + ": " + book.author
+                    hint = localizeHelper.localize(MR.strings.author)
                 )
+                
                 SimpleTextField(
                     query = description,
                     onValueChange = { description = it },
                     onConfirm = {},
-                    hint = localizeHelper.localize(MR.strings.description) + ": " + book.description
+                    hint = localizeHelper.localize(MR.strings.description),
+                    maxLines = 5
                 )
+                
                 SimpleTextField(
                     query = cover,
                     onValueChange = { cover = it },
                     onConfirm = {},
-                    hint = localizeHelper.localize(MR.strings.cover) + ": " + book.cover
+                    hint = "Cover URL",
+                    isError = !isCoverUrlValid
                 )
-//                SimpleTextField(
-//                    query = tags,
-//                    onValueChange = { tags = it },
-//                    onConfirm = {
-//                                editedTags = editedTags + tags
-//                        tags = ""
-//                    },
-//                    hint = localizeHelper.localize(MR.strings.tags)
-//                )
+                if (!isCoverUrlValid) {
+                    Text(
+                        text = "Cover URL must start with http://, https://, or file://",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                    )
+                }
             }
         }
     )
@@ -131,15 +159,18 @@ fun SimpleTextField(
     hint: String,
     keyboardAction: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
     keyboardActions: KeyboardActions = KeyboardActions(onDone = { onConfirm() }),
+    maxLines: Int = 1,
+    isError: Boolean = false
 ) {
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
         value = query,
         onValueChange = onValueChange,
-        maxLines = 1,
+        maxLines = maxLines,
         keyboardOptions = keyboardAction,
         keyboardActions = keyboardActions,
-        singleLine = true,
+        singleLine = maxLines == 1,
+        isError = isError,
         textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
         placeholder = {
             Text(
@@ -147,7 +178,7 @@ fun SimpleTextField(
                 text = hint,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
+                maxLines = if (maxLines == 1) 1 else 2,
                 overflow = TextOverflow.Ellipsis
             )
         },

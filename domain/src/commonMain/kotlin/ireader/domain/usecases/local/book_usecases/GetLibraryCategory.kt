@@ -62,11 +62,17 @@ class GetLibraryCategory  internal constructor(
                         it.id in downloadedBooksId
                     }
                 }
+                LibraryFilter.Type.InProgress -> {
+                    { book ->
+                        book.unreadCount > 0 && book.unreadCount < book.totalChapters
+                    }
+                }
             }
+            // Apply AND logic by filtering the already filtered list
             filteredList = when (filter.value) {
-                LibraryFilter.Value.Included -> filter(filterFn)
-                LibraryFilter.Value.Excluded -> filterNot(filterFn)
-                LibraryFilter.Value.Missing -> this
+                LibraryFilter.Value.Included -> filteredList.filter(filterFn)
+                LibraryFilter.Value.Excluded -> filteredList.filterNot(filterFn)
+                LibraryFilter.Value.Missing -> filteredList
             }
         }
 

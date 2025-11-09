@@ -189,11 +189,31 @@ class BookDetailViewModel(
                         it.content.joinToString("").isNotBlank()
                     }
                 }
+                ChaptersFilters.Type.Read -> {
+                    {
+                        it.read
+                    }
+                }
+                ChaptersFilters.Type.Duplicate -> {
+                    // Detect duplicates by comparing chapter names and numbers
+                    { chapter ->
+                        val isDuplicate = this.any { other ->
+                            other.id != chapter.id && (
+                                // Same name
+                                other.name.trim().equals(chapter.name.trim(), ignoreCase = true) ||
+                                // Same chapter number (if recognized)
+                                (chapter.isRecognizedNumber && other.isRecognizedNumber && 
+                                 kotlin.math.abs(other.number - chapter.number) < 0.01f)
+                            )
+                        }
+                        isDuplicate
+                    }
+                }
             }
             filteredList = when (filter.value) {
-                ChaptersFilters.Value.Included -> filter(filterFn)
-                ChaptersFilters.Value.Excluded -> filterNot(filterFn)
-                ChaptersFilters.Value.Missing -> this
+                ChaptersFilters.Value.Included -> filteredList.filter(filterFn)
+                ChaptersFilters.Value.Excluded -> filteredList.filterNot(filterFn)
+                ChaptersFilters.Value.Missing -> filteredList
             }
         }
 
@@ -312,6 +332,34 @@ class BookDetailViewModel(
 
     fun startDownloadService(book: Book) {
         serviceUseCases.startDownloadServicesUseCase.start(bookIds = longArrayOf(book.id))
+    }
+    
+    fun downloadUnreadChapters() {
+        val unreadChapterIds = chapters.filter { !it.read }.map { it.id }.toLongArray()
+        if (unreadChapterIds.isNotEmpty()) {
+            serviceUseCases.startDownloadServicesUseCase.start(chapterIds = unreadChapterIds)
+            scope.launch {
+                showSnackBar(ireader.i18n.UiText.DynamicString("Downloading ${unreadChapterIds.size} unread chapters"))
+            }
+        } else {
+            scope.launch {
+                showSnackBar(ireader.i18n.UiText.DynamicString("No unread chapters to download"))
+            }
+        }
+    }
+    
+    fun downloadUndownloadedChapters() {
+        val undownloadedChapterIds = chapters.filter { it.content.joinToString("").isBlank() }.map { it.id }.toLongArray()
+        if (undownloadedChapterIds.isNotEmpty()) {
+            serviceUseCases.startDownloadServicesUseCase.start(chapterIds = undownloadedChapterIds)
+            scope.launch {
+                showSnackBar(ireader.i18n.UiText.DynamicString("Downloading ${undownloadedChapterIds.size} chapters"))
+            }
+        } else {
+            scope.launch {
+                showSnackBar(ireader.i18n.UiText.DynamicString("All chapters are already downloaded"))
+            }
+        }
     }
 
     fun toggleFilter(type: ChaptersFilters.Type) {

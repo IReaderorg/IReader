@@ -1,6 +1,8 @@
 package ireader.presentation.ui.home.sources.extension
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.icons.Icons
@@ -8,6 +10,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,6 +25,8 @@ import ireader.domain.models.entities.*
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
 import ireader.presentation.imageloader.IImageLoader
+import ireader.domain.models.entities.SourceStatus
+import ireader.presentation.ui.component.components.SourceStatusIndicator
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.ContentAlpha
@@ -38,6 +43,9 @@ fun CatalogItem(
     onUninstall: (() -> Unit)? = null,
     onPinToggle: (() -> Unit)? = null,
     onCancelInstaller: ((Catalog) -> Unit)? = null,
+    onShowDetails: (() -> Unit)? = null,
+    sourceStatus: SourceStatus? = null,
+    onLogin: (() -> Unit)? = null,
 ) {
     val title = buildAnnotatedString {
         append("${catalog.name} ")
@@ -48,8 +56,16 @@ fun CatalogItem(
         is CatalogRemote -> catalog.lang
     }?.let { Language(it) }
 
+    @OptIn(ExperimentalFoundationApi::class)
     Row(
-        modifier = onClick?.let { modifier.clickable(onClick = it) } ?: modifier
+        modifier = if (onClick != null || onShowDetails != null) {
+            modifier.combinedClickable(
+                onClick = { onClick?.invoke() },
+                onLongClick = { onShowDetails?.invoke() }
+            )
+        } else {
+            modifier
+        }
     ) {
         CatalogPic(
             catalog = catalog,
@@ -62,14 +78,27 @@ fun CatalogItem(
                 .fillMaxHeight()
                 .align(Alignment.CenterVertically)
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .padding(top = 12.dp)
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(top = 12.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
+                )
+                
+                // Show status indicator for installed sources
+                if (sourceStatus != null && catalog is CatalogInstalled) {
+                    SourceStatusIndicator(
+                        status = sourceStatus,
+                        showLabel = false
+                    )
+                }
+            }
 
             Text(
                 text = lang?.code?.uppercase(Locale.getDefault()) ?: "",
@@ -93,6 +122,8 @@ fun CatalogItem(
                 .align(Alignment.CenterVertically)
                 .padding(end = 4.dp),
             onCancelInstaller = onCancelInstaller,
+            sourceStatus = sourceStatus,
+            onLogin = onLogin,
         )
     }
 }
@@ -122,9 +153,21 @@ private fun CatalogButtons(
     onPinToggle: (() -> Unit)?,
     onCancelInstaller: ((Catalog) -> Unit)?,
     modifier: Modifier = Modifier,
+    sourceStatus: SourceStatus? = null,
+    onLogin: (() -> Unit)? = null,
 ) {
     Row(modifier = modifier) {
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium()) {
+            // Show login button if source requires authentication
+            if (sourceStatus is SourceStatus.LoginRequired && onLogin != null) {
+                MidSizeTextComposable(
+                    text = "Login",
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable { onLogin() }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+            
             // Show either progress indicator or install button
             if (installStep != null && !installStep.isFinished()) {
                 Box(contentAlignment = androidx.compose.ui.Alignment.Center) {
@@ -162,6 +205,7 @@ private fun CatalogButtons(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun CatalogMenuButton(
     catalog: Catalog,

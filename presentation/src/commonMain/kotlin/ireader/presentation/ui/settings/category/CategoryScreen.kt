@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -48,6 +49,8 @@ fun CategoryScreen(
     
     var categoryToDelete by remember { mutableStateOf<CategoryWithCount?>(null) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
+    var categoryToRename by remember { mutableStateOf<CategoryWithCount?>(null) }
+    var showRenameDialog by remember { mutableStateOf(false) }
 
     val state: ReorderableLazyListState = rememberReorderLazyListState(
         onMove = { from, to ->
@@ -58,14 +61,55 @@ fun CategoryScreen(
     )
     
     Box(modifier = Modifier.fillMaxSize()) {
-        CategoryContent(
-            state = state,
-            data = data,
-            onDelete = { category ->
-                categoryToDelete = category
-                showDeleteConfirmation = true
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Show Empty Categories Toggle
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 2.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Show Empty Categories",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Display categories with no books",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = vm.showEmptyCategories.value,
+                        onCheckedChange = { vm.showEmptyCategories.value = it }
+                    )
+                }
             }
-        )
+            
+            CategoryContent(
+                state = state,
+                data = data,
+                onDelete = { category ->
+                    categoryToDelete = category
+                    showDeleteConfirmation = true
+                },
+                onRename = { category ->
+                    categoryToRename = category
+                    showRenameDialog = true
+                }
+            )
+        }
 
         CategoryFloatingActionButton(vm)
         
@@ -83,6 +127,25 @@ fun CategoryScreen(
             vm.createCategoryWithName.await(it)
         }
     })
+    
+    // Rename dialog
+    if (showRenameDialog && categoryToRename != null) {
+        RenameCategoryDialog(
+            category = categoryToRename!!,
+            existingCategories = data.map { it.name },
+            onConfirm = { newName ->
+                vm.scope.launch {
+                    vm.renameCategory(categoryToRename!!.id, newName)
+                }
+                showRenameDialog = false
+                categoryToRename = null
+            },
+            onDismiss = {
+                showRenameDialog = false
+                categoryToRename = null
+            }
+        )
+    }
     
     // Enhanced delete confirmation dialog
     if (showDeleteConfirmation && categoryToDelete != null) {
@@ -149,7 +212,8 @@ fun CategoryFloatingActionButton(
 private fun CategoryContent(
     state: ReorderableLazyListState,
     data: MutableList<CategoryWithCount>,
-    onDelete: (CategoryWithCount) -> Unit
+    onDelete: (CategoryWithCount) -> Unit,
+    onRename: (CategoryWithCount) -> Unit
 ) {
     LazyColumn(
         state = state.listState,
@@ -167,7 +231,8 @@ private fun CategoryContent(
                     .draggedItem(state.offsetByKey(item.id))
                     .detectReorderAfterLongPress(state),
                 category = item,
-                onDelete = { onDelete(item) }
+                onDelete = { onDelete(item) },
+                onRename = { onRename(item) }
             )
         }
     }
@@ -177,7 +242,8 @@ private fun CategoryContent(
 private fun EnhancedCategoryItem(
     modifier: Modifier = Modifier,
     category: CategoryWithCount,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onRename: () -> Unit
 ) {
     Surface(
         modifier = modifier
@@ -238,17 +304,34 @@ private fun EnhancedCategoryItem(
                 }
             }
             
-            // Delete button with enhanced styling
-            Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
-                modifier = Modifier.padding(start = 8.dp)
+            // Action buttons
+            Row(
+                modifier = Modifier.padding(start = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                AppIconButton(
-                    imageVector = Icons.Default.DeleteForever,
-                    onClick = onDelete,
-                    tint = MaterialTheme.colorScheme.error
-                )
+                // Rename button
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                ) {
+                    AppIconButton(
+                        imageVector = Icons.Default.Edit,
+                        onClick = onRename,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
+                // Delete button with enhanced styling
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+                ) {
+                    AppIconButton(
+                        imageVector = Icons.Default.DeleteForever,
+                        onClick = onDelete,
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }
@@ -345,6 +428,177 @@ private fun DeleteConfirmationDialog(
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "Delete",
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = "Cancel",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    )
+}
+
+@Composable
+private fun RenameCategoryDialog(
+    category: CategoryWithCount,
+    existingCategories: List<String>,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    var newName by remember { mutableStateOf(category.name) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    
+    IAlertDialog(
+        modifier = Modifier
+            .heightIn(max = 400.dp, min = 250.dp)
+            .widthIn(min = 280.dp),
+        onDismissRequest = onDismiss,
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .size(28.dp)
+                        .padding(end = 8.dp)
+                )
+                Text(
+                    text = "Rename Category",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    value = newName,
+                    onValueChange = {
+                        newName = it
+                        // Clear error when user starts typing
+                        if (errorMessage != null && it.isNotBlank()) {
+                            errorMessage = null
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = {
+                        Text(
+                            text = "Category Name",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    },
+                    placeholder = {
+                        Text(
+                            text = "Enter new category name",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                    },
+                    isError = errorMessage != null,
+                    supportingText = if (errorMessage != null) {
+                        {
+                            Text(
+                                text = errorMessage!!,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    } else null,
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        errorBorderColor = MaterialTheme.colorScheme.error,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    ),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            val trimmedName = newName.trim()
+                            when {
+                                trimmedName.isEmpty() -> {
+                                    errorMessage = "Category name cannot be empty"
+                                }
+                                trimmedName.length < 2 -> {
+                                    errorMessage = "Category name must be at least 2 characters"
+                                }
+                                trimmedName == category.name -> {
+                                    errorMessage = "Please enter a different name"
+                                }
+                                existingCategories.any { it.equals(trimmedName, ignoreCase = true) } -> {
+                                    errorMessage = "A category with this name already exists"
+                                }
+                                else -> {
+                                    onConfirm(trimmedName)
+                                }
+                            }
+                        }
+                    )
+                )
+                
+                // Helper text
+                if (errorMessage == null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Renaming \"${category.name}\"",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val trimmedName = newName.trim()
+                    when {
+                        trimmedName.isEmpty() -> {
+                            errorMessage = "Category name cannot be empty"
+                        }
+                        trimmedName.length < 2 -> {
+                            errorMessage = "Category name must be at least 2 characters"
+                        }
+                        trimmedName == category.name -> {
+                            errorMessage = "Please enter a different name"
+                        }
+                        existingCategories.any { it.equals(trimmedName, ignoreCase = true) } -> {
+                            errorMessage = "A category with this name already exists"
+                        }
+                        else -> {
+                            onConfirm(trimmedName)
+                        }
+                    }
+                },
+                enabled = newName.isNotBlank() && newName.trim() != category.name,
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
+                Text(
+                    text = "Rename",
                     style = MaterialTheme.typography.labelLarge
                 )
             }

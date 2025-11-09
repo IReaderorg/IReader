@@ -43,3 +43,6 @@ DELETE FROM download WHERE book_id = :book_id;
 
 deleteAll:
 DELETE FROM download;
+
+updatePriority:
+UPDATE download SET priority = CAST(:priority AS INTEGER) WHERE chapter_id = :chapterId;

@@ -12,6 +12,7 @@ import ireader.domain.usecases.download.get.FindDownloadsUseCase
 import ireader.domain.usecases.download.get.SubscribeDownloadsUseCase
 import ireader.domain.usecases.download.insert.InsertDownload
 import ireader.domain.usecases.download.insert.InsertDownloads
+import ireader.domain.usecases.download.update.UpdateDownloadPriority
 import ireader.domain.usecases.history.HistoryUseCase
 import ireader.domain.usecases.local.book_usecases.FindAllInLibraryBooks
 import ireader.domain.usecases.local.book_usecases.FindBookById
@@ -61,6 +62,9 @@ import ireader.domain.usecases.remote.GetRemoteBooksUseCase
 import ireader.domain.usecases.remote.GetRemoteChapters
 import ireader.domain.usecases.remote.GetRemoteReadingContent
 import ireader.domain.usecases.remote.RemoteUseCases
+import ireader.domain.usecases.statistics.GetReadingStatisticsUseCase
+import ireader.domain.usecases.statistics.StatisticsUseCases
+import ireader.domain.usecases.statistics.TrackReadingProgressUseCase
 import ireader.domain.usecases.updates.DeleteAllUpdates
 import ireader.domain.usecases.updates.SubscribeUpdates
 import ireader.domain.usecases.updates.UpdateUseCases
@@ -74,8 +78,10 @@ val UseCasesInject = module {
         getRemoteBooks = GetRemoteBooksUseCase(),
         getRemoteChapters = GetRemoteChapters(),
         getRemoteReadingContent = GetRemoteReadingContent(),
+        globalSearch = get(),
     ) }
     single<ireader.domain.usecases.reader.PreloadChapterUseCase> { ireader.domain.usecases.reader.PreloadChapterUseCase() }
+    single<ireader.domain.usecases.reader.ApplyDefaultReadingModeUseCase> { ireader.domain.usecases.reader.ApplyDefaultReadingModeUseCase(get(), get()) }
     single<ireader.domain.usecases.local.LocalInsertUseCases> {
         ireader.domain.usecases.local.LocalInsertUseCases(
             insertBook = InsertBook(get()),
@@ -169,6 +175,7 @@ val UseCasesInject = module {
         insertDownload = InsertDownload(get()),
         insertDownloads = InsertDownloads(get()),
         subscribeDownloadsUseCase = SubscribeDownloadsUseCase(get()),
+        updateDownloadPriority = UpdateDownloadPriority(get()),
     ) }
     
     // Translation use cases
@@ -197,4 +204,15 @@ val UseCasesInject = module {
     single { ireader.domain.usecases.glossary.ExportGlossaryUseCase(get()) }
     single { ireader.domain.usecases.glossary.ImportGlossaryUseCase(get()) }
     single { ireader.domain.usecases.glossary.GetGlossaryAsMapUseCase(get()) }
+    
+    // Batch operations use cases
+    single { ireader.domain.usecases.local.book_usecases.DownloadUnreadChaptersUseCase(get(), get()) }
+    
+    // Statistics use cases
+    single { GetReadingStatisticsUseCase(get()) }
+    single { TrackReadingProgressUseCase(get()) }
+    single { StatisticsUseCases(
+        getReadingStatistics = get(),
+        trackReadingProgress = get()
+    ) }
 }

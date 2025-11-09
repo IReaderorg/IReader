@@ -1,67 +1,48 @@
 package ireader.presentation.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Api
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Help
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.Button
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.data.engines.ContentType
 import ireader.domain.data.engines.ToneType
 import ireader.domain.usecases.translate.TranslationEnginesManager
-import ireader.i18n.localize
 import ireader.i18n.resources.MR
-import ireader.presentation.ui.component.components.ChipChoicePreference
 import ireader.presentation.ui.component.components.Components
-import ireader.presentation.ui.component.components.PreferenceRow
-import ireader.presentation.ui.component.components.SwitchPreference
 import ireader.presentation.ui.component.components.setupUiComponent
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.presentation.ui.core.ui.Colour
 import ireader.presentation.ui.core.ui.PreferenceMutableState
+import ireader.presentation.ui.settings.general.TestConnectionState
+import ireader.presentation.ui.settings.general.TranslationSettingsViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun TranslationSettingsScreen(
@@ -88,6 +69,7 @@ fun TranslationSettingsScreen(
     onTranslatorToneTypeChange: (Int) -> Unit,
     onTranslatorPreserveStyleChange: (Boolean) -> Unit,
     translationEnginesManager: TranslationEnginesManager,
+    viewModel: TranslationSettingsViewModel? = null,
 ) {
     // This state is used to force recomposition
     var recomposeCounter by remember { mutableStateOf(0) }
@@ -242,6 +224,50 @@ fun TranslationSettingsScreen(
             )
         }
 
+        // Add Test Connection button for API-based engines
+        if (viewModel != null) {
+            items.add(Components.Dynamic {
+                val testState = viewModel.testConnectionState
+                
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Button(
+                        onClick = { viewModel.testConnection() },
+                        enabled = testState !is TestConnectionState.Testing,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        when (testState) {
+                            is TestConnectionState.Testing -> Text("Testing Connection...")
+                            else -> Text("Test Connection")
+                        }
+                    }
+                    
+                    when (testState) {
+                        is TestConnectionState.Success -> {
+                            Text(
+                                text = testState.message,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+                        is TestConnectionState.Error -> {
+                            Text(
+                                text = testState.message,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+                        else -> {}
+                    }
+                }
+            })
+        }
+        
         items.add(Components.Space)
     }
 
@@ -661,19 +687,59 @@ fun TranslationSettingsScreen(
                         isRefreshing = true
                         refreshMessage = null
                         coroutineScope.launch {
-                            val engines = translationEnginesManager.getAvailableEngines()
-                            val engine = engines.find { it.id == 8L } as? ireader.domain.usecases.translate.GeminiTranslateEngine
-                            if (engine != null && geminiApiKey.value.isNotBlank()) {
-                                val result = engine.fetchAvailableGeminiModels(geminiApiKey.value)
-                                refreshMessage = if (result.isSuccess) {
-                                    "Successfully loaded ${result.getOrNull()?.size ?: 0} models"
-                                } else {
-                                    "Failed to load models: ${result.exceptionOrNull()?.message}"
+                            try {
+                                val engines = translationEnginesManager.getAvailableEngines()
+                                val engine = engines.find { it.id == 8L }
+                                
+                                if (engine == null) {
+                                    refreshMessage = "Gemini engine not found. Please restart the app."
+                                    isRefreshing = false
+                                    return@launch
                                 }
-                            } else {
-                                refreshMessage = "Please enter your Gemini API key first"
+                                
+                                if (geminiApiKey.value.isBlank()) {
+                                    refreshMessage = "Please enter your Gemini API key first"
+                                    isRefreshing = false
+                                    return@launch
+                                }
+                                
+                                // Cast to WebscrapingTranslateEngine to access fetchAvailableGeminiModels
+                                val geminiEngine = engine as? ireader.domain.usecases.translate.WebscrapingTranslateEngine
+                                
+                                if (geminiEngine != null) {
+                                    val result = geminiEngine.fetchAvailableGeminiModels(geminiApiKey.value)
+                                    refreshMessage = if (result.isSuccess) {
+                                        val models = result.getOrNull()
+                                        if (models.isNullOrEmpty()) {
+                                            "No models found. Please check your API key."
+                                        } else {
+                                            "Successfully loaded ${models.size} model(s)"
+                                        }
+                                    } else {
+                                        val error = result.exceptionOrNull()
+                                        when {
+                                            error?.message?.contains("401") == true || 
+                                            error?.message?.contains("API key") == true -> 
+                                                "Invalid API key. Please check your key and try again."
+                                            error?.message?.contains("403") == true -> 
+                                                "API key does not have permission. Please check your Google Cloud project settings."
+                                            error?.message?.contains("timeout") == true || 
+                                            error?.message?.contains("network") == true -> 
+                                                "Network error. Please check your internet connection and try again."
+                                            error?.message?.contains("429") == true -> 
+                                                "Rate limit exceeded. Please wait a moment and try again."
+                                            else -> 
+                                                "Failed to load models: ${error?.message ?: "Unknown error"}"
+                                        }
+                                    }
+                                } else {
+                                    refreshMessage = "Engine type mismatch. Please restart the app."
+                                }
+                            } catch (e: Exception) {
+                                refreshMessage = "Error: ${e.message ?: "Unknown error occurred"}"
+                            } finally {
+                                isRefreshing = false
                             }
-                            isRefreshing = false
                         }
                     },
                     enabled = !isRefreshing && geminiApiKey.value.isNotBlank(),

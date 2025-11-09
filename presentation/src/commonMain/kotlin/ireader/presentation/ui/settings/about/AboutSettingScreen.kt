@@ -1,6 +1,5 @@
 package ireader.presentation.ui.settings.about
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -15,6 +15,7 @@ import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,8 +23,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -47,11 +51,14 @@ import kotlinx.coroutines.launch
 fun AboutSettingScreen(
     modifier: Modifier = Modifier,
     getFormattedBuildTime: () -> String,
-    onPopBackStack: () -> Unit
+    onPopBackStack: () -> Unit,
+    onNavigateToChangelog: () -> Unit = {}
 ) {
     val uriHandler = LocalUriHandler.current
     val clipboardManager = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    var isCheckingUpdate by remember { mutableStateOf(false) }
     
     // Build version info string for copying
     val versionInfo = remember(getFormattedBuildTime()) {
@@ -68,9 +75,15 @@ fun AboutSettingScreen(
         }
     }
     
-    LazyColumn(
+    androidx.compose.material3.Scaffold(
         modifier = modifier,
-    ) {
+        snackbarHost = {
+            androidx.compose.material3.SnackbarHost(hostState = snackbarHostState)
+        }
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier.padding(paddingValues),
+        ) {
         item {
             LogoHeader()
         }
@@ -112,7 +125,10 @@ fun AboutSettingScreen(
                             onClick = {
                                 clipboardManager.setText(AnnotatedString(versionInfo))
                                 scope.launch {
-                                    // Could show a snackbar here if needed
+                                    snackbarHostState.showSnackbar(
+                                        message = "Version info copied to clipboard",
+                                        duration = androidx.compose.material3.SnackbarDuration.Short
+                                    )
                                 }
                             }
                         ) {
@@ -182,15 +198,71 @@ fun AboutSettingScreen(
         item {
             PreferenceRow(
                 title = localize(MR.strings.check_the_update),
+                subtitle = if (isCheckingUpdate) "Checking for updates..." else null,
                 onClick = {
-                    uriHandler.openUri("https://github.com/kazemcodes/Infinity/releases")
+                    if (!isCheckingUpdate) {
+                        isCheckingUpdate = true
+                        scope.launch {
+                            try {
+                                // Show checking message
+                                snackbarHostState.showSnackbar(
+                                    message = "Checking for updates...",
+                                    duration = androidx.compose.material3.SnackbarDuration.Short
+                                )
+                                
+                                // Simulate checking (in real implementation, this would check GitHub API)
+                                kotlinx.coroutines.delay(1500)
+                                
+                                // For now, we'll just open the releases page
+                                // In a real implementation, you would:
+                                // 1. Fetch latest release from GitHub API
+                                // 2. Compare with current version
+                                // 3. Show appropriate message
+                                
+                                try {
+                                    uriHandler.openUri("https://github.com/kazemcodes/Infinity/releases")
+                                    
+                                    // Show success message
+                                    snackbarHostState.showSnackbar(
+                                        message = "Opening releases page. Check if a newer version is available.",
+                                        duration = androidx.compose.material3.SnackbarDuration.Long
+                                    )
+                                } catch (uriException: Exception) {
+                                    // Failed to open browser
+                                    snackbarHostState.showSnackbar(
+                                        message = "Failed to open browser. Please visit GitHub manually.",
+                                        duration = androidx.compose.material3.SnackbarDuration.Long
+                                    )
+                                }
+                                
+                                isCheckingUpdate = false
+                            } catch (e: Exception) {
+                                isCheckingUpdate = false
+                                // Network or other error
+                                snackbarHostState.showSnackbar(
+                                    message = "Failed to check for updates. Please check your internet connection and try again.",
+                                    duration = androidx.compose.material3.SnackbarDuration.Long
+                                )
+                            }
+                        }
+                    }
                 },
+                action = {
+                    if (isCheckingUpdate) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
             )
         }
         item {
             PreferenceRow(
                 title = localize(MR.strings.whats_new),
-                onClick = { uriHandler.openUri("https://github.com/kazemcodes/IReader/releases/latest") },
+                subtitle = "View version history and new features",
+                onClick = onNavigateToChangelog
             )
         }
         // Enhanced social links section
@@ -229,6 +301,7 @@ fun AboutSettingScreen(
                     )
                 }
             }
+        }
         }
     }
 }

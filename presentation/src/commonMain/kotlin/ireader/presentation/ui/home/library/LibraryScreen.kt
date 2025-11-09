@@ -16,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
 
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.Category
@@ -24,11 +25,19 @@ import ireader.i18n.resources.MR
 import ireader.presentation.ui.core.ui.EmptyScreen
 import ireader.presentation.ui.core.ui.LoadingScreen
 import ireader.presentation.ui.home.library.components.EditCategoriesDialog
+import ireader.presentation.ui.home.library.components.LibraryFilterBottomSheet
+import ireader.presentation.ui.home.library.components.BatchOperationProgressDialog
+import ireader.presentation.ui.home.library.components.BatchOperationResultDialog
 import ireader.presentation.ui.home.library.ui.LibraryContent
 import ireader.presentation.ui.home.library.ui.LibrarySelectionBar
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 
 
 @ExperimentalAnimationApi
@@ -43,6 +52,7 @@ fun LibraryScreen(
     onBook: (book: BookItem) -> Unit,
     onLongBook: (book: BookItem) -> Unit,
     onDownload: () -> Unit,
+    onDownloadUnread: () -> Unit,
     onMarkAsRead: () -> Unit,
     onMarkAsNotRead: () -> Unit,
     onDelete: () -> Unit,
@@ -59,7 +69,11 @@ fun LibraryScreen(
     editCategoryOnRemoteInInsertQueue: (Category) -> Unit,
     editCategoryOnRemoteInDeleteQueue: (Category) -> Unit,
     editCategoryOnAddDeleteQueue: (Category) -> Unit,
+    showFilterSheet: Boolean = false,
+    onShowFilterSheet: () -> Unit = {},
+    onHideFilterSheet: () -> Unit = {},
 ) {
+    
     LaunchedEffect(vm.selectionMode) {
         requestHideBottomNav(vm.selectionMode)
     }
@@ -127,10 +141,77 @@ fun LibraryScreen(
                     onClickChangeCategory = onClickChangeCategory,
                     onClickDeleteDownload = onDelete,
                     onClickDownload = onDownload,
+                    onClickDownloadUnread = onDownloadUnread,
                     onClickMarkAsRead = onMarkAsRead,
                     onClickMarkAsUnread = onMarkAsNotRead
                 )
             }
         }
+        
+        // Filter Bottom Sheet
+        if (showFilterSheet) {
+            LibraryFilterBottomSheet(
+                filters = vm.filters.value,
+                sorting = vm.sorting.value,
+                columnCount = vm.columnInPortrait.value,
+                displayMode = vm.layout,
+                onFilterToggle = { type ->
+                    vm.toggleFilterImmediate(type)
+                },
+                onSortChange = { type ->
+                    vm.toggleSort(type)
+                },
+                onSortDirectionToggle = {
+                    vm.toggleSortDirection()
+                },
+                onColumnCountChange = { count ->
+                    vm.updateColumnCount(count)
+                },
+                onDisplayModeChange = { mode ->
+                    vm.onLayoutTypeChange(mode)
+                },
+                onDismiss = onHideFilterSheet
+            )
+        }
+        
+        // Batch operation progress dialog
+        BatchOperationProgressDialog(
+            isVisible = vm.batchOperationInProgress,
+            message = vm.batchOperationMessage ?: "Processing..."
+        )
+        
+        // Batch operation result dialog
+        var showResultDialog by remember { mutableStateOf(false) }
+        var resultMessage by remember { mutableStateOf("") }
+        var showUndoOption by remember { mutableStateOf(false) }
+        
+        LaunchedEffect(vm.batchOperationMessage, vm.batchOperationInProgress) {
+            if (!vm.batchOperationInProgress && vm.batchOperationMessage != null) {
+                resultMessage = vm.batchOperationMessage ?: ""
+                showResultDialog = true
+                // Show undo option if there's a recent undo state (within 10 seconds)
+                showUndoOption = vm.lastUndoState != null && 
+                    (System.currentTimeMillis() - (vm.lastUndoState?.timestamp ?: 0)) < 10000
+            }
+        }
+        
+        BatchOperationResultDialog(
+            isVisible = showResultDialog,
+            title = "Batch Operation Complete",
+            message = resultMessage,
+            showUndo = showUndoOption,
+            onUndo = {
+                vm.scope.launch(Dispatchers.IO) {
+                    vm.lastUndoState?.let { undoState ->
+                        vm.undoMarkOperation(undoState.previousChapterStates)
+                        vm.lastUndoState = null
+                    }
+                }
+            },
+            onDismiss = {
+                showResultDialog = false
+                vm.batchOperationMessage = null
+            }
+        )
     }
 }

@@ -91,7 +91,8 @@ fun ComfortableGridLayout(
                                 downloaded = if (showReadBadge || showDownloadedChaptersBadge) book.downloaded else null,
                                 isLocal = showLocalMangaBadge && book.sourceId == -1L,
                                 sourceId = book.sourceId,
-                                showLanguage = showLanguageBadge
+                                showLanguage = showLanguageBadge,
+                                isPinned = false // Will be implemented in task 5.2
                             )
                         }
 

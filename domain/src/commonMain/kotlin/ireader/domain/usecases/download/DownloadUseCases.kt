@@ -9,6 +9,7 @@ import ireader.domain.usecases.download.get.FindDownloadsUseCase
 import ireader.domain.usecases.download.get.SubscribeDownloadsUseCase
 import ireader.domain.usecases.download.insert.InsertDownload
 import ireader.domain.usecases.download.insert.InsertDownloads
+import ireader.domain.usecases.download.update.UpdateDownloadPriority
 
 data class DownloadUseCases(
     val subscribeDownloadsUseCase: SubscribeDownloadsUseCase,
@@ -20,4 +21,5 @@ data class DownloadUseCases(
     val deleteSavedDownloadByBookId: DeleteSavedDownloadByBookId,
     val insertDownload: InsertDownload,
     val insertDownloads: InsertDownloads,
+    val updateDownloadPriority: UpdateDownloadPriority,
 )

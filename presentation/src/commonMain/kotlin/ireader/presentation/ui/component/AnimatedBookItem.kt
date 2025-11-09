@@ -10,14 +10,18 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -245,7 +249,8 @@ private fun GridModeBookCard(
                 BookCoverImage(
                     book = book,
                     headers = headers,
-                    isSelected = isSelected
+                    isSelected = isSelected,
+                    isBlurred = false // Will be controlled by preferences in the library screen
                 )
                 
                 // Status indicators row at the top
@@ -360,7 +365,8 @@ private fun ListModeBookCard(
                 BookCoverImage(
                     book = book,
                     headers = headers,
-                    isSelected = isSelected
+                    isSelected = isSelected,
+                    isBlurred = false // Will be controlled by preferences in the library screen
                 )
             }
             
@@ -445,13 +451,19 @@ private fun ListModeBookCard(
 fun BookCoverImage(
     book: BookItem,
     headers: ((url: String) -> okhttp3.Headers?)? = null,
-    isSelected: Boolean = false
+    isSelected: Boolean = false,
+    isBlurred: Boolean = false
 ) {
+    var revealed by remember(book.id) { mutableStateOf(!isBlurred) }
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
             .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clickable(enabled = isBlurred && !revealed) {
+                revealed = true
+            }
     ) {
         // Apply subtle border effect for selected items
         if (isSelected) {
@@ -469,8 +481,28 @@ fun BookCoverImage(
         IImageLoader(
             model = BookCover.from(book).cover,
             contentDescription = book.title,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .then(
+                    if (isBlurred && !revealed) {
+                        Modifier.blur(20.dp)
+                    } else {
+                        Modifier
+                    }
+                ),
             contentScale = ContentScale.Crop
         )
+        
+        // Show reveal icon when blurred
+        if (isBlurred && !revealed) {
+            Icon(
+                imageVector = androidx.compose.material.icons.Icons.Default.Visibility,
+                contentDescription = "Tap to reveal",
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(32.dp),
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+        }
     }
 } 

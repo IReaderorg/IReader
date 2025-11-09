@@ -4,6 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -11,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,6 +35,7 @@ val kaomojis = listOf(
 fun EmptyScreen(
     modifier: Modifier = Modifier,
     text: String,
+    icon: ImageVector? = null,
 ) {
     val kaomoji = remember { kaomojis.random() }
 
@@ -38,13 +44,24 @@ fun EmptyScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = kaomoji,
-            style = MaterialTheme.typography.bodyMedium.copy(
-                color = LocalContentColor.current.copy(alpha = ContentAlpha.medium()),
-                fontSize = 48.sp
-            ),
-        )
+        if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(96.dp)
+                    .padding(bottom = 16.dp),
+                tint = LocalContentColor.current.copy(alpha = ContentAlpha.medium())
+            )
+        } else {
+            Text(
+                text = kaomoji,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = LocalContentColor.current.copy(alpha = ContentAlpha.medium()),
+                    fontSize = 48.sp
+                ),
+            )
+        }
         Text(
             text = text,
             style = MaterialTheme.typography.bodyMedium.copy(

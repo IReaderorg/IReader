@@ -96,6 +96,23 @@ fun AppearanceSettingScreen(
     var colorPickerInfo by remember {
         mutableStateOf(ColorPickerInfo())
     }
+    
+    // Theme export state
+    var showThemeExport by remember { mutableStateOf(false) }
+    var themeToExport by remember { mutableStateOf("") }
+    
+    OnShowThemeExport(
+        show = showThemeExport,
+        themeJson = themeToExport,
+        onFileSelected = { success ->
+            showThemeExport = false
+            if (success) {
+                vm.showSnackBar(UiText.DynamicString("Theme exported successfully"))
+            } else {
+                vm.showSnackBar(UiText.DynamicString("Failed to export theme"))
+            }
+        }
+    )
 
     LazyColumnWithInsets(scaffoldPaddingValues) {
         // Theme Mode Section
@@ -127,6 +144,35 @@ fun AppearanceSettingScreen(
                 title = "Material You (Dynamic Colors)",
                 subtitle = "Adapt colors from your wallpaper (Android 12+)",
             ).Build()
+        }
+        item {
+            Components.Switch(
+                preference = vm.useTrueBlack,
+                title = "Use True Black (AMOLED)",
+                subtitle = "Pure black backgrounds for power saving on AMOLED screens",
+            ).Build()
+        }
+        
+        // Section Divider
+        item {
+            Divider(modifier = Modifier.padding(vertical = 16.dp))
+        }
+        
+        // Font Customization Section
+        item {
+            Components.Header(
+                    text = "Font Customization",
+            ).Build()
+        }
+        item {
+            Components.Dynamic {
+                ChoicePreference<String>(
+                        preference = vm.appUiFont,
+                        choices = vm.availableFonts,
+                        title = "App UI Font",
+                        subtitle = "Font used for all app interface elements (not reader)",
+                )
+            }.Build()
         }
         
         // Section Divider
@@ -401,8 +447,8 @@ fun AppearanceSettingScreen(
                             onClick = {
                                 val exported = vm.exportCurrentTheme()
                                 if (exported != null) {
-                                    vm.importExportResult = exported
-                                    vm.showExportDialog = true
+                                    themeToExport = exported
+                                    showThemeExport = true
                                 } else {
                                     vm.showSnackBar(UiText.DynamicString("No custom theme selected"))
                                 }
@@ -416,8 +462,8 @@ fun AppearanceSettingScreen(
                         // Export all themes button
                         Button(
                             onClick = {
-                                vm.importExportResult = vm.exportAllCustomThemes()
-                                vm.showExportDialog = true
+                                themeToExport = vm.exportAllCustomThemes()
+                                showThemeExport = true
                             },
                             modifier = Modifier.weight(1f)
                         ) {
@@ -482,47 +528,7 @@ fun AppearanceSettingScreen(
         )
     }
     
-    // Export dialog
-    if (vm.showExportDialog) {
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { vm.showExportDialog = false },
-            title = { Text("Export Theme") },
-            text = {
-                Column {
-                    Text("Copy the JSON below to backup your theme:")
-                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.requiredHeight(8.dp))
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .requiredHeight(200.dp),
-                        shape = MaterialTheme.shapes.small,
-                        color = MaterialTheme.colorScheme.surfaceVariant
-                    ) {
-                        val scrollState = androidx.compose.foundation.rememberScrollState()
-                        androidx.compose.foundation.layout.Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .verticalScroll(scrollState)
-                                .padding(8.dp)
-                        ) {
-                            androidx.compose.foundation.text.selection.SelectionContainer {
-                                Text(
-                                    vm.importExportResult ?: "",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
-                                )
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { vm.showExportDialog = false }) {
-                    Text("Close")
-                }
-            }
-        )
-    }
+
     
     // Import dialog
     if (vm.showImportDialog) {

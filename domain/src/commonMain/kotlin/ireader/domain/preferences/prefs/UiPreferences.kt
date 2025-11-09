@@ -21,6 +21,15 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun dynamicColorMode(): Preference<Boolean> {
         return preferenceStore.getBoolean("dynamic_color_mode", false)
     }
+    
+    fun useTrueBlack(): Preference<Boolean> {
+        return preferenceStore.getBoolean("use_true_black", false)
+    }
+    
+    fun appUiFont(): Preference<String> {
+        return preferenceStore.getString("app_ui_font", "default")
+    }
+    
         fun installerMode(): Preference<PreferenceValues.Installer> {
         return preferenceStore.getEnum("installer_mode", ireader.domain.models.prefs.PreferenceValues.Installer.AndroidPackageManager)
     }
@@ -146,5 +155,43 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
 
     fun showLanguageFilter(): Preference<Boolean> {
         return preferenceStore.getBoolean("show_language_filter", true)
+    }
+
+    fun groupHistoryByNovel(): Preference<Boolean> {
+        return preferenceStore.getBoolean("group_history_by_novel", false)
+    }
+    
+    // Security Preferences
+    
+    fun appLockEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean("app_lock_enabled", false)
+    }
+    
+    fun appLockMethod(): Preference<String> {
+        return preferenceStore.getString("app_lock_method", "none")
+    }
+    
+    fun appLockPin(): Preference<String> {
+        return preferenceStore.getString("app_lock_pin", "")
+    }
+    
+    fun appLockPassword(): Preference<String> {
+        return preferenceStore.getString("app_lock_password", "")
+    }
+    
+    fun biometricEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean("biometric_enabled", false)
+    }
+    
+    fun secureScreenEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean("secure_screen_enabled", false)
+    }
+    
+    fun hideContentEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean("hide_content_enabled", false)
+    }
+    
+    fun adultSourceLockEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean("adult_source_lock_enabled", false)
     }
 }

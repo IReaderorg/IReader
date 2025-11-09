@@ -19,6 +19,7 @@ fun AppTheme(
 ) {
     val vm = koinInject<AppThemeViewModel>()
     val (materialColors, customColors) = vm.getColors()
+    val typography = vm.getTypography()
     val systemUiController = LocalISystemUIController.currentOrThrow
     systemUiController.InitController()
     val transparentStatusBar = LocalTransparentStatusBar.current.enabled
@@ -77,7 +78,7 @@ fun AppTheme(
     AppColors(
         materialColors = materialColors,
         extraColors = customColors,
-        typography = AppTypography,
+        typography = typography,
         shape = Shapes
     ) {
         CompositionLocalProvider(

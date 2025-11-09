@@ -90,12 +90,6 @@ fun ReaderText(
     
     BoxWithConstraints(
         modifier = Modifier
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null
-            ) {
-                debouncedToggleReaderMode()
-            }
             .supportDesktopScroll(
                 scrollState,
                 scope,
@@ -118,12 +112,20 @@ fun ReaderText(
 
 
         Box(
-            modifier = Modifier.padding(
-                top = vm.topMargin.value.dp,
-                bottom = vm.bottomMargin.value.dp,
-                start = vm.leftMargin.value.dp,
-                end = vm.rightMargin.value.dp
-            )
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null
+                ) {
+                    debouncedToggleReaderMode()
+                }
+                .padding(
+                    top = vm.topMargin.value.dp,
+                    bottom = vm.bottomMargin.value.dp,
+                    start = vm.leftMargin.value.dp,
+                    end = vm.rightMargin.value.dp
+                )
         ) {
             MultiSwipeRefresh(
                 modifier = Modifier.fillMaxSize(),

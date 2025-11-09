@@ -8,7 +8,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import ireader.domain.models.entities.Catalog
@@ -33,6 +36,44 @@ fun RemoteSourcesScreen(
         onClickUninstall: (Catalog) -> Unit,
         onCancelInstaller: ((Catalog) -> Unit)? = null,
 ) {
+    // State for login dialog
+    var showLoginDialog by remember { mutableStateOf(false) }
+    var loginSourceId by remember { mutableStateOf<Long?>(null) }
+    var loginSourceName by remember { mutableStateOf("") }
+    
+    // State for add repository dialog
+    var showAddRepositoryDialog by remember { mutableStateOf(false) }
+    
+    // Show login dialog when needed
+    if (showLoginDialog && loginSourceId != null) {
+        SourceLoginDialog(
+            sourceName = loginSourceName,
+            onDismiss = {
+                showLoginDialog = false
+                loginSourceId = null
+            },
+            onLogin = { username, password ->
+                loginSourceId?.let { sourceId ->
+                    vm.loginToSource(sourceId, username, password)
+                }
+                showLoginDialog = false
+                loginSourceId = null
+            }
+        )
+    }
+    
+    // Show add repository dialog when needed
+    if (showAddRepositoryDialog) {
+        AddRepositoryDialog(
+            onDismiss = {
+                showAddRepositoryDialog = false
+            },
+            onAdd = { url ->
+                vm.addRepository(url)
+                showAddRepositoryDialog = false
+            }
+        )
+    }
     val allCatalogs = remember {
         derivedStateOf {
             vm.pinnedCatalogs + vm.unpinnedCatalogs
@@ -131,6 +172,12 @@ fun RemoteSourcesScreen(
                                         if (onCancelInstaller != null) {
                                             onCancelInstaller(it)
                                         }
+                                    },
+                                    sourceStatus = vm.getSourceStatus(catalog.source.sourceId),
+                                    onLogin = {
+                                        loginSourceId = catalog.source.sourceId
+                                        loginSourceName = catalog.source.name
+                                        showLoginDialog = true
                                     },
                             )
                         }

@@ -65,12 +65,29 @@ fun ExploreScreen(
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
     prevPaddingValues: PaddingValues
 ) {
-    val scrollState = rememberLazyListState()
+    val scrollState = rememberLazyListState(
+        initialFirstVisibleItemIndex = vm.savedScrollIndex,
+        initialFirstVisibleItemScrollOffset = vm.savedScrollOffset
+    )
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
 
-    val gridState = rememberLazyGridState()
+    val gridState = rememberLazyGridState(
+        initialFirstVisibleItemIndex = vm.savedScrollIndex,
+        initialFirstVisibleItemScrollOffset = vm.savedScrollOffset
+    )
 
     val scope = rememberCoroutineScope()
+
+    // Save scroll position when it changes
+    LaunchedEffect(scrollState.firstVisibleItemIndex, scrollState.firstVisibleItemScrollOffset) {
+        vm.savedScrollIndex = scrollState.firstVisibleItemIndex
+        vm.savedScrollOffset = scrollState.firstVisibleItemScrollOffset
+    }
+    
+    LaunchedEffect(gridState.firstVisibleItemIndex, gridState.firstVisibleItemScrollOffset) {
+        vm.savedScrollIndex = gridState.firstVisibleItemIndex
+        vm.savedScrollOffset = gridState.firstVisibleItemScrollOffset
+    }
 
     LaunchedEffect(key1 = true) {
         vm.modifiedFilter = source.getFilters()

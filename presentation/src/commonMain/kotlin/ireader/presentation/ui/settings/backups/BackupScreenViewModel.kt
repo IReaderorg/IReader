@@ -20,14 +20,34 @@ class BackupScreenViewModel(
     val restoreBackup: RestoreBackup,
     val createBackup: CreateBackup,
     val uiPreferences: UiPreferences,
-    //val automaticBackupUseCase: PreferenceValues.AutomaticBackup,
     val getSimpleStorage: GetSimpleStorage,
+    private val scheduleAutomaticBackup: ireader.domain.usecases.backup.ScheduleAutomaticBackup? = null,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
 
     val automaticBackup = uiPreferences.automaticBackupTime().asState()
     val maxAutomaticFiles = uiPreferences.maxAutomaticBackupFiles().asState()
+    
+    init {
+        // Schedule automatic backups if enabled
+        if (automaticBackup.value != ireader.domain.models.prefs.PreferenceValues.AutomaticBackup.Off) {
+            scheduleAutomaticBackup?.schedule(automaticBackup.value)
+        }
+    }
+    
+    /**
+     * Update automatic backup frequency and reschedule
+     */
+    fun updateAutomaticBackupFrequency(frequency: ireader.domain.models.prefs.PreferenceValues.AutomaticBackup) {
+        automaticBackup.value = frequency
+        
+        if (frequency == ireader.domain.models.prefs.PreferenceValues.AutomaticBackup.Off) {
+            scheduleAutomaticBackup?.cancel()
+        } else {
+            scheduleAutomaticBackup?.schedule(frequency)
+        }
+    }
 //    fun onLocalBackupRequested(onStart: (Intent) -> Unit) {
 //        val mimeTypes = arrayOf("application/gzip")
 //        val fn = "IReader_${convertLongToTime(Calendar.getInstance().timeInMillis)}.gz"

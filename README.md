@@ -61,6 +61,10 @@ Check out our comprehensive wiki for detailed guides:
 - [Troubleshooting](docs/wiki/Troubleshooting.md) - Solutions to common issues
 - [FAQ](docs/wiki/FAQ.md) - Frequently asked questions
 
+### Developer Documentation
+
+- [UI Improvements Guide](docs/UI_Improvements_Guide.md) - Comprehensive guide to the enhanced UI components and improvements
+
 ---
 
 ## 🌍 Contributing

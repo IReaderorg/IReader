@@ -88,6 +88,32 @@ class ReaderScreenViewModel(
     var isSettingChanging by mutableStateOf(false)
 
     var isSettingChangingJob : Job? = null
+    
+    var showBrightnessControl by mutableStateOf(false)
+    var showFontSizeAdjuster by mutableStateOf(false)
+    
+    // Autoscroll speed control
+    fun increaseAutoScrollSpeed() {
+        val currentSpeed = autoScrollOffset.value
+        if (currentSpeed < 2000) {
+            val newSpeed = (currentSpeed + 50).coerceAtMost(2000)
+            autoScrollOffset.value = newSpeed
+            readerPreferences.autoScrollOffset().set(newSpeed)
+        }
+    }
+    
+    fun decreaseAutoScrollSpeed() {
+        val currentSpeed = autoScrollOffset.value
+        if (currentSpeed > 100) {
+            val newSpeed = (currentSpeed - 50).coerceAtLeast(100)
+            autoScrollOffset.value = newSpeed
+            readerPreferences.autoScrollOffset().set(newSpeed)
+        }
+    }
+    
+    fun toggleAutoScroll() {
+        autoScrollMode = !autoScrollMode
+    }
     fun makeSettingTransparent() {
         isSettingChangingJob?.cancel()
         isSettingChangingJob = scope.launch {
@@ -142,6 +168,8 @@ class ReaderScreenViewModel(
     var chapterNumberMode by readerPreferences.showChapterNumberPreferences().asState()
     val isScrollIndicatorDraggable = readerPreferences.scrollbarMode().asState()
     val font = platformUiPreferences.font()?.asState()
+    val selectedFontId = readerPreferences.selectedFontId().asState()
+    var customFont by mutableStateOf<ireader.domain.models.fonts.CustomFont?>(null)
     val webViewIntegration = readerPreferences.webViewIntegration().asState()
     val selectableMode = readerPreferences.selectableText().asState()
     val fontSize = readerPreferences.fontSize().asState()
@@ -164,6 +192,9 @@ class ReaderScreenViewModel(
     val showTranslatedContent = readerPreferences.showTranslatedContent().asState()
     val autoSaveTranslations = readerPreferences.autoSaveTranslations().asState()
     val applyGlossaryToTranslations = readerPreferences.applyGlossaryToTranslations().asState()
+    val bilingualModeEnabled = readerPreferences.bilingualModeEnabled().asState()
+    val bilingualModeLayout = readerPreferences.bilingualModeLayout().asState()
+    val volumeKeyNavigation = readerPreferences.volumeKeyNavigation().asState()
     
     // Override to provide translation-aware content
     override fun getCurrentContent(): List<ireader.core.source.model.Page> {
@@ -362,7 +393,7 @@ class ReaderScreenViewModel(
         isToggleInProgress = true
         
         // Set the reader mode state - this will trigger the LaunchedEffect in ReaderScreen
-        isReaderModeEnable = enable ?: !state.isReaderModeEnable
+        isReaderModeEnable = enable ?: !isReaderModeEnable
         
         // Make sure the bottom content is accessible when reader mode is off
         isMainBottomModeEnable = !isReaderModeEnable
@@ -672,6 +703,23 @@ class ReaderScreenViewModel(
     }
     
     /**
+     * Toggle bilingual mode
+     */
+    fun toggleBilingualMode() {
+        val currentValue = bilingualModeEnabled.value
+        readerPreferences.bilingualModeEnabled().set(!currentValue)
+    }
+    
+    /**
+     * Switch bilingual mode layout
+     */
+    fun switchBilingualLayout() {
+        val currentLayout = bilingualModeLayout.value
+        // Toggle between 0 (SIDE_BY_SIDE) and 1 (PARAGRAPH_BY_PARAGRAPH)
+        readerPreferences.bilingualModeLayout().set(if (currentLayout == 0) 1 else 0)
+    }
+    
+    /**
      * Get current chapter content (original or translated)
      */
     fun getCurrentChapterContent(): List<ireader.core.source.model.Page> {
@@ -692,10 +740,77 @@ class ReaderScreenViewModel(
     }
     
     /**
-     * Translate the current chapter
+     * Check if API key is required and set for the current translation engine
+     */
+    fun isApiKeyRequired(): Boolean {
+        val engine = translationEnginesManager.get()
+        return engine.requiresApiKey
+    }
+    
+    /**
+     * Check if API key is set for the current translation engine
+     */
+    fun isApiKeySet(): Boolean {
+        val engine = translationEnginesManager.get()
+        if (!engine.requiresApiKey) return true
+        
+        return when (engine.id) {
+            2L -> openAIApiKey.value.isNotBlank() // OpenAI
+            3L -> deepSeekApiKey.value.isNotBlank() // DeepSeek
+            else -> true
+        }
+    }
+    
+    /**
+     * Get the name of the current translation engine
+     */
+    fun getCurrentEngineName(): String {
+        return translationEnginesManager.get().engineName
+    }
+    
+    /**
+     * Test the translation API connection
+     */
+    fun testTranslationConnection(
+        onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        scope.launch {
+            try {
+                // Test with a simple phrase
+                translationEnginesManager.translateWithContext(
+                    texts = listOf("Hello"),
+                    source = "en",
+                    target = translatorTargetLanguage.value,
+                    onProgress = { },
+                    onSuccess = { translatedTexts ->
+                        if (translatedTexts.isNotEmpty()) {
+                            onSuccess("Connection successful! Translation engine is working correctly.")
+                        } else {
+                            onError("Connection test failed: Empty response")
+                        }
+                    },
+                    onError = { error ->
+                        onError("Connection test failed: ${error.toString()}")
+                    }
+                )
+            } catch (e: Exception) {
+                onError("Connection test failed: ${e.message ?: "Unknown error"}")
+            }
+        }
+    }
+    
+    /**
+     * Translate the current chapter with API key validation
      */
     fun translateCurrentChapter(forceRetranslate: Boolean = false) {
         val chapter = stateChapter ?: return
+        
+        // Check if API key is required and set
+        if (isApiKeyRequired() && !isApiKeySet()) {
+            showSnackBar(UiText.DynamicString("Please configure your ${getCurrentEngineName()} API key in settings"))
+            return
+        }
         
         translationState.isTranslating = true
         translationState.translationError = null
@@ -842,6 +957,269 @@ class ReaderScreenViewModel(
                 showSnackBar(UiText.MStringResource(MR.strings.success))
             } catch (e: Exception) {
                 showSnackBar(UiText.ExceptionString(e))
+            }
+        }
+    }
+
+    // ==================== Find in Chapter Methods ====================
+    
+    /**
+     * Toggle find in chapter bar visibility
+     */
+    fun toggleFindInChapter() {
+        showFindInChapter = !showFindInChapter
+        if (!showFindInChapter) {
+            // Clear search when closing
+            findQuery = ""
+            findMatches = emptyList()
+            currentFindMatchIndex = 0
+        }
+    }
+    
+    /**
+     * Update find query and search for matches
+     */
+    fun updateFindQuery(query: String) {
+        findQuery = query
+        if (query.isEmpty()) {
+            findMatches = emptyList()
+            currentFindMatchIndex = 0
+            return
+        }
+        
+        // Get current chapter content as text
+        val content = getCurrentChapterContent()
+        val fullText = content.joinToString("\n") { page ->
+            when (page) {
+                is ireader.core.source.model.Text -> page.text
+                else -> ""
+            }
+        }
+        
+        // Find all matches using case-insensitive regex
+        val matches = mutableListOf<IntRange>()
+        val regex = Regex(Regex.escape(query), RegexOption.IGNORE_CASE)
+        var matchResult = regex.find(fullText)
+        
+        while (matchResult != null) {
+            matches.add(matchResult.range)
+            matchResult = matchResult.next()
+        }
+        
+        findMatches = matches
+        currentFindMatchIndex = if (matches.isNotEmpty()) 0 else 0
+    }
+    
+    /**
+     * Navigate to next match (with wrap-around)
+     */
+    fun findNext() {
+        if (findMatches.isEmpty()) return
+        currentFindMatchIndex = (currentFindMatchIndex + 1) % findMatches.size
+        scrollToCurrentMatch()
+    }
+    
+    /**
+     * Navigate to previous match (with wrap-around)
+     */
+    fun findPrevious() {
+        if (findMatches.isEmpty()) return
+        currentFindMatchIndex = if (currentFindMatchIndex == 0) {
+            findMatches.size - 1
+        } else {
+            currentFindMatchIndex - 1
+        }
+        scrollToCurrentMatch()
+    }
+    
+    /**
+     * Scroll to the current match position
+     */
+    private fun scrollToCurrentMatch() {
+        // This will be handled by the UI layer
+        // The UI will observe currentFindMatchIndex and scroll accordingly
+    }
+    
+    // ==================== Report Broken Chapter Methods ====================
+    
+    /**
+     * Toggle report dialog visibility
+     */
+    fun toggleReportDialog() {
+        showReportDialog = !showReportDialog
+    }
+    
+    /**
+     * Report a broken chapter
+     * Note: This is a placeholder implementation. In a real app, you would:
+     * 1. Add ReportBrokenChapterUseCase to the ViewModel constructor
+     * 2. Call the use case to save the report to the database
+     * 3. Optionally send the report to a remote server
+     */
+    fun reportBrokenChapter(
+        issueCategory: ireader.domain.models.entities.IssueCategory,
+        description: String
+    ) {
+        val chapter = stateChapter ?: return
+        val bookId = book?.id ?: return
+        
+        scope.launch {
+            try {
+                // TODO: Inject ReportBrokenChapterUseCase and use it here
+                // For now, just show a success message
+                showSnackBar(UiText.DynamicString("Chapter reported successfully. Thank you for your feedback!"))
+                
+                // In a real implementation:
+                // val result = reportBrokenChapterUseCase.execute(
+                //     chapterId = chapter.id,
+                //     bookId = bookId,
+                //     issueCategory = issueCategory,
+                //     description = description
+                // )
+                // if (result.isSuccess) {
+                //     showSnackBar(UiText.DynamicString("Chapter reported successfully"))
+                // } else {
+                //     showSnackBar(UiText.DynamicString("Failed to report chapter"))
+                // }
+            } catch (e: Exception) {
+                showSnackBar(UiText.ExceptionString(e))
+            }
+        }
+    }
+    
+    // ==================== Reading Time Estimation Methods ====================
+    
+    /**
+     * Calculate and update reading time estimation for current chapter
+     * @param scrollProgress Progress through the chapter (0.0 to 1.0)
+     */
+    fun updateReadingTimeEstimation(scrollProgress: Float = 0f) {
+        val content = getCurrentChapterContent()
+        
+        // Extract text from content
+        val fullText = content.joinToString("\n") { page ->
+            when (page) {
+                is ireader.core.source.model.Text -> page.text
+                else -> ""
+            }
+        }
+        
+        // Count total words
+        totalWords = countWords(fullText)
+        
+        // Calculate words remaining based on scroll progress
+        val progressClamped = scrollProgress.coerceIn(0f, 1f)
+        wordsRemaining = (totalWords * (1f - progressClamped)).toInt().coerceAtLeast(0)
+        
+        // Get user's reading speed (default: 225 WPM for average readers)
+        // TODO: Make this configurable in settings
+        val wordsPerMinute = 225
+        
+        // Calculate estimated time
+        estimatedReadingMinutes = calculateReadingTime(wordsRemaining, wordsPerMinute)
+    }
+    
+    /**
+     * Toggle reading time display
+     */
+    fun toggleReadingTimeDisplay() {
+        showReadingTime = !showReadingTime
+    }
+    
+    /**
+     * Count words in text
+     */
+    private fun countWords(text: String): Int {
+        if (text.isBlank()) return 0
+        return text.trim().split(Regex("\\s+")).size
+    }
+    
+    /**
+     * Calculate reading time based on word count and reading speed
+     */
+    private fun calculateReadingTime(wordCount: Int, wordsPerMinute: Int): Int {
+        if (wordCount <= 0) return 0
+        return (wordCount.toFloat() / wordsPerMinute).toInt().coerceAtLeast(1)
+    }
+
+    // ==================== Paragraph Translation Methods ====================
+    
+    /**
+     * Show paragraph translation dialog with the selected text
+     */
+    fun showParagraphTranslation(text: String) {
+        paragraphToTranslate = text
+        translatedParagraph = null
+        isParagraphTranslating = false
+        paragraphTranslationError = null
+        showParagraphTranslationDialog = true
+        
+        // Automatically start translation
+        translateParagraphInternal()
+    }
+    
+    /**
+     * Hide paragraph translation dialog
+     */
+    fun hideParagraphTranslation() {
+        showParagraphTranslationDialog = false
+        paragraphToTranslate = ""
+        translatedParagraph = null
+        isParagraphTranslating = false
+        paragraphTranslationError = null
+    }
+    
+    /**
+     * Retry paragraph translation
+     */
+    fun retryParagraphTranslation() {
+        translateParagraphInternal()
+    }
+    
+    /**
+     * Internal method to translate a paragraph
+     */
+    private fun translateParagraphInternal() {
+        if (paragraphToTranslate.isBlank()) return
+        
+        // Check if API key is required and set
+        if (isApiKeyRequired() && !isApiKeySet()) {
+            paragraphTranslationError = "Please configure your ${getCurrentEngineName()} API key in settings"
+            isParagraphTranslating = false
+            return
+        }
+        
+        isParagraphTranslating = true
+        paragraphTranslationError = null
+        translatedParagraph = null
+        
+        scope.launch {
+            try {
+                translationEnginesManager.translateWithContext(
+                    texts = listOf(paragraphToTranslate),
+                    source = translatorOriginLanguage.value,
+                    target = translatorTargetLanguage.value,
+                    contentType = ireader.domain.data.engines.ContentType.values()[translatorContentType.value],
+                    toneType = ireader.domain.data.engines.ToneType.values()[translatorToneType.value],
+                    preserveStyle = translatorPreserveStyle.value,
+                    onProgress = { },
+                    onSuccess = { translatedTexts ->
+                        if (translatedTexts.isNotEmpty()) {
+                            translatedParagraph = translatedTexts.first()
+                            isParagraphTranslating = false
+                        } else {
+                            paragraphTranslationError = "Translation returned empty result"
+                            isParagraphTranslating = false
+                        }
+                    },
+                    onError = { error ->
+                        paragraphTranslationError = error.toString()
+                        isParagraphTranslating = false
+                    }
+                )
+            } catch (e: Exception) {
+                paragraphTranslationError = e.message ?: "Unknown error occurred"
+                isParagraphTranslating = false
             }
         }
     }

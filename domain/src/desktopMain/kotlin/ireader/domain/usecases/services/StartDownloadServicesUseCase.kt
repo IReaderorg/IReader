@@ -59,8 +59,11 @@ actual class StartDownloadServicesUseCase(
                 onCancel = { error, bookName ->
 
                 },
-                onSuccess = {
-
+                onSuccess = { completedDownloads ->
+                    // Add completed downloads to the state
+                    val currentCompleted = downloadServiceState.completedDownloads.toMutableList()
+                    currentCompleted.addAll(completedDownloads)
+                    downloadServiceState.completedDownloads = currentCompleted
                 },
                 remoteUseCases = remoteUseCases,
                 updateProgress = { max, progress, inProgess ->

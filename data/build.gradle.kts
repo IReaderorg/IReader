@@ -50,6 +50,7 @@ kotlin {
                 implementation(libs.requerySqlite)
                 implementation(libs.sqldelight.android)
                 implementation(libs.androidSqlite)
+                implementation("androidx.biometric:biometric:1.1.0")
             }
         }
 

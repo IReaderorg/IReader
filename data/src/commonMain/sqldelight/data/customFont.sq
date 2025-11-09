@@ -1,0 +1,45 @@
+import kotlin.Boolean;
+import kotlin.Long;
+import kotlin.String;
+
+CREATE TABLE IF NOT EXISTS customFonts(
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    filePath TEXT NOT NULL,
+    isSystemFont INTEGER AS Boolean NOT NULL DEFAULT 0,
+    dateAdded INTEGER NOT NULL
+);
+
+getAllFonts:
+SELECT *
+FROM customFonts
+ORDER BY isSystemFont DESC, name ASC;
+
+getCustomFonts:
+SELECT *
+FROM customFonts
+WHERE isSystemFont = 0
+ORDER BY name ASC;
+
+getSystemFonts:
+SELECT *
+FROM customFonts
+WHERE isSystemFont = 1
+ORDER BY name ASC;
+
+getFontById:
+SELECT *
+FROM customFonts
+WHERE id = :fontId
+LIMIT 1;
+
+insert:
+INSERT OR REPLACE INTO customFonts(id, name, filePath, isSystemFont, dateAdded)
+VALUES (:id, :name, :filePath, :isSystemFont, :dateAdded);
+
+delete:
+DELETE FROM customFonts
+WHERE id = :fontId;
+
+deleteAll:
+DELETE FROM customFonts;

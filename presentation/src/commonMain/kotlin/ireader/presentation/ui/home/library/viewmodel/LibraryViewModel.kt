@@ -13,12 +13,19 @@ import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.domain.usecases.category.CategoriesUseCases
 import ireader.domain.usecases.local.book_usecases.GetLibraryCategory
 import ireader.domain.usecases.local.book_usecases.MarkBookAsReadOrNotUseCase
+import ireader.domain.usecases.local.book_usecases.MarkResult
+import ireader.domain.usecases.local.book_usecases.DownloadUnreadChaptersUseCase
+import ireader.domain.usecases.local.book_usecases.DownloadResult
 import ireader.domain.usecases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
+import ireader.domain.models.entities.Chapter
 import ireader.domain.usecases.services.ServiceUseCases
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 
 
@@ -35,7 +42,8 @@ class LibraryViewModel(
         private val getLibraryCategory: GetLibraryCategory,
         private val libraryPreferences: LibraryPreferences,
         val markBookAsReadOrNotUseCase: MarkBookAsReadOrNotUseCase,
-        val getCategory: CategoriesUseCases
+        val getCategory: CategoriesUseCases,
+        private val downloadUnreadChaptersUseCase: DownloadUnreadChaptersUseCase
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), LibraryState by state {
 
     var lastUsedCategory = libraryPreferences.lastUsedCategory().asState()
@@ -67,23 +75,37 @@ class LibraryViewModel(
     var columnInPortrait = libraryPreferences.columnsInPortrait().asState()
     val columnInLandscape by libraryPreferences.columnsInLandscape().asState()
     val layout by derivedStateOf { DisplayMode.getFlag(layouts.value) ?: DisplayMode.CompactGrid }
+    
+    // New filter state management
+    private val _activeFilters = MutableStateFlow<Set<LibraryFilter.Type>>(emptySet())
+    val activeFilters: StateFlow<Set<LibraryFilter.Type>> = _activeFilters.asStateFlow()
 
 
+
+    val showEmptyCategories = libraryPreferences.showEmptyCategories().asState()
 
     init {
         readLayoutTypeAndFilterTypeAndSortType()
-        libraryPreferences.showAllCategory().stateIn(scope)
-            .flatMapLatest { showAll ->
-                getCategory.subscribe(showAll).onEach { categories ->
-                    val lastCategoryId = lastUsedCategory.value
+        
+        // Initialize active filters from preferences
+        updateActiveFilters(filters.value)
+        
+        combine(
+            libraryPreferences.showAllCategory().stateIn(scope),
+            libraryPreferences.showEmptyCategories().stateIn(scope)
+        ) { showAll, showEmpty ->
+            Pair(showAll, showEmpty)
+        }.flatMapLatest { (showAll, showEmpty) ->
+            getCategory.subscribe(showAll, showEmpty).onEach { categories ->
+                val lastCategoryId = lastUsedCategory.value
 
-                    val index =
-                        categories.indexOfFirst { it.id == lastCategoryId }.takeIf { it >= 0 } ?: 0
+                val index =
+                    categories.indexOfFirst { it.id == lastCategoryId }.takeIf { it >= 0 } ?: 0
 
-                    state.categories = categories
-                    state.selectedCategoryIndex = index
-                }
-            }.launchIn(scope)
+                state.categories = categories
+                state.selectedCategoryIndex = index
+            }
+        }.launchIn(scope)
     }
 
     private val loadedManga = mutableMapOf<Long, List<BookItem>>()
@@ -103,6 +125,46 @@ class LibraryViewModel(
 fun downloadChapters() {
     serviceUseCases.startDownloadServicesUseCase.start(bookIds = selectedBooks.toLongArray())
     selectedBooks.clear()
+}
+
+/**
+ * Download all unread chapters for selected books
+ */
+suspend fun downloadUnreadChapters(): DownloadResult {
+    val result = downloadUnreadChaptersUseCase.downloadUnreadChapters(selectedBooks.toList())
+    if (result is DownloadResult.Success || result is DownloadResult.NoUnreadChapters) {
+        selectedBooks.clear()
+    }
+    return result
+}
+
+/**
+ * Mark all chapters as read for selected books with undo support
+ */
+suspend fun markAsReadWithUndo(): MarkResult {
+    val result = markBookAsReadOrNotUseCase.markAsReadWithUndo(selectedBooks.toList())
+    if (result is MarkResult.Success) {
+        selectedBooks.clear()
+    }
+    return result
+}
+
+/**
+ * Mark all chapters as unread for selected books with undo support
+ */
+suspend fun markAsUnreadWithUndo(): MarkResult {
+    val result = markBookAsReadOrNotUseCase.markAsUnreadWithUndo(selectedBooks.toList())
+    if (result is MarkResult.Success) {
+        selectedBooks.clear()
+    }
+    return result
+}
+
+/**
+ * Undo the last mark operation
+ */
+suspend fun undoMarkOperation(previousStates: Map<Long, List<Chapter>>) {
+    markBookAsReadOrNotUseCase.undoMark(previousStates)
 }
 
 fun readLayoutTypeAndFilterTypeAndSortType() {
@@ -132,14 +194,96 @@ fun toggleFilter(type: LibraryFilter.Type) {
         }
 
     this.filters.value = newFilters
+    
+    // Update active filters set for immediate UI feedback
+    updateActiveFilters(newFilters)
+    
+    // Persist filter changes immediately
+    scope.launch {
+        libraryPreferences.filters(true).set(newFilters)
+    }
+}
+
+/**
+ * Toggle a filter on/off immediately with visual feedback
+ */
+fun toggleFilterImmediate(type: LibraryFilter.Type) {
+    val currentFilters = _activeFilters.value.toMutableSet()
+    if (type in currentFilters) {
+        currentFilters.remove(type)
+    } else {
+        currentFilters.add(type)
+    }
+    _activeFilters.value = currentFilters
+    
+    // Update the actual filter preferences
+    val newFilters = filters.value.map { filterState ->
+        if (filterState.type == type) {
+            LibraryFilter(
+                type,
+                if (type in currentFilters) LibraryFilter.Value.Included else LibraryFilter.Value.Missing
+            )
+        } else {
+            filterState
+        }
+    }
+    
+    filters.value = newFilters
+    
+    // Persist immediately
+    scope.launch {
+        libraryPreferences.filters(true).set(newFilters)
+    }
+}
+
+/**
+ * Update active filters set from filter list
+ */
+private fun updateActiveFilters(filterList: List<LibraryFilter>) {
+    _activeFilters.value = filterList
+        .filter { it.value == LibraryFilter.Value.Included }
+        .map { it.type }
+        .toSet()
 }
 
 fun toggleSort(type: LibrarySort.Type) {
     val currentSort = sorting
-    sorting.value = if (type == currentSort.value.type) {
+    val newSort = if (type == currentSort.value.type) {
         currentSort.value.copy(isAscending = !currentSort.value.isAscending)
     } else {
         currentSort.value.copy(type = type)
+    }
+    sorting.value = newSort
+    
+    // Persist sort changes immediately
+    scope.launch {
+        libraryPreferences.sorting().set(newSort)
+    }
+}
+
+/**
+ * Toggle sort direction without changing sort type
+ */
+fun toggleSortDirection() {
+    val currentSort = sorting.value
+    val newSort = currentSort.copy(isAscending = !currentSort.isAscending)
+    sorting.value = newSort
+    
+    // Persist immediately
+    scope.launch {
+        libraryPreferences.sorting().set(newSort)
+    }
+}
+
+/**
+ * Update column count with immediate persistence
+ */
+fun updateColumnCount(count: Int) {
+    columnInPortrait.value = count
+    
+    // Persist immediately
+    scope.launch {
+        libraryPreferences.columnsInPortrait().set(count)
     }
 }
 
@@ -214,9 +358,12 @@ fun getLibraryForCategoryIndex(categoryIndex: Int): State<List<BookItem>> {
         if (query.isNullOrBlank()) {
             unfiltered
         } else {
-            unfiltered.map { mangas ->
-                mangas.filter { it.title.contains(query, true) }
-            }
+            // Debounce search queries for performance
+            unfiltered
+                .debounce(300) // 300ms debounce for search
+                .map { mangas ->
+                    mangas.filter { it.title.contains(query, true) }
+                }
         }
             .onEach { loadedManga[categoryId] = it }
             .onCompletion { loadedManga.remove(categoryId) }

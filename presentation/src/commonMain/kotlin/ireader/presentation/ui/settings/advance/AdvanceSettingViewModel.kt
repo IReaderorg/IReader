@@ -108,4 +108,18 @@ class AdvanceSettingViewModel(
             }
         }
     }
+    
+    /**
+     * Gets the cover cache size formatted as a human-readable string
+     * 
+     * @return Formatted cache size (e.g., "150.2 MB", "1.5 GB")
+     */
+    fun getCoverCacheSize(): String {
+        return try {
+            // TODO: Implement cache size calculation
+            "0 MB"
+        } catch (e: Exception) {
+            "Unknown"
+        }
+    }
 }

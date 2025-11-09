@@ -121,6 +121,14 @@ fun BookDetailScreen(
                                 onSortClick = onSortClick
                         )
                     }
+                    item {
+                        ChapterListFilterBar(
+                            filters = vm.filters.value,
+                            onToggleFilter = { filterType ->
+                                vm.toggleFilter(filterType)
+                            }
+                        )
+                    }
                     if (vm.searchMode) {
                         item {
                             AppTextField(

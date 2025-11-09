@@ -8,7 +8,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import ireader.domain.models.entities.Catalog
@@ -26,8 +29,37 @@ fun UserSourcesScreen(
         vm: ExtensionViewModel,
         onClickCatalog: (Catalog) -> Unit,
         onClickTogglePinned: (Catalog) -> Unit,
+        onShowDetails: ((Catalog) -> Unit)? = null,
 ) {
     val scrollState = rememberLazyListState()
+    
+    // State for login dialog
+    var showLoginDialog by remember { mutableStateOf(false) }
+    var loginSourceId by remember { mutableStateOf<Long?>(null) }
+    var loginSourceName by remember { mutableStateOf("") }
+    
+    // Check source health when screen is displayed
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        vm.checkAllSourcesHealth()
+    }
+    
+    // Show login dialog when needed
+    if (showLoginDialog && loginSourceId != null) {
+        SourceLoginDialog(
+            sourceName = loginSourceName,
+            onDismiss = {
+                showLoginDialog = false
+                loginSourceId = null
+            },
+            onLogin = { username, password ->
+                loginSourceId?.let { sourceId ->
+                    vm.loginToSource(sourceId, username, password)
+                }
+                showLoginDialog = false
+                loginSourceId = null
+            }
+        )
+    }
 
     val usersSources = remember {
         derivedStateOf {
@@ -86,6 +118,13 @@ fun UserSourcesScreen(
                         installStep = if (catalogItem.source is CatalogInstalled) vm.installSteps[catalogItem.source.pkgName] else null,
                         onClick = { onClickCatalog(catalogItem.source) },
                         onPinToggle = { onClickTogglePinned(catalogItem.source) },
+                        onShowDetails = onShowDetails?.let { { it(catalogItem.source) } },
+                        sourceStatus = vm.getSourceStatus(catalogItem.source.sourceId),
+                        onLogin = {
+                            loginSourceId = catalogItem.source.sourceId
+                            loginSourceName = catalogItem.source.name
+                            showLoginDialog = true
+                        },
                 )
             }
         }

@@ -43,11 +43,14 @@ suspend fun runDownloadService(
     updateTitle: (String) -> Unit,
     updateSubtitle: (String) -> Unit,
     onCancel:(error: Throwable,bookName:String) -> Unit,
-    onSuccess: () -> Unit,
+    onSuccess: (completedDownloads: List<CompletedDownload>) -> Unit,
     updateNotification: (Int) -> Unit,
     downloadDelayMs: Long = 1000L,
     concurrentLimit: Int = 3
 ) : Boolean {
+    // Track completed downloads for notifications
+    val completedDownloadsList = mutableListOf<CompletedDownload>()
+    
     var savedDownload: SavedDownload =
         SavedDownload(
             bookId = 0,
@@ -203,6 +206,17 @@ suspend fun runDownloadService(
                                                 
                                                 downloadSuccess = true
                                                 
+                                                // Add to completed downloads list
+                                                completedDownloadsList.add(
+                                                    CompletedDownload(
+                                                        chapterId = download.chapterId,
+                                                        bookId = download.bookId,
+                                                        bookName = download.bookName,
+                                                        chapterName = download.chapterName,
+                                                        completedAt = System.currentTimeMillis()
+                                                    )
+                                                )
+                                                
                                                 // Remove completed chapter from active downloads list (thread-safe, on Main thread)
                                                 withContext(Dispatchers.Main) {
                                                     progressMutex.withLock {
@@ -257,7 +271,7 @@ suspend fun runDownloadService(
 
     withContext(Dispatchers.Main) {
         notificationManager.cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
-        onSuccess()
+        onSuccess(completedDownloadsList)
     }
     return true
 }

@@ -6,12 +6,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import ireader.domain.models.entities.Category
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.Toolbar
@@ -28,6 +36,10 @@ fun UpdatesToolbar(
         onClickFlipSelection: () -> Unit,
         onClickRefresh: () -> Unit,
         onClickDelete: () -> Unit,
+        onClickUpdateAll: (() -> Unit)? = null,
+        onClickUpdateSelected: (() -> Unit)? = null,
+        categories: List<Category> = emptyList(),
+        onCategorySelected: (Long?) -> Unit = {},
         scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
@@ -38,6 +50,7 @@ fun UpdatesToolbar(
                     onClickCancelSelection = onClickCancelSelection,
                     onClickSelectAll = onClickSelectAll,
                     onClickInvertSelection = onClickFlipSelection,
+                    onClickUpdateSelected = onClickUpdateSelected,
                     scrollBehavior = scrollBehavior
                 )
             }
@@ -45,6 +58,10 @@ fun UpdatesToolbar(
                 UpdatesRegularToolbar(
                     onClickRefresh = onClickRefresh,
                     onClickDelete = onClickDelete,
+                    onClickUpdateAll = onClickUpdateAll,
+                    categories = categories,
+                    selectedCategoryId = state.selectedCategoryId,
+                    onCategorySelected = onCategorySelected,
                     scrollBehavior = scrollBehavior
                 )
             }
@@ -59,6 +76,7 @@ private fun UpdatesSelectionToolbar(
     onClickCancelSelection: () -> Unit,
     onClickSelectAll: () -> Unit,
     onClickInvertSelection: () -> Unit,
+    onClickUpdateSelected: (() -> Unit)? = null,
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Toolbar(
@@ -69,6 +87,11 @@ private fun UpdatesSelectionToolbar(
             }
         },
         actions = {
+            if (onClickUpdateSelected != null) {
+                IconButton(onClick = onClickUpdateSelected) {
+                    AppIcon(imageVector = Icons.Default.GetApp, contentDescription = localize(MR.strings.update_selected))
+                }
+            }
             IconButton(onClick = onClickSelectAll) {
                 AppIcon(imageVector = Icons.Default.SelectAll, contentDescription = null)
             }
@@ -85,11 +108,60 @@ private fun UpdatesSelectionToolbar(
 fun UpdatesRegularToolbar(
     onClickRefresh: () -> Unit,
     onClickDelete: () -> Unit,
+    onClickUpdateAll: (() -> Unit)? = null,
+    categories: List<Category> = emptyList(),
+    selectedCategoryId: Long? = null,
+    onCategorySelected: (Long?) -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
+    var showCategoryMenu by remember { mutableStateOf(false) }
+    
     Toolbar(
         title = { BigSizeTextComposable(text = localize(MR.strings.updates_screen_label)) },
         actions = {
+            if (categories.isNotEmpty()) {
+                Box {
+                    IconButton(onClick = { showCategoryMenu = true }) {
+                        AppIcon(imageVector = Icons.Default.FilterList, contentDescription = "Filter by category")
+                    }
+                    DropdownMenu(
+                        expanded = showCategoryMenu,
+                        onDismissRequest = { showCategoryMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("All Categories") },
+                            onClick = {
+                                onCategorySelected(null)
+                                showCategoryMenu = false
+                            },
+                            leadingIcon = {
+                                if (selectedCategoryId == null) {
+                                    Icon(Icons.Default.Check, contentDescription = null)
+                                }
+                            }
+                        )
+                        categories.forEach { category ->
+                            DropdownMenuItem(
+                                text = { Text(category.name) },
+                                onClick = {
+                                    onCategorySelected(category.id)
+                                    showCategoryMenu = false
+                                },
+                                leadingIcon = {
+                                    if (selectedCategoryId == category.id) {
+                                        Icon(Icons.Default.Check, contentDescription = null)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            if (onClickUpdateAll != null) {
+                IconButton(onClick = onClickUpdateAll) {
+                    AppIcon(imageVector = Icons.Default.GetApp, contentDescription = localize(MR.strings.update_all))
+                }
+            }
             IconButton(onClick = onClickRefresh) {
                 AppIcon(imageVector = Icons.Default.Refresh, contentDescription = null)
             }

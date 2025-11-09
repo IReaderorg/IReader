@@ -57,29 +57,41 @@ actual val DomainModule: Module = module {
     }
     single { LocalizeHelper() }
 
+    single<StartDownloadServicesUseCase> {
+        StartDownloadServicesUseCase(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
+    
+    single<StartLibraryUpdateServicesUseCase> {
+        StartLibraryUpdateServicesUseCase(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
+    
+    single<StartTTSServicesUseCase> {
+        StartTTSServicesUseCase()
+    }
+
     single<ServiceUseCases> {
         ServiceUseCases(
-            startDownloadServicesUseCase = StartDownloadServicesUseCase(
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get()
-            ),
-            startLibraryUpdateServicesUseCase = StartLibraryUpdateServicesUseCase(
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get()
-            ),
-            startTTSServicesUseCase = StartTTSServicesUseCase(),
+            startDownloadServicesUseCase = get(),
+            startLibraryUpdateServicesUseCase = get(),
+            startTTSServicesUseCase = get(),
         )
     }
     single<HttpClients> { HttpClients(get<PreferenceStoreFactory>().create("cookies")) }

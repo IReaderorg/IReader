@@ -134,6 +134,9 @@ class BookRepositoryImpl(
                 initialized = book.initialized,
                 favorite = book.favorite,
                 genre = book.genres.let(bookGenresConverter::encode),
+                isPinned = book.isPinned,
+                pinnedOrder = book.pinnedOrder.toLong(),
+                isArchived = book.isArchived,
             )
 
         }
@@ -165,7 +168,10 @@ class BookRepositoryImpl(
                     id = book.id,
                     initialized = book.initialized,
                     favorite = book.favorite,
-                    genre = book.genres.let(bookGenresConverter::encode)
+                    genre = book.genres.let(bookGenresConverter::encode),
+                    isPinned = book.isPinned,
+                    pinnedOrder = book.pinnedOrder.toLong(),
+                    isArchived = book.isArchived,
                 )
             }
 
@@ -194,6 +200,9 @@ class BookRepositoryImpl(
                 nextUpdate = 0,
                 thumbnailUrl = book.cover,
                 viewerFlags = book.viewer,
+                isPinned = book.isPinned,
+                pinnedOrder = book.pinnedOrder.toLong(),
+                isArchived = book.isArchived,
             )
             bookQueries.selectLastInsertedRowId()
         } ?: -1
@@ -228,6 +237,9 @@ class BookRepositoryImpl(
                 nextUpdate = 0,
                 thumbnailUrl = book.cover,
                 viewerFlags = book.viewer,
+                isPinned = book.isPinned,
+                pinnedOrder = book.pinnedOrder.toLong(),
+                isArchived = book.isArchived,
             )
             bookQueries.selectLastInsertedRowId()
         } ?: -1
@@ -256,6 +268,9 @@ class BookRepositoryImpl(
                 nextUpdate = 0,
                 thumbnailUrl = book.cover,
                 viewerFlags = book.viewer,
+                isPinned = book.isPinned,
+                pinnedOrder = book.pinnedOrder.toLong(),
+                isArchived = book.isArchived,
             )
             bookQueries.selectLastInsertedRowId()
         } ?: -1
@@ -324,6 +339,9 @@ class BookRepositoryImpl(
                     genre = book.genres.let(bookGenresConverter::encode),
                     nextUpdate = null,
                     artist = null,
+                    isPinned = book.isPinned,
+                    pinnedOrder = book.pinnedOrder.toLong(),
+                    isArchived = book.isArchived,
                 )
 
             }
@@ -354,6 +372,9 @@ class BookRepositoryImpl(
                     genre = book.genres.let(bookGenresConverter::encode),
                     nextUpdate = null,
                     artist = null,
+                    isPinned = book.isPinned,
+                    pinnedOrder = book.pinnedOrder.toLong(),
+                    isArchived = book.isArchived,
                 )
             }
 
@@ -380,6 +401,9 @@ class BookRepositoryImpl(
                     initialized = book.initialized,
                     favorite = book.favorite,
                     genre = book.genres.let(bookGenresConverter::encode),
+                    isPinned = book.isPinned,
+                    pinnedOrder = book.pinnedOrder.toLong(),
+                    isArchived = book.isArchived,
                 )
             }
 
@@ -405,10 +429,47 @@ class BookRepositoryImpl(
                     id = book.id,
                     initialized = book.initialized,
                     favorite = book.favorite,
-                    genre = book.genres.let(bookGenresConverter::encode)
+                    genre = book.genres.let(bookGenresConverter::encode),
+                    isPinned = book.isPinned,
+                    pinnedOrder = book.pinnedOrder.toLong(),
+                    isArchived = book.isArchived,
                 )
             }
 
+        }
+    }
+    
+    override suspend fun updatePinStatus(bookId: Long, isPinned: Boolean, pinnedOrder: Int) {
+        handler.await {
+            bookQueries.updatePinStatus(
+                bookId = bookId,
+                isPinned = isPinned,
+                pinnedOrder = pinnedOrder.toLong()
+            )
+        }
+    }
+    
+    override suspend fun updatePinnedOrder(bookId: Long, pinnedOrder: Int) {
+        handler.await {
+            bookQueries.updatePinnedOrder(
+                bookId = bookId,
+                pinnedOrder = pinnedOrder.toLong()
+            )
+        }
+    }
+    
+    override suspend fun getMaxPinnedOrder(): Int {
+        return handler.awaitList {
+            bookQueries.findInLibraryBooks(booksMapper)
+        }.maxOfOrNull { it.pinnedOrder } ?: 0
+    }
+    
+    override suspend fun updateArchiveStatus(bookId: Long, isArchived: Boolean) {
+        handler.await {
+            bookQueries.updateArchiveStatus(
+                bookId = bookId,
+                isArchived = isArchived
+            )
         }
     }
 }

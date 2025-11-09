@@ -11,9 +11,14 @@ import ireader.data.repository.LibraryRepositoryImpl
 import ireader.data.repository.ReaderThemeRepositoryImpl
 import ireader.data.repository.ThemeRepositoryImpl
 import ireader.data.repository.UpdatesRepositoryImpl
+import ireader.data.repository.SourceCredentialsRepositoryImpl
+import ireader.data.services.SourceHealthCheckerImpl
+import ireader.data.statistics.ReadingStatisticsRepositoryImpl
 import ireader.data.translation.GlossaryRepositoryImpl
 import ireader.data.translation.TranslatedChapterRepositoryImpl
 import ireader.domain.catalogs.service.CatalogRemoteRepository
+import ireader.domain.data.repository.SourceCredentialsRepository
+import ireader.domain.services.SourceHealthChecker
 import ireader.domain.data.repository.BookCategoryRepository
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.CategoryRepository
@@ -22,6 +27,7 @@ import ireader.domain.data.repository.DownloadRepository
 import ireader.domain.data.repository.GlossaryRepository
 import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.data.repository.LibraryRepository
+import ireader.domain.data.repository.ReadingStatisticsRepository
 import ireader.domain.data.repository.ReaderThemeRepository
 import ireader.domain.data.repository.ThemeRepository
 import ireader.domain.data.repository.TranslatedChapterRepository
@@ -45,4 +51,13 @@ val repositoryInjectModule = module {
     // Translation repositories
     single<TranslatedChapterRepository> { TranslatedChapterRepositoryImpl(get()) }
     single<GlossaryRepository> { GlossaryRepositoryImpl(get()) }
+    
+    // Source health checker
+    single<SourceHealthChecker> { SourceHealthCheckerImpl(get()) }
+    
+    // Source credentials repository
+    single<SourceCredentialsRepository> { SourceCredentialsRepositoryImpl(get()) }
+    
+    // Reading statistics repository
+    single<ReadingStatisticsRepository> { ReadingStatisticsRepositoryImpl(get()) }
 }

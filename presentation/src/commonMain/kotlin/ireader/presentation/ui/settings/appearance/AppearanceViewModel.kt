@@ -35,6 +35,8 @@ class AppearanceViewModel(
     val themeMode = uiPreferences.themeMode().asState()
     val colorTheme = uiPreferences.colorTheme().asState()
     val dynamicColorMode = uiPreferences.dynamicColorMode().asState()
+    val useTrueBlack = uiPreferences.useTrueBlack().asState()
+    val appUiFont = uiPreferences.appUiFont().asState()
     val dateFormat = uiPreferences.dateFormat().asState()
     val relativeTime = uiPreferences.relativeTime().asState()
     val lightColors = uiPreferences.getLightColors().asState(scope)
@@ -46,6 +48,14 @@ class AppearanceViewModel(
         PreferenceValues.RelativeTime.Off,
         PreferenceValues.RelativeTime.Day,
         PreferenceValues.RelativeTime.Week
+    )
+    
+    val availableFonts = mapOf(
+        "default" to "Default (Roboto)",
+        "sans_serif" to "Sans Serif",
+        "serif" to "Serif",
+        "monospace" to "Monospace",
+        "cursive" to "Cursive"
     )
 
     fun saveNightModePreferences(mode: PreferenceValues.ThemeMode) {

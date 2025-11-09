@@ -76,6 +76,26 @@ object UpdateScreenSpec : Tab {
                             vm.updates = emptyMap()
                         }
                     },
+                    onClickUpdateAll = if (vm.updates.isNotEmpty()) {
+                        {
+                            // Select all updates and download them
+                            val allIds = vm.updates.values.flatMap { list -> list.map { it.chapterId } }
+                            vm.selection.clear()
+                            vm.selection.addAll(allIds)
+                            vm.downloadChapters()
+                            vm.selection.clear()
+                        }
+                    } else null,
+                    onClickUpdateSelected = if (vm.hasSelection) {
+                        {
+                            vm.downloadChapters()
+                            vm.selection.clear()
+                        }
+                    } else null,
+                    categories = vm.categories,
+                    onCategorySelected = { categoryId ->
+                        vm.selectCategory(categoryId)
+                    },
                     scrollBehavior = scrollBehavior,
                 )
             }
@@ -126,6 +146,9 @@ object UpdateScreenSpec : Tab {
                         this.copy(bookmark = !this.bookmark)
                     }
                     vm.selection.clear()
+                },
+                onRefresh = {
+                    vm.refreshUpdate()
                 }
             )
 

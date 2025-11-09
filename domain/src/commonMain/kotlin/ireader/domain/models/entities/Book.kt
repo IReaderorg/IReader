@@ -23,6 +23,9 @@ data class Book(
     val dateAdded: Long = 0,
     val viewer: Long = 0,
     val flags: Long = 0,
+    val isPinned: Boolean = false,
+    val pinnedOrder: Int = 0,
+    val isArchived: Boolean = false,
 ) : BaseBook {
 
     companion object {
@@ -183,6 +186,9 @@ data class LibraryBook(
         get() = readCount > 0
     var category: Int = 0
     var lastRead: Long = 0
+    var isPinned: Boolean = false
+    var pinnedOrder: Int = 0
+    var isArchived: Boolean = false
 
     fun toBookItem(): BookItem {
         return BookItem(
@@ -197,6 +203,9 @@ data class LibraryBook(
             lastRead = lastRead,
             totalChapters = totalChapters,
             favorite = hasStarted,
+            isPinned = isPinned,
+            pinnedOrder = pinnedOrder,
+            isArchived = isArchived,
         )
     }
 
@@ -234,7 +243,10 @@ data class BookItem(
     val totalChapters : Int = 0,
     val lastRead: Long = 0,
     val description: String = "",
-    val progress: Float? = 0.0f
+    val progress: Float? = 0.0f,
+    val isPinned: Boolean = false,
+    val pinnedOrder: Int = 0,
+    val isArchived: Boolean = false
 ) : BaseBook
 
 

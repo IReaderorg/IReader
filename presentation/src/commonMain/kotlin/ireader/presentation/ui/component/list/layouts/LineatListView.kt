@@ -40,12 +40,15 @@ fun LinearBookItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(40.dp)
+                .height(80.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            // Book cover thumbnail
             IBookImageComposable(
                 image = BookCover.from(book),
-                modifier = modifier
-                    .aspectRatio(3f / 4f)
+                modifier = Modifier
+                    .width(48.dp)
+                    .height(64.dp)
                     .clip(RoundedCornerShape(4.dp))
                     .border(
                         .2.dp,
@@ -55,13 +58,49 @@ fun LinearBookItem(
                     ),
                 headers = headers
             )
-            Spacer(modifier = Modifier.width(15.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                textAlign = TextAlign.Center
-            )
+            
+            Spacer(modifier = Modifier.width(12.dp))
+            
+            // Book information column
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.Center
+            ) {
+                // Title
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    maxLines = 2,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                // Author
+                if (book.author.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = book.author,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                        maxLines = 1,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                
+                // Unread count
+                if (book.unread != null && book.unread!! > 0) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "${book.unread} unread",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
         }
     }
 }

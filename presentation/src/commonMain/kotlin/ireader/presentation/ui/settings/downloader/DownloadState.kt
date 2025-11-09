@@ -9,11 +9,16 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import ireader.domain.models.entities.SavedDownloadWithInfo
 
 
+enum class DownloadTab {
+    ACTIVE, COMPLETED
+}
+
 interface DownloadState {
     var downloads: List<SavedDownloadWithInfo>
     var isMenuExpanded: Boolean
     var selection: SnapshotStateList<Long>
     val hasSelection: Boolean
+    var selectedTab: DownloadTab
 }
 
 open class DownloadStateImpl : DownloadState {
@@ -21,4 +26,5 @@ open class DownloadStateImpl : DownloadState {
     override var isMenuExpanded: Boolean by mutableStateOf(false)
     override var selection: SnapshotStateList<Long> = mutableStateListOf()
     override val hasSelection: Boolean by derivedStateOf { selection.isNotEmpty() }
+    override var selectedTab: DownloadTab by mutableStateOf(DownloadTab.ACTIVE)
 }

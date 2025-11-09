@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Source
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -27,6 +27,7 @@ import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.home.sources.extension.ExtensionScreen
 import ireader.presentation.ui.home.sources.extension.ExtensionScreenTopAppBar
 import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
+import ireader.presentation.ui.home.sources.extension.SourceDetailScreen
 
 object ExtensionScreenSpec : Tab {
 
@@ -34,7 +35,7 @@ object ExtensionScreenSpec : Tab {
         @Composable
         get() {
             val title = localize(MR.strings.explore_screen_label)
-            val icon = rememberVectorPainter(Icons.Filled.Explore)
+            val icon = rememberVectorPainter(Icons.Filled.Source)
             return remember {
                 TabOptions(
                         index = 3u,
@@ -121,6 +122,9 @@ object ExtensionScreenSpec : Tab {
                         onClickUninstall = { vm.uninstallCatalog(it) },
                         snackBarHostState = snackBarHostState,
                         onCancelInstaller = { vm.cancelCatalogJob(it) },
+                        onShowDetails = { catalog ->
+                            navigator.push(SourceDetailScreen(catalog))
+                        },
                 )
             }
             PullRefreshIndicator(

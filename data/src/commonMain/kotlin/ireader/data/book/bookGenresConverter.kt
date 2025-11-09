@@ -39,3 +39,13 @@ internal val intLongColumnAdapter = object : ColumnAdapter<Int, Long> {
     return  value.toLong()
   }
 }
+
+internal val booleanIntAdapter = object : ColumnAdapter<Boolean, Long> {
+  override fun decode(databaseValue: Long): Boolean {
+    return databaseValue != 0L
+  }
+
+  override fun encode(value: Boolean): Long {
+    return if (value) 1L else 0L
+  }
+}

@@ -35,6 +35,7 @@ import ireader.presentation.ui.settings.general.GeneralSettingScreenViewModel
 import ireader.presentation.ui.settings.general.TranslationSettingsViewModel
 import ireader.presentation.ui.settings.reader.ReaderSettingScreenViewModel
 import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
+import ireader.presentation.ui.settings.statistics.StatisticsViewModel
 import org.koin.dsl.module
 
 val PresentationModules = module {
@@ -56,23 +57,24 @@ val PresentationModules = module {
 
     factory<ExploreViewModel> { ExploreViewModel(get(), get(), get(), get(),get(), get(), get(),get(),get(),get()) }
     factory  { HistoryViewModel(get(), get(), get()) }
-    factory  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
-    factory  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
-    factory<GlobalSearchViewModel> { GlobalSearchViewModel(get(), get(), get(), get(), get()) }
+    factory  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory<GlobalSearchViewModel> { GlobalSearchViewModel(get(), get(), get(), get(), get(), get()) }
 
-    factory  { UpdatesViewModel(get(), get(), get(), get(), get(), get()) }
+    factory  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
     factory<BookDetailViewModel>  { BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     factory  { MainSettingScreenViewModel(get()) }
     factory  { AppearanceViewModel(get(), get()) }
 
-    factory  { CategoryScreenViewModel(get(), get(), get()) }
+    factory  { CategoryScreenViewModel(get(), get(), get(),get(),get()) }
     factory  { DownloaderViewModel(get(), get(), get(), get()) }
-    factory  { FontScreenViewModel(get(), get(), get(), get()) }
+    factory  { FontScreenViewModel(get(), get(), get(), get(),get()) }
     factory  { GeneralSettingScreenViewModel(get(), get(), get(), get()) }
     factory  { TranslationSettingsViewModel(get(), get()) }
     factory  { ReaderSettingScreenViewModel(get(), get(), get()) }
     factory  { SourceRepositoryViewModel(get(), get()) }
+    factory  { StatisticsViewModel(get()) }
 
 
     factory <ChapterStateImpl> { ChapterStateImpl() }

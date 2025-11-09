@@ -1,10 +1,10 @@
 package ireader.presentation.ui.settings.advance
 
 
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,6 +21,8 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import kotlinx.serialization.ExperimentalSerializationApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun AdvanceSettings(
@@ -52,46 +54,22 @@ fun AdvanceSettings(
 
     val items = remember {
         listOf<Components>(
-            // Data Section
+            // Cache Management Section (Safe operations)
             Components.Header(
-                text = localizeHelper.localize(MR.strings.data),
+                text = "Cache Management",
                 icon = Icons.Default.Storage
             ),
             Components.Row(
-                title = localizeHelper.localize(MR.strings.clear_all_database),
-                subtitle = "Remove all books and chapters from the database",
-                icon = Icons.Default.DeleteSweep,
-                onClick = {
-                    showClearAllDatabase = true
-                }
-            ),
-            Components.Row(
-                title = localizeHelper.localize(MR.strings.clear_not_in_library_books),
-                subtitle = "Remove books that are not in your library",
-                icon = Icons.Default.CleaningServices,
-                onClick = {
-                    showClearNotInLibrary = true
-                }
-            ),
-            Components.Row(
-                title = localizeHelper.localize(MR.strings.clear_all_chapters),
-                subtitle = "Remove all downloaded chapter content",
-                icon = Icons.Default.MenuBook,
-                onClick = {
-                    showClearAllChapters = true
-                }
-            ),
-            Components.Row(
-                title = localizeHelper.localize(MR.strings.clear_all_cache),
-                subtitle = vm.importEpub.getCacheSize(),
+                title = "${localizeHelper.localize(MR.strings.clear_all_cache)} (${vm.importEpub.getCacheSize()})",
+                subtitle = "Clear all cached data to free up storage space",
                 icon = Icons.Default.FolderDelete,
                 onClick = {
                     showClearCache = true
                 }
             ),
             Components.Row(
-                title = localizeHelper.localize(MR.strings.clear_all_cover_cache),
-                subtitle = "Clear cached book cover images",
+                title = "${localizeHelper.localize(MR.strings.clear_all_cover_cache)} (${vm.getCoverCacheSize()})",
+                subtitle = "Clear cached book cover images to free up storage",
                 icon = Icons.Default.Image,
                 onClick = {
                     showClearCoverCache = true
@@ -100,39 +78,7 @@ fun AdvanceSettings(
             
             Components.Space,
             
-            // Reset Settings Section
-            Components.Header(
-                text = localizeHelper.localize(MR.strings.reset_setting),
-                icon = Icons.Default.RestartAlt
-            ),
-            Components.Row(
-                title = localizeHelper.localize(MR.strings.reset_reader_screen_settings),
-                subtitle = "Restore default reader preferences",
-                icon = Icons.Default.AutoStories,
-                onClick = {
-                    showResetReaderSettings = true
-                }
-            ),
-            Components.Row(
-                title = localizeHelper.localize(MR.strings.reset_themes),
-                subtitle = "Remove all custom themes",
-                icon = Icons.Default.Palette,
-                onClick = {
-                    showResetThemes = true
-                }
-            ),
-            Components.Row(
-                title = localizeHelper.localize(MR.strings.reset_categories),
-                subtitle = "Restore default category list",
-                icon = Icons.Default.Category,
-                onClick = {
-                    showResetCategories = true
-                }
-            ),
-            
-            Components.Space,
-            
-            // EPUB Section
+            // EPUB Section (Safe operations)
             Components.Header(
                 text = localizeHelper.localize(MR.strings.epub),
                 icon = Icons.Default.Book
@@ -148,18 +94,10 @@ fun AdvanceSettings(
             
             Components.Space,
             
-            // Database Section
+            // Database Maintenance Section (Safe operations)
             Components.Header(
-                text = "Database",
+                text = "Database Maintenance",
                 icon = Icons.Default.DataObject
-            ),
-            Components.Row(
-                title = localizeHelper.localize(MR.strings.delete_all_database),
-                subtitle = "Permanently delete the entire database",
-                icon = Icons.Default.Warning,
-                onClick = {
-                    showDeleteAllDb = true
-                }
             ),
             Components.Row(
                 title = localizeHelper.localize(MR.strings.repair_database),
@@ -177,33 +115,47 @@ fun AdvanceSettings(
                     vm.repairBookCategories()
                 }
             ),
+            
+            Components.Space,
+            
+            // Danger Zone Section (Destructive operations)
+            Components.Dynamic {
+                DangerZoneSection(
+                    onClearAllDatabase = { showClearAllDatabase = true },
+                    onClearNotInLibrary = { showClearNotInLibrary = true },
+                    onClearAllChapters = { showClearAllChapters = true },
+                    onResetReaderSettings = { showResetReaderSettings = true },
+                    onResetThemes = { showResetThemes = true },
+                    onResetCategories = { showResetCategories = true },
+                    onDeleteAllDatabase = { showDeleteAllDb = true }
+                )
+            },
         )
     }
 
 
     SetupSettingComponents(scaffoldPadding = padding, items = items)
     
-    // Confirmation Dialogs
+    // Destructive Action Dialogs with Typed Confirmation
     if (showClearAllDatabase) {
-        ConfirmationDialog(
+        DestructiveActionDialog(
             title = localizeHelper.localize(MR.strings.clear_all_database),
-            message = "This will permanently remove all books and chapters from the database. This action cannot be undone.",
-            confirmText = "Clear",
+            message = "⚠️ WARNING: This will permanently remove all books and chapters from the database. This action cannot be undone and all your library data will be lost.",
+            confirmationWord = "DELETE",
             onConfirm = {
                 vm.deleteAllDatabase()
                 vm.showSnackBar(UiText.MStringResource(MR.strings.database_was_cleared))
                 showClearAllDatabase = false
             },
-            onDismiss = { showClearAllDatabase = false },
-            isDestructive = true
+            onDismiss = { showClearAllDatabase = false }
         )
     }
     
     if (showClearNotInLibrary) {
-        ConfirmationDialog(
+        DestructiveActionDialog(
             title = localizeHelper.localize(MR.strings.clear_not_in_library_books),
             message = "This will remove all books that are not in your library. This action cannot be undone.",
-            confirmText = "Clear",
+            confirmationWord = "DELETE",
             onConfirm = {
                 vm.scope.launchIO {
                     vm.deleteUseCase.deleteNotInLibraryBooks()
@@ -211,23 +163,21 @@ fun AdvanceSettings(
                 }
                 showClearNotInLibrary = false
             },
-            onDismiss = { showClearNotInLibrary = false },
-            isDestructive = true
+            onDismiss = { showClearNotInLibrary = false }
         )
     }
     
     if (showClearAllChapters) {
-        ConfirmationDialog(
+        DestructiveActionDialog(
             title = localizeHelper.localize(MR.strings.clear_all_chapters),
-            message = "This will remove all downloaded chapter content. You will need to re-download chapters to read offline.",
-            confirmText = "Clear",
+            message = "This will remove all downloaded chapter content. You will need to re-download chapters to read offline. This action cannot be undone.",
+            confirmationWord = "DELETE",
             onConfirm = {
                 vm.deleteAllChapters()
                 vm.showSnackBar(UiText.MStringResource(MR.strings.chapters_was_cleared))
                 showClearAllChapters = false
             },
-            onDismiss = { showClearAllChapters = false },
-            isDestructive = true
+            onDismiss = { showClearAllChapters = false }
         )
     }
     
@@ -262,66 +212,67 @@ fun AdvanceSettings(
     }
     
     if (showResetReaderSettings) {
-        ConfirmationDialog(
+        DestructiveActionDialog(
             title = localizeHelper.localize(MR.strings.reset_reader_screen_settings),
-            message = "This will restore all reader settings to their default values. Your custom preferences will be lost.",
-            confirmText = "Reset",
+            message = "This will restore all reader settings to their default values. Your custom preferences (font size, colors, spacing, etc.) will be lost. This action cannot be undone.",
+            confirmationWord = "RESET",
             onConfirm = {
                 vm.deleteDefaultSettings()
                 vm.showSnackBar(UiText.DynamicString("Reader settings have been reset."))
                 showResetReaderSettings = false
             },
-            onDismiss = { showResetReaderSettings = false },
-            isDestructive = true
+            onDismiss = { showResetReaderSettings = false }
         )
     }
     
     if (showResetThemes) {
-        ConfirmationDialog(
+        DestructiveActionDialog(
             title = localizeHelper.localize(MR.strings.reset_themes),
-            message = "This will remove all custom themes. Only default themes will remain.",
-            confirmText = "Reset",
+            message = "This will remove all custom themes. Only default themes will remain. This action cannot be undone.",
+            confirmationWord = "RESET",
             onConfirm = {
                 vm.resetThemes()
                 vm.showSnackBar(UiText.MStringResource(MR.strings.success))
                 showResetThemes = false
             },
-            onDismiss = { showResetThemes = false },
-            isDestructive = true
+            onDismiss = { showResetThemes = false }
         )
     }
     
     if (showResetCategories) {
-        ConfirmationDialog(
+        DestructiveActionDialog(
             title = localizeHelper.localize(MR.strings.reset_categories),
-            message = "This will restore the default category list. Your custom categories will be removed.",
-            confirmText = "Reset",
+            message = "This will restore the default category list. Your custom categories will be removed and books will be reassigned. This action cannot be undone.",
+            confirmationWord = "RESET",
             onConfirm = {
                 vm.resetCategories()
                 vm.showSnackBar(UiText.MStringResource(MR.strings.success))
                 showResetCategories = false
             },
-            onDismiss = { showResetCategories = false },
-            isDestructive = true
+            onDismiss = { showResetCategories = false }
         )
     }
     
     if (showDeleteAllDb) {
-        ConfirmationDialog(
+        DestructiveActionDialog(
             title = localizeHelper.localize(MR.strings.delete_all_database),
-            message = "⚠️ WARNING: This will permanently delete the entire database. All your data will be lost and cannot be recovered. Are you absolutely sure?",
-            confirmText = "Delete Everything",
+            message = "⚠️⚠️⚠️ CRITICAL WARNING ⚠️⚠️⚠️\n\nThis will PERMANENTLY DELETE the ENTIRE database. ALL your data including:\n• All books in your library\n• All reading history\n• All bookmarks\n• All settings\n• All categories\n\nThis action CANNOT be recovered. Are you absolutely sure?",
+            confirmationWord = "DELETE",
             onConfirm = {
                 vm.deleteAllDatabase()
                 vm.showSnackBar(UiText.DynamicString("Database has been deleted."))
                 showDeleteAllDb = false
             },
-            onDismiss = { showDeleteAllDb = false },
-            isDestructive = true
+            onDismiss = { showDeleteAllDb = false }
         )
     }
 }
 
+/**
+ * Confirmation Dialog for non-destructive or less critical actions
+ * 
+ * Simple confirmation dialog without typed confirmation requirement.
+ */
 @Composable
 private fun ConfirmationDialog(
     title: String,
@@ -384,4 +335,290 @@ private fun ConfirmationDialog(
             }
         }
     )
+}
+
+/**
+ * Destructive Action Dialog with Typed Confirmation
+ * 
+ * Requires the user to type a specific confirmation word (DELETE or RESET)
+ * to proceed with the destructive action. This prevents accidental data loss.
+ * 
+ * @param title Dialog title
+ * @param message Warning message explaining the consequences
+ * @param confirmationWord The word user must type (e.g., "DELETE", "RESET")
+ * @param onConfirm Callback when user confirms with correct word
+ * @param onDismiss Callback when dialog is dismissed
+ */
+@Composable
+private fun DestructiveActionDialog(
+    title: String,
+    message: String,
+    confirmationWord: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    var inputText by remember { mutableStateOf("") }
+    val isConfirmEnabled = inputText.trim().equals(confirmationWord, ignoreCase = true)
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Warning,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(32.dp)
+            )
+        },
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.error
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                
+                Text(
+                    text = "Type \"$confirmationWord\" to confirm:",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                
+                OutlinedTextField(
+                    value = inputText,
+                    onValueChange = { inputText = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.error,
+                        focusedLabelColor = MaterialTheme.colorScheme.error
+                    ),
+                    placeholder = {
+                        Text(
+                            text = confirmationWord,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                )
+                
+                if (inputText.isNotEmpty() && !isConfirmEnabled) {
+                    Text(
+                        text = "Text does not match",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onConfirm()
+                    inputText = "" // Reset for next time
+                },
+                enabled = isConfirmEnabled,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
+                Text(
+                    text = "Confirm",
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    inputText = "" // Reset on cancel
+                    onDismiss()
+                }
+            ) {
+                Text(
+                    text = "Cancel",
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 6.dp
+    )
+}
+
+/**
+ * Danger Zone Section Component
+ * 
+ * Displays a visually distinct section for destructive actions with:
+ * - Red error container background
+ * - Warning icon and "Danger Zone" header
+ * - Grouped dangerous actions with clear styling
+ * 
+ * This component helps prevent accidental data loss by clearly marking
+ * dangerous operations and separating them from regular settings.
+ */
+@Composable
+fun DangerZoneSection(
+    onClearAllDatabase: () -> Unit,
+    onClearNotInLibrary: () -> Unit,
+    onClearAllChapters: () -> Unit,
+    onResetReaderSettings: () -> Unit,
+    onResetThemes: () -> Unit,
+    onResetCategories: () -> Unit,
+    onDeleteAllDatabase: () -> Unit
+) {
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // Danger Zone Header
+            Row(
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 12.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Danger Zone",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+            
+            Text(
+                text = "These actions are destructive and cannot be undone. Proceed with caution.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            
+            // Dangerous Actions
+            DangerButton(
+                text = localizeHelper.localize(MR.strings.clear_all_database),
+                subtitle = "Remove all books and chapters",
+                onClick = onClearAllDatabase
+            )
+            
+            DangerButton(
+                text = localizeHelper.localize(MR.strings.clear_not_in_library_books),
+                subtitle = "Remove books not in library",
+                onClick = onClearNotInLibrary
+            )
+            
+            DangerButton(
+                text = localizeHelper.localize(MR.strings.clear_all_chapters),
+                subtitle = "Remove all downloaded chapters",
+                onClick = onClearAllChapters
+            )
+            
+            DangerButton(
+                text = localizeHelper.localize(MR.strings.reset_reader_screen_settings),
+                subtitle = "Restore default reader settings",
+                onClick = onResetReaderSettings
+            )
+            
+            DangerButton(
+                text = localizeHelper.localize(MR.strings.reset_themes),
+                subtitle = "Remove all custom themes",
+                onClick = onResetThemes
+            )
+            
+            DangerButton(
+                text = localizeHelper.localize(MR.strings.reset_categories),
+                subtitle = "Restore default categories",
+                onClick = onResetCategories
+            )
+            
+            // Most dangerous action - Delete All Database
+            Divider(
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = MaterialTheme.colorScheme.error.copy(alpha = 0.3f)
+            )
+            
+            DangerButton(
+                text = localizeHelper.localize(MR.strings.delete_all_database),
+                subtitle = "⚠️ Permanently delete entire database",
+                onClick = onDeleteAllDatabase,
+                isHighRisk = true
+            )
+        }
+    }
+}
+
+/**
+ * Danger Button Component
+ * 
+ * A button styled for dangerous actions within the Danger Zone.
+ */
+@Composable
+private fun DangerButton(
+    text: String,
+    subtitle: String,
+    onClick: () -> Unit,
+    isHighRisk: Boolean = false
+) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        color = if (isHighRisk) {
+            MaterialTheme.colorScheme.error.copy(alpha = 0.1f)
+        } else {
+            MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
+        },
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp)
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (isHighRisk) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
 }

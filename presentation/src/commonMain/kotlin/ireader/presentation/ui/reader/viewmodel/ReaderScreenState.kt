@@ -28,6 +28,7 @@ open class ReaderScreenStateImpl: ReaderScreenState {
     override var isReaderModeEnable by mutableStateOf<Boolean>(true)
     override var isSettingModeEnable by mutableStateOf<Boolean>(false)
     override var isMainBottomModeEnable by mutableStateOf<Boolean>(false)
+    override var showSettingsBottomSheet by mutableStateOf<Boolean>(false)
     override var currentChapterIndex: Int by mutableStateOf<Int>(0)
     override var maxScrollstate: Int by mutableStateOf<Int>(0)
     override val source: Source? by derivedStateOf { catalog?.source }
@@ -54,6 +55,7 @@ interface ReaderScreenState {
 
     var isSettingModeEnable: Boolean
     var isMainBottomModeEnable: Boolean
+    var showSettingsBottomSheet: Boolean
 
     var currentChapterIndex: Int
     var maxScrollstate: Int
@@ -89,6 +91,28 @@ open class ReaderScreenPreferencesStateImpl() : ReaderScreenPreferencesState {
     override var expandTopMenu by mutableStateOf<Boolean>(false)
 
     override var scrollMode by mutableStateOf<Boolean>(false)
+    
+    // Find in chapter state
+    override var showFindInChapter by mutableStateOf<Boolean>(false)
+    override var findQuery by mutableStateOf<String>("")
+    override var findMatches by mutableStateOf<List<IntRange>>(emptyList())
+    override var currentFindMatchIndex by mutableStateOf<Int>(0)
+    
+    // Report broken chapter state
+    override var showReportDialog by mutableStateOf<Boolean>(false)
+    
+    // Reading time estimation state
+    override var showReadingTime by mutableStateOf<Boolean>(true)
+    override var estimatedReadingMinutes by mutableStateOf<Int>(0)
+    override var wordsRemaining by mutableStateOf<Int>(0)
+    override var totalWords by mutableStateOf<Int>(0)
+    
+    // Paragraph translation state
+    override var showParagraphTranslationDialog by mutableStateOf<Boolean>(false)
+    override var paragraphToTranslate by mutableStateOf<String>("")
+    override var translatedParagraph by mutableStateOf<String?>(null)
+    override var isParagraphTranslating by mutableStateOf<Boolean>(false)
+    override var paragraphTranslationError by mutableStateOf<String?>(null)
 }
 
 interface ReaderScreenPreferencesState {
@@ -105,5 +129,27 @@ interface ReaderScreenPreferencesState {
     var currentViewingSearchResultIndex: Int
 
     var scrollMode: Boolean
+    
+    // Find in chapter state
+    var showFindInChapter: Boolean
+    var findQuery: String
+    var findMatches: List<IntRange>
+    var currentFindMatchIndex: Int
+    
+    // Report broken chapter state
+    var showReportDialog: Boolean
+    
+    // Reading time estimation state
+    var showReadingTime: Boolean
+    var estimatedReadingMinutes: Int
+    var wordsRemaining: Int
+    var totalWords: Int
+    
+    // Paragraph translation state
+    var showParagraphTranslationDialog: Boolean
+    var paragraphToTranslate: String
+    var translatedParagraph: String?
+    var isParagraphTranslating: Boolean
+    var paragraphTranslationError: String?
     //  val isVerticalScrolling : Boolean
 }

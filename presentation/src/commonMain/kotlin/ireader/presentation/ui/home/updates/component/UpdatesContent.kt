@@ -31,10 +31,16 @@ fun UpdatesContent(
                 top = 8.dp
             )
         ) {
+            // New Updates Section
+            if (state.updates.isNotEmpty()) {
+                item {
+                    TextSection(text = "New Updates")
+                }
+            }
+            
             state.updates.forEach { (date, updates) ->
                 item {
                     TextSection(
-
                         text = date.date.asRelativeTimeString()
                     )
                 }
@@ -49,6 +55,20 @@ fun UpdatesContent(
                         onClickCover = onClickCover,
                         onClickDownload = onClickDownload,
                         isDownloadable = !updates[index].downloaded
+                    )
+                }
+            }
+            
+            // Update History Section
+            if (state.updateHistory.isNotEmpty()) {
+                item {
+                    TextSection(text = "Update History")
+                }
+                items(
+                    count = state.updateHistory.size
+                ) { index ->
+                    UpdateHistoryItem(
+                        history = state.updateHistory[index]
                     )
                 }
             }

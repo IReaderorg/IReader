@@ -96,4 +96,8 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     fun showLanguageBadge(): Preference<Boolean> {
         return preferenceStore.getBoolean("show_language_badge", false)
     }
+
+    fun showEmptyCategories(): Preference<Boolean> {
+        return preferenceStore.getBoolean("show_empty_categories", false)
+    }
 }

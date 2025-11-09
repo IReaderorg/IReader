@@ -297,6 +297,31 @@ class ReaderPreferences constructor(
     fun applyGlossaryToTranslations(): Preference<Boolean> {
         return preferenceStore.getBoolean("apply_glossary_to_translations", true)
     }
+    
+    // Bilingual mode preferences
+    fun bilingualModeEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean("bilingual_mode_enabled", false)
+    }
+    
+    fun bilingualModeLayout(): Preference<Int> {
+        // 0 = SIDE_BY_SIDE, 1 = PARAGRAPH_BY_PARAGRAPH
+        return preferenceStore.getInt("bilingual_mode_layout", 0)
+    }
+    
+    // Volume key navigation
+    fun volumeKeyNavigation(): Preference<Boolean> {
+        return preferenceStore.getBoolean("volume_key_navigation", false)
+    }
+    
+    // Custom font selection
+    fun selectedFontId(): Preference<String> {
+        return preferenceStore.getString("selected_font_id", "")
+    }
+    
+    // Default reading mode for new books
+    fun defaultReadingMode(): Preference<ReadingMode> {
+        return preferenceStore.getEnum("default_reading_mode", ReadingMode.Page)
+    }
 }
 
 enum class ReadingMode {

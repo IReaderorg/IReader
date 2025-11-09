@@ -23,7 +23,10 @@ CREATE TABLE IF NOT EXISTS book(
     viewer INTEGER NOT NULL,
     chapter_flags INTEGER NOT NULL,
     cover_last_modified INTEGER AS Long NOT NULL,
-    date_added INTEGER AS Long NOT NULL
+    date_added INTEGER AS Long NOT NULL,
+    is_pinned INTEGER AS Boolean NOT NULL DEFAULT 0,
+    pinned_order INTEGER NOT NULL DEFAULT 0,
+    is_archived INTEGER AS Boolean NOT NULL DEFAULT 0
 );
 
 
@@ -210,13 +213,13 @@ genre,title,status,
 thumbnail_url,favorite,
 last_update,next_update,initialized,
 viewer,chapter_flags,cover_last_modified,
-date_added)
+date_added,is_pinned,pinned_order,is_archived)
 VALUES (:id,:source,:url,
 :artist,:author,:description,
 :genre,:title,:status,:thumbnailUrl,
 :favorite,:lastUpdate,:nextUpdate,:initialized,
 :viewerFlags,:chapterFlags,:coverLastModified,
-:dateAdded);
+:dateAdded,:isPinned,:pinnedOrder,:isArchived);
 
 
 update:
@@ -235,7 +238,10 @@ UPDATE book SET
     viewer = coalesce(:viewer, viewer),
     chapter_flags = coalesce(:chapterFlags, chapter_flags),
     cover_last_modified = coalesce(:coverLastModified, cover_last_modified),
-    date_added = coalesce(:dateAdded, date_added)
+    date_added = coalesce(:dateAdded, date_added),
+    is_pinned = coalesce(:isPinned, is_pinned),
+    pinned_order = coalesce(:pinnedOrder, pinned_order),
+    is_archived = coalesce(:isArchived, is_archived)
 WHERE _id = :id;
 
 deleteByKey:
@@ -250,7 +256,21 @@ DELETE FROM book;
 deleteByBookId:
 DELETE FROM book WHERE book._id = :bookId;
 
+updatePinStatus:
+UPDATE book SET
+    is_pinned = :isPinned,
+    pinned_order = :pinnedOrder
+WHERE _id = :bookId;
 
+updatePinnedOrder:
+UPDATE book SET
+    pinned_order = :pinnedOrder
+WHERE _id = :bookId;
+
+updateArchiveStatus:
+UPDATE book SET
+    is_archived = :isArchived
+WHERE _id = :bookId;
 
 selectLastInsertedRowId:
 SELECT LAST_INSERT_ROWID();

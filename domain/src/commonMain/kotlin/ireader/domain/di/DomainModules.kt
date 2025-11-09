@@ -121,6 +121,7 @@ val DomainServices = module {
     factory  { GetRemoteBooksUseCase() }
     factory  { GetRemoteChapters() }
     factory  { GetRemoteReadingContent() }
+    factory  { ireader.domain.usecases.remote.GlobalSearchUseCase(get()) }
 
     factory  {
         TranslationEnginesManager(

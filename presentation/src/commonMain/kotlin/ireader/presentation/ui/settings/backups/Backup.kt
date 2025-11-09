@@ -25,7 +25,8 @@ fun BackUpAndRestoreScreen(
     onBackStack: () -> Unit,
     snackbarHostState: SnackbarHostState,
     vm: BackupScreenViewModel,
-    scaffoldPadding: PaddingValues
+    scaffoldPadding: PaddingValues,
+    onNavigateToCloudBackup: () -> Unit = {}
 ) {
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     val globalScope = LocalGlobalCoroutineScope.currentOrThrow
@@ -98,6 +99,14 @@ fun BackUpAndRestoreScreen(
 
                 }
             ),
+            Components.Header("Cloud Backup"),
+            Components.Row(
+                "Cloud Storage",
+                subtitle = "Backup to Google Drive or Dropbox",
+                onClick = {
+                    onNavigateToCloudBackup()
+                }
+            ),
             Components.Header(localizeHelper.localize(MR.strings.automatic_backup)),
             Components.Dynamic {
                 ChoicePreference<PreferenceValues.AutomaticBackup>(
@@ -123,8 +132,9 @@ fun BackUpAndRestoreScreen(
                     title = localizeHelper.localize(
                         MR.strings.automatic_backup
                     ),
-                    onItemSelected = {
+                    onValue = { newValue ->
                         vm.getSimpleStorage.checkPermission()
+                        vm.updateAutomaticBackupFrequency(newValue)
                     }
                 )
             },

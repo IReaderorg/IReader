@@ -41,6 +41,7 @@ fun ExtensionScreen(
         onClickTogglePinned: (Catalog) -> Unit,
         onCancelInstaller: ((Catalog) -> Unit)? = null,
         snackBarHostState: androidx.compose.material3.SnackbarHostState,
+        onShowDetails: ((Catalog) -> Unit)? = null,
 ) {
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     LaunchedEffect(key1 = true) {
@@ -74,6 +75,7 @@ fun ExtensionScreen(
             onClickUninstall = onClickUninstall,
             pages = pages,
             onCancelInstaller = onCancelInstaller,
+            onShowDetails = onShowDetails,
         )
     }
 }
@@ -112,6 +114,7 @@ private fun ExtensionContent(
         onClickInstall: (Catalog) -> Unit,
         onClickUninstall: (Catalog) -> Unit,
         onCancelInstaller: ((Catalog) -> Unit)? = null,
+        onShowDetails: ((Catalog) -> Unit)? = null,
 
         ) {
     val pagerState = rememberPagerState(
@@ -135,7 +138,8 @@ private fun ExtensionContent(
         onClickTogglePinned = onClickTogglePinned,
         onClickUninstall = onClickUninstall,
         pages = pages,
-        onCancelInstaller = onCancelInstaller
+        onCancelInstaller = onCancelInstaller,
+        onShowDetails = onShowDetails
     )
 }
 
@@ -152,6 +156,7 @@ private fun ExtensionPager(
     onClickInstall: (Catalog) -> Unit,
     onClickUninstall: (Catalog) -> Unit,
     onCancelInstaller: ((Catalog) -> Unit)? = null,
+    onShowDetails: ((Catalog) -> Unit)? = null,
 ) {
     HorizontalPager(
         modifier = Modifier.fillMaxSize(),
@@ -173,6 +178,7 @@ private fun ExtensionPager(
                         onClickCatalog = onClickCatalog,
                         onClickTogglePinned = onClickTogglePinned,
                         vm = vm,
+                        onShowDetails = onShowDetails,
                     )
                 }
 

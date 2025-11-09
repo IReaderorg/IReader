@@ -3,16 +3,16 @@ package ireader.presentation.ui.home.sources.global_search.viewmodel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import ireader.core.log.Log
 import ireader.core.source.CatalogSource
-import ireader.core.source.model.Filter
 import ireader.domain.catalogs.interactor.GetInstalledCatalog
 import ireader.domain.catalogs.interactor.GetLocalCatalogs
 import ireader.domain.models.entities.CatalogInstalled
-import ireader.domain.models.entities.toBook
 import ireader.domain.usecases.local.LocalInsertUseCases
-import ireader.domain.utils.extensions.replace
-
+import ireader.domain.usecases.remote.RemoteUseCases
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onStart
 
 
 
@@ -21,6 +21,7 @@ class GlobalSearchViewModel(
         private val catalogStore: GetLocalCatalogs,
         val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
         val getInstalledCatalog: GetInstalledCatalog,
+        private val remoteUseCases: RemoteUseCases,
         val param: Param
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), GlobalSearchState by state {
     data class Param(val query: String?)
@@ -32,7 +33,7 @@ class GlobalSearchViewModel(
     var withResult by mutableStateOf(emptyList<SearchItem>())
     var numberOfTries by mutableStateOf(0)
 
-
+    private var searchJob: Job? = null
 
     init {
         val query = param.query
@@ -43,51 +44,54 @@ class GlobalSearchViewModel(
     }
 
     fun searchBooks(query: String) {
+        if (query.isBlank()) {
+            return
+        }
+
+        // Cancel previous search
+        searchJob?.cancel()
+
         numberOfTries++
         inProgress = emptyList()
         noResult = emptyList()
         withResult = emptyList()
-        scope.launch {
-            installedCatalogs = getInstalledCatalog.get()
-            val catalogs =
-                installedCatalogs.mapNotNull { it.source }.filterIsInstance<CatalogSource>()
-            var availableThreads = 5
-            catalogs.forEach { source ->
-                scope.launch {
+
+        searchJob = scope.launch {
+            try {
+                installedCatalogs = getInstalledCatalog.get()
+                val catalogs = installedCatalogs.mapNotNull { it.source }.filterIsInstance<CatalogSource>()
+
+                // Mark all sources as loading initially
+                catalogs.forEach { source ->
                     SearchItem(source).handleSearchItems(true)
-                    while (availableThreads <= 0) {
-                        delay(500)
-                    }
-                    availableThreads--
-                    kotlin.runCatching {
-
-                        var items = withTimeout(60000) {
-                            source.getMangaList(
-                                filters = listOf(
-                                    Filter.Title()
-                                        .apply { this.value = query }
-                                ),
-                                1
-                            ).mangas.map { it.toBook(source.id) }
-                        }
-
-                        withContext(Dispatchers.IO) {
-                            items.forEachIndexed { index, book ->
-                                items = items.replace(index, book)
-                            }
-                        }
-                        val searchedItems = SearchItem(source, items = items)
-                        searchedItems.handleSearchItems()
-                    }.getOrElse {
-                        SearchItem(source, items = emptyList()).handleSearchItems(false)
-                    }
-                    availableThreads++
                 }
+
+                // Use the new GlobalSearchUseCase
+                remoteUseCases.globalSearch(query)
+                    .onStart {
+                        Log.debug { "Starting global search for query: $query" }
+                    }
+                    .catch { e ->
+                        Log.error(e, "Error during global search")
+                    }
+                    .collect { result ->
+                        // Find the source for this result
+                        val source = catalogs.find { it.id == result.sourceId }
+                        if (source != null) {
+                            val searchItem = SearchItem(
+                                source = source,
+                                items = result.books
+                            )
+                            searchItem.handleSearchItems(loading = false)
+                        }
+                    }
+            } catch (e: Exception) {
+                Log.error(e, "Error during global search")
             }
         }
     }
 
-    private fun SearchItem.handleSearchItems(loading:Boolean = false) {
+    private fun SearchItem.handleSearchItems(loading: Boolean = false) {
         if (loading) {
             inProgress = inProgress + this
             return
@@ -101,6 +105,10 @@ class GlobalSearchViewModel(
                 withResult = withResult + this
             }
         }
+    }
 
+    override fun onDispose() {
+        super.onDispose()
+        searchJob?.cancel()
     }
 }

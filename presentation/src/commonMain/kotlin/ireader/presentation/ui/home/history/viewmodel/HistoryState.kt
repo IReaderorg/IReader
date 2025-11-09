@@ -14,9 +14,15 @@ interface HistoryState {
 
     var searchMode: Boolean
     var searchQuery: String
+    var groupByNovel: Boolean
+    var dateFilter: DateFilter?
     
     // Add a force refresh signal to trigger UI updates
     var refreshTrigger: Int
+}
+
+enum class DateFilter {
+    TODAY, YESTERDAY, PAST_7_DAYS
 }
 
 class HistoryStateImpl : HistoryState {
@@ -25,5 +31,7 @@ class HistoryStateImpl : HistoryState {
     override val isEmpty: Boolean by  mutableStateOf(false)
     override var searchMode by mutableStateOf<Boolean>(false)
     override var searchQuery by mutableStateOf<String>("")
+    override var groupByNovel by mutableStateOf<Boolean>(false)
+    override var dateFilter by mutableStateOf<DateFilter?>(null)
     override var refreshTrigger by mutableStateOf(0)
 }

@@ -34,6 +34,10 @@ interface ExploreState {
 
     var stateFilters: List<Filter<*>>?
     var stateListing: Listing?
+    
+    // Scroll position state for preserving scroll when returning from browser
+    var savedScrollIndex: Int
+    var savedScrollOffset: Int
 }
 
 open class ExploreStateImpl: ExploreState {
@@ -55,6 +59,10 @@ open class ExploreStateImpl: ExploreState {
     override var endReached by mutableStateOf(false)
     override var stateFilters by mutableStateOf<List<Filter<*>>?>(null)
     override var stateListing by mutableStateOf<Listing?>(null)
+    
+    // Scroll position state for preserving scroll when returning from browser
+    override var savedScrollIndex by mutableStateOf(0)
+    override var savedScrollOffset by mutableStateOf(0)
 }
 
 

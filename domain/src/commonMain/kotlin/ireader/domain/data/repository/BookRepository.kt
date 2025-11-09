@@ -55,4 +55,24 @@ interface BookRepository {
      * Ensures all books have the default category assigned
      */
     suspend fun repairCategoryAssignments()
+    
+    /**
+     * Update pin status for a book
+     */
+    suspend fun updatePinStatus(bookId: Long, isPinned: Boolean, pinnedOrder: Int)
+    
+    /**
+     * Update pinned order for a book
+     */
+    suspend fun updatePinnedOrder(bookId: Long, pinnedOrder: Int)
+    
+    /**
+     * Get the maximum pinned order value
+     */
+    suspend fun getMaxPinnedOrder(): Int
+    
+    /**
+     * Update archive status for a book
+     */
+    suspend fun updateArchiveStatus(bookId: Long, isArchived: Boolean)
 }

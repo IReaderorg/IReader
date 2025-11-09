@@ -8,6 +8,7 @@ import migrations.Reader_theme
 import migrations.Theme
 import ir.kazemcodes.infinityreader.Database
 import ireader.data.book.bookGenresConverter
+import ireader.data.book.booleanIntAdapter
 import ireader.data.book.floatDoubleColumnAdapter
 import ireader.data.book.intLongColumnAdapter
 import ireader.data.book.longConverter

@@ -39,10 +39,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ReadingMode
+import ireader.presentation.ui.component.getContextWrapper
 import ireader.presentation.ui.core.ui.Colour.Transparent
+import ireader.presentation.ui.reader.components.AutoScrollSpeedControl
+import ireader.presentation.ui.reader.components.BrightnessControl
+import ireader.presentation.ui.reader.components.FindInChapterBar
+import ireader.presentation.ui.reader.components.FindInChapterState
 import ireader.presentation.ui.reader.components.GlossaryDialogWithFilePickers
+import ireader.presentation.ui.reader.components.ReportBrokenChapterDialog
 import ireader.presentation.ui.reader.components.MainBottomSettingComposable
 import ireader.presentation.ui.reader.components.PreloadIndicator
+import ireader.presentation.ui.reader.components.QuickFontSizeAdjuster
+import ireader.presentation.ui.reader.components.ReadingTimeEstimator
+import ireader.presentation.ui.reader.components.ReaderSettingsBottomSheet
 import ireader.presentation.ui.reader.components.TranslationBadge
 import ireader.presentation.ui.reader.components.TranslationProgressIndicator
 import ireader.presentation.ui.reader.components.TranslationToggleButton
@@ -88,6 +97,13 @@ fun ReadingScreen(
     
     val scope = rememberCoroutineScope()
     val chapter = vm.stateChapter
+    
+    // Calculate reading time when chapter changes
+    LaunchedEffect(key1 = chapter?.id) {
+        if (chapter != null && !vm.isLoading) {
+            vm.updateReadingTimeEstimation(0f)
+        }
+    }
 
     // Initialize the modal sheet state based on reader mode
     LaunchedEffect(Unit) {
@@ -205,7 +221,7 @@ fun ReadingScreen(
                                     chapter = chapter,
                                     chapters = vm.stateChapters,
                                     currentChapterIndex = vm.currentChapterIndex,
-                                    onSetting = onReaderBottomOnSetting,
+                                    onSetting = { vm.showSettingsBottomSheet = true },
                                     onNext = { onNext(true) },
                                     onPrev = { onPrev(true) },
                                     onSliderChange = onSliderChange,
@@ -228,6 +244,23 @@ fun ReadingScreen(
                                 lazyListState = lazyListState,
                                 onChapterShown = onChapterShown
                             )
+                            
+                            // Settings Bottom Sheet
+                            if (vm.showSettingsBottomSheet) {
+                                ReaderSettingsBottomSheet(
+                                    vm = vm,
+                                    onDismiss = { vm.showSettingsBottomSheet = false },
+                                    onFontSelected = { /* Handle font selection */ },
+                                    onToggleAutoBrightness = { /* Handle brightness toggle */ },
+                                    onChangeBrightness = { /* Handle brightness change */ },
+                                    onBackgroundChange = { themeId ->
+                                        vm.changeBackgroundColor(themeId)
+                                    },
+                                    onTextAlign = { alignment ->
+                                        vm.saveTextAlignment(alignment)
+                                    }
+                                )
+                            }
                             
                             // Translation toggle button
                             TranslationToggleButton(
@@ -277,6 +310,75 @@ fun ReadingScreen(
                                     .align(Alignment.BottomCenter)
                                     .padding(bottom = 16.dp)
                             )
+                            
+                            // Brightness control
+                            BrightnessControl(
+                                visible = vm.showBrightnessControl,
+                                brightness = vm.brightness.value,
+                                onBrightnessChange = { newBrightness ->
+                                    vm.brightness.value = newBrightness
+                                    // Platform-specific brightness saving handled in ViewModel
+                                },
+                                onDismiss = { vm.showBrightnessControl = false },
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .padding(top = 80.dp)
+                            )
+                            
+                            // Quick font size adjuster
+                            QuickFontSizeAdjuster(
+                                visible = vm.showFontSizeAdjuster,
+                                fontSize = vm.fontSize.value,
+                                onFontSizeChange = { newSize ->
+                                    vm.fontSize.value = newSize
+                                    vm.makeSettingTransparent()
+                                },
+                                onDismiss = { vm.showFontSizeAdjuster = false },
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .padding(top = 80.dp)
+                            )
+                            
+                            // Autoscroll speed control
+                            AutoScrollSpeedControl(
+                                visible = vm.autoScrollMode,
+                                isScrolling = vm.autoScrollMode,
+                                scrollSpeed = vm.autoScrollOffset.value,
+                                onSpeedIncrease = { vm.increaseAutoScrollSpeed() },
+                                onSpeedDecrease = { vm.decreaseAutoScrollSpeed() },
+                                onToggleScroll = { vm.toggleAutoScroll() },
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = 80.dp)
+                            )
+                            
+                            // Find in chapter bar
+                            if (vm.showFindInChapter) {
+                                FindInChapterBar(
+                                    state = FindInChapterState(
+                                        query = vm.findQuery,
+                                        matches = vm.findMatches,
+                                        currentMatchIndex = vm.currentFindMatchIndex
+                                    ),
+                                    onQueryChange = { vm.updateFindQuery(it) },
+                                    onNext = { vm.findNext() },
+                                    onPrevious = { vm.findPrevious() },
+                                    onClose = { vm.toggleFindInChapter() },
+                                    modifier = Modifier
+                                        .align(Alignment.TopCenter)
+                                        .padding(top = 56.dp)
+                                )
+                            }
+                            
+                            // Reading time estimator
+                            ReadingTimeEstimator(
+                                visible = vm.showReadingTime && !vm.isLoading,
+                                estimatedMinutes = vm.estimatedReadingMinutes,
+                                wordsRemaining = vm.wordsRemaining,
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = 16.dp)
+                            )
                         }
                         
                         // Glossary dialog
@@ -303,6 +405,29 @@ fun ReadingScreen(
                                 onShowSnackBar = { message ->
                                     vm.showSnackBar(message)
                                 }
+                            )
+                        }
+                        
+                        // Report broken chapter dialog
+                        if (vm.showReportDialog) {
+                            ReportBrokenChapterDialog(
+                                chapterName = vm.stateChapter?.name ?: "Unknown Chapter",
+                                onDismiss = { vm.toggleReportDialog() },
+                                onReport = { category, description ->
+                                    vm.reportBrokenChapter(category, description)
+                                }
+                            )
+                        }
+                        
+                        // Paragraph translation dialog
+                        if (vm.showParagraphTranslationDialog) {
+                            ireader.presentation.ui.reader.components.TranslationResultDialog(
+                                originalText = vm.paragraphToTranslate,
+                                translatedText = vm.translatedParagraph,
+                                isLoading = vm.isParagraphTranslating,
+                                error = vm.paragraphTranslationError,
+                                onDismiss = { vm.hideParagraphTranslation() },
+                                onRetry = { vm.retryParagraphTranslation() }
                             )
                         }
                     }

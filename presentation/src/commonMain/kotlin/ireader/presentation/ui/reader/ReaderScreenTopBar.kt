@@ -11,10 +11,14 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BrightnessHigh
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Report
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -90,6 +94,40 @@ fun ReaderScreenTopBar(
                                 onBookMark()
                             }
                         )
+                        AppIconButton(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Find in chapter",
+                            onClick = {
+                                vm.toggleFindInChapter()
+                            }
+                        )
+                        AppIconButton(
+                            imageVector = Icons.Default.Report,
+                            contentDescription = "Report broken chapter",
+                            onClick = {
+                                vm.toggleReportDialog()
+                            }
+                        )
+                        AppIconButton(
+                            imageVector = Icons.Default.BrightnessHigh,
+                            contentDescription = "Brightness",
+                            onClick = {
+                                vm.showBrightnessControl = !vm.showBrightnessControl
+                            }
+                        )
+                        // Font size quick adjuster button
+                        IconButton(
+                            onClick = {
+                                vm.showFontSizeAdjuster = !vm.showFontSizeAdjuster
+                            }
+                        ) {
+                            Text(
+                                text = "Aa",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
                         if (!vm.webViewIntegration.value) {
                             AppIconButton(
                                 imageVector = Icons.Default.Public,

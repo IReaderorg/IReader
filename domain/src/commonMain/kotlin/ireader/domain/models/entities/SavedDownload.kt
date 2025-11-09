@@ -39,7 +39,10 @@ data class SavedDownloadWithInfo(
     val chapterKey: String,
     val chapterName: String,
     val translator: String,
-    val isDownloaded: Boolean
+    val isDownloaded: Boolean,
+    val isFailed: Boolean = false,
+    val errorMessage: String? = null,
+    val retryCount: Int = 0
 ) {
     fun toDownload(): Download {
         return Download(

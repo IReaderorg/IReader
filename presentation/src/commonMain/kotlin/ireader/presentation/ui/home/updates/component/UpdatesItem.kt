@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircleOutline
 import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -82,6 +83,12 @@ fun UpdatesItem(
             )
         }
 
+        Checkbox(
+            checked = isSelected,
+            onCheckedChange = { onLongClickItem(book) },
+            modifier = Modifier.padding(end = 8.dp)
+        )
+        
         if (isDownloadable) {
             IconButton(onClick = { onClickDownload(book) }) {
                 Icon(imageVector = Icons.Outlined.Download, contentDescription = "")

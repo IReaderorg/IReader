@@ -32,8 +32,24 @@ internal fun AddingRepositoryScreen(
     val username = rememberMutableString()
     val password = rememberMutableString()
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    var showHelpDialog by remember { mutableStateOf(false) }
     androidx.compose.material3.Scaffold(
             modifier = Modifier.fillMaxSize().padding(top = scaffoldPadding.calculateTopPadding()),
+            topBar = {
+                androidx.compose.material3.TopAppBar(
+                    title = { androidx.compose.material3.Text("Add Repository") },
+                    actions = {
+                        androidx.compose.material3.IconButton(
+                            onClick = { showHelpDialog = true }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Help,
+                                contentDescription = localizeHelper.localize(MR.strings.help)
+                            )
+                        }
+                    }
+                )
+            },
             floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
             floatingActionButton = {
                 androidx.compose.material3.FloatingActionButton(
@@ -80,8 +96,68 @@ internal fun AddingRepositoryScreen(
                 FormComponent(localizeHelper.localize(MR.strings.password), Icons.Default.Key, password, false)
             }
         }
-
-
+    }
+    
+    // Help dialog
+    if (showHelpDialog) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showHelpDialog = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    tint = androidx.compose.material3.MaterialTheme.colorScheme.primary
+                )
+            },
+            title = {
+                androidx.compose.material3.Text(
+                    text = localizeHelper.localize(MR.strings.what_is_repository),
+                    style = androidx.compose.material3.MaterialTheme.typography.headlineSmall
+                )
+            },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    androidx.compose.material3.Text(
+                        text = localizeHelper.localize(MR.strings.repository_explanation),
+                        style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    
+                    androidx.compose.material3.Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = androidx.compose.material3.MaterialTheme.shapes.small,
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp)
+                        ) {
+                            androidx.compose.material3.Text(
+                                text = "Example URL:",
+                                style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
+                                color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            androidx.compose.material3.Text(
+                                text = localizeHelper.localize(MR.strings.repository_example_url),
+                                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                                color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(
+                    onClick = { showHelpDialog = false }
+                ) {
+                    androidx.compose.material3.Text("Got it")
+                }
+            }
+        )
     }
 }
 

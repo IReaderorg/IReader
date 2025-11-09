@@ -2,8 +2,10 @@ package ireader.presentation.ui.home.history
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,7 +29,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -35,19 +36,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.HistoryWithRelations
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
-import ireader.domain.models.BookCover
 import ireader.presentation.ui.component.BookListItemImage
-import ireader.presentation.ui.component.components.BookImageCover
-import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.reusable_composable.WarningAlertData
 import ireader.presentation.ui.core.coil.rememberBookCover
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.ui.EmptyScreen
+import ireader.presentation.ui.home.history.viewmodel.DateFilter
 import ireader.presentation.ui.home.history.viewmodel.HistoryViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -86,7 +85,11 @@ fun HistoryScreen(
                 onSearchModeChange = { vm.toggleSearchMode() },
                 onSearchQueryChange = { vm.onSearchQueryChange(it) },
                 focusRequester = searchFocusRequester,
-                onClearClick = { vm.onSearchQueryChange("") }
+                onClearClick = { vm.onSearchQueryChange("") },
+                groupByNovel = vm.groupByNovel,
+                onToggleGroupByNovel = { vm.toggleGroupByNovel() },
+                dateFilter = vm.dateFilter,
+                onDateFilterChange = { vm.setDateFilterHistory(it) }
             )
         },
         floatingActionButton = {
@@ -113,11 +116,13 @@ fun HistoryScreen(
             when {
                 items.values.flatten().isEmpty() && vm.searchQuery.isNotEmpty() -> EmptyScreen(
                     text = localize(MR.strings.no_matches_found_in_search) + " \"${vm.searchQuery}\"",
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    icon = Icons.Outlined.Search
                 )
                 items.values.isEmpty() -> EmptyScreen(
                     text = localize(MR.strings.nothing_read_recently),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    icon = Icons.Outlined.History
                 )
                 else -> HistoryContent(
                     items = items,
@@ -155,9 +160,14 @@ fun HistoryTopAppBar(
     onSearchModeChange: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
     focusRequester: FocusRequester,
-    onClearClick: () -> Unit
+    onClearClick: () -> Unit,
+    groupByNovel: Boolean,
+    onToggleGroupByNovel: () -> Unit,
+    dateFilter: DateFilter?,
+    onDateFilterChange: (DateFilter?) -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+    var showFilterMenu by remember { mutableStateOf(false) }
 
     if (searchMode) {
         TextField(
@@ -209,6 +219,87 @@ fun HistoryTopAppBar(
                         contentDescription = localize(MR.strings.search)
                     )
                 }
+                IconButton(onClick = { showFilterMenu = true }) {
+                    Icon(
+                        imageVector = Icons.Default.FilterList,
+                        contentDescription = localize(MR.strings.filter)
+                    )
+                }
+                
+                DropdownMenu(
+                    expanded = showFilterMenu,
+                    onDismissRequest = { showFilterMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { 
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Checkbox(
+                                    checked = groupByNovel,
+                                    onCheckedChange = null
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Group by Novel")
+                            }
+                        },
+                        onClick = {
+                            onToggleGroupByNovel()
+                        }
+                    )
+                    
+                    HorizontalDivider()
+                    
+                    DropdownMenuItem(
+                        text = { Text("All Time") },
+                        onClick = {
+                            onDateFilterChange(null)
+                            showFilterMenu = false
+                        },
+                        trailingIcon = {
+                            if (dateFilter == null) {
+                                Icon(Icons.Default.Check, contentDescription = null)
+                            }
+                        }
+                    )
+                    
+                    DropdownMenuItem(
+                        text = { Text(localize(MR.strings.relative_time_today)) },
+                        onClick = {
+                            onDateFilterChange(DateFilter.TODAY)
+                            showFilterMenu = false
+                        },
+                        trailingIcon = {
+                            if (dateFilter == DateFilter.TODAY) {
+                                Icon(Icons.Default.Check, contentDescription = null)
+                            }
+                        }
+                    )
+                    
+                    DropdownMenuItem(
+                        text = { Text(localize(MR.strings.yesterday)) },
+                        onClick = {
+                            onDateFilterChange(DateFilter.YESTERDAY)
+                            showFilterMenu = false
+                        },
+                        trailingIcon = {
+                            if (dateFilter == DateFilter.YESTERDAY) {
+                                Icon(Icons.Default.Check, contentDescription = null)
+                            }
+                        }
+                    )
+                    
+                    DropdownMenuItem(
+                        text = { Text(localize(MR.strings.past_7_days)) },
+                        onClick = {
+                            onDateFilterChange(DateFilter.PAST_7_DAYS)
+                            showFilterMenu = false
+                        },
+                        trailingIcon = {
+                            if (dateFilter == DateFilter.PAST_7_DAYS) {
+                                Icon(Icons.Default.Check, contentDescription = null)
+                            }
+                        }
+                    )
+                }
             }
         )
     }
@@ -244,13 +335,22 @@ fun HistoryContent(
         add(Calendar.DAY_OF_MONTH, -6) // Now 7 days ago in total
     }.timeInMillis
     
+    // Apply date filter
+    val allItems = items.values.flatten()
+    val filteredItems = when (vm.dateFilter) {
+        DateFilter.TODAY -> allItems.filter { it.readAt >= today }
+        DateFilter.YESTERDAY -> allItems.filter { it.readAt >= yesterday && it.readAt < today }
+        DateFilter.PAST_7_DAYS -> allItems.filter { it.readAt >= lastWeek }
+        null -> allItems
+    }
+    
     // Group history items
     val todayItems = mutableListOf<HistoryWithRelations>()
     val yesterdayItems = mutableListOf<HistoryWithRelations>()
     val thisWeekItems = mutableListOf<HistoryWithRelations>()
     val earlierItems = mutableListOf<HistoryWithRelations>()
     
-    items.values.flatten().forEach { history ->
+    filteredItems.forEach { history ->
         when {
             history.readAt >= today -> todayItems.add(history)
             history.readAt >= yesterday -> yesterdayItems.add(history)
@@ -389,7 +489,7 @@ fun HistoryTimeHeader(title: String) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun HistoryItem(
     history: HistoryWithRelations,
@@ -403,6 +503,7 @@ fun HistoryItem(
     vm: HistoryViewModel
 ) {
     val scope = rememberCoroutineScope()
+    var showContextMenu by remember { mutableStateOf(false) }
     
     // Keep track of whether an alert is active to prevent multiple dismisses
     val alertShowing = remember { mutableStateOf(false) }
@@ -474,17 +575,21 @@ fun HistoryItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
-                    .clickable(
+                    .combinedClickable(
                         interactionSource = interactionSource,
-                        indication = null
-                    ) {
-                        isPressed = true
-                        scope.launch {
-                            delay(100)
-                            isPressed = false
-                            onClickItem(history)
+                        indication = null,
+                        onClick = {
+                            isPressed = true
+                            scope.launch {
+                                delay(100)
+                                isPressed = false
+                                onClickItem(history)
+                            }
+                        },
+                        onLongClick = {
+                            showContextMenu = true
                         }
-                    }
+                    )
                     .graphicsLayer {
                         scaleX = scale
                         scaleY = scale
@@ -536,15 +641,17 @@ fun HistoryItem(
                             .weight(1f)
                             .padding(horizontal = 12.dp)
                     ) {
-                        Text(
+                        HighlightedText(
                             text = history.title,
+                            searchQuery = vm.searchQuery,
                             style = MaterialTheme.typography.titleMedium,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                         
-                        Text(
+                        HighlightedText(
                             text = history.chapterName ?: "",
+                            searchQuery = vm.searchQuery,
                             style = MaterialTheme.typography.bodyMedium,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -590,6 +697,54 @@ fun HistoryItem(
         },
         directions = setOf(DismissDirection.EndToStart)
     )
+    
+    // Context menu
+    DropdownMenu(
+        expanded = showContextMenu,
+        onDismissRequest = { showContextMenu = false }
+    ) {
+        DropdownMenuItem(
+            text = { Text("Go to Chapter") },
+            onClick = {
+                showContextMenu = false
+                onClickItem(history)
+            },
+            leadingIcon = {
+                Icon(Icons.Default.MenuBook, contentDescription = null)
+            }
+        )
+        
+        DropdownMenuItem(
+            text = { Text("View Novel Details") },
+            onClick = {
+                showContextMenu = false
+                onBookCover(history)
+            },
+            leadingIcon = {
+                Icon(Icons.Default.Info, contentDescription = null)
+            }
+        )
+        
+        HorizontalDivider()
+        
+        DropdownMenuItem(
+            text = { Text("Remove from History") },
+            onClick = {
+                showContextMenu = false
+                onHistoryDelete(history)
+            },
+            leadingIcon = {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
+                )
+            },
+            colors = MenuDefaults.itemColors(
+                textColor = MaterialTheme.colorScheme.error
+            )
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -688,4 +843,67 @@ fun WarningAlertDialog(data: WarningAlertData) {
             }
         }
     )
+}
+
+@Composable
+fun HighlightedText(
+    text: String,
+    searchQuery: String,
+    modifier: Modifier = Modifier,
+    style: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodyMedium,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    color: Color = Color.Unspecified
+) {
+    if (searchQuery.isBlank()) {
+        Text(
+            text = text,
+            modifier = modifier,
+            style = style,
+            maxLines = maxLines,
+            overflow = overflow,
+            color = color
+        )
+    } else {
+        val annotatedString = androidx.compose.ui.text.buildAnnotatedString {
+            var currentIndex = 0
+            val lowerText = text.lowercase()
+            val lowerQuery = searchQuery.lowercase()
+            
+            while (currentIndex < text.length) {
+                val matchIndex = lowerText.indexOf(lowerQuery, currentIndex)
+                if (matchIndex == -1) {
+                    append(text.substring(currentIndex))
+                    break
+                }
+                
+                // Add text before match
+                if (matchIndex > currentIndex) {
+                    append(text.substring(currentIndex, matchIndex))
+                }
+                
+                // Add highlighted match
+                withStyle(
+                    style = androidx.compose.ui.text.SpanStyle(
+                        background = MaterialTheme.colorScheme.primaryContainer,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontWeight = FontWeight.Bold
+                    )
+                ) {
+                    append(text.substring(matchIndex, matchIndex + searchQuery.length))
+                }
+                
+                currentIndex = matchIndex + searchQuery.length
+            }
+        }
+        
+        Text(
+            text = annotatedString,
+            modifier = modifier,
+            style = style,
+            maxLines = maxLines,
+            overflow = overflow,
+            color = if (color != Color.Unspecified) color else LocalContentColor.current
+        )
+    }
 }

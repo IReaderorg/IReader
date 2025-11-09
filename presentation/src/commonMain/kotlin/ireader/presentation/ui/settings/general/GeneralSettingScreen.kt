@@ -50,6 +50,7 @@ import ireader.presentation.ui.component.components.ChoicePreference
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.core.ui.asStateIn
 import ireader.presentation.ui.video.component.cores.player.SubtitleHelper
 
 @Composable
@@ -127,16 +128,19 @@ fun GeneralSettingScreen(
                 Components.Switch(
                         preference = vm.showSystemWideCatalogs,
                         title = localizeHelper.localize(MR.strings.show_system_catalogs),
+                        subtitle = localizeHelper.localize(MR.strings.show_system_catalogs_subtitle),
                         icon = Icons.Filled.Storage
                 ),
                 Components.Switch(
                         preference = vm.showLocalCatalogs,
                         title = localizeHelper.localize(MR.strings.show_local_catalogs),
+                        subtitle = localizeHelper.localize(MR.strings.show_local_catalogs_subtitle),
                         icon = Icons.Filled.Storage
                 ),
                 Components.Switch(
                         preference = vm.autoInstaller,
                         title = localizeHelper.localize(MR.strings.auto_installer),
+                        subtitle = localizeHelper.localize(MR.strings.auto_installer_subtitle),
                         icon = Icons.Filled.Settings
                 ),
                 Components.Switch(
@@ -341,21 +345,21 @@ class GeneralSettingScreenViewModel(
         val localeHelper: LocaleHelper
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
 
-    val appUpdater = appPreferences.appUpdater().asState()
+    val appUpdater = appPreferences.appUpdater().asStateIn(scope)
 
-    var showHistory = uiPreferences.showHistoryInButtonBar().asState()
-    var showUpdate = uiPreferences.showUpdatesInButtonBar().asState()
-    var confirmExit = uiPreferences.confirmExit().asState()
-    var installer = uiPreferences.installerMode().asState()
-    var language = uiPreferences.language().asState()
-    var showSystemWideCatalogs = uiPreferences.showSystemWideCatalogs().asState()
-    var showLocalCatalogs = uiPreferences.showLocalCatalogs().asState()
-    var autoInstaller = uiPreferences.autoCatalogUpdater().asState()
-    var localSourceLocation = uiPreferences.savedLocalCatalogLocation().asState()
+    var showHistory = uiPreferences.showHistoryInButtonBar().asStateIn(scope)
+    var showUpdate = uiPreferences.showUpdatesInButtonBar().asStateIn(scope)
+    var confirmExit = uiPreferences.confirmExit().asStateIn(scope)
+    var installer = uiPreferences.installerMode().asStateIn(scope)
+    var language = uiPreferences.language().asStateIn(scope)
+    var showSystemWideCatalogs = uiPreferences.showSystemWideCatalogs().asStateIn(scope)
+    var showLocalCatalogs = uiPreferences.showLocalCatalogs().asStateIn(scope)
+    var autoInstaller = uiPreferences.autoCatalogUpdater().asStateIn(scope)
+    var localSourceLocation = uiPreferences.savedLocalCatalogLocation().asStateIn(scope)
     
     // Download preferences
-    val downloadDelayMs = downloadPreferences.downloadDelayMs().asState()
-    val concurrentDownloads = downloadPreferences.concurrentDownloadsLimit().asState()
+    val downloadDelayMs = downloadPreferences.downloadDelayMs().asStateIn(scope)
+    val concurrentDownloads = downloadPreferences.concurrentDownloadsLimit().asStateIn(scope)
 
     @Composable
     fun getLanguageChoices(): Map<String, String> {

@@ -27,7 +27,10 @@ CREATE TABLE IF NOT EXISTS book(
     viewer INTEGER NOT NULL,
     chapter_flags INTEGER NOT NULL,
     cover_last_modified INTEGER AS Long NOT NULL,
-    date_added INTEGER AS Long NOT NULL
+    date_added INTEGER AS Long NOT NULL,
+    is_pinned INTEGER AS Boolean NOT NULL DEFAULT 0,
+    pinned_order INTEGER NOT NULL DEFAULT 0,
+    is_archived INTEGER AS Boolean NOT NULL DEFAULT 0
 );
 CREATE TABLE
 IF NOT EXISTS theme

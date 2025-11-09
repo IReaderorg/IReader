@@ -61,13 +61,23 @@ class LibraryRepositoryImpl(
     }
 
     private suspend fun List<LibraryBook>.sortWith(sort: LibrarySort): List<LibraryBook> {
-        return when (sort.type) {
-            LibrarySort.Type.Title -> this.sortedBy { it.title }
+        // Filter out archived books by default
+        val nonArchivedBooks = this.filter { !it.isArchived }
+        
+        // First, separate pinned and unpinned books
+        val (pinnedBooks, unpinnedBooks) = nonArchivedBooks.partition { it.isPinned }
+        
+        // Sort pinned books by pinnedOrder
+        val sortedPinnedBooks = pinnedBooks.sortedBy { it.pinnedOrder }
+        
+        // Sort unpinned books according to the selected sort type
+        val sortedUnpinnedBooks = when (sort.type) {
+            LibrarySort.Type.Title -> unpinnedBooks.sortedBy { it.title }
             LibrarySort.Type.LastRead -> {
                 val list = handler.awaitList {
                     bookQueries.getLastRead(libraryManga)
                 }
-                val books: List<LibraryBook> = this.map { book ->
+                val books: List<LibraryBook> = unpinnedBooks.map { book ->
                     book.apply {
                         lastRead = list.find { item -> item.id == book.id }?.lastRead ?: 0L
                     }
@@ -76,13 +86,13 @@ class LibraryRepositoryImpl(
                 books.sortedBy { it.lastRead }
             }
 
-            LibrarySort.Type.LastUpdated -> this.sortedBy { it.lastUpdate }
+            LibrarySort.Type.LastUpdated -> unpinnedBooks.sortedBy { it.lastUpdate }
 
-            LibrarySort.Type.Unread -> this.sortedBy { it.unreadCount }
+            LibrarySort.Type.Unread -> unpinnedBooks.sortedBy { it.unreadCount }
 
-            LibrarySort.Type.TotalChapters -> this.sortedBy { it.totalChapters }
+            LibrarySort.Type.TotalChapters -> unpinnedBooks.sortedBy { it.totalChapters }
 
-            LibrarySort.Type.Source -> this.sortedBy { it.sourceId }
+            LibrarySort.Type.Source -> unpinnedBooks.sortedBy { it.sourceId }
 
             LibrarySort.Type.DateAdded
             -> {
@@ -90,7 +100,7 @@ class LibraryRepositoryImpl(
                     handler.awaitList {
                         bookQueries.getLatestByChapterUploadDate(libraryManga)
                     }
-                return this.map { book ->
+                unpinnedBooks.map { book ->
                     dateAdded.firstOrNull { it.id == book.id }?.let { newOne ->
                         book.apply { dateUpload = newOne.dateUpload }
                     } ?: book
@@ -102,13 +112,16 @@ class LibraryRepositoryImpl(
                     handler.awaitList {
                         bookQueries.getLatestByChapterFetchDate(libraryManga)
                     }
-                return this.map { book ->
+                unpinnedBooks.map { book ->
                     dateFetched.firstOrNull { it.id == book.id }?.let { newOne ->
                         book.apply { this.dateFetched = newOne.dateFetched }
                     } ?: book
                 }.sortedBy { it.dateFetched }
             }
         }
+        
+        // Return pinned books first, then unpinned books
+        return sortedPinnedBooks + sortedUnpinnedBooks
     }
 
     override suspend fun findDownloadedBooks(): List<Book> {

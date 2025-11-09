@@ -61,6 +61,22 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler,) :
            downloadQueries.deleteAll()
         }
     }
+    
+    override suspend fun updateDownloadPriority(chapterId: Long, priority: Int) {
+        handler.await {
+            downloadQueries.updatePriority(priority, chapterId)
+        }
+    }
+    
+    override suspend fun markDownloadAsFailed(chapterId: Long, errorMessage: String) {
+        // Failed downloads are tracked in DownloadServiceState
+        // This method is here for future database schema updates
+    }
+    
+    override suspend fun retryFailedDownload(chapterId: Long) {
+        // Retry is handled by re-adding to download queue
+        // This method is here for future enhancements
+    }
 
 
 }

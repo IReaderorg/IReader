@@ -1,0 +1,35 @@
+import kotlin.String;
+import kotlin.Long;
+
+CREATE TABLE IF NOT EXISTS update_history(
+    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    book_id INTEGER NOT NULL,
+    book_title TEXT NOT NULL,
+    chapters_added INTEGER NOT NULL,
+    timestamp INTEGER NOT NULL,
+    FOREIGN KEY(book_id) REFERENCES book(_id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS update_history_book_id_index ON update_history(book_id);
+CREATE INDEX IF NOT EXISTS update_history_timestamp_index ON update_history(timestamp);
+
+insertUpdateHistory:
+INSERT INTO update_history(book_id, book_title, chapters_added, timestamp)
+VALUES (?, ?, ?, ?);
+
+getUpdateHistory:
+SELECT * FROM update_history
+ORDER BY timestamp DESC
+LIMIT :limit;
+
+getUpdateHistoryByBook:
+SELECT * FROM update_history
+WHERE book_id = :bookId
+ORDER BY timestamp DESC;
+
+deleteUpdateHistory:
+DELETE FROM update_history
+WHERE _id = :id;
+
+deleteAllUpdateHistory:
+DELETE FROM update_history;

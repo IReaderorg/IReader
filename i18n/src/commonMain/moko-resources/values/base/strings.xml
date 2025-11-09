@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="library_screen_label">Library</string>
-    <string name="explore_screen_label">Explore</string>
+    <string name="explore_screen_label">Sources</string>
     <string name="setting_screen_label">Setting</string>
     <string name="delete_all_downloads">Delete all downloads</string>
     <string name="cancel_all">Cancel all</string>
@@ -14,9 +14,31 @@
     <string name="add">Add</string>
     <string name="view_book">View Book</string>
     <string name="show_system_catalogs">Show System Extensions</string>
+    <string name="show_system_catalogs_subtitle">Display built-in extensions that come with the app</string>
     <string name="show_local_catalogs">Show Local Extensions</string>
+    <string name="show_local_catalogs_subtitle">Display extensions installed from local files</string>
     <string name="auto_installer">Auto Installer</string>
+    <string name="auto_installer_subtitle">Automatically install extension updates when available</string>
     <string name="saved_local_source_location">Saved Sources to Cache</string>
+    <string name="what_is_repository">What is a repository?</string>
+    <string name="repository_explanation">A repository is a collection of extensions hosted online. You can add custom repositories to access additional sources for books and novels.</string>
+    <string name="repository_example_url">Example: https://github.com/username/repo/raw/main/index.json</string>
+    <string name="no_active_downloads">No active downloads</string>
+    <string name="no_active_downloads_subtitle">Downloads will appear here when you start downloading chapters</string>
+    <string name="active_downloads">Active</string>
+    <string name="completed_downloads">Completed</string>
+    <string name="no_completed_downloads">No completed downloads</string>
+    <string name="no_completed_downloads_subtitle">Completed downloads will appear here</string>
+    <string name="clear_completed">Clear Completed</string>
+    <string name="download_completed">Download completed</string>
+    <string name="download_completed_at">Completed at</string>
+    <string name="no_repositories_added">No repositories added</string>
+    <string name="no_repositories_added_subtitle">Add a repository to access additional sources</string>
+    <string name="add_repository">Add Repository</string>
+    <string name="checking_for_updates">Checking for updates…</string>
+    <string name="you_are_on_latest_version">You are on the latest version</string>
+    <string name="update_available">Update available</string>
+    <string name="failed_to_check_updates">Failed to check for updates</string>
     <string name="search_hint">Search…</string>
     <string name="nothing_read_recently">Nothing read recently</string>
     <string name="hint">…</string>
@@ -50,6 +72,9 @@
     <string name="loading">Loading</string>
     <string name="error">Error</string>
     <string name="refresh">Refresh</string>
+    <string name="check_for_updates">Check for Updates</string>
+    <string name="update_all">Update All</string>
+    <string name="update_selected">Update Selected</string>
     <string name="share">Share</string>
     <string name="export_book_as_epub">Export Book As Epub</string>
     <string name="description_placeholder">No description</string>
@@ -78,8 +103,18 @@
     <string name="fetch_chapters">Fetch Chapters</string>
     <string name="go">Go</string>
     <string name="filter">Filter</string>
+    <string name="filter_and_sort">Filter &amp; Sort</string>
     <string name="sort">Sort</string>
+    <string name="ascending">Ascending</string>
+    <string name="descending">Descending</string>
+    <string name="in_progress">In Progress</string>
     <string name="search">Search</string>
+    <string name="searching">Searching…</string>
+    <string name="search_across_all_sources">Search across all sources</string>
+    <string name="enter_query_and_tap_search">Enter a query and tap search to find books</string>
+    <string name="results_found">results found</string>
+    <string name="results">results</string>
+    <string name="more">more</string>
     <string name="webView">WebView</string>
     <string name="browse">Browse</string>
     <string name="open_last_chapter">Open last chapter</string>
@@ -102,7 +137,7 @@
 
     <string name="appearance">Appearance</string>
     <string name="updater_is_enable">Updater</string>
-    <string name="show_update">Show Update</string>
+    <string name="show_update">Show App Update Notifications</string>
     <string name="confirm_exit">Confirm Exit</string>
     <string name="installer_mode">Installer Mode</string>
     <string name="package_manager">Package Manager</string>
@@ -110,7 +145,7 @@
     <string name="use_auth">Require unlock</string>
     <string name="manage_notification">Manage Notification</string>
     <string name="confirm_exit_message">Press back again to exit</string>
-    <string name="show_history">Show History</string>
+    <string name="show_history">Enable Reading History</string>
     <string name="night_mode">Night Mode</string>
     <string name="dark_mode">Dark Mode</string>
     <string name="second">Second</string>
@@ -149,8 +184,8 @@
     <string name="dismiss">Dismiss</string>
     <string name="book_name">Book Name</string>
     <string name="auto_sort_chapters_in_db">Auto Sort Chapters in DB</string>
-    <string name="advance_setting">Advance Setting</string>
-    <string name="advance_commands">Advance Commands</string>
+    <string name="advance_setting">Advanced Settings</string>
+    <string name="advance_commands">Advanced Commands</string>
     <string name="pause">Pause</string>
     <string name="resume">Resume</string>
     <string name="unknown">Unknown</string>
@@ -191,8 +226,11 @@
     <string name="partial">Partial</string>
     <string name="disable">Disable</string>
     <string name="mark_as_read">Mark as read</string>
+    <string name="mark_as_unread">Mark as unread</string>
+    <string name="add_to_category">Add to Category</string>
     <string name="delete_update">Delete Update</string>
-    <string name="no_new_update_available">No New Updates is Available.</string>
+    <string name="no_new_update_available">No New Updates are Available</string>
+    <string name="no_updates_hint">Check for updates to see new chapters from your library</string>
     <string name="package_installer_failed_to_install_packages">Package installer failed to install
         packages: STATUS_CODE:
     </string>
@@ -306,8 +344,8 @@
     <string name="installed">Installed</string>
     <string name="uninstall">Uninstall</string>
     <string name="available">Available</string>
-    <string name="extensions">Extensions</string>
-    <string name="sources">Sources</string>
+    <string name="extensions">Installed</string>
+    <string name="sources">Browse</string>
     <string name="backup">Backup</string>
     <string name="backup_and_restore">Backup and restore</string>
     <string name="restore">Restore</string>
@@ -330,6 +368,8 @@
     <string name="reset_themes">Reset themes</string>
     <string name="pin">Pin</string>
     <string name="unpin">Unpin</string>
+    <string name="pin_to_top">Pin to top</string>
+    <string name="pinned_to_top">Pinned to top</string>
     <string name="text_align">Text Align</string>
     <string name="text_align_left">Text Align Left</string>
     <string name="text_align_center">Text Align Center</string>
@@ -411,6 +451,7 @@
     <string name="layout">Layout</string>
     <string name="retry">Retry</string>
     <string name="delete_all_histories">Delete All Histories</string>
+    <string name="action_cannot_be_undone">This action cannot be undone.</string>
     <string name="open_in_webView">Open in WebView</string>
     <string name="downloads_queue">Downloads queue</string>
     <string name="cancel_all_for_this_series">"Cancel all for this series</string>
@@ -478,6 +519,7 @@
     <string name="list_layout_description">Books displayed in a vertical list</string>
     <string name="cover_only_layout_description">2 columns of cover images only (no text)</string>
     <string name="yesterday">Yesterday</string>
+    <string name="past_7_days">Past 7 Days</string>
     <string name="delete_all_database">Delete All Databases</string>
     <string name="repair_database">Repair Database</string>
     <string name="repair_categories">Repair Categories</string>
@@ -550,7 +592,7 @@
     <string name="translation_engine">Translation Engine</string>
     <string name="translate_now">Translate now</string>
     <string name="api_keys">API Keys</string>
-    <string name="advanced_settings">Advance settings</string>
+    <string name="advanced_settings">Advanced Settings</string>
     <string name="no_app_was_found_to_lauch">Something went wrong. you don\'t have the required
         app.
     </string>

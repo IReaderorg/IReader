@@ -11,7 +11,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 3
+    const val CURRENT_VERSION = 4
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -66,8 +66,9 @@ object DatabaseMigrations {
         when (fromVersion) {
             1 -> migrateV1toV2(driver)
             2 -> migrateV2toV3(driver)
+            3 -> migrateV3toV4(driver)
             // Add more migration cases as the database evolves
-            // 3 -> migrateV3toV4(driver)
+            // 4 -> migrateV4toV5(driver)
             // etc.
         }
     }
@@ -86,6 +87,62 @@ object DatabaseMigrations {
         // This migration is now handled by the SQLDelight migration file (1.sqm)
         // SQLDelight will apply the SQL statements in that file directly
         // No additional SQL execution is needed here
+    }
+    
+    /**
+     * Migration from version 3 to version 4
+     * Adds is_pinned, pinned_order, and is_archived columns to book table
+     */
+    private fun migrateV3toV4(driver: SqlDriver) {
+        try {
+            // Check if columns already exist
+            val columnsCheck = "PRAGMA table_info(book)"
+            var hasPinnedColumn = false
+            var hasPinnedOrderColumn = false
+            var hasArchivedColumn = false
+            
+            driver.executeQuery(
+                identifier = null,
+                sql = columnsCheck,
+                mapper = { cursor ->
+                    var result = cursor.next()
+                    while (result.value) {
+                        val columnName = cursor.getString(1)
+                        when (columnName) {
+                            "is_pinned" -> hasPinnedColumn = true
+                            "pinned_order" -> hasPinnedOrderColumn = true
+                            "is_archived" -> hasArchivedColumn = true
+                        }
+                        result = cursor.next()
+                    }
+                    result
+                },
+                parameters = 0
+            )
+            
+            // Add missing columns
+            if (!hasPinnedColumn) {
+                driver.execute(null, "ALTER TABLE book ADD COLUMN is_pinned INTEGER NOT NULL DEFAULT 0;", 0)
+                println("Added is_pinned column to book table")
+            }
+            
+            if (!hasPinnedOrderColumn) {
+                driver.execute(null, "ALTER TABLE book ADD COLUMN pinned_order INTEGER NOT NULL DEFAULT 0;", 0)
+                println("Added pinned_order column to book table")
+            }
+            
+            if (!hasArchivedColumn) {
+                driver.execute(null, "ALTER TABLE book ADD COLUMN is_archived INTEGER NOT NULL DEFAULT 0;", 0)
+                println("Added is_archived column to book table")
+            }
+            
+            println("Successfully migrated to version 4")
+            
+        } catch (e: Exception) {
+            println("Error migrating to version 4: ${e.message}")
+            e.printStackTrace()
+            throw e
+        }
     }
     
     /**

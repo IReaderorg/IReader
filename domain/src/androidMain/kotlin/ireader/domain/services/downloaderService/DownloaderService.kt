@@ -85,25 +85,77 @@ class DownloaderService constructor(
                     ).build()
                 )
             },
-            onSuccess = {
+            onSuccess = { completedDownloads ->
                 // Cancel progress notification first
                 notificationManager.cancel(notificationId)
                 
-                val notification = NotificationCompat.Builder(
-                    applicationContext.applicationContext,
-                    CHANNEL_DOWNLOADER_COMPLETE
-                ).apply {
-                    setContentTitle("Download was successfully completed.")
-                    setSmallIcon(R.drawable.ic_downloading)
-                    priority = NotificationCompat.PRIORITY_DEFAULT
-                    setSubText("It was Downloaded Successfully")
-                    setAutoCancel(true)
-                    setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
-                }.build()
-                notificationManager.show(
-                    notificationId + 2,
-                    notification
-                )
+                // Add completed downloads to the state
+                val currentCompleted = downloadServiceState.completedDownloads.toMutableList()
+                currentCompleted.addAll(completedDownloads)
+                downloadServiceState.completedDownloads = currentCompleted
+                
+                // Create notifications for completed downloads
+                if (completedDownloads.isNotEmpty()) {
+                    if (completedDownloads.size == 1) {
+                        // Single download notification
+                        val download = completedDownloads.first()
+                        val notification = NotificationCompat.Builder(
+                            applicationContext.applicationContext,
+                            CHANNEL_DOWNLOADER_COMPLETE
+                        ).apply {
+                            setContentTitle("${download.bookName}")
+                            setContentText("${download.chapterName} downloaded")
+                            setSmallIcon(R.drawable.ic_downloading)
+                            priority = NotificationCompat.PRIORITY_DEFAULT
+                            setAutoCancel(true)
+                            setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
+                            setGroup("download_complete_group")
+                        }.build()
+                        notificationManager.show(
+                            notificationId + 2,
+                            notification
+                        )
+                    } else {
+                        // Multiple downloads - show individual notifications and a summary
+                        completedDownloads.forEachIndexed { index, download ->
+                            val notification = NotificationCompat.Builder(
+                                applicationContext.applicationContext,
+                                CHANNEL_DOWNLOADER_COMPLETE
+                            ).apply {
+                                setContentTitle("${download.bookName}")
+                                setContentText("${download.chapterName} downloaded")
+                                setSmallIcon(R.drawable.ic_downloading)
+                                priority = NotificationCompat.PRIORITY_LOW
+                                setAutoCancel(true)
+                                setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
+                                setGroup("download_complete_group")
+                            }.build()
+                            notificationManager.show(
+                                notificationId + 2 + index,
+                                notification
+                            )
+                        }
+                        
+                        // Summary notification
+                        val summaryNotification = NotificationCompat.Builder(
+                            applicationContext.applicationContext,
+                            CHANNEL_DOWNLOADER_COMPLETE
+                        ).apply {
+                            setContentTitle("Downloads completed")
+                            setContentText("${completedDownloads.size} chapters downloaded")
+                            setSmallIcon(R.drawable.ic_downloading)
+                            priority = NotificationCompat.PRIORITY_DEFAULT
+                            setAutoCancel(true)
+                            setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
+                            setGroup("download_complete_group")
+                            setGroupSummary(true)
+                        }.build()
+                        notificationManager.show(
+                            notificationId + 1000,
+                            summaryNotification
+                        )
+                    }
+                }
             },
             remoteUseCases = remoteUseCases,
             updateProgress = { max, progress, inProgess ->

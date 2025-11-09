@@ -5,7 +5,8 @@ data class LibraryFilter(val type: Type, val value: Value) {
     enum class Type {
         Unread,
         Completed,
-        Downloaded;
+        Downloaded,
+        InProgress;
     }
 
     enum class Value {
@@ -71,4 +72,55 @@ fun LibraryFilter.Companion.deserializeList(
             )
         }
     }
+}
+
+/**
+ * Comprehensive state for library filtering and sorting
+ */
+data class LibraryFilterState(
+    val filters: Set<LibraryFilter.Type> = emptySet(),
+    val sortOption: SortOption = SortOption.TITLE,
+    val sortDirection: SortDirection = SortDirection.ASCENDING,
+    val displayMode: DisplayMode = DisplayMode.COMPACT_GRID,
+    val columnCount: Int = 3
+) {
+    companion object {
+        val default = LibraryFilterState()
+    }
+}
+
+/**
+ * Available sort options for library
+ */
+enum class SortOption {
+    TITLE,
+    AUTHOR,
+    LAST_READ,
+    DATE_ADDED,
+    UNREAD_COUNT;
+}
+
+/**
+ * Sort direction
+ */
+enum class SortDirection {
+    ASCENDING,
+    DESCENDING;
+    
+    fun toggle(): SortDirection {
+        return when (this) {
+            ASCENDING -> DESCENDING
+            DESCENDING -> ASCENDING
+        }
+    }
+}
+
+/**
+ * Display mode for library items
+ */
+enum class DisplayMode {
+    COMPACT_GRID,
+    COMFORTABLE_GRID,
+    LIST,
+    COVER_ONLY;
 }

@@ -72,11 +72,11 @@ val mangaChapterMapper: (Long, Long, String, String?, String?, String?, List<Str
     }
 
 val libraryManga:
-            (Long, Long, String, String?, String?, String?, String?, String, Long, String?, Boolean, Long?, Long?, Boolean, Long, Long, Long, Long, Long?) -> LibraryBook =
+            (Long, Long, String, String?, String?, String?, String?, String, Long, String?, Boolean, Long?, Long?, Boolean, Long, Long, Long, Long, Boolean, Long, Boolean, Long?) -> LibraryBook =
     { _id, source, url, artist, author, description, genre, title,
         status, thumbnail_url, favorite, last_update,
       next_update, initialized, viewer, chapter_flags,
-        cover_last_modified, date_added, max ->
+        cover_last_modified, date_added, is_pinned, pinned_order, is_archived, max ->
         LibraryBook(
             _id,
             source,
@@ -90,6 +90,9 @@ val libraryManga:
             this.readCount = readCount.toInt()
             this.category = category.toInt()
             this.lastRead = max?.toLong()?:0L
+            this.isPinned = is_pinned
+            this.pinnedOrder = pinned_order.toInt()
+            this.isArchived = is_archived
         }
     }
 
@@ -110,7 +113,10 @@ val booksMapper= { _id: Long,
                    viewer: Long,
                    chapter_flags: Long,
                    cover_last_modified: Long,
-                   date_added: Long, ->
+                   date_added: Long,
+                   is_pinned: Boolean,
+                   pinned_order: Long,
+                   is_archived: Boolean, ->
     Book(
         id = _id,
         sourceId = source,
@@ -127,6 +133,9 @@ val booksMapper= { _id: Long,
         status = status ?: MangaInfo.UNKNOWN,
         cover = thumbnail_url ?:"",
         initialized = initialized,
+        isPinned = is_pinned,
+        pinnedOrder = pinned_order.toInt(),
+        isArchived = is_archived,
     )
 
 
@@ -151,6 +160,9 @@ val getLibraryMapper = { _id: Long,
                          chapter_flags: Long,
                          cover_last_modified: Long,
                          date_added: Long,
+                         is_pinned: Boolean,
+                         pinned_order: Long,
+                         is_archived: Boolean,
                          unread_count: Long,
                          read_count: Long,
                          category: Long, ->
@@ -167,6 +179,9 @@ val getLibraryMapper = { _id: Long,
         this.unreadCount = unread_count.toInt()
         this.readCount = read_count.toInt()
         this.category = category.toInt()
+        this.isPinned = is_pinned
+        this.pinnedOrder = pinned_order.toInt()
+        this.isArchived = is_archived
     }
 
 }

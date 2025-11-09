@@ -24,7 +24,7 @@ class CategoriesUseCases  internal constructor(
         Category(id = Category.UNCATEGORIZED_ID, "", Category.UNCATEGORIZED_ID, 0),
     )
 
-    fun subscribe(withAllCategory: Boolean): Flow<List<CategoryWithCount>> {
+    fun subscribe(withAllCategory: Boolean, showEmptyCategories: Boolean = false): Flow<List<CategoryWithCount>> {
 
         return repo.subscribe().map { categories ->
             categories.mapNotNull { categoryAndCount ->
@@ -44,8 +44,14 @@ class CategoriesUseCases  internal constructor(
                         }
                     }
 
-                    // User created category, always show
-                    else -> categoryAndCount
+                    // User created category - filter by empty status if preference is set
+                    else -> {
+                        if (showEmptyCategories || count > 0) {
+                            categoryAndCount
+                        } else {
+                            null
+                        }
+                    }
                 }
             }
         }
