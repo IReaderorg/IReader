@@ -1,13 +1,181 @@
 package ireader.presentation.ui.home.library.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+
+/**
+ * Enum representing available batch operations
+ */
+enum class BatchOperation {
+    MARK_AS_READ,
+    MARK_AS_UNREAD,
+    DOWNLOAD,
+    DOWNLOAD_UNREAD,
+    DELETE,
+    CHANGE_CATEGORY,
+    ARCHIVE
+}
+
+/**
+ * Main dialog for selecting batch operations
+ */
+@Composable
+fun BatchOperationDialog(
+    isVisible: Boolean,
+    selectedCount: Int,
+    onOperationSelected: (BatchOperation) -> Unit,
+    onDismiss: () -> Unit
+) {
+    if (isVisible) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = {
+                Text(text = "Batch Operations ($selectedCount selected)")
+            },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    BatchOperationItem(
+                        icon = Icons.Outlined.Done,
+                        title = "Mark as Read",
+                        description = "Mark all chapters as read",
+                        onClick = {
+                            onOperationSelected(BatchOperation.MARK_AS_READ)
+                            onDismiss()
+                        }
+                    )
+                    
+                    BatchOperationItem(
+                        icon = Icons.Outlined.DoneOutline,
+                        title = "Mark as Unread",
+                        description = "Mark all chapters as unread",
+                        onClick = {
+                            onOperationSelected(BatchOperation.MARK_AS_UNREAD)
+                            onDismiss()
+                        }
+                    )
+                    
+                    BatchOperationItem(
+                        icon = Icons.Outlined.Download,
+                        title = "Download",
+                        description = "Download all chapters",
+                        onClick = {
+                            onOperationSelected(BatchOperation.DOWNLOAD)
+                            onDismiss()
+                        }
+                    )
+                    
+                    BatchOperationItem(
+                        icon = Icons.Outlined.DownloadForOffline,
+                        title = "Download Unread",
+                        description = "Download only unread chapters",
+                        onClick = {
+                            onOperationSelected(BatchOperation.DOWNLOAD_UNREAD)
+                            onDismiss()
+                        }
+                    )
+                    
+                    BatchOperationItem(
+                        icon = Icons.Outlined.Delete,
+                        title = "Delete",
+                        description = "Delete selected books",
+                        onClick = {
+                            onOperationSelected(BatchOperation.DELETE)
+                            onDismiss()
+                        }
+                    )
+                    
+                    BatchOperationItem(
+                        icon = Icons.Outlined.Label,
+                        title = "Change Category",
+                        description = "Move to different category",
+                        onClick = {
+                            onOperationSelected(BatchOperation.CHANGE_CATEGORY)
+                            onDismiss()
+                        }
+                    )
+                    
+                    BatchOperationItem(
+                        icon = Icons.Outlined.Archive,
+                        title = "Archive",
+                        description = "Archive selected books",
+                        onClick = {
+                            onOperationSelected(BatchOperation.ARCHIVE)
+                            onDismiss()
+                        }
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = onDismiss) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+}
+
+/**
+ * Individual batch operation item
+ */
+@Composable
+private fun BatchOperationItem(
+    icon: ImageVector,
+    title: String,
+    description: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = MaterialTheme.shapes.small,
+        tonalElevation = 0.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
 
 /**
  * Dialog showing progress of batch operations

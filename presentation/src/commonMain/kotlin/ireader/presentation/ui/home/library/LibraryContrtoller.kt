@@ -130,11 +130,7 @@ fun LibraryController(
         },
         onBook = { book ->
             if (vm.selectionMode) {
-                if (book.id in vm.selectedBooks) {
-                    vm.selectedBooks.remove(book.id)
-                } else {
-                    vm.selectedBooks.add(book.id)
-                }
+                vm.toggleSelection(book.id)
             } else {
                 goToDetail(book)
             }

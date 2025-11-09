@@ -1,7 +1,12 @@
 package ireader.domain.di
 
 import ireader.domain.services.downloaderService.DownloadServiceStateImpl
+import ireader.domain.usecases.backup.CloudBackupManager
+import ireader.domain.usecases.backup.CloudProvider
+import ireader.domain.usecases.backup.CloudStorageProvider
 import ireader.domain.usecases.backup.CreateBackup
+import ireader.domain.usecases.backup.DropboxProvider
+import ireader.domain.usecases.backup.GoogleDriveProvider
 import ireader.domain.usecases.backup.RestoreBackup
 import ireader.domain.usecases.category.CategoriesUseCases
 import ireader.domain.usecases.category.CreateCategoryWithName
@@ -52,13 +57,27 @@ val DomainServices = module {
             get(),
         )
     }
-    factory  { CategoriesUseCases(get(), get()) }
+    
+    // Cloud Backup Providers
+    single { DropboxProvider() }
+    single { GoogleDriveProvider() }
+    
+    single {
+        CloudBackupManager(
+            providers = mapOf(
+                CloudProvider.DROPBOX to get<DropboxProvider>(),
+                CloudProvider.GOOGLE_DRIVE to get<GoogleDriveProvider>()
+            )
+        )
+    }
+    factory  { CategoriesUseCases(get(), get(), get(), get()) }
     factory  { CreateCategoryWithName(get()) }
     factory  { ReorderCategory(get()) }
     factory  { SubscribeDownloadsUseCase(get()) }
 
 
     factory  { FontUseCase(get()) }
+    factory  { ireader.domain.usecases.fonts.FontManagementUseCase(get()) }
 
 
     factory  { ireader.domain.usecases.local.FindBooksByKey(get()) }
@@ -66,7 +85,7 @@ val DomainServices = module {
     factory  { ireader.domain.usecases.local.FindBookByKey(get()) }
     factory  { ireader.domain.usecases.local.book_usecases.BookMarkChapterUseCase(get()) }
     factory  { ireader.domain.usecases.local.book_usecases.FindAllInLibraryBooks(get()) }
-    factory  { ireader.domain.usecases.local.book_usecases.GetLibraryCategory(get()) }
+    factory  { ireader.domain.usecases.local.book_usecases.GetLibraryCategory(get(), get()) }
     factory  {
         ireader.domain.usecases.local.book_usecases.MarkBookAsReadOrNotUseCase(
             get(),

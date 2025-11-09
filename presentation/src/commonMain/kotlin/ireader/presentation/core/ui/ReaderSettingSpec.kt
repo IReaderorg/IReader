@@ -119,6 +119,15 @@ class ReaderSettingSpec : VoyagerScreen() {
                     title = localizeHelper.localize(MR.strings.preload_only_on_wifi),
                     subtitle = localizeHelper.localize(MR.strings.preload_only_on_wifi_summary),
                 ),
+                Components.Header(
+                    localizeHelper.localize(MR.strings.reading_speed)
+                ),
+                Components.Slider(
+                    preferenceAsInt = vm.readingSpeedWPM,
+                    title = localizeHelper.localize(MR.strings.reading_speed),
+                    trailing = "${vm.readingSpeedWPM.value} ${localizeHelper.localize(MR.strings.reading_speed_wpm)}",
+                    valueRange = 150.0F..400.0F,
+                ),
             )
         }
 

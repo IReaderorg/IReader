@@ -51,6 +51,16 @@ This implementation plan breaks down the integration of unused features into dis
 
 
 
+
+
+
+
+
+
+
+
+
+
 - [ ] 4. Implement books completed tracking
   - Add completion detection in `ReaderScreenViewModel` when last chapter is read
   - Invoke `TrackReadingProgressUseCase` with completion flag
@@ -61,8 +71,17 @@ This implementation plan breaks down the integration of unused features into dis
 ---
 
 ## Phase 2: Security Settings Enhancement
+-
 
 - [ ] 5. Create SecuritySettingsViewModel
+
+
+
+
+
+
+- [ ] 5. Create SecuritySettingsViewModel
+
   - Create `SecuritySettingsViewModel.kt` in `presentation/src/commonMain/kotlin/ireader/presentation/ui/settings/security/`
   - Add state properties for app lock, secure screen, hide content, adult source lock, biometric
   - Implement `toggleAppLock()`, `toggleSecureScreen()`, `toggleHideContent()`, `toggleAdultSourceLock()` methods
@@ -70,16 +89,35 @@ This implementation plan breaks down the integration of unused features into dis
   - Add `showOnboarding()` and `hideOnboarding()` methods
   - Register ViewModel in `PresentationModules.kt`
   - _Requirements: 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11_
+-
 
-- [ ] 6. Update Android SecuritySettingSpec implementation
+- [x] 6. Update Android SecuritySettingSpec implementation
+
+
+
+
   - Edit `presentation/src/androidMain/kotlin/ireader/presentation/core/ui/SecuritySettingSpec.kt`
   - Replace Content() function to use `SecuritySettingsScreen` composable
   - Pass `SecuritySettingsViewModel` to `SecuritySettingsScreen`
   - Wrap in IScaffold with TitleToolbar
   - Test Android security settings display correctly
   - _Requirements: 3.1_
+- [ ] 7. Create Desktop SecuritySettingSpec implementation
+
+
+
+
+
+
+
+
+
+
+
+
 
 - [ ] 7. Create Desktop SecuritySettingSpec implementation
+
   - Edit `presentation/src/desktopMain/kotlin/ireader/presentation/core/ui/SecuritySettingSpec.kt`
   - Implement Content() function using `SecuritySettingsScreen` composable
   - Pass `SecuritySettingsViewModel` to `SecuritySettingsScreen`
@@ -87,7 +125,11 @@ This implementation plan breaks down the integration of unused features into dis
   - Test Desktop security settings display correctly
   - _Requirements: 3.1_
 
-- [ ] 8. Create SecurityRepository implementation
+- [x] 8. Create SecurityRepository implementation
+
+
+
+
   - Create `SecurityRepositoryImpl.kt` in `data/src/commonMain/kotlin/ireader/data/security/`
   - Implement `saveAuthMethod()`, `getAuthMethod()`, `verifyAuth()`, `clearAuth()` methods
   - Use encrypted preferences for storing auth data
@@ -98,8 +140,13 @@ This implementation plan breaks down the integration of unused features into dis
 ---
 
 ## Phase 3: Report Broken Chapter
+- [x] 9. Create ReportBrokenChapterUseCase
+
+
+
 
 - [ ] 9. Create ReportBrokenChapterUseCase
+
   - Create `ReportBrokenChapterUseCase.kt` in `domain/src/commonMain/kotlin/ireader/domain/usecases/chapter/`
   - Implement invoke method with chapterId, bookId, sourceId, reason, description parameters
   - Create ChapterReport entity with timestamp and "pending" status
@@ -108,7 +155,12 @@ This implementation plan breaks down the integration of unused features into dis
   - Register use case in `UseCasesInject.kt`
   - _Requirements: 4.1, 4.7, 4.8, 4.9_
 
-- [ ] 10. Integrate report functionality into ReaderScreenViewModel
+- [x] 10. Integrate report functionality into ReaderScreenViewModel
+
+
+
+
+
   - Add `ReportBrokenChapterUseCase` parameter to `ReaderScreenViewModel` constructor
   - Create `reportBrokenChapter(reason: String, description: String)` method
   - Get current chapter and book from state
@@ -117,7 +169,12 @@ This implementation plan breaks down the integration of unused features into dis
   - Update `PresentationModules.kt` to inject use case
   - _Requirements: 4.2, 4.8, 4.9_
 
-- [ ] 11. Add Report Issue button to reader menu
+- [x] 11. Add Report Issue button to reader menu
+
+
+
+
+
   - Edit `ReaderScreen.kt` to add "Report Issue" menu item
   - Show `ReportBrokenChapterDialog` when tapped
   - Pass `reportBrokenChapter` callback to dialog
@@ -127,20 +184,34 @@ This implementation plan breaks down the integration of unused features into dis
 ---
 
 ## Phase 4: Configurable Reading Speed
+-
 
-- [ ] 12. Add reading speed preference
+- [x] 12. Add reading speed preference
+
+
+
+
   - Edit `domain/src/commonMain/kotlin/ireader/domain/preferences/prefs/ReaderPreferences.kt`
   - Add `fun readingSpeedWPM() = preferenceStore.getInt("reading_speed_wpm", 225)` method
   - Test preference saves and retrieves correctly
   - _Requirements: 5.1_
 
-- [ ] 13. Update reading time calculation to use preference
+- [x] 13. Update reading time calculation to use preference
+
+
+
+
   - Edit `ReaderScreenViewModel.kt` line 1117
   - Replace hardcoded `val wordsPerMinute = 225` with `val wordsPerMinute = readerPreferences.readingSpeedWPM().get()`
   - Test reading time estimates use configured speed
   - _Requirements: 5.6_
+- [x] 14. Add reading speed slider to Reader Settings
+
+
+
 
 - [ ] 14. Add reading speed slider to Reader Settings
+
   - Edit `ReaderSettingScreenViewModel.kt` to add `val readingSpeedWPM = readerPreferences.readingSpeedWPM().asState()`
   - Edit Reader Settings UI to add slider component
   - Set slider range to 150-400 WPM
@@ -153,7 +224,14 @@ This implementation plan breaks down the integration of unused features into dis
 
 ## Phase 5: Cache Size Calculation
 
-- [ ] 15. Implement cache size calculation
+- [x] 15. Implement cache size calculation
+
+
+
+
+
+
+
   - Edit `presentation/src/commonMain/kotlin/ireader/presentation/ui/settings/advance/AdvanceSettingViewModel.kt`
   - Replace `getCoverCacheSize()` method implementation
   - Locate cover cache directory
@@ -168,13 +246,22 @@ This implementation plan breaks down the integration of unused features into dis
 
 ## Phase 6: WorkManager Automatic Backups
 
-- [ ] 16. Add WorkManager dependency
+- [x] 16. Add WorkManager dependency
+
+
+
+
+
   - Edit `android/build.gradle.kts` or `domain/build.gradle.kts`
   - Add `implementation("androidx.work:work-runtime-ktx:2.8.1")` to dependencies
   - Sync Gradle
   - _Requirements: 7.1_
 
-- [ ] 17. Update ScheduleAutomaticBackupImpl with WorkManager
+
+- [x] 17. Update ScheduleAutomaticBackupImpl with WorkManager
+
+
+
   - Edit `domain/src/androidMain/kotlin/ireader/domain/usecases/backup/ScheduleAutomaticBackupImpl.kt`
   - Add `private val context: Context` parameter to constructor
   - Uncomment all WorkManager code in `schedule()` method
@@ -182,14 +269,24 @@ This implementation plan breaks down the integration of unused features into dis
   - Uncomment WorkManager code in `isScheduled()` method
   - Test backup scheduling works correctly
   - _Requirements: 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 7.10, 7.11, 7.12_
+- [x] 18. Update DI to inject Context
+
+
+
 
 - [ ] 18. Update DI to inject Context
+
   - Edit `domain/src/androidMain/kotlin/ireader/domain/di/DomainModule.kt`
   - Update `ScheduleAutomaticBackupImpl` binding to inject `androidContext()`
   - Test DI provides Context correctly
   - _Requirements: 7.2_
+-
 
-- [ ] 19. Verify AutoBackupWorker implementation
+- [x] 19. Verify AutoBackupWorker implementation
+
+
+
+
   - Check `domain/src/androidMain/kotlin/ireader/domain/usecases/backup/AutoBackupWorker.kt` exists
   - Verify `doWork()` method invokes `CreateBackup` use case
   - Verify worker is registered in AndroidManifest if needed
@@ -199,22 +296,36 @@ This implementation plan breaks down the integration of unused features into dis
 ---
 
 ## Phase 7: Cloud Backup Integration
+-
 
-- [ ] 20. Create CloudBackupScreenSpec
+- [x] 20. Create CloudBackupScreenSpec
+
+
+
+
   - Create `CloudBackupScreenSpec.kt` in `presentation/src/commonMain/kotlin/ireader/presentation/core/ui/`
   - Implement Content() function to display `CloudBackupScreen`
   - Pass navigation callback to screen
   - Test screen displays correctly
   - _Requirements: 8.1, 8.3_
 
-- [ ] 21. Add Cloud Backup navigation to Backup Settings
+- [x] 21. Add Cloud Backup navigation to Backup Settings
+
+
+
+
   - Edit `presentation/src/commonMain/kotlin/ireader/presentation/ui/settings/backups/Backup.kt`
   - Add "Cloud Backup" menu item with cloud icon
   - Navigate to `CloudBackupScreenSpec` when tapped
   - Test navigation works correctly
   - _Requirements: 8.2_
+-
 
-- [ ] 22. Implement cloud provider authentication
+- [x] 22. Implement cloud provider authentication
+
+
+
+
   - Verify `DropboxProvider` and `GoogleDriveProvider` OAuth implementations
   - Test Dropbox authentication flow
   - Test Google Drive authentication flow
@@ -222,7 +333,12 @@ This implementation plan breaks down the integration of unused features into dis
   - Test authentication status displays correctly
   - _Requirements: 8.4, 8.5, 8.6_
 
-- [ ] 23. Implement cloud backup upload
+
+- [x] 23. Implement cloud backup upload
+
+
+
+
   - Verify `CloudBackupManager.uploadBackup()` implementation
   - Test backup file upload to Dropbox
   - Test backup file upload to Google Drive
@@ -233,8 +349,16 @@ This implementation plan breaks down the integration of unused features into dis
 ---
 
 ## Phase 8: Source Detail Report Functionality
+-
 
-- [ ] 24. Implement Report as Broken functionality
+- [x] 24. Implement Report as Broken functionality
+
+
+
+
+
+
+
   - Edit `presentation/src/commonMain/kotlin/ireader/presentation/ui/home/sources/extension/SourceDetailScreen.kt`
   - Replace TODO comment on line 157 with actual implementation
   - Create confirmation dialog when button tapped
@@ -247,15 +371,29 @@ This implementation plan breaks down the integration of unused features into dis
 ---
 
 ## Phase 9: Changelog Screen Integration
+- [x] 25. Create ChangelogScreenSpec
+
+
+
 
 - [ ] 25. Create ChangelogScreenSpec
+
+
+
   - Create `ChangelogScreenSpec.kt` in `presentation/src/commonMain/kotlin/ireader/presentation/core/ui/`
   - Implement Content() function to display `ChangelogScreen`
   - Pass navigation callback to screen
   - Test screen displays correctly
   - _Requirements: 10.1, 10.3_
 
+- [x] 26. Add Changelog navigation to About Settings
+
+
+
+
 - [ ] 26. Add Changelog navigation to About Settings
+
+
   - Edit `presentation/src/commonMain/kotlin/ireader/presentation/ui/settings/about/AboutSettingScreen.kt`
   - Add "Changelog" menu item with history icon
   - Navigate to `ChangelogScreenSpec` when tapped
@@ -266,7 +404,12 @@ This implementation plan breaks down the integration of unused features into dis
 
 ## Phase 10: Reader Enhancement Components
 
-- [ ] 27. Integrate BrightnessControl into ReaderScreen
+- [x] 27. Integrate BrightnessControl into ReaderScreen
+
+
+
+
+
   - Add brightness state to `ReaderScreenViewModel`
   - Add `BrightnessControl` composable to reader settings bottom sheet
   - Implement brightness adjustment logic
@@ -274,7 +417,12 @@ This implementation plan breaks down the integration of unused features into dis
   - Test brightness control works correctly
   - _Requirements: 11.1, 11.2_
 
-- [ ] 28. Integrate FontPicker into ReaderScreen
+- [x] 28. Integrate FontPicker into ReaderScreen
+
+
+
+
+
   - Add selected font state to `ReaderScreenViewModel`
   - Add `FontPicker` composable to reader settings
   - Load system and custom fonts
@@ -282,7 +430,12 @@ This implementation plan breaks down the integration of unused features into dis
   - Test font picker works correctly
   - _Requirements: 11.3, 11.4_
 
-- [ ] 29. Integrate AutoScrollSpeedControl into ReaderScreen
+-
+
+- [x] 29. Integrate AutoScrollSpeedControl into ReaderScreen
+
+
+
   - Add auto-scroll speed state to `ReaderScreenViewModel`
   - Add `AutoScrollSpeedControl` composable to reader settings
   - Implement auto-scroll logic with configurable speed
@@ -290,15 +443,25 @@ This implementation plan breaks down the integration of unused features into dis
   - Test auto-scroll works correctly
   - _Requirements: 11.5, 11.6_
 
-- [ ] 30. Integrate VolumeKeyHandler into ReaderScreen
+-
+
+- [x] 30. Integrate VolumeKeyHandler into ReaderScreen
+
+
+
   - Add volume key handling to `ReaderScreen`
   - Implement platform-specific volume key detection
   - Navigate to next/previous chapter on volume key press
   - Add preference to enable/disable volume key navigation
   - Test volume key navigation works correctly
   - _Requirements: 11.7_
+-
 
-- [ ] 31. Integrate FindInChapterBar into ReaderScreen
+- [x] 31. Integrate FindInChapterBar into ReaderScreen
+
+
+
+
   - Add search query state to `ReaderScreenViewModel`
   - Add `FindInChapterBar` composable to reader screen
   - Implement text search in current chapter
@@ -311,15 +474,25 @@ This implementation plan breaks down the integration of unused features into dis
 
 ## Phase 11: Library Batch Operations
 
-- [ ] 32. Implement selection mode in LibraryScreen
+
+- [x] 32. Implement selection mode in LibraryScreen
+
+
+
+
   - Add selected books state to `LibraryViewModel`
   - Implement long-press to enter selection mode
   - Add `toggleSelection(bookId)` method
   - Display selection count in toolbar
   - Test selection mode activates correctly
   - _Requirements: 12.1, 12.2, 12.3_
+-
 
-- [ ] 33. Create BatchOperationDialog
+- [x] 33. Create BatchOperationDialog
+
+
+
+
   - Verify `BatchOperationDialog.kt` exists in library components
   - Add dialog state to `LibraryViewModel`
   - Display dialog when batch operations button tapped
@@ -327,7 +500,12 @@ This implementation plan breaks down the integration of unused features into dis
   - Test dialog displays correctly
   - _Requirements: 12.4, 12.5_
 
-- [ ] 34. Implement batch operation execution
+
+- [x] 34. Implement batch operation execution
+
+
+
+
   - Add `performBatchOperation(operation)` method to `LibraryViewModel`
   - Implement Mark as Read/Unread for selected books
   - Implement Download chapters for selected books using `DownloadUnreadChaptersUseCase`
@@ -342,14 +520,24 @@ This implementation plan breaks down the integration of unused features into dis
 
 ## Phase 12: Smart Categories
 
-- [ ] 35. Create default smart categories
+- [x] 35. Create default smart categories
+
+
+
+
+
   - Create smart category definitions for "Recently Added", "Currently Reading", "Completed", "Unread"
   - Add smart category icons
   - Register smart categories in library initialization
   - Test smart categories appear in library
   - _Requirements: 13.1, 13.2_
+-
 
-- [ ] 36. Implement smart category filtering
+- [x] 36. Implement smart category filtering
+
+
+
+
   - Integrate `GetSmartCategoryBooksUseCase` into `LibraryViewModel`
   - Implement "Recently Added" filter (books added in last 7 days)
   - Implement "Currently Reading" filter (1-99% progress)
@@ -361,8 +549,13 @@ This implementation plan breaks down the integration of unused features into dis
 ---
 
 ## Phase 13: Translation Features
+-
 
-- [ ] 37. Integrate paragraph translation into ReaderScreen
+- [x] 37. Integrate paragraph translation into ReaderScreen
+
+
+
+
   - Add translation state to `ReaderScreenViewModel`
   - Add long-press handler to paragraph text
   - Display translation option in context menu
@@ -371,15 +564,25 @@ This implementation plan breaks down the integration of unused features into dis
   - Test paragraph translation works correctly
   - _Requirements: 14.1, 14.2, 14.3, 14.4_
 
-- [ ] 38. Implement translation API key prompt
+- [x] 38. Implement translation API key prompt
+
+
+
+
+
   - Check if translation API key is configured
   - Display `TranslationApiKeyPrompt` if not configured
   - Save API key to preferences when entered
   - Retry translation after key is saved
   - Test API key prompt works correctly
   - _Requirements: 14.5, 14.6_
+-
 
-- [ ] 39. Implement bilingual mode
+- [x] 39. Implement bilingual mode
+
+
+
+
   - Add bilingual mode preference
   - Add bilingual mode toggle to reader settings
   - Display original and translated text side-by-side when enabled
@@ -390,28 +593,47 @@ This implementation plan breaks down the integration of unused features into dis
 
 ## Phase 14: Font Management
 
-- [ ] 40. Initialize system fonts on app start
+-
+
+- [x] 40. Initialize system fonts on app start
+
+
+
   - Invoke `SystemFontsInitializer` during app initialization
   - Load system fonts into font cache
   - Test system fonts are available
   - _Requirements: 15.1_
+-
 
-- [ ] 41. Create Font Settings screen
+- [x] 41. Create Font Settings screen
+
+
+
+
   - Create font settings UI to display available fonts
   - List system and custom fonts
   - Add "Add Font" button
   - Test font list displays correctly
   - _Requirements: 15.2_
 
-- [ ] 42. Implement custom font import
+- [x] 42. Implement custom font import
+
+
+
+
   - Add file picker for font files (.ttf, .otf)
   - Invoke `FontManagementUseCase` to import selected font
   - Insert `CustomFont` record in database
   - Cache font using `FontCache`
   - Test custom font import works correctly
   - _Requirements: 15.3, 15.4, 15.5, 15.6_
+-
 
-- [ ] 43. Implement custom font deletion
+- [x] 43. Implement custom font deletion
+
+
+
+
   - Add delete option for custom fonts
   - Remove font from database
   - Remove font from cache
@@ -452,8 +674,18 @@ This implementation plan breaks down the integration of unused features into dis
 - [ ]* 47.4 Reduce memory usage where possible
 - [ ]* 47.5 Test app performance on low-end devices
 
-- [ ] 48. Update documentation
-- [ ]* 48.1 Update README with new features
+- [x] 48. Update documentation
+
+
+
+
+
+- [x] 48.1 Update README with new features
+
+
+
+
+
 - [ ]* 48.2 Create user guide for statistics
 - [ ]* 48.3 Create user guide for security settings
 - [ ]* 48.4 Create user guide for cloud backup

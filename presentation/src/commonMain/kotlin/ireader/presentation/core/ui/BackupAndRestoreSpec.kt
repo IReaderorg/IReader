@@ -46,7 +46,10 @@ class BackupAndRestoreScreenSpec : VoyagerScreen() {
                     popBackStack(navigator)
                 },
                 snackbarHostState = snackBarHostState,
-                scaffoldPadding = padding
+                scaffoldPadding = padding,
+                onNavigateToCloudBackup = {
+                    navigator.push(CloudBackupScreenSpec())
+                }
             )
         }
 

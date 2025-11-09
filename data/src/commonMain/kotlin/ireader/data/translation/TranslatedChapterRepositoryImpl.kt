@@ -46,7 +46,7 @@ class TranslatedChapterRepositoryImpl(
                 sourceLanguage = translatedChapter.sourceLanguage,
                 targetLanguage = translatedChapter.targetLanguage,
                 translatorEngineId = translatedChapter.translatorEngineId,
-                translatedContent = chapterContentConvertor.encode(translatedChapter.translatedContent),
+                translatedContent = translatedChapter.translatedContent,
                 createdAt = translatedChapter.createdAt,
                 updatedAt = translatedChapter.updatedAt
             )
@@ -58,7 +58,7 @@ class TranslatedChapterRepositoryImpl(
         handler.await(inTransaction = true) {
             translatedChapterQueries.update(
                 id = translatedChapter.id,
-                translatedContent = chapterContentConvertor.encode(translatedChapter.translatedContent),
+                translatedContent = translatedChapter.translatedContent,
                 updatedAt = translatedChapter.updatedAt
             )
         }
@@ -72,7 +72,7 @@ class TranslatedChapterRepositoryImpl(
                 sourceLanguage = translatedChapter.sourceLanguage,
                 targetLanguage = translatedChapter.targetLanguage,
                 translatorEngineId = translatedChapter.translatorEngineId,
-                translatedContent = chapterContentConvertor.encode(translatedChapter.translatedContent),
+                translatedContent = translatedChapter.translatedContent,
                 createdAt = translatedChapter.createdAt,
                 updatedAt = translatedChapter.updatedAt
             )

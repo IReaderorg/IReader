@@ -139,7 +139,8 @@ actual class GoogleDriveProvider : CloudStorageProvider {
                 .execute()
             
             Log.i("GoogleDriveProvider", "Uploaded backup: ${file.name} (${file.id})")
-            BackupResult.Success("Backup uploaded to Google Drive")
+            val timestamp = System.currentTimeMillis()
+            BackupResult.Success(filePath = file.id, timestamp = timestamp)
         } catch (e: Exception) {
             Log.e("GoogleDriveProvider", "Upload error", e)
             BackupResult.Error("Upload failed: ${e.message}")
@@ -176,7 +177,8 @@ actual class GoogleDriveProvider : CloudStorageProvider {
             outputStream.close()
             
             Log.i("GoogleDriveProvider", "Downloaded backup: ${file.name}")
-            BackupResult.Success("Backup downloaded from Google Drive")
+            val timestamp = System.currentTimeMillis()
+            BackupResult.Success(filePath = localFilePath, timestamp = timestamp)
         } catch (e: Exception) {
             Log.e("GoogleDriveProvider", "Download error", e)
             BackupResult.Error("Download failed: ${e.message}")

@@ -68,6 +68,7 @@ fun LibraryScreenTopBar(
     onClickSelectAll: () -> Unit,
     onClickInvertSelection: () -> Unit,
     onClearSelection: () -> Unit,
+    onClickBatchOperations: () -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null,
     showModalSheet:() -> Unit,
     hideModalSheet:() -> Unit,
@@ -92,6 +93,7 @@ fun LibraryScreenTopBar(
                 onClickCancelSelection = onClearSelection,
                 onClickSelectAll = onClickSelectAll,
                 onClickInvertSelection = onClickInvertSelection,
+                onClickBatchOperations = onClickBatchOperations,
                 scrollBehavior = scrollBehavior
             )
         } else {
@@ -230,6 +232,7 @@ private fun EditModeTopAppBar(
     onClickCancelSelection: () -> Unit,
     onClickSelectAll: () -> Unit,
     onClickInvertSelection: () -> Unit,
+    onClickBatchOperations: () -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Toolbar(
@@ -273,6 +276,13 @@ private fun EditModeTopAppBar(
         },
         elevation = DEFAULT_ELEVATION,
         actions = {
+            IconButton(onClick = onClickBatchOperations) {
+                Icon(
+                    Icons.Default.MoreVert, 
+                    contentDescription = "Batch Operations",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             IconButton(onClick = onClickSelectAll) {
                 Icon(
                     Icons.Default.SelectAll, 

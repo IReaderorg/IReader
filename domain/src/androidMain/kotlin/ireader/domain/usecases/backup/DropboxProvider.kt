@@ -153,7 +153,8 @@ actual class DropboxProvider : CloudStorageProvider {
                 Log.i("DropboxProvider", "Uploaded backup: ${metadata.name} (${metadata.size} bytes)")
             }
             
-            BackupResult.Success("Backup uploaded to Dropbox")
+            val timestamp = System.currentTimeMillis()
+            BackupResult.Success(filePath = remotePath, timestamp = timestamp)
         } catch (e: Exception) {
             Log.e("DropboxProvider", "Upload error", e)
             BackupResult.Error("Upload failed: ${e.message}")
@@ -187,7 +188,8 @@ actual class DropboxProvider : CloudStorageProvider {
             }
             
             Log.i("DropboxProvider", "Downloaded backup: $cloudFileName")
-            BackupResult.Success("Backup downloaded from Dropbox")
+            val timestamp = System.currentTimeMillis()
+            BackupResult.Success(filePath = localFilePath, timestamp = timestamp)
         } catch (e: Exception) {
             Log.e("DropboxProvider", "Download error", e)
             BackupResult.Error("Download failed: ${e.message}")

@@ -36,7 +36,8 @@ class UpdatesViewModel(
         
         scope.launch {
             categoryUseCases.subscribe(true,
-                showEmptyCategories = true
+                showEmptyCategories = true,
+                scope
             ).collect { categoriesWithCount ->
                 categories = categoriesWithCount.map { it.category }
             }

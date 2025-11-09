@@ -32,7 +32,7 @@ class CategoryScreenViewModel(
     init {
         libraryPreferences.showEmptyCategories().stateIn(scope)
             .flatMapLatest { showEmpty ->
-                categoriesUseCase.subscribe(false, showEmpty)
+                categoriesUseCase.subscribe(false, showEmpty,scope)
             }
             .onEach { list ->
                 categories.clear()

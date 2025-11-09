@@ -3,6 +3,7 @@ package ireader.data.font
 import data.CustomFonts
 import ireader.core.db.Transactions
 import ireader.domain.data.repository.FontRepository
+import ireader.domain.models.common.Uri
 import ireader.domain.models.fonts.CustomFont
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -28,14 +29,39 @@ val customFontMapper: (
 
 class FontRepositoryImpl(
     private val handler: ireader.data.core.DatabaseHandler,
-    private val transactions: Transactions,
-    private val fileSystem: FileSystem,
-    private val fontsDirectory: String
+    private val transactions: Transactions
 ) : FontRepository {
+    private val fileSystem: FileSystem = FileSystem.SYSTEM
+    private val fontsDirectory: String = "fonts" // Will be platform-specific
 
     override suspend fun importFont(filePath: String, fontName: String): Result<CustomFont> {
         return withContext(Dispatchers.IO) {
             try {
+                // Handle system fonts (empty filePath) - just insert into database
+                if (filePath.isEmpty()) {
+                    val fontId = "system_${fontName.lowercase().replace(" ", "_")}"
+                    val customFont = CustomFont(
+                        id = fontId,
+                        name = fontName,
+                        filePath = "",
+                        isSystemFont = true,
+                        dateAdded = System.currentTimeMillis()
+                    )
+                    
+                    // Save to database
+                    handler.await(inTransaction = true) {
+                        customFontQueries.insert(
+                            id = customFont.id,
+                            name = customFont.name,
+                            filePath = customFont.filePath,
+                            isSystemFont = customFont.isSystemFont,
+                            dateAdded = customFont.dateAdded
+                        )
+                    }
+                    
+                    return@withContext Result.success(customFont)
+                }
+                
                 val sourcePath = filePath.toPath()
                 
                 // Validate file exists and is a font file
@@ -142,6 +168,58 @@ class FontRepositoryImpl(
     override suspend fun getFontById(fontId: String): CustomFont? {
         return handler.awaitOneOrNull {
             customFontQueries.getFontById(fontId, customFontMapper)
+        }
+    }
+    
+    override suspend fun importFontFromUri(uri: Uri, fontName: String): Result<CustomFont> {
+        return withContext(Dispatchers.IO) {
+            try {
+                // Determine file extension from URI or default to ttf
+                val uriString = uri.toString()
+                val extension = when {
+                    uriString.contains(".otf", ignoreCase = true) -> "otf"
+                    uriString.contains(".ttf", ignoreCase = true) -> "ttf"
+                    else -> "ttf" // default
+                }
+                
+                // Create fonts directory if it doesn't exist
+                val fontsDir = fontsDirectory.toPath()
+                if (!fileSystem.exists(fontsDir)) {
+                    fileSystem.createDirectories(fontsDir)
+                }
+                
+                // Generate unique ID and destination path
+                val fontId = UUID.randomUUID().toString()
+                val fileName = "${fontId}.${extension}"
+                val destPath = fontsDir.resolve(fileName)
+                
+                // Copy font file from URI to app directory using platform-specific helper
+                copyFontFromUri(uri, destPath)
+                
+                // Create CustomFont object
+                val customFont = CustomFont(
+                    id = fontId,
+                    name = fontName,
+                    filePath = destPath.toString(),
+                    isSystemFont = false,
+                    dateAdded = System.currentTimeMillis()
+                )
+                
+                // Save to database
+                handler.await(inTransaction = true) {
+                    customFontQueries.insert(
+                        id = customFont.id,
+                        name = customFont.name,
+                        filePath = customFont.filePath,
+                        isSystemFont = customFont.isSystemFont,
+                        dateAdded = customFont.dateAdded
+                    )
+                }
+                
+                Result.success(customFont)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
         }
     }
 }

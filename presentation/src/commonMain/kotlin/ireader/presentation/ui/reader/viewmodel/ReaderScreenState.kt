@@ -113,6 +113,7 @@ open class ReaderScreenPreferencesStateImpl() : ReaderScreenPreferencesState {
     override var translatedParagraph by mutableStateOf<String?>(null)
     override var isParagraphTranslating by mutableStateOf<Boolean>(false)
     override var paragraphTranslationError by mutableStateOf<String?>(null)
+    override var showTranslationApiKeyPrompt by mutableStateOf<Boolean>(false)
 }
 
 interface ReaderScreenPreferencesState {
@@ -151,5 +152,6 @@ interface ReaderScreenPreferencesState {
     var translatedParagraph: String?
     var isParagraphTranslating: Boolean
     var paragraphTranslationError: String?
+    var showTranslationApiKeyPrompt: Boolean
     //  val isVerticalScrolling : Boolean
 }

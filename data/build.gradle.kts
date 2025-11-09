@@ -126,7 +126,7 @@ sqldelight {
             dialect("app.cash.sqldelight:sqlite-3-24-dialect:2.0.2")
             verifyMigrations = true
             migrationOutputDirectory = file("src/commonMain/sqldelight/migrations")
-            deriveSchemaFromMigrations = true
+            deriveSchemaFromMigrations = false
             srcDirs(file("src/commonMain/sqldelight"))
             verifyMigrations.set(System.getenv("CI") != null)
         }

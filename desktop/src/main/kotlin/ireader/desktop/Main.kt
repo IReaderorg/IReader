@@ -43,6 +43,7 @@ import ireader.presentation.imageloader.coil.imageloader.CatalogRemoteKeyer
 import ireader.presentation.imageloader.coil.imageloader.CatalogRemoteMapper
 import ireader.presentation.imageloader.coil.imageloader.InstalledCatalogKeyer
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import org.koin.compose.KoinContext
@@ -114,11 +115,23 @@ fun main() {
             println("Error while trying to clean database files: ${e.message}")
         }
         
-        startKoin {
+        val koinApp = startKoin {
             modules(
                 localModule,dataPlatformModule, CatalogModule, DataModule,preferencesInjectModule,
                 repositoryInjectModule, UseCasesInject, PresentationModules,DomainServices,DomainModule,presentationPlatformModule, DesktopDI
             )
+        }
+        
+        // Initialize system fonts
+        try {
+            val systemFontsInitializer = koinApp.koin.get<ireader.domain.usecases.fonts.SystemFontsInitializer>()
+            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                systemFontsInitializer.initializeSystemFonts()
+                println("System fonts initialized successfully")
+            }
+        } catch (e: Exception) {
+            println("Failed to initialize system fonts: ${e.message}")
+            e.printStackTrace()
         }
 
         //Dispatchers.setMain(StandardTestDispatcher())

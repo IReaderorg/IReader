@@ -526,7 +526,10 @@ data class ReaderScreenSpec(
                                     }
                                 }
                             },
-                            paddingValues = padding
+                            paddingValues = padding,
+                            onNavigateToTranslationSettings = {
+                                navigator.push(TranslationScreenSpec())
+                            }
                         )
                     }
 

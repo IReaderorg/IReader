@@ -73,19 +73,50 @@ class FontScreenViewModel(
         readerPreferences.selectedFontId().set(fontId)
     }
     
-    fun importFont(fontName: String) {
-        // This will be called after file picker selection
-        // The actual file path will be provided by platform-specific code
+    fun importFont(fontName: String, uri: ireader.domain.models.common.Uri) {
+        fontManagementUseCase?.let { useCase ->
+            scope.launch {
+                try {
+                    val result = useCase.importFontFromUri(uri, fontName)
+                    result.onSuccess { font ->
+                        // Reload fonts to show the newly imported font
+                        loadCustomFonts()
+                        // Optionally select the newly imported font
+                        onFontSelected(font.id)
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Font imported successfully"))
+                    }
+                    result.onFailure { error ->
+                        // Handle error - could show a snackbar or error message
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Failed to import font: ${error.message}"))
+                        ireader.core.log.Log.error("Failed to import font", error)
+                    }
+                } catch (e: Exception) {
+                    ireader.core.log.Log.error("Failed to import font", e)
+                }
+            }
+        }
     }
     
     fun deleteFont(fontId: String) {
         fontManagementUseCase?.let { useCase ->
             scope.launch {
                 try {
-                    useCase.deleteFont(fontId)
-                    loadCustomFonts()
+                    val result = useCase.deleteFont(fontId)
+                    result.onSuccess {
+                        loadCustomFonts()
+                        // If deleted font was selected, reset to default
+                        if (selectedFontId.value == fontId) {
+                            selectedFontId.value = ""
+                            readerPreferences.selectedFontId().set("")
+                        }
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Font deleted successfully"))
+                    }.onFailure { error ->
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Failed to delete font: ${error.message}"))
+                        ireader.core.log.Log.error("Failed to delete font", error)
+                    }
                 } catch (e: Exception) {
-                    // Handle error
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to delete font: ${e.message}"))
+                    ireader.core.log.Log.error("Failed to delete font", e)
                 }
             }
         }

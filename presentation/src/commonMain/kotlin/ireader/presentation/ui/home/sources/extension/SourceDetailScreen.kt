@@ -17,6 +17,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.Catalog
 import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogLocal
+import ireader.domain.usecases.source.ReportBrokenSourceUseCase
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
 import ireader.presentation.core.VoyagerScreen
@@ -25,6 +26,8 @@ import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.home.sources.extension.composables.LetterIcon
 import ireader.presentation.imageloader.IImageLoader
+import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import java.util.*
 
 data class SourceDetailScreen(
@@ -66,14 +69,21 @@ private fun SourceDetailContent(
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
+    val reportBrokenSourceUseCase: ReportBrokenSourceUseCase = koinInject()
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    
+    var showReportDialog by remember { mutableStateOf(false) }
+    var isReporting by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
         // Source Icon and Name
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -154,18 +164,26 @@ private fun SourceDetailContent(
 
         // Report as Broken Button
         Button(
-            onClick = { /* TODO: Implement report functionality */ },
+            onClick = { showReportDialog = true },
             modifier = Modifier.fillMaxWidth(),
+            enabled = !isReporting && catalog is CatalogInstalled,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.errorContainer,
                 contentColor = MaterialTheme.colorScheme.onErrorContainer
             )
         ) {
-            Icon(
-                imageVector = Icons.Default.BugReport,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp)
-            )
+            if (isReporting) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(18.dp),
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.BugReport,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
             Spacer(modifier = Modifier.width(8.dp))
             Text("Report as Broken")
         }
@@ -185,6 +203,48 @@ private fun SourceDetailContent(
                 value = catalog.versionCode.toString()
             )
         }
+    }
+    
+    // Snackbar host
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = Modifier.align(Alignment.BottomCenter)
+    )
+    }
+    
+    // Report confirmation dialog
+    if (showReportDialog && catalog is CatalogInstalled) {
+        ReportSourceDialog(
+            sourceName = catalog.name,
+            onDismiss = { showReportDialog = false },
+            onConfirm = { reason ->
+                showReportDialog = false
+                isReporting = true
+                
+                scope.launch {
+                    val result = reportBrokenSourceUseCase(
+                        sourceId = catalog.sourceId,
+                        packageName = catalog.pkgName,
+                        version = catalog.versionName,
+                        reason = reason
+                    )
+                    
+                    isReporting = false
+                    
+                    if (result.isSuccess) {
+                        snackbarHostState.showSnackbar(
+                            message = "Source reported successfully. Thank you for your feedback!",
+                            duration = SnackbarDuration.Short
+                        )
+                    } else {
+                        snackbarHostState.showSnackbar(
+                            message = "Failed to report source: ${result.exceptionOrNull()?.message ?: "Unknown error"}",
+                            duration = SnackbarDuration.Long
+                        )
+                    }
+                }
+            }
+        )
     }
 }
 
@@ -208,4 +268,73 @@ private fun DetailItem(
             color = MaterialTheme.colorScheme.onSurface
         )
     }
+}
+
+
+@Composable
+private fun ReportSourceDialog(
+    sourceName: String,
+    onDismiss: () -> Unit,
+    onConfirm: (reason: String) -> Unit
+) {
+    var reason by remember { mutableStateOf("") }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Report Source as Broken",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "You are about to report \"$sourceName\" as broken or not working properly.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                
+                Text(
+                    text = "Please describe the issue:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                
+                OutlinedTextField(
+                    value = reason,
+                    onValueChange = { reason = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("e.g., Source not loading, broken search, missing content...") },
+                    minLines = 3,
+                    maxLines = 5
+                )
+                
+                Text(
+                    text = "Your report will be stored locally for review.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { 
+                    if (reason.isNotBlank()) {
+                        onConfirm(reason)
+                    }
+                },
+                enabled = reason.isNotBlank()
+            ) {
+                Text("Submit Report")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

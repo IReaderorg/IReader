@@ -120,6 +120,9 @@ object LibraryScreenSpec : Tab {
                                 onClickSelectAll = {
                                     vm.selectAllInCurrentCategory()
                                 },
+                                onClickBatchOperations = {
+                                    vm.showBatchOperationDialog()
+                                },
                                 scrollBehavior = scrollBehavior,
                                 hideModalSheet = {
                                     scope.launch {

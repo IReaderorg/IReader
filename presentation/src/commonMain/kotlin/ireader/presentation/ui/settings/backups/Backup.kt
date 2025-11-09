@@ -1,6 +1,8 @@
 package ireader.presentation.ui.settings.backups
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -101,8 +103,9 @@ fun BackUpAndRestoreScreen(
             ),
             Components.Header("Cloud Backup"),
             Components.Row(
-                "Cloud Storage",
+                title = "Cloud Storage",
                 subtitle = "Backup to Google Drive or Dropbox",
+                icon = Icons.Filled.Cloud,
                 onClick = {
                     onNavigateToCloudBackup()
                 }

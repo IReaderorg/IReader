@@ -15,6 +15,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ireader.domain.models.common.Uri
+import ireader.presentation.core.util.FilePicker
 import ireader.presentation.ui.component.components.PreferenceRow
 import ireader.presentation.ui.component.reusable_composable.AppIcon
 import ireader.presentation.ui.reader.components.FontPicker
@@ -26,6 +28,8 @@ fun FontScreen(
         onFont: (String) -> Unit
 ) {
     var showImportDialog by remember { mutableStateOf(false) }
+    var showFilePicker by remember { mutableStateOf(false) }
+    var pendingFontName by remember { mutableStateOf("") }
 
     Column {
         if (vm.previewMode.value) {
@@ -86,9 +90,23 @@ fun FontScreen(
         ImportFontDialog(
             onDismiss = { showImportDialog = false },
             onConfirm = { fontName ->
-                vm.importFont(fontName)
+                pendingFontName = fontName
                 showImportDialog = false
+                showFilePicker = true
             }
         )
     }
+    
+    // File picker for selecting font file
+    FilePicker(
+        show = showFilePicker,
+        fileExtensions = listOf("ttf", "otf"),
+        onFileSelected = { uri ->
+            showFilePicker = false
+            if (uri != null && pendingFontName.isNotBlank()) {
+                vm.importFont(pendingFontName, uri)
+            }
+            pendingFontName = ""
+        }
+    )
 }

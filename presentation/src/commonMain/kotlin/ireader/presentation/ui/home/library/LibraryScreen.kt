@@ -28,6 +28,8 @@ import ireader.presentation.ui.home.library.components.EditCategoriesDialog
 import ireader.presentation.ui.home.library.components.LibraryFilterBottomSheet
 import ireader.presentation.ui.home.library.components.BatchOperationProgressDialog
 import ireader.presentation.ui.home.library.components.BatchOperationResultDialog
+import ireader.presentation.ui.home.library.components.BatchOperationDialog
+import ireader.presentation.ui.home.library.components.BatchOperation
 import ireader.presentation.ui.home.library.ui.LibraryContent
 import ireader.presentation.ui.home.library.ui.LibrarySelectionBar
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
@@ -173,6 +175,20 @@ fun LibraryScreen(
                 onDismiss = onHideFilterSheet
             )
         }
+        
+        // Batch operation dialog
+        BatchOperationDialog(
+            isVisible = vm.showBatchOperationDialog,
+            selectedCount = vm.selectedBooks.size,
+            onOperationSelected = { operation ->
+                when (operation) {
+                    BatchOperation.DELETE -> onDelete()
+                    BatchOperation.CHANGE_CATEGORY -> onClickChangeCategory()
+                    else -> vm.performBatchOperation(operation)
+                }
+            },
+            onDismiss = { vm.hideBatchOperationDialog() }
+        )
         
         // Batch operation progress dialog
         BatchOperationProgressDialog(

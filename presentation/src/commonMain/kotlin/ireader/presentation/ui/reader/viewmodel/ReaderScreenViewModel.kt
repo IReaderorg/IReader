@@ -67,6 +67,7 @@ class ReaderScreenViewModel(
         val preloadChapterUseCase: ireader.domain.usecases.reader.PreloadChapterUseCase,
         // Translation use cases
         val translateChapterWithStorageUseCase: ireader.domain.usecases.translate.TranslateChapterWithStorageUseCase,
+        val translateParagraphUseCase: ireader.domain.usecases.translate.TranslateParagraphUseCase,
         val getTranslatedChapterUseCase: ireader.domain.usecases.translation.GetTranslatedChapterUseCase,
         val getGlossaryByBookIdUseCase: ireader.domain.usecases.glossary.GetGlossaryByBookIdUseCase,
         val saveGlossaryEntryUseCase: ireader.domain.usecases.glossary.SaveGlossaryEntryUseCase,
@@ -75,6 +76,10 @@ class ReaderScreenViewModel(
         val importGlossaryUseCase: ireader.domain.usecases.glossary.ImportGlossaryUseCase,
         // Statistics use case
         val trackReadingProgressUseCase: ireader.domain.usecases.statistics.TrackReadingProgressUseCase,
+        // Report use case
+        val reportBrokenChapterUseCase: ireader.domain.usecases.chapter.ReportBrokenChapterUseCase,
+        // Font management use case
+        val fontManagementUseCase: ireader.domain.usecases.fonts.FontManagementUseCase,
         val params: Param,
         val globalScope: CoroutineScope
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(),
@@ -93,15 +98,23 @@ class ReaderScreenViewModel(
     
     var showBrightnessControl by mutableStateOf(false)
     var showFontSizeAdjuster by mutableStateOf(false)
+    var showFontPicker by mutableStateOf(false)
     
     // Reading statistics tracking
     private var chapterOpenTimestamp: Long? = null
     
+    // Font management state
+    var customFonts by mutableStateOf<List<ireader.domain.models.fonts.CustomFont>>(emptyList())
+        private set
+    var systemFonts by mutableStateOf<List<ireader.domain.models.fonts.CustomFont>>(emptyList())
+        private set
+    val selectedFontId = readerPreferences.selectedFontId().asState()
+    
     // Autoscroll speed control
     fun increaseAutoScrollSpeed() {
         val currentSpeed = autoScrollOffset.value
-        if (currentSpeed < 2000) {
-            val newSpeed = (currentSpeed + 50).coerceAtMost(2000)
+        if (currentSpeed < 20) {
+            val newSpeed = (currentSpeed + 1).coerceAtMost(100)
             autoScrollOffset.value = newSpeed
             readerPreferences.autoScrollOffset().set(newSpeed)
         }
@@ -109,8 +122,8 @@ class ReaderScreenViewModel(
     
     fun decreaseAutoScrollSpeed() {
         val currentSpeed = autoScrollOffset.value
-        if (currentSpeed > 100) {
-            val newSpeed = (currentSpeed - 50).coerceAtLeast(100)
+        if (currentSpeed > 1) {
+            val newSpeed = (currentSpeed - 1).coerceAtLeast(1)
             autoScrollOffset.value = newSpeed
             readerPreferences.autoScrollOffset().set(newSpeed)
         }
@@ -119,6 +132,14 @@ class ReaderScreenViewModel(
     fun toggleAutoScroll() {
         autoScrollMode = !autoScrollMode
     }
+    
+    /**
+     * Update brightness value and save to preferences
+     */
+    fun updateBrightness( newBrightness: Float) {
+        readerUseCases.brightnessStateUseCase.saveBrightness(newBrightness)
+    }
+    
     fun makeSettingTransparent() {
         isSettingChangingJob?.cancel()
         isSettingChangingJob = scope.launch {
@@ -173,7 +194,6 @@ class ReaderScreenViewModel(
     var chapterNumberMode by readerPreferences.showChapterNumberPreferences().asState()
     val isScrollIndicatorDraggable = readerPreferences.scrollbarMode().asState()
     val font = platformUiPreferences.font()?.asState()
-    val selectedFontId = readerPreferences.selectedFontId().asState()
     var customFont by mutableStateOf<ireader.domain.models.fonts.CustomFont?>(null)
     val webViewIntegration = readerPreferences.webViewIntegration().asState()
     val selectableMode = readerPreferences.selectableText().asState()
@@ -233,6 +253,7 @@ class ReaderScreenViewModel(
                     state.book = getBookUseCases.findBookById(bookId)
                     setupChapters(bookId, chapterId)
                     loadGlossary()
+                    loadFonts()
                 }
         } else {
             scope.launch {
@@ -972,6 +993,79 @@ class ReaderScreenViewModel(
         }
     }
 
+    // ==================== Font Management Methods ====================
+    
+    /**
+     * Load system and custom fonts
+     */
+    fun loadFonts() {
+        scope.launch {
+            try {
+                systemFonts = fontManagementUseCase.getSystemFonts()
+                customFonts = fontManagementUseCase.getCustomFonts()
+            } catch (e: Exception) {
+                ireader.core.log.Log.error("Failed to load fonts", e)
+            }
+        }
+    }
+    
+    /**
+     * Select a font by ID
+     */
+    fun selectFont(fontId: String) {
+        readerPreferences.selectedFontId().set(fontId)
+        scope.launch {
+            try {
+                customFont = fontManagementUseCase.getFontById(fontId)
+            } catch (e: Exception) {
+                ireader.core.log.Log.error("Failed to load font", e)
+            }
+        }
+    }
+    
+    /**
+     * Import a custom font
+     */
+    fun importFont(filePath: String, fontName: String) {
+        scope.launch {
+            try {
+                val result = fontManagementUseCase.importFont(filePath, fontName)
+                result.onSuccess { font ->
+                    loadFonts()
+                    showSnackBar(UiText.DynamicString("Font imported successfully"))
+                }.onFailure { error ->
+                    showSnackBar(UiText.ExceptionString(error as Exception))
+                }
+            } catch (e: Exception) {
+                showSnackBar(UiText.ExceptionString(e))
+            }
+        }
+    }
+    
+    /**
+     * Delete a custom font
+     */
+    fun deleteFont(fontId: String) {
+        scope.launch {
+            try {
+                val result = fontManagementUseCase.deleteFont(fontId)
+                result.onSuccess {
+                    loadFonts()
+                    // If deleted font was selected, reset to default
+                    if (selectedFontId.value == fontId) {
+                        readerPreferences.selectedFontId().set("")
+                        customFont = null
+                    }
+                    showSnackBar(UiText.DynamicString("Font deleted successfully"))
+                }.onFailure { error ->
+                    showSnackBar(UiText.ExceptionString(error as Exception))
+                }
+            } catch (e: Exception) {
+                showSnackBar(UiText.ExceptionString(e))
+            }
+        }
+    }
+    
     // ==================== Find in Chapter Methods ====================
     
     /**
@@ -1067,6 +1161,70 @@ class ReaderScreenViewModel(
      * 2. Call the use case to save the report to the database
      * 3. Optionally send the report to a remote server
      */
+    /**
+     * Report a broken chapter with reason as String
+     * @param reason The reason for the report (e.g., "Missing Content", "Incorrect Order")
+     * @param description Additional details about the issue
+     */
+    fun reportBrokenChapter(
+        reason: String,
+        description: String
+    ) {
+        val chapter = stateChapter ?: return
+        val bookId = book?.id ?: return
+        val sourceId = book?.sourceId ?: 0L
+        
+        scope.launch {
+            try {
+                val result = reportBrokenChapterUseCase.invoke(
+                    chapterId = chapter.id,
+                    bookId = bookId,
+                    sourceId = sourceId,
+                    reason = reason,
+                    description = description
+                )
+                if (result.isSuccess) {
+                    showSnackBar(UiText.DynamicString("Chapter reported successfully. Thank you for your feedback!"))
+                } else {
+                    showSnackBar(UiText.DynamicString("Failed to report chapter: ${result.exceptionOrNull()?.message}"))
+                }
+            } catch (e: Exception) {
+                showSnackBar(UiText.ExceptionString(e))
+            }
+        }
+    }
+    
+    // ==================== Bilingual Mode Methods (Duplicates Removed) ====================
+    
+    /**
+     * Get translation for a specific paragraph index
+     * Returns null if no translation is available for that paragraph
+     */
+    fun getTranslationForParagraph(index: Int): String? {
+        if (!translationState.hasTranslation || translationState.translatedChapter == null) {
+            return null
+        }
+        
+        val translatedContent = translationState.translatedChapter?.translatedContent ?: return null
+        
+        // Make sure the index is within bounds
+        if (index < 0 || index >= translatedContent.size) {
+            return null
+        }
+        
+        // Get the translated page at this index
+        val translatedPage = translatedContent.getOrNull(index)
+        return when (translatedPage) {
+            is ireader.core.source.model.Text -> translatedPage.text
+            else -> null
+        }
+    }
+    
+    /**
+     * Report a broken chapter with IssueCategory enum
+     * @param issueCategory The category of the issue
+     * @param description Additional details about the issue
+     */
     fun reportBrokenChapter(
         issueCategory: ireader.domain.models.entities.IssueCategory,
         description: String
@@ -1076,22 +1234,17 @@ class ReaderScreenViewModel(
         
         scope.launch {
             try {
-                // TODO: Inject ReportBrokenChapterUseCase and use it here
-                // For now, just show a success message
-                showSnackBar(UiText.DynamicString("Chapter reported successfully. Thank you for your feedback!"))
-                
-                // In a real implementation:
-                // val result = reportBrokenChapterUseCase.execute(
-                //     chapterId = chapter.id,
-                //     bookId = bookId,
-                //     issueCategory = issueCategory,
-                //     description = description
-                // )
-                // if (result.isSuccess) {
-                //     showSnackBar(UiText.DynamicString("Chapter reported successfully"))
-                // } else {
-                //     showSnackBar(UiText.DynamicString("Failed to report chapter"))
-                // }
+                val result = reportBrokenChapterUseCase.execute(
+                    chapterId = chapter.id,
+                    bookId = bookId,
+                    issueCategory = issueCategory,
+                    description = description
+                )
+                if (result.isSuccess) {
+                    showSnackBar(UiText.DynamicString("Chapter reported successfully. Thank you for your feedback!"))
+                } else {
+                    showSnackBar(UiText.DynamicString("Failed to report chapter: ${result.exceptionOrNull()?.message}"))
+                }
             } catch (e: Exception) {
                 showSnackBar(UiText.ExceptionString(e))
             }
@@ -1122,9 +1275,8 @@ class ReaderScreenViewModel(
         val progressClamped = scrollProgress.coerceIn(0f, 1f)
         wordsRemaining = (totalWords * (1f - progressClamped)).toInt().coerceAtLeast(0)
         
-        // Get user's reading speed (default: 225 WPM for average readers)
-        // TODO: Make this configurable in settings
-        val wordsPerMinute = 225
+        // Get user's reading speed from preferences (default: 225 WPM for average readers)
+        val wordsPerMinute = readerPreferences.readingSpeedWPM().get()
         
         // Calculate estimated time
         estimatedReadingMinutes = calculateReadingTime(wordsRemaining, wordsPerMinute)
@@ -1195,7 +1347,7 @@ class ReaderScreenViewModel(
         
         // Check if API key is required and set
         if (isApiKeyRequired() && !isApiKeySet()) {
-            paragraphTranslationError = "Please configure your ${getCurrentEngineName()} API key in settings"
+            showTranslationApiKeyPrompt = true
             isParagraphTranslating = false
             return
         }
@@ -1206,22 +1358,13 @@ class ReaderScreenViewModel(
         
         scope.launch {
             try {
-                translationEnginesManager.translateWithContext(
-                    texts = listOf(paragraphToTranslate),
-                    source = translatorOriginLanguage.value,
-                    target = translatorTargetLanguage.value,
-                    contentType = ireader.domain.data.engines.ContentType.values()[translatorContentType.value],
-                    toneType = ireader.domain.data.engines.ToneType.values()[translatorToneType.value],
-                    preserveStyle = translatorPreserveStyle.value,
-                    onProgress = { },
-                    onSuccess = { translatedTexts ->
-                        if (translatedTexts.isNotEmpty()) {
-                            translatedParagraph = translatedTexts.first()
-                            isParagraphTranslating = false
-                        } else {
-                            paragraphTranslationError = "Translation returned empty result"
-                            isParagraphTranslating = false
-                        }
+                translateParagraphUseCase.execute(
+                    text = paragraphToTranslate,
+                    sourceLanguage = translatorOriginLanguage.value,
+                    targetLanguage = translatorTargetLanguage.value,
+                    onSuccess = { translatedText ->
+                        translatedParagraph = translatedText
+                        isParagraphTranslating = false
                     },
                     onError = { error ->
                         paragraphTranslationError = error.toString()
@@ -1233,6 +1376,22 @@ class ReaderScreenViewModel(
                 isParagraphTranslating = false
             }
         }
+    }
+    
+    /**
+     * Dismiss the translation API key prompt
+     */
+    fun dismissTranslationApiKeyPrompt() {
+        showTranslationApiKeyPrompt = false
+    }
+    
+    /**
+     * Navigate to settings from the API key prompt
+     * This will be called when user taps "Go to Settings" button
+     */
+    fun navigateToTranslationSettings() {
+        showTranslationApiKeyPrompt = false
+        // The navigation will be handled by the UI layer
     }
 
     // ==================== Reading Statistics Tracking Methods ====================

@@ -3,6 +3,7 @@ package ireader.domain.usecases.local.book_usecases
 import ireader.core.source.model.MangaInfo
 import ireader.domain.data.repository.LibraryRepository
 import ireader.domain.models.entities.LibraryBook
+import ireader.domain.models.entities.SmartCategory
 import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +14,8 @@ import kotlinx.coroutines.withContext
 
 
 class GetLibraryCategory  internal constructor(
-    private val libraryRepository: LibraryRepository
+    private val libraryRepository: LibraryRepository,
+    private val getSmartCategoryBooksUseCase: GetSmartCategoryBooksUseCase
 ) {
 
     suspend fun await(
@@ -21,9 +23,18 @@ class GetLibraryCategory  internal constructor(
         sort: LibrarySort = LibrarySort.default,
         filters: List<LibraryFilter> = emptyList()
     ): List<LibraryBook> {
-        return libraryRepository.findAll(sort).filter { books ->
-            books.category.toLong() == categoryId
-        }.filteredWith(filters)
+        // Check if this is a smart category
+        val smartCategory = SmartCategory.getById(categoryId)
+        
+        return if (smartCategory != null) {
+            // Use smart category filtering
+            getSmartCategoryBooksUseCase.await(smartCategory, sort).filteredWith(filters)
+        } else {
+            // Use regular category filtering
+            libraryRepository.findAll(sort).filter { books ->
+                books.category.toLong() == categoryId
+            }.filteredWith(filters)
+        }
     }
 
     fun subscribe(
@@ -31,9 +42,18 @@ class GetLibraryCategory  internal constructor(
         sort: LibrarySort = LibrarySort.default,
         filters: List<LibraryFilter> = emptyList()
     ): Flow<List<LibraryBook>> {
-      return  libraryRepository.subscribe(sort).map { it.filter { books ->
-            books.category.toLong() == categoryId
-        } }.map { it.filteredWith(filters) }
+        // Check if this is a smart category
+        val smartCategory = SmartCategory.getById(categoryId)
+        
+        return if (smartCategory != null) {
+            // Use smart category filtering
+            getSmartCategoryBooksUseCase.subscribe(smartCategory, sort).map { it.filteredWith(filters) }
+        } else {
+            // Use regular category filtering
+            libraryRepository.subscribe(sort).map { it.filter { books ->
+                books.category.toLong() == categoryId
+            } }.map { it.filteredWith(filters) }
+        }
     }
 
     private suspend fun List<LibraryBook>.filteredWith(filters: List<LibraryFilter>): List<LibraryBook> {

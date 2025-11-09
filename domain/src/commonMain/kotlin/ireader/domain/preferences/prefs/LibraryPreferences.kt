@@ -1,13 +1,13 @@
 package ireader.domain.preferences.prefs
 
+import ireader.core.prefs.Preference
+import ireader.core.prefs.PreferenceStore
 import ireader.domain.models.entities.Category
 import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
 import ireader.domain.models.library.deserialize
 import ireader.domain.models.library.deserializeList
 import ireader.domain.models.library.serialize
-import ireader.core.prefs.Preference
-import ireader.core.prefs.PreferenceStore
 
 class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
@@ -99,5 +99,9 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun showEmptyCategories(): Preference<Boolean> {
         return preferenceStore.getBoolean("show_empty_categories", false)
+    }
+
+    fun showSmartCategories(): Preference<Boolean> {
+        return preferenceStore.getBoolean("show_smart_categories", false)
     }
 }

@@ -7,6 +7,7 @@ package ireader.domain.models.entities
 sealed class SmartCategory(
     val id: Long,
     val name: String,
+    val iconName: String, // Icon identifier for UI layer
     val isSystemCategory: Boolean = true
 ) {
     /**
@@ -14,7 +15,8 @@ sealed class SmartCategory(
      */
     object CurrentlyReading : SmartCategory(
         id = CURRENTLY_READING_ID,
-        name = "Currently Reading"
+        name = "Currently Reading",
+        iconName = "AutoStories" // Book with bookmark icon
     )
     
     /**
@@ -22,7 +24,8 @@ sealed class SmartCategory(
      */
     object RecentlyAdded : SmartCategory(
         id = RECENTLY_ADDED_ID,
-        name = "Recently Added"
+        name = "Recently Added",
+        iconName = "NewReleases" // New/star icon
     )
     
     /**
@@ -30,7 +33,8 @@ sealed class SmartCategory(
      */
     object Completed : SmartCategory(
         id = COMPLETED_ID,
-        name = "Completed"
+        name = "Completed",
+        iconName = "CheckCircle" // Checkmark icon
     )
     
     /**
@@ -38,7 +42,8 @@ sealed class SmartCategory(
      */
     object Unread : SmartCategory(
         id = UNREAD_ID,
-        name = "Unread"
+        name = "Unread",
+        iconName = "Circle" // Empty circle icon
     )
     
     /**
@@ -46,7 +51,8 @@ sealed class SmartCategory(
      */
     object Archived : SmartCategory(
         id = ARCHIVED_ID,
-        name = "Archived"
+        name = "Archived",
+        iconName = "Archive" // Archive box icon
     )
     
     companion object {

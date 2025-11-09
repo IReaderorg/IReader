@@ -52,6 +52,7 @@ interface LibraryState {
     var batchOperationInProgress: Boolean
     var batchOperationMessage: String?
     var lastUndoState: UndoState?
+    var showBatchOperationDialog: Boolean
 }
 
 
@@ -83,4 +84,5 @@ open class LibraryStateImpl : LibraryState {
     override var batchOperationInProgress by mutableStateOf<Boolean>(false)
     override var batchOperationMessage by mutableStateOf<String?>(null)
     override var lastUndoState by mutableStateOf<UndoState?>(null)
+    override var showBatchOperationDialog by mutableStateOf<Boolean>(false)
 }

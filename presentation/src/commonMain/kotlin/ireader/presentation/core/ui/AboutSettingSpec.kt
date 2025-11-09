@@ -43,6 +43,9 @@ class AboutSettingSpec : VoyagerScreen() {
                     navigator.pop()
                 },
                 getFormattedBuildTime = this::getFormattedBuildTime,
+                onNavigateToChangelog = {
+                    navigator.push(ChangelogScreenSpec())
+                }
             )
         }
 

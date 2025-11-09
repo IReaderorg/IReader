@@ -285,8 +285,8 @@ fun ReaderScreenTab(
             Components.Slider(
                 preferenceAsInt = vm.autoScrollOffset,
                 title = localizeHelper.localize(MR.strings.offset),
-                trailing = (vm.autoScrollOffset.value / 1000).toInt().toString(),
-                valueRange = 500.0F..10000F,onValueChange = {
+                trailing = (vm.autoScrollOffset.value / 100).toInt().toString(),
+                valueRange = 1.0F..8F,onValueChange = {
                     vm.makeSettingTransparent()
                 }
             ).Build()
@@ -638,6 +638,36 @@ fun GeneralScreenTab(
             )
         }
         item {
+            SwitchPreference(
+                preference = vm.volumeKeyNavigation,
+                title = localizeHelper.localize(MR.strings.volume_key_navigation),
+            )
+        }
+        item {
+            Components.Header(
+                "Bilingual Mode"
+            ).Build()
+        }
+        item {
+            SwitchPreference(
+                preference = vm.bilingualModeEnabled,
+                title = "Enable Bilingual Mode"
+            )
+        }
+        item {
+            ChipPreference(
+                preference = listOf(
+                    "Side by Side",
+                    "Paragraph by Paragraph",
+                ),
+                selected = vm.bilingualModeLayout.value,
+                onValueChange = {
+                    vm.switchBilingualLayout()
+                },
+                title = "Bilingual Layout"
+            )
+        }
+        item {
             Spacer(modifier = Modifier.height(100.dp))
         }
     }
@@ -914,3 +944,29 @@ fun TranslateButton(
 }
 
 
+
+/**
+ * Font Picker Tab for selecting custom fonts
+ */
+@Composable
+fun FontPickerTab(
+    vm: ReaderScreenViewModel
+) {
+    FontPicker(
+        selectedFontId = vm.selectedFontId.value,
+        customFonts = vm.customFonts,
+        systemFonts = vm.systemFonts,
+        onFontSelected = { fontId ->
+            vm.selectFont(fontId)
+        },
+        onImportFont = {
+            // TODO: Platform-specific file picker implementation
+            // For now, show a message that this feature requires platform implementation
+            vm.showSnackBar(ireader.i18n.UiText.DynamicString("Font import requires platform-specific implementation"))
+        },
+        onDeleteFont = { fontId ->
+            vm.deleteFont(fontId)
+        },
+        modifier = Modifier.fillMaxSize()
+    )
+}

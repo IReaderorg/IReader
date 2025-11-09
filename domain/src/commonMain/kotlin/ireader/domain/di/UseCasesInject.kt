@@ -193,6 +193,11 @@ val UseCasesInject = module {
             applyGlossaryToTextUseCase = get()
         ) 
     }
+    single { 
+        ireader.domain.usecases.translate.TranslateParagraphUseCase(
+            translationEnginesManager = get()
+        ) 
+    }
     
     // Glossary use cases
     single { ireader.domain.usecases.glossary.GetGlossaryByBookIdUseCase(get()) }
@@ -207,6 +212,10 @@ val UseCasesInject = module {
     
     // Batch operations use cases
     single { ireader.domain.usecases.local.book_usecases.DownloadUnreadChaptersUseCase(get(), get()) }
+    single { ireader.domain.usecases.local.book_usecases.ArchiveBookUseCase(get()) }
+    
+    // Smart categories use case
+    single { ireader.domain.usecases.local.book_usecases.GetSmartCategoryBooksUseCase(get()) }
     
     // Statistics use cases
     single { GetReadingStatisticsUseCase(get()) }
@@ -215,4 +224,13 @@ val UseCasesInject = module {
         getReadingStatistics = get(),
         trackReadingProgress = get()
     ) }
+    
+    // Chapter report use cases
+    single { ireader.domain.usecases.chapter.ReportBrokenChapterUseCase(get()) }
+    
+    // Source report use cases
+    single { ireader.domain.usecases.source.ReportBrokenSourceUseCase(get()) }
+    
+    // Font management use cases
+    single { ireader.domain.usecases.fonts.SystemFontsInitializer(get()) }
 }

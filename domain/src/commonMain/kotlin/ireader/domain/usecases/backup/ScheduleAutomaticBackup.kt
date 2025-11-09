@@ -21,8 +21,3 @@ interface ScheduleAutomaticBackup {
      */
     fun isScheduled(): Boolean
 }
-
-/**
- * Platform-specific implementation
- */
-expect class ScheduleAutomaticBackupImpl() : ScheduleAutomaticBackup

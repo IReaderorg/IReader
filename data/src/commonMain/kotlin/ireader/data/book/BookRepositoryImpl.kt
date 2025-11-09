@@ -1,12 +1,8 @@
 package ireader.data.book
 
-import app.cash.sqldelight.Query
-import app.cash.sqldelight.TransactionWithReturn
-import ir.kazemcodes.infinityreader.Database
 import ireader.data.core.DatabaseHandler
 import ireader.data.util.BaseDao
 import ireader.data.util.toDB
-import ireader.data.util.toLong
 import ireader.domain.data.repository.BookCategoryRepository
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.models.entities.Book
@@ -16,7 +12,7 @@ import ireader.domain.models.entities.Chapter
 import ireader.domain.models.entities.LibraryBook
 import ireader.domain.models.library.LibrarySort
 import kotlinx.coroutines.flow.Flow
-import java.util.*
+import java.util.Locale
 
 class BookRepositoryImpl(
     private val handler: DatabaseHandler,
@@ -189,7 +185,7 @@ class BookRepositoryImpl(
                 favorite = book.favorite,
                 title = book.title,
                 status = book.status,
-                genre = book.genres.let(bookGenresConverter::encode),
+                genre = book.genres,
                 description = book.description,
                 author = book.author,
                 initialized = book.initialized,
@@ -226,7 +222,7 @@ class BookRepositoryImpl(
                 favorite = book.favorite,
                 title = book.title,
                 status = book.status,
-                genre = book.genres.let(bookGenresConverter::encode),
+                genre = book.genres,
                 description = book.description,
                 author = book.author,
                 initialized = book.initialized,
@@ -257,7 +253,7 @@ class BookRepositoryImpl(
                 favorite = book.favorite,
                 title = book.title,
                 status = book.status,
-                genre = book.genres.let(bookGenresConverter::encode),
+                genre = book.genres,
                 description = book.description,
                 author = book.author,
                 initialized = book.initialized,
@@ -336,7 +332,7 @@ class BookRepositoryImpl(
                     viewerFlags = book.viewer,
                     initialized = book.initialized,
                     favorite = book.favorite,
-                    genre = book.genres.let(bookGenresConverter::encode),
+                    genre = book.genres,
                     nextUpdate = null,
                     artist = null,
                     isPinned = book.isPinned,
@@ -369,7 +365,7 @@ class BookRepositoryImpl(
                     viewerFlags = book.viewer,
                     initialized = book.initialized,
                     favorite = book.favorite,
-                    genre = book.genres.let(bookGenresConverter::encode),
+                    genre = book.genres,
                     nextUpdate = null,
                     artist = null,
                     isPinned = book.isPinned,

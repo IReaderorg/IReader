@@ -37,6 +37,11 @@ class SettingScreenSpec : VoyagerScreen() {
                     onClick = { navigator.push(AppearanceScreenSpec()) },
                 ),
                 SettingsSection(
+                    icon = Icons.Default.FontDownload,
+                    titleRes = MR.strings.font,
+                    onClick = { navigator.push(FontScreenSpec()) },
+                ),
+                SettingsSection(
                     icon = Icons.Default.Tune,
                     titleRes = MR.strings.general,
                     onClick = { navigator.push(GeneralScreenSpec()) },

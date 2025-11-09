@@ -426,6 +426,7 @@
     <string name="bionic_reading">Bionic Reading mode</string>
     <string name="show_webView_during_fetching">WebView Integration</string>
     <string name="screen_always_on">Screen Always On</string>
+    <string name="volume_key_navigation">Volume Key Navigation</string>
     <string name="general">General</string>
     <string name="use_default_image_loader">Use the Default Image Loader</string>
     <string name="system_default">Default</string>
@@ -641,4 +642,7 @@
     <string name="show_translation">Show Translation</string>
     <string name="translated">Translated</string>
     <string name="statistics">Statistics</string>
+    <string name="reading_speed">Reading Speed</string>
+    <string name="reading_speed_wpm">WPM</string>
+    <string name="changelog">Changelog</string>
 </resources>

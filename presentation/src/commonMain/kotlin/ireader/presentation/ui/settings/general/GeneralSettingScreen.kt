@@ -92,6 +92,21 @@ fun GeneralSettingScreen(
                 
                 Components.Space,
                 
+                // Library Settings Section
+                Components.Header(
+                        text = "Library Settings",
+                        padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+                        icon = Icons.Filled.Storage
+                ),
+                Components.Switch(
+                        preference = vm.showSmartCategories,
+                        title = "Show Smart Categories",
+                        subtitle = "Display auto-populated categories like Recently Added, Currently Reading, etc.",
+                        icon = Icons.Filled.Storage
+                ),
+                
+                Components.Space,
+                
                 // Download Settings Section
                 Components.Header(
                         text = "Download Settings",
@@ -342,6 +357,7 @@ class GeneralSettingScreenViewModel(
         private val appPreferences: AppPreferences,
         private val uiPreferences: UiPreferences,
         private val downloadPreferences: ireader.domain.preferences.prefs.DownloadPreferences,
+        private val libraryPreferences: ireader.domain.preferences.prefs.LibraryPreferences,
         val localeHelper: LocaleHelper
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
 
@@ -356,6 +372,9 @@ class GeneralSettingScreenViewModel(
     var showLocalCatalogs = uiPreferences.showLocalCatalogs().asStateIn(scope)
     var autoInstaller = uiPreferences.autoCatalogUpdater().asStateIn(scope)
     var localSourceLocation = uiPreferences.savedLocalCatalogLocation().asStateIn(scope)
+    
+    // Library preferences
+    val showSmartCategories = libraryPreferences.showSmartCategories().asStateIn(scope)
     
     // Download preferences
     val downloadDelayMs = downloadPreferences.downloadDelayMs().asStateIn(scope)

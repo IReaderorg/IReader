@@ -97,6 +97,10 @@ actual val DomainModule: Module = module {
     single<HttpClients> { HttpClients(get<PreferenceStoreFactory>().create("cookies")) }
     single<EpubCreator> { EpubCreator(get()) }
     
+    single<ireader.domain.usecases.backup.ScheduleAutomaticBackup> {
+        ireader.domain.usecases.backup.ScheduleAutomaticBackupImpl()
+    }
+    
     // Local Library Source
     single<LocalCatalogSource> {
         val appDataDir = File(System.getProperty("user.home"), ".ireader")

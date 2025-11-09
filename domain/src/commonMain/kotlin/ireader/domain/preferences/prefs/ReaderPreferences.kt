@@ -12,6 +12,7 @@ class ReaderPreferences constructor(
 ) {
     companion object PreferenceKeys {
         const val SAVED_FONT_SIZE_PREFERENCES = "reader_font_size"
+        const val SELECTED_FONT_ID = "selected_font_id"
 
         const val SAVED_BRIGHTNESS_PREFERENCES = "reader_brightness"
         const val SAVED_IMMERSIVE_MODE_PREFERENCES = "reader_immersive_mode"
@@ -63,7 +64,9 @@ class ReaderPreferences constructor(
         return preferenceStore.getInt(SAVED_FONT_SIZE_PREFERENCES, 18)
     }
 
-
+    fun selectedFontId(): Preference<String> {
+        return preferenceStore.getString(SELECTED_FONT_ID, "")
+    }
 
     fun followTTSSpeaker(): Preference<Boolean> {
         return preferenceStore.getBoolean("follow_tts_speaker",false)
@@ -182,7 +185,11 @@ class ReaderPreferences constructor(
     }
 
     fun autoScrollOffset(): Preference<Int> {
-        return preferenceStore.getInt(AUTO_SCROLL_MODE_OFFSET, 500)
+        return preferenceStore.getInt(AUTO_SCROLL_MODE_OFFSET, 1)
+    }
+
+    fun readingSpeedWPM(): Preference<Int> {
+        return preferenceStore.getInt("reading_speed_wpm", 225)
     }
 
     fun scrollIndicatorWith(): Preference<Int> {
@@ -312,11 +319,7 @@ class ReaderPreferences constructor(
     fun volumeKeyNavigation(): Preference<Boolean> {
         return preferenceStore.getBoolean("volume_key_navigation", false)
     }
-    
-    // Custom font selection
-    fun selectedFontId(): Preference<String> {
-        return preferenceStore.getString("selected_font_id", "")
-    }
+
     
     // Default reading mode for new books
     fun defaultReadingMode(): Preference<ReadingMode> {

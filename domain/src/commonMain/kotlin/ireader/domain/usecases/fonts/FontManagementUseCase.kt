@@ -1,6 +1,7 @@
 package ireader.domain.usecases.fonts
 
 import ireader.domain.data.repository.FontRepository
+import ireader.domain.models.common.Uri
 import ireader.domain.models.fonts.CustomFont
 
 /**
@@ -10,10 +11,21 @@ class FontManagementUseCase(
     private val fontRepository: FontRepository
 ) {
     /**
-     * Import a font from a file
+     * Import a font from a file path
      */
     suspend fun importFont(filePath: String, fontName: String): Result<CustomFont> {
         val result = fontRepository.importFont(filePath, fontName)
+        result.getOrNull()?.let { font ->
+            FontCache.put(font.id, font)
+        }
+        return result
+    }
+    
+    /**
+     * Import a font from a Uri
+     */
+    suspend fun importFontFromUri(uri: Uri, fontName: String): Result<CustomFont> {
+        val result = fontRepository.importFontFromUri(uri, fontName)
         result.getOrNull()?.let { font ->
             FontCache.put(font.id, font)
         }

@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit
  * Desktop implementation of automatic backup scheduling
  * Uses a coroutine-based timer approach for desktop platforms
  */
-actual class ScheduleAutomaticBackupImpl actual constructor() : ScheduleAutomaticBackup {
+class ScheduleAutomaticBackupImpl() : ScheduleAutomaticBackup {
     
     private var scheduledJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())

@@ -134,8 +134,8 @@ class ReadingStatisticsRepositoryImpl(
             val genreMap = mutableMapOf<String, Int>()
             
             books.filter { it.favorite }.forEach { book ->
-                // Genre is stored as semicolon-separated string
-                book.genre?.split(";")?.forEach { genre ->
+                // Genre is now a List<String>
+                book.genre?.forEach { genre ->
                     val trimmedGenre = genre.trim()
                     if (trimmedGenre.isNotBlank()) {
                         genreMap[trimmedGenre] = (genreMap[trimmedGenre] ?: 0) + 1

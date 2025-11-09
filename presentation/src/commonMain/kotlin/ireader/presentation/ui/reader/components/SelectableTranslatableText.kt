@@ -1,12 +1,15 @@
 package ireader.presentation.ui.reader.components
 
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
@@ -17,6 +20,8 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeoutOrNull
 
 @Composable
 fun SelectableTranslatableText(
@@ -53,12 +58,18 @@ fun SelectableTranslatableText(
                     fontWeight = fontWeight,
                     onTextLayout = { textLayoutResult = it },
                     modifier = Modifier.pointerInput(Unit) {
-                        detectTapGestures(
-                            onLongPress = { offset ->
-                                // Get the text at the long-press position
+                        awaitEachGesture {
+                            val down = awaitFirstDown(requireUnconsumed = false)
+                            val longPressTimeout = withTimeoutOrNull(500L) {
+                                waitForUpOrCancellation()
+                            }
+                            
+                            if (longPressTimeout == null) {
+                                // Long press detected - consume the event
+                                down.consume()
+                                val offset = down.position
                                 textLayoutResult?.let { layout ->
                                     val position = layout.getOffsetForPosition(offset)
-                                    // Find the paragraph containing this position
                                     val paragraphText = extractParagraphAtPosition(text, position)
                                     if (paragraphText.isNotBlank()) {
                                         selectedText = paragraphText
@@ -67,7 +78,8 @@ fun SelectableTranslatableText(
                                     }
                                 }
                             }
-                        )
+                            // If it's a tap (released before timeout), do nothing - let it pass through
+                        }
                     }
                 )
             }
@@ -83,12 +95,18 @@ fun SelectableTranslatableText(
                 fontWeight = fontWeight,
                 onTextLayout = { textLayoutResult = it },
                 modifier = Modifier.pointerInput(Unit) {
-                    detectTapGestures(
-                        onLongPress = { offset ->
-                            // Get the text at the long-press position
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        val longPressTimeout = withTimeoutOrNull(500L) {
+                            waitForUpOrCancellation()
+                        }
+                        
+                        if (longPressTimeout == null) {
+                            // Long press detected - consume the event
+                            down.consume()
+                            val offset = down.position
                             textLayoutResult?.let { layout ->
                                 val position = layout.getOffsetForPosition(offset)
-                                // Find the paragraph containing this position
                                 val paragraphText = extractParagraphAtPosition(text, position)
                                 if (paragraphText.isNotBlank()) {
                                     selectedText = paragraphText
@@ -97,7 +115,8 @@ fun SelectableTranslatableText(
                                 }
                             }
                         }
-                    )
+                        // If it's a tap (released before timeout), do nothing - let it pass through
+                    }
                 }
             )
         }

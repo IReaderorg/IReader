@@ -69,6 +69,14 @@ actual val DomainModule = module {
             get(),
         )
     }
+    worker {
+        ireader.domain.usecases.backup.AutoBackupWorker(
+            androidContext(),
+            get(),
+            get(),
+            get()
+        )
+    }
 
     factory<Service>() {
         TTSService()
@@ -79,6 +87,11 @@ actual val DomainModule = module {
                 get(),
                 get(),
                 get()
+        )
+    }
+    single<ireader.domain.usecases.backup.ScheduleAutomaticBackup> {
+        ireader.domain.usecases.backup.ScheduleAutomaticBackupImpl(
+                androidContext()
         )
     }
     factory <TTSStateImpl> { ireader.domain.services.tts_service.TTSStateImpl() }

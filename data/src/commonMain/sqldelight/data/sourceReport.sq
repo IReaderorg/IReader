@@ -1,0 +1,31 @@
+CREATE TABLE IF NOT EXISTS sourceReport (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    sourceId INTEGER NOT NULL,
+    packageName TEXT NOT NULL,
+    version TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending'
+);
+
+CREATE INDEX IF NOT EXISTS sourceReport_sourceId_index ON sourceReport(sourceId);
+CREATE INDEX IF NOT EXISTS sourceReport_status_index ON sourceReport(status);
+
+insert:
+INSERT INTO sourceReport(sourceId, packageName, version, reason, timestamp, status)
+VALUES (?, ?, ?, ?, ?, ?);
+
+selectAll:
+SELECT * FROM sourceReport;
+
+selectBySourceId:
+SELECT * FROM sourceReport WHERE sourceId = ?;
+
+selectPending:
+SELECT * FROM sourceReport WHERE status = 'pending';
+
+updateStatus:
+UPDATE sourceReport SET status = ? WHERE id = ?;
+
+deleteById:
+DELETE FROM sourceReport WHERE id = ?;

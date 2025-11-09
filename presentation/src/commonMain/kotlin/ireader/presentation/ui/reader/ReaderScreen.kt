@@ -37,21 +37,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import coil3.compose.LocalPlatformContext
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ReadingMode
-import ireader.presentation.ui.component.getContextWrapper
 import ireader.presentation.ui.core.ui.Colour.Transparent
 import ireader.presentation.ui.reader.components.AutoScrollSpeedControl
 import ireader.presentation.ui.reader.components.BrightnessControl
 import ireader.presentation.ui.reader.components.FindInChapterBar
 import ireader.presentation.ui.reader.components.FindInChapterState
 import ireader.presentation.ui.reader.components.GlossaryDialogWithFilePickers
-import ireader.presentation.ui.reader.components.ReportBrokenChapterDialog
 import ireader.presentation.ui.reader.components.MainBottomSettingComposable
 import ireader.presentation.ui.reader.components.PreloadIndicator
 import ireader.presentation.ui.reader.components.QuickFontSizeAdjuster
-import ireader.presentation.ui.reader.components.ReadingTimeEstimator
 import ireader.presentation.ui.reader.components.ReaderSettingsBottomSheet
+import ireader.presentation.ui.reader.components.ReadingTimeEstimator
+import ireader.presentation.ui.reader.components.ReportBrokenChapterDialog
 import ireader.presentation.ui.reader.components.TranslationBadge
 import ireader.presentation.ui.reader.components.TranslationProgressIndicator
 import ireader.presentation.ui.reader.components.TranslationToggleButton
@@ -82,7 +82,8 @@ fun ReadingScreen(
         onSliderChange: (index: Float) -> Unit,
         onReaderPlay: () -> Unit,
         onChapterShown: (chapter: Chapter) -> Unit,
-        paddingValues: PaddingValues
+        paddingValues: PaddingValues,
+        onNavigateToTranslationSettings: () -> Unit
 ) {
 
     val modalBottomSheetState = rememberModalBottomSheetState(
@@ -96,6 +97,7 @@ fun ReadingScreen(
     }
     
     val scope = rememberCoroutineScope()
+    val context = LocalPlatformContext.current
     val chapter = vm.stateChapter
     
     // Calculate reading time when chapter changes
@@ -149,7 +151,12 @@ fun ReadingScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(vm.backgroundColor.value),
+            .background(vm.backgroundColor.value)
+            .volumeKeyHandler(
+                enabled = vm.volumeKeyNavigation.value,
+                onVolumeUp = { onPrev(true) },
+                onVolumeDown = { onNext(true) }
+            ),
         contentAlignment = Alignment.Center,
     ) {
         if (vm.webViewManger.inProgress && vm.webViewIntegration.value) {
@@ -226,7 +233,8 @@ fun ReadingScreen(
                                     onPrev = { onPrev(true) },
                                     onSliderChange = onSliderChange,
                                     onSliderFinished = onSliderFinished,
-                                    onPlay = onReaderPlay
+                                    onPlay = onReaderPlay,
+                                    onAutoScrollToggle = { vm.toggleAutoScroll() }
                                 )
                             }
                         },
@@ -316,8 +324,7 @@ fun ReadingScreen(
                                 visible = vm.showBrightnessControl,
                                 brightness = vm.brightness.value,
                                 onBrightnessChange = { newBrightness ->
-                                    vm.brightness.value = newBrightness
-                                    // Platform-specific brightness saving handled in ViewModel
+                                    vm.updateBrightness( newBrightness)
                                 },
                                 onDismiss = { vm.showBrightnessControl = false },
                                 modifier = Modifier
@@ -428,6 +435,18 @@ fun ReadingScreen(
                                 error = vm.paragraphTranslationError,
                                 onDismiss = { vm.hideParagraphTranslation() },
                                 onRetry = { vm.retryParagraphTranslation() }
+                            )
+                        }
+                        
+                        // Translation API key prompt dialog
+                        if (vm.showTranslationApiKeyPrompt) {
+                            ireader.presentation.ui.reader.components.TranslationApiKeyPromptDialog(
+                                engineName = vm.getCurrentEngineName(),
+                                onDismiss = { vm.dismissTranslationApiKeyPrompt() },
+                                onGoToSettings = {
+                                    vm.navigateToTranslationSettings()
+                                    onNavigateToTranslationSettings()
+                                }
                             )
                         }
                     }

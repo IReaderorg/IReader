@@ -1,5 +1,6 @@
 package ireader.domain.data.repository
 
+import ireader.domain.models.common.Uri
 import ireader.domain.models.fonts.CustomFont
 
 /**
@@ -13,6 +14,14 @@ interface FontRepository {
      * @return Result containing the imported CustomFont or an error
      */
     suspend fun importFont(filePath: String, fontName: String): Result<CustomFont>
+    
+    /**
+     * Import a font file from a Uri
+     * @param uri The Uri pointing to the font file (.ttf or .otf)
+     * @param fontName The display name for the font
+     * @return Result containing the imported CustomFont or an error
+     */
+    suspend fun importFontFromUri(uri: Uri, fontName: String): Result<CustomFont>
     
     /**
      * Get all custom fonts (both system and user-imported)

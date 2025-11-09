@@ -33,6 +33,7 @@ fun FontPicker(
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = LocalLocalizeHelper.current
+    var fontToDelete by remember { mutableStateOf<CustomFont?>(null) }
     
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
@@ -90,10 +91,34 @@ fun FontPicker(
                     font = font,
                     isSelected = selectedFontId == font.id,
                     onClick = { onFontSelected(font.id) },
-                    onDelete = { onDeleteFont(font.id) }
+                    onDelete = { fontToDelete = font }
                 )
             }
         }
+    }
+    
+    // Confirmation dialog for font deletion
+    fontToDelete?.let { font ->
+        AlertDialog(
+            onDismissRequest = { fontToDelete = null },
+            title = { Text("Delete Font") },
+            text = { Text("Are you sure you want to delete \"${font.name}\"? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDeleteFont(font.id)
+                        fontToDelete = null
+                    }
+                ) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { fontToDelete = null }) {
+                    Text(localizeHelper?.localize(MR.strings.cancel) ?: "Cancel")
+                }
+            }
+        )
     }
 }
 

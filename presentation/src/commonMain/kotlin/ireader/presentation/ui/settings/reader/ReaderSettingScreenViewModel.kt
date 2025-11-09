@@ -41,4 +41,5 @@ class ReaderSettingScreenViewModel(
     val verticalScrolling = readerPreferences.scrollMode().asState()
     val autoPreloadNextChapter = readerPreferences.autoPreloadNextChapter().asState()
     val preloadOnlyOnWifi = readerPreferences.preloadOnlyOnWifi().asState()
+    val readingSpeedWPM = readerPreferences.readingSpeedWPM().asState()
 }

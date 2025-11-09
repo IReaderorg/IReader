@@ -15,7 +15,7 @@ val chapterMapper = {_id: Long,
                      source_order: Long,
                      date_fetch: Long,
                      date_upload: Long,
-                     content: String,
+                     content: List<Page>,
                      type: Long, ->
     Chapter(
         name = name,
@@ -29,7 +29,7 @@ val chapterMapper = {_id: Long,
         read = read,
         id = _id,
         lastPageRead = last_page_read,
-        content = chapterContentConvertor.decode(content),
+        content = content,
         sourceOrder =  source_order,
         type = type,
     )

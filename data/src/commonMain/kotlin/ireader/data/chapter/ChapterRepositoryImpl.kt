@@ -84,7 +84,7 @@ class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
                     chapter.sourceOrder,
                     chapter.dateFetch,
                     chapter.dateUpload,
-                    chapterContentConvertor.encode(chapter.content),
+                    chapter.content,
                     chapter.type,
                 )
              chapterQueries.selectLastInsertedRowId()
@@ -107,7 +107,7 @@ class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
                 chapter.sourceOrder,
                 chapter.dateFetch,
                 chapter.dateUpload,
-                chapterContentConvertor.encode(chapter.content),
+                chapter.content,
                 chapter.type
             )
             }

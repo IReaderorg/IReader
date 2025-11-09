@@ -42,30 +42,30 @@ class GetSmartCategoryBooksUseCase(
     ): List<LibraryBook> {
         val currentTime = kotlin.time.Clock.System.now().toEpochMilliseconds()
         val sevenDaysAgo = currentTime - 7.days.inWholeMilliseconds
-        val thirtyDaysAgo = currentTime - 30.days.inWholeMilliseconds
         
         return when (smartCategory) {
             is SmartCategory.CurrentlyReading -> {
-                // Books with lastRead in past 7 days and not completed
+                // Books with reading progress between 1% and 99% (1-99% progress)
                 books.filter { book ->
-                    book.lastRead > sevenDaysAgo && 
+                    book.totalChapters > 0 &&
+                    book.readCount > 0 && 
                     book.unreadCount > 0
                 }
             }
             is SmartCategory.RecentlyAdded -> {
-                // Books added in past 30 days
+                // Books added in the last 7 days
                 books.filter { book ->
-                    book.dateUpload > thirtyDaysAgo
+                    book.dateUpload > sevenDaysAgo
                 }
             }
             is SmartCategory.Completed -> {
-                // Books where all chapters are read (unreadCount == 0 and totalChapters > 0)
+                // Books with 100% reading progress (all chapters read)
                 books.filter { book ->
                     book.unreadCount == 0 && book.totalChapters > 0
                 }
             }
             is SmartCategory.Unread -> {
-                // Books with no chapters read (readCount == 0)
+                // Books with 0% reading progress (no chapters read)
                 books.filter { book ->
                     book.readCount == 0 && book.totalChapters > 0
                 }

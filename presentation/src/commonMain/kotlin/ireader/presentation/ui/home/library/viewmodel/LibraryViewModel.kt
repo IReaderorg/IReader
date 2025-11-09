@@ -1,32 +1,48 @@
 package ireader.presentation.ui.home.library.viewmodel
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.state.ToggleableState
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.entities.BookCategory
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.Category
+import ireader.domain.models.entities.Chapter
 import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
 import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.domain.usecases.category.CategoriesUseCases
+import ireader.domain.usecases.local.book_usecases.DownloadResult
+import ireader.domain.usecases.local.book_usecases.DownloadUnreadChaptersUseCase
 import ireader.domain.usecases.local.book_usecases.GetLibraryCategory
 import ireader.domain.usecases.local.book_usecases.MarkBookAsReadOrNotUseCase
 import ireader.domain.usecases.local.book_usecases.MarkResult
-import ireader.domain.usecases.local.book_usecases.DownloadUnreadChaptersUseCase
-import ireader.domain.usecases.local.book_usecases.DownloadResult
 import ireader.domain.usecases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
-import ireader.domain.models.entities.Chapter
 import ireader.domain.usecases.services.ServiceUseCases
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -43,7 +59,8 @@ class LibraryViewModel(
         private val libraryPreferences: LibraryPreferences,
         val markBookAsReadOrNotUseCase: MarkBookAsReadOrNotUseCase,
         val getCategory: CategoriesUseCases,
-        private val downloadUnreadChaptersUseCase: DownloadUnreadChaptersUseCase
+        private val downloadUnreadChaptersUseCase: DownloadUnreadChaptersUseCase,
+        private val archiveBookUseCase: ireader.domain.usecases.local.book_usecases.ArchiveBookUseCase
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), LibraryState by state {
 
     var lastUsedCategory = libraryPreferences.lastUsedCategory().asState()
@@ -96,7 +113,7 @@ class LibraryViewModel(
         ) { showAll, showEmpty ->
             Pair(showAll, showEmpty)
         }.flatMapLatest { (showAll, showEmpty) ->
-            getCategory.subscribe(showAll, showEmpty).onEach { categories ->
+            getCategory.subscribe(showAll, showEmpty,scope).onEach { categories ->
                 val lastCategoryId = lastUsedCategory.value
 
                 val index =
@@ -306,6 +323,19 @@ fun unselectAll() {
     state.selectedBooks.clear()
 }
 
+/**
+ * Toggle selection for a specific book
+ * If the book is selected, it will be deselected
+ * If the book is not selected, it will be selected
+ */
+fun toggleSelection(bookId: Long) {
+    if (bookId in state.selectedBooks) {
+        state.selectedBooks.remove(bookId)
+    } else {
+        state.selectedBooks.add(bookId)
+    }
+}
+
 fun selectAllInCurrentCategory() {
     val mangaInCurrentCategory = loadedManga[selectedCategory?.id] ?: return
     val currentSelected = selectedBooks.toList()
@@ -376,5 +406,116 @@ fun getColumnsForOrientation(isLandscape: Boolean, scope: CoroutineScope): State
     } else {
         libraryPreferences.columnsInPortrait()
     }.stateIn(scope)
+}
+
+/**
+ * Show the batch operation dialog
+ */
+fun showBatchOperationDialog() {
+    state.showBatchOperationDialog = true
+}
+
+/**
+ * Hide the batch operation dialog
+ */
+fun hideBatchOperationDialog() {
+    state.showBatchOperationDialog = false
+}
+
+/**
+ * Perform a batch operation on selected books
+ */
+fun performBatchOperation(operation: ireader.presentation.ui.home.library.components.BatchOperation) {
+    scope.launch {
+        state.batchOperationInProgress = true
+        state.batchOperationMessage = "Processing..."
+        
+        try {
+            when (operation) {
+                ireader.presentation.ui.home.library.components.BatchOperation.MARK_AS_READ -> {
+                    val result = markAsReadWithUndo()
+                    when (result) {
+                        is MarkResult.Success -> {
+                            state.batchOperationMessage = "Marked ${result.totalChapters} chapter(s) in ${result.totalBooks} book(s) as read"
+                            state.lastUndoState = UndoState(
+                                previousChapterStates = result.previousStates,
+                                operationType = UndoOperationType.MARK_AS_READ,
+                                timestamp = System.currentTimeMillis()
+                            )
+                        }
+                        is MarkResult.Failure -> {
+                            state.batchOperationMessage = "Error: ${result.message}"
+                        }
+                    }
+                }
+                
+                ireader.presentation.ui.home.library.components.BatchOperation.MARK_AS_UNREAD -> {
+                    val result = markAsUnreadWithUndo()
+                    when (result) {
+                        is MarkResult.Success -> {
+                            state.batchOperationMessage = "Marked ${result.totalChapters} chapter(s) in ${result.totalBooks} book(s) as unread"
+                            state.lastUndoState = UndoState(
+                                previousChapterStates = result.previousStates,
+                                operationType = UndoOperationType.MARK_AS_UNREAD,
+                                timestamp = System.currentTimeMillis()
+                            )
+                        }
+                        is MarkResult.Failure -> {
+                            state.batchOperationMessage = "Error: ${result.message}"
+                        }
+                    }
+                }
+                
+                ireader.presentation.ui.home.library.components.BatchOperation.DOWNLOAD -> {
+                    downloadChapters()
+                    state.batchOperationMessage = "Started downloading ${selectedBooks.size} book(s)"
+                }
+                
+                ireader.presentation.ui.home.library.components.BatchOperation.DOWNLOAD_UNREAD -> {
+                    val result = downloadUnreadChapters()
+                    when (result) {
+                        is DownloadResult.Success -> {
+                            state.batchOperationMessage = "Started downloading ${result.totalChapters} unread chapter(s) from ${result.totalBooks} book(s)"
+                        }
+                        is DownloadResult.NoUnreadChapters -> {
+                            state.batchOperationMessage = "No unread chapters to download"
+                        }
+                        is DownloadResult.Failure -> {
+                            state.batchOperationMessage = "Error: ${result.message}"
+                        }
+                    }
+                }
+                
+                ireader.presentation.ui.home.library.components.BatchOperation.DELETE -> {
+                    // Delete operation - this should trigger the existing delete flow
+                    state.batchOperationMessage = "Deleted ${selectedBooks.size} book(s)"
+                    // Note: Actual deletion is handled by the existing onDelete callback
+                }
+                
+                ireader.presentation.ui.home.library.components.BatchOperation.CHANGE_CATEGORY -> {
+                    // Change category - this should trigger the existing category dialog
+                    state.batchOperationMessage = null // No message, dialog will handle it
+                    // Note: Category change is handled by the existing onClickChangeCategory callback
+                }
+                
+                ireader.presentation.ui.home.library.components.BatchOperation.ARCHIVE -> {
+                    val result = archiveBookUseCase.archiveBooks(selectedBooks.toList())
+                    result.fold(
+                        onSuccess = {
+                            state.batchOperationMessage = "Archived ${selectedBooks.size} book(s)"
+                            selectedBooks.clear()
+                        },
+                        onFailure = { e ->
+                            state.batchOperationMessage = "Error archiving books: ${e.message}"
+                        }
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            state.batchOperationMessage = "Error: ${e.message}"
+        } finally {
+            state.batchOperationInProgress = false
+        }
+    }
 }
 }

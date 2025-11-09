@@ -50,7 +50,7 @@ fun ReaderSettingsBottomSheet(
         initialPage = 0,
         initialPageOffsetFraction = 0f
     ) {
-        3
+        4 // Changed from 3 to 4 to include Fonts tab
     }
     val scope = rememberCoroutineScope()
 
@@ -105,6 +105,11 @@ fun ReaderSettingsBottomSheet(
                     selected = pagerState.currentPage == 2,
                     onClick = { scope.launch { pagerState.animateScrollToPage(2) } }
                 )
+                Tab(
+                    text = { MidSizeTextComposable(text = "Fonts") },
+                    selected = pagerState.currentPage == 3,
+                    onClick = { scope.launch { pagerState.animateScrollToPage(3) } }
+                )
             }
 
             // Content
@@ -116,6 +121,7 @@ fun ReaderSettingsBottomSheet(
                     0 -> ReaderScreenTab(vm, onTextAlign)
                     1 -> GeneralScreenTab(vm)
                     2 -> ColorScreenTab(vm, onChangeBrightness, onBackgroundChange)
+                    3 -> FontPickerTab(vm)
                 }
             }
         }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -262,6 +263,7 @@ fun AboutSettingScreen(
             PreferenceRow(
                 title = localize(MR.strings.whats_new),
                 subtitle = "View version history and new features",
+                icon = Icons.Outlined.History,
                 onClick = onNavigateToChangelog
             )
         }

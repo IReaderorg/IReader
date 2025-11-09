@@ -10,7 +10,7 @@ val translatedChapterMapper = { _id: Long,
                                  source_language: String,
                                  target_language: String,
                                  translator_engine_id: Long,
-                                 translated_content: String,
+                                 translated_content: List<Page>,
                                  created_at: Long,
                                  updated_at: Long ->
     TranslatedChapter(
@@ -20,7 +20,7 @@ val translatedChapterMapper = { _id: Long,
         sourceLanguage = source_language,
         targetLanguage = target_language,
         translatorEngineId = translator_engine_id,
-        translatedContent = chapterContentConvertor.decode(translated_content),
+        translatedContent = translated_content,
         createdAt = created_at,
         updatedAt = updated_at
     )

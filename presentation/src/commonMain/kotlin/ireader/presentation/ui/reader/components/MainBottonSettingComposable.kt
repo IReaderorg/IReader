@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,6 +36,7 @@ fun MainBottomSettingComposable(
         onPlay: () -> Unit,
         onSliderFinished: () -> Unit,
         onSliderChange: (index: Float) -> Unit,
+        onAutoScrollToggle: (() -> Unit)? = null,
 ) {
     ChaptersSliderComposable(
         onNext = {
@@ -71,6 +73,15 @@ fun MainBottomSettingComposable(
             contentDescription = localize(MR.strings.play),
             onClick = { onPlay() }
         )
+        
+        // Auto-scroll toggle button
+        if (onAutoScrollToggle != null) {
+            AppIconButton(
+                imageVector = Icons.Default.PlayArrow,
+                contentDescription = "Auto Scroll",
+                onClick = { onAutoScrollToggle() }
+            )
+        }
 
         AppIconButton(
             imageVector = Icons.Default.Settings,

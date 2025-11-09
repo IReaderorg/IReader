@@ -17,10 +17,10 @@ import ireader.domain.di.DomainServices
 import ireader.domain.di.UseCasesInject
 import ireader.domain.di.localModule
 import ireader.domain.di.preferencesInjectModule
-import ireader.domain.image.CoverCache
 import ireader.presentation.core.di.PresentationModules
 import ireader.presentation.core.di.presentationPlatformModule
 import ireader.presentation.imageloader.CoilLoaderFactory
+import kotlinx.coroutines.launch
 import org.ireader.app.di.AppModule
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
@@ -28,9 +28,7 @@ import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.core.KoinApplication
 import org.koin.core.component.KoinComponent
-import org.koin.core.context.KoinContext
 import org.koin.core.context.startKoin
-import org.koin.dsl.module
 
 class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent {
     override fun onCreate() {
@@ -63,6 +61,18 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
             databaseHandler.initialize()
         } catch (e: Exception) {
             println("Failed to initialize database: ${e.message}")
+            e.printStackTrace()
+        }
+        
+        // Initialize system fonts
+        try {
+            val systemFontsInitializer: ireader.domain.usecases.fonts.SystemFontsInitializer by inject()
+            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                systemFontsInitializer.initializeSystemFonts()
+                println("System fonts initialized successfully")
+            }
+        } catch (e: Exception) {
+            println("Failed to initialize system fonts: ${e.message}")
             e.printStackTrace()
         }
     }

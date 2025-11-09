@@ -1,34 +1,30 @@
 package ireader.domain.usecases.backup
 
+import android.content.Context
+import android.util.Log
+import androidx.work.BackoffPolicy
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
 import ireader.domain.models.prefs.PreferenceValues
+import java.util.concurrent.TimeUnit
 
 /**
- * Android implementation of automatic backup scheduling
- * 
- * Note: This implementation is ready for WorkManager integration.
- * To enable WorkManager scheduling:
- * 
- * 1. Add WorkManager dependency to build.gradle.kts:
- *    implementation("androidx.work:work-runtime-ktx:2.8.1")
- * 
- * 2. Uncomment the WorkManager code below
- * 
- * 3. Create AutoBackupWorker class (see AutoBackupWorker.kt for template)
- * 
- * 4. Inject Android Context via constructor
+ * Android implementation of automatic backup scheduling using WorkManager
  */
-actual class ScheduleAutomaticBackupImpl actual constructor() : ScheduleAutomaticBackup {
-    
-    // Uncomment when WorkManager is added:
-    // private val context: Context
+class ScheduleAutomaticBackupImpl(
+    private val context: Context
+) : ScheduleAutomaticBackup {
     
     override fun schedule(frequency: PreferenceValues.AutomaticBackup) {
         if (frequency == PreferenceValues.AutomaticBackup.Off) {
             cancel()
             return
         }
-        
-        /* Uncomment when WorkManager dependency is added:
         
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
@@ -66,29 +62,16 @@ actual class ScheduleAutomaticBackupImpl actual constructor() : ScheduleAutomati
             )
         
         Log.i("ScheduleAutomaticBackup", "Scheduled automatic backup: $frequency")
-        */
-        
-        // Placeholder until WorkManager is integrated
-        println("Automatic backup scheduled: $frequency")
-        println("Note: WorkManager integration required for actual scheduling")
     }
     
     override fun cancel() {
-        /* Uncomment when WorkManager dependency is added:
-        
         WorkManager.getInstance(context)
             .cancelUniqueWork("automatic_backup")
         
         Log.i("ScheduleAutomaticBackup", "Cancelled automatic backup")
-        */
-        
-        // Placeholder until WorkManager is integrated
-        println("Automatic backup cancelled")
     }
     
     override fun isScheduled(): Boolean {
-        /* Uncomment when WorkManager dependency is added:
-        
         return try {
             val workInfos = WorkManager.getInstance(context)
                 .getWorkInfosForUniqueWork("automatic_backup")
@@ -101,9 +84,5 @@ actual class ScheduleAutomaticBackupImpl actual constructor() : ScheduleAutomati
             Log.e("ScheduleAutomaticBackup", "Error checking schedule status", e)
             false
         }
-        */
-        
-        // Placeholder until WorkManager is integrated
-        return false
     }
 }

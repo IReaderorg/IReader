@@ -26,6 +26,7 @@ import ireader.presentation.ui.settings.MainSettingScreenViewModel
 import ireader.presentation.ui.settings.advance.AdvanceSettingViewModel
 import ireader.presentation.ui.settings.appearance.AppearanceViewModel
 import ireader.presentation.ui.settings.backups.BackupScreenViewModel
+import ireader.presentation.ui.settings.backups.CloudBackupViewModel
 import ireader.presentation.ui.settings.category.CategoryScreenViewModel
 import ireader.presentation.ui.settings.downloader.DownloadStateImpl
 import ireader.presentation.ui.settings.downloader.DownloaderViewModel
@@ -46,7 +47,8 @@ val PresentationModules = module {
     single<LibraryStateImpl> { LibraryStateImpl() }
     single<CatalogsStateImpl> { CatalogsStateImpl() }
     single<UpdateStateImpl> { UpdateStateImpl() }
-    factory   { BackupScreenViewModel(get(),get(),get(),get(),get(),get(),get()) }
+    factory   { BackupScreenViewModel(get(),get(),get(),get(),get(),get(),get(),get()) }
+    factory   { CloudBackupViewModel(get(), get()) }
     factory <ExploreStateImpl> { ExploreStateImpl() }
     factory <GlobalSearchStateImpl> { GlobalSearchStateImpl() }
     factory   { AdvanceSettingViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
@@ -58,7 +60,7 @@ val PresentationModules = module {
 
     factory<ExploreViewModel> { ExploreViewModel(get(), get(), get(), get(),get(), get(), get(),get(),get(),get()) }
     factory  { HistoryViewModel(get(), get(), get()) }
-    factory  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory<GlobalSearchViewModel> { GlobalSearchViewModel(get(), get(), get(), get(), get(), get()) }
 
@@ -71,7 +73,7 @@ val PresentationModules = module {
     factory  { CategoryScreenViewModel(get(), get(), get(),get(),get()) }
     factory  { DownloaderViewModel(get(), get(), get(), get()) }
     factory  { FontScreenViewModel(get(), get(), get(), get(),get()) }
-    factory  { GeneralSettingScreenViewModel(get(), get(), get(), get()) }
+    factory  { GeneralSettingScreenViewModel(get(), get(), get(), get(), get()) }
     factory  { TranslationSettingsViewModel(get(), get()) }
     factory  { ReaderSettingScreenViewModel(get(), get(), get()) }
     factory  { SourceRepositoryViewModel(get(), get()) }
@@ -92,8 +94,12 @@ val PresentationModules = module {
         get(),get(),get(),get(),get(),get(),get(),
         // Statistics use case
         get(),
+        // Report use case
+        get(),
+        // Font management use case
+        get(),
         // Params and scope
-        get(),get()
+        get(),get(),get()
     ) }
 
 
