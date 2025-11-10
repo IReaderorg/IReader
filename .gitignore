@@ -45,3 +45,19 @@ render.experimental.xml
 # Android Profiling
 *.hprof
 /.kotlin
+# Nati
+ve libraries (should be downloaded/built by developers)
+native/libs/
+native/piper/
+*.dll
+*.so
+*.dylib
+
+# Downloaded voice models
+voice_models/
+*.onnx
+*.onnx.json
+
+# Build artifacts
+native/build/
+native/cmake-build-*/
