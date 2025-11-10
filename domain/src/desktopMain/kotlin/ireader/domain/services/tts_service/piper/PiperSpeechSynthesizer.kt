@@ -188,8 +188,6 @@ class PiperSpeechSynthesizer : SpeechSynthesizer {
                 return@withContext emptyList()
             }
             
-            Log.debug { "Calculating word boundaries for text: ${text.take(50)}..." }
-            
             // Split text into words using whitespace and punctuation
             val wordPattern = Regex("\\b\\w+\\b")
             val matches = wordPattern.findAll(text)
@@ -232,7 +230,6 @@ class PiperSpeechSynthesizer : SpeechSynthesizer {
     
     override fun setSpeechRate(rate: Float) {
         subprocessSynthesizer.setSpeechRate(rate)
-        Log.debug { "Speech rate set to: $rate" }
     }
     
     override fun shutdown() {

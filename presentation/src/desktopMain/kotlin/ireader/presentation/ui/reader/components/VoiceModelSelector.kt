@@ -63,7 +63,9 @@ fun VoiceModelSelector(
                 )
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 400.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(models) { model ->

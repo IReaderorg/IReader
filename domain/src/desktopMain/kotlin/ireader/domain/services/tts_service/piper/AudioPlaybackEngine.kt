@@ -28,7 +28,6 @@ class AudioPlaybackEngine : AudioPlayback {
     }
     
     init {
-        Log.info { "AudioPlaybackEngine initialized with ${platformConfig.getPlatformName()}" }
     }
     
     /**
@@ -43,8 +42,6 @@ class AudioPlaybackEngine : AudioPlayback {
                     return@withContext
                 }
                 
-                Log.debug { "Playing audio: ${audioData.samples.size} bytes, ${audioData.sampleRate}Hz, ${audioData.channels} channels" }
-                
                 initializeAudioLine(audioData)
                 
                 val line = sourceDataLine
@@ -54,13 +51,8 @@ class AudioPlaybackEngine : AudioPlayback {
                 }
                 
                 line.start()
-                Log.debug { "Audio line started, writing ${audioData.samples.size} bytes" }
-                
-                val bytesWritten = line.write(audioData.samples, 0, audioData.samples.size)
-                Log.debug { "Wrote $bytesWritten bytes to audio line" }
-                
+                line.write(audioData.samples, 0, audioData.samples.size)
                 line.drain()
-                Log.debug { "Audio line drained, playback complete" }
                 
                 // Update position
                 updatePosition(audioData)
@@ -105,7 +97,6 @@ class AudioPlaybackEngine : AudioPlayback {
                 // Drain remaining audio
                 sourceDataLine?.drain()
             } catch (e: CancellationException) {
-                Log.debug { "Audio stream playback cancelled" }
                 throw e
             } catch (e: LineUnavailableException) {
                 Log.error { "Audio line unavailable during streaming: ${e.message}" }
@@ -125,7 +116,6 @@ class AudioPlaybackEngine : AudioPlayback {
             isPaused = true
         }
         sourceDataLine?.stop()
-        Log.debug { "Audio playback paused" }
     }
     
     /**
@@ -136,7 +126,6 @@ class AudioPlaybackEngine : AudioPlayback {
             isPaused = false
         }
         sourceDataLine?.start()
-        Log.debug { "Audio playback resumed" }
     }
     
     /**
@@ -153,8 +142,6 @@ class AudioPlaybackEngine : AudioPlayback {
             currentPositionMs = 0L
             isPaused = false
         }
-        
-        Log.debug { "Audio playback stopped" }
     }
     
     /**
@@ -216,12 +203,6 @@ class AudioPlaybackEngine : AudioPlayback {
         // Use platform-specific buffer size
         val bufferSize = platformConfig.getBufferSize()
         sourceDataLine?.open(format, bufferSize)
-        
-        Log.debug { 
-            "Audio line initialized: sampleRate=${audioData.sampleRate}, " +
-            "channels=${audioData.channels}, bitDepth=$bitDepth, " +
-            "bufferSize=$bufferSize, platform=${platformConfig.getPlatformName()}"
-        }
     }
     
     /**
@@ -249,7 +230,6 @@ class AudioPlaybackEngine : AudioPlayback {
         stop()
         platformConfig.cleanup()
         scope.cancel()
-        Log.debug { "Audio playback engine shutdown" }
     }
 }
 

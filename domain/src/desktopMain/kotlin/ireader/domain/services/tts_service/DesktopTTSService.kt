@@ -79,12 +79,9 @@ class DesktopTTSService : KoinComponent {
         // Load Piper native libraries
         serviceScope.launch {
             try {
-                Log.info { "Loading Piper native libraries..." }
                 NativeLibraryLoader.loadLibraries()
-                Log.info { "Piper native libraries loaded successfully" }
             } catch (e: Exception) {
                 Log.error { "Failed to load Piper native libraries: ${e.message}" }
-                Log.error { "Detailed platform info:\n${NativeLibraryLoader.getPlatformInfo()}" }
                 enableSimulationMode("Failed to load native libraries: ${e.message}")
             }
             
@@ -113,7 +110,6 @@ class DesktopTTSService : KoinComponent {
                 state.selectedVoiceModel = state.availableVoiceModels.find { it.id == selectedModelId }
             }
             
-            Log.info { "Loaded ${allModels.size} available models, ${downloadedModelIds.size} downloaded" }
         } catch (e: Exception) {
             Log.error { "Failed to load available models: ${e.message}" }
         }
@@ -125,25 +121,19 @@ class DesktopTTSService : KoinComponent {
             if (selectedModelId.isNotEmpty()) {
                 val paths = modelManager.getModelPaths(selectedModelId)
                 if (paths != null) {
-                    Log.info { "Loading Piper voice model: $selectedModelId" }
                     val result = synthesizer.initialize(paths.modelPath, paths.configPath)
                     
                     result.onSuccess {
-                        Log.info { "Piper voice model loaded successfully" }
                         isSimulationMode = false
-                        
-                        // Apply saved TTS settings (rate, pitch, volume)
                         applySavedTTSSettings()
                     }.onFailure { error ->
                         Log.error { "Failed to load Piper voice model: ${error.message}" }
                         enableSimulationMode("Failed to initialize Piper TTS: ${error.message}")
                     }
                 } else {
-                    Log.warn { "Selected voice model not found: $selectedModelId" }
                     enableSimulationMode("Voice model not found. Please download a voice model.")
                 }
             } else {
-                Log.info { "No voice model selected, using simulation mode" }
                 enableSimulationMode("No voice model selected. Using simulation mode.")
             }
         } catch (e: Exception) {
@@ -158,11 +148,9 @@ class DesktopTTSService : KoinComponent {
             val speechRate = state.speechSpeed
             if (speechRate > 0 && speechRate in 0.5f..2.0f) {
                 try {
-                    // Use synthesizer's setSpeechRate method (works with subprocess)
                     synthesizer.setSpeechRate(speechRate)
-                    Log.debug { "Applied speech rate: $speechRate" }
                 } catch (e: Exception) {
-                    Log.warn { "Failed to apply speech rate: ${e.message}" }
+                    Log.error { "Failed to apply speech rate: ${e.message}" }
                 }
             }
             
@@ -180,14 +168,6 @@ class DesktopTTSService : KoinComponent {
     
     private fun enableSimulationMode(reason: String? = null) {
         isSimulationMode = true
-        
-        if (reason != null) {
-            Log.warn { "TTS fallback to simulation mode: $reason" }
-            // Notify user through state (UI can display this)
-            // For now, just log it - UI notification can be added later
-        } else {
-            Log.info { "TTS running in simulation mode" }
-        }
     }
     
     private fun startWordBoundaryTracking(text: String) {
@@ -200,11 +180,11 @@ class DesktopTTSService : KoinComponent {
                 val boundaries = synthesizer.getWordBoundaries(text)
                 
                 if (boundaries.isEmpty()) {
-                    Log.debug { "No word boundaries calculated for text" }
+                    println("DEBUG: No word boundaries calculated")
                     return@launch
                 }
                 
-                Log.debug { "Starting word boundary tracking for ${boundaries.size} words" }
+                println("DEBUG: Starting word boundary tracking for ${boundaries.size} words")
                 
                 // Track the start time for synchronization
                 val startTime = System.currentTimeMillis()
@@ -226,14 +206,13 @@ class DesktopTTSService : KoinComponent {
                     
                     // Emit word boundary event for UI highlighting
                     state.currentWordBoundary = boundary
-                    Log.debug { "Highlighting word: ${boundary.word} at offset ${boundary.startOffset}" }
+                    println("DEBUG: Set word boundary - word: '${boundary.word}', offset: ${boundary.startOffset}-${boundary.endOffset}")
                 }
                 
                 // Clear word boundary when done
                 state.currentWordBoundary = null
                 
             } catch (e: CancellationException) {
-                Log.debug { "Word boundary tracking cancelled" }
                 state.currentWordBoundary = null
             } catch (e: Exception) {
                 Log.error { "Error during word boundary tracking: ${e.message}" }
@@ -273,10 +252,6 @@ class DesktopTTSService : KoinComponent {
             readerPreferences.speechPitch().changes().collect {
                 state.pitch = it
                 // Apply pitch change if not in simulation mode
-                if (!isSimulationMode) {
-                    // Note: Piper may not support runtime pitch changes
-                    Log.debug { "Pitch changed to: $it" }
-                }
             }
         }
         serviceScope.launch {
@@ -286,7 +261,6 @@ class DesktopTTSService : KoinComponent {
                 if (!isSimulationMode) {
                     try {
                         synthesizer.setSpeechRate(it)
-                        Log.debug { "Speech rate changed to: $it" }
                     } catch (e: Exception) {
                         Log.error { "Failed to apply speech rate: ${e.message}" }
                     }
@@ -308,8 +282,6 @@ class DesktopTTSService : KoinComponent {
         serviceScope.launch {
             appPrefs.selectedPiperModel().changes().collect { modelId ->
                 if (modelId.isNotEmpty()) {
-                    Log.info { "Piper model selection changed to: $modelId" }
-                    // Reload the voice model when selection changes
                     loadSelectedVoiceModel()
                 }
             }
@@ -330,7 +302,6 @@ class DesktopTTSService : KoinComponent {
             
             // Load chapter content if empty
             if (chapter.isEmpty()) {
-                Log.info { "Chapter is empty, loading content from source..." }
                 loadChapter(chapterId)
             } else {
                 state.ttsChapter = chapter
@@ -374,16 +345,8 @@ class DesktopTTSService : KoinComponent {
 
     @OptIn(ExperimentalTime::class)
     private suspend fun playReading() {
-        Log.info { "playReading() called" }
-        Log.info { "Current chapter: ${state.ttsChapter?.name}" }
-        Log.info { "Current book: ${state.ttsBook?.title}" }
-        Log.info { "Simulation mode: $isSimulationMode" }
-        Log.info { "Selected voice model: ${state.selectedVoiceModel?.name}" }
-        
         state.isPlaying = true
         state.startTime = kotlin.time.Clock.System.now()
-        
-        Log.info { "Calling readText()" }
         readText()
     }
 
@@ -401,8 +364,6 @@ class DesktopTTSService : KoinComponent {
         
         // Record feature usage
         usageAnalytics.recordFeatureUsage("pause_reading")
-        
-        Log.debug { "Reading paused" }
     }
 
     private fun stopReading() {
@@ -420,8 +381,6 @@ class DesktopTTSService : KoinComponent {
         // Reset state
         state.currentReadingParagraph = 0
         state.currentWordBoundary = null
-        
-        Log.debug { "Reading stopped" }
     }
 
     private suspend fun skipToNextChapter() {
@@ -454,8 +413,6 @@ class DesktopTTSService : KoinComponent {
         
         // Record feature usage
         usageAnalytics.recordFeatureUsage("skip_next_chapter")
-        
-        Log.debug { "Skipped to next chapter" }
     }
 
     private suspend fun skipToPreviousChapter() {
@@ -488,8 +445,6 @@ class DesktopTTSService : KoinComponent {
         
         // Record feature usage
         usageAnalytics.recordFeatureUsage("skip_previous_chapter")
-        
-        Log.debug { "Skipped to previous chapter" }
     }
 
     private fun nextParagraph() {
@@ -547,20 +502,11 @@ class DesktopTTSService : KoinComponent {
     private suspend fun readText() {
         val content = state.ttsContent?.value
         
-        if (content == null) {
-            Log.error { "TTS content is null, cannot read text" }
+        if (content == null || content.isEmpty()) {
             return
         }
-        
-        if (content.isEmpty()) {
-            Log.error { "TTS content is empty, cannot read text" }
-            return
-        }
-        
-        Log.info { "TTS content has ${content.size} paragraphs, current: ${state.currentReadingParagraph}" }
         
         if (state.currentReadingParagraph >= content.size) {
-            Log.info { "Reached end of chapter, handling end of chapter" }
             handleEndOfChapter()
             return
         }
@@ -568,42 +514,29 @@ class DesktopTTSService : KoinComponent {
         val text = content[state.currentReadingParagraph]
         
         if (text.isBlank()) {
-            Log.warn { "Paragraph ${state.currentReadingParagraph} is blank, skipping to next" }
             advanceToNextParagraph()
             return
         }
         
         state.utteranceId = state.currentReadingParagraph.toString()
-        
-        Log.info { "Starting speech for paragraph ${state.currentReadingParagraph}, simulation mode: $isSimulationMode" }
 
         speechJob = serviceScope.launch {
             try {
                 if (isSimulationMode) {
-                    Log.info { "Using simulation mode for TTS" }
-                    // Simulation mode - calculate reading time
                     readTextSimulation(text)
                 } else {
-                    Log.info { "Using Piper TTS mode" }
-                    // Piper TTS mode - generate and play audio
                     readTextWithPiper(text)
                 }
             } catch (e: CancellationException) {
-                Log.debug { "Speech cancelled" }
                 audioEngine.stop()
             } catch (e: Exception) {
                 Log.error { "Error during speech: ${e.message}" }
-                e.printStackTrace()
-                // Skip to next paragraph on error
                 advanceToNextParagraph()
             }
         }
     }
     
     private suspend fun readTextWithPiper(text: String) {
-        Log.info { "Reading paragraph ${state.currentReadingParagraph} with Piper: ${text.take(50)}..." }
-        Log.info { "Selected voice model: ${state.selectedVoiceModel?.name ?: "None"}" }
-        
         // Check if synthesizer is initialized
         if (!synthesizer.isInitialized()) {
             Log.error { "Synthesizer is not initialized! Falling back to simulation mode." }
@@ -615,12 +548,8 @@ class DesktopTTSService : KoinComponent {
         // Performance monitoring - start timing
         val startTime = System.currentTimeMillis()
         
-        Log.info { "Calling synthesizer.synthesize() for text length: ${text.length}" }
-        
         // Generate audio using Piper
         val audioResult = synthesizer.synthesize(text)
-        
-        Log.info { "Synthesizer returned result: ${if (audioResult.isSuccess) "SUCCESS" else "FAILURE"}" }
         
         // Performance monitoring - record metrics
         val synthesisTime = System.currentTimeMillis() - startTime
@@ -650,24 +579,14 @@ class DesktopTTSService : KoinComponent {
                 characterCount = text.length
             )
             
-            // Log performance metrics
-            val avgTimePerChar = if (text.isNotEmpty()) synthesisTime.toFloat() / text.length else 0f
-            Log.debug { 
-                "Synthesis completed in ${synthesisTime}ms " +
-                "(${avgTimePerChar.format(2)}ms/char, ${text.length} chars)"
-            }
-            
             // Start word boundary tracking for text highlighting
             startWordBoundaryTracking(text)
             
             // Play generated audio - this will block until playback completes
-            Log.debug { "Starting audio playback for paragraph ${state.currentReadingParagraph}" }
             try {
                 audioEngine.play(audioData)
-                Log.debug { "Audio playback completed for paragraph ${state.currentReadingParagraph}" }
             } catch (e: Exception) {
                 Log.error { "Audio playback error: ${e.message}" }
-                // Continue to next paragraph even if playback fails
             }
             
             // Check sleep time
@@ -1000,15 +919,8 @@ class DesktopTTSService : KoinComponent {
      */
     fun saveTTSSettings() {
         try {
-            // Save speech rate
             readerPreferences.speechRate().set(state.speechSpeed)
-            
-            // Save pitch
             readerPreferences.speechPitch().set(state.pitch)
-            
-            // Note: Volume would be saved here if supported
-            
-            Log.debug { "TTS settings saved - Rate: ${state.speechSpeed}, Pitch: ${state.pitch}" }
         } catch (e: Exception) {
             Log.error { "Failed to save TTS settings: ${e.message}" }
         }

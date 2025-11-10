@@ -454,14 +454,23 @@ private fun StyleText(
             fontWeight = FontWeight(vm.textWeight.value),
         )
     } else {
-        // Use word-highlighted text for TTS or normal text for regular reading
-        WordHighlightedText(
+        // Normal text rendering
+        SelectableTranslatableText(
             text = originalText,
-            paragraphIndex = index,
-            vm = vm,
             modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = vm.paragraphsIndent.value.dp)
+                .padding(horizontal = vm.paragraphsIndent.value.dp),
+            fontSize = vm.fontSize.value.sp,
+            fontFamily = vm.font?.value?.fontFamily,
+            textAlign = mapTextAlign(vm.textAlignment.value),
+            color = vm.textColor.value,
+            lineHeight = vm.lineHeight.value.sp,
+            letterSpacing = vm.betweenLetterSpaces.value.sp,
+            fontWeight = FontWeight(vm.textWeight.value),
+            selectable = vm.selectableMode.value,
+            onTranslateRequest = { selectedText ->
+                vm.showParagraphTranslation(selectedText)
+            }
         )
     }
 
@@ -644,40 +653,7 @@ private fun ReaderHorizontalScreen(
     }
 }
 
-/**
- * Composable that renders text with word highlighting for TTS playback
- * Observes currentWordBoundary from TTS state and highlights the currently spoken word
- * 
- * Note: TTS word highlighting is only available on desktop platform.
- * This common implementation always renders normal text without highlighting.
- * Desktop-specific implementation can override this behavior.
- */
-@Composable
-private fun WordHighlightedText(
-    text: String,
-    paragraphIndex: Int,
-    vm: ReaderScreenViewModel,
-    modifier: Modifier = Modifier
-) {
-    // TTS service is only available on desktop platform
-    // For now, word highlighting is disabled in common code
-    // Normal text rendering without highlighting
-    SelectableTranslatableText(
-        text = text,
-        modifier = modifier,
-        fontSize = vm.fontSize.value.sp,
-        fontFamily = vm.font?.value?.fontFamily,
-        textAlign = mapTextAlign(vm.textAlignment.value),
-        color = vm.textColor.value,
-        lineHeight = vm.lineHeight.value.sp,
-        letterSpacing = vm.betweenLetterSpaces.value.sp,
-        fontWeight = FontWeight(vm.textWeight.value),
-        selectable = vm.selectableMode.value,
-        onTranslateRequest = { selectedText ->
-            vm.showParagraphTranslation(selectedText)
-        }
-    )
-}
+
 
 /**
  * Get highlight color based on background color

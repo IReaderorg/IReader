@@ -130,9 +130,11 @@ actual class TTSScreenSpec actual constructor(
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
+                                    
+                                    // Display text with word highlighting
+                                    TTSTextWithHighlighting(
                                         text = content[ttsService.state.currentReadingParagraph],
-                                        style = MaterialTheme.typography.bodyLarge
+                                        ttsService = ttsService
                                     )
                                 }
                             }
