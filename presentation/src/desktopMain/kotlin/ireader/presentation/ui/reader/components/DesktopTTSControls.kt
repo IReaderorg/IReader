@@ -183,7 +183,9 @@ fun DesktopTTSControls(
                     // Speed slider
                     Slider(
                         value = state.speechSpeed,
-                        onValueChange = { /* Will be updated via preferences */ },
+                        onValueChange = { newSpeed ->
+                            ttsService.setSpeechRate(newSpeed)
+                        },
                         valueRange = 0.5f..2.0f,
                         steps = 14,
                         modifier = Modifier.fillMaxWidth()
@@ -206,6 +208,29 @@ fun DesktopTTSControls(
                         onCheckedChange = { /* Will be updated via preferences */ }
                     )
                 }
+            }
+            
+            // Voice model settings button
+            TextButton(
+                onClick = { showSettings = !showSettings },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = if (showSettings) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = if (showSettings) "Hide Settings" else "Show Settings"
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (showSettings) "Hide Voice Settings" else "Show Voice Settings"
+                )
+            }
+            
+            // Voice model management panel (collapsible)
+            if (showSettings) {
+                Spacer(modifier = Modifier.height(16.dp))
+                VoiceModelManagementPanel(
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }

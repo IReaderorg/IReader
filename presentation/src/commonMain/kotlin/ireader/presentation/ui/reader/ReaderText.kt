@@ -34,6 +34,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
@@ -453,23 +454,14 @@ private fun StyleText(
             fontWeight = FontWeight(vm.textWeight.value),
         )
     } else {
-        // Use SelectableTranslatableText for normal reading mode to enable paragraph translation
-        SelectableTranslatableText(
+        // Use word-highlighted text for TTS or normal text for regular reading
+        WordHighlightedText(
             text = originalText,
+            paragraphIndex = index,
+            vm = vm,
             modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = vm.paragraphsIndent.value.dp),
-            fontSize = vm.fontSize.value.sp,
-            fontFamily = vm.font?.value?.fontFamily,
-            textAlign = mapTextAlign(vm.textAlignment.value),
-            color = vm.textColor.value,
-            lineHeight = vm.lineHeight.value.sp,
-            letterSpacing = vm.betweenLetterSpaces.value.sp,
-            fontWeight = FontWeight(vm.textWeight.value),
-            selectable = vm.selectableMode.value,
-            onTranslateRequest = { selectedText ->
-                vm.showParagraphTranslation(selectedText)
-            }
+                .padding(horizontal = vm.paragraphsIndent.value.dp)
         )
     }
 
@@ -649,6 +641,66 @@ private fun ReaderHorizontalScreen(
             ) {
             }
         }
+    }
+}
+
+/**
+ * Composable that renders text with word highlighting for TTS playback
+ * Observes currentWordBoundary from TTS state and highlights the currently spoken word
+ * 
+ * Note: TTS word highlighting is only available on desktop platform.
+ * This common implementation always renders normal text without highlighting.
+ * Desktop-specific implementation can override this behavior.
+ */
+@Composable
+private fun WordHighlightedText(
+    text: String,
+    paragraphIndex: Int,
+    vm: ReaderScreenViewModel,
+    modifier: Modifier = Modifier
+) {
+    // TTS service is only available on desktop platform
+    // For now, word highlighting is disabled in common code
+    // Normal text rendering without highlighting
+    SelectableTranslatableText(
+        text = text,
+        modifier = modifier,
+        fontSize = vm.fontSize.value.sp,
+        fontFamily = vm.font?.value?.fontFamily,
+        textAlign = mapTextAlign(vm.textAlignment.value),
+        color = vm.textColor.value,
+        lineHeight = vm.lineHeight.value.sp,
+        letterSpacing = vm.betweenLetterSpaces.value.sp,
+        fontWeight = FontWeight(vm.textWeight.value),
+        selectable = vm.selectableMode.value,
+        onTranslateRequest = { selectedText ->
+            vm.showParagraphTranslation(selectedText)
+        }
+    )
+}
+
+/**
+ * Get highlight color based on background color
+ * Returns a color that is visible in both light and dark themes
+ * 
+ * Requirements: 5.2 - Highlight must be visible in light and dark themes
+ */
+private fun getHighlightColor(backgroundColor: Color): Color {
+    // Calculate relative luminance using the standard formula
+    // https://www.w3.org/TR/WCAG20/#relativeluminancedef
+    val luminance = (0.299 * backgroundColor.red + 
+                    0.587 * backgroundColor.green + 
+                    0.114 * backgroundColor.blue)
+    
+    // Return appropriate highlight color based on background luminance
+    return if (luminance > 0.5) {
+        // Light background (e.g., white, light gray, beige)
+        // Use a warm yellow/amber highlight with moderate transparency
+        Color(0xFFFFC107).copy(alpha = 0.45f) // Amber 500 with 45% opacity
+    } else {
+        // Dark background (e.g., black, dark gray, dark blue)
+        // Use a brighter yellow highlight with less transparency for better visibility
+        Color(0xFFFFEB3B).copy(alpha = 0.35f) // Yellow 500 with 35% opacity
     }
 }
 

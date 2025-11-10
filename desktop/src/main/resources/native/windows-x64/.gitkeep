@@ -1,0 +1,4 @@
+# Placeholder for Windows x64 native libraries
+# Place the following files here:
+# - piper_jni.dll
+# - onnxruntime.dll

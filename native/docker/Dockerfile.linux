@@ -1,0 +1,34 @@
+# Dockerfile.linux - Linux build environment for Piper JNI
+FROM ubuntu:22.04
+
+# Avoid interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    curl \
+    openjdk-17-jdk \
+    libasound2-dev \
+    libpulse-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set JAVA_HOME
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+ENV PATH=$JAVA_HOME/bin:$PATH
+
+# Create working directory
+WORKDIR /workspace
+
+# Copy source code
+COPY . /workspace/
+
+# Set build script as executable
+RUN chmod +x /workspace/scripts/build_linux.sh
+
+# Default command
+CMD ["/workspace/scripts/build_linux.sh", "release"]

@@ -11,6 +11,9 @@ import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.models.prefs.IReaderVoice
+import ireader.domain.services.tts_service.piper.DownloadProgress
+import ireader.domain.services.tts_service.piper.VoiceModel
+import ireader.domain.services.tts_service.piper.WordBoundary
 import kotlinx.datetime.Instant
 import kotlin.time.ExperimentalTime
 
@@ -55,4 +58,20 @@ class DesktopTTSState : TTSState {
         if (!isDrawerAsc) ttsChapters else ttsChapters.reversed() 
     }
     override var isDrawerAsc by mutableStateOf(false)
+    
+    // Piper-specific properties
+    /** Current word boundary for text highlighting during TTS playback */
+    var currentWordBoundary by mutableStateOf<WordBoundary?>(null)
+    
+    /** List of available Piper voice models */
+    var availableVoiceModels by mutableStateOf<List<VoiceModel>>(emptyList())
+    
+    /** Currently selected Piper voice model */
+    var selectedVoiceModel by mutableStateOf<VoiceModel?>(null)
+    
+    /** Indicates if a voice model is currently being downloaded */
+    var isDownloadingModel by mutableStateOf(false)
+    
+    /** Download progress for the current model download */
+    var downloadProgress by mutableStateOf<DownloadProgress?>(null)
 }

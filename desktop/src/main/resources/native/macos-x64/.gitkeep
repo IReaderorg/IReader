@@ -1,0 +1,4 @@
+# Placeholder for macOS x64 (Intel) native libraries
+# Place the following files here:
+# - libpiper_jni.dylib
+# - libonnxruntime.dylib

@@ -194,4 +194,22 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun adultSourceLockEnabled(): Preference<Boolean> {
         return preferenceStore.getBoolean("adult_source_lock_enabled", false)
     }
+    
+    // TTS Preferences
+    
+    fun selectedVoiceId(): Preference<String> {
+        return preferenceStore.getString("selected_voice_id", "en-us-amy-low")
+    }
+    
+    fun ttsEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean("tts_enabled", false)
+    }
+    
+    fun ttsSpeechRate(): Preference<Float> {
+        return preferenceStore.getFloat("tts_speech_rate", 1.0f)
+    }
+    
+    fun ttsAutoPlay(): Preference<Boolean> {
+        return preferenceStore.getBoolean("tts_auto_play", false)
+    }
 }

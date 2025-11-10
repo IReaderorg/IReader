@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" 
+           Name="IReader" 
+           Language="1033" 
+           Version="1.0.0.0" 
+           Manufacturer="IReader Team" 
+           UpgradeCode="12345678-1234-1234-1234-123456789012">
+    
+    <Package InstallerVersion="200" 
+             Compressed="yes" 
+             InstallScope="perMachine" 
+             Description="IReader - eBook Reader with TTS Support"
+             Comments="Offline text-to-speech enabled eBook reader" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Feature definition -->
+    <Feature Id="ProductFeature" Title="IReader" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentGroupRef Id="NativeLibraries" />
+    </Feature>
+
+    <!-- Directory structure -->
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="IReader">
+          <Directory Id="LIBFOLDER" Name="lib">
+            <Directory Id="NATIVEFOLDER" Name="native" />
+          </Directory>
+        </Directory>
+      </Directory>
+      
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="IReader"/>
+      </Directory>
+      
+      <Directory Id="DesktopFolder" Name="Desktop" />
+    </Directory>
+
+    <!-- Component groups -->
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="MainExecutable" Guid="*">
+        <File Id="IReaderJar" Source="$(var.SourceDir)\ireader.jar" KeyPath="yes" />
+        <File Id="IReaderExe" Source="$(var.SourceDir)\ireader.exe" KeyPath="no" />
+        
+        <!-- Start menu shortcut -->
+        <Shortcut Id="ApplicationStartMenuShortcut" 
+                  Name="IReader" 
+                  Description="IReader eBook Reader"
+                  Target="[INSTALLFOLDER]ireader.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Directory="ApplicationProgramsFolder" />
+        
+        <!-- Desktop shortcut -->
+        <Shortcut Id="ApplicationDesktopShortcut" 
+                  Name="IReader" 
+                  Description="IReader eBook Reader"
+                  Target="[INSTALLFOLDER]ireader.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Directory="DesktopFolder" />
+        
+        <RemoveFolder Id="CleanUpShortCut" Directory="ApplicationProgramsFolder" On="uninstall"/>
+        <RegistryValue Root="HKCU" 
+                      Key="Software\IReader" 
+                      Name="installed" 
+                      Type="integer" 
+                      Value="1" 
+                      KeyPath="no"/>
+      </Component>
+      
+      <Component Id="LicenseFiles" Guid="*">
+        <File Id="LICENSE" Source="$(var.SourceDir)\LICENSE" KeyPath="yes" />
+        <File Id="THIRDPARTY" Source="$(var.SourceDir)\THIRD_PARTY_LICENSES.txt" KeyPath="no" />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="NativeLibraries" Directory="NATIVEFOLDER">
+      <Component Id="PiperJNI" Guid="*">
+        <File Id="PiperJNIDLL" Source="$(var.SourceDir)\lib\native\piper_jni.dll" KeyPath="yes" />
+      </Component>
+      
+      <Component Id="ONNXRuntime" Guid="*">
+        <File Id="ONNXRuntimeDLL" Source="$(var.SourceDir)\lib\native\onnxruntime.dll" KeyPath="yes" />
+      </Component>
+      
+      <Component Id="EspeakNG" Guid="*">
+        <File Id="EspeakNGDLL" Source="$(var.SourceDir)\lib\native\espeak-ng.dll" KeyPath="yes" />
+      </Component>
+      
+      <Component Id="PiperPhonemize" Guid="*">
+        <File Id="PiperPhonemizeDLL" Source="$(var.SourceDir)\lib\native\piper_phonemize.dll" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <!-- UI customization -->
+    <UIRef Id="WixUI_InstallDir" />
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.SourceDir)\license.rtf" />
+    <WixVariable Id="WixUIBannerBmp" Value="$(var.SourceDir)\banner.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="$(var.SourceDir)\dialog.bmp" />
+
+  </Product>
+</Wix>

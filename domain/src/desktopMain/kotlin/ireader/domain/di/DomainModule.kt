@@ -24,6 +24,9 @@ import ireader.domain.usecases.services.StartLibraryUpdateServicesUseCase
 import ireader.domain.usecases.services.StartTTSServicesUseCase
 import ireader.domain.utils.NotificationManager
 import ireader.i18n.LocalizeHelper
+import ireader.domain.services.tts_service.piper.PiperSpeechSynthesizer
+import ireader.domain.services.tts_service.piper.AudioPlaybackEngine
+import ireader.domain.services.tts_service.piper.PiperModelManager
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -81,6 +84,20 @@ actual val DomainModule: Module = module {
             get(),
             get()
         )
+    }
+    
+    // Piper TTS Components
+    single<PiperSpeechSynthesizer> {
+        PiperSpeechSynthesizer()
+    }
+    
+    single<AudioPlaybackEngine> {
+        AudioPlaybackEngine()
+    }
+    
+    single<PiperModelManager> {
+        val appDataDir = File(System.getProperty("user.home"), ".ireader")
+        PiperModelManager(appDataDir)
     }
     
     single<ireader.domain.services.tts_service.DesktopTTSService> {

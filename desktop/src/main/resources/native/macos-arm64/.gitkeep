@@ -1,0 +1,4 @@
+# Placeholder for macOS ARM64 (Apple Silicon) native libraries
+# Place the following files here:
+# - libpiper_jni.dylib
+# - libonnxruntime.dylib

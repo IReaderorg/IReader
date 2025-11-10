@@ -1,0 +1,104 @@
+{
+  "models": [
+    {
+      "id": "en_US-lessac-medium",
+      "name": "English (US) - Lessac - Medium Quality",
+      "language": "en-US",
+      "quality": "MEDIUM",
+      "gender": "MALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json"
+    },
+    {
+      "id": "en_US-amy-medium",
+      "name": "English (US) - Amy - Medium Quality",
+      "language": "en-US",
+      "quality": "MEDIUM",
+      "gender": "FEMALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/amy/medium/en_US-amy-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/amy/medium/en_US-amy-medium.onnx.json"
+    },
+    {
+      "id": "en_GB-alan-medium",
+      "name": "English (GB) - Alan - Medium Quality",
+      "language": "en-GB",
+      "quality": "MEDIUM",
+      "gender": "MALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/alan/medium/en_GB-alan-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/alan/medium/en_GB-alan-medium.onnx.json"
+    },
+    {
+      "id": "es_ES-mls_10246-low",
+      "name": "Spanish (Spain) - MLS 10246 - Low Quality",
+      "language": "es-ES",
+      "quality": "LOW",
+      "gender": "MALE",
+      "sizeBytes": 18874368,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/mls_10246/low/es_ES-mls_10246-low.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/mls_10246/low/es_ES-mls_10246-low.onnx.json"
+    },
+    {
+      "id": "fr_FR-siwis-medium",
+      "name": "French (France) - Siwis - Medium Quality",
+      "language": "fr-FR",
+      "quality": "MEDIUM",
+      "gender": "FEMALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/siwis/medium/fr_FR-siwis-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/siwis/medium/fr_FR-siwis-medium.onnx.json"
+    },
+    {
+      "id": "de_DE-thorsten-medium",
+      "name": "German (Germany) - Thorsten - Medium Quality",
+      "language": "de-DE",
+      "quality": "MEDIUM",
+      "gender": "MALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx.json"
+    },
+    {
+      "id": "it_IT-riccardo-medium",
+      "name": "Italian (Italy) - Riccardo - Medium Quality",
+      "language": "it-IT",
+      "quality": "MEDIUM",
+      "gender": "MALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/riccardo/x_low/it_IT-riccardo-x_low.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/riccardo/x_low/it_IT-riccardo-x_low.onnx.json"
+    },
+    {
+      "id": "pt_BR-faber-medium",
+      "name": "Portuguese (Brazil) - Faber - Medium Quality",
+      "language": "pt-BR",
+      "quality": "MEDIUM",
+      "gender": "MALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/faber/medium/pt_BR-faber-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/faber/medium/pt_BR-faber-medium.onnx.json"
+    },
+    {
+      "id": "zh_CN-huayan-medium",
+      "name": "Chinese (Mandarin) - Huayan - Medium Quality",
+      "language": "zh-CN",
+      "quality": "MEDIUM",
+      "gender": "FEMALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/zh/zh_CN/huayan/medium/zh_CN-huayan-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/zh/zh_CN/huayan/medium/zh_CN-huayan-medium.onnx.json"
+    },
+    {
+      "id": "ja_JP-natsumivoice-medium",
+      "name": "Japanese - Natsumi - Medium Quality",
+      "language": "ja-JP",
+      "quality": "MEDIUM",
+      "gender": "FEMALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ja/ja_JP/natsumivoice/medium/ja_JP-natsumivoice-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ja/ja_JP/natsumivoice/medium/ja_JP-natsumivoice-medium.onnx.json"
+    }
+  ]
+}

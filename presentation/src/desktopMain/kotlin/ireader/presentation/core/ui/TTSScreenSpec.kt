@@ -140,10 +140,15 @@ actual class TTSScreenSpec actual constructor(
                     }
                     
                     // TTS Controls
-                    DesktopTTSControls(
-                        ttsService = ttsService,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        DesktopTTSControls(
+                            ttsService = ttsService,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
                 
                 // TTS Indicator

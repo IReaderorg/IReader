@@ -1,0 +1,6 @@
+﻿# Piper JNI Library Checksums
+# Generated: 2025-11-10 20:12:48
+
+# Platform: windows | Size: 67.5 KB
+95D1DFE33705C29A82637632A64D504E487BF48A01EEB0445DEBBAB085D59D16  piper_jni.dll
+

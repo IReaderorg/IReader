@@ -37,6 +37,10 @@ class AppPreferences(
         const val AUTO_FETCH_BOOK_ENABLED = "auto_fetch_book_enabled"
         const val AUTO_FETCH_CHAPTERS_ENABLED = "auto_fetch_chapters_enabled"
         const val AUTO_FETCH_CHAPTER_CONTENT_ENABLED = "auto_fetch_chapter_content_enabled"
+        
+        /** Piper TTS Preferences **/
+        const val SELECTED_PIPER_MODEL = "selected_piper_model"
+        const val DOWNLOADED_MODELS = "downloaded_models"
 
         enum class Orientation {
             Portrait,
@@ -154,5 +158,19 @@ class AppPreferences(
      */
     fun lastDonationMilestone(): Preference<Int> {
         return preferenceStore.getInt("last_donation_milestone", 0)
+    }
+    
+    /**
+     * Selected Piper TTS voice model ID
+     */
+    fun selectedPiperModel(): Preference<String> {
+        return preferenceStore.getString(SELECTED_PIPER_MODEL, "")
+    }
+    
+    /**
+     * List of downloaded Piper voice model IDs (comma-separated)
+     */
+    fun downloadedModels(): Preference<Set<String>> {
+        return preferenceStore.getStringSet(DOWNLOADED_MODELS, emptySet())
     }
 }

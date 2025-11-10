@@ -1,0 +1,50 @@
+{
+  "voice_id": "example-voice-id",
+  "name": "Example Voice",
+  "version": "1.0.0",
+  "license": {
+    "type": "MIT",
+    "text": "MIT License\n\nCopyright (c) [year] [copyright holder]\n\nPermission is hereby granted, free of charge, to any person obtaining a copy...",
+    "url": "https://opensource.org/licenses/MIT",
+    "commercial_use": true,
+    "redistribution": true,
+    "modification": true,
+    "attribution_required": true
+  },
+  "training_data": {
+    "dataset": "Example Dataset",
+    "dataset_license": "CC-BY-SA-4.0",
+    "dataset_url": "https://example.com/dataset",
+    "speakers": ["Speaker Name"],
+    "language": "en-US"
+  },
+  "model_info": {
+    "architecture": "VITS",
+    "architecture_license": "MIT",
+    "trained_by": "Organization/Individual Name",
+    "training_date": "2024-01-01",
+    "model_url": "https://example.com/model"
+  },
+  "attribution": {
+    "required_text": "Voice model '[Voice Name]' by [Author], licensed under [License]",
+    "credits": [
+      "Model training: [Organization]",
+      "Dataset: [Dataset Name]",
+      "Architecture: VITS by Jaehyeon Kim et al."
+    ]
+  },
+  "usage_restrictions": {
+    "commercial_use": true,
+    "redistribution": true,
+    "modification": true,
+    "attribution_required": true,
+    "share_alike": false,
+    "additional_terms": []
+  },
+  "verification": {
+    "checksum": "sha256:...",
+    "verified_date": "2025-11-10",
+    "verified_by": "IReader Team",
+    "compliance_notes": "Verified that all licenses permit commercial use and redistribution"
+  }
+}

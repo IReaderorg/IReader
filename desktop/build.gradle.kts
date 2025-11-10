@@ -99,6 +99,11 @@ compose.desktop {
         nativeDistributions {
             // Package a JRE with the application
             includeAllModules = true
+            
+            // Include native libraries in the distribution
+            // This ensures Piper TTS native libraries are packaged with the application
+            appResourcesRootDir.set(project.layout.projectDirectory.dir("src/main/resources"))
+            
             targetFormats(
                     // Windows
                     TargetFormat.Msi,
@@ -244,4 +249,53 @@ tasks.register<JavaExec>("verifyDatabase") {
     description = "Verifies and repairs the IReader database"
     classpath = sourceSets["main"].runtimeClasspath
     mainClass.set("ireader.desktop.DatabaseVerifier")
+}
+
+// Task to verify native libraries are present
+tasks.register("verifyNativeLibraries") {
+    group = "verification"
+    description = "Verifies that Piper TTS native libraries are present in resources"
+    
+    doLast {
+        val nativeDir = project.file("src/main/resources/native")
+        val platforms = listOf("windows-x64", "macos-x64", "macos-arm64", "linux-x64")
+        val requiredLibs = mapOf(
+            "windows-x64" to listOf("piper_jni.dll", "onnxruntime.dll"),
+            "macos-x64" to listOf("libpiper_jni.dylib", "libonnxruntime.dylib"),
+            "macos-arm64" to listOf("libpiper_jni.dylib", "libonnxruntime.dylib"),
+            "linux-x64" to listOf("libpiper_jni.so", "libonnxruntime.so")
+        )
+        
+        var allPresent = true
+        platforms.forEach { platform ->
+            val platformDir = nativeDir.resolve(platform)
+            logger.lifecycle("Checking $platform:")
+            requiredLibs[platform]?.forEach { lib ->
+                val libFile = platformDir.resolve(lib)
+                if (libFile.exists()) {
+                    logger.lifecycle("  ✓ $lib (${libFile.length()} bytes)")
+                } else {
+                    logger.warn("  ✗ $lib (missing)")
+                    allPresent = false
+                }
+            }
+        }
+        
+        if (!allPresent) {
+            logger.warn("")
+            logger.warn("WARNING: Some native libraries are missing.")
+            logger.warn("Piper TTS will fall back to simulation mode if libraries are not available.")
+            logger.warn("See desktop/src/main/resources/native/README.md for instructions.")
+        } else {
+            logger.lifecycle("")
+            logger.lifecycle("✓ All native libraries are present")
+        }
+    }
+}
+
+// Run verification before packaging
+tasks.whenTaskAdded {
+    if (name.startsWith("package") || name.startsWith("createDistributable")) {
+        dependsOn("verifyNativeLibraries")
+    }
 }

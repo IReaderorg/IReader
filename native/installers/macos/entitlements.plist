@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Allow JIT compilation for JVM -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    
+    <!-- Allow unsigned executable memory for JNI -->
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+    
+    <!-- Disable library validation for JNI libraries -->
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+    
+    <!-- Network access for downloading voice models -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+    
+    <!-- File access for reading eBooks -->
+    <key>com.apple.security.files.user-selected.read-only</key>
+    <true/>
+    
+    <!-- Audio output for TTS -->
+    <key>com.apple.security.device.audio-input</key>
+    <false/>
+    
+    <!-- Hardened runtime -->
+    <key>com.apple.security.cs.hardened-runtime</key>
+    <true/>
+</dict>
+</plist>

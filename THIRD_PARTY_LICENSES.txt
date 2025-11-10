@@ -1,0 +1,315 @@
+================================================================================
+THIRD-PARTY SOFTWARE LICENSES
+IReader - eBook Reader with Text-to-Speech
+================================================================================
+
+This document contains the licenses for third-party software components used
+in IReader. All components are used in compliance with their respective licenses.
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+1. Piper TTS
+2. ONNX Runtime
+3. espeak-ng
+4. Kotlin Standard Library
+5. Jetpack Compose
+6. Ktor
+7. SQLDelight
+8. Kotlinx Serialization
+9. Kotlinx Coroutines
+10. Voice Models
+
+================================================================================
+1. PIPER TTS
+================================================================================
+
+Project: Piper - A fast, local neural text to speech system
+URL: https://github.com/rhasspy/piper
+License: MIT License
+
+Copyright (c) 2023 Michael Hansen
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+================================================================================
+2. ONNX RUNTIME
+================================================================================
+
+Project: ONNX Runtime
+URL: https://github.com/microsoft/onnxruntime
+License: MIT License
+
+Copyright (c) Microsoft Corporation
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+================================================================================
+3. ESPEAK-NG
+================================================================================
+
+Project: eSpeak NG - open source speech synthesizer
+URL: https://github.com/espeak-ng/espeak-ng
+License: GNU General Public License v3.0
+
+Copyright (C) 1995-2013 by Jonathan Duddington
+Copyright (C) 2013-2017 Reece H. Dunn
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+NOTE: espeak-ng is used as a phonemizer component in Piper TTS.
+The full GPL v3 license text is available at:
+https://www.gnu.org/licenses/gpl-3.0.txt
+
+================================================================================
+4. KOTLIN STANDARD LIBRARY
+================================================================================
+
+Project: Kotlin Programming Language
+URL: https://github.com/JetBrains/kotlin
+License: Apache License 2.0
+
+Copyright 2010-2023 JetBrains s.r.o. and Kotlin Programming Language contributors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+================================================================================
+5. JETPACK COMPOSE
+================================================================================
+
+Project: Jetpack Compose for Desktop
+URL: https://github.com/JetBrains/compose-multiplatform
+License: Apache License 2.0
+
+Copyright 2020-2023 JetBrains s.r.o. and respective authors and developers
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+================================================================================
+6. KTOR
+================================================================================
+
+Project: Ktor - asynchronous framework for creating microservices
+URL: https://github.com/ktorio/ktor
+License: Apache License 2.0
+
+Copyright 2014-2023 JetBrains s.r.o. and contributors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+================================================================================
+7. SQLDELIGHT
+================================================================================
+
+Project: SQLDelight - Generates typesafe Kotlin APIs from SQL
+URL: https://github.com/cashapp/sqldelight
+License: Apache License 2.0
+
+Copyright 2016 Square, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+================================================================================
+8. KOTLINX SERIALIZATION
+================================================================================
+
+Project: Kotlin serialization
+URL: https://github.com/Kotlin/kotlinx.serialization
+License: Apache License 2.0
+
+Copyright 2017-2023 JetBrains s.r.o. and respective authors and developers
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+================================================================================
+9. KOTLINX COROUTINES
+================================================================================
+
+Project: Kotlin Coroutines
+URL: https://github.com/Kotlin/kotlinx.coroutines
+License: Apache License 2.0
+
+Copyright 2016-2023 JetBrains s.r.o. and respective authors and developers
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+================================================================================
+10. VOICE MODELS
+================================================================================
+
+The voice models distributed with IReader are sourced from various projects
+and are subject to their respective licenses. Each voice model includes
+license information in its metadata.
+
+Common voice model sources:
+
+a) Piper Voice Models
+   URL: https://github.com/rhasspy/piper/releases
+   License: Varies by model (typically MIT or CC-BY-SA)
+   
+   Most Piper voice models are trained on datasets with permissive licenses
+   that allow commercial use and redistribution. Specific license information
+   for each voice model is available in the voice catalog.
+
+b) VITS Models
+   URL: https://github.com/jaywalnut310/vits
+   License: MIT License (for the VITS architecture)
+   
+   Individual models may have different licenses based on training data.
+
+IMPORTANT: Users should verify the license of each voice model before use
+in commercial applications. The voice catalog includes license information
+for each available voice.
+
+================================================================================
+ADDITIONAL NOTICES
+================================================================================
+
+This software uses components from the following projects:
+
+- Java Runtime Environment (JRE)
+  License: GNU General Public License v2.0 with Classpath Exception
+  URL: https://openjdk.org/legal/gplv2+ce.html
+
+- Various Android/AndroidX libraries
+  License: Apache License 2.0
+  URL: https://source.android.com/license
+
+- Material Design Icons
+  License: Apache License 2.0
+  URL: https://github.com/google/material-design-icons
+
+================================================================================
+COMPLIANCE STATEMENT
+================================================================================
+
+IReader is committed to open source compliance. We:
+
+1. Include all required license files with distributions
+2. Provide attribution for all third-party components
+3. Comply with copyleft requirements (GPL components)
+4. Make source code available as required by licenses
+5. Maintain accurate documentation of dependencies
+
+For questions about licensing or to report compliance issues:
+Email: legal@ireader.org
+GitHub: https://github.com/yourusername/ireader/issues
+
+================================================================================
+FULL LICENSE TEXTS
+================================================================================
+
+Full text of common licenses:
+
+- Apache License 2.0: https://www.apache.org/licenses/LICENSE-2.0.txt
+- MIT License: https://opensource.org/licenses/MIT
+- GPL v3: https://www.gnu.org/licenses/gpl-3.0.txt
+- GPL v2 with Classpath Exception: https://openjdk.org/legal/gplv2+ce.html
+
+================================================================================
+LAST UPDATED: November 10, 2025
+================================================================================
