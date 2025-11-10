@@ -188,6 +188,7 @@
     <string name="advance_commands">Advanced Commands</string>
     <string name="pause">Pause</string>
     <string name="resume">Resume</string>
+    <string name="continue_reading">Continue Reading</string>
     <string name="unknown">Unknown</string>
     <string name="remove">Remove</string>
     <string name="dialog_remove_chapter_history_description">This will remove the read date of this
@@ -645,4 +646,16 @@
     <string name="reading_speed">Reading Speed</string>
     <string name="reading_speed_wpm">WPM</string>
     <string name="changelog">Changelog</string>
+    <string name="archive">Archive</string>
+    <string name="unarchive">Unarchive</string>
+    <string name="archived">Archived</string>
+    <string name="show_archived">Show Archived</string>
+    <string name="show_archived_books">Show Archived Books</string>
+    <string name="end_of_life_options_title">Novel Completed</string>
+    <string name="end_of_life_options_description">What would you like to do with this completed novel?</string>
+    <string name="archive_option_title">Archive</string>
+    <string name="archive_option_description">Move to archived category, hidden from main library</string>
+    <string name="export_epub_option_title">Export as ePub</string>
+    <string name="export_epub_option_description">Download as ePub file for offline reading</string>
+    <string name="export_epub">Export ePub</string>
 </resources>

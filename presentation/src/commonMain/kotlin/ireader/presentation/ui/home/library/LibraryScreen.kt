@@ -79,6 +79,11 @@ fun LibraryScreen(
     LaunchedEffect(vm.selectionMode) {
         requestHideBottomNav(vm.selectionMode)
     }
+    
+    // Refresh last read info when screen becomes visible
+    LaunchedEffect(Unit) {
+        vm.loadLastReadInfo()
+    }
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -97,8 +102,29 @@ fun LibraryScreen(
                     goToLatestChapter = goToLatestChapter,
                     onPageChanged = onPagerPageChange,
                     getColumnsForOrientation = getColumnsForOrientation,
+                    onResumeReading = {}
                 )
             }
+            
+            // Spotify-style Resume Reading Bar at the bottom
+            ireader.presentation.ui.home.library.components.ResumeReadingCard(
+                lastRead = vm.lastReadInfo,
+                onResume = {
+                    vm.lastReadInfo?.let { info ->
+                        val bookItem = BookItem(
+                            id = info.novelId,
+                            sourceId = 0,
+                            title = info.novelTitle,
+                            cover = info.coverUrl,
+                            customCover = info.coverUrl
+                        )
+                        goToLatestChapter(bookItem)
+                    }
+                },
+                onDismiss = { vm.dismissResumeCard() },
+                isVisible = vm.isResumeCardVisible && !vm.selectionMode,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
             
             EditCategoriesDialog(
                 vm = vm,
@@ -157,6 +183,8 @@ fun LibraryScreen(
                 sorting = vm.sorting.value,
                 columnCount = vm.columnInPortrait.value,
                 displayMode = vm.layout,
+                showResumeReadingCard = vm.showResumeReadingCard.value,
+                showArchivedBooks = vm.showArchivedBooks.value,
                 onFilterToggle = { type ->
                     vm.toggleFilterImmediate(type)
                 },
@@ -171,6 +199,12 @@ fun LibraryScreen(
                 },
                 onDisplayModeChange = { mode ->
                     vm.onLayoutTypeChange(mode)
+                },
+                onResumeReadingCardToggle = { enabled ->
+                    vm.toggleResumeReadingCard(enabled)
+                },
+                onArchivedBooksToggle = { enabled ->
+                    vm.toggleShowArchivedBooks(enabled)
                 },
                 onDismiss = onHideFilterSheet
             )

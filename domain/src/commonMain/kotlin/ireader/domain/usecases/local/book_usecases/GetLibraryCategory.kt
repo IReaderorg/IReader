@@ -21,7 +21,8 @@ class GetLibraryCategory  internal constructor(
     suspend fun await(
         categoryId: Long,
         sort: LibrarySort = LibrarySort.default,
-        filters: List<LibraryFilter> = emptyList()
+        filters: List<LibraryFilter> = emptyList(),
+        includeArchived: Boolean = false
     ): List<LibraryBook> {
         // Check if this is a smart category
         val smartCategory = SmartCategory.getById(categoryId)
@@ -31,7 +32,7 @@ class GetLibraryCategory  internal constructor(
             getSmartCategoryBooksUseCase.await(smartCategory, sort).filteredWith(filters)
         } else {
             // Use regular category filtering
-            libraryRepository.findAll(sort).filter { books ->
+            libraryRepository.findAll(sort, includeArchived).filter { books ->
                 books.category.toLong() == categoryId
             }.filteredWith(filters)
         }
@@ -40,7 +41,8 @@ class GetLibraryCategory  internal constructor(
     fun subscribe(
         categoryId: Long,
         sort: LibrarySort = LibrarySort.default,
-        filters: List<LibraryFilter> = emptyList()
+        filters: List<LibraryFilter> = emptyList(),
+        includeArchived: Boolean = false
     ): Flow<List<LibraryBook>> {
         // Check if this is a smart category
         val smartCategory = SmartCategory.getById(categoryId)
@@ -50,7 +52,7 @@ class GetLibraryCategory  internal constructor(
             getSmartCategoryBooksUseCase.subscribe(smartCategory, sort).map { it.filteredWith(filters) }
         } else {
             // Use regular category filtering
-            libraryRepository.subscribe(sort).map { it.filter { books ->
+            libraryRepository.subscribe(sort, includeArchived).map { it.filter { books ->
                 books.category.toLong() == categoryId
             } }.map { it.filteredWith(filters) }
         }

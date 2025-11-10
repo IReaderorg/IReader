@@ -17,10 +17,10 @@ class LibraryRepositoryImpl(
     private val handler: DatabaseHandler,
 ) : LibraryRepository {
 
-    override suspend fun findAll(sort: LibrarySort): List<LibraryBook> {
+    override suspend fun findAll(sort: LibrarySort, includeArchived: Boolean): List<LibraryBook> {
         return handler.awaitList {
             getLibrary(sort)
-        }.sortWith(sort).let { flow ->
+        }.sortWith(sort, includeArchived).let { flow ->
             if (sort.isAscending) flow else flow.reversed()
         }
     }
@@ -50,19 +50,19 @@ class LibraryRepositoryImpl(
     }
 
 
-    override fun subscribe(sort: LibrarySort): Flow<List<LibraryBook>> {
+    override fun subscribe(sort: LibrarySort, includeArchived: Boolean): Flow<List<LibraryBook>> {
         return handler.subscribeToList {
             getLibrary(sort)
         }.map { flow ->
-            flow.sortWith(sort).distinctBy { it.id }
+            flow.sortWith(sort, includeArchived).distinctBy { it.id }
         }.let { flow ->
             if (sort.isAscending) flow else flow.map { it.reversed() }
         }
     }
 
-    private suspend fun List<LibraryBook>.sortWith(sort: LibrarySort): List<LibraryBook> {
-        // Filter out archived books by default
-        val nonArchivedBooks = this.filter { !it.isArchived }
+    private suspend fun List<LibraryBook>.sortWith(sort: LibrarySort, includeArchived: Boolean): List<LibraryBook> {
+        // Filter out archived books unless includeArchived is true
+        val nonArchivedBooks = if (includeArchived) this else this.filter { !it.isArchived }
         
         // First, separate pinned and unpinned books
         val (pinnedBooks, unpinnedBooks) = nonArchivedBooks.partition { it.isPinned }

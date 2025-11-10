@@ -53,13 +53,18 @@ fun LibraryFilterBottomSheet(
     sorting: LibrarySort,
     columnCount: Int,
     displayMode: ireader.domain.models.DisplayMode = ireader.domain.models.DisplayMode.CompactGrid,
+    showResumeReadingCard: Boolean = true,
+    showArchivedBooks: Boolean = false,
     onFilterToggle: (LibraryFilter.Type) -> Unit,
     onSortChange: (LibrarySort.Type) -> Unit,
     onSortDirectionToggle: () -> Unit,
     onColumnCountChange: (Int) -> Unit,
     onDisplayModeChange: (ireader.domain.models.DisplayMode) -> Unit = {},
+    onResumeReadingCardToggle: (Boolean) -> Unit = {},
+    onArchivedBooksToggle: (Boolean) -> Unit = {},
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -111,11 +116,85 @@ fun LibraryFilterBottomSheet(
                 columnCount = columnCount,
                 displayMode = displayMode,
                 onColumnCountChange = onColumnCountChange,
-                onDisplayModeChange = onDisplayModeChange
+                onDisplayModeChange = onDisplayModeChange,
             )
+            
+            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+            
+            // General Settings Section
+            GeneralSection(
+                showResumeReadingCard = showResumeReadingCard,
+                showArchivedBooks = showArchivedBooks,
+                onResumeReadingCardToggle = onResumeReadingCardToggle,
+                onArchivedBooksToggle = onArchivedBooksToggle
+            )
+
         }
     }
 }
+
+@Composable
+private fun GeneralSection(
+    showResumeReadingCard: Boolean,
+    showArchivedBooks: Boolean,
+    onResumeReadingCardToggle: (Boolean) -> Unit,
+    onArchivedBooksToggle: (Boolean) -> Unit
+) {
+    Text(
+        text = localize(MR.strings.general),
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.SemiBold,
+        modifier = Modifier.padding(bottom = 12.dp)
+    )
+    
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        FilterChip(
+            selected = showResumeReadingCard,
+            onClick = { onResumeReadingCardToggle(!showResumeReadingCard) },
+            label = {
+                Text(
+                    text = "Show Continue Reading Bar",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            },
+            leadingIcon = if (showResumeReadingCard) {
+                {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            } else null,
+            modifier = Modifier.fillMaxWidth()
+        )
+        
+        FilterChip(
+            selected = showArchivedBooks,
+            onClick = { onArchivedBooksToggle(!showArchivedBooks) },
+            label = {
+                Text(
+                    text = "Show Archived Books",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            },
+            leadingIcon = if (showArchivedBooks) {
+                {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            } else null,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+
 
 @Composable
 private fun FilterSection(
@@ -243,7 +322,7 @@ private fun DisplaySection(
     columnCount: Int,
     displayMode: ireader.domain.models.DisplayMode,
     onColumnCountChange: (Int) -> Unit,
-    onDisplayModeChange: (ireader.domain.models.DisplayMode) -> Unit
+    onDisplayModeChange: (ireader.domain.models.DisplayMode) -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
     

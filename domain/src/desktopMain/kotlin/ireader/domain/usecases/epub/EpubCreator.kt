@@ -1,5 +1,6 @@
 package ireader.domain.usecases.epub
 
+import androidx.compose.runtime.Composable
 import ireader.core.source.model.Text
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.common.Uri
@@ -109,9 +110,16 @@ actual class EpubCreator(
         }
         
         val paragraphs = contents.joinToString("\n") { text ->
-            val cleaned = escapeXml(text.trim())
-            if (cleaned.isNotBlank()) {
-                "    <p>$cleaned</p>"
+            // Clean HTML content to remove scripts, styles, ads, and watermarks
+            val cleanedText = if (HtmlContentCleaner.isHtml(text)) {
+                HtmlContentCleaner.extractPlainText(text)
+            } else {
+                text.trim()
+            }
+            
+            val escaped = escapeXml(cleanedText)
+            if (escaped.isNotBlank()) {
+                "    <p>$escaped</p>"
             } else {
                 ""
             }
@@ -272,13 +280,13 @@ $navPoints
     <rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
   </rootfiles>
 </container>"""
-    
-    actual fun onEpubCreateRequested(book: Book, onStart: (Any) -> Unit) {
+
+    @Composable
+    actual fun onEpubCreateRequested(book: Book, onStart: @Composable ((Any) -> Unit)) {
         // Desktop implementation - could open file chooser dialog
         val filename = sanitizeFilename(book.title) + ".epub"
         onStart(filename)
     }
-    
     private fun sanitizeFilename(name: String): String {
         return name.replace(Regex("[|\\\\?*<\":>+\\[\\]/']+"), " ")
             .replace(Regex("\\s+"), " ")

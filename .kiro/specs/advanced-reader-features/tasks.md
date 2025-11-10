@@ -8,7 +8,12 @@ This implementation plan breaks down the advanced reader features into discrete,
 
 ## Tasks
 
-- [ ] 1. Implement Auto-Chapter Repair System
+- [x] 1. Implement Auto-Chapter Repair System
+
+
+
+
+
   - Create `ChapterHealthChecker` class with detection logic for broken chapters (word count < 50, empty content, scrambled text)
   - Implement `AutoRepairChapterUseCase` to search all installed sources for working chapter replacements
   - Add `ChapterHealth` database table and repository methods for tracking broken chapters
@@ -16,8 +21,13 @@ This implementation plan breaks down the advanced reader features into discrete,
   - Create repair banner UI component that displays when broken chapter is detected
   - Add caching mechanism to avoid repeated repair attempts (24-hour cache)
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9_
+-
 
-- [ ] 2. Implement Smart Source Switching
+- [x] 2. Implement Smart Source Switching
+
+
+
+
   - Create `CheckSourceAvailabilityUseCase` to compare chapter counts across installed sources
   - Implement `SourceComparison` data model and caching repository (24-hour TTL)
   - Add background source checking when user opens novel detail page
@@ -28,7 +38,12 @@ This implementation plan breaks down the advanced reader features into discrete,
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9_
 
 
-- [ ] 4. Implement True Read-Along TTS
+- [x] 4. Implement True Read-Along TTS
+
+
+
+
+
   - Create `TTSReadAlongManager` class to handle word boundary callbacks from TTS engine
   - Implement word highlighting logic using `AnnotatedString` with background color spans
   - Build `ReadAlongText` composable that highlights current word being spoken
@@ -39,8 +54,13 @@ This implementation plan breaks down the advanced reader features into discrete,
   - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7_
 
 
+-
 
-- [ ] 6. Implement Reading Break Reminder System
+- [x] 6. Implement Reading Break Reminder System
+
+
+
+
   - Create `ReadingTimerManager` class with start, pause, resume, and reset methods
   - Add reading break interval preference to settings (30, 45, 60, 90, 120 minutes)
   - Implement timer logic that tracks continuous reading time
@@ -51,7 +71,19 @@ This implementation plan breaks down the advanced reader features into discrete,
   - Add auto-dismiss logic (15 seconds) if user doesn't respond to reminder
   - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7, 12.8_
 
-- [ ] 7. Implement Resume Last Read Feature
+- [x] 7. Implement Resume Last Read Feature
+
+
+
+
+
+
+
+
+
+
+
+
   - Create `GetLastReadNovelUseCase` that queries reading history for most recent chapter
   - Implement `LastReadInfo` data model with novel details, chapter info, and progress
   - Build `ResumeReadingCard` composable with cover image, title, chapter, and progress bar
@@ -60,8 +92,13 @@ This implementation plan breaks down the advanced reader features into discrete,
   - Add automatic update when user finishes a chapter to show next chapter
   - Handle novel switching to always show most recently read novel
   - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 13.7_
+-
+- [x] 8. Implement End of Life Management - Archive
 
-- [ ] 8. Implement End of Life Management - Archive
+- [x] 8. Implement End of Life Management - Archive
+
+
+
   - Create `ArchiveNovelUseCase` to move completed novels to archived category
   - Add "Archived" category to database and category management system
   - Implement `EndOfLifeOptionsDialog` that appears when user marks novel as completed
@@ -70,8 +107,13 @@ This implementation plan breaks down the advanced reader features into discrete,
   - Implement "Unarchive" functionality to restore novels to original category
   - Wire dialog into novel detail screen's "Mark as Completed" action
   - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6, 14.7_
+-
 
-- [ ] 9. Implement End of Life Management - ePub Export
+- [x] 9. Implement End of Life Management - ePub Export
+
+
+
+
   - Create `EpubGenerator` class to build ePub file structure (META-INF, OEBPS, mimetype)
   - Implement HTML content cleaning to remove scripts, styles, ads, and watermarks
   - Build `ExportNovelAsEpubUseCase` to fetch all chapters and generate ePub
@@ -182,6 +224,8 @@ This implementation plan breaks down the advanced reader features into discrete,
 
 
 - [ ] 20. Create Settings and Configuration UI
+
+
   - Add "Reading Break Reminder" toggle and interval selector to Reader settings
   - Implement "Enable Dynamic Theme" toggle in Appearance settings
   - Add "Support Development" menu item to main Settings screen

@@ -1,7 +1,14 @@
 package ireader.presentation.ui.book.viewmodel
 
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import ireader.core.log.Log
 import ireader.core.source.model.CommandList
 import ireader.domain.catalogs.interactor.GetLocalCatalog
@@ -19,10 +26,18 @@ import ireader.i18n.UiText
 import ireader.i18n.resources.MR
 import ireader.presentation.core.PlatformHelper
 import ireader.presentation.ui.home.explore.viewmodel.BooksState
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
-import kotlinx.datetime.Clock
-import java.util.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.util.Calendar
 import kotlin.time.ExperimentalTime
 
 
@@ -38,12 +53,17 @@ class BookDetailViewModel(
     val deleteUseCase: ireader.domain.usecases.local.DeleteUseCase,
     private val applicationScope: CoroutineScope,
     val createEpub: EpubCreator,
+    val exportNovelAsEpub: ireader.domain.usecases.epub.ExportNovelAsEpubUseCase,
     val historyUseCase: HistoryUseCase,
     val readerPreferences: ReaderPreferences,
     val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     private val param: Param,
     val booksState: BooksState,
-    val platformHelper: PlatformHelper
+    val platformHelper: PlatformHelper,
+    private val archiveBookUseCase: ireader.domain.usecases.local.book_usecases.ArchiveBookUseCase,
+    private val checkSourceAvailabilityUseCase: ireader.domain.usecases.source.CheckSourceAvailabilityUseCase,
+    private val migrateToSourceUseCase: ireader.domain.usecases.source.MigrateToSourceUseCase,
+    private val catalogStore: ireader.domain.catalogs.CatalogStore
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), DetailState by state, ChapterState by chapterState {
     data class Param(val bookId: Long?)
 
@@ -72,6 +92,10 @@ class BookDetailViewModel(
     }
 
     var launcher : () -> Any = {}
+    
+    // Source switching state
+    val sourceSwitchingState = SourceSwitchingState()
+    
     init {
         booksState.book = null
         val bookId = param.bookId
@@ -94,6 +118,7 @@ class BookDetailViewModel(
                 subscribeChapters(bookId = bookId)
                 getLastReadChapter(bookId)
                 initBook(bookId)
+                checkSourceAvailability(bookId)
             }
 
         } else {
@@ -317,6 +342,74 @@ class BookDetailViewModel(
         }
     }
 
+    var showEndOfLifeDialog by mutableStateOf(false)
+        private set
+
+    fun showEndOfLifeOptionsDialog() {
+        showEndOfLifeDialog = true
+    }
+
+    fun hideEndOfLifeOptionsDialog() {
+        showEndOfLifeDialog = false
+    }
+
+    fun archiveBook(book: Book) {
+        applicationScope.launch {
+            try {
+                archiveBookUseCase.toggleArchive(book.id, true).onSuccess {
+                    withUIContext {
+                        showSnackBar(UiText.DynamicString("${book.title} has been archived"))
+                    }
+                }.onFailure { error ->
+                    withUIContext {
+                        showSnackBar(UiText.ExceptionString(error))
+                    }
+                }
+            } catch (e: Exception) {
+                withUIContext {
+                    showSnackBar(UiText.ExceptionString(e))
+                }
+            }
+        }
+    }
+
+    fun unarchiveBook(book: Book) {
+        applicationScope.launch {
+            try {
+                archiveBookUseCase.toggleArchive(book.id, false).onSuccess {
+                    withUIContext {
+                        showSnackBar(UiText.DynamicString("${book.title} has been unarchived"))
+                    }
+                }.onFailure { error ->
+                    withUIContext {
+                        showSnackBar(UiText.ExceptionString(error))
+                    }
+                }
+            } catch (e: Exception) {
+                withUIContext {
+                    showSnackBar(UiText.ExceptionString(e))
+                }
+            }
+        }
+    }
+
+    /**
+     * Exports a novel as an ePub file with progress reporting.
+     * This is a convenience method that wraps the ExportNovelAsEpubUseCase.
+     */
+    fun exportNovelAsEpub(book: Book, uri: ireader.domain.models.common.Uri) {
+        applicationScope.launch {
+            try {
+                exportNovelAsEpub(book, uri) { progress ->
+                    showSnackBar(UiText.DynamicString(progress))
+                }
+                showSnackBar(UiText.MStringResource(MR.strings.success))
+            } catch (e: Exception) {
+                showSnackBar(UiText.ExceptionString(e))
+            }
+        }
+    }
+
 
     fun deleteChapters(chapters: List<Chapter>) {
         scope.launch(Dispatchers.IO) {
@@ -395,4 +488,86 @@ class BookDetailViewModel(
         sorting.value = newSort
         saveSortingPreference(newSort)
     }
+    // Source Switching Methods
+
+    /**
+     * Checks if better sources are available for the current book
+     */
+    fun checkSourceAvailability(bookId: Long) {
+        scope.launch {
+            try {
+                val result = checkSourceAvailabilityUseCase(bookId)
+                result.onSuccess { comparison ->
+                    if (comparison != null && comparison.betterSourceId != null) {
+                        sourceSwitchingState.sourceComparison = comparison
+                        sourceSwitchingState.betterSourceName = catalogStore.get(comparison.betterSourceId)?.name
+                        sourceSwitchingState.showBanner = true
+                    }
+                }
+            } catch (e: Exception) {
+                Log.error { "Error checking source availability" }
+            }
+        }
+    }
+
+    /**
+     * Initiates migration to a better source
+     */
+    fun migrateToSource() {
+        val comparison = sourceSwitchingState.sourceComparison ?: return
+        val betterSourceId = comparison.betterSourceId ?: return
+
+        sourceSwitchingState.showBanner = false
+        sourceSwitchingState.showMigrationDialog = true
+
+        scope.launch {
+            migrateToSourceUseCase(comparison.bookId, betterSourceId).collect { progress ->
+                sourceSwitchingState.migrationProgress = progress
+
+                if (progress.isComplete) {
+                    if (progress.error == null) {
+                        // Migration successful - refresh the book and chapters
+                        delay(1000) // Brief delay to show completion
+                        sourceSwitchingState.showMigrationDialog = false
+                        sourceSwitchingState.reset()
+
+                        // Refresh the book data
+                        initBook(comparison.bookId)
+
+                        showSnackBar(UiText.DynamicString("Successfully migrated to ${sourceSwitchingState.betterSourceName}"))
+                    } else {
+                        // Migration failed
+                        delay(2000) // Show error for a bit longer
+                        sourceSwitchingState.showMigrationDialog = false
+                        showSnackBar(UiText.DynamicString("Migration failed: ${progress.error}"))
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Dismisses the source switching banner for 7 days
+     */
+    fun dismissSourceSwitchingBanner() {
+        val comparison = sourceSwitchingState.sourceComparison ?: return
+
+        scope.launch {
+            try {
+                val dismissedUntil = System.currentTimeMillis() + (7 * 24 * 60 * 60 * 1000L) // 7 days
+                comparison.copy(dismissedUntil = dismissedUntil).let {
+                    // Update the dismissal time in the repository
+                    withIOContext {
+                        insertUseCases.updateBook.update(
+                            getBookUseCases.findBookById(comparison.bookId) ?: return@withIOContext
+                        )
+                    }
+                }
+                sourceSwitchingState.showBanner = false
+            } catch (e: Exception) {
+                Log.error { "Error dismissing source switching banner" }
+            }
+        }
+    }
 }
+

@@ -159,6 +159,13 @@ val UseCasesInject = module {
     single<HistoryUseCase> { HistoryUseCase(
         get()
     ) }
+    single<ireader.domain.usecases.history.GetLastReadNovelUseCase> { 
+        ireader.domain.usecases.history.GetLastReadNovelUseCase(
+            historyRepository = get(),
+            bookRepository = get(),
+            chapterRepository = get()
+        ) 
+    }
     single<UpdateUseCases> { UpdateUseCases(
         subscribeUpdates = SubscribeUpdates(get()),
         deleteAllUpdates = DeleteAllUpdates(get()),
@@ -228,8 +235,31 @@ val UseCasesInject = module {
     // Chapter report use cases
     single { ireader.domain.usecases.chapter.ReportBrokenChapterUseCase(get()) }
     
+    // Chapter health and repair use cases
+    single { ireader.domain.services.ChapterHealthChecker() }
+    single { ireader.domain.usecases.chapter.AutoRepairChapterUseCase(
+        chapterRepository = get(),
+        chapterHealthRepository = get(),
+        catalogStore = get(),
+        chapterHealthChecker = get()
+    ) }
+    
     // Source report use cases
     single { ireader.domain.usecases.source.ReportBrokenSourceUseCase(get()) }
+    
+    // Source switching use cases
+    single { ireader.domain.usecases.source.CheckSourceAvailabilityUseCase(
+        bookRepository = get(),
+        chapterRepository = get(),
+        sourceComparisonRepository = get(),
+        catalogStore = get()
+    ) }
+    single { ireader.domain.usecases.source.MigrateToSourceUseCase(
+        bookRepository = get(),
+        chapterRepository = get(),
+        sourceComparisonRepository = get(),
+        catalogStore = get()
+    ) }
     
     // Font management use cases
     single { ireader.domain.usecases.fonts.SystemFontsInitializer(get()) }
@@ -249,4 +279,7 @@ val UseCasesInject = module {
         copyAddress = get(),
         generatePaymentUri = get()
     ) }
+    
+    // ePub export use case
+    single { ireader.domain.usecases.epub.ExportNovelAsEpubUseCase(get()) }
 }

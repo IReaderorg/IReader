@@ -20,7 +20,6 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -32,7 +31,6 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.source.CatalogSource
 import ireader.core.source.HttpSource
-import ireader.core.source.model.ChapterInfo
 import ireader.domain.models.entities.Book
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.UiText
@@ -92,6 +90,45 @@ data class BookDetailScreenSpec constructor(
             })
         val topbarState = rememberTopAppBarState()
         val snackBarHostState = SnackBarListener(vm)
+        
+        // ActivityResultListeners must be created at the top level of the Composable
+        val onShare = ActivityResultListener(onSuccess = { uri ->
+            vm.booksState.book?.let { book ->
+                vm.createEpub(book, uri, currentEvent = {
+                    vm.showSnackBar(UiText.DynamicString(it))
+                })
+            }
+            vm.showSnackBar(UiText.MStringResource(MR.strings.success))
+        }) { e ->
+            vm.showSnackBar(UiText.ExceptionString(e))
+        }
+        
+        val onShareEpub = ActivityResultListener(onSuccess = { uri ->
+            vm.booksState.book?.let { book ->
+                vm.createEpub(book, uri, currentEvent = {
+                    vm.showSnackBar(UiText.DynamicString(it))
+                })
+            }
+            vm.showSnackBar(UiText.MStringResource(MR.strings.success))
+        }) { e ->
+            vm.showSnackBar(UiText.ExceptionString(e))
+        }
+        
+        // Call onEpubCreateRequested at Composable level for both use cases
+        book?.let { book ->
+            vm.createEpub.onEpubCreateRequested(book) { uri ->
+                onShare.launch(uri)
+            }
+        }
+        
+        if (vm.showEndOfLifeDialog) {
+            book?.let { book ->
+                vm.createEpub.onEpubCreateRequested(book) { uri ->
+                    onShareEpub.launch(uri)
+                }
+            }
+        }
+        
         Box(modifier = Modifier.fillMaxSize()) {
         IModalSheets(
             sheetContent = {
@@ -169,16 +206,6 @@ data class BookDetailScreenSpec constructor(
                     topBarScrollBehavior = scrollBehavior,
                     snackbarHostState = snackbarHostState,
                     topBar = { scrollBehavior ->
-                        val onShare = ActivityResultListener(onSuccess = { uri ->
-                            vm.booksState.book?.let { book ->
-                                vm.createEpub(book, uri, currentEvent = {
-                                    vm.showSnackBar(UiText.DynamicString(it))
-                                })
-                            }
-                            vm.showSnackBar(UiText.MStringResource(MR.strings.success))
-                        }) { e ->
-                            vm.showSnackBar(UiText.ExceptionString(e))
-                        }
                         val globalScope = LocalGlobalCoroutineScope.currentOrThrow
 
                         BookDetailTopAppBar(
@@ -201,11 +228,8 @@ data class BookDetailScreenSpec constructor(
                                 }
                             },
                             onShare = {
-                                book?.let { book ->
-                                    vm.createEpub.onEpubCreateRequested(book) {
-                                        onShare.launch(it)
-                                    }
-                                }
+                                // onEpubCreateRequested is called at the top level
+                                // This callback is intentionally empty as the logic is handled above
                             },
                             state = vm,
                             onSelectBetween = {
@@ -247,7 +271,14 @@ data class BookDetailScreenSpec constructor(
                             },
                             onInfo = {
                                 vm.showDialog = true
-                            }
+                            },
+                            onArchive = {
+                                book?.let { vm.archiveBook(it) }
+                            },
+                            onUnarchive = {
+                                book?.let { vm.unarchiveBook(it) }
+                            },
+                            isArchived = book?.isArchived ?: false
                         )
                     },
                     floatingActionButton = {
@@ -411,6 +442,20 @@ data class BookDetailScreenSpec constructor(
                     )
             }
 
+        }
+        
+        // End of Life Options Dialog
+        if (vm.showEndOfLifeDialog) {
+            ireader.presentation.ui.book.components.EndOfLifeOptionsDialog(
+                onDismiss = { vm.hideEndOfLifeOptionsDialog() },
+                onArchive = {
+                    book?.let { vm.archiveBook(it) }
+                },
+                onExportEpub = {
+                    // onEpubCreateRequested is called at the top level
+                    // This callback is intentionally empty as the logic is handled above
+                }
+            )
         }
     }
 

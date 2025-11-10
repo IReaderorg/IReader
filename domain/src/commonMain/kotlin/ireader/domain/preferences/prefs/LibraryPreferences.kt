@@ -104,4 +104,12 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     fun showSmartCategories(): Preference<Boolean> {
         return preferenceStore.getBoolean("show_smart_categories", false)
     }
+
+    fun showArchivedBooks(): Preference<Boolean> {
+        return preferenceStore.getBoolean("show_archived_books", false)
+    }
+
+    fun showResumeReadingCard(): Preference<Boolean> {
+        return preferenceStore.getBoolean("show_resume_reading_card", false)
+    }
 }

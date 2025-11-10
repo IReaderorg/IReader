@@ -44,6 +44,9 @@ fun BookDetailTopAppBar(
     onSelectBetween: () -> Unit,
     paddingValues: PaddingValues,
     onInfo: () -> Unit,
+    onArchive: () -> Unit = {},
+    onUnarchive: () -> Unit = {},
+    isArchived: Boolean = false,
 ) {
 
         when {
@@ -68,7 +71,10 @@ fun BookDetailTopAppBar(
                     onRefresh = onRefresh,
                     source = source,
                     onDownload = onDownload,
-                    onInfo = onInfo
+                    onInfo = onInfo,
+                    onArchive = onArchive,
+                    onUnarchive = onUnarchive,
+                    isArchived = isArchived
                 )
             }
         }
@@ -86,7 +92,10 @@ fun RegularChapterDetailTopAppBar(
     onCommand: () -> Unit,
     onShare: () -> Unit,
     onInfo: () -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior?
+    scrollBehavior: TopAppBarScrollBehavior?,
+    onArchive: () -> Unit = {},
+    onUnarchive: () -> Unit = {},
+    isArchived: Boolean = false
 ) {
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     val (dropDownState, setDropDownState) = remember {
@@ -152,7 +161,30 @@ fun RegularChapterDetailTopAppBar(
                         setDropDownState(false)
                     },
                 ) {
-                    IDropdownMenuItem(text = { Text(text = localizeHelper.localize(MR.strings.export_book_as_epub)) }, onClick = onShare)
+                    IDropdownMenuItem(
+                        text = { Text(text = localizeHelper.localize(MR.strings.export_book_as_epub)) }, 
+                        onClick = {
+                            onShare()
+                            setDropDownState(false)
+                        }
+                    )
+                    if (isArchived) {
+                        IDropdownMenuItem(
+                            text = { Text(text = localizeHelper.localize(MR.strings.unarchive)) }, 
+                            onClick = {
+                                onUnarchive()
+                                setDropDownState(false)
+                            }
+                        )
+                    } else {
+                        IDropdownMenuItem(
+                            text = { Text(text = localizeHelper.localize(MR.strings.archive)) }, 
+                            onClick = {
+                                onArchive()
+                                setDropDownState(false)
+                            }
+                        )
+                    }
                 }
             }
         },

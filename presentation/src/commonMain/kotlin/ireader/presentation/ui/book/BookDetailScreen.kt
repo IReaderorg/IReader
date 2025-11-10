@@ -72,6 +72,21 @@ fun BookDetailScreen(
                     }
                 })
             }
+            
+            // Migration progress dialog
+            if (vm.sourceSwitchingState.showMigrationDialog && 
+                vm.sourceSwitchingState.migrationProgress != null) {
+                val progress = vm.sourceSwitchingState.migrationProgress!!
+                ireader.presentation.ui.component.MigrationProgressDialog(
+                    currentStep = progress.currentStep,
+                    progress = progress.progress,
+                    onDismiss = {
+                        if (progress.isComplete) {
+                            vm.sourceSwitchingState.showMigrationDialog = false
+                        }
+                    }
+                )
+            }
             IVerticalFastScroller(listState = scrollState) {
 
                 LazyColumn(
@@ -120,6 +135,19 @@ fun BookDetailScreen(
                                 onMap = onMap,
                                 onSortClick = onSortClick
                         )
+                    }
+                    // Source switching banner
+                    if (vm.sourceSwitchingState.showBanner && 
+                        vm.sourceSwitchingState.betterSourceName != null &&
+                        vm.sourceSwitchingState.sourceComparison != null) {
+                        item {
+                            ireader.presentation.ui.component.SourceSwitchingBanner(
+                                sourceName = vm.sourceSwitchingState.betterSourceName!!,
+                                chapterDifference = vm.sourceSwitchingState.sourceComparison!!.chapterDifference,
+                                onSwitch = { vm.migrateToSource() },
+                                onDismiss = { vm.dismissSourceSwitchingBanner() }
+                            )
+                        }
                     }
                     item {
                         ChapterListFilterBar(

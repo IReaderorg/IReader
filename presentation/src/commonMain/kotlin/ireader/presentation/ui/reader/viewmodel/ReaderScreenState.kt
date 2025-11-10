@@ -114,6 +114,17 @@ open class ReaderScreenPreferencesStateImpl() : ReaderScreenPreferencesState {
     override var isParagraphTranslating by mutableStateOf<Boolean>(false)
     override var paragraphTranslationError by mutableStateOf<String?>(null)
     override var showTranslationApiKeyPrompt by mutableStateOf<Boolean>(false)
+    
+    // Reading break reminder state
+    override var showReadingBreakDialog by mutableStateOf<Boolean>(false)
+    
+    // Chapter health and repair state
+    override var isChapterBroken by mutableStateOf<Boolean>(false)
+    override var chapterBreakReason by mutableStateOf<String?>(null)
+    override var showRepairBanner by mutableStateOf<Boolean>(false)
+    override var isRepairing by mutableStateOf<Boolean>(false)
+    override var showRepairSuccess by mutableStateOf<Boolean>(false)
+    override var repairSuccessSourceName by mutableStateOf<String?>(null)
 }
 
 interface ReaderScreenPreferencesState {
@@ -153,5 +164,16 @@ interface ReaderScreenPreferencesState {
     var isParagraphTranslating: Boolean
     var paragraphTranslationError: String?
     var showTranslationApiKeyPrompt: Boolean
+    
+    // Reading break reminder state
+    var showReadingBreakDialog: Boolean
+    
+    // Chapter health and repair state
+    var isChapterBroken: Boolean
+    var chapterBreakReason: String?
+    var showRepairBanner: Boolean
+    var isRepairing: Boolean
+    var showRepairSuccess: Boolean
+    var repairSuccessSourceName: String?
     //  val isVerticalScrolling : Boolean
 }

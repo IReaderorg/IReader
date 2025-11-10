@@ -3,14 +3,18 @@ package ireader.domain.usecases.epub
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.runtime.Composable
 import ireader.core.source.model.Text
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.image.CoverCache
 import ireader.domain.models.BookCover
 import ireader.domain.models.entities.Book
-import ireader.domain.utils.fastForEachIndexed
+import ireader.domain.models.entities.Chapter
 import java.io.File
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -29,7 +33,7 @@ actual class EpubCreator(
     private fun createEpub(
         uri: Uri,
         book: Book,
-        chapters: List<ireader.domain.models.entities.Chapter>,
+        chapters: List<Chapter>,
         coverFile: File?,
         progressCallback: (String) -> Unit
     ) {
@@ -133,7 +137,7 @@ actual class EpubCreator(
     /**
      * Creates XHTML content for a chapter with proper formatting
      */
-    private fun createChapterHtml(chapter: ireader.domain.models.entities.Chapter, index: Int): String {
+    private fun createChapterHtml(chapter: Chapter, index: Int): String {
         val contents = chapter.content.mapNotNull {
             when(it) {
                 is Text -> it.text
@@ -142,9 +146,16 @@ actual class EpubCreator(
         }
         
         val paragraphs = contents.joinToString("\n") { text ->
-            val cleaned = escapeXml(text.trim())
-            if (cleaned.isNotBlank()) {
-                "    <p>$cleaned</p>"
+            // Clean HTML content to remove scripts, styles, ads, and watermarks
+            val cleanedText = if (HtmlContentCleaner.isHtml(text)) {
+                HtmlContentCleaner.extractPlainText(text)
+            } else {
+                text.trim()
+            }
+            
+            val escaped = escapeXml(cleanedText)
+            if (escaped.isNotBlank()) {
+                "    <p>$escaped</p>"
             } else {
                 ""
             }
@@ -205,7 +216,7 @@ section {
     /**
      * Creates EPUB 3 navigation document
      */
-    private fun createNavDocument(book: Book, chapters: List<ireader.domain.models.entities.Chapter>): String {
+    private fun createNavDocument(book: Book, chapters: List<Chapter>): String {
         val navItems = chapters.mapIndexed { index, chapter ->
             """        <li><a href="chapter$index.xhtml">${escapeXml(chapter.name)}</a></li>"""
         }.joinToString("\n")
@@ -231,7 +242,7 @@ $navItems
     /**
      * Creates OPF package document with complete metadata
      */
-    private fun createContentOpf(book: Book, chapters: List<ireader.domain.models.entities.Chapter>, hasCover: Boolean): String {
+    private fun createContentOpf(book: Book, chapters: List<Chapter>, hasCover: Boolean): String {
         val coverExtension = if (hasCover) "jpg" else null
         val coverMediaType = when (coverExtension) {
             "jpg", "jpeg" -> "image/jpeg"
@@ -263,7 +274,7 @@ $navItems
             }
         }
         
-        val currentDate = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US).format(java.util.Date())
+        val currentDate = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).format(Date())
         
         return """<?xml version="1.0" encoding="UTF-8"?>
 <package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="BookId">
@@ -286,7 +297,7 @@ $spine
 </package>"""
     }
     
-    private fun createTocNcx(book: Book, chapters: List<ireader.domain.models.entities.Chapter>): String {
+    private fun createTocNcx(book: Book, chapters: List<Chapter>): String {
         val navPoints = chapters.mapIndexed { index, chapter ->
             """    <navPoint id="navPoint-${index + 1}" playOrder="${index + 1}">
       <navLabel>
@@ -336,16 +347,19 @@ $navPoints
         }
         return tempName.replace("  ", " ")
     }
-    actual fun onEpubCreateRequested(book: Book, onStart: (Any) -> Unit) {
+
+
+    @Composable
+    actual fun onEpubCreateRequested(book: Book, onStart: @Composable ((Any) -> Unit)) {
         val mimeTypes = arrayOf("application/epub+zip")
         val fn = "${sanitizeFilename(book.title)}.epub"
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
-                .addCategory(Intent.CATEGORY_OPENABLE)
-                .setType("application/epub+zip")
-                .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
-                .putExtra(
-                        Intent.EXTRA_TITLE, fn
-                )
+            .addCategory(Intent.CATEGORY_OPENABLE)
+            .setType("application/epub+zip")
+            .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+            .putExtra(
+                Intent.EXTRA_TITLE, fn
+            )
         onStart(intent)
     }
 }

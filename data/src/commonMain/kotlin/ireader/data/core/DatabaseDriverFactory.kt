@@ -4,9 +4,11 @@ import app.cash.sqldelight.db.SqlDriver
 import data.Book
 import data.Catalog
 import data.Chapter
+import data.ChapterHealth
 import data.Download
 import data.Glossary
 import data.Reader_theme
+import data.SourceComparison
 import data.Theme
 import data.Translated_chapter
 import ir.kazemcodes.infinityreader.Database
@@ -80,7 +82,14 @@ fun createDatabase(driver: SqlDriver): Database {
         translated_chapterAdapter = Translated_chapter.Adapter(
             translated_contentAdapter = chapterContentConvertor,
             created_atAdapter = longConverter,
-            updated_atAdapter = longConverter
+            updated_atAdapter = longConverter,
+        ),
+        chapterHealthAdapter = ChapterHealth.Adapter(
+            longConverter
+        ),
+        sourceComparisonAdapter = SourceComparison.Adapter(
+            longConverter,
+            longConverter
         )
     )
     

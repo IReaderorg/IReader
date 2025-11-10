@@ -5,8 +5,10 @@ import ireader.data.catalog.CatalogRemoteRepositoryImpl
 import ireader.data.category.BookCategoryRepositoryImpl
 import ireader.data.category.CategoryRepositoryImpl
 import ireader.data.chapter.ChapterRepositoryImpl
+import ireader.data.chapterhealth.ChapterHealthRepositoryImpl
 import ireader.data.chapterreport.ChapterReportRepositoryImpl
 import ireader.data.downloads.DownloadRepositoryImpl
+import ireader.data.sourcecomparison.SourceComparisonRepositoryImpl
 import ireader.data.font.FontRepositoryImpl
 import ireader.data.history.HistoryRepositoryImpl
 import ireader.data.repository.FundingGoalRepositoryImpl
@@ -25,6 +27,7 @@ import ireader.domain.catalogs.service.CatalogRemoteRepository
 import ireader.domain.data.repository.BookCategoryRepository
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.CategoryRepository
+import ireader.domain.data.repository.ChapterHealthRepository
 import ireader.domain.data.repository.ChapterReportRepository
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.data.repository.DownloadRepository
@@ -35,6 +38,7 @@ import ireader.domain.data.repository.LibraryRepository
 import ireader.domain.data.repository.ReaderThemeRepository
 import ireader.domain.data.repository.ReadingStatisticsRepository
 import ireader.domain.data.repository.SecurityRepository
+import ireader.domain.data.repository.SourceComparisonRepository
 import ireader.domain.data.repository.SourceCredentialsRepository
 import ireader.domain.data.repository.SourceReportRepository
 import ireader.domain.data.repository.ThemeRepository
@@ -51,6 +55,8 @@ val repositoryInjectModule = module {
     single<CategoryRepository> { CategoryRepositoryImpl(get()) }
     single<CatalogRemoteRepository> { CatalogRemoteRepositoryImpl(get()) }
     single<ChapterRepository> { ChapterRepositoryImpl(get()) }
+    single<ChapterHealthRepository> { ChapterHealthRepositoryImpl(get()) }
+    single<SourceComparisonRepository> { SourceComparisonRepositoryImpl(get()) }
     single<BookRepository> { BookRepositoryImpl(get(), get<BookCategoryRepository>()) }
     single<HistoryRepository> { HistoryRepositoryImpl(get()) }
     single<BookCategoryRepository> { BookCategoryRepositoryImpl(get()) }

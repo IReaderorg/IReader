@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface LibraryRepository {
 
-    suspend fun findAll(sort: LibrarySort): List<LibraryBook>
-    fun subscribe(sort: LibrarySort): Flow<List<LibraryBook>>
+    suspend fun findAll(sort: LibrarySort, includeArchived: Boolean = false): List<LibraryBook>
+    fun subscribe(sort: LibrarySort, includeArchived: Boolean = false): Flow<List<LibraryBook>>
 
     suspend fun findDownloadedBooks(): List<Book>
 

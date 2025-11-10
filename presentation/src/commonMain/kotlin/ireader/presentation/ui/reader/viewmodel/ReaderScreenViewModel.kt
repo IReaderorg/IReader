@@ -80,6 +80,10 @@ class ReaderScreenViewModel(
         val reportBrokenChapterUseCase: ireader.domain.usecases.chapter.ReportBrokenChapterUseCase,
         // Font management use case
         val fontManagementUseCase: ireader.domain.usecases.fonts.FontManagementUseCase,
+        // Chapter health and repair
+        val chapterHealthChecker: ireader.domain.services.ChapterHealthChecker,
+        val chapterHealthRepository: ireader.domain.data.repository.ChapterHealthRepository,
+        val autoRepairChapterUseCase: ireader.domain.usecases.chapter.AutoRepairChapterUseCase,
         val params: Param,
         val globalScope: CoroutineScope
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(),
@@ -109,6 +113,14 @@ class ReaderScreenViewModel(
     var systemFonts by mutableStateOf<List<ireader.domain.models.fonts.CustomFont>>(emptyList())
         private set
     val selectedFontId = readerPreferences.selectedFontId().asState()
+    
+    // Reading break reminder
+    private val readingTimerManager = ireader.domain.services.ReadingTimerManager(
+        scope = scope,
+        onIntervalReached = { onReadingBreakIntervalReached() }
+    )
+    val readingBreakReminderEnabled = readerPreferences.readingBreakReminderEnabled().asState()
+    val readingBreakInterval = readerPreferences.readingBreakInterval().asState()
     
     // Autoscroll speed control
     fun increaseAutoScrollSpeed() {
@@ -330,6 +342,11 @@ class ReaderScreenViewModel(
         
         // Track chapter open
         onChapterOpened()
+        
+        // Check chapter health after loading
+        stateChapter?.let { ch ->
+            checkChapterHealth(ch, chapterHealthChecker, chapterHealthRepository)
+        }
         
         // Trigger preload of next chapter
         triggerPreloadNextChapter()
@@ -1410,6 +1427,9 @@ class ReaderScreenViewModel(
                 ireader.core.log.Log.error("Failed to update reading streak", e)
             }
         }
+        
+        // Start reading break timer if enabled
+        startReadingBreakTimer()
     }
     
     /**
@@ -1462,6 +1482,9 @@ class ReaderScreenViewModel(
         
         // Reset timestamp
         chapterOpenTimestamp = null
+        
+        // Pause reading break timer
+        pauseReadingBreakTimer()
     }
     
     /**
@@ -1482,9 +1505,131 @@ class ReaderScreenViewModel(
         }
     }
 
+    // ==================== Reading Break Reminder Methods ====================
+    
+    /**
+     * Start the reading break timer if enabled
+     */
+    private fun startReadingBreakTimer() {
+        if (!readingBreakReminderEnabled.value) {
+            return
+        }
+        
+        val intervalMinutes = readingBreakInterval.value
+        if (intervalMinutes > 0) {
+            readingTimerManager.startTimer(intervalMinutes)
+            ireader.core.log.Log.debug("Reading break timer started: $intervalMinutes minutes")
+        }
+    }
+    
+    /**
+     * Pause the reading break timer
+     */
+    private fun pauseReadingBreakTimer() {
+        readingTimerManager.pauseTimer()
+        ireader.core.log.Log.debug("Reading break timer paused")
+    }
+    
+    /**
+     * Resume the reading break timer
+     */
+    fun resumeReadingBreakTimer() {
+        if (readingBreakReminderEnabled.value) {
+            readingTimerManager.resumeTimer()
+            ireader.core.log.Log.debug("Reading break timer resumed")
+        }
+    }
+    
+    /**
+     * Reset the reading break timer
+     */
+    fun resetReadingBreakTimer() {
+        readingTimerManager.resetTimer()
+        ireader.core.log.Log.debug("Reading break timer reset")
+    }
+    
+    /**
+     * Called when the reading break interval is reached
+     * Shows the reminder dialog if appropriate
+     */
+    private fun onReadingBreakIntervalReached() {
+        // Check if we should show the reminder based on sentence boundaries
+        val content = getCurrentChapterContent()
+        val lastText = content.lastOrNull()
+        
+        // Simple sentence boundary detection - check if last character is a sentence ending
+        val shouldShowNow = when (lastText) {
+            is ireader.core.source.model.Text -> {
+                val text = lastText.text.trim()
+                text.isEmpty() || text.lastOrNull() in listOf('.', '!', '?', '。', '！', '？')
+            }
+            else -> true
+        }
+        
+        if (shouldShowNow) {
+            showReadingBreakDialog = true
+            ireader.core.log.Log.debug("Reading break reminder shown")
+        } else {
+            // Wait a bit and try again (will check on next timer tick)
+            scope.launch {
+                delay(5000) // Wait 5 seconds
+                if (!showReadingBreakDialog) {
+                    showReadingBreakDialog = true
+                    ireader.core.log.Log.debug("Reading break reminder shown (delayed)")
+                }
+            }
+        }
+    }
+    
+    /**
+     * Handle "Take a Break" action from the reminder dialog
+     */
+    fun onTakeBreak() {
+        showReadingBreakDialog = false
+        pauseReadingBreakTimer()
+
+        
+        ireader.core.log.Log.debug("User chose to take a break")
+    }
+    
+    /**
+     * Handle "Continue Reading" action from the reminder dialog
+     */
+    fun onContinueReading() {
+        showReadingBreakDialog = false
+        resetReadingBreakTimer()
+        startReadingBreakTimer()
+        ireader.core.log.Log.debug("User chose to continue reading")
+    }
+    
+    /**
+     * Dismiss the reading break dialog
+     */
+    fun dismissReadingBreakDialog() {
+        showReadingBreakDialog = false
+        onContinueReading()
+    }
+    
+    /**
+     * Get the remaining time until next break (for UI display)
+     */
+    fun getRemainingTimeUntilBreak(): Long {
+        return readingTimerManager.getRemainingTime()
+    }
+    
+    /**
+     * Check if the reading timer is currently running
+     */
+    fun isReadingTimerRunning(): Boolean {
+        return readingTimerManager.isTimerRunning()
+    }
+
     override fun onDestroy() {
         // Track chapter close on destroy
         onChapterClosed()
+        
+        // Stop reading break timer
+        readingTimerManager.stopTimer()
         
         getChapterJob?.cancel()
         getContentJob?.cancel()

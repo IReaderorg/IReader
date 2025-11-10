@@ -57,6 +57,9 @@ import ireader.presentation.ui.reader.components.TranslationProgressIndicator
 import ireader.presentation.ui.reader.components.TranslationToggleButton
 import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
+import ireader.presentation.ui.reader.viewmodel.dismissRepairBanner
+import ireader.presentation.ui.reader.viewmodel.dismissRepairSuccessBanner
+import ireader.presentation.ui.reader.viewmodel.repairChapter
 import kotlinx.coroutines.launch
 
 @ExperimentalAnimationApi
@@ -319,6 +322,28 @@ fun ReadingScreen(
                                     .padding(bottom = 16.dp)
                             )
                             
+                            // Chapter repair banner
+                            ireader.presentation.ui.reader.components.ChapterRepairBanner(
+                                visible = vm.showRepairBanner,
+                                message = vm.chapterBreakReason ?: "This chapter appears to be broken",
+                                isRepairing = vm.isRepairing,
+                                onRepairClick = { vm.repairChapter(vm.autoRepairChapterUseCase) },
+                                onDismiss = { vm.dismissRepairBanner() },
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .padding(top = 16.dp)
+                            )
+                            
+                            // Chapter repair success banner
+                            ireader.presentation.ui.reader.components.ChapterRepairSuccessBanner(
+                                visible = vm.showRepairSuccess,
+                                sourceName = vm.repairSuccessSourceName ?: "alternative source",
+                                onDismiss = { vm.dismissRepairSuccessBanner() },
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .padding(top = 16.dp)
+                            )
+                            
                             // Brightness control
                             BrightnessControl(
                                 visible = vm.showBrightnessControl,
@@ -449,9 +474,20 @@ fun ReadingScreen(
                                 }
                             )
                         }
+                        
+                        // Reading break reminder dialog
+                        if (vm.showReadingBreakDialog) {
+                            ireader.presentation.ui.reader.components.ReadingBreakReminderDialog(
+                                intervalMinutes = vm.readingBreakInterval.value,
+                                onTakeBreak = { vm.onTakeBreak() },
+                                onContinueReading = { vm.onContinueReading() },
+                                onDismiss = { vm.dismissReadingBreakDialog() }
+                            )
+                        }
+                        }
                     }
                 }
             }
         }
     }
-}
+

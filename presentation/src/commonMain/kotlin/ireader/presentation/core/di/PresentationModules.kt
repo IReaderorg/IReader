@@ -60,13 +60,13 @@ val PresentationModules = module {
 
     factory<ExploreViewModel> { ExploreViewModel(get(), get(), get(), get(),get(), get(), get(),get(),get(),get()) }
     factory  { HistoryViewModel(get(), get(), get()) }
-    factory  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory<GlobalSearchViewModel> { GlobalSearchViewModel(get(), get(), get(), get(), get(), get()) }
 
     factory  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
-    factory<BookDetailViewModel>  { BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
+    factory<BookDetailViewModel>  { BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     factory  { MainSettingScreenViewModel(get()) }
     factory  { AppearanceViewModel(get(), get()) }
 
@@ -101,7 +101,7 @@ val PresentationModules = module {
         // Font management use case
         get(),
         // Params and scope
-        get(),get(),get()
+        get(),get(),get(),get(),get(),get()
     ) }
 
 

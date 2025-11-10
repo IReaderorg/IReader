@@ -1,0 +1,57 @@
+import kotlin.Boolean;
+import kotlin.Long;
+
+CREATE TABLE IF NOT EXISTS sourceComparison(
+    book_id INTEGER NOT NULL PRIMARY KEY,
+    current_source_id INTEGER AS Long NOT NULL,
+    better_source_id INTEGER AS Long,
+    chapter_difference INTEGER NOT NULL,
+    cached_at INTEGER AS Long NOT NULL,
+    dismissed_until INTEGER AS Long,
+    FOREIGN KEY(book_id) REFERENCES book (_id)
+    ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS source_comparison_cached_at_index ON sourceComparison(cached_at);
+CREATE INDEX IF NOT EXISTS source_comparison_dismissed_until_index ON sourceComparison(dismissed_until);
+
+getSourceComparisonByBookId:
+SELECT *
+FROM sourceComparison
+WHERE book_id = :bookId;
+
+insert:
+INSERT INTO sourceComparison(book_id, current_source_id, better_source_id, chapter_difference, cached_at, dismissed_until)
+VALUES (:bookId, :currentSourceId, :betterSourceId, :chapterDifference, :cachedAt, :dismissedUntil);
+
+update:
+UPDATE sourceComparison
+SET current_source_id = :currentSourceId,
+    better_source_id = :betterSourceId,
+    chapter_difference = :chapterDifference,
+    cached_at = :cachedAt,
+    dismissed_until = :dismissedUntil
+WHERE book_id = :bookId;
+
+upsert:
+INSERT INTO sourceComparison(book_id, current_source_id, better_source_id, chapter_difference, cached_at, dismissed_until)
+VALUES (:bookId, :currentSourceId, :betterSourceId, :chapterDifference, :cachedAt, :dismissedUntil)
+ON CONFLICT(book_id)
+DO UPDATE
+SET current_source_id = :currentSourceId,
+    better_source_id = :betterSourceId,
+    chapter_difference = :chapterDifference,
+    cached_at = :cachedAt,
+    dismissed_until = :dismissedUntil
+WHERE book_id = :bookId;
+
+delete:
+DELETE FROM sourceComparison WHERE book_id = :bookId;
+
+deleteOldEntries:
+DELETE FROM sourceComparison WHERE cached_at < :timestamp;
+
+updateDismissedUntil:
+UPDATE sourceComparison
+SET dismissed_until = :dismissedUntil
+WHERE book_id = :bookId;

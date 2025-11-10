@@ -325,6 +325,20 @@ class ReaderPreferences constructor(
     fun defaultReadingMode(): Preference<ReadingMode> {
         return preferenceStore.getEnum("default_reading_mode", ReadingMode.Page)
     }
+    
+    // Reading break reminder preferences
+    fun readingBreakReminderEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean("reading_break_reminder_enabled", false)
+    }
+    
+    fun readingBreakInterval(): Preference<Int> {
+        // Interval in minutes: 30, 45, 60, 90, 120
+        return preferenceStore.getInt("reading_break_interval", 60)
+    }
+    
+    fun lastReadingBreakPromptTime(): Preference<Long> {
+        return preferenceStore.getLong("last_reading_break_prompt_time", 0L)
+    }
 }
 
 enum class ReadingMode {

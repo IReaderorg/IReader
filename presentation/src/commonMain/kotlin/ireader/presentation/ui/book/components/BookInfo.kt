@@ -110,6 +110,31 @@ internal fun RowScope.BookInfo(
                 )
             }
             
+            // Archived indicator
+            if (book.isArchived) {
+                Text(
+                    text = "•",
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Archive,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.tertiary
+                    )
+                    Text(
+                        text = "Archived",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.tertiary,
+                    )
+                }
+            }
+            
             if (source != null) {
                 Text(
                     text = "•",

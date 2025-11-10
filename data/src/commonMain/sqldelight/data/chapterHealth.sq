@@ -1,0 +1,55 @@
+import kotlin.Boolean;
+import kotlin.Long;
+import kotlin.String;
+
+CREATE TABLE IF NOT EXISTS chapterHealth(
+    chapter_id INTEGER NOT NULL PRIMARY KEY,
+    is_broken INTEGER AS Boolean NOT NULL,
+    break_reason TEXT,
+    checked_at INTEGER AS Long NOT NULL,
+    repair_attempted_at INTEGER AS Long,
+    repair_successful INTEGER AS Boolean,
+    replacement_source_id INTEGER AS Long,
+    FOREIGN KEY(chapter_id) REFERENCES chapter (_id)
+    ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS chapter_health_checked_at_index ON chapterHealth(checked_at);
+
+getChapterHealthById:
+SELECT *
+FROM chapterHealth
+WHERE chapter_id = :chapterId;
+
+insert:
+INSERT INTO chapterHealth(chapter_id, is_broken, break_reason, checked_at, repair_attempted_at, repair_successful, replacement_source_id)
+VALUES (:chapterId, :isBroken, :breakReason, :checkedAt, :repairAttemptedAt, :repairSuccessful, :replacementSourceId);
+
+update:
+UPDATE chapterHealth
+SET is_broken = :isBroken,
+    break_reason = :breakReason,
+    checked_at = :checkedAt,
+    repair_attempted_at = :repairAttemptedAt,
+    repair_successful = :repairSuccessful,
+    replacement_source_id = :replacementSourceId
+WHERE chapter_id = :chapterId;
+
+upsert:
+INSERT INTO chapterHealth(chapter_id, is_broken, break_reason, checked_at, repair_attempted_at, repair_successful, replacement_source_id)
+VALUES (:chapterId, :isBroken, :breakReason, :checkedAt, :repairAttemptedAt, :repairSuccessful, :replacementSourceId)
+ON CONFLICT(chapter_id)
+DO UPDATE
+SET is_broken = :isBroken,
+    break_reason = :breakReason,
+    checked_at = :checkedAt,
+    repair_attempted_at = :repairAttemptedAt,
+    repair_successful = :repairSuccessful,
+    replacement_source_id = :replacementSourceId
+WHERE chapter_id = :chapterId;
+
+delete:
+DELETE FROM chapterHealth WHERE chapter_id = :chapterId;
+
+deleteOldEntries:
+DELETE FROM chapterHealth WHERE checked_at < :timestamp;

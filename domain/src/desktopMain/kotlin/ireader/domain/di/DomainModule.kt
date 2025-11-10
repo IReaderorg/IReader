@@ -83,8 +83,14 @@ actual val DomainModule: Module = module {
         )
     }
     
+    single<ireader.domain.services.tts_service.DesktopTTSService> {
+        ireader.domain.services.tts_service.DesktopTTSService().apply {
+            initialize()
+        }
+    }
+    
     single<StartTTSServicesUseCase> {
-        StartTTSServicesUseCase()
+        StartTTSServicesUseCase(get())
     }
 
     single<ServiceUseCases> {

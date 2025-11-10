@@ -60,7 +60,8 @@ class LibraryViewModel(
         val markBookAsReadOrNotUseCase: MarkBookAsReadOrNotUseCase,
         val getCategory: CategoriesUseCases,
         private val downloadUnreadChaptersUseCase: DownloadUnreadChaptersUseCase,
-        private val archiveBookUseCase: ireader.domain.usecases.local.book_usecases.ArchiveBookUseCase
+        private val archiveBookUseCase: ireader.domain.usecases.local.book_usecases.ArchiveBookUseCase,
+        private val getLastReadNovelUseCase: ireader.domain.usecases.history.GetLastReadNovelUseCase
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), LibraryState by state {
 
     var lastUsedCategory = libraryPreferences.lastUsedCategory().asState()
@@ -100,12 +101,24 @@ class LibraryViewModel(
 
 
     val showEmptyCategories = libraryPreferences.showEmptyCategories().asState()
+    val showResumeReadingCard = libraryPreferences.showResumeReadingCard().asState()
+    val showArchivedBooks = libraryPreferences.showArchivedBooks().asState()
+
+    // Last read novel state for Resume Reading Card
+    var lastReadInfo by mutableStateOf<ireader.domain.models.entities.LastReadInfo?>(null)
+        private set
+    
+    var isResumeCardVisible by mutableStateOf(true)
+        private set
 
     init {
         readLayoutTypeAndFilterTypeAndSortType()
         
         // Initialize active filters from preferences
         updateActiveFilters(filters.value)
+        
+        // Load last read info
+        loadLastReadInfo()
         
         combine(
             libraryPreferences.showAllCategory().stateIn(scope),
@@ -123,6 +136,43 @@ class LibraryViewModel(
                 state.selectedCategoryIndex = index
             }
         }.launchIn(scope)
+    }
+    
+    /**
+     * Load the last read novel information
+     */
+    fun loadLastReadInfo() {
+        scope.launch {
+            lastReadInfo = getLastReadNovelUseCase()
+            // Reset visibility when new data is loaded
+            isResumeCardVisible = showResumeReadingCard.value
+        }
+    }
+    
+    /**
+     * Dismiss the resume reading card temporarily
+     */
+    fun dismissResumeCard() {
+        isResumeCardVisible = false
+    }
+    
+    /**
+     * Toggle the resume reading card preference
+     */
+    fun toggleResumeReadingCard(enabled: Boolean) {
+        scope.launch {
+            libraryPreferences.showResumeReadingCard().set(enabled)
+            isResumeCardVisible = enabled
+        }
+    }
+    
+    /**
+     * Toggle the show archived books preference
+     */
+    fun toggleShowArchivedBooks(enabled: Boolean) {
+        scope.launch {
+            libraryPreferences.showArchivedBooks().set(enabled)
+        }
     }
 
     private val loadedManga = mutableMapOf<Long, List<BookItem>>()
@@ -366,8 +416,8 @@ fun getLibraryForCategoryIndex(categoryIndex: Int): State<List<BookItem>> {
         mutableStateOf(emptyList())
     }
 
-    val unfiltered = remember(sorting.value, filters.value, categoryId, categories.size) {
-        getLibraryCategory.subscribe(categoryId, sorting.value, filters.value)
+    val unfiltered = remember(sorting.value, filters.value, categoryId, categories.size, showArchivedBooks.value) {
+        getLibraryCategory.subscribe(categoryId, sorting.value, filters.value, showArchivedBooks.value)
             .map { list ->
                 books = list
                 list.mapIndexed { index, libraryBook ->
@@ -383,6 +433,7 @@ fun getLibraryForCategoryIndex(categoryIndex: Int): State<List<BookItem>> {
         searchQuery,
         showAllCategoryTab.value,
         categories.size,
+        showArchivedBooks.value,
     ) {
         val query = searchQuery
         if (query.isNullOrBlank()) {
