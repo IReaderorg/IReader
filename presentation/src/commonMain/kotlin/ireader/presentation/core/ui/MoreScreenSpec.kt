@@ -77,6 +77,9 @@ object MoreScreenSpec : Tab {
                 },
                 onDonation = {
                     navigator.push(DonationScreenSpec())
+                },
+                onTTSEngineManager = {
+                    navigator.push(TTSEngineManagerScreenSpec())
                 }
             )
         }

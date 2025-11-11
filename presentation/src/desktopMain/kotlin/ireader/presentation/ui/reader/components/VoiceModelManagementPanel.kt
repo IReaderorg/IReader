@@ -302,11 +302,17 @@ fun VoiceModelManagementPanel(
                         }
                     )
                     
-                    // Downloaded only
+                    // Downloaded only - Icon only to save space
                     FilterChip(
                         selected = showDownloadedOnly,
                         onClick = { showDownloadedOnly = !showDownloadedOnly },
-                        label = { Text("Downloaded") },
+                        label = { 
+                            Icon(
+                                imageVector = Icons.Default.CloudDownload,
+                                contentDescription = "Show Downloaded Only",
+                                modifier = Modifier.size(18.dp)
+                            )
+                        },
                         leadingIcon = if (showDownloadedOnly) {
                             { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
                         } else null

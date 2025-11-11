@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.RecordVoiceOver
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -51,6 +52,7 @@ fun MoreScreen(
     onAbout: () -> Unit,
     onHelp: () -> Unit,
     onDonation: () -> Unit = {},
+    onTTSEngineManager: () -> Unit = {},
 ) {
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     
@@ -254,6 +256,15 @@ fun MoreScreen(
                 description = "Configure app preferences",
                 icon = Icons.Outlined.Settings,
                 onClick = onSettings
+            )
+        }
+        
+        item {
+            SettingsItem(
+                title = "TTS Engine Manager",
+                description = "Install and manage text-to-speech engines",
+                icon = Icons.Outlined.RecordVoiceOver,
+                onClick = onTTSEngineManager
             )
         }
         

@@ -7,7 +7,7 @@ import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
-
+import ireader.domain.services.tts_service.piper.PiperException
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
 import kotlinx.coroutines.CancellationException
@@ -17,8 +17,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import ireader.domain.services.tts_service.piper.PiperException
-
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration.Companion.minutes
@@ -36,12 +35,36 @@ class DesktopTTSService : KoinComponent {
     private val remoteUseCases: RemoteUseCases by inject()
     private val extensions: CatalogStore by inject()
     private val readerPreferences: ReaderPreferences by inject()
-    private val appPrefs: AppPreferences by inject()
+    val appPrefs: AppPreferences by inject()
     
     // Piper TTS components
-    private val synthesizer: ireader.domain.services.tts_service.piper.PiperSpeechSynthesizer by inject()
+    val synthesizer: ireader.domain.services.tts_service.piper.PiperSpeechSynthesizer by inject()
     private val audioEngine: ireader.domain.services.tts_service.piper.AudioPlaybackEngine by inject()
     private val modelManager: ireader.domain.services.tts_service.piper.PiperModelManager by inject()
+    
+    // Kokoro TTS components (optional)
+    private val kokoroEngine: ireader.domain.services.tts_service.kokoro.KokoroTTSEngine by lazy {
+        val maxProcesses = appPrefs.maxConcurrentTTSProcesses().get()
+        ireader.domain.services.tts_service.kokoro.KokoroTTSEngine(
+            maxConcurrentProcesses = maxProcesses
+        )
+    }
+    val kokoroAdapter: ireader.domain.services.tts_service.kokoro.KokoroTTSAdapter by lazy {
+        ireader.domain.services.tts_service.kokoro.KokoroTTSAdapter(kokoroEngine)
+    }
+    
+    // Maya TTS components (optional)
+    private val mayaEngine: ireader.domain.services.tts_service.maya.MayaTTSEngine by lazy {
+        ireader.domain.services.tts_service.maya.MayaTTSEngine()
+    }
+    val mayaAdapter: ireader.domain.services.tts_service.maya.MayaTTSAdapter by lazy {
+        ireader.domain.services.tts_service.maya.MayaTTSAdapter(mayaEngine)
+    }
+    
+    // TTS Engine selection
+    private var currentEngine: TTSEngine = TTSEngine.PIPER
+    var kokoroAvailable = false
+    var mayaAvailable = false
 
     lateinit var state: DesktopTTSState
     private var serviceJob: Job? = null
@@ -54,6 +77,17 @@ class DesktopTTSService : KoinComponent {
     private val performanceMonitor = ireader.domain.services.tts_service.piper.PerformanceMonitor()
     private val usageAnalytics = ireader.domain.services.tts_service.piper.UsageAnalytics(
         privacyMode = ireader.domain.services.tts_service.piper.PrivacyMode.BALANCED
+    )
+    
+    // Audio caching for faster playback
+    private val audioCache = TTSAudioCache(
+        cacheDir = java.io.File(ireader.core.storage.AppDir, "tts_cache"),
+        maxCacheSizeMB = 500
+    )
+    
+    // Chapter audio downloader
+    val chapterDownloader = ChapterAudioDownloader(
+        audioDir = java.io.File(ireader.core.storage.AppDir, "chapter_audio")
     )
 
     companion object {
@@ -76,12 +110,94 @@ class DesktopTTSService : KoinComponent {
         // Record session start for analytics
         usageAnalytics.recordSessionStart()
         
-        // Load available and downloaded models
-        // piper-jni handles native library loading automatically
+        // Start periodic cleanup task for zombie processes
+        startProcessCleanupTask()
+        
+        // Initialize TTS engines
         serviceScope.launch {
-            loadAvailableModels()
-            loadSelectedVoiceModel()
+            // Try to initialize Piper (always attempt)
+            try {
+                Log.info { "Initializing Piper TTS..." }
+                // Load available and downloaded models
+                loadAvailableModels()
+                loadSelectedVoiceModel()
+            } catch (e: Exception) {
+                Log.error { "Failed to load Piper: ${e.message}" }
+            }
+            
+            // Check if Kokoro is already installed (don't auto-install)
+            try {
+                val kokoroDir = java.io.File(ireader.core.storage.AppDir, "kokoro/kokoro-tts")
+                
+                // Only initialize if FULLY installed (repo exists AND dependencies installed)
+                if (kokoroDir.exists() && kokoroDir.listFiles()?.isNotEmpty() == true) {
+                    Log.info { "Found Kokoro repository, checking if fully installed..." }
+                    
+                    // Check if dependencies are installed without triggering installation
+                    // Try to run kokoro --help to verify it's working
+                    val pythonCheck = ProcessBuilder(
+                        "python", "-m", "kokoro", "--help"
+                    ).directory(kokoroDir)
+                        .redirectErrorStream(true)
+                        .start()
+                    
+                    val checkCompleted = pythonCheck.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)
+                    val output = pythonCheck.inputStream.bufferedReader().readText()
+                    
+                    if (checkCompleted && pythonCheck.exitValue() == 0 && output.contains("--voice")) {
+                        kokoroAvailable = true
+                        Log.info { "Kokoro TTS available (fully installed)" }
+                    } else {
+                        Log.info { "Kokoro repository found but not fully installed (user can complete installation from TTS Manager)" }
+                    }
+                } else {
+                    Log.info { "Kokoro not installed (user must install from TTS Manager)" }
+                }
+            } catch (e: Exception) {
+                Log.debug { "Kokoro check: ${e.message}" }
+            }
+            
+            // Check if Maya is already installed (don't auto-install)
+            try {
+                val mayaDir = java.io.File(ireader.core.storage.AppDir, "maya")
+                val mayaScript = java.io.File(mayaDir, "maya_tts.py")
+                
+                // Only initialize if the script already exists (meaning it was installed before)
+                if (mayaScript.exists()) {
+                    Log.info { "Found existing Maya installation, verifying..." }
+                    
+                    // Check if dependencies are installed without triggering installation
+                    val pythonCheck = ProcessBuilder(
+                        "python", "-c", 
+                        "import torch; import transformers; import scipy; print('OK')"
+                    ).redirectErrorStream(true).start()
+                    
+                    val checkCompleted = pythonCheck.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)
+                    if (checkCompleted && pythonCheck.exitValue() == 0) {
+                        mayaAvailable = true
+                        Log.info { "Maya TTS available (dependencies verified)" }
+                    } else {
+                        Log.info { "Maya script found but dependencies missing (user can reinstall from TTS Manager)" }
+                    }
+                } else {
+                    Log.info { "Maya not installed (user must install from TTS Manager)" }
+                }
+            } catch (e: Exception) {
+                Log.debug { "Maya check: ${e.message}" }
+            }
+            
+            // If Piper failed, enable simulation mode
+            if (!synthesizer.isInitialized()) {
+                enableSimulationMode("Piper TTS not available. Please download a voice model or install Kokoro/Maya from TTS Manager.")
+            }
         }
+    }
+    
+    enum class TTSEngine {
+        PIPER,
+        KOKORO,
+        MAYA,
+        SIMULATION
     }
     
     private suspend fun loadAvailableModels() {
@@ -512,13 +628,21 @@ class DesktopTTSService : KoinComponent {
         }
         
         state.utteranceId = state.currentReadingParagraph.toString()
+        
+        // Pre-generate upcoming paragraphs for Kokoro (speeds up playback)
+        if (currentEngine == TTSEngine.KOKORO && state.currentReadingParagraph % 3 == 0) {
+            serviceScope.launch {
+                preGenerateParagraphs(5)
+            }
+        }
 
         speechJob = serviceScope.launch {
             try {
-                if (isSimulationMode) {
-                    readTextSimulation(text)
-                } else {
-                    readTextWithPiper(text)
+                when (currentEngine) {
+                    TTSEngine.PIPER -> readTextWithPiper(text)
+                    TTSEngine.KOKORO -> readTextWithKokoro(text)
+                    TTSEngine.MAYA -> readTextWithMaya(text)
+                    TTSEngine.SIMULATION -> readTextSimulation(text)
                 }
             } catch (e: CancellationException) {
                 audioEngine.stop()
@@ -653,6 +777,94 @@ class DesktopTTSService : KoinComponent {
         checkSleepTime()
         
         if (state.isPlaying) {
+            advanceToNextParagraph()
+        }
+    }
+    
+    private suspend fun readTextWithKokoro(text: String) {
+        try {
+            Log.debug { "Synthesizing with Kokoro: text length=${text.length}" }
+            
+            // Use default voice or get from preferences
+            val voice = "af_bella" // TODO: Add voice selection to preferences
+            
+            // Check cache first
+            val cachedAudio = audioCache.get(text, voice, state.speechSpeed)
+            
+            val audioData = if (cachedAudio != null) {
+                Log.debug { "Using cached audio for Kokoro" }
+                cachedAudio
+            } else {
+                // Synthesize with Kokoro
+                val result = kokoroAdapter.synthesize(text, voice, state.speechSpeed)
+                
+                result.onSuccess { audio ->
+                    // Cache the generated audio
+                    audioCache.put(text, voice, state.speechSpeed, audio)
+                }.getOrNull()
+            }
+            
+            if (audioData != null) {
+                Log.debug { "Kokoro synthesis successful: ${audioData.samples.size} bytes" }
+                
+                // Play generated audio
+                try {
+                    audioEngine.play(audioData)
+                } catch (e: Exception) {
+                    Log.error { "Audio playback error: ${e.message}" }
+                }
+                
+                // Check sleep time
+                checkSleepTime()
+                
+                // Move to next paragraph if still playing
+                if (state.isPlaying) {
+                    advanceToNextParagraph()
+                }
+            } else {
+                Log.error { "Kokoro synthesis failed" }
+                advanceToNextParagraph()
+            }
+        } catch (e: Exception) {
+            Log.error { "Kokoro error: ${e.message}" }
+            advanceToNextParagraph()
+        }
+    }
+    
+    private suspend fun readTextWithMaya(text: String) {
+        try {
+            Log.debug { "Synthesizing with Maya: text length=${text.length}" }
+            
+            // Use default language or get from preferences
+            val language = "en" // TODO: Add language selection to preferences
+            
+            // Synthesize with Maya
+            val result = mayaAdapter.synthesize(text, language, state.speechSpeed)
+            
+            result.onSuccess { audioData ->
+                Log.debug { "Maya synthesis successful: ${audioData.samples.size} bytes" }
+                
+                // Play generated audio
+                try {
+                    audioEngine.play(audioData)
+                } catch (e: Exception) {
+                    Log.error { "Audio playback error: ${e.message}" }
+                }
+                
+                // Check sleep time
+                checkSleepTime()
+                
+                // Move to next paragraph if still playing
+                if (state.isPlaying) {
+                    advanceToNextParagraph()
+                }
+            }.onFailure { error ->
+                Log.error { "Maya synthesis failed: ${error.message}" }
+                // Fall back to next paragraph
+                advanceToNextParagraph()
+            }
+        } catch (e: Exception) {
+            Log.error { "Maya error: ${e.message}" }
             advanceToNextParagraph()
         }
     }
@@ -1037,6 +1249,331 @@ class DesktopTTSService : KoinComponent {
         )
     }
     
+    /**
+     * Get current TTS engine
+     */
+    fun getCurrentEngine(): TTSEngine {
+        return currentEngine
+    }
+    
+    /**
+     * Set TTS engine
+     */
+    fun setEngine(engine: TTSEngine) {
+        when (engine) {
+            TTSEngine.PIPER -> {
+                if (synthesizer.isInitialized()) {
+                    currentEngine = TTSEngine.PIPER
+                    isSimulationMode = false
+                    Log.info { "Switched to Piper TTS" }
+                } else {
+                    Log.warn { "Piper not available" }
+                }
+            }
+            TTSEngine.KOKORO -> {
+                if (kokoroAvailable) {
+                    currentEngine = TTSEngine.KOKORO
+                    isSimulationMode = false
+                    Log.info { "Switched to Kokoro TTS" }
+                } else {
+                    Log.warn { "Kokoro not available. Please install from TTS Manager." }
+                }
+            }
+            TTSEngine.MAYA -> {
+                if (mayaAvailable) {
+                    currentEngine = TTSEngine.MAYA
+                    isSimulationMode = false
+                    Log.info { "Switched to Maya TTS" }
+                } else {
+                    Log.warn { "Maya not available. Please install from TTS Manager." }
+                }
+            }
+            TTSEngine.SIMULATION -> {
+                currentEngine = TTSEngine.SIMULATION
+                isSimulationMode = true
+                Log.info { "Switched to Simulation mode" }
+            }
+        }
+    }
+    
+    /**
+     * Get list of available engines
+     */
+    fun getAvailableEngines(): List<TTSEngine> {
+        return buildList {
+            if (synthesizer.isInitialized()) add(TTSEngine.PIPER)
+            if (kokoroAvailable) add(TTSEngine.KOKORO)
+            if (mayaAvailable) add(TTSEngine.MAYA)
+            add(TTSEngine.SIMULATION)
+        }
+    }
+    
+    /**
+     * Check Kokoro availability on-demand (only when needed)
+     * This is called when opening TTS settings screen
+     */
+    suspend fun checkKokoroAvailability(): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val kokoroDir = java.io.File(ireader.core.storage.AppDir, "kokoro/kokoro-tts")
+            
+            if (kokoroDir.exists() && kokoroDir.listFiles()?.isNotEmpty() == true) {
+                Log.info { "Found Kokoro repository, checking if fully installed..." }
+                
+                // Check if dependencies are installed
+                val pythonCheck = ProcessBuilder(
+                    "python", "-m", "kokoro", "--help"
+                ).directory(kokoroDir)
+                    .redirectErrorStream(true)
+                    .start()
+                
+                val checkCompleted = pythonCheck.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)
+                val output = pythonCheck.inputStream.bufferedReader().readText()
+                
+                if (checkCompleted && pythonCheck.exitValue() == 0 && output.contains("--voice")) {
+                    kokoroAvailable = true
+                    Log.info { "Kokoro TTS available (fully installed)" }
+                    return@withContext true
+                } else {
+                    Log.info { "Kokoro repository found but not fully installed" }
+                    return@withContext false
+                }
+            } else {
+                Log.info { "Kokoro not installed" }
+                return@withContext false
+            }
+        } catch (e: Exception) {
+            Log.debug { "Kokoro check: ${e.message}" }
+            return@withContext false
+        }
+    }
+    
+    /**
+     * Start periodic cleanup task to monitor and kill zombie processes
+     */
+    private fun startProcessCleanupTask() {
+        serviceScope.launch {
+            while (true) {
+                try {
+                    delay(30000) // Check every 30 seconds
+                    
+                    // Log active process count for monitoring
+                    if (kokoroAvailable) {
+                        val activeCount = kokoroAdapter.getActiveProcessCount()
+                        if (activeCount > 0) {
+                            Log.debug { "Kokoro active processes: $activeCount" }
+                        }
+                    }
+                    
+                } catch (e: CancellationException) {
+                    break
+                } catch (e: Exception) {
+                    Log.error { "Error in process cleanup task: ${e.message}" }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Check Maya availability on-demand (only when needed)
+     * This is called when opening TTS settings screen
+     */
+    suspend fun checkMayaAvailability(): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val mayaDir = java.io.File(ireader.core.storage.AppDir, "maya")
+            val mayaScript = java.io.File(mayaDir, "maya_tts.py")
+            
+            if (mayaScript.exists()) {
+                Log.info { "Found existing Maya installation, verifying..." }
+                
+                // Check if dependencies are installed
+                val pythonCheck = ProcessBuilder(
+                    "python", "-c", 
+                    "import torch; import transformers; import scipy; print('OK')"
+                ).redirectErrorStream(true).start()
+                
+                val checkCompleted = pythonCheck.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)
+                if (checkCompleted && pythonCheck.exitValue() == 0) {
+                    mayaAvailable = true
+                    Log.info { "Maya TTS available (dependencies verified)" }
+                    return@withContext true
+                } else {
+                    Log.info { "Maya script found but dependencies missing" }
+                    return@withContext false
+                }
+            } else {
+                Log.info { "Maya not installed" }
+                return@withContext false
+            }
+        } catch (e: Exception) {
+            Log.debug { "Maya check: ${e.message}" }
+            return@withContext false
+        }
+    }
+    
+    /**
+     * Pre-generate audio for upcoming paragraphs
+     * This speeds up playback by generating audio in advance
+     */
+    suspend fun preGenerateParagraphs(count: Int = 5) {
+        val content = state.ttsContent?.value ?: return
+        val currentIndex = state.currentReadingParagraph
+        
+        // Get next N paragraphs
+        val upcomingParagraphs = content
+            .drop(currentIndex + 1)
+            .take(count)
+            .filter { it.isNotBlank() }
+        
+        if (upcomingParagraphs.isEmpty()) return
+        
+        Log.info { "Pre-generating ${upcomingParagraphs.size} paragraphs..." }
+        
+        val voice = when (currentEngine) {
+            TTSEngine.KOKORO -> "af_bella"
+            else -> return // Only Kokoro benefits from pre-generation currently
+        }
+        
+        audioCache.preGenerate(
+            paragraphs = upcomingParagraphs,
+            voice = voice,
+            speed = state.speechSpeed,
+            synthesizer = { text ->
+                when (currentEngine) {
+                    TTSEngine.KOKORO -> kokoroAdapter.synthesize(text, voice, state.speechSpeed)
+                    else -> Result.failure(Exception("Engine not supported"))
+                }
+            }
+        )
+    }
+    
+    /**
+     * Download entire chapter audio for offline listening
+     * 
+     * @param chapterId Chapter to download
+     * @param onProgress Progress callback (current, total)
+     * @return Path to saved audio file
+     */
+    suspend fun downloadChapterAudio(
+        chapterId: Long,
+        onProgress: (Int, Int) -> Unit = { _, _ -> }
+    ): Result<java.io.File> {
+        val chapter = chapterRepo.findChapterById(chapterId)
+            ?: return Result.failure(Exception("Chapter not found"))
+        
+        // Load chapter content if empty
+        if (chapter.isEmpty()) {
+            loadChapter(chapterId)
+            delay(1000) // Wait for content to load
+        }
+        
+        val updatedChapter = state.ttsChapter
+            ?: return Result.failure(Exception("Failed to load chapter content"))
+        
+        Log.info { "Downloading chapter audio: ${updatedChapter.name}" }
+        
+        // Verify TTS engine is ready
+        when (currentEngine) {
+            TTSEngine.PIPER -> {
+                if (!synthesizer.isInitialized()) {
+                    return Result.failure(Exception("Piper TTS not initialized. Please select a voice model first."))
+                }
+            }
+            TTSEngine.KOKORO -> {
+                if (!kokoroAvailable) {
+                    return Result.failure(Exception("Kokoro TTS not available. Please initialize it first."))
+                }
+            }
+            TTSEngine.MAYA -> {
+                if (!mayaAvailable) {
+                    return Result.failure(Exception("Maya TTS not available. Please initialize it first."))
+                }
+            }
+            TTSEngine.SIMULATION -> {
+                return Result.failure(Exception("Cannot download in simulation mode"))
+            }
+        }
+        
+        // Create synthesizer function based on current engine
+        val synthesizerFn: suspend (String) -> Result<ireader.domain.services.tts_service.piper.AudioData> = { text ->
+            try {
+                when (currentEngine) {
+                    TTSEngine.PIPER -> this.synthesizer.synthesize(text)
+                    TTSEngine.KOKORO -> {
+                        val voice = "af_bella"
+                        kokoroAdapter.synthesize(text, voice, state.speechSpeed)
+                    }
+                    TTSEngine.MAYA -> {
+                        val language = "en"
+                        mayaAdapter.synthesize(text, language, state.speechSpeed)
+                    }
+                    TTSEngine.SIMULATION -> Result.failure(Exception("Cannot download in simulation mode"))
+                }
+            } catch (e: Exception) {
+                Log.error { "Synthesis error during chapter download: ${e.message}" }
+                Result.failure(e)
+            }
+        }
+        
+        return chapterDownloader.downloadChapter(
+            chapter = updatedChapter,
+            synthesizer = synthesizerFn,
+            onProgress = onProgress
+        )
+    }
+    
+    /**
+     * Get list of downloaded chapter audio files
+     */
+    fun getDownloadedChapters(): List<ChapterAudioDownloader.ChapterAudioInfo> {
+        return chapterDownloader.getDownloadedChapters()
+    }
+    
+    /**
+     * Delete downloaded chapter audio
+     */
+    fun deleteChapterAudio(chapterId: Long): Boolean {
+        return chapterDownloader.deleteChapterAudio(chapterId)
+    }
+    
+    /**
+     * Get audio cache statistics
+     */
+    suspend fun getCacheStats(): TTSAudioCache.CacheStats {
+        return audioCache.getStats()
+    }
+    
+    /**
+     * Clear audio cache
+     */
+    suspend fun clearCache() {
+        audioCache.clear()
+    }
+    
+    /**
+     * Get maximum concurrent TTS processes setting
+     */
+    fun getMaxConcurrentProcesses(): Int {
+        return appPrefs.maxConcurrentTTSProcesses().get()
+    }
+    
+    /**
+     * Set maximum concurrent TTS processes (1-8)
+     * Applies to Kokoro and Maya engines
+     */
+    fun setMaxConcurrentProcesses(max: Int) {
+        val clamped = max.coerceIn(1, 8)
+        appPrefs.maxConcurrentTTSProcesses().set(clamped)
+        
+        // Update Kokoro engine if initialized
+        if (kokoroAvailable) {
+            kokoroEngine.setMaxConcurrentProcesses(clamped)
+        }
+        
+        // TODO: Update Maya engine when implemented
+        
+        Log.info { "Max concurrent TTS processes set to: $clamped" }
+    }
+    
     fun shutdown() {
         Log.info { "Shutting down DesktopTTSService" }
         
@@ -1058,6 +1595,28 @@ class DesktopTTSService : KoinComponent {
                 Log.info { "Piper components shutdown successfully" }
             } catch (e: Exception) {
                 Log.error { "Error shutting down Piper components: ${e.message}" }
+            }
+        }
+        
+        // Shutdown Kokoro and kill all Python processes
+        if (kokoroAvailable) {
+            try {
+                Log.info { "Shutting down Kokoro TTS..." }
+                kokoroAdapter.shutdown()
+                Log.info { "Kokoro TTS shutdown successfully" }
+            } catch (e: Exception) {
+                Log.error { "Error shutting down Kokoro: ${e.message}" }
+            }
+        }
+        
+        // Shutdown Maya
+        if (mayaAvailable) {
+            try {
+                Log.info { "Shutting down Maya TTS..." }
+                mayaAdapter.shutdown()
+                Log.info { "Maya TTS shutdown successfully" }
+            } catch (e: Exception) {
+                Log.error { "Error shutting down Maya: ${e.message}" }
             }
         }
         

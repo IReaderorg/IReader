@@ -41,6 +41,9 @@ class AppPreferences(
         /** Piper TTS Preferences **/
         const val SELECTED_PIPER_MODEL = "selected_piper_model"
         const val DOWNLOADED_MODELS = "downloaded_models"
+        
+        /** TTS Performance Preferences **/
+        const val MAX_CONCURRENT_TTS_PROCESSES = "max_concurrent_tts_processes"
 
         enum class Orientation {
             Portrait,
@@ -172,5 +175,13 @@ class AppPreferences(
      */
     fun downloadedModels(): Preference<Set<String>> {
         return preferenceStore.getStringSet(DOWNLOADED_MODELS, emptySet())
+    }
+    
+    /**
+     * Maximum number of concurrent TTS processes (for Kokoro/Maya)
+     * Default: 2, Range: 1-4
+     */
+    fun maxConcurrentTTSProcesses(): Preference<Int> {
+        return preferenceStore.getInt(MAX_CONCURRENT_TTS_PROCESSES, 2)
     }
 }
