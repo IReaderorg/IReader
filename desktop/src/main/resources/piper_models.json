@@ -2,7 +2,7 @@
   "models": [
     {
       "id": "en_US-lessac-medium",
-      "name": "English (US) - Lessac - Medium Quality",
+      "name": "English (US) - Lessac - Medium",
       "language": "en-US",
       "quality": "MEDIUM",
       "gender": "MALE",
@@ -11,8 +11,18 @@
       "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json"
     },
     {
+      "id": "en_US-lessac-high",
+      "name": "English (US) - Lessac - High",
+      "language": "en-US",
+      "quality": "HIGH",
+      "gender": "MALE",
+      "sizeBytes": 94201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/high/en_US-lessac-high.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/high/en_US-lessac-high.onnx.json"
+    },
+    {
       "id": "en_US-amy-medium",
-      "name": "English (US) - Amy - Medium Quality",
+      "name": "English (US) - Amy - Medium",
       "language": "en-US",
       "quality": "MEDIUM",
       "gender": "FEMALE",
@@ -21,8 +31,28 @@
       "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/amy/medium/en_US-amy-medium.onnx.json"
     },
     {
+      "id": "en_US-libritts-high",
+      "name": "English (US) - LibriTTS - High",
+      "language": "en-US",
+      "quality": "HIGH",
+      "gender": "FEMALE",
+      "sizeBytes": 94201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/libritts/high/en_US-libritts-high.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/libritts/high/en_US-libritts-high.onnx.json"
+    },
+    {
+      "id": "en_US-ryan-high",
+      "name": "English (US) - Ryan - High",
+      "language": "en-US",
+      "quality": "HIGH",
+      "gender": "MALE",
+      "sizeBytes": 94201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ryan/high/en_US-ryan-high.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ryan/high/en_US-ryan-high.onnx.json"
+    },
+    {
       "id": "en_GB-alan-medium",
-      "name": "English (GB) - Alan - Medium Quality",
+      "name": "English (GB) - Alan - Medium",
       "language": "en-GB",
       "quality": "MEDIUM",
       "gender": "MALE",
@@ -31,8 +61,18 @@
       "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/alan/medium/en_GB-alan-medium.onnx.json"
     },
     {
+      "id": "en_GB-alba-medium",
+      "name": "English (GB) - Alba - Medium",
+      "language": "en-GB",
+      "quality": "MEDIUM",
+      "gender": "FEMALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/alba/medium/en_GB-alba-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/alba/medium/en_GB-alba-medium.onnx.json"
+    },
+    {
       "id": "es_ES-mls_10246-low",
-      "name": "Spanish (Spain) - MLS 10246 - Low Quality",
+      "name": "Spanish (Spain) - MLS 10246 - Low",
       "language": "es-ES",
       "quality": "LOW",
       "gender": "MALE",
@@ -41,8 +81,28 @@
       "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/mls_10246/low/es_ES-mls_10246-low.onnx.json"
     },
     {
+      "id": "es_ES-mls_9972-low",
+      "name": "Spanish (Spain) - MLS 9972 - Low",
+      "language": "es-ES",
+      "quality": "LOW",
+      "gender": "FEMALE",
+      "sizeBytes": 18874368,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/mls_9972/low/es_ES-mls_9972-low.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/mls_9972/low/es_ES-mls_9972-low.onnx.json"
+    },
+    {
+      "id": "es_MX-ald-medium",
+      "name": "Spanish (Mexico) - Ald - Medium",
+      "language": "es-MX",
+      "quality": "MEDIUM",
+      "gender": "MALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_MX/ald/medium/es_MX-ald-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_MX/ald/medium/es_MX-ald-medium.onnx.json"
+    },
+    {
       "id": "fr_FR-siwis-medium",
-      "name": "French (France) - Siwis - Medium Quality",
+      "name": "French (France) - Siwis - Medium",
       "language": "fr-FR",
       "quality": "MEDIUM",
       "gender": "FEMALE",
@@ -51,8 +111,18 @@
       "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/siwis/medium/fr_FR-siwis-medium.onnx.json"
     },
     {
+      "id": "fr_FR-upmc-medium",
+      "name": "French (France) - UPMC - Medium",
+      "language": "fr-FR",
+      "quality": "MEDIUM",
+      "gender": "MALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/upmc/medium/fr_FR-upmc-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/upmc/medium/fr_FR-upmc-medium.onnx.json"
+    },
+    {
       "id": "de_DE-thorsten-medium",
-      "name": "German (Germany) - Thorsten - Medium Quality",
+      "name": "German (Germany) - Thorsten - Medium",
       "language": "de-DE",
       "quality": "MEDIUM",
       "gender": "MALE",
@@ -61,8 +131,28 @@
       "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx.json"
     },
     {
+      "id": "de_DE-thorsten-high",
+      "name": "German (Germany) - Thorsten - High",
+      "language": "de-DE",
+      "quality": "HIGH",
+      "gender": "MALE",
+      "sizeBytes": 94201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/high/de_DE-thorsten-high.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/high/de_DE-thorsten-high.onnx.json"
+    },
+    {
+      "id": "de_DE-eva_k-medium",
+      "name": "German (Germany) - Eva K - Medium",
+      "language": "de-DE",
+      "quality": "MEDIUM",
+      "gender": "FEMALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/eva_k/medium/de_DE-eva_k-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/eva_k/medium/de_DE-eva_k-medium.onnx.json"
+    },
+    {
       "id": "it_IT-riccardo-medium",
-      "name": "Italian (Italy) - Riccardo - Medium Quality",
+      "name": "Italian (Italy) - Riccardo - Medium",
       "language": "it-IT",
       "quality": "MEDIUM",
       "gender": "MALE",
@@ -72,7 +162,7 @@
     },
     {
       "id": "pt_BR-faber-medium",
-      "name": "Portuguese (Brazil) - Faber - Medium Quality",
+      "name": "Portuguese (Brazil) - Faber - Medium",
       "language": "pt-BR",
       "quality": "MEDIUM",
       "gender": "MALE",
@@ -81,8 +171,18 @@
       "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/faber/medium/pt_BR-faber-medium.onnx.json"
     },
     {
+      "id": "pt_PT-tugao-medium",
+      "name": "Portuguese (Portugal) - Tugão - Medium",
+      "language": "pt-PT",
+      "quality": "MEDIUM",
+      "gender": "MALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_PT/tugao/medium/pt_PT-tugao-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_PT/tugao/medium/pt_PT-tugao-medium.onnx.json"
+    },
+    {
       "id": "zh_CN-huayan-medium",
-      "name": "Chinese (Mandarin) - Huayan - Medium Quality",
+      "name": "Chinese (Mandarin) - Huayan - Medium",
       "language": "zh-CN",
       "quality": "MEDIUM",
       "gender": "FEMALE",
@@ -92,13 +192,113 @@
     },
     {
       "id": "ja_JP-natsumivoice-medium",
-      "name": "Japanese - Natsumi - Medium Quality",
+      "name": "Japanese - Natsumi - Medium",
       "language": "ja-JP",
       "quality": "MEDIUM",
       "gender": "FEMALE",
       "sizeBytes": 63201308,
       "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ja/ja_JP/natsumivoice/medium/ja_JP-natsumivoice-medium.onnx",
       "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ja/ja_JP/natsumivoice/medium/ja_JP-natsumivoice-medium.onnx.json"
+    },
+    {
+      "id": "ko_KR-kss-medium",
+      "name": "Korean - KSS - Medium",
+      "language": "ko-KR",
+      "quality": "MEDIUM",
+      "gender": "FEMALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ko/ko_KR/kss/medium/ko_KR-kss-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ko/ko_KR/kss/medium/ko_KR-kss-medium.onnx.json"
+    },
+    {
+      "id": "ru_RU-dmitri-medium",
+      "name": "Russian - Dmitri - Medium",
+      "language": "ru-RU",
+      "quality": "MEDIUM",
+      "gender": "MALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/dmitri/medium/ru_RU-dmitri-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/dmitri/medium/ru_RU-dmitri-medium.onnx.json"
+    },
+    {
+      "id": "ru_RU-irina-medium",
+      "name": "Russian - Irina - Medium",
+      "language": "ru-RU",
+      "quality": "MEDIUM",
+      "gender": "FEMALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/irina/medium/ru_RU-irina-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/irina/medium/ru_RU-irina-medium.onnx.json"
+    },
+    {
+      "id": "ar_JO-kareem-medium",
+      "name": "Arabic (Jordan) - Kareem - Medium",
+      "language": "ar-JO",
+      "quality": "MEDIUM",
+      "gender": "MALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ar/ar_JO/kareem/medium/ar_JO-kareem-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ar/ar_JO/kareem/medium/ar_JO-kareem-medium.onnx.json"
+    },
+    {
+      "id": "nl_NL-mls-medium",
+      "name": "Dutch (Netherlands) - MLS - Medium",
+      "language": "nl-NL",
+      "quality": "MEDIUM",
+      "gender": "MALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_NL/mls/medium/nl_NL-mls-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_NL/mls/medium/nl_NL-mls-medium.onnx.json"
+    },
+    {
+      "id": "pl_PL-mls_6892-low",
+      "name": "Polish - MLS 6892 - Low",
+      "language": "pl-PL",
+      "quality": "LOW",
+      "gender": "MALE",
+      "sizeBytes": 18874368,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/pl/pl_PL/mls_6892/low/pl_PL-mls_6892-low.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/pl/pl_PL/mls_6892/low/pl_PL-mls_6892-low.onnx.json"
+    },
+    {
+      "id": "tr_TR-dfki-medium",
+      "name": "Turkish - DFKI - Medium",
+      "language": "tr-TR",
+      "quality": "MEDIUM",
+      "gender": "MALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/tr/tr_TR/dfki/medium/tr_TR-dfki-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/tr/tr_TR/dfki/medium/tr_TR-dfki-medium.onnx.json"
+    },
+    {
+      "id": "uk_UA-lada-medium",
+      "name": "Ukrainian - Lada - Medium",
+      "language": "uk-UA",
+      "quality": "MEDIUM",
+      "gender": "FEMALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/uk/uk_UA/lada/medium/uk_UA-lada-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/uk/uk_UA/lada/medium/uk_UA-lada-medium.onnx.json"
+    },
+    {
+      "id": "vi_VN-vais1000-medium",
+      "name": "Vietnamese - VAIS1000 - Medium",
+      "language": "vi-VN",
+      "quality": "MEDIUM",
+      "gender": "MALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/vi/vi_VN/vais1000/medium/vi_VN-vais1000-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/vi/vi_VN/vais1000/medium/vi_VN-vais1000-medium.onnx.json"
+    },
+    {
+      "id": "hi_IN-coqui-medium",
+      "name": "Hindi (India) - Coqui - Medium",
+      "language": "hi-IN",
+      "quality": "MEDIUM",
+      "gender": "FEMALE",
+      "sizeBytes": 63201308,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/hi/hi_IN/coqui/medium/hi_IN-coqui-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/hi/hi_IN/coqui/medium/hi_IN-coqui-medium.onnx.json"
     }
   ]
 }

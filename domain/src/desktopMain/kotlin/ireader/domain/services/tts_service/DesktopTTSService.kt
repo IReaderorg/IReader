@@ -277,7 +277,7 @@ class DesktopTTSService : KoinComponent {
         }
     }
 
-    suspend fun startReading(bookId: Long, chapterId: Long) {
+    suspend fun startReading(bookId: Long, chapterId: Long, autoPlay: Boolean = false) {
         val book = bookRepo.findBookById(bookId)
         val chapter = chapterRepo.findChapterById(chapterId)
         val chapters = chapterRepo.findChaptersByBookId(bookId)
@@ -291,12 +291,16 @@ class DesktopTTSService : KoinComponent {
             
             // Load chapter content if empty
             if (chapter.isEmpty()) {
+                Log.info { "Chapter is empty, loading content from source..." }
                 loadChapter(chapterId)
             } else {
                 state.ttsChapter = chapter
             }
             
-            startService(ACTION_PLAY)
+            // Only auto-play if explicitly requested
+            if (autoPlay) {
+                startService(ACTION_PLAY)
+            }
         }
     }
 

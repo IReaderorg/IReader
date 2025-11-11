@@ -2,7 +2,7 @@ package ireader.presentation.ui.reader.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,6 +38,7 @@ fun VoiceModelManagementPanel(
     appPrefs: AppPreferences = koinInject()
 ) {
     var availableModels by remember { mutableStateOf<List<VoiceModel>>(emptyList()) }
+    var filteredModels by remember { mutableStateOf<List<VoiceModel>>(emptyList()) }
     var selectedModelId by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
     var showDownloadDialog by remember { mutableStateOf(false) }
@@ -45,8 +46,35 @@ fun VoiceModelManagementPanel(
     var downloadFlow by remember { mutableStateOf<Flow<DownloadProgress>?>(null) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var modelToDelete by remember { mutableStateOf<VoiceModel?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedLanguageFilter by remember { mutableStateOf<String?>(null) }
+    var selectedQualityFilter by remember { mutableStateOf<VoiceModel.Quality?>(null) }
+    var selectedGenderFilter by remember { mutableStateOf<VoiceModel.Gender?>(null) }
+    var showDownloadedOnly by remember { mutableStateOf(false) }
     
     val scope = rememberCoroutineScope()
+    
+    // Apply filters
+    LaunchedEffect(availableModels, searchQuery, selectedLanguageFilter, selectedQualityFilter, selectedGenderFilter, showDownloadedOnly) {
+        filteredModels = availableModels.filter { model ->
+            val matchesSearch = searchQuery.isBlank() || 
+                model.name.contains(searchQuery, ignoreCase = true) ||
+                model.language.contains(searchQuery, ignoreCase = true)
+            
+            val matchesLanguage = selectedLanguageFilter == null || 
+                model.language.startsWith(selectedLanguageFilter!!)
+            
+            val matchesQuality = selectedQualityFilter == null || 
+                model.quality == selectedQualityFilter
+            
+            val matchesGender = selectedGenderFilter == null || 
+                model.gender == selectedGenderFilter
+            
+            val matchesDownloaded = !showDownloadedOnly || model.isDownloaded
+            
+            matchesSearch && matchesLanguage && matchesQuality && matchesGender && matchesDownloaded
+        }
+    }
     
     // Load available models and selected model on mount
     LaunchedEffect(Unit) {
@@ -221,9 +249,80 @@ fun VoiceModelManagementPanel(
                     models = availableModels
                 )
                 
+                // Search bar
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Search voices...") },
+                    leadingIcon = {
+                        Icon(Icons.Default.Search, contentDescription = "Search")
+                    },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(Icons.Default.Clear, contentDescription = "Clear")
+                            }
+                        }
+                    },
+                    singleLine = true
+                )
+                
+                // Filters
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Language filter
+                    val languages = availableModels.map { it.language.substringBefore("-") }.distinct().sorted()
+                    FilterChipDropdown(
+                        label = "Language",
+                        options = languages,
+                        selectedOption = selectedLanguageFilter,
+                        onOptionSelected = { selectedLanguageFilter = it }
+                    )
+                    
+                    // Quality filter
+                    FilterChipDropdown(
+                        label = "Quality",
+                        options = VoiceModel.Quality.values().map { it.name },
+                        selectedOption = selectedQualityFilter?.name,
+                        onOptionSelected = { 
+                            selectedQualityFilter = it?.let { VoiceModel.Quality.valueOf(it) }
+                        }
+                    )
+                    
+                    // Gender filter
+                    FilterChipDropdown(
+                        label = "Gender",
+                        options = VoiceModel.Gender.values().map { it.name },
+                        selectedOption = selectedGenderFilter?.name,
+                        onOptionSelected = { 
+                            selectedGenderFilter = it?.let { VoiceModel.Gender.valueOf(it) }
+                        }
+                    )
+                    
+                    // Downloaded only
+                    FilterChip(
+                        selected = showDownloadedOnly,
+                        onClick = { showDownloadedOnly = !showDownloadedOnly },
+                        label = { Text("Downloaded") },
+                        leadingIcon = if (showDownloadedOnly) {
+                            { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                        } else null
+                    )
+                }
+                
+                // Results count
+                Text(
+                    text = "${filteredModels.size} voice${if (filteredModels.size != 1) "s" else ""} found",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
                 // Voice model selector
                 VoiceModelSelector(
-                    models = availableModels,
+                    models = filteredModels,
                     selectedModelId = selectedModelId,
                     onModelSelected = onModelSelected,
                     onDownloadModel = onDownloadModel,
@@ -321,5 +420,72 @@ private fun formatFileSize(bytes: Long): String {
         mb >= 1.0 -> String.format("%.2f MB", mb)
         kb >= 1.0 -> String.format("%.2f KB", kb)
         else -> "$bytes B"
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FilterChipDropdown(
+    label: String,
+    options: List<String>,
+    selectedOption: String?,
+    onOptionSelected: (String?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    
+    Box(modifier = modifier) {
+        FilterChip(
+            selected = selectedOption != null,
+            onClick = { expanded = true },
+            label = { 
+                Text(
+                    text = selectedOption ?: label,
+                    maxLines = 1
+                )
+            },
+            trailingIcon = {
+                Icon(
+                    imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        )
+        
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            // Clear option
+            if (selectedOption != null) {
+                DropdownMenuItem(
+                    text = { Text("All") },
+                    onClick = {
+                        onOptionSelected(null)
+                        expanded = false
+                    },
+                    leadingIcon = {
+                        Icon(Icons.Default.Clear, contentDescription = null)
+                    }
+                )
+                Divider()
+            }
+            
+            // Options
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        onOptionSelected(option)
+                        expanded = false
+                    },
+                    leadingIcon = if (option == selectedOption) {
+                        { Icon(Icons.Default.Check, contentDescription = null) }
+                    } else null
+                )
+            }
+        }
     }
 }

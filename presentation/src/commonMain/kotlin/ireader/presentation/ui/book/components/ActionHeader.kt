@@ -87,7 +87,7 @@ private fun ActionButton(
     
     val contentColor by animateColorAsState(
         targetValue = if (isActive) {
-            MaterialTheme.colorScheme.onPrimaryContainer
+            MaterialTheme.colorScheme.onPrimary
         } else {
             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         },
@@ -126,13 +126,11 @@ private fun ActionButton(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = contentColor,
                 modifier = Modifier.size(24.dp),
             )
             Spacer(Modifier.height(6.dp))
             Text(
                 text = title,
-                color = contentColor,
                 fontSize = 13.sp,
                 fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Medium,
                 textAlign = TextAlign.Center,

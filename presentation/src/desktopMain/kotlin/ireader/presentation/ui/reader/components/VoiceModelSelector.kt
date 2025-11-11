@@ -1,15 +1,29 @@
 package ireader.presentation.ui.reader.components
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -107,12 +121,16 @@ private fun VoiceModelItem(
             containerColor = if (isSelected) 
                 MaterialTheme.colorScheme.primaryContainer 
             else 
-                MaterialTheme.colorScheme.surface
+                MaterialTheme.colorScheme.surfaceVariant
         ),
-        border = if (isSelected) 
-            CardDefaults.outlinedCardBorder() 
-        else 
+        border = if (isSelected) {
+            androidx.compose.foundation.BorderStroke(
+                width = 2.dp,
+                color = MaterialTheme.colorScheme.primary
+            )
+        } else {
             null
+        }
     ) {
         Row(
             modifier = Modifier
@@ -135,7 +153,7 @@ private fun VoiceModelItem(
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Medium,
                         color = if (isSelected) 
-                            MaterialTheme.colorScheme.onPrimaryContainer 
+                            MaterialTheme.colorScheme.onPrimary
                         else 
                             MaterialTheme.colorScheme.onSurface
                     )
@@ -157,7 +175,7 @@ private fun VoiceModelItem(
                     // Language
                     MetadataChip(
                         text = model.language,
-                        color = MaterialTheme.colorScheme.secondary
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                     
                     // Quality
@@ -173,7 +191,7 @@ private fun VoiceModelItem(
                     // Gender
                     MetadataChip(
                         text = model.gender.name.lowercase().replaceFirstChar { it.uppercase() },
-                        color = MaterialTheme.colorScheme.outline
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
                 
@@ -182,7 +200,7 @@ private fun VoiceModelItem(
                     text = formatFileSize(model.sizeBytes),
                     style = MaterialTheme.typography.bodySmall,
                     color = if (isSelected) 
-                        MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
                     else 
                         MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -230,13 +248,14 @@ private fun MetadataChip(
 ) {
     Surface(
         modifier = modifier,
-        color = color.copy(alpha = 0.2f),
+        color = color.copy(alpha = 0.15f),
         shape = MaterialTheme.shapes.extraSmall
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.labelSmall,
-            color = color,
+            // Use a contrasting color that works on both light and dark backgrounds
+            color = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
         )
     }
