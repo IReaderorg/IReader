@@ -57,8 +57,6 @@ class WindowsAudioConfig : PlatformAudioConfig {
     override fun getPlatformName(): String = "Windows (WASAPI)"
     
     override fun initialize() {
-        Log.debug { "Initializing Windows audio configuration" }
-        
         // Find the best available mixer for Windows
         preferredMixer = findBestMixer()
         
@@ -73,7 +71,6 @@ class WindowsAudioConfig : PlatformAudioConfig {
     }
     
     override fun cleanup() {
-        Log.debug { "Cleaning up Windows audio configuration" }
         preferredMixer = null
     }
     
@@ -107,14 +104,7 @@ class WindowsAudioConfig : PlatformAudioConfig {
      * Log available audio mixers for debugging purposes
      */
     private fun logAvailableMixers() {
-        try {
-            val mixers = AudioSystem.getMixerInfo()
-            Log.debug { "Available Windows audio mixers (${mixers.size}):" }
-            mixers.forEachIndexed { index, mixer ->
-                Log.debug { "  [$index] ${mixer.name} - ${mixer.description}" }
-            }
-        } catch (e: Exception) {
-            Log.warn { "Failed to enumerate audio mixers: ${e.message}" }
-        }
+        // Disabled to reduce log noise
+        // Mixers can be inspected via AudioSystem.getMixerInfo() if needed
     }
 }

@@ -7,7 +7,7 @@ import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
-import ireader.domain.services.tts_service.piper.NativeLibraryLoader
+
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
 import kotlinx.coroutines.CancellationException
@@ -18,7 +18,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ireader.domain.services.tts_service.piper.PiperException
-import ireader.domain.services.tts_service.piper.PiperNative
+
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration.Companion.minutes
@@ -76,16 +76,9 @@ class DesktopTTSService : KoinComponent {
         // Record session start for analytics
         usageAnalytics.recordSessionStart()
         
-        // Load Piper native libraries
+        // Load available and downloaded models
+        // piper-jni handles native library loading automatically
         serviceScope.launch {
-            try {
-                NativeLibraryLoader.loadLibraries()
-            } catch (e: Exception) {
-                Log.error { "Failed to load Piper native libraries: ${e.message}" }
-                enableSimulationMode("Failed to load native libraries: ${e.message}")
-            }
-            
-            // Load available and downloaded models
             loadAvailableModels()
             loadSelectedVoiceModel()
         }
@@ -180,11 +173,8 @@ class DesktopTTSService : KoinComponent {
                 val boundaries = synthesizer.getWordBoundaries(text)
                 
                 if (boundaries.isEmpty()) {
-                    println("DEBUG: No word boundaries calculated")
                     return@launch
                 }
-                
-                println("DEBUG: Starting word boundary tracking for ${boundaries.size} words")
                 
                 // Track the start time for synchronization
                 val startTime = System.currentTimeMillis()
@@ -206,7 +196,6 @@ class DesktopTTSService : KoinComponent {
                     
                     // Emit word boundary event for UI highlighting
                     state.currentWordBoundary = boundary
-                    println("DEBUG: Set word boundary - word: '${boundary.word}', offset: ${boundary.startOffset}-${boundary.endOffset}")
                 }
                 
                 // Clear word boundary when done
@@ -653,9 +642,6 @@ class DesktopTTSService : KoinComponent {
         val words = text.split("\\s+".toRegex())
         val wordsPerMinute = 150 * state.speechSpeed // Base reading speed
         val readingTimeMs = (words.size / wordsPerMinute * 60 * 1000).toLong()
-        
-        Log.debug { "Reading paragraph ${state.currentReadingParagraph} (simulation): $text" }
-        Log.debug { "Estimated reading time: ${readingTimeMs}ms for ${words.size} words" }
         
         delay(readingTimeMs)
         

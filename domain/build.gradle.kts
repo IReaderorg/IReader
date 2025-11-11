@@ -115,6 +115,8 @@ kotlin {
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
                 implementation(compose.desktop.currentOs)
+                // Piper JNI for text-to-speech - Testing version 1.2.0-a0f09cd
+                implementation("io.github.givimad:piper-jni:1.2.0-a0f09cd")
             }
         }
     }

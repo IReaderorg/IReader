@@ -13,14 +13,14 @@ import ireader.core.log.Log
  * Implementation of SpeechSynthesizer using the Piper TTS engine.
  * This class provides text-to-speech synthesis using locally stored ONNX models.
  * 
- * Now uses subprocess approach for better reliability.
+ * Testing piper-jni version 1.2.0-a0f09cd for better DLL compatibility.
  */
 class PiperSpeechSynthesizer : SpeechSynthesizer {
     
     /**
-     * Subprocess-based Piper synthesizer
+     * Piper JNI synthesizer
      */
-    private val subprocessSynthesizer = PiperSubprocessSynthesizer()
+    private val jniSynthesizer = PiperJNISynthesizer()
     
     /**
      * Coroutine scope for async operations.
@@ -63,21 +63,21 @@ class PiperSpeechSynthesizer : SpeechSynthesizer {
                     shutdown()
                 }
                 
-                Log.info { "Initializing Piper subprocess with model: $modelPath" }
+                Log.info { "Initializing Piper JNI (v1.2.0-a0f09cd) with model: $modelPath" }
                 
-                // Initialize using subprocess
-                val success = subprocessSynthesizer.initialize(modelPath, configPath)
+                // Initialize using JNI
+                val success = jniSynthesizer.initialize(modelPath, configPath)
                 
                 if (!success) {
                     return@withContext Result.failure(
-                        IllegalStateException("Failed to initialize Piper subprocess")
+                        IllegalStateException("Failed to initialize Piper JNI")
                     )
                 }
                 
                 initialized = true
-                sampleRate = subprocessSynthesizer.getSampleRate()
+                sampleRate = jniSynthesizer.getSampleRate()
                 
-                Log.info { "Piper subprocess initialized successfully with sample rate: $sampleRate Hz" }
+                Log.info { "Piper JNI (v1.2.0-a0f09cd) initialized successfully with sample rate: $sampleRate Hz" }
                 Result.success(Unit)
                 
             } catch (e: Exception) {
@@ -104,10 +104,8 @@ class PiperSpeechSynthesizer : SpeechSynthesizer {
                     )
                 }
                 
-                Log.debug { "Synthesizing text: ${text.take(50)}..." }
-                
-                // Call subprocess synthesis
-                val audioBytes = subprocessSynthesizer.synthesize(text)
+                // Call JNI synthesis
+                val audioBytes = jniSynthesizer.synthesize(text)
                 
                 // Create AudioData object
                 val audioData = AudioData(
@@ -117,7 +115,6 @@ class PiperSpeechSynthesizer : SpeechSynthesizer {
                     format = AudioData.AudioFormat.PCM_16 // Piper uses 16-bit PCM
                 )
                 
-                Log.debug { "Synthesis complete: ${audioBytes.size} bytes generated" }
                 Result.success(audioData)
                 
             } catch (e: Exception) {
@@ -137,8 +134,6 @@ class PiperSpeechSynthesizer : SpeechSynthesizer {
             return@flow
         }
         
-        Log.debug { "Starting streaming synthesis for text: ${text.take(50)}..." }
-        
         // Split text into sentences for progressive generation
         // This regex splits on sentence-ending punctuation followed by whitespace
         val sentences = text.split(Regex("(?<=[.!?])\\s+"))
@@ -148,8 +143,6 @@ class PiperSpeechSynthesizer : SpeechSynthesizer {
             return@flow
         }
         
-        Log.debug { "Split text into ${sentences.size} sentences for streaming" }
-        
         // Process each sentence
         sentences.forEachIndexed { index, sentence ->
             val trimmedSentence = sentence.trim()
@@ -157,8 +150,6 @@ class PiperSpeechSynthesizer : SpeechSynthesizer {
             if (trimmedSentence.isEmpty()) {
                 return@forEachIndexed
             }
-            
-            Log.debug { "Synthesizing sentence ${index + 1}/${sentences.size}" }
             
             // Synthesize this sentence
             val result = synthesize(trimmedSentence)
@@ -171,15 +162,11 @@ class PiperSpeechSynthesizer : SpeechSynthesizer {
                     isLast = (index == sentences.size - 1)
                 )
                 emit(chunk)
-                
-                Log.debug { "Emitted audio chunk ${index + 1}/${sentences.size}" }
             }.onFailure { error ->
                 Log.error(error, "Failed to synthesize sentence: $trimmedSentence")
                 // Continue with next sentence instead of failing the entire stream
             }
         }
-        
-        Log.debug { "Streaming synthesis complete" }
     }.flowOn(Dispatchers.IO)
     
     override suspend fun getWordBoundaries(text: String): List<WordBoundary> {
@@ -223,13 +210,12 @@ class PiperSpeechSynthesizer : SpeechSynthesizer {
                 currentTimeMs += 50L
             }
             
-            Log.debug { "Calculated ${boundaries.size} word boundaries" }
             boundaries
         }
     }
     
     override fun setSpeechRate(rate: Float) {
-        subprocessSynthesizer.setSpeechRate(rate)
+        jniSynthesizer.setSpeechRate(rate)
     }
     
     override fun shutdown() {
@@ -237,8 +223,8 @@ class PiperSpeechSynthesizer : SpeechSynthesizer {
             try {
                 Log.info { "Shutting down Piper speech synthesizer" }
                 
-                // Shutdown subprocess
-                subprocessSynthesizer.shutdown()
+                // Shutdown JNI
+                jniSynthesizer.shutdown()
                 
                 // Reset state
                 initialized = false

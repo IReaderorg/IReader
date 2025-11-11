@@ -96,13 +96,6 @@ class PerformanceMonitor {
         
         // Update state
         updateMetricsState()
-        
-        // Log performance metrics
-        val charsPerSecond = if (durationMs > 0) (textLength * 1000 / durationMs) else 0
-        Log.debug { 
-            "Synthesis: ${textLength} chars in ${durationMs}ms " +
-            "(${charsPerSecond} chars/sec, voice: $voiceId)"
-        }
     }
     
     /**

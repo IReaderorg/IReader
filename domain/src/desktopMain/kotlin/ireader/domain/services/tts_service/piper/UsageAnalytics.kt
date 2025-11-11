@@ -74,8 +74,6 @@ class UsageAnalytics(
         
         // Update state
         updateAnalyticsState()
-        
-        Log.debug { "Voice usage recorded: $language, ${durationBucket}, $characterCount chars" }
     }
     
     /**
@@ -92,8 +90,6 @@ class UsageAnalytics(
         dailyStats.recordFeatureUsage(featureName)
         
         updateAnalyticsState()
-        
-        Log.debug { "Feature usage recorded: $featureName" }
     }
     
     /**
@@ -146,8 +142,6 @@ class UsageAnalytics(
         dailyStats.recordSession()
         
         updateAnalyticsState()
-        
-        Log.debug { "Session started" }
     }
     
     /**
