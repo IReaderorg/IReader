@@ -316,7 +316,7 @@ private fun LanguageListItem(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         color = if (isSelected) {
-            MaterialTheme.colorScheme.primaryContainer
+            MaterialTheme.colorScheme.onPrimary
         } else {
             MaterialTheme.colorScheme.surface
         }
@@ -332,7 +332,7 @@ private fun LanguageListItem(
                 text = text,
                 style = MaterialTheme.typography.bodyLarge,
                 color = if (isSelected) {
-                    MaterialTheme.colorScheme.onPrimaryContainer
+                    MaterialTheme.colorScheme.onPrimary
                 } else {
                     MaterialTheme.colorScheme.onSurface
                 }
