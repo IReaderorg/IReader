@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.RecordVoiceOver
 import androidx.compose.material3.*
@@ -53,6 +54,7 @@ fun MoreScreen(
     onHelp: () -> Unit,
     onDonation: () -> Unit = {},
     onTTSEngineManager: () -> Unit = {},
+    onWeb3Profile: () -> Unit = {},
 ) {
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     
@@ -163,6 +165,23 @@ fun MoreScreen(
                     )
                 }
             }
+        }
+        
+        // Web3 Profile Section
+        item {
+            SectionHeader(
+                title = "Web3 Profile",
+                icon = Icons.Filled.AccountBalanceWallet
+            )
+        }
+        
+        item {
+            SettingsItem(
+                title = "Wallet & Sync",
+                description = "Connect wallet and sync reading progress",
+                icon = Icons.Outlined.AccountBalanceWallet,
+                onClick = onWeb3Profile
+            )
         }
         
         // Library Management Section

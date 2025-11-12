@@ -1,0 +1,12 @@
+# IReader Desktop Configuration
+# Copy this file to config.properties and fill in your Supabase credentials
+
+# Supabase Configuration
+supabase.url=https://your-project.supabase.co
+supabase.anon.key=your-anon-key-here
+
+# Optional: Enable/disable realtime sync (default: true)
+supabase.realtime.enabled=true
+
+# Optional: Sync interval in milliseconds (default: 30000 = 30 seconds)
+supabase.sync.interval.ms=30000

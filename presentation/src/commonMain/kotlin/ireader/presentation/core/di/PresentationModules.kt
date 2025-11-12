@@ -38,6 +38,7 @@ import ireader.presentation.ui.settings.reader.ReaderSettingScreenViewModel
 import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
 import ireader.presentation.ui.settings.security.SecuritySettingsViewModel
 import ireader.presentation.ui.settings.statistics.StatisticsViewModel
+import ireader.presentation.ui.settings.web3.Web3ProfileViewModel
 import org.koin.dsl.module
 
 val PresentationModules = module {
@@ -81,6 +82,7 @@ val PresentationModules = module {
     factory  { StatisticsViewModel(get()) }
     factory  { ireader.presentation.ui.settings.donation.DonationViewModel(get(), get()) }
     factory  { ireader.presentation.ui.settings.donation.DonationTriggerViewModel(get()) }
+    factory  { Web3ProfileViewModel(getOrNull(), getOrNull()) }
 
 
     factory <ChapterStateImpl> { ChapterStateImpl() }

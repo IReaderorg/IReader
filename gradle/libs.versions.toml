@@ -23,6 +23,11 @@ napier = "2.7.1"
 sqldelight = "2.1.0"
 # Preferences
 multiplatformSettings = "1.3.0"
+# Backend
+supabase = "3.2.6"
+# Web3
+walletconnect-bom = "1.30.0"
+web3j = "4.12.2"
 
 # Localization
 moko = "0.25.1"
@@ -128,11 +133,28 @@ multiplatformSettings = { module = "com.russhwolf:multiplatform-settings", versi
 multiplatformSettings-coroutines = { module = "com.russhwolf:multiplatform-settings-coroutines", version.ref = "multiplatformSettings" }
 multiplatformSettings-serialization = { module = "com.russhwolf:multiplatform-settings-serialization", version.ref = "multiplatformSettings" }
 
+supabase-postgrest = { module = "io.github.jan-tennert.supabase:postgrest-kt", version.ref = "supabase" }
+supabase-auth = { module = "io.github.jan-tennert.supabase:auth-kt", version.ref = "supabase" }
+supabase-realtime = { module = "io.github.jan-tennert.supabase:realtime-kt", version.ref = "supabase" }
+supabase-functions = { module = "io.github.jan-tennert.supabase:functions-kt", version.ref = "supabase" }
+
+# WalletConnect v2 - Using BOM for version management
+walletconnect-bom = { module = "com.walletconnect:android-bom", version.ref = "walletconnect-bom" }
+walletconnect-android = { module = "com.walletconnect:android-core" }
+walletconnect-web3wallet = { module = "com.walletconnect:web3wallet" }
+
+# Web3j for Ethereum
+web3j-core = { module = "org.web3j:core", version.ref = "web3j" }
+web3j-crypto = { module = "org.web3j:crypto", version.ref = "web3j" }
+
 
 
 [bundles]
 simplestorage = ["storage", "documentfile"]
 ireader = ["jsoup","ktor-core","ktor-core-cio","ktor-okhttp","ktor-contentNegotiation","ktor-contentNegotiation-gson","ktor-contentNegotiation-kotlinx","ktor-contentNegotiation-jackson","ktor-core-android"]
+supabase = ["supabase-postgrest", "supabase-auth", "supabase-realtime", "supabase-functions"]
+walletconnect = ["walletconnect-android", "walletconnect-web3wallet"]
+web3j = ["web3j-core", "web3j-crypto"]
 
 [plugins]
 # Compose

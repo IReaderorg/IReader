@@ -21,7 +21,10 @@ import ireader.core.http.HttpClients
 import ireader.core.http.okhttp
 import ireader.data.di.DataModule
 import ireader.data.di.dataPlatformModule
+import ireader.data.di.remoteModule
+import ireader.data.di.remotePlatformModule
 import ireader.data.di.repositoryInjectModule
+import ireader.data.remote.AutoSyncService
 import ireader.desktop.di.DesktopDI
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.di.CatalogModule
@@ -118,7 +121,7 @@ fun main() {
         val koinApp = startKoin {
             modules(
                 localModule,dataPlatformModule, CatalogModule, DataModule,preferencesInjectModule,
-                repositoryInjectModule, UseCasesInject, PresentationModules,DomainServices,DomainModule,presentationPlatformModule, DesktopDI
+                repositoryInjectModule, remotePlatformModule, remoteModule, UseCasesInject, PresentationModules,DomainServices,DomainModule,presentationPlatformModule, DesktopDI
             )
         }
         
@@ -132,6 +135,15 @@ fun main() {
         } catch (e: Exception) {
             println("Failed to initialize system fonts: ${e.message}")
             e.printStackTrace()
+        }
+        
+        // Start auto-sync service if available
+        try {
+            val autoSyncService = koinApp.koin.getOrNull<AutoSyncService>()
+            autoSyncService?.start()
+            println("Auto-sync service started successfully")
+        } catch (e: Exception) {
+            println("Auto-sync service not available or failed to start: ${e.message}")
         }
 
         //Dispatchers.setMain(StandardTestDispatcher())

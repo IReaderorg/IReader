@@ -22,5 +22,10 @@ enum class CryptoType(
         displayName = "Litecoin",
         symbol = "LTC",
         uriScheme = "litecoin"
-    )
+    ),
+    DOGECOIN(
+        displayName = "Dogecoin",
+        symbol = "DOGE",
+        uriScheme = "dogecoin"
+    ),
 }

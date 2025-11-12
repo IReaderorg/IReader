@@ -1,0 +1,24 @@
+-- Sync queue for offline reading progress updates
+CREATE TABLE sync_queue (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    book_id TEXT NOT NULL,
+    data TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,
+    retry_count INTEGER DEFAULT 0
+);
+
+selectAll:
+SELECT * FROM sync_queue ORDER BY timestamp ASC;
+
+insert:
+INSERT INTO sync_queue(book_id, data, timestamp)
+VALUES (?, ?, ?);
+
+delete:
+DELETE FROM sync_queue WHERE id = ?;
+
+incrementRetry:
+UPDATE sync_queue SET retry_count = retry_count + 1 WHERE id = ?;
+
+deleteAll:
+DELETE FROM sync_queue;

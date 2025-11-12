@@ -1,6 +1,7 @@
 
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Properties
 import java.util.TimeZone
 
 plugins {
@@ -37,6 +38,7 @@ android {
                 "META-INF/LICENSE.txt",
                 "META-INF/README.md",
                 "META-INF/NOTICE",
+                "META-INF/DISCLAIMER",
                 "META-INF/*.kotlin_module",
                 "META-INF/*.version",
             )
@@ -75,6 +77,15 @@ android {
         buildConfigField("boolean", "PREVIEW", "false")
         buildConfigField("String", "VERSION_NAME", "\"${ProjectConfig.versionName}\"")
         buildConfigField("int", "VERSION_CODE", "${ProjectConfig.versionCode}")
+        
+        // Supabase configuration - Load from local.properties or use empty defaults
+        val properties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            properties.load(localPropertiesFile.inputStream())
+        }
+        buildConfigField("String", "SUPABASE_URL", "\"${properties.getProperty("supabase.url", "")}\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${properties.getProperty("supabase.anon.key", "")}\"")
     }
     dependenciesInfo {
         includeInApk = false

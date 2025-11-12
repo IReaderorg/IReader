@@ -61,3 +61,6 @@ voice_models/
 # Build artifacts
 native/build/
 native/cmake-build-*/
+
+# Supabase configuration files (contain sensitive credentials)
+config.properties

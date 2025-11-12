@@ -42,6 +42,9 @@ kotlin {
                 api(libs.jsoup)
                 api(kotlinx.datetime)
                 api(libs.bundles.ireader)
+                
+                // Supabase
+                implementation(libs.bundles.supabase)
             }
         }
         androidMain {

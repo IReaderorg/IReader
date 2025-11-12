@@ -10,7 +10,7 @@
   <configuration default="false" name="Desktop" type="JetRunConfigurationType">
     <option name="MAIN_CLASS_NAME" value="ireader.desktop.MainKt" />
     <module name="Infinity.desktop.main" />
-    <shortenClasspath name="NONE" />
+    <shortenClasspath name="ARGS_FILE" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

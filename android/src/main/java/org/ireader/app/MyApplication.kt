@@ -10,7 +10,10 @@ import ireader.core.http.WebViewUtil
 import ireader.data.core.DatabaseHandler
 import ireader.data.di.DataModule
 import ireader.data.di.dataPlatformModule
+import ireader.data.di.remoteModule
+import ireader.data.di.remotePlatformModule
 import ireader.data.di.repositoryInjectModule
+import ireader.data.remote.AutoSyncService
 import ireader.domain.di.CatalogModule
 import ireader.domain.di.DomainModule
 import ireader.domain.di.DomainServices
@@ -48,6 +51,8 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
             modules(localModule)
             modules(preferencesInjectModule)
             modules(repositoryInjectModule)
+            modules(remotePlatformModule)
+            modules(remoteModule)
             modules(UseCasesInject)
             modules(PresentationModules)
             modules(DomainServices)
@@ -74,6 +79,15 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
         } catch (e: Exception) {
             println("Failed to initialize system fonts: ${e.message}")
             e.printStackTrace()
+        }
+        
+        // Start auto-sync service if available
+        try {
+            val autoSyncService: AutoSyncService? by inject()
+            autoSyncService?.start()
+            println("Auto-sync service started successfully")
+        } catch (e: Exception) {
+            println("Auto-sync service not available or failed to start: ${e.message}")
         }
     }
 

@@ -18,5 +18,17 @@ enum class WalletApp(
     COINBASE_WALLET(
         displayName = "Coinbase Wallet",
         packageName = "org.toshi"
+    ),
+    RAINBOW(
+        displayName = "Rainbow",
+        packageName = "me.rainbow.wallet"
+    ),
+    ARGENT(
+        displayName = "Argent",
+        packageName = "com.wallet.argent"
+    ),
+    COINBASE(
+        displayName = "Coinbase",
+        packageName = "org.toshi"
     )
 }

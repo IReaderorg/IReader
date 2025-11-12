@@ -50,4 +50,20 @@ interface WalletIntegrationManager {
      * @param address The address to copy
      */
     suspend fun copyToClipboard(address: String)
+    
+    /**
+     * Request a signature from the user's wallet for authentication
+     * @param walletAddress The wallet address to sign with
+     * @param message The message to sign
+     * @return The signature string, or null if the user cancelled or an error occurred
+     */
+    suspend fun requestSignature(walletAddress: String, message: String): String?
+    
+    /**
+     * Get the current wallet address
+     * On desktop, this returns the address from the stored key pair
+     * On mobile, this would return the address from the connected wallet
+     * @return The wallet address, or null if no wallet is available
+     */
+    suspend fun getWalletAddress(): String?
 }

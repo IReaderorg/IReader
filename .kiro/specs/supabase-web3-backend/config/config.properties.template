@@ -1,0 +1,20 @@
+# Desktop Configuration Template for Supabase
+# Copy this file to the project root as 'config.properties' and fill in your values
+# DO NOT commit config.properties to version control - it contains sensitive credentials
+
+# Supabase Project URL
+# Get this from: Supabase Dashboard → Settings → API → Project URL
+# Example: https://abcdefghijklmnop.supabase.co
+supabase.url=
+
+# Supabase Anonymous/Public Key
+# Get this from: Supabase Dashboard → Settings → API → Project API keys → anon public
+# This key is safe to use in client applications (has limited permissions via RLS)
+# Example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+supabase.anon.key=
+
+# Optional: Enable/disable realtime features
+supabase.realtime.enabled=true
+
+# Optional: Sync interval in milliseconds (default: 30000 = 30 seconds)
+supabase.sync.interval=30000
