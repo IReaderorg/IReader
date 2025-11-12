@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.Info
@@ -532,10 +533,30 @@ fun TTSEngineManagerScreen(
                                     fontWeight = FontWeight.Bold
                                 )
                             }
-                            IconButton(
-                                onClick = { installationLog = "" }
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                Icon(Icons.Default.Clear, "Clear log")
+                                // Copy button
+                                IconButton(
+                                    onClick = {
+                                        try {
+                                            val clipboard = java.awt.Toolkit.getDefaultToolkit().systemClipboard
+                                            val stringSelection = java.awt.datatransfer.StringSelection(installationLog)
+                                            clipboard.setContents(stringSelection, null)
+                                            Log.info { "Installation log copied to clipboard" }
+                                        } catch (e: Exception) {
+                                            Log.error { "Failed to copy log: ${e.message}" }
+                                        }
+                                    }
+                                ) {
+                                    Icon(Icons.Default.ContentCopy, "Copy log")
+                                }
+                                // Clear button
+                                IconButton(
+                                    onClick = { installationLog = "" }
+                                ) {
+                                    Icon(Icons.Default.Clear, "Clear log")
+                                }
                             }
                         }
                         

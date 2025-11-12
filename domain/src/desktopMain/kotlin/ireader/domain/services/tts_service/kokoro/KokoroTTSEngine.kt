@@ -317,32 +317,24 @@ class KokoroTTSEngine(
                 } == true
             }
             
-            val timeout = if (!hasModelCache) {
-                Log.info { "First run detected - using extended timeout for model download (${FIRST_RUN_TIMEOUT_SECONDS}s)" }
-                Log.info { "Kokoro will download ~327 MB model on first use. This may take 5-10 minutes..." }
-                FIRST_RUN_TIMEOUT_SECONDS
-            } else {
-                TIMEOUT_SECONDS
-            }
-            
             // Wait for completion with timeout
-            val completed = process.waitFor(timeout, TimeUnit.SECONDS)
+            val completed = process.waitFor(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             
             // Unregister process
             unregisterProcess(process)
             
             if (!completed) {
-                process.destroyForcibly()
+                process?.destroyForcibly()
                 return@withContext Result.failure(
-                    KokoroException("Synthesis timeout after ${timeout}s. If this is first run, the model download may have failed.")
+                    KokoroException("Synthesis timeout after ${TIMEOUT_SECONDS}s")
                 )
             }
             
-            val exitCode = process.exitValue()
+            val exitCode = process?.exitValue() ?: 0
             if (exitCode != 0) {
                 // Read error output only after process completes
                 val error = try {
-                    process.inputStream.bufferedReader().use { it.readText() }
+                    process?.inputStream?.bufferedReader()?.use { it.readText() } ?: "No error output available"
                 } catch (e: Exception) {
                     "Unable to read error output: ${e.message}"
                 }
@@ -597,49 +589,91 @@ class KokoroTTSEngine(
                 return
             }
             
-            Log.info { "Installing Kokoro dependencies (this may take several minutes and download ~2-3 GB)..." }
+            Log.info { "=" .repeat(80) }
+            Log.info { "Installing Kokoro dependencies..." }
+            Log.info { "This will download ~2-3 GB and may take 10-20 minutes" }
             Log.info { "Dependencies: PyTorch, Transformers, NumPy, Hugging Face Hub, Loguru, Misaki" }
+            Log.info { "=" .repeat(80) }
+            Log.info { "Opening terminal window to show installation progress..." }
             
-            // Install the package in editable mode with pip
-            val process = ProcessBuilder(
-                pythonExecutable!!,
-                "-m", "pip", "install", "-e", kokoroPath.absolutePath, "--verbose"
-            ).directory(kokoroPath)
-                .redirectErrorStream(true)
+            // Build command for CMD window
+            val cmdCommand = buildString {
+                append("cmd.exe /k \"")
+                append("echo ========================================")
+                append(" && echo Kokoro TTS - Dependency Installation")
+                append(" && echo ========================================")
+                append(" && echo Dependencies: PyTorch, Transformers, NumPy, HF Hub, Loguru, Misaki")
+                append(" && echo Download size: ~2-3 GB")
+                append(" && echo Time: 10-20 minutes")
+                append(" && echo.")
+                append(" && echo Installation will start now...")
+                append(" && echo.")
+                append(" && cd /d \"${kokoroPath.absolutePath}\"")
+                append(" && \"${pythonExecutable}\" -m pip install -e \"${kokoroPath.absolutePath}\" --verbose")
+                append(" && echo.")
+                append(" && echo ========================================")
+                append(" && echo Installation complete!")
+                append(" && echo You can close this window now.")
+                append(" && echo ========================================")
+                append(" && pause")
+                append("\"")
+            }
+            
+            Log.info { "Launching CMD window for dependency installation..." }
+            
+            // Start CMD window
+            val cmdProcess = ProcessBuilder("cmd.exe", "/c", "start", cmdCommand)
                 .start()
             
-            // Stream output in real-time
-            val reader = process.inputStream.bufferedReader()
-            var line: String?
-            var lastLogTime = System.currentTimeMillis()
+            cmdProcess.waitFor(5, TimeUnit.SECONDS) // Just wait for CMD to launch
             
-            while (reader.readLine().also { line = it } != null) {
-                val currentTime = System.currentTimeMillis()
+            Log.info { "Terminal window opened. Please wait for installation to complete..." }
+            Log.info { "The window will show real-time progress and close when done." }
+            
+            // Wait for installation to complete by checking if packages are installed
+            Log.info { "Waiting for dependency installation to complete..." }
+            
+            var waitTime = 0
+            val maxWaitTime = 1800 // 30 minutes max
+            var installationComplete = false
+            
+            while (!installationComplete && waitTime < maxWaitTime) {
+                Thread.sleep(5000) // Check every 5 seconds
+                waitTime += 5
                 
-                // Log important lines or every 2 seconds to avoid spam
-                if (line!!.contains("Collecting") || 
-                    line!!.contains("Downloading") || 
-                    line!!.contains("Installing") ||
-                    line!!.contains("Successfully") ||
-                    line!!.contains("ERROR") ||
-                    line!!.contains("WARNING") ||
-                    (currentTime - lastLogTime > 2000)) {
+                // Check if kokoro module is installed
+                try {
+                    val checkProcess = ProcessBuilder(
+                        pythonExecutable!!,
+                        "-c",
+                        "import kokoro; print('OK')"
+                    ).directory(kokoroPath)
+                        .redirectErrorStream(true)
+                        .start()
                     
-                    Log.info { "pip: $line" }
-                    lastLogTime = currentTime
+                    val checkCompleted = checkProcess.waitFor(10, TimeUnit.SECONDS)
+                    if (checkCompleted && checkProcess.exitValue() == 0) {
+                        val output = checkProcess.inputStream.bufferedReader().readText().trim()
+                        if (output.contains("OK")) {
+                            installationComplete = true
+                            Log.info { "✓ Dependencies installed successfully!" }
+                        }
+                    }
+                } catch (e: Exception) {
+                    // Still installing, continue waiting
+                }
+                
+                // Log progress every 30 seconds
+                if (waitTime % 30 == 0 && !installationComplete) {
+                    Log.info { "Still installing dependencies... (${waitTime}s elapsed)" }
                 }
             }
             
-            val completed = process.waitFor(300, TimeUnit.SECONDS) // Increased to 5 minutes
-            
-            if (!completed) {
-                process.destroyForcibly()
-                Log.warn { "Dependency installation timeout after 300 seconds" }
-            } else if (process.exitValue() != 0) {
-                Log.error { "Dependency installation failed with exit code: ${process.exitValue()}" }
-            } else {
-                Log.info { "✓ Dependencies installed successfully!" }
+            if (!installationComplete) {
+                Log.warn { "Dependency installation timeout or incomplete after ${waitTime}s" }
+                Log.warn { "Please check the terminal window for errors" }
             }
+            
         } catch (e: Exception) {
             Log.warn { "Error installing dependencies: ${e.message}" }
         }

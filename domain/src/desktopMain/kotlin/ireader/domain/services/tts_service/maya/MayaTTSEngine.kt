@@ -39,7 +39,7 @@ class MayaTTSEngine(
     companion object {
         private const val MODEL_ID = "maya-research/maya1"
         private const val TIMEOUT_SECONDS = 120L // 2 minutes for normal synthesis
-        private const val FIRST_RUN_TIMEOUT_SECONDS = 600L // 10 minutes for model download on first run
+        // No timeout for first run - Maya model is 5GB and needs time to download
     }
     
     /**
@@ -165,15 +165,8 @@ class MayaTTSEngine(
                 } == true
             }
             
-            val timeout = if (!hasModelCache) {
-                Log.info { "First run detected - using extended timeout for model download (${FIRST_RUN_TIMEOUT_SECONDS}s)" }
-                Log.info { "Maya will download model on first use. This may take 5-10 minutes..." }
-                FIRST_RUN_TIMEOUT_SECONDS
-            } else {
-                TIMEOUT_SECONDS
-            }
-            
-            val completed = process.waitFor(timeout, TimeUnit.SECONDS)
+            // Wait for completion with timeout
+            val completed = process.waitFor(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             
             // Unregister process
             unregisterProcess(process)
@@ -183,25 +176,41 @@ class MayaTTSEngine(
                 inputFile?.delete()
                 outputFile?.delete()
                 return@withContext Result.failure(
-                    MayaException("Synthesis timeout after ${timeout}s. If this is first run, the model download may have failed.")
+                    MayaException("Synthesis timeout after ${TIMEOUT_SECONDS}s")
                 )
             }
             
-            val exitCode = process.exitValue()
+            // Check exit code (skip for first run where process is null)
+            val exitCode = process?.exitValue() ?: 0
             if (exitCode != 0) {
                 // Read error output only after process completes
                 val error = try {
-                    process.inputStream.bufferedReader().use { it.readText() }
+                    process?.inputStream?.bufferedReader()?.use { it.readText() } ?: "No error output available"
                 } catch (e: Exception) {
                     "Unable to read error output: ${e.message}"
                 }
                 Log.error { "Maya synthesis failed with exit code $exitCode" }
                 Log.error { "Error output: $error" }
+                
+                // Check for common errors and provide helpful messages
+                val errorMessage = when {
+                    error.contains("disk space", ignoreCase = true) -> {
+                        "Insufficient disk space. Maya requires ~5 GB free space for model download. Please free up disk space and try again."
+                    }
+                    error.contains("OutOfMemoryError", ignoreCase = true) || error.contains("CUDA out of memory", ignoreCase = true) -> {
+                        "Out of memory. Maya model requires significant RAM/VRAM. Try closing other applications."
+                    }
+                    error.contains("Connection", ignoreCase = true) || error.contains("timeout", ignoreCase = true) -> {
+                        "Network error during model download. Please check your internet connection and try again."
+                    }
+                    else -> "Synthesis failed with exit code $exitCode: $error"
+                }
+                
                 // Cleanup temporary files on error
                 inputFile?.delete()
                 outputFile?.delete()
                 return@withContext Result.failure(
-                    MayaException("Synthesis failed with exit code $exitCode: $error")
+                    MayaException(errorMessage)
                 )
             }
             
@@ -434,8 +443,12 @@ if __name__ == "__main__":
      */
     private fun installDependencies() {
         try {
-            Log.info { "Installing Maya dependencies (this may take several minutes and download ~2-3 GB)..." }
-            Log.info { "Dependencies: PyTorch, Transformers, SciPy, NumPy" }
+            Log.info { "=" .repeat(80) }
+            Log.info { "Installing Maya dependencies..." }
+            Log.info { "This will download ~2-3 GB and may take 10-20 minutes" }
+            Log.info { "Dependencies: PyTorch, Transformers, SciPy, NumPy, Accelerate" }
+            Log.info { "=" .repeat(80) }
+            Log.info { "Opening terminal window to show installation progress..." }
             
             val packages = listOf(
                 "torch",
@@ -445,50 +458,82 @@ if __name__ == "__main__":
                 "accelerate"
             )
             
-            val command = mutableListOf(
-                pythonExecutable!!,
-                "-m", "pip", "install"
-            ).apply {
-                addAll(packages)
-                add("--verbose")
+            // Build command for CMD window
+            val cmdCommand = buildString {
+                append("cmd.exe /k \"")
+                append("echo ========================================")
+                append(" && echo Maya TTS - Dependency Installation")
+                append(" && echo ========================================")
+                append(" && echo Dependencies: PyTorch, Transformers, SciPy, NumPy, Accelerate")
+                append(" && echo Download size: ~2-3 GB")
+                append(" && echo Time: 10-20 minutes")
+                append(" && echo.")
+                append(" && echo Installation will start now...")
+                append(" && echo.")
+                append(" && cd /d \"${mayaDir.absolutePath}\"")
+                append(" && \"${pythonExecutable}\" -m pip install ${packages.joinToString(" ")} --verbose")
+                append(" && echo.")
+                append(" && echo ========================================")
+                append(" && echo Installation complete!")
+                append(" && echo You can close this window now.")
+                append(" && echo ========================================")
+                append(" && pause")
+                append("\"")
             }
             
-            val process = ProcessBuilder(command)
-                .directory(mayaDir)
-                .redirectErrorStream(true)
+            Log.info { "Launching CMD window for dependency installation..." }
+            
+            // Start CMD window
+            val cmdProcess = ProcessBuilder("cmd.exe", "/c", "start", cmdCommand)
                 .start()
             
-            // Stream output in real-time
-            val reader = process.inputStream.bufferedReader()
-            var line: String?
-            var lastLogTime = System.currentTimeMillis()
+            cmdProcess.waitFor(5, TimeUnit.SECONDS) // Just wait for CMD to launch
             
-            while (reader.readLine().also { line = it } != null) {
-                val currentTime = System.currentTimeMillis()
+            Log.info { "Terminal window opened. Please wait for installation to complete..." }
+            Log.info { "The window will show real-time progress and close when done." }
+            
+            // Wait for installation to complete by checking if packages are installed
+            Log.info { "Waiting for dependency installation to complete..." }
+            
+            var waitTime = 0
+            val maxWaitTime = 1800 // 30 minutes max
+            var installationComplete = false
+            
+            while (!installationComplete && waitTime < maxWaitTime) {
+                Thread.sleep(5000) // Check every 5 seconds
+                waitTime += 5
                 
-                if (line!!.contains("Collecting") || 
-                    line!!.contains("Downloading") || 
-                    line!!.contains("Installing") ||
-                    line!!.contains("Successfully") ||
-                    line!!.contains("ERROR") ||
-                    line!!.contains("WARNING") ||
-                    (currentTime - lastLogTime > 2000)) {
+                // Check if torch is installed (main dependency)
+                try {
+                    val checkProcess = ProcessBuilder(
+                        pythonExecutable!!,
+                        "-c",
+                        "import torch; import transformers; print('OK')"
+                    ).redirectErrorStream(true).start()
                     
-                    Log.info { "pip: $line" }
-                    lastLogTime = currentTime
+                    val checkCompleted = checkProcess.waitFor(10, TimeUnit.SECONDS)
+                    if (checkCompleted && checkProcess.exitValue() == 0) {
+                        val output = checkProcess.inputStream.bufferedReader().readText().trim()
+                        if (output.contains("OK")) {
+                            installationComplete = true
+                            Log.info { "✓ Dependencies installed successfully!" }
+                        }
+                    }
+                } catch (e: Exception) {
+                    // Still installing, continue waiting
+                }
+                
+                // Log progress every 30 seconds
+                if (waitTime % 30 == 0 && !installationComplete) {
+                    Log.info { "Still installing dependencies... (${waitTime}s elapsed)" }
                 }
             }
             
-            val completed = process.waitFor(300, TimeUnit.SECONDS)
-            
-            if (!completed) {
-                process.destroyForcibly()
-                Log.warn { "Dependency installation timeout after 300 seconds" }
-            } else if (process.exitValue() != 0) {
-                Log.error { "Dependency installation failed with exit code: ${process.exitValue()}" }
-            } else {
-                Log.info { "✓ Dependencies installed successfully!" }
+            if (!installationComplete) {
+                Log.warn { "Dependency installation timeout or incomplete after ${waitTime}s" }
+                Log.warn { "Please check the terminal window for errors" }
             }
+            
         } catch (e: Exception) {
             Log.warn { "Error installing dependencies: ${e.message}" }
         }

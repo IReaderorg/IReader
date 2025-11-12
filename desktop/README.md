@@ -2,17 +2,21 @@
 
 ## Installation Requirements
 
-IReader requires Java 17 or later to run. There are two distribution options:
+### Option 1: Installer Version (Recommended for most users)
+**✅ No Java installation required!**
 
-### Option 1: Standalone Version (Recommended)
-- Download the standalone version which includes a packaged JRE
-- No additional installation required
-- Available as:
-  - Windows: `IReader-x.x.x.exe` or `IReader-x.x.x.msi`
-  - macOS: `IReader-x.x.x.dmg`
-  - Linux: `IReader-x.x.x.deb` or `IReader-x.x.x.rpm`
+The installer versions include a bundled JRE (Java Runtime Environment), so you don't need to install Java separately.
+
+Download and install:
+- **Windows**: `IReader-x.x.x.msi` or `IReader-x.x.x.exe`
+- **macOS**: `IReader-x.x.x.dmg`
+- **Linux**: `IReader-x.x.x.deb` or `IReader-x.x.x.rpm`
+
+Just run the installer and you're ready to go!
 
 ### Option 2: JAR Version (For advanced users)
+**⚠️ Requires Java 17 or later**
+
 If you download the JAR version, you need to install Java manually:
 
 1. Install Java 17 or later:
