@@ -1,6 +1,7 @@
 package data
 
 import app.cash.sqldelight.db.SqlDriver
+import data.DatabaseMigrations.CURRENT_VERSION
 
 /**
  * DatabaseMigrations class that manages schema migrations between different database versions.
@@ -11,7 +12,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 6
+    const val CURRENT_VERSION = 8
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]

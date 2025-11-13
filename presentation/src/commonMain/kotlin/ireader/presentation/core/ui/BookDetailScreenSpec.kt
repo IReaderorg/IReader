@@ -91,6 +91,10 @@ data class BookDetailScreenSpec constructor(
         val topbarState = rememberTopAppBarState()
         val snackBarHostState = SnackBarListener(vm)
         
+        // State to control when to trigger epub export
+        var triggerEpubExport = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+        var triggerEpubExportFromDialog = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+        
         // ActivityResultListeners must be created at the top level of the Composable
         val onShare = ActivityResultListener(onSuccess = { uri ->
             vm.booksState.book?.let { book ->
@@ -114,18 +118,19 @@ data class BookDetailScreenSpec constructor(
             vm.showSnackBar(UiText.ExceptionString(e))
         }
         
-        // Call onEpubCreateRequested at Composable level for both use cases
-        book?.let { book ->
+        // Trigger epub export when requested from menu
+        if (triggerEpubExport.value && book != null) {
             vm.createEpub.onEpubCreateRequested(book) { uri ->
                 onShare.launch(uri)
+                triggerEpubExport.value = false
             }
         }
         
-        if (vm.showEndOfLifeDialog) {
-            book?.let { book ->
-                vm.createEpub.onEpubCreateRequested(book) { uri ->
-                    onShareEpub.launch(uri)
-                }
+        // Trigger epub export when requested from End of Life dialog
+        if (triggerEpubExportFromDialog.value && book != null) {
+            vm.createEpub.onEpubCreateRequested(book) { uri ->
+                onShareEpub.launch(uri)
+                triggerEpubExportFromDialog.value = false
             }
         }
         
@@ -228,8 +233,7 @@ data class BookDetailScreenSpec constructor(
                                 }
                             },
                             onShare = {
-                                // onEpubCreateRequested is called at the top level
-                                // This callback is intentionally empty as the logic is handled above
+                                triggerEpubExport.value = true
                             },
                             state = vm,
                             onSelectBetween = {
@@ -452,8 +456,7 @@ data class BookDetailScreenSpec constructor(
                     book?.let { vm.archiveBook(it) }
                 },
                 onExportEpub = {
-                    // onEpubCreateRequested is called at the top level
-                    // This callback is intentionally empty as the logic is handled above
+                    triggerEpubExportFromDialog.value = true
                 }
             )
         }

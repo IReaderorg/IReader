@@ -206,19 +206,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
 
     override fun onResume() {
         super.onResume()
-        println("🔷 MainActivity.onResume() called")
-        println("   Current intent: ${intent?.data}")
-        
-        // Notify MetaMask manager that activity resumed
-        // This might help the SDK reconnect if needed
-        lifecycleScope.launch {
-            try {
-                val metaMaskManager = org.koin.core.context.GlobalContext.get().get<ireader.domain.services.MetaMaskMobileManager>()
-                println("🔷 Notifying MetaMask manager of resume")
-            } catch (e: Exception) {
-                println("⚠️ Could not notify MetaMask manager: ${e.message}")
-            }
-        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
@@ -12,6 +14,33 @@ android {
     compileSdk = ProjectConfig.compileSdk
     defaultConfig {
         minSdk = ProjectConfig.minSdk
+        
+        // Load Supabase credentials from local.properties
+        val properties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            properties.load(localPropertiesFile.inputStream())
+        }
+        
+        // Primary endpoint
+        buildConfigField("String", "SUPABASE_URL", "\"${properties.getProperty("SUPABASE_URL", "")}\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${properties.getProperty("SUPABASE_ANON_KEY", "")}\"")
+        
+        // Books endpoint
+        buildConfigField("String", "SUPABASE_BOOKS_URL", "\"${properties.getProperty("supabase.books.url", "")}\"")
+        buildConfigField("String", "SUPABASE_BOOKS_KEY", "\"${properties.getProperty("supabase.books.key", "")}\"")
+        
+        // Progress endpoint
+        buildConfigField("String", "SUPABASE_PROGRESS_URL", "\"${properties.getProperty("supabase.progress.url", "")}\"")
+        buildConfigField("String", "SUPABASE_PROGRESS_KEY", "\"${properties.getProperty("supabase.progress.key", "")}\"")
+        
+        // Reviews endpoint
+        buildConfigField("String", "SUPABASE_REVIEWS_URL", "\"${properties.getProperty("supabase.reviews.url", "")}\"")
+        buildConfigField("String", "SUPABASE_REVIEWS_KEY", "\"${properties.getProperty("supabase.reviews.key", "")}\"")
+        
+        // Community endpoint
+        buildConfigField("String", "SUPABASE_COMMUNITY_URL", "\"${properties.getProperty("supabase.community.url", "")}\"")
+        buildConfigField("String", "SUPABASE_COMMUNITY_KEY", "\"${properties.getProperty("supabase.community.key", "")}\"")
     }
     lint {
         targetSdk = ProjectConfig.targetSdk
@@ -19,6 +48,9 @@ android {
     compileOptions {
         sourceCompatibility = ProjectConfig.androidJvmTarget
         targetCompatibility = ProjectConfig.androidJvmTarget
+    }
+    buildFeatures {
+        buildConfig = true
     }
     androidComponents.onVariants { variant ->
         val name = variant.name

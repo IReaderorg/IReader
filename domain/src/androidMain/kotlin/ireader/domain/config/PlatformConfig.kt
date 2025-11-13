@@ -1,6 +1,6 @@
 package ireader.domain.config
 
-import org.ireader.app.BuildConfig
+import ireader.domain.BuildConfig
 
 /**
  * Android platform configuration
