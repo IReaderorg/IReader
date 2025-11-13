@@ -55,6 +55,7 @@ fun MoreScreen(
     onDonation: () -> Unit = {},
     onTTSEngineManager: () -> Unit = {},
     onWeb3Profile: () -> Unit = {},
+    onSupabaseConfig: () -> Unit = {},
 ) {
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     
@@ -181,6 +182,15 @@ fun MoreScreen(
                 description = "Manage your account and sync reading progress",
                 icon = Icons.Outlined.AccountCircle,
                 onClick = onWeb3Profile
+            )
+        }
+        
+        item {
+            SettingsItem(
+                title = "Supabase Configuration",
+                description = "Configure custom Supabase instance for sync",
+                icon = Icons.Outlined.Cloud,
+                onClick = onSupabaseConfig
             )
         }
         

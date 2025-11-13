@@ -10,5 +10,6 @@ import org.koin.dsl.module
 val preferencesInjectModule = module {
     single<AppPreferences> { AppPreferences(get()) }
     single<UiPreferences> { UiPreferences(get()) }
+    single<ireader.domain.preferences.prefs.SupabasePreferences> { ireader.domain.preferences.prefs.SupabasePreferences(get()) }
     single<LibraryPreferences> { LibraryPreferences(get()) }
 }

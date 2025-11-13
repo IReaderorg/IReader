@@ -6,97 +6,41 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
- * In-memory cache for remote data to reduce backend requests
- * 
- * Requirements: 10.4
+ * In-memory cache for remote data
  */
 class RemoteCache {
+    private val userCache = mutableMapOf<String, User>()
+    private val progressCache = mutableMapOf<String, ReadingProgress>()
     private val mutex = Mutex()
     
-    // User profile cache
-    private var cachedUser: User? = null
-    private var userCacheTimestamp: Long = 0
-    
-    // Reading progress cache - keyed by "walletAddress:bookId"
-    private val progressCache = mutableMapOf<String, CachedProgress>()
-    
-    // Cache TTL in milliseconds
-    private val userCacheTtl = 5 * 60 * 1000L // 5 minutes
-    private val progressCacheTtl = 30 * 1000L // 30 seconds
-    
-    data class CachedProgress(
-        val progress: ReadingProgress,
-        val timestamp: Long
-    )
-    
-    /**
-     * Cache a user profile
-     */
-    suspend fun cacheUser(user: User) = mutex.withLock {
-        cachedUser = user
-        userCacheTimestamp = System.currentTimeMillis()
-    }
-    
-    /**
-     * Get cached user if still valid
-     */
-    suspend fun getCachedUser(): User? = mutex.withLock {
-        val now = System.currentTimeMillis()
-        if (cachedUser != null && (now - userCacheTimestamp) < userCacheTtl) {
-            cachedUser
-        } else {
-            null
+    suspend fun cacheUser(user: User) {
+        mutex.withLock {
+            userCache[user.id] = user
         }
     }
     
-    /**
-     * Clear user cache
-     */
-    suspend fun clearUserCache() = mutex.withLock {
-        cachedUser = null
-        userCacheTimestamp = 0
-    }
-    
-    /**
-     * Cache reading progress
-     */
-    suspend fun cacheProgress(walletAddress: String, bookId: String, progress: ReadingProgress) = mutex.withLock {
-        val key = "$walletAddress:$bookId"
-        progressCache[key] = CachedProgress(
-            progress = progress,
-            timestamp = System.currentTimeMillis()
-        )
-    }
-    
-    /**
-     * Get cached reading progress if still valid
-     */
-    suspend fun getCachedProgress(walletAddress: String, bookId: String): ReadingProgress? = mutex.withLock {
-        val key = "$walletAddress:$bookId"
-        val cached = progressCache[key]
-        val now = System.currentTimeMillis()
-        
-        if (cached != null && (now - cached.timestamp) < progressCacheTtl) {
-            cached.progress
-        } else {
-            progressCache.remove(key)
-            null
+    suspend fun getCachedUser(): User? {
+        return mutex.withLock {
+            userCache.values.firstOrNull()
         }
     }
     
-    /**
-     * Clear all progress cache
-     */
-    suspend fun clearProgressCache() = mutex.withLock {
-        progressCache.clear()
+    suspend fun cacheProgress(userId: String, bookId: String, progress: ReadingProgress) {
+        mutex.withLock {
+            progressCache["$userId:$bookId"] = progress
+        }
     }
     
-    /**
-     * Clear all caches
-     */
-    suspend fun clearAll() = mutex.withLock {
-        cachedUser = null
-        userCacheTimestamp = 0
-        progressCache.clear()
+    suspend fun getCachedProgress(userId: String, bookId: String): ReadingProgress? {
+        return mutex.withLock {
+            progressCache["$userId:$bookId"]
+        }
+    }
+    
+    suspend fun clearAll() {
+        mutex.withLock {
+            userCache.clear()
+            progressCache.clear()
+        }
     }
 }

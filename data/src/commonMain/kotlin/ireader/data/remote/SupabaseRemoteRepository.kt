@@ -54,6 +54,16 @@ class SupabaseRemoteRepository(
         val updated_at: String? = null
     )
     
+    @Serializable
+    private data class SyncedBookDto(
+        val user_id: String,
+        val book_id: String,
+        val source_id: Long,
+        val title: String,
+        val book_url: String,
+        val last_read: Long
+    )
+    
     init {
         _connectionStatus.value = ConnectionStatus.CONNECTED
     }
@@ -175,6 +185,7 @@ class SupabaseRemoteRepository(
             
             currentUser = currentUser?.copy(username = sanitizedUsername)
             currentUser?.let { cache.cacheUser(it) }
+            Unit
         }
     
     override suspend fun updateEthWalletAddress(userId: String, ethWalletAddress: String): Result<Unit> = 
@@ -190,6 +201,7 @@ class SupabaseRemoteRepository(
             
             currentUser = currentUser?.copy(ethWalletAddress = ethWalletAddress)
             currentUser?.let { cache.cacheUser(it) }
+            Unit
         }
     
     override suspend fun getUserById(userId: String): Result<User?> = 
@@ -210,8 +222,8 @@ class SupabaseRemoteRepository(
         }
     
     override suspend fun syncReadingProgress(progress: ReadingProgress): Result<Unit> = 
-        retryPolicy.executeWithRetry {
-            RemoteErrorMapper.withErrorMapping {
+        RemoteErrorMapper.withErrorMapping {
+            retryPolicy.executeWithRetry {
                 try {
                     val sanitizedProgress = progress.copy(
                         bookId = InputSanitizer.sanitizeBookId(progress.bookId),
@@ -229,7 +241,7 @@ class SupabaseRemoteRepository(
                     syncQueue.enqueue(progress)
                     throw e
                 }
-            }.getOrThrow()
+            }
         }
     
     override suspend fun getReadingProgress(userId: String, bookId: String): Result<ReadingProgress?> = 
@@ -387,5 +399,70 @@ class SupabaseRemoteRepository(
         } catch (e: Exception) {
             System.currentTimeMillis()
         }
+    }
+    
+    // Book Sync Implementation
+    
+    override suspend fun syncBook(book: ireader.domain.models.remote.SyncedBook): Result<Unit> = 
+        RemoteErrorMapper.withErrorMapping {
+            retryPolicy.executeWithRetry {
+                supabaseClient.postgrest["synced_books"]
+                    .upsert(book.toDto()) {
+                        select(Columns.ALL)
+                    }
+            }
+        }
+    
+    override suspend fun getSyncedBooks(userId: String): Result<List<ireader.domain.models.remote.SyncedBook>> = 
+        RemoteErrorMapper.withErrorMapping {
+            try {
+                val booksDto = supabaseClient.postgrest["synced_books"]
+                    .select {
+                        filter {
+                            eq("user_id", userId)
+                        }
+                    }
+                    .decodeList<SyncedBookDto>()
+                
+                booksDto.map { it.toDomain() }
+            } catch (e: Exception) {
+                emptyList()
+            }
+        }
+    
+    override suspend fun deleteSyncedBook(userId: String, bookId: String): Result<Unit> = 
+        RemoteErrorMapper.withErrorMapping {
+            supabaseClient.postgrest["synced_books"]
+                .delete {
+                    filter {
+                        eq("user_id", userId)
+                        eq("book_id", bookId)
+                    }
+                }
+            Unit
+        }
+    
+    // DTO Converters for Books
+    
+    private fun ireader.domain.models.remote.SyncedBook.toDto(): SyncedBookDto {
+        return SyncedBookDto(
+            user_id = userId,
+            book_id = bookId,
+            source_id = sourceId,
+            title = title,
+            book_url = bookUrl,
+            last_read = lastRead
+        )
+    }
+    
+    private fun SyncedBookDto.toDomain(): ireader.domain.models.remote.SyncedBook {
+        return ireader.domain.models.remote.SyncedBook(
+            userId = user_id,
+            bookId = book_id,
+            sourceId = source_id,
+            title = title,
+            bookUrl = book_url,
+            lastRead = last_read
+        )
     }
 }

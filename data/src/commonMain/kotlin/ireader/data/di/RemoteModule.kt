@@ -1,186 +1,96 @@
 package ireader.data.di
 
-import ireader.data.remote.AutoSyncService
-import ireader.data.remote.DebouncedProgressSync
-import ireader.data.remote.NetworkConnectivityMonitor
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.realtime.Realtime
 import ireader.data.remote.RemoteCache
 import ireader.data.remote.RetryPolicy
-import ireader.data.remote.SupabaseConfig
 import ireader.data.remote.SupabaseRemoteRepository
 import ireader.data.remote.SyncQueue
 import ireader.domain.data.repository.RemoteRepository
-import ireader.domain.models.remote.loadRemoteConfig
-import ireader.domain.usecases.remote.SignUpUseCase
-import ireader.domain.usecases.remote.SignInUseCase
-import ireader.domain.usecases.remote.GetCurrentUserUseCase
-import ireader.domain.usecases.remote.GetReadingProgressUseCase
-import ireader.domain.usecases.remote.ObserveConnectionStatusUseCase
-import ireader.domain.usecases.remote.ObserveReadingProgressUseCase
-import ireader.domain.usecases.remote.RemoteBackendUseCases
-import ireader.domain.usecases.remote.SignOutUseCase
-import ireader.domain.usecases.remote.SyncReadingProgressUseCase
-import ireader.domain.usecases.remote.UpdateUsernameUseCase
-import ireader.domain.usecases.remote.UpdateEthWalletAddressUseCase
+import ireader.domain.preferences.prefs.SupabasePreferences
 import org.koin.dsl.module
 
 /**
- * Koin module for remote backend dependencies
- * Provides Supabase client, repository implementation, and related services
- * 
- * Requirements: 1.5, 8.1, 8.2, 10.1, 10.3, 10.4, 11.3
+ * Dependency injection module for remote/sync components
  */
 val remoteModule = module {
     
-    // Remote configuration - keep as single since it's always available
-    single {
-        loadRemoteConfig()
-    }
-    
-    // Supabase client (only created if config is available)
-    // Using factory to avoid caching null when config is missing
-    factory<io.github.jan.supabase.SupabaseClient?> {
-        try {
-            val config = getOrNull<ireader.domain.models.remote.RemoteConfig>()
-            if (config != null) {
-                SupabaseConfig.createClient(config.supabaseUrl, config.supabaseAnonKey)
-            } else {
-                println("⚠️ Supabase config not found - remote features will be disabled")
-                null
-            }
+    // Supabase client
+    single<SupabaseClient> {
+        val prefs = get<SupabasePreferences>()
+        
+        // Load credentials from platform-specific sources
+        // Android: BuildConfig (from local.properties or env vars)
+        // Desktop: config.properties or env vars
+        val platformUrl = try {
+            ireader.domain.config.PlatformConfig.getSupabaseUrl()
         } catch (e: Exception) {
-            println("⚠️ Failed to create Supabase client: ${e.message}")
-            e.printStackTrace()
-            null
+            ""
+        }
+        
+        val platformKey = try {
+            ireader.domain.config.PlatformConfig.getSupabaseAnonKey()
+        } catch (e: Exception) {
+            ""
+        }
+        
+        // Use custom config if enabled, otherwise use platform config
+        val useCustom = prefs.useCustomSupabase().get()
+        val url = if (useCustom) {
+            prefs.supabaseUrl().get()
+        } else {
+            platformUrl.ifEmpty { 
+                ireader.domain.preferences.prefs.SupabasePreferences.DEFAULT_SUPABASE_URL 
+            }
+        }
+        
+        val key = if (useCustom) {
+            prefs.supabaseApiKey().get()
+        } else {
+            platformKey.ifEmpty { 
+                ireader.domain.preferences.prefs.SupabasePreferences.DEFAULT_SUPABASE_API_KEY 
+            }
+        }
+        
+        // Validate credentials before creating client
+        if (url.isEmpty() || key.isEmpty()) {
+            throw IllegalStateException(
+                "Supabase credentials not configured. " +
+                "Please add your credentials to local.properties (Android) or config.properties (Desktop). " +
+                "Alternatively, configure a custom instance in Settings → Supabase Configuration. " +
+                "See SECURE_CONFIGURATION_GUIDE.md for instructions."
+            )
+        }
+        
+        createSupabaseClient(
+            supabaseUrl = url,
+            supabaseKey = key
+        ) {
+            install(Auth)
+            install(Postgrest)
+            install(Realtime)
         }
     }
     
-    // Core components - keep as singletons since they're always created
+    // Sync queue
+    single { SyncQueue() }
+    
+    // Retry policy
     single { RetryPolicy() }
-    single { SyncQueue(get()) }
+    
+    // Remote cache
     single { RemoteCache() }
     
-    // Remote repository implementation (only if Supabase client is available)
-    // Using factory instead of single to avoid caching null values
-    factory<SupabaseRemoteRepository?> {
-        val supabaseClient = getOrNull<io.github.jan.supabase.SupabaseClient>()
-        supabaseClient?.let {
-            SupabaseRemoteRepository(
-                supabaseClient = it,
-                syncQueue = get(),
-                retryPolicy = get(),
-                cache = get()
-            )
-        }
-    }
-    
-    // Expose as RemoteRepository interface - use factory to avoid singleton null issue
-    factory<RemoteRepository?> {
-        getOrNull<SupabaseRemoteRepository>()
-    }
-    
-    // Auto-sync service
-    factory<AutoSyncService?> {
-        val repository = getOrNull<SupabaseRemoteRepository>()
-        val monitor = getOrNull<NetworkConnectivityMonitor>()
-        if (repository != null && monitor != null) {
-            AutoSyncService(monitor, repository)
-        } else {
-            null
-        }
-    }
-    
-    // Debounced progress sync
-    factory<DebouncedProgressSync?> {
-        val repository = getOrNull<RemoteRepository>()
-        repository?.let {
-            DebouncedProgressSync(
-                syncOperation = { progress -> it.syncReadingProgress(progress) },
-                delayMs = 2000
-            )
-        }
-    }
-    
-    // Use cases (only created if repository is available)
-    factory<SignUpUseCase?> {
-        val repository = getOrNull<RemoteRepository>()
-        repository?.let { SignUpUseCase(it) }
-    }
-    
-    factory<SignInUseCase?> {
-        val repository = getOrNull<RemoteRepository>()
-        repository?.let { SignInUseCase(it) }
-    }
-    
-    factory<GetCurrentUserUseCase?> {
-        val repository = getOrNull<RemoteRepository>()
-        repository?.let { GetCurrentUserUseCase(it) }
-    }
-    
-    factory<SignOutUseCase?> {
-        val repository = getOrNull<RemoteRepository>()
-        repository?.let { SignOutUseCase(it) }
-    }
-    
-    factory<UpdateUsernameUseCase?> {
-        val repository = getOrNull<RemoteRepository>()
-        repository?.let { UpdateUsernameUseCase(it) }
-    }
-    
-    factory<UpdateEthWalletAddressUseCase?> {
-        val repository = getOrNull<RemoteRepository>()
-        repository?.let { UpdateEthWalletAddressUseCase(it) }
-    }
-    
-    factory<SyncReadingProgressUseCase?> {
-        val repository = getOrNull<RemoteRepository>()
-        repository?.let { SyncReadingProgressUseCase(it, get()) }
-    }
-    
-    factory<GetReadingProgressUseCase?> {
-        val repository = getOrNull<RemoteRepository>()
-        repository?.let { GetReadingProgressUseCase(it) }
-    }
-    
-    factory<ObserveReadingProgressUseCase?> {
-        val repository = getOrNull<RemoteRepository>()
-        repository?.let { ObserveReadingProgressUseCase(it) }
-    }
-    
-    factory<ObserveConnectionStatusUseCase?> {
-        val repository = getOrNull<RemoteRepository>()
-        repository?.let { ObserveConnectionStatusUseCase(it) }
-    }
-    
-    // Use cases container (only if all use cases are available)
-    factory<RemoteBackendUseCases?> {
-        val signUp = getOrNull<SignUpUseCase>()
-        val signIn = getOrNull<SignInUseCase>()
-        val getCurrentUser = getOrNull<GetCurrentUserUseCase>()
-        val signOut = getOrNull<SignOutUseCase>()
-        val updateUsername = getOrNull<UpdateUsernameUseCase>()
-        val updateEthWallet = getOrNull<UpdateEthWalletAddressUseCase>()
-        val syncProgress = getOrNull<SyncReadingProgressUseCase>()
-        val getProgress = getOrNull<GetReadingProgressUseCase>()
-        val observeProgress = getOrNull<ObserveReadingProgressUseCase>()
-        val observeConnection = getOrNull<ObserveConnectionStatusUseCase>()
-        
-        if (signUp != null && signIn != null && getCurrentUser != null && signOut != null && 
-            updateUsername != null && updateEthWallet != null && syncProgress != null && 
-            getProgress != null && observeProgress != null && observeConnection != null) {
-            RemoteBackendUseCases(
-                signUp = signUp,
-                signIn = signIn,
-                getCurrentUser = getCurrentUser,
-                signOut = signOut,
-                updateUsername = updateUsername,
-                updateEthWalletAddress = updateEthWallet,
-                syncReadingProgress = syncProgress,
-                getReadingProgress = getProgress,
-                observeReadingProgress = observeProgress,
-                observeConnectionStatus = observeConnection
-            )
-        } else {
-            null
-        }
+    // Remote repository
+    single<RemoteRepository> {
+        SupabaseRemoteRepository(
+            supabaseClient = get(),
+            syncQueue = get(),
+            retryPolicy = get(),
+            cache = get()
+        )
     }
 }

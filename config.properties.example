@@ -1,12 +1,13 @@
-# IReader Desktop Configuration
-# Copy this file to config.properties and fill in your Supabase credentials
-
 # Supabase Configuration
+# Copy this file to config.properties and add your credentials
+# config.properties is gitignored and will not be committed
+
+# Your Supabase project URL
 supabase.url=https://your-project.supabase.co
+
+# Your Supabase anon/public key (NOT the service_role key!)
+# Get this from: https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api
 supabase.anon.key=your-anon-key-here
 
-# Optional: Enable/disable realtime sync (default: true)
-supabase.realtime.enabled=true
-
-# Optional: Sync interval in milliseconds (default: 30000 = 30 seconds)
-supabase.sync.interval.ms=30000
+# Other configuration
+WALLET_USE_BROWSER=true

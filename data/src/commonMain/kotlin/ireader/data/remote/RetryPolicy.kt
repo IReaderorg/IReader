@@ -3,43 +3,32 @@ package ireader.data.remote
 import kotlinx.coroutines.delay
 
 /**
- * Retry policy with exponential backoff for failed operations
+ * Retry policy for network operations
  */
-class RetryPolicy {
+class RetryPolicy(
+    private val maxRetries: Int = 3,
+    private val initialDelayMs: Long = 1000,
+    private val maxDelayMs: Long = 10000,
+    private val factor: Double = 2.0
+) {
     
-    companion object {
-        const val MAX_RETRIES = 3
-        const val INITIAL_DELAY_MS = 1000L
-        const val MAX_DELAY_MS = 10000L
-        const val BACKOFF_MULTIPLIER = 2.0
-    }
-    
-    /**
-     * Executes an operation with retry logic and exponential backoff
-     * 
-     * @param operation The suspend function to execute
-     * @return Result containing the operation result or the last exception
-     */
-    suspend fun <T> executeWithRetry(
-        operation: suspend () -> T
-    ): Result<T> {
-        var currentDelay = INITIAL_DELAY_MS
+    suspend fun <T> executeWithRetry(block: suspend () -> T): T {
+        var currentDelay = initialDelayMs
         var lastException: Exception? = null
         
-        repeat(MAX_RETRIES) { attempt ->
+        repeat(maxRetries) { attempt ->
             try {
-                return Result.success(operation())
+                return block()
             } catch (e: Exception) {
                 lastException = e
-                if (attempt < MAX_RETRIES - 1) {
+                
+                if (attempt < maxRetries - 1) {
                     delay(currentDelay)
-                    currentDelay = (currentDelay * BACKOFF_MULTIPLIER)
-                        .toLong()
-                        .coerceAtMost(MAX_DELAY_MS)
+                    currentDelay = (currentDelay * factor).toLong().coerceAtMost(maxDelayMs)
                 }
             }
         }
         
-        return Result.failure(lastException ?: Exception("Unknown error"))
+        throw lastException ?: Exception("Retry failed")
     }
 }

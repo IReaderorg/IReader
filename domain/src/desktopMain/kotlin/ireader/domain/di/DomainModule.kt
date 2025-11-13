@@ -32,6 +32,9 @@ import org.koin.dsl.module
 
 
 actual val DomainModule: Module = module {
+    // Include sync module for sync functionality
+    includes(syncModule)
+    
     factory <ScreenAlwaysOn> {
         ScreenAlwaysOnImpl()
     }

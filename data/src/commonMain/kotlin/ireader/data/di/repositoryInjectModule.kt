@@ -49,6 +49,9 @@ import org.koin.dsl.module
 
 
 val repositoryInjectModule = module {
+    // Include remote module for sync functionality
+    includes(remoteModule)
+    
     single<DownloadRepository> { DownloadRepositoryImpl(get()) }
     single<UpdatesRepository> { UpdatesRepositoryImpl(get()) }
     single<LibraryRepository> { LibraryRepositoryImpl(get()) }

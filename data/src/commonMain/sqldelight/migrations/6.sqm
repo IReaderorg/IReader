@@ -1,0 +1,36 @@
+-- Migration 6: Add review tables
+-- This migration adds support for book and chapter reviews
+
+-- Create book reviews table
+CREATE TABLE IF NOT EXISTS bookReview (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    book_title TEXT NOT NULL,
+    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    review_text TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    synced INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(book_title)
+);
+
+CREATE INDEX IF NOT EXISTS idx_book_review_title ON bookReview(book_title);
+CREATE INDEX IF NOT EXISTS idx_book_review_rating ON bookReview(rating DESC);
+CREATE INDEX IF NOT EXISTS idx_book_review_synced ON bookReview(synced) WHERE synced = 0;
+
+-- Create chapter reviews table
+CREATE TABLE IF NOT EXISTS chapterReview (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    book_title TEXT NOT NULL,
+    chapter_name TEXT NOT NULL,
+    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    review_text TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    synced INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(book_title, chapter_name)
+);
+
+CREATE INDEX IF NOT EXISTS idx_chapter_review_book ON chapterReview(book_title);
+CREATE INDEX IF NOT EXISTS idx_chapter_review_book_chapter ON chapterReview(book_title, chapter_name);
+CREATE INDEX IF NOT EXISTS idx_chapter_review_rating ON chapterReview(rating DESC);
+CREATE INDEX IF NOT EXISTS idx_chapter_review_synced ON chapterReview(synced) WHERE synced = 0;

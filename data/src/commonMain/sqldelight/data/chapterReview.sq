@@ -1,0 +1,52 @@
+-- Chapter reviews table (local)
+-- Reviews are based on normalized book title + chapter name - shared across all sources
+CREATE TABLE IF NOT EXISTS chapterReview (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    book_title TEXT NOT NULL,
+    chapter_name TEXT NOT NULL,
+    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    review_text TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    synced INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(book_title, chapter_name)
+);
+
+CREATE INDEX IF NOT EXISTS idx_chapter_review_book ON chapterReview(book_title);
+CREATE INDEX IF NOT EXISTS idx_chapter_review_book_chapter ON chapterReview(book_title, chapter_name);
+CREATE INDEX IF NOT EXISTS idx_chapter_review_rating ON chapterReview(rating DESC);
+CREATE INDEX IF NOT EXISTS idx_chapter_review_synced ON chapterReview(synced) WHERE synced = 0;
+
+-- Queries
+selectAll:
+SELECT * FROM chapterReview ORDER BY updated_at DESC;
+
+selectByBookTitle:
+SELECT * FROM chapterReview WHERE book_title = ? ORDER BY chapter_name;
+
+selectByBookAndChapter:
+SELECT * FROM chapterReview WHERE book_title = ? AND chapter_name = ? LIMIT 1;
+
+selectUnsynced:
+SELECT * FROM chapterReview WHERE synced = 0;
+
+insert:
+INSERT OR REPLACE INTO chapterReview(book_title, chapter_name, rating, review_text, created_at, updated_at, synced)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE chapterReview 
+SET rating = ?, review_text = ?, updated_at = ?, synced = 0
+WHERE book_title = ? AND chapter_name = ?;
+
+markSynced:
+UPDATE chapterReview SET synced = 1 WHERE book_title = ? AND chapter_name = ?;
+
+delete:
+DELETE FROM chapterReview WHERE book_title = ? AND chapter_name = ?;
+
+deleteByBook:
+DELETE FROM chapterReview WHERE book_title = ?;
+
+deleteAll:
+DELETE FROM chapterReview;

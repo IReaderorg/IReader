@@ -78,14 +78,21 @@ android {
         buildConfigField("String", "VERSION_NAME", "\"${ProjectConfig.versionName}\"")
         buildConfigField("int", "VERSION_CODE", "${ProjectConfig.versionCode}")
         
-        // Supabase configuration - Load from local.properties or use empty defaults
+        // Supabase configuration
+        // Priority: 1. Environment variables (CI/CD), 2. local.properties (dev), 3. Empty (requires user config)
         val properties = Properties()
         val localPropertiesFile = rootProject.file("local.properties")
         if (localPropertiesFile.exists()) {
             properties.load(localPropertiesFile.inputStream())
         }
-        buildConfigField("String", "SUPABASE_URL", "\"${properties.getProperty("supabase.url", "")}\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${properties.getProperty("supabase.anon.key", "")}\"")
+        
+        val supabaseUrl = System.getenv("SUPABASE_URL") 
+            ?: properties.getProperty("supabase.url", "")
+        val supabaseAnonKey = System.getenv("SUPABASE_ANON_KEY") 
+            ?: properties.getProperty("supabase.anon.key", "")
+        
+        buildConfigField("String", "SUPABASE_URL", "\"${supabaseUrl}\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${supabaseAnonKey}\"")
     }
     dependenciesInfo {
         includeInApk = false

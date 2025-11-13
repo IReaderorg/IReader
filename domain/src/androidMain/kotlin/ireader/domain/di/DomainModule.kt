@@ -41,6 +41,9 @@ import org.koin.dsl.module
 
 @OptIn(ExperimentalTextApi::class)
 actual val DomainModule = module {
+    // Include sync module for sync functionality
+    includes(syncModule)
+    
     worker {
         DownloaderService(
             androidContext(),

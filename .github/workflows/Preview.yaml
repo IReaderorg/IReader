@@ -101,8 +101,14 @@ jobs:
           echo "COMMIT_COUNT=$commit_count" >> $GITHUB_ENV
       - name: Build rpm Package
         if: ${{ matrix.runtime == 'linux-fedora-x64' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace fedora:latest bash -c "
+          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace \
+            -e SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
+            -e SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}" \
+            fedora:latest bash -c "
             dnf install -y java-21-openjdk-devel java-21-openjdk-jmods rpm-build findutils &&
             export JAVA_HOME=/usr/lib/jvm/java-21-openjdk &&
             export PATH=\$JAVA_HOME/bin:\$PATH &&
@@ -112,6 +118,9 @@ jobs:
       - name: Build
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
         uses: gradle/gradle-build-action@v2
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         with:
           arguments: >
             ${{ matrix.build }}

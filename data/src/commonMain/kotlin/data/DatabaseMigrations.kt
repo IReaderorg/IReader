@@ -11,7 +11,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 4
+    const val CURRENT_VERSION = 6
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -67,8 +67,10 @@ object DatabaseMigrations {
             1 -> migrateV1toV2(driver)
             2 -> migrateV2toV3(driver)
             3 -> migrateV3toV4(driver)
+            4 -> migrateV4toV5(driver)
+            5 -> migrateV5toV6(driver)
             // Add more migration cases as the database evolves
-            // 4 -> migrateV4toV5(driver)
+            // 6 -> migrateV6toV7(driver)
             // etc.
         }
     }
@@ -87,6 +89,111 @@ object DatabaseMigrations {
         // This migration is now handled by the SQLDelight migration file (1.sqm)
         // SQLDelight will apply the SQL statements in that file directly
         // No additional SQL execution is needed here
+    }
+    
+    /**
+     * Migration from version 5 to version 6
+     * Adds book and chapter review tables
+     */
+    private fun migrateV5toV6(driver: SqlDriver) {
+        try {
+            println("Starting migration from version 5 to 6...")
+            
+            // Create book reviews table
+            val createBookReviewSql = """
+                CREATE TABLE IF NOT EXISTS bookReview (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    book_title TEXT NOT NULL,
+                    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+                    review_text TEXT NOT NULL,
+                    created_at INTEGER NOT NULL,
+                    updated_at INTEGER NOT NULL,
+                    synced INTEGER NOT NULL DEFAULT 0,
+                    UNIQUE(book_title)
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createBookReviewSql, 0)
+            println("Created bookReview table")
+            
+            // Create indexes for book reviews
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_book_review_title ON bookReview(book_title);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_book_review_rating ON bookReview(rating DESC);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_book_review_synced ON bookReview(synced) WHERE synced = 0;", 0)
+            println("Created indexes for bookReview table")
+            
+            // Create chapter reviews table
+            val createChapterReviewSql = """
+                CREATE TABLE IF NOT EXISTS chapterReview (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    book_title TEXT NOT NULL,
+                    chapter_name TEXT NOT NULL,
+                    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+                    review_text TEXT NOT NULL,
+                    created_at INTEGER NOT NULL,
+                    updated_at INTEGER NOT NULL,
+                    synced INTEGER NOT NULL DEFAULT 0,
+                    UNIQUE(book_title, chapter_name)
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createChapterReviewSql, 0)
+            println("Created chapterReview table")
+            
+            // Create indexes for chapter reviews
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_chapter_review_book ON chapterReview(book_title);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_chapter_review_book_chapter ON chapterReview(book_title, chapter_name);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_chapter_review_rating ON chapterReview(rating DESC);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_chapter_review_synced ON chapterReview(synced) WHERE synced = 0;", 0)
+            println("Created indexes for chapterReview table")
+            
+            println("Successfully migrated to version 6")
+            
+        } catch (e: Exception) {
+            println("Error migrating to version 6: ${e.message}")
+            e.printStackTrace()
+            // Don't throw - allow the app to continue even if migration fails
+        }
+    }
+    
+    /**
+     * Migration from version 4 to version 5
+     * Fixes sync_queue table and adds indexes for better performance
+     */
+    private fun migrateV4toV5(driver: SqlDriver) {
+        try {
+            println("Starting migration from version 4 to 5...")
+            
+            // Drop and recreate sync_queue table to ensure clean state
+            driver.execute(null, "DROP TABLE IF EXISTS sync_queue;", 0)
+            println("Dropped old sync_queue table")
+            
+            // Create sync_queue table with proper schema
+            val createSyncQueueSql = """
+                CREATE TABLE sync_queue (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    book_id TEXT NOT NULL,
+                    data TEXT NOT NULL,
+                    timestamp INTEGER NOT NULL,
+                    retry_count INTEGER DEFAULT 0
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createSyncQueueSql, 0)
+            println("Created new sync_queue table")
+            
+            // Create indexes for better performance
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_sync_queue_timestamp ON sync_queue(timestamp ASC);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_sync_queue_book_id ON sync_queue(book_id);", 0)
+            println("Created indexes for sync_queue table")
+            
+            println("Successfully migrated to version 5")
+            
+        } catch (e: Exception) {
+            println("Error migrating to version 5: ${e.message}")
+            e.printStackTrace()
+            // Don't throw - allow the app to continue even if migration fails
+        }
     }
     
     /**

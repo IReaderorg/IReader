@@ -83,6 +83,9 @@ object MoreScreenSpec : Tab {
                 },
                 onWeb3Profile = {
                     navigator.push(ireader.presentation.ui.settings.auth.ProfileScreen())
+                },
+                onSupabaseConfig = {
+                    navigator.push(ireader.presentation.ui.settings.sync.SupabaseConfigScreen())
                 }
             )
         }

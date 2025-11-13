@@ -85,6 +85,9 @@ val PresentationModules = module {
     // Authentication ViewModels
     factory  { ireader.presentation.ui.settings.auth.AuthViewModel(get()) }
     factory  { ireader.presentation.ui.settings.auth.ProfileViewModel(get()) }
+    
+    // Sync ViewModels
+    factory  { ireader.presentation.ui.settings.sync.SupabaseConfigViewModel(get(), get()) }
 
     factory <ChapterStateImpl> { ChapterStateImpl() }
     factory <DetailStateImpl> { DetailStateImpl() }

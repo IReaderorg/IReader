@@ -104,4 +104,29 @@ interface RemoteRepository {
      * @return Flow emitting ConnectionStatus updates
      */
     fun observeConnectionStatus(): Flow<ConnectionStatus>
+    
+    // Book Sync
+    
+    /**
+     * Sync a book to the remote backend
+     * Only syncs essential metadata - no chapter content
+     * @param book The synced book data
+     * @return Result indicating success or failure
+     */
+    suspend fun syncBook(book: ireader.domain.models.remote.SyncedBook): Result<Unit>
+    
+    /**
+     * Get all synced books for a user
+     * @param userId The user's ID
+     * @return Result containing list of synced books
+     */
+    suspend fun getSyncedBooks(userId: String): Result<List<ireader.domain.models.remote.SyncedBook>>
+    
+    /**
+     * Delete a synced book
+     * @param userId The user's ID
+     * @param bookId The book ID to delete
+     * @return Result indicating success or failure
+     */
+    suspend fun deleteSyncedBook(userId: String, bookId: String): Result<Unit>
 }

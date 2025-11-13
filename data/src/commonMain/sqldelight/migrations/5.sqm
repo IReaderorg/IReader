@@ -1,0 +1,17 @@
+-- Migration 5: Add sync-related tables and fix sync_queue
+-- This migration adds support for Supabase sync feature
+
+-- Drop and recreate sync_queue table to ensure clean state
+DROP TABLE IF EXISTS sync_queue;
+
+CREATE TABLE sync_queue (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    book_id TEXT NOT NULL,
+    data TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,
+    retry_count INTEGER DEFAULT 0
+);
+
+-- Create index for faster queries
+CREATE INDEX IF NOT EXISTS idx_sync_queue_timestamp ON sync_queue(timestamp ASC);
+CREATE INDEX IF NOT EXISTS idx_sync_queue_book_id ON sync_queue(book_id);
