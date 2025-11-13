@@ -17,7 +17,17 @@ data class SupabaseConfigState(
     val isTesting: Boolean = false,
     val isSyncing: Boolean = false,
     val testResult: String? = null,
-    val error: String? = null
+    val error: String? = null,
+    // Multi-endpoint configuration
+    val useMultiEndpoint: Boolean = false,
+    val booksUrl: String = "",
+    val booksApiKey: String = "",
+    val progressUrl: String = "",
+    val progressApiKey: String = "",
+    val reviewsUrl: String = "",
+    val reviewsApiKey: String = "",
+    val communityUrl: String = "",
+    val communityApiKey: String = ""
 )
 
 class SupabaseConfigViewModel(
@@ -39,7 +49,17 @@ class SupabaseConfigViewModel(
                 supabaseApiKey = supabasePreferences.supabaseApiKey().get(),
                 autoSyncEnabled = supabasePreferences.autoSyncEnabled().get(),
                 syncOnWifiOnly = supabasePreferences.syncOnWifiOnly().get(),
-                lastSyncTime = supabasePreferences.lastSyncTime().get()
+                lastSyncTime = supabasePreferences.lastSyncTime().get(),
+                // Multi-endpoint
+                useMultiEndpoint = supabasePreferences.useMultiEndpoint().get(),
+                booksUrl = supabasePreferences.booksUrl().get(),
+                booksApiKey = supabasePreferences.booksApiKey().get(),
+                progressUrl = supabasePreferences.progressUrl().get(),
+                progressApiKey = supabasePreferences.progressApiKey().get(),
+                reviewsUrl = supabasePreferences.reviewsUrl().get(),
+                reviewsApiKey = supabasePreferences.reviewsApiKey().get(),
+                communityUrl = supabasePreferences.communityUrl().get(),
+                communityApiKey = supabasePreferences.communityApiKey().get()
             )}
         }
     }
@@ -188,5 +208,90 @@ class SupabaseConfigViewModel(
     
     fun clearError() {
         mutableState.update { it.copy(error = null) }
+    }
+    
+    // Multi-endpoint configuration methods
+    fun setUseMultiEndpoint(useMulti: Boolean) {
+        mutableState.update { it.copy(useMultiEndpoint = useMulti) }
+    }
+    
+    fun setBooksUrl(url: String) {
+        mutableState.update { it.copy(booksUrl = url) }
+    }
+    
+    fun setBooksApiKey(apiKey: String) {
+        mutableState.update { it.copy(booksApiKey = apiKey) }
+    }
+    
+    fun setProgressUrl(url: String) {
+        mutableState.update { it.copy(progressUrl = url) }
+    }
+    
+    fun setProgressApiKey(apiKey: String) {
+        mutableState.update { it.copy(progressApiKey = apiKey) }
+    }
+    
+    fun setReviewsUrl(url: String) {
+        mutableState.update { it.copy(reviewsUrl = url) }
+    }
+    
+    fun setReviewsApiKey(apiKey: String) {
+        mutableState.update { it.copy(reviewsApiKey = apiKey) }
+    }
+    
+    fun setCommunityUrl(url: String) {
+        mutableState.update { it.copy(communityUrl = url) }
+    }
+    
+    fun setCommunityApiKey(apiKey: String) {
+        mutableState.update { it.copy(communityApiKey = apiKey) }
+    }
+    
+    fun saveMultiEndpointConfiguration() {
+        screenModelScope.launch {
+            try {
+                // Save primary endpoint
+                supabasePreferences.supabaseUrl().set(state.value.supabaseUrl)
+                supabasePreferences.supabaseApiKey().set(state.value.supabaseApiKey)
+                supabasePreferences.useMultiEndpoint().set(state.value.useMultiEndpoint)
+                
+                // Save books endpoint
+                supabasePreferences.booksUrl().set(state.value.booksUrl)
+                supabasePreferences.booksApiKey().set(state.value.booksApiKey)
+                supabasePreferences.booksEnabled().set(
+                    state.value.booksUrl.isNotEmpty() && state.value.booksApiKey.isNotEmpty()
+                )
+                
+                // Save progress endpoint
+                supabasePreferences.progressUrl().set(state.value.progressUrl)
+                supabasePreferences.progressApiKey().set(state.value.progressApiKey)
+                supabasePreferences.progressEnabled().set(
+                    state.value.progressUrl.isNotEmpty() && state.value.progressApiKey.isNotEmpty()
+                )
+                
+                // Save reviews endpoint
+                supabasePreferences.reviewsUrl().set(state.value.reviewsUrl)
+                supabasePreferences.reviewsApiKey().set(state.value.reviewsApiKey)
+                supabasePreferences.reviewsEnabled().set(
+                    state.value.reviewsUrl.isNotEmpty() && state.value.reviewsApiKey.isNotEmpty()
+                )
+                
+                // Save community endpoint
+                supabasePreferences.communityUrl().set(state.value.communityUrl)
+                supabasePreferences.communityApiKey().set(state.value.communityApiKey)
+                supabasePreferences.communityEnabled().set(
+                    state.value.communityUrl.isNotEmpty() && state.value.communityApiKey.isNotEmpty()
+                )
+                
+                mutableState.update { it.copy(
+                    testResult = "✓ Multi-endpoint configuration saved successfully!",
+                    error = null
+                )}
+            } catch (e: Exception) {
+                mutableState.update { it.copy(
+                    error = "Failed to save multi-endpoint configuration: ${e.message}"
+                )}
+            }
+        }
     }
 }

@@ -1,12 +1,56 @@
 package ireader.presentation.ui.settings.sync
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.CloudSync
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -64,6 +108,33 @@ class SupabaseConfigScreen : Screen {
                         isTesting = state.isTesting,
                         testResult = state.testResult
                     )
+                }
+                
+                // Multi-endpoint configuration
+                if (state.useCustomSupabase) {
+                    item {
+                        MultiEndpointCard(
+                            useMultiEndpoint = state.useMultiEndpoint,
+                            booksUrl = state.booksUrl,
+                            booksApiKey = state.booksApiKey,
+                            progressUrl = state.progressUrl,
+                            progressApiKey = state.progressApiKey,
+                            reviewsUrl = state.reviewsUrl,
+                            reviewsApiKey = state.reviewsApiKey,
+                            communityUrl = state.communityUrl,
+                            communityApiKey = state.communityApiKey,
+                            onUseMultiEndpointChanged = { viewModel.setUseMultiEndpoint(it) },
+                            onBooksUrlChanged = { viewModel.setBooksUrl(it) },
+                            onBooksApiKeyChanged = { viewModel.setBooksApiKey(it) },
+                            onProgressUrlChanged = { viewModel.setProgressUrl(it) },
+                            onProgressApiKeyChanged = { viewModel.setProgressApiKey(it) },
+                            onReviewsUrlChanged = { viewModel.setReviewsUrl(it) },
+                            onReviewsApiKeyChanged = { viewModel.setReviewsApiKey(it) },
+                            onCommunityUrlChanged = { viewModel.setCommunityUrl(it) },
+                            onCommunityApiKeyChanged = { viewModel.setCommunityApiKey(it) },
+                            onSave = { viewModel.saveMultiEndpointConfiguration() }
+                        )
+                    }
                 }
                 
                 item {
@@ -547,6 +618,237 @@ private fun SchemaTable(tableName: String, columns: List<String>) {
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun MultiEndpointCard(
+    useMultiEndpoint: Boolean,
+    booksUrl: String,
+    booksApiKey: String,
+    progressUrl: String,
+    progressApiKey: String,
+    reviewsUrl: String,
+    reviewsApiKey: String,
+    communityUrl: String,
+    communityApiKey: String,
+    onUseMultiEndpointChanged: (Boolean) -> Unit,
+    onBooksUrlChanged: (String) -> Unit,
+    onBooksApiKeyChanged: (String) -> Unit,
+    onProgressUrlChanged: (String) -> Unit,
+    onProgressApiKeyChanged: (String) -> Unit,
+    onReviewsUrlChanged: (String) -> Unit,
+    onReviewsApiKeyChanged: (String) -> Unit,
+    onCommunityUrlChanged: (String) -> Unit,
+    onCommunityApiKeyChanged: (String) -> Unit,
+    onSave: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Multi-Endpoint Configuration",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Use separate Supabase projects for better scalability",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                
+                Switch(
+                    checked = useMultiEndpoint,
+                    onCheckedChange = onUseMultiEndpointChanged
+                )
+            }
+            
+            if (useMultiEndpoint) {
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Books Endpoint
+                EndpointSection(
+                    title = "Books Endpoint",
+                    description = "Separate project for book sync data",
+                    icon = Icons.Default.Book,
+                    url = booksUrl,
+                    apiKey = booksApiKey,
+                    onUrlChanged = onBooksUrlChanged,
+                    onApiKeyChanged = onBooksApiKeyChanged
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Progress Endpoint
+                EndpointSection(
+                    title = "Progress Endpoint",
+                    description = "Separate project for reading progress",
+                    icon = Icons.Default.TrendingUp,
+                    url = progressUrl,
+                    apiKey = progressApiKey,
+                    onUrlChanged = onProgressUrlChanged,
+                    onApiKeyChanged = onProgressApiKeyChanged
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Reviews Endpoint (Future)
+                EndpointSection(
+                    title = "Reviews Endpoint",
+                    description = "Coming soon - Reviews and ratings",
+                    icon = Icons.Default.Star,
+                    url = reviewsUrl,
+                    apiKey = reviewsApiKey,
+                    onUrlChanged = onReviewsUrlChanged,
+                    onApiKeyChanged = onReviewsApiKeyChanged,
+                    enabled = false,
+                    badge = "Coming Soon"
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Community Endpoint (Future)
+                EndpointSection(
+                    title = "Community Endpoint",
+                    description = "Coming soon - Social features",
+                    icon = Icons.Default.People,
+                    url = communityUrl,
+                    apiKey = communityApiKey,
+                    onUrlChanged = onCommunityUrlChanged,
+                    onApiKeyChanged = onCommunityApiKeyChanged,
+                    enabled = false,
+                    badge = "Coming Soon"
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Button(
+                    onClick = onSave,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.Save, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Save Multi-Endpoint Configuration")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EndpointSection(
+    title: String,
+    description: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    url: String,
+    apiKey: String,
+    onUrlChanged: (String) -> Unit,
+    onApiKeyChanged: (String) -> Unit,
+    enabled: Boolean = true,
+    badge: String? = null
+) {
+    var showApiKey by remember { mutableStateOf(false) }
+    
+    Column {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp)
+            )
+            
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
+            badge?.let {
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = MaterialTheme.colorScheme.tertiary
+                ) {
+                    Text(
+                        text = it,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onTertiary
+                    )
+                }
+            }
+        }
+        
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 28.dp)
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        OutlinedTextField(
+            value = url,
+            onValueChange = onUrlChanged,
+            label = { Text("URL") },
+            placeholder = { Text("https://$title-project.supabase.co") },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            singleLine = true,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            )
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        OutlinedTextField(
+            value = apiKey,
+            onValueChange = onApiKeyChanged,
+            label = { Text("API Key") },
+            placeholder = { Text("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...") },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            trailingIcon = {
+                IconButton(onClick = { showApiKey = !showApiKey }) {
+                    Icon(
+                        imageVector = if (showApiKey) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        contentDescription = if (showApiKey) "Hide" else "Show"
+                    )
+                }
+            },
+            visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
+            singleLine = true,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            )
+        )
     }
 }
 

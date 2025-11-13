@@ -78,7 +78,7 @@ android {
         buildConfigField("String", "VERSION_NAME", "\"${ProjectConfig.versionName}\"")
         buildConfigField("int", "VERSION_CODE", "${ProjectConfig.versionCode}")
         
-        // Supabase configuration
+        // Supabase configuration - Multi-endpoint support
         // Priority: 1. Environment variables (CI/CD), 2. local.properties (dev), 3. Empty (requires user config)
         val properties = Properties()
         val localPropertiesFile = rootProject.file("local.properties")
@@ -86,13 +86,49 @@ android {
             properties.load(localPropertiesFile.inputStream())
         }
         
+        // Primary/Users endpoint (required)
         val supabaseUrl = System.getenv("SUPABASE_URL") 
             ?: properties.getProperty("supabase.url", "")
         val supabaseAnonKey = System.getenv("SUPABASE_ANON_KEY") 
             ?: properties.getProperty("supabase.anon.key", "")
         
+        // Books endpoint (optional)
+        val supabaseBooksUrl = System.getenv("SUPABASE_BOOKS_URL")
+            ?: properties.getProperty("supabase.books.url", "")
+        val supabaseBooksKey = System.getenv("SUPABASE_BOOKS_KEY")
+            ?: properties.getProperty("supabase.books.key", "")
+        
+        // Progress endpoint (optional)
+        val supabaseProgressUrl = System.getenv("SUPABASE_PROGRESS_URL")
+            ?: properties.getProperty("supabase.progress.url", "")
+        val supabaseProgressKey = System.getenv("SUPABASE_PROGRESS_KEY")
+            ?: properties.getProperty("supabase.progress.key", "")
+        
+        // Reviews endpoint (optional - future)
+        val supabaseReviewsUrl = System.getenv("SUPABASE_REVIEWS_URL")
+            ?: properties.getProperty("supabase.reviews.url", "")
+        val supabaseReviewsKey = System.getenv("SUPABASE_REVIEWS_KEY")
+            ?: properties.getProperty("supabase.reviews.key", "")
+        
+        // Community endpoint (optional - future)
+        val supabaseCommunityUrl = System.getenv("SUPABASE_COMMUNITY_URL")
+            ?: properties.getProperty("supabase.community.url", "")
+        val supabaseCommunityKey = System.getenv("SUPABASE_COMMUNITY_KEY")
+            ?: properties.getProperty("supabase.community.key", "")
+        
+        // Primary endpoint (backward compatible)
         buildConfigField("String", "SUPABASE_URL", "\"${supabaseUrl}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${supabaseAnonKey}\"")
+        
+        // Multi-endpoint configuration
+        buildConfigField("String", "SUPABASE_BOOKS_URL", "\"${supabaseBooksUrl}\"")
+        buildConfigField("String", "SUPABASE_BOOKS_KEY", "\"${supabaseBooksKey}\"")
+        buildConfigField("String", "SUPABASE_PROGRESS_URL", "\"${supabaseProgressUrl}\"")
+        buildConfigField("String", "SUPABASE_PROGRESS_KEY", "\"${supabaseProgressKey}\"")
+        buildConfigField("String", "SUPABASE_REVIEWS_URL", "\"${supabaseReviewsUrl}\"")
+        buildConfigField("String", "SUPABASE_REVIEWS_KEY", "\"${supabaseReviewsKey}\"")
+        buildConfigField("String", "SUPABASE_COMMUNITY_URL", "\"${supabaseCommunityUrl}\"")
+        buildConfigField("String", "SUPABASE_COMMUNITY_KEY", "\"${supabaseCommunityKey}\"")
     }
     dependenciesInfo {
         includeInApk = false

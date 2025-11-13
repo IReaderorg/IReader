@@ -1,0 +1,21 @@
+# Test Configuration: Single Endpoint
+# Copy this to local.properties for testing single endpoint setup
+
+# Primary endpoint (required) - all data in one project
+supabase.url=https://xyzcompany.supabase.co
+supabase.anon.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example
+
+# Leave multi-endpoint fields empty for single endpoint mode
+supabase.books.url=
+supabase.books.key=
+supabase.progress.url=
+supabase.progress.key=
+supabase.reviews.url=
+supabase.reviews.key=
+supabase.community.url=
+supabase.community.key=
+
+# Expected behavior:
+# - All data (users, books, progress) in single Supabase project
+# - Backward compatible with existing setup
+# - No changes to database structure needed

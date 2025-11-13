@@ -76,10 +76,26 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_BOOKS_URL: ${{ secrets.SUPABASE_BOOKS_URL }}
+          SUPABASE_BOOKS_KEY: ${{ secrets.SUPABASE_BOOKS_KEY }}
+          SUPABASE_PROGRESS_URL: ${{ secrets.SUPABASE_PROGRESS_URL }}
+          SUPABASE_PROGRESS_KEY: ${{ secrets.SUPABASE_PROGRESS_KEY }}
+          SUPABASE_REVIEWS_URL: ${{ secrets.SUPABASE_REVIEWS_URL }}
+          SUPABASE_REVIEWS_KEY: ${{ secrets.SUPABASE_REVIEWS_KEY }}
+          SUPABASE_COMMUNITY_URL: ${{ secrets.SUPABASE_COMMUNITY_URL }}
+          SUPABASE_COMMUNITY_KEY: ${{ secrets.SUPABASE_COMMUNITY_KEY }}
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace \
             -e SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
             -e SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}" \
+            -e SUPABASE_BOOKS_URL="${{ secrets.SUPABASE_BOOKS_URL }}" \
+            -e SUPABASE_BOOKS_KEY="${{ secrets.SUPABASE_BOOKS_KEY }}" \
+            -e SUPABASE_PROGRESS_URL="${{ secrets.SUPABASE_PROGRESS_URL }}" \
+            -e SUPABASE_PROGRESS_KEY="${{ secrets.SUPABASE_PROGRESS_KEY }}" \
+            -e SUPABASE_REVIEWS_URL="${{ secrets.SUPABASE_REVIEWS_URL }}" \
+            -e SUPABASE_REVIEWS_KEY="${{ secrets.SUPABASE_REVIEWS_KEY }}" \
+            -e SUPABASE_COMMUNITY_URL="${{ secrets.SUPABASE_COMMUNITY_URL }}" \
+            -e SUPABASE_COMMUNITY_KEY="${{ secrets.SUPABASE_COMMUNITY_KEY }}" \
             fedora:latest bash -c "
             dnf install -y java-21-openjdk-devel java-21-openjdk-jmods rpm-build findutils &&
             export JAVA_HOME=/usr/lib/jvm/java-21-openjdk &&
@@ -93,6 +109,14 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_BOOKS_URL: ${{ secrets.SUPABASE_BOOKS_URL }}
+          SUPABASE_BOOKS_KEY: ${{ secrets.SUPABASE_BOOKS_KEY }}
+          SUPABASE_PROGRESS_URL: ${{ secrets.SUPABASE_PROGRESS_URL }}
+          SUPABASE_PROGRESS_KEY: ${{ secrets.SUPABASE_PROGRESS_KEY }}
+          SUPABASE_REVIEWS_URL: ${{ secrets.SUPABASE_REVIEWS_URL }}
+          SUPABASE_REVIEWS_KEY: ${{ secrets.SUPABASE_REVIEWS_KEY }}
+          SUPABASE_COMMUNITY_URL: ${{ secrets.SUPABASE_COMMUNITY_URL }}
+          SUPABASE_COMMUNITY_KEY: ${{ secrets.SUPABASE_COMMUNITY_KEY }}
         with:
           arguments: >
             ${{ matrix.build }}

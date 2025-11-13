@@ -1,19 +1,50 @@
-## This file must *NOT* be checked into Version Control Systems,
-# as it contains information specific to your local configuration.
-#
-# Location of the SDK. This is only used by Gradle.
-# For customization when using a Version Control System, please read the
-# header note.
+# Supabase Configuration Example
+# Copy this file to local.properties and fill in your values
 
-# Android SDK location
-sdk.dir=/path/to/your/android/sdk
-
-# Supabase Configuration (Optional)
-# Add your Supabase credentials here to enable sync features
-# Get these from: https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api
-
-# Your Supabase project URL
+# ============================================
+# PRIMARY ENDPOINT (Required)
+# ============================================
+# This is your main Supabase project for users and authentication
 supabase.url=https://your-project.supabase.co
-
-# Your Supabase anon/public key (NOT the service_role key!)
 supabase.anon.key=your-anon-key-here
+
+# ============================================
+# BOOKS ENDPOINT (Optional)
+# ============================================
+# Separate Supabase project for book sync data
+# Leave empty to use primary endpoint
+supabase.books.url=
+supabase.books.key=
+
+# ============================================
+# PROGRESS ENDPOINT (Optional)
+# ============================================
+# Separate Supabase project for reading progress
+# Leave empty to use primary endpoint
+supabase.progress.url=
+supabase.progress.key=
+
+# ============================================
+# REVIEWS ENDPOINT (Optional - Future)
+# ============================================
+# Separate Supabase project for reviews and ratings
+# Leave empty to use primary endpoint
+supabase.reviews.url=
+supabase.reviews.key=
+
+# ============================================
+# COMMUNITY ENDPOINT (Optional - Future)
+# ============================================
+# Separate Supabase project for community features
+# Leave empty to use primary endpoint
+supabase.community.url=
+supabase.community.key=
+
+# ============================================
+# NOTES
+# ============================================
+# 1. Never commit local.properties to git (it's in .gitignore)
+# 2. For single endpoint setup, only fill in primary endpoint
+# 3. For multi-endpoint setup, fill in additional endpoints as needed
+# 4. Empty values will fall back to primary endpoint
+# 5. Get your Supabase URL and keys from: https://app.supabase.com/project/_/settings/api

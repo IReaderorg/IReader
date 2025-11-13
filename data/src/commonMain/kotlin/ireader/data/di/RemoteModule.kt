@@ -18,13 +18,11 @@ import org.koin.dsl.module
  */
 val remoteModule = module {
     
-    // Supabase client
-    single<SupabaseClient> {
+    // Supabase Client Provider (Multi-endpoint support)
+    single<ireader.domain.data.repository.SupabaseClientProvider> {
         val prefs = get<SupabasePreferences>()
         
         // Load credentials from platform-specific sources
-        // Android: BuildConfig (from local.properties or env vars)
-        // Desktop: config.properties or env vars
         val platformUrl = try {
             ireader.domain.config.PlatformConfig.getSupabaseUrl()
         } catch (e: Exception) {
@@ -37,9 +35,37 @@ val remoteModule = module {
             ""
         }
         
+        // Load multi-endpoint platform configs
+        val platformBooksUrl = try {
+            ireader.domain.config.PlatformConfig.getSupabaseBooksUrl()
+        } catch (e: Exception) {
+            ""
+        }
+        
+        val platformBooksKey = try {
+            ireader.domain.config.PlatformConfig.getSupabaseBooksKey()
+        } catch (e: Exception) {
+            ""
+        }
+        
+        val platformProgressUrl = try {
+            ireader.domain.config.PlatformConfig.getSupabaseProgressUrl()
+        } catch (e: Exception) {
+            ""
+        }
+        
+        val platformProgressKey = try {
+            ireader.domain.config.PlatformConfig.getSupabaseProgressKey()
+        } catch (e: Exception) {
+            ""
+        }
+        
         // Use custom config if enabled, otherwise use platform config
         val useCustom = prefs.useCustomSupabase().get()
-        val url = if (useCustom) {
+        val useMulti = prefs.useMultiEndpoint().get()
+        
+        // Primary endpoint (Users)
+        val usersUrl = if (useCustom) {
             prefs.supabaseUrl().get()
         } else {
             platformUrl.ifEmpty { 
@@ -47,7 +73,7 @@ val remoteModule = module {
             }
         }
         
-        val key = if (useCustom) {
+        val usersKey = if (useCustom) {
             prefs.supabaseApiKey().get()
         } else {
             platformKey.ifEmpty { 
@@ -55,8 +81,8 @@ val remoteModule = module {
             }
         }
         
-        // Validate credentials before creating client
-        if (url.isEmpty() || key.isEmpty()) {
+        // Validate primary credentials
+        if (usersUrl.isEmpty() || usersKey.isEmpty()) {
             throw IllegalStateException(
                 "Supabase credentials not configured. " +
                 "Please add your credentials to local.properties (Android) or config.properties (Desktop). " +
@@ -65,17 +91,45 @@ val remoteModule = module {
             )
         }
         
-        createSupabaseClient(
-            supabaseUrl = url,
-            supabaseKey = key
-        ) {
-            install(Auth) {
-                // Enable automatic session refresh
-                alwaysAutoRefresh = true
-            }
-            install(Postgrest)
-            install(Realtime)
+        // Create configuration
+        val config = if (useMulti && useCustom) {
+            // Multi-endpoint from user preferences
+            val booksUrl = prefs.booksUrl().get()
+            val booksKey = prefs.booksApiKey().get()
+            val progressUrl = prefs.progressUrl().get()
+            val progressKey = prefs.progressApiKey().get()
+            
+            ireader.domain.models.remote.SupabaseConfig(
+                users = ireader.domain.models.remote.SupabaseEndpointConfig(usersUrl, usersKey, true),
+                books = if (booksUrl.isNotEmpty() && booksKey.isNotEmpty()) {
+                    ireader.domain.models.remote.SupabaseEndpointConfig(booksUrl, booksKey, true)
+                } else null,
+                progress = if (progressUrl.isNotEmpty() && progressKey.isNotEmpty()) {
+                    ireader.domain.models.remote.SupabaseEndpointConfig(progressUrl, progressKey, true)
+                } else null
+            )
+        } else if (!useCustom && platformBooksUrl.isNotEmpty() && platformBooksKey.isNotEmpty()) {
+            // Multi-endpoint from platform config (BuildConfig/System properties)
+            ireader.domain.models.remote.SupabaseConfig(
+                users = ireader.domain.models.remote.SupabaseEndpointConfig(usersUrl, usersKey, true),
+                books = ireader.domain.models.remote.SupabaseEndpointConfig(platformBooksUrl, platformBooksKey, true),
+                progress = if (platformProgressUrl.isNotEmpty() && platformProgressKey.isNotEmpty()) {
+                    ireader.domain.models.remote.SupabaseEndpointConfig(platformProgressUrl, platformProgressKey, true)
+                } else null
+            )
+        } else {
+            // Single endpoint (backward compatible)
+            ireader.domain.models.remote.SupabaseConfig.createDefault(usersUrl, usersKey)
         }
+        
+        ireader.data.remote.SupabaseClientProviderImpl(config)
+    }
+    
+    // Supabase client (backward compatibility - returns primary/users client)
+    single<SupabaseClient> {
+        val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
+        (provider as ireader.data.remote.SupabaseClientProviderImpl)
+            .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS)
     }
     
     // Sync queue

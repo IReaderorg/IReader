@@ -94,7 +94,25 @@ compose.desktop {
         
         // The rest of your application configuration stays the same
         mainClass = "ireader.desktop.MainKt"
-        jvmArgs += listOf("-Xmx2G")  // Increase JVM memory
+        
+        // Supabase configuration - Multi-endpoint support
+        // Load from environment variables or system properties
+        val supabaseUrl = System.getenv("SUPABASE_URL") ?: System.getProperty("supabase.url", "")
+        val supabaseAnonKey = System.getenv("SUPABASE_ANON_KEY") ?: System.getProperty("supabase.anon.key", "")
+        val supabaseBooksUrl = System.getenv("SUPABASE_BOOKS_URL") ?: System.getProperty("supabase.books.url", "")
+        val supabaseBooksKey = System.getenv("SUPABASE_BOOKS_KEY") ?: System.getProperty("supabase.books.key", "")
+        val supabaseProgressUrl = System.getenv("SUPABASE_PROGRESS_URL") ?: System.getProperty("supabase.progress.url", "")
+        val supabaseProgressKey = System.getenv("SUPABASE_PROGRESS_KEY") ?: System.getProperty("supabase.progress.key", "")
+        
+        jvmArgs += listOf(
+            "-Xmx2G",  // Increase JVM memory
+            "-Dsupabase.url=$supabaseUrl",
+            "-Dsupabase.anon.key=$supabaseAnonKey",
+            "-Dsupabase.books.url=$supabaseBooksUrl",
+            "-Dsupabase.books.key=$supabaseBooksKey",
+            "-Dsupabase.progress.url=$supabaseProgressUrl",
+            "-Dsupabase.progress.key=$supabaseProgressKey"
+        )
         
         nativeDistributions {
             // Package a JRE with the application

@@ -5,15 +5,23 @@ package ireader.domain.config
  * Provides Supabase credentials from platform-specific sources
  */
 expect object PlatformConfig {
-    /**
-     * Get Supabase URL from platform-specific source
-     * Android: BuildConfig, Desktop: config.properties or env vars
-     */
+    // Primary endpoint (Users)
     fun getSupabaseUrl(): String
-    
-    /**
-     * Get Supabase anon key from platform-specific source
-     * Android: BuildConfig, Desktop: config.properties or env vars
-     */
     fun getSupabaseAnonKey(): String
+    
+    // Books endpoint
+    fun getSupabaseBooksUrl(): String
+    fun getSupabaseBooksKey(): String
+    
+    // Progress endpoint
+    fun getSupabaseProgressUrl(): String
+    fun getSupabaseProgressKey(): String
+    
+    // Reviews endpoint
+    fun getSupabaseReviewsUrl(): String
+    fun getSupabaseReviewsKey(): String
+    
+    // Community endpoint
+    fun getSupabaseCommunityUrl(): String
+    fun getSupabaseCommunityKey(): String
 }
