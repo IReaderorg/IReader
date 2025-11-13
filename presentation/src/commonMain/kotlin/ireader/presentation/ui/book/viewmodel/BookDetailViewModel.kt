@@ -63,7 +63,8 @@ class BookDetailViewModel(
     private val archiveBookUseCase: ireader.domain.usecases.local.book_usecases.ArchiveBookUseCase,
     private val checkSourceAvailabilityUseCase: ireader.domain.usecases.source.CheckSourceAvailabilityUseCase,
     private val migrateToSourceUseCase: ireader.domain.usecases.source.MigrateToSourceUseCase,
-    private val catalogStore: ireader.domain.catalogs.CatalogStore
+    private val catalogStore: ireader.domain.catalogs.CatalogStore,
+    private val syncUseCases: ireader.domain.usecases.sync.SyncUseCases? = null
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), DetailState by state, ChapterState by chapterState {
     data class Param(val bookId: Long?)
 
@@ -324,19 +325,22 @@ class BookDetailViewModel(
     fun toggleInLibrary(book: Book) {
         this.inLibraryLoading = true
         applicationScope.launch {
-            if (!book.favorite) {
-                withIOContext {
-                    localInsertUseCases.updateBook.update(
-                        book.copy(
-                            favorite = true,
-                            dateAdded = Calendar.getInstance().timeInMillis,
-                        )
-                    )
-                }
-            } else {
-                withIOContext {
-                    deleteUseCase.unFavoriteBook(listOf(book.id))
-                }
+            withIOContext {
+                // Use the clean architecture use case
+                syncUseCases?.toggleBookInLibrary?.invoke(book)
+                    ?: run {
+                        // Fallback if sync is not available
+                        if (!book.favorite) {
+                            localInsertUseCases.updateBook.update(
+                                book.copy(
+                                    favorite = true,
+                                    dateAdded = Calendar.getInstance().timeInMillis,
+                                )
+                            )
+                        } else {
+                            deleteUseCase.unFavoriteBook(listOf(book.id))
+                        }
+                    }
             }
             this@BookDetailViewModel.inLibraryLoading = false
         }

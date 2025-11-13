@@ -222,7 +222,7 @@ private fun UserProfileCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Username",
+                        text = "Name",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
                     )
@@ -498,11 +498,11 @@ private fun UsernameDialog(
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Set Username") },
+        title = { Text("Set Name") },
         text = {
             Column {
                 Text(
-                    text = "Choose a username for your profile",
+                    text = "Choose a name for your profile",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 
@@ -514,7 +514,7 @@ private fun UsernameDialog(
                         username = it
                         error = null
                     },
-                    label = { Text("Username") },
+                    label = { Text("Name") },
                     singleLine = true,
                     isError = error != null,
                     supportingText = error?.let { { Text(it) } }
@@ -525,7 +525,7 @@ private fun UsernameDialog(
             TextButton(
                 onClick = {
                     if (username.length < 3) {
-                        error = "Username must be at least 3 characters"
+                        error = "Name must be at least 3 characters"
                     } else {
                         onConfirm(username)
                     }

@@ -60,13 +60,13 @@ val PresentationModules = module {
 
     factory<ExploreViewModel> { ExploreViewModel(get(), get(), get(), get(),get(), get(), get(),get(),get(),get()) }
     factory  { HistoryViewModel(get(), get(), get()) }
-    factory  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull()) }
     factory  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory<GlobalSearchViewModel> { GlobalSearchViewModel(get(), get(), get(), get(), get(), get()) }
 
     factory  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
-    factory<BookDetailViewModel>  { BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
+    factory<BookDetailViewModel>  { BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),getOrNull()) }
     factory  { MainSettingScreenViewModel(get()) }
     factory  { AppearanceViewModel(get(), get()) }
 
@@ -87,7 +87,7 @@ val PresentationModules = module {
     factory  { ireader.presentation.ui.settings.auth.ProfileViewModel(get()) }
     
     // Sync ViewModels
-    factory  { ireader.presentation.ui.settings.sync.SupabaseConfigViewModel(get(), get()) }
+    factory  { ireader.presentation.ui.settings.sync.SupabaseConfigViewModel(get(), get(), getOrNull(), getOrNull()) }
 
     factory <ChapterStateImpl> { ChapterStateImpl() }
     factory <DetailStateImpl> { DetailStateImpl() }

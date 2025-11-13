@@ -128,7 +128,7 @@ val UseCasesInject = module {
             unFavoriteBook = UnFavoriteBook(
                 get(),
                 bookCategoryRepository = get(),
-                get()
+                get(),get(),get()
             ),
             deleteNotInLibraryBooks = DeleteNotInLibraryBooks(get())
         )

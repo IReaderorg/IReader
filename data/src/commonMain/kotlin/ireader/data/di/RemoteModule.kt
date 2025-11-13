@@ -1,8 +1,8 @@
 package ireader.data.di
 
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.realtime.Realtime
 import ireader.data.remote.RemoteCache
@@ -69,7 +69,10 @@ val remoteModule = module {
             supabaseUrl = url,
             supabaseKey = key
         ) {
-            install(Auth)
+            install(Auth) {
+                // Enable automatic session refresh
+                alwaysAutoRefresh = true
+            }
             install(Postgrest)
             install(Realtime)
         }

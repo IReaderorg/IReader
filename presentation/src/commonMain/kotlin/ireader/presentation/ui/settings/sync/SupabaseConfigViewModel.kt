@@ -22,7 +22,9 @@ data class SupabaseConfigState(
 
 class SupabaseConfigViewModel(
     private val supabasePreferences: SupabasePreferences,
-    private val remoteRepository: RemoteRepository
+    private val remoteRepository: RemoteRepository,
+    private val syncManager: ireader.domain.services.SyncManager? = null,
+    private val bookRepository: ireader.domain.data.repository.BookRepository? = null
 ) : StateScreenModel<SupabaseConfigState>(SupabaseConfigState()) {
     
     init {
@@ -122,24 +124,57 @@ class SupabaseConfigViewModel(
             mutableState.update { it.copy(isSyncing = true) }
             
             try {
+                // Check if sync manager is available
+                if (syncManager == null || bookRepository == null) {
+                    mutableState.update { it.copy(
+                        isSyncing = false,
+                        error = "Sync not available. Please restart the app."
+                    )}
+                    return@launch
+                }
+                
                 // Get current user
                 val userResult = remoteRepository.getCurrentUser()
                 val user = userResult.getOrNull()
                 
-                if (user != null) {
-                    // Update last sync time
+                if (user == null) {
+                    mutableState.update { it.copy(
+                        isSyncing = false,
+                        error = "Please sign in to sync"
+                    )}
+                    return@launch
+                }
+                
+                // Get all books
+                val books = bookRepository.findAllBooks()
+                
+                if (books.isEmpty()) {
+                    mutableState.update { it.copy(
+                        isSyncing = false,
+                        lastSyncTime = System.currentTimeMillis(),
+                        error = "No books to sync"
+                    )}
+                    return@launch
+                }
+                
+                // Perform full sync
+                val syncResult = syncManager.performFullSync(user.id, books)
+                
+                if (syncResult.isSuccess) {
                     val currentTime = System.currentTimeMillis()
                     supabasePreferences.lastSyncTime().set(currentTime)
                     
+                    val favoriteCount = books.count { it.favorite }
                     mutableState.update { it.copy(
                         isSyncing = false,
                         lastSyncTime = currentTime,
+                        testResult = "✓ Synced $favoriteCount favorite books successfully!",
                         error = null
                     )}
                 } else {
                     mutableState.update { it.copy(
                         isSyncing = false,
-                        error = "Please sign in to sync"
+                        error = "Sync failed: ${syncResult.exceptionOrNull()?.message}"
                     )}
                 }
             } catch (e: Exception) {

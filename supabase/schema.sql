@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS public.synced_books (
     CONSTRAINT book_id_synced_not_empty CHECK (LENGTH(book_id) > 0),
     CONSTRAINT title_not_empty CHECK (LENGTH(title) > 0),
     CONSTRAINT book_url_not_empty CHECK (LENGTH(book_url) > 0),
-    CONSTRAINT source_id_positive CHECK (source_id > 0),
+    -- Removed source_id_positive constraint to allow large/negative values
     CONSTRAINT last_read_non_negative CHECK (last_read >= 0)
 );
 

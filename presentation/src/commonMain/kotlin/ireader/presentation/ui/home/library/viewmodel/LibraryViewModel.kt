@@ -61,7 +61,8 @@ class LibraryViewModel(
         val getCategory: CategoriesUseCases,
         private val downloadUnreadChaptersUseCase: DownloadUnreadChaptersUseCase,
         private val archiveBookUseCase: ireader.domain.usecases.local.book_usecases.ArchiveBookUseCase,
-        private val getLastReadNovelUseCase: ireader.domain.usecases.history.GetLastReadNovelUseCase
+        private val getLastReadNovelUseCase: ireader.domain.usecases.history.GetLastReadNovelUseCase,
+        private val syncUseCases: ireader.domain.usecases.sync.SyncUseCases? = null
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), LibraryState by state {
 
     var lastUsedCategory = libraryPreferences.lastUsedCategory().asState()
@@ -120,6 +121,8 @@ class LibraryViewModel(
         // Load last read info
         loadLastReadInfo()
         
+        // Auto-sync is managed by SyncManager in domain layer
+        
         combine(
             libraryPreferences.showAllCategory().stateIn(scope),
             libraryPreferences.showEmptyCategories().stateIn(scope)
@@ -136,6 +139,33 @@ class LibraryViewModel(
                 state.selectedCategoryIndex = index
             }
         }.launchIn(scope)
+    }
+    
+    /**
+     * Trigger sync for books (called when books are modified)
+     */
+    private fun triggerSync(books: List<ireader.domain.models.entities.Book>) {
+        scope.launch {
+            syncUseCases?.syncBooksToRemote?.invoke(books)
+        }
+    }
+    
+    /**
+     * Trigger sync for a single book
+     */
+    private fun triggerSyncForBook(book: ireader.domain.models.entities.Book) {
+        scope.launch {
+            syncUseCases?.syncBookToRemote?.invoke(book)
+        }
+    }
+    
+    /**
+     * Perform full sync of all library books
+     */
+    fun performFullSync() {
+        scope.launch {
+            syncUseCases?.performFullSync?.invoke()
+        }
     }
     
     /**
@@ -355,9 +385,25 @@ fun updateColumnCount(count: Int) {
 }
 
 fun refreshUpdate() {
-    isBookRefreshing = true
-    serviceUseCases.startLibraryUpdateServicesUseCase.start()
-    isBookRefreshing = false
+    scope.launch {
+        isBookRefreshing = true
+        try {
+            // First, sync books from remote using clean architecture use case
+            syncUseCases?.refreshLibraryFromRemote?.invoke()?.let { result ->
+                result.onSuccess { syncResult ->
+                    println("Sync completed: ${syncResult.successMessage}")
+                }
+                result.onFailure { error ->
+                    println("Sync failed: ${error.message}")
+                }
+            }
+            
+            // Then update library metadata
+            serviceUseCases.startLibraryUpdateServicesUseCase.start()
+        } finally {
+            isBookRefreshing = false
+        }
+    }
 }
 
 fun setSelectedPage(index: Int) {
@@ -562,6 +608,11 @@ fun performBatchOperation(operation: ireader.presentation.ui.home.library.compon
                     )
                 }
             }
+            
+            // Trigger sync after batch operation
+            val allBooks = localGetBookUseCases.findAllInLibraryBooks()
+            triggerSync(allBooks)
+            
         } catch (e: Exception) {
             state.batchOperationMessage = "Error: ${e.message}"
         } finally {

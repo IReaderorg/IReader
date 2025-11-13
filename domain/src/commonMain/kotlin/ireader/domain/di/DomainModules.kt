@@ -108,6 +108,8 @@ val DomainServices = module {
         ireader.domain.usecases.local.delete_usecases.book.UnFavoriteBook(
             get(),
             get(),
+            get(),
+            get(),
             get()
         )
     }
@@ -156,6 +158,24 @@ val DomainServices = module {
     // Sync Use Cases
     factory  { ireader.domain.usecases.sync.SyncBooksUseCase(get()) }
     factory  { ireader.domain.usecases.sync.GetSyncedDataUseCase(get()) }
+    factory  { ireader.domain.usecases.sync.FetchAndMergeSyncedBooksUseCase(get(), get(), get()) }
+    factory  { ireader.domain.usecases.sync.RefreshLibraryFromRemoteUseCase(get(), get()) }
+    factory  { ireader.domain.usecases.sync.SyncBookToRemoteUseCase(get(), get()) }
+    factory  { ireader.domain.usecases.sync.SyncBooksToRemoteUseCase(get(), get()) }
+    factory  { ireader.domain.usecases.sync.PerformFullSyncUseCase(get(), get(), get()) }
+    factory  { ireader.domain.usecases.sync.ToggleBookInLibraryUseCase(get(), get(), get()) }
+    
+    // Sync use cases container
+    factory {
+        ireader.domain.usecases.sync.SyncUseCases(
+            syncBookToRemote = get(),
+            syncBooksToRemote = get(),
+            performFullSync = get(),
+            refreshLibraryFromRemote = get(),
+            toggleBookInLibrary = get(),
+            fetchAndMergeSyncedBooks = get()
+        )
+    }
     
     // Sync Manager
     single { 
