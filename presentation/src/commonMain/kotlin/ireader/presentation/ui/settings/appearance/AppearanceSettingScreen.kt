@@ -741,7 +741,7 @@ private fun ThemeItem(
                     Surface(
                         modifier = Modifier.size(32.dp),
                         shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
-                        color = MaterialTheme.colorScheme.primaryContainer,
+                        color = theme.materialColors.primaryContainer,
                         tonalElevation = 2.dp
                     ) {}
                     
@@ -751,7 +751,7 @@ private fun ThemeItem(
                                     .padding(4.dp),
                             imageVector = Icons.Filled.CheckCircle,
                             contentDescription = "theme is selected",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = theme.materialColors.onPrimaryContainer
                     )
                 }
             }
