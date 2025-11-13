@@ -5,7 +5,7 @@ package ireader.domain.models.remote
  */
 data class ReadingProgress(
     val id: String? = null,
-    val userWalletAddress: String,
+    val userId: String,
     val bookId: String,
     val lastChapterSlug: String,
     val lastScrollPosition: Float,

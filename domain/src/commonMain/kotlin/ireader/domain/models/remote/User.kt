@@ -1,11 +1,13 @@
 package ireader.domain.models.remote
 
 /**
- * Domain model representing a user authenticated via Web3 wallet
+ * Domain model representing an authenticated user
  */
 data class User(
-    val walletAddress: String,
+    val id: String,
+    val email: String,
     val username: String?,
+    val ethWalletAddress: String?,
     val createdAt: Long,
     val isSupporter: Boolean
 )

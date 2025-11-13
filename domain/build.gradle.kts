@@ -70,12 +70,6 @@ kotlin {
                 api(libs.koin.core)
 
                 api(libs.coil.core)
-                
-                // Web3 / Ethereum support
-                // Note: web3j uses OkHttp which may conflict with Supabase's Ktor
-                // If issues occur, consider excluding OkHttp from web3j dependencies
-                implementation(libs.web3j.core)
-                implementation(libs.web3j.crypto)
             }
         }
          androidMain {
@@ -116,11 +110,6 @@ kotlin {
                 implementation(kotlinx.stdlib)
                 api(libs.koin.android)
                 api(libs.koin.workManager)
-                
-                // WalletConnect v2 for Web3 wallet integration (using BOM)
-                implementation(project.dependencies.platform(libs.walletconnect.bom))
-                implementation(libs.walletconnect.android)
-                implementation(libs.walletconnect.web3wallet)
             }
         }
         val desktopMain by getting {

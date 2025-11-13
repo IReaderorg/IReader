@@ -40,10 +40,8 @@ IReader Desktop now supports **real browser wallet integration** for production 
 
 ## Supported Wallets
 
-- ✅ MetaMask
-- ✅ Coinbase Wallet (browser extension)
-- ✅ Brave Wallet
-- ✅ Any wallet supporting `window.ethereum` API
+- ✅ MetaMask (primary support)
+- ✅ Any wallet supporting `window.ethereum` API (Brave Wallet, etc.)
 
 ## Development Mode
 

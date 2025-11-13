@@ -4,6 +4,7 @@ import android.app.Service
 import androidx.compose.ui.text.ExperimentalTextApi
 import ireader.core.prefs.PreferenceStore
 import ireader.core.prefs.PreferenceStoreFactory
+import ireader.core.source.LocalCatalogSource
 import ireader.domain.preferences.prefs.AndroidUiPreferences
 import ireader.domain.preferences.prefs.PlatformUiPreferences
 import ireader.domain.services.downloaderService.DefaultNotificationHelper
@@ -18,11 +19,10 @@ import ireader.domain.usecases.epub.EpubCreator
 import ireader.domain.usecases.epub.ImportEpub
 import ireader.domain.usecases.file.AndroidFileSaver
 import ireader.domain.usecases.file.FileSaver
-import ireader.domain.usecases.local.LocalSourceImpl
-import ireader.domain.usecases.local.RefreshLocalLibrary
-import ireader.core.source.LocalCatalogSource
 import ireader.domain.usecases.files.AndroidGetSimpleStorage
 import ireader.domain.usecases.files.GetSimpleStorage
+import ireader.domain.usecases.local.LocalSourceImpl
+import ireader.domain.usecases.local.RefreshLocalLibrary
 import ireader.domain.usecases.preferences.AndroidReaderPrefUseCases
 import ireader.domain.usecases.preferences.SelectedFontStateUseCase
 import ireader.domain.usecases.preferences.TextReaderPrefUseCase
@@ -164,7 +164,7 @@ actual val DomainModule = module {
         )
     }
     
-    // Wallet Integration
+    // Wallet Integration for donations only
     single<ireader.domain.services.WalletIntegrationManager> {
         ireader.domain.services.AndroidWalletIntegrationManager(androidContext())
     }

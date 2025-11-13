@@ -167,19 +167,19 @@ fun MoreScreen(
             }
         }
         
-        // Web3 Profile Section
+        // Profile Section
         item {
             SectionHeader(
-                title = "Web3 Profile",
-                icon = Icons.Filled.AccountBalanceWallet
+                title = "Account",
+                icon = Icons.Filled.AccountCircle
             )
         }
         
         item {
             SettingsItem(
-                title = "Wallet & Sync",
-                description = "Connect wallet and sync reading progress",
-                icon = Icons.Outlined.AccountBalanceWallet,
+                title = "Profile & Sync",
+                description = "Manage your account and sync reading progress",
+                icon = Icons.Outlined.AccountCircle,
                 onClick = onWeb3Profile
             )
         }

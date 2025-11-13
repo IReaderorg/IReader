@@ -10,7 +10,8 @@ import ireader.data.remote.SupabaseRemoteRepository
 import ireader.data.remote.SyncQueue
 import ireader.domain.data.repository.RemoteRepository
 import ireader.domain.models.remote.loadRemoteConfig
-import ireader.domain.usecases.remote.AuthenticateWithWalletUseCase
+import ireader.domain.usecases.remote.SignUpUseCase
+import ireader.domain.usecases.remote.SignInUseCase
 import ireader.domain.usecases.remote.GetCurrentUserUseCase
 import ireader.domain.usecases.remote.GetReadingProgressUseCase
 import ireader.domain.usecases.remote.ObserveConnectionStatusUseCase
@@ -19,6 +20,7 @@ import ireader.domain.usecases.remote.RemoteBackendUseCases
 import ireader.domain.usecases.remote.SignOutUseCase
 import ireader.domain.usecases.remote.SyncReadingProgressUseCase
 import ireader.domain.usecases.remote.UpdateUsernameUseCase
+import ireader.domain.usecases.remote.UpdateEthWalletAddressUseCase
 import org.koin.dsl.module
 
 /**
@@ -99,9 +101,14 @@ val remoteModule = module {
     }
     
     // Use cases (only created if repository is available)
-    factory<AuthenticateWithWalletUseCase?> {
+    factory<SignUpUseCase?> {
         val repository = getOrNull<RemoteRepository>()
-        repository?.let { AuthenticateWithWalletUseCase(it, get()) }
+        repository?.let { SignUpUseCase(it) }
+    }
+    
+    factory<SignInUseCase?> {
+        val repository = getOrNull<RemoteRepository>()
+        repository?.let { SignInUseCase(it) }
     }
     
     factory<GetCurrentUserUseCase?> {
@@ -117,6 +124,11 @@ val remoteModule = module {
     factory<UpdateUsernameUseCase?> {
         val repository = getOrNull<RemoteRepository>()
         repository?.let { UpdateUsernameUseCase(it) }
+    }
+    
+    factory<UpdateEthWalletAddressUseCase?> {
+        val repository = getOrNull<RemoteRepository>()
+        repository?.let { UpdateEthWalletAddressUseCase(it) }
     }
     
     factory<SyncReadingProgressUseCase?> {
@@ -141,23 +153,27 @@ val remoteModule = module {
     
     // Use cases container (only if all use cases are available)
     factory<RemoteBackendUseCases?> {
-        val auth = getOrNull<AuthenticateWithWalletUseCase>()
+        val signUp = getOrNull<SignUpUseCase>()
+        val signIn = getOrNull<SignInUseCase>()
         val getCurrentUser = getOrNull<GetCurrentUserUseCase>()
         val signOut = getOrNull<SignOutUseCase>()
         val updateUsername = getOrNull<UpdateUsernameUseCase>()
+        val updateEthWallet = getOrNull<UpdateEthWalletAddressUseCase>()
         val syncProgress = getOrNull<SyncReadingProgressUseCase>()
         val getProgress = getOrNull<GetReadingProgressUseCase>()
         val observeProgress = getOrNull<ObserveReadingProgressUseCase>()
         val observeConnection = getOrNull<ObserveConnectionStatusUseCase>()
         
-        if (auth != null && getCurrentUser != null && signOut != null && 
-            updateUsername != null && syncProgress != null && getProgress != null &&
-            observeProgress != null && observeConnection != null) {
+        if (signUp != null && signIn != null && getCurrentUser != null && signOut != null && 
+            updateUsername != null && updateEthWallet != null && syncProgress != null && 
+            getProgress != null && observeProgress != null && observeConnection != null) {
             RemoteBackendUseCases(
-                authenticateWithWallet = auth,
+                signUp = signUp,
+                signIn = signIn,
                 getCurrentUser = getCurrentUser,
                 signOut = signOut,
                 updateUsername = updateUsername,
+                updateEthWalletAddress = updateEthWallet,
                 syncReadingProgress = syncProgress,
                 getReadingProgress = getProgress,
                 observeReadingProgress = observeProgress,

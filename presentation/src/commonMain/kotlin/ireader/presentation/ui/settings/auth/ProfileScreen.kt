@@ -1,4 +1,4 @@
-package ireader.presentation.ui.settings.web3
+package ireader.presentation.ui.settings.auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -21,22 +20,19 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.presentation.ui.component.components.Toolbar
 import org.koin.compose.koinInject
 
-/**
- * Screen for Web3 wallet authentication and profile management
- */
-class Web3ProfileScreen : Screen {
+class ProfileScreen : Screen {
     
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val viewModel: Web3ProfileViewModel = koinInject()
+        val viewModel: ProfileViewModel = koinInject()
         val state by viewModel.state.collectAsState()
         
         Scaffold(
             topBar = {
                 Toolbar(
-                    title = { Text("Web3 Profile") },
+                    title = { Text("Profile") },
                     navigationIcon = {
                         IconButton(onClick = { navigator.pop() }) {
                             Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -65,12 +61,12 @@ class Web3ProfileScreen : Screen {
                     }
                     
                     state.currentUser != null -> {
-                        // User is logged in - show profile
                         item {
                             UserProfileCard(
                                 user = state.currentUser!!,
                                 onSignOut = { viewModel.signOut() },
-                                onUpdateUsername = { viewModel.showUsernameDialog() }
+                                onUpdateUsername = { viewModel.showUsernameDialog() },
+                                onUpdateWallet = { viewModel.showWalletDialog() }
                             )
                         }
                         
@@ -83,11 +79,9 @@ class Web3ProfileScreen : Screen {
                     }
                     
                     else -> {
-                        // User is not logged in - show login options
                         item {
-                            WalletLoginCard(
-                                onConnectWallet = { viewModel.showWalletSelection() },
-                                error = state.error
+                            LoginPromptCard(
+                                onLogin = { navigator.push(AuthScreen()) }
                             )
                         }
                         
@@ -99,17 +93,6 @@ class Web3ProfileScreen : Screen {
             }
         }
         
-        // Wallet selection dialog
-        if (state.showWalletSelection) {
-            WalletSelectionDialog(
-                onDismiss = { viewModel.hideWalletSelection() },
-                onWalletSelected = { wallet ->
-                    viewModel.connectWallet(wallet)
-                }
-            )
-        }
-        
-        // Username dialog
         if (state.showUsernameDialog) {
             UsernameDialog(
                 currentUsername = state.currentUser?.username,
@@ -118,10 +101,16 @@ class Web3ProfileScreen : Screen {
             )
         }
         
-        // Error snackbar
+        if (state.showWalletDialog) {
+            WalletDialog(
+                currentWallet = state.currentUser?.ethWalletAddress,
+                onDismiss = { viewModel.hideWalletDialog() },
+                onConfirm = { wallet -> viewModel.updateWallet(wallet) }
+            )
+        }
+        
         state.error?.let { error ->
             LaunchedEffect(error) {
-                // Show error message
                 viewModel.clearError()
             }
         }
@@ -132,7 +121,8 @@ class Web3ProfileScreen : Screen {
 private fun UserProfileCard(
     user: ireader.domain.models.remote.User,
     onSignOut: () -> Unit,
-    onUpdateUsername: () -> Unit
+    onUpdateUsername: () -> Unit,
+    onUpdateWallet: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -146,7 +136,6 @@ private fun UserProfileCard(
                 .fillMaxWidth()
                 .padding(20.dp)
         ) {
-            // Wallet Address Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -154,20 +143,19 @@ private fun UserProfileCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Connected Wallet",
+                        text = "Email",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = user.walletAddress.take(6) + "..." + user.walletAddress.takeLast(4),
+                        text = user.email,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
                 
-                // Supporter Badge
                 if (user.isSupporter) {
                     Box(
                         modifier = Modifier
@@ -187,7 +175,6 @@ private fun UserProfileCard(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Username Section
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -213,10 +200,37 @@ private fun UserProfileCard(
             }
             
             Spacer(modifier = Modifier.height(16.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "ETH Wallet Address (API Key)",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = user.ethWalletAddress?.let { 
+                            it.take(6) + "..." + it.takeLast(4) 
+                        } ?: "Not set",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+                
+                TextButton(onClick = onUpdateWallet) {
+                    Text("Edit")
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
             Divider()
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Sign Out Button
             OutlinedButton(
                 onClick = onSignOut,
                 modifier = Modifier.fillMaxWidth(),
@@ -233,9 +247,8 @@ private fun UserProfileCard(
 }
 
 @Composable
-private fun WalletLoginCard(
-    onConnectWallet: () -> Unit,
-    error: String?
+private fun LoginPromptCard(
+    onLogin: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -248,7 +261,7 @@ private fun WalletLoginCard(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
-                imageVector = Icons.Default.AccountBalanceWallet,
+                imageVector = Icons.Default.AccountCircle,
                 contentDescription = null,
                 modifier = Modifier.size(64.dp),
                 tint = MaterialTheme.colorScheme.primary
@@ -257,7 +270,7 @@ private fun WalletLoginCard(
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "Connect Your Wallet",
+                text = "Sign In to Sync",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -265,7 +278,7 @@ private fun WalletLoginCard(
             Spacer(modifier = Modifier.height(8.dp))
             
             Text(
-                text = "Sign in with your Web3 wallet to sync your reading progress across devices",
+                text = "Sign in to sync your reading progress across all your devices",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -274,21 +287,12 @@ private fun WalletLoginCard(
             Spacer(modifier = Modifier.height(24.dp))
             
             Button(
-                onClick = onConnectWallet,
+                onClick = onLogin,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Icon(Icons.Default.AccountBalanceWallet, contentDescription = null)
+                Icon(Icons.Default.Login, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Connect Wallet")
-            }
-            
-            error?.let {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error
-                )
+                Text("Sign In / Sign Up")
             }
         }
     }
@@ -363,7 +367,7 @@ private fun BenefitsCard() {
                 .padding(20.dp)
         ) {
             Text(
-                text = "Benefits of Web3 Login",
+                text = "Benefits of Signing In",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -381,7 +385,7 @@ private fun BenefitsCard() {
             BenefitItem(
                 icon = Icons.Default.Security,
                 title = "Secure & Private",
-                description = "Your data is secured by blockchain technology"
+                description = "Your data is secured with industry-standard encryption"
             )
             
             Spacer(modifier = Modifier.height(12.dp))
@@ -469,6 +473,64 @@ private fun UsernameDialog(
                         error = "Username must be at least 3 characters"
                     } else {
                         onConfirm(username)
+                    }
+                }
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun WalletDialog(
+    currentWallet: String?,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var wallet by remember { mutableStateOf(currentWallet ?: "") }
+    var error by remember { mutableStateOf<String?>(null) }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Set ETH Wallet Address") },
+        text = {
+            Column {
+                Text(
+                    text = "Enter your Ethereum wallet address. This will be used as an API key to access server features.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                OutlinedTextField(
+                    value = wallet,
+                    onValueChange = {
+                        wallet = it
+                        error = null
+                    },
+                    label = { Text("Wallet Address") },
+                    placeholder = { Text("0x...") },
+                    singleLine = true,
+                    isError = error != null,
+                    supportingText = error?.let { { Text(it) } }
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    if (wallet.isNotBlank() && !wallet.startsWith("0x")) {
+                        error = "Invalid wallet address format"
+                    } else if (wallet.isNotBlank() && wallet.length != 42) {
+                        error = "Wallet address must be 42 characters"
+                    } else {
+                        onConfirm(wallet)
                     }
                 }
             ) {

@@ -261,7 +261,6 @@ fun DonationScreen(
             onWalletSelected = { walletApp ->
                 viewModel.openWallet(
                     walletApp = walletApp,
-                    cryptoType = cryptoType,
                     address = address,
                     amount = null
                 )

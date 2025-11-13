@@ -82,7 +82,7 @@ object MoreScreenSpec : Tab {
                     navigator.push(TTSEngineManagerScreenSpec())
                 },
                 onWeb3Profile = {
-                    navigator.push(ireader.presentation.ui.settings.web3.Web3ProfileScreen())
+                    navigator.push(ireader.presentation.ui.settings.auth.ProfileScreen())
                 }
             )
         }

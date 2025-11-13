@@ -15,17 +15,20 @@ interface RemoteRepository {
     // Authentication
     
     /**
-     * Authenticate a user using their wallet signature
-     * @param walletAddress The user's wallet address
-     * @param signature The signed message from the wallet
-     * @param message The original message that was signed
+     * Sign up a new user with email and password
+     * @param email The user's email address
+     * @param password The user's password
      * @return Result containing the authenticated User or an error
      */
-    suspend fun authenticateWithWallet(
-        walletAddress: String,
-        signature: String,
-        message: String
-    ): Result<User>
+    suspend fun signUp(email: String, password: String): Result<User>
+    
+    /**
+     * Sign in a user with email and password
+     * @param email The user's email address
+     * @param password The user's password
+     * @return Result containing the authenticated User or an error
+     */
+    suspend fun signIn(email: String, password: String): Result<User>
     
     /**
      * Get the currently authenticated user
@@ -42,18 +45,26 @@ interface RemoteRepository {
     
     /**
      * Update the username for a user
-     * @param walletAddress The user's wallet address
+     * @param userId The user's ID
      * @param username The new username
      * @return Result indicating success or failure
      */
-    suspend fun updateUsername(walletAddress: String, username: String): Result<Unit>
+    suspend fun updateUsername(userId: String, username: String): Result<Unit>
     
     /**
-     * Get a user by their wallet address
-     * @param walletAddress The wallet address to look up
+     * Update the ETH wallet address for a user
+     * @param userId The user's ID
+     * @param ethWalletAddress The ETH wallet address
+     * @return Result indicating success or failure
+     */
+    suspend fun updateEthWalletAddress(userId: String, ethWalletAddress: String): Result<Unit>
+    
+    /**
+     * Get a user by their ID
+     * @param userId The user ID to look up
      * @return Result containing the User or null if not found
      */
-    suspend fun getUserByWallet(walletAddress: String): Result<User?>
+    suspend fun getUserById(userId: String): Result<User?>
     
     // Reading Progress
     
@@ -66,23 +77,23 @@ interface RemoteRepository {
     
     /**
      * Get reading progress for a specific book
-     * @param walletAddress The user's wallet address
+     * @param userId The user's ID
      * @param bookId The normalized book identifier
      * @return Result containing the ReadingProgress or null if not found
      */
     suspend fun getReadingProgress(
-        walletAddress: String,
+        userId: String,
         bookId: String
     ): Result<ReadingProgress?>
     
     /**
      * Observe reading progress changes in real-time
-     * @param walletAddress The user's wallet address
+     * @param userId The user's ID
      * @param bookId The normalized book identifier
      * @return Flow emitting ReadingProgress updates
      */
     fun observeReadingProgress(
-        walletAddress: String,
+        userId: String,
         bookId: String
     ): Flow<ReadingProgress?>
     

@@ -2,13 +2,13 @@ package ireader.data.remote
 
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.realtime.PostgresAction
 import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.postgresChangeFlow
 import io.github.jan.supabase.realtime.realtime
-import io.github.jan.supabase.functions.functions
 import ireader.domain.data.repository.RemoteRepository
 import ireader.domain.models.remote.ConnectionStatus
 import ireader.domain.models.remote.ReadingProgress
@@ -17,15 +17,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 
 /**
- * Supabase implementation of RemoteRepository
- * Handles authentication, user management, and reading progress synchronization
+ * Supabase implementation of RemoteRepository with email/password authentication
  */
 class SupabaseRemoteRepository(
     private val supabaseClient: SupabaseClient,
@@ -39,11 +34,12 @@ class SupabaseRemoteRepository(
     
     private var currentUser: User? = null
     
-    // DTO classes for Supabase serialization
     @Serializable
     private data class UserDto(
-        val wallet_address: String,
+        val id: String,
+        val email: String,
         val username: String? = null,
+        val eth_wallet_address: String? = null,
         val created_at: String? = null,
         val is_supporter: Boolean = false
     )
@@ -51,78 +47,111 @@ class SupabaseRemoteRepository(
     @Serializable
     private data class ReadingProgressDto(
         val id: String? = null,
-        val user_wallet_address: String,
+        val user_id: String,
         val book_id: String,
         val last_chapter_slug: String,
         val last_scroll_position: Float,
         val updated_at: String? = null
     )
     
-    @Serializable
-    private data class SignatureVerificationRequest(
-        val walletAddress: String,
-        val signature: String,
-        val message: String
-    )
-    
-    @Serializable
-    private data class SignatureVerificationResponse(
-        val verified: Boolean,
-        val walletAddress: String? = null,
-        val error: String? = null
-    )
-    
     init {
         _connectionStatus.value = ConnectionStatus.CONNECTED
     }
     
-    override suspend fun authenticateWithWallet(
-        walletAddress: String,
-        signature: String,
-        message: String
-    ): Result<User> = RemoteErrorMapper.withErrorMapping {
-        println("🔷 SupabaseRemoteRepository: Authenticating with wallet")
-        println("   Wallet Address: $walletAddress")
-        println("   Signature: ${signature.take(66)}...")
-        println("   Signature length: ${signature.length}")
-        println("   Message: $message")
-        
-        // Verify signature on backend using Edge Function
-        val verificationResponse = supabaseClient.functions.invoke(
-            "verify-wallet-signature",
-            body = buildJsonObject {
-                put("walletAddress", walletAddress)
-                put("signature", signature)
-                put("message", message)
+    override suspend fun signUp(email: String, password: String): Result<User> = 
+        RemoteErrorMapper.withErrorMapping {
+            try {
+                supabaseClient.auth.signUpWith(Email) {
+                    this.email = email
+                    this.password = password
+                }
+                
+                val authUser = supabaseClient.auth.currentUserOrNull()
+                
+                // If user is null, it might be because email confirmation is required
+                if (authUser == null) {
+                    throw Exception(
+                        "Sign up initiated. Please check your email for confirmation link. " +
+                        "If you don't receive an email, ask the admin to disable email confirmation in Supabase Dashboard."
+                    )
+                }
+                
+                val userDto = supabaseClient.postgrest["users"]
+                    .upsert(
+                        UserDto(
+                            id = authUser.id,
+                            email = email,
+                            username = null,
+                            eth_wallet_address = null,
+                            is_supporter = false
+                        )
+                    ) {
+                        select(Columns.ALL)
+                    }
+                    .decodeSingle<UserDto>()
+                
+                val user = userDto.toDomain()
+                currentUser = user
+                cache.cacheUser(user)
+                user
+            } catch (e: Exception) {
+                // Provide helpful error message
+                val message = when {
+                    e.message?.contains("email", ignoreCase = true) == true -> 
+                        "Email confirmation required. Please check your email or contact admin to disable email confirmation."
+                    e.message?.contains("already registered", ignoreCase = true) == true ->
+                        "This email is already registered. Please sign in instead."
+                    else -> e.message ?: "Sign up failed. Please try again."
+                }
+                throw Exception(message)
             }
-        )
-        
-        println("✅ SupabaseRemoteRepository: Signature verified successfully")
-        
-        // Create or get user from database
-        val userDto = supabaseClient.postgrest["users"]
-            .upsert(
-                UserDto(
-                    wallet_address = walletAddress,
-                    username = null,
-                    is_supporter = false
-                )
-            ) {
-                select(Columns.ALL)
+        }
+    
+    override suspend fun signIn(email: String, password: String): Result<User> = 
+        RemoteErrorMapper.withErrorMapping {
+            supabaseClient.auth.signInWith(Email) {
+                this.email = email
+                this.password = password
             }
-            .decodeSingle<UserDto>()
-        
-        // Convert to domain model and cache
-        val user = userDto.toDomain()
-        currentUser = user
-        cache.cacheUser(user)
-        
-        user
-    }
+            
+            val authUser = supabaseClient.auth.currentUserOrNull()
+                ?: throw Exception("Failed to get user after sign in")
+            
+            val userDto = supabaseClient.postgrest["users"]
+                .select {
+                    filter {
+                        eq("id", authUser.id)
+                    }
+                }
+                .decodeSingle<UserDto>()
+            
+            val user = userDto.toDomain()
+            currentUser = user
+            cache.cacheUser(user)
+            user
+        }
     
     override suspend fun getCurrentUser(): Result<User?> = RemoteErrorMapper.withErrorMapping {
-        // Try cache first
-        cache.getCachedUser() ?: currentUser
+        cache.getCachedUser() ?: currentUser ?: run {
+            val authUser = supabaseClient.auth.currentUserOrNull() ?: return@withErrorMapping null
+            
+            try {
+                val userDto = supabaseClient.postgrest["users"]
+                    .select {
+                        filter {
+                            eq("id", authUser.id)
+                        }
+                    }
+                    .decodeSingle<UserDto>()
+                
+                val user = userDto.toDomain()
+                currentUser = user
+                cache.cacheUser(user)
+                user
+            } catch (e: Exception) {
+                null
+            }
+        }
     }
     
     override suspend fun signOut() {
@@ -131,34 +160,45 @@ class SupabaseRemoteRepository(
         supabaseClient.auth.signOut()
     }
     
-    override suspend fun updateUsername(
-        walletAddress: String,
-        username: String
-    ): Result<Unit> = RemoteErrorMapper.withErrorMapping {
-        // Sanitize username
-        val sanitizedUsername = InputSanitizer.sanitizeUsername(username)
-        
-        supabaseClient.postgrest["users"]
-            .update(
-                mapOf("username" to sanitizedUsername)
-            ) {
-                filter {
-                    eq("wallet_address", walletAddress)
+    override suspend fun updateUsername(userId: String, username: String): Result<Unit> = 
+        RemoteErrorMapper.withErrorMapping {
+            val sanitizedUsername = InputSanitizer.sanitizeUsername(username)
+            
+            supabaseClient.postgrest["users"]
+                .update(
+                    mapOf("username" to sanitizedUsername)
+                ) {
+                    filter {
+                        eq("id", userId)
+                    }
                 }
-            }
-        
-        // Update cached user
-        currentUser = currentUser?.copy(username = sanitizedUsername)
-        currentUser?.let { cache.cacheUser(it) }
-    }
+            
+            currentUser = currentUser?.copy(username = sanitizedUsername)
+            currentUser?.let { cache.cacheUser(it) }
+        }
     
-    override suspend fun getUserByWallet(walletAddress: String): Result<User?> = 
+    override suspend fun updateEthWalletAddress(userId: String, ethWalletAddress: String): Result<Unit> = 
+        RemoteErrorMapper.withErrorMapping {
+            supabaseClient.postgrest["users"]
+                .update(
+                    mapOf("eth_wallet_address" to ethWalletAddress)
+                ) {
+                    filter {
+                        eq("id", userId)
+                    }
+                }
+            
+            currentUser = currentUser?.copy(ethWalletAddress = ethWalletAddress)
+            currentUser?.let { cache.cacheUser(it) }
+        }
+    
+    override suspend fun getUserById(userId: String): Result<User?> = 
         RemoteErrorMapper.withErrorMapping {
             try {
                 val userDto = supabaseClient.postgrest["users"]
                     .select {
                         filter {
-                            eq("wallet_address", walletAddress)
+                            eq("id", userId)
                         }
                     }
                     .decodeSingle<UserDto>()
@@ -173,7 +213,6 @@ class SupabaseRemoteRepository(
         retryPolicy.executeWithRetry {
             RemoteErrorMapper.withErrorMapping {
                 try {
-                    // Sanitize inputs
                     val sanitizedProgress = progress.copy(
                         bookId = InputSanitizer.sanitizeBookId(progress.bookId),
                         lastChapterSlug = InputSanitizer.sanitizeChapterSlug(progress.lastChapterSlug),
@@ -185,77 +224,62 @@ class SupabaseRemoteRepository(
                             select(Columns.ALL)
                         }
                     
-                    // Update cache
-                    cache.cacheProgress(sanitizedProgress.userWalletAddress, sanitizedProgress.bookId, sanitizedProgress)
+                    cache.cacheProgress(sanitizedProgress.userId, sanitizedProgress.bookId, sanitizedProgress)
                 } catch (e: Exception) {
-                    // Queue for later if sync fails
                     syncQueue.enqueue(progress)
                     throw e
                 }
             }.getOrThrow()
         }
     
-    override suspend fun getReadingProgress(
-        walletAddress: String,
-        bookId: String
-    ): Result<ReadingProgress?> = RemoteErrorMapper.withErrorMapping {
-        // Try cache first
-        val cached = cache.getCachedProgress(walletAddress, bookId)
-        if (cached != null) {
-            return@withErrorMapping cached
-        }
-        
-        try {
-            val progressDto = supabaseClient.postgrest["reading_progress"]
-                .select {
-                    filter {
-                        eq("user_wallet_address", walletAddress)
-                        eq("book_id", bookId)
-                    }
-                }
-                .decodeSingle<ReadingProgressDto>()
+    override suspend fun getReadingProgress(userId: String, bookId: String): Result<ReadingProgress?> = 
+        RemoteErrorMapper.withErrorMapping {
+            val cached = cache.getCachedProgress(userId, bookId)
+            if (cached != null) {
+                return@withErrorMapping cached
+            }
             
-            val progress = progressDto.toDomain()
-            cache.cacheProgress(walletAddress, bookId, progress)
-            progress
-        } catch (e: Exception) {
-            null
+            try {
+                val progressDto = supabaseClient.postgrest["reading_progress"]
+                    .select {
+                        filter {
+                            eq("user_id", userId)
+                            eq("book_id", bookId)
+                        }
+                    }
+                    .decodeSingle<ReadingProgressDto>()
+                
+                val progress = progressDto.toDomain()
+                cache.cacheProgress(userId, bookId, progress)
+                progress
+            } catch (e: Exception) {
+                null
+            }
         }
-    }
     
-    override fun observeReadingProgress(
-        walletAddress: String,
-        bookId: String
-    ): Flow<ReadingProgress?> {
+    override fun observeReadingProgress(userId: String, bookId: String): Flow<ReadingProgress?> {
         return kotlinx.coroutines.flow.flow {
-            // First emit the current value from cache or database
-            val initial = getReadingProgress(walletAddress, bookId).getOrNull()
+            val initial = getReadingProgress(userId, bookId).getOrNull()
             emit(initial)
             
             try {
-                // Subscribe to real-time updates for this specific user's reading progress
-                val channel = supabaseClient.realtime.channel("reading_progress:$walletAddress")
-                
-                // Subscribe to the channel
+                val channel = supabaseClient.realtime.channel("reading_progress:$userId")
                 channel.subscribe()
                 
-                // Listen to postgres changes for the reading_progress table
                 channel.postgresChangeFlow<PostgresAction>(schema = "public") {
                     table = "reading_progress"
                 }.collect { action ->
                     try {
                         when (action) {
                             is PostgresAction.Insert -> {
-                                // Decode the new record
                                 val record = action.record
-                                val recordWallet = record["user_wallet_address"] as? String
+                                val recordUserId = record["user_id"] as? String
                                 val recordBookId = record["book_id"] as? String
                                 
-                                // Only process if it matches our wallet and book
-                                if (recordWallet == walletAddress && recordBookId == bookId) {
+                                if (recordUserId == userId && recordBookId == bookId) {
                                     val dto = ReadingProgressDto(
                                         id = record["id"] as? String,
-                                        user_wallet_address = recordWallet ?: "",
+                                        user_id = recordUserId ?: "",
                                         book_id = recordBookId ?: "",
                                         last_chapter_slug = record["last_chapter_slug"] as? String ?: "",
                                         last_scroll_position = (record["last_scroll_position"] as? Number)?.toFloat() ?: 0f,
@@ -263,21 +287,19 @@ class SupabaseRemoteRepository(
                                     )
                                     
                                     val progress = dto.toDomain()
-                                    cache.cacheProgress(walletAddress, bookId, progress)
+                                    cache.cacheProgress(userId, bookId, progress)
                                     emit(progress)
                                 }
                             }
                             is PostgresAction.Update -> {
-                                // Decode the updated record
                                 val record = action.record
-                                val recordWallet = record["user_wallet_address"] as? String
+                                val recordUserId = record["user_id"] as? String
                                 val recordBookId = record["book_id"] as? String
                                 
-                                // Only process if it matches our wallet and book
-                                if (recordWallet == walletAddress && recordBookId == bookId) {
+                                if (recordUserId == userId && recordBookId == bookId) {
                                     val dto = ReadingProgressDto(
                                         id = record["id"] as? String,
-                                        user_wallet_address = recordWallet ?: "",
+                                        user_id = recordUserId ?: "",
                                         book_id = recordBookId ?: "",
                                         last_chapter_slug = record["last_chapter_slug"] as? String ?: "",
                                         last_scroll_position = (record["last_scroll_position"] as? Number)?.toFloat() ?: 0f,
@@ -285,35 +307,31 @@ class SupabaseRemoteRepository(
                                     )
                                     
                                     val progress = dto.toDomain()
-                                    cache.cacheProgress(walletAddress, bookId, progress)
+                                    cache.cacheProgress(userId, bookId, progress)
                                     emit(progress)
                                 }
                             }
                             is PostgresAction.Delete -> {
                                 val oldRecord = action.oldRecord
-                                val deletedWallet = oldRecord["user_wallet_address"] as? String
+                                val deletedUserId = oldRecord["user_id"] as? String
                                 val deletedBookId = oldRecord["book_id"] as? String
                                 
-                                // Only emit null if it matches our wallet and book
-                                if (deletedWallet == walletAddress && deletedBookId == bookId) {
+                                if (deletedUserId == userId && deletedBookId == bookId) {
                                     emit(null)
                                 }
                             }
-                            else -> {
-                                // No action needed for other events
-                            }
+                            else -> {}
                         }
                     } catch (e: Exception) {
                         println("Error processing realtime event: ${e.message}")
                     }
                 }
             } catch (e: Exception) {
-                // Log error and fall back to polling
                 println("Real-time subscription failed: ${e.message}, falling back to polling")
                 while (true) {
-                    val progress = getReadingProgress(walletAddress, bookId).getOrNull()
+                    val progress = getReadingProgress(userId, bookId).getOrNull()
                     emit(progress)
-                    kotlinx.coroutines.delay(5000) // Poll every 5 seconds
+                    kotlinx.coroutines.delay(5000)
                 }
             }
         }
@@ -323,23 +341,18 @@ class SupabaseRemoteRepository(
         return connectionStatus
     }
     
-    /**
-     * Processes the sync queue to upload any pending reading progress updates
-     * Should be called when network connectivity is restored
-     * 
-     * @return Number of successfully synced items
-     */
     suspend fun processSyncQueue(): Int {
         return syncQueue.processQueue { progress ->
             syncReadingProgress(progress)
         }
     }
     
-    // Extension functions for DTO conversion
     private fun UserDto.toDomain(): User {
         return User(
-            walletAddress = wallet_address,
+            id = id,
+            email = email,
             username = username,
+            ethWalletAddress = eth_wallet_address,
             createdAt = parseTimestamp(created_at),
             isSupporter = is_supporter
         )
@@ -348,18 +361,18 @@ class SupabaseRemoteRepository(
     private fun ReadingProgress.toDto(): ReadingProgressDto {
         return ReadingProgressDto(
             id = id,
-            user_wallet_address = userWalletAddress,
+            user_id = userId,
             book_id = bookId,
             last_chapter_slug = lastChapterSlug,
             last_scroll_position = lastScrollPosition,
-            updated_at = null // Let Supabase set the timestamp
+            updated_at = null
         )
     }
     
     private fun ReadingProgressDto.toDomain(): ReadingProgress {
         return ReadingProgress(
             id = id,
-            userWalletAddress = user_wallet_address,
+            userId = user_id,
             bookId = book_id,
             lastChapterSlug = last_chapter_slug,
             lastScrollPosition = last_scroll_position,
@@ -369,11 +382,7 @@ class SupabaseRemoteRepository(
     
     private fun parseTimestamp(timestamp: String?): Long {
         if (timestamp == null) return System.currentTimeMillis()
-        
-        // Parse ISO 8601 timestamp from Supabase
-        // Format: 2024-01-01T12:00:00.000Z
         return try {
-            // Simple parsing - in production, use a proper date library
             System.currentTimeMillis()
         } catch (e: Exception) {
             System.currentTimeMillis()

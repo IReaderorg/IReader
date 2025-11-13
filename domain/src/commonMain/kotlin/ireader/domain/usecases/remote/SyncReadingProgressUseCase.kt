@@ -46,7 +46,7 @@ class SyncReadingProgressUseCase(
             
             // Create reading progress object
             val progress = ReadingProgress(
-                userWalletAddress = user.walletAddress,
+                userId = user.id,
                 bookId = normalizedBookId,
                 lastChapterSlug = chapterSlug,
                 lastScrollPosition = scrollPosition,

@@ -34,7 +34,7 @@ class ObserveReadingProgressUseCase(
             val normalizedBookId = BookIdNormalizer.normalize(bookTitle)
             
             // Observe reading progress from remote backend
-            remoteRepository.observeReadingProgress(user.walletAddress, normalizedBookId)
+            remoteRepository.observeReadingProgress(user.id, normalizedBookId)
         } catch (e: Exception) {
             emptyFlow()
         }

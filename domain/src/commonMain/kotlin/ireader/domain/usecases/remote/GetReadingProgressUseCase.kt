@@ -32,7 +32,7 @@ class GetReadingProgressUseCase(
             val normalizedBookId = BookIdNormalizer.normalize(bookTitle)
             
             // Get reading progress from remote backend
-            remoteRepository.getReadingProgress(user.walletAddress, normalizedBookId)
+            remoteRepository.getReadingProgress(user.id, normalizedBookId)
         } catch (e: Exception) {
             Result.failure(e)
         }

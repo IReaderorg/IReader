@@ -64,19 +64,30 @@ class DonationViewModel(
      */
     fun openWallet(
         walletApp: WalletApp,
-        cryptoType: CryptoType,
         address: String,
-        amount: Double? = null
+        amount: String? = null
     ) {
         screenModelScope.launch {
-            val result = donationUseCases.openWallet(
-                walletApp = walletApp,
-                cryptoType = cryptoType,
+            // Generate payment URI
+            val paymentUri = donationUseCases.generatePaymentUri(
                 address = address,
-                amount = amount,
+                amount = amount
             )
             
-            handleWalletResult(result, walletApp)
+            // Open wallet with payment URI
+            val success = donationUseCases.openWallet(
+                walletApp = walletApp,
+                paymentUri = paymentUri
+            )
+            
+            // Handle result
+            if (success) {
+                // Wallet opened successfully
+                println("✅ Wallet opened: ${walletApp.displayName}")
+            } else {
+                // Failed to open wallet
+                println("❌ Failed to open wallet: ${walletApp.displayName}")
+            }
         }
     }
     

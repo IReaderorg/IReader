@@ -15,20 +15,12 @@ class UpdateUsernameUseCase(
     private val remoteRepository: RemoteRepository
 ) {
     /**
-     * Update the username for the current user
+     * Update the username for a user
+     * @param userId The user ID
      * @param username The new username
      * @return Result indicating success or failure
      */
-    suspend operator fun invoke(username: String): Result<Unit> {
-        return try {
-            // Get current authenticated user
-            val user = remoteRepository.getCurrentUser().getOrNull()
-                ?: return Result.failure(Exception("User not authenticated"))
-            
-            // Update username
-            remoteRepository.updateUsername(user.walletAddress, username)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    suspend operator fun invoke(userId: String, username: String): Result<Unit> {
+        return remoteRepository.updateUsername(userId, username)
     }
 }

@@ -11,20 +11,20 @@ class GeneratePaymentUriUseCase(
 ) {
     /**
      * Generate a payment URI
-     * @param cryptoType The cryptocurrency type
      * @param address The wallet address
      * @param amount Optional amount to include in URI
+     * @param token Optional token contract address
      * @return Payment URI string
      */
     operator fun invoke(
-        cryptoType: CryptoType,
         address: String,
-        amount: Double? = null
+        amount: String? = null,
+        token: String? = null
     ): String {
         return walletIntegrationManager.generatePaymentUri(
-            cryptoType = cryptoType,
             address = address,
-            amount = amount
+            amount = amount,
+            token = token
         )
     }
 }

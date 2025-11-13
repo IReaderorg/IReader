@@ -266,13 +266,13 @@ val UseCasesInject = module {
     
     // Donation use cases
     single { ireader.domain.usecases.donation.DonationTriggerManager(get(), get()) }
-    single { ireader.domain.usecases.donation.OpenWalletUseCase(get()) }
-    single { ireader.domain.usecases.donation.CheckWalletInstalledUseCase(get()) }
-    single { ireader.domain.usecases.donation.CopyAddressUseCase(get()) }
-    single { ireader.domain.usecases.donation.GeneratePaymentUriUseCase(get()) }
-    single { ireader.domain.usecases.donation.GetFundingGoalsUseCase(get()) }
-    single { ireader.domain.usecases.donation.UpdateFundingGoalUseCase(get()) }
-    single { ireader.domain.usecases.donation.DonationUseCases(
+    single<ireader.domain.usecases.donation.OpenWalletUseCase> { ireader.domain.usecases.donation.OpenWalletUseCase(get()) }
+    single<ireader.domain.usecases.donation.CheckWalletInstalledUseCase> { ireader.domain.usecases.donation.CheckWalletInstalledUseCase(get()) }
+    single<ireader.domain.usecases.donation.CopyAddressUseCase> { ireader.domain.usecases.donation.CopyAddressUseCase(get()) }
+    single<ireader.domain.usecases.donation.GeneratePaymentUriUseCase> { ireader.domain.usecases.donation.GeneratePaymentUriUseCase(get()) }
+    single<ireader.domain.usecases.donation.GetFundingGoalsUseCase> { ireader.domain.usecases.donation.GetFundingGoalsUseCase(get()) }
+    single<ireader.domain.usecases.donation.UpdateFundingGoalUseCase> { ireader.domain.usecases.donation.UpdateFundingGoalUseCase(get()) }
+    single<ireader.domain.usecases.donation.DonationUseCases> { ireader.domain.usecases.donation.DonationUseCases(
         donationTriggerManager = get(),
         openWallet = get(),
         checkWalletInstalled = get(),

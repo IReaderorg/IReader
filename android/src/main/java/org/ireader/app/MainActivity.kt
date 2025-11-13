@@ -191,6 +191,36 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        println("🔷 MainActivity.onNewIntent() OVERRIDE called")
+        println("   Intent: $intent")
+        println("   Data: ${intent.data}")
+        println("   Action: ${intent.action}")
+        println("   Scheme: ${intent.data?.scheme}")
+        println("   Host: ${intent.data?.host}")
+        
+        // CRITICAL: Update the activity's intent
+        setIntent(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        println("🔷 MainActivity.onResume() called")
+        println("   Current intent: ${intent?.data}")
+        
+        // Notify MetaMask manager that activity resumed
+        // This might help the SDK reconnect if needed
+        lifecycleScope.launch {
+            try {
+                val metaMaskManager = org.koin.core.context.GlobalContext.get().get<ireader.domain.services.MetaMaskMobileManager>()
+                println("🔷 Notifying MetaMask manager of resume")
+            } catch (e: Exception) {
+                println("⚠️ Could not notify MetaMask manager: ${e.message}")
+            }
+        }
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         getSimpleStorage.simpleStorageHelper.onSaveInstanceState(outState)
         super.onSaveInstanceState(outState)
@@ -230,11 +260,46 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                 val consumer = Consumer<Intent> { trySend(it) }
                 componentActivity.addOnNewIntentListener(consumer)
                 awaitClose { componentActivity.removeOnNewIntentListener(consumer) }
-            }.collectLatest { handleIntentAction(it, navigator) }
+            }.collectLatest { 
+                // Set the new intent so it can be accessed by the SDK
+                setIntent(it)
+                handleIntentAction(it, navigator) 
+            }
         }
     }
 
     private fun handleIntentAction(intent: Intent, navigator: Navigator): Boolean {
+        // Log all intent details for debugging
+        println("🔷 handleIntentAction called")
+        println("   Action: ${intent.action}")
+        println("   Data: ${intent.data}")
+        println("   Scheme: ${intent.data?.scheme}")
+        println("   Host: ${intent.data?.host}")
+        
+        // Check if this is a wallet callback
+        val uri = intent.data
+        if (uri != null) {
+            val scheme = uri.scheme
+            // MetaMask SDK callback (uses package name as scheme)
+            if (scheme == "ir.kazemcodes.infinityreader.debug" ||
+                scheme == "ir.kazemcodes.infinityreader" ||
+                scheme == "org.ireader.app" ||
+                scheme?.startsWith("ir.kazemcodes") == true ||
+                scheme?.startsWith("org.ireader") == true) {
+                println("✅ MetaMask SDK callback detected: $uri")
+                println("   Full URI: $uri")
+                println("   Query: ${uri.query}")
+                // The MetaMask SDK automatically handles this when the activity's intent is updated
+                return true
+            }
+            
+            // Custom wallet callback
+            if (uri.scheme == "ireader" && uri.host == "wallet-callback") {
+                println("✅ Custom wallet callback detected: $uri")
+                return true
+            }
+        }
+        
         return when (intent.action) {
             SHORTCUT_TTS -> {
                 val bookId = intent.extras?.getLong(Args.ARG_BOOK_ID)

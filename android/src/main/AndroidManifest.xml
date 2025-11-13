@@ -13,6 +13,7 @@
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <!-- Media permissions for Android 13+ -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
@@ -53,22 +54,7 @@
             <data android:scheme="ireader.*" />
         </intent>
         
-        <!-- Wallet app queries for Android 11+ package visibility -->
-        <package android:name="io.metamask" />
-        <package android:name="com.wallet.crypto.trustapp" />
-        <package android:name="me.rainbow" />
-        <package android:name="org.toshi" />
-        <package android:name="im.argent.contractwalletclient" />
-        
-        <!-- WalletConnect deep links -->
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="wc" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="ethereum" />
-        </intent>
+
     </queries>
 
     <application
@@ -112,24 +98,6 @@
                     android:host="deeplink"
                     android:scheme="ireader" />
             </intent-filter>
-            
-            <!-- WalletConnect deep link -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                
-                <data android:scheme="ireader" android:host="wc" />
-            </intent-filter>
-            
-            <!-- Wallet signature callback -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                
-                <data android:scheme="ireader" android:host="wallet-callback" />
-            </intent-filter>
 
 
         </activity>
@@ -161,6 +129,7 @@
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
+
         <receiver
             android:name="androidx.media.session.MediaButtonReceiver"
             android:exported="false">
