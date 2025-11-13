@@ -7,138 +7,143 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
- * Manages reading timer for break reminders
- * Tracks continuous reading time and triggers reminders at configured intervals
+ * Manages reading time tracking and triggers rest reminders
+ * Requirements: 17.1, 17.2, 17.3, 17.4, 17.5
  */
 class ReadingTimerManager(
     private val scope: CoroutineScope,
     private val onIntervalReached: () -> Unit
 ) {
-    private var startTime: Long = 0
-    private var pausedTime: Long = 0
-    private var accumulatedTime: Long = 0
-    private var intervalMillis: Long = 0
     private var timerJob: Job? = null
-    private var isRunning: Boolean = false
-    private var isPaused: Boolean = false
+    private var startTime: Long = 0
+    private var accumulatedTime: Long = 0
+    private var intervalMinutes: Int = 30
     
     /**
-     * Start the timer with the specified interval in minutes
+     * Start the reading timer
      */
     fun startTimer(intervalMinutes: Int) {
-        if (isRunning && !isPaused) {
-            // Timer already running, don't restart
-            return
+        this.intervalMinutes = intervalMinutes
+        
+        if (timerJob?.isActive == true) {
+            return // Already running
         }
-        
-        intervalMillis = intervalMinutes * 60 * 1000L
-        
-        if (isPaused) {
-            // Resume from paused state
-            resumeTimer()
-        } else {
-            // Start fresh
-            startTime = System.currentTimeMillis()
-            accumulatedTime = 0
-            isRunning = true
-            isPaused = false
-            
-            startTimerJob()
-        }
-    }
-    
-    /**
-     * Pause the timer (preserves accumulated time)
-     */
-    fun pauseTimer() {
-        if (!isRunning || isPaused) return
-        
-        pausedTime = System.currentTimeMillis()
-        accumulatedTime += (pausedTime - startTime)
-        isPaused = true
-        timerJob?.cancel()
-    }
-    
-    /**
-     * Resume the timer from paused state
-     */
-    fun resumeTimer() {
-        if (!isRunning || !isPaused) return
         
         startTime = System.currentTimeMillis()
-        isPaused = false
-        startTimerJob()
+        
+        timerJob = scope.launch {
+            while (isActive) {
+                delay(1000) // Check every second
+                
+                val currentTime = System.currentTimeMillis()
+                val elapsedMinutes = ((currentTime - startTime + accumulatedTime) / 60000).toInt()
+                
+                if (elapsedMinutes >= intervalMinutes) {
+                    onIntervalReached()
+                    // Reset timer after reminder
+                    resetTimer()
+                    startTime = System.currentTimeMillis()
+                }
+            }
+        }
     }
     
     /**
-     * Reset the timer completely
+     * Pause the reading timer
      */
-    fun resetTimer() {
-        timerJob?.cancel()
-        startTime = 0
-        pausedTime = 0
-        accumulatedTime = 0
-        isRunning = false
-        isPaused = false
+    fun pauseTimer() {
+        if (timerJob?.isActive == true) {
+            val currentTime = System.currentTimeMillis()
+            accumulatedTime += (currentTime - startTime)
+            timerJob?.cancel()
+            timerJob = null
+        }
     }
     
     /**
-     * Stop the timer (same as reset)
+     * Resume the reading timer
+     */
+    fun resumeTimer() {
+        if (timerJob?.isActive != true && intervalMinutes > 0) {
+            startTime = System.currentTimeMillis()
+            
+            timerJob = scope.launch {
+                while (isActive) {
+                    delay(1000) // Check every second
+                    
+                    val currentTime = System.currentTimeMillis()
+                    val elapsedMinutes = ((currentTime - startTime + accumulatedTime) / 60000).toInt()
+                    
+                    if (elapsedMinutes >= intervalMinutes) {
+                        onIntervalReached()
+                        // Reset timer after reminder
+                        resetTimer()
+                        startTime = System.currentTimeMillis()
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Stop and reset the reading timer
      */
     fun stopTimer() {
+        timerJob?.cancel()
+        timerJob = null
         resetTimer()
     }
     
     /**
-     * Get the current elapsed time in milliseconds
+     * Reset accumulated time
      */
-    fun getElapsedTime(): Long {
-        if (!isRunning) return 0
-        
-        return if (isPaused) {
-            accumulatedTime
-        } else {
-            accumulatedTime + (System.currentTimeMillis() - startTime)
-        }
+    fun resetTimer() {
+        accumulatedTime = 0
+        startTime = System.currentTimeMillis()
     }
     
     /**
-     * Get the remaining time until next break in milliseconds
+     * Get total reading time in minutes
+     */
+    fun getTotalReadingTimeMinutes(): Int {
+        if (timerJob?.isActive != true) {
+            return 0
+        }
+        val currentTime = System.currentTimeMillis()
+        return ((currentTime - startTime + accumulatedTime) / 60000).toInt()
+    }
+    
+    /**
+     * Get remaining time until next break in milliseconds
      */
     fun getRemainingTime(): Long {
-        if (!isRunning || intervalMillis == 0L) return 0
-        
-        val elapsed = getElapsedTime()
-        val remaining = intervalMillis - elapsed
-        return if (remaining > 0) remaining else 0
+        if (timerJob?.isActive != true) {
+            return 0L
+        }
+        val currentTime = System.currentTimeMillis()
+        val elapsedMillis = currentTime - startTime + accumulatedTime
+        val targetMillis = intervalMinutes * 60000L
+        return (targetMillis - elapsedMillis).coerceAtLeast(0L)
     }
     
     /**
-     * Check if timer is currently running
+     * Check if the timer is currently running
      */
-    fun isTimerRunning(): Boolean = isRunning && !isPaused
+    fun isTimerRunning(): Boolean {
+        return timerJob?.isActive == true
+    }
     
     /**
-     * Check if timer is paused
+     * Snooze the reminder for specified minutes
      */
-    fun isTimerPaused(): Boolean = isPaused
-    
-    /**
-     * Internal method to start the timer coroutine
-     */
-    private fun startTimerJob() {
-        timerJob?.cancel()
-        timerJob = scope.launch {
-            while (isActive && isRunning && !isPaused) {
-                delay(1000) // Check every second
-                
-                val elapsed = accumulatedTime + (System.currentTimeMillis() - startTime)
-                if (elapsed >= intervalMillis) {
-                    onIntervalReached()
-                    resetTimer()
-                    break
-                }
-            }
+    fun snoozeTimer(minutes: Int) {
+        resetTimer()
+        startTime = System.currentTimeMillis()
+        // Adjust accumulated time to effectively snooze
+        accumulatedTime = -(minutes * 60000L)
+        // Resume the timer if it was running
+        if (intervalMinutes > 0) {
+            resumeTimer()
         }
     }
 }

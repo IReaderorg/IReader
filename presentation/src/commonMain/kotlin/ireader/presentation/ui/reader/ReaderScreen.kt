@@ -499,6 +499,7 @@ fun ReadingScreen(
                                 intervalMinutes = vm.readingBreakInterval.value,
                                 onTakeBreak = { vm.onTakeBreak() },
                                 onContinueReading = { vm.onContinueReading() },
+                                onSnooze = { minutes -> vm.onSnoozeReadingBreak(minutes) },
                                 onDismiss = { vm.dismissReadingBreakDialog() }
                             )
                         }

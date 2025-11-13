@@ -1610,6 +1610,16 @@ class ReaderScreenViewModel(
     }
     
     /**
+     * Handle "Snooze" action from the reminder dialog
+     * Requirements: 17.4, 17.5
+     */
+    fun onSnoozeReadingBreak(minutes: Int) {
+        showReadingBreakDialog = false
+        readingTimerManager.snoozeTimer(minutes)
+        ireader.core.log.Log.debug("User snoozed reading break for $minutes minutes")
+    }
+    
+    /**
      * Dismiss the reading break dialog
      */
     fun dismissReadingBreakDialog() {

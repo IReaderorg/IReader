@@ -120,7 +120,7 @@ fun GeneralSettingScreen(
                     icon = Icons.Filled.Download,
                     valueRange = 0f..10000f,
                     steps = 19,
-                    trailing = vm.formatDownloadDelay(vm.downloadDelayMs.value)
+                    trailingFormatter = { value -> vm.formatDownloadDelay(value.toLong()) }
                 ),
                 Components.Slider(
                     preferenceAsInt = vm.concurrentDownloads,
@@ -129,7 +129,10 @@ fun GeneralSettingScreen(
                     icon = Icons.Filled.Download,
                     valueRange = 1f..10f,
                     steps = 8,
-                    trailing = "${vm.concurrentDownloads.value} ${if (vm.concurrentDownloads.value == 1) "download" else "downloads"}"
+                    trailingFormatter = { value -> 
+                        val count = value.toInt()
+                        "$count ${if (count == 1) "download" else "downloads"}"
+                    }
                 ),
                 
                 Components.Space,

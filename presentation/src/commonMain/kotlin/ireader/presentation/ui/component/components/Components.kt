@@ -79,7 +79,8 @@ sealed class Components(
      * @property title The slider title
      * @property subtitle Optional descriptive text below the title
      * @property icon Optional leading icon
-     * @property trailing Optional text to display the current value (e.g., "50%")
+     * @property trailing Optional text to display the current value (e.g., "50%") - deprecated, use trailingFormatter
+     * @property trailingFormatter Function to format the current value for display (e.g., { "$it sp" })
      * @property onValueChange Callback invoked when the value changes
      * @property valueRange The range of valid values (default: 0f..1f)
      * @property onValueChangeFinished Callback invoked when user finishes adjusting
@@ -96,6 +97,7 @@ sealed class Components(
         val subtitle: String? = null,
         val icon: ImageVector? = null,
         val trailing: String? = null,
+        val trailingFormatter: ((Float) -> String)? = null,
         val onValueChange: ((Float) -> Unit)? = null,
         val valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
         val onValueChangeFinished: ((Float) -> Unit)? = null,
@@ -499,6 +501,7 @@ fun Components.Build() {
                         this.onValueChange?.invoke(it)
                     },
                     trailing = this.trailing,
+                    trailingFormatter = this.trailingFormatter,
                     valueRange = this.valueRange,
                     onValueChangeFinished = {
                         this.onValueChangeFinished?.invoke(it)

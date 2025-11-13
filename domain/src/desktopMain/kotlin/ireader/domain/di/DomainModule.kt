@@ -27,6 +27,7 @@ import ireader.i18n.LocalizeHelper
 import ireader.domain.services.tts_service.piper.PiperSpeechSynthesizer
 import ireader.domain.services.tts_service.piper.AudioPlaybackEngine
 import ireader.domain.services.tts_service.piper.PiperModelManager
+import ireader.domain.services.ExtensionWatcherService
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -57,6 +58,9 @@ actual val DomainModule: Module = module {
     }
     single<StartExtensionManagerService> {
         StartExtensionManagerService(get(), get(), get(), get())
+    }
+    single<ExtensionWatcherService> {
+        ExtensionWatcherService()
     }
     single<PreferenceStore> {
         get<PreferenceStoreFactory>().create("ireader")

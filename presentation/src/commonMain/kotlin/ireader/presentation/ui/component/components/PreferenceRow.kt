@@ -344,6 +344,7 @@ fun SliderPreference(
         subtitle: String? = null,
         icon: ImageVector? = null,
         trailing: String? = null,
+        trailingFormatter: ((Float) -> String)? = null,
         onValueChange: ((Float) -> Unit) = {},
         valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
         onValueChangeFinished: ((Float) -> Unit)? = null,
@@ -356,9 +357,18 @@ fun SliderPreference(
     // Track if slider is being actively dragged for enhanced visual feedback
     var isInteracting by remember { mutableStateOf(false) }
     
-    // Get current value for accessibility
+    // Get current value for real-time display
     val currentValue = preferenceAsFloat?.lazyValue ?: preferenceAsInt?.lazyValue?.toFloat()
         ?: preferenceAsLong?.lazyValue?.toFloat() ?: mutablePreferences?.value ?: 0F
+    
+    // Calculate trailing text with real-time updates
+    val displayTrailing = remember(currentValue, trailing, trailingFormatter) {
+        when {
+            trailingFormatter != null -> trailingFormatter(currentValue)
+            trailing != null -> trailing
+            else -> currentValue.toInt().toString()
+        }
+    }
     
     // Build content description for accessibility
     val contentDesc = buildString {
@@ -367,10 +377,8 @@ fun SliderPreference(
             append(". ")
             append(subtitle)
         }
-        if (trailing != null) {
-            append(". Current value: ")
-            append(trailing)
-        }
+        append(". Current value: ")
+        append(displayTrailing)
     }
 
     Column(
@@ -441,33 +449,31 @@ fun SliderPreference(
                 }
             }
             
-            // Value display with enhanced styling
-            if (trailing != null) {
-                Surface(
-                    modifier = Modifier.padding(start = 12.dp),
-                    color = if (isInteracting && isEnable) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surfaceVariant
-                    },
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        text = trailing,
-                        style = MaterialTheme.typography.labelLarge,
-                        color = if (isEnable) {
-                            if (isInteracting) {
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            }
+            // Value display with enhanced styling and real-time updates
+            Surface(
+                modifier = Modifier.padding(start = 12.dp),
+                color = if (isInteracting && isEnable) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
+                },
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    text = displayTrailing,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (isEnable) {
+                        if (isInteracting) {
+                            MaterialTheme.colorScheme.onPrimaryContainer
                         } else {
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        },
-                        textAlign = TextAlign.Center
-                    )
-                }
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    } else {
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    },
+                    textAlign = TextAlign.Center
+                )
             }
         }
         

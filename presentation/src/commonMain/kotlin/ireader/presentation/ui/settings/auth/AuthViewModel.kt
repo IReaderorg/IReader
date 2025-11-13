@@ -54,10 +54,11 @@ class AuthViewModel(
                         mutableState.update { it.copy(isLoading = false, success = true) }
                     },
                     onFailure = { error ->
+                        val authError = mapAuthError(error)
                         mutableState.update { 
                             it.copy(
                                 isLoading = false,
-                                error = error.message ?: "Authentication failed"
+                                error = authError.toUserMessage()
                             ) 
                         }
                     }
@@ -65,15 +66,16 @@ class AuthViewModel(
                     mutableState.update { 
                         it.copy(
                             isLoading = false,
-                            error = "Authentication service not available"
+                            error = AuthError.ServiceUnavailable.toUserMessage()
                         ) 
                     }
                 }
             } catch (e: Exception) {
+                val authError = mapAuthError(e)
                 mutableState.update { 
                     it.copy(
                         isLoading = false,
-                        error = e.message ?: "An error occurred"
+                        error = authError.toUserMessage()
                     ) 
                 }
             }
@@ -101,6 +103,79 @@ class AuthViewModel(
         }
         
         return isValid
+    }
+    
+    /**
+     * Map exceptions to user-friendly auth errors
+     */
+    private fun mapAuthError(error: Throwable): AuthError {
+        val message = error.message?.lowercase() ?: ""
+        
+        return when {
+            // Network errors
+            message.contains("network") || 
+            message.contains("connection") ||
+            message.contains("timeout") ||
+            message.contains("unreachable") -> AuthError.NetworkError
+            
+            // Invalid credentials
+            message.contains("invalid") && (message.contains("credential") || message.contains("password") || message.contains("email")) ||
+            message.contains("wrong password") ||
+            message.contains("incorrect") ||
+            message.contains("unauthorized") ||
+            message.contains("401") -> AuthError.InvalidCredentials
+            
+            // User not found
+            message.contains("user not found") ||
+            message.contains("account not found") ||
+            message.contains("does not exist") -> AuthError.UserNotFound
+            
+            // Email already exists
+            message.contains("already exists") ||
+            message.contains("already registered") ||
+            message.contains("email taken") -> AuthError.EmailAlreadyExists
+            
+            // Server errors
+            message.contains("server") ||
+            message.contains("500") ||
+            message.contains("502") ||
+            message.contains("503") -> AuthError.ServerError
+            
+            // Rate limiting
+            message.contains("too many") ||
+            message.contains("rate limit") -> AuthError.TooManyAttempts
+            
+            // Default to unknown
+            else -> AuthError.Unknown(error.message ?: "An unexpected error occurred")
+        }
+    }
+}
+
+/**
+ * Sealed class representing authentication errors with user-friendly messages
+ */
+sealed class AuthError {
+    object InvalidCredentials : AuthError()
+    object NetworkError : AuthError()
+    object ServerError : AuthError()
+    object ServiceUnavailable : AuthError()
+    object UserNotFound : AuthError()
+    object EmailAlreadyExists : AuthError()
+    object TooManyAttempts : AuthError()
+    data class Unknown(val message: String) : AuthError()
+    
+    /**
+     * Convert error to user-friendly message with actionable guidance
+     */
+    fun toUserMessage(): String = when (this) {
+        is InvalidCredentials -> "Invalid email or password. Please check your credentials and try again."
+        is NetworkError -> "No internet connection. Please check your network and try again."
+        is ServerError -> "Server error occurred. Please try again later."
+        is ServiceUnavailable -> "Authentication service is not available. Please try again later."
+        is UserNotFound -> "No account found with this email. Please sign up or check your email address."
+        is EmailAlreadyExists -> "An account with this email already exists. Please sign in or use a different email."
+        is TooManyAttempts -> "Too many login attempts. Please wait a few minutes and try again."
+        is Unknown -> message
     }
 }
 

@@ -137,16 +137,18 @@ fun TTSScreen(
                             Row(modifier = Modifier
                                 .align(alignment.toComposeAlignment())) {
                                 AppIconButton(
+                                    modifier = Modifier.size(48.dp), // Minimum 48dp touch target
                                     onClick = onPlay,
                                     imageVector = if (vm.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                                     tint = vm.theme.value.onTextColor.toComposeColor(),
-                                    contentDescription = null
+                                    contentDescription = if (vm.isPlaying) "Pause" else "Play"
                                 )
                                 AppIconButton(
+                                    modifier = Modifier.size(48.dp), // Minimum 48dp touch target
                                     onClick = { vm.fullScreenMode = !vm.fullScreenMode },
                                     imageVector = if (vm.fullScreenMode) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
                                     tint = vm.theme.value.onTextColor.toComposeColor(),
-                                    contentDescription = null
+                                    contentDescription = if (vm.fullScreenMode) "Exit fullscreen" else "Enter fullscreen"
                                 )
                             }
                         }
@@ -196,6 +198,10 @@ fun TTLScreenPlay(
     }
 }
 
+/**
+ * Media controllers with minimum 48dp touch targets for accessibility
+ * Requirements: 16.1, 16.2, 16.3, 16.4, 16.5
+ */
 @Composable
 fun MediaControllers(
     modifier: Modifier = Modifier,
@@ -214,14 +220,14 @@ fun MediaControllers(
         horizontalArrangement = Arrangement.SpaceAround
     ) {
         AppIconButton(
-            modifier = Modifier.size(50.dp),
+            modifier = Modifier.size(56.dp), // Increased from 50dp to 56dp for better touch target
             imageVector = Icons.Filled.SkipPrevious,
             contentDescription = localize(MR.strings.previous_chapter),
             onClick = onPrev,
             tint = MaterialTheme.colorScheme.onBackground
         )
         AppIconButton(
-            modifier = Modifier.size(50.dp),
+            modifier = Modifier.size(56.dp), // Increased from 50dp to 56dp for better touch target
             imageVector = Icons.Filled.FastRewind,
             contentDescription = localize(MR.strings.previous_paragraph),
             onClick = onPrevPar,
@@ -258,14 +264,14 @@ fun MediaControllers(
         }
 
         AppIconButton(
-            modifier = Modifier.size(50.dp),
+            modifier = Modifier.size(56.dp), // Increased from 50dp to 56dp for better touch target
             imageVector = Icons.Filled.FastForward,
             contentDescription = localize(MR.strings.next_paragraph),
             onClick = onNextPar,
             tint = MaterialTheme.colorScheme.onBackground
         )
         AppIconButton(
-            modifier = Modifier.size(50.dp),
+            modifier = Modifier.size(56.dp), // Increased from 50dp to 56dp for better touch target
             imageVector = Icons.Filled.SkipNext,
             contentDescription = localize(MR.strings.next_chapter),
             onClick = onNext,

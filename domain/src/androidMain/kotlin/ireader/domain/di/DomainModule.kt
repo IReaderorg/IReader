@@ -35,6 +35,7 @@ import ireader.domain.usecases.services.StartLibraryUpdateServicesUseCase
 import ireader.domain.usecases.services.StartTTSServicesUseCase
 import ireader.domain.utils.NotificationManager
 import ireader.i18n.LocalizeHelper
+import ireader.domain.services.ExtensionWatcherService
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.dsl.worker
 import org.koin.dsl.module
@@ -113,6 +114,9 @@ actual val DomainModule = module {
         StartExtensionManagerService(
                 get()
         )
+    }
+    single<ExtensionWatcherService> {
+        ExtensionWatcherService()
     }
     single<GetSimpleStorage>{ AndroidGetSimpleStorage(get()) }
     single<AndroidGetSimpleStorage>{ AndroidGetSimpleStorage(get()) }

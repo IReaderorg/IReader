@@ -204,7 +204,7 @@ fun ReaderScreenTab(
             Components.Slider(
                 preferenceAsInt = vm.fontSize,
                 title = localizeHelper.localize(MR.strings.font_size),
-                trailing = vm.fontSize.value.toInt().toString(),
+                trailingFormatter = { value -> "${value.toInt()} sp" },
                 valueRange = 8.0F..180.0F,
                 onValueChange = {
                     // Real-time update - no need to make transparent
@@ -216,7 +216,7 @@ fun ReaderScreenTab(
             Components.Slider(
                 preferenceAsInt = vm.textWeight,
                 title = localizeHelper.localize(MR.strings.font_weight),
-                trailing = vm.textWeight.value.toInt().toString(),
+                trailingFormatter = { value -> value.toInt().toString() },
                 valueRange = 1f..900F,
                 onValueChange = {
                     // Real-time update - no need to make transparent
@@ -232,7 +232,7 @@ fun ReaderScreenTab(
             Components.Slider(
                 preferenceAsInt = vm.paragraphsIndent,
                 title = localizeHelper.localize(MR.strings.paragraph_indent),
-                trailing = vm.paragraphsIndent.value.toInt().toString(),
+                trailingFormatter = { value -> value.toInt().toString() },
                 valueRange = 0.0F..100.0F,
                 onValueChange = {
                     // Real-time update
@@ -243,7 +243,7 @@ fun ReaderScreenTab(
             Components.Slider(
                 preferenceAsInt = vm.distanceBetweenParagraphs,
                 title = localizeHelper.localize(MR.strings.paragraph_distance),
-                trailing = vm.distanceBetweenParagraphs.value.toInt().toString(),
+                trailingFormatter = { value -> value.toInt().toString() },
                 valueRange = 0.0F..10.0F,
                 onValueChange = {
                     // Real-time update
@@ -259,7 +259,7 @@ fun ReaderScreenTab(
             Components.Slider(
                 preferenceAsInt = vm.lineHeight,
                 title = localizeHelper.localize(MR.strings.line_height),
-                trailing = vm.lineHeight.value.toInt().toString(),
+                trailingFormatter = { value -> "${value.toInt()} sp" },
                 valueRange = 22.0F..100.0F,
                 onValueChange = {
                     // Real-time update with smooth transition

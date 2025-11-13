@@ -89,7 +89,9 @@ fun HistoryScreen(
                 groupByNovel = vm.groupByNovel,
                 onToggleGroupByNovel = { vm.toggleGroupByNovel() },
                 dateFilter = vm.dateFilter,
-                onDateFilterChange = { vm.setDateFilterHistory(it) }
+                onDateFilterChange = { vm.setDateFilterHistory(it) },
+                onClearAll = { vm.deleteAllHistories(localizeHelper) },
+                hasHistory = items.values.isNotEmpty()
             )
         },
         floatingActionButton = {
@@ -164,10 +166,13 @@ fun HistoryTopAppBar(
     groupByNovel: Boolean,
     onToggleGroupByNovel: () -> Unit,
     dateFilter: DateFilter?,
-    onDateFilterChange: (DateFilter?) -> Unit
+    onDateFilterChange: (DateFilter?) -> Unit,
+    onClearAll: () -> Unit,
+    hasHistory: Boolean
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     var showFilterMenu by remember { mutableStateOf(false) }
+    var showMoreMenu by remember { mutableStateOf(false) }
 
     if (searchMode) {
         TextField(
@@ -224,6 +229,46 @@ fun HistoryTopAppBar(
                         imageVector = Icons.Default.FilterList,
                         contentDescription = localize(MR.strings.filter)
                     )
+                }
+                
+                // More menu with Clear All option
+                Box {
+                    IconButton(
+                        onClick = { showMoreMenu = true },
+                        enabled = hasHistory
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "More options",
+                            tint = if (hasHistory) MaterialTheme.colorScheme.onSurface 
+                                   else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                    }
+                    
+                    DropdownMenu(
+                        expanded = showMoreMenu,
+                        onDismissRequest = { showMoreMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { 
+                                Text(
+                                    text = localize(MR.strings.delete_all_histories),
+                                    color = MaterialTheme.colorScheme.error
+                                ) 
+                            },
+                            onClick = {
+                                showMoreMenu = false
+                                onClearAll()
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.DeleteForever,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        )
+                    }
                 }
                 
                 DropdownMenu(

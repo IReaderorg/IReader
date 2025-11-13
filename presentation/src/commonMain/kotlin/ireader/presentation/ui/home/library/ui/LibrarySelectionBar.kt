@@ -91,7 +91,7 @@ internal fun LibrarySelectionBar(
                 SelectionActionButton(
                     icon = Icons.Outlined.Delete,
                     label = localize(MR.strings.delete),
-                    onClick = onClickDeleteDownload
+                    onClick = onClickDeleteDownload,
                 )
             }
         }

@@ -10,6 +10,8 @@ import ireader.domain.models.entities.*
 import ireader.domain.models.entities.SourceHealth
 import ireader.domain.models.entities.SourceStatus
 import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.services.ExtensionChangeEvent
+import ireader.domain.services.ExtensionWatcherService
 import ireader.domain.services.SourceHealthChecker
 import ireader.domain.usecases.services.StartExtensionManagerService
 import ireader.domain.utils.exceptionHandler
@@ -34,6 +36,7 @@ class ExtensionViewModel(
         val startExtensionManagerService: StartExtensionManagerService,
         private val sourceHealthChecker: SourceHealthChecker,
         private val sourceCredentialsRepository: ireader.domain.data.repository.SourceCredentialsRepository,
+        private val extensionWatcherService: ExtensionWatcherService,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), CatalogsState by state {
 
     val incognito = uiPreferences.incognitoMode().asStateIn(scope)
@@ -124,6 +127,47 @@ class ExtensionViewModel(
                     .filteredByChoice(selectedLanguage)
         }
                 .onEach { state.remoteCatalogs = it }.launchIn(scope)
+        
+        // Start extension watcher (desktop only)
+        startExtensionWatcher()
+    }
+    
+    /**
+     * Start watching for extension changes (desktop only)
+     */
+    private fun startExtensionWatcher() {
+        // Start the watcher
+        extensionWatcherService.start()
+        
+        // Listen for extension change events
+        scope.launch {
+            extensionWatcherService.events.collect { event ->
+                when (event) {
+                    is ExtensionChangeEvent.Added -> {
+                        // Show notification
+                        showSnackBar(UiText.DynamicString("Extension added: ${event.extensionName}"))
+                        // Refresh catalogs to load the new extension
+                        refreshCatalogsQuietly()
+                    }
+                    is ExtensionChangeEvent.Removed -> {
+                        // Show notification
+                        showSnackBar(UiText.DynamicString("Extension removed: ${event.extensionName}"))
+                        // Refresh catalogs to remove the extension
+                        refreshCatalogsQuietly()
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Refresh catalogs without showing loading indicator (for background updates)
+     */
+    private fun refreshCatalogsQuietly() {
+        scope.launch(Dispatchers.IO) {
+            // Just trigger a refresh of local catalogs without syncing remote
+            // The getCatalogsByType.subscribe flow will automatically update the UI
+        }
     }
 
     fun installCatalog(catalog: Catalog) {
