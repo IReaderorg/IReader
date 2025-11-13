@@ -35,6 +35,7 @@ fun SelectableTranslatableText(
     letterSpacing: TextUnit = TextUnit.Unspecified,
     fontWeight: FontWeight? = null,
     selectable: Boolean = true,
+    paragraphTranslationEnabled: Boolean = false,
     onTextSelected: (String) -> Unit = {},
     onTranslateRequest: (String) -> Unit = {}
 ) {
@@ -121,7 +122,7 @@ fun SelectableTranslatableText(
             )
         }
         
-        if (showContextMenu && selectedText.isNotBlank()) {
+        if (paragraphTranslationEnabled && showContextMenu && selectedText.isNotBlank()) {
             ParagraphTranslationMenu(
                 selectedText = selectedText,
                 onTranslate = {

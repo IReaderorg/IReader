@@ -320,6 +320,10 @@ class ReaderPreferences constructor(
         return preferenceStore.getBoolean("volume_key_navigation", false)
     }
 
+    // Paragraph translation menu
+    fun paragraphTranslationEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean("paragraph_translation_enabled", false)
+    }
     
     // Default reading mode for new books
     fun defaultReadingMode(): Preference<ReadingMode> {

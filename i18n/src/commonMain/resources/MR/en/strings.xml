@@ -25,4 +25,5 @@
     <string name="libretranslate_info">LibreTranslate is a free and open-source machine translation API. No API key required.</string>
     <string name="show_original">Show Original</string>
     <string name="show_translation">Show Translation</string>
-    <string name="translated">Translated</string> 
+    <string name="translated">Translated</string>
+    <string name="paragraph_translation_menu">Paragraph Translation Menu</string> 

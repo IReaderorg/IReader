@@ -267,6 +267,7 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.workManager)
     implementation(libs.napier)
+    implementation(libs.voyager.navigator)
 }
 composeCompiler {
     featureFlags.set(setOf(

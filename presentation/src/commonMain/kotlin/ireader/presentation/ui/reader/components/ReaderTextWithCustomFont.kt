@@ -29,6 +29,7 @@ fun ReaderTextWithCustomFont(
     letterSpacing: TextUnit = TextUnit.Unspecified,
     fontWeight: FontWeight? = null,
     selectable: Boolean = true,
+    paragraphTranslationEnabled: Boolean = false,
     onTextSelected: (String) -> Unit = {},
     onTranslateRequest: (String) -> Unit = {}
 ) {
@@ -69,6 +70,7 @@ fun ReaderTextWithCustomFont(
         letterSpacing = letterSpacing,
         fontWeight = fontWeight,
         selectable = selectable,
+        paragraphTranslationEnabled = paragraphTranslationEnabled,
         onTextSelected = onTextSelected,
         onTranslateRequest = onTranslateRequest
     )

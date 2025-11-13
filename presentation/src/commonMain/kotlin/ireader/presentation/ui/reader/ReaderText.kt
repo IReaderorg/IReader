@@ -471,6 +471,7 @@ private fun StyleText(
             letterSpacing = vm.betweenLetterSpaces.value.sp,
             fontWeight = FontWeight(vm.textWeight.value),
             selectable = vm.selectableMode.value,
+            paragraphTranslationEnabled = vm.paragraphTranslationEnabled.value,
             onTranslateRequest = { selectedText ->
                 vm.showParagraphTranslation(selectedText)
             }

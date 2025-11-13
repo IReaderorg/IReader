@@ -57,13 +57,28 @@ actual class StartDownloadServicesUseCase(
                 localizeHelper = localizeHelper,
                 notificationManager = notificationManager,
                 onCancel = { error, bookName ->
-
+                    // Log error for desktop - could show system notification in future
+                    ireader.core.log.Log.error { "Download failed for $bookName: ${error.message}" }
                 },
                 onSuccess = { completedDownloads ->
                     // Add completed downloads to the state
                     val currentCompleted = downloadServiceState.completedDownloads.toMutableList()
                     currentCompleted.addAll(completedDownloads)
                     downloadServiceState.completedDownloads = currentCompleted
+                    
+                    // Log success for desktop
+                    if (completedDownloads.isNotEmpty()) {
+                        ireader.core.log.Log.info { "Successfully downloaded ${completedDownloads.size} chapters" }
+                    }
+                    
+                    // Log failures if any
+                    val failedDownloads = downloadServiceState.failedDownloads.values.toList()
+                    if (failedDownloads.isNotEmpty()) {
+                        ireader.core.log.Log.warn { "${failedDownloads.size} chapters failed to download" }
+                        failedDownloads.forEach { failed ->
+                            ireader.core.log.Log.warn { "Chapter ${failed.chapterId}: ${failed.errorMessage}" }
+                        }
+                    }
                 },
                 remoteUseCases = remoteUseCases,
                 updateProgress = { max, progress, inProgess ->

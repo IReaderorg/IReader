@@ -39,7 +39,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.data.engines.TranslateEngine
@@ -641,6 +640,12 @@ fun GeneralScreenTab(
             SwitchPreference(
                 preference = vm.volumeKeyNavigation,
                 title = localizeHelper.localize(MR.strings.volume_key_navigation),
+            )
+        }
+        item {
+            SwitchPreference(
+                preference = vm.paragraphTranslationEnabled,
+                title = "Paragraph Translation Menu",
             )
         }
         item {

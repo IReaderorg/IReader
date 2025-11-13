@@ -77,12 +77,18 @@ class DownloaderService constructor(
             notificationManager = notificationManager,
             onCancel = { error, bookName->
                 notificationManager.cancel(notificationId)
+                
+                // Show error notification with user-friendly message
+                val errorMessage = error.message ?: "Download failed"
                 notificationManager.show(
                     notificationId + 1,
                     defaultNotificationHelper.baseCancelledNotificationDownloader(
                         bookName = bookName,
                         error
-                    ).build()
+                    ).apply {
+                        setContentText(errorMessage)
+                        setStyle(NotificationCompat.BigTextStyle().bigText(errorMessage))
+                    }.build()
                 )
             },
             onSuccess = { completedDownloads ->
@@ -94,9 +100,12 @@ class DownloaderService constructor(
                 currentCompleted.addAll(completedDownloads)
                 downloadServiceState.completedDownloads = currentCompleted
                 
+                // Get failed downloads from state
+                val failedDownloads = downloadServiceState.failedDownloads.values.toList()
+                
                 // Create notifications for completed downloads
                 if (completedDownloads.isNotEmpty()) {
-                    if (completedDownloads.size == 1) {
+                    if (completedDownloads.size == 1 && failedDownloads.isEmpty()) {
                         // Single download notification
                         val download = completedDownloads.first()
                         val notification = NotificationCompat.Builder(
@@ -104,7 +113,7 @@ class DownloaderService constructor(
                             CHANNEL_DOWNLOADER_COMPLETE
                         ).apply {
                             setContentTitle("${download.bookName}")
-                            setContentText("${download.chapterName} downloaded")
+                            setContentText("${download.chapterName} downloaded successfully")
                             setSmallIcon(R.drawable.ic_downloading)
                             priority = NotificationCompat.PRIORITY_DEFAULT
                             setAutoCancel(true)
@@ -136,13 +145,19 @@ class DownloaderService constructor(
                             )
                         }
                         
-                        // Summary notification
+                        // Summary notification with success and failure counts
+                        val summaryText = if (failedDownloads.isEmpty()) {
+                            "${completedDownloads.size} chapters downloaded successfully"
+                        } else {
+                            "${completedDownloads.size} succeeded, ${failedDownloads.size} failed"
+                        }
+                        
                         val summaryNotification = NotificationCompat.Builder(
                             applicationContext.applicationContext,
                             CHANNEL_DOWNLOADER_COMPLETE
                         ).apply {
                             setContentTitle("Downloads completed")
-                            setContentText("${completedDownloads.size} chapters downloaded")
+                            setContentText(summaryText)
                             setSmallIcon(R.drawable.ic_downloading)
                             priority = NotificationCompat.PRIORITY_DEFAULT
                             setAutoCancel(true)
@@ -155,6 +170,47 @@ class DownloaderService constructor(
                             summaryNotification
                         )
                     }
+                }
+                
+                // Show notification for failed downloads if any
+                if (failedDownloads.isNotEmpty()) {
+                    val failedNotification = NotificationCompat.Builder(
+                        applicationContext.applicationContext,
+                        CHANNEL_DOWNLOADER_COMPLETE
+                    ).apply {
+                        setContentTitle("Download failures")
+                        
+                        if (failedDownloads.size == 1) {
+                            val failed = failedDownloads.first()
+                            setContentText(failed.errorMessage)
+                            setStyle(NotificationCompat.BigTextStyle().bigText(failed.errorMessage))
+                        } else {
+                            setContentText("${failedDownloads.size} chapters failed to download")
+                            val inboxStyle = NotificationCompat.InboxStyle()
+                            inboxStyle.setBigContentTitle("Download failures")
+                            failedDownloads.take(5).forEach { failed ->
+                                // Get chapter name from downloads list
+                                val chapterName = downloadServiceState.downloads
+                                    .find { it.chapterId == failed.chapterId }?.chapterName 
+                                    ?: "Chapter ${failed.chapterId}"
+                                inboxStyle.addLine("$chapterName: ${failed.errorMessage}")
+                            }
+                            if (failedDownloads.size > 5) {
+                                inboxStyle.addLine("... and ${failedDownloads.size - 5} more")
+                            }
+                            setStyle(inboxStyle)
+                        }
+                        
+                        setSmallIcon(R.drawable.ic_downloading)
+                        priority = NotificationCompat.PRIORITY_HIGH
+                        setAutoCancel(true)
+                        setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
+                        setGroup("download_complete_group")
+                    }.build()
+                    notificationManager.show(
+                        notificationId + 1500,
+                        failedNotification
+                    )
                 }
             },
             remoteUseCases = remoteUseCases,

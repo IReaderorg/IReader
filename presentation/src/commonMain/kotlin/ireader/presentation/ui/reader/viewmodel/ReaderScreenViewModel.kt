@@ -232,6 +232,7 @@ class ReaderScreenViewModel(
     val bilingualModeEnabled = readerPreferences.bilingualModeEnabled().asState()
     val bilingualModeLayout = readerPreferences.bilingualModeLayout().asState()
     val volumeKeyNavigation = readerPreferences.volumeKeyNavigation().asState()
+    val paragraphTranslationEnabled = readerPreferences.paragraphTranslationEnabled().asState()
     
     // Override to provide translation-aware content
     override fun getCurrentContent(): List<ireader.core.source.model.Page> {
