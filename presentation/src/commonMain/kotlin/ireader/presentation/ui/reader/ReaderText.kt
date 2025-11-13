@@ -48,6 +48,9 @@ import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.toUri
 import ireader.core.source.model.ImageUrl
+import ireader.presentation.core.toComposeColor
+import ireader.presentation.core.toComposeFontFamily
+import ireader.presentation.core.toComposeTextAlign
 import ireader.core.source.model.Page
 import ireader.core.source.model.Text
 import ireader.domain.models.entities.Chapter
@@ -401,8 +404,8 @@ private fun StyleText(
                 .fillMaxWidth()
                 .padding(horizontal = vm.paragraphsIndent.value.dp),
             fontSize = vm.fontSize.value.sp,
-            fontFamily = vm.font?.value?.fontFamily,
-            textAlign = mapTextAlign(vm.textAlignment.value),
+            fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
+            textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
             originalColor = vm.textColor.value,
             translatedColor = vm.textColor.value.copy(alpha = 0.9f),
             lineHeight = vm.lineHeight.value.sp,
@@ -411,9 +414,6 @@ private fun StyleText(
         )
     } else if (enableBioReading) {
         Text(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(horizontal = vm.paragraphsIndent.value.dp),
             text = buildAnnotatedString {
                 var currentCursorIndex = 0
                 originalText.split(" ")
@@ -445,9 +445,12 @@ private fun StyleText(
                     }
 
             },
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = vm.paragraphsIndent.value.dp),
             fontSize = vm.fontSize.value.sp,
-            fontFamily = vm.font?.value?.fontFamily,
-            textAlign = mapTextAlign(vm.textAlignment.value),
+            fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
+            textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
             color = vm.textColor.value,
             lineHeight = vm.lineHeight.value.sp,
             letterSpacing = vm.betweenLetterSpaces.value.sp,
@@ -461,8 +464,8 @@ private fun StyleText(
                 .fillMaxWidth()
                 .padding(horizontal = vm.paragraphsIndent.value.dp),
             fontSize = vm.fontSize.value.sp,
-            fontFamily = vm.font?.value?.fontFamily,
-            textAlign = mapTextAlign(vm.textAlignment.value),
+            fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
+            textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
             color = vm.textColor.value,
             lineHeight = vm.lineHeight.value.sp,
             letterSpacing = vm.betweenLetterSpaces.value.sp,

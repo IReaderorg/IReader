@@ -7,6 +7,7 @@ import ireader.data.category.CategoryRepositoryImpl
 import ireader.data.chapter.ChapterRepositoryImpl
 import ireader.data.chapterhealth.ChapterHealthRepositoryImpl
 import ireader.data.chapterreport.ChapterReportRepositoryImpl
+import ireader.data.database.RepairDatabaseUseCaseImpl
 import ireader.data.downloads.DownloadRepositoryImpl
 import ireader.data.sourcecomparison.SourceComparisonRepositoryImpl
 import ireader.data.font.FontRepositoryImpl
@@ -23,6 +24,7 @@ import ireader.data.sourcereport.SourceReportRepositoryImpl
 import ireader.data.statistics.ReadingStatisticsRepositoryImpl
 import ireader.data.translation.GlossaryRepositoryImpl
 import ireader.data.translation.TranslatedChapterRepositoryImpl
+import ireader.data.tts.VoiceModelRepositoryImpl
 import ireader.domain.catalogs.service.CatalogRemoteRepository
 import ireader.domain.data.repository.BookCategoryRepository
 import ireader.domain.data.repository.BookRepository
@@ -44,7 +46,9 @@ import ireader.domain.data.repository.SourceReportRepository
 import ireader.domain.data.repository.ThemeRepository
 import ireader.domain.data.repository.TranslatedChapterRepository
 import ireader.domain.data.repository.UpdatesRepository
+import ireader.domain.data.repository.VoiceModelRepository
 import ireader.domain.services.SourceHealthChecker
+import ireader.domain.usecases.database.RepairDatabaseUseCase
 import org.koin.dsl.module
 
 
@@ -94,4 +98,10 @@ val repositoryInjectModule = module {
     single<ireader.domain.data.repository.FundingGoalRepository> {
         FundingGoalRepositoryImpl()
     }
+    
+    // Voice model repository
+    single<VoiceModelRepository> { VoiceModelRepositoryImpl(get(), get()) }
+    
+    // Database use cases
+    single<RepairDatabaseUseCase> { RepairDatabaseUseCaseImpl(get()) }
 }

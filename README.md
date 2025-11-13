@@ -152,6 +152,22 @@ Check out our comprehensive wiki for detailed guides:
 
 ---
 
+## 📖 Developer Documentation
+
+Comprehensive documentation for developers is available in the [`docs/`](docs/) directory:
+
+### Architecture & Design
+- **[Architecture Guide](docs/ARCHITECTURE.md)** - Clean architecture principles, module structure, and development guidelines
+- **[Module Dependencies](docs/MODULE_DEPENDENCIES.md)** - Detailed dependency graph and module relationships
+- **[Build Optimization](docs/BUILD_OPTIMIZATION.md)** - Build configuration, dependency management, and performance tips
+
+### Quick Links
+- [Documentation Index](docs/README.md) - Complete documentation overview
+- [Quick Start for Developers](docs/ARCHITECTURE.md#quick-start)
+- [Adding New Features](docs/ARCHITECTURE.md#adding-a-new-feature)
+
+---
+
 ## 🌍 Contributing
 
 ### 🌐 Translations
@@ -161,6 +177,14 @@ Check out our comprehensive wiki for detailed guides:
 ### 📦 Create a New Source
 
 - See [Contributing Guide](https://github.com/IReaderorg/IReader-extensions/blob/master/tutorial/CONTRIBUTING.md)
+
+### 💻 Code Contributions
+
+1. Read the [Architecture Guide](docs/ARCHITECTURE.md) to understand the project structure
+2. Follow clean architecture principles
+3. Write tests for new features
+4. Document public APIs with KDoc
+5. Submit a pull request
 
 ---
 

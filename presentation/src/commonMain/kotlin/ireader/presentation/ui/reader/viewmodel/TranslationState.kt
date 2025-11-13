@@ -7,7 +7,7 @@ import ireader.core.source.model.Page
 import ireader.domain.models.entities.Glossary
 import ireader.domain.models.entities.TranslatedChapter
 
-data class TranslationState(
+data class ChapterTranslationState(
     val isShowingTranslation: Boolean = false,
     val hasTranslation: Boolean = false,
     val translatedChapter: TranslatedChapter? = null,

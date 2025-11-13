@@ -1,10 +1,10 @@
 package ireader.domain.preferences.models
 
-import androidx.compose.ui.graphics.Color
+import ireader.domain.models.common.ColorModel
 
 data class ReaderColors(
     val id: Long,
-    val backgroundColor: Color,
-    val onTextColor: Color,
+    val backgroundColor: ColorModel,
+    val onTextColor: ColorModel,
     val isDefault: Boolean = false
 )

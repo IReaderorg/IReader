@@ -28,8 +28,8 @@ class GetLibraryCategory  internal constructor(
         val smartCategory = SmartCategory.getById(categoryId)
         
         return if (smartCategory != null) {
-            // Use smart category filtering
-            getSmartCategoryBooksUseCase.await(smartCategory, sort).filteredWith(filters)
+            // Use smart category filtering with includeArchived parameter
+            getSmartCategoryBooksUseCase.await(smartCategory, sort, includeArchived).filteredWith(filters)
         } else {
             // Use regular category filtering
             libraryRepository.findAll(sort, includeArchived).filter { books ->
@@ -48,8 +48,8 @@ class GetLibraryCategory  internal constructor(
         val smartCategory = SmartCategory.getById(categoryId)
         
         return if (smartCategory != null) {
-            // Use smart category filtering
-            getSmartCategoryBooksUseCase.subscribe(smartCategory, sort).map { it.filteredWith(filters) }
+            // Use smart category filtering with includeArchived parameter
+            getSmartCategoryBooksUseCase.subscribe(smartCategory, sort, includeArchived).map { it.filteredWith(filters) }
         } else {
             // Use regular category filtering
             libraryRepository.subscribe(sort, includeArchived).map { it.filter { books ->

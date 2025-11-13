@@ -255,35 +255,16 @@ dependencies {
     implementation(libs.jsoup)
     testImplementation(libs.ktor.core.cio)
 
-//    implementation(compose.compiler.auto)
-    implementation(compose.runtime)
-    implementation(compose.foundation)
-
+    // Removed duplicate compose dependencies - already included via presentation module
     testImplementation(test.bundles.common)
 
     testRuntimeOnly(libs.junit.vintage.engine)
-   androidTestImplementation(test.bundles.common)
+    androidTestImplementation(test.bundles.common)
 
-    implementation(libs.koin.core)
-    implementation(libs.voyager.navigator)
-
-
-    implementation(compose.runtime)
-    implementation(compose.foundation)
-    implementation(compose.animation)
-    implementation(compose.animationGraphics)
-    implementation(compose.materialIconsExtended)
-    implementation(compose.preview)
-    implementation(compose.ui)
-    @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-    implementation(compose.material3)
-    implementation(compose.materialIconsExtended)
-
-
-    implementation(libs.koin.core)
+    // Removed duplicate koin.core, voyager.navigator, and compose dependencies
+    // These are already provided by the presentation module
     implementation(libs.koin.androidCompose)
     implementation(libs.koin.android)
-    implementation(libs.koin.compose)
     implementation(libs.koin.workManager)
     implementation(libs.napier)
 }

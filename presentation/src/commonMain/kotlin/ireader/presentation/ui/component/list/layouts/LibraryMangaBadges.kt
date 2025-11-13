@@ -27,6 +27,7 @@ fun LibraryBadges(
     sourceId: Long? = null,
     showLanguage: Boolean = false,
     isPinned: Boolean = false,
+    isArchived: Boolean = false,
 ) {
     // Get language from catalog if needed
     val language = if (showLanguage && sourceId != null) {
@@ -34,7 +35,7 @@ fun LibraryBadges(
         catalogStore.get(sourceId)?.source?.lang
     } else null
 
-    if (unread == null && downloaded == null && !isLocal && language == null && !isPinned) return
+    if (unread == null && downloaded == null && !isLocal && language == null && !isPinned && !isArchived) return
 
     Column(modifier = modifier) {
         // Pin indicator at the top
@@ -72,6 +73,14 @@ fun LibraryBadges(
                     text = "LOCAL",
                     backgroundColor = MaterialTheme.colorScheme.secondary,
                     textColor = MaterialTheme.colorScheme.onSecondary
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+            }
+            if (isArchived) {
+                BookCoverBadge(
+                    text = "ARCHIVED",
+                    backgroundColor = MaterialTheme.colorScheme.error,
+                    textColor = MaterialTheme.colorScheme.onError
                 )
                 Spacer(modifier = Modifier.width(4.dp))
             }

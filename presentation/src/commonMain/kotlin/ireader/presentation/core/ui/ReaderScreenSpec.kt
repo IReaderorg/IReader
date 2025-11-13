@@ -270,7 +270,7 @@ data class ReaderScreenSpec(
                             onFontSelected = { index ->
                                 vm.font?.value = FontType(
                                     vm.fonts.getOrNull(index) ?: getDefaultFont().name,
-                                    FontFamily.Default
+                                    ireader.domain.models.common.FontFamilyModel.Default
                                 )
                                 vm.makeSettingTransparent()
                             },

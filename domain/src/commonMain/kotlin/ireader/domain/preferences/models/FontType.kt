@@ -1,11 +1,11 @@
 package ireader.domain.preferences.models
 
-import androidx.compose.ui.text.font.FontFamily
+import ireader.domain.models.common.FontFamilyModel
 
 data class FontType(
     val name: String,
-    val fontFamily: FontFamily
+    val fontFamily: FontFamilyModel
 )
 fun getDefaultFont(): FontType {
-    return FontType("Roboto", FontFamily.Default)
+    return FontType("Roboto", FontFamilyModel.Default)
 }

@@ -43,10 +43,11 @@ kotlin {
                 api(compose.materialIconsExtended)
                 api(compose.preview)
                 api(compose.ui)
+                // Material2 for backward compatibility (to be migrated to Material3)
                 api(compose.material)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 api(compose.material3)
-                api(compose.materialIconsExtended)
+                // Removed duplicate compose.materialIconsExtended
 
 
                 implementation(libs.voyager.navigator)

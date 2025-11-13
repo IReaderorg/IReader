@@ -25,23 +25,11 @@ dependencies {
     implementation(project(Modules.presentation))
     implementation(project(Modules.commonResources))
     implementation(compose.desktop.currentOs)
-    implementation(compose.uiTooling)
-    implementation(compose.materialIconsExtended)
-    implementation(compose.foundation)
-    @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-    implementation(compose.material3)
-    implementation(compose.animation)
-    implementation(compose.animationGraphics)
-    implementation(compose.runtime)
-    implementation(compose.ui)
-    implementation(libs.koin.core)
-    implementation(libs.koin.compose)
-    implementation(libs.voyager.navigator)
-    implementation(kotlinx.coroutines.core)
+    // Removed duplicate compose dependencies - already provided by presentation module
+    // Only keeping desktop-specific dependencies
     implementation(libs.napier)
-    implementation(libs.coil.network.ktor)
-    implementation(libs.coil.compose)
-    
+    implementation(libs.voyager.navigator)
+
     // Add explicit MOKO resources dependency
     implementation(libs.moko.core)
 }

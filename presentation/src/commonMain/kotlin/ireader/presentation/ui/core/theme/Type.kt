@@ -1,7 +1,6 @@
 package ireader.presentation.ui.core.theme
 
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
+import ireader.domain.models.common.ColorModel
 import ireader.domain.models.theme.ReaderTheme
 import ireader.domain.preferences.models.ReaderColors
 
@@ -17,8 +16,8 @@ fun ReaderColors.ReaderTheme(): ReaderTheme {
 fun ReaderTheme.ReaderColors(): ReaderColors {
     return ReaderColors(
         id = id,
-        backgroundColor = Color(this.backgroundColor),
-        onTextColor = Color(this.onTextColor),
+        backgroundColor = ColorModel.fromArgb(this.backgroundColor),
+        onTextColor = ColorModel.fromArgb(this.onTextColor),
         isDefault = id < 0
     )
 }

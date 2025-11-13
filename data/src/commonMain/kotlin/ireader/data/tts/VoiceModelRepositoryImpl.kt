@@ -1,6 +1,7 @@
-package ireader.domain.data.repository
+package ireader.data.tts
 
 import ireader.domain.catalogs.VoiceCatalog
+import ireader.domain.data.repository.VoiceModelRepository
 import ireader.domain.models.tts.VoiceModel
 import ireader.domain.services.tts_service.VoiceDownloader
 import ireader.domain.services.tts_service.VoiceStorage

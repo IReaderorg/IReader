@@ -1,6 +1,7 @@
 package ireader.domain.models.prefs
 
-import androidx.compose.ui.Alignment
+import ireader.domain.models.common.AlignmentModel
+import ireader.domain.models.common.TextAlignmentModel
 import ireader.i18n.UiText
 import ireader.i18n.resources.MR
 
@@ -83,19 +84,19 @@ object PreferenceValues {
         Weekly
     }
 }
-fun PreferenceValues.PreferenceAlignment.mapAlignment() : Alignment? {
+fun PreferenceValues.PreferenceAlignment.mapAlignment() : AlignmentModel? {
     return when(this) {
-        PreferenceValues.PreferenceAlignment.TopLeft -> Alignment.TopEnd
-        PreferenceValues.PreferenceAlignment.BottomLeft -> Alignment.BottomEnd
+        PreferenceValues.PreferenceAlignment.TopLeft -> AlignmentModel.TOP_END
+        PreferenceValues.PreferenceAlignment.BottomLeft -> AlignmentModel.BOTTOM_END
         else -> null
     }
 }
-fun mapTextAlign(textAlign: PreferenceValues.PreferenceTextAlignment): androidx.compose.ui.text.style.TextAlign {
+fun mapTextAlign(textAlign: PreferenceValues.PreferenceTextAlignment): TextAlignmentModel {
     return when (textAlign) {
-        PreferenceValues.PreferenceTextAlignment.Center -> androidx.compose.ui.text.style.TextAlign.Center
-        PreferenceValues.PreferenceTextAlignment.Right -> androidx.compose.ui.text.style.TextAlign.Right
-        PreferenceValues.PreferenceTextAlignment.Left -> androidx.compose.ui.text.style.TextAlign.Left
-        PreferenceValues.PreferenceTextAlignment.Justify -> androidx.compose.ui.text.style.TextAlign.Justify
-        PreferenceValues.PreferenceTextAlignment.Hide -> androidx.compose.ui.text.style.TextAlign.Justify
+        PreferenceValues.PreferenceTextAlignment.Center -> TextAlignmentModel.CENTER
+        PreferenceValues.PreferenceTextAlignment.Right -> TextAlignmentModel.RIGHT
+        PreferenceValues.PreferenceTextAlignment.Left -> TextAlignmentModel.LEFT
+        PreferenceValues.PreferenceTextAlignment.Justify -> TextAlignmentModel.JUSTIFY
+        PreferenceValues.PreferenceTextAlignment.Hide -> TextAlignmentModel.JUSTIFY
     }
 }

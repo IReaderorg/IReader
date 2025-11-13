@@ -31,7 +31,6 @@ import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.NO_VALUE
 import ireader.i18n.UiText
 import ireader.i18n.resources.MR
-import ireader.presentation.ui.core.theme.ReaderColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -41,6 +40,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.time.ExperimentalTime
+import ireader.presentation.core.toComposeColor
 
 @OptIn(ExperimentalTextApi::class)
 
@@ -94,7 +94,7 @@ class ReaderScreenViewModel(
     val globalChapterId : State<Long?> = mutableStateOf(params.chapterId)
     val globalBookId : State<Long?> = mutableStateOf(params.bookId)
 
-    val readerColors: SnapshotStateList<ReaderColors> = readerThemes
+    val readerColors: SnapshotStateList<ReaderColors> = androidx.compose.runtime.mutableStateListOf<ReaderColors>().apply { addAll(readerThemes) }
 
     var isSettingChanging by mutableStateOf(false)
 
@@ -277,7 +277,14 @@ class ReaderScreenViewModel(
     private fun subscribeReaderThemes() {
         readerThemeRepository.subscribe().onEach { list ->
             readerColors.removeIf { !it.isDefault }
-            readerColors.addAll(0, list.map { it.ReaderColors() }.reversed())
+            readerColors.addAll(0, list.map { theme ->
+                ReaderColors(
+                    id = theme.id,
+                    backgroundColor = ireader.domain.models.common.ColorModel.fromArgb(theme.backgroundColor),
+                    onTextColor = ireader.domain.models.common.ColorModel.fromArgb(theme.onTextColor),
+                    isDefault = false
+                )
+            }.reversed())
         }.launchIn(scope)
     }
 
@@ -459,10 +466,10 @@ class ReaderScreenViewModel(
             readerTheme.value = theme
             val bgColor = theme.backgroundColor
             val textColor = theme.onTextColor
-            backgroundColor.value = bgColor
-            this.textColor.value = textColor
-            setReaderBackgroundColor(bgColor)
-            setReaderTextColor(textColor)
+            backgroundColor.value = bgColor.toComposeColor()
+            this.textColor.value = textColor.toComposeColor()
+            setReaderBackgroundColor(bgColor.toComposeColor())
+            setReaderTextColor(textColor.toComposeColor())
         }
 
     }

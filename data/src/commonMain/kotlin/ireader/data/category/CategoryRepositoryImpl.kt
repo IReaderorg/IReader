@@ -70,6 +70,30 @@ class CategoryRepositoryImpl(
         }
     }
 
+    override suspend fun update(category: Category) {
+        handler.await {
+            categoryQueries.update(
+                name = category.name,
+                order = category.order,
+                flags = category.flags,
+                categoryId = category.id,
+            )
+        }
+    }
+
+    override suspend fun updateBatch(categories: List<Category>) {
+        handler.await(inTransaction = true) {
+            for (category in categories) {
+                categoryQueries.update(
+                    name = category.name,
+                    order = category.order,
+                    flags = category.flags,
+                    categoryId = category.id,
+                )
+            }
+        }
+    }
+
     override suspend fun updatePartial(update: CategoryUpdate) {
         handler.await {
             updatePartialBlocking(update)

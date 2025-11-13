@@ -146,7 +146,7 @@ fun ReaderScreenTab(
             vm.font?.let { font ->
                 ChipChoicePreference(
                         preference = font,
-                        choices = vm.fonts.map { FontType(it, FontFamily.Default) }
+                        choices = vm.fonts.map { FontType(it, ireader.domain.models.common.FontFamilyModel.Default) }
                                 .associate { fontType ->
                                     postion++
                                     return@associate fontType to fontType.name

@@ -19,6 +19,7 @@ import ireader.i18n.resources.MR
 import ireader.presentation.ui.component.components.PreferenceRow
 import ireader.presentation.ui.core.modifier.clickableNoIndication
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
+import ireader.presentation.core.toComposeColor
 
 
 @Composable
@@ -55,7 +56,7 @@ fun ReaderBackgroundComposable(
                                 ),
                             imageVector = Icons.Default.Circle,
                             contentDescription = "color selected",
-                            tint = themes[index].backgroundColor
+                            tint = themes[index].backgroundColor.toComposeColor()
                         )
                         if (viewModel.readerTheme.value.id == themes[index].id) {
                             Icon(

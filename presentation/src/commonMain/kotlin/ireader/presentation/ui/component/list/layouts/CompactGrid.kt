@@ -81,11 +81,12 @@ fun CompactGridLayoutComposable(
                         if (showGoToLastChapterBadge) {
                             GoToLastReadComposable(onClick = { goToLatestChapter(book) }, size = (height.value.height / 20).dp)
                         }
-                        if (showUnreadBadge || showReadBadge) {
+                        if (showUnreadBadge || showReadBadge || book.isArchived) {
                             LibraryBadges(
                                 unread = if (showUnreadBadge) book.unread else null,
                                 downloaded = if (showReadBadge) book.downloaded else null,
-                                isPinned = false // Will be implemented in task 5.2
+                                isPinned = false, // Will be implemented in task 5.2
+                                isArchived = book.isArchived
                             )
                         }
 

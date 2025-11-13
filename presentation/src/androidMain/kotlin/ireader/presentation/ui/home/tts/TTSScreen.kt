@@ -48,6 +48,10 @@ import ireader.presentation.ui.component.components.ShowLoading
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.SuperSmallTextComposable
 import ireader.presentation.ui.core.modifier.clickableNoIndication
+import ireader.presentation.core.toComposeColor
+import ireader.presentation.core.toComposeAlignment
+import ireader.presentation.core.toComposeFontFamily
+import ireader.presentation.core.toComposeTextAlign
 
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
@@ -66,8 +70,8 @@ fun TTSScreen(
 ) {
     val gradient = Brush.verticalGradient(
         colors = listOf(
-            vm.theme.value.backgroundColor.copy(alpha = .8f),
-            vm.theme.value.backgroundColor.copy(alpha = .8f)
+            vm.theme.value.backgroundColor.toComposeColor().copy(alpha = .8f),
+            vm.theme.value.backgroundColor.toComposeColor().copy(alpha = .8f)
         ),
         startY = 1f,  // 1/3
         endY = 1f,
@@ -106,9 +110,9 @@ fun TTSScreen(
                                     "\n".repeat(vm.paragraphDistance.value)
                                 ) else "",
                                 fontSize = vm.fontSize.value.sp,
-                                fontFamily = vm.font?.value?.fontFamily,
-                                textAlign = mapTextAlign(vm.textAlignment.value),
-                                color = vm.theme.value.onTextColor.copy(alpha = if (index == vm.currentReadingParagraph) 1f else .6f),
+                                fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
+                                textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
+                                color = vm.theme.value.onTextColor.toComposeColor().copy(alpha = if (index == vm.currentReadingParagraph) 1f else .6f),
                                 lineHeight = vm.lineHeight.value.sp,
                                 letterSpacing = vm.betweenLetterSpaces.value.sp,
                                 fontWeight = FontWeight(vm.textWeight.value),
@@ -126,22 +130,22 @@ fun TTSScreen(
                         ) {
                             SuperSmallTextComposable(
                                 text = "${vm.currentReadingParagraph + 1}/${vm.ttsContent?.value?.size ?: 0L}",
-                                color = vm.theme.value.onTextColor,
+                                color = vm.theme.value.onTextColor.toComposeColor(),
                             )
                         }
                         vm.ttsIconAlignments.value.mapAlignment()?.let { alignment ->
                             Row(modifier = Modifier
-                                .align(alignment)) {
+                                .align(alignment.toComposeAlignment())) {
                                 AppIconButton(
                                     onClick = onPlay,
                                     imageVector = if (vm.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                    tint = vm.theme.value.onTextColor,
+                                    tint = vm.theme.value.onTextColor.toComposeColor(),
                                     contentDescription = null
                                 )
                                 AppIconButton(
                                     onClick = { vm.fullScreenMode = !vm.fullScreenMode },
                                     imageVector = if (vm.fullScreenMode) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
-                                    tint = vm.theme.value.onTextColor,
+                                    tint = vm.theme.value.onTextColor.toComposeColor(),
                                     contentDescription = null
                                 )
                             }

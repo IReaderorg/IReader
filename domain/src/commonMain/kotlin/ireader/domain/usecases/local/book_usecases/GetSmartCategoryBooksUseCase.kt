@@ -19,18 +19,24 @@ class GetSmartCategoryBooksUseCase(
     @OptIn(ExperimentalTime::class)
     suspend fun await(
         smartCategory: SmartCategory,
-        sort: LibrarySort = LibrarySort.default
+        sort: LibrarySort = LibrarySort.default,
+        includeArchived: Boolean = false
     ): List<LibraryBook> {
-        val allBooks = libraryRepository.findAll(sort)
+        // For Archived smart category, always include archived books
+        val shouldIncludeArchived = smartCategory is SmartCategory.Archived || includeArchived
+        val allBooks = libraryRepository.findAll(sort, shouldIncludeArchived)
         return filterBooksForSmartCategory(allBooks, smartCategory)
     }
     
     @OptIn(ExperimentalTime::class)
     fun subscribe(
         smartCategory: SmartCategory,
-        sort: LibrarySort = LibrarySort.default
+        sort: LibrarySort = LibrarySort.default,
+        includeArchived: Boolean = false
     ): Flow<List<LibraryBook>> {
-        return libraryRepository.subscribe(sort).map { books ->
+        // For Archived smart category, always include archived books
+        val shouldIncludeArchived = smartCategory is SmartCategory.Archived || includeArchived
+        return libraryRepository.subscribe(sort, shouldIncludeArchived).map { books ->
             filterBooksForSmartCategory(books, smartCategory)
         }
     }

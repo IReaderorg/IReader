@@ -34,7 +34,7 @@ class FontPreferences @OptIn(ExperimentalTextApi::class) constructor(
 
 
     private val localFontFamily = listOf<FontType>(
-        FontType("Cooper Arabic" ,FontFamily(androidx.compose.ui.text.font.Font(R.font.cooper_arabic, weight = FontWeight.Normal)))
+        FontType("Cooper Arabic", ireader.domain.models.common.FontFamilyModel.Custom("Cooper Arabic", "cooper_arabic"))
     )
 
     @OptIn(ExperimentalTextApi::class)
@@ -44,18 +44,20 @@ class FontPreferences @OptIn(ExperimentalTextApi::class) constructor(
             return font
         }
         return kotlin.runCatching {
+            // Create the Compose FontFamily for rendering
             val fontFamily = androidx.compose.ui.text.font.FontFamily(
                 Font(
                     googleFont = GoogleFont(fontName),
                     provider
                 )
             )
+            // Return domain model with custom font
             FontType(
                 fontName,
-                fontFamily
+                ireader.domain.models.common.FontFamilyModel.Custom(fontName)
             )
         }.getOrElse {
-            FontType("Roboto", FontFamily.Default)
+            FontType("Roboto", ireader.domain.models.common.FontFamilyModel.Default)
         }
     }
 

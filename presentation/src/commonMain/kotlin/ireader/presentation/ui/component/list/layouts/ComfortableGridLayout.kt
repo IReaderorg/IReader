@@ -85,14 +85,15 @@ fun ComfortableGridLayout(
                                 size = (height.value.height / 20).dp
                             )
                         }
-                        if (showUnreadBadge || showReadBadge || showDownloadedChaptersBadge || showUnreadChaptersBadge || showLocalMangaBadge || showLanguageBadge) {
+                        if (showUnreadBadge || showReadBadge || showDownloadedChaptersBadge || showUnreadChaptersBadge || showLocalMangaBadge || showLanguageBadge || book.isArchived) {
                             LibraryBadges(
                                 unread = if (showUnreadBadge || showUnreadChaptersBadge) book.unread else null,
                                 downloaded = if (showReadBadge || showDownloadedChaptersBadge) book.downloaded else null,
                                 isLocal = showLocalMangaBadge && book.sourceId == -1L,
                                 sourceId = book.sourceId,
                                 showLanguage = showLanguageBadge,
-                                isPinned = false // Will be implemented in task 5.2
+                                isPinned = false, // Will be implemented in task 5.2
+                                isArchived = book.isArchived
                             )
                         }
 

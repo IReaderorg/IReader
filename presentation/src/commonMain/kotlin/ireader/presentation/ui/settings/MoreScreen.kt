@@ -39,6 +39,8 @@ import ireader.presentation.ui.component.components.PreferenceRow
 import ireader.presentation.ui.component.components.SwitchPreference
 import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.settings.components.SettingsItem
+import ireader.presentation.ui.settings.components.SettingsSectionHeader
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -170,7 +172,7 @@ fun MoreScreen(
         
         // Profile Section
         item {
-            SectionHeader(
+            SettingsSectionHeader(
                 title = "Account",
                 icon = Icons.Filled.AccountCircle
             )
@@ -196,7 +198,7 @@ fun MoreScreen(
         
         // Library Management Section
         item {
-            SectionHeader(
+            SettingsSectionHeader(
                 title = "Library Management",
                 icon = Icons.Filled.MenuBook
             )
@@ -231,7 +233,7 @@ fun MoreScreen(
         
         // Appearance & Settings Section
         item {
-            SectionHeader(
+            SettingsSectionHeader(
                 title = "Appearance & Settings",
                 icon = Icons.Filled.Palette
             )
@@ -299,7 +301,7 @@ fun MoreScreen(
         
         // Information & Support Section
         item {
-            SectionHeader(
+            SettingsSectionHeader(
                 title = "Information & Support",
                 icon = Icons.Filled.Info
             )
@@ -329,104 +331,6 @@ fun MoreScreen(
                 description = "Help keep IReader free and ad-free",
                 icon = Icons.Outlined.Favorite,
                 onClick = onDonation
-            )
-        }
-    }
-}
-
-@Composable
-private fun SectionHeader(
-    title: String,
-    icon: ImageVector
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(24.dp)
-        )
-        
-        Spacer(modifier = Modifier.width(16.dp))
-        
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
-        
-        Spacer(modifier = Modifier.width(16.dp))
-        
-        Divider(
-            color = MaterialTheme.colorScheme.outlineVariant,
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-private fun SettingsItem(
-    title: String,
-    description: String,
-    icon: ImageVector,
-    onClick: () -> Unit
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick),
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 1.dp
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(24.dp)
-            )
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                
-                Spacer(modifier = Modifier.height(2.dp))
-                
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            
-            Spacer(modifier = Modifier.width(8.dp))
-            
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                modifier = Modifier.size(20.dp)
             )
         }
     }

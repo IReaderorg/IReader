@@ -35,7 +35,7 @@ okhttp = "5.3.0"
 jsoup = "1.21.2"
 dex2jar = "2.4.32"
 coil = "3.3.0"
-readium = "3.1.2"
+# Removed readium version - not used
 
 
 
@@ -120,9 +120,7 @@ sqldelight-android-paging = { module = "app.cash.sqldelight:androidx-paging3-ext
 requerySqlite = "com.github.requery:sqlite-android:3.49.0"
 androidSqlite = "androidx.sqlite:sqlite-framework:2.6.1"
 
-# Modern Kotlin-based EPUB library from Readium Foundation
-readium-shared = { module = "org.readium.kotlin-toolkit:readium-shared", version.ref = "readium" }
-readium-streamer = { module = "org.readium.kotlin-toolkit:readium-streamer", version.ref = "readium" }
+# Removed Readium library - not used in codebase (using custom EPUB implementation)
 
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
 

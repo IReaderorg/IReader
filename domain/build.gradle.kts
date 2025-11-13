@@ -86,6 +86,8 @@ kotlin {
                 implementation(project(Modules.commonResources))
                 implementation(project(Modules.coreApi))
                 implementation(project(Modules.sourceApi))
+                // NOTE: Compose dependencies should be removed - domain should not depend on UI framework
+                // This is a clean architecture violation that will be fixed in Task 5
                 api(compose.ui)
                 api(compose.runtime)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
@@ -111,7 +113,7 @@ kotlin {
                 implementation(androidx.biometric)
                 implementation(androidx.security.crypto)
                 implementation(androidx.lifecycle.viewmodelktx)
-                implementation(androidx.lifecycle.viewmodelktx)
+                // Removed duplicate lifecycle.viewmodelktx
                 implementation(composeLib.compose.googlFonts)
                 implementation(androidx.media)
 
@@ -126,7 +128,7 @@ kotlin {
                 implementation(libs.okhttp.okhttp3)
                 implementation(libs.okhttp.interceptor)
                 implementation(libs.okhttp.doh)
-                implementation(libs.okhttp.doh)
+                // Removed duplicate okhttp.doh
 
                 implementation(androidx.dataStore)
                 implementation(androidx.core)

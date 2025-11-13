@@ -1,8 +1,7 @@
 package ireader.domain.preferences.models.prefs
 
-import androidx.compose.runtime.toMutableStateList
-import androidx.compose.ui.graphics.Color
 import ireader.core.prefs.Preference
+import ireader.domain.models.common.ColorModel
 import ireader.domain.preferences.models.ReaderColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -59,63 +58,61 @@ fun Preference<Long>.asReaderTheme(): ReaderThemePreferences {
 val readerThemes = listOf<ReaderColors>(
     ReaderColors(
         id = -1,
-        Color(0xff000000),
-        Color(0xffffffff),
+        ColorModel.fromArgb(0xff000000.toInt()),
+        ColorModel.fromArgb(0xffffffff.toInt()),
         true
     ),
     ReaderColors(
-        -2, Color(0xffffffff), Color(0xff000000),
+        -2, ColorModel.fromArgb(0xffffffff.toInt()), ColorModel.fromArgb(0xff000000.toInt()),
         true
     ),
     ReaderColors(
-        -3, Color(0xff262626),
-        Color(
-            0xFFE9E9E9,
-        ),
+        -3, ColorModel.fromArgb(0xff262626.toInt()),
+        ColorModel.fromArgb(0xFFE9E9E9.toInt()),
         true
     ),
     ReaderColors(
-        -4, Color(0xFF405A61), Color(0xFFFFFFFF),
+        -4, ColorModel.fromArgb(0xFF405A61.toInt()), ColorModel.fromArgb(0xFFFFFFFF.toInt()),
         true
     ),
     ReaderColors(
-        -5, Color(248, 249, 250), Color(51, 51, 51),
+        -5, ColorModel.fromRgb(248, 249, 250), ColorModel.fromRgb(51, 51, 51),
         true
     ),
     ReaderColors(
-        -6, Color(150, 173, 252), Color(0xff000000),
+        -6, ColorModel.fromRgb(150, 173, 252), ColorModel.fromArgb(0xff000000.toInt()),
         true
     ),
     ReaderColors(
-        -7, Color(219, 225, 241), Color(0xff000000),
+        -7, ColorModel.fromRgb(219, 225, 241), ColorModel.fromArgb(0xff000000.toInt()),
         true
     ),
     ReaderColors(
-        -8, Color(237, 221, 110), Color(0xff000000),
+        -8, ColorModel.fromRgb(237, 221, 110), ColorModel.fromArgb(0xff000000.toInt()),
         true
     ),
     ReaderColors(
-        -9, Color(168, 242, 154), Color(0xff000000),
+        -9, ColorModel.fromRgb(168, 242, 154), ColorModel.fromArgb(0xff000000.toInt()),
         true
     ),
     ReaderColors(
-        -10, Color(233, 214, 107), Color(0xff000000),
+        -10, ColorModel.fromRgb(233, 214, 107), ColorModel.fromArgb(0xff000000.toInt()),
         true
     ),
     ReaderColors(
-        -11, Color(237, 209, 176), Color(0xff000000),
+        -11, ColorModel.fromRgb(237, 209, 176), ColorModel.fromArgb(0xff000000.toInt()),
         true
     ),
     ReaderColors(
-        -12, Color(185, 135, 220), Color(0xff000000),
+        -12, ColorModel.fromRgb(185, 135, 220), ColorModel.fromArgb(0xff000000.toInt()),
         true
     ),
     ReaderColors(
-        -13, Color(224, 166, 170), Color(0xff000000),
+        -13, ColorModel.fromRgb(224, 166, 170), ColorModel.fromArgb(0xff000000.toInt()),
         true
     ),
     ReaderColors(
-        -14, Color(248, 253, 137), Color(0xff000000),
+        -14, ColorModel.fromRgb(248, 253, 137), ColorModel.fromArgb(0xff000000.toInt()),
         true
     ),
-).toMutableStateList()
+)

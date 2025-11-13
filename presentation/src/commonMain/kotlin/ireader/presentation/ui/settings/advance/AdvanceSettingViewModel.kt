@@ -3,7 +3,6 @@ package ireader.presentation.ui.settings.advance
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import ireader.data.core.DatabaseHandler
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.CategoryRepository
 import ireader.domain.data.repository.ThemeRepository
@@ -12,6 +11,7 @@ import ireader.domain.preferences.models.getDefaultFont
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.PlatformUiPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
+import ireader.domain.usecases.database.RepairDatabaseUseCase
 import ireader.domain.usecases.epub.ImportEpub
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
@@ -32,7 +32,7 @@ class AdvanceSettingViewModel(
     private val themeRepository: ThemeRepository,
     private val categoryRepository: CategoryRepository,
     private val appPreferences: AppPreferences,
-    private val databaseHandler: DatabaseHandler,
+    private val repairDatabaseUseCase: RepairDatabaseUseCase,
     private val bookRepository: BookRepository,
     ) : BaseViewModel() {
 
@@ -72,7 +72,7 @@ class AdvanceSettingViewModel(
     fun repairDatabase() {
         scope.launchIO {
             try {
-                databaseHandler.repairDatabase()
+                repairDatabaseUseCase.execute()
                 showSnackBar(UiText.MStringResource(MR.strings.success))
             } catch (e: Exception) {
                 showSnackBar(UiText.DynamicString("Database repair failed: ${e.message}"))
