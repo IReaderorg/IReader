@@ -62,7 +62,7 @@ jobs:
       - uses: actions/setup-java@v4
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
         with:
-          java-version: 21
+          java-version: 24
           distribution: temurin
           architecture: ${{ matrix.arch }}
 
@@ -97,8 +97,8 @@ jobs:
             -e SUPABASE_COMMUNITY_URL="${{ secrets.SUPABASE_COMMUNITY_URL }}" \
             -e SUPABASE_COMMUNITY_KEY="${{ secrets.SUPABASE_COMMUNITY_KEY }}" \
             fedora:latest bash -c "
-            dnf install -y java-21-openjdk-devel java-21-openjdk-jmods rpm-build findutils &&
-            export JAVA_HOME=/usr/lib/jvm/java-21-openjdk &&
+            dnf install -y java-24-openjdk-devel java-24-openjdk-jmods rpm-build findutils &&
+            export JAVA_HOME=/usr/lib/jvm/java-24-openjdk &&
             export PATH=\$JAVA_HOME/bin:\$PATH &&
             ./gradlew ${{ matrix.build }} --stacktrace
           "
