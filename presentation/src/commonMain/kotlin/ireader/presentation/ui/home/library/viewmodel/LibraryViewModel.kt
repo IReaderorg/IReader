@@ -111,12 +111,19 @@ class LibraryViewModel(
     
     var isResumeCardVisible by mutableStateOf(true)
         private set
+    
+    // Sync availability state
+    var isSyncAvailable by mutableStateOf(false)
+        private set
 
     init {
         readLayoutTypeAndFilterTypeAndSortType()
         
         // Initialize active filters from preferences
         updateActiveFilters(filters.value)
+        
+        // Check sync availability
+        checkSyncAvailability()
         
         // Load last read info
         loadLastReadInfo()
@@ -176,6 +183,15 @@ class LibraryViewModel(
             lastReadInfo = getLastReadNovelUseCase()
             // Reset visibility when new data is loaded
             isResumeCardVisible = showResumeReadingCard.value
+        }
+    }
+    
+    /**
+     * Check if sync is available (user is authenticated)
+     */
+    fun checkSyncAvailability() {
+        scope.launch {
+            isSyncAvailable = syncUseCases?.isSyncAvailable() ?: false
         }
     }
     
@@ -584,9 +600,10 @@ fun performBatchOperation(operation: ireader.presentation.ui.home.library.compon
                 }
                 
                 ireader.presentation.ui.home.library.components.BatchOperation.DELETE -> {
-                    // Delete operation - this should trigger the existing delete flow
-                    state.batchOperationMessage = "Deleted ${selectedBooks.size} book(s)"
-                    // Note: Actual deletion is handled by the existing onDelete callback
+                    // Delete books from library (unfavorite) with remote sync
+                    deleteUseCase.unFavoriteBook(selectedBooks.toList())
+                    state.batchOperationMessage = "Removed ${selectedBooks.size} book(s) from library"
+                    selectedBooks.clear()
                 }
                 
                 ireader.presentation.ui.home.library.components.BatchOperation.CHANGE_CATEGORY -> {

@@ -10,5 +10,13 @@ data class SyncUseCases(
     val performFullSync: PerformFullSyncUseCase,
     val refreshLibraryFromRemote: RefreshLibraryFromRemoteUseCase,
     val toggleBookInLibrary: ToggleBookInLibraryUseCase,
-    val fetchAndMergeSyncedBooks: FetchAndMergeSyncedBooksUseCase
-)
+    val fetchAndMergeSyncedBooks: FetchAndMergeSyncedBooksUseCase,
+    val isUserAuthenticated: IsUserAuthenticatedUseCase
+) {
+    /**
+     * Check if sync features are available (user is authenticated)
+     */
+    suspend fun isSyncAvailable(): Boolean {
+        return isUserAuthenticated()
+    }
+}

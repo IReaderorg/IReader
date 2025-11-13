@@ -22,12 +22,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
 import ireader.i18n.resources.MR
@@ -119,11 +117,11 @@ private fun SelectionActionButton(
             )
         }
         Spacer(modifier = Modifier.height(2.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            textAlign = TextAlign.Center,
-            maxLines = 1
-        )
+//        Text(
+//            text = label,
+//            style = MaterialTheme.typography.labelSmall,
+//            textAlign = TextAlign.Center,
+//            maxLines = 1
+//        )
     }
 }

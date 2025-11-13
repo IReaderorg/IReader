@@ -41,6 +41,7 @@ class ExploreViewModel(
     val booksState: BooksState,
     private val libraryPreferences: LibraryPreferences,
     private val openLocalFolder: ireader.domain.usecases.local.OpenLocalFolder,
+    private val syncUseCases: ireader.domain.usecases.sync.SyncUseCases? = null
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), ExploreState by state {
     data class Param(val sourceId: Long?, val query: String?)
 
@@ -161,7 +162,14 @@ class ExploreViewModel(
         val favorite = !bookItem.favorite
         val book = bookItem.toBook().copy(favorite = favorite)
         val bookId = insertUseCases.insertBook(book)
-        onFavorite(book.copy(id = bookId))
+        val updatedBook = book.copy(id = bookId)
+        
+        // Sync to remote if book is being favorited
+        if (favorite) {
+            syncUseCases?.syncBookToRemote?.invoke(updatedBook)
+        }
+        
+        onFavorite(updatedBook)
     }
 
 

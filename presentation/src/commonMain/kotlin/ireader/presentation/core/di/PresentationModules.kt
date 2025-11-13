@@ -58,7 +58,7 @@ val PresentationModules = module {
     factory  { ScreenContentViewModel(get()) }
     single<AppThemeViewModel> { AppThemeViewModel(get(), get(), get(), get()) }
 
-    factory<ExploreViewModel> { ExploreViewModel(get(), get(), get(), get(),get(), get(), get(),get(),get(),get()) }
+    factory<ExploreViewModel> { ExploreViewModel(get(), get(), get(), get(),get(), get(), get(),get(),get(),get(),getOrNull()) }
     factory  { HistoryViewModel(get(), get(), get()) }
     factory  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull()) }
     factory  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }

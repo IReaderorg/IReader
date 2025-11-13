@@ -164,6 +164,7 @@ val DomainServices = module {
     factory  { ireader.domain.usecases.sync.SyncBooksToRemoteUseCase(get(), get()) }
     factory  { ireader.domain.usecases.sync.PerformFullSyncUseCase(get(), get(), get()) }
     factory  { ireader.domain.usecases.sync.ToggleBookInLibraryUseCase(get(), get(), get()) }
+    factory  { ireader.domain.usecases.sync.IsUserAuthenticatedUseCase(get()) }
     
     // Sync use cases container
     factory {
@@ -173,7 +174,8 @@ val DomainServices = module {
             performFullSync = get(),
             refreshLibraryFromRemote = get(),
             toggleBookInLibrary = get(),
-            fetchAndMergeSyncedBooks = get()
+            fetchAndMergeSyncedBooks = get(),
+            isUserAuthenticated = get()
         )
     }
     

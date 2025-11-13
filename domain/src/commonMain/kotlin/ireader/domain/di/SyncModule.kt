@@ -47,6 +47,7 @@ val syncModule = module {
     single { ireader.domain.usecases.sync.SyncBooksToRemoteUseCase(get(), get()) }
     single { ireader.domain.usecases.sync.PerformFullSyncUseCase(get(), get(), get()) }
     single { ireader.domain.usecases.sync.ToggleBookInLibraryUseCase(get(), get(), get()) }
+    single { ireader.domain.usecases.sync.IsUserAuthenticatedUseCase(get()) }
     
     // Sync use cases container
     single {
@@ -56,7 +57,8 @@ val syncModule = module {
             performFullSync = get(),
             refreshLibraryFromRemote = get(),
             toggleBookInLibrary = get(),
-            fetchAndMergeSyncedBooks = get()
+            fetchAndMergeSyncedBooks = get(),
+            isUserAuthenticated = get()
         )
     }
     

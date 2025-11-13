@@ -1,10 +1,28 @@
 package ireader.presentation.ui.home.library.components
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.outlined.Archive
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Done
+import androidx.compose.material.icons.outlined.DoneOutline
+import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.DownloadForOffline
+import androidx.compose.material.icons.outlined.Label
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,7 +68,6 @@ fun BatchOperationDialog(
                     BatchOperationItem(
                         icon = Icons.Outlined.Done,
                         title = "Mark as Read",
-                        description = "Mark all chapters as read",
                         onClick = {
                             onOperationSelected(BatchOperation.MARK_AS_READ)
                             onDismiss()
@@ -60,7 +77,6 @@ fun BatchOperationDialog(
                     BatchOperationItem(
                         icon = Icons.Outlined.DoneOutline,
                         title = "Mark as Unread",
-                        description = "Mark all chapters as unread",
                         onClick = {
                             onOperationSelected(BatchOperation.MARK_AS_UNREAD)
                             onDismiss()
@@ -70,7 +86,6 @@ fun BatchOperationDialog(
                     BatchOperationItem(
                         icon = Icons.Outlined.Download,
                         title = "Download",
-                        description = "Download all chapters",
                         onClick = {
                             onOperationSelected(BatchOperation.DOWNLOAD)
                             onDismiss()
@@ -80,7 +95,6 @@ fun BatchOperationDialog(
                     BatchOperationItem(
                         icon = Icons.Outlined.DownloadForOffline,
                         title = "Download Unread",
-                        description = "Download only unread chapters",
                         onClick = {
                             onOperationSelected(BatchOperation.DOWNLOAD_UNREAD)
                             onDismiss()
@@ -90,7 +104,6 @@ fun BatchOperationDialog(
                     BatchOperationItem(
                         icon = Icons.Outlined.Delete,
                         title = "Delete",
-                        description = "Delete selected books",
                         onClick = {
                             onOperationSelected(BatchOperation.DELETE)
                             onDismiss()
@@ -100,7 +113,6 @@ fun BatchOperationDialog(
                     BatchOperationItem(
                         icon = Icons.Outlined.Label,
                         title = "Change Category",
-                        description = "Move to different category",
                         onClick = {
                             onOperationSelected(BatchOperation.CHANGE_CATEGORY)
                             onDismiss()
@@ -110,7 +122,6 @@ fun BatchOperationDialog(
                     BatchOperationItem(
                         icon = Icons.Outlined.Archive,
                         title = "Archive",
-                        description = "Archive selected books",
                         onClick = {
                             onOperationSelected(BatchOperation.ARCHIVE)
                             onDismiss()
@@ -134,7 +145,6 @@ fun BatchOperationDialog(
 private fun BatchOperationItem(
     icon: ImageVector,
     title: String,
-    description: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -159,20 +169,11 @@ private fun BatchOperationItem(
                 tint = MaterialTheme.colorScheme.primary
             )
             
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+//            Text(
+//                text = title,
+//                style = MaterialTheme.typography.bodyLarge,
+//                modifier = Modifier.weight(1f)
+//            )
         }
     }
 }
