@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,6 +38,7 @@ fun MainBottomSettingComposable(
         onSliderFinished: () -> Unit,
         onSliderChange: (index: Float) -> Unit,
         onAutoScrollToggle: (() -> Unit)? = null,
+        onReviews: (() -> Unit)? = null,
 ) {
     ChaptersSliderComposable(
         onNext = {
@@ -73,6 +75,15 @@ fun MainBottomSettingComposable(
             contentDescription = localize(MR.strings.play),
             onClick = { onPlay() }
         )
+        
+        // Chapter Reviews button
+        if (onReviews != null) {
+            AppIconButton(
+                imageVector = androidx.compose.material.icons.Icons.Default.RateReview,
+                contentDescription = "Chapter Reviews",
+                onClick = { onReviews() }
+            )
+        }
         
         // Auto-scroll toggle button
         if (onAutoScrollToggle != null) {

@@ -15,5 +15,6 @@ data class ChapterReview(
     val rating: Int, // 1-5 stars
     val reviewText: String,
     val createdAt: Long,
-    val updatedAt: Long
+    val updatedAt: Long,
+    val username: String? = null
 )

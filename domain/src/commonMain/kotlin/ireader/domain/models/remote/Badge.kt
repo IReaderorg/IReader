@@ -2,33 +2,24 @@ package ireader.domain.models.remote
 
 import kotlinx.serialization.Serializable
 
-/**
- * Domain model for badges
- */
 @Serializable
 data class Badge(
     val id: String,
     val name: String,
     val description: String,
     val icon: String,
-    val category: BadgeCategory,
-    val rarity: BadgeRarity,
-    val createdAt: Long
+    val category: String,
+    val rarity: String
 )
 
 @Serializable
-enum class BadgeCategory {
-    DONOR,
-    CONTRIBUTOR,
-    READER,
-    REVIEWER,
-    SPECIAL
-}
-
-@Serializable
-enum class BadgeRarity {
-    COMMON,
-    RARE,
-    EPIC,
-    LEGENDARY
-}
+data class UserBadge(
+    val badgeId: String,
+    val badgeName: String,
+    val badgeDescription: String,
+    val badgeIcon: String,
+    val badgeCategory: String,
+    val badgeRarity: String,
+    val earnedAt: String,
+    val metadata: Map<String, String>? = null
+)

@@ -129,6 +129,12 @@ fun BookDetailScreen(
                         )
                     }
                     item {
+                        BookReviewsIntegration(
+                            bookTitle = book.title,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                    item {
                         ChapterBar(
                                 vm = vm,
                                 chapters = chapters.value,

@@ -114,6 +114,7 @@ COMMENT ON COLUMN public.synced_books.last_read IS 'Last read timestamp (millise
 -- ----------------------------------------------------------------------------
 -- Book Reviews Table
 -- Reviews are based on normalized book title - shared across all sources
+-- NOTE: Users can submit multiple reviews for the same book
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.book_reviews (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -124,7 +125,7 @@ CREATE TABLE IF NOT EXISTS public.book_reviews (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     
     -- Constraints
-    CONSTRAINT unique_user_book_review UNIQUE(user_id, book_title),
+    -- NOTE: No unique constraint - users can submit multiple reviews
     CONSTRAINT book_title_not_empty CHECK (LENGTH(book_title) > 0),
     CONSTRAINT rating_range CHECK (rating >= 1 AND rating <= 5),
     CONSTRAINT review_text_length CHECK (LENGTH(review_text) > 0 AND LENGTH(review_text) <= 2000)
@@ -145,6 +146,7 @@ COMMENT ON COLUMN public.book_reviews.review_text IS 'User review text (max 2000
 -- ----------------------------------------------------------------------------
 -- Chapter Reviews Table
 -- Reviews are based on normalized book title + chapter name - shared across all sources
+-- NOTE: Users can submit multiple reviews for the same chapter
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.chapter_reviews (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -156,7 +158,7 @@ CREATE TABLE IF NOT EXISTS public.chapter_reviews (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     
     -- Constraints
-    CONSTRAINT unique_user_chapter_review UNIQUE(user_id, book_title, chapter_name),
+    -- NOTE: No unique constraint - users can submit multiple reviews
     CONSTRAINT book_title_chapter_not_empty CHECK (LENGTH(book_title) > 0),
     CONSTRAINT chapter_name_not_empty CHECK (LENGTH(chapter_name) > 0),
     CONSTRAINT chapter_rating_range CHECK (rating >= 1 AND rating <= 5),
@@ -466,6 +468,29 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 COMMENT ON FUNCTION get_user_badges(UUID) IS 'Returns all badges earned by a user';
 
 -- ----------------------------------------------------------------------------
+-- Function: Generate default username
+-- Automatically generates a username for users who don't have one
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION generate_default_username()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- If username is NULL or empty, generate one from email or random
+    IF NEW.username IS NULL OR LENGTH(TRIM(NEW.username)) = 0 THEN
+        -- Try to use email prefix
+        IF NEW.email IS NOT NULL THEN
+            NEW.username := 'Reader_' || SUBSTRING(NEW.email FROM 1 FOR POSITION('@' IN NEW.email) - 1);
+        ELSE
+            -- Fallback to random username
+            NEW.username := 'Reader_' || SUBSTRING(NEW.id::TEXT FROM 1 FOR 8);
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+COMMENT ON FUNCTION generate_default_username() IS 'Auto-generates username for users without one';
+
+-- ----------------------------------------------------------------------------
 -- Function: Get user statistics
 -- Returns reading statistics for a user
 -- ----------------------------------------------------------------------------
@@ -503,12 +528,19 @@ COMMENT ON FUNCTION get_user_statistics(UUID) IS 'Returns reading statistics for
 
 -- Create triggers for automatic updated_at timestamp updates
 
--- Users table trigger
+-- Users table trigger for updated_at
 DROP TRIGGER IF EXISTS update_users_updated_at ON public.users;
 CREATE TRIGGER update_users_updated_at
     BEFORE UPDATE ON public.users
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
+
+-- Users table trigger for auto-generating username
+DROP TRIGGER IF EXISTS generate_username_on_insert ON public.users;
+CREATE TRIGGER generate_username_on_insert
+    BEFORE INSERT ON public.users
+    FOR EACH ROW
+    EXECUTE FUNCTION generate_default_username();
 
 -- Reading progress table trigger
 DROP TRIGGER IF EXISTS update_reading_progress_updated_at ON public.reading_progress;
@@ -748,3 +780,30 @@ BEGIN
     RAISE NOTICE '3. Award badges using award_badge() function';
     RAISE NOTICE '4. Monitor using the views and statistics function';
 END $$;
+
+
+-- ============================================================================
+-- MIGRATION NOTES
+-- ============================================================================
+
+-- This schema includes all migrations applied:
+-- 
+-- 1. Added book_url column to synced_books (required field)
+--    - All books must have a URL/link to the source
+-- 
+-- 2. Removed source_id_positive constraint
+--    - Allows large source IDs that may appear negative when stored as BIGINT
+-- 
+-- 3. Removed unique constraints on reviews (IMPORTANT!)
+--    - Users can now submit multiple reviews per book/chapter
+--    - Removed: unique_user_book_review from book_reviews
+--    - Removed: unique_user_chapter_review from chapter_reviews
+--
+-- If you're migrating from an older schema, these changes are already included.
+-- No additional migration scripts needed - just run this complete schema.
+--
+-- For a fresh installation, simply run this entire file in Supabase SQL Editor.
+
+-- ============================================================================
+-- END OF SCHEMA
+-- ============================================================================

@@ -102,6 +102,7 @@ fun ReadingScreen(
     val scope = rememberCoroutineScope()
     val context = LocalPlatformContext.current
     val chapter = vm.stateChapter
+    var showChapterReviews = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     
     // Calculate reading time when chapter changes
     LaunchedEffect(key1 = chapter?.id) {
@@ -237,7 +238,10 @@ fun ReadingScreen(
                                     onSliderChange = onSliderChange,
                                     onSliderFinished = onSliderFinished,
                                     onPlay = onReaderPlay,
-                                    onAutoScrollToggle = { vm.toggleAutoScroll() }
+                                    onAutoScrollToggle = { vm.toggleAutoScroll() },
+                                    onReviews = if (vm.book != null && vm.stateChapter != null) {
+                                        { showChapterReviews.value = true }
+                                    } else null
                                 )
                             }
                         },
@@ -271,6 +275,20 @@ fun ReadingScreen(
                                         vm.saveTextAlignment(alignment)
                                     }
                                 )
+                            }
+                            
+                            // Chapter Reviews Modal
+                            if (showChapterReviews.value && vm.book != null && vm.stateChapter != null) {
+                                androidx.compose.material3.ModalBottomSheet(
+                                    onDismissRequest = { showChapterReviews.value = false },
+                                    sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
+                                ) {
+                                    ireader.presentation.ui.reader.components.ChapterReviewsFullSheet(
+                                        bookTitle = vm.book!!.title,
+                                        chapterName = vm.stateChapter!!.name,
+                                        onDismiss = { showChapterReviews.value = false }
+                                    )
+                                }
                             }
                             
                             // Translation toggle button

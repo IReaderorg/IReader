@@ -24,6 +24,7 @@ import ireader.data.di.dataPlatformModule
 import ireader.data.di.remoteModule
 import ireader.data.di.remotePlatformModule
 import ireader.data.di.repositoryInjectModule
+import ireader.data.di.reviewModule
 import ireader.data.remote.AutoSyncService
 import ireader.desktop.di.DesktopDI
 import ireader.domain.catalogs.CatalogStore
@@ -121,7 +122,7 @@ fun main() {
         val koinApp = startKoin {
             modules(
                 localModule,dataPlatformModule, CatalogModule, DataModule,preferencesInjectModule,
-                repositoryInjectModule, remotePlatformModule, remoteModule, UseCasesInject, PresentationModules,DomainServices,DomainModule,presentationPlatformModule, DesktopDI
+                repositoryInjectModule, remotePlatformModule, remoteModule, reviewModule, UseCasesInject, PresentationModules,DomainServices,DomainModule,presentationPlatformModule, DesktopDI
             )
         }
         

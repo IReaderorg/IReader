@@ -13,6 +13,7 @@ import ireader.data.di.dataPlatformModule
 import ireader.data.di.remoteModule
 import ireader.data.di.remotePlatformModule
 import ireader.data.di.repositoryInjectModule
+import ireader.data.di.reviewModule
 import ireader.data.remote.AutoSyncService
 import ireader.domain.di.CatalogModule
 import ireader.domain.di.DomainModule
@@ -53,6 +54,7 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
             modules(repositoryInjectModule)
             modules(remotePlatformModule)
             modules(remoteModule)
+            modules(reviewModule)
             modules(UseCasesInject)
             modules(PresentationModules)
             modules(DomainServices)
