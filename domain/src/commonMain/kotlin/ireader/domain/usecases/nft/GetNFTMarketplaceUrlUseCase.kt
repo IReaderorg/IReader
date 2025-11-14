@@ -1,0 +1,7 @@
+package ireader.domain.usecases.nft
+
+class GetNFTMarketplaceUrlUseCase {
+    operator fun invoke(): String {
+        return "https://nftbaz.com/asset/matic/0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc/0"
+    }
+}

@@ -231,8 +231,10 @@ This specification addresses critical UI/UX issues and missing functionality acr
 3. THE IReader System SHALL allow users to enable or disable rest reminders
 4. WHEN a rest reminder is displayed, THE IReader System SHALL provide options to dismiss or snooze
 5. THE IReader System SHALL track reading time accurately across reading sessions
+IReader System SHALL persist the toggle state across reading sessions
+5. THE IReader System SHALL make this feature available to all users without payment
 
-### Requirement 18: Theme Card UI Redesign
+### Requirement 19: Theme Card UI Redesign
 
 **User Story:** As a user, I want an attractive and modern theme selection interface, so that choosing themes is visually appealing
 
@@ -244,19 +246,29 @@ This specification addresses critical UI/UX issues and missing functionality acr
 4. THE IReader System SHALL ensure theme cards have appropriate spacing and padding
 5. THE IReader System SHALL apply smooth animations when selecting themes
 
-### Requirement 19: Separate Light and Dark Theme Sections
+### Requirement 20: Separate Light and Dark Theme Sections
 
 **User Story:** As a user, I want light and dark themes displayed in separate sections, so that I can easily browse themes for my preferred mode
 
 #### Acceptance Criteria
 
 1. WHEN a user views the Appearance screen, THE IReader System SHALL display light themes in a dedicated section
-2. WHEN a user views the Appearance screen, THE IReader System SHALL display dark themes in a separate dedicated section
+2. WHEN a user views the Appearance scr
+### Requirement 18: TTS with Translated Text Toggle
+
+**User Story:** As a user, I want to use text-to-speech with translated text when available, so that I can listen to books in my preferred language
+
+#### Acceptance Criteria
+
+1. WHEN a user opens the Reader screen modal sheet General tab, THE IReader System SHALL display a toggle for "TTS with Translated Text"
+2. WHEN a user enables the toggle, THE IReader System SHALL use translated text for TTS playback when translation is available
+3. WHEN translated text is unavailable, THE IReader System SHALL fall back to original text for TTS
+4. THE een, THE IReader System SHALL display dark themes in a separate dedicated section
 3. THE IReader System SHALL label each section clearly with "Light Themes" and "Dark Themes" headers
 4. THE IReader System SHALL remove the mode selection toggle for dark, light, and auto
 5. WHEN a user selects a light theme, THE IReader System SHALL automatically switch to light mode
 
-### Requirement 20: Theme Card Large Screen Optimization
+### Requirement 21: Theme Card Large Screen Optimization
 
 **User Story:** As a desktop user, I want theme cards optimized for large screens, so that the appearance settings look professional on my display
 
@@ -268,7 +280,7 @@ This specification addresses critical UI/UX issues and missing functionality acr
 4. THE IReader System SHALL maintain consistent card aspect ratios across all screen sizes
 5. THE IReader System SHALL ensure theme card content remains readable and properly scaled on large screens
 
-### Requirement 21: Desktop UI General Optimization
+### Requirement 22: Desktop UI General Optimization
 
 **User Story:** As a desktop user, I want all UI features optimized for desktop use, so that the app feels native to my platform
 

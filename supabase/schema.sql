@@ -181,7 +181,7 @@ COMMENT ON COLUMN public.chapter_reviews.review_text IS 'User review text (max 1
 
 -- ----------------------------------------------------------------------------
 -- Badges Table
--- Defines available badges that can be earned
+-- Defines available badges that can be earned or purchased
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.badges (
     id TEXT PRIMARY KEY,
@@ -190,36 +190,50 @@ CREATE TABLE IF NOT EXISTS public.badges (
     icon TEXT NOT NULL,
     category TEXT NOT NULL,
     rarity TEXT NOT NULL,
+    price DECIMAL(10, 2),
+    type TEXT NOT NULL DEFAULT 'ACHIEVEMENT',
+    image_url TEXT,
+    is_available BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     
     -- Constraints
     CONSTRAINT badge_id_not_empty CHECK (LENGTH(id) > 0),
     CONSTRAINT badge_name_not_empty CHECK (LENGTH(name) > 0),
-    CONSTRAINT badge_category_valid CHECK (category IN ('donor', 'contributor', 'reader', 'reviewer', 'special')),
-    CONSTRAINT badge_rarity_valid CHECK (rarity IN ('common', 'rare', 'epic', 'legendary'))
+    CONSTRAINT badge_category_valid CHECK (category IN ('donor', 'contributor', 'reader', 'reviewer', 'special', 'purchasable', 'nft')),
+    CONSTRAINT badge_rarity_valid CHECK (rarity IN ('common', 'rare', 'epic', 'legendary')),
+    CONSTRAINT badge_type_valid CHECK (type IN ('PURCHASABLE', 'NFT_EXCLUSIVE', 'ACHIEVEMENT')),
+    CONSTRAINT badge_price_positive CHECK (price IS NULL OR price > 0)
 );
 
 -- Indexes for badges table
 CREATE INDEX IF NOT EXISTS idx_badges_category ON public.badges(category);
 CREATE INDEX IF NOT EXISTS idx_badges_rarity ON public.badges(rarity);
+CREATE INDEX IF NOT EXISTS idx_badges_type ON public.badges(type);
+CREATE INDEX IF NOT EXISTS idx_badges_available ON public.badges(is_available) WHERE is_available = TRUE;
 
 -- Comments
-COMMENT ON TABLE public.badges IS 'Available badges that users can earn';
+COMMENT ON TABLE public.badges IS 'Available badges that users can earn or purchase';
 COMMENT ON COLUMN public.badges.id IS 'Unique badge identifier (e.g., "donor_bronze")';
 COMMENT ON COLUMN public.badges.name IS 'Display name of the badge';
 COMMENT ON COLUMN public.badges.description IS 'Description of how to earn the badge';
 COMMENT ON COLUMN public.badges.icon IS 'Icon/emoji for the badge';
-COMMENT ON COLUMN public.badges.category IS 'Badge category (donor, contributor, reader, reviewer, special)';
+COMMENT ON COLUMN public.badges.category IS 'Badge category (donor, contributor, reader, reviewer, special, purchasable, nft)';
 COMMENT ON COLUMN public.badges.rarity IS 'Badge rarity (common, rare, epic, legendary)';
+COMMENT ON COLUMN public.badges.price IS 'Price in USD for purchasable badges (NULL for non-purchasable)';
+COMMENT ON COLUMN public.badges.type IS 'Badge type (PURCHASABLE, NFT_EXCLUSIVE, ACHIEVEMENT)';
+COMMENT ON COLUMN public.badges.image_url IS 'URL to badge image (optional, falls back to icon)';
+COMMENT ON COLUMN public.badges.is_available IS 'Whether badge is currently available for purchase/earning';
 
 -- ----------------------------------------------------------------------------
 -- User Badges Table
--- Tracks which badges each user has earned
+-- Tracks which badges each user has earned or purchased
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.user_badges (
     user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
     badge_id TEXT NOT NULL REFERENCES public.badges(id) ON DELETE CASCADE,
     earned_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    is_primary BOOLEAN DEFAULT FALSE,
+    is_featured BOOLEAN DEFAULT FALSE,
     metadata JSONB,
     
     -- Constraints
@@ -230,13 +244,87 @@ CREATE TABLE IF NOT EXISTS public.user_badges (
 CREATE INDEX IF NOT EXISTS idx_user_badges_user_id ON public.user_badges(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_badges_badge_id ON public.user_badges(badge_id);
 CREATE INDEX IF NOT EXISTS idx_user_badges_earned_at ON public.user_badges(earned_at DESC);
+CREATE INDEX IF NOT EXISTS idx_user_badges_primary ON public.user_badges(user_id, is_primary) WHERE is_primary = TRUE;
+CREATE INDEX IF NOT EXISTS idx_user_badges_featured ON public.user_badges(user_id, is_featured) WHERE is_featured = TRUE;
 
 -- Comments
-COMMENT ON TABLE public.user_badges IS 'Badges earned by users';
+COMMENT ON TABLE public.user_badges IS 'Badges earned or purchased by users';
 COMMENT ON COLUMN public.user_badges.user_id IS 'User who earned the badge';
 COMMENT ON COLUMN public.user_badges.badge_id IS 'Badge that was earned';
 COMMENT ON COLUMN public.user_badges.earned_at IS 'When the badge was earned';
+COMMENT ON COLUMN public.user_badges.is_primary IS 'Whether this badge is displayed on user reviews (only one can be primary)';
+COMMENT ON COLUMN public.user_badges.is_featured IS 'Whether this badge is featured on user profile (max 3 can be featured)';
 COMMENT ON COLUMN public.user_badges.metadata IS 'Additional data (e.g., donation amount, task details)';
+
+-- ----------------------------------------------------------------------------
+-- Payment Proofs Table
+-- Stores payment proof submissions for badge purchases
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.payment_proofs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    badge_id TEXT NOT NULL REFERENCES public.badges(id) ON DELETE CASCADE,
+    transaction_id TEXT NOT NULL,
+    payment_method TEXT NOT NULL,
+    proof_image_url TEXT,
+    status TEXT NOT NULL DEFAULT 'PENDING',
+    submitted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    reviewed_at TIMESTAMP WITH TIME ZONE,
+    reviewed_by UUID REFERENCES public.users(id),
+    
+    -- Constraints
+    CONSTRAINT payment_status_valid CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
+    CONSTRAINT transaction_id_not_empty CHECK (LENGTH(transaction_id) > 0),
+    CONSTRAINT payment_method_not_empty CHECK (LENGTH(payment_method) > 0)
+);
+
+-- Indexes for payment_proofs table
+CREATE INDEX IF NOT EXISTS idx_payment_proofs_user_id ON public.payment_proofs(user_id);
+CREATE INDEX IF NOT EXISTS idx_payment_proofs_status ON public.payment_proofs(status);
+CREATE INDEX IF NOT EXISTS idx_payment_proofs_submitted_at ON public.payment_proofs(submitted_at DESC);
+
+-- Comments
+COMMENT ON TABLE public.payment_proofs IS 'Payment proof submissions for badge purchases';
+COMMENT ON COLUMN public.payment_proofs.user_id IS 'User who submitted the payment proof';
+COMMENT ON COLUMN public.payment_proofs.badge_id IS 'Badge being purchased';
+COMMENT ON COLUMN public.payment_proofs.transaction_id IS 'Transaction ID from payment provider';
+COMMENT ON COLUMN public.payment_proofs.payment_method IS 'Payment method used (crypto, direct transfer, etc.)';
+COMMENT ON COLUMN public.payment_proofs.proof_image_url IS 'Optional URL to payment proof image';
+COMMENT ON COLUMN public.payment_proofs.status IS 'Verification status (PENDING, APPROVED, REJECTED)';
+COMMENT ON COLUMN public.payment_proofs.reviewed_by IS 'Admin who reviewed the payment proof';
+
+-- ----------------------------------------------------------------------------
+-- NFT Wallets Table
+-- Stores Ethereum wallet addresses and NFT ownership verification
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.nft_wallets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL UNIQUE REFERENCES public.users(id) ON DELETE CASCADE,
+    wallet_address TEXT NOT NULL,
+    last_verified TIMESTAMP WITH TIME ZONE,
+    owns_nft BOOLEAN DEFAULT FALSE,
+    nft_token_id TEXT,
+    verification_cache_expires TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    -- Constraints
+    CONSTRAINT wallet_address_format CHECK (wallet_address ~* '^0x[a-fA-F0-9]{40}$')
+);
+
+-- Indexes for nft_wallets table
+CREATE INDEX IF NOT EXISTS idx_nft_wallets_user_id ON public.nft_wallets(user_id);
+CREATE INDEX IF NOT EXISTS idx_nft_wallets_address ON public.nft_wallets(wallet_address);
+CREATE INDEX IF NOT EXISTS idx_nft_wallets_cache_expires ON public.nft_wallets(verification_cache_expires);
+
+-- Comments
+COMMENT ON TABLE public.nft_wallets IS 'Ethereum wallet addresses and NFT ownership verification';
+COMMENT ON COLUMN public.nft_wallets.user_id IS 'User who owns the wallet';
+COMMENT ON COLUMN public.nft_wallets.wallet_address IS 'Ethereum wallet address (0x format)';
+COMMENT ON COLUMN public.nft_wallets.last_verified IS 'Last time NFT ownership was verified';
+COMMENT ON COLUMN public.nft_wallets.owns_nft IS 'Whether user owns an IReader NFT';
+COMMENT ON COLUMN public.nft_wallets.nft_token_id IS 'Token ID of owned NFT (if any)';
+COMMENT ON COLUMN public.nft_wallets.verification_cache_expires IS 'When verification cache expires (24h from last_verified)';
 
 -- ============================================================================
 -- ROW LEVEL SECURITY (RLS)
@@ -250,6 +338,8 @@ ALTER TABLE public.book_reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chapter_reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.badges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_badges ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.payment_proofs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.nft_wallets ENABLE ROW LEVEL SECURITY;
 
 -- ----------------------------------------------------------------------------
 -- Users Table Policies
@@ -390,8 +480,53 @@ CREATE POLICY "Everyone can view user badges"
     ON public.user_badges FOR SELECT
     USING (true);
 
+-- Users can update their own badge settings (primary/featured)
+CREATE POLICY "Users can update their own badge settings"
+    ON public.user_badges FOR UPDATE
+    USING (auth.uid() = user_id)
+    WITH CHECK (auth.uid() = user_id);
+
 -- Only admins can award badges (handled via service role)
--- No INSERT/UPDATE/DELETE policies for regular users
+-- No INSERT/DELETE policies for regular users
+
+-- ----------------------------------------------------------------------------
+-- Payment Proofs Table Policies
+-- ----------------------------------------------------------------------------
+
+-- Users can view their own payment proofs
+CREATE POLICY "Users can view their own payment proofs"
+    ON public.payment_proofs FOR SELECT
+    USING (auth.uid() = user_id);
+
+-- Users can insert their own payment proofs
+CREATE POLICY "Users can insert their own payment proofs"
+    ON public.payment_proofs FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
+-- Only admins can update payment proof status (handled via service role)
+-- No UPDATE/DELETE policies for regular users
+
+-- ----------------------------------------------------------------------------
+-- NFT Wallets Table Policies
+-- ----------------------------------------------------------------------------
+
+-- Users can view their own NFT wallet
+CREATE POLICY "Users can view their own NFT wallet"
+    ON public.nft_wallets FOR SELECT
+    USING (auth.uid() = user_id);
+
+-- Users can insert their own NFT wallet
+CREATE POLICY "Users can insert their own NFT wallet"
+    ON public.nft_wallets FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
+-- Users can update their own NFT wallet
+CREATE POLICY "Users can update their own NFT wallet"
+    ON public.nft_wallets FOR UPDATE
+    USING (auth.uid() = user_id)
+    WITH CHECK (auth.uid() = user_id);
+
+-- No DELETE policy - wallets should not be deleted
 
 -- ============================================================================
 -- FUNCTIONS
@@ -466,6 +601,51 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 COMMENT ON FUNCTION get_user_badges(UUID) IS 'Returns all badges earned by a user';
+
+-- ----------------------------------------------------------------------------
+-- Function: Get user badges with details (including primary/featured flags)
+-- Returns all badges earned by a user with complete details
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION get_user_badges_with_details(p_user_id UUID)
+RETURNS TABLE (
+    badge_id TEXT,
+    badge_name TEXT,
+    badge_description TEXT,
+    badge_icon TEXT,
+    badge_category TEXT,
+    badge_rarity TEXT,
+    badge_type TEXT,
+    badge_price DECIMAL(10, 2),
+    badge_image_url TEXT,
+    earned_at TIMESTAMP WITH TIME ZONE,
+    is_primary BOOLEAN,
+    is_featured BOOLEAN,
+    metadata JSONB
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        b.id,
+        b.name,
+        b.description,
+        b.icon,
+        b.category,
+        b.rarity,
+        b.type,
+        b.price,
+        b.image_url,
+        ub.earned_at,
+        ub.is_primary,
+        ub.is_featured,
+        ub.metadata
+    FROM public.user_badges ub
+    JOIN public.badges b ON ub.badge_id = b.id
+    WHERE ub.user_id = p_user_id
+    ORDER BY ub.earned_at DESC;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+COMMENT ON FUNCTION get_user_badges_with_details(UUID) IS 'Returns all badges earned by a user with complete details including primary/featured flags';
 
 -- ----------------------------------------------------------------------------
 -- Function: Generate default username
@@ -549,7 +729,12 @@ CREATE TRIGGER update_reading_progress_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
-
+-- NFT wallets table trigger
+DROP TRIGGER IF EXISTS update_nft_wallets_updated_at ON public.nft_wallets;
+CREATE TRIGGER update_nft_wallets_updated_at
+    BEFORE UPDATE ON public.nft_wallets
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================================================
 -- VIEWS (Optional - for analytics and reporting)
@@ -752,18 +937,20 @@ ON CONFLICT (id) DO NOTHING;
 DO $$
 BEGIN
     RAISE NOTICE 'IReader Sync schema created successfully!';
-    RAISE NOTICE 'Tables: users, reading_progress, synced_books, book_reviews, chapter_reviews, badges, user_badges';
+    RAISE NOTICE 'Tables: users, reading_progress, synced_books, book_reviews, chapter_reviews, badges, user_badges, payment_proofs, nft_wallets';
     RAISE NOTICE 'RLS: Enabled on all tables';
     RAISE NOTICE 'Policies: Created for all CRUD operations';
     RAISE NOTICE 'Triggers: Created for automatic timestamp updates';
     RAISE NOTICE 'Views: user_reading_summary, recent_activity';
-    RAISE NOTICE 'Functions: update_updated_at_column, get_user_statistics, award_badge, get_user_badges';
+    RAISE NOTICE 'Functions: update_updated_at_column, get_user_statistics, award_badge, get_user_badges, get_user_badges_with_details';
     RAISE NOTICE '';
     RAISE NOTICE 'Features:';
     RAISE NOTICE '- Optimized storage: Essential book data synced';
     RAISE NOTICE '- Book reviews: Shared across all sources (by title)';
     RAISE NOTICE '- Chapter reviews: Shared across all sources (by title + chapter)';
     RAISE NOTICE '- Badge system: Reward donors and contributors';
+    RAISE NOTICE '- Badge monetization: Purchase badges with Iran-accessible payments';
+    RAISE NOTICE '- NFT integration: Exclusive badges for NFT holders';
     RAISE NOTICE '- Public reviews: All users can read reviews';
     RAISE NOTICE '- All fields required: user_id, book_id, source_id, title, book_url, last_read';
     RAISE NOTICE '';
@@ -773,12 +960,20 @@ BEGIN
     RAISE NOTICE '- Reader: Novice, Bookworm, Scholar, Master';
     RAISE NOTICE '- Reviewer: Critic, Expert, Master';
     RAISE NOTICE '- Special: Early Adopter, Bug Hunter, Community Hero';
+    RAISE NOTICE '- Purchasable: Custom badges available for purchase';
+    RAISE NOTICE '- NFT: Exclusive badges for NFT holders';
+    RAISE NOTICE '';
+    RAISE NOTICE 'Badge Types:';
+    RAISE NOTICE '- ACHIEVEMENT: Earned through actions (reading, reviewing, etc.)';
+    RAISE NOTICE '- PURCHASABLE: Available for purchase with direct payment';
+    RAISE NOTICE '- NFT_EXCLUSIVE: Granted to verified NFT owners';
     RAISE NOTICE '';
     RAISE NOTICE 'Next steps:';
     RAISE NOTICE '1. Configure authentication in Supabase Dashboard';
-    RAISE NOTICE '2. Test with the IReader app';
-    RAISE NOTICE '3. Award badges using award_badge() function';
-    RAISE NOTICE '4. Monitor using the views and statistics function';
+    RAISE NOTICE '2. Deploy verify-nft-ownership Edge Function';
+    RAISE NOTICE '3. Test with the IReader app';
+    RAISE NOTICE '4. Award badges using award_badge() function';
+    RAISE NOTICE '5. Monitor using the views and statistics function';
 END $$;
 
 

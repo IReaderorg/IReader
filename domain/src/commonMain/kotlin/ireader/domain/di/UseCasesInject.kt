@@ -282,4 +282,16 @@ val UseCasesInject = module {
     
     // ePub export use case
     single { ireader.domain.usecases.epub.ExportNovelAsEpubUseCase(get()) }
+    
+    // Badge use cases
+    factory { ireader.domain.usecases.badge.GetAvailableBadgesUseCase(get()) }
+    factory { ireader.domain.usecases.badge.SubmitPaymentProofUseCase(get()) }
+    factory { ireader.domain.usecases.badge.SetPrimaryBadgeUseCase(get()) }
+    factory { ireader.domain.usecases.badge.SetFeaturedBadgesUseCase(get()) }
+    
+    // NFT use cases
+    factory { ireader.domain.usecases.nft.SaveWalletAddressUseCase(get()) }
+    factory { ireader.domain.usecases.nft.VerifyNFTOwnershipUseCase(get()) }
+    factory { ireader.domain.usecases.nft.GetNFTVerificationStatusUseCase(get()) }
+    factory { ireader.domain.usecases.nft.GetNFTMarketplaceUrlUseCase() }
 }

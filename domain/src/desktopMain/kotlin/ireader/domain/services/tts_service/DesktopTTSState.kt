@@ -38,6 +38,9 @@ class DesktopTTSState : TTSState {
                 ?.mapNotNull { it?.trim() }
         }
     override var autoNextChapter by mutableStateOf(false)
+    
+    // Translated content for TTS (set externally when translation is available)
+    var translatedTTSContent by mutableStateOf<List<String>?>(null)
     override var pitch by mutableStateOf(0.8f)
     override var prevPitch by mutableStateOf(0.8f)
     override var speechSpeed by mutableStateOf(0.8f)

@@ -88,6 +88,15 @@ object MoreScreenSpec : Tab {
                 },
                 onSupabaseConfig = {
                     navController.navigate(NavigationRoutes.supabaseConfig)
+                },
+                onBadgeStore = {
+                    navController.navigate(NavigationRoutes.badgeStore)
+                },
+                onNFTBadge = {
+                    navController.navigate(NavigationRoutes.nftBadge)
+                },
+                onBadgeManagement = {
+                    navController.navigate(NavigationRoutes.badgeManagement)
                 }
             )
         }

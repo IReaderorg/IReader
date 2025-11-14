@@ -10,7 +10,36 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import ireader.domain.catalogs.CatalogStore
-import ireader.presentation.core.ui.*
+import ireader.presentation.core.ui.AboutSettingSpec
+import ireader.presentation.core.ui.AdvanceSettingSpec
+import ireader.presentation.core.ui.AppearanceScreenSpec
+import ireader.presentation.core.ui.BackupAndRestoreScreenSpec
+import ireader.presentation.core.ui.BadgeManagementScreenSpec
+import ireader.presentation.core.ui.BadgeStoreScreenSpec
+import ireader.presentation.core.ui.BookDetailScreenSpec
+import ireader.presentation.core.ui.CategoryScreenSpec
+import ireader.presentation.core.ui.ChangelogScreenSpec
+import ireader.presentation.core.ui.ChatGptLoginScreenSpec
+import ireader.presentation.core.ui.CloudBackupScreenSpec
+import ireader.presentation.core.ui.DeepSeekLoginScreenSpec
+import ireader.presentation.core.ui.DonationScreenSpec
+import ireader.presentation.core.ui.DownloaderScreenSpec
+import ireader.presentation.core.ui.ExploreScreenSpec
+import ireader.presentation.core.ui.FontScreenSpec
+import ireader.presentation.core.ui.GeneralScreenSpec
+import ireader.presentation.core.ui.GlobalSearchScreenSpec
+import ireader.presentation.core.ui.NFTBadgeScreenSpec
+import ireader.presentation.core.ui.ReaderScreenSpec
+import ireader.presentation.core.ui.ReaderSettingSpec
+import ireader.presentation.core.ui.RepositoryAddScreenSpec
+import ireader.presentation.core.ui.RepositoryScreenSpec
+import ireader.presentation.core.ui.SecuritySettingSpec
+import ireader.presentation.core.ui.SettingScreenSpec
+import ireader.presentation.core.ui.StatisticsScreenSpec
+import ireader.presentation.core.ui.TTSEngineManagerScreenSpec
+import ireader.presentation.core.ui.TTSScreenSpec
+import ireader.presentation.core.ui.TranslationScreenSpec
+import ireader.presentation.core.ui.WebViewScreenSpec
 import ireader.presentation.ui.home.sources.extension.SourceDetailScreen
 import org.koin.compose.koinInject
 
@@ -59,6 +88,18 @@ fun CommonNavHost(
         composable(NavigationRoutes.supabaseConfig) {
             ireader.presentation.ui.settings.sync.SupabaseConfigScreen().Content()
         }
+        
+        // Badge routes
+        composable(NavigationRoutes.badgeStore) {
+            BadgeStoreScreenSpec().Content()
+        }
+        composable(NavigationRoutes.nftBadge) {
+            NFTBadgeScreenSpec().Content()
+        }
+        composable(NavigationRoutes.badgeManagement) {
+            BadgeManagementScreenSpec().Content()
+        }
+        
         composable(NavigationRoutes.translationSettings) {
             TranslationScreenSpec().Content()
         }
@@ -263,6 +304,15 @@ fun CommonNavHost(
         
         composable("deepSeekLogin") {
             DeepSeekLoginScreenSpec().Content()
+        }
+        composable(NavigationRoutes.badgeStore) {
+            BadgeStoreScreenSpec().Content()
+        }
+        composable(NavigationRoutes.badgeManagement) {
+            BadgeManagementScreenSpec().Content()
+        }
+        composable(NavigationRoutes.nftBadge) {
+            NFTBadgeScreenSpec().Content()
         }
         
         composable(

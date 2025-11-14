@@ -343,6 +343,11 @@ class ReaderPreferences constructor(
     fun lastReadingBreakPromptTime(): Preference<Long> {
         return preferenceStore.getLong("last_reading_break_prompt_time", 0L)
     }
+    
+    // TTS with translated text preference
+    fun useTTSWithTranslatedText(): Preference<Boolean> {
+        return preferenceStore.getBoolean("use_tts_with_translated_text", false)
+    }
 }
 
 enum class ReadingMode {

@@ -2,6 +2,7 @@ package ireader.presentation.ui.settings.auth
 
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
+import ireader.presentation.ui.component.badges.ProfileBadgeDisplay
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -107,6 +108,15 @@ class ProfileScreen  {
                                 onSignOut = { viewModel.signOut() },
                                 onUpdateUsername = { viewModel.showUsernameDialog() },
                                 onUpdateWallet = { viewModel.showWalletDialog() }
+                            )
+                        }
+                        
+                        item {
+                            BadgesSection(
+                                badges = state.featuredBadges,
+                                isLoading = state.isBadgesLoading,
+                                error = state.badgesError,
+                                onRetry = { viewModel.retryLoadBadges() }
                             )
                         }
                         
@@ -598,6 +608,83 @@ private fun WalletDialog(
             }
         }
     )
+}
+
+@Composable
+private fun BadgesSection(
+    badges: List<ireader.domain.models.remote.Badge>,
+    isLoading: Boolean,
+    error: String?,
+    onRetry: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
+            Text(
+                text = "Badges",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            when {
+                isLoading -> {
+                    // Loading state with skeleton placeholders (3 circular shimmer boxes)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        repeat(3) {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                            )
+                        }
+                    }
+                }
+                
+                error != null -> {
+                    // Error state with retry button
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = error,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        TextButton(onClick = onRetry) {
+                            Text("Retry")
+                        }
+                    }
+                }
+                
+                badges.isEmpty() -> {
+                    // Empty state
+                    Text(
+                        text = "No badges yet. Earn badges by purchasing them or owning IReader NFTs!",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                
+                else -> {
+                    // Display badges using ProfileBadgeDisplay
+                    ProfileBadgeDisplay(badges = badges)
+                }
+            }
+        }
+    }
 }
 
 private fun formatTime(timestamp: Long): String {

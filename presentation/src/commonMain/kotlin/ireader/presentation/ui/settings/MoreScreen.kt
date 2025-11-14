@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.RecordVoiceOver
 import androidx.compose.material3.*
@@ -59,6 +60,9 @@ fun MoreScreen(
     onTTSEngineManager: () -> Unit = {},
     onWeb3Profile: () -> Unit = {},
     onSupabaseConfig: () -> Unit = {},
+    onBadgeStore: () -> Unit = {},
+    onNFTBadge: () -> Unit = {},
+    onBadgeManagement: () -> Unit = {},
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
@@ -194,6 +198,41 @@ fun MoreScreen(
                 description = "Configure custom Supabase instance for sync",
                 icon = Icons.Outlined.Cloud,
                 onClick = onSupabaseConfig
+            )
+        }
+        
+        // Badges & Customization Section
+        item {
+            SettingsSectionHeader(
+                title = "Badges & Customization",
+                icon = Icons.Filled.Star
+            )
+        }
+        
+        item {
+            SettingsItem(
+                title = "Badge Store",
+                description = "Purchase unique badges to customize your profile",
+                icon = Icons.Outlined.AccountBalanceWallet,
+                onClick = onBadgeStore
+            )
+        }
+        
+        item {
+            SettingsItem(
+                title = "NFT Badge",
+                description = "Verify NFT ownership to unlock exclusive badge",
+                icon = Icons.Filled.Star,
+                onClick = onNFTBadge
+            )
+        }
+        
+        item {
+            SettingsItem(
+                title = "Manage Badges",
+                description = "Customize which badges appear on your profile and reviews",
+                icon = Icons.Outlined.Settings,
+                onClick = onBadgeManagement
             )
         }
         

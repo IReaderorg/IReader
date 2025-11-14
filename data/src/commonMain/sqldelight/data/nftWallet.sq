@@ -1,0 +1,43 @@
+import kotlin.Boolean;
+import kotlin.Long;
+import kotlin.String;
+
+CREATE TABLE IF NOT EXISTS nftWallets(
+    userId TEXT NOT NULL PRIMARY KEY,
+    walletAddress TEXT NOT NULL,
+    lastVerified INTEGER AS Long,
+    ownsNFT INTEGER AS Boolean NOT NULL DEFAULT 0,
+    nftTokenId TEXT,
+    cacheExpiresAt INTEGER AS Long NOT NULL
+);
+
+getWalletByUserId:
+SELECT *
+FROM nftWallets
+WHERE userId = :userId
+LIMIT 1;
+
+getWalletAddress:
+SELECT walletAddress
+FROM nftWallets
+WHERE userId = :userId
+LIMIT 1;
+
+insert:
+INSERT OR REPLACE INTO nftWallets(userId, walletAddress, lastVerified, ownsNFT, nftTokenId, cacheExpiresAt)
+VALUES (:userId, :walletAddress, :lastVerified, :ownsNFT, :nftTokenId, :cacheExpiresAt);
+
+updateVerification:
+UPDATE nftWallets
+SET lastVerified = :lastVerified,
+    ownsNFT = :ownsNFT,
+    nftTokenId = :nftTokenId,
+    cacheExpiresAt = :cacheExpiresAt
+WHERE userId = :userId;
+
+delete:
+DELETE FROM nftWallets
+WHERE userId = :userId;
+
+deleteAll:
+DELETE FROM nftWallets;

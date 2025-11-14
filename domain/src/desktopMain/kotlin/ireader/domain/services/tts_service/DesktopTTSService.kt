@@ -36,6 +36,7 @@ class DesktopTTSService : KoinComponent {
     private val extensions: CatalogStore by inject()
     private val readerPreferences: ReaderPreferences by inject()
     val appPrefs: AppPreferences by inject()
+    private val getTranslatedChapterUseCase: ireader.domain.usecases.translation.GetTranslatedChapterUseCase by inject()
     
     // Piper TTS components
     val synthesizer: ireader.domain.services.tts_service.piper.PiperSpeechSynthesizer by inject()
@@ -413,10 +414,54 @@ class DesktopTTSService : KoinComponent {
                 state.ttsChapter = chapter
             }
             
+            // Load translated content if TTS with translated text is enabled
+            loadTranslatedContentForTTS(chapterId)
+            
             // Only auto-play if explicitly requested
             if (autoPlay) {
                 startService(ACTION_PLAY)
             }
+        }
+    }
+    
+    private suspend fun loadTranslatedContentForTTS(chapterId: Long) {
+        // Check if TTS with translated text is enabled
+        val useTTSWithTranslatedText = readerPreferences.useTTSWithTranslatedText().get()
+        
+        if (!useTTSWithTranslatedText) {
+            state.translatedTTSContent = null
+            return
+        }
+        
+        // Get translation preferences
+        val targetLanguage = readerPreferences.translatorTargetLanguage().get()
+        val engineId = readerPreferences.translatorEngine().get()
+        
+        try {
+            // Try to get translated chapter
+            val translatedChapter = getTranslatedChapterUseCase.execute(
+                chapterId = chapterId,
+                targetLanguage = targetLanguage,
+                engineId = engineId
+            )
+            
+            if (translatedChapter != null) {
+                // Extract text from translated content
+                val translatedText = translatedChapter.translatedContent
+                    .filterIsInstance<ireader.core.source.model.Text>()
+                    .map { it.text }
+                    .filter { it.isNotBlank() }
+                    .map { it.trim() }
+                
+                state.translatedTTSContent = translatedText
+                Log.info { "Loaded translated content for TTS: ${translatedText.size} paragraphs" }
+            } else {
+                state.translatedTTSContent = null
+                Log.info { "No translated content available for TTS, will use original text" }
+            }
+        } catch (e: Exception) {
+            Log.error{ "Error loading translated content for TTS" }
+            state.translatedTTSContent = null
         }
     }
 
@@ -514,6 +559,9 @@ class DesktopTTSService : KoinComponent {
             loadChapter(nextChapter.id)
             state.currentReadingParagraph = 0
             
+            // Load translated content for the new chapter
+            loadTranslatedContentForTTS(nextChapter.id)
+            
             // Start reading if playing (responds within 500ms as per requirements)
             if (state.isPlaying) {
                 readText()
@@ -546,6 +594,9 @@ class DesktopTTSService : KoinComponent {
             loadChapter(prevChapter.id)
             state.currentReadingParagraph = 0
             
+            // Load translated content for the new chapter
+            loadTranslatedContentForTTS(prevChapter.id)
+            
             // Start reading if playing (responds within 500ms as per requirements)
             if (state.isPlaying) {
                 readText()
@@ -557,8 +608,15 @@ class DesktopTTSService : KoinComponent {
     }
 
     private fun nextParagraph() {
-        state.ttsContent?.value?.let { content ->
-            if (state.currentReadingParagraph < content.lastIndex) {
+        // Use translated content if available, otherwise use original content
+        val content = if (state.translatedTTSContent != null && state.translatedTTSContent!!.isNotEmpty()) {
+            state.translatedTTSContent
+        } else {
+            state.ttsContent?.value
+        }
+        
+        content?.let { paragraphs ->
+            if (state.currentReadingParagraph < paragraphs.lastIndex) {
                 // Stop current audio playback
                 if (!isSimulationMode) {
                     audioEngine.stop()
@@ -583,7 +641,14 @@ class DesktopTTSService : KoinComponent {
     }
 
     private fun previousParagraph() {
-        state.ttsContent?.value?.let { content ->
+        // Use translated content if available, otherwise use original content
+        val content = if (state.translatedTTSContent != null && state.translatedTTSContent!!.isNotEmpty()) {
+            state.translatedTTSContent
+        } else {
+            state.ttsContent?.value
+        }
+        
+        content?.let { paragraphs ->
             if (state.currentReadingParagraph > 0) {
                 // Stop current audio playback
                 if (!isSimulationMode) {
@@ -609,7 +674,12 @@ class DesktopTTSService : KoinComponent {
     }
 
     private suspend fun readText() {
-        val content = state.ttsContent?.value
+        // Use translated content if available, otherwise use original content
+        val content = if (state.translatedTTSContent != null && state.translatedTTSContent!!.isNotEmpty()) {
+            state.translatedTTSContent
+        } else {
+            state.ttsContent?.value
+        }
         
         if (content == null || content.isEmpty()) {
             return
@@ -870,7 +940,12 @@ class DesktopTTSService : KoinComponent {
     }
     
     private suspend fun advanceToNextParagraph() {
-        val content = state.ttsContent?.value ?: return
+        // Use translated content if available, otherwise use original content
+        val content = if (state.translatedTTSContent != null && state.translatedTTSContent!!.isNotEmpty()) {
+            state.translatedTTSContent
+        } else {
+            state.ttsContent?.value
+        } ?: return
         
         if (state.currentReadingParagraph < content.lastIndex) {
             state.currentReadingParagraph += 1
@@ -1415,7 +1490,13 @@ class DesktopTTSService : KoinComponent {
      * This speeds up playback by generating audio in advance
      */
     suspend fun preGenerateParagraphs(count: Int = 5) {
-        val content = state.ttsContent?.value ?: return
+        // Use translated content if available, otherwise use original content
+        val content = if (state.translatedTTSContent != null && state.translatedTTSContent!!.isNotEmpty()) {
+            state.translatedTTSContent
+        } else {
+            state.ttsContent?.value
+        } ?: return
+        
         val currentIndex = state.currentReadingParagraph
         
         // Get next N paragraphs

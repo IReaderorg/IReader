@@ -84,10 +84,15 @@ val PresentationModules = module {
     
     // Authentication ViewModels
     factory  { ireader.presentation.ui.settings.auth.AuthViewModel(get()) }
-    factory  { ireader.presentation.ui.settings.auth.ProfileViewModel(get()) }
+    factory  { ireader.presentation.ui.settings.auth.ProfileViewModel(get(), getOrNull()) }
     
     // Sync ViewModels
     factory  { ireader.presentation.ui.settings.sync.SupabaseConfigViewModel(get(), get(), getOrNull(), getOrNull()) }
+    
+    // Badge ViewModels
+    factory { ireader.presentation.ui.settings.badges.store.BadgeStoreViewModel(get(), get()) }
+    factory { ireader.presentation.ui.settings.badges.nft.NFTBadgeViewModel(get(), get(), get(), get(), get()) }
+    factory { ireader.presentation.ui.settings.badges.manage.BadgeManagementViewModel(get(), get(), get()) }
 
     factory <ChapterStateImpl> { ChapterStateImpl() }
     factory <DetailStateImpl> { DetailStateImpl() }

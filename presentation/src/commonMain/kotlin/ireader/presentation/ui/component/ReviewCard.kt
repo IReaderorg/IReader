@@ -7,7 +7,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ireader.domain.models.remote.Badge
 import ireader.domain.models.remote.UserBadge
+import ireader.presentation.ui.component.badges.ReviewBadgeDisplay
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.ExperimentalTime
 
@@ -19,7 +21,8 @@ fun ReviewCard(
     reviewText: String,
     createdAt: Long,
     modifier: Modifier = Modifier,
-    userBadges: List<UserBadge> = emptyList()
+    userBadges: List<UserBadge> = emptyList(),
+    reviewerBadge: Badge? = null
 ) {
     val formattedDate = remember(createdAt) {
         try {
@@ -43,10 +46,18 @@ fun ReviewCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = userName,
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                    // Display username with badge next to it
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = userName,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        // Display reviewer's primary badge next to username
+                        ReviewBadgeDisplay(badge = reviewerBadge)
+                    }
                     if (userBadges.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(4.dp))
                         BadgeRow(badges = userBadges, maxVisible = 2)

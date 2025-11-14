@@ -12,6 +12,7 @@ import ireader.data.downloads.DownloadRepositoryImpl
 import ireader.data.sourcecomparison.SourceComparisonRepositoryImpl
 import ireader.data.font.FontRepositoryImpl
 import ireader.data.history.HistoryRepositoryImpl
+import ireader.data.nft.NFTRepositoryImpl
 import ireader.data.repository.FundingGoalRepositoryImpl
 import ireader.data.repository.LibraryRepositoryImpl
 import ireader.data.repository.ReaderThemeRepositoryImpl
@@ -37,6 +38,7 @@ import ireader.domain.data.repository.FontRepository
 import ireader.domain.data.repository.GlossaryRepository
 import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.data.repository.LibraryRepository
+import ireader.domain.data.repository.NFTRepository
 import ireader.domain.data.repository.ReaderThemeRepository
 import ireader.domain.data.repository.ReadingStatisticsRepository
 import ireader.domain.data.repository.SecurityRepository
@@ -55,6 +57,8 @@ import org.koin.dsl.module
 val repositoryInjectModule = module {
     // Include remote module for sync functionality
     includes(remoteModule)
+    // Include review module for badge functionality
+    includes(reviewModule)
     
     single<DownloadRepository> { DownloadRepositoryImpl(get()) }
     single<UpdatesRepository> { UpdatesRepositoryImpl(get()) }
@@ -101,6 +105,9 @@ val repositoryInjectModule = module {
     
     // Voice model repository
     single<VoiceModelRepository> { VoiceModelRepositoryImpl(get(), get()) }
+    
+    // NFT repository
+    single<NFTRepository> { NFTRepositoryImpl(get(), get()) }
     
     // Database use cases
     single<RepairDatabaseUseCase> { RepairDatabaseUseCaseImpl(get()) }

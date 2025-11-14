@@ -1,28 +1,45 @@
 package ireader.presentation.ui.settings.appearance
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -37,8 +54,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.domain.models.prefs.PreferenceValues
@@ -114,30 +133,20 @@ fun AppearanceSettingScreen(
         }
     )
 
+    // Calculate responsive grid size based on screen width
+    // Using a default size that works well across platforms
+    val gridMinSize = 180.dp
+    
+    // Separate themes by light and dark
+    val lightThemes = remember(vm.vmThemes.size) {
+        vm.vmThemes.filter { !it.isDark }
+    }
+    val darkThemes = remember(vm.vmThemes.size) {
+        vm.vmThemes.filter { it.isDark }
+    }
+
     LazyColumnWithInsets(scaffoldPaddingValues) {
-        // Theme Mode Section
-        item {
-            Components.Header(
-                    text = "Theme Mode",
-            ).Build()
-        }
-        item {
-            Components.Dynamic {
-                ChoicePreference<PreferenceValues.ThemeMode>(
-                        preference = vm.themeMode,
-                        choices = mapOf(
-                                PreferenceValues.ThemeMode.System to localizeHelper.localize(Res.string.follow_system_settings),
-                                PreferenceValues.ThemeMode.Light to localizeHelper.localize(Res.string.light),
-                                PreferenceValues.ThemeMode.Dark to localizeHelper.localize(Res.string.dark)
-                        ),
-                        title = localizeHelper.localize(Res.string.theme),
-                        subtitle = null,
-                        onValue = {
-                            vm.saveNightModePreferences(it)
-                        }
-                )
-            }.Build()
-        }
+        // Dynamic Colors Section
         item {
             Components.Switch(
                 preference = vm.dynamicColorMode,
@@ -180,38 +189,122 @@ fun AppearanceSettingScreen(
             Divider(modifier = Modifier.padding(vertical = 16.dp))
         }
         
-        // Preset Themes Section with enhanced header
-        item {
-            Components.Header(
-                    text = "Preset Themes",
-            ).Build()
-        }
+        // Light Themes Section
         item {
             Components.Dynamic {
                 Column(modifier = Modifier.padding(vertical = 8.dp)) {
                     Text(
-                        text = "Choose from ${themesForCurrentMode.size} available themes",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        text = "Light Themes",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
-                    LazyRow(
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        items(items = themesForCurrentMode) { theme ->
-                            ThemeItem(
-                                    theme,
-                                    onClick = { theme ->
-                                        vm.colorTheme.value = theme.id
-                                        customizedColors.primaryState.value = theme.materialColors.primary
-                                        customizedColors.secondaryState.value = theme.materialColors.secondary
-                                        customizedColors.barsState.value = theme.extraColors.bars
-                                        vm.isSavable = false
-                                    },
-                                    isSelected = vm.colorTheme.value == theme.id,
-                            )
-                        }
+                    Text(
+                        text = "${lightThemes.size} themes available",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                    )
+                }
+            }.Build()
+        }
+        item {
+            Components.Dynamic {
+                // Calculate required height based on number of items and grid configuration
+                val itemHeight = gridMinSize + 16.dp // item height + spacing
+                val columns = 2 // Minimum columns for adaptive grid
+                val rows = (lightThemes.size + columns - 1) / columns
+                val gridHeight = (itemHeight * rows) + 16.dp // Add padding
+                
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = gridMinSize),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .requiredHeight(gridHeight)
+                        .padding(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(8.dp),
+                    userScrollEnabled = false
+                ) {
+                    items(items = lightThemes, key = { it.id }) { theme ->
+                        ThemeCard(
+                            theme = theme,
+                            onClick = { selectedTheme ->
+                                vm.colorTheme.value = selectedTheme.id
+                                customizedColors.primaryState.value = selectedTheme.materialColors.primary
+                                customizedColors.secondaryState.value = selectedTheme.materialColors.secondary
+                                customizedColors.barsState.value = selectedTheme.extraColors.bars
+                                vm.isSavable = false
+                                // Auto-switch to light mode
+                                vm.saveNightModePreferences(PreferenceValues.ThemeMode.Light)
+                            },
+                            isSelected = vm.colorTheme.value == theme.id,
+                            gridMinSize = gridMinSize
+                        )
+                    }
+                }
+            }.Build()
+        }
+        
+        // Section Divider
+        item {
+            Divider(modifier = Modifier.padding(vertical = 24.dp))
+        }
+        
+        // Dark Themes Section
+        item {
+            Components.Dynamic {
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text(
+                        text = "Dark Themes",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                    Text(
+                        text = "${darkThemes.size} themes available",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                    )
+                }
+            }.Build()
+        }
+        item {
+            Components.Dynamic {
+                // Calculate required height based on number of items and grid configuration
+                val itemHeight = gridMinSize + 16.dp // item height + spacing
+                val columns = 2 // Minimum columns for adaptive grid
+                val rows = (darkThemes.size + columns - 1) / columns
+                val gridHeight = (itemHeight * rows) + 16.dp // Add padding
+                
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = gridMinSize),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .requiredHeight(gridHeight)
+                        .padding(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(8.dp),
+                    userScrollEnabled = false
+                ) {
+                    items(items = darkThemes, key = { it.id }) { theme ->
+                        ThemeCard(
+                            theme = theme,
+                            onClick = { selectedTheme ->
+                                vm.colorTheme.value = selectedTheme.id
+                                customizedColors.primaryState.value = selectedTheme.materialColors.primary
+                                customizedColors.secondaryState.value = selectedTheme.materialColors.secondary
+                                customizedColors.barsState.value = selectedTheme.extraColors.bars
+                                vm.isSavable = false
+                                // Auto-switch to dark mode
+                                vm.saveNightModePreferences(PreferenceValues.ThemeMode.Dark)
+                            },
+                            isSelected = vm.colorTheme.value == theme.id,
+                            gridMinSize = gridMinSize
+                        )
                     }
                 }
             }.Build()
@@ -580,179 +673,233 @@ fun AppearanceSettingScreen(
     }
 }
 
+private fun getThemeName(themeId: Long): String {
+    return when (themeId) {
+        -1L -> "Tachiyomi Light"
+        -2L -> "Tachiyomi Dark"
+        -3L -> "Blue Light"
+        -4L -> "Blue Dark"
+        -5L -> "Midnight Light"
+        -6L -> "Midnight Dark"
+        -7L -> "Green Apple Light"
+        -8L -> "Green Apple Dark"
+        -9L -> "Strawberries Light"
+        -10L -> "Strawberries Dark"
+        -11L -> "Tako Light"
+        -12L -> "Tako Dark"
+        -13L -> "Ocean Blue Light"
+        -14L -> "Ocean Blue Dark"
+        -15L -> "Sunset Orange Light"
+        -16L -> "Sunset Orange Dark"
+        -17L -> "Lavender Purple Light"
+        -18L -> "Lavender Purple Dark"
+        -19L -> "Forest Green Light"
+        -20L -> "Forest Green Dark"
+        -21L -> "Monochrome Light"
+        -22L -> "Monochrome Dark"
+        -23L -> "Cherry Blossom Light"
+        -24L -> "Cherry Blossom Dark"
+        -25L -> "Midnight Sky Light"
+        -26L -> "Midnight Sky Dark"
+        -27L -> "Autumn Harvest Light"
+        -28L -> "Autumn Harvest Dark"
+        -29L -> "Emerald Forest Light"
+        -30L -> "Emerald Forest Dark"
+        -31L -> "Rose Gold Light"
+        -32L -> "Rose Gold Dark"
+        else -> "Custom Theme"
+    }
+}
+
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-private fun ThemeItem(
+private fun ThemeCard(
         theme: Theme,
         onClick: (Theme) -> Unit,
         onLongClick: (Theme) -> Unit = {},
         isSelected: Boolean = false,
+        gridMinSize: Dp = 160.dp
 ) {
-    val borders = MaterialTheme.shapes.medium
-    val borderColor = remember {
-        if (theme.materialColors.isLight()) {
-            Color.Black.copy(alpha = 0.25f)
-        } else {
-            Color.White.copy(alpha = 0.15f)
-        }
-    }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
     
-    // Enhanced elevation and scale animation for selected state
-    val elevation by androidx.compose.animation.core.animateDpAsState(
-        targetValue = if (isSelected) 8.dp else 2.dp,
-        animationSpec = androidx.compose.animation.core.spring(
-            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
-            stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+    // Animated elevation for selection and hover states
+    val elevation by animateDpAsState(
+        targetValue = when {
+            isSelected -> 8.dp
+            isHovered -> 4.dp
+            else -> 2.dp
+        },
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
         )
     )
     
-    val scale by androidx.compose.animation.core.animateFloatAsState(
-        targetValue = if (isSelected) 1.05f else 1f,
-        animationSpec = androidx.compose.animation.core.spring(
-            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
-            stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+    // Animated scale for selection
+    val scale by animateFloatAsState(
+        targetValue = if (isSelected) 1.02f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
         )
     )
     
-    Surface(
-            tonalElevation = elevation,
-            shadowElevation = elevation,
-            color = theme.materialColors.background,
-            shape = borders,
-            modifier = Modifier
-                    .size(110.dp, 170.dp)
-                    .padding(12.dp)
-                    .graphicsLayer {
-                        scaleX = scale
-                        scaleY = scale
-                    }
-                    .border(
-                        width = if (isSelected) 2.dp else 1.dp,
-                        color = if (isSelected) MaterialTheme.colorScheme.primary else borderColor,
-                        shape = borders
-                    )
-                    .combinedClickable(
-                        onClick = { onClick(theme) },
-                        onLongClick = { onLongClick(theme) }
-                    )
+    // Animated border color
+    val borderColor by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        )
+    )
+    
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(1.2f / 1f)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .border(
+                width = 3.dp,
+                color = borderColor,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .hoverable(interactionSource = interactionSource)
+            .combinedClickable(
+                onClick = { onClick(theme) },
+                onLongClick = { onLongClick(theme) }
+            ),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = theme.materialColors.background
+        ),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = elevation
+        )
     ) {
-        Box {
+        Box(modifier = Modifier.fillMaxSize()) {
             Column(
-                    modifier = Modifier.padding(2.dp)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(12.dp)
             ) {
-                // Enhanced toolbar preview
-                Toolbar(
-                        modifier = Modifier.requiredHeight(28.dp),
-                        title = {},
-                        backgroundColor = theme.extraColors.bars
-                )
-                
-                // Content area with better spacing and more preview elements
+                // Theme preview area with 3-color gradient
                 Box(
-                        Modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                                .padding(8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth()
+                    // Gradient background showing primary, secondary, tertiary
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        shape = RoundedCornerShape(8.dp),
+                        color = Color.Transparent
                     ) {
-                        // Sample text with better typography
-                        Text(
-                            "Aa",
-                            fontSize = 16.sp,
-                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                            color = theme.materialColors.onBackground,
-                        )
-                        
-                        // Surface variant preview
-                        Surface(
+                        Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 4.dp)
-                                .requiredHeight(20.dp),
-                            shape = MaterialTheme.shapes.extraSmall,
-                            color = theme.materialColors.surfaceVariant,
-                            tonalElevation = 1.dp
+                                .fillMaxSize()
+                                .graphicsLayer {
+                                    clip = true
+                                    shape = RoundedCornerShape(8.dp)
+                                }
                         ) {
-                            Box(
-                                modifier = Modifier.padding(4.dp)
+                            // Three color sections
+                            Row(modifier = Modifier.fillMaxSize()) {
+                                Surface(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxSize(),
+                                    color = theme.materialColors.primary
+                                ) {}
+                                Surface(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxSize(),
+                                    color = theme.materialColors.secondary
+                                ) {}
+                                Surface(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxSize(),
+                                    color = theme.materialColors.tertiary
+                                ) {}
+                            }
+                            
+                            // Sample text overlay
+                            Column(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .padding(8.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    "Text",
-                                    fontSize = 8.sp,
-                                    color = theme.materialColors.onSurfaceVariant,
+                                    text = "Aa",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    color = theme.materialColors.onPrimary
                                 )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Surface(
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = theme.materialColors.surfaceVariant.copy(alpha = 0.9f)
+                                ) {
+                                    Text(
+                                        text = "Sample",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = theme.materialColors.onSurfaceVariant,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
                             }
                         }
                     }
-                    
-                    // Primary color button preview
-                    Button(
-                            onClick = { onClick(theme) },
-                            enabled = true,
-                            contentPadding = PaddingValues(),
-                            modifier = Modifier
-                                    .align(Alignment.BottomStart)
-                                    .size(44.dp, 22.dp),
-                            content = {},
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = theme.materialColors.primary
-                            )
-                    )
-                    
-                    // Secondary color FAB preview
-                    Surface(
-                            modifier = Modifier
-                                    .size(28.dp)
-                                    .align(Alignment.BottomEnd),
-                            shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
-                            color = theme.materialColors.secondary,
-                            tonalElevation = 4.dp,
-                            content = { }
-                    )
                 }
                 
-                // Bottom bar preview
-                BottomAppBar(
-                        modifier = Modifier.requiredHeight(28.dp),
-                        containerColor = theme.extraColors.bars
-                ) {
-                }
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // Theme name
+                Text(
+                    text = getThemeName(theme.id),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = theme.materialColors.onBackground,
+                    maxLines = 1,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
             
-            // Enhanced selection indicator with animation
+            // Selection checkmark indicator
             androidx.compose.animation.AnimatedVisibility(
                 visible = isSelected,
                 enter = androidx.compose.animation.scaleIn(
-                    animationSpec = androidx.compose.animation.core.spring(
-                        dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy
                     )
                 ) + androidx.compose.animation.fadeIn(),
-                exit = androidx.compose.animation.scaleOut() + androidx.compose.animation.fadeOut()
+                exit = androidx.compose.animation.scaleOut() + androidx.compose.animation.fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(6.dp)
+                Surface(
+                    modifier = Modifier.size(32.dp),
+                    shape = RoundedCornerShape(percent = 50),
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    tonalElevation = 2.dp
                 ) {
-                    // Background circle for better visibility
-                    Surface(
-                        modifier = Modifier.size(32.dp),
-                        shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
-                        color = theme.materialColors.primaryContainer,
-                        tonalElevation = 2.dp
-                    ) {}
-                    
-                    Icon(
-                            modifier = Modifier
-                                    .size(32.dp)
-                                    .padding(4.dp),
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
                             imageVector = Icons.Filled.CheckCircle,
-                            contentDescription = "theme is selected",
-                            tint = theme.materialColors.onPrimaryContainer
-                    )
+                            contentDescription = "Selected",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
         }

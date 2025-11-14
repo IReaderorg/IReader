@@ -62,6 +62,7 @@ class TTSService(
     private val readerPreferences: ReaderPreferences by inject()
     private val appPrefs: AppPreferences by inject()
     private val localizeHelper: LocalizeHelper by inject()
+    private val getTranslatedChapterUseCase: ireader.domain.usecases.translation.GetTranslatedChapterUseCase by inject()
 
     lateinit var ttsNotificationBuilder: TTSNotificationBuilder
     lateinit var state: TTSStateImpl
@@ -392,6 +393,10 @@ class TTSService(
                             state.ttsChapters = chapters
                             state.ttsCatalog = source
                             state.currentReadingParagraph = 0
+                            
+                            // Load translated content for TTS if enabled
+                            loadTranslatedContentForTTS(chapterId)
+                            
                             setBundle(book, chapter)
                             startService(command)
                         }
@@ -630,8 +635,15 @@ class TTSService(
                                                 }
                                             }
                                             Player.PREV_PAR -> {
-                                                state.ttsContent?.value?.let { content ->
-                                                    if (state.currentReadingParagraph > 0 && state.currentReadingParagraph in 0..content.lastIndex) {
+                                                // Use translated content if available, otherwise use original content
+                                                val content = if (state.translatedTTSContent != null && state.translatedTTSContent!!.isNotEmpty()) {
+                                                    state.translatedTTSContent
+                                                } else {
+                                                    state.ttsContent?.value
+                                                }
+                                                
+                                                content?.let { paragraphs ->
+                                                    if (state.currentReadingParagraph > 0 && state.currentReadingParagraph in 0..paragraphs.lastIndex) {
                                                         state.currentReadingParagraph -= 1
                                                         updateNotification()
                                                         if (state.isPlaying) {
@@ -664,9 +676,16 @@ class TTSService(
                                                 }
                                             }
                                             Player.NEXT_PAR -> {
-                                                state.ttsContent?.value?.let { content ->
-                                                    if (state.currentReadingParagraph >= 0 && state.currentReadingParagraph < content.size) {
-                                                        if (state.currentReadingParagraph < content.lastIndex) {
+                                                // Use translated content if available, otherwise use original content
+                                                val content = if (state.translatedTTSContent != null && state.translatedTTSContent!!.isNotEmpty()) {
+                                                    state.translatedTTSContent
+                                                } else {
+                                                    state.ttsContent?.value
+                                                }
+                                                
+                                                content?.let { paragraphs ->
+                                                    if (state.currentReadingParagraph >= 0 && state.currentReadingParagraph < paragraphs.size) {
+                                                        if (state.currentReadingParagraph < paragraphs.lastIndex) {
                                                             state.currentReadingParagraph += 1
                                                         }
                                                         if (state.isPlaying) {
@@ -774,7 +793,14 @@ class TTSService(
             }
 
             ttsChapter?.let { chapter ->
-                ttsContent?.value?.let { content ->
+                // Use translated content if available, otherwise use original content
+                val content = if (state.translatedTTSContent != null && state.translatedTTSContent!!.isNotEmpty()) {
+                    state.translatedTTSContent
+                } else {
+                    ttsContent?.value
+                }
+                
+                content?.let { paragraphs ->
                     state.ttsBook?.let { book ->
                         try {
 
@@ -783,7 +809,7 @@ class TTSService(
                             }
                             if (state.utteranceId != (currentReadingParagraph).toString()) {
                                 player?.speak(
-                                    content[currentReadingParagraph],
+                                    paragraphs[currentReadingParagraph],
                                     TextToSpeech.QUEUE_FLUSH,
                                     null,
                                     currentReadingParagraph.toString()
@@ -920,6 +946,10 @@ class TTSService(
             if (localChapter != null && !localChapter.isEmpty()) {
                 state.ttsChapter = localChapter
                 state.currentReadingParagraph = 0
+                
+                // Load translated content for TTS if enabled
+                loadTranslatedContentForTTS(chapterId)
+                
                 setBundle(isLoading = false)
                 ttsState.ttsBook?.let { book ->
                     updateNotification()
@@ -939,6 +969,12 @@ class TTSService(
                                     state.ttsChapters = res
                                 }
                                 state.currentReadingParagraph = 0
+                                
+                                // Load translated content for TTS if enabled
+                                serviceScope.launch {
+                                    loadTranslatedContentForTTS(chapterId)
+                                }
+                                
                                 setBundle(isLoading = false)
 
                                 ttsState.ttsBook?.let { book ->
@@ -964,6 +1000,47 @@ class TTSService(
         }
     }
 
+    private suspend fun loadTranslatedContentForTTS(chapterId: Long) {
+        // Check if TTS with translated text is enabled
+        val useTTSWithTranslatedText = readerPreferences.useTTSWithTranslatedText().get()
+        
+        if (!useTTSWithTranslatedText) {
+            state.translatedTTSContent = null
+            return
+        }
+        
+        // Get translation preferences
+        val targetLanguage = readerPreferences.translatorTargetLanguage().get()
+        val engineId = readerPreferences.translatorEngine().get()
+        
+        try {
+            // Try to get translated chapter
+            val translatedChapter = getTranslatedChapterUseCase.execute(
+                chapterId = chapterId,
+                targetLanguage = targetLanguage,
+                engineId = engineId
+            )
+            
+            if (translatedChapter != null) {
+                // Extract text from translated content
+                val translatedText = translatedChapter.translatedContent
+                    .filterIsInstance<ireader.core.source.model.Text>()
+                    .map { it.text }
+                    .filter { it.isNotBlank() }
+                    .map { it.trim() }
+                
+                state.translatedTTSContent = translatedText
+                Log.info { "Loaded translated content for TTS: ${translatedText.size} paragraphs" }
+            } else {
+                state.translatedTTSContent = null
+                Log.info { "No translated content available for TTS, will use original text" }
+            }
+        } catch (e: Exception) {
+            Log.error(e) { "Error loading translated content for TTS" }
+            state.translatedTTSContent = null
+        }
+    }
+    
     fun getChapterIndex(chapter: Chapter, chapters: List<Chapter>): Int {
         val chaptersIds = chapters.map { it.name }
         val index = chaptersIds.indexOfFirst { it == chapter.name }

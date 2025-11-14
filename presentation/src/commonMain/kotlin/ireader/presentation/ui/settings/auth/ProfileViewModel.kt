@@ -1,21 +1,25 @@
 package ireader.presentation.ui.settings.auth
 
 
+import ireader.domain.models.remote.Badge
 import ireader.domain.models.remote.ConnectionStatus
 import ireader.domain.models.remote.User
 import ireader.domain.usecases.remote.RemoteBackendUseCases
+import ireader.domain.data.repository.BadgeRepository
 import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
-    private val remoteUseCases: RemoteBackendUseCases?
+    private val remoteUseCases: RemoteBackendUseCases?,
+    private val badgeRepository: BadgeRepository?
 ) : StateViewModel<ProfileState>(ProfileState()) {
     
     init {
         loadCurrentUser()
         observeConnectionStatus()
+        loadFeaturedBadges()
     }
     
     private fun loadCurrentUser() {
@@ -124,6 +128,27 @@ class ProfileViewModel(
     fun clearError() {
         updateState { it.copy(error = null) }
     }
+    
+    private fun loadFeaturedBadges() {
+        scope.launch {
+            updateState { it.copy(isBadgesLoading = true) }
+            
+            badgeRepository?.getFeaturedBadges()?.fold(
+                onSuccess = { badges ->
+                    updateState { it.copy(featuredBadges = badges, isBadgesLoading = false, badgesError = null) }
+                },
+                onFailure = { error ->
+                    updateState { it.copy(badgesError = error.message, isBadgesLoading = false) }
+                }
+            ) ?: run {
+                updateState { it.copy(isBadgesLoading = false) }
+            }
+        }
+    }
+    
+    fun retryLoadBadges() {
+        loadFeaturedBadges()
+    }
 }
 
 data class ProfileState(
@@ -133,5 +158,8 @@ data class ProfileState(
     val connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED,
     val lastSyncTime: Long? = null,
     val showUsernameDialog: Boolean = false,
-    val showWalletDialog: Boolean = false
+    val showWalletDialog: Boolean = false,
+    val featuredBadges: List<Badge> = emptyList(),
+    val isBadgesLoading: Boolean = false,
+    val badgesError: String? = null
 )

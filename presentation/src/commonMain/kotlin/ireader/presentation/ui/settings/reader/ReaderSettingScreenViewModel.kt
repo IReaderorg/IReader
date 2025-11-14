@@ -42,4 +42,5 @@ class ReaderSettingScreenViewModel(
     val autoPreloadNextChapter = readerPreferences.autoPreloadNextChapter().asState()
     val preloadOnlyOnWifi = readerPreferences.preloadOnlyOnWifi().asState()
     val readingSpeedWPM = readerPreferences.readingSpeedWPM().asState()
+    val useTTSWithTranslatedText = readerPreferences.useTTSWithTranslatedText().asState()
 }

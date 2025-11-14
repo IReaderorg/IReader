@@ -589,7 +589,7 @@ fun GeneralScreenTab(
         item {
             SwitchPreference(
                 preference = vm.autoScrollMode,
-                title = localizeHelper.localize(Res.string.autoScroll),
+                title = localizeHelper.localize(Res.string.autoscroll),
                 onValueChange = { vm.autoScrollMode = it }
             )
         }
@@ -646,6 +646,18 @@ fun GeneralScreenTab(
             SwitchPreference(
                 preference = vm.paragraphTranslationEnabled,
                 title = "Paragraph Translation Menu",
+            )
+        }
+        item {
+            Components.Header(
+                "Text-to-Speech Settings"
+            ).Build()
+        }
+        item {
+            SwitchPreference(
+                preference = vm.useTTSWithTranslatedText,
+                title = "TTS with Translated Text",
+                subtitle = "Use translated text for text-to-speech when available"
             )
         }
         item {

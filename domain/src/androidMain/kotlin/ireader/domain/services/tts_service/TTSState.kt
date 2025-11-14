@@ -45,6 +45,9 @@ class TTSStateImpl() : AndroidTTSState {
     override var ttsContent: State<List<String>?>? =
         derivedStateOf { ttsChapter?.content?.filter { it is Text }?.map { (it as? Text)?.text }?.filter { it != null && it.isNotBlank() }?.mapNotNull { it?.trim() } }
     override var autoNextChapter by mutableStateOf(false)
+    
+    // Translated content for TTS (set externally when translation is available)
+    var translatedTTSContent by mutableStateOf<List<String>?>(null)
     override var pitch by mutableStateOf(0.8f)
     override var prevPitch by mutableStateOf(0.8f)
     override var speechSpeed by mutableStateOf(0.8f)

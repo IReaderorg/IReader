@@ -7,6 +7,7 @@ import data.Chapter
 import data.ChapterHealth
 import data.Download
 import data.Glossary
+import data.NftWallets
 import data.Reader_theme
 import data.SourceComparison
 import data.Theme
@@ -90,7 +91,10 @@ fun createDatabase(driver: SqlDriver): Database {
         sourceComparisonAdapter = SourceComparison.Adapter(
             longConverter,
             longConverter
-        )
+        ),
+        nftWalletsAdapter = NftWallets.Adapter(
+            longConverter,
+            )
     )
     
     return database

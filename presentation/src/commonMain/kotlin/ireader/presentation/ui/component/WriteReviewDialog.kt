@@ -10,6 +10,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ireader.domain.models.remote.Badge
+import ireader.presentation.ui.component.badges.ReviewBadgeDisplay
 
 @Composable
 fun WriteReviewDialog(
@@ -17,7 +19,9 @@ fun WriteReviewDialog(
     onSubmit: (rating: Int, reviewText: String) -> Unit,
     initialRating: Int = 0,
     initialReviewText: String = "",
-    title: String = "Write Review"
+    title: String = "Write Review",
+    userName: String? = null,
+    primaryBadge: Badge? = null
 ) {
     var rating by remember { mutableStateOf(initialRating) }
     var reviewText by remember { mutableStateOf(initialReviewText) }
@@ -57,6 +61,31 @@ fun WriteReviewDialog(
                     modifier = Modifier.fillMaxWidth().height(150.dp),
                     maxLines = 5
                 )
+                
+                // Show preview of how the review will appear
+                if (userName != null) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Text(
+                        text = "Your review will appear as:",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    // Preview section showing username + badge
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = userName,
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        ReviewBadgeDisplay(badge = primaryBadge)
+                    }
+                }
             }
         },
         confirmButton = {
