@@ -62,7 +62,7 @@ jobs:
       - uses: actions/setup-java@v4
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
         with:
-          java-version: 4
+          java-version: 21
           distribution: temurin
           architecture: ${{ matrix.arch }}
 
