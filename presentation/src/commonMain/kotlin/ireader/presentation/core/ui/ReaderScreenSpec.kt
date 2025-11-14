@@ -7,10 +7,8 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -20,7 +18,6 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -29,11 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.ScreenKey
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.log.Log
 import ireader.core.util.getBuildNumber
 import ireader.domain.preferences.models.FontType
@@ -41,10 +34,13 @@ import ireader.domain.preferences.models.getDefaultFont
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.this_is_first_chapter
+import ireader.i18n.resources.this_is_last_chapter
 import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.IModalSheets
-import ireader.presentation.core.VoyagerScreen
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
+import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.getContextWrapper
 import ireader.presentation.ui.core.theme.AppColors
@@ -66,16 +62,15 @@ import org.koin.core.parameter.parametersOf
 data class ReaderScreenSpec(
     val bookId: Long,
     val chapterId: Long
-) : VoyagerScreen() {
+) {
 
-    override val key: ScreenKey = "Reader_Screen#$chapterId"
-
+    
     @OptIn(
         ExperimentalAnimationApi::class,
         ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
     )
     @Composable
-    override fun Content() {
+    fun Content() {
         val scope = rememberCoroutineScope()
 
         val vm: ReaderScreenViewModel =
@@ -94,7 +89,7 @@ data class ReaderScreenSpec(
         val context = getContextWrapper()
         val scrollState = rememberScrollState()
         val lazyListState = rememberLazyListState()
-        val navigator = LocalNavigator.currentOrThrow
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
 
         DisposableEffect(key1 = scrollState.hashCode()) {
             vm.readerScrollState = scrollState
@@ -333,7 +328,7 @@ data class ReaderScreenSpec(
                                     onWebView = {
                                         try {
                                             catalog?.let { catalog ->
-                                                navigator.push(
+                                                navController.navigateTo(
                                                     WebViewScreenSpec(
                                                         url = chapter?.key,
                                                         sourceId = catalog.sourceId,
@@ -361,7 +356,7 @@ data class ReaderScreenSpec(
                                         vm.bookmarkChapter()
                                     },
                                     onPopBackStack = {
-                                        popBackStack(navigator)
+                                        navController.popBackStack()
                                     }
                                 )
                             }
@@ -497,7 +492,7 @@ data class ReaderScreenSpec(
                             onReaderPlay = {
                                 vm.book?.let { book ->
                                     vm.stateChapter?.let { chapter ->
-                                        navigator.push(
+                                        navController.navigateTo(
                                             TTSScreenSpec(
                                                 bookId = book.id,
                                                 sourceId = book.sourceId,
@@ -528,7 +523,7 @@ data class ReaderScreenSpec(
                             },
                             paddingValues = padding,
                             onNavigateToTranslationSettings = {
-                                navigator.push(TranslationScreenSpec())
+                                navController.navigate(NavigationRoutes.translationSettings)
                             }
                         )
                     }

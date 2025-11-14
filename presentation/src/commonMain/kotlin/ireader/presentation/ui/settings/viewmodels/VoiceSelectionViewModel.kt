@@ -1,13 +1,13 @@
 package ireader.presentation.ui.settings.viewmodels
 
+
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import cafe.adriel.voyager.core.model.StateScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
 import ireader.domain.catalogs.VoiceCatalog
 import ireader.domain.models.tts.VoiceModel
 import ireader.domain.preferences.prefs.UiPreferences
+import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
  */
 class VoiceSelectionViewModel(
     private val uiPreferences: UiPreferences
-) : StateScreenModel<VoiceSelectionState>(VoiceSelectionState()) {
+) : StateViewModel<VoiceSelectionState>(VoiceSelectionState()) {
     
     private val _downloadProgress = MutableStateFlow<DownloadProgress?>(null)
     val downloadProgress: StateFlow<DownloadProgress?> = _downloadProgress.asStateFlow()
@@ -34,7 +34,7 @@ class VoiceSelectionViewModel(
     }
     
     private fun loadVoices() {
-        mutableState.update { currentState ->
+        updateState { currentState ->
             currentState.copy(
                 allVoices = VoiceCatalog.getAllVoices(),
                 filteredVoices = VoiceCatalog.getAllVoices(),
@@ -44,14 +44,14 @@ class VoiceSelectionViewModel(
     }
     
     private fun loadInstalledVoices() {
-        screenModelScope.launch {
+        scope.launch {
             // TODO: Load from actual storage when voice download is implemented
             _installedVoices.value = emptySet()
         }
     }
     
     fun filterByLanguage(language: String?) {
-        mutableState.update { currentState ->
+        updateState { currentState ->
             val filtered = if (language == null) {
                 currentState.allVoices
             } else {
@@ -66,7 +66,7 @@ class VoiceSelectionViewModel(
     }
     
     fun searchVoices(query: String) {
-        mutableState.update { currentState ->
+        updateState { currentState ->
             val filtered = if (query.isBlank()) {
                 if (currentState.selectedLanguage != null) {
                     currentState.allVoices.filter { it.language == currentState.selectedLanguage }
@@ -89,15 +89,15 @@ class VoiceSelectionViewModel(
     }
     
     fun selectVoice(voice: VoiceModel) {
-        mutableState.update { it.copy(selectedVoice = voice) }
+        updateState { it.copy(selectedVoice = voice) }
         // Save to preferences
-        screenModelScope.launch {
+        scope.launch {
             uiPreferences.selectedVoiceId().set(voice.id)
         }
     }
     
     fun downloadVoice(voice: VoiceModel) {
-        screenModelScope.launch {
+        scope.launch {
             _downloadProgress.value = DownloadProgress(voice.id, 0f)
             
             try {
@@ -114,30 +114,30 @@ class VoiceSelectionViewModel(
                 
             } catch (e: Exception) {
                 _downloadProgress.value = null
-                mutableState.update { it.copy(error = "Failed to download voice: ${e.message}") }
+                updateState { it.copy(error = "Failed to download voice: ${e.message}") }
             }
         }
     }
     
     fun previewVoice(voice: VoiceModel) {
-        screenModelScope.launch {
+        scope.launch {
             try {
                 // TODO: Implement voice preview when TTS service is ready
                 // For now, just select the voice
                 selectVoice(voice)
             } catch (e: Exception) {
-                mutableState.update { it.copy(error = "Failed to preview voice: ${e.message}") }
+                updateState { it.copy(error = "Failed to preview voice: ${e.message}") }
             }
         }
     }
     
     fun deleteVoice(voice: VoiceModel) {
-        screenModelScope.launch {
+        scope.launch {
             try {
                 // TODO: Implement actual deletion when voice storage is ready
                 _installedVoices.update { it - voice.id }
             } catch (e: Exception) {
-                mutableState.update { it.copy(error = "Failed to delete voice: ${e.message}") }
+                updateState { it.copy(error = "Failed to delete voice: ${e.message}") }
             }
         }
     }
@@ -147,7 +147,7 @@ class VoiceSelectionViewModel(
     }
     
     fun clearError() {
-        mutableState.update { it.copy(error = null) }
+        updateState { it.copy(error = null) }
     }
 }
 

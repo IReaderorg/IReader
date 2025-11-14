@@ -33,7 +33,7 @@ fun FontPicker(
     onDeleteFont: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val localizeHelper = LocalLocalizeHelper.current
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var fontToDelete by remember { mutableStateOf<CustomFont?>(null) }
     
     LazyColumn(
@@ -214,7 +214,7 @@ fun ImportFontDialog(
     onConfirm: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val localizeHelper = LocalLocalizeHelper.current ?: return
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" } ?: return
     var fontName by remember { mutableStateOf("") }
     
     AlertDialog(

@@ -1,4 +1,6 @@
 //package ireader.presentation.core.ui
+
+import ireader.presentation.core.LocalNavigator
 //
 //import androidx.compose.foundation.layout.Column
 //import androidx.compose.foundation.layout.Spacer
@@ -22,10 +24,7 @@
 //import androidx.compose.ui.text.input.KeyboardType
 //import androidx.compose.ui.text.input.PasswordVisualTransformation
 //import androidx.compose.ui.unit.dp
-//import cafe.adriel.voyager.core.screen.Screen
-//import cafe.adriel.voyager.navigator.LocalNavigator
-//import cafe.adriel.voyager.navigator.currentOrThrow
-//import ireader.domain.usecases.translate.WebscrapingTranslateEngine
+////////import ireader.domain.usecases.translate.WebscrapingTranslateEngine
 //import ireader.i18n.localize
 //import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
@@ -42,10 +41,10 @@ import ireader.i18n.resources.*
 //    override val key: String = "gemini_api_settings_screen"
 //
 //    @Composable
-//    override fun Content() {
-//        val navigator = LocalNavigator.currentOrThrow
+//    fun Content() {
+//        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
 //        val engine = koinInject<WebscrapingTranslateEngine>()
-//        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+//        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
 //
 //        // Set the current AI service to Gemini
 //        engine.setAIService(WebscrapingTranslateEngine.AI_SERVICE.GEMINI)
@@ -63,7 +62,7 @@ import ireader.i18n.resources.*
 //                ireader.presentation.ui.component.ScrollableAppBar(
 //                    title = localizeHelper.localize(Res.string.gemini_api_key),
 //                    navigateBack = {
-//                        navigator.pop()
+//                        navController.popBackStack()
 //                    },
 //                    scrollBehavior = scrollBehavior,
 //                )

@@ -1,13 +1,12 @@
 package ireader.presentation.ui.settings.donation
 
-import cafe.adriel.voyager.core.model.StateScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
 import ireader.domain.models.donation.CryptoType
 import ireader.domain.models.donation.FundingGoal
 import ireader.domain.models.donation.WalletApp
 import ireader.domain.models.donation.WalletIntegrationResult
 import ireader.domain.usecases.donation.DonationUseCases
 import ireader.domain.usecases.donation.GetFundingGoalsUseCase
+import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.launch
 
 /**
@@ -17,7 +16,7 @@ import kotlinx.coroutines.launch
 class DonationViewModel(
     private val getFundingGoalsUseCase: GetFundingGoalsUseCase,
     private val donationUseCases: DonationUseCases
-) : StateScreenModel<DonationViewModel.State>(State()) {
+) : StateViewModel<DonationViewModel.State>(State()) {
     
     data class State(
         val fundingGoals: List<FundingGoal> = emptyList(),
@@ -34,20 +33,20 @@ class DonationViewModel(
      * Load funding goals from repository
      */
     fun loadFundingGoals() {
-        screenModelScope.launch {
-            mutableState.value = state.value.copy(isLoading = true, error = null)
+        scope.launch {
+            updateState { it.copy(isLoading = true, error = null) }
             
             try {
                 val goals = getFundingGoalsUseCase()
-                mutableState.value = state.value.copy(
+                updateState { it.copy(
                     fundingGoals = goals,
                     isLoading = false
-                )
+                ) }
             } catch (e: Exception) {
-                mutableState.value = state.value.copy(
+                updateState { it.copy(
                     isLoading = false,
                     error = e.message ?: "Failed to load funding goals"
-                )
+                ) }
             }
         }
     }
@@ -67,7 +66,7 @@ class DonationViewModel(
         address: String,
         amount: String? = null
     ) {
-        screenModelScope.launch {
+        scope.launch {
             // Generate payment URI
             val paymentUri = donationUseCases.generatePaymentUri(
                 address = address,
@@ -102,11 +101,11 @@ class DonationViewModel(
      * Copy cryptocurrency address to clipboard
      */
     fun copyAddress(address: String, cryptoName: String) {
-        screenModelScope.launch {
+        scope.launch {
             donationUseCases.copyAddress(address)
-            mutableState.value = state.value.copy(
+            updateState { it.copy(
                 walletOperationMessage = "$cryptoName address copied to clipboard"
-            )
+            ) }
         }
     }
     
@@ -114,7 +113,7 @@ class DonationViewModel(
      * Clear wallet operation message
      */
     fun clearWalletMessage() {
-        mutableState.value = state.value.copy(walletOperationMessage = null)
+        updateState { it.copy(walletOperationMessage = null) }
     }
     
     /**
@@ -133,6 +132,6 @@ class DonationViewModel(
             }
         }
         
-        mutableState.value = state.value.copy(walletOperationMessage = message)
+        updateState { it.copy(walletOperationMessage = message) }
     }
 }

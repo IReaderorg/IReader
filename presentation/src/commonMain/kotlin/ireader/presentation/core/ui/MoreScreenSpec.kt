@@ -1,5 +1,8 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
+
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreHoriz
@@ -9,8 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalUriHandler
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import ireader.i18n.discord
@@ -45,7 +46,7 @@ object MoreScreenSpec : Tab {
     override fun Content() {
         val uriHandler = LocalUriHandler.current
         val vm: MainSettingScreenViewModel = getIViewModel()
-        val navigator = LocalNavigator.currentOrThrow
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         IScaffold(
             topBar = { scrollBehavior ->
                 TitleToolbar(
@@ -59,34 +60,34 @@ object MoreScreenSpec : Tab {
                 modifier = Modifier.padding(padding),
                 vm = vm,
                 onAbout = {
-                    navigator.push(AboutSettingSpec())
+                    navController.navigate(NavigationRoutes.about)
                 },
                 onSettings = {
-                    navigator.push(SettingScreenSpec())
+                    navController.navigate(NavigationRoutes.settings)
                 },
                 onBackupScreen = {
-                    navigator.push(BackupAndRestoreScreenSpec())
+                    navController.navigate(NavigationRoutes.backupRestore)
                 },
                 onDownloadScreen = {
-                    navigator.push(DownloaderScreenSpec())
+                    navController.navigate(NavigationRoutes.downloader)
                 },
                 onHelp = {
                     uriHandler.openUri(discord)
                 },
                 onCategory = {
-                    navigator.push(CategoryScreenSpec())
+                    navController.navigate(NavigationRoutes.category)
                 },
                 onDonation = {
-                    navigator.push(DonationScreenSpec())
+                    navController.navigate(NavigationRoutes.donation)
                 },
                 onTTSEngineManager = {
-                    navigator.push(TTSEngineManagerScreenSpec())
+                    navController.navigate(NavigationRoutes.ttsEngineManager)
                 },
                 onWeb3Profile = {
-                    navigator.push(ireader.presentation.ui.settings.auth.ProfileScreen())
+                    navController.navigate(NavigationRoutes.profile)
                 },
                 onSupabaseConfig = {
-                    navigator.push(ireader.presentation.ui.settings.sync.SupabaseConfigScreen())
+                    navController.navigate(NavigationRoutes.supabaseConfig)
                 }
             )
         }

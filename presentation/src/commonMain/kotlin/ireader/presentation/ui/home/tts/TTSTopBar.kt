@@ -7,7 +7,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.Toolbar
@@ -27,7 +26,7 @@ fun TTSTopBar(
     title:String,
     subtitle:String
 ) {
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Toolbar(
         title = {
                 PreferenceRow(title = title, subtitle = subtitle)

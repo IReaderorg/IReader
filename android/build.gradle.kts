@@ -211,7 +211,7 @@ dependencies {
     implementation(libs.coil.core)
     implementation(composeLib.compose.googlFonts)
     implementation(composeLib.material3.windowsizeclass)
-
+    implementation(libs.navigation.compose)
     implementation(project(Modules.coreApi))
     implementation(project(Modules.sourceApi))
     implementation(project(Modules.data))
@@ -264,7 +264,6 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.workManager)
     implementation(libs.napier)
-    implementation(libs.voyager.navigator)
 }
 composeCompiler {
     featureFlags.set(setOf(

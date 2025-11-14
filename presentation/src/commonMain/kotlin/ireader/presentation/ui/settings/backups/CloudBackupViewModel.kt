@@ -1,12 +1,11 @@
 package ireader.presentation.ui.settings.backups
 
 import androidx.compose.runtime.mutableStateOf
-import cafe.adriel.voyager.core.model.StateScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
 import ireader.domain.data.repository.SourceCredentialsRepository
 import ireader.domain.usecases.backup.CloudBackupFile
 import ireader.domain.usecases.backup.CloudBackupManager
 import ireader.domain.usecases.backup.CloudProvider
+import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +17,7 @@ import kotlinx.coroutines.launch
 class CloudBackupViewModel(
     private val cloudBackupManager: CloudBackupManager,
     private val credentialsRepository: SourceCredentialsRepository
-) : StateScreenModel<CloudBackupViewModel.State>(State()) {
+) : StateViewModel<CloudBackupViewModel.State>(State()) {
 
     data class State(
         val selectedProvider: CloudProvider? = null,
@@ -51,7 +50,7 @@ class CloudBackupViewModel(
      * Select a cloud provider
      */
     fun selectProvider(provider: CloudProvider) {
-        screenModelScope.launch {
+        scope.launch {
             _selectedProvider.value = provider
             _isAuthenticated.value = false
             _cloudBackups.value = emptyList()
@@ -59,11 +58,11 @@ class CloudBackupViewModel(
             // Check if already authenticated
             checkAuthentication(provider)
             
-            mutableState.value = state.value.copy(
+            updateState { it.copy(
                 selectedProvider = provider,
                 isAuthenticated = _isAuthenticated.value,
                 cloudBackups = emptyList()
-            )
+            ) }
         }
     }
 
@@ -90,7 +89,7 @@ class CloudBackupViewModel(
     fun authenticate() {
         val provider = _selectedProvider.value ?: return
         
-        screenModelScope.launch {
+        scope.launch {
             _isLoading.value = true
             _errorMessage.value = null
             
@@ -117,15 +116,15 @@ class CloudBackupViewModel(
                     // Load backups after successful authentication
                     loadCloudBackups()
                     
-                    mutableState.value = state.value.copy(
+                    updateState { it.copy(
                         isAuthenticated = true,
                         successMessage = _successMessage.value
-                    )
+                    ) }
                 }.onFailure { error ->
                     _errorMessage.value = error.message ?: "Authentication failed"
-                    mutableState.value = state.value.copy(
+                    updateState { it.copy(
                         errorMessage = _errorMessage.value
-                    )
+                    ) }
                 }
             } finally {
                 _isLoading.value = false
@@ -139,7 +138,7 @@ class CloudBackupViewModel(
     fun signOut() {
         val provider = _selectedProvider.value ?: return
         
-        screenModelScope.launch {
+        scope.launch {
             _isLoading.value = true
             
             try {
@@ -158,16 +157,16 @@ class CloudBackupViewModel(
                     }
                     credentialsRepository.removeCredentials(sourceId)
                     
-                    mutableState.value = state.value.copy(
+                    updateState { it.copy(
                         isAuthenticated = false,
                         cloudBackups = emptyList(),
                         successMessage = _successMessage.value
-                    )
+                    ) }
                 }.onFailure { error ->
                     _errorMessage.value = error.message ?: "Sign out failed"
-                    mutableState.value = state.value.copy(
+                    updateState { it.copy(
                         errorMessage = _errorMessage.value
-                    )
+                    ) }
                 }
             } finally {
                 _isLoading.value = false
@@ -181,7 +180,7 @@ class CloudBackupViewModel(
     fun loadCloudBackups() {
         val provider = _selectedProvider.value ?: return
         
-        screenModelScope.launch {
+        scope.launch {
             _isLoading.value = true
             _errorMessage.value = null
             
@@ -190,14 +189,14 @@ class CloudBackupViewModel(
                 
                 result.onSuccess { backups ->
                     _cloudBackups.value = backups
-                    mutableState.value = state.value.copy(
+                    updateState { it.copy(
                         cloudBackups = backups
-                    )
+                    ) }
                 }.onFailure { error ->
                     _errorMessage.value = "Failed to load backups: ${error.message}"
-                    mutableState.value = state.value.copy(
+                    updateState { it.copy(
                         errorMessage = _errorMessage.value
-                    )
+                    ) }
                 }
             } finally {
                 _isLoading.value = false
@@ -211,7 +210,7 @@ class CloudBackupViewModel(
     fun uploadBackup(localFilePath: String, fileName: String) {
         val provider = _selectedProvider.value ?: return
         
-        screenModelScope.launch {
+        scope.launch {
             _isLoading.value = true
             _errorMessage.value = null
             
@@ -225,15 +224,15 @@ class CloudBackupViewModel(
                         _successMessage.value = "Backup uploaded successfully at $timestamp"
                         // Reload backups to show the new one
                         loadCloudBackups()
-                        mutableState.value = state.value.copy(
+                        updateState { it.copy(
                             successMessage = _successMessage.value
-                        )
+                        ) }
                     }
                     is ireader.domain.models.BackupResult.Error -> {
                         _errorMessage.value = result.message
-                        mutableState.value = state.value.copy(
+                        updateState { it.copy(
                             errorMessage = result.message
-                        )
+                        ) }
                     }
                 }
             } finally {
@@ -248,7 +247,7 @@ class CloudBackupViewModel(
     fun downloadBackup(cloudFileName: String, localFilePath: String) {
         val provider = _selectedProvider.value ?: return
         
-        screenModelScope.launch {
+        scope.launch {
             _isLoading.value = true
             _errorMessage.value = null
             
@@ -258,15 +257,15 @@ class CloudBackupViewModel(
                 when (result) {
                     is ireader.domain.models.BackupResult.Success -> {
                         _successMessage.value = "Backup downloaded successfully to ${result.filePath}"
-                        mutableState.value = state.value.copy(
+                        updateState { it.copy(
                             successMessage = _successMessage.value
-                        )
+                        ) }
                     }
                     is ireader.domain.models.BackupResult.Error -> {
                         _errorMessage.value = result.message
-                        mutableState.value = state.value.copy(
+                        updateState { it.copy(
                             errorMessage = result.message
-                        )
+                        ) }
                     }
                 }
             } finally {
@@ -281,7 +280,7 @@ class CloudBackupViewModel(
     fun deleteBackup(backup: CloudBackupFile) {
         val provider = _selectedProvider.value ?: return
         
-        screenModelScope.launch {
+        scope.launch {
             _isLoading.value = true
             _errorMessage.value = null
             
@@ -293,14 +292,14 @@ class CloudBackupViewModel(
                     _successMessage.value = "Backup deleted successfully"
                     // Reload backups to reflect the deletion
                     loadCloudBackups()
-                    mutableState.value = state.value.copy(
+                    updateState { it.copy(
                         successMessage = _successMessage.value
-                    )
+                    ) }
                 }?.onFailure { error ->
                     _errorMessage.value = "Failed to delete backup: ${error.message}"
-                    mutableState.value = state.value.copy(
+                    updateState { it.copy(
                         errorMessage = _errorMessage.value
-                    )
+                    ) }
                 }
             } finally {
                 _isLoading.value = false
@@ -314,10 +313,10 @@ class CloudBackupViewModel(
     fun clearMessages() {
         _errorMessage.value = null
         _successMessage.value = null
-        mutableState.value = state.value.copy(
+        updateState { it.copy(
             errorMessage = null,
             successMessage = null
-        )
+        ) }
     }
 
     private fun getProviderName(provider: CloudProvider): String {

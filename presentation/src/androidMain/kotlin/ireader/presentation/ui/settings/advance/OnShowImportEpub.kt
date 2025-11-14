@@ -6,14 +6,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.common.Uri
 import ireader.domain.utils.extensions.launchIO
 import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
 
 @Composable
 actual fun OnShowImportEpub(show:Boolean, onFileSelected: suspend (List<Uri>) -> Unit) {
-    val globalScope = LocalGlobalCoroutineScope.currentOrThrow
+    val globalScope = requireNotNull(LocalGlobalCoroutineScope.current) { "LocalGlobalCoroutineScope not provided" }
     val onImportEpub =         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
         if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
             val selectedFiles = mutableListOf<Uri>()

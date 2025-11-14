@@ -2,12 +2,9 @@ package ireader.presentation.core.ui
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.toSavedDownload
-import ireader.presentation.core.VoyagerScreen
-
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.settings.downloader.DownloaderScreen
@@ -15,20 +12,20 @@ import ireader.presentation.ui.settings.downloader.DownloaderTopAppBar
 import ireader.presentation.ui.settings.downloader.DownloaderViewModel
 
 
-class DownloaderScreenSpec : VoyagerScreen() {
+class DownloaderScreenSpec {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content(
+    fun Content(
     ) {
         val vm: DownloaderViewModel = getIViewModel()
-        val navigator = LocalNavigator.currentOrThrow
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val snackBarHostState = SnackBarListener(vm)
         IScaffold(
             topBar = { scrollBehavior ->
             DownloaderTopAppBar(
                     onPopBackStack = {
-                        popBackStack(navigator)
+                        navController.popBackStack()
                     },
                     onCancelAll = {
                         vm.deleteSelectedDownloads(vm.downloads.map { it.toSavedDownload() })
@@ -53,10 +50,8 @@ class DownloaderScreenSpec : VoyagerScreen() {
         ) { padding ->
             DownloaderScreen(
                 onDownloadItem = { item ->
-                    navigator.push(
-                        BookDetailScreenSpec(
-                            bookId = item.bookId
-                        )
+                    navController.navigate(
+                        NavigationRoutes.bookDetail(item.bookId)
                     )
                 },
                 vm = vm,

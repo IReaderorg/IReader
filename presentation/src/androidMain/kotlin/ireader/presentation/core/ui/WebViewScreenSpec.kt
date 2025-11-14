@@ -1,5 +1,7 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
@@ -76,9 +78,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
-import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.web.WebPageScreen
@@ -102,14 +101,14 @@ actual data class WebViewScreenSpec actual constructor(
     val enableBookFetch: Boolean,
     val enableChapterFetch: Boolean,
     val enableChaptersFetch: Boolean,
-) : VoyagerScreen() {
+) {
 
     @Composable
-    override fun Content() {
+    actual fun Content() {
         val vm: WebViewPageModel = getIViewModel(parameters =
         { parametersOf(WebViewPageModel.Param(url,bookId,sourceId,chapterId,enableChapterFetch,enableChaptersFetch,enableBookFetch))}
         )
-        val navigator = LocalNavigator.currentOrThrow
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val scope = rememberCoroutineScope()
         val host = SnackBarListener(vm)
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -148,7 +147,7 @@ actual data class WebViewScreenSpec actual constructor(
                         focusManager.clearFocus()
                     },
                     onRefresh = { webView?.reload() },
-                    onBack = { navigator.pop() },
+                    onBack = { navController.popBackStack() },
                     urlFocusRequester = urlFocusRequester,
                     canGoBack = webView?.canGoBack() == true,
                     canGoForward = webView?.canGoForward() == true,

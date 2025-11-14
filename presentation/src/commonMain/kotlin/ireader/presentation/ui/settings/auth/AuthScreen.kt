@@ -1,5 +1,9 @@
 package ireader.presentation.ui.settings.auth
 
+
+import androidx.compose.runtime.collectAsState
+import ireader.presentation.core.LocalNavigator
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
@@ -17,18 +21,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.presentation.ui.component.components.Toolbar
 import org.koin.compose.koinInject
 
-class AuthScreen : Screen {
+class AuthScreen  {
     
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+    fun Content() {
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val viewModel: AuthViewModel = koinInject()
         val state by viewModel.state.collectAsState()
         
@@ -37,7 +38,7 @@ class AuthScreen : Screen {
                 Toolbar(
                     title = { Text(if (state.isSignUp) "Sign Up" else "Sign In") },
                     navigationIcon = {
-                        IconButton(onClick = { navigator.pop() }) {
+                        IconButton(onClick = { navController.popBackStack() }) {
                             Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                         }
                     }
@@ -185,7 +186,7 @@ class AuthScreen : Screen {
                 
                 if (state.success) {
                     LaunchedEffect(Unit) {
-                        navigator.pop()
+                        navController.popBackStack()
                     }
                 }
             }

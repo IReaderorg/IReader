@@ -7,7 +7,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.utils.extensions.launchIO
 import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
 import java.io.OutputStreamWriter
@@ -18,7 +17,7 @@ actual fun OnShowThemeExport(
     themeJson: String,
     onFileSelected: suspend (Boolean) -> Unit
 ) {
-    val globalScope = LocalGlobalCoroutineScope.currentOrThrow
+    val globalScope = requireNotNull(LocalGlobalCoroutineScope.current) { "LocalGlobalCoroutineScope not provided" }
     val context = LocalContext.current
     val onExport =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->

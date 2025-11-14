@@ -1,12 +1,12 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
+
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
-import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -15,20 +15,20 @@ import ireader.presentation.ui.settings.general.GeneralSettingScreenViewModel
 
 
 @ExperimentalMaterial3Api
-class GeneralScreenSpec : VoyagerScreen() {
+class GeneralScreenSpec {
 
     @Composable
-    override fun Content() {
+    fun Content() {
         val vm: GeneralSettingScreenViewModel = getIViewModel()
-        val navigator = LocalNavigator.currentOrThrow
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         IScaffold(
             topBar = { scrollBehavior ->
                 TitleToolbar(
                     title = localizeHelper.localize(Res.string.general),
                     scrollBehavior = scrollBehavior,
                     popBackStack = {
-                        popBackStack(navigator)
+                        navController.popBackStack()
                     }
                 )
             }
@@ -37,7 +37,7 @@ class GeneralScreenSpec : VoyagerScreen() {
                 scaffoldPadding = scaffoldPadding,
                 vm = vm,
                 onTranslationSettingsClick = {
-                    navigator.push(TranslationScreenSpec())
+                    navController.navigate(NavigationRoutes.translationSettings)
                 },
             )
         }

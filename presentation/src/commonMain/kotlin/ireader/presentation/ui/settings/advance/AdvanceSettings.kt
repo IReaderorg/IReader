@@ -8,7 +8,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.log.Log
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
@@ -30,8 +29,8 @@ fun AdvanceSettings(
     vm: AdvanceSettingViewModel,
     padding: PaddingValues
 ) {
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
-    val globalScope = LocalGlobalCoroutineScope.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val globalScope = requireNotNull(LocalGlobalCoroutineScope.current) { "LocalGlobalCoroutineScope not provided" }
     val showImport = remember { mutableStateOf(false) }
     var showDeleteAllDb by remember { mutableStateOf(false) }
     var showClearAllDatabase by remember { mutableStateOf(false) }
@@ -482,7 +481,7 @@ fun DangerZoneSection(
     onResetCategories: () -> Unit,
     onDeleteAllDatabase: () -> Unit
 ) {
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
     Card(
         modifier = Modifier

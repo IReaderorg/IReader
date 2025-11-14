@@ -1,18 +1,17 @@
 package ireader.presentation.ui.settings.auth
 
-import cafe.adriel.voyager.core.model.StateScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
+
 import ireader.domain.models.remote.ConnectionStatus
 import ireader.domain.models.remote.User
 import ireader.domain.usecases.remote.RemoteBackendUseCases
+import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
     private val remoteUseCases: RemoteBackendUseCases?
-) : StateScreenModel<ProfileState>(ProfileState()) {
+) : StateViewModel<ProfileState>(ProfileState()) {
     
     init {
         loadCurrentUser()
@@ -20,32 +19,32 @@ class ProfileViewModel(
     }
     
     private fun loadCurrentUser() {
-        screenModelScope.launch {
-            mutableState.update { it.copy(isLoading = true) }
+        scope.launch {
+            updateState { it.copy(isLoading = true) }
             
             remoteUseCases?.getCurrentUser?.invoke()?.fold(
                 onSuccess = { user ->
-                    mutableState.update { it.copy(currentUser = user, isLoading = false) }
+                    updateState { it.copy(currentUser = user, isLoading = false) }
                 },
                 onFailure = { error ->
-                    mutableState.update { it.copy(error = error.message, isLoading = false) }
+                    updateState { it.copy(error = error.message, isLoading = false) }
                 }
             ) ?: run {
-                mutableState.update { it.copy(isLoading = false) }
+                updateState { it.copy(isLoading = false) }
             }
         }
     }
     
     private fun observeConnectionStatus() {
         remoteUseCases?.observeConnectionStatus?.invoke()?.onEach { status ->
-            mutableState.update { it.copy(connectionStatus = status) }
-        }?.launchIn(screenModelScope)
+            updateState { it.copy(connectionStatus = status) }
+        }?.launchIn(scope)
     }
     
     fun signOut() {
-        screenModelScope.launch {
+        scope.launch {
             remoteUseCases?.signOut?.invoke()
-            mutableState.update { 
+            updateState { 
                 it.copy(
                     currentUser = null,
                     lastSyncTime = null
@@ -55,28 +54,28 @@ class ProfileViewModel(
     }
     
     fun showUsernameDialog() {
-        mutableState.update { it.copy(showUsernameDialog = true) }
+        updateState { it.copy(showUsernameDialog = true) }
     }
     
     fun hideUsernameDialog() {
-        mutableState.update { it.copy(showUsernameDialog = false) }
+        updateState { it.copy(showUsernameDialog = false) }
     }
     
     fun showWalletDialog() {
-        mutableState.update { it.copy(showWalletDialog = true) }
+        updateState { it.copy(showWalletDialog = true) }
     }
     
     fun hideWalletDialog() {
-        mutableState.update { it.copy(showWalletDialog = false) }
+        updateState { it.copy(showWalletDialog = false) }
     }
     
     fun updateUsername(username: String) {
-        screenModelScope.launch {
-            mutableState.update { it.copy(isLoading = true, showUsernameDialog = false) }
+        scope.launch {
+            updateState { it.copy(isLoading = true, showUsernameDialog = false) }
             
-            val userId = state.value.currentUser?.id
+            val userId = currentState.currentUser?.id
             if (userId == null) {
-                mutableState.update { it.copy(isLoading = false, error = "User not found") }
+                updateState { it.copy(isLoading = false, error = "User not found") }
                 return@launch
             }
             
@@ -85,7 +84,7 @@ class ProfileViewModel(
                     loadCurrentUser()
                 },
                 onFailure = { error ->
-                    mutableState.update { 
+                    updateState { 
                         it.copy(
                             error = error.message ?: "Failed to update username", 
                             isLoading = false
@@ -97,12 +96,12 @@ class ProfileViewModel(
     }
     
     fun updateWallet(wallet: String) {
-        screenModelScope.launch {
-            mutableState.update { it.copy(isLoading = true, showWalletDialog = false) }
+        scope.launch {
+            updateState { it.copy(isLoading = true, showWalletDialog = false) }
             
-            val userId = state.value.currentUser?.id
+            val userId = currentState.currentUser?.id
             if (userId == null) {
-                mutableState.update { it.copy(isLoading = false, error = "User not found") }
+                updateState { it.copy(isLoading = false, error = "User not found") }
                 return@launch
             }
             
@@ -111,7 +110,7 @@ class ProfileViewModel(
                     loadCurrentUser()
                 },
                 onFailure = { error ->
-                    mutableState.update { 
+                    updateState { 
                         it.copy(
                             error = error.message ?: "Failed to update wallet", 
                             isLoading = false
@@ -123,7 +122,7 @@ class ProfileViewModel(
     }
     
     fun clearError() {
-        mutableState.update { it.copy(error = null) }
+        updateState { it.copy(error = null) }
     }
 }
 

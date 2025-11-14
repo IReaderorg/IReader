@@ -12,7 +12,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.DEFAULT
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
@@ -28,7 +27,7 @@ fun BrightnessSliderComposable(
         viewModel: ReaderScreenViewModel,
         onChangeBrightness: (Float) -> Unit
 ) {
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,

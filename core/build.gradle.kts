@@ -65,6 +65,7 @@ kotlin {
                 implementation(compose.components.resources)
                 api(libs.ktor.contentNegotiation.kotlinx)
                 api(libs.okio)
+                api(libs.navigation.compose)
                 compileOnly(libs.jsoup)
                 api(libs.koin.core)
                 api(libs.androidx.datastore.core)

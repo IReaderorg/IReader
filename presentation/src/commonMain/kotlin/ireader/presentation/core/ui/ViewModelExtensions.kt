@@ -1,11 +1,9 @@
 package ireader.presentation.core.ui
 
-import cafe.adriel.voyager.core.model.StateScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -15,13 +13,13 @@ import kotlinx.coroutines.launch
 /**
  * Execute an async operation and update UI state
  */
-fun <T, S> StateScreenModel<S>.executeAsync(
+fun <T> ViewModel.executeAsync(
     stateFlow: MutableStateFlow<UiState<T>>,
     operation: suspend () -> T,
     onSuccess: ((T) -> Unit)? = null,
     onError: ((Throwable) -> Unit)? = null
 ) {
-    screenModelScope.launch {
+    viewModelScope.launch {
         stateFlow.value = UiState.Loading
         try {
             val result = operation()
@@ -37,13 +35,13 @@ fun <T, S> StateScreenModel<S>.executeAsync(
 /**
  * Execute an async operation with Result type and update UI state
  */
-fun <T, S> StateScreenModel<S>.executeAsyncResult(
+fun <T> ViewModel.executeAsyncResult(
     stateFlow: MutableStateFlow<UiState<T>>,
     operation: suspend () -> Result<T>,
     onSuccess: ((T) -> Unit)? = null,
     onError: ((Throwable) -> Unit)? = null
 ) {
-    screenModelScope.launch {
+    viewModelScope.launch {
         stateFlow.value = UiState.Loading
         val result = operation()
         result.fold(
@@ -62,6 +60,6 @@ fun <T, S> StateScreenModel<S>.executeAsyncResult(
 /**
  * Launch a coroutine in the ViewModel scope
  */
-fun <S> StateScreenModel<S>.launchInScope(block: suspend CoroutineScope.() -> Unit) {
-    screenModelScope.launch(block = block)
+fun ViewModel.launchInScope(block: suspend CoroutineScope.() -> Unit) {
+    viewModelScope.launch(block = block)
 }

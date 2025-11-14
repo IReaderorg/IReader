@@ -40,7 +40,6 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.UiPreferences
@@ -60,7 +59,7 @@ fun GeneralSettingScreen(
         vm: GeneralSettingScreenViewModel,
         onTranslationSettingsClick: () -> Unit,
 ) {
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val manageNotificationComponent = mangeNotificationRow()
     val items = remember {
         listOf<Components>(

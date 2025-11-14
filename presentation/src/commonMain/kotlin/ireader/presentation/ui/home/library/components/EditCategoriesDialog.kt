@@ -12,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.Category
 import ireader.domain.models.entities.CategoryWithCount
 import ireader.i18n.resources.Res
@@ -34,7 +33,7 @@ fun EditCategoriesDialog(
         onAddDeleteQueue: (Category) -> Unit,
         categories: List<CategoryWithCount>
 ) {
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     if (vm.showDialog) {
         IAlertDialog(
             modifier = modifier.heightIn(max = 350.dp, min = 200.dp),

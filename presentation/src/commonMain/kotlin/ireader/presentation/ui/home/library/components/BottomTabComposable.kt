@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import cafe.adriel.voyager.navigator.currentOrThrow
 
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.library.LibraryFilter
@@ -34,7 +33,7 @@ fun BottomTabComposable(
     vm: LibraryViewModel,
     scaffoldPadding: PaddingValues
 ) {
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val tabs = listOf(
         TabItem(
             localizeHelper.localize(Res.string.filter)

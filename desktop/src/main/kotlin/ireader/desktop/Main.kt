@@ -1,13 +1,13 @@
 package ireader.desktop
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
-import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.navigator.NavigatorDisposeBehavior
+import androidx.navigation.compose.composable
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.annotation.ExperimentalCoilApi
@@ -36,11 +36,13 @@ import ireader.domain.di.localModule
 import ireader.domain.di.preferencesInjectModule
 import ireader.domain.image.CoverCache
 import ireader.domain.usecases.files.GetSimpleStorage
-import ireader.presentation.core.DefaultNavigatorScreenTransition
 import ireader.presentation.core.MainStarterScreen
 import ireader.presentation.core.di.PresentationModules
 import ireader.presentation.core.di.presentationPlatformModule
 import ireader.presentation.core.theme.AppTheme
+import ireader.presentation.core.ui.AppearanceScreenSpec
+import ireader.presentation.core.ui.BackupAndRestoreScreenSpec
+import ireader.presentation.core.ui.SettingScreenSpec
 import ireader.presentation.imageloader.BookCoverFetcher
 import ireader.presentation.imageloader.coil.imageloader.BookCoverKeyer
 import ireader.presentation.imageloader.coil.imageloader.CatalogRemoteKeyer
@@ -175,16 +177,207 @@ fun main() {
                     }
                     val coroutineScope = rememberCoroutineScope()
                     AppTheme(coroutineScope) {
-                        Navigator(
-                            screen = MainStarterScreen,
-                            disposeBehavior = NavigatorDisposeBehavior(
-                                disposeNestedNavigators = false,
-                                disposeSteps = true
-                            ),
-                        ) { navigator ->
-
-
-                            DefaultNavigatorScreenTransition(navigator = navigator)
+                        val navController = androidx.navigation.compose.rememberNavController()
+                        ireader.presentation.core.ProvideNavigator(navController) {
+                            androidx.navigation.compose.NavHost(
+                                navController = navController,
+                                startDestination = "main"
+                            ) {
+                                composable("main") {
+                                    MainStarterScreen()
+                                }
+                                // Settings routes
+                                composable(ireader.presentation.core.NavigationRoutes.profile) {
+                                    ireader.presentation.ui.settings.auth.ProfileScreen().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.auth) {
+                                    ireader.presentation.ui.settings.auth.AuthScreen().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.settings) {
+                                    SettingScreenSpec().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.appearance) {
+                                    AppearanceScreenSpec().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.statistics) {
+                                    ireader.presentation.core.ui.StatisticsScreenSpec().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.donation) {
+                                    ireader.presentation.core.ui.DonationScreenSpec().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.cloudBackup) {
+                                    ireader.presentation.core.ui.CloudBackupScreenSpec().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.supabaseConfig) {
+                                    ireader.presentation.ui.settings.sync.SupabaseConfigScreen().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.translationSettings) {
+                                    ireader.presentation.core.ui.TranslationScreenSpec().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.backupRestore) {
+                                   BackupAndRestoreScreenSpec().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.category) {
+                                    ireader.presentation.core.ui.CategoryScreenSpec().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.downloader) {
+                                    ireader.presentation.core.ui.DownloaderScreenSpec().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.fontSettings) {
+                                    ireader.presentation.core.ui.FontScreenSpec().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.about) {
+                                    ireader.presentation.core.ui.AboutSettingSpec().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.generalSettings) {
+                                    ireader.presentation.core.ui.GeneralScreenSpec().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.readerSettings) {
+                                    ireader.presentation.core.ui.ReaderSettingSpec().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.securitySettings) {
+                                    ireader.presentation.core.ui.SecuritySettingSpec().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.repository) {
+                                    ireader.presentation.core.ui.RepositoryScreenSpec().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.repositoryAdd) {
+                                    ireader.presentation.core.ui.RepositoryAddScreenSpec().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.changelog) {
+                                    ireader.presentation.core.ui.ChangelogScreenSpec().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.advanceSettings) {
+                                    ireader.presentation.core.ui.AdvanceSettingSpec().Content()
+                                }
+                                composable(ireader.presentation.core.NavigationRoutes.ttsEngineManager) {
+                                    ireader.presentation.core.ui.TTSEngineManagerScreenSpec().Content()
+                                }
+                                // Routes with parameters
+                                composable(
+                                    route = "bookDetail/{bookId}",
+                                    arguments = listOf(androidx.navigation.navArgument("bookId") { 
+                                        type = androidx.navigation.NavType.StringType 
+                                    })
+                                ) { backStackEntry ->
+                                    val bookId = androidx.compose.runtime.remember(backStackEntry) {
+                                        backStackEntry.savedStateHandle.get<String>("bookId")?.toLongOrNull()
+                                    }
+                                    if (bookId != null) {
+                                        androidx.compose.runtime.key(bookId) {
+                                            ireader.presentation.core.ui.BookDetailScreenSpec(bookId).Content()
+                                        }
+                                    }
+                                }
+                                composable(
+                                    route = "reader/{bookId}/{chapterId}",
+                                    arguments = listOf(
+                                        androidx.navigation.navArgument("bookId") { type = androidx.navigation.NavType.StringType },
+                                        androidx.navigation.navArgument("chapterId") { type = androidx.navigation.NavType.StringType }
+                                    )
+                                ) { backStackEntry ->
+                                    val bookId = androidx.compose.runtime.remember(backStackEntry) {
+                                        backStackEntry.savedStateHandle.get<String>("bookId")?.toLongOrNull()
+                                    }
+                                    val chapterId = androidx.compose.runtime.remember(backStackEntry) {
+                                        backStackEntry.savedStateHandle.get<String>("chapterId")?.toLongOrNull()
+                                    }
+                                    if (bookId != null && chapterId != null) {
+                                        androidx.compose.runtime.key(bookId, chapterId) {
+                                            ireader.presentation.core.ui.ReaderScreenSpec(bookId, chapterId).Content()
+                                        }
+                                    }
+                                }
+                                composable(
+                                    route = "explore/{sourceId}",
+                                    arguments = listOf(
+                                        androidx.navigation.navArgument("sourceId") { type = androidx.navigation.NavType.StringType }
+                                    )
+                                ) { backStackEntry ->
+                                    val sourceId = androidx.compose.runtime.remember(backStackEntry) {
+                                        backStackEntry.savedStateHandle.get<String>("sourceId")?.toLongOrNull()
+                                    }
+                                    if (sourceId != null) {
+                                        androidx.compose.runtime.key(sourceId) {
+                                            ireader.presentation.core.ui.ExploreScreenSpec(sourceId, null).Content()
+                                        }
+                                    }
+                                }
+                                composable(
+                                    route = "globalSearch"
+                                ) { backStackEntry ->
+                                    ireader.presentation.core.ui.GlobalSearchScreenSpec(null).Content()
+                                }
+                                composable(
+                                    route = "webView"
+                                ) {
+                                    // Desktop WebView opens in external browser
+                                    // Show a message that the browser was opened
+                                    androidx.compose.foundation.layout.Box(
+                                        modifier = androidx.compose.ui.Modifier.fillMaxSize(),
+                                        contentAlignment = androidx.compose.ui.Alignment.Center
+                                    ) {
+                                        androidx.compose.material3.Text(
+                                            text = "Opening in external browser...",
+                                            style = androidx.compose.material3.MaterialTheme.typography.bodyLarge
+                                        )
+                                    }
+                                }
+                                composable(
+                                    route = "tts/{bookId}/{chapterId}/{sourceId}/{readingParagraph}",
+                                    arguments = listOf(
+                                        androidx.navigation.navArgument("bookId") { type = androidx.navigation.NavType.StringType },
+                                        androidx.navigation.navArgument("chapterId") { type = androidx.navigation.NavType.StringType },
+                                        androidx.navigation.navArgument("sourceId") { type = androidx.navigation.NavType.StringType },
+                                        androidx.navigation.navArgument("readingParagraph") { type = androidx.navigation.NavType.StringType }
+                                    )
+                                ) { backStackEntry ->
+                                    val bookId = androidx.compose.runtime.remember(backStackEntry) {
+                                        backStackEntry.savedStateHandle.get<String>("bookId")?.toLongOrNull()
+                                    }
+                                    val chapterId = androidx.compose.runtime.remember(backStackEntry) {
+                                        backStackEntry.savedStateHandle.get<String>("chapterId")?.toLongOrNull()
+                                    }
+                                    val sourceId = androidx.compose.runtime.remember(backStackEntry) {
+                                        backStackEntry.savedStateHandle.get<String>("sourceId")?.toLongOrNull()
+                                    }
+                                    val readingParagraph = androidx.compose.runtime.remember(backStackEntry) {
+                                        backStackEntry.savedStateHandle.get<String>("readingParagraph")?.toIntOrNull()
+                                    }
+                                    if (bookId != null && chapterId != null && sourceId != null && readingParagraph != null) {
+                                        androidx.compose.runtime.key(bookId, chapterId, sourceId, readingParagraph) {
+                                            ireader.presentation.core.ui.TTSScreenSpec(bookId, chapterId, sourceId, readingParagraph).Content()
+                                        }
+                                    }
+                                }
+                                composable("chatGptLogin") {
+                                    ireader.presentation.core.ui.ChatGptLoginScreenSpec().Content()
+                                }
+                                composable("deepSeekLogin") {
+                                    ireader.presentation.core.ui.DeepSeekLoginScreenSpec().Content()
+                                }
+                                composable(
+                                    route = "sourceDetail/{sourceId}",
+                                    arguments = listOf(
+                                        androidx.navigation.navArgument("sourceId") { type = androidx.navigation.NavType.StringType }
+                                    )
+                                ) { backStackEntry ->
+                                    val sourceId = androidx.compose.runtime.remember(backStackEntry) {
+                                        backStackEntry.savedStateHandle.get<String>("sourceId")?.toLongOrNull()
+                                    }
+                                    if (sourceId != null) {
+                                        val catalogStore: CatalogStore = koinInject()
+                                        val catalog = androidx.compose.runtime.remember(sourceId) {
+                                            catalogStore.catalogs.find { it.sourceId == sourceId }
+                                        }
+                                        if (catalog != null) {
+                                            androidx.compose.runtime.key(sourceId) {
+                                                ireader.presentation.ui.home.sources.extension.SourceDetailScreen(catalog).Content()
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

@@ -1,5 +1,7 @@
 package ireader.presentation.ui.settings.statistics
 
+import ireader.presentation.core.LocalNavigator
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -13,22 +15,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.ReadingStatistics
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class StatisticsScreen : Screen, KoinComponent {
+class StatisticsScreen : KoinComponent {
     
     private val viewModel: StatisticsViewModel by inject()
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+    fun Content() {
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val statistics by viewModel.statistics.collectAsState()
 
         Scaffold(
@@ -36,7 +35,7 @@ class StatisticsScreen : Screen, KoinComponent {
                 TopAppBar(
                     title = { Text("Reading Statistics") },
                     navigationIcon = {
-                        TopAppBarBackButton(onClick = { navigator.pop() })
+                        TopAppBarBackButton(onClick = { navController.popBackStack() })
                     }
                 )
             }

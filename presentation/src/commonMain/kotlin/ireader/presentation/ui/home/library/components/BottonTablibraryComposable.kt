@@ -40,7 +40,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
@@ -127,7 +126,7 @@ fun TabsContent(
     vm: LibraryViewModel,
     scaffoldPadding: PaddingValues
 ) {
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val layouts = remember {
         listOf(
             DisplayMode.CompactGrid,
@@ -263,7 +262,7 @@ private fun LazyListScope.DispalyPage(
         )
     }
     items(layouts) { layout ->
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         Column(
             Modifier
                 .fillMaxSize()
@@ -315,7 +314,7 @@ private fun LazyListScope.DispalyPage(
         )
     }
     item {
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         ClickableRow(onClick = { vm.readBadge.value = !vm.readBadge.value }) {
             Checkbox(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -328,7 +327,7 @@ private fun LazyListScope.DispalyPage(
         }
     }
     item {
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         ClickableRow(onClick = { vm.unreadBadge.value = !vm.unreadBadge.value }) {
             Checkbox(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -341,7 +340,7 @@ private fun LazyListScope.DispalyPage(
         }
     }
     item {
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         ClickableRow(onClick = { vm.goToLastChapterBadge.value = !vm.goToLastChapterBadge.value }) {
             Checkbox(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -354,7 +353,7 @@ private fun LazyListScope.DispalyPage(
         }
     }
     item {
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         ClickableRow(onClick = { vm.showDownloadedChaptersBadge.value = !vm.showDownloadedChaptersBadge.value }) {
             Checkbox(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -367,7 +366,7 @@ private fun LazyListScope.DispalyPage(
         }
     }
     item {
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         ClickableRow(onClick = { vm.showUnreadChaptersBadge.value = !vm.showUnreadChaptersBadge.value }) {
             Checkbox(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -380,7 +379,7 @@ private fun LazyListScope.DispalyPage(
         }
     }
     item {
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         ClickableRow(onClick = { vm.showLocalMangaBadge.value = !vm.showLocalMangaBadge.value }) {
             Checkbox(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -393,7 +392,7 @@ private fun LazyListScope.DispalyPage(
         }
     }
     item {
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         ClickableRow(onClick = { vm.showLanguageBadge.value = !vm.showLanguageBadge.value }) {
             Checkbox(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -414,7 +413,7 @@ private fun LazyListScope.DispalyPage(
         )
     }
     item {
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         ClickableRow(onClick = { vm.showCategoryTabs.value = !vm.showCategoryTabs.value }) {
             Checkbox(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -427,7 +426,7 @@ private fun LazyListScope.DispalyPage(
         }
     }
     item {
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         ClickableRow(onClick = { vm.showAllCategoryTab.value = !vm.showAllCategoryTab.value }) {
             Checkbox(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -440,7 +439,7 @@ private fun LazyListScope.DispalyPage(
         }
     }
     item {
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         ClickableRow(onClick = { vm.showCountInCategory.value = !vm.showCountInCategory.value }) {
             Checkbox(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -453,7 +452,7 @@ private fun LazyListScope.DispalyPage(
         }
     }
     item {
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         ClickableRow(onClick = { vm.toggleResumeReadingCard(!vm.showResumeReadingCard.value) }) {
             Checkbox(
                 modifier = Modifier.padding(horizontal = 16.dp),

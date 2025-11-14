@@ -1,0 +1,18 @@
+package ireader.presentation.core
+
+import androidx.navigation.NavHostController
+import ireader.presentation.core.ui.TTSScreenSpec
+import ireader.presentation.core.ui.WebViewScreenSpec
+
+/**
+ * Desktop-specific navigation extensions for expect classes
+ */
+
+actual fun NavHostController.navigateTo(spec: WebViewScreenSpec) {
+    // For desktop, WebView just opens in browser, so we use a simple route
+    navigate("webView")
+}
+
+actual fun NavHostController.navigateTo(spec: TTSScreenSpec) {
+    navigate("tts/${spec.bookId}/${spec.chapterId}/${spec.sourceId}/${spec.readingParagraph}")
+}

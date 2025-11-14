@@ -1,14 +1,13 @@
 package ireader.presentation.ui.settings.auth
 
-import cafe.adriel.voyager.core.model.StateScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
+
 import ireader.domain.usecases.remote.RemoteBackendUseCases
-import kotlinx.coroutines.flow.update
+import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.launch
 
 class AuthViewModel(
     private val remoteUseCases: RemoteBackendUseCases?
-) : StateScreenModel<AuthState>(AuthState()) {
+) : StateViewModel<AuthState>(AuthState()) {
     
     private fun isValidEmail(email: String): Boolean {
         val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex()
@@ -16,15 +15,15 @@ class AuthViewModel(
     }
     
     fun updateEmail(email: String) {
-        mutableState.update { it.copy(email = email, emailError = null, error = null) }
+        updateState { it.copy(email = email, emailError = null, error = null) }
     }
     
     fun updatePassword(password: String) {
-        mutableState.update { it.copy(password = password, passwordError = null, error = null) }
+        updateState { it.copy(password = password, passwordError = null, error = null) }
     }
     
     fun toggleMode() {
-        mutableState.update { 
+        updateState { 
             it.copy(
                 isSignUp = !it.isSignUp,
                 emailError = null,
@@ -35,27 +34,27 @@ class AuthViewModel(
     }
     
     fun submit() {
-        val currentState = state.value
+        val stateValue = currentState
         
         if (!validateInputs()) return
         
-        screenModelScope.launch {
-            mutableState.update { it.copy(isLoading = true, error = null) }
+        scope.launch {
+            updateState { it.copy(isLoading = true, error = null) }
             
             try {
-                val result = if (currentState.isSignUp) {
-                    remoteUseCases?.signUp?.invoke(currentState.email, currentState.password)
+                val result = if (stateValue.isSignUp) {
+                    remoteUseCases?.signUp?.invoke(stateValue.email, stateValue.password)
                 } else {
-                    remoteUseCases?.signIn?.invoke(currentState.email, currentState.password)
+                    remoteUseCases?.signIn?.invoke(stateValue.email, stateValue.password)
                 }
                 
                 result?.fold(
                     onSuccess = {
-                        mutableState.update { it.copy(isLoading = false, success = true) }
+                        updateState { it.copy(isLoading = false, success = true) }
                     },
                     onFailure = { error ->
                         val authError = mapAuthError(error)
-                        mutableState.update { 
+                        updateState { 
                             it.copy(
                                 isLoading = false,
                                 error = authError.toUserMessage()
@@ -63,7 +62,7 @@ class AuthViewModel(
                         }
                     }
                 ) ?: run {
-                    mutableState.update { 
+                    updateState { 
                         it.copy(
                             isLoading = false,
                             error = AuthError.ServiceUnavailable.toUserMessage()
@@ -72,7 +71,7 @@ class AuthViewModel(
                 }
             } catch (e: Exception) {
                 val authError = mapAuthError(e)
-                mutableState.update { 
+                updateState { 
                     it.copy(
                         isLoading = false,
                         error = authError.toUserMessage()
@@ -83,22 +82,22 @@ class AuthViewModel(
     }
     
     private fun validateInputs(): Boolean {
-        val currentState = state.value
+        val stateValue = currentState
         var isValid = true
         
-        if (currentState.email.isBlank()) {
-            mutableState.update { it.copy(emailError = "Email is required") }
+        if (stateValue.email.isBlank()) {
+            updateState { it.copy(emailError = "Email is required") }
             isValid = false
-        } else if (!isValidEmail(currentState.email)) {
-            mutableState.update { it.copy(emailError = "Invalid email address") }
+        } else if (!isValidEmail(stateValue.email)) {
+            updateState { it.copy(emailError = "Invalid email address") }
             isValid = false
         }
         
-        if (currentState.password.isBlank()) {
-            mutableState.update { it.copy(passwordError = "Password is required") }
+        if (stateValue.password.isBlank()) {
+            updateState { it.copy(passwordError = "Password is required") }
             isValid = false
         } else if (currentState.password.length < 6) {
-            mutableState.update { it.copy(passwordError = "Password must be at least 6 characters") }
+            updateState { it.copy(passwordError = "Password must be at least 6 characters") }
             isValid = false
         }
         

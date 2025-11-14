@@ -1,7 +1,8 @@
 package ireader.presentation.core.ui
 
-import ireader.presentation.core.VoyagerScreen
+import androidx.compose.runtime.Composable
 
-expect class SecuritySettingSpec() : VoyagerScreen {
-
+expect class SecuritySettingSpec() {
+    @Composable
+    fun Content()
 }

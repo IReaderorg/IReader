@@ -1,35 +1,34 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
-import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.settings.advance.AdvanceSettingViewModel
 import ireader.presentation.ui.settings.advance.AdvanceSettings
-class AdvanceSettingSpec : VoyagerScreen() {
+class AdvanceSettingSpec {
 
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content() {
+    fun Content() {
         val vm: AdvanceSettingViewModel = getIViewModel()
         val host = SnackBarListener(vm = vm)
-        val navigator = LocalNavigator.currentOrThrow
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         IScaffold(
             topBar = {scrollBehavior ->
                 TitleToolbar(
                     title = localize(Res.string.advance_setting),
                     scrollBehavior = scrollBehavior,
                     popBackStack = {
-                        navigator.pop()
+                        navController.popBackStack()
                     }
                 )
             }, snackbarHostState = host

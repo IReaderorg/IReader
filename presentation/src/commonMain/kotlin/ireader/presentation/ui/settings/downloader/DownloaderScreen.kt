@@ -55,7 +55,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.SavedDownload
 import ireader.domain.models.entities.SavedDownloadWithInfo
 import ireader.domain.models.entities.toSavedDownload
@@ -87,7 +86,7 @@ fun DownloaderScreen(
         snackBarHostState: SnackbarHostState,
         paddingValues: PaddingValues
 ) {
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scrollState = rememberLazyListState()
     LaunchedEffect(key1 = true) {
         vm.eventFlow.collectLatest { event ->
@@ -411,7 +410,7 @@ private fun CompletedDownloadsContent(
     vm: DownloaderViewModel,
     onDownloadItem: (SavedDownloadWithInfo) -> Unit
 ) {
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
     if (completedDownloads.isEmpty()) {
         // Empty state

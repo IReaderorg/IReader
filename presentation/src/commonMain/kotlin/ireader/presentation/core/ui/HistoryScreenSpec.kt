@@ -1,5 +1,8 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
+
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
@@ -8,8 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import ireader.domain.utils.extensions.launchIO
@@ -18,6 +19,7 @@ import ireader.i18n.localize
 
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.reusable_composable.WarningAlert
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -48,8 +50,8 @@ object HistoryScreenSpec : Tab {
     @Composable
     override fun Content() {
         val vm: HistoryViewModel = getIViewModel()
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
-        val navigator = LocalNavigator.currentOrThrow
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
 
         val host = SnackBarListener(vm)
         IScaffold(
@@ -83,7 +85,7 @@ object HistoryScreenSpec : Tab {
                 modifier = Modifier
                     .padding(scaffoldPadding),
                 onHistory = { history ->
-                    navigator.push(
+                    navController.navigateTo(
                         ReaderScreenSpec(
                             history.bookId,
                             history.chapterId
@@ -91,7 +93,7 @@ object HistoryScreenSpec : Tab {
                     )
                 },
                 onHistoryPlay = { history ->
-                    navigator.push(
+                    navController.navigateTo(
                         ReaderScreenSpec(
                             history.bookId,
                             history.chapterId
@@ -100,7 +102,7 @@ object HistoryScreenSpec : Tab {
                 },
                 vm = vm,
                 onBookCover = { history ->
-                    navigator.push(
+                    navController.navigateTo(
                         BookDetailScreenSpec(
                             history.bookId
                         )

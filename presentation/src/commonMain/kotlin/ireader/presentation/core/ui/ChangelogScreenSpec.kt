@@ -1,19 +1,17 @@
 package ireader.presentation.core.ui
 
 import androidx.compose.runtime.Composable
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
-import ireader.presentation.core.VoyagerScreen
+import ireader.presentation.core.LocalNavigator
 import ireader.presentation.ui.settings.about.ChangelogScreen
 
-class ChangelogScreenSpec : VoyagerScreen() {
+class ChangelogScreenSpec {
 
     @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+    fun Content() {
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         
         ChangelogScreen(
-            onPopBackStack = { popBackStack(navigator) }
+            onPopBackStack = { navController.popBackStack() }
         )
     }
 }

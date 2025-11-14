@@ -1,5 +1,8 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
+
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
@@ -12,8 +15,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.source.HttpSource
 import ireader.domain.models.entities.toBookItem
 import ireader.domain.utils.extensions.launchIO
@@ -21,7 +22,7 @@ import ireader.i18n.UiText
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.core.IModalSheets
-import ireader.presentation.core.VoyagerScreen
+import ireader.presentation.core.navigateTo
 import ireader.presentation.imageloader.convertToOkHttpRequest
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.EmptyScreenComposable
@@ -43,18 +44,18 @@ import org.koin.core.parameter.parametersOf
 data class ExploreScreenSpec(
         val sourceId: Long,
         val query: String?
-) : VoyagerScreen() {
+) {
     @OptIn(
             ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class,
             ExperimentalComposeUiApi::class
     )
     @Composable
-    override fun Content() {
+    fun Content() {
         val vm: ExploreViewModel =
                 getIViewModel(parameters = { parametersOf(ExploreViewModel.Param(sourceId, query)) }
 
                 )
-        val navigator = LocalNavigator.currentOrThrow
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val source = vm.source
         val scope = rememberCoroutineScope()
         val headers = remember {
@@ -126,7 +127,7 @@ data class ExploreScreenSpec(
                                 },
                                 onWebView = {
                                     if (source is HttpSource) {
-                                        navigator.push(
+                                        navController.navigateTo(
                                                 WebViewScreenSpec(
                                                         url = (source).baseUrl,
                                                         sourceId = source.id,
@@ -139,7 +140,7 @@ data class ExploreScreenSpec(
                                         )
                                     }
                                 },
-                                onPop = { popBackStack(navigator) },
+                                onPop = { navController.popBackStack() },
                                 onLayoutTypeSelect = { layout ->
                                     vm.saveLayoutType(layout)
                                 },
@@ -183,14 +184,14 @@ data class ExploreScreenSpec(
 
                                     if (bookId != 0L) {
                                         vm.booksState.replaceBook(newBook?.copy(id = bookId))
-                                        navigator.push(BookDetailScreenSpec(bookId = bookId))
+                                        navController.navigate(NavigationRoutes.bookDetail(bookId))
                                     }
 
                                 }
 
                             },
                             onAppbarWebView = {
-                                navigator.push(
+                                navController.navigateTo(
                                         WebViewScreenSpec(
                                                 url = it,
                                                 sourceId = source.id,
@@ -203,7 +204,7 @@ data class ExploreScreenSpec(
                                 )
                             },
                             onPopBackStack = {
-                                popBackStack(navigator)
+                                navController.popBackStack()
                             },
                             snackBarHostState = snackBarHostState,
                             showmodalSheet = {
@@ -234,7 +235,7 @@ data class ExploreScreenSpec(
                     EmptyScreenComposable(
                             UiText.MStringResource(Res.string.source_not_available),
                             onPopBackStack = {
-                                popBackStack(navigator)
+                                navController.popBackStack()
                             }
                     )
                 }

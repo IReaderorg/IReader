@@ -1,5 +1,7 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -41,11 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cafe.adriel.voyager.core.screen.ScreenKey
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.services.tts_service.DesktopTTSService
-import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Divider
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
@@ -59,15 +57,12 @@ actual class TTSScreenSpec actual constructor(
     val chapterId: Long,
     val sourceId: Long,
     val readingParagraph: Int
-) : VoyagerScreen() {
-
-    override val key: ScreenKey
-        get() = "TTS_SCREEN#$chapterId"
+) {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+    actual fun Content() {
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val ttsService: DesktopTTSService = koinInject()
         
         // TTS Settings State - Use theme colors by default
@@ -136,7 +131,7 @@ actual class TTSScreenSpec actual constructor(
                     },
                     navigationIcon = {
                         TopAppBarBackButton(
-                            onClick = { navigator.pop() }
+                            onClick = { navController.popBackStack() }
                         )
                     },
                     actions = {

@@ -1,5 +1,7 @@
 package ireader.presentation.ui.home.sources.extension
 
+import ireader.presentation.core.LocalNavigator
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,8 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.Catalog
 import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogLocal
@@ -21,7 +21,6 @@ import ireader.domain.usecases.source.ReportBrokenSourceUseCase
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
-import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
@@ -33,12 +32,12 @@ import java.util.*
 
 data class SourceDetailScreen(
     val catalog: Catalog
-) : VoyagerScreen() {
+) {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+    fun Content() {
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
         IScaffold(
@@ -49,7 +48,7 @@ data class SourceDetailScreen(
                         AppIconButton(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = localize(Res.string.go_back),
-                            onClick = { navigator.pop() }
+                            onClick = { navController.popBackStack() }
                         )
                     },
                     scrollBehavior = scrollBehavior

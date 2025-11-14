@@ -49,9 +49,23 @@ val LocalCustomSystemColor = staticCompositionLocalOf { CustomStatusBar(false) }
 val LocalLocalizeHelper: ProvidableCompositionLocal<LocalizeHelper?> = staticCompositionLocalOf {
     null
 }
+
 val LocalGlobalCoroutineScope: ProvidableCompositionLocal<CoroutineScope?> = staticCompositionLocalOf {
     null
 }
+
+/**
+ * Extension properties for safe access to CompositionLocals
+ */
+@get:Composable
+@get:JvmName("getLocalizeHelperCurrentOrThrow")
+val ProvidableCompositionLocal<LocalizeHelper?>.currentOrThrow: LocalizeHelper
+    get() = this.current ?: error("LocalLocalizeHelper not provided")
+
+@get:Composable
+@get:JvmName("getCoroutineScopeCurrentOrThrow")
+val ProvidableCompositionLocal<CoroutineScope?>.currentOrThrow: CoroutineScope
+    get() = this.current ?: error("LocalGlobalCoroutineScope not provided")
 
 class TransparentStatusBar(enabled: Boolean) {
     var enabled by mutableStateOf(enabled)

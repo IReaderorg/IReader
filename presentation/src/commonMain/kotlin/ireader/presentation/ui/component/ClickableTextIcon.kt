@@ -13,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.UiText
 import ireader.i18n.asString
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -26,7 +25,7 @@ fun ClickableTextIcon(
         contentDescription: String = "an Icon",
         onClick: () -> Unit,
 ) {
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Button(
         modifier = modifier,
         onClick = { onClick() },

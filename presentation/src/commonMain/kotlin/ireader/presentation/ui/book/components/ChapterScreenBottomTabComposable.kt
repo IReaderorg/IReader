@@ -6,7 +6,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.preferences.prefs.ChapterDisplayMode
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
@@ -30,7 +29,7 @@ fun ChapterScreenBottomTabComposable(
     onLayoutSelected: (ChapterDisplayMode) -> Unit,
     vm: BookDetailViewModel
 ) {
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val tabs = remember {
         listOf(
             localizeHelper.localize(Res.string.filter),

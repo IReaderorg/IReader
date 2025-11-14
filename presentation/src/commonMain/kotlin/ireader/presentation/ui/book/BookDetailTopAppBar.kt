@@ -30,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.source.Source
 import ireader.core.source.model.Command
 import ireader.i18n.localize
@@ -115,7 +114,7 @@ fun RegularChapterDetailTopAppBar(
     onUnarchive: () -> Unit = {},
     isArchived: Boolean = false
 ) {
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val (dropDownState, setDropDownState) = remember {
         mutableStateOf(false)
     }

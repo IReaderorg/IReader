@@ -2,21 +2,19 @@ package ireader.presentation.core.ui
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
-import ireader.presentation.core.VoyagerScreen
+import ireader.presentation.core.LocalNavigator
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.security.SecuritySettingsScreen
 import ireader.presentation.ui.settings.security.SecuritySettingsViewModel
 
-actual class SecuritySettingSpec : VoyagerScreen() {
+actual class SecuritySettingSpec {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content() {
+    actual fun Content() {
         val vm: SecuritySettingsViewModel = getIViewModel()
-        val navigator = LocalNavigator.currentOrThrow
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
 
         IScaffold(
             topBar = { scrollBehavior ->
@@ -24,7 +22,7 @@ actual class SecuritySettingSpec : VoyagerScreen() {
                     title = "Security",
                     scrollBehavior = scrollBehavior,
                     popBackStack = {
-                        popBackStack(navigator)
+                        navController.popBackStack()
                     }
                 )
             }

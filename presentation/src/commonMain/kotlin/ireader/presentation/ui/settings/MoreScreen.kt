@@ -27,7 +27,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.currentOrThrow
 import org.jetbrains.compose.resources.StringResource
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.i18n.Images.incognito
@@ -61,7 +60,7 @@ fun MoreScreen(
     onWeb3Profile: () -> Unit = {},
     onSupabaseConfig: () -> Unit = {},
 ) {
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
     // Theme mode state
     var showThemeOptions by remember { mutableStateOf(false) }

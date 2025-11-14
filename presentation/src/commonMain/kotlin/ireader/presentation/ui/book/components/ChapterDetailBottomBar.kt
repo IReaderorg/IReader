@@ -23,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.preferences.prefs.ChapterDisplayMode
 import ireader.i18n.asString
 import ireader.i18n.resources.Res
@@ -144,7 +143,7 @@ private fun LazyListScope.SortPage(
 ) {
 
     items(ChapterSort.types) { type ->
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         ClickableRow(onClick = { onClick(type) }) {
             val iconModifier = Modifier.requiredWidth(56.dp)
             if (sorting.type == type) {
@@ -174,7 +173,7 @@ private fun LazyListScope.DispalyPage(
     selectedLayout: ChapterDisplayMode
 ) {
     items(layouts) { layout ->
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         Column(
             Modifier
                 .fillMaxSize()

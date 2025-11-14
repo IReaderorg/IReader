@@ -40,7 +40,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.data.engines.TranslateEngine
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.theme.ReaderTheme
@@ -82,7 +81,7 @@ fun ReaderSettingMainLayout(
     ) {
       3
     }
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
 
     val readerTab: TabItem = remember {
         TabItem(
@@ -130,7 +129,7 @@ fun ReaderScreenTab(
         vm: ReaderScreenViewModel,
         onTextAlign: (PreferenceValues.PreferenceTextAlignment) -> Unit
 ) {
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LazyColumn(
         verticalArrangement = Arrangement.Top,
         modifier = Modifier.fillMaxSize()
@@ -429,7 +428,7 @@ fun GeneralScreenTab(
         vm: ReaderScreenViewModel,
 ) {
     val scope = rememberCoroutineScope()
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LazyColumn(
         verticalArrangement = Arrangement.Top,
         modifier = Modifier.fillMaxSize()
@@ -685,7 +684,7 @@ fun ColorScreenTab(
         onChangeBrightness: (Float) -> Unit,
         onBackgroundChange: (themeId: Long) -> Unit,
 ) {
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scope = rememberCoroutineScope()
     LazyColumn(
         modifier = androidx.compose.ui.Modifier
@@ -868,7 +867,7 @@ fun TranslateButton(
     engine: TranslateEngine,
     vm: ReaderScreenViewModel,
 ) {
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
     Box(
         modifier = Modifier

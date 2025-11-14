@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
@@ -31,8 +30,8 @@ fun BackUpAndRestoreScreen(
     scaffoldPadding: PaddingValues,
     onNavigateToCloudBackup: () -> Unit = {}
 ) {
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
-    val globalScope = LocalGlobalCoroutineScope.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val globalScope = requireNotNull(LocalGlobalCoroutineScope.current) { "LocalGlobalCoroutineScope not provided" }
     val onShowRestore = remember { mutableStateOf(false) }
     val onShowBackup = remember { mutableStateOf(false) }
     OnShowRestore(onShowRestore.value, onFileSelected = {

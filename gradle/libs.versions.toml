@@ -6,7 +6,8 @@ coreSplashscreen = "1.2.0"
 firebaseAnalytics = "23.0.0"
 junitVintageEngine = "6.0.1"
 kotlinxCoroutinesSwing = "1.10.2"
-voyager = "1.1.0-beta03"
+navigation = "2.9.1"
+voyager = "1.0.0"
 zxing = "3.5.3"
 # Android
 proguard = "7.2.2"
@@ -58,10 +59,9 @@ googleTranslator = "com.google.mlkit:translate:17.0.3"
 
 junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junitVintageEngine" }
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinxCoroutinesSwing" }
-voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
+navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation" }
+navigation-runtime = { module = "org.jetbrains.androidx.navigation:navigation-runtime", version.ref = "navigation" }
 voyager-tab-navigator = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyager" }
-voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
-voyager-screenmodel = { module = "cafe.adriel.voyager:voyager-screenmodel", version.ref = "voyager" }
 
 storage = { module = "com.anggrayudi:storage", version = "2.2.0" }
 documentfile = { module = "androidx.documentfile:documentfile", version = "1.1.0" }

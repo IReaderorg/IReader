@@ -1,12 +1,11 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.IScaffold
@@ -15,21 +14,21 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.TranslationSettingsScreen
 import ireader.presentation.ui.settings.general.TranslationSettingsViewModel
 
-class TranslationScreenSpec : Screen {
+class TranslationScreenSpec {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+    fun Content() {
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val viewModel = getIViewModel<TranslationSettingsViewModel>()
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
 
         IScaffold(
             topBar = { scrollBehavior ->
                 TitleToolbar(
                     title = localizeHelper.localize(Res.string.translations),
                     scrollBehavior = scrollBehavior,
-                    popBackStack = { navigator.pop() }
+                    popBackStack = { navController.popBackStack() }
                 )
             }
         ) { padding ->

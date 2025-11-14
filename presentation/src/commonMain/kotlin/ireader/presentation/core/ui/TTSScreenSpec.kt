@@ -1,12 +1,13 @@
 package ireader.presentation.core.ui
 
-import ireader.presentation.core.VoyagerScreen
+import androidx.compose.runtime.Composable
 
 expect class TTSScreenSpec(
-         bookId: Long,
-         chapterId: Long,
-         sourceId: Long,
-         readingParagraph: Int,
-) : VoyagerScreen {
-
+    bookId: Long,
+    chapterId: Long,
+    sourceId: Long,
+    readingParagraph: Int,
+) {
+    @Composable
+    fun Content()
 }

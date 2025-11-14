@@ -1,5 +1,8 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
+
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,13 +19,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalFocusManager
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.home.sources.extension.ExtensionScreen
@@ -62,7 +64,7 @@ object ExtensionScreenSpec : Tab {
         }
         val focusManager = LocalFocusManager.current
         val snackBarHostState = SnackBarListener(vm)
-        val navigator = LocalNavigator.currentOrThrow
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val swipeState = rememberPullRefreshState(vm.isRefreshing, onRefresh = {
             vm.refreshCatalogs()
         })
@@ -95,7 +97,7 @@ object ExtensionScreenSpec : Tab {
                             searchMode = true
                         },
                         onSearchNavigate = {
-                            navigator.push(
+                            navController.navigateTo(
                                     GlobalSearchScreenSpec()
                             )
                         },
@@ -111,7 +113,7 @@ object ExtensionScreenSpec : Tab {
                             if (!vm.incognito.value) {
                                 vm.lastUsedSource.value = it.sourceId
                             }
-                            navigator.push(
+                            navController.navigateTo(
                                     ExploreScreenSpec(
                                             sourceId = it.sourceId,
                                             query = ""
@@ -124,7 +126,7 @@ object ExtensionScreenSpec : Tab {
                         snackBarHostState = snackBarHostState,
                         onCancelInstaller = { vm.cancelCatalogJob(it) },
                         onShowDetails = { catalog ->
-                            navigator.push(SourceDetailScreen(catalog))
+                            navController.navigateTo(SourceDetailScreen(catalog))
                         },
                 )
             }

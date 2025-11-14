@@ -1,7 +1,8 @@
 package ireader.presentation.ui.reader.viewmodel
 
-import cafe.adriel.voyager.core.model.StateScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +18,7 @@ import kotlin.time.Duration.Companion.seconds
  * ViewModel for TTS playback controls
  * Requirements: 10.1, 10.2, 10.3, 10.4
  */
-class TTSViewModel : StateScreenModel<TTSState>(TTSState()) {
+class TTSViewModel : ViewModel() {
     
     private val _isPlaying = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
@@ -116,12 +117,15 @@ class TTSViewModel : StateScreenModel<TTSState>(TTSState()) {
         _duration.value = duration
     }
     
+    private val _state = MutableStateFlow(TTSState())
+    val state: StateFlow<TTSState> = _state.asStateFlow()
+    
     /**
      * Set current text being read
      */
     fun setCurrentText(text: String, index: Int) {
         _currentTextIndex.value = index
-        mutableState.update { it.copy(currentText = text) }
+        _state.update { it.copy(currentText = text) }
     }
     
     /**
@@ -129,7 +133,7 @@ class TTSViewModel : StateScreenModel<TTSState>(TTSState()) {
      */
     private fun startPlaybackTimer() {
         playbackJob?.cancel()
-        playbackJob = screenModelScope.launch {
+        playbackJob = viewModelScope.launch {
             while (_isPlaying.value && _currentPosition.value < _duration.value) {
                 delay(100) // Update every 100ms
                 _currentPosition.update { 
@@ -152,8 +156,8 @@ class TTSViewModel : StateScreenModel<TTSState>(TTSState()) {
         // This will be implemented when integrated with actual TTS service
     }
     
-    override fun onDispose() {
-        super.onDispose()
+    override fun onCleared() {
+        super.onCleared()
         playbackJob?.cancel()
     }
 }

@@ -8,13 +8,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.updates_screen_label
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.home.updates.UpdateScreen
 import ireader.presentation.ui.home.updates.component.UpdatesToolbar
@@ -44,7 +44,7 @@ object UpdateScreenSpec : Tab {
     @Composable
     override fun Content() {
         val vm: UpdatesViewModel = getIViewModel()
-        val navigator = LocalNavigator.currentOrThrow
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
 
         IScaffold(
             topBar = { scrollBehavior ->
@@ -108,7 +108,7 @@ object UpdateScreenSpec : Tab {
                     if (vm.hasSelection) {
                         vm.addUpdate(update)
                     } else {
-                        navigator.push(
+                        navController.navigateTo(
                             ReaderScreenSpec(
                                 update.bookId,
                                 update.chapterId
@@ -121,7 +121,7 @@ object UpdateScreenSpec : Tab {
                     vm.addUpdate(it)
                 },
                 onCoverUpdate = { update ->
-                    navigator.push(
+                    navController.navigateTo(
                         BookDetailScreenSpec(
                             update.bookId,
                         )

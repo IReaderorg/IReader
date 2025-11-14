@@ -1,34 +1,23 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+
 import androidx.compose.runtime.Composable
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.core.screen.ScreenKey
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.presentation.ui.settings.TTSEngineManagerScreen
 
 /**
  * Desktop implementation of TTS Engine Manager Screen
  */
-private class TTSEngineManagerScreenImpl : Screen {
-    
-    override val key: ScreenKey = "TTS_ENGINE_MANAGER"
+actual class TTSEngineManagerScreenSpec {
     
     @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+    actual fun Content() {
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         
         TTSEngineManagerScreen(
             onNavigateBack = {
-                navigator.pop()
+                navController.popBackStack()
             }
         )
     }
-}
-
-/**
- * Factory function for creating TTS Engine Manager screen
- */
-actual fun TTSEngineManagerScreenSpec(): Screen {
-    return TTSEngineManagerScreenImpl()
 }

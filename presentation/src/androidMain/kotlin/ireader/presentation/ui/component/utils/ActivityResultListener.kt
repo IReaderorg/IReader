@@ -7,7 +7,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.common.Uri
 import ireader.domain.utils.extensions.launchIO
 import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
@@ -20,7 +19,7 @@ actual fun ActivityResultListener(
         onSuccess: suspend (Uri) -> Unit,
         onError: (Throwable) -> Unit,
 ) : ActivityResultLauncher {
-    val globalScope = LocalGlobalCoroutineScope.currentOrThrow
+    val globalScope = requireNotNull(LocalGlobalCoroutineScope.current) { "LocalGlobalCoroutineScope not provided" }
     val result = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
         if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
             val uri = resultIntent.data!!.data!!

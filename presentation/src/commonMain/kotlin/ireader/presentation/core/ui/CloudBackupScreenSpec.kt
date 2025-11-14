@@ -1,5 +1,7 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -7,19 +9,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
-import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.settings.backups.CloudBackupScreen
 import ireader.presentation.ui.settings.backups.CloudBackupViewModel
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
-class CloudBackupScreenSpec : VoyagerScreen() {
+class CloudBackupScreenSpec {
 
     @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+    fun Content() {
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val viewModel: CloudBackupViewModel = getIViewModel()
 
         val backupCreator = koinInject<ireader.domain.usecases.backup.CreateBackup>()
@@ -50,7 +49,7 @@ class CloudBackupScreenSpec : VoyagerScreen() {
         }
         
         CloudBackupScreen(
-            onPopBackStack = { popBackStack(navigator) },
+            onPopBackStack = { navController.popBackStack() },
             selectedProvider = selectedProvider,
             isAuthenticated = isAuthenticated,
             cloudBackups = cloudBackups,

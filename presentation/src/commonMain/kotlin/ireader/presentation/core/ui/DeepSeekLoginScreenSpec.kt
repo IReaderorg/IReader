@@ -1,9 +1,8 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+
 import androidx.compose.runtime.Composable
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.usecases.translate.WebscrapingTranslateEngine
 import org.koin.compose.koinInject
 import java.util.UUID
@@ -11,17 +10,11 @@ import java.util.UUID
 /**
  * Screen for logging into DeepSeek and handling translation
  */
-class DeepSeekLoginScreenSpec : Screen {
-    
-    // Create a unique key for this screen instance
-    private val uniqueKey = UUID.randomUUID().toString()
-    
-    // Override key property to provide a unique value
-    override val key: String = "deepseek_login_screen_$uniqueKey"
+class DeepSeekLoginScreenSpec {
     
     @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+    fun Content() {
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val engine = koinInject<WebscrapingTranslateEngine>()
         
         // On Android, we use the platform-specific WebView
@@ -29,11 +22,11 @@ class DeepSeekLoginScreenSpec : Screen {
             engine = engine,
             onTranslationDone = {
                 // Return to previous screen when translation is done
-                navigator.pop()
+                navController.popBackStack()
             },
             onClose = {
                 // Return to previous screen when user clicks back
-                navigator.pop()
+                navController.popBackStack()
             }
         )
     }

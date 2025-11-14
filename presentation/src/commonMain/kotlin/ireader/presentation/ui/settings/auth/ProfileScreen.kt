@@ -1,5 +1,8 @@
 package ireader.presentation.ui.settings.auth
 
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,18 +57,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.presentation.ui.component.components.Toolbar
 import org.koin.compose.koinInject
 
-class ProfileScreen : Screen {
+class ProfileScreen  {
     
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+    fun Content() {
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val viewModel: ProfileViewModel = koinInject()
         val state by viewModel.state.collectAsState()
         
@@ -74,7 +74,7 @@ class ProfileScreen : Screen {
                 Toolbar(
                     title = { Text("Profile") },
                     navigationIcon = {
-                        IconButton(onClick = { navigator.pop() }) {
+                        IconButton(onClick = { navController.popBackStack() }) {
                             Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                         }
                     }
@@ -121,7 +121,7 @@ class ProfileScreen : Screen {
                     else -> {
                         item {
                             LoginPromptCard(
-                                onLogin = { navigator.push(AuthScreen()) }
+                                onLogin = { navController.navigate(NavigationRoutes.auth) }
                             )
                         }
                         

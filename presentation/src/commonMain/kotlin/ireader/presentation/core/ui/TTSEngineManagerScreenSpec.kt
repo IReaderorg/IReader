@@ -1,6 +1,6 @@
 package ireader.presentation.core.ui
 
-import cafe.adriel.voyager.core.screen.Screen
+import androidx.compose.runtime.Composable
 
 /**
  * TTS Engine Manager Screen - Desktop only
@@ -8,4 +8,7 @@ import cafe.adriel.voyager.core.screen.Screen
  * This screen allows users to install and manage TTS engines.
  * Only available on desktop platform.
  */
-expect fun TTSEngineManagerScreenSpec(): Screen
+expect class TTSEngineManagerScreenSpec() {
+    @Composable
+    fun Content()
+}

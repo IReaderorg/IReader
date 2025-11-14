@@ -1,5 +1,7 @@
 package ireader.presentation.core
 
+import ireader.presentation.core.LocalNavigator
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -12,8 +14,6 @@ import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
@@ -27,17 +27,17 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
-object MainStarterScreen : VoyagerScreen() {
+object MainStarterScreen {
     private const val TabFadeDuration = 200
     private val showBottomNavEvent = Channel<Boolean>()
 
     @OptIn(ExperimentalLayoutApi::class)
     @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+    operator fun invoke() {
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val vm: ScreenContentViewModel = getIViewModel()
         TabNavigator(LibraryScreenSpec) { tabNavigator ->
-            CompositionLocalProvider(LocalNavigator provides navigator) {
+            CompositionLocalProvider(LocalNavigator provides navController) {
                 IScaffold(
                         startBar = {
                             if (isTableUi()) {
@@ -152,7 +152,7 @@ fun NavigationRailItem(tab: Tab) {
 @Composable
 private fun RowScope.TabNavigationItem(tab: Tab) {
     val tabNavigator = LocalTabNavigator.current
-    val navigator = LocalNavigator.currentOrThrow
+    val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
     val isSelected = tabNavigator.current::class == tab::class
     NavigationBarItem(
             selected = isSelected,

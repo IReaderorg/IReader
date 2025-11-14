@@ -1,5 +1,8 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
+
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -7,13 +10,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 
-import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.TitleToolbar
@@ -21,7 +21,7 @@ import ireader.presentation.ui.component.components.setupUiComponent
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.reader.ReaderSettingScreenViewModel
 
-class ReaderSettingSpec : VoyagerScreen() {
+class ReaderSettingSpec {
 
 
 
@@ -29,12 +29,12 @@ class ReaderSettingSpec : VoyagerScreen() {
          ExperimentalMaterial3Api::class
     )
     @Composable
-    override fun Content(
+    fun Content(
 
     ) {
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         val vm: ReaderSettingScreenViewModel = getIViewModel()
-        val navigator = LocalNavigator.currentOrThrow
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
 
         val items = remember {
             listOf<Components>(
@@ -44,7 +44,7 @@ class ReaderSettingSpec : VoyagerScreen() {
                 Components.Row(
                     title = localizeHelper.localize(Res.string.font),
                     onClick = {
-                        navigator.push(FontScreenSpec())
+                        navController.navigate(NavigationRoutes.fontSettings)
                     },
                 ),
                 Components.Slider(
@@ -137,7 +137,7 @@ class ReaderSettingSpec : VoyagerScreen() {
                 title = localize(Res.string.reader),
                 scrollBehavior = scrollBehavior,
                 popBackStack = {
-                    popBackStack(navigator)
+                    navController.popBackStack()
                 }
             )
         }) { padding ->

@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.source.model.Filter
 import ireader.core.source.model.Listing
 import ireader.i18n.localize
@@ -40,7 +39,7 @@ fun ExploreFilterModalSheet(
     onModifyFilter: (Filter<*>) -> Unit,
     vm: ExploreViewModel
 ) {
-    val helper = LocalLocalizeHelper.currentOrThrow
+    val helper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         modifier = Modifier.fillMaxHeight(0.9f),
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),

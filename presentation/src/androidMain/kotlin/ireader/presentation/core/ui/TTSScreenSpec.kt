@@ -1,5 +1,7 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,9 +24,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.ScreenKey
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.log.Log
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.models.prefs.readerThemes
@@ -33,7 +32,6 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.IModalSheets
-import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.CustomizeAnimateVisibility
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.NavigationBarTokens
@@ -60,11 +58,7 @@ actual class TTSScreenSpec actual constructor(
     val chapterId: Long,
     val sourceId: Long,
     val readingParagraph: Int,
-) : VoyagerScreen() {
-
-
-    override val key: ScreenKey
-        get() = "TTS_SCREEN#$chapterId"
+) {
 //    fun buildDeepLink(
 //        bookId: Long,
 //        sourceId: Long,
@@ -92,9 +86,9 @@ actual class TTSScreenSpec actual constructor(
         ExperimentalMaterial3Api::class
     )
     @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    actual fun Content() {
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         val vm: TTSViewModel =
             getIViewModel(parameters =
             { parametersOf(TTSViewModel.Param(sourceId,chapterId,bookId,readingParagraph))}
@@ -250,7 +244,7 @@ actual class TTSScreenSpec actual constructor(
                         CustomizeAnimateVisibility(visible = !vm.fullScreenMode) {
                             TTSTopBar(
                                 onPopBackStack = {
-                                    popBackStack(navigator)
+                                    navController.popBackStack()
                                 },
                                 scrollBehavior = scrollBehavior,
                                 onSetting = {
@@ -322,7 +316,7 @@ actual class TTSScreenSpec actual constructor(
                         },
                         source = vm.ttsSource,
                         onPopStack = {
-                            popBackStack(navigator)
+                            navController.popBackStack()
                         },
                         lazyState = lazyState,
                         bottomSheetState = sheetState,

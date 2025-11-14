@@ -41,7 +41,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.theme.Theme
 import ireader.domain.utils.extensions.launchIO
@@ -73,7 +72,7 @@ fun AppearanceSettingScreen(
         onColorChange: () -> Unit,
         onColorReset: () -> Unit
 ) {
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val customizedColors = vm.getCustomizedColors()
     val systemTheme = isSystemInDarkTheme()
     val isLight = remember(vm.themeMode.value) {

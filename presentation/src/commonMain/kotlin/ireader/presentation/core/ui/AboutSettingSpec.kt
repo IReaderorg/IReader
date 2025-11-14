@@ -1,17 +1,17 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
+
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.utils.extensions.toDateTimestampString
 import ireader.i18n.BuildKonfig
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
-import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.about.AboutSettingScreen
@@ -19,21 +19,21 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AboutSettingSpec : VoyagerScreen() {
+class AboutSettingSpec {
 
     @OptIn(
         ExperimentalMaterial3Api::class
     )
     @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+    fun Content() {
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         IScaffold(
             topBar = { scrollBehavior ->
                 TitleToolbar(
                     title = localize(Res.string.about),
                     scrollBehavior = scrollBehavior,
                     popBackStack = {
-                        navigator.pop()
+                        navController.popBackStack()
                     }
                 )
             }
@@ -41,11 +41,11 @@ class AboutSettingSpec : VoyagerScreen() {
             AboutSettingScreen(
                 modifier = Modifier.padding(padding),
                 onPopBackStack = {
-                    navigator.pop()
+                    navController.popBackStack()
                 },
                 getFormattedBuildTime = this::getFormattedBuildTime,
                 onNavigateToChangelog = {
-                    navigator.push(ChangelogScreenSpec())
+                    navController.navigate(NavigationRoutes.changelog)
                 }
             )
         }

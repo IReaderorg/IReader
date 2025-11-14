@@ -1,5 +1,7 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -14,10 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.os.openInBrowser
-import ireader.presentation.core.VoyagerScreen
 
 actual class WebViewScreenSpec actual constructor(
     private val url: String?,
@@ -27,10 +26,10 @@ actual class WebViewScreenSpec actual constructor(
     enableBookFetch: Boolean,
     enableChapterFetch: Boolean,
     enableChaptersFetch: Boolean
-) : VoyagerScreen() {
+) {
     @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+    actual fun Content() {
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val snackbarHostState = remember { SnackbarHostState() }
         
         LaunchedEffect(url) {
@@ -43,7 +42,7 @@ actual class WebViewScreenSpec actual constructor(
                 }
             }
             // Pop back after attempting to open browser
-            navigator.pop()
+            navController.popBackStack()
         }
         
         // Show a brief loading screen while opening browser

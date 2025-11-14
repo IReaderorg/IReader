@@ -1,8 +1,8 @@
 package ireader.presentation.ui.core.viewmodel
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import ireader.core.prefs.Preference
 import ireader.domain.utils.extensions.showSnackBar
 import ireader.i18n.UiEvent
@@ -14,9 +14,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-abstract class BaseViewModel : ScreenModel {
+abstract class BaseViewModel : ViewModel() {
 
- val scope: CoroutineScope = screenModelScope
+ val scope: CoroutineScope = viewModelScope
 
   protected val _eventFlow = MutableSharedFlow<UiEvent>()
   open val eventFlow = _eventFlow.asSharedFlow()
@@ -26,10 +26,12 @@ abstract class BaseViewModel : ScreenModel {
       _eventFlow.showSnackBar(message ?: UiText.MStringResource(Res.string.error_unknown))
     }
   }
-  override fun onDispose() {
+  
+  override fun onCleared() {
     onDestroy()
-    super.onDispose()
+    super.onCleared()
   }
+  
    open fun onDestroy() {
   }
    fun <T> Preference<T>.asState() = PreferenceMutableState(this, scope)

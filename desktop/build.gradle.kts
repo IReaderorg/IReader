@@ -10,7 +10,7 @@ plugins {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion.set(JavaLanguageVersion.of(24))
     }
 }
 
@@ -27,7 +27,6 @@ dependencies {
     // Removed duplicate compose dependencies - already provided by presentation module
     // Only keeping desktop-specific dependencies
     implementation(libs.napier)
-    implementation(libs.voyager.navigator)
 }
 
 kotlin {

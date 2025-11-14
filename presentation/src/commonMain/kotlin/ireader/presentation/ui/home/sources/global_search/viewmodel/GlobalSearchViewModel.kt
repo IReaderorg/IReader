@@ -107,8 +107,8 @@ class GlobalSearchViewModel(
         }
     }
 
-    override fun onDispose() {
-        super.onDispose()
+    override fun onCleared() {
+        super.onCleared()
         searchJob?.cancel()
     }
 }

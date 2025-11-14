@@ -1,5 +1,8 @@
 package ireader.presentation.ui.settings
 
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.data.engines.ContentType
 import ireader.domain.data.engines.ToneType
 import ireader.domain.usecases.translate.TranslationEnginesManager
@@ -75,14 +77,14 @@ fun TranslationSettingsScreen(
     // This state is used to force recomposition
     var recomposeCounter by remember { mutableStateOf(0) }
     val forceRecompose = { recomposeCounter += 1 }
-    val navigator = cafe.adriel.voyager.navigator.LocalNavigator.currentOrThrow
+    val navigator = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
     val scrollState = rememberScrollState()
     val engines = translationEnginesManager.getAvailableEngines()
     val options = engines.map { it.id to it.engineName }
     var openAIKeyVisible by remember { mutableStateOf(false) }
     //Temp
     var deepSeekKeyVisible by remember { mutableStateOf(false) }
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val contentTypes = ContentType.entries.map {
         it.ordinal to it.name.lowercase()
             .replaceFirstChar { c -> c.uppercase() }
@@ -430,7 +432,7 @@ fun TranslationSettingsScreen(
                     Button(
                         onClick = {
                             // Navigate to ChatGpt login screen
-                            navigator.push(
+                            navigator.navigate(
                                 ireader.presentation.core.ui.ChatGptLoginScreenSpec()
                             )
                         },
@@ -486,7 +488,7 @@ fun TranslationSettingsScreen(
                     Button(
                         onClick = {
                             // Navigate to DeepSeek login screen
-                            navigator.push(
+                            navigator.navigate(
                                 ireader.presentation.core.ui.DeepSeekLoginScreenSpec()
                             )
                         },

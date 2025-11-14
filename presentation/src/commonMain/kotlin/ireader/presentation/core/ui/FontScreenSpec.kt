@@ -1,5 +1,7 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -8,14 +10,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.models.getDefaultFont
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
-import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.SearchToolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
@@ -23,12 +22,12 @@ import ireader.presentation.ui.settings.font_screens.FontScreen
 import ireader.presentation.ui.settings.font_screens.FontScreenViewModel
 
 @ExperimentalMaterial3Api
-class FontScreenSpec : VoyagerScreen() {
+class FontScreenSpec {
 
     @Composable
-    override fun Content() {
+    fun Content() {
         val vm: FontScreenViewModel = getIViewModel()
-        val navigator = LocalNavigator.currentOrThrow
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         IScaffold(
             topBar = { scrollBehavior ->
                 SearchToolbar(
@@ -43,7 +42,7 @@ class FontScreenSpec : VoyagerScreen() {
                         )
                     },
                     onPopBackStack = {
-                       popBackStack(navigator)
+                       navController.popBackStack()
                     },
                     onValueChange = {
                         vm.searchQuery = it

@@ -21,16 +21,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.library_screen_label
 import ireader.presentation.core.IModalSheets
+import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.MainStarterScreen
+import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.home.library.LibraryController
 import ireader.presentation.ui.home.library.LibraryScreenTopBar
@@ -67,7 +67,7 @@ object LibraryScreenSpec : Tab {
             MainStarterScreen.showBottomNav(!vm.selectionMode)
         }
         val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-        val navigator = LocalNavigator.currentOrThrow
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val scope = rememberCoroutineScope()
 
         val swipeRefreshState = rememberPullRefreshState(vm.isBookRefreshing, onRefresh = {
@@ -145,7 +145,7 @@ object LibraryScreenSpec : Tab {
                             modifier = Modifier,
                             vm = vm,
                             goToReader = { book ->
-                                navigator.push(
+                                navController.navigateTo(
                                         ReaderScreenSpec(
                                                 bookId = book.id,
                                                 chapterId = LAST_CHAPTER
@@ -153,7 +153,7 @@ object LibraryScreenSpec : Tab {
                                 )
                             },
                             goToDetail = { book ->
-                                navigator.push(
+                                navController.navigateTo(
                                         BookDetailScreenSpec(
                                                 bookId = book.id
                                         )

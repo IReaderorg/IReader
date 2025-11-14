@@ -1,5 +1,7 @@
 package ireader.presentation.ui.settings.sync
 
+import ireader.presentation.core.LocalNavigator
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -57,18 +59,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.presentation.ui.component.components.Toolbar
 import org.koin.compose.koinInject
 
-class SupabaseConfigScreen : Screen {
+class SupabaseConfigScreen  {
     
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+    fun Content() {
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val viewModel: SupabaseConfigViewModel = koinInject()
         val state by viewModel.state.collectAsState()
         
@@ -77,7 +76,7 @@ class SupabaseConfigScreen : Screen {
                 Toolbar(
                     title = { Text("Supabase Configuration") },
                     navigationIcon = {
-                        IconButton(onClick = { navigator.pop() }) {
+                        IconButton(onClick = { navController.popBackStack() }) {
                             Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                         }
                     }

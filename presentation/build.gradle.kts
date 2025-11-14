@@ -51,10 +51,8 @@ kotlin {
                 // Removed duplicate compose.materialIconsExtended
 
 
-                implementation(libs.voyager.navigator)
+                implementation(libs.navigation.compose)
                 implementation(libs.voyager.tab.navigator)
-                implementation(libs.voyager.transitions)
-                implementation(libs.voyager.screenmodel)
                 api(libs.koin.core)
                 api(libs.koin.compose)
 

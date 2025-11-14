@@ -28,6 +28,7 @@ import androidx.compose.material.rememberDismissState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
@@ -38,7 +39,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.HistoryWithRelations
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
@@ -69,7 +69,7 @@ fun HistoryScreen(
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     val searchFocusRequester = remember { FocusRequester() }
-    val localizeHelper = _root_ide_package_.ireader.presentation.ui.core.theme.LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull<ireader.i18n.LocalizeHelper>(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Observe when back in history
     LaunchedEffect(vm.searchQuery) {
         vm.applySearchFilter()

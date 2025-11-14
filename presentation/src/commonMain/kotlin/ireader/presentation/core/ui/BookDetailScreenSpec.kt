@@ -26,9 +26,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.ScreenKey
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.source.CatalogSource
 import ireader.core.source.HttpSource
 import ireader.domain.models.entities.Book
@@ -36,9 +33,14 @@ import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.UiText
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.no_chapter_is_available
+import ireader.i18n.resources.resume
+import ireader.i18n.resources.source_not_available
+import ireader.i18n.resources.start
+import ireader.i18n.resources.success
 import ireader.presentation.core.IModalSheets
-import ireader.presentation.core.VoyagerScreen
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.book.BookDetailScreen
 import ireader.presentation.ui.book.BookDetailTopAppBar
 import ireader.presentation.ui.book.components.ChapterCommandBottomSheet
@@ -57,20 +59,19 @@ import org.koin.core.parameter.parametersOf
 
 data class BookDetailScreenSpec constructor(
     val bookId: Long,
-) : VoyagerScreen() {
+) {
 
 
-    override val key: ScreenKey = "Detail_Screen#$bookId"
-
+    
     @OptIn(
         ExperimentalMaterialApi::class,
         ExperimentalMaterial3Api::class,
         ExperimentalFoundationApi::class,
     )
     @Composable
-    override fun Content(
+    fun Content(
     ) {
-        val navigator = LocalNavigator.currentOrThrow
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val vm: BookDetailViewModel =
             getIViewModel(parameters = { parametersOf(BookDetailViewModel.Param(bookId)) })
         val snackbarHostState = SnackBarListener(vm = vm)
@@ -212,7 +213,7 @@ data class BookDetailScreenSpec constructor(
                     topBarScrollBehavior = scrollBehavior,
                     snackbarHostState = snackbarHostState,
                     topBar = { scrollBehavior ->
-                        val globalScope = LocalGlobalCoroutineScope.currentOrThrow
+                        val globalScope = requireNotNull(LocalGlobalCoroutineScope.current) { "LocalGlobalCoroutineScope not provided" }
 
                         BookDetailTopAppBar(
                             scrollBehavior = scrollBehavior,
@@ -225,7 +226,7 @@ data class BookDetailScreenSpec constructor(
                                 }
                             },
                             onPopBackStack = {
-                                popBackStack(navigator)
+                                navController.popBackStack()
                             },
                             source = vm.source,
                             onCommand = {
@@ -306,14 +307,14 @@ data class BookDetailScreenSpec constructor(
                                 onClick = {
                                     if (catalog != null && book != null) {
                                         if (vm.chapters.any { it.read } && vm.chapters.isNotEmpty()) {
-                                            navigator.push(
+                                            navController.navigateTo(
                                                 ReaderScreenSpec(
                                                     bookId = book.id,
                                                     chapterId = LAST_CHAPTER,
                                                 )
                                             )
                                         } else if (vm.chapters.isNotEmpty()) {
-                                            navigator.push(
+                                            navController.navigateTo(
                                                 ReaderScreenSpec(
                                                     bookId = book.id,
                                                     chapterId = vm.chapters.first().id,
@@ -347,7 +348,7 @@ data class BookDetailScreenSpec constructor(
                         vm = vm,
                         onTitle = {
                             try {
-                                navigator.push(
+                                navController.navigateTo(
                                     GlobalSearchScreenSpec(
                                         query = it
                                     )
@@ -361,7 +362,7 @@ data class BookDetailScreenSpec constructor(
                         onItemClick = { chapter ->
                             if (vm.selection.isEmpty()) {
                                 if (book != null) {
-                                            navigator.push(
+                                            navController.navigateTo(
                                                 ReaderScreenSpec(
                                                     bookId = book.id,
                                                     chapterId = chapter.id,
@@ -411,7 +412,7 @@ data class BookDetailScreenSpec constructor(
                         },
                         onWebView = {
                             if (source != null && source is HttpSource && book != null) {
-                                navigator.push(
+                                navController.navigateTo(
                                     WebViewScreenSpec(
                                         url = book.key,
                                         sourceId = book.sourceId,

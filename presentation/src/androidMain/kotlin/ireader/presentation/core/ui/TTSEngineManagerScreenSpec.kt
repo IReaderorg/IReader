@@ -1,5 +1,7 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -10,29 +12,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.core.screen.ScreenKey
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 
 /**
  * Android stub - TTS Engine Manager is desktop-only
  */
-private class TTSEngineManagerScreenStub : Screen {
-    
-    override val key: ScreenKey = "TTS_ENGINE_MANAGER_STUB"
+actual class TTSEngineManagerScreenSpec {
     
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+    actual fun Content() {
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         
         Scaffold(
             topBar = {
                 TopAppBar(
                     title = { Text("TTS Engine Manager") },
                     navigationIcon = {
-                        IconButton(onClick = { navigator.pop() }) {
+                        IconButton(onClick = { navController.popBackStack() }) {
                             Icon(Icons.Default.ArrowBack, "Back")
                         }
                     }
@@ -73,11 +69,4 @@ private class TTSEngineManagerScreenStub : Screen {
             }
         }
     }
-}
-
-/**
- * Factory function - returns stub for Android
- */
-actual fun TTSEngineManagerScreenSpec(): Screen {
-    return TTSEngineManagerScreenStub()
 }

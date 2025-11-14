@@ -1,5 +1,7 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentPasteSearch
@@ -8,14 +10,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.ExtensionSource
 import ireader.i18n.UiText
 import ireader.i18n.asString
 import ireader.i18n.localize
 
-import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.IAlertDialog
 import ireader.presentation.ui.component.components.Toolbar
@@ -30,19 +29,19 @@ import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
 import kotlinx.coroutines.launch
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
-class RepositoryAddScreenSpec : VoyagerScreen() {
+class RepositoryAddScreenSpec {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content() {
+    fun Content() {
         val scope = rememberCoroutineScope()
         var text by remember {
             mutableStateOf("")
         }
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         val vm: SourceRepositoryViewModel = getIViewModel()
         val host = SnackBarListener(vm = vm)
-        val navigator = LocalNavigator.currentOrThrow
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
 
         val showDialog = vm.showAutomaticSourceDialog
         IScaffold(
@@ -53,7 +52,7 @@ class RepositoryAddScreenSpec : VoyagerScreen() {
                         MidSizeTextComposable(text = localize(Res.string.repository_adding_a_new))
                     },
                     scrollBehavior = scrollBehavior,
-                    navigationIcon = { TopAppBarBackButton(onClick = { popBackStack(navigator) }) },
+                    navigationIcon = { TopAppBarBackButton(onClick = { navController.popBackStack() }) },
                     actions = {
                         AppIconButton(
                             imageVector = Icons.Default.ContentPasteSearch,
@@ -80,7 +79,7 @@ class RepositoryAddScreenSpec : VoyagerScreen() {
                         )
                     )
                 }
-                popBackStack(navigator)
+                navController.popBackStack()
             }
             )
             if (showDialog.value) {

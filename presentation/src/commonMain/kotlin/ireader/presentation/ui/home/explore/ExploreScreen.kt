@@ -17,7 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.source.HttpSource
 import ireader.core.source.Source
 import ireader.core.source.model.Filter
@@ -70,7 +69,7 @@ fun ExploreScreen(
         initialFirstVisibleItemIndex = vm.savedScrollIndex,
         initialFirstVisibleItemScrollOffset = vm.savedScrollOffset
     )
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
 
     val gridState = rememberLazyGridState(
         initialFirstVisibleItemIndex = vm.savedScrollIndex,

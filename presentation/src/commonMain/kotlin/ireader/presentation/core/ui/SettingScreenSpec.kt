@@ -1,5 +1,8 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
+
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,12 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
-import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
@@ -24,13 +24,13 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.components.SettingsItem
 import ireader.presentation.ui.settings.components.SettingsSectionHeader
 
-class SettingScreenSpec : VoyagerScreen() {
+class SettingScreenSpec {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
-        val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    fun Content() {
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         
         IScaffold(
             topBar = { scrollBehavior ->
@@ -39,7 +39,7 @@ class SettingScreenSpec : VoyagerScreen() {
                     title = {
                         BigSizeTextComposable(text = localize(Res.string.settings))
                     },
-                    navigationIcon = { TopAppBarBackButton(onClick = { popBackStack(navigator) }) },
+                    navigationIcon = { TopAppBarBackButton(onClick = { navController.popBackStack() }) },
                 )
             }
         ) { padding ->
@@ -60,7 +60,7 @@ class SettingScreenSpec : VoyagerScreen() {
                         title = localizeHelper.localize(Res.string.appearance),
                         description = "Customize app theme and colors",
                         icon = Icons.Default.Palette,
-                        onClick = { navigator.push(AppearanceScreenSpec()) }
+                        onClick = { navController.navigate(NavigationRoutes.appearance) }
                     )
                 }
                 
@@ -69,7 +69,7 @@ class SettingScreenSpec : VoyagerScreen() {
                         title = localizeHelper.localize(Res.string.font),
                         description = "Choose reading fonts and sizes",
                         icon = Icons.Default.FontDownload,
-                        onClick = { navigator.push(FontScreenSpec()) }
+                        onClick = { navController.navigate(NavigationRoutes.fontSettings) }
                     )
                 }
                 
@@ -86,7 +86,7 @@ class SettingScreenSpec : VoyagerScreen() {
                         title = localizeHelper.localize(Res.string.general),
                         description = "General app preferences",
                         icon = Icons.Default.Tune,
-                        onClick = { navigator.push(GeneralScreenSpec()) }
+                        onClick = { navController.navigate(NavigationRoutes.generalSettings) }
                     )
                 }
                 
@@ -95,7 +95,7 @@ class SettingScreenSpec : VoyagerScreen() {
                         title = localizeHelper.localize(Res.string.translation_settings),
                         description = "Configure translation preferences",
                         icon = Icons.Default.Translate,
-                        onClick = { navigator.push(TranslationScreenSpec()) }
+                        onClick = { navController.navigate(NavigationRoutes.translationSettings) }
                     )
                 }
                 
@@ -112,7 +112,7 @@ class SettingScreenSpec : VoyagerScreen() {
                         title = localizeHelper.localize(Res.string.reader),
                         description = "Customize reading experience",
                         icon = Icons.Default.ChromeReaderMode,
-                        onClick = { navigator.push(ReaderSettingSpec()) }
+                        onClick = { navController.navigate(NavigationRoutes.readerSettings) }
                     )
                 }
                 
@@ -121,7 +121,7 @@ class SettingScreenSpec : VoyagerScreen() {
                         title = localizeHelper.localize(Res.string.statistics),
                         description = "View reading statistics and progress",
                         icon = Icons.Default.BarChart,
-                        onClick = { navigator.push(StatisticsScreenSpec()) }
+                        onClick = { navController.navigate(NavigationRoutes.statistics) }
                     )
                 }
                 
@@ -138,7 +138,7 @@ class SettingScreenSpec : VoyagerScreen() {
                         title = localizeHelper.localize(Res.string.security),
                         description = "Manage security and privacy settings",
                         icon = Icons.Default.Security,
-                        onClick = { navigator.push(SecuritySettingSpec()) }
+                        onClick = { navController.navigate(NavigationRoutes.securitySettings) }
                     )
                 }
                 
@@ -155,7 +155,7 @@ class SettingScreenSpec : VoyagerScreen() {
                         title = localizeHelper.localize(Res.string.repository),
                         description = "Manage content sources and extensions",
                         icon = Icons.Default.Extension,
-                        onClick = { navigator.push(RepositoryScreenSpec()) }
+                        onClick = { navController.navigate(NavigationRoutes.repository) }
                     )
                 }
                 
@@ -164,7 +164,7 @@ class SettingScreenSpec : VoyagerScreen() {
                         title = localizeHelper.localize(Res.string.advance_setting),
                         description = "Advanced configuration options",
                         icon = Icons.Default.Code,
-                        onClick = { navigator.push(AdvanceSettingSpec()) }
+                        onClick = { navController.navigate(NavigationRoutes.advanceSettings) }
                     )
                 }
             }

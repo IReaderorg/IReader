@@ -1,5 +1,8 @@
 package ireader.presentation.core.ui
 
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
+
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,13 +21,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import io.ktor.http.*
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
-import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.PreferenceRow
 import ireader.presentation.ui.component.components.Toolbar
@@ -36,15 +36,15 @@ import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
 import kotlinx.coroutines.launch
 
 
-class RepositoryScreenSpec : VoyagerScreen() {
+class RepositoryScreenSpec {
 
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content() {
+    fun Content() {
         val vm : SourceRepositoryViewModel =  getIViewModel()
         val host = SnackBarListener(vm = vm)
-        val navigator = LocalNavigator.currentOrThrow
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
 
         IScaffold(
             topBar = { scrollBehavior ->
@@ -53,7 +53,7 @@ class RepositoryScreenSpec : VoyagerScreen() {
                         MidSizeTextComposable(text =  localize(Res.string.repository))
                     },
                     scrollBehavior = scrollBehavior,
-            navigationIcon = { TopAppBarBackButton(onClick = { popBackStack(navigator) }) },
+            navigationIcon = { TopAppBarBackButton(onClick = { navController.popBackStack() }) },
                 )
             },
             snackbarHostState = host,
@@ -67,7 +67,7 @@ class RepositoryScreenSpec : VoyagerScreen() {
                         )
                     },
                     onClick = {
-                        navigator.push(RepositoryAddScreenSpec())
+                        navController.navigate(NavigationRoutes.repositoryAdd)
                         //showDialog = true
                     },
                     icon = {
@@ -121,7 +121,7 @@ class RepositoryScreenSpec : VoyagerScreen() {
                         
                         Button(
                             onClick = {
-                                navigator.push(RepositoryAddScreenSpec())
+                                navController.navigate(NavigationRoutes.repositoryAdd)
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary

@@ -1,20 +1,25 @@
 package ireader.presentation.core.ui
 
 import androidx.compose.runtime.Composable
-import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.core.model.rememberScreenModel
-import cafe.adriel.voyager.core.screen.Screen
+import androidx.compose.runtime.remember
 import org.koin.compose.getKoin
 import org.koin.core.parameter.ParametersDefinition
 import org.koin.core.qualifier.Qualifier
 
+/**
+ * Get a ViewModel instance from Koin with optional parameters.
+ * This replaces Voyager's getIViewModel() function.
+ * The ViewModel is remembered to prevent recreation on recomposition.
+ */
 @Composable
-public inline fun <reified T : ScreenModel> Screen.getIViewModel(
+public inline fun <reified T : Any> getIViewModel(
     qualifier: Qualifier? = null,
     noinline parameters: ParametersDefinition? = null,
 ): T {
     val koin = getKoin()
-    return rememberScreenModel(tag = qualifier?.value) { koin.get(qualifier, parameters) }
+    return remember(qualifier, parameters) {
+        koin.get(qualifier, parameters)
+    }
 }
 
 

@@ -29,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.source.HttpSource
 import ireader.core.source.LocalSource
 import ireader.core.source.model.Filter
@@ -69,7 +68,7 @@ fun BrowseTopAppBar(
     val layouts = remember {
         listOf(DisplayMode.ComfortableGrid, DisplayMode.CompactGrid, DisplayMode.List, DisplayMode.OnlyCover)
     }
-    val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Toolbar(
             scrollBehavior = scrollBehavior,
             title = {
