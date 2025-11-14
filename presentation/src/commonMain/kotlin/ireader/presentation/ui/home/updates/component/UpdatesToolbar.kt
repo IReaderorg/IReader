@@ -21,7 +21,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import ireader.domain.models.entities.Category
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIcon
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
@@ -89,7 +90,7 @@ private fun UpdatesSelectionToolbar(
         actions = {
             if (onClickUpdateSelected != null) {
                 IconButton(onClick = onClickUpdateSelected) {
-                    AppIcon(imageVector = Icons.Default.GetApp, contentDescription = localize(MR.strings.update_selected))
+                    AppIcon(imageVector = Icons.Default.GetApp, contentDescription = localize(Res.string.update_selected))
                 }
             }
             IconButton(onClick = onClickSelectAll) {
@@ -117,7 +118,7 @@ fun UpdatesRegularToolbar(
     var showCategoryMenu by remember { mutableStateOf(false) }
     
     Toolbar(
-        title = { BigSizeTextComposable(text = localize(MR.strings.updates_screen_label)) },
+        title = { BigSizeTextComposable(text = localize(Res.string.updates_screen_label)) },
         actions = {
             if (categories.isNotEmpty()) {
                 Box {
@@ -159,7 +160,7 @@ fun UpdatesRegularToolbar(
             }
             if (onClickUpdateAll != null) {
                 IconButton(onClick = onClickUpdateAll) {
-                    AppIcon(imageVector = Icons.Default.GetApp, contentDescription = localize(MR.strings.update_all))
+                    AppIcon(imageVector = Icons.Default.GetApp, contentDescription = localize(Res.string.update_all))
                 }
             }
             IconButton(onClick = onClickRefresh) {

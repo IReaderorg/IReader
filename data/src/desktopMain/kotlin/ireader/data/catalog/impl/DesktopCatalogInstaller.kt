@@ -14,7 +14,8 @@ import ireader.domain.models.entities.CatalogRemote
 import ireader.i18n.LocalizeHelper
 import ireader.i18n.UiText
 import ireader.i18n.asString
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.io.File
@@ -74,7 +75,7 @@ class DesktopCatalogInstaller(
             val deleted = file.deleteRecursively()
             file.deleteOnExit()
             installationChanges.notifyAppUninstall(pkgName)
-            if (deleted ) InstallStep.Success else InstallStep.Error(localizeHelper.localize(MR.strings.failed))
+            if (deleted ) InstallStep.Success else InstallStep.Error(localizeHelper.localize(Res.string.failed))
         } catch (e: Throwable) {
             InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper))
         }

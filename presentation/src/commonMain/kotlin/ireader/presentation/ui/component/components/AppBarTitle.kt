@@ -11,7 +11,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 
 @Composable
 fun AppBarTitle(
@@ -58,7 +59,7 @@ fun AppBarActions(
     val overflowActions = actions.filterIsInstance<AppBar.OverflowAction>()
     if (overflowActions.isNotEmpty()) {
         IconButton(onClick = { showMenu = !showMenu }) {
-            Icon(Icons.Default.MoreVert, contentDescription = localize(MR.strings.label_more))
+            Icon(Icons.Default.MoreVert, contentDescription = localize(Res.string.label_more))
         }
 
         IDropdownMenu(

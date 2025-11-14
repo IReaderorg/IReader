@@ -11,7 +11,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.IDropdownMenu
 import ireader.presentation.ui.component.components.IDropdownMenuItem
 
@@ -32,7 +33,7 @@ fun BuildDropDownMenu(
         IconButton(onClick = { setState(true) }) {
             Icon(
                 imageVector = Icons.Outlined.MoreVert,
-                contentDescription = localize(MR.strings.export_book_as_epub),
+                contentDescription = localize(Res.string.export_book_as_epub),
             )
         }
         IDropdownMenu(

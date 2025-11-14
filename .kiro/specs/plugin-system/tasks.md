@@ -1,0 +1,203 @@
+# Implementation Plan
+
+- [ ] 1. Create Plugin Core Architecture and API
+  - Create `domain/src/commonMain/kotlin/ireader/domain/plugins/` package structure
+  - Define base `Plugin` interface with `PluginManifest`, `PluginContext`, lifecycle methods (`initialize()`, `cleanup()`)
+  - Create `PluginManifest` data class with id, name, version, author, type, permissions, platforms, monetization, assets
+  - Define `PluginType` enum (THEME, TRANSLATION, TTS, FEATURE) and `PluginPermission` enum (NETWORK, STORAGE, READER_CONTEXT, LIBRARY_ACCESS, PREFERENCES, NOTIFICATIONS)
+  - Create `PluginMonetization` sealed class with Premium, Freemium, and Free variants including pricing and feature definitions
+  - Define type-specific plugin interfaces: `ThemePlugin` (getColorScheme, getExtraColors, getTypography, getBackgroundAssets), `TranslationPlugin` (translate, translateBatch, getSupportedLanguages, configureApiKey), `TTSPlugin` (speak, getAvailableVoices, supportsStreaming, getAudioFormat), `FeaturePlugin` (getMenuItems, getScreens, onReaderContext, getPreferencesScreen)
+  - Create supporting data classes: `PluginAuthor`, `PremiumFeature`, `ThemeBackgrounds`, `LanguagePair`, `VoiceConfig`, `AudioFormat`, `PluginMenuItem`, `PluginScreen`, `ReaderContext`, `PluginAction`
+  - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 3.1, 3.2, 3.3, 4.1, 4.2, 4.3, 5.1, 5.2, 5.3, 6.1, 6.2, 6.3, 6.4, 6.5_
+
+- [ ] 2. Implement Plugin Manager and Registry
+  - Create `PluginManager` class in `domain/src/commonMain/kotlin/ireader/domain/plugins/PluginManager.kt` with dependencies on PluginLoader, PluginRegistry, PluginPreferences, MonetizationService
+  - Implement plugin lifecycle methods: `loadPlugins()`, `installPlugin(packageFile)`, `uninstallPlugin(pluginId)`, `enablePlugin(pluginId)`, `disablePlugin(pluginId)`
+  - Add plugin query methods: `getPlugin(pluginId)`, `getPluginsByType(type)`, `getEnabledPlugins()`
+  - Create `PluginInfo` data class with id, manifest, status, installDate, lastUpdate, isPurchased, rating, downloadCount
+  - Define `PluginStatus` enum (ENABLED, DISABLED, ERROR, UPDATING)
+  - Implement `PluginRegistry` class with thread-safe plugin storage using Mutex, plugin registration, and database integration
+  - Add registry methods: `registerAll(plugins)`, `get(pluginId)`, `getAll()`, `getByType(type)`, `remove(pluginId)`
+  - Create `PluginPreferences` class with preferences for enabled plugins set, auto-update flag, and update check interval
+  - Integrate PluginManager with Koin DI in `domain/src/commonMain/kotlin/ireader/domain/di/DomainModules.kt`
+  - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 14.1, 14.2, 14.3, 14.4, 14.5_
+
+- [ ] 3. Build Plugin Loader and Validator
+  - Create `PluginLoader` class in `domain/src/commonMain/kotlin/ireader/domain/plugins/PluginLoader.kt` with pluginsDir, validator, and classLoader dependencies
+  - Implement `loadAll()` method to scan plugins directory for .iplugin files and load each plugin
+  - Implement `loadPlugin(file)` method to extract manifest, validate, load plugin class, and instantiate plugin
+  - Create `extractManifest(file)` method to parse plugin.json from .iplugin package
+  - Implement platform-specific `PluginClassLoader` (expect/actual) for loading plugin classes from packages
+  - Create `PluginValidator` class with manifest validation logic
+  - Implement validation methods: `validateVersion(version)` for semver checking, `validatePermissions(permissions)` for permission validation, `validateMonetization(monetization)` for pricing validation, `validatePlatformCompatibility(platforms)` for platform checking
+  - Define `PluginError` sealed class with InvalidManifest, IncompatibleVersion, MissingPermissions, LoadFailed, InitializationFailed, PluginNotFound variants
+  - Create error-to-message mapping function `PluginError.toUserMessage()`
+  - Add plugin file format specification (.iplugin as ZIP with plugin.json manifest and compiled classes)
+  - _Requirements: 1.1, 1.2, 1.3, 1.4, 17.1, 17.2, 17.3, 17.4, 17.5_
+
+- [ ] 4. Implement Plugin Security and Sandboxing
+  - Create `PluginSandbox` class in `domain/src/commonMain/kotlin/ireader/domain/plugins/PluginSandbox.kt` with permission checking
+  - Implement `checkPermission(permission)` method to verify plugin has required permission
+  - Implement `restrictFileAccess(path)` to limit file access to plugin's own directory
+  - Implement `restrictNetworkAccess(url)` to check network permission before allowing requests
+  - Create `getPluginDataDir(pluginId)` method to return plugin-specific data directory path
+  - Implement `PluginContext` class that provides sandboxed access to app resources (preferences, file storage, network client)
+  - Add permission request flow: when plugin requests sensitive permission, show user dialog for approval
+  - Create `PluginPermissionManager` to track granted permissions per plugin
+  - Implement resource usage monitoring: track CPU, memory, and network usage per plugin
+  - Add plugin throttling/termination when resource limits exceeded
+  - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5, 11.1, 11.2, 11.3, 11.4, 11.5_
+
+- [ ] 5. Create Plugin Database Schema and Repository
+  - Create `PluginEntity` table in `data/src/commonMain/kotlin/ireader/data/database/` with fields: id (PK), name, version, versionCode, type, author, description, iconUrl, status, installDate, lastUpdate, manifestJson
+  - Create `PluginPurchaseEntity` table with fields: id (PK), pluginId, featureId, amount, currency, timestamp, userId, receiptData
+  - Create `PluginReviewEntity` table with fields: id (PK), pluginId, userId, rating, reviewText, timestamp, helpful
+  - Implement `PluginDao` interface with methods: insertPlugin, updatePlugin, deletePlugin, getPlugin, getAllPlugins, getPluginsByType, getPluginsByStatus
+  - Implement `PluginPurchaseDao` interface with methods: insertPurchase, getPurchasesByUser, isPurchased, isFeaturePurchased
+  - Implement `PluginReviewDao` interface with methods: insertReview, getReviewsByPlugin, updateReview, deleteReview
+  - Create `PluginDatabase` class wrapping DAOs and providing high-level database operations
+  - Implement `PluginRepository` in `data/src/commonMain/kotlin/ireader/data/repository/` to abstract database access
+  - Add database migration scripts for plugin tables
+  - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 7.1, 7.2, 7.3, 13.1, 13.2, 13.3, 13.4, 13.5_
+
+- [ ] 6. Implement Monetization Service and Payment Processing
+  - Create `MonetizationService` class in `domain/src/commonMain/kotlin/ireader/domain/plugins/MonetizationService.kt` with PaymentProcessor and PurchaseRepository dependencies
+  - Implement `purchasePlugin(pluginId, price)` method to process premium plugin purchases
+  - Implement `purchaseFeature(pluginId, featureId, price)` method for in-plugin purchases
+  - Add purchase verification methods: `isPurchased(pluginId)`, `isFeaturePurchased(pluginId, featureId)`
+  - Implement `syncPurchases(userId)` method to sync purchases across devices via backend
+  - Create `Purchase` data class with id, pluginId, featureId, amount, currency, timestamp, userId
+  - Define platform-specific `PaymentProcessor` interface (expect/actual) for Google Play, App Store, and desktop payment processing
+  - Implement `PurchaseRepository` to save and query purchase records from database
+  - Create `PaymentError` sealed class with NetworkError, PaymentCancelled, PaymentFailed, AlreadyPurchased, ServerError variants
+  - Add error-to-message mapping function `PaymentError.toUserMessage()`
+  - Implement trial period logic for premium plugins with expiration tracking
+  - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 9.1, 9.2, 9.3, 9.4, 9.5_
+
+- [ ] 7. Build Plugin Marketplace UI
+  - Create `PluginMarketplaceScreen` in `presentation/src/commonMain/kotlin/ireader/presentation/ui/plugins/marketplace/PluginMarketplaceScreen.kt`
+  - Implement `PluginMarketplaceViewModel` with state management for plugins list, categories, search, and filters
+  - Create marketplace state data class with plugins, selectedCategory, searchQuery, sortOrder, isLoading, error
+  - Implement plugin category tabs using `PluginCategoryTabs` composable with THEME, TRANSLATION, TTS, FEATURE categories
+  - Create `FeaturedPluginsSection` composable to display featured/popular plugins in horizontal scroll
+  - Implement `PluginCard` composable showing plugin icon, name, author, description, rating, download count, and price
+  - Add search functionality with text input and real-time filtering
+  - Implement filter options: by category, by price (free/paid/freemium), by rating, by platform compatibility
+  - Add sort options: by popularity, by rating, by date added, by price
+  - Create loading states with skeleton placeholders and error states with retry button
+  - Implement pull-to-refresh for marketplace data
+  - Add navigation to plugin details screen on card click
+  - _Requirements: 2.1, 2.2, 2.3, 16.1, 16.2, 16.3, 16.4, 16.5_
+
+- [ ] 8. Create Plugin Details and Installation UI
+  - Create `PluginDetailsScreen` in `presentation/src/commonMain/kotlin/ireader/presentation/ui/plugins/details/PluginDetailsScreen.kt`
+  - Implement `PluginDetailsViewModel` with plugin details, reviews, installation state, and purchase state
+  - Create `PluginHeader` composable displaying large icon, name, author, version, rating, download count
+  - Implement `PluginScreenshots` composable with horizontal pager for plugin screenshots
+  - Add full description section with expandable text
+  - Create `DeveloperInfoSection` showing author name, email, website, and other published plugins
+  - Implement `PermissionsSection` listing all required permissions with explanations
+  - Create `ReviewsSection` displaying user reviews with rating, text, timestamp, and helpfulness votes
+  - Add "Write Review" button opening review dialog with rating picker and text input
+  - Implement `InstallButton` composable handling free install, premium purchase, or "Open" for installed plugins
+  - Add purchase dialog for premium plugins showing price, trial info, and payment confirmation
+  - Implement installation progress indicator with download percentage and status
+  - Show post-installation success message with "Open" or "Configure" options
+  - Handle installation errors with user-friendly messages and retry option
+  - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 7.1, 7.2, 7.3, 7.4, 7.5, 8.1, 8.2, 8.3, 13.1, 13.2, 13.3_
+
+- [ ] 9. Implement Plugin Management UI
+  - Create `PluginManagementScreen` in `presentation/src/commonMain/kotlin/ireader/presentation/ui/plugins/management/PluginManagementScreen.kt`
+  - Implement `PluginManagementViewModel` with installed plugins list, enable/disable actions, uninstall actions, and configuration
+  - Create `InstalledPluginItem` composable showing plugin icon, name, version, status (enabled/disabled/error/updating)
+  - Add enable/disable switch for each plugin with immediate state update
+  - Implement configure button opening plugin-specific settings screen
+  - Add uninstall button with confirmation dialog
+  - Show plugin status with color coding: green for enabled, gray for disabled, red for error
+  - Implement plugin update notifications with "Update Available" badge
+  - Add "Update All" button for batch plugin updates
+  - Create plugin configuration screens for plugins that provide `getPreferencesScreen()`
+  - Implement plugin error details dialog showing error message and troubleshooting steps
+  - Add plugin performance metrics display (memory usage, CPU usage) for debugging
+  - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 12.1, 12.2, 12.3, 12.4, 12.5_
+
+- [ ] 10. Integrate Theme Plugins with App Theme System
+  - Extend `ThemeManager` or create `PluginThemeManager` in `presentation/src/commonMain/kotlin/ireader/presentation/ui/theme/`
+  - Implement `getAvailableThemes()` method combining built-in themes and theme plugins
+  - Create `ThemeOption` sealed class with BuiltIn and Plugin variants
+  - Implement `applyTheme(theme)` method handling both built-in and plugin themes
+  - Add `applyPluginTheme(plugin)` method to extract ColorScheme, ExtraColors, Typography, and backgrounds from ThemePlugin
+  - Integrate plugin themes into Appearance Settings screen theme selector
+  - Add theme preview functionality showing sample UI with plugin theme applied
+  - Implement theme asset loading for custom backgrounds and images
+  - Handle theme plugin errors gracefully with fallback to default theme
+  - Add theme plugin hot-reload support for development
+  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
+
+- [ ] 11. Integrate Translation Plugins with Translation System
+  - Extend existing `TranslationEnginesManager` in `domain/src/commonMain/kotlin/ireader/domain/usecases/translate/TranslationEnginesManager.kt`
+  - Implement `getAvailableEngines()` method combining built-in engines and translation plugins
+  - Create `TranslationEngine` sealed class with BuiltIn and Plugin variants
+  - Implement `translate(text, from, to, engine)` method routing to plugin or built-in engine
+  - Add translation plugin selection in reader settings translation section
+  - Implement API key configuration UI for plugins requiring authentication
+  - Add translation caching for plugin translations to improve performance
+  - Handle translation plugin errors with fallback to built-in engines
+  - Implement batch translation support for plugins that provide `translateBatch()`
+  - Add language pair validation ensuring plugin supports requested translation
+  - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
+
+- [ ] 12. Integrate TTS Plugins with TTS System
+  - Extend existing TTS service in `domain/src/commonMain/kotlin/ireader/domain/services/tts/` or create `PluginTTSManager`
+  - Implement `getAvailableVoices()` method combining VoiceCatalog voices and TTS plugin voices
+  - Add voice source tracking to distinguish built-in vs plugin voices
+  - Implement `speak(text, voice)` method routing to appropriate plugin or built-in TTS
+  - Create `findPluginForVoice(voice)` method to locate plugin providing specific voice
+  - Integrate plugin voices into TTS settings voice selector
+  - Implement audio stream handling for plugin TTS output
+  - Add voice preview functionality for plugin voices
+  - Handle TTS plugin errors with fallback to built-in TTS
+  - Implement streaming support for plugins that provide `supportsStreaming()`
+  - Add voice configuration UI for plugin-specific settings (speed, pitch, volume)
+  - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
+
+- [ ] 13. Integrate Feature Plugins with App Navigation and Reader
+  - Create `FeaturePluginIntegration` class in `presentation/src/commonMain/kotlin/ireader/presentation/ui/plugins/integration/`
+  - Implement `getPluginMenuItems()` method collecting menu items from all feature plugins
+  - Add plugin menu items to reader screen overflow menu or bottom sheet
+  - Implement `getPluginScreens()` method collecting screens from all feature plugins
+  - Register plugin screens with app navigation system (Compose Navigation or Voyager)
+  - Create `handleReaderContext(context)` method to notify plugins of reader events (text selection, chapter change, bookmark)
+  - Build `ReaderContext` data class with bookId, chapterId, selectedText, currentPosition
+  - Implement plugin action execution when user interacts with plugin menu items
+  - Add plugin screen navigation with proper back stack handling
+  - Handle feature plugin errors without disrupting main app functionality
+  - Implement plugin data storage API allowing plugins to save preferences and data
+  - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
+
+- [ ] 14. Implement Plugin Update System
+  - Create `PluginUpdateChecker` service in `domain/src/commonMain/kotlin/ireader/domain/plugins/PluginUpdateChecker.kt`
+  - Implement periodic update checking based on `pluginUpdateCheckInterval` preference
+  - Create `checkForUpdates()` method comparing installed plugin versions with marketplace versions
+  - Implement `downloadUpdate(pluginId)` method to download updated plugin package
+  - Create `installUpdate(pluginId, packageFile)` method to replace old plugin with new version
+  - Add update notification showing available updates count
+  - Implement auto-update functionality when `autoUpdatePlugins` preference is enabled
+  - Create update changelog display showing what's new in plugin updates
+  - Implement rollback functionality allowing users to revert to previous plugin version
+  - Add update history tracking in database
+  - Handle update failures with error messages and retry option
+  - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5_
+
+- [ ] 15. Create Plugin Developer Tools and Documentation
+  - Create plugin development documentation in `docs/plugin-development/` covering API usage, manifest format, packaging, and best practices
+  - Implement plugin template generator creating skeleton projects for each plugin type
+  - Create example plugins demonstrating theme, translation, TTS, and feature plugin implementations
+  - Build `PluginValidator` CLI tool for testing plugin manifests and packages before submission
+  - Implement plugin debugging mode with detailed logging and error reporting
+  - Create plugin testing framework with mock PluginContext for unit testing
+  - Add plugin API documentation generator extracting docs from code comments
+  - Implement plugin submission guidelines and review process documentation
+  - Create plugin marketplace backend API documentation for plugin distribution
+  - Build developer portal UI for managing published plugins, viewing analytics, and responding to reviews
+  - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5_

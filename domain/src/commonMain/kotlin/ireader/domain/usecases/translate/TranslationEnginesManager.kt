@@ -7,7 +7,8 @@ import ireader.domain.data.engines.TranslateEngine
 import ireader.domain.data.engines.TranslationContext
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 
 class TranslationEnginesManager(
     private val readerPreferences: ReaderPreferences,
@@ -56,7 +57,7 @@ class TranslationEnginesManager(
         // Check if texts is empty or null
         if (texts.isNullOrEmpty()) {
             println("Translation error: No text to translate")
-            onError(UiText.MStringResource(MR.strings.no_text_to_translate))
+            onError(UiText.MStringResource(Res.string.no_text_to_translate))
             return
         }
         
@@ -74,7 +75,7 @@ class TranslationEnginesManager(
                         val apiKey = readerPreferences.openAIApiKey().get()
                         if (apiKey.isBlank()) {
                             println("Translation error: OpenAI API key not set")
-                            onError(UiText.MStringResource(MR.strings.openai_api_key_not_set))
+                            onError(UiText.MStringResource(Res.string.openai_api_key_not_set))
                             return
                         }
                     }
@@ -82,7 +83,7 @@ class TranslationEnginesManager(
                         val apiKey = readerPreferences.deepSeekApiKey().get()
                         if (apiKey.isBlank()) {
                             println("Translation error: DeepSeek API key not set")
-                            onError(UiText.MStringResource(MR.strings.deepseek_api_key_not_set))
+                            onError(UiText.MStringResource(Res.string.deepseek_api_key_not_set))
                             return
                         }
                     }
@@ -109,17 +110,17 @@ class TranslationEnginesManager(
                 // Provide a user-friendly error message
                 val errorMessage = when {
                     e.message?.contains("401") == true || e.message?.contains("unauthorized") == true -> 
-                        UiText.MStringResource(MR.strings.openai_api_key_invalid)
+                        UiText.MStringResource(Res.string.openai_api_key_invalid)
                     e.message?.contains("402") == true ->
                         UiText.MStringResource(when (engine.id) {
-                            2L -> MR.strings.openai_quota_exceeded
-                            3L -> MR.strings.deepseek_payment_required
-                            else -> MR.strings.api_rate_limit_exceeded
+                            2L -> Res.string.openai_quota_exceeded
+                            3L -> Res.string.deepseek_payment_required
+                            else -> Res.string.api_rate_limit_exceeded
                         })
                     e.message?.contains("429") == true || e.message?.contains("rate limit") == true ->
-                        UiText.MStringResource(MR.strings.api_rate_limit_exceeded)
+                        UiText.MStringResource(Res.string.api_rate_limit_exceeded)
                     e is NullPointerException && e.message?.contains("isEmpty") == true ->
-                        UiText.MStringResource(MR.strings.api_response_error)
+                        UiText.MStringResource(Res.string.api_response_error)
                     else -> UiText.ExceptionString(e)
                 }
                 
@@ -131,7 +132,7 @@ class TranslationEnginesManager(
             e.printStackTrace()
             
             // Provide a user-friendly error message
-            onError(UiText.MStringResource(MR.strings.api_response_error))
+            onError(UiText.MStringResource(Res.string.api_response_error))
         }
     }
 }

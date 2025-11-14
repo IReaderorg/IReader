@@ -60,10 +60,10 @@ fun Context.copyToClipboard(label: String, content: String) {
         val clipboard = getSystemService<ClipboardManager>()!!
         clipboard.setPrimaryClip(ClipData.newPlainText(label, content))
 
-        toast(getString(R.string.copied_to_clipboard))
+        toast("Copied to clipboard")
     } catch (e: Throwable) {
         Log.error("copyToClipboard $e")
-        toast(R.string.clipboard_copy_error)
+        toast("Can't copy this text")
     }
 }
 

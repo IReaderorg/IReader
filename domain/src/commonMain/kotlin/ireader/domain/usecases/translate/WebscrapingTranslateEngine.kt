@@ -15,7 +15,8 @@ import ireader.domain.data.engines.TranslateEngine
 import ireader.domain.data.engines.TranslationContext
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -253,7 +254,7 @@ open class WebscrapingTranslateEngine(
         onError: (UiText) -> Unit
     ) {
         if (texts.isEmpty()) {
-            onError(UiText.MStringResource(MR.strings.no_text_to_translate))
+            onError(UiText.MStringResource(Res.string.no_text_to_translate))
             return
         }
         
@@ -263,7 +264,7 @@ open class WebscrapingTranslateEngine(
             
             // Check login state
             if (!isLoggedIn()) {
-                onError(UiText.MStringResource(MR.strings.sign_in_to_chatgpt))
+                onError(UiText.MStringResource(Res.string.sign_in_to_chatgpt))
                 _loginState.value = LoginState.LOGGED_OUT
                 return
             }
@@ -671,7 +672,7 @@ open class WebscrapingTranslateEngine(
     private suspend fun translateWithGeminiApi(prompt: String): String {
         val apiKey = getCookies()
         if (apiKey.isEmpty()) {
-            throw Exception(MR.strings.gemini_api_key_not_set.toString())
+            throw Exception(Res.string.gemini_api_key_not_set.toString())
         }
         
         // Get user-selected model or use available models
@@ -810,7 +811,7 @@ open class WebscrapingTranslateEngine(
                     // Check for specific error codes
                     when (response.status.value) {
                         400 -> throw Exception("Invalid request: $errorBody")
-                        401 -> throw Exception(MR.strings.gemini_api_key_not_set.toString())
+                        401 -> throw Exception(Res.string.gemini_api_key_not_set.toString())
                         403 -> throw Exception("API key does not have permission")
                         404 -> throw Exception("Model $modelName not found or not available")
                         429 -> {
@@ -818,7 +819,7 @@ open class WebscrapingTranslateEngine(
                             if (errorBody.contains("You exceeded your current quota") || errorBody.contains("quota exceeded")) {
                                 throw Exception("You exceeded your current Gemini API quota. Please check your plan and billing details.")
                             } else {
-                                throw Exception(MR.strings.gemini_payment_required.toString())
+                                throw Exception(Res.string.gemini_payment_required.toString())
                             }
                         }
                         500, 501, 502, 503 -> {

@@ -25,7 +25,8 @@ import androidx.compose.ui.unit.dp
 import ireader.core.source.Source
 import ireader.domain.models.entities.Book
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.list.layouts.BookImage
 import ireader.presentation.ui.component.loading.DotsFlashing
@@ -187,7 +188,7 @@ fun ModernGlobalSearchCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowForward,
-                            contentDescription = localize(MR.strings.open_explore),
+                            contentDescription = localize(Res.string.open_explore),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -316,7 +317,7 @@ fun GlobalSearchBookInfo(
                 DotsFlashing(loading)
                 AppIconButton(
                     imageVector = Icons.Default.ArrowForward,
-                    contentDescription = localize(MR.strings.open_explore),
+                    contentDescription = localize(Res.string.open_explore),
                     onClick = goToExplore
                 )
             }

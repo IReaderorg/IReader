@@ -16,7 +16,8 @@ import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
 import ireader.i18n.localize
 
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.reusable_composable.WarningAlert
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -31,7 +32,7 @@ object HistoryScreenSpec : Tab {
     override val options: TabOptions
         @Composable
         get()  {
-            val title = localize(MR.strings.history_screen_label)
+            val title = localize(Res.string.history_screen_label)
             val icon = rememberVectorPainter(Icons.Filled.History)
             return remember {
                 TabOptions(
@@ -58,9 +59,9 @@ object HistoryScreenSpec : Tab {
                     onDeleteAll = {
                         vm.warningAlert.apply {
                             enable = true
-                            this.title.value = localizeHelper.localize(MR.strings.remove)
+                            this.title.value = localizeHelper.localize(Res.string.remove)
                             this.title.value =
-                                localizeHelper.localize(MR.strings.dialog_remove_chapter_books_description)
+                                localizeHelper.localize(Res.string.dialog_remove_chapter_books_description)
                             this.onDismiss.value = {
                                 this.enable = false
                             }
@@ -108,9 +109,9 @@ object HistoryScreenSpec : Tab {
                 onHistoryDelete = { history ->
                     vm.warningAlert.apply {
                         enable = true
-                        this.title.value = localizeHelper.localize(MR.strings.remove)
+                        this.title.value = localizeHelper.localize(Res.string.remove)
                         this.title.value =
-                            localizeHelper.localize(MR.strings.dialog_remove_chapter_history_description)
+                            localizeHelper.localize(Res.string.dialog_remove_chapter_history_description)
                         this.onDismiss.value = {
                             this.enable = false
                         }
@@ -125,9 +126,9 @@ object HistoryScreenSpec : Tab {
                 onLongClickDelete = { history ->
                     vm.warningAlert.apply {
                         enable = true
-                        this.title.value = localizeHelper.localize(MR.strings.remove)
+                        this.title.value = localizeHelper.localize(Res.string.remove)
                         this.title.value =
-                            localizeHelper.localize(MR.strings.dialog_remove_chapter_book_description)
+                            localizeHelper.localize(Res.string.dialog_remove_chapter_book_description)
                         this.onDismiss.value = {
                             this.enable = false
                         }

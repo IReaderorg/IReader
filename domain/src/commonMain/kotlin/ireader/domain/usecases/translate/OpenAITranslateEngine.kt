@@ -14,7 +14,8 @@ import ireader.domain.data.engines.TranslateEngine
 import ireader.domain.data.engines.TranslationContext
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -139,14 +140,14 @@ class OpenAITranslateEngine(
     ) {
         // Validate inputs and handle empty or null lists
         if (texts.isNullOrEmpty()) {
-            onError(UiText.MStringResource(MR.strings.no_text_to_translate))
+            onError(UiText.MStringResource(Res.string.no_text_to_translate))
             return
         }
         
         val apiKey = readerPreferences.openAIApiKey().get()
         
         if (apiKey.isBlank()) {
-            onError(UiText.MStringResource(MR.strings.openai_api_key_not_set))
+            onError(UiText.MStringResource(Res.string.openai_api_key_not_set))
             return
         }
         
@@ -181,11 +182,11 @@ class OpenAITranslateEngine(
                 // Check the response status code
                 if (response.status.value == 402 || response.status.value == 429) {
                     println("OpenAI API error: HTTP ${response.status.value} - Quota exceeded or rate limited")
-                    onError(UiText.MStringResource(MR.strings.openai_quota_exceeded))
+                    onError(UiText.MStringResource(Res.string.openai_quota_exceeded))
                     return
                 } else if (response.status.value == 401) {
                     println("OpenAI API error: HTTP 401 - Invalid API key")
-                    onError(UiText.MStringResource(MR.strings.openai_api_key_invalid))
+                    onError(UiText.MStringResource(Res.string.openai_api_key_invalid))
                     return
                 }
                 
@@ -221,11 +222,11 @@ class OpenAITranslateEngine(
                         onSuccess(finalTexts)
                     } else {
                         println("OpenAI API returned empty message content")
-                        onError(UiText.MStringResource(MR.strings.empty_response))
+                        onError(UiText.MStringResource(Res.string.empty_response))
                     }
                 } else {
                     println("OpenAI API returned empty choices array")
-                    onError(UiText.MStringResource(MR.strings.empty_response))
+                    onError(UiText.MStringResource(Res.string.empty_response))
                 }
             } catch (e: Exception) {
                 // Log the network error for debugging
@@ -236,16 +237,16 @@ class OpenAITranslateEngine(
                 val errorMessage = when {
                     e.message?.contains("401") == true || e.message?.contains("unauthorized") == true || 
                     e.message?.contains("authentication") == true || e.message?.contains("invalid_api_key") == true -> 
-                        UiText.MStringResource(MR.strings.openai_api_key_invalid)
+                        UiText.MStringResource(Res.string.openai_api_key_invalid)
                     
                     e.message?.contains("429") == true || e.message?.contains("rate limit") == true ->
-                        UiText.MStringResource(MR.strings.api_rate_limit_exceeded)
+                        UiText.MStringResource(Res.string.api_rate_limit_exceeded)
                         
                     e.message?.contains("insufficient_quota") == true || e.message?.contains("402") == true ->
-                        UiText.MStringResource(MR.strings.openai_quota_exceeded)
+                        UiText.MStringResource(Res.string.openai_quota_exceeded)
                         
                     e is NullPointerException && e.message?.contains("Collection.isEmpty()") == true ->
-                        UiText.MStringResource(MR.strings.api_response_error)
+                        UiText.MStringResource(Res.string.api_response_error)
                         
                     else -> UiText.ExceptionString(e)
                 }

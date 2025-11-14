@@ -27,7 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.prefs.PreferenceValues
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
@@ -91,17 +92,17 @@ fun ReaderSettingsBottomSheet(
                 contentColor = MaterialTheme.colorScheme.onSurface
             ) {
                 Tab(
-                    text = { MidSizeTextComposable(text = localizeHelper.localize(MR.strings.reader)) },
+                    text = { MidSizeTextComposable(text = localizeHelper.localize(Res.string.reader)) },
                     selected = pagerState.currentPage == 0,
                     onClick = { scope.launch { pagerState.animateScrollToPage(0) } }
                 )
                 Tab(
-                    text = { MidSizeTextComposable(text = localizeHelper.localize(MR.strings.general)) },
+                    text = { MidSizeTextComposable(text = localizeHelper.localize(Res.string.general)) },
                     selected = pagerState.currentPage == 1,
                     onClick = { scope.launch { pagerState.animateScrollToPage(1) } }
                 )
                 Tab(
-                    text = { MidSizeTextComposable(text = localizeHelper.localize(MR.strings.colors)) },
+                    text = { MidSizeTextComposable(text = localizeHelper.localize(Res.string.colors)) },
                     selected = pagerState.currentPage == 2,
                     onClick = { scope.launch { pagerState.animateScrollToPage(2) } }
                 )

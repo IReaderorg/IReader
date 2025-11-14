@@ -36,7 +36,8 @@ import ireader.core.source.model.Filter
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.getLayoutName
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.*
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
@@ -137,7 +138,7 @@ fun BrowseTopAppBar(
                         ) {
                             AppIconButton(
                                 imageVector = Icons.Default.Close,
-                                contentDescription = localize(MR.strings.close),
+                                contentDescription = localize(Res.string.close),
                                 onClick = {
                                     onSearchDisable()
                                 },
@@ -164,7 +165,7 @@ fun BrowseTopAppBar(
                         ) {
                             AppIconButton(
                                 imageVector = Icons.Default.Search,
-                                contentDescription = localize(MR.strings.search),
+                                contentDescription = localize(Res.string.search),
                                 onClick = {
                                     onSearchEnable()
                                 },
@@ -183,7 +184,7 @@ fun BrowseTopAppBar(
                         ) {
                             AppIconButton(
                                 imageVector = Icons.Default.Public,
-                                contentDescription = localize(MR.strings.webView),
+                                contentDescription = localize(Res.string.webView),
                                 onClick = {
                                     onWebView()
                                 },
@@ -224,7 +225,7 @@ fun BrowseTopAppBar(
                         ) {
                             AppIconButton(
                                 imageVector = Icons.Default.GridView,
-                                contentDescription = localize(MR.strings.layout),
+                                contentDescription = localize(Res.string.layout),
                                 onClick = {
                                     topMenu = true
                                 },
@@ -251,10 +252,10 @@ fun BrowseTopAppBar(
                                 }, text = {
                                     val layoutName = layout.getLayoutName(localizeHelper)
                                     val description = when (layout) {
-                                        DisplayMode.ComfortableGrid -> localize(MR.strings.comfortable_grid_layout_description)
-                                        DisplayMode.CompactGrid -> localize(MR.strings.compact_grid_layout_description)
-                                        DisplayMode.List -> localize(MR.strings.list_layout_description) 
-                                        DisplayMode.OnlyCover -> localize(MR.strings.cover_only_layout_description)
+                                        DisplayMode.ComfortableGrid -> localize(Res.string.comfortable_grid_layout_description)
+                                        DisplayMode.CompactGrid -> localize(Res.string.compact_grid_layout_description)
+                                        DisplayMode.List -> localize(Res.string.list_layout_description) 
+                                        DisplayMode.OnlyCover -> localize(Res.string.cover_only_layout_description)
                                     }
                                     
                                     RadioButton(

@@ -18,7 +18,8 @@ import ireader.core.source.HttpSource
 import ireader.domain.models.entities.toBookItem
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.imageloader.convertToOkHttpRequest
@@ -110,7 +111,7 @@ data class ExploreScreenSpec(
                                         vm.stateListing = source?.getListings()?.first()
                                         vm.loadItems()
                                         scope.launch {
-                                            vm.showSnackBar(UiText.MStringResource(MR.strings.query_must_not_be_empty))
+                                            vm.showSnackBar(UiText.MStringResource(Res.string.query_must_not_be_empty))
                                         }
                                     }
                                     focusManager.clearFocus()
@@ -231,7 +232,7 @@ data class ExploreScreenSpec(
                     )
                 } else {
                     EmptyScreenComposable(
-                            UiText.MStringResource(MR.strings.source_not_available),
+                            UiText.MStringResource(Res.string.source_not_available),
                             onPopBackStack = {
                                 popBackStack(navigator)
                             }

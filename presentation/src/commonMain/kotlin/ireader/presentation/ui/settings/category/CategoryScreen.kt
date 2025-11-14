@@ -28,7 +28,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.CategoryWithCount
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.IAlertDialog
 import ireader.presentation.ui.component.components.PreferenceRow
 import ireader.presentation.ui.component.reorderable.*
@@ -102,10 +103,10 @@ fun CategoryScreen(
     // Create category dialog using unified component
     if (vm.showDialog) {
         SettingsTextInputDialog(
-            title = localize(MR.strings.edit_category),
-            label = localize(MR.strings.category_hint),
+            title = localize(Res.string.edit_category),
+            label = localize(Res.string.category_hint),
             placeholder = "e.g., Fantasy, Romance, Sci-Fi",
-            confirmText = localize(MR.strings.confirm),
+            confirmText = localize(Res.string.confirm),
             validator = { text ->
                 when {
                     text.isEmpty() -> "Category name cannot be empty"
@@ -219,7 +220,7 @@ fun CategoryFloatingActionButton(
                 .padding(16.dp),
             text = {
                 MidSizeTextComposable(
-                    text = localize(MR.strings.add),
+                    text = localize(Res.string.add),
                     color = MaterialTheme.colorScheme.onSecondary
                 )
             },

@@ -13,7 +13,8 @@ import ireader.domain.utils.extensions.AuthenticatorUtil
 import ireader.domain.utils.extensions.AuthenticatorUtil.startAuthentication
 import ireader.i18n.LocalizeHelper
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
@@ -34,7 +35,7 @@ actual class SecuritySettingSpec : VoyagerScreen() {
         IScaffold(
             topBar = { scrollBehavior ->
                 TitleToolbar(
-                    title = localize(MR.strings.security),
+                    title = localize(Res.string.security),
                     scrollBehavior = scrollBehavior,
                     popBackStack = {
                         popBackStack(navigator)
@@ -65,7 +66,7 @@ class UnlockActivity : FragmentActivity() {
         val title = intent.extras?.getString(TITLE)
         val subtitle = intent.extras?.getString(SUBTITLE)
         this.startAuthentication(
-            title = title ?: localizeHelper.localize(MR.strings.unlock_app),
+            title = title ?: localizeHelper.localize(Res.string.unlock_app),
             subtitle = subtitle,
             confirmationRequired = false,
             callback = object : AuthenticatorUtil.AuthenticationCallback() {

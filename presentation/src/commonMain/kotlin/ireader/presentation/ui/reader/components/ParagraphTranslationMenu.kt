@@ -18,7 +18,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 
 @Composable
 fun ParagraphTranslationMenu(
@@ -124,7 +125,7 @@ fun TranslationResultDialog(
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = localize(MR.strings.close)
+                            contentDescription = localize(Res.string.close)
                         )
                     }
                 }
@@ -154,7 +155,7 @@ fun TranslationResultDialog(
                 
                 // Translated text or loading/error state
                 Text(
-                    text = localize(MR.strings.translated),
+                    text = localize(Res.string.translated),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -181,7 +182,7 @@ fun TranslationResultDialog(
                                         modifier = Modifier.size(32.dp)
                                     )
                                     Text(
-                                        text = localize(MR.strings.translating),
+                                        text = localize(Res.string.translating),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -198,7 +199,7 @@ fun TranslationResultDialog(
                                         color = MaterialTheme.colorScheme.error
                                     )
                                     TextButton(onClick = onRetry) {
-                                        Text(localize(MR.strings.retry))
+                                        Text(localize(Res.string.retry))
                                     }
                                 }
                             }
@@ -219,7 +220,7 @@ fun TranslationResultDialog(
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(localize(MR.strings.close))
+                    Text(localize(Res.string.close))
                 }
             }
         }

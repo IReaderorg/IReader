@@ -23,7 +23,8 @@ import ireader.domain.usecases.services.ServiceUseCases
 import ireader.domain.utils.extensions.withIOContext
 import ireader.domain.utils.extensions.withUIContext
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.core.PlatformHelper
 import ireader.presentation.ui.home.explore.viewmodel.BooksState
 import kotlinx.coroutines.CoroutineScope
@@ -124,7 +125,7 @@ class BookDetailViewModel(
 
         } else {
             scope.launch {
-                showSnackBar(UiText.MStringResource(MR.strings.something_is_wrong_with_this_book))
+                showSnackBar(UiText.MStringResource(Res.string.something_is_wrong_with_this_book))
             }
         }
     }
@@ -407,7 +408,7 @@ class BookDetailViewModel(
                 exportNovelAsEpub(book, uri) { progress ->
                     showSnackBar(UiText.DynamicString(progress))
                 }
-                showSnackBar(UiText.MStringResource(MR.strings.success))
+                showSnackBar(UiText.MStringResource(Res.string.success))
             } catch (e: Exception) {
                 showSnackBar(UiText.ExceptionString(e))
             }

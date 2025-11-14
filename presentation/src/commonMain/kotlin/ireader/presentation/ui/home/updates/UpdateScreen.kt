@@ -36,7 +36,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.UpdatesWithRelations
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.core.theme.ContentAlpha
 import ireader.presentation.ui.core.ui.LoadingScreen
@@ -106,10 +107,10 @@ fun UpdateScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Refresh,
-                    contentDescription = localize(MR.strings.refresh)
+                    contentDescription = localize(Res.string.refresh)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = localize(MR.strings.check_for_updates))
+                Text(text = localize(Res.string.check_for_updates))
             }
         }
     }
@@ -130,7 +131,7 @@ private fun UpdatesEmptyState() {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = localize(MR.strings.no_new_update_available),
+            text = localize(Res.string.no_new_update_available),
             style = MaterialTheme.typography.titleMedium.copy(
                 color = LocalContentColor.current.copy(alpha = ContentAlpha.medium())
             ),
@@ -139,7 +140,7 @@ private fun UpdatesEmptyState() {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = localize(MR.strings.no_updates_hint),
+            text = localize(Res.string.no_updates_hint),
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = LocalContentColor.current.copy(alpha = ContentAlpha.disabled())
             ),
@@ -241,19 +242,19 @@ private fun BoxScope.UpdateEditBar(
             ) {
                 AppIconButton(
                     imageVector = Icons.Default.GetApp,
-                    contentDescription = localize(MR.strings.download),
+                    contentDescription = localize(Res.string.download),
                     onClick = onBottomBarDownload
                 )
             }
             AppIconButton(
                 imageVector = Icons.Default.BookmarkBorder,
-                contentDescription = localize(MR.strings.bookmark),
+                contentDescription = localize(Res.string.bookmark),
                 onClick = onBottomBookMark
             )
 
             AppIconButton(
                 imageVector = Icons.Default.Done,
-                contentDescription = localize(MR.strings.mark_as_read),
+                contentDescription = localize(Res.string.mark_as_read),
                 onClick = onBottomBarMarkAsRead
             )
         }

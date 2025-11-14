@@ -7,7 +7,8 @@ import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -26,7 +27,7 @@ class TranslationScreenSpec : Screen {
         IScaffold(
             topBar = { scrollBehavior ->
                 TitleToolbar(
-                    title = localizeHelper.localize(MR.strings.translations),
+                    title = localizeHelper.localize(Res.string.translations),
                     scrollBehavior = scrollBehavior,
                     popBackStack = { navigator.pop() }
                 )

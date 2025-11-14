@@ -41,7 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import ireader.domain.usecases.translate.WebscrapingTranslateEngine
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import kotlinx.coroutines.delay
 
 private const val TAG = "ChatGptWebViewImpl"
@@ -127,11 +128,11 @@ actual fun ChatGptWebViewImpl(
                 
                 Text(
                     text = if (isCaptchaRequired.value)
-                        localize(MR.strings.complete_captcha) 
+                        localize(Res.string.complete_captcha) 
                     else if (isLoggedIn) 
-                        localize(MR.strings.chatgpt_translation) 
+                        localize(Res.string.chatgpt_translation) 
                     else 
-                        localize(MR.strings.sign_in_to_chatgpt),
+                        localize(Res.string.sign_in_to_chatgpt),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.align(Alignment.Center)
                 )

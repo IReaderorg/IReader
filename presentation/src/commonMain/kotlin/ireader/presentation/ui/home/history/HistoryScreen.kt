@@ -41,7 +41,8 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.HistoryWithRelations
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.BookListItemImage
 import ireader.presentation.ui.component.reusable_composable.WarningAlertData
 import ireader.presentation.ui.core.coil.rememberBookCover
@@ -103,7 +104,7 @@ fun HistoryScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.DeleteForever,
-                        contentDescription = localize(MR.strings.delete_all_histories),
+                        contentDescription = localize(Res.string.delete_all_histories),
                         tint = MaterialTheme.colorScheme.onErrorContainer
                     )
                 }
@@ -117,12 +118,12 @@ fun HistoryScreen(
         ) {
             when {
                 items.values.flatten().isEmpty() && vm.searchQuery.isNotEmpty() -> EmptyScreen(
-                    text = localize(MR.strings.no_matches_found_in_search) + " \"${vm.searchQuery}\"",
+                    text = localize(Res.string.no_matches_found_in_search) + " \"${vm.searchQuery}\"",
                     modifier = Modifier.fillMaxSize(),
                     icon = Icons.Outlined.Search
                 )
                 items.values.isEmpty() -> EmptyScreen(
-                    text = localize(MR.strings.nothing_read_recently),
+                    text = localize(Res.string.nothing_read_recently),
                     modifier = Modifier.fillMaxSize(),
                     icon = Icons.Outlined.History
                 )
@@ -182,12 +183,12 @@ fun HistoryTopAppBar(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp, vertical = 4.dp)
                 .focusRequester(focusRequester),
-            placeholder = { Text(localize(MR.strings.search_history)) },
+            placeholder = { Text(localize(Res.string.search_history)) },
             leadingIcon = { 
                 IconButton(onClick = onSearchModeChange) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = localize(MR.strings.close)
+                        contentDescription = localize(Res.string.close)
                     )
                 }
             },
@@ -200,7 +201,7 @@ fun HistoryTopAppBar(
                     IconButton(onClick = onClearClick) {
                         Icon(
                             imageVector = Icons.Default.Clear,
-                            contentDescription = localize(MR.strings.clear)
+                            contentDescription = localize(Res.string.clear)
                         )
                     }
                 }
@@ -216,18 +217,18 @@ fun HistoryTopAppBar(
         )
     } else {
         TopAppBar(
-            title = { Text(localize(MR.strings.history)) },
+            title = { Text(localize(Res.string.history)) },
             actions = {
                 IconButton(onClick = onSearchModeChange) {
                     Icon(
                         imageVector = Icons.Outlined.Search,
-                        contentDescription = localize(MR.strings.search)
+                        contentDescription = localize(Res.string.search)
                     )
                 }
                 IconButton(onClick = { showFilterMenu = true }) {
                     Icon(
                         imageVector = Icons.Default.FilterList,
-                        contentDescription = localize(MR.strings.filter)
+                        contentDescription = localize(Res.string.filter)
                     )
                 }
                 
@@ -252,7 +253,7 @@ fun HistoryTopAppBar(
                         DropdownMenuItem(
                             text = { 
                                 Text(
-                                    text = localize(MR.strings.delete_all_histories),
+                                    text = localize(Res.string.delete_all_histories),
                                     color = MaterialTheme.colorScheme.error
                                 ) 
                             },
@@ -307,7 +308,7 @@ fun HistoryTopAppBar(
                     )
                     
                     DropdownMenuItem(
-                        text = { Text(localize(MR.strings.relative_time_today)) },
+                        text = { Text(localize(Res.string.relative_time_today)) },
                         onClick = {
                             onDateFilterChange(DateFilter.TODAY)
                             showFilterMenu = false
@@ -320,7 +321,7 @@ fun HistoryTopAppBar(
                     )
                     
                     DropdownMenuItem(
-                        text = { Text(localize(MR.strings.yesterday)) },
+                        text = { Text(localize(Res.string.yesterday)) },
                         onClick = {
                             onDateFilterChange(DateFilter.YESTERDAY)
                             showFilterMenu = false
@@ -333,7 +334,7 @@ fun HistoryTopAppBar(
                     )
                     
                     DropdownMenuItem(
-                        text = { Text(localize(MR.strings.past_7_days)) },
+                        text = { Text(localize(Res.string.past_7_days)) },
                         onClick = {
                             onDateFilterChange(DateFilter.PAST_7_DAYS)
                             showFilterMenu = false
@@ -419,7 +420,7 @@ fun HistoryContent(
             // Today section
             if (todayItems.isNotEmpty()) {
                 item {
-                    HistoryTimeHeader(title = localize(MR.strings.relative_time_today))
+                    HistoryTimeHeader(title = localize(Res.string.relative_time_today))
                 }
                 
                 items(todayItems.sortedByDescending { it.readAt }) { history ->
@@ -440,7 +441,7 @@ fun HistoryContent(
             // Yesterday section
             if (yesterdayItems.isNotEmpty()) {
                 item {
-                    HistoryTimeHeader(title = localize(MR.strings.yesterday))
+                    HistoryTimeHeader(title = localize(Res.string.yesterday))
                 }
                 
                 items(yesterdayItems.sortedByDescending { it.readAt }) { history ->
@@ -461,7 +462,7 @@ fun HistoryContent(
             // This week section
             if (thisWeekItems.isNotEmpty()) {
                 item {
-                    HistoryTimeHeader(title = localize(MR.strings.weekly))
+                    HistoryTimeHeader(title = localize(Res.string.weekly))
                 }
                 
                 items(thisWeekItems.sortedByDescending { it.readAt }) { history ->
@@ -482,7 +483,7 @@ fun HistoryContent(
             // Earlier section
             if (earlierItems.isNotEmpty()) {
                 item {
-                    HistoryTimeHeader(title = localize(MR.strings.recently))
+                    HistoryTimeHeader(title = localize(Res.string.recently))
                 }
                 
                 items(earlierItems.sortedByDescending { it.readAt }) { history ->
@@ -733,7 +734,7 @@ fun HistoryItem(
                     ) {
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
-                            contentDescription = localize(MR.strings.resume),
+                            contentDescription = localize(Res.string.resume),
                             tint = MaterialTheme.colorScheme.onSecondary
                         )
                     }
@@ -870,7 +871,7 @@ fun WarningAlertDialog(data: WarningAlertData) {
                 }
             ) {
                 Text(
-                    text = localize(MR.strings.confirm),
+                    text = localize(Res.string.confirm),
                     color = MaterialTheme.colorScheme.error
                 )
             }
@@ -884,7 +885,7 @@ fun WarningAlertDialog(data: WarningAlertData) {
                     }
                 }
             ) {
-                Text(text = localize(MR.strings.cancel))
+                Text(text = localize(Res.string.cancel))
             }
         }
     )

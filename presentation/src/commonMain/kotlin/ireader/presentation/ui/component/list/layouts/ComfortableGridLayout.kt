@@ -21,7 +21,8 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.BookItem
 import ireader.i18n.UiText
 import ireader.presentation.ui.component.list.isScrolledToTheEnd
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ComfortableGridLayout(
@@ -98,7 +99,7 @@ fun ComfortableGridLayout(
                         }
 
                         if (showInLibraryBadge && book.favorite) {
-                            TextBadge(text = UiText.MStringResource(MR.strings.in_library))
+                            TextBadge(text = UiText.MStringResource(Res.string.in_library))
                         }
                     }
                 }

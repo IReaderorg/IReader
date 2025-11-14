@@ -43,6 +43,7 @@ kotlin {
                 api(compose.materialIconsExtended)
                 api(compose.preview)
                 api(compose.ui)
+                api(compose.components.resources)
                 // Material2 for backward compatibility (to be migrated to Material3)
                 api(compose.material)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)

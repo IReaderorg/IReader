@@ -19,7 +19,8 @@ import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.usecases.source.ReportBrokenSourceUseCase
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
@@ -43,11 +44,11 @@ data class SourceDetailScreen(
         IScaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text(localize(MR.strings.source)) },
+                    title = { Text(localize(Res.string.source)) },
                     navigationIcon = {
                         AppIconButton(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = localize(MR.strings.go_back),
+                            contentDescription = localize(Res.string.go_back),
                             onClick = { navigator.pop() }
                         )
                     },
@@ -126,10 +127,10 @@ private fun SourceDetailContent(
 
         // Language
         DetailItem(
-            label = localize(MR.strings.language),
+            label = localize(Res.string.language),
             value = when (catalog) {
-                is CatalogInstalled -> catalog.source?.lang?.uppercase(Locale.getDefault()) ?: localize(MR.strings.unknown)
-                else -> localize(MR.strings.unknown)
+                is CatalogInstalled -> catalog.source?.lang?.uppercase(Locale.getDefault()) ?: localize(Res.string.unknown)
+                else -> localize(Res.string.unknown)
             }
         )
 
@@ -145,10 +146,10 @@ private fun SourceDetailContent(
 
         // Status
         DetailItem(
-            label = localize(MR.strings.status),
+            label = localize(Res.string.status),
             value = when (catalog) {
-                is CatalogInstalled -> localize(MR.strings.installed)
-                else -> localize(MR.strings.available)
+                is CatalogInstalled -> localize(Res.string.installed)
+                else -> localize(Res.string.available)
             }
         )
 

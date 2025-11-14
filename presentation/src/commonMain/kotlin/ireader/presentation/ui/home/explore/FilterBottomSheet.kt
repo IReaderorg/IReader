@@ -41,7 +41,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.core.source.model.Filter
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import kotlinx.coroutines.delay
 
@@ -95,7 +96,7 @@ fun FilterBottomSheet(
             ) {
                 Column {
                     Text(
-                        text = localize(MR.strings.filter),
+                        text = localize(Res.string.filter),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -180,7 +181,7 @@ fun FilterBottomSheet(
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
-                            text = localize(MR.strings.reset),
+                            text = localize(Res.string.reset),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -192,7 +193,7 @@ fun FilterBottomSheet(
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
-                            text = localize(MR.strings.apply),
+                            text = localize(Res.string.apply),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold
                         )

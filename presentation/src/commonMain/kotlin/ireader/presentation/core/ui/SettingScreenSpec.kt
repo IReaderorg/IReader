@@ -13,7 +13,8 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Toolbar
@@ -36,7 +37,7 @@ class SettingScreenSpec : VoyagerScreen() {
                 Toolbar(
                     scrollBehavior = scrollBehavior,
                     title = {
-                        BigSizeTextComposable(text = localize(MR.strings.settings))
+                        BigSizeTextComposable(text = localize(Res.string.settings))
                     },
                     navigationIcon = { TopAppBarBackButton(onClick = { popBackStack(navigator) }) },
                 )
@@ -49,14 +50,14 @@ class SettingScreenSpec : VoyagerScreen() {
                 // Appearance & Display Section
                 item {
                     SettingsSectionHeader(
-                        title = localizeHelper.localize(MR.strings.appearance),
+                        title = localizeHelper.localize(Res.string.appearance),
                         icon = Icons.Default.Palette
                     )
                 }
                 
                 item {
                     SettingsItem(
-                        title = localizeHelper.localize(MR.strings.appearance),
+                        title = localizeHelper.localize(Res.string.appearance),
                         description = "Customize app theme and colors",
                         icon = Icons.Default.Palette,
                         onClick = { navigator.push(AppearanceScreenSpec()) }
@@ -65,7 +66,7 @@ class SettingScreenSpec : VoyagerScreen() {
                 
                 item {
                     SettingsItem(
-                        title = localizeHelper.localize(MR.strings.font),
+                        title = localizeHelper.localize(Res.string.font),
                         description = "Choose reading fonts and sizes",
                         icon = Icons.Default.FontDownload,
                         onClick = { navigator.push(FontScreenSpec()) }
@@ -75,14 +76,14 @@ class SettingScreenSpec : VoyagerScreen() {
                 // General Settings Section
                 item {
                     SettingsSectionHeader(
-                        title = localizeHelper.localize(MR.strings.general),
+                        title = localizeHelper.localize(Res.string.general),
                         icon = Icons.Default.Tune
                     )
                 }
                 
                 item {
                     SettingsItem(
-                        title = localizeHelper.localize(MR.strings.general),
+                        title = localizeHelper.localize(Res.string.general),
                         description = "General app preferences",
                         icon = Icons.Default.Tune,
                         onClick = { navigator.push(GeneralScreenSpec()) }
@@ -91,7 +92,7 @@ class SettingScreenSpec : VoyagerScreen() {
                 
                 item {
                     SettingsItem(
-                        title = localizeHelper.localize(MR.strings.translation_settings),
+                        title = localizeHelper.localize(Res.string.translation_settings),
                         description = "Configure translation preferences",
                         icon = Icons.Default.Translate,
                         onClick = { navigator.push(TranslationScreenSpec()) }
@@ -101,14 +102,14 @@ class SettingScreenSpec : VoyagerScreen() {
                 // Reading Experience Section
                 item {
                     SettingsSectionHeader(
-                        title = localizeHelper.localize(MR.strings.reader),
+                        title = localizeHelper.localize(Res.string.reader),
                         icon = Icons.Default.ChromeReaderMode
                     )
                 }
                 
                 item {
                     SettingsItem(
-                        title = localizeHelper.localize(MR.strings.reader),
+                        title = localizeHelper.localize(Res.string.reader),
                         description = "Customize reading experience",
                         icon = Icons.Default.ChromeReaderMode,
                         onClick = { navigator.push(ReaderSettingSpec()) }
@@ -117,7 +118,7 @@ class SettingScreenSpec : VoyagerScreen() {
                 
                 item {
                     SettingsItem(
-                        title = localizeHelper.localize(MR.strings.statistics),
+                        title = localizeHelper.localize(Res.string.statistics),
                         description = "View reading statistics and progress",
                         icon = Icons.Default.BarChart,
                         onClick = { navigator.push(StatisticsScreenSpec()) }
@@ -127,14 +128,14 @@ class SettingScreenSpec : VoyagerScreen() {
                 // Security & Privacy Section
                 item {
                     SettingsSectionHeader(
-                        title = localizeHelper.localize(MR.strings.security),
+                        title = localizeHelper.localize(Res.string.security),
                         icon = Icons.Default.Security
                     )
                 }
                 
                 item {
                     SettingsItem(
-                        title = localizeHelper.localize(MR.strings.security),
+                        title = localizeHelper.localize(Res.string.security),
                         description = "Manage security and privacy settings",
                         icon = Icons.Default.Security,
                         onClick = { navigator.push(SecuritySettingSpec()) }
@@ -151,7 +152,7 @@ class SettingScreenSpec : VoyagerScreen() {
                 
                 item {
                     SettingsItem(
-                        title = localizeHelper.localize(MR.strings.repository),
+                        title = localizeHelper.localize(Res.string.repository),
                         description = "Manage content sources and extensions",
                         icon = Icons.Default.Extension,
                         onClick = { navigator.push(RepositoryScreenSpec()) }
@@ -160,7 +161,7 @@ class SettingScreenSpec : VoyagerScreen() {
                 
                 item {
                     SettingsItem(
-                        title = localizeHelper.localize(MR.strings.advance_setting),
+                        title = localizeHelper.localize(Res.string.advance_setting),
                         description = "Advanced configuration options",
                         icon = Icons.Default.Code,
                         onClick = { navigator.push(AdvanceSettingSpec()) }

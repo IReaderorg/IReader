@@ -62,7 +62,8 @@ import ireader.domain.models.entities.toSavedDownload
 import ireader.i18n.UiEvent
 import ireader.i18n.asString
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.BookListItem
 import ireader.presentation.ui.component.BookListItemColumn
 import ireader.presentation.ui.component.BookListItemSubtitle
@@ -109,7 +110,7 @@ fun DownloaderScreen(
                     TopAppBar(
                             title = {
                                 Text(
-                                        text = "${vm.selection.size} ${localize(MR.strings.selected)}",
+                                        text = "${vm.selection.size} ${localize(Res.string.selected)}",
                                         style = MaterialTheme.typography.titleLarge
                                 )
                             },
@@ -117,7 +118,7 @@ fun DownloaderScreen(
                                 IconButton(onClick = { vm.selection.clear() }) {
                                     Icon(
                                             imageVector = Icons.Filled.Close,
-                                            contentDescription = localize(MR.strings.cancel)
+                                            contentDescription = localize(Res.string.cancel)
                                     )
                                 }
                             },
@@ -135,7 +136,7 @@ fun DownloaderScreen(
                                 ) {
                                     Icon(
                                             imageVector = Icons.Filled.SelectAll,
-                                            contentDescription = localize(MR.strings.select_all),
+                                            contentDescription = localize(Res.string.select_all),
                                             tint = if (vm.selection.size == downloads.size) {
                                                 MaterialTheme.colorScheme.primary
                                             } else {
@@ -156,7 +157,7 @@ fun DownloaderScreen(
                                 ) {
                                     Icon(
                                             imageVector = Icons.Filled.Delete,
-                                            contentDescription = localize(MR.strings.delete),
+                                            contentDescription = localize(Res.string.delete),
                                             tint = MaterialTheme.colorScheme.error
                                     )
                                 }
@@ -177,8 +178,8 @@ fun DownloaderScreen(
                             text = {
                                 MidSizeTextComposable(
                                         text = when (isDownloading) {
-                                            true -> localize(MR.strings.pause)
-                                            else -> localize(MR.strings.resume)
+                                            true -> localize(Res.string.pause)
+                                            else -> localize(Res.string.resume)
                                         },
                                         color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
@@ -196,8 +197,8 @@ fun DownloaderScreen(
                                             else -> Icons.Filled.PlayArrow
                                         },
                                         contentDescription = when (isDownloading) {
-                                            true -> localize(MR.strings.pause)
-                                            else -> localize(MR.strings.resume)
+                                            true -> localize(Res.string.pause)
+                                            else -> localize(Res.string.resume)
                                         },
                                         tint = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
@@ -219,12 +220,12 @@ fun DownloaderScreen(
                 Tab(
                     selected = vm.selectedTab == DownloadTab.ACTIVE,
                     onClick = { vm.selectedTab = DownloadTab.ACTIVE },
-                    text = { Text(localize(MR.strings.active_downloads)) }
+                    text = { Text(localize(Res.string.active_downloads)) }
                 )
                 Tab(
                     selected = vm.selectedTab == DownloadTab.COMPLETED,
                     onClick = { vm.selectedTab = DownloadTab.COMPLETED },
-                    text = { Text(localize(MR.strings.completed_downloads)) }
+                    text = { Text(localize(Res.string.completed_downloads)) }
                 )
             }
             
@@ -274,14 +275,14 @@ private fun ActiveDownloadsContent(
                 )
                 
                 Text(
-                    text = localize(MR.strings.no_active_downloads),
+                    text = localize(Res.string.no_active_downloads),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 
                 Text(
-                    text = localize(MR.strings.no_active_downloads_subtitle),
+                    text = localize(Res.string.no_active_downloads_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -431,14 +432,14 @@ private fun CompletedDownloadsContent(
                 )
                 
                 Text(
-                    text = localize(MR.strings.no_completed_downloads),
+                    text = localize(Res.string.no_completed_downloads),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 
                 Text(
-                    text = localize(MR.strings.no_completed_downloads_subtitle),
+                    text = localize(Res.string.no_completed_downloads_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -464,7 +465,7 @@ private fun CompletedDownloadsContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "${completedDownloads.size} ${localize(MR.strings.completed_downloads)}",
+                        text = "${completedDownloads.size} ${localize(Res.string.completed_downloads)}",
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )
@@ -475,7 +476,7 @@ private fun CompletedDownloadsContent(
                             containerColor = MaterialTheme.colorScheme.error
                         )
                     ) {
-                        Text(localize(MR.strings.clear_completed))
+                        Text(localize(Res.string.clear_completed))
                     }
                 }
             }
@@ -529,7 +530,7 @@ private fun CompletedDownloadItem(
                 
                 // Completion timestamp
                 Text(
-                    text = "${localize(MR.strings.download_completed_at)}: ${formatTimestamp(item.completedAt)}",
+                    text = "${localize(Res.string.download_completed_at)}: ${formatTimestamp(item.completedAt)}",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -541,7 +542,7 @@ private fun CompletedDownloadItem(
             ) {
                 Icon(
                     imageVector = Icons.Outlined.CheckCircle,
-                    contentDescription = localize(MR.strings.downloaded),
+                    contentDescription = localize(Res.string.downloaded),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
@@ -552,7 +553,7 @@ private fun CompletedDownloadItem(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Delete,
-                        contentDescription = localize(MR.strings.delete),
+                        contentDescription = localize(Res.string.delete),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
@@ -759,7 +760,7 @@ fun DownloadScreenItem(
                     isDownloaded -> {
                         Icon(
                                 imageVector = Icons.Outlined.CheckCircle,
-                                contentDescription = localize(MR.strings.downloaded),
+                                contentDescription = localize(Res.string.downloaded),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(24.dp)
                         )
@@ -782,7 +783,7 @@ fun DownloadScreenItem(
                     else -> {
                         Icon(
                                 imageVector = Icons.Outlined.Download,
-                                contentDescription = localize(MR.strings.loading),
+                                contentDescription = localize(Res.string.loading),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(24.dp)
                         )
@@ -799,7 +800,7 @@ fun DownloadScreenItem(
                     ) {
                         Icon(
                                 imageVector = Icons.Outlined.MoreVert,
-                                contentDescription = localize(MR.strings.hint),
+                                contentDescription = localize(Res.string.hint),
                                 tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -813,14 +814,14 @@ fun DownloadScreenItem(
                                     onCancelDownload(item)
                                     isMenuExpanded = false
                                 },
-                                text = { MidSizeTextComposable(text = localize(MR.strings.cancel)) }
+                                text = { MidSizeTextComposable(text = localize(Res.string.cancel)) }
                         )
                         ireader.presentation.ui.component.components.IDropdownMenuItem(
                                 onClick = {
                                     onCancelAllFromThisSeries(item)
                                     isMenuExpanded = false
                                 },
-                                text = { MidSizeTextComposable(text = localize(MR.strings.cancel_all_for_this_series)) }
+                                text = { MidSizeTextComposable(text = localize(Res.string.cancel_all_for_this_series)) }
                         )
                     }
                 }

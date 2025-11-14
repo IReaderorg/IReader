@@ -67,7 +67,7 @@ class AutomaticBackup(
                 Log.error(e, "AutomaticBackup")
                 uiPreferences.automaticBackupTime().set(PreferenceValues.AutomaticBackup.Off)
                 withUIContext {
-                    context.toast(R.string.permission_not_given)
+                    context.toast("Permission not given")
                 }
             }
         }

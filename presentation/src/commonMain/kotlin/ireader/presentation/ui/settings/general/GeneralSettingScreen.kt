@@ -44,7 +44,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.UiPreferences
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.core.theme.LocaleHelper
 import ireader.presentation.ui.component.components.ChoicePreference
 import ireader.presentation.ui.component.components.Components
@@ -71,22 +72,22 @@ fun GeneralSettingScreen(
                 ),
                 Components.Switch(
                         preference = vm.appUpdater,
-                        title = localizeHelper.localize(MR.strings.updater_is_enable),
+                        title = localizeHelper.localize(Res.string.updater_is_enable),
                         icon = Icons.Filled.Update
                 ),
                 Components.Switch(
                         preference = vm.showHistory,
-                        title = localizeHelper.localize(MR.strings.show_history),
+                        title = localizeHelper.localize(Res.string.show_history),
                         icon = Icons.Filled.History
                 ),
                 Components.Switch(
                         preference = vm.showUpdate,
-                        title = localizeHelper.localize(MR.strings.show_update),
+                        title = localizeHelper.localize(Res.string.show_update),
                         icon = Icons.Filled.Update
                 ),
                 Components.Switch(
                         preference = vm.confirmExit,
-                        title = localizeHelper.localize(MR.strings.confirm_exit),
+                        title = localizeHelper.localize(Res.string.confirm_exit),
                         icon = Icons.Filled.Settings
                 ),
                 
@@ -145,25 +146,25 @@ fun GeneralSettingScreen(
                 ),
                 Components.Switch(
                         preference = vm.showSystemWideCatalogs,
-                        title = localizeHelper.localize(MR.strings.show_system_catalogs),
-                        subtitle = localizeHelper.localize(MR.strings.show_system_catalogs_subtitle),
+                        title = localizeHelper.localize(Res.string.show_system_catalogs),
+                        subtitle = localizeHelper.localize(Res.string.show_system_catalogs_subtitle),
                         icon = Icons.Filled.Storage
                 ),
                 Components.Switch(
                         preference = vm.showLocalCatalogs,
-                        title = localizeHelper.localize(MR.strings.show_local_catalogs),
-                        subtitle = localizeHelper.localize(MR.strings.show_local_catalogs_subtitle),
+                        title = localizeHelper.localize(Res.string.show_local_catalogs),
+                        subtitle = localizeHelper.localize(Res.string.show_local_catalogs_subtitle),
                         icon = Icons.Filled.Storage
                 ),
                 Components.Switch(
                         preference = vm.autoInstaller,
-                        title = localizeHelper.localize(MR.strings.auto_installer),
-                        subtitle = localizeHelper.localize(MR.strings.auto_installer_subtitle),
+                        title = localizeHelper.localize(Res.string.auto_installer),
+                        subtitle = localizeHelper.localize(Res.string.auto_installer_subtitle),
                         icon = Icons.Filled.Settings
                 ),
                 Components.Switch(
                         preference = vm.localSourceLocation,
-                        title = localizeHelper.localize(MR.strings.saved_local_source_location),
+                        title = localizeHelper.localize(Res.string.saved_local_source_location),
                         icon = Icons.Filled.Storage
                 ),
                 Components.Dynamic {
@@ -171,12 +172,12 @@ fun GeneralSettingScreen(
                         preference = vm.installer,
                         choices = mapOf(
                             PreferenceValues.Installer.AndroidPackageManager to localizeHelper.localize(
-                                MR.strings.package_manager
+                                Res.string.package_manager
                             ),
-                            PreferenceValues.Installer.LocalInstaller to localizeHelper.localize(MR.strings.local_installer),
+                            PreferenceValues.Installer.LocalInstaller to localizeHelper.localize(Res.string.local_installer),
                         ),
                         title = localizeHelper.localize(
-                            MR.strings.installer_mode
+                            Res.string.installer_mode
                         )
                     )
                 },
@@ -201,8 +202,8 @@ fun GeneralSettingScreen(
                 ),
                 Components.Dynamic {
                     NavigationPreferenceCustom(
-                        title = localizeHelper.localize(MR.strings.translation_settings),
-                        subtitle = localizeHelper.localize(MR.strings.api_settings),
+                        title = localizeHelper.localize(Res.string.translation_settings),
+                        subtitle = localizeHelper.localize(Res.string.api_settings),
                         icon = { Icon(Icons.Filled.Translate, contentDescription = null) },
                         onClick = onTranslationSettingsClick
                     )
@@ -212,7 +213,7 @@ fun GeneralSettingScreen(
                             preference = vm.language,
                             choices = vm.getLanguageChoices(),
                             title = localizeHelper.localize(
-                                    MR.strings.languages
+                                    Res.string.languages
                             ),
                             onValue = { value: String ->
                                 vm.language.value = value

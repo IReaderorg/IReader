@@ -9,55 +9,57 @@
 package ireader.i18n
 
 import androidx.compose.runtime.Composable
-import dev.icerock.moko.resources.PluralsResource
-import dev.icerock.moko.resources.StringResource
-import dev.icerock.moko.resources.desc.*
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.PluralStringResource
+import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.pluralStringResource
+import kotlinx.coroutines.runBlocking
 
 @Composable
 actual fun localize(resource: StringResource): String {
-  return StringDesc.Resource(resource).localized()
+  return stringResource(resource)
 }
 
 @Composable
 actual fun localize(resource: StringResource, vararg args: Any): String {
-  return StringDesc.ResourceFormatted(resource, *args).localized()
+  return stringResource(resource, *args)
 }
 
 @Composable
-actual fun localizePlural(resource: PluralsResource, quantity: Int): String {
-  return StringDesc.Plural(resource, quantity).localized()
+actual fun localizePlural(resource: PluralStringResource, quantity: Int): String {
+  return pluralStringResource(resource, quantity)
 }
 
 @Composable
-actual fun localizePlural(resource: PluralsResource, quantity: Int, vararg args: Any): String {
-  return StringDesc.PluralFormatted(resource, quantity, *args).localized()
+actual fun localizePlural(resource: PluralStringResource, quantity: Int, vararg args: Any): String {
+  return pluralStringResource(resource, quantity, *args)
 }
 
 actual class LocalizeHelper {
-    actual fun localize(resource: StringResource): String {
-        return StringDesc.Resource(resource).localized()
+    actual fun localize(resource: StringResource): String = runBlocking {
+        org.jetbrains.compose.resources.getString(resource)
     }
 
     actual fun localize(
         resource: StringResource,
         vararg args: Any
-    ): String {
-        return StringDesc.ResourceFormatted(resource, *args).localized()
+    ): String = runBlocking {
+        org.jetbrains.compose.resources.getString(resource, *args)
     }
 
     actual fun localizePlural(
-        resource: PluralsResource,
+        resource: PluralStringResource,
         quantity: Int
-    ): String {
-        return StringDesc.Plural(resource, quantity).localized()
+    ): String = runBlocking {
+        org.jetbrains.compose.resources.getPluralString(resource, quantity)
     }
 
     actual fun localizePlural(
-        resource: PluralsResource,
+        resource: PluralStringResource,
         quantity: Int,
         vararg args: Any
-    ): String {
-        return StringDesc.PluralFormatted(resource, quantity, *args).localized()
+    ): String = runBlocking {
+        org.jetbrains.compose.resources.getPluralString(resource, quantity, *args)
     }
 
     actual fun localize(resId: Int): String {

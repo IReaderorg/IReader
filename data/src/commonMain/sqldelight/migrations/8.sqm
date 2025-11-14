@@ -1,16 +1,17 @@
--- Migration 8: Add sourceComparison table
--- This migration adds support for source comparison and migration features
+-- Migration 8: Ensure sync_queue table has correct schema
+-- This migration handles the case where sync_queue table exists but might have wrong schema
 
-CREATE TABLE IF NOT EXISTS sourceComparison(
-    book_id INTEGER NOT NULL PRIMARY KEY,
-    current_source_id INTEGER NOT NULL,
-    better_source_id INTEGER,
-    chapter_difference INTEGER NOT NULL,
-    cached_at INTEGER NOT NULL,
-    dismissed_until INTEGER,
-    FOREIGN KEY(book_id) REFERENCES book (_id)
-    ON DELETE CASCADE
+-- Drop and recreate sync_queue table to ensure correct state
+DROP TABLE IF EXISTS sync_queue;
+
+CREATE TABLE sync_queue (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    book_id TEXT NOT NULL,
+    data TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,
+    retry_count INTEGER DEFAULT 0
 );
 
-CREATE INDEX IF NOT EXISTS source_comparison_cached_at_index ON sourceComparison(cached_at);
-CREATE INDEX IF NOT EXISTS source_comparison_dismissed_until_index ON sourceComparison(dismissed_until);
+-- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_sync_queue_timestamp ON sync_queue(timestamp ASC);
+CREATE INDEX IF NOT EXISTS idx_sync_queue_book_id ON sync_queue(book_id);

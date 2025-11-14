@@ -14,7 +14,8 @@ import ireader.domain.data.engines.TranslateEngine
 import ireader.domain.data.engines.TranslationContext
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -178,7 +179,7 @@ class OllamaTranslateEngine(
         onError: (UiText) -> Unit
     ) {
         if (texts.isEmpty()) {
-            onError(UiText.MStringResource(MR.strings.no_text_to_translate))
+            onError(UiText.MStringResource(Res.string.no_text_to_translate))
             return
         }
         

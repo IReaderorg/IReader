@@ -7,13 +7,10 @@ import java.util.TimeZone
 plugins {
     id("com.android.application")
     kotlin("android")
-    id("com.google.gms.google-services") apply false
     kotlin("plugin.serialization")
-    id("com.google.firebase.crashlytics") apply false
     id("com.google.devtools.ksp")
     alias(kotlinx.plugins.compose.compiler)
     alias(libs.plugins.jetbrainCompose)
-    id("dev.icerock.mobile.multiplatform-resources")
 }
 
 val SUPPORTED_ABIS = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")

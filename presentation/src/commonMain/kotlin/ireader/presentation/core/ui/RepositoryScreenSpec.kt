@@ -22,7 +22,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import io.ktor.http.*
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.PreferenceRow
@@ -49,7 +50,7 @@ class RepositoryScreenSpec : VoyagerScreen() {
             topBar = { scrollBehavior ->
                 Toolbar(
                     title ={
-                        MidSizeTextComposable(text =  localize(MR.strings.repository))
+                        MidSizeTextComposable(text =  localize(Res.string.repository))
                     },
                     scrollBehavior = scrollBehavior,
             navigationIcon = { TopAppBarBackButton(onClick = { popBackStack(navigator) }) },
@@ -61,7 +62,7 @@ class RepositoryScreenSpec : VoyagerScreen() {
                 ExtendedFloatingActionButton(
                     text = {
                         MidSizeTextComposable(
-                            text = localize(MR.strings.add),
+                            text = localize(Res.string.add),
                             color = MaterialTheme.colorScheme.onSecondary
                         )
                     },
@@ -103,14 +104,14 @@ class RepositoryScreenSpec : VoyagerScreen() {
                         )
                         
                         Text(
-                            text = localize(MR.strings.no_repositories_added),
+                            text = localize(Res.string.no_repositories_added),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         
                         Text(
-                            text = localize(MR.strings.no_repositories_added_subtitle),
+                            text = localize(Res.string.no_repositories_added_subtitle),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -132,7 +133,7 @@ class RepositoryScreenSpec : VoyagerScreen() {
                                 modifier = Modifier.size(18.dp)
                             )
                             androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = localize(MR.strings.add_repository))
+                            Text(text = localize(Res.string.add_repository))
                         }
                     }
                 }

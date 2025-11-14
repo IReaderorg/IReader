@@ -2,7 +2,8 @@ package ireader.domain.data.engines
 
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -86,7 +87,7 @@ class OllamaTranslateEngine(
             val model = readerPreferences.ollamaModel().get()
             
             if (serverUrl.isBlank()) {
-                onError(UiText.MStringResource(MR.strings.ollama_server_url_not_set))
+                onError(UiText.MStringResource(Res.string.ollama_server_url_not_set))
                 return
             }
 

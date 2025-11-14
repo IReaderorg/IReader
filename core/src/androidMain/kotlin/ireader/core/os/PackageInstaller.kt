@@ -24,7 +24,8 @@ import android.os.SystemClock
 import android.widget.Toast
 import ireader.core.log.Log
 import ireader.i18n.LocalizeHelper
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -43,7 +44,7 @@ class PackageInstaller(
         try {
           // Make sure the file is readable and has appropriate attributes
           if (!file.exists() || !file.canRead()) {
-            val errorMsg = localizeHelper.localize(MR.strings.file_not_found_error)
+            val errorMsg = localizeHelper.localize(Res.string.file_not_found_error)
             // Show a toast to make the error more visible
             withContext(Dispatchers.Main) {
               Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
@@ -216,7 +217,7 @@ class PackageInstaller(
           InstallStep.Downloading
         } catch (e: Exception) {
           Log.error("Failed to install package", e.message)
-          val errorMsg = localizeHelper.localize(MR.strings.installation_error) + ": ${e.message}"
+          val errorMsg = localizeHelper.localize(Res.string.installation_error) + ": ${e.message}"
           
           withContext(Dispatchers.Main) {
             Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
@@ -324,7 +325,7 @@ class PackageInstaller(
           val confirmationIntent = intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
           if (confirmationIntent == null) {
             Log.warn { "Fatal error for $intent - no confirmation intent" }
-            val errorMessage = localizeHelper.localize(MR.strings.fatal_error)
+            val errorMessage = localizeHelper.localize(Res.string.fatal_error)
             Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
             deferred.complete(InstallStep.Error(errorMessage))
             return
@@ -370,7 +371,7 @@ class PackageInstaller(
             // The final result will come in a separate broadcast
           } catch (e: Throwable) {
             Log.warn("Error while showing installation dialog", e)
-            val errorMessage = localizeHelper.localize(MR.strings.installation_error) + ": " + e.message
+            val errorMessage = localizeHelper.localize(Res.string.installation_error) + ": " + e.message
             Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
             deferred.complete(InstallStep.Error(errorMessage))
           }
@@ -379,49 +380,49 @@ class PackageInstaller(
           Log.info("Installation successful")
           Toast.makeText(
             context, 
-            localizeHelper.localize(MR.strings.installation_successful), 
+            localizeHelper.localize(Res.string.installation_successful), 
             Toast.LENGTH_SHORT
           ).show()
           deferred.complete(InstallStep.Success)
         }
         PackageInstaller.STATUS_FAILURE_ABORTED -> {
-          val errorMessage = localizeHelper.localize(MR.strings.installation_error_aborted)
+          val errorMessage = localizeHelper.localize(Res.string.installation_error_aborted)
           Log.warn("Installation aborted: $errorMessage")
           Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
           deferred.complete(InstallStep.Error(errorMessage))
         }
         PackageInstaller.STATUS_FAILURE_BLOCKED -> {
-          val errorMessage = localizeHelper.localize(MR.strings.installation_error_blocked)
+          val errorMessage = localizeHelper.localize(Res.string.installation_error_blocked)
           Log.warn("Installation blocked: $errorMessage")
           Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
           deferred.complete(InstallStep.Error(errorMessage))
         }
         PackageInstaller.STATUS_FAILURE_CONFLICT -> {
-          val errorMessage = localizeHelper.localize(MR.strings.installation_error_conflicted)
+          val errorMessage = localizeHelper.localize(Res.string.installation_error_conflicted)
           Log.warn("Installation conflict: $errorMessage")
           Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
           deferred.complete(InstallStep.Error(errorMessage))
         }
         PackageInstaller.STATUS_FAILURE_INCOMPATIBLE -> {
-          val errorMessage = localizeHelper.localize(MR.strings.installation_error_incompatible)
+          val errorMessage = localizeHelper.localize(Res.string.installation_error_incompatible)
           Log.warn("Installation incompatible: $errorMessage")
           Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
           deferred.complete(InstallStep.Error(errorMessage))
         }
         PackageInstaller.STATUS_FAILURE_STORAGE -> {
-          val errorMessage = localizeHelper.localize(MR.strings.installation_error_Storage)
+          val errorMessage = localizeHelper.localize(Res.string.installation_error_Storage)
           Log.warn("Installation storage error: $errorMessage")
           Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
           deferred.complete(InstallStep.Error(errorMessage))
         }
         PackageInstaller.STATUS_FAILURE_INVALID -> {
-          val errorMessage = localizeHelper.localize(MR.strings.installation_error_invalid)
+          val errorMessage = localizeHelper.localize(Res.string.installation_error_invalid)
           Log.warn("Installation invalid: $errorMessage")
           Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
           deferred.complete(InstallStep.Error(errorMessage))
         }
         else -> {
-          val errorMessage = localizeHelper.localize(MR.strings.package_installer_failed_to_install_packages) + " Status: $status, Message: $statusMessage"
+          val errorMessage = localizeHelper.localize(Res.string.package_installer_failed_to_install_packages) + " Status: $status, Message: $statusMessage"
           Log.error("Package installer failed: $errorMessage")
           Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
           deferred.complete(InstallStep.Error(errorMessage))

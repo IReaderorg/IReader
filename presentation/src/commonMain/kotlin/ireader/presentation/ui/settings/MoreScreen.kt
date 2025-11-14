@@ -28,11 +28,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
-import dev.icerock.moko.resources.StringResource
+import org.jetbrains.compose.resources.StringResource
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.i18n.Images.incognito
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.Divider
 import ireader.presentation.ui.component.components.LogoHeader
 import ireader.presentation.ui.component.components.PreferenceRow
@@ -142,7 +144,7 @@ fun MoreScreen(
                         modifier = Modifier.weight(1f)
                     ) {
                         Text(
-                            text = localize(MR.strings.pref_incognito_mode),
+                            text = localize(Res.string.pref_incognito_mode),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = if (vm.incognitoMode.value) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
@@ -151,7 +153,7 @@ fun MoreScreen(
                         Spacer(modifier = Modifier.height(2.dp))
                         
                         Text(
-                            text = localize(MR.strings.pref_incognito_mode_summary),
+                            text = localize(Res.string.pref_incognito_mode_summary),
                             style = MaterialTheme.typography.bodySmall,
                             color = if (vm.incognitoMode.value) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -206,7 +208,7 @@ fun MoreScreen(
         
         item {
             SettingsItem(
-                title = localizeHelper.localize(MR.strings.download),
+                title = localizeHelper.localize(Res.string.download),
                 description = "Manage downloaded content",
                 icon = Icons.Outlined.Download,
                 onClick = onDownloadScreen
@@ -215,7 +217,7 @@ fun MoreScreen(
         
         item {
             SettingsItem(
-                title = localizeHelper.localize(MR.strings.backup_and_restore),
+                title = localizeHelper.localize(Res.string.backup_and_restore),
                 description = "Backup and restore your library",
                 icon = Icons.Outlined.SettingsBackupRestore,
                 onClick = onBackupScreen
@@ -224,7 +226,7 @@ fun MoreScreen(
         
         item {
             SettingsItem(
-                title = localizeHelper.localize(MR.strings.category),
+                title = localizeHelper.localize(Res.string.category),
                 description = "Organize books with categories",
                 icon = Icons.Outlined.Label,
                 onClick = onCategory
@@ -283,7 +285,7 @@ fun MoreScreen(
         
         item {
             SettingsItem(
-                title = localizeHelper.localize(MR.strings.settings),
+                title = localizeHelper.localize(Res.string.settings),
                 description = "Configure app preferences",
                 icon = Icons.Outlined.Settings,
                 onClick = onSettings
@@ -309,7 +311,7 @@ fun MoreScreen(
         
         item {
             SettingsItem(
-                title = localizeHelper.localize(MR.strings.about),
+                title = localizeHelper.localize(Res.string.about),
                 description = "App info and credits",
                 icon = Icons.Outlined.Info,
                 onClick = onAbout
@@ -318,7 +320,7 @@ fun MoreScreen(
         
         item {
             SettingsItem(
-                title = localizeHelper.localize(MR.strings.help),
+                title = localizeHelper.localize(Res.string.help),
                 description = "Get help with the app",
                 icon = Icons.Outlined.Help,
                 onClick = onHelp

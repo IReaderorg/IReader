@@ -24,7 +24,8 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -123,8 +124,8 @@ fun GetPermissions(uiPreferences: UiPreferences, context: Context) {
     if (showRationale) {
         AlertDialog(
             onDismissRequest = { showRationale = false },
-            title = { Text(localize(MR.strings.permission_required)) },
-            text = { Text(localize(MR.strings.storage_permission_required_explanation)) },
+            title = { Text(localize(Res.string.permission_required)) },
+            text = { Text(localize(Res.string.storage_permission_required_explanation)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -137,14 +138,14 @@ fun GetPermissions(uiPreferences: UiPreferences, context: Context) {
                         }
                     }
                 ) {
-                    Text(localize(MR.strings.settings))
+                    Text(localize(Res.string.settings))
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = { showRationale = false }
                 ) {
-                    Text(localize(MR.strings.cancel))
+                    Text(localize(Res.string.cancel))
                 }
             }
         )

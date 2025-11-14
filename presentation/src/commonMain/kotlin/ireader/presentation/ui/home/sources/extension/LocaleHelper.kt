@@ -1,7 +1,8 @@
 package ireader.presentation.ui.home.sources.extension
 
 import ireader.i18n.LocalizeHelper
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import java.util.*
 
 /**
@@ -14,12 +15,12 @@ object LocaleHelper {
      */
     fun getSourceDisplayName(lang: String?, localizeHelper: LocalizeHelper): String {
         return when (lang) {
-            SourceKeys.LAST_USED_KEY -> localizeHelper.localize(MR.strings.last_used_source)
-            SourceKeys.PINNED_KEY -> localizeHelper.localize(MR.strings.pinned_sources)
-            SourceKeys.INSTALLED_KEY -> localizeHelper.localize(MR.strings.installed)
-            SourceKeys.AVAILABLE -> localizeHelper.localize(MR.strings.available)
-            "other" -> localizeHelper.localize(MR.strings.other_source)
-            "all" -> localizeHelper.localize(MR.strings.all_lang)
+            SourceKeys.LAST_USED_KEY -> localizeHelper.localize(Res.string.last_used_source)
+            SourceKeys.PINNED_KEY -> localizeHelper.localize(Res.string.pinned_sources)
+            SourceKeys.INSTALLED_KEY -> localizeHelper.localize(Res.string.installed)
+            SourceKeys.AVAILABLE -> localizeHelper.localize(Res.string.available)
+            "other" -> localizeHelper.localize(Res.string.other_source)
+            "all" -> localizeHelper.localize(Res.string.all_lang)
             else -> getDisplayName(lang)
         }
     }

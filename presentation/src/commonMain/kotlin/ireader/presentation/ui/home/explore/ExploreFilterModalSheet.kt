@@ -20,7 +20,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.source.model.Filter
 import ireader.core.source.model.Listing
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
 
@@ -53,7 +54,7 @@ fun ExploreFilterModalSheet(
             TopAppBar(
                 title = {
                     Text(
-                        text = localize(MR.strings.filter),
+                        text = localize(Res.string.filter),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -88,7 +89,7 @@ fun ExploreFilterModalSheet(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 16.dp),
-                        label = { Text(localize(MR.strings.search)) },
+                        label = { Text(localize(Res.string.search)) },
                         shape = RoundedCornerShape(8.dp),
                         singleLine = true
                     )
@@ -98,7 +99,7 @@ fun ExploreFilterModalSheet(
                 if (catalogs.isNotEmpty()) {
                     item {
                         Text(
-                            text = localize(MR.strings.source_browse_latest),
+                            text = localize(Res.string.source_browse_latest),
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
@@ -127,7 +128,7 @@ fun ExploreFilterModalSheet(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = localize(MR.strings.filter),
+                                text = localize(Res.string.filter),
                                 style = MaterialTheme.typography.titleMedium
                             )
                         }
@@ -165,7 +166,7 @@ fun ExploreFilterModalSheet(
                         contentDescription = null
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = localize(MR.strings.filter))
+                    Text(text = localize(Res.string.filter))
                 }
             }
         }
@@ -186,7 +187,7 @@ fun ListingChips(
         FilterChip(
             selected = selectedListing == null,
             onClick = { onListingSelected(null) },
-            label = { Text(localize(MR.strings.all)) },
+            label = { Text(localize(Res.string.all)) },
             colors = FilterChipDefaults.filterChipColors(
                 selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                 selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer

@@ -12,7 +12,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 
 /**
  * Dialog that appears when user marks a novel as completed
@@ -30,7 +31,7 @@ fun EndOfLifeOptionsDialog(
         modifier = modifier,
         title = {
             Text(
-                text = localize(MR.strings.end_of_life_options_title),
+                text = localize(Res.string.end_of_life_options_title),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -41,7 +42,7 @@ fun EndOfLifeOptionsDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = localize(MR.strings.end_of_life_options_description),
+                    text = localize(Res.string.end_of_life_options_description),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -68,12 +69,12 @@ fun EndOfLifeOptionsDialog(
                         )
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = localize(MR.strings.archive_option_title),
+                                text = localize(Res.string.archive_option_title),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
-                                text = localize(MR.strings.archive_option_description),
+                                text = localize(Res.string.archive_option_description),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -103,12 +104,12 @@ fun EndOfLifeOptionsDialog(
                         )
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = localize(MR.strings.export_epub_option_title),
+                                text = localize(Res.string.export_epub_option_title),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
-                                text = localize(MR.strings.export_epub_option_description),
+                                text = localize(Res.string.export_epub_option_description),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -135,7 +136,7 @@ fun EndOfLifeOptionsDialog(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(localize(MR.strings.archive))
+                    Text(localize(Res.string.archive))
                 }
                 
                 FilledTonalButton(
@@ -151,13 +152,13 @@ fun EndOfLifeOptionsDialog(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(localize(MR.strings.export_epub))
+                    Text(localize(Res.string.export_epub))
                 }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(localize(MR.strings.cancel))
+                Text(localize(Res.string.cancel))
             }
         }
     )

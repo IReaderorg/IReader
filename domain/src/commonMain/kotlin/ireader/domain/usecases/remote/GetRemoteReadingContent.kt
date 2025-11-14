@@ -8,7 +8,8 @@ import ireader.domain.utils.exceptionHandler
 import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.i18n.SourceNotFoundException
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -30,7 +31,7 @@ class GetRemoteReadingContent() {
                     val page = source.getPageList(chapter.toChapterInfo(), commands)
 
                     if (page.isEmpty()) {
-                        onError(UiText.MStringResource(MR.strings.cant_get_content))
+                        onError(UiText.MStringResource(Res.string.cant_get_content))
                     } else {
                         ireader.core.log.Log.debug("Timber: GetRemoteReadingContentUseCase was Finished Successfully")
                         onSuccess(

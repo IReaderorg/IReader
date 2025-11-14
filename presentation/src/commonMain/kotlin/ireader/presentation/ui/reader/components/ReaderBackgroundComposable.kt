@@ -15,7 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.preferences.models.ReaderColors
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.PreferenceRow
 import ireader.presentation.ui.core.modifier.clickableNoIndication
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
@@ -32,7 +33,7 @@ fun ReaderBackgroundComposable(
 
     PreferenceRow(
         modifier = Modifier.height(80.dp),
-        title = localize(MR.strings.background_color),
+        title = localize(Res.string.background_color),
         action = {
             LazyRow(
                 contentPadding = PaddingValues(4.dp)

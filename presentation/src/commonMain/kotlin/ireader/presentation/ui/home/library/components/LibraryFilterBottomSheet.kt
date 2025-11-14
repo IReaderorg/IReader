@@ -40,7 +40,8 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 
 /**
  * Bottom sheet for library filtering and sorting options
@@ -79,7 +80,7 @@ fun LibraryFilterBottomSheet(
             ) {
                 BottomSheetDefaults.DragHandle()
                 Text(
-                    text = localize(MR.strings.filter_and_sort),
+                    text = localize(Res.string.filter_and_sort),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -141,7 +142,7 @@ private fun GeneralSection(
     onArchivedBooksToggle: (Boolean) -> Unit
 ) {
     Text(
-        text = localize(MR.strings.general),
+        text = localize(Res.string.general),
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold,
         modifier = Modifier.padding(bottom = 12.dp)
@@ -202,7 +203,7 @@ private fun FilterSection(
     onFilterToggle: (LibraryFilter.Type) -> Unit
 ) {
     Text(
-        text = localize(MR.strings.filter),
+        text = localize(Res.string.filter),
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold,
         modifier = Modifier.padding(bottom = 12.dp)
@@ -251,7 +252,7 @@ private fun SortSection(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = localize(MR.strings.sort),
+            text = localize(Res.string.sort),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold
         )
@@ -267,9 +268,9 @@ private fun SortSection(
                     Icons.Default.ArrowDownward
                 },
                 contentDescription = if (sorting.isAscending) {
-                    localize(MR.strings.ascending)
+                    localize(Res.string.ascending)
                 } else {
-                    localize(MR.strings.descending)
+                    localize(Res.string.descending)
                 },
                 tint = MaterialTheme.colorScheme.primary
             )
@@ -336,7 +337,7 @@ private fun DisplaySection(
     }
     
     Text(
-        text = localize(MR.strings.display),
+        text = localize(Res.string.display),
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold,
         modifier = Modifier.padding(bottom = 12.dp)
@@ -348,7 +349,7 @@ private fun DisplaySection(
         // Display Mode Toggle
         Column {
             Text(
-                text = localize(MR.strings.display_mode),
+                text = localize(Res.string.display_mode),
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
@@ -400,7 +401,7 @@ private fun DisplaySection(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = localize(MR.strings.columns),
+                        text = localize(Res.string.columns),
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
@@ -438,9 +439,9 @@ private fun DisplaySection(
 @Composable
 private fun getFilterLabel(type: LibraryFilter.Type): String {
     return when (type) {
-        LibraryFilter.Type.Unread -> localize(MR.strings.unread)
-        LibraryFilter.Type.Completed -> localize(MR.strings.completed)
-        LibraryFilter.Type.Downloaded -> localize(MR.strings.downloaded)
-        LibraryFilter.Type.InProgress -> localize(MR.strings.in_progress)
+        LibraryFilter.Type.Unread -> localize(Res.string.unread)
+        LibraryFilter.Type.Completed -> localize(Res.string.completed)
+        LibraryFilter.Type.Downloaded -> localize(Res.string.downloaded)
+        LibraryFilter.Type.InProgress -> localize(Res.string.in_progress)
     }
 }

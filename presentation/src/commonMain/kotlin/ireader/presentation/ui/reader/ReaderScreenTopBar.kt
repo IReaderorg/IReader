@@ -27,7 +27,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Chapter
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
@@ -80,7 +81,7 @@ fun ReaderScreenTopBar(
                 if (chapter != null) {
                     AppIconButton(
                         imageVector = if (vm.expandTopMenu) Icons.Default.ChevronRight else Icons.Default.ChevronLeft,
-                        contentDescription = localize(MR.strings.expand_menu),
+                        contentDescription = localize(Res.string.expand_menu),
                         onClick = {
                             vm.expandTopMenu = !vm.expandTopMenu
                         }
@@ -88,7 +89,7 @@ fun ReaderScreenTopBar(
                     if (vm.expandTopMenu) {
                         AppIconButton(
                             imageVector = if (chapter.bookmark) Icons.Filled.Bookmark else Icons.Default.Bookmark,
-                            contentDescription = localize(MR.strings.bookmark),
+                            contentDescription = localize(Res.string.bookmark),
                             tint = if (chapter.bookmark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
                             onClick = {
                                 onBookMark()
@@ -131,7 +132,7 @@ fun ReaderScreenTopBar(
                         if (!vm.webViewIntegration.value) {
                             AppIconButton(
                                 imageVector = Icons.Default.Public,
-                                contentDescription = localize(MR.strings.webView),
+                                contentDescription = localize(Res.string.webView),
                                 onClick = {
                                     onWebView()
                                 }
@@ -141,7 +142,7 @@ fun ReaderScreenTopBar(
                     }
                     AppIconButton(
                         imageVector = Icons.Default.Autorenew,
-                        contentDescription = localize(MR.strings.refresh),
+                        contentDescription = localize(Res.string.refresh),
                         onClick = {
                             onRefresh()
                         }
@@ -160,7 +161,7 @@ fun ReaderScreenTopBar(
                 if (chapter != null) {
                     AppIconButton(
                         imageVector = Icons.Default.Autorenew,
-                        contentDescription = localize(MR.strings.refresh),
+                        contentDescription = localize(Res.string.refresh),
                         onClick = {
                             onRefresh()
                         },
@@ -168,7 +169,7 @@ fun ReaderScreenTopBar(
                     )
                     AppIconButton(
                         imageVector = Icons.Default.Public,
-                        contentDescription = localize(MR.strings.webView),
+                        contentDescription = localize(Res.string.webView),
                         onClick = {
                             onWebView()
                         },

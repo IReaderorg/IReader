@@ -18,7 +18,8 @@ import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.i18n.LocalizeHelper
 import ireader.i18n.UiText
 import ireader.i18n.asString
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -180,14 +181,14 @@ class WebViewPageModel(
                     onError = {
                         fetchChapterState = FetchButtonState.Error(it?.asString(localizeHelper =localizeHelper ) ?:"Unknown error")
                         showSnackBar(it)
-                        showSnackBar(UiText.MStringResource(MR.strings.failed_to_get_content))
+                        showSnackBar(UiText.MStringResource(Res.string.failed_to_get_content))
                     },
                     onSuccess = { result ->
                         if (result.content.isNotEmpty()) {
                             webChapter = result
                             insertChapter(result)
                             fetchChapterState = FetchButtonState.Success("Chapter fetched successfully")
-                            showSnackBar(UiText.MStringResource(MR.strings.download_notifier_download_finish))
+                            showSnackBar(UiText.MStringResource(Res.string.download_notifier_download_finish))
                         } else {
                             // Retry with fallback parsing if content is empty
                             fetchChapterState = FetchButtonState.Error("No content found. Please try again.")
@@ -227,7 +228,7 @@ class WebViewPageModel(
                         if (result.isNotEmpty()) {
                             insertChapters(result.map { it.copy(bookId = book.id) })
                             val message = if (result.size == 1) 
-                                UiText.MStringResource(MR.strings.download_notifier_download_finish) 
+                                UiText.MStringResource(Res.string.download_notifier_download_finish) 
                             else 
                                 UiText.DynamicString("${result.size} chapters have been downloaded")
                             fetchChaptersState = FetchButtonState.Success("${result.size} chapters fetched")

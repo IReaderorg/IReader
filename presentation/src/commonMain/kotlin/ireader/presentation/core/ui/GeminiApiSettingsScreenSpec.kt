@@ -27,7 +27,8 @@
 //import cafe.adriel.voyager.navigator.currentOrThrow
 //import ireader.domain.usecases.translate.WebscrapingTranslateEngine
 //import ireader.i18n.localize
-//import ireader.i18n.resources.MR
+//import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 //import ireader.presentation.ui.component.IScaffold
 //import ireader.presentation.ui.component.components.Components
 //import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -60,7 +61,7 @@
 //        IScaffold(
 //            topBar = { scrollBehavior ->
 //                ireader.presentation.ui.component.ScrollableAppBar(
-//                    title = localizeHelper.localize(MR.strings.gemini_api_key),
+//                    title = localizeHelper.localize(Res.string.gemini_api_key),
 //                    navigateBack = {
 //                        navigator.pop()
 //                    },
@@ -105,7 +106,7 @@
 //                        saveSuccess = true
 //                        isSaving = false
 //                    },
-//                    text = localizeHelper.localize(MR.strings.save),
+//                    text = localizeHelper.localize(Res.string.save),
 //                    isLoading = isSaving
 //                ).Build()
 //

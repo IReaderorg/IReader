@@ -7,7 +7,8 @@ import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Toolbar
@@ -27,7 +28,7 @@ class StatisticsScreenSpec : VoyagerScreen() {
                 Toolbar(
                     scrollBehavior = scrollBehavior,
                     title = {
-                        BigSizeTextComposable(text = localize(MR.strings.statistics))
+                        BigSizeTextComposable(text = localize(Res.string.statistics))
                     },
                     navigationIcon = { TopAppBarBackButton(onClick = { popBackStack(navigator) }) },
                 )

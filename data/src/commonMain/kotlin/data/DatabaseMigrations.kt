@@ -12,7 +12,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 8
+    const val CURRENT_VERSION = 9
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -70,9 +70,10 @@ object DatabaseMigrations {
             3 -> migrateV3toV4(driver)
             4 -> migrateV4toV5(driver)
             5 -> migrateV5toV6(driver)
+            6 -> migrateV6toV7(driver)
+            7 -> migrateV7toV8(driver)
+            8 -> migrateV8toV9(driver)
             // Add more migration cases as the database evolves
-            // 6 -> migrateV6toV7(driver)
-            // etc.
         }
     }
     
@@ -154,6 +155,114 @@ object DatabaseMigrations {
             println("Error migrating to version 6: ${e.message}")
             e.printStackTrace()
             // Don't throw - allow the app to continue even if migration fails
+        }
+    }
+    
+    /**
+     * Migration from version 6 to version 7
+     * Updates sync_queue table schema for better sync management
+     */
+    private fun migrateV6toV7(driver: SqlDriver) {
+        try {
+            println("Starting migration from version 6 to 7...")
+            
+            // Check if sync_queue table exists
+            var syncQueueExists = false
+            driver.executeQuery(
+                identifier = null,
+                sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='sync_queue'",
+                mapper = { cursor ->
+                    val result = cursor.next()
+                    syncQueueExists = result.value
+                    result
+                },
+                parameters = 0
+            )
+            
+            if (syncQueueExists) {
+                driver.execute(null, "DROP TABLE IF EXISTS sync_queue;", 0)
+                println("Dropped old sync_queue table")
+            }
+            
+            // Create new sync_queue table with updated schema
+            val createSyncQueueSql = """
+                CREATE TABLE sync_queue (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    operation TEXT NOT NULL,
+                    entity_type TEXT NOT NULL,
+                    entity_id TEXT NOT NULL,
+                    data TEXT NOT NULL,
+                    created_at INTEGER NOT NULL,
+                    retry_count INTEGER NOT NULL DEFAULT 0,
+                    last_error TEXT,
+                    status TEXT NOT NULL DEFAULT 'pending'
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createSyncQueueSql, 0)
+            println("Created new sync_queue table with updated schema")
+            
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_sync_queue_status ON sync_queue(status);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_sync_queue_created_at ON sync_queue(created_at);", 0)
+            println("Created indexes for sync_queue table")
+            
+            println("Successfully migrated to version 7")
+            
+        } catch (e: Exception) {
+            println("Error migrating to version 7: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+    
+    /**
+     * Migration from version 7 to version 8
+     * Reverts sync_queue table to simpler schema
+     */
+    private fun migrateV7toV8(driver: SqlDriver) {
+        try {
+            println("Starting migration from version 7 to 8...")
+            
+            // Check if sync_queue table exists
+            var syncQueueExists = false
+            driver.executeQuery(
+                identifier = null,
+                sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='sync_queue'",
+                mapper = { cursor ->
+                    val result = cursor.next()
+                    syncQueueExists = result.value
+                    result
+                },
+                parameters = 0
+            )
+            
+            if (syncQueueExists) {
+                driver.execute(null, "DROP TABLE IF EXISTS sync_queue;", 0)
+                println("Dropped old sync_queue table")
+            }
+            
+            // Create sync_queue table with final schema (matching sync_queue.sq)
+            val createSyncQueueSql = """
+                CREATE TABLE sync_queue (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    book_id TEXT NOT NULL,
+                    data TEXT NOT NULL,
+                    timestamp INTEGER NOT NULL,
+                    retry_count INTEGER DEFAULT 0
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createSyncQueueSql, 0)
+            println("Created sync_queue table with final schema")
+            
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_sync_queue_timestamp ON sync_queue(timestamp ASC);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_sync_queue_book_id ON sync_queue(book_id);", 0)
+            println("Created indexes for sync_queue table")
+            
+            println("Successfully migrated to version 8")
+            
+        } catch (e: Exception) {
+            println("Error migrating to version 8: ${e.message}")
+            e.printStackTrace()
         }
     }
     

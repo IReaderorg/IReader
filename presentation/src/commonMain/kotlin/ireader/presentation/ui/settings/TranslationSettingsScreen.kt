@@ -35,7 +35,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.data.engines.ContentType
 import ireader.domain.data.engines.ToneType
 import ireader.domain.usecases.translate.TranslationEnginesManager
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.setupUiComponent
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -109,7 +110,7 @@ fun TranslationSettingsScreen(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = localizeHelper.localize(MR.strings.translation_settings),
+                    text = localizeHelper.localize(Res.string.translation_settings),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -126,14 +127,14 @@ fun TranslationSettingsScreen(
     // Engine Selection Section
     items.add(
         Components.Header(
-            localizeHelper.localize(MR.strings.translation_engine)
+            localizeHelper.localize(Res.string.translation_engine)
         )
     )
 
     items.add(
         Components.Chip(
             preference = options.map { it.second },
-            title = localizeHelper.localize(MR.strings.translation_engine),
+            title = localizeHelper.localize(Res.string.translation_engine),
             onValueChange = { value ->
                 onTranslatorEngineChange(value.toLong())
                 forceRecompose()
@@ -148,14 +149,14 @@ fun TranslationSettingsScreen(
     if (engines.find { it.id == translatorEngine }?.requiresApiKey == true) {
         items.add(
             Components.Header(
-                localizeHelper.localize(MR.strings.api_keys)
+                localizeHelper.localize(Res.string.api_keys)
             )
         )
 
         if (translatorEngine == 2L) { // OpenAI
             items.add(
                 Components.Row(
-                    title = localizeHelper.localize(MR.strings.openai_api_key),
+                    title = localizeHelper.localize(Res.string.openai_api_key),
                     icon = Icons.Default.Api,
                     subtitle = "Required for OpenAI translations",
                     onClick = {},
@@ -166,7 +167,7 @@ fun TranslationSettingsScreen(
                                 onOpenAIApiKeyChange(it)
                                 forceRecompose()
                             },
-                            label = { Text(localizeHelper.localize(MR.strings.openai_api_key)) },
+                            label = { Text(localizeHelper.localize(Res.string.openai_api_key)) },
                             visualTransformation = if (openAIKeyVisible) {
                                 androidx.compose.ui.text.input.VisualTransformation.None
                             } else {
@@ -191,7 +192,7 @@ fun TranslationSettingsScreen(
         if (translatorEngine == 3L) { // DeepSeek
             items.add(
                 Components.Row(
-                    title = localizeHelper.localize(MR.strings.deepseek_api_key),
+                    title = localizeHelper.localize(Res.string.deepseek_api_key),
                     icon = Icons.Default.Api,
                     subtitle = "Required for DeepSeek translations",
                     onClick = {},
@@ -202,7 +203,7 @@ fun TranslationSettingsScreen(
                                 onDeepSeekApiKeyChange(it)
                                 forceRecompose()
                             },
-                            label = { Text(localizeHelper.localize(MR.strings.deepseek_api_key)) },
+                            label = { Text(localizeHelper.localize(Res.string.deepseek_api_key)) },
                             visualTransformation = if (deepSeekKeyVisible) {
                                 androidx.compose.ui.text.input.VisualTransformation.None
                             } else {
@@ -281,7 +282,7 @@ fun TranslationSettingsScreen(
 
         items.add(
             Components.Row(
-                title = localizeHelper.localize(MR.strings.ollama_url),
+                title = localizeHelper.localize(Res.string.ollama_url),
                 icon = Icons.Default.Api,
                 subtitle = "URL of your Ollama API server",
                 onClick = {},
@@ -292,7 +293,7 @@ fun TranslationSettingsScreen(
                             onOllamaUrlChange(it)
                             forceRecompose()
                         },
-                        label = { Text(localizeHelper.localize(MR.strings.ollama_url)) },
+                        label = { Text(localizeHelper.localize(Res.string.ollama_url)) },
                         modifier = Modifier.fillMaxWidth(),
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Uri
@@ -304,7 +305,7 @@ fun TranslationSettingsScreen(
 
         items.add(
             Components.Row(
-                title = localizeHelper.localize(MR.strings.ollama_model),
+                title = localizeHelper.localize(Res.string.ollama_model),
                 icon = Icons.Default.Settings,
                 subtitle = "Model to use for translation (e.g., mistral, llama2)",
                 onClick = {},
@@ -315,7 +316,7 @@ fun TranslationSettingsScreen(
                             onOllamaModelChange(it)
                             forceRecompose()
                         },
-                        label = { Text(localizeHelper.localize(MR.strings.ollama_model)) },
+                        label = { Text(localizeHelper.localize(Res.string.ollama_model)) },
                         modifier = Modifier.fillMaxWidth(),
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Text
@@ -377,7 +378,7 @@ fun TranslationSettingsScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = localizeHelper.localize(MR.strings.libretranslate_info),
+                        text = localizeHelper.localize(Res.string.libretranslate_info),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                         modifier = Modifier.padding(top = 8.dp)
@@ -514,7 +515,7 @@ fun TranslationSettingsScreen(
 
         items.add(
             Components.Row(
-                title = localizeHelper.localize(MR.strings.gemini_api_key),
+                title = localizeHelper.localize(Res.string.gemini_api_key),
                 icon = Icons.Default.Api,
                 subtitle = "Required for Google Gemini translations",
                 onClick = {},
@@ -525,7 +526,7 @@ fun TranslationSettingsScreen(
                             onGeminiApiKeyChange(it)
                             forceRecompose()
                         },
-                        label = { Text(localizeHelper.localize(MR.strings.gemini_api_key)) },
+                        label = { Text(localizeHelper.localize(Res.string.gemini_api_key)) },
                         visualTransformation = if (geminiKeyVisible) {
                             androidx.compose.ui.text.input.VisualTransformation.None
                         } else {
@@ -578,13 +579,13 @@ fun TranslationSettingsScreen(
     if (isAiEngine) {
         items.add(
             Components.Header(
-                localizeHelper.localize(MR.strings.advanced_settings)
+                localizeHelper.localize(Res.string.advanced_settings)
             )
         )
 
         items.add(
             Components.Chip(
-            title = localizeHelper.localize(MR.strings.content_type),
+            title = localizeHelper.localize(Res.string.content_type),
             icon = Icons.Default.Translate,
             subtitle = "Optimizes translation for specific content",
             onValueChange = {
@@ -597,7 +598,7 @@ fun TranslationSettingsScreen(
 
         items.add(
             Components.Chip(
-            title = localizeHelper.localize(MR.strings.tone_type),
+            title = localizeHelper.localize(Res.string.tone_type),
             icon = Icons.Default.Translate,
             subtitle = "Sets the tone of translated text",
             onValueChange = {
@@ -610,7 +611,7 @@ fun TranslationSettingsScreen(
 
         items.add(
             Components.Switch(
-                title = localizeHelper.localize(MR.strings.preserve_style),
+                title = localizeHelper.localize(Res.string.preserve_style),
                 icon = Icons.Default.Style,
                 subtitle = "Keep the original writing style when translating",
                 preference = translatorPreserveStyle,

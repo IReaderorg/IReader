@@ -13,7 +13,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 
@@ -36,15 +37,15 @@ fun BottomTabComposable(
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
     val tabs = listOf(
         TabItem(
-            localizeHelper.localize(MR.strings.filter)
+            localizeHelper.localize(Res.string.filter)
         ) {
         },
         TabItem(
-            localizeHelper.localize(MR.strings.sort)
+            localizeHelper.localize(Res.string.sort)
         ) {
         },
         TabItem(
-            localizeHelper.localize(MR.strings.display)
+            localizeHelper.localize(Res.string.display)
         ) {
         },
     )

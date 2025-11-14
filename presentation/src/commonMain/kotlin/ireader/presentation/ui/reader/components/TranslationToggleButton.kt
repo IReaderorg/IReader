@@ -17,7 +17,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 
 @Composable
 fun TranslationToggleButton(
@@ -46,9 +47,9 @@ fun TranslationToggleButton(
             Icon(
                 imageVector = Icons.Default.Translate,
                 contentDescription = if (isTranslated) 
-                    localize(MR.strings.show_original) 
+                    localize(Res.string.show_original) 
                 else 
-                    localize(MR.strings.show_translation),
+                    localize(Res.string.show_translation),
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -80,7 +81,7 @@ fun TranslationBadge(
                     tint = textColor
                 )
                 Text(
-                    text = localize(MR.strings.translated),
+                    text = localize(Res.string.translated),
                     style = MaterialTheme.typography.labelSmall,
                     color = textColor
                 )

@@ -16,7 +16,8 @@ import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.i18n.LocalizeHelper
 import ireader.i18n.UiText
 import ireader.i18n.asString
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -105,14 +106,14 @@ class DeepSeekTranslateEngine(
     ) {
         // Validate inputs and handle empty or null lists
         if (texts.isNullOrEmpty()) {
-            onError(UiText.MStringResource(MR.strings.no_text_to_translate))
+            onError(UiText.MStringResource(Res.string.no_text_to_translate))
             return
         }
         
         val apiKey = readerPreferences.deepSeekApiKey().get()
         
         if (apiKey.isBlank()) {
-            onError(UiText.MStringResource(MR.strings.deepseek_api_key_not_set))
+            onError(UiText.MStringResource(Res.string.deepseek_api_key_not_set))
             return
         }
         
@@ -147,7 +148,7 @@ class DeepSeekTranslateEngine(
                 // Check the response status code
                 if (response.status.value == 402) {
                     println("DeepSeek API error: HTTP 402 Payment Required - Subscription issue or account balance")
-                    onError(UiText.MStringResource(MR.strings.deepseek_payment_required))
+                    onError(UiText.MStringResource(Res.string.deepseek_payment_required))
                     return
                 }
                 
@@ -183,11 +184,11 @@ class DeepSeekTranslateEngine(
                         onSuccess(finalTexts)
                     } else {
                         println("DeepSeek API returned empty message content")
-                        onError(UiText.MStringResource(MR.strings.empty_response))
+                        onError(UiText.MStringResource(Res.string.empty_response))
                     }
                 } else {
                     println("DeepSeek API returned empty choices array")
-                    onError(UiText.MStringResource(MR.strings.empty_response))
+                    onError(UiText.MStringResource(Res.string.empty_response))
                 }
             } catch (e: Exception) {
                 // Log the network error for debugging
@@ -198,16 +199,16 @@ class DeepSeekTranslateEngine(
                 val errorMessage = when {
                     e.message?.contains("401") == true || e.message?.contains("unauthorized") == true || 
                     e.message?.contains("authentication") == true -> 
-                        UiText.MStringResource(MR.strings.deepseek_api_key_invalid)
+                        UiText.MStringResource(Res.string.deepseek_api_key_invalid)
                     
                     e.message?.contains("402") == true ->
-                        UiText.MStringResource(MR.strings.deepseek_api_key_invalid)
+                        UiText.MStringResource(Res.string.deepseek_api_key_invalid)
                         
                     e.message?.contains("429") == true || e.message?.contains("rate limit") == true ->
-                        UiText.MStringResource(MR.strings.api_rate_limit_exceeded)
+                        UiText.MStringResource(Res.string.api_rate_limit_exceeded)
                     
                     e is NullPointerException && e.message?.contains("Collection.isEmpty()") == true ->
-                        UiText.MStringResource(MR.strings.api_response_error)
+                        UiText.MStringResource(Res.string.api_response_error)
                         
                     else -> UiText.ExceptionString(e)
                 }

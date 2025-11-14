@@ -17,7 +17,8 @@ import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.ui.settings.reader.SettingState
 
@@ -73,7 +74,7 @@ class AdvanceSettingViewModel(
         scope.launchIO {
             try {
                 repairDatabaseUseCase.execute()
-                showSnackBar(UiText.MStringResource(MR.strings.success))
+                showSnackBar(UiText.MStringResource(Res.string.success))
             } catch (e: Exception) {
                 showSnackBar(UiText.DynamicString("Database repair failed: ${e.message}"))
             }
@@ -84,14 +85,14 @@ class AdvanceSettingViewModel(
         scope.launchIO {
             categoryRepository.deleteAll()
             categoryRepository.insert(Category.baseCategories)
-            showSnackBar(UiText.MStringResource(MR.strings.success))
+            showSnackBar(UiText.MStringResource(Res.string.success))
         }
     }
 
     fun resetThemes() {
         scope.launchIO {
             themeRepository.deleteAll()
-            showSnackBar(UiText.MStringResource(MR.strings.success))
+            showSnackBar(UiText.MStringResource(Res.string.success))
         }
     }
 
@@ -102,7 +103,7 @@ class AdvanceSettingViewModel(
         scope.launchIO {
             try {
                 bookRepository.repairCategoryAssignments()
-                showSnackBar(UiText.MStringResource(MR.strings.success))
+                showSnackBar(UiText.MStringResource(Res.string.success))
             } catch (e: Exception) {
                 showSnackBar(UiText.DynamicString("Failed to repair categories: ${e.message}"))
             }

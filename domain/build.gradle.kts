@@ -90,6 +90,7 @@ kotlin {
                 // This is a clean architecture violation that will be fixed in Task 5
                 api(compose.ui)
                 api(compose.runtime)
+                api(compose.components.resources)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 implementation(compose.material3)
                 api(kotlinx.coroutines.core)

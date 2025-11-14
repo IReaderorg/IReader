@@ -19,7 +19,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.UiText
 import ireader.i18n.asString
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.SuperSmallTextComposable
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -45,7 +46,7 @@ fun GoToLastReadComposable(modifier: Modifier = Modifier, size: Dp = 40.dp, onCl
         ) {
             AppIconButton(
                 imageVector = Icons.Default.ImportContacts,
-                contentDescription = localize(MR.strings.open_last_chapter),
+                contentDescription = localize(Res.string.open_last_chapter),
                 onClick = {
                     onClick()
                 },

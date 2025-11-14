@@ -14,7 +14,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.UiText
 import ireader.i18n.asString
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.BuildDropDownMenu
@@ -81,7 +82,7 @@ private fun RegularTopBar(
         scrollBehavior = scrollBehavior,
         title = {
             Text(
-                text = UiText.MStringResource(MR.strings.downloads_queue).asString(localizeHelper),
+                text = UiText.MStringResource(Res.string.downloads_queue).asString(localizeHelper),
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
@@ -92,7 +93,7 @@ private fun RegularTopBar(
             val list =
                 listOf<DropDownMenuItem>(
                     DropDownMenuItem(
-                        localize(MR.strings.cancel_all)
+                        localize(Res.string.cancel_all)
                     ) {
                         onCancelAll()
                     }
@@ -103,7 +104,7 @@ private fun RegularTopBar(
             IconButton(onClick = onPopBackStack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = localize(MR.strings.return_to_previous_screen),
+                    contentDescription = localize(Res.string.return_to_previous_screen),
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }

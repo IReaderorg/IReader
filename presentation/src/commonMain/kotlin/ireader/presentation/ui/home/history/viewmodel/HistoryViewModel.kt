@@ -7,7 +7,8 @@ import ireader.domain.models.entities.HistoryWithRelations
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.history.HistoryUseCase
 import ireader.i18n.LocalizeHelper
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.reusable_composable.WarningAlertData
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.launch
@@ -122,8 +123,8 @@ class HistoryViewModel(
         // Now create a new alert dialog
         warningAlert = WarningAlertData().copy(
             enable = true,
-            title = localizeHelper.localize(MR.strings.remove),
-            text = localizeHelper.localize(MR.strings.dialog_remove_chapter_history_description),
+            title = localizeHelper.localize(Res.string.remove),
+            text = localizeHelper.localize(Res.string.dialog_remove_chapter_history_description),
             onDismiss = {
                 // Just dismiss the alert without deleting when cancel is pressed
                 warningAlert = warningAlert.copy(enable = false)
@@ -151,12 +152,12 @@ class HistoryViewModel(
         warningAlert = WarningAlertData()
         
         // Now create a new alert dialog
-        val warningMessage = localizeHelper.localize(MR.strings.dialog_remove_chapter_books_description) + 
-            " " + localizeHelper.localize(MR.strings.action_cannot_be_undone)
+        val warningMessage = localizeHelper.localize(Res.string.dialog_remove_chapter_books_description) + 
+            " " + localizeHelper.localize(Res.string.action_cannot_be_undone)
         
         warningAlert = WarningAlertData().copy(
             enable = true,
-            title = localizeHelper.localize(MR.strings.delete_all_histories),
+            title = localizeHelper.localize(Res.string.delete_all_histories),
             text = warningMessage,
             onDismiss = {
                 // Just dismiss the alert without deleting when cancel is pressed

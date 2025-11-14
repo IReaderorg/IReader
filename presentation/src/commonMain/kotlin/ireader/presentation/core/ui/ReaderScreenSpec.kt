@@ -40,8 +40,8 @@ import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.models.getDefaultFont
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
-import ireader.i18n.resources.MR.strings.padding
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
@@ -403,7 +403,7 @@ data class ReaderScreenSpec(
                                     scope.launch {
                                         vm.showSnackBar(
                                             UiText.MStringResource(
-                                                MR.strings.this_is_last_chapter
+                                                Res.string.this_is_last_chapter
                                             )
                                         )
                                     }
@@ -435,7 +435,7 @@ data class ReaderScreenSpec(
                                         scope.launch {
                                             vm.showSnackBar(
                                                 UiText.MStringResource(
-                                                    MR.strings.this_is_first_chapter
+                                                    Res.string.this_is_first_chapter
                                                 )
                                             )
                                         }

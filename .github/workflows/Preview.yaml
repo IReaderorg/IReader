@@ -73,7 +73,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: 24
+          java-version: 21
           distribution: temurin
 
       - name: Get previous release
@@ -87,7 +87,7 @@ jobs:
       - uses: actions/setup-java@v4
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
         with:
-          java-version: 24
+          java-version: 21
           distribution: temurin
           architecture: ${{ matrix.arch }}
 
@@ -109,8 +109,8 @@ jobs:
             -e SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
             -e SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}" \
             fedora:latest bash -c "
-            dnf install -y java-24-openjdk-devel java-24-openjdk-jmods rpm-build findutils &&
-            export JAVA_HOME=/usr/lib/jvm/java-24-openjdk &&
+            dnf install -y java-21-openjdk-devel java-21-openjdk-jmods rpm-build findutils &&
+            export JAVA_HOME=/usr/lib/jvm/java-21-openjdk &&
             export PATH=\$JAVA_HOME/bin:\$PATH &&
             ./gradlew ${{ matrix.build }} -Ppreview=\"${{ env.COMMIT_COUNT }}\" --stacktrace
           "

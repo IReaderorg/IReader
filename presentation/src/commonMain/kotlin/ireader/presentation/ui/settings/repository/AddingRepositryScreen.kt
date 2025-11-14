@@ -23,7 +23,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.remember.rememberMutableString
 import ireader.presentation.ui.component.reusable_composable.SmallTextComposable
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -90,7 +91,7 @@ internal fun AddingRepositoryScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Help,
-                                contentDescription = localizeHelper.localize(MR.strings.help),
+                                contentDescription = localizeHelper.localize(Res.string.help),
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -183,7 +184,7 @@ internal fun AddingRepositoryScreen(
             
             item {
                 EnhancedFormComponent(
-                    label = localizeHelper.localize(MR.strings.name),
+                    label = localizeHelper.localize(Res.string.name),
                     icon = Icons.Default.Badge,
                     state = name,
                     error = nameError,
@@ -199,7 +200,7 @@ internal fun AddingRepositoryScreen(
             
             item {
                 EnhancedFormComponent(
-                    label = localizeHelper.localize(MR.strings.url),
+                    label = localizeHelper.localize(Res.string.url),
                     icon = Icons.Default.Link,
                     state = url,
                     error = urlError,
@@ -226,7 +227,7 @@ internal fun AddingRepositoryScreen(
             
             item {
                 EnhancedFormComponent(
-                    label = localizeHelper.localize(MR.strings.owner),
+                    label = localizeHelper.localize(Res.string.owner),
                     icon = Icons.Default.Copyright,
                     state = owner,
                     placeholder = "Repository owner",
@@ -241,7 +242,7 @@ internal fun AddingRepositoryScreen(
             
             item {
                 EnhancedFormComponent(
-                    label = localizeHelper.localize(MR.strings.source),
+                    label = localizeHelper.localize(Res.string.source),
                     icon = Icons.Default.HideSource,
                     state = source,
                     placeholder = "Source identifier",
@@ -289,7 +290,7 @@ internal fun AddingRepositoryScreen(
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         EnhancedFormComponent(
-                            label = localizeHelper.localize(MR.strings.username),
+                            label = localizeHelper.localize(Res.string.username),
                             icon = Icons.Default.Person,
                             state = username,
                             placeholder = "Username",
@@ -303,7 +304,7 @@ internal fun AddingRepositoryScreen(
                         )
                         
                         EnhancedFormComponent(
-                            label = localizeHelper.localize(MR.strings.password),
+                            label = localizeHelper.localize(Res.string.password),
                             icon = Icons.Default.Key,
                             state = password,
                             placeholder = "Password",
@@ -342,7 +343,7 @@ internal fun AddingRepositoryScreen(
             },
             title = {
                 Text(
-                    text = localizeHelper.localize(MR.strings.what_is_repository),
+                    text = localizeHelper.localize(Res.string.what_is_repository),
                     style = MaterialTheme.typography.headlineSmall
                 )
             },
@@ -351,7 +352,7 @@ internal fun AddingRepositoryScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = localizeHelper.localize(MR.strings.repository_explanation),
+                        text = localizeHelper.localize(Res.string.repository_explanation),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -372,7 +373,7 @@ internal fun AddingRepositoryScreen(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = localizeHelper.localize(MR.strings.repository_example_url),
+                                text = localizeHelper.localize(Res.string.repository_example_url),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace

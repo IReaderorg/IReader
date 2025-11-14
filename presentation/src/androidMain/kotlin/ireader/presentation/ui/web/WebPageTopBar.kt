@@ -14,7 +14,8 @@ import androidx.compose.ui.unit.dp
 import ireader.core.source.findInstance
 import ireader.core.source.model.Command
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.CustomTextField
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.BuildDropDownMenu
@@ -66,22 +67,22 @@ fun WebPageTopBar(
             val list =
                 mutableListOf<DropDownMenuItem>(
                     DropDownMenuItem(
-                        localize(MR.strings.go)
+                        localize(Res.string.go)
                     ) {
                         onGo()
                     },
                     DropDownMenuItem(
-                        localize(MR.strings.refresh)
+                        localize(Res.string.refresh)
                     ) {
                         refresh()
                     },
                     DropDownMenuItem(
-                        localize(MR.strings.go_back)
+                        localize(Res.string.go_back)
                     ) {
                         goBack()
                     },
                     DropDownMenuItem(
-                        localize(MR.strings.go_forward)
+                        localize(Res.string.go_forward)
                     ) {
                         goForward()
                     },
@@ -89,10 +90,10 @@ fun WebPageTopBar(
             // Fetch buttons are always enabled regardless of page load state
             if (source != null && source.getCommands().findInstance<Command.Detail.Fetch>() != null && state.enableBookFetch) {
                 val fetchBookLabel = when (state.fetchBookState) {
-                    is FetchButtonState.Fetching -> "${localize(MR.strings.fetch_book)} (Loading...)"
-                    is FetchButtonState.Success -> "${localize(MR.strings.fetch_book)} ✓"
-                    is FetchButtonState.Error -> "${localize(MR.strings.fetch_book)} ✗"
-                    else -> localize(MR.strings.fetch_book)
+                    is FetchButtonState.Fetching -> "${localize(Res.string.fetch_book)} (Loading...)"
+                    is FetchButtonState.Success -> "${localize(Res.string.fetch_book)} ✓"
+                    is FetchButtonState.Error -> "${localize(Res.string.fetch_book)} ✗"
+                    else -> localize(Res.string.fetch_book)
                 }
                 list.add(
                     DropDownMenuItem(fetchBookLabel) {
@@ -102,10 +103,10 @@ fun WebPageTopBar(
             }
             if (source != null && source.getCommands().findInstance<Command.Content.Fetch>() != null && state.stateChapter != null && state.enableChapterFetch) {
                 val fetchChapterLabel = when (state.fetchChapterState) {
-                    is FetchButtonState.Fetching -> "${localize(MR.strings.fetch_chapter)} (Loading...)"
-                    is FetchButtonState.Success -> "${localize(MR.strings.fetch_chapter)} ✓"
-                    is FetchButtonState.Error -> "${localize(MR.strings.fetch_chapter)} ✗"
-                    else -> localize(MR.strings.fetch_chapter)
+                    is FetchButtonState.Fetching -> "${localize(Res.string.fetch_chapter)} (Loading...)"
+                    is FetchButtonState.Success -> "${localize(Res.string.fetch_chapter)} ✓"
+                    is FetchButtonState.Error -> "${localize(Res.string.fetch_chapter)} ✗"
+                    else -> localize(Res.string.fetch_chapter)
                 }
                 list.add(
                     DropDownMenuItem(fetchChapterLabel) {
@@ -115,10 +116,10 @@ fun WebPageTopBar(
             }
             if (source != null && source.getCommands().findInstance<Command.Chapter.Fetch>() != null && state.stateBook != null && state.enableChaptersFetch) {
                 val fetchChaptersLabel = when (state.fetchChaptersState) {
-                    is FetchButtonState.Fetching -> "${localize(MR.strings.fetch_chapters)} (Loading...)"
-                    is FetchButtonState.Success -> "${localize(MR.strings.fetch_chapters)} ✓"
-                    is FetchButtonState.Error -> "${localize(MR.strings.fetch_chapters)} ✗"
-                    else -> localize(MR.strings.fetch_chapters)
+                    is FetchButtonState.Fetching -> "${localize(Res.string.fetch_chapters)} (Loading...)"
+                    is FetchButtonState.Success -> "${localize(Res.string.fetch_chapters)} ✓"
+                    is FetchButtonState.Error -> "${localize(Res.string.fetch_chapters)} ✗"
+                    else -> localize(Res.string.fetch_chapters)
                 }
                 list.add(
                     DropDownMenuItem(fetchChaptersLabel) {

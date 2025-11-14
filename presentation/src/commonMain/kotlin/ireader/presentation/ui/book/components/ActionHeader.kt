@@ -25,7 +25,8 @@ import androidx.compose.ui.unit.sp
 import ireader.core.source.HttpSource
 import ireader.core.source.Source
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 
 @Composable
 fun ActionHeader(
@@ -44,9 +45,9 @@ fun ActionHeader(
         // Favorite button with enhanced styling
         ActionButton(
             title = if (favorite) {
-                localize(MR.strings.in_library)
+                localize(Res.string.in_library)
             } else {
-                localize(MR.strings.add_to_library)
+                localize(Res.string.add_to_library)
             },
             icon = if (favorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
             isActive = favorite,
@@ -57,7 +58,7 @@ fun ActionHeader(
         // WebView button
         if (source is HttpSource) {
             ActionButton(
-                title = localize(MR.strings.webView),
+                title = localize(Res.string.webView),
                 icon = Icons.Default.Public,
                 isActive = false,
                 onClick = onWebView,

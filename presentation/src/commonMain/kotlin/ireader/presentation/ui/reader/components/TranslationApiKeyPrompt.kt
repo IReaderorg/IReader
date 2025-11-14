@@ -14,7 +14,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 
 @Composable
 fun TranslationApiKeyPromptDialog(
@@ -72,7 +73,7 @@ fun TranslationApiKeyPromptDialog(
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text(localize(MR.strings.cancel))
+                        Text(localize(Res.string.cancel))
                     }
                     
                     Button(
@@ -85,7 +86,7 @@ fun TranslationApiKeyPromptDialog(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(localize(MR.strings.settings))
+                        Text(localize(Res.string.settings))
                     }
                 }
             }

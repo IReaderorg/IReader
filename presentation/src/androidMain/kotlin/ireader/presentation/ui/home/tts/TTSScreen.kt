@@ -43,7 +43,8 @@ import ireader.domain.models.prefs.mapAlignment
 import ireader.domain.models.prefs.mapTextAlign
 import ireader.domain.services.tts_service.TTSState
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.ShowLoading
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.SuperSmallTextComposable
@@ -222,14 +223,14 @@ fun MediaControllers(
         AppIconButton(
             modifier = Modifier.size(56.dp), // Increased from 50dp to 56dp for better touch target
             imageVector = Icons.Filled.SkipPrevious,
-            contentDescription = localize(MR.strings.previous_chapter),
+            contentDescription = localize(Res.string.previous_chapter),
             onClick = onPrev,
             tint = MaterialTheme.colorScheme.onBackground
         )
         AppIconButton(
             modifier = Modifier.size(56.dp), // Increased from 50dp to 56dp for better touch target
             imageVector = Icons.Filled.FastRewind,
-            contentDescription = localize(MR.strings.previous_paragraph),
+            contentDescription = localize(Res.string.previous_paragraph),
             onClick = onPrevPar,
             tint = MaterialTheme.colorScheme.onBackground
         )
@@ -246,7 +247,7 @@ fun MediaControllers(
                     AppIconButton(
                         modifier = Modifier.size(80.dp),
                         imageVector = Icons.Filled.PauseCircle,
-                        contentDescription = localize(MR.strings.play),
+                        contentDescription = localize(Res.string.play),
                         onClick = onPlay,
                         tint = MaterialTheme.colorScheme.onBackground
                     )
@@ -255,7 +256,7 @@ fun MediaControllers(
                     AppIconButton(
                         modifier = Modifier.size(80.dp),
                         imageVector = Icons.Filled.PlayCircle,
-                        contentDescription = localize(MR.strings.pause),
+                        contentDescription = localize(Res.string.pause),
                         onClick = onPlay,
                         tint = MaterialTheme.colorScheme.onBackground
                     )
@@ -266,14 +267,14 @@ fun MediaControllers(
         AppIconButton(
             modifier = Modifier.size(56.dp), // Increased from 50dp to 56dp for better touch target
             imageVector = Icons.Filled.FastForward,
-            contentDescription = localize(MR.strings.next_paragraph),
+            contentDescription = localize(Res.string.next_paragraph),
             onClick = onNextPar,
             tint = MaterialTheme.colorScheme.onBackground
         )
         AppIconButton(
             modifier = Modifier.size(56.dp), // Increased from 50dp to 56dp for better touch target
             imageVector = Icons.Filled.SkipNext,
-            contentDescription = localize(MR.strings.next_chapter),
+            contentDescription = localize(Res.string.next_chapter),
             onClick = onNext,
             tint = MaterialTheme.colorScheme.onBackground
         )

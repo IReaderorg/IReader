@@ -341,7 +341,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         BackHandler(enabled = !waitingConfirmation && confirmExit) {
             scope.launch {
                 waitingConfirmation = true
-                val toast = toast(R.string.confirm_exit, Toast.LENGTH_LONG)
+                val toast = toast("Press back again to exit", Toast.LENGTH_LONG)
                 delay(2.seconds)
                 toast.cancel()
                 waitingConfirmation = false

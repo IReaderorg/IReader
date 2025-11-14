@@ -6,7 +6,8 @@ import androidx.compose.runtime.Composable
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
@@ -25,7 +26,7 @@ class AdvanceSettingSpec : VoyagerScreen() {
         IScaffold(
             topBar = {scrollBehavior ->
                 TitleToolbar(
-                    title = localize(MR.strings.advance_setting),
+                    title = localize(Res.string.advance_setting),
                     scrollBehavior = scrollBehavior,
                     popBackStack = {
                         navigator.pop()

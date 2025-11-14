@@ -15,7 +15,8 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.Category
 import ireader.domain.models.entities.CategoryWithCount
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.IAlertDialog
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -38,7 +39,7 @@ fun EditCategoriesDialog(
         IAlertDialog(
             modifier = modifier.heightIn(max = 350.dp, min = 200.dp),
             onDismissRequest = { vm.showDialog = false },
-            title = { Text(localizeHelper.localize(MR.strings.edit_category)) },
+            title = { Text(localizeHelper.localize(Res.string.edit_category)) },
             text = {
                 LazyColumn {
                     items(items = categories) { category ->
@@ -96,7 +97,7 @@ fun EditCategoriesDialog(
             },
             confirmButton = {
                 Button(onClick = onConfirm) {
-                    MidSizeTextComposable(text = localizeHelper.localize(MR.strings.add))
+                    MidSizeTextComposable(text = localizeHelper.localize(Res.string.add))
                 }
             }
         )

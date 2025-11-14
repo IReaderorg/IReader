@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <plurals name="relative_time">
+        <item quantity="one">دیروز</item>
+        <item quantity="other">%1$ روز پیش</item>
+    </plurals>
+    <plurals name="lock_after_mins">
+        <item quantity="one">بعد از %1$s دقیقه</item>
+        <item quantity="other">بعد از %1$s دقیقه</item>
+    </plurals>
+</resources>

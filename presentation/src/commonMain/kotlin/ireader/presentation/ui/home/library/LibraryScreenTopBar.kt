@@ -45,7 +45,8 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
@@ -143,7 +144,7 @@ private fun RegularTopBar(
             ) { inSearchMode ->
                 if (!inSearchMode) {
                     BigSizeTextComposable(
-                        text = localize(MR.strings.library),
+                        text = localize(Res.string.library),
                         style = MaterialTheme.typography.headlineSmall.copy(
                             fontWeight = FontWeight.Bold
                         )
@@ -171,7 +172,7 @@ private fun RegularTopBar(
             if (vm.inSearchMode) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
-                    contentDescription = localize(MR.strings.close),
+                    contentDescription = localize(Res.string.close),
                     onClick = {
                         vm.inSearchMode = false
                         vm.searchQuery = null
@@ -181,7 +182,7 @@ private fun RegularTopBar(
             } else {
                 TopBarActionButton(
                     icon = Icons.Outlined.Sort,
-                    contentDescription = localize(MR.strings.filter),
+                    contentDescription = localize(Res.string.filter),
                     onClick = {
                         scope.launch {
                             if (isModalVisible) {
@@ -196,7 +197,7 @@ private fun RegularTopBar(
                 
                 TopBarActionButton(
                     icon = Icons.Outlined.Search,
-                    contentDescription = localize(MR.strings.search),
+                    contentDescription = localize(Res.string.search),
                     onClick = {
                         vm.inSearchMode = true
                     }
@@ -204,7 +205,7 @@ private fun RegularTopBar(
                 
                 TopBarActionButton(
                     icon = Icons.Outlined.Refresh,
-                    contentDescription = localize(MR.strings.refresh),
+                    contentDescription = localize(Res.string.refresh),
                     onClick = {
                         refreshUpdate()
                     }
@@ -259,7 +260,7 @@ private fun EditModeTopAppBar(
                 }
             ) {
                 Text(
-                    text = localize(MR.strings.selected),
+                    text = localize(Res.string.selected),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -269,7 +270,7 @@ private fun EditModeTopAppBar(
             IconButton(onClick = onClickCancelSelection) {
                 Icon(
                     Icons.Default.Close, 
-                    contentDescription = localize(MR.strings.close),
+                    contentDescription = localize(Res.string.close),
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
@@ -286,14 +287,14 @@ private fun EditModeTopAppBar(
             IconButton(onClick = onClickSelectAll) {
                 Icon(
                     Icons.Default.SelectAll, 
-                    contentDescription = localize(MR.strings.select_all),
+                    contentDescription = localize(Res.string.select_all),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             IconButton(onClick = onClickInvertSelection) {
                 Icon(
                     Icons.Default.FlipToBack, 
-                    contentDescription = localize(MR.strings.invert_selection),
+                    contentDescription = localize(Res.string.invert_selection),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

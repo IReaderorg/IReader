@@ -63,7 +63,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.core.ui.PreferenceMutableState
 import kotlin.math.round
 
@@ -139,7 +140,7 @@ fun ColorPickerDialog(
                 onClick = { onSelected(currentColor) },
                 shape = MaterialTheme.shapes.medium
             ) {
-                androidx.compose.material3.Text(localize(MR.strings.select))
+                androidx.compose.material3.Text(localize(Res.string.select))
             }
         },
         dismissButton = {
@@ -147,7 +148,7 @@ fun ColorPickerDialog(
                 onClick = { showPresets = !showPresets },
                 shape = MaterialTheme.shapes.medium
             ) {
-                val text = if (showPresets) MR.strings.custom else MR.strings.presents
+                val text = if (showPresets) Res.string.custom else Res.string.presents
                 androidx.compose.material3.Text(localize(text))
             }
         }

@@ -15,7 +15,8 @@ import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.i18n.DEFAULT
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
@@ -44,7 +45,7 @@ fun BrightnessSliderComposable(
             AppIconButton(
                 modifier = modifier.weight(1f),
                 imageVector = Icons.Default.LightMode,
-                contentDescription = localize(MR.strings.less_brightness),
+                contentDescription = localize(Res.string.less_brightness),
             )
             Slider(
                 viewModel.brightness.value,
@@ -65,7 +66,7 @@ fun BrightnessSliderComposable(
             AppIconButton(
                 modifier = modifier.weight(1f),
                 imageVector = Icons.Default.Brightness7,
-                contentDescription = localizeHelper.localize(MR.strings.more_brightness)
+                contentDescription = localizeHelper.localize(Res.string.more_brightness)
             )
         }
     }

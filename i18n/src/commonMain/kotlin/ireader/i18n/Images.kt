@@ -1,6 +1,7 @@
 package ireader.i18n
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 
 
@@ -53,6 +54,6 @@ expect object Images {
     @Composable
     fun incognito(): ImageVector
     @Composable
-    fun arrowDown(atEnd: Boolean): androidx.compose.ui.graphics.painter.Painter
+    fun arrowDown(atEnd: Boolean): Painter
 
 }

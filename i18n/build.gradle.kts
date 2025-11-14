@@ -7,7 +7,6 @@ import java.util.*
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
-    id(libs.plugins.moko.get().pluginId)
     alias(libs.plugins.jetbrainCompose)
     id(libs.plugins.buildkonfig.get().pluginId)
     alias(kotlinx.plugins.compose.compiler)
@@ -24,31 +23,23 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                api(libs.moko.core)
-                compileOnly(compose.runtime)
-                compileOnly(compose.ui)
-
+                implementation(compose.runtime)
+                implementation(compose.ui)
+                implementation(compose.components.resources)
             }
-            this.kotlin.srcDirs(File(layout.buildDirectory.orNull!!.asFile, "generated/moko-resources/commonMain/src"))
         }
         androidMain {
             dependencies {
-                compileOnly(compose.animationGraphics)
+                implementation(compose.animationGraphics)
             }
         }
         jvmMain {
             dependencies {
-                api(libs.moko.core)
+                implementation(compose.components.resources)
             }
         }
     }
 
-}
-dependencies {
-    commonMainApi(libs.moko.core)
-//    commonMainApi("dev.icerock.moko:resources-compose:0.23.0") // for compose multiplatform
-//
-//    commonTestImplementation("dev.icerock.moko:resources-test:0.23.0")
 }
 
 android {
@@ -64,17 +55,7 @@ android {
         sourceCompatibility = ProjectConfig.androidJvmTarget
         targetCompatibility = ProjectConfig.androidJvmTarget
     }
-    sourceSets.getByName("main") {
-        assets.srcDir(File(layout.buildDirectory.get().asFile, "generated/moko-resources/commonMain/assets"))
-        res.srcDir(File(layout.buildDirectory.get().asFile, "generated/moko-resources/commonMain/res"))
-        res.srcDir("src/commonMain/moko-resources")
-    }
 }
-tasks {
-    this@tasks.registerResources(project)
-
-}
-
 buildkonfig {
     packageName = "ireader.i18n"
     exposeObjectWithName = "BuildKonfig"
@@ -115,20 +96,10 @@ fun runCommand(command: String): String {
         "unknown"
     }
 }
-multiplatformResources {
-    this.resourcesPackage = "ireader.i18n.resources"
-}
 
-// Add a custom task to ensure MOKO resources are generated for desktop
-tasks.register("generateMokoResources") {
-    dependsOn("generateMRjvmMain")
-    group = "build"
-    description = "Generate MOKO resources for desktop"
-    
-    doLast {
-        logger.lifecycle("MOKO resources generated for desktop")
-    }
+// Configure Compose Multiplatform Resources
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "ireader.i18n.resources"
+    generateResClass = org.jetbrains.compose.resources.ResourcesExtension.ResourceClassGeneration.Always
 }
-
-// Make sure the resource generation happens before compilation
-tasks.getByName("jvmMainClasses").dependsOn("generateMokoResources")

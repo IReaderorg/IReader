@@ -30,7 +30,8 @@ import ireader.domain.utils.extensions.async.prevBefore
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.NO_VALUE
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -270,7 +271,7 @@ class ReaderScreenViewModel(
                 }
         } else {
             scope.launch {
-                showSnackBar(UiText.MStringResource(MR.strings.something_is_wrong_with_this_book))
+                showSnackBar(UiText.MStringResource(Res.string.something_is_wrong_with_this_book))
             }
         }
     }
@@ -492,7 +493,7 @@ class ReaderScreenViewModel(
             translationCompleted = 0
             
             try {
-                showSnackBar(UiText.MStringResource(MR.strings.translating))
+                showSnackBar(UiText.MStringResource(Res.string.translating))
                 
                 val contentType = ireader.domain.data.engines.ContentType.values().getOrElse(translatorContentType.value) { 
                     ireader.domain.data.engines.ContentType.GENERAL 
@@ -512,7 +513,7 @@ class ReaderScreenViewModel(
                 val texts = content.filterIsInstance<ireader.core.source.model.Text>().map { it.text }
                 
                 if (texts.isEmpty()) {
-                    showSnackBar(UiText.MStringResource(MR.strings.no_text_to_translate))
+                    showSnackBar(UiText.MStringResource(Res.string.no_text_to_translate))
                     isTranslating = false
                     return
                 }
@@ -539,7 +540,7 @@ class ReaderScreenViewModel(
                         },
                         onSuccess = { result ->
                             stateChapter = stateChapter!!.copy(content = result.map { ireader.core.source.model.Text(it) })
-                            showSnackBar(UiText.MStringResource(MR.strings.translation_complete))
+                            showSnackBar(UiText.MStringResource(Res.string.translation_complete))
                             translationProgress = 1f
                             isTranslating = false
                         },
@@ -550,15 +551,15 @@ class ReaderScreenViewModel(
                             // Log the error in a readable format - convert MR strings if needed
                             if (errorMessage is UiText.MStringResource) {
                                 val stringRes = when (errorMessage.res) {
-                                    MR.strings.no_text_to_translate -> "No text to translate"
-                                    MR.strings.empty_response -> "Empty response from translation service"
-                                    MR.strings.api_response_error -> "Error processing API response"
-                                    MR.strings.deepseek_api_key_not_set -> "DeepSeek API key not set"
-                                    MR.strings.deepseek_api_key_invalid -> "DeepSeek API key invalid or quota exceeded"
-                                    MR.strings.openai_api_key_not_set -> "OpenAI API key not set"
-                                    MR.strings.openai_api_key_invalid -> "OpenAI API key invalid"
-                                    MR.strings.api_rate_limit_exceeded -> "API rate limit exceeded"
-                                    MR.strings.openai_quota_exceeded -> "OpenAI quota exceeded"
+                                    Res.string.no_text_to_translate -> "No text to translate"
+                                    Res.string.empty_response -> "Empty response from translation service"
+                                    Res.string.api_response_error -> "Error processing API response"
+                                    Res.string.deepseek_api_key_not_set -> "DeepSeek API key not set"
+                                    Res.string.deepseek_api_key_invalid -> "DeepSeek API key invalid or quota exceeded"
+                                    Res.string.openai_api_key_not_set -> "OpenAI API key not set"
+                                    Res.string.openai_api_key_invalid -> "OpenAI API key invalid"
+                                    Res.string.api_rate_limit_exceeded -> "API rate limit exceeded"
+                                    Res.string.openai_quota_exceeded -> "OpenAI quota exceeded"
                                     else -> "Translation error: ${errorMessage.res}"
                                 }
                                 println("Translation error: $stringRes")
@@ -586,7 +587,7 @@ class ReaderScreenViewModel(
                         },
                         onSuccess = { result ->
                             stateChapter = stateChapter!!.copy(content = result.map { ireader.core.source.model.Text(it) })
-                            showSnackBar(UiText.MStringResource(MR.strings.translation_complete))
+                            showSnackBar(UiText.MStringResource(Res.string.translation_complete))
                             translationProgress = 1f
                             isTranslating = false
                         },
@@ -597,15 +598,15 @@ class ReaderScreenViewModel(
                             // Log the error in a readable format - convert MR strings if needed
                             if (errorMessage is UiText.MStringResource) {
                                 val stringRes = when (errorMessage.res) {
-                                    MR.strings.no_text_to_translate -> "No text to translate"
-                                    MR.strings.empty_response -> "Empty response from translation service"
-                                    MR.strings.api_response_error -> "Error processing API response"
-                                    MR.strings.deepseek_api_key_not_set -> "DeepSeek API key not set"
-                                    MR.strings.deepseek_api_key_invalid -> "DeepSeek API key invalid"
-                                    MR.strings.openai_api_key_not_set -> "OpenAI API key not set"
-                                    MR.strings.openai_api_key_invalid -> "OpenAI API key invalid"
-                                    MR.strings.api_rate_limit_exceeded -> "API rate limit exceeded"
-                                    MR.strings.openai_quota_exceeded -> "OpenAI quota exceeded"
+                                    Res.string.no_text_to_translate -> "No text to translate"
+                                    Res.string.empty_response -> "Empty response from translation service"
+                                    Res.string.api_response_error -> "Error processing API response"
+                                    Res.string.deepseek_api_key_not_set -> "DeepSeek API key not set"
+                                    Res.string.deepseek_api_key_invalid -> "DeepSeek API key invalid"
+                                    Res.string.openai_api_key_not_set -> "OpenAI API key not set"
+                                    Res.string.openai_api_key_invalid -> "OpenAI API key invalid"
+                                    Res.string.api_rate_limit_exceeded -> "API rate limit exceeded"
+                                    Res.string.openai_quota_exceeded -> "OpenAI quota exceeded"
                                     else -> "Translation error: ${errorMessage.res}"
                                 }
                                 println("Translation error: $stringRes")
@@ -892,7 +893,7 @@ class ReaderScreenViewModel(
                     translationState.isTranslating = false
                     translationState.isShowingTranslation = true
                     
-                    showSnackBar(UiText.MStringResource(MR.strings.success))
+                    showSnackBar(UiText.MStringResource(Res.string.success))
                 },
                 onError = { error ->
                     translationState.translationError = error.toString()
@@ -945,7 +946,7 @@ class ReaderScreenViewModel(
                 notes = notes
             )
             loadGlossary()
-            showSnackBar(UiText.MStringResource(MR.strings.success))
+            showSnackBar(UiText.MStringResource(Res.string.success))
         }
     }
     
@@ -963,7 +964,7 @@ class ReaderScreenViewModel(
                 entryId = entry.id
             )
             loadGlossary()
-            showSnackBar(UiText.MStringResource(MR.strings.success))
+            showSnackBar(UiText.MStringResource(Res.string.success))
         }
     }
     
@@ -974,7 +975,7 @@ class ReaderScreenViewModel(
         scope.launch {
             deleteGlossaryEntryUseCase.execute(id)
             loadGlossary()
-            showSnackBar(UiText.MStringResource(MR.strings.success))
+            showSnackBar(UiText.MStringResource(Res.string.success))
         }
     }
 
@@ -1011,7 +1012,7 @@ class ReaderScreenViewModel(
                     targetBookId = bookId
                 )
                 loadGlossary()
-                showSnackBar(UiText.MStringResource(MR.strings.success))
+                showSnackBar(UiText.MStringResource(Res.string.success))
             } catch (e: Exception) {
                 showSnackBar(UiText.ExceptionString(e))
             }

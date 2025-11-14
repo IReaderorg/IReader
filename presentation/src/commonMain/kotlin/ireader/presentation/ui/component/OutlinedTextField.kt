@@ -15,7 +15,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 
 
@@ -29,7 +30,7 @@ fun CustomTextField(
         paddingTrailingIconStart: Dp = 0.dp,
         leadingIcon: (@Composable() () -> Unit)? = null,
         trailingIcon: (@Composable() () -> Unit)? = null,
-        hint: String = localize(MR.strings.search_hint),
+        hint: String = localize(Res.string.search_hint),
         textColor: Color = MaterialTheme.colorScheme.onBackground,
 ) {
 

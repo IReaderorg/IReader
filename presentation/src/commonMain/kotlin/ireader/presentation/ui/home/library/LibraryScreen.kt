@@ -21,7 +21,8 @@ import kotlinx.coroutines.Dispatchers
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.Category
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.core.ui.EmptyScreen
 import ireader.presentation.ui.core.ui.LoadingScreen
 import ireader.presentation.ui.home.library.components.EditCategoriesDialog
@@ -144,7 +145,7 @@ fun LibraryScreen(
                 when {
                     isLoading -> LoadingScreen()
                     isEmpty && vm.filters.value.isEmpty() -> EmptyScreen(
-                        text = localize(MR.strings.empty_library)
+                        text = localize(Res.string.empty_library)
                     )
                 }
             }

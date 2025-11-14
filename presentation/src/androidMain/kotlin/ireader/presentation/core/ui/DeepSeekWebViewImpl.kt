@@ -40,7 +40,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import ireader.domain.usecases.translate.WebscrapingTranslateEngine
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import kotlinx.coroutines.delay
 
 private const val TAG = "DeepSeekWebViewImpl"
@@ -126,7 +127,7 @@ actual fun DeepSeekWebViewImpl(
                 
                 Text(
                     text = if (isCaptchaRequired.value)
-                        localize(MR.strings.complete_captcha) 
+                        localize(Res.string.complete_captcha) 
                     else if (isLoggedIn) 
                         "DeepSeek Translation" 
                     else 

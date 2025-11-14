@@ -28,7 +28,8 @@ import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.settings.repository.AddingRepositoryScreen
 import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
 import kotlinx.coroutines.launch
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 class RepositoryAddScreenSpec : VoyagerScreen() {
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -49,7 +50,7 @@ class RepositoryAddScreenSpec : VoyagerScreen() {
             topBar = { scrollBehavior ->
                 Toolbar(
                     title = {
-                        MidSizeTextComposable(text = localize(MR.strings.repository_adding_a_new))
+                        MidSizeTextComposable(text = localize(Res.string.repository_adding_a_new))
                     },
                     scrollBehavior = scrollBehavior,
                     navigationIcon = { TopAppBarBackButton(onClick = { popBackStack(navigator) }) },
@@ -92,16 +93,16 @@ class RepositoryAddScreenSpec : VoyagerScreen() {
                                     vm.catalogSourceRepository.insert(vm.parseUrl(text))
 
                                 } catch (e: Exception) {
-                                    vm.showSnackBar(UiText.MStringResource(MR.strings.url_is_invalid))
+                                    vm.showSnackBar(UiText.MStringResource(Res.string.url_is_invalid))
                                 }
                             }
                             showDialog.value = false
                         }) {
-                            MidSizeTextComposable(text = localizeHelper.localize(MR.strings.add))
+                            MidSizeTextComposable(text = localizeHelper.localize(Res.string.add))
                         }
                     },
                     title = {
-                        MidSizeTextComposable(text = localizeHelper.localize(MR.strings.add_as_new))
+                        MidSizeTextComposable(text = localizeHelper.localize(Res.string.add_as_new))
                     },
                     text = {
                         androidx.compose.material3.OutlinedTextField(

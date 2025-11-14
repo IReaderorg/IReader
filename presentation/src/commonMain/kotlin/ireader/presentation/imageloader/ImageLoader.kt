@@ -39,7 +39,8 @@ import coil3.compose.LocalPlatformContext
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import ireader.core.log.Log
-import ireader.i18n.resources.MR.strings.data
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.LoadingScreen
 
 

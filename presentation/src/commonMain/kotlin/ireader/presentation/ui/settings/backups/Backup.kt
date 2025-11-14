@@ -13,7 +13,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.ChoicePreference
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
@@ -40,7 +41,7 @@ fun BackUpAndRestoreScreen(
                 vm.restoreBackup.restoreFrom(it, onError = {
                     vm.showSnackBar(it)
                 }, onSuccess = {
-                    vm.showSnackBar((UiText.MStringResource(MR.strings.restoredSuccessfully)))
+                    vm.showSnackBar((UiText.MStringResource(Res.string.restoredSuccessfully)))
                 })
             }
         }
@@ -51,7 +52,7 @@ fun BackUpAndRestoreScreen(
                 vm.createBackup.saveTo(it, onError = {
                     vm.showSnackBar(it)
                 }, onSuccess = {
-                    vm.showSnackBar((UiText.MStringResource(MR.strings.backup_created_successfully)))
+                    vm.showSnackBar((UiText.MStringResource(Res.string.backup_created_successfully)))
                 }, currentEvent = {
                     vm.showSnackBar(UiText.DynamicString(it))
                 })
@@ -68,7 +69,7 @@ fun BackUpAndRestoreScreen(
 //                    vm.restoreBackup.restoreFrom(Uri(uri), onError = {
 //                        vm.showSnackBar(it)
 //                    }, onSuccess = {
-//                        vm.showSnackBar((UiText.MStringResource(MR.strings.restoredSuccessfully)))
+//                        vm.showSnackBar((UiText.MStringResource(Res.string.restoredSuccessfully)))
 //                    })
 //                }
 //            }
@@ -82,7 +83,7 @@ fun BackUpAndRestoreScreen(
 //                    val result = vm.createBackup.saveTo(Uri(uri), onError = {
 //                        vm.showSnackBar(it)
 //                    }, onSuccess = {
-//                        vm.showSnackBar((UiText.MStringResource(MR.strings.backup_created_successfully)))
+//                        vm.showSnackBar((UiText.MStringResource(Res.string.backup_created_successfully)))
 //                    })
 //                }
 //            }
@@ -90,13 +91,13 @@ fun BackUpAndRestoreScreen(
     val items = remember {
         listOf<Components>(
             Components.Row(
-                localizeHelper.localize(MR.strings.create_backup), onClick = {
+                localizeHelper.localize(Res.string.create_backup), onClick = {
                     onShowBackup.value = true
 
                 }
             ),
             Components.Row(
-                localizeHelper.localize(MR.strings.restore), onClick = {
+                localizeHelper.localize(Res.string.restore), onClick = {
                     onShowRestore.value = true
 
                 }
@@ -110,30 +111,20 @@ fun BackUpAndRestoreScreen(
                     onNavigateToCloudBackup()
                 }
             ),
-            Components.Header(localizeHelper.localize(MR.strings.automatic_backup)),
+            Components.Header(localizeHelper.localize(Res.string.automatic_backup)),
             Components.Dynamic {
                 ChoicePreference<PreferenceValues.AutomaticBackup>(
                     preference = vm.automaticBackup,
                     choices = mapOf(
-                        PreferenceValues.AutomaticBackup.Off to localizeHelper.localize(MR.strings.off),
-                        PreferenceValues.AutomaticBackup.Every6Hours to localizeHelper.localizePlural(
-                            MR.plurals.every_hour,
-                            6, 6
-
-                        ),
-                        PreferenceValues.AutomaticBackup.Every12Hours to localizeHelper.localizePlural(
-                            MR.plurals.every_hour,
-                            12, 12
-                        ),
-                        PreferenceValues.AutomaticBackup.Daily to localizeHelper.localize(MR.strings.daily),
-                        PreferenceValues.AutomaticBackup.Every2Days to localizeHelper.localizePlural(
-                            MR.plurals.every_day,
-                            2, 2
-                        ),
-                        PreferenceValues.AutomaticBackup.Weekly to localizeHelper.localize(MR.strings.weekly),
+                        PreferenceValues.AutomaticBackup.Off to localizeHelper.localize(Res.string.off),
+                        PreferenceValues.AutomaticBackup.Every6Hours to "Every 6 hours",
+                        PreferenceValues.AutomaticBackup.Every12Hours to "Every 12 hours",
+                        PreferenceValues.AutomaticBackup.Daily to localizeHelper.localize(Res.string.daily),
+                        PreferenceValues.AutomaticBackup.Every2Days to "Every 2 days",
+                        PreferenceValues.AutomaticBackup.Weekly to localizeHelper.localize(Res.string.weekly),
                     ),
                     title = localizeHelper.localize(
-                        MR.strings.automatic_backup
+                        Res.string.automatic_backup
                     ),
                     onValue = { newValue ->
                         vm.getSimpleStorage.checkPermission()
@@ -152,7 +143,7 @@ fun BackUpAndRestoreScreen(
                         5 to "5",
                     ),
                     title = localizeHelper.localize(
-                        MR.strings.maximum_backups
+                        Res.string.maximum_backups
                     ),
                     enable = vm.automaticBackup.value != PreferenceValues.AutomaticBackup.Off
                 )

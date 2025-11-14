@@ -6,7 +6,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 
 /**
  * Dialog for adding a new repository
@@ -79,7 +80,7 @@ fun AddRepositoryDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(localize(MR.strings.cancel))
+                Text(localize(Res.string.cancel))
             }
         }
     )

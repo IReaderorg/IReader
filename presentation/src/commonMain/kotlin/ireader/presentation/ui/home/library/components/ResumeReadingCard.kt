@@ -21,7 +21,8 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import ireader.domain.models.entities.LastReadInfo
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 
 /**
  * Spotify-style bottom bar that displays the last read novel and allows quick resume
@@ -91,7 +92,7 @@ fun ResumeReadingCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
-                            contentDescription = localize(MR.strings.resume),
+                            contentDescription = localize(Res.string.resume),
                             modifier = Modifier.size(18.dp),
                             tint = MaterialTheme.colorScheme.primary
                         )

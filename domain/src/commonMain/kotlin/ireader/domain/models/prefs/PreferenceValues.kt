@@ -3,7 +3,8 @@ package ireader.domain.models.prefs
 import ireader.domain.models.common.AlignmentModel
 import ireader.domain.models.common.TextAlignmentModel
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 
 /**
  * This class stores the values for the preferences in the application.
@@ -17,9 +18,9 @@ object PreferenceValues {
 
 
     enum class SecureScreenMode(val titleResId: UiText.MStringResource) {
-        ALWAYS(UiText.MStringResource(MR.strings.lock_always)),
-        INCOGNITO(UiText.MStringResource(MR.strings.pref_incognito_mode)),
-        NEVER(UiText.MStringResource(MR.strings.lock_never)),
+        ALWAYS(UiText.MStringResource(Res.string.lock_always)),
+        INCOGNITO(UiText.MStringResource(Res.string.pref_incognito_mode)),
+        NEVER(UiText.MStringResource(Res.string.lock_never)),
     }
 
     enum class RelativeTime {

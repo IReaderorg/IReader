@@ -34,7 +34,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.source.Source
 import ireader.core.source.model.Command
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.components.IDropdownMenu
 import ireader.presentation.ui.component.components.IDropdownMenuItem
@@ -133,7 +134,7 @@ fun RegularChapterDetailTopAppBar(
                 }) {
                     Icon(
                         imageVector = Icons.Default.Autorenew,
-                        contentDescription = localizeHelper.localize(MR.strings.refresh),
+                        contentDescription = localizeHelper.localize(Res.string.refresh),
                         tint = MaterialTheme.colorScheme.onBackground,
                     )
                 }
@@ -142,7 +143,7 @@ fun RegularChapterDetailTopAppBar(
                 }) {
                     Icon(
                         imageVector = Icons.Default.Info,
-                        contentDescription = localizeHelper.localize(MR.strings.share),
+                        contentDescription = localizeHelper.localize(Res.string.share),
                         tint = MaterialTheme.colorScheme.onBackground,
                     )
                 }
@@ -152,7 +153,7 @@ fun RegularChapterDetailTopAppBar(
                     }) {
                         Icon(
                             imageVector = Icons.Default.Tune,
-                            contentDescription = localizeHelper.localize(MR.strings.advance_commands),
+                            contentDescription = localizeHelper.localize(Res.string.advance_commands),
                             tint = MaterialTheme.colorScheme.onBackground,
                         )
                     }
@@ -170,7 +171,7 @@ fun RegularChapterDetailTopAppBar(
                     IconButton(onClick = { setDropDownState(true) }) {
                         Icon(
                             imageVector = Icons.Outlined.MoreVert,
-                            contentDescription = localize(MR.strings.export_book_as_epub),
+                            contentDescription = localize(Res.string.export_book_as_epub),
                         )
                     }
                     IDropdownMenu(
@@ -181,7 +182,7 @@ fun RegularChapterDetailTopAppBar(
                         },
                     ) {
                         IDropdownMenuItem(
-                            text = { Text(text = localizeHelper.localize(MR.strings.export_book_as_epub)) },
+                            text = { Text(text = localizeHelper.localize(Res.string.export_book_as_epub)) },
                             onClick = {
                                 onShare()
                                 setDropDownState(false)
@@ -189,7 +190,7 @@ fun RegularChapterDetailTopAppBar(
                         )
                         if (isArchived) {
                             IDropdownMenuItem(
-                                text = { Text(text = localizeHelper.localize(MR.strings.unarchive)) },
+                                text = { Text(text = localizeHelper.localize(Res.string.unarchive)) },
                                 onClick = {
                                     onUnarchive()
                                     setDropDownState(false)
@@ -197,7 +198,7 @@ fun RegularChapterDetailTopAppBar(
                             )
                         } else {
                             IDropdownMenuItem(
-                                text = { Text(text = localizeHelper.localize(MR.strings.archive)) },
+                                text = { Text(text = localizeHelper.localize(Res.string.archive)) },
                                 onClick = {
                                     onArchive()
                                     setDropDownState(false)
@@ -226,7 +227,7 @@ fun RegularChapterDetailTopAppBar(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = localizeHelper.localize(MR.strings.go_back),
+                    contentDescription = localizeHelper.localize(Res.string.go_back),
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
@@ -253,24 +254,24 @@ private fun EditModeChapterDetailTopAppBar(
         navigationIcon = {
             AppIconButton(
                 imageVector = Icons.Default.Close,
-                contentDescription = localize(MR.strings.close),
+                contentDescription = localize(Res.string.close),
                 onClick = onClickCancelSelection
             )
         },
         actions = {
             AppIconButton(
                 imageVector = Icons.Default.SelectAll,
-                contentDescription = localize(MR.strings.select_all),
+                contentDescription = localize(Res.string.select_all),
                 onClick = onClickSelectAll
             )
             AppIconButton(
                 imageVector = Icons.Default.FlipToBack,
-                contentDescription = localize(MR.strings.select_inverted),
+                contentDescription = localize(Res.string.select_inverted),
                 onClick = onClickInvertSelection
             )
             AppIconButton(
                 imageVector = Icons.Default.SyncAlt,
-                contentDescription = localize(MR.strings.select_between),
+                contentDescription = localize(Res.string.select_between),
                 onClick = onSelectBetween
             )
         }

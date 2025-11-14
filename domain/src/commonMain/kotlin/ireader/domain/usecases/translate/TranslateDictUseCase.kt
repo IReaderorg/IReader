@@ -5,7 +5,8 @@ import io.ktor.client.statement.*
 import ireader.core.http.HttpClients
 import ireader.domain.data.engines.TranslateEngine
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import kotlinx.coroutines.delay
 import java.net.URLEncoder
 
@@ -135,7 +136,7 @@ class TranslateDictUseCase(
     ) {
         // Validate inputs
         if (texts.isNullOrEmpty()) {
-            onError(UiText.MStringResource(MR.strings.no_text_to_translate))
+            onError(UiText.MStringResource(Res.string.no_text_to_translate))
             return
         }
         
@@ -151,7 +152,7 @@ class TranslateDictUseCase(
             }.joinToString().split("\n")
             
             if (result.isEmpty()) {
-                onError(UiText.MStringResource(MR.strings.empty_response))
+                onError(UiText.MStringResource(Res.string.empty_response))
                 return
             }
             

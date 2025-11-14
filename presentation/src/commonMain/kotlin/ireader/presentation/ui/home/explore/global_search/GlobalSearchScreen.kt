@@ -20,7 +20,8 @@ import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.toBookItem
 import ireader.domain.usecases.remote.SearchResult
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,7 +42,7 @@ fun GlobalSearchScreen(
                     TextField(
                         value = state.searchQuery,
                         onValueChange = vm::onSearchQueryChange,
-                        placeholder = { Text(localize(MR.strings.search_across_all_sources)) },
+                        placeholder = { Text(localize(Res.string.search_across_all_sources)) },
                         singleLine = true,
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -96,9 +97,9 @@ fun GlobalSearchScreen(
                             item {
                                 Text(
                                     text = if (state.isSearching) {
-                                        localize(MR.strings.searching)
+                                        localize(Res.string.searching)
                                     } else {
-                                        "${state.totalResults} ${localize(MR.strings.results_found)}"
+                                        "${state.totalResults} ${localize(Res.string.results_found)}"
                                     },
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.onSurface
@@ -139,13 +140,13 @@ private fun EmptySearchState() {
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = localize(MR.strings.search_across_all_sources),
+                text = localize(Res.string.search_across_all_sources),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
             Text(
-                text = localize(MR.strings.enter_query_and_tap_search),
+                text = localize(Res.string.enter_query_and_tap_search),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -192,14 +193,14 @@ private fun SearchResultSection(
                     }
                     result.error != null -> {
                         Text(
-                            text = localize(MR.strings.error),
+                            text = localize(Res.string.error),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.error
                         )
                     }
                     result.books.isNotEmpty() -> {
                         Text(
-                            text = "${result.books.size} ${localize(MR.strings.results)}",
+                            text = "${result.books.size} ${localize(Res.string.results)}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -234,7 +235,7 @@ private fun SearchResultSection(
                     
                     if (result.books.size > 5) {
                         Text(
-                            text = "+${result.books.size - 5} ${localize(MR.strings.more)}",
+                            text = "+${result.books.size - 5} ${localize(Res.string.more)}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(start = 8.dp)

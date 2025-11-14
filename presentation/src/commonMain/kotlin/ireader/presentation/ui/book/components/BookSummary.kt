@@ -43,7 +43,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.core.modifier.clickableNoIndication
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
@@ -65,7 +66,7 @@ fun BookSummary(
         }
         val desc =
             description.takeIf { it.isNotBlank() }
-                ?: localizeHelper.localize(MR.strings.description_placeholder)
+                ?: localizeHelper.localize(Res.string.description_placeholder)
         val trimmedDescription = remember(desc) {
             desc
                 .replace(whitespaceLineRegex, "\n")

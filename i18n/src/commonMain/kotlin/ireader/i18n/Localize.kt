@@ -8,8 +8,8 @@
 package ireader.i18n
 
 import androidx.compose.runtime.Composable
-import dev.icerock.moko.resources.PluralsResource
-import dev.icerock.moko.resources.StringResource
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.PluralStringResource
 
 
 @Composable
@@ -19,10 +19,10 @@ expect fun localize(resource: StringResource): String
 expect fun localize(resource: StringResource, vararg args: Any): String
 
 @Composable
-expect fun localizePlural(resource: PluralsResource, quantity: Int): String
+expect fun localizePlural(resource: PluralStringResource, quantity: Int): String
 
 @Composable
-expect fun localizePlural(resource: PluralsResource, quantity: Int, vararg args: Any): String
+expect fun localizePlural(resource: PluralStringResource, quantity: Int, vararg args: Any): String
 
 
 
@@ -33,9 +33,9 @@ expect class LocalizeHelper {
 
      fun localize(resource: StringResource, vararg args: Any): String
 
-     fun localizePlural(resource: PluralsResource, quantity: Int): String
+     fun localizePlural(resource: PluralStringResource, quantity: Int): String
 
-     fun localizePlural(resource: PluralsResource, quantity: Int, vararg args: Any): String
+     fun localizePlural(resource: PluralStringResource, quantity: Int, vararg args: Any): String
 
 
 }

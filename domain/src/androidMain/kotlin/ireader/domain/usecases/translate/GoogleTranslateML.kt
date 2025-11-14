@@ -4,7 +4,8 @@ import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.TranslatorOptions
 import ireader.domain.data.engines.TranslateEngine
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 
 actual class GoogleTranslateML : TranslateEngine() {
     override val id: Long
@@ -19,7 +20,7 @@ actual class GoogleTranslateML : TranslateEngine() {
     ) {
         // Validate inputs
         if (texts.isNullOrEmpty()) {
-            onError(UiText.MStringResource(MR.strings.no_text_to_translate))
+            onError(UiText.MStringResource(Res.string.no_text_to_translate))
             return
         }
         
@@ -37,7 +38,7 @@ actual class GoogleTranslateML : TranslateEngine() {
                         onProgress(100)
                         onSuccess(result.split("####"))
                     } else {
-                        onError(UiText.MStringResource(MR.strings.empty_response))
+                        onError(UiText.MStringResource(Res.string.empty_response))
                     }
                 }
             }.addOnFailureListener {

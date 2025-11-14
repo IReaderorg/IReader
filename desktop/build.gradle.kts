@@ -5,13 +5,12 @@ plugins {
     id(kotlinx.plugins.kotlin.jvm.get().pluginId)
     id(kotlinx.plugins.ksp.get().pluginId)
     id(libs.plugins.jetbrainCompose.get().pluginId)
-    id("dev.icerock.mobile.multiplatform-resources")
     alias(kotlinx.plugins.compose.compiler)
 }
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(24))
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
 }
 
@@ -29,58 +28,20 @@ dependencies {
     // Only keeping desktop-specific dependencies
     implementation(libs.napier)
     implementation(libs.voyager.navigator)
-
-    // Add explicit MOKO resources dependency
-    implementation(libs.moko.core)
 }
 
 kotlin {
     sourceSets.main {
         kotlin.srcDir("build/generated/ksp/main/kotlin")
-        kotlin.srcDir(project.rootProject.file("i18n/build/generated/moko-resources/jvmMain/res/"))
     }
     sourceSets.test {
         kotlin.srcDir("build/generated/ksp/test/kotlin")
     }
 }
 
-// Add task dependency to ensure resources are generated before the desktop app builds
-tasks.named("compileKotlin") {
-    dependsOn(":i18n:generateMokoResources")
-}
-
-// Add task to copy drawable resources
-tasks.register<Copy>("copyIconResources") {
-    group = "resources"
-    description = "Copies all drawable resources for desktop to ensure icons are available"
-    
-    // Source directories
-    from(project.rootProject.file("i18n/src/commonMain/moko-resources/drawable"))
-    into(project.layout.buildDirectory.get().asFile.resolve("resources/main/drawable"))
-    
-    doLast {
-        logger.lifecycle("Copied drawable resources to desktop build")
-        // List all copied files to verify
-        project.layout.buildDirectory.get().asFile.resolve("resources/main/drawable").listFiles()?.forEach {
-            logger.lifecycle("  - ${it.name}")
-        }
-    }
-}
-
 // Configure the compose desktop application
 compose.desktop {
     application {
-        // Copy resources before any tasks run
-        tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-            dependsOn("copyIconResources")
-        }
-        
-        // Configure any additional dependencies here
-        tasks.withType<JavaExec>().configureEach {
-            dependsOn("copyIconResources")
-        }
-        
-        // The rest of your application configuration stays the same
         mainClass = "ireader.desktop.MainKt"
         
         // Supabase configuration - Multi-endpoint support
@@ -195,7 +156,7 @@ listOf(
     "packageDistributionForCurrentOS", 
     "packageUberJarForCurrentOS"
 ).forEach { taskName ->
-    tasks.findByName(taskName)?.dependsOn("copyIconResources", "createWindowsLauncher")
+    tasks.findByName(taskName)?.dependsOn("createWindowsLauncher")
 }
 
 // For release variants
@@ -208,21 +169,7 @@ listOf(
     "packageReleaseDistributionForCurrentOS", 
     "packageReleaseUberJarForCurrentOS"
 ).forEach { taskName ->
-    tasks.findByName(taskName)?.dependsOn("copyIconResources", "createWindowsLauncher")
-}
-
-// Ensure resources are included in the distribution
-tasks.whenTaskAdded {
-    if (name.startsWith("package") || name.startsWith("dist") || name.contains("Resources")) {
-        dependsOn("copyIconResources")
-    }
-}
-
-// Make sure the WindowsLauncher is created before packaging
-tasks.whenTaskAdded {
-    if (name.startsWith("package") || name.startsWith("dist")) {
-        dependsOn("createWindowsLauncher")
-    }
+    tasks.findByName(taskName)?.dependsOn("createWindowsLauncher")
 }
 
 // Create a batch file for Windows users to help with JRE troubleshooting

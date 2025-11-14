@@ -16,7 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import ireader.domain.models.entities.Chapter
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -64,7 +65,7 @@ fun MainBottomSettingComposable(
     ) {
         AppIconButton(
             imageVector = Icons.Default.Menu,
-            contentDescription = localize(MR.strings.drawer),
+            contentDescription = localize(Res.string.drawer),
             onClick = { scope.launch { drawerState.open() } }
         )
 
@@ -72,7 +73,7 @@ fun MainBottomSettingComposable(
 
         AppIconButton(
             imageVector = Icons.Default.Headphones,
-            contentDescription = localize(MR.strings.play),
+            contentDescription = localize(Res.string.play),
             onClick = { onPlay() }
         )
         
@@ -96,7 +97,7 @@ fun MainBottomSettingComposable(
 
         AppIconButton(
             imageVector = Icons.Default.Settings,
-            contentDescription = localize(MR.strings.settings),
+            contentDescription = localize(Res.string.settings),
             onClick = { onSetting() }
         )
     }

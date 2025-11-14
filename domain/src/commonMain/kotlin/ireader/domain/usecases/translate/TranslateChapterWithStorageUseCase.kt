@@ -11,7 +11,8 @@ import ireader.domain.usecases.translation.ApplyGlossaryToTextUseCase
 import ireader.domain.usecases.translation.GetTranslatedChapterUseCase
 import ireader.domain.usecases.translation.SaveTranslatedChapterUseCase
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -57,7 +58,7 @@ class TranslateChapterWithStorageUseCase(
             // Extract text from chapter content
             val textPages = chapter.content.filterIsInstance<Text>()
             if (textPages.isEmpty()) {
-                onError(UiText.MStringResource(MR.strings.no_text_to_translate))
+                onError(UiText.MStringResource(Res.string.no_text_to_translate))
                 return@launch
             }
             
@@ -149,7 +150,7 @@ class TranslateChapterWithStorageUseCase(
             if (savedTranslation != null) {
                 onSuccess(savedTranslation)
             } else {
-                onError(UiText.MStringResource(MR.strings.api_response_error))
+                onError(UiText.MStringResource(Res.string.api_response_error))
             }
         } catch (e: Exception) {
             onError(UiText.ExceptionString(e))

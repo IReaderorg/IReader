@@ -11,7 +11,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 
 /**
  * Dialog for entering source login credentials
@@ -48,7 +49,7 @@ fun SourceLoginDialog(
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
-                    label = { Text(localize(MR.strings.username)) },
+                    label = { Text(localize(Res.string.username)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -56,7 +57,7 @@ fun SourceLoginDialog(
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text(localize(MR.strings.password)) },
+                    label = { Text(localize(Res.string.password)) },
                     singleLine = true,
                     visualTransformation = if (passwordVisible) {
                         VisualTransformation.None
@@ -97,7 +98,7 @@ fun SourceLoginDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(localize(MR.strings.cancel))
+                Text(localize(Res.string.cancel))
             }
         }
     )

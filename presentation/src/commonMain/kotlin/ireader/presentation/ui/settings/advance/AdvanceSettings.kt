@@ -12,7 +12,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.core.log.Log
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.IAlertDialog
 import ireader.presentation.ui.component.components.SetupSettingComponents
@@ -45,7 +46,7 @@ fun AdvanceSettings(
     OnShowImportEpub(showImport.value, onFileSelected = {
         try {
             vm.importEpub.parse(it)
-            vm.showSnackBar(UiText.MStringResource(MR.strings.success))
+            vm.showSnackBar(UiText.MStringResource(Res.string.success))
         } catch (e: Throwable) {
             Log.error(e, "epub parser throws an exception")
             vm.showSnackBar(UiText.ExceptionString(e))
@@ -60,7 +61,7 @@ fun AdvanceSettings(
                 icon = Icons.Default.Storage
             ),
             Components.Row(
-                title = "${localizeHelper.localize(MR.strings.clear_all_cache)} (${vm.importEpub.getCacheSize()})",
+                title = "${localizeHelper.localize(Res.string.clear_all_cache)} (${vm.importEpub.getCacheSize()})",
                 subtitle = "Clear all cached data to free up storage space",
                 icon = Icons.Default.FolderDelete,
                 onClick = {
@@ -68,7 +69,7 @@ fun AdvanceSettings(
                 }
             ),
             Components.Row(
-                title = "${localizeHelper.localize(MR.strings.clear_all_cover_cache)} (${vm.getCoverCacheSize()})",
+                title = "${localizeHelper.localize(Res.string.clear_all_cover_cache)} (${vm.getCoverCacheSize()})",
                 subtitle = "Clear cached book cover images to free up storage",
                 icon = Icons.Default.Image,
                 onClick = {
@@ -80,11 +81,11 @@ fun AdvanceSettings(
             
             // EPUB Section (Safe operations)
             Components.Header(
-                text = localizeHelper.localize(MR.strings.epub),
+                text = localizeHelper.localize(Res.string.epub),
                 icon = Icons.Default.Book
             ),
             Components.Row(
-                title = localizeHelper.localize(MR.strings.import_epub),
+                title = localizeHelper.localize(Res.string.import_epub),
                 subtitle = "Import EPUB files into your library",
                 icon = Icons.Default.Upload,
                 onClick = {
@@ -100,7 +101,7 @@ fun AdvanceSettings(
                 icon = Icons.Default.DataObject
             ),
             Components.Row(
-                title = localizeHelper.localize(MR.strings.repair_database),
+                title = localizeHelper.localize(Res.string.repair_database),
                 subtitle = "Fix database structure and integrity issues",
                 icon = Icons.Default.Build,
                 onClick = {
@@ -108,7 +109,7 @@ fun AdvanceSettings(
                 }
             ),
             Components.Row(
-                title = localizeHelper.localize(MR.strings.repair_categories),
+                title = localizeHelper.localize(Res.string.repair_categories),
                 subtitle = "Fix book category assignments",
                 icon = Icons.Default.Construction,
                 onClick = {
@@ -139,12 +140,12 @@ fun AdvanceSettings(
     // Destructive Action Dialogs with Typed Confirmation
     if (showClearAllDatabase) {
         DestructiveActionDialog(
-            title = localizeHelper.localize(MR.strings.clear_all_database),
+            title = localizeHelper.localize(Res.string.clear_all_database),
             message = "⚠️ WARNING: This will permanently remove all books and chapters from the database. This action cannot be undone and all your library data will be lost.",
             confirmationWord = "DELETE",
             onConfirm = {
                 vm.deleteAllDatabase()
-                vm.showSnackBar(UiText.MStringResource(MR.strings.database_was_cleared))
+                vm.showSnackBar(UiText.MStringResource(Res.string.database_was_cleared))
                 showClearAllDatabase = false
             },
             onDismiss = { showClearAllDatabase = false }
@@ -153,13 +154,13 @@ fun AdvanceSettings(
     
     if (showClearNotInLibrary) {
         DestructiveActionDialog(
-            title = localizeHelper.localize(MR.strings.clear_not_in_library_books),
+            title = localizeHelper.localize(Res.string.clear_not_in_library_books),
             message = "This will remove all books that are not in your library. This action cannot be undone.",
             confirmationWord = "DELETE",
             onConfirm = {
                 vm.scope.launchIO {
                     vm.deleteUseCase.deleteNotInLibraryBooks()
-                    vm.showSnackBar(UiText.MStringResource(MR.strings.success))
+                    vm.showSnackBar(UiText.MStringResource(Res.string.success))
                 }
                 showClearNotInLibrary = false
             },
@@ -169,12 +170,12 @@ fun AdvanceSettings(
     
     if (showClearAllChapters) {
         DestructiveActionDialog(
-            title = localizeHelper.localize(MR.strings.clear_all_chapters),
+            title = localizeHelper.localize(Res.string.clear_all_chapters),
             message = "This will remove all downloaded chapter content. You will need to re-download chapters to read offline. This action cannot be undone.",
             confirmationWord = "DELETE",
             onConfirm = {
                 vm.deleteAllChapters()
-                vm.showSnackBar(UiText.MStringResource(MR.strings.chapters_was_cleared))
+                vm.showSnackBar(UiText.MStringResource(Res.string.chapters_was_cleared))
                 showClearAllChapters = false
             },
             onDismiss = { showClearAllChapters = false }
@@ -183,7 +184,7 @@ fun AdvanceSettings(
     
     if (showClearCache) {
         ConfirmationDialog(
-            title = localizeHelper.localize(MR.strings.clear_all_cache),
+            title = localizeHelper.localize(Res.string.clear_all_cache),
             message = "This will clear all cached data (${vm.importEpub.getCacheSize()}). The app may need to re-download some content.",
             confirmText = "Clear",
             onConfirm = {
@@ -198,7 +199,7 @@ fun AdvanceSettings(
     
     if (showClearCoverCache) {
         ConfirmationDialog(
-            title = localizeHelper.localize(MR.strings.clear_all_cover_cache),
+            title = localizeHelper.localize(Res.string.clear_all_cover_cache),
             message = "This will clear all cached book cover images. Covers will be re-downloaded when needed.",
             confirmText = "Clear",
             onConfirm = {
@@ -213,7 +214,7 @@ fun AdvanceSettings(
     
     if (showResetReaderSettings) {
         DestructiveActionDialog(
-            title = localizeHelper.localize(MR.strings.reset_reader_screen_settings),
+            title = localizeHelper.localize(Res.string.reset_reader_screen_settings),
             message = "This will restore all reader settings to their default values. Your custom preferences (font size, colors, spacing, etc.) will be lost. This action cannot be undone.",
             confirmationWord = "RESET",
             onConfirm = {
@@ -227,12 +228,12 @@ fun AdvanceSettings(
     
     if (showResetThemes) {
         DestructiveActionDialog(
-            title = localizeHelper.localize(MR.strings.reset_themes),
+            title = localizeHelper.localize(Res.string.reset_themes),
             message = "This will remove all custom themes. Only default themes will remain. This action cannot be undone.",
             confirmationWord = "RESET",
             onConfirm = {
                 vm.resetThemes()
-                vm.showSnackBar(UiText.MStringResource(MR.strings.success))
+                vm.showSnackBar(UiText.MStringResource(Res.string.success))
                 showResetThemes = false
             },
             onDismiss = { showResetThemes = false }
@@ -241,12 +242,12 @@ fun AdvanceSettings(
     
     if (showResetCategories) {
         DestructiveActionDialog(
-            title = localizeHelper.localize(MR.strings.reset_categories),
+            title = localizeHelper.localize(Res.string.reset_categories),
             message = "This will restore the default category list. Your custom categories will be removed and books will be reassigned. This action cannot be undone.",
             confirmationWord = "RESET",
             onConfirm = {
                 vm.resetCategories()
-                vm.showSnackBar(UiText.MStringResource(MR.strings.success))
+                vm.showSnackBar(UiText.MStringResource(Res.string.success))
                 showResetCategories = false
             },
             onDismiss = { showResetCategories = false }
@@ -255,7 +256,7 @@ fun AdvanceSettings(
     
     if (showDeleteAllDb) {
         DestructiveActionDialog(
-            title = localizeHelper.localize(MR.strings.delete_all_database),
+            title = localizeHelper.localize(Res.string.delete_all_database),
             message = "⚠️⚠️⚠️ CRITICAL WARNING ⚠️⚠️⚠️\n\nThis will PERMANENTLY DELETE the ENTIRE database. ALL your data including:\n• All books in your library\n• All reading history\n• All bookmarks\n• All settings\n• All categories\n\nThis action CANNOT be recovered. Are you absolutely sure?",
             confirmationWord = "DELETE",
             onConfirm = {
@@ -525,37 +526,37 @@ fun DangerZoneSection(
             
             // Dangerous Actions
             DangerButton(
-                text = localizeHelper.localize(MR.strings.clear_all_database),
+                text = localizeHelper.localize(Res.string.clear_all_database),
                 subtitle = "Remove all books and chapters",
                 onClick = onClearAllDatabase
             )
             
             DangerButton(
-                text = localizeHelper.localize(MR.strings.clear_not_in_library_books),
+                text = localizeHelper.localize(Res.string.clear_not_in_library_books),
                 subtitle = "Remove books not in library",
                 onClick = onClearNotInLibrary
             )
             
             DangerButton(
-                text = localizeHelper.localize(MR.strings.clear_all_chapters),
+                text = localizeHelper.localize(Res.string.clear_all_chapters),
                 subtitle = "Remove all downloaded chapters",
                 onClick = onClearAllChapters
             )
             
             DangerButton(
-                text = localizeHelper.localize(MR.strings.reset_reader_screen_settings),
+                text = localizeHelper.localize(Res.string.reset_reader_screen_settings),
                 subtitle = "Restore default reader settings",
                 onClick = onResetReaderSettings
             )
             
             DangerButton(
-                text = localizeHelper.localize(MR.strings.reset_themes),
+                text = localizeHelper.localize(Res.string.reset_themes),
                 subtitle = "Remove all custom themes",
                 onClick = onResetThemes
             )
             
             DangerButton(
-                text = localizeHelper.localize(MR.strings.reset_categories),
+                text = localizeHelper.localize(Res.string.reset_categories),
                 subtitle = "Restore default categories",
                 onClick = onResetCategories
             )
@@ -567,7 +568,7 @@ fun DangerZoneSection(
             )
             
             DangerButton(
-                text = localizeHelper.localize(MR.strings.delete_all_database),
+                text = localizeHelper.localize(Res.string.delete_all_database),
                 subtitle = "⚠️ Permanently delete entire database",
                 onClick = onDeleteAllDatabase,
                 isHighRisk = true

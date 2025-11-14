@@ -40,7 +40,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.domain.data.engines.TranslateEngine
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 
 @Composable
 fun TranslationProgressIndicator(
@@ -101,7 +102,7 @@ fun TranslationProgressIndicator(
                     
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = localize(MR.strings.translating),
+                            text = localize(Res.string.translating),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface

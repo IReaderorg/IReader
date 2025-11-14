@@ -16,7 +16,8 @@ import androidx.compose.ui.unit.sp
 import ireader.core.source.HttpSource
 import ireader.core.source.Source
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.core.ui.kaomojis
 
 /**
@@ -88,13 +89,13 @@ fun ExploreScreenError(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = localize(MR.strings.retry),
+                            contentDescription = localize(Res.string.retry),
                             modifier = Modifier.size(18.dp),
                             tint = MaterialTheme.colorScheme.onSecondary
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = localize(MR.strings.retry),
+                            text = localize(Res.string.retry),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onSecondary
                         )
@@ -112,13 +113,13 @@ fun ExploreScreenError(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Public,
-                                contentDescription = localize(MR.strings.open_in_webView),
+                                contentDescription = localize(Res.string.open_in_webView),
                                 modifier = Modifier.size(18.dp),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = localize(MR.strings.open_in_webView),
+                                text = localize(Res.string.open_in_webView),
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.primary
                             )

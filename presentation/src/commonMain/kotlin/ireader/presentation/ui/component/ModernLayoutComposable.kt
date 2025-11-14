@@ -79,7 +79,8 @@ import ireader.domain.models.BookCover
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.entities.BookItem
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.BookShimmerLoading
 import kotlinx.coroutines.delay
 
@@ -505,7 +506,7 @@ fun ModernListItem(
                             // Show favorite indicator
                             if (book.favorite) {
                                 ChipIndicator(
-                                    text = localize(MR.strings.in_library),
+                                    text = localize(Res.string.in_library),
                                     color = MaterialTheme.colorScheme.primary
                                 )
                                 
@@ -516,7 +517,7 @@ fun ModernListItem(
                             book.unread?.let { unreadCount ->
                                 if (unreadCount > 0) {
                                     ChipIndicator(
-                                        text = "$unreadCount ${localize(MR.strings.unread_chapters)}",
+                                        text = "$unreadCount ${localize(Res.string.unread_chapters)}",
                                         color = MaterialTheme.colorScheme.tertiary
                                     )
                                 }
@@ -554,7 +555,7 @@ fun ModernListItem(
                         ) {
                             // Last read date
                             Text(
-                                text = "${localize(MR.strings.last_read)}: ${formatRelativeTime(lastRead)}",
+                                text = "${localize(Res.string.last_read)}: ${formatRelativeTime(lastRead)}",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                             )
@@ -562,7 +563,7 @@ fun ModernListItem(
                             // Total chapters
                             book.totalChapters?.let { total ->
                                 Text(
-                                    text = "$total ${localize(MR.strings.total_chapter)}",
+                                    text = "$total ${localize(Res.string.total_chapter)}",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                 )
@@ -943,7 +944,7 @@ fun EmptyContent() {
         Spacer(modifier = Modifier.height(24.dp))
         
         Text(
-            text = localize(MR.strings.no_results_found),
+            text = localize(Res.string.no_results_found),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
             textAlign = TextAlign.Center
@@ -952,7 +953,7 @@ fun EmptyContent() {
         Spacer(modifier = Modifier.height(12.dp))
         
         Text(
-            text = localize(MR.strings.try_another_search),
+            text = localize(Res.string.try_another_search),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             textAlign = TextAlign.Center

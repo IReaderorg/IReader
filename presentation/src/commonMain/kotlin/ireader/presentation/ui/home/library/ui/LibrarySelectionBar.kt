@@ -28,7 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.core.theme.AppColors
 
 
@@ -70,7 +71,7 @@ internal fun LibrarySelectionBar(
                 )
                 SelectionActionButton(
                     icon = Icons.Outlined.Download,
-                    label = localize(MR.strings.download),
+                    label = localize(Res.string.download),
                     onClick = onClickDownload
                 )
                 SelectionActionButton(
@@ -90,7 +91,7 @@ internal fun LibrarySelectionBar(
                 )
                 SelectionActionButton(
                     icon = Icons.Outlined.Delete,
-                    label = localize(MR.strings.delete),
+                    label = localize(Res.string.delete),
                     onClick = onClickDeleteDownload,
                 )
             }

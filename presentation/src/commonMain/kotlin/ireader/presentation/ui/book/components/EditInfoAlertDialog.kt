@@ -12,7 +12,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.models.entities.Book
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.ChipPreference
 import ireader.presentation.ui.component.components.IAlertDialog
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
@@ -56,7 +57,7 @@ fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm:
                     onStateChange(state)
                     state = false
                 }) {
-                    MidSizeTextComposable(text = localizeHelper.localize(MR.strings.cancel))
+                    MidSizeTextComposable(text = localizeHelper.localize(Res.string.cancel))
                 }
                 TextButton(
                     onClick = {
@@ -76,7 +77,7 @@ fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm:
                     },
                     enabled = canSave
                 ) {
-                    MidSizeTextComposable(text = localizeHelper.localize(MR.strings.confirm))
+                    MidSizeTextComposable(text = localizeHelper.localize(Res.string.confirm))
                 }
             }
         },
@@ -86,12 +87,12 @@ fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm:
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    MidSizeTextComposable(text = localizeHelper.localize(MR.strings.status))
+                    MidSizeTextComposable(text = localizeHelper.localize(Res.string.status))
                     Spacer(modifier = Modifier.width(8.dp))
                     ChipPreference(
                         preference = book.allStatus(),
                         selected = status.toInt(),
-                        title = localizeHelper.localize(MR.strings.status),
+                        title = localizeHelper.localize(Res.string.status),
                         onValueChange = {
                             status = it.toLong()
                         }
@@ -102,7 +103,7 @@ fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm:
                     query = title,
                     onValueChange = { title = it },
                     onConfirm = {},
-                    hint = localizeHelper.localize(MR.strings.title),
+                    hint = localizeHelper.localize(Res.string.title),
                     isError = !isTitleValid
                 )
                 if (!isTitleValid) {
@@ -118,14 +119,14 @@ fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm:
                     query = author,
                     onValueChange = { author = it },
                     onConfirm = {},
-                    hint = localizeHelper.localize(MR.strings.author)
+                    hint = localizeHelper.localize(Res.string.author)
                 )
                 
                 SimpleTextField(
                     query = description,
                     onValueChange = { description = it },
                     onConfirm = {},
-                    hint = localizeHelper.localize(MR.strings.description),
+                    hint = localizeHelper.localize(Res.string.description),
                     maxLines = 5
                 )
                 

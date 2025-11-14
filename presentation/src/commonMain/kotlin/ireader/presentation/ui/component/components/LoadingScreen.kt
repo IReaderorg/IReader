@@ -17,7 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import kotlin.random.Random
 
 @Composable
@@ -38,7 +39,7 @@ fun LoadingScreen(
         /*@FloatRange(from = 0.0, to = 1.0)*/
         progress: Float = 0.0F,
         errorMessage: String? = null,
-        retryMessage: String = localize(MR.strings.retry),
+        retryMessage: String = localize(Res.string.retry),
         retry: (() -> Unit)? = null
 ) {
     Crossfade(isLoading, modifier) {
@@ -92,7 +93,7 @@ object ProgressIndicatorDefaults {
 fun ErrorScreen(
         errorMessage: String? = null,
         modifier: Modifier = Modifier,
-        retryMessage: String = localize(MR.strings.retry),
+        retryMessage: String = localize(Res.string.retry),
         retry: (() -> Unit)? = null
 ) {
     Box(modifier then Modifier.fillMaxSize()) {

@@ -4,6 +4,7 @@ plugins {
     kotlin("plugin.serialization")
     id(libs.plugins.sqldelight.get().pluginId)
     id("com.google.devtools.ksp")
+    alias(libs.plugins.jetbrainCompose)
     alias(kotlinx.plugins.compose.compiler)
 }
 
@@ -37,6 +38,8 @@ kotlin {
                 implementation(kotlinx.serialization.json)
                 implementation(libs.sqldelight.runtime)
                 implementation(libs.sqldelight.coroutines)
+                implementation(compose.runtime)
+                implementation(compose.components.resources)
 
                 api(libs.koin.core)
                 api(libs.jsoup)

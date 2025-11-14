@@ -46,7 +46,8 @@ import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.theme.Theme
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.Build
 import ireader.presentation.ui.component.components.ChoicePreference
 import ireader.presentation.ui.component.components.ColorPickerDialog
@@ -126,11 +127,11 @@ fun AppearanceSettingScreen(
                 ChoicePreference<PreferenceValues.ThemeMode>(
                         preference = vm.themeMode,
                         choices = mapOf(
-                                PreferenceValues.ThemeMode.System to localizeHelper.localize(MR.strings.follow_system_settings),
-                                PreferenceValues.ThemeMode.Light to localizeHelper.localize(MR.strings.light),
-                                PreferenceValues.ThemeMode.Dark to localizeHelper.localize(MR.strings.dark)
+                                PreferenceValues.ThemeMode.System to localizeHelper.localize(Res.string.follow_system_settings),
+                                PreferenceValues.ThemeMode.Light to localizeHelper.localize(Res.string.light),
+                                PreferenceValues.ThemeMode.Dark to localizeHelper.localize(Res.string.dark)
                         ),
-                        title = localizeHelper.localize(MR.strings.theme),
+                        title = localizeHelper.localize(Res.string.theme),
                         subtitle = null,
                         onValue = {
                             vm.saveNightModePreferences(it)
@@ -382,17 +383,17 @@ fun AppearanceSettingScreen(
                                                 val themeId =
                                                         vm.themeRepository.insert(theme.toCustomTheme())
                                                 vm.colorTheme.value = themeId
-                                                vm.showSnackBar(UiText.MStringResource(MR.strings.theme_was_saved))
+                                                vm.showSnackBar(UiText.MStringResource(Res.string.theme_was_saved))
                                             }
                                         } else {
-                                            vm.showSnackBar(UiText.MStringResource(MR.strings.theme_was_not_valid))
+                                            vm.showSnackBar(UiText.MStringResource(Res.string.theme_was_not_valid))
                                         }
                                         vm.isSavable = false
                                     }
                                 },
                                 shape = MaterialTheme.shapes.medium
                             ) {
-                                MidSizeTextComposable(text = localizeHelper.localize(MR.strings.save_custom_theme))
+                                MidSizeTextComposable(text = localizeHelper.localize(Res.string.save_custom_theme))
                             }
                         } else if (vm.colorTheme.value > 0) {
                             TextButton(onClick = {
@@ -402,10 +403,10 @@ fun AppearanceSettingScreen(
                                                 ?.toCustomTheme()
                                                 ?.let { vm.themeRepository.delete(it) }
                                     }
-                                    vm.showSnackBar(UiText.MStringResource(MR.strings.theme_was_deleted))
+                                    vm.showSnackBar(UiText.MStringResource(Res.string.theme_was_deleted))
                                 }
                             }) {
-                                MidSizeTextComposable(text = localizeHelper.localize(MR.strings.delete_custom_theme))
+                                MidSizeTextComposable(text = localizeHelper.localize(Res.string.delete_custom_theme))
                             }
                         }
                     }
@@ -501,13 +502,13 @@ fun AppearanceSettingScreen(
                         preference = vm.relativeTime,
                         choices = vm.relativeTimes.associateWith { value ->
                             when (value) {
-                                PreferenceValues.RelativeTime.Off -> localizeHelper.localize(MR.strings.off)
-                                PreferenceValues.RelativeTime.Day -> localizeHelper.localize(MR.strings.pref_relative_time_short)
-                                PreferenceValues.RelativeTime.Week -> localizeHelper.localize(MR.strings.pref_relative_time_long)
-                                else -> localizeHelper.localize(MR.strings.off)
+                                PreferenceValues.RelativeTime.Off -> localizeHelper.localize(Res.string.off)
+                                PreferenceValues.RelativeTime.Day -> localizeHelper.localize(Res.string.pref_relative_time_short)
+                                PreferenceValues.RelativeTime.Week -> localizeHelper.localize(Res.string.pref_relative_time_long)
+                                else -> localizeHelper.localize(Res.string.off)
                             }
                         },
-                        title = localizeHelper.localize(MR.strings.pref_relative_format),
+                        title = localizeHelper.localize(Res.string.pref_relative_format),
                         subtitle = null,
                 )
             }.Build()

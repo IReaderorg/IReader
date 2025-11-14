@@ -29,7 +29,8 @@ import ireader.domain.models.entities.toBook
 import ireader.domain.models.entities.toBookItem
 import ireader.i18n.asString
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.ModernLayoutComposable
 import ireader.presentation.ui.component.components.BookShimmerLoading
 import ireader.presentation.ui.component.isLandscape
@@ -154,7 +155,7 @@ fun ExploreScreen(
             ExtendedFloatingActionButton(
                 text = {
                     Text(
-                        text = localize(MR.strings.filter),
+                        text = localize(Res.string.filter),
                         color = MaterialTheme.colorScheme.onSecondary
                     )
                 },

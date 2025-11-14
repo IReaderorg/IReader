@@ -16,7 +16,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.fonts.CustomFont
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
@@ -115,7 +116,7 @@ fun FontPicker(
             },
             dismissButton = {
                 TextButton(onClick = { fontToDelete = null }) {
-                    Text(localizeHelper?.localize(MR.strings.cancel) ?: "Cancel")
+                    Text(localizeHelper?.localize(Res.string.cancel) ?: "Cancel")
                 }
             }
         )
@@ -244,7 +245,7 @@ fun ImportFontDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(localizeHelper.localize(MR.strings.cancel))
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         },
         modifier = modifier

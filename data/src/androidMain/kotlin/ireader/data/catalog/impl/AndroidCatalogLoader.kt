@@ -22,7 +22,8 @@ import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.utils.extensions.withIOContext
 import ireader.i18n.BuildKonfig
 import ireader.i18n.LocalizeHelper
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -259,7 +260,7 @@ class AndroidCatalogLoader(
         val source = loadSource(pkgName, loader, data)
 
         return CatalogInstalled.SystemWide(
-            name = source?.name ?: localizeHelper.localize(MR.strings.unknown),
+            name = source?.name ?: localizeHelper.localize(Res.string.unknown),
             description = data.description,
             source = source,
             pkgName = pkgName,

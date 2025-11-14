@@ -6,6 +6,8 @@ plugins {
     id("org.jetbrains.dokka")
     kotlin("plugin.serialization")
     id("com.google.devtools.ksp")
+    alias(libs.plugins.jetbrainCompose)
+    alias(kotlinx.plugins.compose.compiler)
 }
 android {
     namespace = "ireader.core"
@@ -58,6 +60,9 @@ kotlin {
                 implementation(libs.ktor.contentNegotiation.gson)
                 api(libs.ktor.core)
                 api(libs.ktor.contentNegotiation)
+                // Needed for Compose Resources StringResource type
+                implementation(compose.runtime)
+                implementation(compose.components.resources)
                 api(libs.ktor.contentNegotiation.kotlinx)
                 api(libs.okio)
                 compileOnly(libs.jsoup)

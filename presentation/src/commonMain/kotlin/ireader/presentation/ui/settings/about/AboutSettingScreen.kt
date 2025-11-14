@@ -41,7 +41,8 @@ import ireader.i18n.BuildKonfig
 import ireader.i18n.Images.discord
 import ireader.i18n.Images.github
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.LinkIcon
 import ireader.presentation.ui.component.components.LogoHeader
 import ireader.presentation.ui.component.components.PreferenceRow
@@ -115,7 +116,7 @@ fun AboutSettingScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = localize(MR.strings.version),
+                            text = localize(Res.string.version),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -198,7 +199,7 @@ fun AboutSettingScreen(
         
         item {
             PreferenceRow(
-                title = localize(MR.strings.check_the_update),
+                title = localize(Res.string.check_the_update),
                 subtitle = if (isCheckingUpdate) "Checking for updates..." else null,
                 onClick = {
                     if (!isCheckingUpdate) {
@@ -261,7 +262,7 @@ fun AboutSettingScreen(
         }
         item {
             PreferenceRow(
-                title = localize(MR.strings.whats_new),
+                title = localize(Res.string.whats_new),
                 subtitle = "View version history and new features",
                 icon = Icons.Outlined.History,
                 onClick = onNavigateToChangelog
@@ -287,7 +288,7 @@ fun AboutSettingScreen(
                     horizontalArrangement = Arrangement.Center,
                 ) {
                     LinkIcon(
-                        label = localize(MR.strings.website),
+                        label = localize(Res.string.website),
                         painter = rememberVectorPainter(Icons.Outlined.Public),
                         url = "https://github.com/kazemcodes/IReader",
                     )

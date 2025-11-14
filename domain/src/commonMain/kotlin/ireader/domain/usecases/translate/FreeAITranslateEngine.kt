@@ -11,7 +11,8 @@ import ireader.core.http.HttpClients
 import ireader.domain.data.engines.TranslateEngine
 import ireader.domain.data.engines.TranslationContext
 import ireader.i18n.UiText
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -83,7 +84,7 @@ class FreeAITranslateEngine(
     ) {
         // Validate inputs
         if (texts.isNullOrEmpty()) {
-            onError(UiText.MStringResource(MR.strings.no_text_to_translate))
+            onError(UiText.MStringResource(Res.string.no_text_to_translate))
             return
         }
         
@@ -163,7 +164,7 @@ class FreeAITranslateEngine(
             }
             
             if (results.isEmpty()) {
-                onError(UiText.MStringResource(MR.strings.empty_response))
+                onError(UiText.MStringResource(Res.string.empty_response))
             } else {
                 onProgress(100)
                 onSuccess(results)
@@ -175,9 +176,9 @@ class FreeAITranslateEngine(
             val errorMessage = when {
                 e.message?.contains("failed to connect") == true || 
                 e.message?.contains("connection") == true -> 
-                    UiText.MStringResource(MR.strings.noInternetError)
+                    UiText.MStringResource(Res.string.noInternetError)
                 e.message?.contains("429") == true -> 
-                    UiText.MStringResource(MR.strings.api_rate_limit_exceeded)
+                    UiText.MStringResource(Res.string.api_rate_limit_exceeded)
                 else -> UiText.ExceptionString(e)
             }
             

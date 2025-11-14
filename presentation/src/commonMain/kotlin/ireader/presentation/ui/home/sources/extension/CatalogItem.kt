@@ -23,7 +23,8 @@ import androidx.compose.ui.unit.dp
 import ireader.core.os.InstallStep
 import ireader.domain.models.entities.*
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.imageloader.IImageLoader
 import ireader.domain.models.entities.SourceStatus
 import ireader.presentation.ui.component.components.SourceStatusIndicator
@@ -182,13 +183,13 @@ private fun CatalogButtons(
             } else if (onInstall != null) {
                 if (catalog is CatalogLocal) {
                     MidSizeTextComposable(
-                        text = localize(MR.strings.update),
+                        text = localize(Res.string.update),
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.clickable { onInstall() }
                     )
                 } else if (catalog is CatalogRemote) {
                     MidSizeTextComposable(
-                        text = localize(MR.strings.install),
+                        text = localize(Res.string.install),
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.clickable { onInstall() }
                     )
@@ -219,7 +220,7 @@ internal fun CatalogMenuButton(
                 AppIconButton(
                     imageVector = Icons.Filled.PushPin,
                     tint = MaterialTheme.colorScheme.primary,
-                    contentDescription = localize(MR.strings.pin),
+                    contentDescription = localize(Res.string.pin),
                     onClick = onPinToggle
                 )
             } else {
@@ -228,7 +229,7 @@ internal fun CatalogMenuButton(
                     tint = MaterialTheme.colorScheme.onBackground.copy(
                         .5f
                     ),
-                    contentDescription = localize(MR.strings.unpin),
+                    contentDescription = localize(Res.string.unpin),
                     onClick = onPinToggle
                 )
             }
@@ -236,7 +237,7 @@ internal fun CatalogMenuButton(
             Spacer(modifier = Modifier.padding(horizontal = 4.dp))
             if (onUninstall != null && catalog is CatalogLocal) {
                 MidSizeTextComposable(
-                    text = localize(MR.strings.uninstall),
+                    text = localize(Res.string.uninstall),
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable { onUninstall() }
                 )

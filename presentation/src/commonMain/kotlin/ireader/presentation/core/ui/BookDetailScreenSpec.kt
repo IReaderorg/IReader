@@ -35,7 +35,8 @@ import ireader.domain.models.entities.Book
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.UiText
 import ireader.i18n.localize
-import ireader.i18n.resources.MR
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.VoyagerScreen
 import ireader.presentation.ui.book.BookDetailScreen
@@ -102,7 +103,7 @@ data class BookDetailScreenSpec constructor(
                     vm.showSnackBar(UiText.DynamicString(it))
                 })
             }
-            vm.showSnackBar(UiText.MStringResource(MR.strings.success))
+            vm.showSnackBar(UiText.MStringResource(Res.string.success))
         }) { e ->
             vm.showSnackBar(UiText.ExceptionString(e))
         }
@@ -113,7 +114,7 @@ data class BookDetailScreenSpec constructor(
                     vm.showSnackBar(UiText.DynamicString(it))
                 })
             }
-            vm.showSnackBar(UiText.MStringResource(MR.strings.success))
+            vm.showSnackBar(UiText.MStringResource(Res.string.success))
         }) { e ->
             vm.showSnackBar(UiText.ExceptionString(e))
         }
@@ -290,9 +291,9 @@ data class BookDetailScreenSpec constructor(
                             ExtendedFloatingActionButton(
                                 text = {
                                     val id = if (chapters.value.any { it.read }) {
-                                        MR.strings.resume
+                                        Res.string.resume
                                     } else {
-                                        MR.strings.start
+                                        Res.string.start
                                     }
                                     Text(text = localize(id))
                                 },
@@ -320,12 +321,12 @@ data class BookDetailScreenSpec constructor(
                                             )
                                         } else {
                                             scope.launch {
-                                                vm.showSnackBar(UiText.MStringResource(MR.strings.no_chapter_is_available))
+                                                vm.showSnackBar(UiText.MStringResource(Res.string.no_chapter_is_available))
                                             }
                                         }
                                     } else {
                                         scope.launch {
-                                            vm.showSnackBar(UiText.MStringResource(MR.strings.source_not_available))
+                                            vm.showSnackBar(UiText.MStringResource(Res.string.source_not_available))
                                         }
                                     }
                                 },
