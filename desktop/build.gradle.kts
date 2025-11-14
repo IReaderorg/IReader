@@ -103,9 +103,6 @@ compose.desktop {
         )
         
         nativeDistributions {
-            // Package a JRE with the application
-            includeAllModules = true
-            
             // Include native libraries in the distribution
             // This ensures Piper TTS native libraries are packaged with the application
             appResourcesRootDir.set(project.layout.projectDirectory.dir("src/main/resources"))
@@ -128,8 +125,20 @@ compose.desktop {
                 "IReader-Preview"
             }
             
-            // Ensure JRE is included
-            includeAllModules = true
+            // Specify required modules instead of including all modules
+            // This prevents jlink errors with Java 24
+            modules(
+                "java.base",
+                "java.desktop",
+                "java.logging",
+                "java.naming",
+                "java.net.http",
+                "java.prefs",
+                "java.sql",
+                "java.xml",
+                "jdk.crypto.ec",
+                "jdk.unsupported"
+            )
             
             description = "IReader"
             copyright = "Mozilla Public License v2.0"
