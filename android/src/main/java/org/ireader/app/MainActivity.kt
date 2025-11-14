@@ -24,8 +24,6 @@ import androidx.core.util.Consumer
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil3.SingletonImageLoader
 import coil3.annotation.ExperimentalCoilApi
@@ -43,16 +41,12 @@ import ireader.i18n.SHORTCUTS.SHORTCUT_DETAIL
 import ireader.i18n.SHORTCUTS.SHORTCUT_DOWNLOAD
 import ireader.i18n.SHORTCUTS.SHORTCUT_READER
 import ireader.i18n.SHORTCUTS.SHORTCUT_TTS
-import ireader.presentation.core.MainStarterScreen
+import ireader.presentation.core.CommonNavHost
 import ireader.presentation.core.NavigationRoutes
 import ireader.presentation.core.ProvideNavigator
 import ireader.presentation.core.popUntilRoot
 import ireader.presentation.core.theme.AppTheme
 import ireader.presentation.core.theme.LocaleHelper
-import ireader.presentation.core.ui.BookDetailScreenSpec
-import ireader.presentation.core.ui.DownloaderScreenSpec
-import ireader.presentation.core.ui.ReaderScreenSpec
-import ireader.presentation.core.ui.TTSScreenSpec
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.theme.themes
 import ireader.presentation.ui.core.ui.asStateIn
@@ -136,195 +130,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                             }
                             
                             IScaffold {
-                                NavHost(
-                                    navController = navController,
-                                    startDestination = "main"
-                                ) {
-                                    composable("main") {
-                                        MainStarterScreen()
-                                    }
-                                    // Settings routes
-                                    composable(NavigationRoutes.profile) {
-                                        ireader.presentation.ui.settings.auth.ProfileScreen().Content()
-                                    }
-                                    composable(NavigationRoutes.auth) {
-                                        ireader.presentation.ui.settings.auth.AuthScreen().Content()
-                                    }
-                                    composable(NavigationRoutes.settings) {
-                                        ireader.presentation.core.ui.SettingScreenSpec().Content()
-                                    }
-                                    composable(NavigationRoutes.appearance) {
-                                        ireader.presentation.core.ui.AppearanceScreenSpec().Content()
-                                    }
-                                    composable(NavigationRoutes.statistics) {
-                                        ireader.presentation.core.ui.StatisticsScreenSpec().Content()
-                                    }
-                                    composable(NavigationRoutes.donation) {
-                                        ireader.presentation.core.ui.DonationScreenSpec().Content()
-                                    }
-                                    composable(NavigationRoutes.cloudBackup) {
-                                        ireader.presentation.core.ui.CloudBackupScreenSpec().Content()
-                                    }
-                                    composable(NavigationRoutes.supabaseConfig) {
-                                        ireader.presentation.ui.settings.sync.SupabaseConfigScreen().Content()
-                                    }
-                                    composable(NavigationRoutes.translationSettings) {
-                                        ireader.presentation.core.ui.TranslationScreenSpec().Content()
-                                    }
-                                    composable(NavigationRoutes.backupRestore) {
-                                        ireader.presentation.core.ui.BackupAndRestoreScreenSpec().Content()
-                                    }
-                                    composable(NavigationRoutes.category) {
-                                        ireader.presentation.core.ui.CategoryScreenSpec().Content()
-                                    }
-                                    composable(NavigationRoutes.downloader) {
-                                        DownloaderScreenSpec().Content()
-                                    }
-                                    composable(NavigationRoutes.fontSettings) {
-                                        ireader.presentation.core.ui.FontScreenSpec().Content()
-                                    }
-                                    composable(NavigationRoutes.about) {
-                                        ireader.presentation.core.ui.AboutSettingSpec().Content()
-                                    }
-                                    composable(NavigationRoutes.generalSettings) {
-                                        ireader.presentation.core.ui.GeneralScreenSpec().Content()
-                                    }
-                                    composable(NavigationRoutes.readerSettings) {
-                                        ireader.presentation.core.ui.ReaderSettingSpec().Content()
-                                    }
-                                    composable(NavigationRoutes.securitySettings) {
-                                        ireader.presentation.core.ui.SecuritySettingSpec().Content()
-                                    }
-                                    composable(NavigationRoutes.repository) {
-                                        ireader.presentation.core.ui.RepositoryScreenSpec().Content()
-                                    }
-                                    composable(NavigationRoutes.repositoryAdd) {
-                                        ireader.presentation.core.ui.RepositoryAddScreenSpec().Content()
-                                    }
-                                    composable(NavigationRoutes.changelog) {
-                                        ireader.presentation.core.ui.ChangelogScreenSpec().Content()
-                                    }
-                                    composable(NavigationRoutes.advanceSettings) {
-                                        ireader.presentation.core.ui.AdvanceSettingSpec().Content()
-                                    }
-                                    composable(NavigationRoutes.ttsEngineManager) {
-                                        ireader.presentation.core.ui.TTSEngineManagerScreenSpec().Content()
-                                    }
-                                    // Routes with parameters
-                                    composable(
-                                        route = "bookDetail/{bookId}",
-                                        arguments = listOf(androidx.navigation.navArgument("bookId") { 
-                                            type = androidx.navigation.NavType.StringType 
-                                        })
-                                    ) { backStackEntry ->
-                                        val bookId = androidx.compose.runtime.remember(backStackEntry) {
-                                            backStackEntry.savedStateHandle.get<String>("bookId")?.toLongOrNull()
-                                        }
-                                        if (bookId != null) {
-                                            androidx.compose.runtime.key(bookId) {
-                                                BookDetailScreenSpec(bookId).Content()
-                                            }
-                                        }
-                                    }
-                                    composable(
-                                        route = "reader/{bookId}/{chapterId}",
-                                        arguments = listOf(
-                                            androidx.navigation.navArgument("bookId") { type = androidx.navigation.NavType.StringType },
-                                            androidx.navigation.navArgument("chapterId") { type = androidx.navigation.NavType.StringType }
-                                        )
-                                    ) { backStackEntry ->
-                                        val bookId = androidx.compose.runtime.remember(backStackEntry) {
-                                            backStackEntry.savedStateHandle.get<String>("bookId")?.toLongOrNull()
-                                        }
-                                        val chapterId = androidx.compose.runtime.remember(backStackEntry) {
-                                            backStackEntry.savedStateHandle.get<String>("chapterId")?.toLongOrNull()
-                                        }
-                                        if (bookId != null && chapterId != null) {
-                                            androidx.compose.runtime.key(bookId, chapterId) {
-                                                ReaderScreenSpec(bookId, chapterId).Content()
-                                            }
-                                        }
-                                    }
-                                    composable(
-                                        route = "explore/{sourceId}",
-                                        arguments = listOf(
-                                            androidx.navigation.navArgument("sourceId") { type = androidx.navigation.NavType.StringType }
-                                        )
-                                    ) { backStackEntry ->
-                                        val sourceId = androidx.compose.runtime.remember(backStackEntry) {
-                                            backStackEntry.savedStateHandle.get<String>("sourceId")?.toLongOrNull()
-                                        }
-                                        if (sourceId != null) {
-                                            androidx.compose.runtime.key(sourceId) {
-                                                ireader.presentation.core.ui.ExploreScreenSpec(sourceId, null).Content()
-                                            }
-                                        }
-                                    }
-                                    composable(
-                                        route = "globalSearch"
-                                    ) { backStackEntry ->
-                                        ireader.presentation.core.ui.GlobalSearchScreenSpec(null).Content()
-                                    }
-                                    composable(
-                                        route = "webView"
-                                    ) {
-                                        // Android WebView - handled by WebViewScreenSpec
-                                    }
-                                    composable(
-                                        route = "tts/{bookId}/{chapterId}/{sourceId}/{readingParagraph}",
-                                        arguments = listOf(
-                                            androidx.navigation.navArgument("bookId") { type = androidx.navigation.NavType.StringType },
-                                            androidx.navigation.navArgument("chapterId") { type = androidx.navigation.NavType.StringType },
-                                            androidx.navigation.navArgument("sourceId") { type = androidx.navigation.NavType.StringType },
-                                            androidx.navigation.navArgument("readingParagraph") { type = androidx.navigation.NavType.StringType }
-                                        )
-                                    ) { backStackEntry ->
-                                        val bookId = androidx.compose.runtime.remember(backStackEntry) {
-                                            backStackEntry.savedStateHandle.get<String>("bookId")?.toLongOrNull()
-                                        }
-                                        val chapterId = androidx.compose.runtime.remember(backStackEntry) {
-                                            backStackEntry.savedStateHandle.get<String>("chapterId")?.toLongOrNull()
-                                        }
-                                        val sourceId = androidx.compose.runtime.remember(backStackEntry) {
-                                            backStackEntry.savedStateHandle.get<String>("sourceId")?.toLongOrNull()
-                                        }
-                                        val readingParagraph = androidx.compose.runtime.remember(backStackEntry) {
-                                            backStackEntry.savedStateHandle.get<String>("readingParagraph")?.toIntOrNull()
-                                        }
-                                        if (bookId != null && chapterId != null && sourceId != null && readingParagraph != null) {
-                                            androidx.compose.runtime.key(bookId, chapterId, sourceId, readingParagraph) {
-                                                TTSScreenSpec(bookId, chapterId, sourceId, readingParagraph).Content()
-                                            }
-                                        }
-                                    }
-                                    composable("chatGptLogin") {
-                                        ireader.presentation.core.ui.ChatGptLoginScreenSpec().Content()
-                                    }
-                                    composable("deepSeekLogin") {
-                                        ireader.presentation.core.ui.DeepSeekLoginScreenSpec().Content()
-                                    }
-                                    composable(
-                                        route = "sourceDetail/{sourceId}",
-                                        arguments = listOf(
-                                            androidx.navigation.navArgument("sourceId") { type = androidx.navigation.NavType.StringType }
-                                        )
-                                    ) { backStackEntry ->
-                                        val sourceId = androidx.compose.runtime.remember(backStackEntry) {
-                                            backStackEntry.savedStateHandle.get<String>("sourceId")?.toLongOrNull()
-                                        }
-                                        if (sourceId != null) {
-                                            val catalogStore: ireader.domain.catalogs.CatalogStore = org.koin.compose.koinInject()
-                                            val catalog = androidx.compose.runtime.remember(sourceId) {
-                                                catalogStore.catalogs.find { it.sourceId == sourceId }
-                                            }
-                                            if (catalog != null) {
-                                                androidx.compose.runtime.key(sourceId) {
-                                                    ireader.presentation.ui.home.sources.extension.SourceDetailScreen(catalog).Content()
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                                CommonNavHost(navController)
                                 
                                 // Pass the application context to GetPermissions
                                 GetPermissions(uiPreferences, context = this@MainActivity)
