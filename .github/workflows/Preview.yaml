@@ -198,7 +198,41 @@ jobs:
             | jq -r '.[]|"- \(.message | first) (@\(.username))"')
           {delimiter}" >> $GITHUB_ENV
           mkdir -p ~/.android/ && echo "${{ secrets.DEBUG_KEYSTORE }}" | base64 --decode > ~/.android/debug.keystore
-      - uses: ncipollo/release-action@v1.12.0
+
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          # Read the release template
+          TEMPLATE=$(cat .github/RELEASE_TEMPLATE.md)
+          
+          # Replace placeholders
+          TEMPLATE="${TEMPLATE//PREV_SHA/${{ env.PREV_RELEASE_SHA }}}"
+          TEMPLATE="${TEMPLATE//CURRENT_SHA/${{ env.CURRENT_SHA }}}"
+          
+          # Insert commit logs after "What's New" section
+          RELEASE_BODY=$(echo "$TEMPLATE" | sed "/<!-- Auto-generated commit logs will be inserted here -->/a\\
+          \\
+          ${{ env.COMMIT_LOGS }}")
+          
+          # Check if changelog.md exists and append it
+          if [ -f "changelog.md" ]; then
+            echo "" >> release_notes.md
+            echo "### 📋 Changelog" >> release_notes.md
+            echo "" >> release_notes.md
+            cat changelog.md >> release_notes.md
+            RELEASE_BODY="$RELEASE_BODY"$'\n\n'"### 📋 Changelog"$'\n\n'"$(cat changelog.md)"
+          fi
+          
+          # Save to file for use in release
+          echo "$RELEASE_BODY" > release_notes.md
+          
+          # Set output for use in next steps
+          echo "RELEASE_BODY<<EOF" >> $GITHUB_OUTPUT
+          echo "$RELEASE_BODY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Preview Release
+        uses: ncipollo/release-action@v1.12.0
         with:
           artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,*/android-standard-universal-release-unsigned-signed.apk,*/android-standard-arm64-v8a-release-unsigned-signed.apk,*/android-standard-armeabi-v7a-release-unsigned-signed.apk,*/android-standard-x86-release-unsigned-signed.apk,*/android-standard-x86_64-release-unsigned-signed.apk"
           allowUpdates: true
@@ -206,13 +240,23 @@ jobs:
           tag: r${{ env.COMMIT_COUNT }}
           repo: IReader-Preview
           name: IReader Preview r${{ env.COMMIT_COUNT }}
-          body: |
-            ### Commits
-            https://github.com/ireaderorg/ireader/compare/${{ env.PREV_RELEASE_SHA }}...${{ env.CURRENT_SHA }}
-            
-            ${{ env.COMMIT_LOGS }}
+          bodyFile: release_notes.md
 
-      - name: Prune old releases
+      - name: Create Main Repository Pre-Release
+        uses: ncipollo/release-action@v1.12.0
+        with:
+          artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,*/android-standard-universal-release-unsigned-signed.apk,*/android-standard-arm64-v8a-release-unsigned-signed.apk,*/android-standard-armeabi-v7a-release-unsigned-signed.apk,*/android-standard-x86-release-unsigned-signed.apk,*/android-standard-x86_64-release-unsigned-signed.apk"
+          allowUpdates: true
+          token: ${{ secrets.WINGET_PUBLISH_PAT }}
+          tag: preview-r${{ env.COMMIT_COUNT }}
+          repo: ireader
+          owner: ireaderorg
+          name: IReader Preview r${{ env.COMMIT_COUNT }}
+          bodyFile: release_notes.md
+          prerelease: true
+          draft: ${{ github.event.inputs.dry-run == 'true' }}
+
+      - name: Prune old preview releases
         uses: dev-drprasad/delete-older-releases@v0.2.0
         env:
           GITHUB_TOKEN: ${{ secrets.WINGET_PUBLISH_PAT }}
@@ -220,3 +264,13 @@ jobs:
           keep_latest: 15
           delete_tags: true
           repo: IReaderorg/IReader-Preview
+
+      - name: Prune old main repository pre-releases
+        uses: dev-drprasad/delete-older-releases@v0.2.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.WINGET_PUBLISH_PAT }}
+        with:
+          keep_latest: 10
+          delete_tags: true
+          delete_tag_pattern: preview-
+          repo: ireaderorg/ireader
