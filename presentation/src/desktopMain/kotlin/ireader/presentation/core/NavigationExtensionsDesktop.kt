@@ -9,8 +9,17 @@ import ireader.presentation.core.ui.WebViewScreenSpec
  */
 
 actual fun NavHostController.navigateTo(spec: WebViewScreenSpec) {
-    // For desktop, WebView just opens in browser, so we use a simple route
-    navigate("webView")
+    // For desktop, open URL in external browser directly
+    spec.url?.let { urlString ->
+        try {
+            val desktop = java.awt.Desktop.getDesktop()
+            if (desktop.isSupported(java.awt.Desktop.Action.BROWSE)) {
+                desktop.browse(java.net.URI(urlString))
+            }
+        } catch (e: Exception) {
+            println("Failed to open URL in browser: ${e.message}")
+        }
+    }
 }
 
 actual fun NavHostController.navigateTo(spec: TTSScreenSpec) {

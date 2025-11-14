@@ -94,10 +94,10 @@ import org.koin.core.parameter.parametersOf
     ExperimentalCoroutinesApi::class, ExperimentalMaterial3Api::class
 )
 actual data class WebViewScreenSpec actual constructor(
-    val url: String?,
-    val sourceId: Long?,
-    val bookId: Long?,
-    val chapterId: Long?,
+    internal val url: String?,
+    internal val sourceId: Long?,
+    internal val bookId: Long?,
+    internal val chapterId: Long?,
     val enableBookFetch: Boolean,
     val enableChapterFetch: Boolean,
     val enableChaptersFetch: Boolean,

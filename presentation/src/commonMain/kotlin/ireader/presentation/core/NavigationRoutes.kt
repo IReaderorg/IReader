@@ -28,9 +28,30 @@ object NavigationRoutes {
     const val appearance = "appearance"
     const val statistics = "statistics"
     const val repository = "repository"
+    const val webView = "webView"
     
     // Routes with parameters
     fun bookDetail(bookId: Long) = "bookDetail/$bookId"
+    fun webView(
+        url: String,
+        sourceId: Long? = null,
+        bookId: Long? = null,
+        chapterId: Long? = null,
+        enableBookFetch: Boolean = false,
+        enableChapterFetch: Boolean = false,
+        enableChaptersFetch: Boolean = false
+    ): String {
+        val params = buildList {
+            add("url=$url")
+            sourceId?.let { add("sourceId=$it") }
+            bookId?.let { add("bookId=$it") }
+            chapterId?.let { add("chapterId=$it") }
+            if (enableBookFetch) add("enableBookFetch=true")
+            if (enableChapterFetch) add("enableChapterFetch=true")
+            if (enableChaptersFetch) add("enableChaptersFetch=true")
+        }.joinToString("&")
+        return "webView?$params"
+    }
     fun reader(bookId: Long, chapterId: Long) = "reader/$bookId/$chapterId"
     fun explore(sourceId: Long) = "explore/$sourceId"
     fun tts(bookId: Long, chapterId: Long, sourceId: Long, readingParagraph: Int) = 

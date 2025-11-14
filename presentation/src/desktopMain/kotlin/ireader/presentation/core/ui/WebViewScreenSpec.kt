@@ -10,22 +10,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import ireader.core.os.openInBrowser
+import java.awt.Desktop
+import java.net.URI
 
 actual class WebViewScreenSpec actual constructor(
-    private val url: String?,
-    sourceId: Long?,
-    bookId: Long?,
-    chapterId: Long?,
-    enableBookFetch: Boolean,
-    enableChapterFetch: Boolean,
-    enableChaptersFetch: Boolean
+    internal val url: String?,
+    internal val sourceId: Long?,
+    internal val bookId: Long?,
+    internal val chapterId: Long?,
+    internal val enableBookFetch: Boolean,
+    internal val enableChapterFetch: Boolean,
+    internal val enableChaptersFetch: Boolean
 ) {
     @Composable
     actual fun Content() {
@@ -34,10 +34,16 @@ actual class WebViewScreenSpec actual constructor(
         
         LaunchedEffect(url) {
             if (url != null) {
-                val result = openInBrowser(url)
-                result.onFailure { error ->
+                try {
+                    val desktop = Desktop.getDesktop()
+                    if (desktop.isSupported(Desktop.Action.BROWSE)) {
+                        desktop.browse(URI(url))
+                    } else {
+                        snackbarHostState.showSnackbar("Browser not supported on this system")
+                    }
+                } catch (e: Exception) {
                     snackbarHostState.showSnackbar(
-                        message = error.message ?: "Failed to open browser"
+                        message = "Failed to open browser: ${e.message}"
                     )
                 }
             }

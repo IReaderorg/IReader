@@ -16,6 +16,10 @@ This specification addresses critical UI/UX issues and missing functionality acr
 - **TTS Module**: Text-to-speech reading functionality
 - **Repository Screen**: Interface for managing content source repositories
 - **Authentication Module**: User sign-in and security features
+- **Appearance Screen**: The settings screen where users configure visual themes and display preferences
+- **Theme Card**: A UI component displaying a theme preview with selection controls
+- **Theme Mode**: The color scheme setting (light, dark, or auto) for the application
+- **Large Screen**: Desktop or tablet displays with width greater than 600dp
 
 ## Requirements
 
@@ -227,3 +231,51 @@ This specification addresses critical UI/UX issues and missing functionality acr
 3. THE IReader System SHALL allow users to enable or disable rest reminders
 4. WHEN a rest reminder is displayed, THE IReader System SHALL provide options to dismiss or snooze
 5. THE IReader System SHALL track reading time accurately across reading sessions
+
+### Requirement 18: Theme Card UI Redesign
+
+**User Story:** As a user, I want an attractive and modern theme selection interface, so that choosing themes is visually appealing
+
+#### Acceptance Criteria
+
+1. WHEN a user views the Appearance screen, THE IReader System SHALL display theme cards with modern, polished design
+2. THE IReader System SHALL use Material Design 3 principles for theme card styling
+3. THE IReader System SHALL display theme previews with clear visual differentiation
+4. THE IReader System SHALL ensure theme cards have appropriate spacing and padding
+5. THE IReader System SHALL apply smooth animations when selecting themes
+
+### Requirement 19: Separate Light and Dark Theme Sections
+
+**User Story:** As a user, I want light and dark themes displayed in separate sections, so that I can easily browse themes for my preferred mode
+
+#### Acceptance Criteria
+
+1. WHEN a user views the Appearance screen, THE IReader System SHALL display light themes in a dedicated section
+2. WHEN a user views the Appearance screen, THE IReader System SHALL display dark themes in a separate dedicated section
+3. THE IReader System SHALL label each section clearly with "Light Themes" and "Dark Themes" headers
+4. THE IReader System SHALL remove the mode selection toggle for dark, light, and auto
+5. WHEN a user selects a light theme, THE IReader System SHALL automatically switch to light mode
+
+### Requirement 20: Theme Card Large Screen Optimization
+
+**User Story:** As a desktop user, I want theme cards optimized for large screens, so that the appearance settings look professional on my display
+
+#### Acceptance Criteria
+
+1. WHEN a user views the Appearance screen on a large screen, THE IReader System SHALL display theme cards in a responsive grid layout
+2. WHEN the screen width exceeds 600dp, THE IReader System SHALL display at least 3 theme cards per row
+3. WHEN the screen width exceeds 1200dp, THE IReader System SHALL display at least 4 theme cards per row
+4. THE IReader System SHALL maintain consistent card aspect ratios across all screen sizes
+5. THE IReader System SHALL ensure theme card content remains readable and properly scaled on large screens
+
+### Requirement 21: Desktop UI General Optimization
+
+**User Story:** As a desktop user, I want all UI features optimized for desktop use, so that the app feels native to my platform
+
+#### Acceptance Criteria
+
+1. WHEN a user interacts with any screen on desktop, THE IReader System SHALL provide appropriate hover states for interactive elements
+2. THE IReader System SHALL support keyboard navigation for all major UI components on desktop
+3. THE IReader System SHALL use desktop-appropriate spacing and sizing for touch targets
+4. THE IReader System SHALL optimize list and grid layouts for mouse and keyboard interaction
+5. THE IReader System SHALL ensure all dialogs and modals are appropriately sized for desktop screens
