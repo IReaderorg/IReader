@@ -21,8 +21,7 @@ ktor = "3.3.2"
 napier = "2.7.1"
 # Storage
 sqldelight = "2.0.2"
-# Preferences
-multiplatformSettings = "1.3.0"
+datastore = "1.1.1"
 # Backend
 supabase = "3.2.6"
 
@@ -123,9 +122,8 @@ androidSqlite = "androidx.sqlite:sqlite-framework:2.6.1"
 
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
 
-multiplatformSettings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformSettings" }
-multiplatformSettings-coroutines = { module = "com.russhwolf:multiplatform-settings-coroutines", version.ref = "multiplatformSettings" }
-multiplatformSettings-serialization = { module = "com.russhwolf:multiplatform-settings-serialization", version.ref = "multiplatformSettings" }
+androidx-datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastore" }
+androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore" }
 
 supabase-postgrest = { module = "io.github.jan-tennert.supabase:postgrest-kt", version.ref = "supabase" }
 supabase-auth = { module = "io.github.jan-tennert.supabase:auth-kt", version.ref = "supabase" }

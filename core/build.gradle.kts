@@ -67,9 +67,8 @@ kotlin {
                 api(libs.okio)
                 compileOnly(libs.jsoup)
                 api(libs.koin.core)
-                api(libs.multiplatformSettings)
-                api(libs.multiplatformSettings.coroutines)
-                api(libs.multiplatformSettings.serialization)
+                api(libs.androidx.datastore.core)
+                api(libs.androidx.datastore.preferences.core)
             }
         }
          androidMain {
