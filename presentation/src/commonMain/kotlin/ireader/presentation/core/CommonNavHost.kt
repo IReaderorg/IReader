@@ -35,6 +35,7 @@ import ireader.presentation.core.ui.RepositoryAddScreenSpec
 import ireader.presentation.core.ui.RepositoryScreenSpec
 import ireader.presentation.core.ui.SecuritySettingSpec
 import ireader.presentation.core.ui.SettingScreenSpec
+import ireader.presentation.core.ui.SourceMigrationScreenSpec
 import ireader.presentation.core.ui.StatisticsScreenSpec
 import ireader.presentation.core.ui.TTSEngineManagerScreenSpec
 import ireader.presentation.core.ui.TTSScreenSpec
