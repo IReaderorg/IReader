@@ -2,7 +2,7 @@ package ireader.core.http
 
 import okhttp3.Headers
 
-actual class BrowserEngine() : BrowserEngineInterface {
+actual class BrowserEngine actual constructor() : BrowserEngineInterface {
     actual override suspend fun fetch(
         url: String,
         selector: String?,
