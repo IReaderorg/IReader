@@ -1,5 +1,6 @@
 package ireader.data.di
 
+import io.github.jan.supabase.SupabaseClient
 import ireader.data.badge.BadgeRepositoryImpl
 import ireader.data.review.ReviewRepositoryImpl
 import ireader.domain.data.repository.BadgeRepository
@@ -12,6 +13,16 @@ import ireader.domain.usecases.review.SubmitChapterReviewUseCase
 import org.koin.dsl.module
 
 val reviewModule = module {
+    // Provide SupabaseClient from SupabaseClientProvider
+    single<SupabaseClient> {
+        val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
+        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
+            throw IllegalStateException("Supabase is not configured. Cannot provide SupabaseClient.")
+        }
+        (provider as ireader.data.remote.SupabaseClientProviderImpl)
+            .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS)
+    }
+    
     // Repositories
     single<ReviewRepository> { 
         ReviewRepositoryImpl(
@@ -26,15 +37,13 @@ val reviewModule = module {
             supabaseClient = get()
         )
     }
-    
-    // NFT Repository - Uncomment when NFTRepositoryImpl is implemented (Task 4)
-    // NOTE: Requires NFTRepositoryImpl class to be created in data/src/commonMain/kotlin/ireader/data/nft/
-    // single<ireader.domain.data.repository.NFTRepository> {
-    //     ireader.data.nft.NFTRepositoryImpl(
-    //         handler = get(),
-    //         supabaseClient = get()
-    //     )
-    // }
+
+     single<ireader.domain.data.repository.NFTRepository> {
+         ireader.data.nft.NFTRepositoryImpl(
+             handler = get(),
+             supabaseClient = get()
+         )
+     }
     
     // Review Use Cases
     factory { GetBookReviewsUseCase(get()) }
@@ -44,19 +53,15 @@ val reviewModule = module {
     
     // Badge Use Cases
     factory { GetUserBadgesUseCase(get()) }
-    
-    // Additional Badge Use Cases - Uncomment when implemented (Task 7)
-    // NOTE: Requires use case classes to be created in domain/src/commonMain/kotlin/ireader/domain/usecases/badge/
-    // factory { ireader.domain.usecases.badge.GetAvailableBadgesUseCase(get()) }
-    // factory { ireader.domain.usecases.badge.SubmitPaymentProofUseCase(get()) }
-    // factory { ireader.domain.usecases.badge.SetPrimaryBadgeUseCase(get()) }
-    // factory { ireader.domain.usecases.badge.SetFeaturedBadgesUseCase(get()) }
-    
-    // NFT Use Cases - Uncomment when implemented (Task 8)
-    // NOTE: Requires use case classes to be created in domain/src/commonMain/kotlin/ireader/domain/usecases/nft/
-    // factory { ireader.domain.usecases.nft.SaveWalletAddressUseCase(get()) }
-    // factory { ireader.domain.usecases.nft.VerifyNFTOwnershipUseCase(get()) }
-    // factory { ireader.domain.usecases.nft.GetNFTVerificationStatusUseCase(get()) }
-    // factory { ireader.domain.usecases.nft.GetNFTMarketplaceUrlUseCase() }
+
+     factory { ireader.domain.usecases.badge.GetAvailableBadgesUseCase(get()) }
+     factory { ireader.domain.usecases.badge.SubmitPaymentProofUseCase(get()) }
+     factory { ireader.domain.usecases.badge.SetPrimaryBadgeUseCase(get()) }
+     factory { ireader.domain.usecases.badge.SetFeaturedBadgesUseCase(get()) }
+
+     factory { ireader.domain.usecases.nft.SaveWalletAddressUseCase(get()) }
+     factory { ireader.domain.usecases.nft.VerifyNFTOwnershipUseCase(get()) }
+     factory { ireader.domain.usecases.nft.GetNFTVerificationStatusUseCase(get()) }
+     factory { ireader.domain.usecases.nft.GetNFTMarketplaceUrlUseCase() }
 }
 

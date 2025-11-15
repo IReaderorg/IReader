@@ -3,7 +3,6 @@ package ireader.data.badge
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.rpc
 import ireader.data.core.DatabaseHandler
 import ireader.data.remote.RemoteErrorMapper
@@ -12,7 +11,6 @@ import ireader.domain.models.remote.Badge
 import ireader.domain.models.remote.BadgeRarity
 import ireader.domain.models.remote.BadgeType
 import ireader.domain.models.remote.PaymentProof
-import ireader.domain.models.remote.PaymentStatus
 import ireader.domain.models.remote.UserBadge
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -41,7 +39,7 @@ class BadgeRepositoryImpl(
         val id: String,
         val name: String,
         val description: String,
-        @SerialName("image_url") val imageUrl: String,
+        @SerialName("image_url") val imageUrl: String? = null,
         val price: Double? = null,
         val type: String,
         val rarity: String,
@@ -131,13 +129,13 @@ class BadgeRepositoryImpl(
                     id = dto.id,
                     name = dto.name,
                     description = dto.description,
-                    icon = dto.icon ?: dto.imageUrl,
+                    icon = dto.icon ?: dto.imageUrl ?: "",
                     category = dto.category ?: "general",
                     rarity = dto.rarity,
                     price = dto.price,
                     type = parseBadgeType(dto.type),
                     badgeRarity = parseBadgeRarity(dto.rarity),
-                    imageUrl = dto.imageUrl,
+                    imageUrl = dto.imageUrl ?:"",
                     isAvailable = dto.isAvailable
                 )
             }

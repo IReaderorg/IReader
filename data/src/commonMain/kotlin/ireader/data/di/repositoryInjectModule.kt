@@ -110,8 +110,7 @@ val repositoryInjectModule = module {
     // Voice model repository
     single<VoiceModelRepository> { VoiceModelRepositoryImpl(get(), get()) }
     
-    // NFT repository
-    single<NFTRepository> { NFTRepositoryImpl(get(), get()) }
+    // NFT repository is defined in reviewModule
     
     // Plugin repository and database
     single<PluginRepository> { PluginRepositoryImpl(get()) }
