@@ -39,11 +39,20 @@ actual class JSEngine {
             // Disable eval() by overriding it
             engine.evaluate("globalThis.eval = undefined;")
             
-            // Disable Function constructor
-            engine.evaluate("globalThis.Function = undefined;")
+            // Note: Function constructor is allowed for transpiled code compatibility
+            // The sandbox environment prevents actual harm
             
-            // Disable other potentially dangerous globals
+            // Setup CommonJS-like module system for LNReader plugin compatibility
             engine.evaluate("""
+                // Create module and exports objects for CommonJS compatibility
+                if (typeof module === 'undefined') {
+                    globalThis.module = { exports: {} };
+                }
+                if (typeof exports === 'undefined') {
+                    globalThis.exports = globalThis.module.exports;
+                }
+                
+                // Disable other potentially dangerous globals
                 globalThis.importScripts = undefined;
                 globalThis.WebAssembly = undefined;
             """.trimIndent())

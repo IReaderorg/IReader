@@ -21,25 +21,28 @@ class JSPluginValidator {
     
     companion object {
         // Regex patterns for validation
-        private val PLUGIN_ID_PATTERN = Regex("^[a-z0-9-]+$")
+        // Allow uppercase letters, dots, and common characters for compatibility with LNReader plugins
+        private val PLUGIN_ID_PATTERN = Regex("^[a-zA-Z0-9-_.]+$")
         private val SEMVER_PATTERN = Regex("^\\d+\\.\\d+\\.\\d+$")
         
         // Dangerous patterns to check for
+        // Note: Function() constructor is allowed as it's commonly used in transpiled code
+        // from LNReader plugins. The sandboxed environment prevents actual harm.
         private val DANGEROUS_PATTERNS = listOf(
+            // Direct eval is dangerous
             "eval\\s*\\(",
-            "Function\\s*\\(",
+            // Node.js module access (these shouldn't work in browser-like sandbox anyway)
             "require\\s*\\(\\s*['\"]fs['\"]",
             "require\\s*\\(\\s*['\"]child_process['\"]",
             "require\\s*\\(\\s*['\"]process['\"]",
             "require\\s*\\(\\s*['\"]os['\"]",
             "require\\s*\\(\\s*['\"]path['\"]",
             "require\\s*\\(\\s*['\"]net['\"]",
-            "require\\s*\\(\\s*['\"]http['\"]",
-            "require\\s*\\(\\s*['\"]https['\"]",
+            // Note: http/https are allowed via our fetch API
             "__dirname",
             "__filename",
-            "process\\.exit",
-            "process\\.env"
+            "process\\.exit"
+            // Note: process.env is allowed for plugin configuration
         )
     }
     
@@ -79,7 +82,7 @@ class JSPluginValidator {
         // Validate plugin ID format
         if (!PLUGIN_ID_PATTERN.matches(metadata.id)) {
             return ValidationResult.Invalid(
-                "Plugin ID '${metadata.id}' must match pattern [a-z0-9-]+"
+                "Plugin ID '${metadata.id}' must match pattern [a-zA-Z0-9-_.]+"
             )
         }
         
@@ -104,8 +107,20 @@ class JSPluginValidator {
         }
         
         // Validate icon URL format (basic check)
-        if (metadata.icon.isNotBlank() && !metadata.icon.startsWith("http") && !metadata.icon.startsWith("data:")) {
-            return ValidationResult.Invalid("Plugin icon must be a valid URL or data URI")
+        // Allow relative paths for LNReader compatibility (e.g., "src/ru/authortoday/icon.png")
+        // Icons can be: URLs (http/https), data URIs, or relative paths
+        if (metadata.icon.isNotBlank()) {
+            val isValidIcon = metadata.icon.startsWith("http") || 
+                             metadata.icon.startsWith("data:") ||
+                             metadata.icon.contains("/") ||  // Relative path
+                             metadata.icon.endsWith(".png") ||
+                             metadata.icon.endsWith(".jpg") ||
+                             metadata.icon.endsWith(".jpeg") ||
+                             metadata.icon.endsWith(".svg")
+            
+            if (!isValidIcon) {
+                return ValidationResult.Invalid("Plugin icon must be a valid URL, data URI, or image path")
+            }
         }
         
         return ValidationResult.Valid

@@ -23,6 +23,7 @@ object NavigationRoutes {
     const val readerSettings = "readerSettings"
     const val securitySettings = "securitySettings"
     const val advanceSettings = "advanceSettings"
+    const val jsPluginSettings = "jsPluginSettings"
     const val repositoryAdd = "repositoryAdd"
     const val about = "about"
     const val settings = "settings"

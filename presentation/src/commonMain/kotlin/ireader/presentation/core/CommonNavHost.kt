@@ -140,6 +140,9 @@ fun CommonNavHost(
         composable(NavigationRoutes.advanceSettings) {
             AdvanceSettingSpec().Content()
         }
+        composable(NavigationRoutes.jsPluginSettings) {
+            ireader.presentation.core.ui.JSPluginSettingsScreenSpec().Content()
+        }
         composable(NavigationRoutes.ttsEngineManager) {
             TTSEngineManagerScreenSpec().Content()
         }

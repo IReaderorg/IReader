@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Update
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -62,6 +63,7 @@ fun GeneralSettingScreen(
         scaffoldPadding: PaddingValues,
         vm: GeneralSettingScreenViewModel,
         onTranslationSettingsClick: () -> Unit,
+        onJSPluginSettingsClick: () -> Unit = {},
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val manageNotificationComponent = mangeNotificationRow()
@@ -234,6 +236,20 @@ fun GeneralSettingScreen(
                         title = localizeHelper.localize(Res.string.show_local_catalogs),
                         subtitle = localizeHelper.localize(Res.string.show_local_catalogs_subtitle),
                         icon = Icons.Filled.Storage
+                ),
+                Components.Dynamic {
+                    NavigationPreferenceCustom(
+                        title = "JavaScript Plugin Settings",
+                        subtitle = "Configure JS plugins and enable LNReader-compatible sources",
+                        icon = { Icon(Icons.Filled.Code, contentDescription = null) },
+                        onClick = onJSPluginSettingsClick
+                    )
+                },
+                Components.Switch(
+                        preference = vm.enableJSPlugins,
+                        title = "Enable JavaScript Plugins",
+                        subtitle = "Allow loading LNReader-compatible JavaScript plugins",
+                        icon = Icons.Filled.Code
                 ),
                 Components.Switch(
                         preference = vm.autoInstaller,
@@ -453,6 +469,7 @@ class GeneralSettingScreenViewModel(
     var language = uiPreferences.language().asStateIn(scope)
     var showSystemWideCatalogs = uiPreferences.showSystemWideCatalogs().asStateIn(scope)
     var showLocalCatalogs = uiPreferences.showLocalCatalogs().asStateIn(scope)
+    var enableJSPlugins = uiPreferences.enableJSPlugins().asStateIn(scope)
     var autoInstaller = uiPreferences.autoCatalogUpdater().asStateIn(scope)
     var localSourceLocation = uiPreferences.savedLocalCatalogLocation().asStateIn(scope)
     

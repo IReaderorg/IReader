@@ -17,7 +17,17 @@ data class JSPluginCatalog(
     override val pkgName: String = metadata.id,
     override val versionName: String = metadata.version,
     override val versionCode: Int = metadata.version.replace(".", "").toIntOrNull() ?: 100,
-    override val iconUrl: String = metadata.icon,
+    // Convert relative icon paths to LNReader GitHub URLs
+    override val iconUrl: String = when {
+        metadata.icon.startsWith("http") -> metadata.icon
+        metadata.icon.isNotBlank() -> {
+            // LNReader plugins use GitHub raw URLs
+            // Format: https://raw.githubusercontent.com/LNReader/lnreader-plugins/plugins/v3.0.0/public/static/{icon_path}
+            val iconPath = metadata.icon.removePrefix("src/").removePrefix("/")
+            "https://raw.githubusercontent.com/LNReader/lnreader-plugins/plugins/v3.0.0/public/static/$iconPath"
+        }
+        else -> "https://via.placeholder.com/300x300?text=${metadata.id}"
+    },
     override val installDir: File = pluginFile.parentFile,
     override val nsfw: Boolean = false,
     override val isPinned: Boolean = false

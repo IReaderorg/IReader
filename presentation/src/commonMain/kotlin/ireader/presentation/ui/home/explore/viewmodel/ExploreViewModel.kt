@@ -51,8 +51,17 @@ class ExploreViewModel(
         booksState.empty()
         val sourceId = param.sourceId
         val query = param.query
-        val catalog =
-                catalogStore.find(sourceId)
+        
+        Log.debug { "[ExploreViewModel] Looking for catalog with sourceId: $sourceId" }
+        Log.debug { "[ExploreViewModel] Available catalogs: ${catalogStore.catalogs.map { "${it.name} (${it.sourceId})" }}" }
+        
+        val catalog = catalogStore.find(sourceId)
+        
+        if (catalog == null) {
+            Log.error { "[ExploreViewModel] Catalog not found for sourceId: $sourceId" }
+        } else {
+            Log.debug { "[ExploreViewModel] Found catalog: ${catalog.name} (${catalog.sourceId})" }
+        }
 
         state.catalog = catalog
         val source = state.source

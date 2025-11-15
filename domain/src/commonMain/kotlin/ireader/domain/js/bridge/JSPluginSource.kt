@@ -1,17 +1,13 @@
 package ireader.domain.js.bridge
 
 import ireader.core.log.Log
-import ireader.core.source.Source
-import ireader.core.source.model.ChapterInfo
-import ireader.core.source.model.Command
-import ireader.core.source.model.MangaInfo
-import ireader.core.source.model.Page
-import ireader.core.source.model.Text
+import ireader.core.source.CatalogSource
+import ireader.core.source.model.*
 import ireader.domain.js.models.JSPluginError
 import ireader.domain.js.models.PluginMetadata
 
 /**
- * Implementation of IReader's Source interface using a JavaScript plugin.
+ * Implementation of IReader's CatalogSource interface using a JavaScript plugin.
  * Delegates all operations to the JSPluginBridge.
  */
 class JSPluginSource(
@@ -20,7 +16,7 @@ class JSPluginSource(
     override val id: Long,
     override val name: String,
     override val lang: String
-) : Source {
+) : CatalogSource {
     
     /**
      * Gets detailed information about a manga/novel.
@@ -158,14 +154,59 @@ class JSPluginSource(
     }
     
     /**
-     * Gets the filter definitions for this source.
+     * Gets the filter definitions for this source (internal method).
      */
-    suspend fun getFilters(): Map<String, ireader.domain.js.models.FilterDefinition> {
+    suspend fun getPluginFilters(): Map<String, ireader.domain.js.models.FilterDefinition> {
         return try {
             bridge.getFilters()
         } catch (e: Exception) {
             Log.error(e, "[JSPluginSource] Failed to get filters")
             emptyMap()
         }
+    }
+    
+    // CatalogSource interface implementation
+    
+    override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
+        return try {
+            Log.debug { "[JSPluginSource] Getting manga list with listing: ${sort?.name}, page: $page" }
+            val novels = bridge.popularNovels(page, emptyMap())
+            val mangaList = novels.map { it.toMangaInfo() }
+            MangasPageInfo(mangaList, hasNextPage = mangaList.isNotEmpty())
+        } catch (e: Exception) {
+            Log.error(e, "[JSPluginSource] Failed to get manga list")
+            MangasPageInfo(emptyList(), hasNextPage = false)
+        }
+    }
+    
+    override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
+        return try {
+            Log.debug { "[JSPluginSource] Getting manga list with filters, page: $page" }
+            val novels = bridge.popularNovels(page, emptyMap())
+            val mangaList = novels.map { it.toMangaInfo() }
+            MangasPageInfo(mangaList, hasNextPage = mangaList.isNotEmpty())
+        } catch (e: Exception) {
+            Log.error(e, "[JSPluginSource] Failed to get manga list with filters")
+            MangasPageInfo(emptyList(), hasNextPage = false)
+        }
+    }
+    
+    override fun getListings(): List<Listing> {
+        // Return a default "Popular" listing
+        return listOf(
+            object : Listing("Popular") {},
+            object : Listing("Latest") {}
+        )
+    }
+    
+    override fun getFilters(): FilterList {
+        // Return empty filter list for now
+        // TODO: Convert JS plugin filters to IReader FilterList
+        return emptyList()
+    }
+    
+    override fun getCommands(): CommandList {
+        // Return empty command list
+        return emptyList()
     }
 }

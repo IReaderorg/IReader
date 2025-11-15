@@ -39,6 +39,9 @@ class GeneralScreenSpec {
                 onTranslationSettingsClick = {
                     navController.navigate(NavigationRoutes.translationSettings)
                 },
+                onJSPluginSettingsClick = {
+                    navController.navigate(NavigationRoutes.jsPluginSettings)
+                },
             )
         }
 

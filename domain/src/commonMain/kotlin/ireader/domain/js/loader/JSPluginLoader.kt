@@ -123,15 +123,39 @@ class JSPluginLoader(
             JSPluginLogger.logDebug(pluginId, "Setup library provider")
             
             // Evaluate plugin code
-            val pluginInstance = engine.evaluateScript(code)
+            engine.evaluateScript(code)
+            
+            // Extract plugin instance from CommonJS exports
+            // LNReader plugins use: exports.default = new PluginClass()
+            var pluginInstance = engine.getGlobalObject("exports")
+            JSPluginLogger.logDebug(pluginId, "Exports object type: ${pluginInstance?.javaClass?.simpleName}")
+            
+            // Try to get the default export if exports is an object
+            if (pluginInstance is Map<*, *>) {
+                JSPluginLogger.logDebug(pluginId, "Exports is a Map with keys: ${pluginInstance.keys}")
+                val defaultExport = pluginInstance["default"]
+                if (defaultExport != null) {
+                    pluginInstance = defaultExport
+                    JSPluginLogger.logDebug(pluginId, "Using exports.default, type: ${defaultExport.javaClass.simpleName}")
+                } else {
+                    JSPluginLogger.logDebug(pluginId, "No default export found, using exports object directly")
+                }
+            }
+            
             if (pluginInstance == null) {
-                val error = JSPluginError.LoadError(pluginId, Exception("Plugin evaluation returned null"))
+                val error = JSPluginError.LoadError(pluginId, Exception("Plugin evaluation returned null - no exports found"))
                 JSPluginLogger.logError(pluginId, error)
                 val duration = System.currentTimeMillis() - startTime
                 JSPluginLogger.logPluginLoad(pluginId, false, duration)
                 return null
             }
-            JSPluginLogger.logDebug(pluginId, "Evaluated plugin code")
+            
+            // Log plugin instance details for debugging
+            if (pluginInstance is Map<*, *>) {
+                JSPluginLogger.logDebug(pluginId, "Plugin instance is Map with keys: ${pluginInstance.keys}")
+            }
+            
+            JSPluginLogger.logDebug(pluginId, "Evaluated plugin code and extracted exports")
             
             // Create bridge
             val bridge = JSPluginBridge(engine, pluginInstance, httpClient, pluginId)
@@ -154,13 +178,16 @@ class JSPluginLoader(
             }
             
             // Create source
+            val sourceId = metadata.id.hashCode().toLong()
             val source = JSPluginSource(
                 bridge = bridge,
                 metadata = metadata,
-                id = metadata.id.hashCode().toLong(),
+                id = sourceId,
                 name = metadata.name,
                 lang = metadata.lang
             )
+            
+            JSPluginLogger.logDebug(pluginId, "Created source with ID: $sourceId (from '${metadata.id}')")
             
             // Wrap in catalog
             val catalog = JSPluginCatalog(
@@ -168,6 +195,8 @@ class JSPluginLoader(
                 metadata = metadata,
                 pluginFile = file
             )
+            
+            JSPluginLogger.logDebug(pluginId, "Created catalog with sourceId: ${catalog.sourceId}")
             
             // Cache the compiled plugin
             pluginCache[pluginId] = CompiledPlugin(catalog, lastModified)
