@@ -13,36 +13,47 @@ import ireader.domain.usecases.review.SubmitChapterReviewUseCase
 import org.koin.dsl.module
 
 val reviewModule = module {
-    // Provide SupabaseClient from SupabaseClientProvider
-    single<SupabaseClient> {
+    // Repositories - conditionally provide NoOp implementations
+    single<ReviewRepository> {
         val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
         if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
-            throw IllegalStateException("Supabase is not configured. Cannot provide SupabaseClient.")
+            ireader.data.repository.NoOpReviewRepository()
+        } else {
+            val supabaseClient = (provider as ireader.data.remote.SupabaseClientProviderImpl)
+                .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS) as SupabaseClient
+            ReviewRepositoryImpl(
+                handler = get(),
+                supabaseClient = supabaseClient
+            )
         }
-        (provider as ireader.data.remote.SupabaseClientProviderImpl)
-            .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS)
-    }
-    
-    // Repositories
-    single<ReviewRepository> { 
-        ReviewRepositoryImpl(
-            handler = get(),
-            supabaseClient = get()
-        )
     }
     
     single<BadgeRepository> {
-        BadgeRepositoryImpl(
-            handler = get(),
-            supabaseClient = get()
-        )
+        val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
+        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
+            ireader.data.repository.NoOpBadgeRepository()
+        } else {
+            val supabaseClient = (provider as ireader.data.remote.SupabaseClientProviderImpl)
+                .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS) as SupabaseClient
+            BadgeRepositoryImpl(
+                handler = get(),
+                supabaseClient = supabaseClient
+            )
+        }
     }
 
      single<ireader.domain.data.repository.NFTRepository> {
-         ireader.data.nft.NFTRepositoryImpl(
-             handler = get(),
-             supabaseClient = get()
-         )
+         val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
+         if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
+             ireader.data.repository.NoOpNFTRepository()
+         } else {
+             val supabaseClient = (provider as ireader.data.remote.SupabaseClientProviderImpl)
+                 .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS) as SupabaseClient
+             ireader.data.nft.NFTRepositoryImpl(
+                 handler = get(),
+                 supabaseClient = supabaseClient
+             )
+         }
      }
     
     // Review Use Cases

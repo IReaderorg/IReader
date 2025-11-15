@@ -45,8 +45,12 @@ object BadgeErrorMapper {
     /**
      * Converts a generic Throwable to a user-friendly error message.
      */
-    fun toUserMessage(throwable: Throwable): String = when (throwable) {
-        is BadgeError -> toUserMessage(throwable)
+    fun toUserMessage(throwable: Throwable): String = when {
+        throwable is BadgeError -> toUserMessage(throwable)
+        throwable is UnsupportedOperationException && 
+            (throwable.message?.contains("Supabase", ignoreCase = true) == true ||
+             throwable.message?.contains("not configured", ignoreCase = true) == true) ->
+            "Badges are not available. Please configure Supabase in Settings."
         else -> "An unexpected error occurred: ${throwable.message ?: "Unknown error"}"
     }
 }

@@ -49,18 +49,29 @@ fun BookReviewsIntegration(
                 reviewList.map { it.rating }.average().toFloat()
             } else 0f
             
-            // Fetch badges for all reviewers
-            val badgesMap = mutableMapOf<String, List<UserBadge>>()
-            reviewList.forEach { review ->
-                getUserBadgesUseCase(review.userId).onSuccess { badges ->
-                    badgesMap[review.userId] = badges
+            // Fetch badges for all reviewers (only if reviews exist)
+            if (reviewList.isNotEmpty()) {
+                val badgesMap = mutableMapOf<String, List<UserBadge>>()
+                reviewList.forEach { review ->
+                    getUserBadgesUseCase(review.userId).onSuccess { badges ->
+                        badgesMap[review.userId] = badges
+                    }
                 }
+                userBadgesMap = badgesMap
             }
-            userBadgesMap = badgesMap
             
             isLoading = false
         }.onFailure { error ->
-            errorMessage = error.message ?: "Failed to load reviews"
+            // Check if this is a Supabase unavailable error
+            val message = error.message ?: "Failed to load reviews"
+            if (message.contains("Supabase", ignoreCase = true) || 
+                message.contains("not configured", ignoreCase = true)) {
+                // Supabase is not configured - don't show as error, just hide reviews
+                errorMessage = null
+                reviews = emptyList()
+            } else {
+                errorMessage = message
+            }
             isLoading = false
         }
     }
@@ -74,14 +85,25 @@ fun BookReviewsIntegration(
                     reviewList.map { it.rating }.average().toFloat()
                 } else 0f
                 
-                // Refresh badges
-                val badgesMap = mutableMapOf<String, List<UserBadge>>()
-                reviewList.forEach { review ->
-                    getUserBadgesUseCase(review.userId).onSuccess { badges ->
-                        badgesMap[review.userId] = badges
+                // Refresh badges (only if reviews exist)
+                if (reviewList.isNotEmpty()) {
+                    val badgesMap = mutableMapOf<String, List<UserBadge>>()
+                    reviewList.forEach { review ->
+                        getUserBadgesUseCase(review.userId).onSuccess { badges ->
+                            badgesMap[review.userId] = badges
+                        }
                     }
+                    userBadgesMap = badgesMap
                 }
-                userBadgesMap = badgesMap
+            }.onFailure { error ->
+                // Handle Supabase unavailable gracefully
+                val message = error.message ?: "Failed to load reviews"
+                if (message.contains("Supabase", ignoreCase = true) || 
+                    message.contains("not configured", ignoreCase = true)) {
+                    reviews = emptyList()
+                } else {
+                    errorMessage = message
+                }
             }
         }
     }
@@ -123,9 +145,18 @@ fun BookReviewsIntegration(
                 onSubmit = { rating, reviewText ->
                     scope.launch {
                         submitBookReviewUseCase(bookTitle, rating, reviewText).onSuccess {
+                            showWriteDialog = false
                             refreshReviews()
                         }.onFailure { error ->
-                            errorMessage = error.message ?: "Failed to submit review"
+                            val message = error.message ?: "Failed to submit review"
+                            // Show user-friendly message for Supabase unavailable
+                            errorMessage = if (message.contains("Supabase", ignoreCase = true) || 
+                                message.contains("not configured", ignoreCase = true)) {
+                                "Reviews are not available. Please configure Supabase in Settings."
+                            } else {
+                                message
+                            }
+                            showWriteDialog = false
                         }
                     }
                 }
