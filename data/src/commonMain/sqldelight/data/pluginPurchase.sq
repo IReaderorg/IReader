@@ -1,0 +1,55 @@
+import kotlin.Long;
+
+-- Plugin purchase table for tracking premium plugin and feature purchases
+CREATE TABLE IF NOT EXISTS plugin_purchase (
+    id TEXT NOT NULL PRIMARY KEY,
+    plugin_id TEXT NOT NULL,
+    feature_id TEXT,
+    amount REAL NOT NULL,
+    currency TEXT NOT NULL,
+    timestamp INTEGER AS Long NOT NULL,
+    user_id TEXT NOT NULL,
+    receipt_data TEXT,
+    FOREIGN KEY (plugin_id) REFERENCES plugin(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_plugin_purchase_plugin_id ON plugin_purchase(plugin_id);
+CREATE INDEX IF NOT EXISTS idx_plugin_purchase_user_id ON plugin_purchase(user_id);
+CREATE INDEX IF NOT EXISTS idx_plugin_purchase_timestamp ON plugin_purchase(timestamp DESC);
+
+-- Queries
+selectAll:
+SELECT * FROM plugin_purchase ORDER BY timestamp DESC;
+
+selectById:
+SELECT * FROM plugin_purchase WHERE id = ? LIMIT 1;
+
+selectByUserId:
+SELECT * FROM plugin_purchase WHERE user_id = ? ORDER BY timestamp DESC;
+
+selectByPluginId:
+SELECT * FROM plugin_purchase WHERE plugin_id = ? ORDER BY timestamp DESC;
+
+checkPurchased:
+SELECT COUNT(*) > 0 FROM plugin_purchase 
+WHERE plugin_id = ? AND user_id = ? AND feature_id IS NULL;
+
+checkFeaturePurchased:
+SELECT COUNT(*) > 0 FROM plugin_purchase 
+WHERE plugin_id = ? AND feature_id = ? AND user_id = ?;
+
+insert:
+INSERT OR REPLACE INTO plugin_purchase(
+    id, plugin_id, feature_id, amount, currency, 
+    timestamp, user_id, receipt_data
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+delete:
+DELETE FROM plugin_purchase WHERE id = ?;
+
+deleteByPluginId:
+DELETE FROM plugin_purchase WHERE plugin_id = ?;
+
+deleteAll:
+DELETE FROM plugin_purchase;

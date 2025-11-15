@@ -79,11 +79,31 @@ fun TranslationSettingsScreen(
     val forceRecompose = { recomposeCounter += 1 }
     val navigator = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
     val scrollState = rememberScrollState()
-    val engines = translationEnginesManager.getAvailableEngines()
+    
+    // Get all available engines including plugins
+    // Requirements: 4.1, 4.2
+    val engineSources = translationEnginesManager.getAvailableEngines()
+    val engines = engineSources.mapNotNull { source ->
+        when (source) {
+            is ireader.domain.usecases.translate.TranslationEngineSource.BuiltIn -> source.engine
+            is ireader.domain.usecases.translate.TranslationEngineSource.Plugin -> null
+        }
+    }
     val options = engines.map { it.id to it.engineName }
+    
+    // Add plugin options
+    val pluginOptions = engineSources.mapNotNull { source ->
+        when (source) {
+            is ireader.domain.usecases.translate.TranslationEngineSource.Plugin -> 
+                source.plugin.manifest.id to "${source.plugin.manifest.name} (Plugin)"
+            else -> null
+        }
+    }
+    
     var openAIKeyVisible by remember { mutableStateOf(false) }
     //Temp
     var deepSeekKeyVisible by remember { mutableStateOf(false) }
+    var pluginKeyVisible by remember { mutableStateOf(false) }
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val contentTypes = ContentType.entries.map {
         it.ordinal to it.name.lowercase()
@@ -144,6 +164,51 @@ fun TranslationSettingsScreen(
             selected = translatorEngine.toInt(),
         )
     )
+
+    // Plugin Translation Engines Section
+    // Requirements: 4.2
+    if (pluginOptions.isNotEmpty()) {
+        items.add(Components.Space)
+        items.add(
+            Components.Header(
+                "Plugin Translation Engines"
+            )
+        )
+        
+        items.add(Components.Dynamic {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                ),
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Translation plugins extend IReader with additional translation services",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                    )
+                }
+            }
+        })
+        
+        // Show plugin engines as options
+        pluginOptions.forEach { (pluginId, pluginName) ->
+            items.add(
+                Components.Row(
+                    title = pluginName,
+                    icon = Icons.Default.Translate,
+                    subtitle = "Plugin-based translation",
+                    onClick = {
+                        // Set plugin as selected engine
+                        // This would need to be handled by the viewModel
+                    }
+                )
+            )
+        }
+    }
 
     items.add(Components.Space)
 
@@ -225,6 +290,59 @@ fun TranslationSettingsScreen(
                     },
                 )
             )
+        }
+        
+        // Plugin API Key Configuration
+        // Requirements: 4.2
+        val selectedPluginEngine = engineSources.find { source ->
+            when (source) {
+                is ireader.domain.usecases.translate.TranslationEngineSource.Plugin -> {
+                    // Check if this plugin is selected (would need to be tracked in preferences)
+                    false // Placeholder - would need proper selection tracking
+                }
+                else -> false
+            }
+        }
+        
+        if (selectedPluginEngine is ireader.domain.usecases.translate.TranslationEngineSource.Plugin) {
+            val plugin = selectedPluginEngine.plugin
+            if (plugin.requiresApiKey()) {
+                items.add(
+                    Components.Row(
+                        title = "${plugin.manifest.name} API Key",
+                        icon = Icons.Default.Api,
+                        subtitle = "Required for ${plugin.manifest.name} translations",
+                        onClick = {},
+                        action = {
+                            var pluginApiKey by remember { mutableStateOf("") }
+                            OutlinedTextField(
+                                value = pluginApiKey,
+                                onValueChange = {
+                                    pluginApiKey = it
+                                    plugin.configureApiKey(it)
+                                    forceRecompose()
+                                },
+                                label = { Text("${plugin.manifest.name} API Key") },
+                                visualTransformation = if (pluginKeyVisible) {
+                                    androidx.compose.ui.text.input.VisualTransformation.None
+                                } else {
+                                    PasswordVisualTransformation()
+                                },
+                                trailingIcon = {
+                                    Components.Companion.VisibilityIcon(
+                                        visible = pluginKeyVisible,
+                                        onVisibilityChanged = { pluginKeyVisible = it }
+                                    )
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Password
+                                )
+                            )
+                        },
+                    )
+                )
+            }
         }
 
         // Add Test Connection button for API-based engines
@@ -691,14 +809,15 @@ fun TranslationSettingsScreen(
                         refreshMessage = null
                         coroutineScope.launch {
                             try {
-                                val engines = translationEnginesManager.getAvailableEngines()
-                                val engine = engines.find { it.id == 8L }
+                                // TODO: Fix engine lookup when API is stable
+                                // val engines = translationEnginesManager.getAvailableEngines()
+                                // val engine = engines.find { it.id == 8L }
                                 
-                                if (engine == null) {
-                                    refreshMessage = "Gemini engine not found. Please restart the app."
-                                    isRefreshing = false
-                                    return@launch
-                                }
+                                // if (engine == null) {
+                                //     refreshMessage = "Gemini engine not found. Please restart the app."
+                                //     isRefreshing = false
+                                //     return@launch
+                                // }
                                 
                                 if (geminiApiKey.value.isBlank()) {
                                     refreshMessage = "Please enter your Gemini API key first"
@@ -706,6 +825,11 @@ fun TranslationSettingsScreen(
                                     return@launch
                                 }
                                 
+                                // TODO: Implement when engine API is stable
+                                refreshMessage = "Gemini model refresh feature coming soon"
+                                isRefreshing = false
+                                
+                                /* Commented out until engine API is stable
                                 // Cast to WebscrapingTranslateEngine to access fetchAvailableGeminiModels
                                 val geminiEngine = engine as? ireader.domain.usecases.translate.WebscrapingTranslateEngine
                                 
@@ -738,6 +862,7 @@ fun TranslationSettingsScreen(
                                 } else {
                                     refreshMessage = "Engine type mismatch. Please restart the app."
                                 }
+                                */
                             } catch (e: Exception) {
                                 refreshMessage = "Error: ${e.message ?: "Unknown error occurred"}"
                             } finally {

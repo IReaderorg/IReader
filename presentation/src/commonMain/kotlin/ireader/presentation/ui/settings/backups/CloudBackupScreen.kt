@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,7 +30,8 @@ fun CloudBackupScreen(
     onSignOut: () -> Unit,
     onUploadBackup: () -> Unit,
     onDownloadBackup: (CloudBackupFile) -> Unit,
-    onDeleteBackup: (CloudBackupFile) -> Unit
+    onDeleteBackup: (CloudBackupFile) -> Unit,
+    onNavigateToGoogleDrive: () -> Unit = {}
 ) {
     var showProviderDialog by remember { mutableStateOf(false) }
     
@@ -69,6 +71,13 @@ fun CloudBackupScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Google Drive card
+            item {
+                GoogleDriveCard(
+                    onNavigate = onNavigateToGoogleDrive
+                )
+            }
+            
             // Provider selection card
             item {
                 Card(
@@ -363,6 +372,54 @@ private fun CloudProviderOption(
             Text(
                 text = name,
                 style = MaterialTheme.typography.bodyLarge
+            )
+        }
+    }
+}
+
+@Composable
+private fun GoogleDriveCard(
+    onNavigate: () -> Unit
+) {
+    Card(
+        onClick = onNavigate,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.CloudQueue,
+                contentDescription = null,
+                modifier = Modifier.size(40.dp),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Google Drive",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Backup and restore your library to Google Drive",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                )
+            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = "Open",
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
     }

@@ -38,12 +38,26 @@ import ireader.i18n.LocalizeHelper
 import ireader.domain.services.ExtensionWatcherService
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.dsl.worker
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import java.io.File
 
 @OptIn(ExperimentalTextApi::class)
 actual val DomainModule = module {
     // Include sync module for sync functionality
     includes(syncModule)
+    
+    // Plugins directory for Android
+    single(named("pluginsDir")) {
+        File(androidContext().filesDir, "plugins").apply { mkdirs() }
+    }
+    
+    // Plugin Class Loader for Android
+    single { 
+        ireader.domain.plugins.PluginClassLoader(
+            cacheDir = androidContext().cacheDir
+        )
+    }
     
     worker {
         DownloaderService(
@@ -174,5 +188,15 @@ actual val DomainModule = module {
     // Wallet Integration for donations only
     single<ireader.domain.services.WalletIntegrationManager> {
         ireader.domain.services.AndroidWalletIntegrationManager(androidContext())
+    }
+    
+    // Payment Processor for plugin monetization
+    single<ireader.domain.plugins.PaymentProcessor> {
+        ireader.domain.plugins.AndroidPaymentProcessor(
+            getCurrentUserId = { 
+                // TODO: Get actual user ID from authentication service
+                "default_user"
+            }
+        )
     }
 }

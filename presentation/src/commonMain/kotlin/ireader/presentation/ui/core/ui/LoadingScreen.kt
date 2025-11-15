@@ -7,12 +7,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
+/**
+ * Displays a loading indicator in the center of the screen.
+ * 
+ * @param modifier Modifier for the container
+ * @param disableAnimation Whether to disable the loading animation (shows static indicator)
+ */
 @Composable
-fun LoadingScreen() {
+fun LoadingScreen(
+    modifier: Modifier = Modifier,
+    disableAnimation: Boolean = false
+) {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator()
+        if (disableAnimation) {
+            // Static progress indicator - just shows a circle without animation
+            CircularProgressIndicator(progress = 0.75f)
+        } else {
+            // Animated progress indicator (default behavior)
+            CircularProgressIndicator()
+        }
     }
 }

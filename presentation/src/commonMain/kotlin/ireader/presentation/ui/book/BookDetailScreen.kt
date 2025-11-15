@@ -15,6 +15,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -26,12 +28,14 @@ import ireader.core.source.Source
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ChapterDisplayMode
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.ui.book.components.*
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.components.ChapterRow
 import ireader.presentation.ui.component.list.scrollbars.IVerticalFastScroller
 import ireader.presentation.ui.component.reusable_composable.AppTextField
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 @OptIn(
         ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class,
@@ -56,10 +60,15 @@ fun BookDetailScreen(
     onFavorite: () -> Unit,
     onWebView: () -> Unit,
     onCopyTitle: (bookTitle: String) -> Unit,
+    uiPreferences: UiPreferences = koinInject(),
 ) {
 
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    
+    // Collect appearance preferences
+    val hideBackdrop by uiPreferences.hideNovelBackdrop().changes().collectAsState(initial = false)
+    val useFab by uiPreferences.useFabInNovelInfo().changes().collectAsState(initial = false)
 
 
 
@@ -71,6 +80,18 @@ fun BookDetailScreen(
                         vm.insertUseCases.insertBook(it)
                     }
                 })
+            }
+            
+            // Migration source selection dialog
+            if (vm.showMigrationDialog) {
+                MigrationSourceDialog(
+                    sources = vm.availableMigrationSources,
+                    onSourceSelected = { targetSource ->
+                        vm.showMigrationDialog = false
+                        vm.startMigration(targetSource.sourceId)
+                    },
+                    onDismiss = { vm.showMigrationDialog = false }
+                )
             }
             
             // Migration progress dialog
@@ -87,6 +108,19 @@ fun BookDetailScreen(
                     }
                 )
             }
+            
+            // EPUB export dialog
+            if (vm.showEpubExportDialog) {
+                EpubExportDialog(
+                    book = book,
+                    chapters = chapters.value,
+                    onExport = { options ->
+                        vm.showEpubExportDialog = false
+                        vm.exportAsEpub(options)
+                    },
+                    onDismiss = { vm.showEpubExportDialog = false }
+                )
+            }
             IVerticalFastScroller(listState = scrollState) {
 
                 LazyColumn(
@@ -100,7 +134,8 @@ fun BookDetailScreen(
                            val scrollProgress = scrollState.firstVisibleItemScrollOffset.toFloat()
                            BookHeaderImage(
                                book = book,
-                               scrollProgress = scrollProgress
+                               scrollProgress = scrollProgress,
+                               hideBackdrop = hideBackdrop
                            )
 
                             BookHeader(
@@ -117,7 +152,9 @@ fun BookDetailScreen(
                                 favorite = book.favorite,
                                 source = source,
                                 onFavorite = onFavorite,
-                                onWebView = onWebView
+                                onWebView = onWebView,
+                                onMigrate = { vm.showMigrationDialog = true },
+                                useFab = useFab
                         )
                     }
                     item {
@@ -217,6 +254,19 @@ fun BookDetailScreen(
                             visible = vm.hasSelection,
                             modifier = Modifier.align(Alignment.BottomCenter)
                     )
+                    
+                    // Show FAB when enabled and no selection is active
+                    if (useFab && !vm.hasSelection) {
+                        NovelInfoFab(
+                            favorite = book.favorite,
+                            source = source,
+                            onFavorite = onFavorite,
+                            onWebView = onWebView,
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(16.dp)
+                        )
+                    }
                 }
 
             }

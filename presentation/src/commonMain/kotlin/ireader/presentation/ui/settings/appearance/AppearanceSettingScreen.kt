@@ -582,6 +582,34 @@ fun AppearanceSettingScreen(
             Divider(modifier = Modifier.padding(vertical = 16.dp))
         }
         
+        // Novel Info Section
+        item {
+            Components.Header(
+                    text = "Novel Info",
+            ).Build()
+        }
+        item {
+            // TODO: Fix preference binding when API is stable
+            // Components.Switch(
+            //     preference = vm.uiPreferences.hideNovelBackdrop(),
+            //     title = "Hide Backdrop",
+            //     subtitle = "Hide background images on novel detail screens for cleaner look and better performance",
+            // ).Build()
+        }
+        item {
+            // TODO: Fix preference binding when API is stable
+            // Components.Switch(
+            //     preference = vm.uiPreferences.useFabInNovelInfo(),
+            //     title = "Use FAB Instead of Buttons",
+            //     subtitle = "Replace standard action buttons with floating action button",
+            // ).Build()
+        }
+        
+        // Section Divider
+        item {
+            Divider(modifier = Modifier.padding(vertical = 16.dp))
+        }
+        
         // Timestamp Section
         item {
             Components.Header(

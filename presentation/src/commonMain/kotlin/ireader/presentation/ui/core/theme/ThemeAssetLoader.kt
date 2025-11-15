@@ -1,0 +1,121 @@
+package ireader.presentation.ui.core.theme
+
+import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.painter.Painter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
+
+/**
+ * Utility for loading theme assets (backgrounds, images)
+ * Requirements: 3.4
+ */
+class ThemeAssetLoader {
+    private val cache = mutableMapOf<String, ImageBitmap>()
+    
+    /**
+     * Load an image asset from a path
+     * Supports both local file paths and URLs
+     */
+    suspend fun loadImage(path: String): Result<ImageBitmap> {
+        return try {
+            // Check cache first
+            cache[path]?.let {
+                return Result.success(it)
+            }
+            
+            val image = withContext(Dispatchers.IO) {
+                when {
+                    path.startsWith("http://") || path.startsWith("https://") -> {
+                        loadImageFromUrl(path)
+                    }
+                    else -> {
+                        loadImageFromFile(path)
+                    }
+                }
+            }
+            
+            // Cache the loaded image
+            cache[path] = image
+            Result.success(image)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Load image from a local file
+     */
+    private fun loadImageFromFile(path: String): ImageBitmap {
+        // Platform-specific implementation would go here
+        // For now, throw an exception to indicate not implemented
+        throw NotImplementedError("File loading not implemented for this platform")
+    }
+    
+    /**
+     * Load image from a URL
+     */
+    private fun loadImageFromUrl(url: String): ImageBitmap {
+        // Platform-specific implementation would go here
+        // For now, throw an exception to indicate not implemented
+        throw NotImplementedError("URL loading not implemented for this platform")
+    }
+    
+    /**
+     * Clear the image cache
+     */
+    fun clearCache() {
+        cache.clear()
+    }
+    
+    /**
+     * Remove a specific image from cache
+     */
+    fun removeFromCache(path: String) {
+        cache.remove(path)
+    }
+}
+
+/**
+ * Composable for loading and displaying theme background
+ * Requirements: 3.4
+ */
+@Composable
+fun rememberThemeBackground(
+    backgroundPath: String?,
+    assetLoader: ThemeAssetLoader = remember { ThemeAssetLoader() }
+): State<ImageBitmap?> {
+    val backgroundState = remember { mutableStateOf<ImageBitmap?>(null) }
+    
+    LaunchedEffect(backgroundPath) {
+        if (backgroundPath != null) {
+            assetLoader.loadImage(backgroundPath).onSuccess { image ->
+                backgroundState.value = image
+            }.onFailure {
+                // Failed to load, keep null
+                backgroundState.value = null
+            }
+        } else {
+            backgroundState.value = null
+        }
+    }
+    
+    return backgroundState
+}
+
+/**
+ * Error handling for theme asset loading
+ * Requirements: 3.5
+ */
+sealed class ThemeAssetError {
+    data class LoadFailed(val path: String, val exception: Throwable) : ThemeAssetError()
+    data class InvalidFormat(val path: String) : ThemeAssetError()
+    data class NotFound(val path: String) : ThemeAssetError()
+    
+    fun toUserMessage(): String = when (this) {
+        is LoadFailed -> "Failed to load theme asset: ${exception.message}"
+        is InvalidFormat -> "Invalid theme asset format: $path"
+        is NotFound -> "Theme asset not found: $path"
+    }
+}

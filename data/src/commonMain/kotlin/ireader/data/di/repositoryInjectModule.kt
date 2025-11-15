@@ -13,6 +13,8 @@ import ireader.data.sourcecomparison.SourceComparisonRepositoryImpl
 import ireader.data.font.FontRepositoryImpl
 import ireader.data.history.HistoryRepositoryImpl
 import ireader.data.nft.NFTRepositoryImpl
+import ireader.data.plugin.PluginDatabaseImpl
+import ireader.data.plugin.PluginRepositoryImpl
 import ireader.data.repository.FundingGoalRepositoryImpl
 import ireader.data.repository.LibraryRepositoryImpl
 import ireader.data.repository.ReaderThemeRepositoryImpl
@@ -39,7 +41,9 @@ import ireader.domain.data.repository.GlossaryRepository
 import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.data.repository.LibraryRepository
 import ireader.domain.data.repository.NFTRepository
+import ireader.domain.data.repository.PluginRepository
 import ireader.domain.data.repository.ReaderThemeRepository
+import ireader.domain.plugins.PluginDatabase
 import ireader.domain.data.repository.ReadingStatisticsRepository
 import ireader.domain.data.repository.SecurityRepository
 import ireader.domain.data.repository.SourceComparisonRepository
@@ -108,6 +112,24 @@ val repositoryInjectModule = module {
     
     // NFT repository
     single<NFTRepository> { NFTRepositoryImpl(get(), get()) }
+    
+    // Plugin repository and database
+    single<PluginRepository> { PluginRepositoryImpl(get()) }
+    single<PluginDatabase> { PluginDatabaseImpl(get(), get()) }
+    
+    // Plugin monetization repositories
+    single<ireader.domain.plugins.PurchaseRepository> { 
+        ireader.data.plugin.PurchaseRepositoryImpl(get()) 
+    }
+    single<ireader.domain.plugins.TrialRepository> { 
+        ireader.data.plugin.TrialRepositoryImpl(
+            handler = get(),
+            getCurrentUserId = { 
+                // TODO: Get actual user ID from authentication service
+                "default_user"
+            }
+        ) 
+    }
     
     // Database use cases
     single<RepairDatabaseUseCase> { RepairDatabaseUseCaseImpl(get()) }

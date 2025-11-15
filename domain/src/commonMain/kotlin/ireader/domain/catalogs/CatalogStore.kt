@@ -200,6 +200,7 @@ class CatalogStore(
             is CatalogBundled -> copy(isPinned = isPinned)
             is CatalogInstalled.Locally -> copy(isPinned = isPinned, hasUpdate = hasUpdate)
             is CatalogInstalled.SystemWide -> copy(isPinned = isPinned, hasUpdate = hasUpdate)
+            is ireader.domain.models.entities.JSPluginCatalog -> copy(isPinned = isPinned, hasUpdate = hasUpdate)
         }
     }
 }

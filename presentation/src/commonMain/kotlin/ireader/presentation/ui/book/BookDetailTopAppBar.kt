@@ -9,11 +9,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FlipToBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SyncAlt
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.outlined.MoreVert
@@ -64,6 +66,8 @@ fun BookDetailTopAppBar(
     onArchive: () -> Unit = {},
     onUnarchive: () -> Unit = {},
     isArchived: Boolean = false,
+    onShareBook: () -> Unit = {},
+    onExportEpub: () -> Unit = {},
 ) {
 
         when {
@@ -112,7 +116,9 @@ fun RegularChapterDetailTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior?,
     onArchive: () -> Unit = {},
     onUnarchive: () -> Unit = {},
-    isArchived: Boolean = false
+    isArchived: Boolean = false,
+    onShareBook: () -> Unit = {},
+    onExportEpub: () -> Unit = {}
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val (dropDownState, setDropDownState) = remember {
@@ -128,6 +134,24 @@ fun RegularChapterDetailTopAppBar(
             contentColor = MaterialTheme.colorScheme.onBackground,
             elevation = 0.dp,
             actions = {
+                // Share button
+                IconButton(onClick = onShareBook) {
+                    Icon(
+                        imageVector = Icons.Default.Share,
+                        contentDescription = localizeHelper.localize(Res.string.share),
+                        tint = MaterialTheme.colorScheme.onBackground,
+                    )
+                }
+                
+                // EPUB export button
+                IconButton(onClick = onExportEpub) {
+                    Icon(
+                        imageVector = Icons.Default.Book,
+                        contentDescription = localizeHelper.localize(Res.string.export_as_epub),
+                        tint = MaterialTheme.colorScheme.onBackground,
+                    )
+                }
+                
                 IconButton(onClick = {
                     onRefresh()
                 }) {
@@ -142,7 +166,7 @@ fun RegularChapterDetailTopAppBar(
                 }) {
                     Icon(
                         imageVector = Icons.Default.Info,
-                        contentDescription = localizeHelper.localize(Res.string.share),
+                        contentDescription = localizeHelper.localize(Res.string.info),
                         tint = MaterialTheme.colorScheme.onBackground,
                     )
                 }
@@ -170,7 +194,7 @@ fun RegularChapterDetailTopAppBar(
                     IconButton(onClick = { setDropDownState(true) }) {
                         Icon(
                             imageVector = Icons.Outlined.MoreVert,
-                            contentDescription = localize(Res.string.export_book_as_epub),
+                            contentDescription = localize(Res.string.more_options),
                         )
                     }
                     IDropdownMenu(

@@ -20,10 +20,14 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Update
+import androidx.compose.material.icons.filled.TouchApp
+import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -103,6 +107,82 @@ fun GeneralSettingScreen(
                         title = "Show Smart Categories",
                         subtitle = "Display auto-populated categories like Recently Added, Currently Reading, etc.",
                         icon = Icons.Filled.Storage
+                ),
+                Components.Switch(
+                        preference = vm.useFabInLibrary,
+                        title = "Use FAB in Library",
+                        subtitle = "Replace toolbar buttons with floating action button",
+                        icon = Icons.Filled.Settings
+                ),
+                Components.Dynamic {
+                    ChoicePreference<String>(
+                        preference = vm.defaultChapterSort,
+                        choices = mapOf(
+                            "SOURCE_ORDER" to "By Source Order",
+                            "CHAPTER_NUMBER" to "By Chapter Number",
+                            "UPLOAD_DATE_ASC" to "By Upload Date (Ascending)",
+                            "UPLOAD_DATE_DESC" to "By Upload Date (Descending)"
+                        ),
+                        title = "Default Chapter Sort",
+                        subtitle = "Default sorting method for chapter lists"
+                    )
+                },
+                
+                Components.Space,
+                
+                // Global Search Section
+                Components.Header(
+                        text = "Global Search",
+                        padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+                        icon = Icons.Filled.Search
+                ),
+                Components.Switch(
+                        preference = vm.onlyUpdateOnFinding,
+                        title = "Only Update on Finding Novel",
+                        subtitle = "Add novels to library only when found in search results",
+                        icon = Icons.Filled.Search
+                ),
+                Components.Switch(
+                        preference = vm.showLastUpdateTime,
+                        title = "Show Last Update Time",
+                        subtitle = "Display when each novel was last checked for updates",
+                        icon = Icons.Filled.Update
+                ),
+                
+                Components.Space,
+                
+                // Auto Download Section
+                Components.Header(
+                        text = "Auto Download",
+                        padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+                        icon = Icons.Filled.Download
+                ),
+                Components.Switch(
+                        preference = vm.autoDownloadNewChapters,
+                        title = "Download New Chapters",
+                        subtitle = "Automatically download newly detected chapters in background",
+                        icon = Icons.Filled.Download
+                ),
+                
+                Components.Space,
+                
+                // User Interface Section
+                Components.Header(
+                        text = "User Interface",
+                        padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+                        icon = Icons.Filled.DisplaySettings
+                ),
+                Components.Switch(
+                        preference = vm.disableHapticFeedback,
+                        title = "Disable Haptic Feedback",
+                        subtitle = "Turn off vibration feedback for interactions",
+                        icon = Icons.Filled.TouchApp
+                ),
+                Components.Switch(
+                        preference = vm.disableLoadingAnimations,
+                        title = "Disable Loading Animations",
+                        subtitle = "Use static indicators instead of animated ones",
+                        icon = Icons.Filled.Autorenew
                 ),
                 
                 Components.Space,
@@ -382,6 +462,22 @@ class GeneralSettingScreenViewModel(
     // Download preferences
     val downloadDelayMs = downloadPreferences.downloadDelayMs().asStateIn(scope)
     val concurrentDownloads = downloadPreferences.concurrentDownloadsLimit().asStateIn(scope)
+    
+    // New General Settings Enhancements
+    // Library preferences
+    val useFabInLibrary = uiPreferences.useFabInLibrary().asStateIn(scope)
+    val defaultChapterSort = uiPreferences.defaultChapterSort().asStateIn(scope)
+    
+    // Global search preferences
+    val onlyUpdateOnFinding = uiPreferences.onlyUpdateOnFinding().asStateIn(scope)
+    val showLastUpdateTime = uiPreferences.showLastUpdateTime().asStateIn(scope)
+    
+    // Auto download preferences
+    val autoDownloadNewChapters = uiPreferences.autoDownloadNewChapters().asStateIn(scope)
+    
+    // User interface preferences
+    val disableHapticFeedback = uiPreferences.disableHapticFeedback().asStateIn(scope)
+    val disableLoadingAnimations = uiPreferences.disableLoadingAnimations().asStateIn(scope)
 
     @Composable
     fun getLanguageChoices(): Map<String, String> {

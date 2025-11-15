@@ -658,4 +658,22 @@
     <string name="export_epub_option_title">Export as ePub</string>
     <string name="export_epub_option_description">Download as ePub file for offline reading</string>
     <string name="export_epub">Export ePub</string>
+    
+    <!-- Missing strings for new features -->
+    <string name="export_as_epub">Export as ePub</string>
+    <string name="info">Info</string>
+    <string name="more_options">More Options</string>
+    <string name="include_cover_image">Include Cover Image</string>
+    <string name="chapter_selection">Chapter Selection</string>
+    <string name="all_chapters">All Chapters</string>
+    <string name="select_chapters">Select Chapters</string>
+    <string name="formatting">Formatting</string>
+    <string name="paragraph_spacing">Paragraph Spacing</string>
+    <string name="chapter_heading_size">Chapter Heading Size</string>
+    <string name="typography">Typography</string>
+    <string name="export">Export</string>
+    <string name="migrate">Migrate</string>
+    <string name="select_source_to_migrate_to">Select source to migrate to</string>
+    <string name="no_sources_available">No sources available</string>
+    <string name="lang">Language</string>
 </resources>

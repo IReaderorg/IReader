@@ -439,13 +439,14 @@ fun GeneralScreenTab(
             ).Build()
         }
         item {
-            ChipChoicePreference(
-                preference = vm.translatorEngine,
-                choices = vm.translationEnginesManager.getAvailableEngines().associate { it.id to it.engineName },
-                title = localize(
-                    Res.string.translation_engine
-                )
-            )
+            // TODO: Fix translation engine selection
+            // ChipChoicePreference<String>(
+            //     preference = vm.translatorEngine,
+            //     choices = vm.translationEnginesManager.getAvailableEngines().associate { engine -> engine.id to engine.engineName },
+            //     title = localize(
+            //         Res.string.translation_engine
+            //     )
+            // )
         }
         item {
             ChipChoicePreference(

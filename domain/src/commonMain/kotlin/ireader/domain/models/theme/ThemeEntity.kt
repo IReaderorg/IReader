@@ -1,6 +1,8 @@
 package ireader.domain.models.theme
 
 import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
@@ -63,38 +65,72 @@ private fun Int.toArgColor(): Color {
     return Color(this)
 }
 
-fun CustomColorScheme.toColorScheme(): ColorScheme {
-    return ColorScheme(
-        primary = this.primary.toArgColor(),
-        primaryContainer = this.primaryContainer.toArgColor(),
-        onPrimary = this.onPrimary.toArgColor(),
-        secondary = this.secondary.toArgColor(),
-        onSecondary = this.onSecondary.toArgColor(),
-        background = this.background.toArgColor(),
-        surface = this.surface.toArgColor(),
-        onBackground = this.onBackground.toArgColor(),
-        onSurface = this.onSurface.toArgColor(),
-        error = this.error.toArgColor(),
-        onError = this.onError.toArgColor(),
-        surfaceTint = this.surfaceTint.toArgColor(),
-        secondaryContainer = this.secondaryContainer.toArgColor(),
-        errorContainer = this.errorContainer.toArgColor(),
-        inverseOnSurface = this.inverseOnSurface.toArgColor(),
-        inversePrimary = this.inversePrimary.toArgColor(),
-        inverseSurface = this.inverseSurface.toArgColor(),
-        onErrorContainer = this.onErrorContainer.toArgColor(),
-        onPrimaryContainer = this.onPrimaryContainer.toArgColor(),
-        onSecondaryContainer = this.onSecondaryContainer.toArgColor(),
-        onSurfaceVariant = this.onSurfaceVariant.toArgColor(),
-        onTertiary = this.onTertiary.toArgColor(),
-        onTertiaryContainer = this.onTertiaryContainer.toArgColor(),
-        outline = this.outline.toArgColor(),
-        surfaceVariant = this.surfaceVariant.toArgColor(),
-        tertiary = this.tertiary.toArgColor(),
-        tertiaryContainer = this.tertiaryContainer.toArgColor(),
-        outlineVariant = this.outlineVariant.toArgColor(),
-        scrim = this.scrim.toArgColor()
-    )
+fun CustomColorScheme.toColorScheme(isDark: Boolean): ColorScheme {
+    return if (isDark) {
+        darkColorScheme(
+            primary = this.primary.toArgColor(),
+            primaryContainer = this.primaryContainer.toArgColor(),
+            onPrimary = this.onPrimary.toArgColor(),
+            secondary = this.secondary.toArgColor(),
+            onSecondary = this.onSecondary.toArgColor(),
+            background = this.background.toArgColor(),
+            surface = this.surface.toArgColor(),
+            onBackground = this.onBackground.toArgColor(),
+            onSurface = this.onSurface.toArgColor(),
+            error = this.error.toArgColor(),
+            onError = this.onError.toArgColor(),
+            surfaceTint = this.surfaceTint.toArgColor(),
+            secondaryContainer = this.secondaryContainer.toArgColor(),
+            errorContainer = this.errorContainer.toArgColor(),
+            inverseOnSurface = this.inverseOnSurface.toArgColor(),
+            inversePrimary = this.inversePrimary.toArgColor(),
+            inverseSurface = this.inverseSurface.toArgColor(),
+            onErrorContainer = this.onErrorContainer.toArgColor(),
+            onPrimaryContainer = this.onPrimaryContainer.toArgColor(),
+            onSecondaryContainer = this.onSecondaryContainer.toArgColor(),
+            onSurfaceVariant = this.onSurfaceVariant.toArgColor(),
+            onTertiary = this.onTertiary.toArgColor(),
+            onTertiaryContainer = this.onTertiaryContainer.toArgColor(),
+            outline = this.outline.toArgColor(),
+            surfaceVariant = this.surfaceVariant.toArgColor(),
+            tertiary = this.tertiary.toArgColor(),
+            tertiaryContainer = this.tertiaryContainer.toArgColor(),
+            outlineVariant = this.outlineVariant.toArgColor(),
+            scrim = this.scrim.toArgColor()
+        )
+    } else {
+        lightColorScheme(
+            primary = this.primary.toArgColor(),
+            primaryContainer = this.primaryContainer.toArgColor(),
+            onPrimary = this.onPrimary.toArgColor(),
+            secondary = this.secondary.toArgColor(),
+            onSecondary = this.onSecondary.toArgColor(),
+            background = this.background.toArgColor(),
+            surface = this.surface.toArgColor(),
+            onBackground = this.onBackground.toArgColor(),
+            onSurface = this.onSurface.toArgColor(),
+            error = this.error.toArgColor(),
+            onError = this.onError.toArgColor(),
+            surfaceTint = this.surfaceTint.toArgColor(),
+            secondaryContainer = this.secondaryContainer.toArgColor(),
+            errorContainer = this.errorContainer.toArgColor(),
+            inverseOnSurface = this.inverseOnSurface.toArgColor(),
+            inversePrimary = this.inversePrimary.toArgColor(),
+            inverseSurface = this.inverseSurface.toArgColor(),
+            onErrorContainer = this.onErrorContainer.toArgColor(),
+            onPrimaryContainer = this.onPrimaryContainer.toArgColor(),
+            onSecondaryContainer = this.onSecondaryContainer.toArgColor(),
+            onSurfaceVariant = this.onSurfaceVariant.toArgColor(),
+            onTertiary = this.onTertiary.toArgColor(),
+            onTertiaryContainer = this.onTertiaryContainer.toArgColor(),
+            outline = this.outline.toArgColor(),
+            surfaceVariant = this.surfaceVariant.toArgColor(),
+            tertiary = this.tertiary.toArgColor(),
+            tertiaryContainer = this.tertiaryContainer.toArgColor(),
+            outlineVariant = this.outlineVariant.toArgColor(),
+            scrim = this.scrim.toArgColor()
+        )
+    }
 }
 
 fun ColorScheme.toCustomColorScheme(): CustomColorScheme {

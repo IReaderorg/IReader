@@ -53,6 +53,25 @@ class CatalogInstalledFetcher(
                     dataSource = DataSource.DISK,
                 )
             }
+            
+            is ireader.domain.models.entities.JSPluginCatalog -> {
+                // For JS plugins, try to load icon from the icon URL
+                if (data.iconUrl.isNotBlank()) {
+                    val file = File(data.installDir, "${data.pkgName}.png")
+                    if (file.exists()) {
+                        val source = withContext(Dispatchers.IO) { file.source().buffer() }
+                        SourceFetchResult(
+                            source = ImageSource(source = source, fileSystem = FileSystem.SYSTEM),
+                            mimeType = "image/*",
+                            dataSource = DataSource.DISK,
+                        )
+                    } else {
+                        null
+                    }
+                } else {
+                    null
+                }
+            }
 
         }
     }

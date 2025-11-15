@@ -27,6 +27,16 @@ abstract class BaseViewModel : ViewModel() {
     }
   }
   
+  /**
+   * Show an event message to the user.
+   * This is a wrapper around event emission for consistency.
+   */
+  open fun showEvent(event: UiEvent) {
+    scope.launch {
+      _eventFlow.emit(event)
+    }
+  }
+  
   override fun onCleared() {
     onDestroy()
     super.onCleared()

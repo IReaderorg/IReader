@@ -1,8 +1,11 @@
 package ireader.presentation.ui.home.sources.extension
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.PagerDefaults
@@ -10,6 +13,8 @@ import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -42,6 +47,8 @@ fun ExtensionScreen(
         onCancelInstaller: ((Catalog) -> Unit)? = null,
         snackBarHostState: androidx.compose.material3.SnackbarHostState,
         onShowDetails: ((Catalog) -> Unit)? = null,
+        onMigrateFromSource: ((Long) -> Unit)? = null,
+        onNavigateToBrowseSettings: (() -> Unit)? = null,
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LaunchedEffect(key1 = true) {
@@ -62,22 +69,54 @@ fun ExtensionScreen(
             localizeHelper.localize(Res.string.extensions),
         )
     }
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-    ) {
-        ExtensionContent(
-            vm = vm,
-            state = vm,
-            onClickCatalog = onClickCatalog,
-            onClickInstall = onClickInstall,
-            onClickTogglePinned = onClickTogglePinned,
-            onClickUninstall = onClickUninstall,
-            pages = pages,
-            onCancelInstaller = onCancelInstaller,
-            onShowDetails = onShowDetails,
-        )
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            ExtensionTopBar(
+                onNavigateToBrowseSettings = onNavigateToBrowseSettings
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            ExtensionContent(
+                vm = vm,
+                state = vm,
+                onClickCatalog = onClickCatalog,
+                onClickInstall = onClickInstall,
+                onClickTogglePinned = onClickTogglePinned,
+                onClickUninstall = onClickUninstall,
+                pages = pages,
+                onCancelInstaller = onCancelInstaller,
+                onShowDetails = onShowDetails,
+            )
+        }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ExtensionTopBar(
+    onNavigateToBrowseSettings: (() -> Unit)?,
+    modifier: Modifier = Modifier
+) {
+    TopAppBar(
+        title = { Text("Extensions") },
+        actions = {
+            if (onNavigateToBrowseSettings != null) {
+                IconButton(onClick = onNavigateToBrowseSettings) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Browse Settings"
+                    )
+                }
+            }
+        },
+        modifier = modifier
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -227,3 +266,4 @@ private fun ExtensionTabs(
         }
     }
 }
+

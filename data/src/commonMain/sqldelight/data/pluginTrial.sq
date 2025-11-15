@@ -1,0 +1,30 @@
+import kotlin.Boolean;
+import kotlin.Long;
+
+-- Plugin trial table for tracking trial periods
+CREATE TABLE IF NOT EXISTS plugin_trial (
+    id TEXT NOT NULL PRIMARY KEY,
+    plugin_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    start_date INTEGER AS Long NOT NULL,
+    expiration_date INTEGER AS Long NOT NULL,
+    is_active INTEGER AS Boolean NOT NULL DEFAULT 1,
+    FOREIGN KEY (plugin_id) REFERENCES plugin(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_plugin_trial_plugin_id ON plugin_trial(plugin_id);
+CREATE INDEX IF NOT EXISTS idx_plugin_trial_user_id ON plugin_trial(user_id);
+
+-- Queries
+selectByPluginAndUser:
+SELECT * FROM plugin_trial WHERE plugin_id = ? AND user_id = ? LIMIT 1;
+
+insert:
+INSERT OR REPLACE INTO plugin_trial(id, plugin_id, user_id, start_date, expiration_date, is_active)
+VALUES (?, ?, ?, ?, ?, ?);
+
+endTrial:
+UPDATE plugin_trial SET is_active = 0 WHERE plugin_id = ? AND user_id = ?;
+
+deleteAll:
+DELETE FROM plugin_trial;

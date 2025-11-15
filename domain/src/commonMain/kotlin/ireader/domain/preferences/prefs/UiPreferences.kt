@@ -212,4 +212,159 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun ttsAutoPlay(): Preference<Boolean> {
         return preferenceStore.getBoolean("tts_auto_play", false)
     }
+    
+    // ============================================================================
+    // General Settings Enhancements
+    // ============================================================================
+    
+    // Library Preferences
+    
+    /**
+     * Whether to use a Floating Action Button instead of toolbar buttons in the Library screen.
+     * Default: false (use toolbar buttons)
+     */
+    fun useFabInLibrary(): Preference<Boolean> {
+        return preferenceStore.getBoolean("use_fab_in_library", false)
+    }
+    
+    /**
+     * Default chapter sort order for all novels.
+     * Values: "SOURCE_ORDER", "CHAPTER_NUMBER", "UPLOAD_DATE_ASC", "UPLOAD_DATE_DESC"
+     * Default: "SOURCE_ORDER"
+     */
+    fun defaultChapterSort(): Preference<String> {
+        return preferenceStore.getString("default_chapter_sort", "SOURCE_ORDER")
+    }
+    
+    // Global Search Preferences
+    
+    /**
+     * Whether to only add novels to library when they are found in search results.
+     * When true: Only add novels when search returns results
+     * When false: Add novels immediately when user clicks "Add to Library"
+     * Default: false
+     */
+    fun onlyUpdateOnFinding(): Preference<Boolean> {
+        return preferenceStore.getBoolean("only_update_on_finding", false)
+    }
+    
+    /**
+     * Whether to display the last update time for each novel in the library.
+     * Shows "Last updated: X hours ago" below novel title when enabled.
+     * Default: true
+     */
+    fun showLastUpdateTime(): Preference<Boolean> {
+        return preferenceStore.getBoolean("show_last_update_time", true)
+    }
+    
+    // Auto Download Preferences
+    
+    /**
+     * Whether to automatically download newly detected chapters in the background.
+     * When enabled, new chapters are automatically added to the download queue.
+     * Default: false
+     */
+    fun autoDownloadNewChapters(): Preference<Boolean> {
+        return preferenceStore.getBoolean("auto_download_new_chapters", false)
+    }
+    
+    // User Interface Preferences
+    
+    /**
+     * Whether to disable haptic feedback (vibration) for interactions.
+     * When enabled, all vibration feedback is suppressed throughout the app.
+     * Default: false (haptic feedback enabled)
+     */
+    fun disableHapticFeedback(): Preference<Boolean> {
+        return preferenceStore.getBoolean("disable_haptic_feedback", false)
+    }
+    
+    /**
+     * Whether to disable loading animations.
+     * When enabled, static progress indicators are used instead of animated ones.
+     * Default: false (animations enabled)
+     */
+    fun disableLoadingAnimations(): Preference<Boolean> {
+        return preferenceStore.getBoolean("disable_loading_animations", false)
+    }
+    
+    // ============================================================================
+    // Appearance Settings for Novel Info
+    // ============================================================================
+    
+    /**
+     * Whether to hide backdrop images on novel detail screens.
+     * When enabled, backdrop images are hidden and replaced with solid background.
+     * This improves performance and provides a cleaner UI.
+     * Default: false (show backdrop)
+     */
+    fun hideNovelBackdrop(): Preference<Boolean> {
+        return preferenceStore.getBoolean("hide_novel_backdrop", false)
+    }
+    
+    /**
+     * Whether to use a Floating Action Button instead of standard buttons on novel detail screens.
+     * When enabled, action buttons are replaced with a FAB in the bottom-right corner.
+     * Default: false (use standard buttons)
+     */
+    fun useFabInNovelInfo(): Preference<Boolean> {
+        return preferenceStore.getBoolean("use_fab_in_novel_info", false)
+    }
+    
+    // ============================================================================
+    // JavaScript Plugin Settings
+    // ============================================================================
+    
+    /**
+     * Whether to enable JavaScript plugin support.
+     * When enabled, LNReader-compatible JavaScript plugins can be loaded and used.
+     * Default: false (disabled for security)
+     */
+    fun enableJSPlugins(): Preference<Boolean> {
+        return preferenceStore.getBoolean("enable_js_plugins", false)
+    }
+    
+    /**
+     * Whether to automatically check for and install plugin updates.
+     * When enabled, the app will check for updates every 24 hours.
+     * Default: true
+     */
+    fun autoUpdateJSPlugins(): Preference<Boolean> {
+        return preferenceStore.getBoolean("auto_update_js_plugins", true)
+    }
+    
+    /**
+     * Whether to enable debug mode for JavaScript plugins.
+     * When enabled, detailed execution logs are generated for troubleshooting.
+     * Default: false
+     */
+    fun jsPluginDebugMode(): Preference<Boolean> {
+        return preferenceStore.getBoolean("js_plugin_debug_mode", false)
+    }
+    
+    /**
+     * Maximum number of concurrent plugin executions.
+     * Range: 1-10
+     * Default: 5
+     */
+    fun jsPluginMaxConcurrent(): Preference<Int> {
+        return preferenceStore.getInt("js_plugin_max_concurrent", 5)
+    }
+    
+    /**
+     * Timeout for plugin method execution in seconds.
+     * Range: 10-60 seconds
+     * Default: 30 seconds
+     */
+    fun jsPluginTimeout(): Preference<Int> {
+        return preferenceStore.getInt("js_plugin_timeout", 30)
+    }
+    
+    /**
+     * Memory limit per plugin in megabytes.
+     * Default: 64 MB
+     */
+    fun jsPluginMemoryLimit(): Preference<Int> {
+        return preferenceStore.getInt("js_plugin_memory_limit", 64)
+    }
 }

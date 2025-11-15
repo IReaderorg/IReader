@@ -14,6 +14,9 @@ import ireader.core.prefs.PrefixedPreferenceStore
 import ireader.core.source.Source
 import ireader.core.source.TestSource
 import ireader.domain.catalogs.service.CatalogLoader
+import ireader.domain.js.engine.JSEnginePool
+import ireader.domain.js.loader.JSPluginLoader
+import ireader.domain.js.util.JSPluginLogger
 import ireader.domain.models.entities.CatalogBundled
 import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogLocal
@@ -25,6 +28,7 @@ import ireader.i18n.LocalizeHelper
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import java.io.File
@@ -46,6 +50,12 @@ class AndroidCatalogLoader(
     // Create secure directories for extension loading
     private val secureExtensionsDir = File(context.codeCacheDir, "secure_extensions").apply { mkdirs() }
     private val secureDexCacheDir = File(context.codeCacheDir, "dex-cache").apply { mkdirs() }
+    
+    // JavaScript plugin loader
+    private val jsPluginLoader: JSPluginLoader by lazy {
+        val jsPluginsDir = File(context.filesDir, "js-plugins").apply { mkdirs() }
+        JSPluginLoader(jsPluginsDir, httpClients.default, preferenceStore, JSEnginePool())
+    }
     
     init {
         // Initialize secure directories at startup
@@ -143,7 +153,26 @@ class AndroidCatalogLoader(
             deferred.awaitAll()
         }.filterNotNull()
 
-        return (bundled + installedCatalogs).distinctBy { it.sourceId }.toSet().toList()
+        // Load JavaScript plugins if enabled
+        val jsPlugins = if (uiPreferences.enableJSPlugins().get()) {
+            try {
+                val startTime = System.currentTimeMillis()
+                val plugins = withContext(Dispatchers.IO) {
+                    jsPluginLoader.loadAllPlugins()
+                }
+                val duration = System.currentTimeMillis() - startTime
+                JSPluginLogger.logInfo("AndroidCatalogLoader", 
+                    "Loaded ${plugins.size} JS plugins in ${duration}ms")
+                plugins
+            } catch (e: Exception) {
+                Log.error(e, "Failed to load JS plugins")
+                emptyList()
+            }
+        } else {
+            emptyList()
+        }
+
+        return (bundled + installedCatalogs + jsPlugins).distinctBy { it.sourceId }.toSet().toList()
     }
 
     /**

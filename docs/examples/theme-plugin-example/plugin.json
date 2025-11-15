@@ -1,0 +1,24 @@
+{
+  "id": "com.example.mytheme",
+  "name": "Midnight Blue Theme",
+  "version": "1.0.0",
+  "versionCode": 1,
+  "description": "A beautiful dark blue theme for comfortable night reading. Features carefully selected colors that reduce eye strain while maintaining excellent readability.",
+  "author": {
+    "name": "Example Developer",
+    "email": "dev@example.com",
+    "website": "https://example.com"
+  },
+  "type": "THEME",
+  "permissions": [],
+  "minIReaderVersion": "1.0.0",
+  "platforms": ["ANDROID", "IOS", "DESKTOP"],
+  "iconUrl": "icon.png",
+  "screenshotUrls": [
+    "screenshots/reader_view.png",
+    "screenshots/library_view.png"
+  ],
+  "monetization": {
+    "type": "FREE"
+  }
+}

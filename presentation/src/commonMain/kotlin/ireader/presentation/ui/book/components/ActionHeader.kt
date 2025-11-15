@@ -1,8 +1,13 @@
 package ireader.presentation.ui.book.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,37 +39,57 @@ fun ActionHeader(
     favorite:Boolean,
     source: Source?,
     onWebView: () -> Unit,
-    onFavorite:() -> Unit
+    onFavorite:() -> Unit,
+    onMigrate: () -> Unit = {},
+    useFab: Boolean = false
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    // Only show standard buttons when FAB is not enabled
+    AnimatedVisibility(
+        visible = !useFab,
+        enter = fadeIn() + slideInVertically(),
+        exit = fadeOut() + slideOutVertically()
     ) {
-        // Favorite button with enhanced styling
-        ActionButton(
-            title = if (favorite) {
-                localize(Res.string.in_library)
-            } else {
-                localize(Res.string.add_to_library)
-            },
-            icon = if (favorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-            isActive = favorite,
-            onClick = onFavorite,
-            modifier = Modifier.weight(1f)
-        )
-        
-        // WebView button
-        if (source is HttpSource) {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Favorite button with enhanced styling
             ActionButton(
-                title = localize(Res.string.webView),
-                icon = Icons.Default.Public,
-                isActive = false,
-                onClick = onWebView,
+                title = if (favorite) {
+                    localize(Res.string.in_library)
+                } else {
+                    localize(Res.string.add_to_library)
+                },
+                icon = if (favorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                isActive = favorite,
+                onClick = onFavorite,
+                modifier = Modifier.weight(1f)
+            )
+            
+            // WebView button
+            if (source is HttpSource) {
+                ActionButton(
+                    title = localize(Res.string.webView),
+                    icon = Icons.Default.Public,
+                    isActive = false,
+                    onClick = onWebView,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            
+            // Migrate button
+            MigrateButton(
+                onClick = onMigrate,
                 modifier = Modifier.weight(1f)
             )
         }
+    }
+    
+    // Add bottom padding when FAB is enabled to prevent content overlap
+    if (useFab) {
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 

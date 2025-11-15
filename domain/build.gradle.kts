@@ -63,8 +63,10 @@ kotlin {
     androidTarget {
         compilations {
             all {
-                compilerOptions.configure {
-                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
+                compileTaskProvider.configure {
+                    compilerOptions {
+                        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
+                    }
                 }
             }
         }
@@ -72,8 +74,10 @@ kotlin {
     jvm("desktop") {
         compilations {
             all {
-                compilerOptions.configure {
-                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.desktopJvmTarget.toString()))
+                compileTaskProvider.configure {
+                    compilerOptions {
+                        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.desktopJvmTarget.toString()))
+                    }
                 }
             }
         }
@@ -145,6 +149,9 @@ kotlin {
                 implementation(kotlinx.stdlib)
                 api(libs.koin.android)
                 api(libs.koin.workManager)
+                
+                // QuickJS for JavaScript engine
+                implementation("app.cash.quickjs:quickjs-android:0.9.2")
             }
         }
         val desktopMain by getting {
@@ -153,6 +160,10 @@ kotlin {
                 implementation(compose.desktop.currentOs)
                 // Piper JNI for text-to-speech - Testing version 1.2.0-a0f09cd
                 implementation("io.github.givimad:piper-jni:1.2.0-a0f09cd")
+                
+                // GraalVM JavaScript for JavaScript engine
+                implementation("org.graalvm.polyglot:polyglot:23.1.0")
+                implementation("org.graalvm.polyglot:js:23.1.0")
             }
         }
     }

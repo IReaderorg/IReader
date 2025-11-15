@@ -13,6 +13,7 @@ import ireader.presentation.ui.home.history.viewmodel.HistoryStateImpl
 import ireader.presentation.ui.home.history.viewmodel.HistoryViewModel
 import ireader.presentation.ui.home.library.viewmodel.LibraryStateImpl
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
+import ireader.presentation.ui.home.sources.browse.BrowseSettingsViewModel
 import ireader.presentation.ui.home.sources.extension.CatalogsStateImpl
 import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
 import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchStateImpl
@@ -63,6 +64,12 @@ val PresentationModules = module {
     factory  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull()) }
     factory  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory<GlobalSearchViewModel> { GlobalSearchViewModel(get(), get(), get(), get(), get(), get()) }
+    
+    // Browse Settings ViewModel
+    factory { BrowseSettingsViewModel(get()) }
+    
+    // Migration ViewModel
+    factory { ireader.presentation.ui.home.sources.migration.MigrationViewModel(get(), get(), get()) }
 
     factory  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get()) }
 

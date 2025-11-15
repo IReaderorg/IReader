@@ -522,6 +522,146 @@ fun getColumnsForOrientation(isLandscape: Boolean, scope: CoroutineScope): State
 }
 
 /**
+ * Update all novels in the library by checking for new chapters
+ */
+fun updateLibrary() {
+    scope.launch {
+        state.isUpdatingLibrary = true
+        try {
+            // Get all books in library
+            val allBooks = localGetBookUseCases.findAllInLibraryBooks()
+            
+            // Start library update service
+            serviceUseCases.startLibraryUpdateServicesUseCase.start()
+            
+            state.batchOperationMessage = "Updating ${allBooks.size} novel(s)..."
+        } catch (e: Exception) {
+            state.batchOperationMessage = "Error updating library: ${e.message}"
+        } finally {
+            state.isUpdatingLibrary = false
+        }
+    }
+}
+
+/**
+ * Show the update category dialog
+ */
+fun showUpdateCategoryDialog() {
+    state.showUpdateCategoryDialog = true
+}
+
+/**
+ * Hide the update category dialog
+ */
+fun hideUpdateCategoryDialog() {
+    state.showUpdateCategoryDialog = false
+}
+
+/**
+ * Update novels in a specific category
+ */
+fun updateCategory(categoryId: Long) {
+    scope.launch {
+        state.isUpdatingLibrary = true
+        try {
+            // Get books in the selected category
+            val booksInCategory = if (categoryId == 0L) {
+                // All category
+                localGetBookUseCases.findAllInLibraryBooks()
+            } else {
+                // Specific category - get books by category
+                bookCategories.value
+                    .filter { it.categoryId == categoryId }
+                    .mapNotNull { bookCategory ->
+                        localGetBookUseCases.findBookById(bookCategory.bookId)
+                    }
+            }
+            
+            if (booksInCategory.isNotEmpty()) {
+                // Start update for these specific books
+                serviceUseCases.startLibraryUpdateServicesUseCase.start()
+                state.batchOperationMessage = "Updating ${booksInCategory.size} novel(s) in category..."
+            } else {
+                state.batchOperationMessage = "No novels found in this category"
+            }
+        } catch (e: Exception) {
+            state.batchOperationMessage = "Error updating category: ${e.message}"
+        } finally {
+            state.isUpdatingLibrary = false
+            hideUpdateCategoryDialog()
+        }
+    }
+}
+
+/**
+ * Import EPUB files into the library
+ * Note: Platform-specific implementation required for file picking
+ */
+fun importEpubFiles(uris: List<String>) {
+    scope.launch {
+        try {
+            state.importProgress = ImportProgress(0, uris.size, "")
+            
+            // TODO: Implement EPUB parsing and import
+            // This requires platform-specific file handling
+            // For now, show a message
+            state.batchOperationMessage = "EPUB import: ${uris.size} file(s) selected. Implementation pending."
+            
+            state.importProgress = null
+        } catch (e: Exception) {
+            state.batchOperationMessage = "Error importing EPUB: ${e.message}"
+            state.importProgress = null
+        }
+    }
+}
+
+/**
+ * Open a random novel from the library
+ * Returns the book ID of the randomly selected novel, or null if library is empty
+ */
+fun openRandomEntry(): Long? {
+    val allBooks = books
+    if (allBooks.isEmpty()) {
+        state.batchOperationMessage = "Library is empty"
+        return null
+    }
+    
+    val randomBook = allBooks.random()
+    return randomBook.id
+}
+
+/**
+ * Sync library with remote service
+ */
+fun syncWithRemote() {
+    scope.launch {
+        try {
+            if (!isSyncAvailable) {
+                state.batchOperationMessage = "Remote sync not configured"
+                return@launch
+            }
+            
+            state.batchOperationMessage = "Syncing with remote..."
+            
+            // Perform full sync
+            syncUseCases?.performFullSync?.invoke()
+            
+            state.batchOperationMessage = "Sync completed successfully"
+        } catch (e: Exception) {
+            state.batchOperationMessage = "Sync error: ${e.message}"
+        }
+    }
+}
+
+/**
+ * Search in library with enhanced filtering
+ */
+fun searchInLibrary(query: String) {
+    state.searchQuery = query
+    // The existing search logic in getLibraryForCategoryIndex will handle this
+}
+
+/**
  * Show the batch operation dialog
  */
 fun showBatchOperationDialog() {

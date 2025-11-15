@@ -29,6 +29,7 @@ import ireader.domain.catalogs.CatalogStore
 import ireader.domain.di.CatalogModule
 import ireader.domain.di.DomainModule
 import ireader.domain.di.DomainServices
+import ireader.domain.di.PluginModule
 import ireader.domain.di.UseCasesInject
 import ireader.domain.di.localModule
 import ireader.domain.di.preferencesInjectModule
@@ -119,7 +120,7 @@ fun main() {
         val koinApp = startKoin {
             modules(
                 localModule,dataPlatformModule, CatalogModule, DataModule,preferencesInjectModule,
-                repositoryInjectModule, remotePlatformModule, remoteModule, reviewModule, UseCasesInject, PresentationModules,DomainServices,DomainModule,presentationPlatformModule, DesktopDI
+                repositoryInjectModule, remotePlatformModule, remoteModule, reviewModule, UseCasesInject, PresentationModules,DomainServices,DomainModule,PluginModule,presentationPlatformModule, DesktopDI
             )
         }
         

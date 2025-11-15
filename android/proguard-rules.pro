@@ -23,6 +23,15 @@
 -keep,allowoptimization class org.jetbrains.kotlinx.** { public protected *; }
 -keep,allowoptimization class app.cash.quickjs.** { public protected *; }
 -keep,allowoptimization class com.google.accompanist.** { public protected *; }
+
+# JS Plugin Support - Keep JavaScript engine classes
+-keep class app.cash.quickjs.** { *; }
+-keep class org.graalvm.** { *; }
+-keep class ireader.domain.js.** { *; }
+-keepclassmembers class ireader.domain.js.** {
+    <methods>;
+    <fields>;
+}
 -keep,allowoptimization class androidx.compose.** { public protected *; }
 -keep,allowoptimization class org.tinylog.** { public protected *; }
 -keep,allowoptimization class org.koin.** { public protected *; }

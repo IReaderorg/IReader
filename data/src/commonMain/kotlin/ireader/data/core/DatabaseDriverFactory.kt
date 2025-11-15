@@ -8,6 +8,10 @@ import data.ChapterHealth
 import data.Download
 import data.Glossary
 import data.NftWallets
+import data.Plugin
+import data.Plugin_purchase
+import data.Plugin_review
+import data.Plugin_trial
 import data.Reader_theme
 import data.SourceComparison
 import data.Theme
@@ -94,7 +98,20 @@ fun createDatabase(driver: SqlDriver): Database {
         ),
         nftWalletsAdapter = NftWallets.Adapter(
             longConverter,
-            )
+            ),
+        pluginAdapter = Plugin.Adapter(
+            install_dateAdapter = longConverter
+        ),
+        plugin_purchaseAdapter = Plugin_purchase.Adapter(
+            timestampAdapter = longConverter
+        ),
+        plugin_reviewAdapter = Plugin_review.Adapter(
+            timestampAdapter = longConverter
+        ),
+        plugin_trialAdapter = Plugin_trial.Adapter(
+            start_dateAdapter = longConverter,
+            expiration_dateAdapter = longConverter
+        )
     )
     
     return database

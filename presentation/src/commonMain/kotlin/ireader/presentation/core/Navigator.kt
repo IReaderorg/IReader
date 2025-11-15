@@ -108,6 +108,10 @@ fun NavHostController.navigateTo(spec: ireader.presentation.ui.home.sources.exte
     navigate("sourceDetail/${spec.catalog.sourceId}")
 }
 
+fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.SourceMigrationScreenSpec) {
+    navigate("sourceMigration/${spec.sourceId}")
+}
+
 // Expect functions for platform-specific screen specs
 expect fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.WebViewScreenSpec)
 expect fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.TTSScreenSpec)

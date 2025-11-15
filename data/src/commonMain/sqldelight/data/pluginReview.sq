@@ -1,0 +1,66 @@
+import kotlin.Long;
+
+-- Plugin review table for user reviews and ratings
+CREATE TABLE IF NOT EXISTS plugin_review (
+    id TEXT NOT NULL PRIMARY KEY,
+    plugin_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    rating REAL NOT NULL CHECK (rating >= 1.0 AND rating <= 5.0),
+    review_text TEXT,
+    timestamp INTEGER AS Long NOT NULL,
+    helpful INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (plugin_id) REFERENCES plugin(id) ON DELETE CASCADE,
+    UNIQUE(plugin_id, user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_plugin_review_plugin_id ON plugin_review(plugin_id);
+CREATE INDEX IF NOT EXISTS idx_plugin_review_user_id ON plugin_review(user_id);
+CREATE INDEX IF NOT EXISTS idx_plugin_review_rating ON plugin_review(rating DESC);
+CREATE INDEX IF NOT EXISTS idx_plugin_review_timestamp ON plugin_review(timestamp DESC);
+
+-- Queries
+selectAll:
+SELECT * FROM plugin_review ORDER BY timestamp DESC;
+
+selectById:
+SELECT * FROM plugin_review WHERE id = ? LIMIT 1;
+
+selectByPluginId:
+SELECT * FROM plugin_review WHERE plugin_id = ? ORDER BY helpful DESC, timestamp DESC;
+
+selectByUserId:
+SELECT * FROM plugin_review WHERE user_id = ? ORDER BY timestamp DESC;
+
+selectByPluginAndUser:
+SELECT * FROM plugin_review WHERE plugin_id = ? AND user_id = ? LIMIT 1;
+
+getAverageRating:
+SELECT AVG(rating) FROM plugin_review WHERE plugin_id = ?;
+
+getReviewCount:
+SELECT COUNT(*) FROM plugin_review WHERE plugin_id = ?;
+
+insert:
+INSERT OR REPLACE INTO plugin_review(
+    id, plugin_id, user_id, rating, review_text, timestamp, helpful
+)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE plugin_review SET
+    rating = ?,
+    review_text = ?,
+    timestamp = ?
+WHERE id = ?;
+
+updateHelpful:
+UPDATE plugin_review SET helpful = ? WHERE id = ?;
+
+delete:
+DELETE FROM plugin_review WHERE id = ?;
+
+deleteByPluginId:
+DELETE FROM plugin_review WHERE plugin_id = ?;
+
+deleteAll:
+DELETE FROM plugin_review;

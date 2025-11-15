@@ -73,7 +73,7 @@ val  appThemeMapper = {
                 outline,
                 outlineVariant,
                 scrim,
-        ).toColorScheme(),
+        ).toColorScheme(isDark),
         extraColors = CustomExtraColors(
                 bars,
                 onBars,

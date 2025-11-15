@@ -352,7 +352,6 @@
     <string name="automatic_backup">Automatic Backup</string>
     <string name="maximum_backups">Maximum backups</string>
     <string name="auto_backup">Auto backup</string>
-    <string name="import_epub">Import Epub</string>
     <string name="data">Data</string>
     <string name="chapters_was_cleared">Chapters was cleared</string>
     <string name="database_was_cleared">Database was cleared.</string>
@@ -610,4 +609,30 @@
     <string name="export_epub_option_title">Export as ePub</string>
     <string name="export_epub_option_description">Download as ePub file for offline reading</string>
     <string name="export_epub">Export ePub</string>
+    
+    <!-- Library Toolbar Actions -->
+    <string name="update_library">Update Library</string>
+    <string name="update_category">Update Category</string>
+    <string name="import_epub">Import EPUB</string>
+    <string name="open_random">Open Random</string>
+    <string name="sync_remote">Sync Remote</string>
+    <string name="no_categories_found">No categories found</string>
+    
+    <!-- Missing strings for new features -->
+    <string name="export_as_epub">Export as ePub</string>
+    <string name="info">Info</string>
+    <string name="more_options">More Options</string>
+    <string name="include_cover_image">Include Cover Image</string>
+    <string name="chapter_selection">Chapter Selection</string>
+    <string name="all_chapters">All Chapters</string>
+    <string name="select_chapters">Select Chapters</string>
+    <string name="formatting">Formatting</string>
+    <string name="paragraph_spacing">Paragraph Spacing</string>
+    <string name="chapter_heading_size">Chapter Heading Size</string>
+    <string name="typography">Typography</string>
+    <string name="export">Export</string>
+    <string name="migrate">Migrate</string>
+    <string name="select_source_to_migrate_to">Select source to migrate to</string>
+    <string name="no_sources_available">No sources available</string>
+    <string name="lang">Language</string>
 </resources>

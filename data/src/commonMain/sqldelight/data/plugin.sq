@@ -1,0 +1,64 @@
+import kotlin.Boolean;
+import kotlin.Long;
+
+-- Plugin table for storing installed plugins
+CREATE TABLE IF NOT EXISTS plugin (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    version TEXT NOT NULL,
+    version_code INTEGER NOT NULL,
+    type TEXT NOT NULL,
+    author TEXT NOT NULL,
+    description TEXT NOT NULL,
+    icon_url TEXT,
+    status TEXT NOT NULL,
+    install_date INTEGER AS Long NOT NULL,
+    last_update INTEGER AS Long,
+    manifest_json TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_plugin_type ON plugin(type);
+CREATE INDEX IF NOT EXISTS idx_plugin_status ON plugin(status);
+
+-- Queries
+selectAll:
+SELECT * FROM plugin ORDER BY install_date DESC;
+
+selectById:
+SELECT * FROM plugin WHERE id = ? LIMIT 1;
+
+selectByType:
+SELECT * FROM plugin WHERE type = ? ORDER BY name ASC;
+
+selectByStatus:
+SELECT * FROM plugin WHERE status = ? ORDER BY name ASC;
+
+insert:
+INSERT OR REPLACE INTO plugin(
+    id, name, version, version_code, type, author, 
+    description, icon_url, status, install_date, last_update, manifest_json
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE plugin SET
+    name = ?,
+    version = ?,
+    version_code = ?,
+    type = ?,
+    author = ?,
+    description = ?,
+    icon_url = ?,
+    status = ?,
+    last_update = ?,
+    manifest_json = ?
+WHERE id = ?;
+
+updateStatus:
+UPDATE plugin SET status = ?, last_update = ? WHERE id = ?;
+
+delete:
+DELETE FROM plugin WHERE id = ?;
+
+deleteAll:
+DELETE FROM plugin;

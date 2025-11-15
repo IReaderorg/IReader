@@ -15,9 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Sort
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -73,7 +71,13 @@ fun LibraryScreenTopBar(
     scrollBehavior: TopAppBarScrollBehavior? = null,
     showModalSheet:() -> Unit,
     hideModalSheet:() -> Unit,
-    isModalVisible:Boolean
+    isModalVisible:Boolean,
+    onUpdateLibrary: () -> Unit = {},
+    onUpdateCategory: () -> Unit = {},
+    onImportEpub: () -> Unit = {},
+    onOpenRandom: () -> Unit = {},
+    onSyncRemote: () -> Unit = {},
+    onSearchLibrary: () -> Unit = {}
 ) {
     AnimatedContent(
         targetState = state.selectionMode,
@@ -107,7 +111,13 @@ fun LibraryScreenTopBar(
                 scrollBehavior = scrollBehavior,
                 hideModalSheet = hideModalSheet,
                 isModalVisible = isModalVisible,
-                showModalSheet = showModalSheet
+                showModalSheet = showModalSheet,
+                onUpdateLibrary = onUpdateLibrary,
+                onUpdateCategory = onUpdateCategory,
+                onImportEpub = onImportEpub,
+                onOpenRandom = onOpenRandom,
+                onSyncRemote = onSyncRemote,
+                onSearchLibrary = onSearchLibrary
             )
         }
     }
@@ -126,7 +136,13 @@ private fun RegularTopBar(
     scrollBehavior: TopAppBarScrollBehavior? = null,
     showModalSheet:() -> Unit,
     hideModalSheet:() -> Unit,
-    isModalVisible:Boolean
+    isModalVisible:Boolean,
+    onUpdateLibrary: () -> Unit = {},
+    onUpdateCategory: () -> Unit = {},
+    onImportEpub: () -> Unit = {},
+    onOpenRandom: () -> Unit = {},
+    onSyncRemote: () -> Unit = {},
+    onSearchLibrary: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
@@ -180,6 +196,41 @@ private fun RegularTopBar(
                     },
                 )
             } else {
+                // Update Library
+                TopBarActionButton(
+                    icon = Icons.Outlined.Update,
+                    contentDescription = localize(Res.string.update_library),
+                    onClick = onUpdateLibrary
+                )
+                
+                // Update Category
+                TopBarActionButton(
+                    icon = Icons.Outlined.Category,
+                    contentDescription = localize(Res.string.update_category),
+                    onClick = onUpdateCategory
+                )
+                
+                // Import EPUB
+                TopBarActionButton(
+                    icon = Icons.Outlined.FileUpload,
+                    contentDescription = localize(Res.string.import_epub),
+                    onClick = onImportEpub
+                )
+                
+                // Open Random Entry
+                TopBarActionButton(
+                    icon = Icons.Outlined.Shuffle,
+                    contentDescription = localize(Res.string.open_random),
+                    onClick = onOpenRandom
+                )
+                
+                // Sync with Remote
+                TopBarActionButton(
+                    icon = Icons.Outlined.CloudSync,
+                    contentDescription = localize(Res.string.sync_remote),
+                    onClick = onSyncRemote
+                )
+                
                 TopBarActionButton(
                     icon = Icons.Outlined.Sort,
                     contentDescription = localize(Res.string.filter),

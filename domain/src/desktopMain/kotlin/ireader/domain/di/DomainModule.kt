@@ -29,12 +29,22 @@ import ireader.domain.services.tts_service.piper.AudioPlaybackEngine
 import ireader.domain.services.tts_service.piper.PiperModelManager
 import ireader.domain.services.ExtensionWatcherService
 import org.koin.core.module.Module
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 
 actual val DomainModule: Module = module {
     // Include sync module for sync functionality
     includes(syncModule)
+    
+    // Plugins directory for desktop
+    single(named("pluginsDir")) {
+        val appDataDir = File(System.getProperty("user.home"), ".ireader")
+        File(appDataDir, "plugins").apply { mkdirs() }
+    }
+    
+    // Plugin Class Loader for desktop
+    single { ireader.domain.plugins.PluginClassLoader() }
     
     factory <ScreenAlwaysOn> {
         ScreenAlwaysOnImpl()
@@ -154,5 +164,15 @@ actual val DomainModule: Module = module {
     // Wallet Integration
     single<ireader.domain.services.WalletIntegrationManager> {
         ireader.domain.services.DesktopWalletIntegrationManager()
+    }
+    
+    // Payment Processor for plugin monetization
+    single<ireader.domain.plugins.PaymentProcessor> {
+        ireader.domain.plugins.DesktopPaymentProcessor(
+            getCurrentUserId = { 
+                // TODO: Get actual user ID from authentication service
+                "default_user"
+            }
+        )
     }
 }

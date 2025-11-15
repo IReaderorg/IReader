@@ -1,16 +1,3 @@
-enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
-rootProject.name = "Infinity"
-include(":android")
-include(":data")
-include(":domain")
-include(":presentation")
-include(":core")
-include(":i18n")
-include(":desktop")
-include(":source-api")
-
-
-
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -22,6 +9,17 @@ pluginManagement {
         }
     }
 }
+
+enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
+rootProject.name = "Infinity"
+include(":android")
+include(":data")
+include(":domain")
+include(":presentation")
+include(":core")
+include(":i18n")
+include(":desktop")
+include(":source-api")
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)

@@ -1,5 +1,6 @@
 package ireader.domain.di
 
+import ireader.domain.plugins.*
 import ireader.domain.services.downloaderService.DownloadServiceStateImpl
 import ireader.domain.usecases.backup.CloudBackupManager
 import ireader.domain.usecases.backup.CloudProvider
@@ -142,12 +143,13 @@ val DomainServices = module {
     factory  { GetRemoteBooksUseCase() }
     factory  { GetRemoteChapters() }
     factory  { GetRemoteReadingContent() }
-    factory  { ireader.domain.usecases.remote.GlobalSearchUseCase(get()) }
+    factory  { ireader.domain.usecases.remote.GlobalSearchUseCase(get(), get()) }
 
     factory  {
         TranslationEnginesManager(
-            get(),
-            get()
+            readerPreferences = get(),
+            httpClients = get(),
+            pluginManager = getOrNull() // Optional to avoid circular dependency
         )
     }
     factory  { ireader.domain.catalogs.interactor.GetInstalledCatalog(get()) }
@@ -186,6 +188,25 @@ val DomainServices = module {
             supabasePreferences = get(),
             syncBooksUseCase = get(),
             getSyncedDataUseCase = get()
+        )
+    }
+
+    // Plugin System
+    // Plugin Preferences
+    single { PluginPreferences(get()) }
+    
+    // Plugin Registry
+    single { PluginRegistry(get()) }
+    
+    // Plugin Manager
+    single {
+        PluginManager(
+            loader = get(),
+            registry = get(),
+            preferences = get(),
+            monetization = get(),
+            database = get(),
+            securityManager = get()
         )
     }
 

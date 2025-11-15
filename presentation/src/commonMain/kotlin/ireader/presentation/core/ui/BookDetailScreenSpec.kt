@@ -284,7 +284,13 @@ data class BookDetailScreenSpec constructor(
                             onUnarchive = {
                                 book?.let { vm.unarchiveBook(it) }
                             },
-                            isArchived = book?.isArchived ?: false
+                            isArchived = book?.isArchived ?: false,
+                            onShareBook = {
+                                vm.shareBook()
+                            },
+                            onExportEpub = {
+                                vm.showEpubExportDialog = true
+                            }
                         )
                     },
                     floatingActionButton = {

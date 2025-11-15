@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.ExperimentalTextApi
 import ireader.i18n.LocalizeHelper
 import ireader.presentation.ui.core.theme.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import kotlinx.coroutines.CoroutineScope
 import org.koin.compose.koinInject
 

@@ -1036,7 +1036,7 @@ class TTSService(
                 Log.info { "No translated content available for TTS, will use original text" }
             }
         } catch (e: Exception) {
-            Log.error(e) { "Error loading translated content for TTS" }
+            Log.error(e, "Error loading translated content for TTS")
             state.translatedTTSContent = null
         }
     }

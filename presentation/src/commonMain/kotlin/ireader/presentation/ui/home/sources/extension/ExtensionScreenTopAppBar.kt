@@ -3,6 +3,7 @@ package ireader.presentation.ui.home.sources.extension
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -27,6 +28,7 @@ fun ExtensionScreenTopAppBar(
     onSearchEnable: () -> Unit,
     onRefresh: () -> Unit,
     onSearchNavigate: () -> Unit,
+    onMigrate: (() -> Unit)? = null,
     onAddRepository: (() -> Unit)? = null,
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
@@ -88,6 +90,13 @@ fun ExtensionScreenTopAppBar(
                         contentDescription = localize(Res.string.search),
                         onClick = onSearchNavigate,
                     )
+                    if (onMigrate != null) {
+                        AppIconButton(
+                            imageVector = Icons.Default.SwapHoriz,
+                            contentDescription = "Migrate from Source",
+                            onClick = onMigrate,
+                        )
+                    }
                 }
             }
         },

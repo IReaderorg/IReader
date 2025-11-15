@@ -224,6 +224,12 @@ class ReaderPreferences constructor(
     fun translatorEngine(): Preference<Long> {
         return preferenceStore.getLong("translatorEngine", -1)
     }
+    
+    // Plugin-based translation engine ID (if using a plugin)
+    // Requirements: 4.2
+    fun translatorPluginId(): Preference<String> {
+        return preferenceStore.getString("translator_plugin_id", "")
+    }
 
     fun translatorOriginLanguage(): Preference<String> {
         return preferenceStore.getString("translator_origin_language", "en")

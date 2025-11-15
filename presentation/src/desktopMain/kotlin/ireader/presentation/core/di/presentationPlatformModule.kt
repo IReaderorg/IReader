@@ -11,6 +11,7 @@ import org.koin.dsl.module
 actual val presentationPlatformModule: Module = module {
     single { LocaleHelper() }
     single { PlatformHelper() }
+    single { ireader.presentation.ui.book.helpers.PlatformHelper() }
     single<PlatformReaderSettingReader> { PlatformReaderSettingReader() }
     single { WebViewManger() }
     single<IUseController> { IUseController() }

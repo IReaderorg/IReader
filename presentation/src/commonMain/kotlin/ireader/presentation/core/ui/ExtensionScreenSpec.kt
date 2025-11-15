@@ -4,15 +4,19 @@ import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Source
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,6 +25,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalFocusManager
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
+import ireader.domain.models.entities.CatalogLocal
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
@@ -62,12 +67,27 @@ object ExtensionScreenSpec : Tab {
         var searchMode by remember {
             mutableStateOf(false)
         }
+        var showMigrationSourceDialog by remember {
+            mutableStateOf(false)
+        }
         val focusManager = LocalFocusManager.current
         val snackBarHostState = SnackBarListener(vm)
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val swipeState = rememberPullRefreshState(vm.isRefreshing, onRefresh = {
             vm.refreshCatalogs()
         })
+        // Migration source selection dialog
+        if (showMigrationSourceDialog) {
+            MigrationSourceSelectionDialog(
+                sources = vm.pinnedCatalogs + vm.unpinnedCatalogs,
+                onSourceSelected = { sourceId ->
+                    showMigrationSourceDialog = false
+                    navController.navigateTo(SourceMigrationScreenSpec(sourceId))
+                },
+                onDismiss = { showMigrationSourceDialog = false }
+            )
+        }
+        
         Box(modifier = Modifier.fillMaxSize()) {
             IScaffold(
                     modifier = Modifier.fillMaxSize().pullRefresh(swipeState, vm.currentPagerPage == 1), topBar = { scrollBehavior ->
@@ -101,6 +121,9 @@ object ExtensionScreenSpec : Tab {
                                     GlobalSearchScreenSpec()
                             )
                         },
+                        onMigrate = {
+                            showMigrationSourceDialog = true
+                        },
                         scrollBehavior = scrollBehavior,
                 )
             }) { scaffoldPadding ->
@@ -128,6 +151,9 @@ object ExtensionScreenSpec : Tab {
                         onShowDetails = { catalog ->
                             navController.navigateTo(SourceDetailScreen(catalog))
                         },
+                        onMigrateFromSource = { sourceId ->
+                            navController.navigateTo(SourceMigrationScreenSpec(sourceId))
+                        }
                 )
             }
             PullRefreshIndicator(
@@ -137,4 +163,37 @@ object ExtensionScreenSpec : Tab {
             )
         }
     }
+}
+
+
+@Composable
+private fun MigrationSourceSelectionDialog(
+    sources: List<CatalogLocal>,
+    onSourceSelected: (Long) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Select Source to Migrate From") },
+        text = {
+            LazyColumn {
+                items(sources, key = { it.sourceId }) { source ->
+                    ListItem(
+                        headlineContent = { Text(source.name) },
+                        supportingContent = { 
+                            Text("${source.source?.lang ?: "unknown"}")
+                        },
+                        modifier = Modifier.clickable {
+                            onSourceSelected(source.sourceId)
+                        }
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(localize(Res.string.cancel))
+            }
+        }
+    )
 }

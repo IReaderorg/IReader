@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import ireader.presentation.core.theme.ToolbarDimensions
+import ireader.presentation.ui.component.components.MinimizedToolbar
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -366,23 +368,24 @@ private fun ModernWebViewTopBar(
         color = MaterialTheme.colorScheme.surface
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            // Top row with back button, URL bar, and refresh
+            // Minimized toolbar with back button, URL bar, and refresh
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(horizontal = 4.dp),
+                    .height(ToolbarDimensions.MinimizedHeight)
+                    .padding(horizontal = ToolbarDimensions.MinimizedPadding),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Back button - fixed width
+                // Back button - fixed width with minimum touch target
                 IconButton(
                     onClick = onBack,
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier.size(ToolbarDimensions.MinimumTouchTarget)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close",
-                        tint = MaterialTheme.colorScheme.onSurface
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize)
                     )
                 }
                 
@@ -391,7 +394,7 @@ private fun ModernWebViewTopBar(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .padding(end = 8.dp)
+                            .padding(horizontal = ToolbarDimensions.MinimizedPadding)
                     ) {
                         TextField(
                             value = currentUrl,
@@ -405,25 +408,28 @@ private fun ModernWebViewTopBar(
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent
                             ),
-                            shape = RoundedCornerShape(20.dp),
+                            shape = RoundedCornerShape(16.dp),
                             placeholder = { 
                                 Text(
                                     "Enter URL", 
+                                    style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 ) 
                             },
+                            textStyle = MaterialTheme.typography.bodySmall,
                             singleLine = true,
                             trailingIcon = {
                                 IconButton(
                                     onClick = onGoToUrl,
-                                    modifier = Modifier.size(40.dp)
+                                    modifier = Modifier.size(32.dp)
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Check,
                                         contentDescription = "Go",
-                                        tint = MaterialTheme.colorScheme.primary
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize)
                                     )
                                 }
                             }
@@ -433,17 +439,17 @@ private fun ModernWebViewTopBar(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(40.dp)
-                            .padding(end = 8.dp)
-                            .clip(RoundedCornerShape(20.dp))
+                            .height(32.dp)
+                            .padding(horizontal = ToolbarDimensions.MinimizedPadding)
+                            .clip(RoundedCornerShape(16.dp))
                             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
                             .clickable { onShowUrlBarChange(true) }
-                            .padding(horizontal = 16.dp),
+                            .padding(horizontal = 12.dp),
                         contentAlignment = Alignment.CenterStart
                     ) {
                         Text(
                             text = currentUrl,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodySmall,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -451,24 +457,25 @@ private fun ModernWebViewTopBar(
                     }
                 }
                 
-                // Refresh button - fixed width
+                // Refresh button - fixed width with minimum touch target
                 IconButton(
                     onClick = onRefresh,
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier.size(ToolbarDimensions.MinimumTouchTarget)
                 ) {
                     Icon(
                         imageVector = if (isLoading) Icons.Default.Close else Icons.Default.Refresh,
                         contentDescription = if (isLoading) "Stop" else "Refresh",
-                        tint = MaterialTheme.colorScheme.onSurface
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize)
                     )
                 }
             }
             
-            // Bottom navigation row
+            // Bottom navigation row - compact design
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                    .padding(horizontal = 12.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End
             ) {
@@ -477,7 +484,7 @@ private fun ModernWebViewTopBar(
                     modifier = Modifier,
                     horizontalArrangement = Arrangement.Start
                 ) {
-                    // Back navigation button
+                    // Back navigation button with minimum touch target
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
@@ -485,7 +492,7 @@ private fun ModernWebViewTopBar(
                                 if (canGoBack) MaterialTheme.colorScheme.primaryContainer 
                                 else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                             )
-                            .size(36.dp)
+                            .size(32.dp)
                             .clickable(enabled = canGoBack) { onGoBack() },
                         contentAlignment = Alignment.Center
                     ) {
@@ -494,13 +501,13 @@ private fun ModernWebViewTopBar(
                             contentDescription = "Back",
                             tint = if (canGoBack) MaterialTheme.colorScheme.onSecondary
                                   else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize)
                         )
                     }
                     
                     Spacer(modifier = Modifier.width(8.dp))
                     
-                    // Forward navigation button
+                    // Forward navigation button with minimum touch target
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
@@ -508,7 +515,7 @@ private fun ModernWebViewTopBar(
                                 if (canGoForward) MaterialTheme.colorScheme.primaryContainer 
                                 else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                             )
-                            .size(36.dp)
+                            .size(32.dp)
                             .clickable(enabled = canGoForward) { onGoForward() },
                         contentAlignment = Alignment.Center
                     ) {
@@ -517,7 +524,7 @@ private fun ModernWebViewTopBar(
                             contentDescription = "Forward",
                             tint = if (canGoForward) MaterialTheme.colorScheme.onSecondary
                                   else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize)
                         )
                     }
                 }
@@ -528,7 +535,7 @@ private fun ModernWebViewTopBar(
                 // Loading indicator (visible only when loading)
                 if (isLoading) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize),
                         strokeWidth = 2.dp,
                         color = MaterialTheme.colorScheme.primary
                     )

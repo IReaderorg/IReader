@@ -25,7 +25,7 @@ import ireader.domain.utils.extensions.withUIContext
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
-import ireader.presentation.core.PlatformHelper
+import ireader.presentation.ui.book.helpers.PlatformHelper
 import ireader.presentation.ui.home.explore.viewmodel.BooksState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -356,6 +356,148 @@ class BookDetailViewModel(
 
     fun hideEndOfLifeOptionsDialog() {
         showEndOfLifeDialog = false
+    }
+    
+    // Migration dialog state
+    var showMigrationDialog by mutableStateOf(false)
+    var availableMigrationSources by mutableStateOf<List<ireader.domain.models.entities.CatalogLocal>>(emptyList())
+    
+    // EPUB export dialog state
+    var showEpubExportDialog by mutableStateOf(false)
+    
+    /**
+     * Load available sources for migration (excluding current source)
+     * TODO: Implement when CatalogStore API is stable
+     */
+    fun loadMigrationSources() {
+        scope.launch {
+            try {
+                // TODO: Fix catalogStore.catalogs() call
+                // val currentSourceId = booksState.book?.sourceId
+                // val allSources = catalogStore.catalogs()
+                // availableMigrationSources = allSources.filter { it.sourceId != currentSourceId }
+                availableMigrationSources = emptyList()
+                showMigrationDialog = true
+                showSnackBar(ireader.i18n.UiText.DynamicString("Migration feature coming soon"))
+            } catch (e: Exception) {
+                Log.error("Error loading migration sources", e)
+                showSnackBar(ireader.i18n.UiText.DynamicString("Failed to load sources: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Start migration to a new source
+     * TODO: Implement full migration functionality
+     */
+    fun startMigration(targetSourceId: Long) {
+        val book = booksState.book ?: return
+        
+        sourceSwitchingState.showMigrationDialog = true
+        
+        scope.launch {
+            try {
+                // TODO: Use the migration use case when it's properly implemented
+                // For now, just show a placeholder message
+                delay(1000)
+                sourceSwitchingState.showMigrationDialog = false
+                showSnackBar(ireader.i18n.UiText.DynamicString("Migration feature coming soon"))
+                
+                /* Commented out until migrateToSourceUseCase is properly implemented
+                migrateToSourceUseCase(book.id, targetSourceId).collect { progress ->
+                    sourceSwitchingState.migrationProgress = progress
+                    
+                    if (progress.isComplete) {
+                        if (progress.error == null) {
+                            delay(1000)
+                            sourceSwitchingState.showMigrationDialog = false
+                            sourceSwitchingState.reset()
+                            
+                            // Refresh book data
+                            initBook(book.id)
+                            
+                            val targetSource = catalogStore.get(targetSourceId)
+                            showSnackBar(ireader.i18n.UiText.DynamicString("Successfully migrated to ${targetSource?.name}"))
+                        } else {
+                            delay(2000)
+                            sourceSwitchingState.showMigrationDialog = false
+                            showSnackBar(ireader.i18n.UiText.DynamicString("Migration failed: ${progress.error}"))
+                        }
+                    }
+                }
+                */
+            } catch (e: Exception) {
+                Log.error("Migration error", e)
+                sourceSwitchingState.showMigrationDialog = false
+                showSnackBar(ireader.i18n.UiText.DynamicString("Migration failed: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Share book information
+     */
+    fun shareBook() {
+        val book = booksState.book ?: return
+        
+        scope.launch {
+            try {
+                val shareText = buildString {
+                    append(book.title)
+                    if (book.author.isNotBlank()) {
+                        append(" by ${book.author}")
+                    }
+                    append("\n\n")
+                    if (book.description.isNotBlank()) {
+                        append(book.description)
+                        append("\n\n")
+                    }
+                    append("Read on iReader")
+                }
+                
+                // Use platform helper to share
+                platformHelper.shareText(shareText)
+            } catch (e: Exception) {
+                Log.error("Error sharing book", e)
+                showSnackBar(ireader.i18n.UiText.DynamicString("Failed to share: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Export book as EPUB with custom options
+     * TODO: Implement full EPUB export functionality
+     * See spec: .kiro/specs/epub-export-feature/ (to be created)
+     */
+    fun exportAsEpub(options: ireader.presentation.ui.book.components.ExportOptions) {
+        val book = booksState.book ?: return
+        
+        scope.launch {
+            try {
+                // TODO: Implement EPUB export
+                // Steps needed:
+                // 1. Fetch all selected chapters content
+                // 2. Create EPUB structure (META-INF, OEBPS, mimetype)
+                // 3. Generate content.opf with metadata
+                // 4. Generate toc.ncx for navigation
+                // 5. Create XHTML files for each chapter
+                // 6. Apply formatting options
+                // 7. Package as ZIP with .epub extension
+                // 8. Save to user-selected location
+                
+                showSnackBar(
+                    ireader.i18n.UiText.DynamicString(
+                        "EPUB export feature is coming soon. " +
+                        "Selected ${options.selectedChapters.size} chapters from '${book.title}'"
+                    )
+                )
+                
+                Log.info { "EPUB export requested for book: ${book.title}, chapters: ${options.selectedChapters.size}" }
+            } catch (e: Exception) {
+                Log.error("Error in EPUB export stub", e)
+                showSnackBar(ireader.i18n.UiText.DynamicString("EPUB export not yet available"))
+            }
+        }
     }
 
     fun archiveBook(book: Book) {

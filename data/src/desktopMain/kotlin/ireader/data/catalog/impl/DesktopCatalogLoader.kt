@@ -11,6 +11,9 @@ import ireader.core.prefs.PrefixedPreferenceStore
 import ireader.core.source.Source
 import ireader.core.storage.ExtensionDir
 import ireader.domain.catalogs.service.CatalogLoader
+import ireader.domain.js.engine.JSEnginePool
+import ireader.domain.js.loader.JSPluginLoader
+import ireader.domain.js.util.JSPluginLogger
 import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.preferences.prefs.UiPreferences
@@ -31,6 +34,12 @@ class DesktopCatalogLoader(
     preferences: PreferenceStoreFactory
 ) : CatalogLoader {
     private val catalogPreferences = preferences.create("catalogs_data")
+    
+    // JavaScript plugin loader
+    private val jsPluginLoader: JSPluginLoader by lazy {
+        val jsPluginsDir = File(System.getProperty("user.home"), ".ireader/js-plugins").apply { mkdirs() }
+        JSPluginLoader(jsPluginsDir, httpClients.default, preferences, JSEnginePool())
+    }
     override suspend fun loadAll(): List<CatalogLocal> {
         val bundled = mutableListOf<ireader.domain.models.entities.CatalogBundled>()
         
@@ -60,7 +69,24 @@ class DesktopCatalogLoader(
             deferred.awaitAll()
         }.filterNotNull()
 
-        return (bundled + installedCatalogs).distinctBy { it.sourceId }.toSet().toList()
+        // Load JavaScript plugins if enabled
+        val jsPlugins = if (uiPreferences.enableJSPlugins().get()) {
+            try {
+                val startTime = System.currentTimeMillis()
+                val plugins = jsPluginLoader.loadAllPlugins()
+                val duration = System.currentTimeMillis() - startTime
+                JSPluginLogger.logInfo("DesktopCatalogLoader", 
+                    "Loaded ${plugins.size} JS plugins in ${duration}ms")
+                plugins
+            } catch (e: Exception) {
+                Log.error { "Failed to load JS plugins" }
+                emptyList()
+            }
+        } else {
+            emptyList()
+        }
+
+        return (bundled + installedCatalogs + jsPlugins).distinctBy { it.sourceId }.toSet().toList()
     }
 
     override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? {

@@ -11,7 +11,7 @@ import ireader.domain.models.theme.toExtraColor
 fun CustomTheme.toBaseTheme(): Theme {
     return Theme(
         id = this.id,
-        materialColors = this.materialColor.toColorScheme(),
+        materialColors = this.materialColor.toColorScheme(this.dark),
         extraColors = this.extraColors.toExtraColor(),
         isDark = this.dark
     )

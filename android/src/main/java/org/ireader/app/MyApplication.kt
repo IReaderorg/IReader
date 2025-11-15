@@ -18,6 +18,7 @@ import ireader.data.remote.AutoSyncService
 import ireader.domain.di.CatalogModule
 import ireader.domain.di.DomainModule
 import ireader.domain.di.DomainServices
+import ireader.domain.di.PluginModule
 import ireader.domain.di.UseCasesInject
 import ireader.domain.di.localModule
 import ireader.domain.di.preferencesInjectModule
@@ -59,6 +60,7 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
             modules(PresentationModules)
             modules(DomainServices)
             modules(DomainModule)
+            modules(PluginModule)
             modules(presentationPlatformModule)
         }
         

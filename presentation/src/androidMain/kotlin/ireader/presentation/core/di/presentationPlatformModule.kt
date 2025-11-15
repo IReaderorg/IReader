@@ -44,6 +44,7 @@ actual val presentationPlatformModule = module  {
 
     single { LocaleHelper(get(),get()) }
     single { PlatformHelper(get()) }
+    single { ireader.presentation.ui.book.helpers.PlatformHelper(get()) }
     single<IUseController> { IUseController() }
     single<CoilLoaderFactory>(createdAtStart = true) {
         CoilLoaderFactory(

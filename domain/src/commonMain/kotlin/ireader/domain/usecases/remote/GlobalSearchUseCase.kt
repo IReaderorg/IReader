@@ -7,11 +7,15 @@ import ireader.core.source.model.MangasPageInfo
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.toBook
+import ireader.domain.preferences.prefs.BrowsePreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -19,7 +23,8 @@ import kotlinx.coroutines.withTimeoutOrNull
  * Use case for searching across all installed sources simultaneously
  */
 class GlobalSearchUseCase(
-    private val catalogStore: CatalogStore
+    private val catalogStore: CatalogStore,
+    private val browsePreferences: BrowsePreferences
 ) {
     /**
      * Search for books across all installed sources
@@ -31,18 +36,38 @@ class GlobalSearchUseCase(
             return@flow
         }
 
+        // Get browse preferences
+        val selectedLanguages = browsePreferences.selectedLanguages().get()
+        val concurrentSearches = browsePreferences.concurrentGlobalSearches().get()
+        val searchTimeout = browsePreferences.searchTimeout().get()
+
+        // Filter catalogs by language and type
         val catalogs = catalogStore.catalogs
             .filter { it.source is CatalogSource }
+            .filter { catalog ->
+                val source = catalog.source
+                source != null && source.lang in selectedLanguages
+            }
         
         if (catalogs.isEmpty()) {
             return@flow
         }
 
-        // Search all sources in parallel
+        // Create semaphore to limit concurrent searches
+        val semaphore = Semaphore(concurrentSearches)
+
+        // Search all sources in parallel with concurrency limit
         coroutineScope {
             catalogs.forEach { catalog ->
                 async {
-                    searchSource(catalog.source as CatalogSource, catalog.sourceId, query)
+                    semaphore.withPermit {
+                        searchSource(
+                            source = catalog.source as CatalogSource,
+                            sourceId = catalog.sourceId,
+                            query = query,
+                            timeout = searchTimeout
+                        )
+                    }
                 }.also { deferred ->
                     // Emit results as they arrive
                     try {
@@ -71,7 +96,8 @@ class GlobalSearchUseCase(
     private suspend fun searchSource(
         source: CatalogSource,
         sourceId: Long,
-        query: String
+        query: String,
+        timeout: Long
     ): SearchResult = withContext(Dispatchers.IO) {
         // Emit loading state first
         val loadingResult = SearchResult(
@@ -83,8 +109,8 @@ class GlobalSearchUseCase(
         )
 
         try {
-            // Search with 30-second timeout
-            val result = withTimeoutOrNull(30_000L) {
+            // Search with configurable timeout
+            val result = withTimeoutOrNull(timeout) {
                 source.getMangaList(
                     filters = listOf(
                         Filter.Title().apply { this.value = query }
@@ -103,9 +129,11 @@ class GlobalSearchUseCase(
                     error = "Search timed out"
                 )
             } else {
-                // Success
+                // Success - apply max results limit
+                val maxResults = browsePreferences.maxResultsPerSource().get()
                 val books = result.mangas
                     .filter { it.title.isNotBlank() }
+                    .take(maxResults)
                     .map { it.toBook(sourceId = sourceId) }
 
                 SearchResult(
