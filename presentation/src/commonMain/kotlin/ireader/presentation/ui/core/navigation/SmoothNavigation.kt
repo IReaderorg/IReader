@@ -1,4 +1,4 @@
-package ireader.presentation.core
+package ireader.presentation.ui.core.navigation
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -14,14 +14,17 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 
 /**
- * Animated NavHost with beautiful transitions for both Android and Desktop platforms.
+ * Smooth navigation host that eliminates white flashes during screen transitions.
  * 
- * Provides consistent slide and fade animations across all navigation actions.
- * Enhanced with persistent background to eliminate white flashes.
+ * This wrapper provides:
+ * - Persistent background color to prevent white flashes
+ * - Smooth fade and slide animations
+ * - Consistent behavior across light and dark themes
+ * - Optimized transition timing for better UX
  */
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun AnimatedNavHost(
+fun SmoothNavigationHost(
     navController: NavHostController,
     startDestination: String,
     modifier: Modifier = Modifier,
@@ -39,15 +42,13 @@ fun AnimatedNavHost(
             startDestination = startDestination,
             modifier = Modifier.fillMaxSize(),
             enterTransition = {
-                // Faster fade-in with subtle slide for smoother transitions
                 fadeIn(
                     animationSpec = tween(
                         durationMillis = 200,
                         easing = FastOutSlowInEasing
                     )
-                ) + slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                    initialOffset = { it / 10 }, // Subtle slide
+                ) + slideInHorizontally(
+                    initialOffsetX = { it / 10 },
                     animationSpec = tween(
                         durationMillis = 300,
                         easing = FastOutSlowInEasing
@@ -55,7 +56,6 @@ fun AnimatedNavHost(
                 )
             },
             exitTransition = {
-                // Quick fade-out to maintain previous screen visibility
                 fadeOut(
                     animationSpec = tween(
                         durationMillis = 200,
@@ -64,7 +64,6 @@ fun AnimatedNavHost(
                 )
             },
             popEnterTransition = {
-                // Smooth fade-in when returning
                 fadeIn(
                     animationSpec = tween(
                         durationMillis = 200,
@@ -73,15 +72,13 @@ fun AnimatedNavHost(
                 )
             },
             popExitTransition = {
-                // Fade-out with subtle slide when going back
                 fadeOut(
                     animationSpec = tween(
                         durationMillis = 200,
                         easing = FastOutSlowInEasing
                     )
-                ) + slideOutOfContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.End,
-                    targetOffset = { it / 10 }, // Subtle slide
+                ) + slideOutHorizontally(
+                    targetOffsetX = { it / 10 },
                     animationSpec = tween(
                         durationMillis = 300,
                         easing = FastOutSlowInEasing
@@ -91,4 +88,47 @@ fun AnimatedNavHost(
             builder = builder
         )
     }
+}
+
+/**
+ * Custom transition extensions for different navigation scenarios
+ */
+
+// Fade transition for dialogs and overlays
+fun fadeTransition(durationMillis: Int = 200): EnterTransition {
+    return fadeIn(animationSpec = tween(durationMillis))
+}
+
+fun fadeOutTransition(durationMillis: Int = 200): ExitTransition {
+    return fadeOut(animationSpec = tween(durationMillis))
+}
+
+// Slide from bottom (for bottom sheets style)
+fun slideUpTransition(): EnterTransition {
+    return slideInVertically(
+        initialOffsetY = { it },
+        animationSpec = tween(300, easing = FastOutSlowInEasing)
+    ) + fadeIn(animationSpec = tween(200))
+}
+
+fun slideDownTransition(): ExitTransition {
+    return slideOutVertically(
+        targetOffsetY = { it },
+        animationSpec = tween(300, easing = FastOutSlowInEasing)
+    ) + fadeOut(animationSpec = tween(200))
+}
+
+// Scale transition for detail screens
+fun scaleInTransition(): EnterTransition {
+    return scaleIn(
+        initialScale = 0.95f,
+        animationSpec = tween(300, easing = FastOutSlowInEasing)
+    ) + fadeIn(animationSpec = tween(200))
+}
+
+fun scaleOutTransition(): ExitTransition {
+    return scaleOut(
+        targetScale = 0.95f,
+        animationSpec = tween(300, easing = FastOutSlowInEasing)
+    ) + fadeOut(animationSpec = tween(200))
 }

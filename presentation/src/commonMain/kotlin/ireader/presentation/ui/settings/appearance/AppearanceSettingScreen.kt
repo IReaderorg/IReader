@@ -5,12 +5,6 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.Spring
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.border
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,30 +12,25 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CornerSize
+
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -54,10 +43,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.domain.models.prefs.PreferenceValues
@@ -79,6 +65,7 @@ import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposab
 import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.theme.isLight
+import ireader.presentation.ui.settings.components.ThemePreviewCard
 import kotlinx.coroutines.launch
 
 @Composable
@@ -133,10 +120,6 @@ fun AppearanceSettingScreen(
         }
     )
 
-    // Calculate responsive grid size based on screen width
-    // Using a default size that works well across platforms
-    val gridMinSize = 180.dp
-    
     // Separate themes by light and dark
     val lightThemes = remember(vm.vmThemes.size) {
         vm.vmThemes.filter { !it.isDark }
@@ -210,37 +193,27 @@ fun AppearanceSettingScreen(
         }
         item {
             Components.Dynamic {
-                // Calculate required height based on number of items and grid configuration
-                val itemHeight = gridMinSize + 16.dp // item height + spacing
-                val columns = 2 // Minimum columns for adaptive grid
-                val rows = (lightThemes.size + columns - 1) / columns
-                val gridHeight = (itemHeight * rows) + 16.dp // Add padding
-                
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = gridMinSize),
+                LazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .requiredHeight(gridHeight)
-                        .padding(horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(8.dp),
-                    userScrollEnabled = false
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp)
                 ) {
                     items(items = lightThemes, key = { it.id }) { theme ->
-                        ThemeCard(
+                        ThemePreviewCard(
                             theme = theme,
-                            onClick = { selectedTheme ->
-                                vm.colorTheme.value = selectedTheme.id
-                                customizedColors.primaryState.value = selectedTheme.materialColors.primary
-                                customizedColors.secondaryState.value = selectedTheme.materialColors.secondary
-                                customizedColors.barsState.value = selectedTheme.extraColors.bars
+                            themeName = getThemeName(theme.id),
+                            isSelected = vm.colorTheme.value == theme.id,
+                            onClick = {
+                                vm.colorTheme.value = theme.id
+                                customizedColors.primaryState.value = theme.materialColors.primary
+                                customizedColors.secondaryState.value = theme.materialColors.secondary
+                                customizedColors.barsState.value = theme.extraColors.bars
                                 vm.isSavable = false
                                 // Auto-switch to light mode
                                 vm.saveNightModePreferences(PreferenceValues.ThemeMode.Light)
-                            },
-                            isSelected = vm.colorTheme.value == theme.id,
-                            gridMinSize = gridMinSize
+                            }
                         )
                     }
                 }
@@ -273,37 +246,27 @@ fun AppearanceSettingScreen(
         }
         item {
             Components.Dynamic {
-                // Calculate required height based on number of items and grid configuration
-                val itemHeight = gridMinSize + 16.dp // item height + spacing
-                val columns = 2 // Minimum columns for adaptive grid
-                val rows = (darkThemes.size + columns - 1) / columns
-                val gridHeight = (itemHeight * rows) + 16.dp // Add padding
-                
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = gridMinSize),
+                LazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .requiredHeight(gridHeight)
-                        .padding(horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(8.dp),
-                    userScrollEnabled = false
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp)
                 ) {
                     items(items = darkThemes, key = { it.id }) { theme ->
-                        ThemeCard(
+                        ThemePreviewCard(
                             theme = theme,
-                            onClick = { selectedTheme ->
-                                vm.colorTheme.value = selectedTheme.id
-                                customizedColors.primaryState.value = selectedTheme.materialColors.primary
-                                customizedColors.secondaryState.value = selectedTheme.materialColors.secondary
-                                customizedColors.barsState.value = selectedTheme.extraColors.bars
+                            themeName = getThemeName(theme.id),
+                            isSelected = vm.colorTheme.value == theme.id,
+                            onClick = {
+                                vm.colorTheme.value = theme.id
+                                customizedColors.primaryState.value = theme.materialColors.primary
+                                customizedColors.secondaryState.value = theme.materialColors.secondary
+                                customizedColors.barsState.value = theme.extraColors.bars
                                 vm.isSavable = false
                                 // Auto-switch to dark mode
                                 vm.saveNightModePreferences(PreferenceValues.ThemeMode.Dark)
-                            },
-                            isSelected = vm.colorTheme.value == theme.id,
-                            gridMinSize = gridMinSize
+                            }
                         )
                     }
                 }
@@ -740,196 +703,4 @@ private fun getThemeName(themeId: Long): String {
 }
 
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
-@Composable
-private fun ThemeCard(
-        theme: Theme,
-        onClick: (Theme) -> Unit,
-        onLongClick: (Theme) -> Unit = {},
-        isSelected: Boolean = false,
-        gridMinSize: Dp = 160.dp
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isHovered by interactionSource.collectIsHoveredAsState()
-    
-    // Animated elevation for selection and hover states
-    val elevation by animateDpAsState(
-        targetValue = when {
-            isSelected -> 8.dp
-            isHovered -> 4.dp
-            else -> 2.dp
-        },
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        )
-    )
-    
-    // Animated scale for selection
-    val scale by animateFloatAsState(
-        targetValue = if (isSelected) 1.02f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        )
-    )
-    
-    // Animated border color
-    val borderColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        )
-    )
-    
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1.2f / 1f)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .border(
-                width = 3.dp,
-                color = borderColor,
-                shape = RoundedCornerShape(16.dp)
-            )
-            .hoverable(interactionSource = interactionSource)
-            .combinedClickable(
-                onClick = { onClick(theme) },
-                onLongClick = { onLongClick(theme) }
-            ),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = theme.materialColors.background
-        ),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = elevation
-        )
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(12.dp)
-            ) {
-                // Theme preview area with 3-color gradient
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                ) {
-                    // Gradient background showing primary, secondary, tertiary
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        shape = RoundedCornerShape(8.dp),
-                        color = Color.Transparent
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .graphicsLayer {
-                                    clip = true
-                                    shape = RoundedCornerShape(8.dp)
-                                }
-                        ) {
-                            // Three color sections
-                            Row(modifier = Modifier.fillMaxSize()) {
-                                Surface(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .fillMaxSize(),
-                                    color = theme.materialColors.primary
-                                ) {}
-                                Surface(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .fillMaxSize(),
-                                    color = theme.materialColors.secondary
-                                ) {}
-                                Surface(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .fillMaxSize(),
-                                    color = theme.materialColors.tertiary
-                                ) {}
-                            }
-                            
-                            // Sample text overlay
-                            Column(
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .padding(8.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = "Aa",
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    color = theme.materialColors.onPrimary
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Surface(
-                                    shape = RoundedCornerShape(4.dp),
-                                    color = theme.materialColors.surfaceVariant.copy(alpha = 0.9f)
-                                ) {
-                                    Text(
-                                        text = "Sample",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = theme.materialColors.onSurfaceVariant,
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                // Theme name
-                Text(
-                    text = getThemeName(theme.id),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = theme.materialColors.onBackground,
-                    maxLines = 1,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-            
-            // Selection checkmark indicator
-            androidx.compose.animation.AnimatedVisibility(
-                visible = isSelected,
-                enter = androidx.compose.animation.scaleIn(
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy
-                    )
-                ) + androidx.compose.animation.fadeIn(),
-                exit = androidx.compose.animation.scaleOut() + androidx.compose.animation.fadeOut(),
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
-            ) {
-                Surface(
-                    modifier = Modifier.size(32.dp),
-                    shape = RoundedCornerShape(percent = 50),
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    tonalElevation = 2.dp
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.CheckCircle,
-                            contentDescription = "Selected",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
+

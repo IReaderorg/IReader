@@ -19,7 +19,10 @@ import kotlinx.coroutines.launch
  * Requirements: 4.1, 4.2, 4.3, 10.1
  */
 class VoiceSelectionViewModel(
-    private val uiPreferences: UiPreferences
+    private val uiPreferences: UiPreferences,
+    private val voiceStorage: ireader.domain.storage.VoiceStorage,
+    private val voiceDownloader: ireader.domain.voice.VoiceDownloader,
+    private val voicePreferences: ireader.domain.preferences.VoicePreferences
 ) : StateViewModel<VoiceSelectionState>(VoiceSelectionState()) {
     
     private val _downloadProgress = MutableStateFlow<DownloadProgress?>(null)
@@ -45,8 +48,16 @@ class VoiceSelectionViewModel(
     
     private fun loadInstalledVoices() {
         scope.launch {
-            // TODO: Load from actual storage when voice download is implemented
-            _installedVoices.value = emptySet()
+            try {
+                val installed = voiceStorage.getInstalledVoices()
+                _installedVoices.value = installed.toSet()
+                
+                // Sync with preferences
+                voicePreferences.setInstalledVoices(_installedVoices.value)
+            } catch (e: Exception) {
+                ireader.core.log.Log.error("Failed to load installed voices", e)
+                _installedVoices.value = emptySet()
+            }
         }
     }
     
@@ -101,17 +112,21 @@ class VoiceSelectionViewModel(
             _downloadProgress.value = DownloadProgress(voice.id, 0f)
             
             try {
-                // TODO: Implement actual download when voice repository is ready
-                // Simulate download progress for now
-                for (progress in 0..100 step 10) {
-                    kotlinx.coroutines.delay(100)
-                    _downloadProgress.value = DownloadProgress(voice.id, progress / 100f)
+                val result = voiceDownloader.downloadVoice(voice) { progress ->
+                    _downloadProgress.value = DownloadProgress(voice.id, progress)
                 }
                 
-                // Mark as installed
-                _installedVoices.update { it + voice.id }
-                _downloadProgress.value = null
-                
+                result.onSuccess {
+                    // Mark as installed
+                    _installedVoices.update { it + voice.id }
+                    voicePreferences.setInstalledVoices(_installedVoices.value)
+                    _downloadProgress.value = null
+                    
+                    updateState { it.copy(error = null) }
+                }.onFailure { error ->
+                    _downloadProgress.value = null
+                    updateState { it.copy(error = "Failed to download voice: ${error.message}") }
+                }
             } catch (e: Exception) {
                 _downloadProgress.value = null
                 updateState { it.copy(error = "Failed to download voice: ${e.message}") }
@@ -122,9 +137,21 @@ class VoiceSelectionViewModel(
     fun previewVoice(voice: VoiceModel) {
         scope.launch {
             try {
-                // TODO: Implement voice preview when TTS service is ready
+                // Check if voice is installed
+                if (!isVoiceDownloaded(voice.id)) {
+                    updateState { it.copy(error = "Voice must be downloaded before preview") }
+                    return@launch
+                }
+                
                 // For now, just select the voice
+                // TTS service integration would go here when available
                 selectVoice(voice)
+                
+                // TODO: Integrate with TTS service when available
+                // val ttsService = get<TTSService>()
+                // ttsService.setVoice(voice.id)
+                // val sampleText = "Hello, this is a preview of the ${voice.name} voice."
+                // ttsService.speak(sampleText)
             } catch (e: Exception) {
                 updateState { it.copy(error = "Failed to preview voice: ${e.message}") }
             }
@@ -134,8 +161,21 @@ class VoiceSelectionViewModel(
     fun deleteVoice(voice: VoiceModel) {
         scope.launch {
             try {
-                // TODO: Implement actual deletion when voice storage is ready
-                _installedVoices.update { it - voice.id }
+                val result = voiceStorage.deleteVoiceModel(voice.id)
+                
+                result.onSuccess {
+                    _installedVoices.update { it - voice.id }
+                    voicePreferences.setInstalledVoices(_installedVoices.value)
+                    
+                    // If this was the selected voice, clear selection
+                    if (state.value.selectedVoice?.id == voice.id) {
+                        updateState { it.copy(selectedVoice = null) }
+                    }
+                    
+                    updateState { it.copy(error = null) }
+                }.onFailure { error ->
+                    updateState { it.copy(error = "Failed to delete voice: ${error.message}") }
+                }
             } catch (e: Exception) {
                 updateState { it.copy(error = "Failed to delete voice: ${e.message}") }
             }

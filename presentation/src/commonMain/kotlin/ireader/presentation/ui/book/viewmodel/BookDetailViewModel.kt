@@ -55,6 +55,7 @@ class BookDetailViewModel(
     private val applicationScope: CoroutineScope,
     val createEpub: EpubCreator,
     val exportNovelAsEpub: ireader.domain.usecases.epub.ExportNovelAsEpubUseCase,
+    private val exportBookAsEpubUseCase: ireader.domain.usecases.epub.ExportBookAsEpubUseCase,
     val historyUseCase: HistoryUseCase,
     val readerPreferences: ReaderPreferences,
     val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
@@ -466,38 +467,65 @@ class BookDetailViewModel(
     
     /**
      * Export book as EPUB with custom options
-     * TODO: Implement full EPUB export functionality
-     * See spec: .kiro/specs/epub-export-feature/ (to be created)
+     * Implements full EPUB 3.0 export functionality with customizable formatting
      */
     fun exportAsEpub(options: ireader.presentation.ui.book.components.ExportOptions) {
         val book = booksState.book ?: return
         
         scope.launch {
             try {
-                // TODO: Implement EPUB export
-                // Steps needed:
-                // 1. Fetch all selected chapters content
-                // 2. Create EPUB structure (META-INF, OEBPS, mimetype)
-                // 3. Generate content.opf with metadata
-                // 4. Generate toc.ncx for navigation
-                // 5. Create XHTML files for each chapter
-                // 6. Apply formatting options
-                // 7. Package as ZIP with .epub extension
-                // 8. Save to user-selected location
+                showSnackBar(UiText.DynamicString("Preparing EPUB export..."))
                 
-                showSnackBar(
-                    ireader.i18n.UiText.DynamicString(
-                        "EPUB export feature is coming soon. " +
-                        "Selected ${options.selectedChapters.size} chapters from '${book.title}'"
-                    )
+                // Get output URI from platform helper
+                val filename = sanitizeFilename(book.title) + ".epub"
+                val outputUri = platformHelper.createEpubExportUri(book.title, book.author)
+                
+                if (outputUri == null) {
+                    showSnackBar(UiText.DynamicString("Export cancelled"))
+                    return@launch
+                }
+                
+                // Convert presentation options to domain options
+                val domainOptions = ireader.domain.models.epub.ExportOptions(
+                    selectedChapters = options.selectedChapters.toSet(),
+                    includeCover = options.includeCover,
+                    paragraphSpacing = options.formatOptions.paragraphSpacing,
+                    chapterHeadingSize = options.formatOptions.chapterHeadingSize,
+                    fontFamily = when (options.formatOptions.typography) {
+                        ireader.presentation.ui.book.components.Typography.SERIF -> "serif"
+                        ireader.presentation.ui.book.components.Typography.SANS_SERIF -> "sans-serif"
+                        else -> "serif"
+                    },
+                    fontSize = 16
                 )
                 
-                Log.info { "EPUB export requested for book: ${book.title}, chapters: ${options.selectedChapters.size}" }
+                // Export the book
+                val result = exportBookAsEpubUseCase(
+                    bookId = book.id,
+                    outputUri = ireader.domain.models.common.Uri(outputUri),
+                    options = domainOptions
+                ) { progress ->
+                    showSnackBar(UiText.DynamicString(progress))
+                }
+                
+                result.onSuccess { filePath ->
+                    showSnackBar(UiText.DynamicString("EPUB exported successfully to: $filePath"))
+                    Log.info { "EPUB export successful: $filePath" }
+                }.onFailure { error ->
+                    showSnackBar(UiText.DynamicString("Export failed: ${error.message}"))
+                    Log.error("EPUB export failed", error)
+                }
             } catch (e: Exception) {
-                Log.error("Error in EPUB export stub", e)
-                showSnackBar(ireader.i18n.UiText.DynamicString("EPUB export not yet available"))
+                Log.error("Error in EPUB export", e)
+                showSnackBar(UiText.DynamicString("Export failed: ${e.message}"))
             }
         }
+    }
+    
+    private fun sanitizeFilename(name: String): String {
+        return name.replace(Regex("[|\\\\?*<\":>+\\[\\]/']+"), " ")
+            .replace(Regex("\\s+"), " ")
+            .trim()
     }
 
     fun archiveBook(book: Book) {

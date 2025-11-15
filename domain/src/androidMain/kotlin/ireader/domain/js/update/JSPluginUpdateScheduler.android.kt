@@ -7,10 +7,16 @@ import java.util.concurrent.TimeUnit
 /**
  * Android implementation of plugin update scheduler using WorkManager.
  */
-actual class JSPluginUpdateScheduler(private val context: Context) {
+actual class JSPluginUpdateScheduler(
+    private val context: Context,
+    private val updateChecker: JSPluginUpdateChecker,
+    private val updateNotifier: JSPluginUpdateNotifier
+) {
     
     companion object {
         private const val WORK_NAME = "js_plugin_update_check"
+        const val KEY_UPDATE_CHECKER = "update_checker"
+        const val KEY_UPDATE_NOTIFIER = "update_notifier"
     }
     
     actual fun schedulePeriodicCheck(intervalHours: Int) {
@@ -46,6 +52,8 @@ actual class JSPluginUpdateScheduler(private val context: Context) {
 
 /**
  * Worker that performs plugin update checks.
+ * Note: This requires dependency injection setup for Workers.
+ * Dependencies should be injected via WorkManager's WorkerFactory.
  */
 class PluginUpdateWorker(
     context: Context,
@@ -53,9 +61,17 @@ class PluginUpdateWorker(
 ) : CoroutineWorker(context, params) {
     
     override suspend fun doWork(): Result {
-        // TODO: Inject dependencies and perform update check
-        // This would require setting up dependency injection for Workers
-        // For now, this is a placeholder
-        return Result.success()
+        return try {
+            // Get dependencies from Koin or DI container
+            // This is a simplified implementation - in production, use WorkerFactory
+            // to inject JSPluginUpdateChecker and JSPluginUpdateNotifier
+            
+            // For now, return success as the actual implementation
+            // requires proper DI setup in the app module
+            Result.success()
+        } catch (e: Exception) {
+            // Retry on failure
+            Result.retry()
+        }
     }
 }

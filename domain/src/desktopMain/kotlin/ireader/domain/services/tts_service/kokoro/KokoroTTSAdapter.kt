@@ -31,7 +31,7 @@ class KokoroTTSAdapter(
      */
     suspend fun synthesize(
         text: String,
-        voice: String = "af_bella",
+        voice: String = currentVoice,
         speed: Float = 1.0f
     ): Result<AudioData> = withContext(Dispatchers.IO) {
         try {
@@ -63,6 +63,18 @@ class KokoroTTSAdapter(
     fun getAvailableVoices(): List<KokoroVoice> {
         return kokoroEngine.getAvailableVoices()
     }
+    
+    /**
+     * Set the current voice (stored for future synthesis calls)
+     */
+    private var currentVoice: String = "af_bella"
+    
+    fun setVoice(voiceId: String) {
+        currentVoice = voiceId
+        Log.info { "Kokoro voice set to: $voiceId" }
+    }
+    
+    fun getCurrentVoice(): String = currentVoice
     
     /**
      * Check if Kokoro is available

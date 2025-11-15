@@ -57,7 +57,8 @@ fun CommonNavHost(
 ) {
     AnimatedNavHost(
         navController = navController,
-        startDestination = startDestination
+        startDestination = startDestination,
+        backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background
     ) {
         // Main screen
         composable("main") {

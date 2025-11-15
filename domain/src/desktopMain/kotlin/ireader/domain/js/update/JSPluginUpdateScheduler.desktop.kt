@@ -8,7 +8,10 @@ import java.util.concurrent.TimeUnit
 /**
  * Desktop implementation of plugin update scheduler using ScheduledExecutorService.
  */
-actual class JSPluginUpdateScheduler {
+actual class JSPluginUpdateScheduler(
+    private val updateChecker: JSPluginUpdateChecker,
+    private val updateNotifier: JSPluginUpdateNotifier
+) {
     
     private var scheduler: ScheduledExecutorService? = null
     private var scheduledFuture: ScheduledFuture<*>? = null
@@ -19,8 +22,18 @@ actual class JSPluginUpdateScheduler {
         scheduler = Executors.newSingleThreadScheduledExecutor()
         scheduledFuture = scheduler?.scheduleAtFixedRate(
             {
-                // TODO: Perform update check
-                // This would require injecting the update checker
+                try {
+                    // Perform update check in a coroutine
+                    kotlinx.coroutines.runBlocking {
+                        val updates = updateChecker.checkForUpdates()
+                        if (updates.isNotEmpty()) {
+                            updateNotifier.showUpdateNotification(updates)
+                        }
+                    }
+                } catch (e: Exception) {
+                    // Log error but don't crash the scheduler
+                    println("Error checking for plugin updates: ${e.message}")
+                }
             },
             intervalHours.toLong(),
             intervalHours.toLong(),

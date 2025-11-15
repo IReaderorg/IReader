@@ -33,8 +33,8 @@ class JSLibraryProvider(
             engine.setGlobalObject("__nativeLocalStorage", localStorage)
             engine.setGlobalObject("__nativeSessionStorage", sessionStorage)
             
-            // Setup require() function
-            val requireSetup = """
+            // First, setup global APIs
+            val globalSetup = """
                 (function() {
                     // Verify native storage is available
                     if (typeof __nativeStorage === 'undefined') {
@@ -106,17 +106,23 @@ class JSLibraryProvider(
                         });
                     };
                     
-                    // Now setup modules (after global APIs are ready)
-                    const modules = {};
-                    
-                    // Cheerio library
-                    modules['cheerio'] = ${getCheerioLibrary()};
-                    
-                    // Dayjs library
-                    modules['dayjs'] = ${getDayjsLibrary()};
-                    
-                    // Urlencode library
-                    modules['urlencode'] = ${getUrlencodeLibrary()};
+                    // Initialize module registry
+                    globalThis.__modules = {};
+                })();
+            """.trimIndent()
+            
+            engine.evaluateScript(globalSetup)
+            
+            // Load third-party libraries
+            loadCheerioLibrary()
+            loadDayjsLibrary()
+            loadUrlencodeLibrary()
+            loadHtmlParser2Library()
+            
+            // Setup LNReader-specific libraries and require function
+            val moduleSetup = """
+                (function() {
+                    const modules = globalThis.__modules;
                     
                     // LNReader-specific libraries
                     modules['@libs/filterInputs'] = ${getFilterInputsLibrary()};
@@ -124,7 +130,6 @@ class JSLibraryProvider(
                     modules['@libs/fetch'] = ${getFetchLibrary()};
                     modules['@libs/novelStatus'] = ${getNovelStatusLibrary()};
                     modules['@libs/storage'] = ${getStorageLibrary()};
-                    modules['htmlparser2'] = ${getHtmlParser2Library()};
                     
                     // Define require function
                     globalThis.require = function(moduleName) {
@@ -136,7 +141,7 @@ class JSLibraryProvider(
                 })();
             """.trimIndent()
             
-            engine.evaluateScript(requireSetup)
+            engine.evaluateScript(moduleSetup)
         } catch (e: Exception) {
             // Fallback to empty implementations if library loading fails
             setupFallbackImplementations()
@@ -144,37 +149,137 @@ class JSLibraryProvider(
     }
     
     /**
-     * Gets the Cheerio library code.
-     * Returns a placeholder for now - actual library will be bundled in resources.
+     * Loads the Cheerio library and registers it in the module system.
      */
-    private fun getCheerioLibrary(): String {
-        // TODO: Load from resources/js/cheerio.min.js
+    private fun loadCheerioLibrary() {
+        try {
+            val cheerioCode = loadLibraryFromResources("/js/cheerio.min.js")
+            if (cheerioCode != null) {
+                // Wrap cheerio in a module loader that captures exports
+                val wrapper = """
+                    (function() {
+                        var exports = {};
+                        var module = { exports: exports };
+                        $cheerioCode
+                        // Cheerio typically exports as module.exports or has a load function
+                        globalThis.__modules['cheerio'] = module.exports.default || module.exports;
+                    })();
+                """.trimIndent()
+                engine.evaluateScript(wrapper)
+            } else {
+                // Use fallback
+                engine.evaluateScript("globalThis.__modules['cheerio'] = ${getCheerioFallback()};")
+            }
+        } catch (e: Exception) {
+            // Use fallback on error
+            engine.evaluateScript("globalThis.__modules['cheerio'] = ${getCheerioFallback()};")
+        }
+    }
+    
+    /**
+     * Loads the Dayjs library and registers it in the module system.
+     */
+    private fun loadDayjsLibrary() {
+        try {
+            val dayjsCode = loadLibraryFromResources("/js/dayjs.min.js")
+            if (dayjsCode != null) {
+                val wrapper = """
+                    (function() {
+                        var exports = {};
+                        var module = { exports: exports };
+                        $dayjsCode
+                        globalThis.__modules['dayjs'] = module.exports.default || module.exports;
+                    })();
+                """.trimIndent()
+                engine.evaluateScript(wrapper)
+            } else {
+                engine.evaluateScript("globalThis.__modules['dayjs'] = ${getDayjsFallback()};")
+            }
+        } catch (e: Exception) {
+            engine.evaluateScript("globalThis.__modules['dayjs'] = ${getDayjsFallback()};")
+        }
+    }
+    
+    /**
+     * Loads the Urlencode library and registers it in the module system.
+     */
+    private fun loadUrlencodeLibrary() {
+        try {
+            val urlencodeCode = loadLibraryFromResources("/js/urlencode.min.js")
+            if (urlencodeCode != null) {
+                val wrapper = """
+                    (function() {
+                        var exports = {};
+                        var module = { exports: exports };
+                        $urlencodeCode
+                        globalThis.__modules['urlencode'] = module.exports.default || module.exports;
+                    })();
+                """.trimIndent()
+                engine.evaluateScript(wrapper)
+            } else {
+                engine.evaluateScript("globalThis.__modules['urlencode'] = ${getUrlencodeFallback()};")
+            }
+        } catch (e: Exception) {
+            engine.evaluateScript("globalThis.__modules['urlencode'] = ${getUrlencodeFallback()};")
+        }
+    }
+    
+    /**
+     * Loads a JavaScript library from resources.
+     */
+    private fun loadLibraryFromResources(path: String): String? {
+        return try {
+            // Try to load from resources
+            val resourceStream = javaClass.getResourceAsStream(path)
+            resourceStream?.bufferedReader()?.use { it.readText() }
+        } catch (e: Exception) {
+            null
+        }
+    }
+    
+    /**
+     * Fallback Cheerio implementation if library cannot be loaded.
+     * Returns an object with a load function that returns a minimal cheerio-like API.
+     */
+    private fun getCheerioFallback(): String {
         return """
-            (function() {
-                // Cheerio placeholder - will be replaced with actual library
-                return {
-                    load: function(html) {
+            {
+                load: function(html) {
+                    // Minimal cheerio-like API
+                    var doc = { html: html };
+                    var createCheerio = function(elements, html) {
                         return {
-                            find: function(selector) { return this; },
+                            find: function(selector) { return createCheerio([], html); },
                             text: function() { return ''; },
-                            attr: function(name) { return ''; },
-                            html: function() { return html; }
+                            attr: function(name, value) { 
+                                if (arguments.length === 1) return '';
+                                return this;
+                            },
+                            html: function() { return html || ''; },
+                            first: function() { return this; },
+                            last: function() { return this; },
+                            eq: function(i) { return this; },
+                            map: function(fn) { return { get: function() { return []; }, toArray: function() { return []; } }; },
+                            toArray: function() { return []; },
+                            get: function(i) { return []; },
+                            length: 0
                         };
-                    }
-                };
-            })()
+                    };
+                    return function(selector) {
+                        return createCheerio([], html);
+                    };
+                }
+            }
         """.trimIndent()
     }
     
     /**
-     * Gets the Dayjs library code.
-     * Returns a placeholder for now - actual library will be bundled in resources.
+     * Fallback Dayjs implementation if library cannot be loaded.
      */
-    private fun getDayjsLibrary(): String {
-        // TODO: Load from resources/js/dayjs.min.js
+    private fun getDayjsFallback(): String {
         return """
             (function() {
-                // Dayjs placeholder - will be replaced with actual library
+                // Dayjs fallback - minimal implementation
                 return function(date) {
                     return {
                         format: function(fmt) { return new Date(date).toISOString(); },
@@ -186,14 +291,12 @@ class JSLibraryProvider(
     }
     
     /**
-     * Gets the Urlencode library code.
-     * Returns a placeholder for now - actual library will be bundled in resources.
+     * Fallback Urlencode implementation if library cannot be loaded.
      */
-    private fun getUrlencodeLibrary(): String {
-        // TODO: Load from resources/js/urlencode.min.js
+    private fun getUrlencodeFallback(): String {
         return """
             (function() {
-                // Urlencode placeholder - will be replaced with actual library
+                // Urlencode fallback - minimal implementation
                 return {
                     encode: function(str) { return encodeURIComponent(str); },
                     decode: function(str) { return decodeURIComponent(str); }
@@ -283,10 +386,71 @@ class JSLibraryProvider(
     /**
      * Gets the LNReader storage library.
      * Provides access to the plugin storage API.
-     * Returns the globalThis.storage object directly (lazy evaluation).
+     * Returns an object with storage, localStorage, and sessionStorage properties.
+     * This matches LNReader's pluginManager behavior where @libs/storage returns
+     * { storage: Storage, localStorage: LocalStorage, sessionStorage: SessionStorage }
      */
     private fun getStorageLibrary(): String {
-        return """globalThis.storage"""
+        return """
+            (function() {
+                // Return an object with storage, localStorage, and sessionStorage
+                // Each property forwards to the corresponding globalThis object
+                return {
+                    storage: {
+                        set: function(key, value, expires) {
+                            return globalThis.storage.set(key, value, expires);
+                        },
+                        get: function(key) {
+                            return globalThis.storage.get(key);
+                        },
+                        delete: function(key) {
+                            return globalThis.storage.delete(key);
+                        },
+                        clearAll: function() {
+                            return globalThis.storage.clearAll();
+                        },
+                        getAllKeys: function() {
+                            return globalThis.storage.getAllKeys();
+                        }
+                    },
+                    localStorage: {
+                        setItem: function(key, value) {
+                            return globalThis.localStorage.setItem(key, value);
+                        },
+                        getItem: function(key) {
+                            return globalThis.localStorage.getItem(key);
+                        },
+                        removeItem: function(key) {
+                            return globalThis.localStorage.removeItem(key);
+                        },
+                        clear: function() {
+                            return globalThis.localStorage.clear();
+                        }
+                    },
+                    sessionStorage: {
+                        setItem: function(key, value) {
+                            return globalThis.sessionStorage.setItem(key, value);
+                        },
+                        getItem: function(key) {
+                            return globalThis.sessionStorage.getItem(key);
+                        },
+                        removeItem: function(key) {
+                            return globalThis.sessionStorage.removeItem(key);
+                        },
+                        clear: function() {
+                            return globalThis.sessionStorage.clear();
+                        }
+                    }
+                };
+            })()
+        """.trimIndent()
+    }
+    
+    /**
+     * Loads the htmlparser2 library and registers it in the module system.
+     */
+    private fun loadHtmlParser2Library() {
+        engine.evaluateScript("globalThis.__modules['htmlparser2'] = ${getHtmlParser2Library()};")
     }
     
     /**

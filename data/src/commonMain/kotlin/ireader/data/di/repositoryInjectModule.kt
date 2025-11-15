@@ -9,10 +9,8 @@ import ireader.data.chapterhealth.ChapterHealthRepositoryImpl
 import ireader.data.chapterreport.ChapterReportRepositoryImpl
 import ireader.data.database.RepairDatabaseUseCaseImpl
 import ireader.data.downloads.DownloadRepositoryImpl
-import ireader.data.sourcecomparison.SourceComparisonRepositoryImpl
 import ireader.data.font.FontRepositoryImpl
 import ireader.data.history.HistoryRepositoryImpl
-import ireader.data.nft.NFTRepositoryImpl
 import ireader.data.plugin.PluginDatabaseImpl
 import ireader.data.plugin.PluginRepositoryImpl
 import ireader.data.repository.FundingGoalRepositoryImpl
@@ -23,6 +21,7 @@ import ireader.data.repository.ThemeRepositoryImpl
 import ireader.data.repository.UpdatesRepositoryImpl
 import ireader.data.security.SecurityRepositoryImpl
 import ireader.data.services.SourceHealthCheckerImpl
+import ireader.data.sourcecomparison.SourceComparisonRepositoryImpl
 import ireader.data.sourcereport.SourceReportRepositoryImpl
 import ireader.data.statistics.ReadingStatisticsRepositoryImpl
 import ireader.data.translation.GlossaryRepositoryImpl
@@ -40,10 +39,8 @@ import ireader.domain.data.repository.FontRepository
 import ireader.domain.data.repository.GlossaryRepository
 import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.data.repository.LibraryRepository
-import ireader.domain.data.repository.NFTRepository
 import ireader.domain.data.repository.PluginRepository
 import ireader.domain.data.repository.ReaderThemeRepository
-import ireader.domain.plugins.PluginDatabase
 import ireader.domain.data.repository.ReadingStatisticsRepository
 import ireader.domain.data.repository.SecurityRepository
 import ireader.domain.data.repository.SourceComparisonRepository
@@ -53,9 +50,11 @@ import ireader.domain.data.repository.ThemeRepository
 import ireader.domain.data.repository.TranslatedChapterRepository
 import ireader.domain.data.repository.UpdatesRepository
 import ireader.domain.data.repository.VoiceModelRepository
+import ireader.domain.plugins.PluginDatabase
 import ireader.domain.services.SourceHealthChecker
 import ireader.domain.usecases.database.RepairDatabaseUseCase
 import org.koin.dsl.module
+import java.io.File
 
 
 val repositoryInjectModule = module {
@@ -132,4 +131,14 @@ val repositoryInjectModule = module {
     
     // Database use cases
     single<RepairDatabaseUseCase> { RepairDatabaseUseCaseImpl(get()) }
+    single<ireader.domain.preferences.VoicePreferences> {
+        ireader.data.preferences.VoicePreferencesImpl(
+            preferenceStore = get()
+        )
+    }
+    // Voice Storage for TTS voice models
+    single<ireader.domain.storage.VoiceStorage> {
+        val appDataDir = File(System.getProperty("user.home"), ".ireader")
+        ireader.data.storage.VoiceStorageImpl(appDataDir)
+    }
 }

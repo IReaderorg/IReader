@@ -17,7 +17,8 @@ class PluginManager(
     private val preferences: PluginPreferences,
     private val monetization: MonetizationService,
     private val database: PluginDatabase,
-    private val securityManager: PluginSecurityManager
+    private val securityManager: PluginSecurityManager,
+    private val performanceMetricsManager: ireader.domain.monitoring.PerformanceMetricsManager
 ) {
     private val scope = createICoroutineScope()
     private val _pluginsFlow = MutableStateFlow<List<PluginInfo>>(emptyList())
@@ -43,6 +44,9 @@ class PluginManager(
             plugins.forEach { plugin ->
                 if (enabledIds.contains(plugin.manifest.id)) {
                     try {
+                        // Track plugin load performance
+                        performanceMetricsManager.startOperation(plugin.manifest.id, "load")
+                        
                         // Create sandboxed context for plugin
                         val context = securityManager.createPluginContext(
                             pluginId = plugin.manifest.id,
@@ -52,7 +56,11 @@ class PluginManager(
                         
                         plugin.initialize(context)
                         database.updateStatus(plugin.manifest.id, PluginStatus.ENABLED)
+                        
+                        performanceMetricsManager.endOperation(plugin.manifest.id, "load", success = true)
                     } catch (e: Exception) {
+                        performanceMetricsManager.endOperation(plugin.manifest.id, "load", success = false)
+                        performanceMetricsManager.recordError(plugin.manifest.id, e)
                         database.updateStatus(plugin.manifest.id, PluginStatus.ERROR)
                     }
                 }
@@ -134,6 +142,9 @@ class PluginManager(
             val plugin = registry.get(pluginId)
                 ?: return Result.failure(Exception("Plugin not found"))
             
+            // Track plugin enable performance
+            performanceMetricsManager.startOperation(pluginId, "enable")
+            
             // Create sandboxed context for plugin
             val context = securityManager.createPluginContext(
                 pluginId = plugin.manifest.id,
@@ -152,10 +163,14 @@ class PluginManager(
             // Update status
             database.updateStatus(pluginId, PluginStatus.ENABLED)
             
+            performanceMetricsManager.endOperation(pluginId, "enable", success = true)
+            
             _pluginsFlow.value = registry.getAll()
             
             Result.success(Unit)
         } catch (e: Exception) {
+            performanceMetricsManager.endOperation(pluginId, "enable", success = false)
+            performanceMetricsManager.recordError(pluginId, e)
             database.updateStatus(pluginId, PluginStatus.ERROR)
             _pluginsFlow.value = registry.getAll()
             Result.failure(e)
@@ -269,6 +284,22 @@ class PluginManager(
     }
     
     /**
+     * Get performance metrics for a plugin
+     * Requirements: 5.1, 5.2, 5.3, 5.4, 5.5
+     */
+    fun getPluginPerformanceMetrics(pluginId: String): PluginPerformanceInfo {
+        return performanceMetricsManager.getMetrics(pluginId)
+    }
+    
+    /**
+     * Get performance metrics for all plugins
+     * Requirements: 5.1, 5.2, 5.3, 5.4, 5.5
+     */
+    fun getAllPerformanceMetrics(): List<PluginPerformanceInfo> {
+        return performanceMetricsManager.getAllMetrics()
+    }
+    
+    /**
      * Check plugins exceeding resource limits and terminate if needed
      * Requirements: 11.3, 11.4, 11.5
      */
@@ -284,6 +315,28 @@ class PluginManager(
                 pluginId,
                 "Plugin exceeded resource limits"
             )
+        }
+    }
+    
+    /**
+     * Execute a plugin operation with performance tracking
+     * Requirements: 5.1, 5.2, 5.3, 5.4, 5.5
+     */
+    suspend fun <T> executePluginOperation(
+        pluginId: String,
+        operation: String,
+        block: suspend () -> T
+    ): Result<T> {
+        performanceMetricsManager.startOperation(pluginId, operation)
+
+        return try {
+            val result = block()
+            performanceMetricsManager.endOperation(pluginId, operation, success = true)
+            Result.success(result)
+        } catch (e: Exception) {
+            performanceMetricsManager.endOperation(pluginId, operation, success = false)
+            performanceMetricsManager.recordError(pluginId, e)
+            Result.failure(e)
         }
     }
     

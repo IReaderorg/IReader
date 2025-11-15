@@ -28,7 +28,7 @@ class MayaTTSAdapter(
      */
     suspend fun synthesize(
         text: String,
-        language: String = "en",
+        language: String = currentLanguage,
         speed: Float = 1.0f
     ): Result<AudioData> = withContext(Dispatchers.IO) {
         try {
@@ -79,6 +79,18 @@ class MayaTTSAdapter(
     fun getSupportedLanguages(): List<MayaLanguage> {
         return engine.getSupportedLanguages()
     }
+    
+    /**
+     * Set the current language (stored for future synthesis calls)
+     */
+    private var currentLanguage: String = "en"
+    
+    fun setLanguage(languageCode: String) {
+        currentLanguage = languageCode
+        Log.info { "Maya language set to: $languageCode" }
+    }
+    
+    fun getCurrentLanguage(): String = currentLanguage
     
     /**
      * Check if Maya is available

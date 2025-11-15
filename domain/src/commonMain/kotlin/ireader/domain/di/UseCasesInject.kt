@@ -280,8 +280,14 @@ val UseCasesInject = module {
         generatePaymentUri = get()
     ) }
     
-    // ePub export use case
+    // ePub export use cases
     single { ireader.domain.usecases.epub.ExportNovelAsEpubUseCase(get()) }
+    single { ireader.domain.epub.EpubBuilder(httpClient = get()) }
+    single { ireader.domain.usecases.epub.ExportBookAsEpubUseCase(
+        findBookById = get<ireader.domain.usecases.local.LocalGetBookUseCases>().findBookById,
+        chapterRepository = get(),
+        epubBuilder = get()
+    ) }
     
     // Badge use cases
     factory { ireader.domain.usecases.badge.GetAvailableBadgesUseCase(get()) }

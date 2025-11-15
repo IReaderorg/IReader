@@ -1,5 +1,9 @@
 package ireader.domain.di
 
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
 import ireader.domain.plugins.*
 import ireader.domain.services.downloaderService.DownloadServiceStateImpl
 import ireader.domain.usecases.backup.CloudBackupManager
@@ -22,10 +26,23 @@ import ireader.domain.usecases.remote.GetRemoteBooksUseCase
 import ireader.domain.usecases.remote.GetRemoteChapters
 import ireader.domain.usecases.remote.GetRemoteReadingContent
 import ireader.domain.usecases.translate.TranslationEnginesManager
+import kotlinx.serialization.json.Json
 import org.koin.dsl.module
 
 
 val DomainServices = module {
+    
+    // HTTP Client for general use (image downloads, etc.)
+    single {
+        HttpClient(OkHttp) {
+            install(ContentNegotiation) {
+                json(Json {
+                    ignoreUnknownKeys = true
+                    isLenient = true
+                })
+            }
+        }
+    }
 
     single<DownloadServiceStateImpl> { ireader.domain.services.downloaderService.DownloadServiceStateImpl() }
 
@@ -206,7 +223,17 @@ val DomainServices = module {
             preferences = get(),
             monetization = get(),
             database = get(),
-            securityManager = get()
+            securityManager = get(),
+            performanceMetricsManager = get()
+        )
+    }
+    
+    // Voice Management - Platform-specific implementation will be provided in platform modules
+    
+    single {
+        ireader.domain.voice.VoiceDownloader(
+            httpClient = get(),
+            storage = get()
         )
     }
 

@@ -1,6 +1,7 @@
 package ireader.presentation.ui.plugins.management
 
 import ireader.domain.plugins.PluginInfo
+import ireader.domain.plugins.PluginPerformanceInfo
 import ireader.domain.plugins.PluginResourceUsage
 
 /**
@@ -16,7 +17,8 @@ data class PluginManagementState(
     val pluginToUninstall: String? = null,
     val updatesAvailable: Map<String, String> = emptyMap(), // pluginId to new version
     val isUpdatingAll: Boolean = false,
-    val resourceUsage: Map<String, PluginResourceUsage> = emptyMap() // pluginId to usage
+    val resourceUsage: Map<String, PluginResourceUsage> = emptyMap(), // pluginId to usage
+    val performanceMetrics: Map<String, PluginPerformanceInfo> = emptyMap() // pluginId to performance metrics
 )
 
 /**

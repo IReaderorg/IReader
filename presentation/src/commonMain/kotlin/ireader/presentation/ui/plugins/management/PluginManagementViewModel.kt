@@ -29,6 +29,7 @@ class PluginManagementViewModel(
         loadInstalledPlugins()
         checkForUpdates()
         loadResourceUsage()
+        loadPerformanceMetrics()
     }
     
     /**
@@ -261,10 +262,35 @@ class PluginManagementViewModel(
     }
     
     /**
-     * Refresh resource usage
+     * Load performance metrics for all plugins
+     * Requirements: 5.1, 5.2, 5.3, 5.4, 5.5
+     */
+    fun loadPerformanceMetrics() {
+        scope.launch {
+            try {
+                val metrics = pluginManager.getAllPerformanceMetrics()
+                val metricsMap = metrics.associateBy { it.pluginId }
+                _state.value = _state.value.copy(performanceMetrics = metricsMap)
+            } catch (e: Exception) {
+                // Silently fail - performance metrics are not critical
+            }
+        }
+    }
+    
+    /**
+     * Get performance metrics for a specific plugin
+     * Requirements: 5.1, 5.2, 5.3, 5.4, 5.5
+     */
+    fun getPluginPerformanceMetrics(pluginId: String): ireader.domain.plugins.PluginPerformanceInfo {
+        return pluginManager.getPluginPerformanceMetrics(pluginId)
+    }
+    
+    /**
+     * Refresh resource usage and performance metrics
      */
     fun refreshResourceUsage() {
         loadResourceUsage()
+        loadPerformanceMetrics()
     }
     
     /**

@@ -73,7 +73,7 @@ val PresentationModules = module {
 
     factory  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
-    factory<BookDetailViewModel>  { BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),getOrNull()) }
+    factory<BookDetailViewModel>  { BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),getOrNull()) }
     factory  { MainSettingScreenViewModel(get()) }
     factory  { AppearanceViewModel(get(), get()) }
 
@@ -100,6 +100,9 @@ val PresentationModules = module {
     factory { ireader.presentation.ui.settings.badges.store.BadgeStoreViewModel(get(), get()) }
     factory { ireader.presentation.ui.settings.badges.nft.NFTBadgeViewModel(get(), get(), get(), get(), get()) }
     factory { ireader.presentation.ui.settings.badges.manage.BadgeManagementViewModel(get(), get(), get()) }
+    
+    // Voice Selection ViewModel
+    factory { ireader.presentation.ui.settings.viewmodels.VoiceSelectionViewModel(get(), get(), get(), get()) }
 
     factory <ChapterStateImpl> { ChapterStateImpl() }
     factory <DetailStateImpl> { DetailStateImpl() }

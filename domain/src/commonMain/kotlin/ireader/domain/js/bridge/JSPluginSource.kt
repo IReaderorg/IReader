@@ -5,6 +5,7 @@ import ireader.core.source.CatalogSource
 import ireader.core.source.model.*
 import ireader.domain.js.models.JSPluginError
 import ireader.domain.js.models.PluginMetadata
+import kotlinx.coroutines.runBlocking
 
 /**
  * Implementation of IReader's CatalogSource interface using a JavaScript plugin.
@@ -170,7 +171,8 @@ class JSPluginSource(
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
         return try {
             Log.debug { "[JSPluginSource] Getting manga list with listing: ${sort?.name}, page: $page" }
-            val novels = bridge.popularNovels(page, emptyMap())
+            val filterValues = getDefaultFilterValues()
+            val novels = bridge.popularNovels(page, filterValues)
             val mangaList = novels.map { it.toMangaInfo() }
             MangasPageInfo(mangaList, hasNextPage = mangaList.isNotEmpty())
         } catch (e: Exception) {
@@ -182,12 +184,38 @@ class JSPluginSource(
     override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
         return try {
             Log.debug { "[JSPluginSource] Getting manga list with filters, page: $page" }
-            val novels = bridge.popularNovels(page, emptyMap())
+            val filterValues = getDefaultFilterValues()
+            val novels = bridge.popularNovels(page, filterValues)
             val mangaList = novels.map { it.toMangaInfo() }
             MangasPageInfo(mangaList, hasNextPage = mangaList.isNotEmpty())
         } catch (e: Exception) {
             Log.error(e, "[JSPluginSource] Failed to get manga list with filters")
             MangasPageInfo(emptyList(), hasNextPage = false)
+        }
+    }
+    
+    /**
+     * Gets default filter values from the plugin's filter definitions.
+     * Returns a map where each filter has a "value" property with its default value.
+     */
+    private suspend fun getDefaultFilterValues(): Map<String, Any> {
+        return try {
+            val filterDefs = bridge.getFilters()
+            filterDefs.mapValues { (_, def) -> 
+                when (def) {
+                    is ireader.domain.js.models.FilterDefinition.Picker -> 
+                        mapOf("value" to def.defaultValue)
+                    is ireader.domain.js.models.FilterDefinition.TextInput -> 
+                        mapOf("value" to def.defaultValue)
+                    is ireader.domain.js.models.FilterDefinition.CheckboxGroup -> 
+                        mapOf("value" to def.defaultValues)
+                    is ireader.domain.js.models.FilterDefinition.ExcludableCheckboxGroup -> 
+                        mapOf("included" to def.included, "excluded" to def.excluded)
+                }
+            }
+        } catch (e: Exception) {
+            Log.error(e, "[JSPluginSource] Failed to get default filter values")
+            emptyMap()
         }
     }
     
@@ -200,9 +228,60 @@ class JSPluginSource(
     }
     
     override fun getFilters(): FilterList {
-        // Return empty filter list for now
-        // TODO: Convert JS plugin filters to IReader FilterList
-        return emptyList()
+        return try {
+            // Get JS plugin filters synchronously (cached from plugin load)
+            val jsFilters = runBlocking { getPluginFilters() }
+            
+            // Convert JS filters to IReader filters
+            jsFilters.map { (key, filterDef) ->
+                convertFilterDefinitionToIReaderFilter(key, filterDef)
+            }.filterNotNull()
+        } catch (e: Exception) {
+            Log.error(e, "[JSPluginSource] Failed to convert filters")
+            emptyList()
+        }
+    }
+    
+    /**
+     * Converts a JS FilterDefinition to an IReader Filter.
+     */
+    private fun convertFilterDefinitionToIReaderFilter(
+        key: String,
+        filterDef: ireader.domain.js.models.FilterDefinition
+    ): Filter<*>? {
+        return when (filterDef) {
+            is ireader.domain.js.models.FilterDefinition.Picker -> {
+                // Convert Picker to Select filter
+                val options = filterDef.options.map { it.label }.toTypedArray()
+                val defaultIndex = filterDef.options.indexOfFirst { it.value == filterDef.defaultValue }
+                    .takeIf { it >= 0 } ?: 0
+                Filter.Select(filterDef.label, options, defaultIndex)
+            }
+            is ireader.domain.js.models.FilterDefinition.TextInput -> {
+                // Convert TextInput to Text filter
+                Filter.Text(filterDef.label, filterDef.defaultValue)
+            }
+            is ireader.domain.js.models.FilterDefinition.CheckboxGroup -> {
+                // Convert CheckboxGroup to Group of Check filters
+                val checkFilters = filterDef.options.map { option ->
+                    val isChecked = filterDef.defaultValues.contains(option.value)
+                    Filter.Check(option.label, allowsExclusion = false, value = isChecked)
+                }
+                Filter.Group(filterDef.label, checkFilters)
+            }
+            is ireader.domain.js.models.FilterDefinition.ExcludableCheckboxGroup -> {
+                // Convert ExcludableCheckboxGroup to Group of Check filters with exclusion
+                val checkFilters = filterDef.options.map { option ->
+                    val value = when {
+                        filterDef.included.contains(option.value) -> true
+                        filterDef.excluded.contains(option.value) -> false
+                        else -> null
+                    }
+                    Filter.Check(option.label, allowsExclusion = true, value = value)
+                }
+                Filter.Group(filterDef.label, checkFilters)
+            }
+        }
     }
     
     override fun getCommands(): CommandList {

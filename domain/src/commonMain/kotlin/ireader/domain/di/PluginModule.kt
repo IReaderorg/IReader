@@ -1,5 +1,6 @@
 package ireader.domain.di
 
+import ireader.domain.monitoring.PerformanceMetricsManager
 import ireader.domain.plugins.*
 import ireader.domain.services.tts.AudioStreamHandler
 import ireader.domain.services.tts.PluginTTSManager
@@ -75,7 +76,8 @@ val PluginModule = module {
             preferences = get(),
             monetization = get(),
             database = get(),
-            securityManager = get()
+            securityManager = get(),
+            performanceMetricsManager = get()
         )
     }
     
@@ -84,8 +86,11 @@ val PluginModule = module {
     single { AudioStreamHandler() }
     single { TTSErrorHandler() }
     
+    // Performance Monitoring
+    single { PerformanceMetricsManager(get()) }
+    
     // Note: PaymentProcessor, PurchaseRepository, TrialRepository, PluginDatabase, 
-    // PluginClassLoader, and pluginsDir are provided by platform-specific modules
+    // PluginClassLoader, MemoryTracker, and pluginsDir are provided by platform-specific modules
 }
 
 // Helper function to get current platform

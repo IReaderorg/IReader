@@ -12,6 +12,7 @@ import ireader.data.core.DatabaseDriverFactory
 import ireader.data.core.DatabaseHandler
 import ireader.data.core.DatabaseTransactions
 import ireader.data.core.JvmDatabaseHandler
+import ireader.data.monitoring.DesktopMemoryTracker
 import ireader.data.security.BiometricAuthenticator
 import ireader.data.security.BiometricAuthenticatorImpl
 import ireader.domain.catalogs.interactor.InstallCatalog
@@ -19,6 +20,7 @@ import ireader.domain.catalogs.interactor.UninstallCatalogs
 import ireader.domain.catalogs.service.CatalogInstallationChanges
 import ireader.domain.catalogs.service.CatalogInstaller
 import ireader.domain.catalogs.service.CatalogLoader
+import ireader.domain.monitoring.MemoryTracker
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -35,4 +37,5 @@ actual val dataPlatformModule: Module = module {
     single<UninstallCatalogs> { DesktopUninstallCatalogs(get()) }
     single<PreferenceStoreFactory> { PreferenceStoreFactory() }
     single<BiometricAuthenticator> { BiometricAuthenticatorImpl() }
+    single<MemoryTracker> { DesktopMemoryTracker() }
 }

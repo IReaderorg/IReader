@@ -12,8 +12,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import ireader.core.log.Log
 import ireader.domain.services.tts_service.DesktopTTSService
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 /**
  * Voice Selection Dialog
@@ -27,6 +29,7 @@ fun VoiceSelectionDialog(
 ) {
     val currentEngine = ttsService.getCurrentEngine()
     val scope = rememberCoroutineScope()
+    val voicePreferences: ireader.domain.preferences.VoicePreferences = koinInject()
     
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -101,7 +104,19 @@ fun VoiceSelectionDialog(
                                     OutlinedCard(
                                         modifier = Modifier.fillMaxWidth(),
                                         onClick = {
-                                            // TODO: Save selected Kokoro voice to preferences
+                                            scope.launch {
+                                                try {
+                                                    // Save selected Kokoro voice to preferences
+                                                    voicePreferences.setSelectedKokoroVoice(voice.id)
+                                                    
+                                                    // Apply to TTS service
+                                                    ttsService.kokoroAdapter.setVoice(voice.id)
+                                                    
+                                                    Log.info { "Kokoro voice selected: ${voice.name}" }
+                                                } catch (e: Exception) {
+                                                    Log.error("Failed to set Kokoro voice", e)
+                                                }
+                                            }
                                             onDismiss()
                                         }
                                     ) {
@@ -163,7 +178,19 @@ fun VoiceSelectionDialog(
                                     OutlinedCard(
                                         modifier = Modifier.fillMaxWidth(),
                                         onClick = {
-                                            // TODO: Save selected Maya language to preferences
+                                            scope.launch {
+                                                try {
+                                                    // Save selected Maya language to preferences
+                                                    voicePreferences.setSelectedMayaLanguage(code)
+                                                    
+                                                    // Apply to TTS service
+                                                    ttsService.mayaAdapter.setLanguage(code)
+                                                    
+                                                    Log.info { "Maya language selected: $name ($code)" }
+                                                } catch (e: Exception) {
+                                                    Log.error("Failed to set Maya language", e)
+                                                }
+                                            }
                                             onDismiss()
                                         }
                                     ) {

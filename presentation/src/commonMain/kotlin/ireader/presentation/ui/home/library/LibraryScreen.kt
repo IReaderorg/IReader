@@ -138,6 +138,19 @@ fun LibraryScreen(
                 categories = vm.categories.filter { !it.category.isSystemCategory }
             )
             
+            // Update Category Dialog
+            if (vm.showUpdateCategoryDialog) {
+                ireader.presentation.ui.home.library.components.UpdateCategoryDialog(
+                    categories = vm.categories.map { it.category }.filter { !it.isSystemCategory },
+                    onCategorySelected = { category ->
+                        vm.updateCategory(category.id)
+                    },
+                    onDismiss = {
+                        vm.hideUpdateCategoryDialog()
+                    }
+                )
+            }
+            
             Crossfade(
                 targetState = Pair(vm.isLoading, vm.isEmpty),
                 animationSpec = tween(durationMillis = 300)

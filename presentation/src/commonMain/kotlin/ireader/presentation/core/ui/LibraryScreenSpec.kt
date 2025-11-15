@@ -135,7 +135,35 @@ object LibraryScreenSpec : Tab {
                                         sheetState.show()
                                     }
                                 },
-                                isModalVisible = sheetState.isVisible
+                                isModalVisible = sheetState.isVisible,
+                                onUpdateLibrary = {
+                                    vm.updateLibrary()
+                                },
+                                onUpdateCategory = {
+                                    vm.showUpdateCategoryDialog()
+                                },
+                                onImportEpub = {
+                                    // TODO: Platform-specific EPUB import
+                                    // This requires file picker which is platform-specific
+                                    // For now, show a message
+                                    vm.scope.launch {
+                                        vm.batchOperationMessage = "EPUB import: Please use file manager to import EPUB files"
+                                    }
+                                },
+                                onOpenRandom = {
+                                    vm.openRandomEntry()?.let { bookId ->
+                                        navController.navigateTo(
+                                            BookDetailScreenSpec(bookId = bookId)
+                                        )
+                                    }
+                                },
+                                onSyncRemote = {
+                                    vm.syncWithRemote()
+                                },
+                                onSearchLibrary = {
+                                    // Search is handled by the search mode in the toolbar
+                                    // This callback is for additional search functionality if needed
+                                }
                         )
                     }
             ) { scaffoldPadding ->
