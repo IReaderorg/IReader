@@ -8,7 +8,7 @@ import ireader.domain.js.models.PluginMetadata
 import kotlinx.coroutines.runBlocking
 
 /**
- * Implementation of IReader's CatalogSource interface using a JavaScript plugin.
+ * Implementation of IReader's HttpSource interface using a JavaScript plugin.
  * Delegates all operations to the JSPluginBridge.
  */
 class JSPluginSource(
@@ -16,8 +16,16 @@ class JSPluginSource(
     private val metadata: PluginMetadata,
     override val id: Long,
     override val name: String,
-    override val lang: String
-) : CatalogSource {
+    override val lang: String,
+    private val dependencies: ireader.core.source.Dependencies
+) : ireader.core.source.HttpSource(dependencies) {
+    
+    /**
+     * Base URL from the plugin metadata.
+     * This allows opening book details in webview.
+     */
+    override val baseUrl: String
+        get() = metadata.site
     
     /**
      * Gets detailed information about a manga/novel.

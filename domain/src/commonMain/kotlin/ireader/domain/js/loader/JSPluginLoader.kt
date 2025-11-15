@@ -1,6 +1,7 @@
 package ireader.domain.js.loader
 
 import io.ktor.client.HttpClient
+import ireader.core.http.BrowserEngine
 import ireader.core.prefs.PreferenceStoreFactory
 import ireader.domain.js.bridge.JSPluginBridge
 import ireader.domain.js.bridge.JSPluginSource
@@ -185,12 +186,26 @@ class JSPluginLoader(
             
             // Create source
             val sourceId = metadata.id.hashCode().toLong()
+            
+            // Create dependencies for HttpSource
+            val httpClientsInterface = object : ireader.core.http.HttpClientsInterface {
+                override val default: HttpClient = httpClient
+                override val cloudflareClient: HttpClient = httpClient
+                override val browser: ireader.core.http.BrowserEngine = ireader.core.http.BrowserEngine()
+            }
+
+            val dependencies = ireader.core.source.Dependencies(
+                httpClients = httpClientsInterface,
+                preferences = pluginPreferenceStore
+            )
+            
             val source = JSPluginSource(
                 bridge = bridge,
                 metadata = metadata,
                 id = sourceId,
                 name = metadata.name,
-                lang = metadata.lang
+                lang = metadata.lang,
+                dependencies = dependencies
             )
             
             JSPluginLogger.logDebug(pluginId, "Created source with ID: $sourceId (from '${metadata.id}')")

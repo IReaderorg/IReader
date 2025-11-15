@@ -110,6 +110,71 @@ class JSLibraryProvider(
                         });
                     };
                     
+                    // Setup window and location objects for browser compatibility
+                    globalThis.window = globalThis;
+                    globalThis.location = {
+                        href: 'about:blank',
+                        protocol: 'about:',
+                        host: '',
+                        hostname: '',
+                        port: '',
+                        pathname: 'blank',
+                        search: '',
+                        hash: ''
+                    };
+                    
+                    // Setup URL API polyfill
+                    globalThis.URL = function(url, base) {
+                        // Parse URL
+                        let fullUrl = url;
+                        if (base && !url.match(/^https?:\/\//)) {
+                            // Relative URL - combine with base
+                            if (url.startsWith('/')) {
+                                // Absolute path
+                                const baseMatch = base.match(/^(https?:\/\/[^\/]+)/);
+                                fullUrl = baseMatch ? baseMatch[1] + url : url;
+                            } else {
+                                // Relative path
+                                const basePath = base.replace(/\/[^\/]*$/, '/');
+                                fullUrl = basePath + url;
+                            }
+                        }
+                        
+                        // Parse the URL
+                        const match = fullUrl.match(/^(https?):\/\/([^\/]+)(\/.*)?$/);
+                        if (!match) {
+                            throw new Error('Invalid URL: ' + fullUrl);
+                        }
+                        
+                        this.protocol = match[1] + ':';
+                        this.host = match[2];
+                        this.hostname = match[2].split(':')[0];
+                        this.port = match[2].includes(':') ? match[2].split(':')[1] : '';
+                        this.pathname = match[3] || '/';
+                        this.href = fullUrl;
+                        this.origin = match[1] + '://' + match[2];
+                        
+                        // Parse search params
+                        const searchIndex = this.pathname.indexOf('?');
+                        if (searchIndex !== -1) {
+                            this.search = this.pathname.substring(searchIndex);
+                            this.pathname = this.pathname.substring(0, searchIndex);
+                        } else {
+                            this.search = '';
+                        }
+                        
+                        // Parse hash
+                        const hashIndex = this.pathname.indexOf('#');
+                        if (hashIndex !== -1) {
+                            this.hash = this.pathname.substring(hashIndex);
+                            this.pathname = this.pathname.substring(0, hashIndex);
+                        } else {
+                            this.hash = '';
+                        }
+                        
+                        this.toString = function() { return this.href; };
+                    };
+                    
                     // Initialize module registry
                     globalThis.__modules = {};
                 })();
@@ -470,15 +535,23 @@ class JSLibraryProvider(
      * Provides HTML parsing functionality.
      */
     private fun getHtmlParser2Library(): String {
-        // Minimal htmlparser2-compatible implementation
+        // Improved htmlparser2-compatible implementation
         return """
             (function() {
+                // List of void/self-closing elements
+                const voidElements = new Set([
+                    'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
+                    'link', 'meta', 'param', 'source', 'track', 'wbr'
+                ]);
+                
                 return {
-                    Parser: function(handlers) {
+                    Parser: function(handlers, options) {
                         this.handlers = handlers || {};
+                        this.options = options || {};
+                        this.tagStack = [];
+                        
                         this.write = function(html) {
-                            // Simple HTML parser - just extract text and basic tags
-                            // This is a minimal implementation for basic parsing
+                            // Simple HTML parser - extract text and basic tags
                             const tagRegex = /<(\/?)([\w-]+)([^>]*)>/g;
                             let match;
                             let lastIndex = 0;
@@ -495,22 +568,40 @@ class JSLibraryProvider(
                                 const isClosing = match[1] === '/';
                                 const tagName = match[2].toLowerCase();
                                 const attrsStr = match[3];
+                                const isSelfClosing = attrsStr.trim().endsWith('/');
                                 
                                 if (isClosing) {
                                     if (this.handlers.onclosetag) {
-                                        this.handlers.onclosetag(tagName);
+                                        const tagInfo = {
+                                            name: tagName,
+                                            isVoidElement: function() { return voidElements.has(tagName); }
+                                        };
+                                        this.handlers.onclosetag(tagName, tagInfo);
                                     }
                                 } else {
                                     // Parse attributes
                                     const attrs = {};
-                                    const attrRegex = /([\w-]+)=["']([^"']*)["']/g;
+                                    const attrRegex = /([\w-]+)(?:=["']([^"']*)["'])?/g;
                                     let attrMatch;
                                     while ((attrMatch = attrRegex.exec(attrsStr)) !== null) {
-                                        attrs[attrMatch[1]] = attrMatch[2];
+                                        if (attrMatch[1] && attrMatch[1] !== '/') {
+                                            attrs[attrMatch[1]] = attrMatch[2] || '';
+                                        }
                                     }
                                     
                                     if (this.handlers.onopentag) {
                                         this.handlers.onopentag(tagName, attrs);
+                                    }
+                                    
+                                    // Auto-close void elements
+                                    if (voidElements.has(tagName) || isSelfClosing) {
+                                        if (this.handlers.onclosetag) {
+                                            const tagInfo = {
+                                                name: tagName,
+                                                isVoidElement: function() { return true; }
+                                            };
+                                            this.handlers.onclosetag(tagName, tagInfo);
+                                        }
                                     }
                                 }
                                 
@@ -525,6 +616,7 @@ class JSLibraryProvider(
                                 }
                             }
                         };
+                        
                         this.end = function() {
                             if (this.handlers.onend) {
                                 this.handlers.onend();

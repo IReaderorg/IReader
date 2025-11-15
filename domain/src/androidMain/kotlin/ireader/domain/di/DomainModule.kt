@@ -202,6 +202,6 @@ actual val DomainModule = module {
     
     // Voice Storage for TTS voice models
     single<ireader.domain.storage.VoiceStorage> {
-        ireader.data.storage.VoiceStorageImpl(androidContext().filesDir)
+        ireader.domain.storage.AndroidVoiceStorage(androidContext().filesDir)
     }
 }

@@ -263,7 +263,15 @@ class JSPluginBridge(
                             const result = await plugin.popularNovels($page, options);
                             globalThis.__promiseResult_${sanitizedId} = { success: true, data: result };
                         } catch (error) {
-                            globalThis.__promiseResult_${sanitizedId} = { success: false, error: error.toString() };
+                            const errorDetails = {
+                                message: error.toString(),
+                                stack: error.stack || 'No stack trace available',
+                                name: error.name || 'Error'
+                            };
+                            globalThis.__promiseResult_${sanitizedId} = { 
+                                success: false, 
+                                error: JSON.stringify(errorDetails)
+                            };
                         }
                     })();
                 """.trimIndent()
@@ -271,38 +279,52 @@ class JSPluginBridge(
                 // Start the async operation
                 engine.evaluateScript(callScript)
                 
-                // Poll for the result
+                // Poll for the result with exponential backoff
                 var attempts = 0
-                val maxAttempts = 300 // 30 seconds with 100ms intervals
+                val maxAttempts = 150 // 30 seconds total
                 var result: Any? = null
+                var waitTime = 10L // Start with 10ms
                 
                 while (attempts < maxAttempts) {
-                    Thread.sleep(100)
-                    val checkScript = "globalThis.__promiseResult_${sanitizedId}"
-                    val promiseResult = engine.evaluateScript(checkScript)
+                    Thread.sleep(waitTime)
                     
-                    if (promiseResult is Map<*, *>) {
-                        val success = promiseResult["success"] as? Boolean ?: false
-                        if (success) {
-                            result = promiseResult["data"]
-                            Log.debug { "[JSPlugin] Promise resolved successfully after ${attempts * 100}ms" }
-                            break
-                        } else {
-                            val error = promiseResult["error"]
-                            Log.error { "[JSPlugin] Promise rejected: $error" }
-                            throw JSException("Promise rejected: $error")
+                    // Only check every few attempts to reduce statement count
+                    if (attempts % 5 == 0 || attempts < 10) {
+                        val checkScript = "globalThis.__promiseResult_${sanitizedId}"
+                        val promiseResult = engine.evaluateScript(checkScript)
+                        
+                        if (promiseResult is Map<*, *>) {
+                            val success = promiseResult["success"] as? Boolean ?: false
+                            if (success) {
+                                result = promiseResult["data"]
+                                Log.debug { "[JSPlugin] Promise resolved successfully after ~${attempts * waitTime}ms" }
+                                break
+                            } else {
+                                val error = promiseResult["error"]
+                                Log.error { "[JSPlugin] Promise rejected: $error" }
+                                throw JSException("Promise rejected: $error")
+                            }
                         }
                     }
+                    
                     attempts++
+                    // Exponential backoff up to 200ms
+                    if (waitTime < 200) {
+                        waitTime = (waitTime * 1.2).toLong().coerceAtMost(200)
+                    }
                 }
                 
                 if (result == null && attempts >= maxAttempts) {
-                    Log.error { "[JSPlugin] Promise timeout after ${maxAttempts * 100}ms" }
+                    Log.error { "[JSPlugin] Promise timeout after checking ${maxAttempts} times" }
                     throw JSException("Promise timeout")
                 }
                 
                 // Clean up
-                engine.evaluateScript("delete globalThis.__promiseResult_${sanitizedId};")
+                try {
+                    engine.evaluateScript("delete globalThis.__promiseResult_${sanitizedId};")
+                } catch (e: Exception) {
+                    // Ignore cleanup errors
+                }
                 
                 Log.debug { "[JSPlugin] popularNovels result type: ${result?.javaClass?.simpleName}" }
                 Log.debug { "[JSPlugin] popularNovels raw result: $result" }

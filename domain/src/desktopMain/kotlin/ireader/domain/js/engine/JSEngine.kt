@@ -21,7 +21,7 @@ actual class JSEngine {
         try {
             // Create resource limits
             val limits = ResourceLimits.newBuilder()
-                .statementLimit(1_000_000, null) // Limit statements for timeout
+                .statementLimit(10_000_000, null) // Increased limit for complex plugins (10M statements)
                 .build()
             
             // Create context with resource limits and host access
