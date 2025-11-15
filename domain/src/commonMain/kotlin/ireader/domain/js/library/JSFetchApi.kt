@@ -29,9 +29,12 @@ class JSFetchApi(
      * @return A map representing the Response object
      */
     fun fetch(url: String, init: Map<String, Any?>? = null): Map<String, Any?> {
+        println("[JSFetchApi] [$pluginId] Fetching: $url")
+        
         // Validate URL for security
         val validationResult = validator.validateNetworkRequest(url, allowLocalhost)
         if (!validationResult.isValid()) {
+            println("[JSFetchApi] [$pluginId] URL validation failed: ${validationResult.getError()}")
             return mapOf(
                 "ok" to false,
                 "status" to 0,
@@ -46,6 +49,8 @@ class JSFetchApi(
                 val method = (init?.get("method") as? String)?.uppercase() ?: "GET"
                 val headersMap = init?.get("headers") as? Map<String, String> ?: emptyMap()
                 val body = init?.get("body") as? String
+                
+                println("[JSFetchApi] [$pluginId] Method: $method, Headers: $headersMap")
                 
                 val response: HttpResponse = when (method) {
                     "POST" -> httpClient.post(url) {
@@ -69,6 +74,8 @@ class JSFetchApi(
                 }
                 
                 val responseText = response.bodyAsText()
+                
+                println("[JSFetchApi] [$pluginId] Response: ${response.status.value} ${response.status.description}, Body length: ${responseText.length}")
                 
                 mapOf(
                     "ok" to (response.status.value in 200..299),

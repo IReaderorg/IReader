@@ -125,6 +125,12 @@ class JSPluginLoader(
             // Evaluate plugin code
             engine.evaluateScript(code)
             
+            // Store the plugin instance in a global variable for later access
+            // This allows us to access JavaScript properties that contain references
+            // Sanitize plugin ID for use as JavaScript variable name
+            val sanitizedId = pluginId.replace(Regex("[^a-zA-Z0-9_]"), "_")
+            engine.evaluateScript("globalThis.__plugin_${sanitizedId} = exports.default || exports;")
+            
             // Extract plugin instance from CommonJS exports
             // LNReader plugins use: exports.default = new PluginClass()
             var pluginInstance = engine.getGlobalObject("exports")

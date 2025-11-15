@@ -19,6 +19,7 @@ class JSLibraryProvider(
     private val storage = JSStorage(preferenceStore, pluginId)
     private val localStorage = JSLocalStorage()
     private val sessionStorage = JSSessionStorage()
+    private val cheerioApi = JSCheerioApi(pluginId)
     
     /**
      * Sets up the require() function and injects global APIs.
@@ -32,6 +33,9 @@ class JSLibraryProvider(
             engine.setGlobalObject("__nativeStorage", storage)
             engine.setGlobalObject("__nativeLocalStorage", localStorage)
             engine.setGlobalObject("__nativeSessionStorage", sessionStorage)
+            
+            // Inject cheerio API
+            engine.setGlobalObject("__nativeCheerio", cheerioApi)
             
             // First, setup global APIs
             val globalSetup = """
@@ -238,14 +242,19 @@ class JSLibraryProvider(
     }
     
     /**
-     * Fallback Cheerio implementation if library cannot be loaded.
-     * Returns an object with a load function that returns a minimal cheerio-like API.
+     * Fallback Cheerio implementation using jsoup bridge.
+     * Returns an object with a load function that provides cheerio-like API using native jsoup.
      */
     private fun getCheerioFallback(): String {
         return """
             {
                 load: function(html) {
-                    // Minimal cheerio-like API
+                    // Use native jsoup through the bridge
+                    if (typeof __nativeCheerio !== 'undefined') {
+                        return __nativeCheerio.load(html);
+                    }
+                    
+                    // Fallback: minimal cheerio-like API
                     var doc = { html: html };
                     var createCheerio = function(elements, html) {
                         return {
@@ -316,9 +325,12 @@ class JSLibraryProvider(
                     FilterTypes: {
                         Picker: 'Picker',
                         Text: 'Text',
+                        TextInput: 'Text',
                         Switch: 'Switch',
                         Checkbox: 'Checkbox',
+                        CheckboxGroup: 'Checkbox',
                         ExcludableCheckbox: 'ExcludableCheckbox',
+                        ExcludableCheckboxGroup: 'XCheckbox',
                         TriState: 'TriState',
                         Sort: 'Sort',
                         Title: 'Title'

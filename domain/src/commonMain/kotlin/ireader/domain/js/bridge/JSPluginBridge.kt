@@ -193,29 +193,138 @@ class JSPluginBridge(
         return "{$entries}"
     }
     
+
     /**
      * Calls the plugin's popularNovels method.
      */
     suspend fun popularNovels(page: Int, filters: Map<String, Any>): List<JSNovelItem> {
         return withTimeout(30000L) {
             try {
-                Log.debug { "[JSPlugin] Calling popularNovels for plugin: $pluginId, page: $page, filters: $filters" }
+                Log.debug { "[JSPlugin] Calling popularNovels for plugin: $pluginId, page: $page" }
+                Log.debug { "[JSPlugin] Filters received: $filters" }
+                Log.debug { "[JSPlugin] Filters keys: ${filters.keys}" }
+                filters.forEach { (key, value) ->
+                    Log.debug { "[JSPlugin] Filter '$key': $value (type: ${value.javaClass.simpleName})" }
+                    if (value is Map<*, *>) {
+                        value.forEach { (k, v) ->
+                            Log.debug { "[JSPlugin]   '$key'.$k = $v (${v?.javaClass?.simpleName})" }
+                        }
+                    }
+                }
                 val startTime = System.currentTimeMillis()
                 
-                val options = mapOf("filters" to filters, "showLatestNovels" to false)
-                val result = callPluginMethod("popularNovels", page, options)
+                // Convert filters to JSON and keep them in JavaScript context
+                val filtersJson = buildString {
+                    append("{")
+                    filters.entries.forEachIndexed { index, (key, value) ->
+                        if (index > 0) append(",")
+                        append("\"$key\":")
+                        when (value) {
+                            is Map<*, *> -> {
+                                append("{")
+                                value.entries.forEachIndexed { vIndex, (vKey, vValue) ->
+                                    if (vIndex > 0) append(",")
+                                    append("\"$vKey\":")
+                                    when (vValue) {
+                                        is String -> append("\"${vValue.replace("\"", "\\\"")}\"")
+                                        is List<*> -> {
+                                            append("[")
+                                            vValue.forEachIndexed { i, item ->
+                                                if (i > 0) append(",")
+                                                append("\"$item\"")
+                                            }
+                                            append("]")
+                                        }
+                                        else -> append("\"$vValue\"")
+                                    }
+                                }
+                                append("}")
+                            }
+                            else -> append("\"$value\"")
+                        }
+                    }
+                    append("}")
+                }
+                
+                Log.debug { "[JSPlugin] Filters JSON: $filtersJson" }
+                
+                // Store filters in JavaScript and call the method directly in JS
+                // Sanitize plugin ID for JavaScript variable name
+                val sanitizedId = pluginId.replace(Regex("[^a-zA-Z0-9_]"), "_")
+                
+                // Store the result in a global variable after the promise resolves
+                val callScript = """
+                    (async function() {
+                        try {
+                            const filters = JSON.parse('${filtersJson.replace("'", "\\'")}');
+                            const options = { filters: filters, showLatestNovels: false };
+                            const plugin = globalThis.__plugin_${sanitizedId};
+                            if (!plugin) throw new Error('Plugin not found in global context');
+                            const result = await plugin.popularNovels($page, options);
+                            globalThis.__promiseResult_${sanitizedId} = { success: true, data: result };
+                        } catch (error) {
+                            globalThis.__promiseResult_${sanitizedId} = { success: false, error: error.toString() };
+                        }
+                    })();
+                """.trimIndent()
+                
+                // Start the async operation
+                engine.evaluateScript(callScript)
+                
+                // Poll for the result
+                var attempts = 0
+                val maxAttempts = 300 // 30 seconds with 100ms intervals
+                var result: Any? = null
+                
+                while (attempts < maxAttempts) {
+                    Thread.sleep(100)
+                    val checkScript = "globalThis.__promiseResult_${sanitizedId}"
+                    val promiseResult = engine.evaluateScript(checkScript)
+                    
+                    if (promiseResult is Map<*, *>) {
+                        val success = promiseResult["success"] as? Boolean ?: false
+                        if (success) {
+                            result = promiseResult["data"]
+                            Log.debug { "[JSPlugin] Promise resolved successfully after ${attempts * 100}ms" }
+                            break
+                        } else {
+                            val error = promiseResult["error"]
+                            Log.error { "[JSPlugin] Promise rejected: $error" }
+                            throw JSException("Promise rejected: $error")
+                        }
+                    }
+                    attempts++
+                }
+                
+                if (result == null && attempts >= maxAttempts) {
+                    Log.error { "[JSPlugin] Promise timeout after ${maxAttempts * 100}ms" }
+                    throw JSException("Promise timeout")
+                }
+                
+                // Clean up
+                engine.evaluateScript("delete globalThis.__promiseResult_${sanitizedId};")
                 
                 Log.debug { "[JSPlugin] popularNovels result type: ${result?.javaClass?.simpleName}" }
+                Log.debug { "[JSPlugin] popularNovels raw result: $result" }
+                
                 if (result is List<*>) {
                     Log.debug { "[JSPlugin] Result is a list with ${result.size} items" }
+                    if (result.isNotEmpty()) {
+                        Log.debug { "[JSPlugin] First item: ${result.first()}" }
+                    }
                 } else if (result is Map<*, *>) {
                     Log.debug { "[JSPlugin] Result is a map with keys: ${result.keys}" }
+                    Log.debug { "[JSPlugin] Map contents: $result" }
                 } else if (result == null) {
                     Log.warn { "[JSPlugin] popularNovels returned null for plugin: $pluginId" }
                     return@withTimeout emptyList()
                 }
                 
                 val novels = parseNovelList(result)
+                Log.debug { "[JSPlugin] Parsed ${novels.size} novels from result" }
+                if (novels.isEmpty() && result != null) {
+                    Log.warn { "[JSPlugin] parseNovelList returned empty list from non-null result" }
+                }
                 
                 val duration = System.currentTimeMillis() - startTime
                 Log.info { "[JSPlugin] popularNovels returned ${novels.size} items in ${duration}ms" }
@@ -316,20 +425,130 @@ class JSPluginBridge(
     
     /**
      * Extracts filter definitions from the plugin.
+     * Manually reads each filter property to handle JavaScript constants.
      */
     suspend fun getFilters(): Map<String, FilterDefinition> {
         return try {
             Log.debug { "[JSPlugin] Extracting filters for plugin: $pluginId" }
             
             val pluginMap = pluginInstance.asMap()
-            val filtersMap = pluginMap["filters"] as? Map<String, Any> ?: return emptyMap()
+            Log.debug { "[JSPlugin] Plugin instance keys: ${pluginMap.keys}" }
+            
+            val filtersObj = pluginMap["filters"]
+            if (filtersObj == null) {
+                Log.warn { "[JSPlugin] No filters property found in plugin" }
+                return emptyMap()
+            }
+            
+            Log.debug { "[JSPlugin] Filters object type: ${filtersObj.javaClass.simpleName}" }
+            
+            // Get filter keys
+            val filterKeys = when (filtersObj) {
+                is Map<*, *> -> filtersObj.keys.mapNotNull { it?.toString() }
+                is JSValue -> filtersObj.asMap().keys.mapNotNull { it?.toString() }
+                else -> return emptyMap()
+            }
+            
+            Log.debug { "[JSPlugin] Found ${filterKeys.size} filter entries: $filterKeys" }
             
             val filterDefinitions = mutableMapOf<String, FilterDefinition>()
             
-            for ((key, value) in filtersMap) {
-                val filterDef = parseFilterDefinition(value)
+            for (key in filterKeys) {
+                Log.debug { "[JSPlugin] Parsing filter '$key'" }
+                
+                // Get the filter object directly from the filtersObj map
+                val filterObj = when (filtersObj) {
+                    is Map<*, *> -> filtersObj[key]
+                    is JSValue -> filtersObj.asMap()[key]
+                    else -> null
+                }
+                
+                if (filterObj == null) {
+                    Log.warn { "[JSPlugin] Filter '$key' object is null" }
+                    continue
+                }
+                
+                // Convert filter object to map and resolve the type property
+                val filterMap = when (filterObj) {
+                    is Map<*, *> -> filterObj as Map<String, Any?>
+                    is JSValue -> filterObj.asMap()
+                    else -> {
+                        Log.warn { "[JSPlugin] Filter '$key' is not a map: ${filterObj.javaClass.simpleName}" }
+                        continue
+                    }
+                }
+                
+                // The type property is null because it's a reference to FilterTypes constant
+                // We need to evaluate it in JavaScript context
+                val typeValue = filterMap["type"]
+                Log.debug { "[JSPlugin] Filter '$key' raw type value: $typeValue (class: ${typeValue?.javaClass?.name})" }
+                
+                val typeString = if (typeValue == null) {
+                    // Type is null, need to evaluate it in JS context using the stored plugin reference
+                    try {
+                        // First check what the type value actually is
+                        val checkScript = """
+                            (function() {
+                                const plugin = globalThis.__plugin_${pluginId};
+                                if (!plugin) return 'NO_PLUGIN';
+                                if (!plugin.filters) return 'NO_FILTERS';
+                                const filter = plugin.filters['$key'];
+                                if (!filter) return 'NO_FILTER_$key';
+                                
+                                // Check type value - don't use if (!filter.type) because it might be falsy but exist
+                                const typeVal = filter.type;
+                                const typeType = typeof typeVal;
+                                const typeStr = typeVal === null ? 'null' : 
+                                               typeVal === undefined ? 'undefined' : 
+                                               String(typeVal);
+                                
+                                return 'type: ' + typeType + ', value: ' + typeStr + ', hasOwnProperty: ' + filter.hasOwnProperty('type');
+                            })()
+                        """.trimIndent()
+                        val checkResult = engine.evaluateScript(checkScript)
+                        Log.debug { "[JSPlugin] Check result for '$key': $checkResult" }
+                        
+                        // Access the filter's type property through the globally stored plugin instance
+                        // Sanitize plugin ID for JavaScript variable name
+                        val sanitizedId = pluginId.replace(Regex("[^a-zA-Z0-9_]"), "_")
+                        val script = """
+                            (function() {
+                                const plugin = globalThis.__plugin_${sanitizedId};
+                                if (!plugin || !plugin.filters) return null;
+                                const filter = plugin.filters['$key'];
+                                if (!filter || !filter.type) return null;
+                                return String(filter.type);
+                            })()
+                        """.trimIndent()
+                        val result = engine.evaluateScript(script)
+                        Log.debug { "[JSPlugin] Evaluated type from JS for '$key': $result (${result?.javaClass?.simpleName})" }
+                        result?.toString()
+                    } catch (e: Exception) {
+                        Log.error(e, "[JSPlugin] Failed to evaluate type for filter '$key': ${e.message}" )
+                        null
+                    }
+                } else {
+                    when (typeValue) {
+                        is String -> typeValue
+                        is JSValue -> typeValue.toString()
+                        else -> typeValue.toString()
+                    }
+                }
+                
+                Log.debug { "[JSPlugin] Filter '$key' resolved type: $typeString" }
+                
+                // Create a new map with the resolved type
+                val resolvedFilterMap = filterMap.toMutableMap()
+                resolvedFilterMap["type"] = typeString
+                
+                Log.debug { "[JSPlugin] Filter '$key' resolved data: $resolvedFilterMap" }
+                
+                val filterDef = parseFilterDefinition(resolvedFilterMap)
                 if (filterDef != null) {
                     filterDefinitions[key] = filterDef
+                    Log.debug { "[JSPlugin] Successfully parsed filter '$key': $filterDef" }
+                } else {
+                    Log.warn { "[JSPlugin] Failed to parse filter '$key'" }
                 }
             }
             
@@ -449,37 +668,54 @@ class JSPluginBridge(
             val map = when (value) {
                 is Map<*, *> -> value as Map<String, Any?>
                 is JSValue -> value.asMap()
-                else -> return null
+                else -> {
+                    Log.warn { "[JSPlugin] Filter value is not a map: ${value.javaClass.simpleName}" }
+                    return null
+                }
             }
             
-            val type = map["type"]?.toString() ?: return null
+            val type = map["type"]?.toString()
+            if (type == null) {
+                Log.warn { "[JSPlugin] Filter has no type property" }
+                return null
+            }
+            
             val label = map["label"]?.toString() ?: ""
+            Log.debug { "[JSPlugin] Parsing filter with type='$type', label='$label'" }
             
             when (type.lowercase()) {
                 "picker" -> {
                     val options = parseFilterOptions(map["options"])
-                    val defaultValue = map["defaultValue"]?.toString() ?: ""
+                    // Check both 'value' (LNReader style) and 'defaultValue' for compatibility
+                    val defaultValue = map["value"]?.toString() ?: map["defaultValue"]?.toString() ?: ""
                     FilterDefinition.Picker(label, options, defaultValue)
                 }
                 "textinput", "text" -> {
-                    val defaultValue = map["defaultValue"]?.toString() ?: ""
+                    val defaultValue = map["value"]?.toString() ?: map["defaultValue"]?.toString() ?: ""
                     FilterDefinition.TextInput(label, defaultValue)
                 }
                 "checkboxgroup", "checkbox" -> {
+                    Log.debug { "[JSPlugin] Parsing CheckboxGroup filter" }
                     val options = parseFilterOptions(map["options"])
-                    val defaultValues = parseStringList(map["defaultValues"])
+                    Log.debug { "[JSPlugin] Parsed ${options.size} options" }
+                    // Check both 'value' and 'defaultValues' for compatibility
+                    val defaultValues = parseStringList(map["value"]) ?: parseStringList(map["defaultValues"])
+                    Log.debug { "[JSPlugin] Default values: $defaultValues" }
                     FilterDefinition.CheckboxGroup(label, options, defaultValues)
                 }
-                "excludablecheckboxgroup", "excludable" -> {
+                "excludablecheckboxgroup", "excludable", "xcheckbox" -> {
                     val options = parseFilterOptions(map["options"])
                     val included = parseStringList(map["included"])
                     val excluded = parseStringList(map["excluded"])
                     FilterDefinition.ExcludableCheckboxGroup(label, options, included, excluded)
                 }
-                else -> null
+                else -> {
+                    Log.warn { "[JSPlugin] Unknown filter type: $type" }
+                    null
+                }
             }
         } catch (e: Exception) {
-            Log.error(e, "[JSPlugin] Failed to parse filter definition")
+            Log.error(e, "[JSPlugin] Failed to parse filter definition: ${e.message}")
             null
         }
     }

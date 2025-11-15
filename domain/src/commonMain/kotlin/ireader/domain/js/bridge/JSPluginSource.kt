@@ -93,14 +93,57 @@ class JSPluginSource(
             val duration = System.currentTimeMillis() - startTime
             Log.info { "[JSPluginSource] Got chapter content (${htmlContent.length} chars) in ${duration}ms" }
             
-            // Wrap HTML content in a Text page
-            listOf(Text(htmlContent))
+            // Parse HTML and create a Text page for each paragraph
+            val pages = parseHtmlToParagraphs(htmlContent)
+            Log.debug { "[JSPluginSource] Parsed ${pages.size} paragraphs from HTML" }
+            
+            pages
         } catch (e: JSPluginError) {
             Log.error(e, "[JSPluginSource] Failed to get page list: ${e.message}")
             throw e
         } catch (e: Exception) {
             Log.error(e, "[JSPluginSource] Unexpected error getting page list")
             throw JSPluginError.ExecutionError(metadata.id, "getPageList", e)
+        }
+    }
+    
+    /**
+     * Parses HTML content into a list of Text pages, one per paragraph.
+     */
+    private fun parseHtmlToParagraphs(html: String): List<Page> {
+        if (html.isBlank()) return emptyList()
+        
+        return try {
+            // Use jsoup to parse HTML and extract text from paragraphs
+            val doc = org.jsoup.Jsoup.parse(html)
+            val paragraphs = doc.select("p, div.paragraph, div.text")
+                .mapNotNull { element ->
+                    val text = element.text().trim()
+                    if (text.isNotEmpty()) Text(text) else null
+                }
+            
+            // If no paragraphs found, try to get all text content
+            if (paragraphs.isEmpty()) {
+                val allText = doc.text().trim()
+                if (allText.isNotEmpty()) {
+                    // Split by double newlines or long single newlines
+                    val splits = allText.split(Regex("\n\n+|\n{3,}"))
+                        .map { it.trim() }
+                        .filter { it.isNotEmpty() }
+                        .map { Text(it) }
+                    
+                    if (splits.isNotEmpty()) return splits
+                }
+                
+                // Last resort: return the HTML as-is
+                listOf(Text(html))
+            } else {
+                paragraphs
+            }
+        } catch (e: Exception) {
+            Log.error(e, "[JSPluginSource] Failed to parse HTML to paragraphs")
+            // Fallback: return HTML as single page
+            listOf(Text(html))
         }
     }
     
@@ -171,7 +214,13 @@ class JSPluginSource(
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
         return try {
             Log.debug { "[JSPluginSource] Getting manga list with listing: ${sort?.name}, page: $page" }
-            val filterValues = getDefaultFilterValues()
+            val filterValues = getDefaultFilterValues().toMutableMap()
+            
+            // Override sort filter to use "latest" by default
+            if (filterValues.containsKey("sort")) {
+                filterValues["sort"] = mapOf("value" to "latest")
+            }
+            
             val novels = bridge.popularNovels(page, filterValues)
             val mangaList = novels.map { it.toMangaInfo() }
             MangasPageInfo(mangaList, hasNextPage = mangaList.isNotEmpty())
@@ -184,7 +233,13 @@ class JSPluginSource(
     override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
         return try {
             Log.debug { "[JSPluginSource] Getting manga list with filters, page: $page" }
-            val filterValues = getDefaultFilterValues()
+            val filterValues = getDefaultFilterValues().toMutableMap()
+            
+            // Override sort filter to use "latest" by default
+            if (filterValues.containsKey("sort")) {
+                filterValues["sort"] = mapOf("value" to "latest")
+            }
+            
             val novels = bridge.popularNovels(page, filterValues)
             val mangaList = novels.map { it.toMangaInfo() }
             MangasPageInfo(mangaList, hasNextPage = mangaList.isNotEmpty())
@@ -201,18 +256,29 @@ class JSPluginSource(
     private suspend fun getDefaultFilterValues(): Map<String, Any> {
         return try {
             val filterDefs = bridge.getFilters()
-            filterDefs.mapValues { (_, def) -> 
-                when (def) {
+            Log.debug { "[JSPluginSource] Got ${filterDefs.size} filter definitions" }
+            
+            val filterValues = filterDefs.mapValues { (key, def) -> 
+                val value = when (def) {
                     is ireader.domain.js.models.FilterDefinition.Picker -> 
                         mapOf("value" to def.defaultValue)
                     is ireader.domain.js.models.FilterDefinition.TextInput -> 
                         mapOf("value" to def.defaultValue)
-                    is ireader.domain.js.models.FilterDefinition.CheckboxGroup -> 
-                        mapOf("value" to def.defaultValues)
+                    is ireader.domain.js.models.FilterDefinition.CheckboxGroup -> {
+                        // Convert to ArrayList to ensure proper JavaScript array conversion
+                        val arrayValue = ArrayList(def.defaultValues)
+                        Log.debug { "[JSPluginSource] CheckboxGroup '$key' defaultValues: $arrayValue (${arrayValue.javaClass.simpleName})" }
+                        mapOf("value" to arrayValue)
+                    }
                     is ireader.domain.js.models.FilterDefinition.ExcludableCheckboxGroup -> 
                         mapOf("included" to def.included, "excluded" to def.excluded)
                 }
+                Log.debug { "[JSPluginSource] Filter '$key' default value: $value" }
+                value
             }
+            
+            Log.debug { "[JSPluginSource] Final filter values: $filterValues" }
+            filterValues
         } catch (e: Exception) {
             Log.error(e, "[JSPluginSource] Failed to get default filter values")
             emptyMap()
@@ -227,6 +293,7 @@ class JSPluginSource(
         )
     }
     
+
     override fun getFilters(): FilterList {
         return try {
             // Get JS plugin filters synchronously (cached from plugin load)
