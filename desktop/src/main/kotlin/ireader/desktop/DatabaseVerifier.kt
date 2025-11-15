@@ -257,7 +257,7 @@ object DatabaseVerifier {
                 book.cover_last_modified AS coverLastModified,
                 chapter.date_upload AS dateUpload,
                 chapter.date_fetch AS datefetch,
-                chapter.content IS NOT "" AS downlaoded,
+                chapter.content IS NOT '' AS downlaoded,
                 history.progress AS readingProgress,
                 history.last_read AS lastReadAt
             FROM book JOIN chapter

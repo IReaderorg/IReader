@@ -12,7 +12,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 9
+    const val CURRENT_VERSION = 10
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -73,6 +73,7 @@ object DatabaseMigrations {
             6 -> migrateV6toV7(driver)
             7 -> migrateV7toV8(driver)
             8 -> migrateV8toV9(driver)
+            9 -> migrateV9toV10(driver)
             // Add more migration cases as the database evolves
         }
     }
@@ -644,7 +645,7 @@ object DatabaseMigrations {
                     book.cover_last_modified AS coverLastModified,
                     chapter.date_upload AS dateUpload,
                     chapter.date_fetch AS datefetch,
-                    chapter.content IS NOT "" AS downlaoded,
+                    chapter.content IS NOT '' AS downlaoded,
                     history.progress AS readingProgress,
                     history.last_read AS lastReadAt
                 FROM book JOIN chapter
@@ -701,6 +702,135 @@ object DatabaseMigrations {
             driver.execute(null, "DROP VIEW IF EXISTS updatesView;", 0)
             initializeViews(driver)
         } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+    
+    /**
+     * Migration from version 8 to version 9
+     * Adds plugin system tables (plugin, plugin_purchase, plugin_review)
+     */
+    private fun migrateV8toV9(driver: SqlDriver) {
+        try {
+            println("Starting migration from version 8 to 9...")
+            
+            // Create plugin table
+            val createPluginSql = """
+                CREATE TABLE IF NOT EXISTS plugin (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    version TEXT NOT NULL,
+                    version_code INTEGER NOT NULL,
+                    type TEXT NOT NULL,
+                    author TEXT NOT NULL,
+                    description TEXT NOT NULL,
+                    icon_url TEXT,
+                    status TEXT NOT NULL,
+                    install_date INTEGER NOT NULL,
+                    last_update INTEGER,
+                    manifest_json TEXT NOT NULL
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createPluginSql, 0)
+            println("Created plugin table")
+            
+            // Create indexes for plugin table
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_type ON plugin(type);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_status ON plugin(status);", 0)
+            println("Created indexes for plugin table")
+            
+            // Create plugin_purchase table
+            val createPluginPurchaseSql = """
+                CREATE TABLE IF NOT EXISTS plugin_purchase (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    plugin_id TEXT NOT NULL,
+                    feature_id TEXT,
+                    amount REAL NOT NULL,
+                    currency TEXT NOT NULL,
+                    timestamp INTEGER NOT NULL,
+                    user_id TEXT NOT NULL,
+                    receipt_data TEXT,
+                    FOREIGN KEY (plugin_id) REFERENCES plugin(id) ON DELETE CASCADE
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createPluginPurchaseSql, 0)
+            println("Created plugin_purchase table")
+            
+            // Create indexes for plugin_purchase table
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_purchase_plugin_id ON plugin_purchase(plugin_id);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_purchase_user_id ON plugin_purchase(user_id);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_purchase_timestamp ON plugin_purchase(timestamp DESC);", 0)
+            println("Created indexes for plugin_purchase table")
+            
+            // Create plugin_review table
+            val createPluginReviewSql = """
+                CREATE TABLE IF NOT EXISTS plugin_review (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    plugin_id TEXT NOT NULL,
+                    user_id TEXT NOT NULL,
+                    rating REAL NOT NULL CHECK (rating >= 1.0 AND rating <= 5.0),
+                    review_text TEXT,
+                    timestamp INTEGER NOT NULL,
+                    helpful INTEGER NOT NULL DEFAULT 0,
+                    FOREIGN KEY (plugin_id) REFERENCES plugin(id) ON DELETE CASCADE,
+                    UNIQUE(plugin_id, user_id)
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createPluginReviewSql, 0)
+            println("Created plugin_review table")
+            
+            // Create indexes for plugin_review table
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_review_plugin_id ON plugin_review(plugin_id);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_review_user_id ON plugin_review(user_id);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_review_rating ON plugin_review(rating DESC);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_review_timestamp ON plugin_review(timestamp DESC);", 0)
+            println("Created indexes for plugin_review table")
+            
+            println("Successfully migrated to version 9")
+            
+        } catch (e: Exception) {
+            println("Error migrating to version 9: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+    
+    /**
+     * Migration from version 9 to version 10
+     * Adds plugin_trial table for tracking trial periods
+     */
+    private fun migrateV9toV10(driver: SqlDriver) {
+        try {
+            println("Starting migration from version 9 to 10...")
+            
+            // Create plugin_trial table
+            val createPluginTrialSql = """
+                CREATE TABLE IF NOT EXISTS plugin_trial (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    plugin_id TEXT NOT NULL,
+                    user_id TEXT NOT NULL,
+                    start_date INTEGER NOT NULL,
+                    expiration_date INTEGER NOT NULL,
+                    is_active INTEGER NOT NULL DEFAULT 1,
+                    FOREIGN KEY (plugin_id) REFERENCES plugin(id) ON DELETE CASCADE
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createPluginTrialSql, 0)
+            println("Created plugin_trial table")
+            
+            // Create indexes for plugin_trial table
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_trial_plugin_id ON plugin_trial(plugin_id);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_trial_user_id ON plugin_trial(user_id);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_trial_active ON plugin_trial(is_active);", 0)
+            println("Created indexes for plugin_trial table")
+            
+            println("Successfully migrated to version 10")
+            
+        } catch (e: Exception) {
+            println("Error migrating to version 10: ${e.message}")
             e.printStackTrace()
         }
     }

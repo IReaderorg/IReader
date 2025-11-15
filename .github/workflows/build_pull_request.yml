@@ -74,12 +74,34 @@ jobs:
       - name: Build rpm Package
         if: ${{ matrix.runtime == 'linux-fedora-x64' }}
         uses: Syer10/Fedora-Java21-Action@v1
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_BOOKS_URL: ${{ secrets.SUPABASE_BOOKS_URL }}
+          SUPABASE_BOOKS_KEY: ${{ secrets.SUPABASE_BOOKS_KEY }}
+          SUPABASE_PROGRESS_URL: ${{ secrets.SUPABASE_PROGRESS_URL }}
+          SUPABASE_PROGRESS_KEY: ${{ secrets.SUPABASE_PROGRESS_KEY }}
+          SUPABASE_REVIEWS_URL: ${{ secrets.SUPABASE_REVIEWS_URL }}
+          SUPABASE_REVIEWS_KEY: ${{ secrets.SUPABASE_REVIEWS_KEY }}
+          SUPABASE_COMMUNITY_URL: ${{ secrets.SUPABASE_COMMUNITY_URL }}
+          SUPABASE_COMMUNITY_KEY: ${{ secrets.SUPABASE_COMMUNITY_KEY }}
         with:
           command: ./gradlew ${{ matrix.build }} --stacktrace
 
       - name: Build
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
         uses: gradle/gradle-build-action@v2
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_BOOKS_URL: ${{ secrets.SUPABASE_BOOKS_URL }}
+          SUPABASE_BOOKS_KEY: ${{ secrets.SUPABASE_BOOKS_KEY }}
+          SUPABASE_PROGRESS_URL: ${{ secrets.SUPABASE_PROGRESS_URL }}
+          SUPABASE_PROGRESS_KEY: ${{ secrets.SUPABASE_PROGRESS_KEY }}
+          SUPABASE_REVIEWS_URL: ${{ secrets.SUPABASE_REVIEWS_URL }}
+          SUPABASE_REVIEWS_KEY: ${{ secrets.SUPABASE_REVIEWS_KEY }}
+          SUPABASE_COMMUNITY_URL: ${{ secrets.SUPABASE_COMMUNITY_URL }}
+          SUPABASE_COMMUNITY_KEY: ${{ secrets.SUPABASE_COMMUNITY_KEY }}
         with:
           arguments: >
             ${{ matrix.build }}

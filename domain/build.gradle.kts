@@ -15,32 +15,54 @@ android {
     defaultConfig {
         minSdk = ProjectConfig.minSdk
         
-        // Load Supabase credentials from local.properties
+        // Load Supabase credentials from environment variables (CI/CD) or local.properties (dev)
         val properties = Properties()
         val localPropertiesFile = rootProject.file("local.properties")
         if (localPropertiesFile.exists()) {
             properties.load(localPropertiesFile.inputStream())
         }
         
-        // Primary endpoint
-        buildConfigField("String", "SUPABASE_URL", "\"${properties.getProperty("SUPABASE_URL", "")}\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${properties.getProperty("SUPABASE_ANON_KEY", "")}\"")
+        // Primary endpoint - Priority: 1. Environment variables, 2. local.properties, 3. Empty
+        val supabaseUrl = System.getenv("SUPABASE_URL") 
+            ?: properties.getProperty("supabase.url", "")
+        val supabaseAnonKey = System.getenv("SUPABASE_ANON_KEY") 
+            ?: properties.getProperty("supabase.anon.key", "")
         
         // Books endpoint
-        buildConfigField("String", "SUPABASE_BOOKS_URL", "\"${properties.getProperty("supabase.books.url", "")}\"")
-        buildConfigField("String", "SUPABASE_BOOKS_KEY", "\"${properties.getProperty("supabase.books.key", "")}\"")
+        val supabaseBooksUrl = System.getenv("SUPABASE_BOOKS_URL")
+            ?: properties.getProperty("supabase.books.url", "")
+        val supabaseBooksKey = System.getenv("SUPABASE_BOOKS_KEY")
+            ?: properties.getProperty("supabase.books.key", "")
         
         // Progress endpoint
-        buildConfigField("String", "SUPABASE_PROGRESS_URL", "\"${properties.getProperty("supabase.progress.url", "")}\"")
-        buildConfigField("String", "SUPABASE_PROGRESS_KEY", "\"${properties.getProperty("supabase.progress.key", "")}\"")
+        val supabaseProgressUrl = System.getenv("SUPABASE_PROGRESS_URL")
+            ?: properties.getProperty("supabase.progress.url", "")
+        val supabaseProgressKey = System.getenv("SUPABASE_PROGRESS_KEY")
+            ?: properties.getProperty("supabase.progress.key", "")
         
         // Reviews endpoint
-        buildConfigField("String", "SUPABASE_REVIEWS_URL", "\"${properties.getProperty("supabase.reviews.url", "")}\"")
-        buildConfigField("String", "SUPABASE_REVIEWS_KEY", "\"${properties.getProperty("supabase.reviews.key", "")}\"")
+        val supabaseReviewsUrl = System.getenv("SUPABASE_REVIEWS_URL")
+            ?: properties.getProperty("supabase.reviews.url", "")
+        val supabaseReviewsKey = System.getenv("SUPABASE_REVIEWS_KEY")
+            ?: properties.getProperty("supabase.reviews.key", "")
         
         // Community endpoint
-        buildConfigField("String", "SUPABASE_COMMUNITY_URL", "\"${properties.getProperty("supabase.community.url", "")}\"")
-        buildConfigField("String", "SUPABASE_COMMUNITY_KEY", "\"${properties.getProperty("supabase.community.key", "")}\"")
+        val supabaseCommunityUrl = System.getenv("SUPABASE_COMMUNITY_URL")
+            ?: properties.getProperty("supabase.community.url", "")
+        val supabaseCommunityKey = System.getenv("SUPABASE_COMMUNITY_KEY")
+            ?: properties.getProperty("supabase.community.key", "")
+        
+        // Build config fields
+        buildConfigField("String", "SUPABASE_URL", "\"${supabaseUrl}\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${supabaseAnonKey}\"")
+        buildConfigField("String", "SUPABASE_BOOKS_URL", "\"${supabaseBooksUrl}\"")
+        buildConfigField("String", "SUPABASE_BOOKS_KEY", "\"${supabaseBooksKey}\"")
+        buildConfigField("String", "SUPABASE_PROGRESS_URL", "\"${supabaseProgressUrl}\"")
+        buildConfigField("String", "SUPABASE_PROGRESS_KEY", "\"${supabaseProgressKey}\"")
+        buildConfigField("String", "SUPABASE_REVIEWS_URL", "\"${supabaseReviewsUrl}\"")
+        buildConfigField("String", "SUPABASE_REVIEWS_KEY", "\"${supabaseReviewsKey}\"")
+        buildConfigField("String", "SUPABASE_COMMUNITY_URL", "\"${supabaseCommunityUrl}\"")
+        buildConfigField("String", "SUPABASE_COMMUNITY_KEY", "\"${supabaseCommunityKey}\"")
     }
     lint {
         targetSdk = ProjectConfig.targetSdk

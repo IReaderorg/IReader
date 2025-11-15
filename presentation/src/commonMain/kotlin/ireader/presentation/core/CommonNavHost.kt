@@ -201,6 +201,22 @@ fun CommonNavHost(
         }
         
         composable(
+            route = "sourceMigration/{sourceId}",
+            arguments = listOf(
+                navArgument("sourceId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val sourceId = remember(backStackEntry) {
+                backStackEntry.savedStateHandle.get<String>("sourceId")?.toLongOrNull()
+            }
+            if (sourceId != null) {
+                key(sourceId) {
+                    SourceMigrationScreenSpec(sourceId).Content()
+                }
+            }
+        }
+        
+        composable(
             route = "webView?url={url}&sourceId={sourceId}&bookId={bookId}&chapterId={chapterId}&enableBookFetch={enableBookFetch}&enableChapterFetch={enableChapterFetch}&enableChaptersFetch={enableChaptersFetch}",
             arguments = listOf(
                 navArgument("url") { 

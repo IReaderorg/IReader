@@ -155,7 +155,7 @@ getDownloaded:
 SELECT book.* FROM book
  JOIN chapter
  ON chapter.book_id = book._id
- WHERE content IS NOT "";
+ WHERE content IS NOT '';
 
 
 

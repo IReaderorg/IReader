@@ -81,14 +81,12 @@ val remoteModule = module {
             }
         }
         
-        // Validate primary credentials
-        if (usersUrl.isEmpty() || usersKey.isEmpty()) {
-            throw IllegalStateException(
-                "Supabase credentials not configured. " +
-                "Please add your credentials to local.properties (Android) or config.properties (Desktop). " +
-                "Alternatively, configure a custom instance in Settings → Supabase Configuration. " +
-                "See SECURE_CONFIGURATION_GUIDE.md for instructions."
-            )
+        // Validate primary credentials - if not configured, return null provider
+        if (usersUrl.isEmpty() || usersKey.isEmpty() || 
+            usersUrl == ireader.domain.preferences.prefs.SupabasePreferences.DEFAULT_SUPABASE_URL ||
+            usersKey == ireader.domain.preferences.prefs.SupabasePreferences.DEFAULT_SUPABASE_API_KEY) {
+            // Return a no-op provider when credentials are not configured
+            return@single ireader.data.remote.NoOpSupabaseClientProvider()
         }
         
         // Create configuration
@@ -125,13 +123,6 @@ val remoteModule = module {
         ireader.data.remote.SupabaseClientProviderImpl(config)
     }
     
-    // Supabase client (backward compatibility - returns primary/users client)
-    single<SupabaseClient> {
-        val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
-        (provider as ireader.data.remote.SupabaseClientProviderImpl)
-            .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS)
-    }
-    
     // Sync queue
     single { SyncQueue() }
     
@@ -143,11 +134,18 @@ val remoteModule = module {
     
     // Remote repository
     single<RemoteRepository> {
-        SupabaseRemoteRepository(
-            supabaseClient = get(),
-            syncQueue = get(),
-            retryPolicy = get(),
-            cache = get()
-        )
+        val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
+        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
+            ireader.data.remote.NoOpRemoteRepository()
+        } else {
+            val supabaseClient = (provider as ireader.data.remote.SupabaseClientProviderImpl)
+                .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS)
+            SupabaseRemoteRepository(
+                supabaseClient = supabaseClient,
+                syncQueue = get(),
+                retryPolicy = get(),
+                cache = get()
+            )
+        }
     }
 }
