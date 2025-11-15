@@ -3,36 +3,38 @@ package ireader.core.http
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.os.Build
+import android.webkit.CookieManager
+import android.webkit.JavascriptInterface
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import ireader.core.log.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
-import ireader.core.log.Log
-import ireader.core.http.BrowserEngineInterface
-import ireader.core.http.Result
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import java.util.concurrent.TimeoutException
-import android.os.Handler
-import android.os.Looper
-import android.webkit.CookieManager
-import android.webkit.JavascriptInterface
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import java.util.UUID
+import java.util.concurrent.TimeoutException
 import kotlin.coroutines.resumeWithException
 
-actual class BrowserEngine(private val webViewManger: WebViewManger, private val webViewCookieJar: WebViewCookieJar) :
-    BrowserEngineInterface {
+actual class BrowserEngine actual constructor() : BrowserEngineInterface {
+    
+    private lateinit var webViewManger: WebViewManger
+    private lateinit var webViewCookieJar: WebViewCookieJar
+    
+    constructor(webViewManger: WebViewManger, webViewCookieJar: WebViewCookieJar) : this() {
+        this.webViewManger = webViewManger
+        this.webViewCookieJar = webViewCookieJar
+    }
 
     private val cloudflareBypassDetected = MutableStateFlow(false)
     private val ajaxCompleted = MutableStateFlow(false)

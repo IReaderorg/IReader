@@ -16,7 +16,7 @@ interface  BrowserEngineInterface {
 
 
 
-expect class BrowserEngine : BrowserEngineInterface {
+expect class BrowserEngine() : BrowserEngineInterface {
     override suspend fun fetch(
         url: String,
         selector: String?,
@@ -24,6 +24,7 @@ expect class BrowserEngine : BrowserEngineInterface {
         timeout: Long,
         userAgent: String,
     ): Result
+
 }
 /**
  * This object is representing the result of an request

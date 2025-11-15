@@ -1,7 +1,6 @@
 package ireader.domain.js.loader
 
 import io.ktor.client.HttpClient
-import ireader.core.http.BrowserEngine
 import ireader.core.prefs.PreferenceStoreFactory
 import ireader.domain.js.bridge.JSPluginBridge
 import ireader.domain.js.bridge.JSPluginSource
@@ -11,7 +10,6 @@ import ireader.domain.js.models.JSPluginError
 import ireader.domain.js.models.PluginMetadata
 import ireader.domain.js.util.JSPluginLogger
 import ireader.domain.js.util.JSPluginValidator
-import ireader.domain.js.util.ValidationResult
 import ireader.domain.models.entities.JSPluginCatalog
 import java.io.File
 

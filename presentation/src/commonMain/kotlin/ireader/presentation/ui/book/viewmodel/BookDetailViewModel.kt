@@ -502,7 +502,7 @@ class BookDetailViewModel(
                 // Export the book
                 val result = exportBookAsEpubUseCase(
                     bookId = book.id,
-                    outputUri = ireader.domain.models.common.Uri(outputUri),
+                    outputUri = ireader.domain.models.common.Uri.parse(outputUri),
                     options = domainOptions
                 ) { progress ->
                     showSnackBar(UiText.DynamicString(progress))
