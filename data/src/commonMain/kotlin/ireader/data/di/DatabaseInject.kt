@@ -31,7 +31,7 @@ val DataModule = module {
     single<ireader.domain.data.repository.FundingGoalRepository> {
         FundingGoalRepositoryImpl()
     }
-    single<SyncRemoteCatalogs> { SyncRemoteCatalogs(get(), CatalogGithubApi(get(),get()),get()) }
+    single<SyncRemoteCatalogs> { SyncRemoteCatalogs(get(), CatalogGithubApi(get(),get(),get()),get()) }
 
     single<CatalogSourceRepository> { CatalogSourceRepositoryImpl(get()) }
 }

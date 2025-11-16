@@ -266,7 +266,7 @@ private fun AddRepositoryDialog(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Text(
-                    text = "Examples:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo/index.min.json\n• LNReader: https://raw.githubusercontent.com/LNReader/lnreader-plugins/plugins/v3.json",
+                    text = "Examples:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo/index.min.json\n• LNReader: https://raw.githubusercontent.com/LNReader/lnreader-plugins/plugins/v3.0.0/.dist/plugins.min.json",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

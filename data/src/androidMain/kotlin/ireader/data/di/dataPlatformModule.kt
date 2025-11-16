@@ -45,7 +45,7 @@ actual val dataPlatformModule = module {
             get()
         )
     }
-    single<CatalogRemoteApi> { CatalogGithubApi(get(), get()) }
+    single<CatalogRemoteApi> { CatalogGithubApi(get(), get(), get()) }
     single<UninstallCatalogs> {
         ireader.data.catalog.impl.interactor.UninstallCatalogImpl(
             get(),

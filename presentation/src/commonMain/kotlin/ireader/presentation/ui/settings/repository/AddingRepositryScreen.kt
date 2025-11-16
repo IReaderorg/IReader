@@ -68,7 +68,7 @@ internal fun AddingRepositoryScreen(
             ),
             QuickAddPreset(
                 name = "LNReader Plugins",
-                url = "https://raw.githubusercontent.com/LNReader/lnreader-plugins/plugins/v3.json",
+                url = "https://raw.githubusercontent.com/LNReader/lnreader-plugins/plugins/v3.0.0/.dist/plugins.min.json",
                 owner = "LNReader",
                 source = "https://github.com/LNReader/lnreader-plugins",
                 type = RepositoryType.LNREADER

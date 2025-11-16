@@ -54,5 +54,5 @@ fun exceptionHandler(e: Throwable): UiText? {
     }
 }
 
-class CatalogNotFoundException : Exception()
+class CatalogNotFoundException(message: String? = null) : Exception(message)
 
