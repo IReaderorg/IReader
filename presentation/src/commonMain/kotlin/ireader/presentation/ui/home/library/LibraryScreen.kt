@@ -77,6 +77,11 @@ fun LibraryScreen(
     onHideFilterSheet: () -> Unit = {},
 ) {
     
+    // Handle back button to close filter sheet instead of closing screen
+    androidx.activity.compose.BackHandler(enabled = showFilterSheet) {
+        onHideFilterSheet()
+    }
+    
     LaunchedEffect(vm.selectionMode) {
         requestHideBottomNav(vm.selectionMode)
     }

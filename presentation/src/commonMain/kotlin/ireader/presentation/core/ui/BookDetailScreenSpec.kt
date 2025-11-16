@@ -81,8 +81,19 @@ data class BookDetailScreenSpec constructor(
         val catalog = state.catalogSource
         val scope = rememberCoroutineScope()
         val chapters = vm.getChapters(book?.id)
-        val scrollState = rememberLazyListState();
+        val scrollState = rememberLazyListState(
+            initialFirstVisibleItemIndex = vm.savedScrollIndex,
+            initialFirstVisibleItemScrollOffset = vm.savedScrollOffset
+        )
         val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+        
+        // Save scroll position when it changes
+        androidx.compose.runtime.LaunchedEffect(scrollState.firstVisibleItemIndex, scrollState.firstVisibleItemScrollOffset) {
+            vm.saveScrollPosition(
+                scrollState.firstVisibleItemIndex,
+                scrollState.firstVisibleItemScrollOffset
+            )
+        }
         val refreshing = vm.detailIsLoading || vm.chapterIsLoading
         val swipeRefreshState =
             rememberPullRefreshState(refreshing = refreshing, onRefresh = {
@@ -133,6 +144,13 @@ data class BookDetailScreenSpec constructor(
             vm.createEpub.onEpubCreateRequested(book) { uri ->
                 onShareEpub.launch(uri)
                 triggerEpubExportFromDialog.value = false
+            }
+        }
+        
+        // Handle back button to close modal sheet instead of closing screen
+        androidx.activity.compose.BackHandler(enabled = sheetState.isVisible) {
+            scope.launch {
+                sheetState.hide()
             }
         }
         

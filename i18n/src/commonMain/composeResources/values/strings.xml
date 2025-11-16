@@ -114,7 +114,7 @@
     <string name="enter_query_and_tap_search">Enter a query and tap search to find books</string>
     <string name="results_found">results found</string>
     <string name="results">results</string>
-    <string name="more">more</string>
+    <string name="more">More</string>
     <string name="webView">WebView</string>
     <string name="browse">Browse</string>
     <string name="open_last_chapter">Open last chapter</string>
@@ -344,7 +344,7 @@
     <string name="installed">Installed</string>
     <string name="uninstall">Uninstall</string>
     <string name="available">Available</string>
-    <string name="extensions">Installed</string>
+    <string name="extensions">Extension</string>
     <string name="sources">Browse</string>
     <string name="backup">Backup</string>
     <string name="backup_and_restore">Backup and restore</string>

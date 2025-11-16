@@ -33,6 +33,7 @@ import ireader.domain.models.remote.BadgeRarity
 import ireader.domain.models.remote.PaymentProof
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
+import ireader.presentation.ui.core.ui.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -189,16 +190,60 @@ fun BadgeCard(
                 .padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Badge Image
-            AsyncImage(
-                model = badge.imageUrl,
-                contentDescription = badge.name,
+            // Badge Image with fallback
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f)
                     .clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Crop
-            )
+                contentAlignment = Alignment.Center
+            ) {
+                if (badge.imageUrl.isNotEmpty()) {
+                    AsyncImage(
+                        model = badge.imageUrl,
+                        contentDescription = badge.name,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                        error = {
+                            // Fallback when image fails to load
+                            Surface(
+                                modifier = Modifier.fillMaxSize(),
+                                color = MaterialTheme.colorScheme.surfaceVariant
+                            ) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = badge.name.take(2).uppercase(),
+                                        style = MaterialTheme.typography.displayLarge,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+                    )
+                } else {
+                    // Fallback when no image URL
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.surfaceVariant
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = badge.name.take(2).uppercase(),
+                                style = MaterialTheme.typography.displayLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            }
             
             Spacer(modifier = Modifier.height(8.dp))
             
@@ -299,16 +344,60 @@ fun BadgePurchaseDialog(
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
             ) {
-                // Badge Image Preview
-                AsyncImage(
-                    model = badge.imageUrl,
-                    contentDescription = badge.name,
+                // Badge Image Preview with fallback
+                Box(
                     modifier = Modifier
                         .size(128.dp)
                         .align(Alignment.CenterHorizontally)
                         .clip(RoundedCornerShape(16.dp)),
-                    contentScale = ContentScale.Crop
-                )
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (badge.imageUrl.isNotEmpty()) {
+                        AsyncImage(
+                            model = badge.imageUrl,
+                            contentDescription = badge.name,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop,
+                            error = {
+                                // Fallback when image fails to load
+                                Surface(
+                                    modifier = Modifier.fillMaxSize(),
+                                    color = MaterialTheme.colorScheme.surfaceVariant
+                                ) {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = badge.name.take(2).uppercase(),
+                                            style = MaterialTheme.typography.displayLarge,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
+                        )
+                    } else {
+                        // Fallback when no image URL
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.surfaceVariant
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = badge.name.take(2).uppercase(),
+                                    style = MaterialTheme.typography.displayLarge,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 

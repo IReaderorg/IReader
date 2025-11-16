@@ -43,7 +43,20 @@ subprojects {
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.desktopJvmTarget.toString()))
-            freeCompilerArgs.add("-Xexpect-actual-classes")
+            freeCompilerArgs.addAll(
+                "-Xexpect-actual-classes",
+                "-opt-in=kotlin.RequiresOptIn"
+            )
+        }
+    }
+    
+    // Optimize Kotlin compilation tasks
+    tasks.withType<KotlinCompilationTask<*>>().configureEach {
+        compilerOptions {
+            // Enable progressive mode for better compilation performance
+            progressiveMode.set(false)
+            // Suppress version compatibility warnings
+            allWarningsAsErrors.set(false)
         }
     }
 }

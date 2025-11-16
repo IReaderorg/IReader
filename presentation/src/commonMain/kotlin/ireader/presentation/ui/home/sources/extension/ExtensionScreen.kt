@@ -38,19 +38,21 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExtensionScreen(
-        modifier: Modifier = Modifier,
-        vm: ExtensionViewModel,
-        onClickCatalog: (Catalog) -> Unit,
-        onClickInstall: (Catalog) -> Unit,
-        onClickUninstall: (Catalog) -> Unit,
-        onClickTogglePinned: (Catalog) -> Unit,
-        onCancelInstaller: ((Catalog) -> Unit)? = null,
-        snackBarHostState: androidx.compose.material3.SnackbarHostState,
-        onShowDetails: ((Catalog) -> Unit)? = null,
-        onMigrateFromSource: ((Long) -> Unit)? = null,
-        onNavigateToBrowseSettings: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    vm: ExtensionViewModel,
+    onClickCatalog: (Catalog) -> Unit,
+    onClickInstall: (Catalog) -> Unit,
+    onClickUninstall: (Catalog) -> Unit,
+    onClickTogglePinned: (Catalog) -> Unit,
+    onCancelInstaller: ((Catalog) -> Unit)? = null,
+    snackBarHostState: androidx.compose.material3.SnackbarHostState,
+    onShowDetails: ((Catalog) -> Unit)? = null,
+    onMigrateFromSource: ((Long) -> Unit)? = null,
+    onNavigateToBrowseSettings: (() -> Unit)? = null,
+    scaffoldPadding: PaddingValues
 ) {
-    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val localizeHelper =
+        requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LaunchedEffect(key1 = true) {
         vm.eventFlow.collectLatest { event ->
             when (event) {
@@ -59,6 +61,7 @@ fun ExtensionScreen(
                         event.uiText.asString(localizeHelper)
                     )
                 }
+
                 else -> {}
             }
         }
@@ -70,30 +73,27 @@ fun ExtensionScreen(
         )
     }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    
-    Scaffold(
-        modifier = modifier,
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            ExtensionContent(
-                vm = vm,
-                state = vm,
-                onClickCatalog = onClickCatalog,
-                onClickInstall = onClickInstall,
-                onClickTogglePinned = onClickTogglePinned,
-                onClickUninstall = onClickUninstall,
-                pages = pages,
-                onCancelInstaller = onCancelInstaller,
-                onShowDetails = onShowDetails,
-            )
-        }
+
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(scaffoldPadding)
+    ) {
+        ExtensionContent(
+            vm = vm,
+            state = vm,
+            onClickCatalog = onClickCatalog,
+            onClickInstall = onClickInstall,
+            onClickTogglePinned = onClickTogglePinned,
+            onClickUninstall = onClickUninstall,
+            pages = pages,
+            onCancelInstaller = onCancelInstaller,
+            onShowDetails = onShowDetails,
+        )
+
     }
 }
-
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -102,7 +102,8 @@ fun SourceHeader(
     modifier: Modifier = Modifier,
     language: String,
 ) {
-    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val localizeHelper =
+        requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.CenterStart
@@ -121,18 +122,18 @@ fun SourceHeader(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ExtensionContent(
-        pages: List<String>,
-        modifier: Modifier = Modifier,
-        state: CatalogsState,
-        onClickCatalog: (Catalog) -> Unit,
-        onClickTogglePinned: (Catalog) -> Unit,
-        vm: ExtensionViewModel,
-        onClickInstall: (Catalog) -> Unit,
-        onClickUninstall: (Catalog) -> Unit,
-        onCancelInstaller: ((Catalog) -> Unit)? = null,
-        onShowDetails: ((Catalog) -> Unit)? = null,
+    pages: List<String>,
+    modifier: Modifier = Modifier,
+    state: CatalogsState,
+    onClickCatalog: (Catalog) -> Unit,
+    onClickTogglePinned: (Catalog) -> Unit,
+    vm: ExtensionViewModel,
+    onClickInstall: (Catalog) -> Unit,
+    onClickUninstall: (Catalog) -> Unit,
+    onCancelInstaller: ((Catalog) -> Unit)? = null,
+    onShowDetails: ((Catalog) -> Unit)? = null,
 
-        ) {
+    ) {
     val pagerState = rememberPagerState(
         initialPage = 0,
         initialPageOffsetFraction = 0f
@@ -184,10 +185,10 @@ private fun ExtensionPager(
         pageSize = PageSize.Fill,
         key = null,
         pageNestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
-            state=pagerState ,
+            state = pagerState,
             Orientation.Horizontal
         ),
-        pageContent = {page ->
+        pageContent = { page ->
             when (page) {
                 0 -> {
                     UserSourcesScreen(

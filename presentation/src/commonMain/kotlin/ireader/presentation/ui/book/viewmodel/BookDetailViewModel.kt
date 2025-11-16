@@ -99,6 +99,17 @@ class BookDetailViewModel(
     // Source switching state
     val sourceSwitchingState = SourceSwitchingState()
     
+    // Scroll state persistence
+    var savedScrollIndex by mutableStateOf(0)
+        private set
+    var savedScrollOffset by mutableStateOf(0)
+        private set
+    
+    fun saveScrollPosition(index: Int, offset: Int) {
+        savedScrollIndex = index
+        savedScrollOffset = offset
+    }
+    
     init {
         booksState.book = null
         val bookId = param.bookId

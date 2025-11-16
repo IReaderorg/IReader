@@ -71,9 +71,18 @@ fun MoreScreen(
     // Theme mode state
     var showThemeOptions by remember { mutableStateOf(false) }
     
-    // Save scroll state across navigation
-    val listState = rememberSaveable(saver = LazyListState.Saver) {
-        LazyListState()
+    // Save scroll state across navigation using ViewModel
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = vm.savedScrollIndex,
+        initialFirstVisibleItemScrollOffset = vm.savedScrollOffset
+    )
+    
+    // Save scroll position when it changes
+    androidx.compose.runtime.LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset) {
+        vm.saveScrollPosition(
+            listState.firstVisibleItemIndex,
+            listState.firstVisibleItemScrollOffset
+        )
     }
     
     LazyColumn(
@@ -559,4 +568,15 @@ class MainSettingScreenViewModel(
     uiPreferences: UiPreferences
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
     val incognitoMode = uiPreferences.incognitoMode().asState()
+    
+    // Scroll state persistence
+    var savedScrollIndex by mutableStateOf(0)
+        private set
+    var savedScrollOffset by mutableStateOf(0)
+        private set
+    
+    fun saveScrollPosition(index: Int, offset: Int) {
+        savedScrollIndex = index
+        savedScrollOffset = offset
+    }
 }

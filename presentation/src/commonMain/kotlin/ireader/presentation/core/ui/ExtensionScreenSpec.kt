@@ -153,7 +153,8 @@ object ExtensionScreenSpec : Tab {
                         },
                         onMigrateFromSource = { sourceId ->
                             navController.navigateTo(SourceMigrationScreenSpec(sourceId))
-                        }
+                        },
+                    scaffoldPadding = scaffoldPadding
                 )
             }
             PullRefreshIndicator(

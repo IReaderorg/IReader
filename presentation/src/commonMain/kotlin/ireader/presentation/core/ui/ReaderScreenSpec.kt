@@ -184,6 +184,14 @@ data class ReaderScreenSpec(
         val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
         val drawerState =
             androidx.compose.material3.rememberDrawerState(androidx.compose.material3.DrawerValue.Closed)
+        
+        // Handle back button to close drawer instead of closing screen
+        androidx.activity.compose.BackHandler(enabled = drawerState.isOpen) {
+            scope.launch {
+                drawerState.close()
+            }
+        }
+        
         IModalDrawer(
             state = drawerState,
             sheetContent = {

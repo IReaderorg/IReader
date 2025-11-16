@@ -21,11 +21,12 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.core.ui.kaomojis
 
 /**
- * A Material 3 compliant error UI component for the Explore screen.
+ * A compact and efficient error UI component for the Explore screen.
  * Features:
- * - Consistent button sizes and styling
- * - Proper Material 3 color theming
- * - Responsive layout with proper spacing
+ * - Minimal padding and spacing for better screen usage
+ * - Compact button layout
+ * - Smaller text and icon sizes
+ * - Reduced card elevation
  */
 @Composable
 fun ExploreScreenError(
@@ -42,86 +43,83 @@ fun ExploreScreenError(
         val kaomoji = remember { kaomojis.random() }
         Card(
             modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .padding(16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                .fillMaxWidth(0.85f)
+                .padding(12.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
         ) {
             Column(
-                modifier = Modifier
-                    .padding(24.dp),
+                modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
                     text = kaomoji,
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                        fontSize = 48.sp
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        fontSize = 32.sp
                     )
                 )
                 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 
                 Text(
                     text = error,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 3
                 )
                 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(20.dp))
                 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Primary action button with proper color scheme for text
+                    // Compact refresh button
                     FilledTonalButton(
                         onClick = { onRefresh() },
                         colors = ButtonDefaults.filledTonalButtonColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                         ),
-                        modifier = Modifier.height(48.dp)
+                        modifier = Modifier.height(40.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
                             contentDescription = localize(Res.string.retry),
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.onSecondary
+                            modifier = Modifier.size(16.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = localize(Res.string.retry),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSecondary
+                            style = MaterialTheme.typography.labelMedium
                         )
                     }
                     
                     if (source is HttpSource) {
-                        // Secondary action button with matching height and proper color scheme
+                        // Compact webview button
                         OutlinedButton(
                             onClick = { onWebView(source) },
                             colors = ButtonDefaults.outlinedButtonColors(
                                 contentColor = MaterialTheme.colorScheme.primary
                             ),
-                            border = ButtonDefaults.outlinedButtonBorder(),
-                            modifier = Modifier.height(48.dp)
+                            modifier = Modifier.height(40.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Public,
                                 contentDescription = localize(Res.string.open_in_webView),
-                                modifier = Modifier.size(18.dp),
-                                tint = MaterialTheme.colorScheme.primary
+                                modifier = Modifier.size(16.dp)
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = localize(Res.string.open_in_webView),
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.primary
+                                style = MaterialTheme.typography.labelMedium
                             )
                         }
                     }
