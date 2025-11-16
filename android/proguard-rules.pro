@@ -235,3 +235,23 @@
 -dontwarn javax.xml.stream.**
 -dontwarn org.graalvm.nativeimage.**
 -dontwarn sun.reflect.**
+
+# Ignore Java AWT classes (desktop-only, not available on Android)
+# These classes are only used in desktop builds and should not be included in Android
+-dontwarn java.awt.**
+-dontwarn javax.imageio.**
+-dontnote java.awt.**
+-dontnote javax.imageio.**
+
+# Tell R8 to ignore missing AWT classes that are referenced from multiplatform code
+# but only used in desktop builds
+-dontwarn java.awt.image.BufferedImage
+-dontwarn javax.imageio.ImageIO
+
+# Prevent R8 from failing on missing desktop-only classes
+# The desktop implementation should not be included in Android builds
+-dontwarn ireader.domain.js.update.JSPluginUpdateNotifier_desktopKt
+-dontwarn ireader.domain.js.update.JSPluginUpdateNotifier$Companion
+
+# Keep rules to prevent R8 from trying to optimize desktop source set classes
+-keep,allowshrinking class ireader.domain.js.update.JSPluginUpdateNotifier { *; }
