@@ -148,6 +148,7 @@ private fun RegularTopBar(
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
+    val (showMoreMenu, setShowMoreMenu) = remember { mutableStateOf(false) }
     
     Toolbar(
         title = {
@@ -196,41 +197,7 @@ private fun RegularTopBar(
                     },
                 )
             } else {
-                // Update Library
-                TopBarActionButton(
-                    icon = Icons.Outlined.Update,
-                    contentDescription = localize(Res.string.update_library),
-                    onClick = onUpdateLibrary
-                )
-                
-                // Update Category
-                TopBarActionButton(
-                    icon = Icons.Outlined.Category,
-                    contentDescription = localize(Res.string.update_category),
-                    onClick = onUpdateCategory
-                )
-                
-                // Import EPUB
-                TopBarActionButton(
-                    icon = Icons.Outlined.FileUpload,
-                    contentDescription = localize(Res.string.import_epub),
-                    onClick = onImportEpub
-                )
-                
-                // Open Random Entry
-                TopBarActionButton(
-                    icon = Icons.Outlined.Shuffle,
-                    contentDescription = localize(Res.string.open_random),
-                    onClick = onOpenRandom
-                )
-                
-                // Sync with Remote
-                TopBarActionButton(
-                    icon = Icons.Outlined.CloudSync,
-                    contentDescription = localize(Res.string.sync_remote),
-                    onClick = onSyncRemote
-                )
-                
+                // Sort/Filter button
                 TopBarActionButton(
                     icon = Icons.Outlined.Sort,
                     contentDescription = localize(Res.string.filter),
@@ -246,6 +213,7 @@ private fun RegularTopBar(
                     isActive = isModalVisible
                 )
                 
+                // Search button
                 TopBarActionButton(
                     icon = Icons.Outlined.Search,
                     contentDescription = localize(Res.string.search),
@@ -254,13 +222,82 @@ private fun RegularTopBar(
                     }
                 )
                 
-                TopBarActionButton(
-                    icon = Icons.Outlined.Refresh,
-                    contentDescription = localize(Res.string.refresh),
-                    onClick = {
-                        refreshUpdate()
+                // More options menu
+                Box {
+                    IconButton(onClick = { setShowMoreMenu(true) }) {
+                        Icon(
+                            imageVector = Icons.Outlined.MoreVert,
+                            contentDescription = localize(Res.string.more_options),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
-                )
+                    
+                    ireader.presentation.ui.component.components.IDropdownMenu(
+                        expanded = showMoreMenu,
+                        onDismissRequest = { setShowMoreMenu(false) }
+                    ) {
+                        ireader.presentation.ui.component.components.IDropdownMenuItem(
+                            text = { Text(localize(Res.string.update_library)) },
+                            onClick = {
+                                onUpdateLibrary()
+                                setShowMoreMenu(false)
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Outlined.Update, contentDescription = null)
+                            }
+                        )
+                        ireader.presentation.ui.component.components.IDropdownMenuItem(
+                            text = { Text(localize(Res.string.update_category)) },
+                            onClick = {
+                                onUpdateCategory()
+                                setShowMoreMenu(false)
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Outlined.Category, contentDescription = null)
+                            }
+                        )
+                        ireader.presentation.ui.component.components.IDropdownMenuItem(
+                            text = { Text(localize(Res.string.import_epub)) },
+                            onClick = {
+                                onImportEpub()
+                                setShowMoreMenu(false)
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Outlined.FileUpload, contentDescription = null)
+                            }
+                        )
+                        ireader.presentation.ui.component.components.IDropdownMenuItem(
+                            text = { Text(localize(Res.string.open_random)) },
+                            onClick = {
+                                onOpenRandom()
+                                setShowMoreMenu(false)
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Outlined.Shuffle, contentDescription = null)
+                            }
+                        )
+                        ireader.presentation.ui.component.components.IDropdownMenuItem(
+                            text = { Text(localize(Res.string.sync_remote)) },
+                            onClick = {
+                                onSyncRemote()
+                                setShowMoreMenu(false)
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Outlined.CloudSync, contentDescription = null)
+                            }
+                        )
+                        ireader.presentation.ui.component.components.IDropdownMenuItem(
+                            text = { Text(localize(Res.string.refresh)) },
+                            onClick = {
+                                refreshUpdate()
+                                setShowMoreMenu(false)
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Outlined.Refresh, contentDescription = null)
+                            }
+                        )
+                    }
+                }
             }
         },
         navigationIcon = {

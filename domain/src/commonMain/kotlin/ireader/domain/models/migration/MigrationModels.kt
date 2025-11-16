@@ -52,3 +52,18 @@ enum class MigrationStatus {
     COMPLETED,
     FAILED
 }
+
+/**
+ * History record of a migration
+ */
+data class MigrationHistory(
+    val id: String,
+    val oldBookId: Long,
+    val newBookId: Long,
+    val oldSourceId: Long,
+    val newSourceId: Long,
+    val timestamp: Long,
+    val chaptersTransferred: Int,
+    val progressPreserved: Boolean,
+    val canRollback: Boolean = true
+)

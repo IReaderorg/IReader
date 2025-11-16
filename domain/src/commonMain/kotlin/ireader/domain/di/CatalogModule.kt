@@ -41,8 +41,5 @@ val CatalogModule = module {
     single<UpdateCatalog> { UpdateCatalog(get(),get()) }
 
     single<TogglePinnedCatalog> { TogglePinnedCatalog(get()) }
-    
-    // Migration use case
-    factory { ireader.domain.use_cases.migration.MigrateNovelUseCase(get(), get(), get(), get(), get()) }
 
 }

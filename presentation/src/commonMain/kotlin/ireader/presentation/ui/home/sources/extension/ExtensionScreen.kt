@@ -69,11 +69,25 @@ fun ExtensionScreen(
             localizeHelper.localize(Res.string.extensions),
         )
     }
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    
     Scaffold(
         modifier = modifier,
         topBar = {
-            ExtensionTopBar(
-                onNavigateToBrowseSettings = onNavigateToBrowseSettings
+            ExtensionScreenTopAppBar(
+                currentPage = vm.currentPagerPage,
+                searchMode = vm.isInSearchMode,
+                query = vm.searchQuery,
+                onValueChange = { vm.searchQuery = it },
+                onConfirm = { /* Search confirm logic */ },
+                onClose = { vm.searchQuery = "" },
+                onSearchDisable = { vm.isInSearchMode = false },
+                onSearchEnable = { vm.isInSearchMode = true },
+                onRefresh = { vm.refreshExtensions() },
+                onSearchNavigate = { /* Navigate to global search */ },
+                onMigrate = onMigrateFromSource?.let { { /* Show migration dialog */ } },
+                onAddRepository = { /* Add repository logic */ },
+                scrollBehavior = scrollBehavior
             )
         }
     ) { paddingValues ->
@@ -97,27 +111,7 @@ fun ExtensionScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ExtensionTopBar(
-    onNavigateToBrowseSettings: (() -> Unit)?,
-    modifier: Modifier = Modifier
-) {
-    TopAppBar(
-        title = { Text("Extensions") },
-        actions = {
-            if (onNavigateToBrowseSettings != null) {
-                IconButton(onClick = onNavigateToBrowseSettings) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Browse Settings"
-                    )
-                }
-            }
-        },
-        modifier = modifier
-    )
-}
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

@@ -439,14 +439,24 @@ fun GeneralScreenTab(
             ).Build()
         }
         item {
-            // TODO: Fix translation engine selection
-            // ChipChoicePreference<String>(
-            //     preference = vm.translatorEngine,
-            //     choices = vm.translationEnginesManager.getAvailableEngines().associate { engine -> engine.id to engine.engineName },
-            //     title = localize(
-            //         Res.string.translation_engine
-            //     )
-            // )
+            // Requirements: 6.6, 6.7 - Use stable API to get and set translation engine preference
+            val engines = vm.translationEnginesManager.getAvailableEngines()
+            val engineChoices = engines.mapNotNull { source ->
+                when (source) {
+                    is ireader.domain.usecases.translate.TranslationEngineSource.BuiltIn -> 
+                        source.engine.id to source.engine.engineName
+                    is ireader.domain.usecases.translate.TranslationEngineSource.Plugin -> 
+                        null // Plugin engines would need different handling
+                }
+            }.toMap()
+            
+            ChipChoicePreference(
+                preference = vm.translatorEngine,
+                choices = engineChoices,
+                title = localize(
+                    Res.string.translation_engine
+                )
+            )
         }
         item {
             ChipChoicePreference(
@@ -978,9 +988,33 @@ fun FontPickerTab(
             vm.selectFont(fontId)
         },
         onImportFont = {
-            // TODO: Platform-specific file picker implementation
-            // For now, show a message that this feature requires platform implementation
-            vm.showSnackBar(ireader.i18n.UiText.DynamicString("Font import requires platform-specific implementation"))
+            vm.scope.launchIO {
+                try {
+                    val filePaths = ireader.core.util.PlatformFilePicker.pickFiles(
+                        fileTypes = listOf("ttf", "otf"),
+                        multiSelect = true
+                    )
+                    
+                    if (filePaths != null && filePaths.isNotEmpty()) {
+                        filePaths.forEach { filePath ->
+                            // Validate font file
+                            val file = java.io.File(filePath)
+                            if (!ireader.presentation.ui.core.theme.FontRegistry.validateFontFile(file)) {
+                                vm.showSnackBar(ireader.i18n.UiText.DynamicString("Invalid font file: ${file.name}"))
+                                return@forEach
+                            }
+                            
+                            // Extract font name from file name
+                            val fontName = file.nameWithoutExtension
+                            
+                            // Import the font
+                            vm.importFont(filePath, fontName)
+                        }
+                    }
+                } catch (e: Exception) {
+                    vm.showSnackBar(ireader.i18n.UiText.ExceptionString(e))
+                }
+            }
         },
         onDeleteFont = { fontId ->
             vm.deleteFont(fontId)

@@ -216,7 +216,10 @@ fun CommonNavHost(
             }
             if (sourceId != null) {
                 key(sourceId) {
-                    SourceMigrationScreenSpec(sourceId).Content()
+                    SourceMigrationScreenSpec(
+                        sourceId = sourceId,
+                        onBackPressed = { navController.popBackStack() }
+                    ).Content()
                 }
             }
         }

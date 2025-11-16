@@ -59,6 +59,10 @@ interface LibraryState {
     var isUpdatingLibrary: Boolean
     var showUpdateCategoryDialog: Boolean
     var importProgress: ImportProgress?
+    
+    // EPUB import/export state
+    var epubImportState: EpubImportState
+    var epubExportState: EpubExportState
 }
 
 /**
@@ -68,6 +72,29 @@ data class ImportProgress(
     val current: Int,
     val total: Int,
     val currentFileName: String
+)
+
+/**
+ * Detailed EPUB import state
+ */
+data class EpubImportState(
+    val showPreview: Boolean = false,
+    val showProgress: Boolean = false,
+    val showSummary: Boolean = false,
+    val previewMetadata: List<ireader.presentation.ui.home.library.components.EpubMetadata> = emptyList(),
+    val progress: ireader.presentation.ui.home.library.components.EpubImportProgress? = null,
+    val summary: ireader.presentation.ui.home.library.components.EpubImportSummary? = null,
+    val selectedUris: List<String> = emptyList()
+)
+
+/**
+ * EPUB export state
+ */
+data class EpubExportState(
+    val showProgress: Boolean = false,
+    val showCompletion: Boolean = false,
+    val progress: ireader.presentation.ui.home.library.components.EpubExportProgress? = null,
+    val result: ireader.presentation.ui.home.library.components.EpubExportResult? = null
 )
 
 /**
@@ -115,4 +142,8 @@ open class LibraryStateImpl : LibraryState {
     override var isUpdatingLibrary by mutableStateOf<Boolean>(false)
     override var showUpdateCategoryDialog by mutableStateOf<Boolean>(false)
     override var importProgress by mutableStateOf<ImportProgress?>(null)
+    
+    // EPUB import/export state
+    override var epubImportState by mutableStateOf(EpubImportState())
+    override var epubExportState by mutableStateOf(EpubExportState())
 }

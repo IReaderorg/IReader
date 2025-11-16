@@ -23,6 +23,9 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
+import ireader.presentation.ui.home.explore.components.JSPluginFilterIntegration
+import ireader.presentation.ui.home.explore.components.DynamicFilterUI
+import ireader.presentation.ui.home.explore.components.rememberJSPluginFilterState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -39,6 +42,14 @@ fun ExploreFilterModalSheet(
     onModifyFilter: (Filter<*>) -> Unit,
     vm: ExploreViewModel
 ) {
+    // Check if this is a JS plugin source and load its filters
+    val source = vm.catalog
+    val filterStateManager = org.koin.compose.koinInject<ireader.domain.filters.FilterStateManager>()
+    val jsPluginFilterState = if (source != null && source.source != null && source.source is ireader.core.source.CatalogSource) {
+        rememberJSPluginFilterState(source.source as ireader.core.source.CatalogSource, filterStateManager)
+    } else {
+        null
+    }
     val helper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         modifier = Modifier.fillMaxHeight(0.9f),
@@ -67,7 +78,13 @@ fun ExploreFilterModalSheet(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { onReset() }) {
+                    IconButton(onClick = { 
+                        if (jsPluginFilterState?.isJSPluginSource == true) {
+                            jsPluginFilterState.resetFilters()
+                        } else {
+                            onReset()
+                        }
+                    }) {
                         Icon(
                             imageVector = Icons.Filled.Refresh,
                             contentDescription = "Reset filters"
@@ -111,8 +128,42 @@ fun ExploreFilterModalSheet(
                     }
                 }
                 
-                // Filters section if available
-                if (filters.isNotEmpty()) {
+                // JS Plugin Filters section (if this is a JS plugin source)
+                if (jsPluginFilterState?.isJSPluginSource == true && jsPluginFilterState.filterDefinitions != null) {
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.FilterList,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = localize(Res.string.filter),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        // Dynamic JS Plugin Filters
+                        DynamicFilterUI(
+                            filterDefinitions = jsPluginFilterState.filterDefinitions!!,
+                            filterValues = jsPluginFilterState.filterValues,
+                            onFilterChange = { filterId, value ->
+                                jsPluginFilterState.updateFilterValue(filterId, value)
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+                // Standard Filters section (for non-JS plugin sources)
+                else if (filters.isNotEmpty()) {
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
                         
@@ -152,7 +203,13 @@ fun ExploreFilterModalSheet(
             ) {
                 Button(
                     onClick = {
-                        onApplyFilter()
+                        // If this is a JS plugin source, apply JS plugin filters
+                        if (jsPluginFilterState?.isJSPluginSource == true) {
+                            val convertedFilters = jsPluginFilterState.getConvertedFilters()
+                            vm.loadItems(reset = true, jsPluginFilters = convertedFilters)
+                        } else {
+                            onApplyFilter()
+                        }
                         onDismissRequest()
                     },
                     modifier = Modifier.fillMaxWidth(),

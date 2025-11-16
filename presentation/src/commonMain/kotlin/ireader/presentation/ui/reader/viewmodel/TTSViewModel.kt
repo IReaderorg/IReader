@@ -99,7 +99,8 @@ class TTSViewModel : ViewModel() {
         val clampedRate = rate.coerceIn(0.5f, 2.0f)
         _speechRate.value = clampedRate
         
-        // TODO: Apply to actual TTS engine when integrated
+        // Note: Speech rate is applied through the TTS service directly in the UI layer
+        // The DesktopTTSService.setSpeechRate() method handles the actual engine integration
     }
     
     /**
@@ -152,8 +153,18 @@ class TTSViewModel : ViewModel() {
      * Update text index based on playback position
      */
     private fun updateTextIndexForPosition(position: Duration) {
-        // TODO: Calculate which text segment corresponds to this position
-        // This will be implemented when integrated with actual TTS service
+        // Calculate which text segment corresponds to this position
+        // This is a simplified implementation that assumes uniform text segment duration
+        val totalDuration = _duration.value.inWholeMilliseconds
+        if (totalDuration > 0) {
+            val positionMs = position.inWholeMilliseconds
+            val progress = positionMs.toFloat() / totalDuration.toFloat()
+            
+            // Estimate text index based on progress
+            // In a real implementation, this would use word boundary information from the TTS engine
+            val estimatedIndex = (progress * 100).toInt().coerceIn(0, 100)
+            _currentTextIndex.value = estimatedIndex
+        }
     }
     
     override fun onCleared() {

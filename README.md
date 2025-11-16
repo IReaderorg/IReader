@@ -1,20 +1,46 @@
 # 📖 IReader
 
-**IReader** is a free and open-source novel reader available for both Android and Desktop platforms. It offers a customizable reading experience with features like multiple reading directions and extensive personalization options.
+<div align="center">
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/IReaderorg/IReader)](https://github.com/IReaderorg/IReader/releases)
+[![Discord](https://img.shields.io/discord/YOUR_DISCORD_ID?label=Discord&logo=discord)](https://discord.gg/your-discord-invite)
+
+**A free and open-source novel reader for Android and Desktop**
+
+[Download](https://ireaderorg.netlify.app/download/) • [Documentation](docs/README.md) • [Discord](https://discord.gg/your-discord-invite) • [Contributing](#-contributing)
+
+</div>
+
+IReader is a powerful, cross-platform novel reader that brings your favorite web novels to life. With support for hundreds of sources through extensions and JavaScript plugins, offline reading, and advanced features like AI-powered text-to-speech, IReader delivers a premium reading experience without ads or tracking.
 
 ---
 
-## 🚀 Features
+## ✨ Features
 
-- 📱 **Cross-Platform** – Android & Desktop support
-- ⚙️ **Customizable Reading Experience** – Multiple reading directions, fonts, themes
-- 🔌 **Extension Support** – Add or create new sources
-- 🔌 **JavaScript Plugin Support** – Load LNReader plugins for access to hundreds of novel sources
-- 📥 **Offline Reading** – Download novels and read without internet
-- 🚫 **Ad-Free** – Clean and distraction-free reading
-- 🔒 **Privacy-Focused** – No tracking or account required
-- 🌙 **Dark Mode** – Comfortable reading in low light
-- 🔊 **Text-to-Speech** – Listen to novels with natural AI voices (Desktop)
+### Core Features
+- 📱 **Cross-Platform** – Native Android and Desktop (Windows, macOS, Linux) support
+- 📚 **Extensive Source Support** – Access hundreds of novel sources via extensions and JavaScript plugins
+- 📥 **Offline Reading** – Download chapters and read anywhere, anytime
+- 🔍 **Smart Search** – Find novels across multiple sources simultaneously
+- 📖 **Library Management** – Organize with categories, filters, and sorting options
+- 🔄 **Auto-Updates** – Automatic chapter updates for your library
+- 💾 **Backup & Restore** – Protect your library data with cloud or local backups
+
+### Reading Experience
+- ⚙️ **Highly Customizable** – Multiple reading directions, fonts, themes, and layouts
+- 🌙 **Dark Mode** – AMOLED-friendly dark theme for comfortable night reading
+- 🎨 **Theme Engine** – Create and share custom color schemes
+- 📏 **Reading Settings** – Adjust font size, line spacing, margins, and more
+- 🔖 **Bookmarks** – Mark important passages and scenes
+- 📍 **Reading Progress** – Automatic progress tracking and sync
+
+### Advanced Features
+- 🔊 **AI Text-to-Speech** (Desktop) – Natural-sounding voices powered by Piper TTS
+- 🔌 **JavaScript Plugin System** – LNReader-compatible plugins for maximum flexibility
+- 🌐 **Multi-Language** – Interface available in multiple languages
+- 🚫 **Ad-Free & Privacy-Focused** – No ads, tracking, or account required
+- ⚡ **Performance Optimized** – Fast loading and smooth scrolling
 
 ---
 
@@ -22,13 +48,16 @@
 
 ### 📲 Android
 
+**Minimum Requirements:** Android 7.0 (API 24) or higher
+
 1. **Download the APK**
-   - From [GitHub Releases](https://github.com/IReaderorg/IReader/releases)
-   - Or from the [Official Website](https://ireaderorg.netlify.app/download/)
+   - [GitHub Releases](https://github.com/IReaderorg/IReader/releases) (recommended)
+   - [Official Website](https://ireaderorg.netlify.app/download/)
 
 2. **Install the APK**
    - Open the downloaded file on your Android device
    - Enable "Install from Unknown Sources" if prompted
+   - Follow the on-screen installation instructions
 
 ### 💻 Desktop
 
@@ -47,18 +76,27 @@
 
 ---
 
-## 📚 Usage
+## 🚀 Quick Start
 
-1. **Launch the App**
-2. **Add Novels**
-   - Use the in-app browser to find and download novels
-3. **Customize**
-   - Open settings to change reading direction, themes, fonts, etc.
-4. **Install Extensions**
-   - Use [IReader Extensions](https://github.com/IReaderorg/IReader-extensions) to access more content
-5. **Install JavaScript Plugins** (Optional)
-   - Download LNReader plugins for access to hundreds of additional novel sources
-   - See [JavaScript Plugin Guide](#-javascript-plugins) below
+### First Time Setup
+
+1. **Launch IReader** on your device
+2. **Install Extensions or Plugins**
+   - Browse to **Settings → Extensions** to install [IReader Extensions](https://github.com/IReaderorg/IReader-extensions)
+   - Or enable **JavaScript Plugins** for LNReader compatibility (see [JS Plugin Guide](#-javascript-plugins))
+3. **Browse Catalogs** to discover novels from your installed sources
+4. **Add to Library** by tapping the bookmark icon on any novel
+5. **Start Reading** and customize your experience in reader settings
+
+### Essential Tips
+
+- **Updating Chapters**: Pull down on your library to check for new chapters
+- **Organizing**: Long-press books to add them to categories
+- **Customizing**: Tap the settings icon while reading to adjust fonts, themes, and layout
+- **Downloading**: Tap the download icon to save chapters for offline reading
+- **Searching**: Use the global search to find novels across all sources
+
+For detailed guides, check out our [Documentation](#-documentation).
 
 ---
 
@@ -296,7 +334,10 @@ Comprehensive documentation for developers is available in the [`docs/`](docs/) 
 
 ## 💬 Community & Support
 
-- Join our [Discord Server](https://discord.gg/your-discord-invite) for help, updates, and community discussions
+- 💬 **Discord** – Join our [Discord Server](https://discord.gg/your-discord-invite) for help, updates, and discussions
+- 🐛 **Bug Reports** – [Open an issue](https://github.com/IReaderorg/IReader/issues/new) on GitHub
+- 💡 **Feature Requests** – Share your ideas in [GitHub Discussions](https://github.com/IReaderorg/IReader/discussions)
+- 📖 **Documentation** – Check our [comprehensive docs](docs/README.md) for guides and tutorials
 
 ---
 
@@ -306,11 +347,36 @@ This project is licensed under the [Apache 2.0 License](https://github.com/IRead
 
 ---
 
+## ⭐ Star History
+
+If you find IReader useful, consider giving it a star on GitHub!
+
+[![Star History Chart](https://api.star-history.com/svg?repos=IReaderorg/IReader&type=Date)](https://star-history.com/#IReaderorg/IReader&Date)
+
+---
+
+## 🙏 Acknowledgments
+
+- [Tachiyomi](https://github.com/tachiyomiorg/tachiyomi) – Inspiration for the architecture and design
+- [LNReader](https://github.com/LNReader/lnreader) – JavaScript plugin compatibility
+- [Piper TTS](https://github.com/rhasspy/piper) – Neural text-to-speech engine
+- All our [contributors](https://github.com/IReaderorg/IReader/graphs/contributors) and community members
+
+---
+
+## 📄 Disclaimer
+
+The developer of this application does not have any affiliation with the content providers available. All content is provided by third-party sources.
+
+---
+
+<div align="center">
+
 🔗 **Website:** [https://ireaderorg.netlify.app/](https://ireaderorg.netlify.app/)
 
-## Disclaimer
+Made with ❤️ by the IReader community
 
-The developer of this application does not have any affiliation with the content providers available.
+</div>
 
 ## Screenshots :camera:
 

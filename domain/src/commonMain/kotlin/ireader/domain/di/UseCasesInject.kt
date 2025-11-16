@@ -261,6 +261,21 @@ val UseCasesInject = module {
         catalogStore = get()
     ) }
     
+    // Migration use cases
+    single<ireader.domain.usecases.migration.BookMatcher> { ireader.domain.usecases.migration.BookMatcher() }
+    single<ireader.domain.usecases.migration.ChapterMapper> { ireader.domain.usecases.migration.ChapterMapper() }
+    single<ireader.domain.use_cases.migration.MigrateNovelUseCase> { 
+        ireader.domain.use_cases.migration.MigrateNovelUseCase(
+            bookRepository = get(),
+            chapterRepository = get(),
+            catalogStore = get(),
+            getRemoteBooksUseCase = get<RemoteUseCases>().getRemoteBooks,
+            getRemoteChapters = get<RemoteUseCases>().getRemoteChapters,
+            bookMatcher = get(),
+            chapterMapper = get()
+        ) 
+    }
+    
     // Font management use cases
     single { ireader.domain.usecases.fonts.SystemFontsInitializer(get()) }
     

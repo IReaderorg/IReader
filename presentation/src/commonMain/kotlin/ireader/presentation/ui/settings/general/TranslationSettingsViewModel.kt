@@ -38,6 +38,16 @@ class TranslationSettingsViewModel(
     var testConnectionState by mutableStateOf<TestConnectionState>(TestConnectionState.Idle)
         private set
     
+    // Gemini model refresh state
+    var geminiModels by mutableStateOf<List<Pair<String, String>>>(emptyList())
+        private set
+    
+    var isRefreshingModels by mutableStateOf(false)
+        private set
+    
+    var modelRefreshMessage by mutableStateOf<String?>(null)
+        private set
+    
     fun updateTranslatorEngine(value: Long) {
         translatorEngine.value = value
     }
@@ -181,5 +191,101 @@ class TranslationSettingsViewModel(
     
     fun resetTestConnectionState() {
         testConnectionState = TestConnectionState.Idle
+    }
+    
+    /**
+     * Refresh available Gemini models from the API
+     * Requirements: 6.2, 6.3, 6.4
+     */
+    fun refreshGeminiModels() {
+        scope.launch {
+            isRefreshingModels = true
+            modelRefreshMessage = null
+            
+            try {
+                // Get the Gemini engine
+                val engines = translationEnginesManager.getAvailableEngines()
+                val geminiEngineSource = engines.find { source ->
+                    when (source) {
+                        is ireader.domain.usecases.translate.TranslationEngineSource.BuiltIn -> 
+                            source.engine.id == 8L // Gemini engine ID
+                        else -> false
+                    }
+                }
+                
+                if (geminiEngineSource == null) {
+                    modelRefreshMessage = "Gemini engine not found. Please restart the app."
+                    isRefreshingModels = false
+                    return@launch
+                }
+                
+                // Validate API key
+                if (geminiApiKey.value.isBlank()) {
+                    modelRefreshMessage = "Please enter your Gemini API key first"
+                    isRefreshingModels = false
+                    return@launch
+                }
+                
+                // Cast to get the engine
+                val geminiEngine = when (geminiEngineSource) {
+                    is ireader.domain.usecases.translate.TranslationEngineSource.BuiltIn -> 
+                        geminiEngineSource.engine as? ireader.domain.usecases.translate.WebscrapingTranslateEngine
+                    else -> null
+                }
+                
+                if (geminiEngine == null) {
+                    modelRefreshMessage = "Unable to access Gemini engine"
+                    isRefreshingModels = false
+                    return@launch
+                }
+                
+                // Fetch models from API
+                val result = geminiEngine.fetchAvailableGeminiModels(geminiApiKey.value)
+                
+                if (result.isSuccess) {
+                    val models = result.getOrNull()
+                    if (models.isNullOrEmpty()) {
+                        modelRefreshMessage = "No models found. Please check your API key."
+                        geminiModels = emptyList()
+                    } else {
+                        geminiModels = models
+                        modelRefreshMessage = "Successfully loaded ${models.size} model(s)"
+                    }
+                } else {
+                    val error = result.exceptionOrNull()
+                    modelRefreshMessage = when {
+                        error?.message?.contains("401") == true || 
+                        error?.message?.contains("API key") == true -> 
+                            "Invalid API key. Please check your key and try again."
+                        error?.message?.contains("403") == true -> 
+                            "Access forbidden. Please check your API key permissions."
+                        error?.message?.contains("429") == true -> 
+                            "Rate limit exceeded. Please try again later."
+                        error?.message?.contains("timeout") == true -> 
+                            "Request timed out. Please check your internet connection."
+                        else -> 
+                            "Failed to fetch models: ${error?.message ?: "Unknown error"}"
+                    }
+                    geminiModels = emptyList()
+                }
+            } catch (e: Exception) {
+                modelRefreshMessage = "Error: ${e.message ?: "Unknown error occurred"}"
+                geminiModels = emptyList()
+            } finally {
+                isRefreshingModels = false
+            }
+        }
+    }
+    
+    /**
+     * Load cached Gemini models
+     * Requirements: 6.4
+     */
+    fun loadCachedGeminiModels() {
+        geminiModels = ireader.domain.usecases.translate.WebscrapingTranslateEngine.AVAILABLE_GEMINI_MODELS
+    }
+    
+    fun resetModelRefreshMessage() {
+        modelRefreshMessage = null
     }
 } 

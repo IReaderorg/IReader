@@ -1,10 +1,12 @@
 package ireader.presentation.ui.plugins.details
 
 import ireader.domain.plugins.PluginInfo
+import ireader.domain.plugins.PluginResourceUsage
+import ireader.domain.plugins.ResourceUsagePercentages
 
 /**
  * State for the Plugin Details screen
- * Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 7.1, 7.2, 7.3, 7.4, 7.5, 8.1, 8.2, 8.3, 13.1, 13.2, 13.3
+ * Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 7.1, 7.2, 7.3, 7.4, 7.5, 8.1, 8.2, 8.3, 13.1, 13.2, 13.3, 4.8, 4.9, 4.10
  */
 data class PluginDetailsState(
     val plugin: PluginInfo? = null,
@@ -17,7 +19,10 @@ data class PluginDetailsState(
     val showReviewDialog: Boolean = false,
     val showSuccessMessage: Boolean = false,
     val userReview: PluginReview? = null,
-    val otherPluginsByDeveloper: List<PluginInfo> = emptyList()
+    val otherPluginsByDeveloper: List<PluginInfo> = emptyList(),
+    val resourceUsage: PluginResourceUsage? = null,
+    val resourcePercentages: ResourceUsagePercentages? = null,
+    val resourceHistory: List<PluginResourceUsage> = emptyList()
 )
 
 /**

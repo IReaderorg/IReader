@@ -6,6 +6,7 @@ import ireader.domain.services.backup.GoogleDriveBackupService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -17,16 +18,20 @@ import java.util.zip.GZIPOutputStream
 /**
  * Implementation of Google Drive backup service
  * 
- * Note: This is a platform-specific implementation that requires Google Drive API integration.
- * For full functionality, you need to:
- * 1. Add Google Drive API dependencies to your build.gradle
- * 2. Configure OAuth2 credentials in Google Cloud Console
- * 3. Implement platform-specific authentication flows
+ * Note: This implementation requires GoogleDriveAuthenticator to be injected.
+ * The authenticator handles platform-specific OAuth2 flows:
+ * - Android: GoogleSignInClient with ActivityResultContracts
+ * - Desktop: Browser-based OAuth with local callback server
+ * - iOS: Google Sign-In iOS SDK
+ * 
+ * Authentication tokens are stored securely using platform-appropriate storage.
  */
-class GoogleDriveBackupServiceImpl : GoogleDriveBackupService {
+class GoogleDriveBackupServiceImpl(
+    private val authenticator: GoogleDriveAuthenticator
+) : GoogleDriveBackupService {
     
-    private var isAuthenticatedState = false
     private var accountEmail: String? = null
+    private var driveClient: GoogleDriveClient? = null
     
     private val json = Json {
         prettyPrint = true
@@ -35,25 +40,21 @@ class GoogleDriveBackupServiceImpl : GoogleDriveBackupService {
     
     override suspend fun authenticate(): Result<String> = withContext(Dispatchers.IO) {
         return@withContext try {
-            // TODO: Implement actual Google Drive OAuth2 authentication
-            // This is a placeholder implementation
-            // 
-            // For Android:
-            // - Use GoogleSignInClient with ActivityResultContracts
-            // - Request drive.file scope
-            // - Store tokens in EncryptedSharedPreferences
-            //
-            // For Desktop:
-            // - Open browser with OAuth URL
-            // - Listen for redirect callback
-            // - Exchange code for tokens
-            //
-            // For iOS:
-            // - Use Google Sign-In iOS SDK
-            // - Store tokens in Keychain
+            // Use the injected authenticator to perform platform-specific OAuth2 flow
+            val result = authenticator.authenticate()
             
-            Result.failure(Exception("Google Drive authentication not yet implemented. " +
-                    "This feature requires Google Drive API credentials and platform-specific OAuth2 implementation."))
+            if (result.isSuccess) {
+                accountEmail = result.getOrNull()
+                
+                // Initialize Drive client with token provider
+                driveClient = GoogleDriveClient(
+                    getAccessToken = { authenticator.getAccessToken() }
+                )
+                
+                Result.success(accountEmail ?: "")
+            } else {
+                Result.failure(result.exceptionOrNull() ?: Exception("Authentication failed"))
+            }
         } catch (e: Exception) {
             Result.failure(Exception("Authentication failed: ${e.message}", e))
         }
@@ -61,8 +62,10 @@ class GoogleDriveBackupServiceImpl : GoogleDriveBackupService {
     
     override suspend fun disconnect(): Result<Unit> = withContext(Dispatchers.IO) {
         return@withContext try {
-            // TODO: Implement token revocation
-            isAuthenticatedState = false
+            // Revoke tokens and clean up
+            authenticator.disconnect()
+            driveClient?.close()
+            driveClient = null
             accountEmail = null
             Result.success(Unit)
         } catch (e: Exception) {
@@ -71,8 +74,7 @@ class GoogleDriveBackupServiceImpl : GoogleDriveBackupService {
     }
     
     override suspend fun isAuthenticated(): Boolean {
-        // TODO: Check if tokens are valid and not expired
-        return isAuthenticatedState
+        return authenticator.isAuthenticated()
     }
     
     override suspend fun createBackup(data: BackupData): Result<String> = withContext(Dispatchers.IO) {
@@ -81,24 +83,31 @@ class GoogleDriveBackupServiceImpl : GoogleDriveBackupService {
                 return@withContext Result.failure(Exception("Not authenticated with Google Drive"))
             }
             
+            val client = driveClient 
+                ?: return@withContext Result.failure(Exception("Drive client not initialized"))
+            
             // Serialize backup data to JSON
             val jsonString = json.encodeToString(data)
             
-            // Compress with GZIP
+            // Compress with GZIP using existing method
             val compressedData = compressData(jsonString.toByteArray())
             
             // Generate filename with timestamp
             val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
             val fileName = "ireader_backup_$timestamp.json.gz"
             
-            // TODO: Upload to Google Drive
-            // - Use Drive API v3
-            // - Upload to app folder (appDataFolder)
-            // - Set metadata (name, mimeType, parents)
-            // - Return file ID
+            // Upload to Google Drive appDataFolder
+            val uploadResult = client.uploadFile(
+                fileName = fileName,
+                content = compressedData,
+                mimeType = "application/gzip"
+            )
             
-            Result.failure(Exception("Google Drive upload not yet implemented. " +
-                    "Backup data prepared: $fileName (${compressedData.size} bytes)"))
+            if (uploadResult.isSuccess) {
+                Result.success(uploadResult.getOrThrow())
+            } else {
+                Result.failure(uploadResult.exceptionOrNull() ?: Exception("Upload failed"))
+            }
         } catch (e: Exception) {
             Result.failure(Exception("Backup creation failed: ${e.message}", e))
         }
@@ -110,14 +119,44 @@ class GoogleDriveBackupServiceImpl : GoogleDriveBackupService {
                 return@withContext Result.failure(Exception("Not authenticated with Google Drive"))
             }
             
-            // TODO: Query Google Drive for backup files
-            // - Search in appDataFolder
-            // - Filter by name pattern: "ireader_backup_*.json.gz"
-            // - Get file metadata (id, name, size, modifiedTime)
-            // - Parse timestamps from filenames
-            // - Sort by timestamp descending
+            val client = driveClient 
+                ?: return@withContext Result.failure(Exception("Drive client not initialized"))
             
-            Result.success(emptyList())
+            // Query Google Drive for backup files in appDataFolder
+            val listResult = client.listFiles("ireader_backup_*.json.gz")
+            
+            if (listResult.isFailure) {
+                return@withContext Result.failure(
+                    listResult.exceptionOrNull() ?: Exception("Failed to list files")
+                )
+            }
+            
+            val driveFiles = listResult.getOrThrow()
+            
+            // Convert DriveFile to BackupInfo
+            val backupInfoList = driveFiles.mapNotNull { driveFile ->
+                try {
+                    // Parse timestamp from filename (ireader_backup_yyyyMMdd_HHmmss.json.gz)
+                    val timestampStr = driveFile.name
+                        .removePrefix("ireader_backup_")
+                        .removeSuffix(".json.gz")
+                    
+                    val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+                    val timestamp = dateFormat.parse(timestampStr)?.time ?: 0L
+                    
+                    BackupInfo(
+                        id = driveFile.id,
+                        name = driveFile.name,
+                        timestamp = timestamp,
+                        size = driveFile.size?.toLongOrNull() ?: 0L
+                    )
+                } catch (e: Exception) {
+                    // Skip files with invalid names
+                    null
+                }
+            }.sortedByDescending { it.timestamp }
+            
+            Result.success(backupInfoList)
         } catch (e: Exception) {
             Result.failure(Exception("Failed to list backups: ${e.message}", e))
         }
@@ -129,13 +168,28 @@ class GoogleDriveBackupServiceImpl : GoogleDriveBackupService {
                 return@withContext Result.failure(Exception("Not authenticated with Google Drive"))
             }
             
-            // TODO: Download file from Google Drive
-            // - Get file by ID
-            // - Download content
-            // - Decompress GZIP
-            // - Deserialize JSON to BackupData
+            val client = driveClient 
+                ?: return@withContext Result.failure(Exception("Drive client not initialized"))
             
-            Result.failure(Exception("Google Drive download not yet implemented"))
+            // Download file from Google Drive by ID
+            val downloadResult = client.downloadFile(backupId)
+            
+            if (downloadResult.isFailure) {
+                return@withContext Result.failure(
+                    downloadResult.exceptionOrNull() ?: Exception("Download failed")
+                )
+            }
+            
+            val compressedData = downloadResult.getOrThrow()
+            
+            // Decompress GZIP using existing method
+            val decompressedData = decompressData(compressedData)
+            
+            // Deserialize JSON to BackupData using existing json instance
+            val jsonString = String(decompressedData, Charsets.UTF_8)
+            val backupData = json.decodeFromString<BackupData>(jsonString)
+            
+            Result.success(backupData)
         } catch (e: Exception) {
             Result.failure(Exception("Backup download failed: ${e.message}", e))
         }
@@ -147,11 +201,18 @@ class GoogleDriveBackupServiceImpl : GoogleDriveBackupService {
                 return@withContext Result.failure(Exception("Not authenticated with Google Drive"))
             }
             
-            // TODO: Delete file from Google Drive
-            // - Use Drive API delete method
-            // - Handle file not found errors
+            val client = driveClient 
+                ?: return@withContext Result.failure(Exception("Drive client not initialized"))
             
-            Result.failure(Exception("Google Drive delete not yet implemented"))
+            // Delete file from Google Drive using Drive API
+            // The client handles 404 errors gracefully
+            val deleteResult = client.deleteFile(backupId)
+            
+            if (deleteResult.isSuccess) {
+                Result.success(Unit)
+            } else {
+                Result.failure(deleteResult.exceptionOrNull() ?: Exception("Delete failed"))
+            }
         } catch (e: Exception) {
             Result.failure(Exception("Backup deletion failed: ${e.message}", e))
         }

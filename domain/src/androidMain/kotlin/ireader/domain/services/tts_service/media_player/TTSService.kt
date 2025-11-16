@@ -519,6 +519,7 @@ class TTSService(
             controller.unregisterCallback(this)
         }
 
+        @android.annotation.SuppressLint("MissingPermission")
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             if (state != null && mediaSession.controller.metadata != null) {
                 scope.launch {
@@ -545,6 +546,7 @@ class TTSService(
 
     suspend fun updateNotification() {
         mediaSession.let { mediaSession ->
+            @android.annotation.SuppressLint("MissingPermission")
             NotificationManagerCompat.from(this).apply {
                 val builder =
                     ttsNotificationBuilder.buildTTSNotification(

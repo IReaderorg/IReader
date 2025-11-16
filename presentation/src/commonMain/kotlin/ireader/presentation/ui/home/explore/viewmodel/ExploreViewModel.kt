@@ -42,7 +42,8 @@ class ExploreViewModel(
     val booksState: BooksState,
     private val libraryPreferences: LibraryPreferences,
     private val openLocalFolder: ireader.domain.usecases.local.OpenLocalFolder,
-    private val syncUseCases: ireader.domain.usecases.sync.SyncUseCases? = null
+    private val syncUseCases: ireader.domain.usecases.sync.SyncUseCases? = null,
+    private val filterStateManager: ireader.domain.filters.FilterStateManager? = null
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), ExploreState by state {
     data class Param(val sourceId: Long?, val query: String?)
 
@@ -91,7 +92,7 @@ class ExploreViewModel(
         }
     }
 
-    fun loadItems(reset: Boolean = false) {
+    fun loadItems(reset: Boolean = false, jsPluginFilters: Map<String, Any>? = null) {
         getBooksJob?.cancel()
         if (reset) {
             page = 1
@@ -115,20 +116,36 @@ class ExploreViewModel(
                                 val source = catalog
                                 if (source != null) {
                                     var result = MangasPageInfo(emptyList(), false)
-                                    remoteUseCases.getRemoteBooks(
-                                            searchQuery,
-                                            listing,
-                                            filters,
-                                            source,
-                                            page,
-                                            onError = {
-                                                throw it
-                                            },
-                                            onSuccess = { res ->
-                                                result = res
-                                            }
-                                    )
-                                    Result.success(result)
+                                    
+                                    // Check if this is a JS plugin source and we have JS plugin filters
+                                    val catalogSource = source.source
+                                    if (catalogSource is ireader.domain.js.bridge.JSPluginSource && jsPluginFilters != null) {
+                                        // Use JS plugin's custom method with filters
+                                        Log.debug { "Using JS plugin filters: $jsPluginFilters" }
+                                        val novels = if (query != null && query.isNotBlank()) {
+                                            catalogSource.searchNovels(query, page)
+                                        } else {
+                                            catalogSource.getPopularNovels(page, jsPluginFilters)
+                                        }
+                                        result = MangasPageInfo(novels, hasNextPage = novels.isNotEmpty())
+                                        Result.success(result)
+                                    } else {
+                                        // Use standard catalog source method
+                                        remoteUseCases.getRemoteBooks(
+                                                searchQuery,
+                                                listing,
+                                                filters,
+                                                source,
+                                                page,
+                                                onError = {
+                                                    throw it
+                                                },
+                                                onSuccess = { res ->
+                                                    result = res
+                                                }
+                                        )
+                                        Result.success(result)
+                                    }
                                 } else {
                                     throw SourceNotFoundException()
                                 }
@@ -260,5 +277,33 @@ class ExploreViewModel(
     
     fun getLocalFolderPath(): String {
         return openLocalFolder.getPath()
+    }
+    
+    /**
+     * Saves JS plugin filter state for the current source.
+     */
+    fun saveJSPluginFilterState(filters: Map<String, Any>) {
+        val sourceId = catalog?.sourceId ?: return
+        scope.launch {
+            filterStateManager?.saveFilterState(sourceId, filters)
+        }
+    }
+    
+    /**
+     * Loads JS plugin filter state for the current source.
+     */
+    suspend fun loadJSPluginFilterState(): Map<String, Any> {
+        val sourceId = catalog?.sourceId ?: return emptyMap()
+        return filterStateManager?.loadFilterState(sourceId) ?: emptyMap()
+    }
+    
+    /**
+     * Clears JS plugin filter state for the current source.
+     */
+    fun clearJSPluginFilterState() {
+        val sourceId = catalog?.sourceId ?: return
+        scope.launch {
+            filterStateManager?.clearFilterState(sourceId)
+        }
     }
 }

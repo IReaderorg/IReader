@@ -24,6 +24,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -780,6 +781,11 @@ fun TranslationSettingsScreen(
 
         // Add Gemini model selection dropdown
         items.add(Components.Dynamic {
+            // Requirements: 6.4 - Load cached models on first display
+            LaunchedEffect(Unit) {
+                viewModel?.loadCachedGeminiModels()
+            }
+            
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -799,84 +805,100 @@ fun TranslationSettingsScreen(
                 )
                 
                 // Refresh models button
+                // Requirements: 6.3 - Add loading state during fetch
                 var isRefreshing by remember { mutableStateOf(false) }
                 var refreshMessage by remember { mutableStateOf<String?>(null) }
                 val coroutineScope = rememberCoroutineScope()
                 
+                // Use ViewModel state if available
+                val actualIsRefreshing = viewModel?.isRefreshingModels ?: isRefreshing
+                val actualRefreshMessage = viewModel?.modelRefreshMessage ?: refreshMessage
+                
                 Button(
                     onClick = {
-                        isRefreshing = true
-                        refreshMessage = null
-                        coroutineScope.launch {
-                            try {
-                                // TODO: Fix engine lookup when API is stable
-                                // val engines = translationEnginesManager.getAvailableEngines()
-                                // val engine = engines.find { it.id == 8L }
-                                
-                                // if (engine == null) {
-                                //     refreshMessage = "Gemini engine not found. Please restart the app."
-                                //     isRefreshing = false
-                                //     return@launch
-                                // }
-                                
-                                if (geminiApiKey.value.isBlank()) {
-                                    refreshMessage = "Please enter your Gemini API key first"
-                                    isRefreshing = false
-                                    return@launch
-                                }
-                                
-                                // TODO: Implement when engine API is stable
-                                refreshMessage = "Gemini model refresh feature coming soon"
-                                isRefreshing = false
-                                
-                                /* Commented out until engine API is stable
-                                // Cast to WebscrapingTranslateEngine to access fetchAvailableGeminiModels
-                                val geminiEngine = engine as? ireader.domain.usecases.translate.WebscrapingTranslateEngine
-                                
-                                if (geminiEngine != null) {
-                                    val result = geminiEngine.fetchAvailableGeminiModels(geminiApiKey.value)
-                                    refreshMessage = if (result.isSuccess) {
-                                        val models = result.getOrNull()
-                                        if (models.isNullOrEmpty()) {
-                                            "No models found. Please check your API key."
-                                        } else {
-                                            "Successfully loaded ${models.size} model(s)"
-                                        }
-                                    } else {
-                                        val error = result.exceptionOrNull()
-                                        when {
-                                            error?.message?.contains("401") == true || 
-                                            error?.message?.contains("API key") == true -> 
-                                                "Invalid API key. Please check your key and try again."
-                                            error?.message?.contains("403") == true -> 
-                                                "API key does not have permission. Please check your Google Cloud project settings."
-                                            error?.message?.contains("timeout") == true || 
-                                            error?.message?.contains("network") == true -> 
-                                                "Network error. Please check your internet connection and try again."
-                                            error?.message?.contains("429") == true -> 
-                                                "Rate limit exceeded. Please wait a moment and try again."
-                                            else -> 
-                                                "Failed to load models: ${error?.message ?: "Unknown error"}"
+                        // Use ViewModel's refresh functionality if available
+                        // Requirements: 6.4 - Cache fetched models in ViewModel
+                        if (viewModel != null) {
+                            viewModel.refreshGeminiModels()
+                        } else {
+                            // Fallback to inline implementation
+                            isRefreshing = true
+                            refreshMessage = null
+                            coroutineScope.launch {
+                                try {
+                                    // Requirements: 6.1 - Use stable engine lookup
+                                    val engines = translationEnginesManager.getAvailableEngines()
+                                    val geminiEngineSource = engines.find { source ->
+                                        when (source) {
+                                            is ireader.domain.usecases.translate.TranslationEngineSource.BuiltIn -> 
+                                                source.engine.id == 8L
+                                            else -> false
                                         }
                                     }
-                                } else {
-                                    refreshMessage = "Engine type mismatch. Please restart the app."
+                                    
+                                    if (geminiEngineSource == null) {
+                                        refreshMessage = "Gemini engine not found. Please restart the app."
+                                        isRefreshing = false
+                                        return@launch
+                                    }
+                                    
+                                    if (geminiApiKey.value.isBlank()) {
+                                        refreshMessage = "Please enter your Gemini API key first"
+                                        isRefreshing = false
+                                        return@launch
+                                    }
+                                    
+                                    // Requirements: 6.2, 6.3 - Implement Gemini model refresh
+                                    val geminiEngine = when (geminiEngineSource) {
+                                        is ireader.domain.usecases.translate.TranslationEngineSource.BuiltIn -> 
+                                            geminiEngineSource.engine as? ireader.domain.usecases.translate.WebscrapingTranslateEngine
+                                        else -> null
+                                    }
+                                    
+                                    if (geminiEngine != null) {
+                                        val result = geminiEngine.fetchAvailableGeminiModels(geminiApiKey.value)
+                                        refreshMessage = if (result.isSuccess) {
+                                            val models = result.getOrNull()
+                                            if (models.isNullOrEmpty()) {
+                                                "No models found. Please check your API key."
+                                            } else {
+                                                "Successfully loaded ${models.size} model(s)"
+                                            }
+                                        } else {
+                                            val error = result.exceptionOrNull()
+                                            when {
+                                                error?.message?.contains("401") == true || 
+                                                error?.message?.contains("API key") == true -> 
+                                                    "Invalid API key. Please check your key and try again."
+                                                error?.message?.contains("403") == true -> 
+                                                    "Access forbidden. Please check your API key permissions."
+                                                error?.message?.contains("429") == true -> 
+                                                    "Rate limit exceeded. Please try again later."
+                                                error?.message?.contains("timeout") == true -> 
+                                                    "Request timed out. Please check your internet connection."
+                                                else -> 
+                                                    "Failed to fetch models: ${error?.message ?: "Unknown error"}"
+                                            }
+                                        }
+                                    } else {
+                                        refreshMessage = "Unable to access Gemini engine"
+                                    }
+                                } catch (e: Exception) {
+                                    refreshMessage = "Error: ${e.message ?: "Unknown error occurred"}"
+                                } finally {
+                                    isRefreshing = false
                                 }
-                                */
-                            } catch (e: Exception) {
-                                refreshMessage = "Error: ${e.message ?: "Unknown error occurred"}"
-                            } finally {
-                                isRefreshing = false
                             }
                         }
                     },
-                    enabled = !isRefreshing && geminiApiKey.value.isNotBlank(),
+                    enabled = !actualIsRefreshing && geminiApiKey.value.isNotBlank(),
                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
                 ) {
-                    Text(if (isRefreshing) "Refreshing..." else "Refresh Available Models")
+                    Text(if (actualIsRefreshing) "Refreshing..." else "Refresh Available Models")
                 }
                 
-                refreshMessage?.let { message ->
+                // Requirements: 6.5 - Add error handling with user-friendly messages
+                actualRefreshMessage?.let { message ->
                     Text(
                         text = message,
                         style = MaterialTheme.typography.bodySmall,
@@ -888,8 +910,12 @@ fun TranslationSettingsScreen(
                     )
                 }
 
-                val geminiModels =
+                // Requirements: 6.4 - Use cached models from ViewModel or fallback to static list
+                val geminiModels = if (viewModel != null && viewModel.geminiModels.isNotEmpty()) {
+                    viewModel.geminiModels
+                } else {
                     ireader.domain.usecases.translate.WebscrapingTranslateEngine.AVAILABLE_GEMINI_MODELS
+                }
 
                 // Use a Column instead of LazyColumn to avoid nested scrolling containers
                 Column(

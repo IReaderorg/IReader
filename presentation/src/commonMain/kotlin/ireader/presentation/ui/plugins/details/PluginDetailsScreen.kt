@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.plugins.details.components.*
+import ireader.presentation.ui.plugins.details.components.ResourceUsageSection
+import ireader.presentation.ui.plugins.details.components.ResourceUsageHistoryGraph
 
 /**
  * Plugin Details screen showing comprehensive plugin information
@@ -169,6 +171,27 @@ private fun PluginDetailsContent(
             item {
                 PermissionsSection(
                     permissions = plugin.manifest.permissions,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
+        
+        // Resource Usage (if plugin is installed and running)
+        if (state.resourceUsage != null && state.resourcePercentages != null) {
+            item {
+                ResourceUsageSection(
+                    usage = state.resourceUsage!!,
+                    percentages = state.resourcePercentages!!,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
+        
+        // Resource Usage History
+        if (state.resourceHistory.isNotEmpty()) {
+            item {
+                ResourceUsageHistoryGraph(
+                    history = state.resourceHistory,
                     modifier = Modifier.padding(16.dp)
                 )
             }

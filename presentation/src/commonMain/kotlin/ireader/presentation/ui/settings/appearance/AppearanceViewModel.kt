@@ -41,6 +41,10 @@ class AppearanceViewModel(
     val relativeTime = uiPreferences.relativeTime().asState()
     val lightColors = uiPreferences.getLightColors().asState(scope)
     val darkColors = uiPreferences.getDarkColors().asState(scope)
+    
+    // Novel Info UI Preferences
+    val hideNovelBackdrop = uiPreferences.hideNovelBackdrop().asState()
+    val useFabInNovelInfo = uiPreferences.useFabInNovelInfo().asState()
 
     val dateFormats =
         arrayOf("", "MM/dd/yy", "dd/MM/yy", "yyyy-MM-dd", "dd MMM yyyy", "MMM dd, yyyy")

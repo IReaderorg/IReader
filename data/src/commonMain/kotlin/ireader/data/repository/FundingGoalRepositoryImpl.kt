@@ -26,7 +26,23 @@ class FundingGoalRepositoryImpl : FundingGoalRepository {
     
     override suspend fun getFundingGoals(): Result<List<FundingGoal>> {
         return try {
-            // TODO: In production, fetch from remote config or API
+            // In production, this should fetch from remote config or API:
+            // 
+            // Option 1: Firebase Remote Config
+            // val remoteConfig = Firebase.remoteConfig
+            // remoteConfig.fetchAndActivate().await()
+            // val goalsJson = remoteConfig.getString("funding_goals")
+            // val goals = Json.decodeFromString<List<FundingGoal>>(goalsJson)
+            //
+            // Option 2: Supabase
+            // val response = supabase.from("funding_goals")
+            //     .select()
+            //     .decodeList<FundingGoal>()
+            //
+            // Option 3: Custom Backend API
+            // val response = httpClient.get("https://api.example.com/funding-goals")
+            // val goals = response.body<List<FundingGoal>>()
+            //
             // For now, return cached goals
             Result.success(goalsCache.values.toList())
         } catch (e: Exception) {
@@ -49,7 +65,23 @@ class FundingGoalRepositoryImpl : FundingGoalRepository {
             val updatedGoal = goal.copy(currentAmount = newAmount)
             goalsCache[goalId] = updatedGoal
             
-            // TODO: In production, update remote config or API
+            // In production, update remote config or API:
+            //
+            // Option 1: Supabase
+            // supabase.from("funding_goals")
+            //     .update(mapOf("current_amount" to newAmount))
+            //     .eq("id", goalId)
+            //     .execute()
+            //
+            // Option 2: Custom Backend API
+            // httpClient.patch("https://api.example.com/funding-goals/$goalId") {
+            //     contentType(ContentType.Application.Json)
+            //     setBody(mapOf("currentAmount" to newAmount))
+            // }
+            //
+            // Option 3: Firebase Realtime Database
+            // database.reference.child("funding_goals").child(goalId)
+            //     .child("currentAmount").setValue(newAmount)
             
             Result.success(updatedGoal)
         } catch (e: Exception) {
@@ -65,7 +97,22 @@ class FundingGoalRepositoryImpl : FundingGoalRepository {
             
             goalsCache[goal.id] = goal
             
-            // TODO: In production, create in remote config or API
+            // In production, create in remote config or API:
+            //
+            // Option 1: Supabase
+            // supabase.from("funding_goals")
+            //     .insert(goal)
+            //     .execute()
+            //
+            // Option 2: Custom Backend API
+            // httpClient.post("https://api.example.com/funding-goals") {
+            //     contentType(ContentType.Application.Json)
+            //     setBody(goal)
+            // }
+            //
+            // Option 3: Firebase Realtime Database
+            // database.reference.child("funding_goals").child(goal.id)
+            //     .setValue(goal)
             
             Result.success(goal)
         } catch (e: Exception) {
@@ -81,7 +128,20 @@ class FundingGoalRepositoryImpl : FundingGoalRepository {
             
             goalsCache.remove(goalId)
             
-            // TODO: In production, delete from remote config or API
+            // In production, delete from remote config or API:
+            //
+            // Option 1: Supabase
+            // supabase.from("funding_goals")
+            //     .delete()
+            //     .eq("id", goalId)
+            //     .execute()
+            //
+            // Option 2: Custom Backend API
+            // httpClient.delete("https://api.example.com/funding-goals/$goalId")
+            //
+            // Option 3: Firebase Realtime Database
+            // database.reference.child("funding_goals").child(goalId)
+            //     .removeValue()
             
             Result.success(Unit)
         } catch (e: Exception) {
@@ -105,10 +165,30 @@ class FundingGoalRepositoryImpl : FundingGoalRepository {
             val newGoal = goal.copy(currentAmount = 0.0)
             goalsCache[goalId] = newGoal
             
-            // TODO: In production:
-            // 1. Archive old goal in database
-            // 2. Update remote config with new goal
-            // 3. Send notifications to users
+            // In production:
+            // 1. Archive old goal in database:
+            //    supabase.from("funding_goals_archive")
+            //        .insert(archivedGoal)
+            //        .execute()
+            //
+            // 2. Update remote config with new goal:
+            //    supabase.from("funding_goals")
+            //        .update(newGoal)
+            //        .eq("id", goalId)
+            //        .execute()
+            //
+            // 3. Send notifications to users:
+            //    notificationService.sendToAll(
+            //        title = "Goal Reached!",
+            //        message = "${goal.title} has been completed! A new goal has started.",
+            //        data = mapOf("goalId" to goalId)
+            //    )
+            //
+            // 4. Log analytics event:
+            //    analytics.logEvent("goal_rollover", mapOf(
+            //        "goal_id" to goalId,
+            //        "final_amount" to goal.currentAmount
+            //    ))
             
             Result.success(newGoal)
         } catch (e: Exception) {

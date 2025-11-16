@@ -79,7 +79,13 @@ fun BookSummary(
                 .padding(top = 12.dp, bottom = 8.dp)
                 .padding(horizontal = 16.dp)
                 .clickableNoIndication(
-                    onLongClick = { onCopy(desc) },
+                    onLongClick = { 
+                        try {
+                            onCopy(desc)
+                        } catch (e: Exception) {
+                            // Silently handle copy errors
+                        }
+                    },
                     onClick = { onExpanded(!expanded) },
                 ),
         )

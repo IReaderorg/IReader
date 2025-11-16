@@ -59,7 +59,7 @@ val PresentationModules = module {
     factory  { ScreenContentViewModel(get()) }
     single<AppThemeViewModel> { AppThemeViewModel(get(), get(), get(), get()) }
 
-    factory<ExploreViewModel> { ExploreViewModel(get(), get(), get(), get(),get(), get(), get(),get(),get(),get(),getOrNull()) }
+    factory<ExploreViewModel> { ExploreViewModel(get(), get(), get(), get(),get(), get(), get(),get(),get(),get(),getOrNull(), getOrNull()) }
     factory  { HistoryViewModel(get(), get(), get()) }
     factory  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull()) }
     factory  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
@@ -103,6 +103,25 @@ val PresentationModules = module {
     
     // Voice Selection ViewModel
     factory { ireader.presentation.ui.settings.viewmodels.VoiceSelectionViewModel(get(), get(), get(), get()) }
+    
+    // Plugin ViewModels
+    factory { (pluginId: String) -> 
+        ireader.presentation.ui.plugins.details.PluginDetailsViewModel(
+            pluginId = pluginId,
+            pluginManager = get(),
+            monetizationService = get(),
+            getCurrentUserId = { 
+                "default_user"
+            },
+            pluginRepository = get(),
+            remoteRepository = get()
+        )
+    }
+    factory { 
+        ireader.presentation.ui.plugins.marketplace.PluginMarketplaceViewModel(
+            pluginManager = get()
+        )
+    }
 
     factory <ChapterStateImpl> { ChapterStateImpl() }
     factory <DetailStateImpl> { DetailStateImpl() }

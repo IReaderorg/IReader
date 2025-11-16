@@ -134,67 +134,22 @@ fun RegularChapterDetailTopAppBar(
             contentColor = MaterialTheme.colorScheme.onBackground,
             elevation = 0.dp,
             actions = {
-                // Share button
-                IconButton(onClick = onShareBook) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = localizeHelper.localize(Res.string.share),
-                        tint = MaterialTheme.colorScheme.onBackground,
-                    )
-                }
-                
-                // EPUB export button
-                IconButton(onClick = onExportEpub) {
-                    Icon(
-                        imageVector = Icons.Default.Book,
-                        contentDescription = localizeHelper.localize(Res.string.export_as_epub),
-                        tint = MaterialTheme.colorScheme.onBackground,
-                    )
-                }
-                
-                IconButton(onClick = {
-                    onRefresh()
-                }) {
+                // Refresh button
+                IconButton(onClick = onRefresh) {
                     Icon(
                         imageVector = Icons.Default.Autorenew,
                         contentDescription = localizeHelper.localize(Res.string.refresh),
                         tint = MaterialTheme.colorScheme.onBackground,
                     )
                 }
-                IconButton(onClick = {
-                    onInfo()
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = localizeHelper.localize(Res.string.info),
-                        tint = MaterialTheme.colorScheme.onBackground,
-                    )
-                }
-                if (source is ireader.core.source.CatalogSource && source.getCommands().any { it !is Command.Fetchers }) {
-                    IconButton(onClick = {
-                        onCommand()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Tune,
-                            contentDescription = localizeHelper.localize(Res.string.advance_commands),
-                            tint = MaterialTheme.colorScheme.onBackground,
-                        )
-                    }
-                }
-                IconButton(onClick = {
-                    onDownload()
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.Download,
-                        contentDescription = "Download",
-                        tint = MaterialTheme.colorScheme.onBackground,
-                    )
-                }
+                
+                // More options menu
                 Box {
                     IconButton(onClick = { setDropDownState(true) }) {
                         Icon(
                             imageVector = Icons.Outlined.MoreVert,
                             contentDescription = localize(Res.string.more_options),
+                            tint = MaterialTheme.colorScheme.onBackground,
                         )
                     }
                     IDropdownMenu(
@@ -204,6 +159,58 @@ fun RegularChapterDetailTopAppBar(
                             setDropDownState(false)
                         },
                     ) {
+                        IDropdownMenuItem(
+                            text = { Text(text = localizeHelper.localize(Res.string.share)) },
+                            onClick = {
+                                onShareBook()
+                                setDropDownState(false)
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Default.Share, contentDescription = null)
+                            }
+                        )
+                        IDropdownMenuItem(
+                            text = { Text(text = localizeHelper.localize(Res.string.export_as_epub)) },
+                            onClick = {
+                                onExportEpub()
+                                setDropDownState(false)
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Default.Book, contentDescription = null)
+                            }
+                        )
+                        IDropdownMenuItem(
+                            text = { Text(text = localizeHelper.localize(Res.string.info)) },
+                            onClick = {
+                                onInfo()
+                                setDropDownState(false)
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Default.Info, contentDescription = null)
+                            }
+                        )
+                        if (source is ireader.core.source.CatalogSource && source.getCommands().any { it !is Command.Fetchers }) {
+                            IDropdownMenuItem(
+                                text = { Text(text = localizeHelper.localize(Res.string.advance_commands)) },
+                                onClick = {
+                                    onCommand()
+                                    setDropDownState(false)
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Default.Tune, contentDescription = null)
+                                }
+                            )
+                        }
+                        IDropdownMenuItem(
+                            text = { Text(text = "Download") },
+                            onClick = {
+                                onDownload()
+                                setDropDownState(false)
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Default.Download, contentDescription = null)
+                            }
+                        )
                         IDropdownMenuItem(
                             text = { Text(text = localizeHelper.localize(Res.string.export_book_as_epub)) },
                             onClick = {

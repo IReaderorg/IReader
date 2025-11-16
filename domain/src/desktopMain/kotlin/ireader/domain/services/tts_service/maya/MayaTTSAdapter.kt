@@ -100,6 +100,13 @@ class MayaTTSAdapter(
     }
     
     /**
+     * Get number of active Maya processes
+     */
+    fun getActiveProcessCount(): Int {
+        return engine.getActiveProcessCount()
+    }
+    
+    /**
      * Shutdown Maya engine
      */
     fun shutdown() {

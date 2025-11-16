@@ -60,26 +60,29 @@ class PluginThemeManager(
     
     /**
      * Apply a theme option to get a Theme object
-     * Requirements: 3.2, 3.3
+     * Requirements: 3.2, 3.3, 9.6, 9.7
      */
-    fun applyTheme(themeOption: ThemeOption): Result<Theme> {
+    fun applyTheme(themeOption: ThemeOption): kotlin.Result<Theme> {
         return try {
             when (themeOption) {
-                is ThemeOption.BuiltIn -> Result.success(themeOption.theme)
+                is ThemeOption.BuiltIn -> kotlin.Result.success(themeOption.theme)
                 is ThemeOption.Plugin -> applyPluginTheme(themeOption.plugin, themeOption.isDark)
             }
         } catch (e: Exception) {
             // Fallback to default theme on error
-            Result.failure(e)
+            // Requirements: 9.7
+            kotlin.Result.failure(e)
         }
     }
     
     /**
      * Apply a plugin theme and convert it to a Theme object
-     * Requirements: 3.2, 3.3, 3.4
+     * Requirements: 3.2, 3.3, 3.4, 9.2, 9.6
      */
-    private fun applyPluginTheme(plugin: ThemePlugin, isDark: Boolean): Result<Theme> {
+    private fun applyPluginTheme(plugin: ThemePlugin, isDark: Boolean): kotlin.Result<Theme> {
         return try {
+            // Get color scheme and extra colors from plugin
+            // Requirements: 9.2
             val colorScheme = plugin.getColorScheme(isDark).toColorScheme(isDark)
             val extraColors = plugin.getExtraColors(isDark).toExtraColors()
             
@@ -93,9 +96,10 @@ class PluginThemeManager(
                 isDark = isDark
             )
             
-            Result.success(theme)
+            kotlin.Result.success(theme)
         } catch (e: Exception) {
-            Result.failure(e)
+            // Requirements: 9.7
+            kotlin.Result.failure(e)
         }
     }
     
@@ -234,6 +238,7 @@ private fun ireader.domain.plugins.ThemeExtraColors.toExtraColors(): ExtraColors
 
 /**
  * Convert plugin ThemeTypography to Compose Typography
+ * Requirements: 9.3, 9.6
  */
 private fun ireader.domain.plugins.ThemeTypography.toTypography(): Typography? {
     // Only create custom typography if at least one value is specified
@@ -257,7 +262,23 @@ private fun ireader.domain.plugins.ThemeTypography.toTypography(): Typography? {
     }
     
     val defaultTypography = Typography()
-    val family = fontFamily?.let { FontFamily.Default } // TODO: Load custom font families
+    val family = fontFamily?.let { fontFamilyPath ->
+        try {
+            // Load custom font from file path using FontRegistry
+            // Requirements: 9.6
+            val fontFile = java.io.File(fontFamilyPath)
+            if (fontFile.exists() && FontRegistry.validateFontFile(fontFile)) {
+                createFontFamilyFromFile(fontFile)
+            } else {
+                // Fallback to default if file doesn't exist or is invalid
+                FontFamily.Default
+            }
+        } catch (e: Exception) {
+            // Fallback to default on any error
+            // Requirements: 9.7
+            FontFamily.Default
+        }
+    }
     
     return Typography(
         displayLarge = defaultTypography.displayLarge.copy(

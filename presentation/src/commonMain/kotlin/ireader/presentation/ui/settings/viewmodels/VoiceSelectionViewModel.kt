@@ -143,15 +143,15 @@ class VoiceSelectionViewModel(
                     return@launch
                 }
                 
-                // For now, just select the voice
-                // TTS service integration would go here when available
+                // Select the voice
                 selectVoice(voice)
                 
-                // TODO: Integrate with TTS service when available
-                // val ttsService = get<TTSService>()
-                // ttsService.setVoice(voice.id)
-                // val sampleText = "Hello, this is a preview of the ${voice.name} voice."
-                // ttsService.speak(sampleText)
+                // Note: This ViewModel is for the voice catalog/download system.
+                // Actual TTS voice selection is handled platform-specifically:
+                // - Desktop: VoiceSelectionDialog directly calls DesktopTTSService.selectVoiceModel()
+                // - Android: Uses Android TTS service APIs
+                // Voice preview would require platform-specific TTS service integration
+                updateState { it.copy(error = null) }
             } catch (e: Exception) {
                 updateState { it.copy(error = "Failed to preview voice: ${e.message}") }
             }

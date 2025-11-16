@@ -635,4 +635,40 @@
     <string name="select_source_to_migrate_to">Select source to migrate to</string>
     <string name="no_sources_available">No sources available</string>
     <string name="lang">Language</string>
+    
+    <!-- ePub Export/Import strings -->
+    <string name="export_successful">Export Successful</string>
+    <string name="export_failed">Export Failed</string>
+    <string name="file_name">File Name</string>
+    <string name="file_size">File Size</string>
+    <string name="open_location">Open Location</string>
+    <string name="unknown_error">Unknown Error</string>
+    <string name="export_another">Export Another</string>
+    <string name="done">Done</string>
+    <string name="exporting_epub">Exporting ePub</string>
+    <string name="progress">Progress</string>
+    <string name="current_chapter">Current Chapter</string>
+    <string name="chapter">Chapter</string>
+    <string name="of">of</string>
+    <string name="estimated_time_remaining">Estimated Time Remaining</string>
+    <string name="cancel_export">Cancel Export</string>
+    <string name="cancel_export_confirmation">Are you sure you want to cancel the export?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="importing_epub_files">Importing ePub Files</string>
+    <string name="overall_progress">Overall Progress</string>
+    <string name="files">Files</string>
+    <string name="cancel_import">Cancel Import</string>
+    <string name="cancel_import_confirmation">Are you sure you want to cancel the import?</string>
+    <string name="import_complete">Import Complete</string>
+    <string name="successful_imports">Successful Imports</string>
+    <string name="failed_imports">Failed Imports</string>
+    <string name="failed_files">Failed Files</string>
+    <string name="view_library">View Library</string>
+    <string name="retry_failed">Retry Failed</string>
+    <string name="book_cover">Book Cover</string>
+    <string name="by">by</string>
+    <string name="publisher">Publisher</string>
+    <string name="chapters">Chapters</string>
+    <string name="import_action">Import</string>
 </resources>

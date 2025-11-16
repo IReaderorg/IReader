@@ -62,6 +62,8 @@ val repositoryInjectModule = module {
     includes(remoteModule)
     // Include review module for badge functionality
     includes(reviewModule)
+    // Include backup module for Google Drive backup functionality
+    includes(backupModule)
     
     single<DownloadRepository> { DownloadRepositoryImpl(get()) }
     single<UpdatesRepository> { UpdatesRepositoryImpl(get()) }
@@ -98,6 +100,11 @@ val repositoryInjectModule = module {
     
     // Source report repository
     single<SourceReportRepository> { SourceReportRepositoryImpl(get()) }
+    
+    // Migration repository
+    single<ireader.domain.data.repository.MigrationRepository> { 
+        ireader.data.repository.MigrationRepositoryImpl(get(), get()) 
+    }
     
     // Font repository
     single<FontRepository> { FontRepositoryImpl(get(), get()) }

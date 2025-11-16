@@ -368,18 +368,20 @@ class BookDetailViewModel(
     
     /**
      * Load available sources for migration (excluding current source)
-     * TODO: Implement when CatalogStore API is stable
      */
     fun loadMigrationSources() {
         scope.launch {
             try {
-                // TODO: Fix catalogStore.catalogs() call
-                // val currentSourceId = booksState.book?.sourceId
-                // val allSources = catalogStore.catalogs()
-                // availableMigrationSources = allSources.filter { it.sourceId != currentSourceId }
-                availableMigrationSources = emptyList()
+                val currentSourceId = booksState.book?.sourceId
+                val allSources = catalogStore.catalogs
+                availableMigrationSources = allSources.filter { 
+                    it.sourceId != currentSourceId && it.source != null 
+                }
                 showMigrationDialog = true
-                showSnackBar(ireader.i18n.UiText.DynamicString("Migration feature coming soon"))
+                
+                if (availableMigrationSources.isEmpty()) {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("No alternative sources available"))
+                }
             } catch (e: Exception) {
                 Log.error("Error loading migration sources", e)
                 showSnackBar(ireader.i18n.UiText.DynamicString("Failed to load sources: ${e.message}"))
@@ -389,22 +391,15 @@ class BookDetailViewModel(
     
     /**
      * Start migration to a new source
-     * TODO: Implement full migration functionality
      */
     fun startMigration(targetSourceId: Long) {
         val book = booksState.book ?: return
         
+        showMigrationDialog = false
         sourceSwitchingState.showMigrationDialog = true
         
         scope.launch {
             try {
-                // TODO: Use the migration use case when it's properly implemented
-                // For now, just show a placeholder message
-                delay(1000)
-                sourceSwitchingState.showMigrationDialog = false
-                showSnackBar(ireader.i18n.UiText.DynamicString("Migration feature coming soon"))
-                
-                /* Commented out until migrateToSourceUseCase is properly implemented
                 migrateToSourceUseCase(book.id, targetSourceId).collect { progress ->
                     sourceSwitchingState.migrationProgress = progress
                     
@@ -426,7 +421,6 @@ class BookDetailViewModel(
                         }
                     }
                 }
-                */
             } catch (e: Exception) {
                 Log.error("Migration error", e)
                 sourceSwitchingState.showMigrationDialog = false
@@ -456,11 +450,58 @@ class BookDetailViewModel(
                     append("Read on iReader")
                 }
                 
-                // Use platform helper to share
-                platformHelper.shareText(shareText)
+                // Use platform helper to share with error handling
+                try {
+                    platformHelper.shareText(shareText)
+                } catch (e: Exception) {
+                    Log.error("Platform share failed", e)
+                    withUIContext {
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Failed to share: ${e.message}"))
+                    }
+                }
             } catch (e: Exception) {
                 Log.error("Error sharing book", e)
-                showSnackBar(ireader.i18n.UiText.DynamicString("Failed to share: ${e.message}"))
+                withUIContext {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to share: ${e.message}"))
+                }
+            }
+        }
+    }
+    
+    /**
+     * Copy book title to clipboard
+     */
+    fun copyBookTitle(title: String) {
+        scope.launch {
+            try {
+                platformHelper.copyToClipboard("Book Title", title)
+                withUIContext {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Title copied to clipboard"))
+                }
+            } catch (e: Exception) {
+                Log.error("Error copying title", e)
+                withUIContext {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to copy: ${e.message}"))
+                }
+            }
+        }
+    }
+    
+    /**
+     * Copy text to clipboard
+     */
+    fun copyToClipboard(label: String, text: String) {
+        scope.launch {
+            try {
+                platformHelper.copyToClipboard(label, text)
+                withUIContext {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Copied to clipboard"))
+                }
+            } catch (e: Exception) {
+                Log.error("Error copying to clipboard", e)
+                withUIContext {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to copy: ${e.message}"))
+                }
             }
         }
     }
@@ -476,9 +517,16 @@ class BookDetailViewModel(
             try {
                 showSnackBar(UiText.DynamicString("Preparing EPUB export..."))
                 
-                // Get output URI from platform helper
-                val filename = sanitizeFilename(book.title) + ".epub"
-                val outputUri = platformHelper.createEpubExportUri(book.title, book.author)
+                // Get output URI from platform helper with error handling
+                val outputUri = try {
+                    platformHelper.createEpubExportUri(book.title, book.author)
+                } catch (e: Exception) {
+                    Log.error("Failed to create export URI", e)
+                    withUIContext {
+                        showSnackBar(UiText.DynamicString("Failed to create export file: ${e.message}"))
+                    }
+                    return@launch
+                }
                 
                 if (outputUri == null) {
                     showSnackBar(UiText.DynamicString("Export cancelled"))
@@ -509,15 +557,21 @@ class BookDetailViewModel(
                 }
                 
                 result.onSuccess { filePath ->
-                    showSnackBar(UiText.DynamicString("EPUB exported successfully to: $filePath"))
+                    withUIContext {
+                        showSnackBar(UiText.DynamicString("EPUB exported successfully"))
+                    }
                     Log.info { "EPUB export successful: $filePath" }
                 }.onFailure { error ->
-                    showSnackBar(UiText.DynamicString("Export failed: ${error.message}"))
+                    withUIContext {
+                        showSnackBar(UiText.DynamicString("Export failed: ${error.message}"))
+                    }
                     Log.error("EPUB export failed", error)
                 }
             } catch (e: Exception) {
                 Log.error("Error in EPUB export", e)
-                showSnackBar(UiText.DynamicString("Export failed: ${e.message}"))
+                withUIContext {
+                    showSnackBar(UiText.DynamicString("Export failed: ${e.message}"))
+                }
             }
         }
     }

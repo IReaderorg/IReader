@@ -41,8 +41,12 @@ internal fun RowScope.BookInfo(
                         }
                     },
                     onLongClick = {
-                        if (book.title.isNotBlank()) {
-                            onCopyTitle(book.title)
+                        try {
+                            if (book.title.isNotBlank()) {
+                                onCopyTitle(book.title)
+                            }
+                        } catch (e: Exception) {
+                            // Silently handle copy errors
                         }
                     }
                 ),

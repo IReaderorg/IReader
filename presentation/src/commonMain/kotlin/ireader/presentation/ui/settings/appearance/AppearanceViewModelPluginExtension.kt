@@ -47,26 +47,41 @@ class AppearanceViewModelPluginExtension(
     
     /**
      * Apply a theme option (built-in or plugin)
-     * Requirements: 3.2, 3.5
-     * TODO: Implement when plugin theme system is complete
+     * Requirements: 3.2, 3.5, 9.6, 9.7, 9.8
      */
     fun applyTheme(themeOption: ThemeOption): Theme {
-        // TODO: Implement proper theme application with error handling
-        // For now, return a default theme
-        return baseViewModel.vmThemes.firstOrNull() ?: throw IllegalStateException("No themes available")
-        
-        /* Commented out until Result type is properly defined
-        val result = errorHandler.applyThemeWithFallback(themeOption) { error ->
+        return try {
+            when (themeOption) {
+                is ThemeOption.BuiltIn -> {
+                    // Built-in themes are already Theme objects
+                    themeOption.theme
+                }
+                is ThemeOption.Plugin -> {
+                    // Apply plugin theme using PluginThemeManager
+                    val result = pluginThemeManager.applyTheme(themeOption)
+                    if (result.isSuccess) {
+                        result.getOrThrow()
+                    } else {
+                        // Fall back to default theme on error
+                        val error = result.exceptionOrNull()
+                        baseViewModel.showSnackBar(
+                            ireader.i18n.UiText.DynamicString(
+                                "Failed to apply plugin theme: ${error?.message ?: "Unknown error"}. Using default theme."
+                            )
+                        )
+                        pluginThemeManager.getDefaultTheme()
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            // Fall back to default theme on any error
             baseViewModel.showSnackBar(
-                ireader.i18n.UiText.DynamicString(error.toUserMessage())
+                ireader.i18n.UiText.DynamicString(
+                    "Error applying theme: ${e.message}. Using default theme."
+                )
             )
+            pluginThemeManager.getDefaultTheme()
         }
-        // Convert custom Result to Theme
-        return when (result) {
-            is ireader.presentation.ui.core.theme.Result.Success -> result.value
-            is ireader.presentation.ui.core.theme.Result.Error -> throw result.error
-        }
-        */
     }
     
     /**
@@ -126,6 +141,36 @@ class AppearanceViewModelPluginExtension(
      */
     suspend fun reloadPluginTheme(pluginId: String): kotlin.Result<Unit> {
         return hotReloadManager.reloadThemePlugin(pluginId)
+    }
+    
+    /**
+     * Check if the currently selected plugin theme is still available
+     * If not, revert to default theme
+     * Requirements: 9.8
+     */
+    fun checkAndRevertIfPluginUninstalled() {
+        val selectedThemeId = baseViewModel.uiPreferences.selectedPluginTheme().get()
+        if (selectedThemeId.isNotEmpty()) {
+            val themeOption = getThemeById(selectedThemeId)
+            if (themeOption == null || (themeOption is ThemeOption.Plugin && !isPluginInstalled(themeOption.plugin.manifest.id))) {
+                // Plugin theme is no longer available, revert to default
+                baseViewModel.uiPreferences.selectedPluginTheme().set("")
+                val defaultTheme = pluginThemeManager.getDefaultTheme()
+                baseViewModel.colorTheme.value = defaultTheme.id
+                baseViewModel.showSnackBar(
+                    ireader.i18n.UiText.DynamicString(
+                        "Plugin theme is no longer available. Reverted to default theme."
+                    )
+                )
+            }
+        }
+    }
+    
+    /**
+     * Check if a plugin is installed
+     */
+    private fun isPluginInstalled(pluginId: String): Boolean {
+        return pluginManager.getEnabledPlugins().any { it.manifest.id == pluginId }
     }
 }
 

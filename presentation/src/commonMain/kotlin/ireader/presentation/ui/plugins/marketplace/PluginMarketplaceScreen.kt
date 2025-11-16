@@ -124,13 +124,23 @@ private fun PluginMarketplaceContent(
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // TODO: Implement pull-to-refresh when Material3 API is stable
-    // val pullRefreshState = rememberPullToRefreshState()
-    
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
+            // Pull-to-refresh indicator at the top
+            if (state.isRefreshing) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
             // Category tabs
             item {
                 PluginCategoryTabs(

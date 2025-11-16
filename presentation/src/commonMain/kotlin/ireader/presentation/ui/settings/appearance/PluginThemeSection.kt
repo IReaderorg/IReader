@@ -36,6 +36,9 @@ fun PluginThemeSection(
     val errors by rememberThemeErrors(pluginExtension.getErrorHandler())
     val scope = rememberCoroutineScope()
     
+    // Track selected plugin theme
+    var selectedPluginThemeId by remember { mutableStateOf(viewModel.uiPreferences.selectedPluginTheme().get()) }
+    
     // Separate plugin themes
     val pluginThemes = remember(allThemes) {
         allThemes.filterIsInstance<ThemeOption.Plugin>()
@@ -144,9 +147,12 @@ fun PluginThemeSection(
                 PluginThemeGrid(
                     themes = lightPluginThemes,
                     currentThemeId = currentThemeId,
+                    selectedPluginThemeId = selectedPluginThemeId,
                     onThemeSelected = { theme ->
                         val appliedTheme = pluginExtension.applyTheme(theme)
                         viewModel.colorTheme.value = appliedTheme.id
+                        viewModel.uiPreferences.selectedPluginTheme().set(theme.id)
+                        selectedPluginThemeId = theme.id
                         viewModel.saveNightModePreferences(PreferenceValues.ThemeMode.Light)
                         onThemeSelected(theme)
                     }
@@ -166,9 +172,12 @@ fun PluginThemeSection(
                 PluginThemeGrid(
                     themes = darkPluginThemes,
                     currentThemeId = currentThemeId,
+                    selectedPluginThemeId = selectedPluginThemeId,
                     onThemeSelected = { theme ->
                         val appliedTheme = pluginExtension.applyTheme(theme)
                         viewModel.colorTheme.value = appliedTheme.id
+                        viewModel.uiPreferences.selectedPluginTheme().set(theme.id)
+                        selectedPluginThemeId = theme.id
                         viewModel.saveNightModePreferences(PreferenceValues.ThemeMode.Dark)
                         onThemeSelected(theme)
                     }
@@ -187,6 +196,7 @@ fun PluginThemeSection(
 private fun PluginThemeGrid(
     themes: List<ThemeOption.Plugin>,
     currentThemeId: Long,
+    selectedPluginThemeId: String,
     onThemeSelected: (ThemeOption.Plugin) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -210,7 +220,7 @@ private fun PluginThemeGrid(
         items(items = themes, key = { it.id }) { themeOption ->
             PluginThemeCard(
                 themeOption = themeOption,
-                isSelected = false, // TODO: Track selected plugin theme
+                isSelected = themeOption.id == selectedPluginThemeId,
                 onClick = { onThemeSelected(themeOption) },
                 gridMinSize = gridMinSize
             )

@@ -594,25 +594,302 @@ fun updateCategory(categoryId: Long) {
 }
 
 /**
- * Import EPUB files into the library
- * Note: Platform-specific implementation required for file picking
+ * Import EPUB files into the library with storage check and progress tracking
  */
-fun importEpubFiles(uris: List<String>) {
+fun importEpubFiles(uris: List<String>, importEpub: ireader.domain.usecases.epub.ImportEpub? = null) {
     scope.launch {
         try {
-            state.importProgress = ImportProgress(0, uris.size, "")
+            // Check storage space before import
+            val estimatedSize = uris.size * 5 * 1024 * 1024L // Estimate 5MB per file
+            if (!ireader.core.util.StorageUtil.checkStorageBeforeOperation(estimatedSize)) {
+                val available = ireader.core.util.StorageUtil.getAvailableStorageSpace()
+                val formatted = ireader.core.util.StorageUtil.formatBytes(available)
+                state.batchOperationMessage = "Insufficient storage space. Available: $formatted. Please free up space and try again."
+                return@launch
+            }
             
-            // TODO: Implement EPUB parsing and import
-            // This requires platform-specific file handling
-            // For now, show a message
-            state.batchOperationMessage = "EPUB import: ${uris.size} file(s) selected. Implementation pending."
+            // Initialize import progress
+            val fileStates = uris.map { uri ->
+                ireader.presentation.ui.home.library.components.FileImportState(
+                    fileName = uri.substringAfterLast('/'),
+                    status = ireader.presentation.ui.home.library.components.ImportStatus.PENDING
+                )
+            }.toMutableList()
             
-            state.importProgress = null
+            state.epubImportState = state.epubImportState.copy(
+                showProgress = true,
+                progress = ireader.presentation.ui.home.library.components.EpubImportProgress(
+                    files = fileStates,
+                    currentFileIndex = 0,
+                    overallProgress = 0f,
+                    isPaused = false
+                )
+            )
+            
+            val results = mutableListOf<ireader.presentation.ui.home.library.components.EpubImportResult>()
+            val startTime = System.currentTimeMillis()
+            
+            // Import each file
+            uris.forEachIndexed { index, uri ->
+                try {
+                    // Update current file status
+                    fileStates[index] = fileStates[index].copy(
+                        status = ireader.presentation.ui.home.library.components.ImportStatus.IN_PROGRESS,
+                        progress = 0.5f
+                    )
+                    
+                    val elapsed = System.currentTimeMillis() - startTime
+                    val avgTimePerFile = if (index > 0) elapsed / index else 0
+                    val remaining = (uris.size - index) * avgTimePerFile
+                    val eta = if (remaining > 0) formatTime(remaining) else null
+                    
+                    state.epubImportState = state.epubImportState.copy(
+                        progress = state.epubImportState.progress?.copy(
+                            files = fileStates.toList(),
+                            currentFileIndex = index,
+                            overallProgress = index.toFloat() / uris.size,
+                            estimatedTimeRemaining = eta
+                        )
+                    )
+                    
+                    // Use ImportEpub if available, otherwise show message
+                    if (importEpub != null) {
+                        importEpub.parse(listOf(ireader.domain.models.common.Uri.parse(uri)))
+                        
+                        fileStates[index] = fileStates[index].copy(
+                            status = ireader.presentation.ui.home.library.components.ImportStatus.COMPLETED,
+                            progress = 1f
+                        )
+                        
+                        results.add(
+                            ireader.presentation.ui.home.library.components.EpubImportResult(
+                                fileName = uri.substringAfterLast('/'),
+                                success = true
+                            )
+                        )
+                    } else {
+                        throw Exception("EPUB import service not available")
+                    }
+                } catch (e: Exception) {
+                    fileStates[index] = fileStates[index].copy(
+                        status = ireader.presentation.ui.home.library.components.ImportStatus.FAILED
+                    )
+                    
+                    val suggestion = when {
+                        e.message?.contains("corrupted", ignoreCase = true) == true -> 
+                            "File may be corrupted - try re-downloading"
+                        e.message?.contains("format", ignoreCase = true) == true -> 
+                            "Invalid EPUB format - ensure file is a valid EPUB"
+                        e.message?.contains("permission", ignoreCase = true) == true -> 
+                            "Permission denied - check file access permissions"
+                        else -> "Try importing the file again or check if it's a valid EPUB"
+                    }
+                    
+                    results.add(
+                        ireader.presentation.ui.home.library.components.EpubImportResult(
+                            fileName = uri.substringAfterLast('/'),
+                            success = false,
+                            errorMessage = e.message ?: "Unknown error",
+                            suggestion = suggestion
+                        )
+                    )
+                }
+            }
+            
+            // Show summary
+            val successCount = results.count { it.success }
+            val failureCount = results.count { !it.success }
+            
+            state.epubImportState = state.epubImportState.copy(
+                showProgress = false,
+                showSummary = true,
+                summary = ireader.presentation.ui.home.library.components.EpubImportSummary(
+                    results = results,
+                    successCount = successCount,
+                    failureCount = failureCount
+                )
+            )
+            
         } catch (e: Exception) {
             state.batchOperationMessage = "Error importing EPUB: ${e.message}"
-            state.importProgress = null
+            state.epubImportState = state.epubImportState.copy(
+                showProgress = false,
+                showSummary = false
+            )
         }
     }
+}
+
+/**
+ * Format milliseconds to human-readable time
+ */
+private fun formatTime(millis: Long): String {
+    val seconds = millis / 1000
+    return when {
+        seconds < 60 -> "${seconds}s"
+        seconds < 3600 -> "${seconds / 60}m ${seconds % 60}s"
+        else -> "${seconds / 3600}h ${(seconds % 3600) / 60}m"
+    }
+}
+
+/**
+ * Retry failed EPUB imports
+ */
+fun retryFailedImports(importEpub: ireader.domain.usecases.epub.ImportEpub? = null) {
+    val failedUris = state.epubImportState.summary?.results
+        ?.filter { !it.success }
+        ?.map { state.epubImportState.selectedUris.find { uri -> uri.endsWith(it.fileName) } ?: "" }
+        ?.filter { it.isNotEmpty() }
+        ?: emptyList()
+    
+    if (failedUris.isNotEmpty()) {
+        state.epubImportState = state.epubImportState.copy(showSummary = false)
+        importEpubFiles(failedUris, importEpub)
+    }
+}
+
+/**
+ * Dismiss EPUB import summary
+ */
+fun dismissEpubImportSummary() {
+    state.epubImportState = state.epubImportState.copy(
+        showSummary = false,
+        summary = null,
+        selectedUris = emptyList()
+    )
+}
+
+/**
+ * Export a book as EPUB with progress tracking
+ */
+fun exportBookAsEpub(
+    bookId: Long,
+    epubExportService: ireader.domain.services.epub.EpubExportService? = null
+) {
+    scope.launch {
+        try {
+            // Get book and chapters
+            val book = localGetBookUseCases.findBookById(bookId) ?: run {
+                state.batchOperationMessage = "Book not found"
+                return@launch
+            }
+            
+            val chapters = localGetChapterUseCase.findChaptersByBookId(bookId)
+            if (chapters.isEmpty()) {
+                state.batchOperationMessage = "No chapters to export"
+                return@launch
+            }
+            
+            // Check storage space
+            val estimatedSize = chapters.size * 50 * 1024L // Estimate 50KB per chapter
+            if (!ireader.core.util.StorageUtil.checkStorageBeforeOperation(estimatedSize)) {
+                val available = ireader.core.util.StorageUtil.getAvailableStorageSpace()
+                val formatted = ireader.core.util.StorageUtil.formatBytes(available)
+                state.batchOperationMessage = "Insufficient storage space. Available: $formatted"
+                return@launch
+            }
+            
+            // Show progress dialog
+            state.epubExportState = state.epubExportState.copy(
+                showProgress = true,
+                progress = ireader.presentation.ui.home.library.components.EpubExportProgress(
+                    currentChapter = chapters.first().name,
+                    currentChapterIndex = 1,
+                    totalChapters = chapters.size,
+                    progress = 0f
+                )
+            )
+            
+            if (epubExportService != null) {
+                val startTime = System.currentTimeMillis()
+                
+                // Export with progress tracking
+                val result = epubExportService.exportBook(
+                    book = book,
+                    chapters = chapters,
+                    options = ireader.domain.services.epub.EpubExportOptions(),
+                    onProgress = { progress, message ->
+                        val elapsed = System.currentTimeMillis() - startTime
+                        val remaining = if (progress > 0) {
+                            ((elapsed / progress) * (1 - progress)).toLong()
+                        } else 0
+                        
+                        val currentIndex = (progress * chapters.size).toInt().coerceIn(0, chapters.size - 1)
+                        
+                        state.epubExportState = state.epubExportState.copy(
+                            progress = state.epubExportState.progress?.copy(
+                                currentChapter = chapters.getOrNull(currentIndex)?.name ?: message,
+                                currentChapterIndex = currentIndex + 1,
+                                progress = progress,
+                                estimatedTimeRemaining = if (remaining > 0) formatTime(remaining) else null
+                            )
+                        )
+                    }
+                )
+                
+                // Show completion dialog
+                result.fold(
+                    onSuccess = { uri ->
+                        // Get file size (platform-specific, estimate for now)
+                        val fileSize = estimatedSize
+                        
+                        state.epubExportState = state.epubExportState.copy(
+                            showProgress = false,
+                            showCompletion = true,
+                            result = ireader.presentation.ui.home.library.components.EpubExportResult(
+                                filePath = uri.toString(),
+                                fileName = "${book.title}.epub",
+                                fileSize = fileSize,
+                                success = true
+                            )
+                        )
+                    },
+                    onFailure = { error ->
+                        state.epubExportState = state.epubExportState.copy(
+                            showProgress = false,
+                            showCompletion = true,
+                            result = ireader.presentation.ui.home.library.components.EpubExportResult(
+                                filePath = "",
+                                fileName = "${book.title}.epub",
+                                fileSize = 0,
+                                success = false,
+                                errorMessage = error.message ?: "Unknown error"
+                            )
+                        )
+                    }
+                )
+            } else {
+                throw Exception("EPUB export service not available")
+            }
+            
+        } catch (e: Exception) {
+            state.batchOperationMessage = "Export error: ${e.message}"
+            state.epubExportState = state.epubExportState.copy(
+                showProgress = false,
+                showCompletion = false
+            )
+        }
+    }
+}
+
+/**
+ * Dismiss EPUB export completion dialog
+ */
+fun dismissEpubExportCompletion() {
+    state.epubExportState = state.epubExportState.copy(
+        showCompletion = false,
+        result = null
+    )
+}
+
+/**
+ * Cancel EPUB export
+ */
+fun cancelEpubExport() {
+    state.epubExportState = state.epubExportState.copy(
+        showProgress = false,
+        progress = null
+    )
 }
 
 /**

@@ -5,6 +5,9 @@ import ireader.core.source.CatalogSource
 import ireader.domain.js.bridge.JSPluginSource
 import ireader.domain.js.models.FilterDefinition
 import ireader.domain.js.util.JSFilterConverter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Helper for integrating JavaScript plugin filters into the browse screen.
@@ -14,29 +17,28 @@ object JSPluginFilterIntegration {
     
     /**
      * Checks if a source is a JavaScript plugin source.
-     * TODO: Fix when CatalogSource.source property is available
+     * 
+     * API Status: CatalogSource is an interface, and JSPluginSource is a concrete implementation.
+     * We can directly check if the catalogSource instance is a JSPluginSource using Kotlin's `is` operator.
      */
     fun isJSPluginSource(catalogSource: CatalogSource): Boolean {
-        // TODO: catalogSource doesn't have a source property yet
-        return false
-        // val innerSource = catalogSource.source
-        // return innerSource is JSPluginSource
+        return catalogSource is JSPluginSource
     }
     
     /**
      * Gets filter definitions from a JavaScript plugin source.
-     * TODO: Fix when CatalogSource.source property is available
+     * 
+     * API Status: JSPluginSource has a getPluginFilters() method that returns filter definitions.
+     * We cast the CatalogSource to JSPluginSource and call this method.
      */
     suspend fun getFilterDefinitions(catalogSource: CatalogSource): Map<String, FilterDefinition>? {
-        // TODO: catalogSource doesn't have a source property yet
-        return null
-        // val innerSource = catalogSource.source
-        // val jsSource = innerSource as? JSPluginSource ?: return null
-        // return try {
-        //     jsSource.getFilters()
-        // } catch (e: Exception) {
-        //     null
-        // }
+        val jsSource = catalogSource as? JSPluginSource ?: return null
+        return try {
+            jsSource.getPluginFilters()
+        } catch (e: Exception) {
+            ireader.core.log.Log.error(e, "[JSPluginFilterIntegration] Failed to get filter definitions")
+            null
+        }
     }
     
     /**
@@ -56,10 +58,11 @@ object JSPluginFilterIntegration {
  */
 @Composable
 fun rememberJSPluginFilterState(
-    source: CatalogSource
+    source: CatalogSource,
+    filterStateManager: ireader.domain.filters.FilterStateManager? = null
 ): JSPluginFilterState {
     val filterState = remember(source) {
-        JSPluginFilterState(source)
+        JSPluginFilterState(source, filterStateManager)
     }
     
     LaunchedEffect(source) {
@@ -73,7 +76,8 @@ fun rememberJSPluginFilterState(
  * State holder for JavaScript plugin filters.
  */
 class JSPluginFilterState(
-    private val source: CatalogSource
+    private val source: CatalogSource,
+    private val filterStateManager: ireader.domain.filters.FilterStateManager? = null
 ) {
     var filterDefinitions by mutableStateOf<Map<String, FilterDefinition>?>(null)
         private set
@@ -94,27 +98,29 @@ class JSPluginFilterState(
         try {
             filterDefinitions = JSPluginFilterIntegration.getFilterDefinitions(source)
             
-            // Initialize filter values with defaults
+            // Try to load saved filter state first
+            val savedState = filterStateManager?.loadFilterState(source.id) ?: emptyMap()
+            
+            // Initialize filter values with saved state or defaults
             filterDefinitions?.let { definitions ->
                 val defaultValues = mutableMapOf<String, Any>()
                 definitions.forEach { (key, definition) ->
-                    when (definition) {
-                        is FilterDefinition.Picker -> {
-                            defaultValues[key] = definition.defaultValue
-                        }
-                        is FilterDefinition.TextInput -> {
-                            defaultValues[key] = definition.defaultValue
-                        }
-                        is FilterDefinition.CheckboxGroup -> {
-                            defaultValues[key] = definition.defaultValues
-                        }
-                        is FilterDefinition.ExcludableCheckboxGroup -> {
-                            defaultValues[key] = mapOf(
+                    // Use saved value if available, otherwise use default
+                    val savedValue = savedState[key]
+                    val value = if (savedValue != null) {
+                        savedValue
+                    } else {
+                        when (definition) {
+                            is FilterDefinition.Picker -> definition.defaultValue
+                            is FilterDefinition.TextInput -> definition.defaultValue
+                            is FilterDefinition.CheckboxGroup -> definition.defaultValues
+                            is FilterDefinition.ExcludableCheckboxGroup -> mapOf(
                                 "included" to definition.included,
                                 "excluded" to definition.excluded
                             )
                         }
                     }
+                    defaultValues[key] = value
                 }
                 filterValues = defaultValues
             }
@@ -125,6 +131,10 @@ class JSPluginFilterState(
     
     fun updateFilterValue(key: String, value: Any) {
         filterValues = filterValues + (key to value)
+        // Save filter state when it changes
+        CoroutineScope(Dispatchers.Default).launch {
+            filterStateManager?.saveFilterState(source.id, filterValues)
+        }
     }
     
     fun getConvertedFilters(): Map<String, Any> {
@@ -155,6 +165,10 @@ class JSPluginFilterState(
                 }
             }
             filterValues = defaultValues
+            // Clear saved filter state
+            CoroutineScope(Dispatchers.Default).launch {
+                filterStateManager?.clearFilterState(source.id)
+            }
         }
     }
 }

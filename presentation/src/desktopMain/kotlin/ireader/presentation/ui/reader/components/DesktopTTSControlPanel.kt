@@ -45,6 +45,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.services.tts_service.DesktopTTSService
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.ui.TTSEngineManagerScreenSpec
 import kotlinx.coroutines.launch
 
 @Composable
@@ -53,6 +55,7 @@ fun DesktopTTSControlPanel(
     modifier: Modifier = Modifier
 ) {
     val state = ttsService.state
+    val navigator = LocalNavigator.current
     var showEngineMenu by remember { mutableStateOf(false) }
     var showVoiceDialog by remember { mutableStateOf(false) }
     var showInitDialog by remember { mutableStateOf(false) }
@@ -407,7 +410,8 @@ fun DesktopTTSControlPanel(
                                 onClick = {
                                     showInitDialog = false
                                     initError = null
-                                    // TODO: Navigate to TTS Engine Manager
+                                    // Navigate to TTS Engine Manager
+                                    navigator?.navigate("ttsEngineManager")
                                 }
                             ) {
                                 Text("Open TTS Manager")

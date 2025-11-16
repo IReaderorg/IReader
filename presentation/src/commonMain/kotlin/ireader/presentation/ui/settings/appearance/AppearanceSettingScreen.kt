@@ -552,20 +552,18 @@ fun AppearanceSettingScreen(
             ).Build()
         }
         item {
-            // TODO: Fix preference binding when API is stable
-            // Components.Switch(
-            //     preference = vm.uiPreferences.hideNovelBackdrop(),
-            //     title = "Hide Backdrop",
-            //     subtitle = "Hide background images on novel detail screens for cleaner look and better performance",
-            // ).Build()
+            Components.Switch(
+                preference = vm.hideNovelBackdrop,
+                title = "Hide Backdrop",
+                subtitle = "Hide background images on novel detail screens for cleaner look and better performance",
+            ).Build()
         }
         item {
-            // TODO: Fix preference binding when API is stable
-            // Components.Switch(
-            //     preference = vm.uiPreferences.useFabInNovelInfo(),
-            //     title = "Use FAB Instead of Buttons",
-            //     subtitle = "Replace standard action buttons with floating action button",
-            // ).Build()
+            Components.Switch(
+                preference = vm.useFabInNovelInfo,
+                title = "Use FAB Instead of Buttons",
+                subtitle = "Replace standard action buttons with floating action button",
+            ).Build()
         }
         
         // Section Divider

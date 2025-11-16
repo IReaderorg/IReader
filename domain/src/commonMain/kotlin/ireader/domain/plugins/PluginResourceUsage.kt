@@ -2,7 +2,7 @@ package ireader.domain.plugins
 
 /**
  * Resource usage data for a plugin
- * TODO: Implement actual memory tracking using platform-specific APIs
+ * Memory tracking implemented using platform-specific ResourceMonitor
  */
 data class PluginResourceUsage(
     val cpuUsagePercent: Double = 0.0,

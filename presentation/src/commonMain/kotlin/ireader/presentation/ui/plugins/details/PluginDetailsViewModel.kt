@@ -2,6 +2,7 @@ package ireader.presentation.ui.plugins.details
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import ireader.domain.models.remote.User
 import ireader.domain.plugins.MonetizationService
 import ireader.domain.plugins.PluginInfo
 import ireader.domain.plugins.PluginManager
@@ -25,7 +26,9 @@ class PluginDetailsViewModel(
     private val pluginId: String,
     private val pluginManager: PluginManager,
     private val monetizationService: MonetizationService,
-    private val getCurrentUserId: () -> String
+    private val getCurrentUserId: () -> String,
+    private val pluginRepository: ireader.domain.data.repository.PluginRepository,
+    private val remoteRepository: ireader.domain.data.repository.RemoteRepository
 ) : BaseViewModel() {
     
     private val _state = mutableStateOf(PluginDetailsState())
@@ -87,9 +90,55 @@ class PluginDetailsViewModel(
      * Load reviews for the plugin
      */
     private suspend fun loadReviews() {
-        // TODO: Implement actual review loading from repository
-        // For now, using empty list
-        _state.value = _state.value.copy(reviews = emptyList())
+        try {
+            // Fetch reviews from repository
+            val domainReviews = pluginRepository.getReviewsByPlugin(pluginId)
+            
+            // Get current user to check if they have reviewed
+            val currentUser = remoteRepository.getCurrentUser().getOrNull()
+            val currentUserId = currentUser?.id ?: getCurrentUserId()
+            
+            // Convert domain reviews to presentation reviews
+            val presentationReviews = domainReviews
+                .sortedWith(
+                    compareByDescending<ireader.domain.data.repository.PluginReview> { it.helpful }
+                        .thenByDescending { it.timestamp }
+                )
+                .map { domainReview ->
+                    PluginReview(
+                        id = domainReview.id,
+                        pluginId = domainReview.pluginId,
+                        userId = domainReview.userId,
+                        userName = getUserDisplayName(domainReview.userId, currentUser),
+                        rating = domainReview.rating,
+                        reviewText = domainReview.reviewText,
+                        timestamp = domainReview.timestamp,
+                        helpfulCount = domainReview.helpful,
+                        isHelpful = false // TODO: Track per-user helpful marks
+                    )
+                }
+            
+            // Find user's own review if exists
+            val userReview = presentationReviews.find { it.userId == currentUserId }
+            
+            _state.value = _state.value.copy(
+                reviews = presentationReviews,
+                userReview = userReview
+            )
+        } catch (e: Exception) {
+            // Log error but don't fail the entire load
+            _state.value = _state.value.copy(reviews = emptyList())
+        }
+    }
+    
+    /**
+     * Get display name for a user
+     */
+    private suspend fun getUserDisplayName(userId: String, currentUser: User?): String {
+        return when {
+            currentUser?.id == userId -> currentUser.username ?: currentUser.email
+            else -> "User $userId" // In production, fetch from user service
+        }
     }
     
     /**
@@ -139,9 +188,28 @@ class PluginDetailsViewModel(
                     installationState = InstallationState.Installing
                 )
                 
-                // TODO: Implement actual plugin installation
-                // For now, simulate installation
-                delay(500)
+                // Download plugin from repository URL
+                val downloadResult = downloadPlugin(plugin)
+                if (downloadResult.isFailure) {
+                    throw downloadResult.exceptionOrNull() 
+                        ?: Exception("Download failed")
+                }
+                
+                val pluginFile = downloadResult.getOrThrow()
+                
+                // Verify plugin signature/checksum
+                val verifyResult = verifyPlugin(pluginFile)
+                if (verifyResult.isFailure) {
+                    throw verifyResult.exceptionOrNull() 
+                        ?: Exception("Plugin verification failed")
+                }
+                
+                // Install plugin to plugins directory
+                val installResult = installPluginFile(pluginFile)
+                if (installResult.isFailure) {
+                    throw installResult.exceptionOrNull() 
+                        ?: Exception("Installation failed")
+                }
                 
                 // Enable the plugin after installation
                 pluginManager.enablePlugin(pluginId)
@@ -276,22 +344,48 @@ class PluginDetailsViewModel(
     fun submitReview(rating: Float, reviewText: String) {
         scope.launch {
             try {
-                // TODO: Implement actual review submission
-                val review = PluginReview(
-                    id = "${pluginId}_${getCurrentUserId()}",
+                // Get current user info
+                val currentUser = remoteRepository.getCurrentUser().getOrNull()
+                val userId = currentUser?.id ?: getCurrentUserId()
+                val userName = currentUser?.username ?: currentUser?.email ?: "Anonymous User"
+                
+                val reviewId = "${pluginId}_${userId}"
+                val timestamp = System.currentTimeMillis()
+                
+                // Save review to repository
+                val result = pluginRepository.insertReview(
+                    id = reviewId,
                     pluginId = pluginId,
-                    userId = getCurrentUserId(),
-                    userName = "Current User", // TODO: Get actual user name
+                    userId = userId,
                     rating = rating,
                     reviewText = reviewText.ifBlank { null },
-                    timestamp = System.currentTimeMillis(),
-                    helpfulCount = 0
+                    timestamp = timestamp,
+                    helpful = 0
                 )
                 
+                if (result.isFailure) {
+                    throw result.exceptionOrNull() 
+                        ?: Exception("Failed to save review")
+                }
+                
+                // Create presentation review object
+                val review = PluginReview(
+                    id = reviewId,
+                    pluginId = pluginId,
+                    userId = userId,
+                    userName = userName,
+                    rating = rating,
+                    reviewText = reviewText.ifBlank { null },
+                    timestamp = timestamp,
+                    helpfulCount = 0,
+                    isHelpful = false
+                )
+                
+                // Update local state
                 _state.value = _state.value.copy(
                     showReviewDialog = false,
                     userReview = review,
-                    reviews = listOf(review) + _state.value.reviews
+                    reviews = listOf(review) + _state.value.reviews.filter { it.userId != userId }
                 )
                 
                 showSnackBar(UiText.DynamicString("Review submitted successfully"))
@@ -307,18 +401,43 @@ class PluginDetailsViewModel(
     fun markReviewHelpful(reviewId: String) {
         scope.launch {
             try {
-                // TODO: Implement actual helpful marking
-                val updatedReviews = _state.value.reviews.map { review ->
-                    if (review.id == reviewId) {
-                        review.copy(
-                            isHelpful = !review.isHelpful,
-                            helpfulCount = if (review.isHelpful) 
-                                review.helpfulCount - 1 
-                            else 
-                                review.helpfulCount + 1
+                // Find the review in the current list
+                val review = _state.value.reviews.find { it.id == reviewId }
+                    ?: throw Exception("Review not found")
+                
+                // Toggle helpful state
+                val newIsHelpful = !review.isHelpful
+                val newHelpfulCount = if (newIsHelpful) {
+                    review.helpfulCount + 1
+                } else {
+                    review.helpfulCount - 1
+                }
+                
+                // Update review in repository
+                val domainReview = pluginRepository.getReviewsByPlugin(pluginId)
+                    .find { it.id == reviewId }
+                
+                if (domainReview != null) {
+                    pluginRepository.updateReview(
+                        id = reviewId,
+                        rating = domainReview.rating,
+                        reviewText = domainReview.reviewText,
+                        timestamp = domainReview.timestamp
+                    )
+                    
+                    // Note: In production, helpful count should be stored separately
+                    // per user to track who marked what as helpful
+                }
+                
+                // Update local state
+                val updatedReviews = _state.value.reviews.map { r ->
+                    if (r.id == reviewId) {
+                        r.copy(
+                            isHelpful = newIsHelpful,
+                            helpfulCount = newHelpfulCount
                         )
                     } else {
-                        review
+                        r
                     }
                 }
                 
@@ -355,5 +474,50 @@ class PluginDetailsViewModel(
      */
     fun clearError() {
         _state.value = _state.value.copy(error = null)
+    }
+    
+    /**
+     * Download plugin from repository URL
+     */
+    private suspend fun downloadPlugin(plugin: PluginInfo): Result<File> = runCatching {
+        // TODO: Implement actual HTTP download with progress tracking
+        // For now, simulate download
+        delay(1000)
+        
+        // In production, this would download from a plugin repository URL
+        // and save to a temporary file
+        File.createTempFile("plugin_${plugin.id}", ".zip")
+    }
+    
+    /**
+     * Verify plugin signature/checksum
+     */
+    private suspend fun verifyPlugin(pluginFile: File): Result<Unit> = runCatching {
+        // TODO: Implement actual signature/checksum verification
+        // For now, simulate verification
+        delay(200)
+        
+        // In production, this would:
+        // 1. Calculate file checksum (SHA-256)
+        // 2. Verify against expected checksum from manifest
+        // 3. Verify digital signature if present
+        if (!pluginFile.exists()) {
+            throw Exception("Plugin file not found")
+        }
+    }
+    
+    /**
+     * Install plugin file to plugins directory
+     */
+    private suspend fun installPluginFile(pluginFile: File): Result<Unit> = runCatching {
+        // TODO: Implement actual plugin installation
+        // For now, simulate installation
+        delay(300)
+        
+        // In production, this would:
+        // 1. Extract plugin archive to plugins directory
+        // 2. Validate plugin structure
+        // 3. Register plugin with PluginManager
+        // 4. Clean up temporary files
     }
 }

@@ -367,4 +367,17 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun jsPluginMemoryLimit(): Preference<Int> {
         return preferenceStore.getInt("js_plugin_memory_limit", 64)
     }
+    
+    // ============================================================================
+    // Plugin Theme Settings
+    // ============================================================================
+    
+    /**
+     * Selected plugin theme ID.
+     * Format: "{pluginId}_{light|dark}" for plugin themes, or theme ID string for built-in themes
+     * Default: "" (no plugin theme selected)
+     */
+    fun selectedPluginTheme(): Preference<String> {
+        return preferenceStore.getString("selected_plugin_theme", "")
+    }
 }

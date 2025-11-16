@@ -26,7 +26,7 @@ class ThemeErrorHandler(
         onError: ((ThemeError) -> Unit)? = null
     ): Theme {
         return when (val result = pluginThemeManager.applyTheme(themeOption)) {
-            is Result.Success -> result.value
+            is Result.Success<*> -> result.value as Theme
             is Result.Failure -> {
                 val error = ThemeError.ApplicationFailed(
                     themeId = themeOption.id,
@@ -43,6 +43,7 @@ class ThemeErrorHandler(
                 // Return fallback theme
                 pluginThemeManager.getDefaultTheme()
             }
+            else -> pluginThemeManager.getDefaultTheme()
         }
     }
     
@@ -57,7 +58,7 @@ class ThemeErrorHandler(
         return try {
             val themeOption = ThemeOption.Plugin(plugin, isDark)
             when (val result = pluginThemeManager.applyTheme(themeOption)) {
-                is Result.Success -> result.value
+                is Result.Success<*> -> result.value as? Theme
                 is Result.Failure -> {
                     val error = ThemeError.PluginLoadFailed(
                         pluginId = plugin.manifest.id,
@@ -68,6 +69,7 @@ class ThemeErrorHandler(
                     onError?.invoke(error)
                     null
                 }
+                else -> null
             }
         } catch (e: Exception) {
             val error = ThemeError.PluginLoadFailed(

@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.core.IOException
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import ireader.core.log.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -74,10 +75,10 @@ internal class DataStorePreference<T>(
                 }
             } catch (e: IOException) {
                 // Log error but don't crash
-                // TODO: Add proper logging
+                Log.error(e, "IOException while setting preference '{}' to value '{}'", key, value)
             } catch (e: Exception) {
                 // Handle other exceptions
-                // TODO: Add proper logging
+                Log.error(e, "Unexpected exception while setting preference '{}' to value '{}'", key, value)
             }
         }
     }
@@ -111,10 +112,10 @@ internal class DataStorePreference<T>(
                 }
             } catch (e: IOException) {
                 // Log error but don't crash
-                // TODO: Add proper logging
+                Log.error(e, "IOException while deleting preference '{}'", key)
             } catch (e: Exception) {
                 // Handle other exceptions
-                // TODO: Add proper logging
+                Log.error(e, "Unexpected exception while deleting preference '{}'", key)
             }
         }
     }

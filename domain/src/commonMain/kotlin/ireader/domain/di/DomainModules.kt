@@ -208,6 +208,9 @@ val DomainServices = module {
         )
     }
 
+    // Filter State Manager
+    single { ireader.domain.filters.FilterStateManager(get()) }
+    
     // Plugin System
     // Plugin Preferences
     single { PluginPreferences(get()) }
@@ -236,5 +239,8 @@ val DomainServices = module {
             storage = get()
         )
     }
+    
+    // Analytics Module
+    includes(analyticsModule)
 
 }

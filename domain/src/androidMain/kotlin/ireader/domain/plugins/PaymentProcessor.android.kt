@@ -33,36 +33,51 @@ class AndroidPaymentProcessor(
         currency: String
     ): Result<Purchase> {
         return runCatching {
-            // TODO: Integrate with Google Play Billing Library
-            // This is a placeholder implementation
-            // In production, this would:
-            // 1. Initialize BillingClient
-            // 2. Query product details
-            // 3. Launch billing flow
-            // 4. Handle purchase result
-            // 5. Acknowledge purchase
-            // 6. Return Purchase object
+            // Traditional payments not supported. Use cryptocurrency donations instead.
+            // 
+            // IReader uses cryptocurrency donations for funding instead of traditional
+            // payment processors like Google Play Billing. This approach:
+            // - Avoids 30% platform fees
+            // - Supports users in regions without access to traditional payment methods
+            // - Provides transparency through blockchain verification
+            // - Eliminates payment processor restrictions
+            //
+            // Users can donate via the Donation Screen in Settings, which supports:
+            // - Bitcoin (BTC)
+            // - Ethereum (ETH)
+            // - Litecoin (LTC)
+            // - USDT and other major cryptocurrencies
+            //
+            // See: presentation/ui/settings/donation/DonationScreen.kt
             
-            throw NotImplementedError("Google Play Billing integration required")
+            throw NotImplementedError(
+                "Traditional payments not supported. " +
+                "Please use cryptocurrency donations in Settings > Support Development"
+            )
         }
     }
     
     override suspend fun verifyReceipt(receiptData: String): Result<Boolean> {
         return runCatching {
-            // TODO: Verify purchase with Google Play
-            // This would validate the receipt with Google's servers
-            throw NotImplementedError("Google Play receipt verification required")
+            // Traditional payments not supported. Use cryptocurrency donations instead.
+            // Cryptocurrency donations are verified through blockchain explorers.
+            // See: domain/models/donation/CryptoDonation.kt
+            throw NotImplementedError(
+                "Traditional payment verification not supported. " +
+                "Cryptocurrency donations are verified via blockchain"
+            )
         }
     }
     
     override suspend fun restorePurchases(): Result<List<Purchase>> {
         return runCatching {
-            // TODO: Query existing purchases from Google Play
-            // This would:
-            // 1. Query purchase history
-            // 2. Convert to Purchase objects
-            // 3. Return list
-            throw NotImplementedError("Google Play purchase restoration required")
+            // Traditional payments not supported. Use cryptocurrency donations instead.
+            // Cryptocurrency donations don't require "restoration" as they are
+            // permanent blockchain transactions that can be verified at any time.
+            throw NotImplementedError(
+                "Traditional purchase restoration not supported. " +
+                "Cryptocurrency donations are permanent blockchain transactions"
+            )
         }
     }
 }

@@ -77,7 +77,7 @@ class ExtensionManagerService constructor(
                         notification)
                 }
             )
-            return if (result) Result.success() else Result.failure()
+        return if (result) Result.success() else Result.failure()
     }
 }
 

@@ -17,6 +17,8 @@ import ireader.domain.models.migration.MigrationProgress
 import ireader.domain.models.migration.MigrationRequest
 import ireader.domain.models.migration.MigrationResult
 import ireader.domain.models.migration.MigrationStatus
+import ireader.domain.usecases.migration.BookMatcher
+import ireader.domain.usecases.migration.ChapterMapper
 import ireader.domain.usecases.remote.GetRemoteBooksUseCase
 import ireader.domain.usecases.remote.GetRemoteChapters
 import kotlinx.coroutines.flow.Flow
@@ -30,7 +32,9 @@ class MigrateNovelUseCase(
     private val chapterRepository: ChapterRepository,
     private val catalogStore: CatalogStore,
     private val getRemoteBooksUseCase: GetRemoteBooksUseCase,
-    private val getRemoteChapters: GetRemoteChapters
+    private val getRemoteChapters: GetRemoteChapters,
+    private val bookMatcher: BookMatcher,
+    private val chapterMapper: ChapterMapper
 ) {
     
     /**
@@ -57,49 +61,31 @@ class MigrateNovelUseCase(
                 catalog = targetCatalog,
                 page = 1,
                 onError = { error ->
-                    Log.error("Error searching for matches: ${error.message}")
+                    Log.error { "Error searching for matches: ${error.message}" }
                 },
                 onSuccess = { result ->
-                    result.mangas.forEach { mangaInfo ->
-                        val confidence = calculateConfidence(
-                            originalTitle = originalNovel.title,
-                            originalAuthor = originalNovel.author,
-                            matchTitle = mangaInfo.title,
-                            matchAuthor = mangaInfo.author
+                    val candidates = result.mangas.map { mangaInfo ->
+                        BookItem(
+                            id = 0,
+                            sourceId = targetSourceId,
+                            title = mangaInfo.title,
+                            author = mangaInfo.author,
+                            description = mangaInfo.description,
+                            cover = mangaInfo.cover,
+                            customCover = mangaInfo.cover,
+                            key = mangaInfo.key
                         )
-                        
-                        if (confidence > 0.3f) { // Only include matches with >30% confidence
-                            matches.add(
-                                MigrationMatch(
-                                    novel = BookItem(
-                                        id = 0,
-                                        sourceId = targetSourceId,
-                                        title = mangaInfo.title,
-                                        author = mangaInfo.author,
-                                        description = mangaInfo.description,
-                                        cover = mangaInfo.cover,
-                                        customCover = mangaInfo.cover,
-                                        key = mangaInfo.key
-                                    ),
-                                    confidenceScore = confidence,
-                                    matchReason = buildMatchReason(
-                                        originalTitle = originalNovel.title,
-                                        matchTitle = mangaInfo.title,
-                                        originalAuthor = originalNovel.author,
-                                        matchAuthor = mangaInfo.author,
-                                        confidence = confidence
-                                    )
-                                )
-                            )
-                        }
                     }
+                    
+                    // Use BookMatcher to find and rank matches
+                    matches.addAll(bookMatcher.findMatches(originalNovel, candidates))
                 }
             )
             
-            // Sort by confidence and take top 5
-            emit(matches.sortedByDescending { it.confidenceScore }.take(5))
+            // Take top 5 matches
+            emit(matches.take(5))
         } catch (e: Exception) {
-            Log.error("Error in searchMatches: ${e.message}")
+            Log.error { "Error in searchMatches: ${e.message}" }
             emit(emptyList())
         }
     }
@@ -151,12 +137,12 @@ class MigrateNovelUseCase(
                     catalog = targetCatalog,
                     oldChapters = emptyList(),
                     onError = { error ->
-                        Log.error("Error fetching chapters: ${error?.toString()}")
+                        Log.error { "Error fetching chapters: ${error?.toString()}" }
                     },
                     onSuccess = { chapters ->
-                        // Transfer reading progress if requested
+                            // Transfer reading progress if requested
                         if (request.preserveProgress && originalChapters.isNotEmpty()) {
-                            transferProgress(originalChapters, chapters, newBookId)
+                            transferProgress(originalChapters, chapters.toList(), newBookId)
                         }
                     }
                 )
@@ -170,13 +156,13 @@ class MigrateNovelUseCase(
             emit(MigrationProgress(request.novelId, MigrationStatus.COMPLETED, 1.0f, null))
             
         } catch (e: Exception) {
-            Log.error("Migration failed: ${e.message}")
+            Log.error { "Migration failed: ${e.message}" }
             emit(MigrationProgress(request.novelId, MigrationStatus.FAILED, 0f, e.message))
         }
     }
     
     /**
-     * Transfer reading progress from old chapters to new chapters
+     * Transfer reading progress from old chapters to new chapters using ChapterMapper
      */
     private suspend fun transferProgress(
         oldChapters: List<Chapter>,
@@ -184,112 +170,33 @@ class MigrateNovelUseCase(
         newBookId: Long
     ) {
         try {
-            // Find the last read chapter
-            val lastReadChapter = oldChapters.filter { it.read }.maxByOrNull { it.number }
+            // Use ChapterMapper to map chapters
+            val mappings = chapterMapper.mapChapters(oldChapters, newChapters)
             
-            if (lastReadChapter != null) {
-                // Try to find matching chapter in new source by number
-                val matchingNewChapter = newChapters.find { 
-                    it.number == lastReadChapter.number 
-                }
+            Log.info { "Mapped ${mappings.size} chapters out of ${oldChapters.size}" }
+            
+            // Transfer reading progress based on mappings
+            for (mapping in mappings) {
+                val oldChapter = oldChapters.find { it.id == mapping.oldChapterId }
+                val newChapter = newChapters.find { it.id == mapping.newChapterId }
                 
-                if (matchingNewChapter != null) {
-                    // Mark chapters up to this point as read
-                    newChapters.filter { it.number <= matchingNewChapter.number }.forEach { chapter ->
-                        chapterRepository.insertChapter(chapter.copy(read = true))
-                    }
+                if (oldChapter != null && newChapter != null && oldChapter.read) {
+                    chapterRepository.insertChapter(
+                        newChapter.copy(
+                            read = true,
+                            lastPageRead = oldChapter.lastPageRead,
+                            bookmark = oldChapter.bookmark
+                        )
+                    )
                 }
             }
+            
+            // Log mapping statistics
+            val stats = chapterMapper.getMappingStatistics(mappings)
+            Log.info { "Chapter mapping stats: ${stats.exactMatches} exact, ${stats.numberMatches} by number, ${stats.fuzzyMatches} fuzzy" }
         } catch (e: Exception) {
-            Log.error("Error transferring progress: ${e.message}")
+            Log.error { "Error transferring progress: ${e.message}" }
         }
     }
     
-    /**
-     * Calculate confidence score using Levenshtein distance and author matching
-     */
-    private fun calculateConfidence(
-        originalTitle: String,
-        originalAuthor: String,
-        matchTitle: String,
-        matchAuthor: String
-    ): Float {
-        val titleSimilarity = 1.0f - (levenshteinDistance(
-            originalTitle.lowercase(),
-            matchTitle.lowercase()
-        ).toFloat() / maxOf(originalTitle.length, matchTitle.length))
-        
-        val authorMatch = if (originalAuthor.isNotBlank() && matchAuthor.isNotBlank()) {
-            if (originalAuthor.lowercase() == matchAuthor.lowercase()) 1.0f else 0.0f
-        } else {
-            0.5f // Neutral if author info is missing
-        }
-        
-        // Weight: 70% title similarity, 30% author match
-        return (titleSimilarity * 0.7f) + (authorMatch * 0.3f)
-    }
-    
-    /**
-     * Build a human-readable match reason
-     */
-    private fun buildMatchReason(
-        originalTitle: String,
-        matchTitle: String,
-        originalAuthor: String,
-        matchAuthor: String,
-        confidence: Float
-    ): String {
-        val reasons = mutableListOf<String>()
-        
-        if (originalTitle.lowercase() == matchTitle.lowercase()) {
-            reasons.add("Exact title match")
-        } else if (confidence > 0.7f) {
-            reasons.add("Very similar title")
-        } else if (confidence > 0.5f) {
-            reasons.add("Similar title")
-        }
-        
-        if (originalAuthor.isNotBlank() && matchAuthor.isNotBlank()) {
-            if (originalAuthor.lowercase() == matchAuthor.lowercase()) {
-                reasons.add("Same author")
-            }
-        }
-        
-        return if (reasons.isNotEmpty()) {
-            reasons.joinToString(", ")
-        } else {
-            "Partial match"
-        }
-    }
-    
-    /**
-     * Calculate Levenshtein distance between two strings
-     */
-    private fun levenshteinDistance(s1: String, s2: String): Int {
-        val len1 = s1.length
-        val len2 = s2.length
-        
-        val dp = Array(len1 + 1) { IntArray(len2 + 1) }
-        
-        for (i in 0..len1) {
-            dp[i][0] = i
-        }
-        
-        for (j in 0..len2) {
-            dp[0][j] = j
-        }
-        
-        for (i in 1..len1) {
-            for (j in 1..len2) {
-                val cost = if (s1[i - 1] == s2[j - 1]) 0 else 1
-                dp[i][j] = minOf(
-                    dp[i - 1][j] + 1,      // deletion
-                    dp[i][j - 1] + 1,      // insertion
-                    dp[i - 1][j - 1] + cost // substitution
-                )
-            }
-        }
-        
-        return dp[len1][len2]
-    }
 }

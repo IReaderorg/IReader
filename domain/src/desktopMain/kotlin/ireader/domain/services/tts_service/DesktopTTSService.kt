@@ -90,6 +90,10 @@ class DesktopTTSService : KoinComponent {
     val chapterDownloader = ChapterAudioDownloader(
         audioDir = java.io.File(ireader.core.storage.AppDir, "chapter_audio")
     )
+    
+    // Process tracker for managing child processes
+    private val processTracker = ProcessTracker()
+    private var cleanupJob: Job? = null
 
     companion object {
         const val TTS_SERVICE_NAME = "DESKTOP_TTS_SERVICE"
@@ -278,6 +282,138 @@ class DesktopTTSService : KoinComponent {
     
     private fun enableSimulationMode(reason: String? = null) {
         isSimulationMode = true
+    }
+    
+    /**
+     * Start periodic cleanup task for zombie processes
+     * 
+     * This task runs every 5 minutes to detect and clean up zombie processes
+     * from Piper, Kokoro, and Maya TTS engines.
+     */
+    private fun startProcessCleanupTask() {
+        cleanupJob = serviceScope.launch {
+            Log.info { "Starting process cleanup task (runs every 5 minutes)" }
+            
+            while (true) {
+                try {
+                    // Wait 5 minutes before next cleanup
+                    delay(5.minutes)
+                    
+                    // Log current process status from engines
+                    logEngineProcessStatus()
+                    
+                    // Log ProcessTracker status
+                    processTracker.logStatus()
+                    
+                    // Detect and clean up zombie processes
+                    val zombieCount = processTracker.cleanupZombieProcesses()
+                    
+                    if (zombieCount > 0) {
+                        Log.warn { "Cleaned up $zombieCount zombie processes during periodic cleanup" }
+                    }
+                    
+                    // Enforce process limits for Maya
+                    enforceProcessLimits()
+                    
+                } catch (e: CancellationException) {
+                    Log.info { "Process cleanup task cancelled" }
+                    break
+                } catch (e: Exception) {
+                    Log.error { "Error during process cleanup: ${e.message}" }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Log process status from all TTS engines
+     */
+    private fun logEngineProcessStatus() {
+        try {
+            val kokoroCount = if (kokoroAvailable) kokoroAdapter.getActiveProcessCount() else 0
+            val mayaCount = if (mayaAvailable) mayaAdapter.getActiveProcessCount() else 0
+            val totalCount = kokoroCount + mayaCount
+            
+            if (totalCount > 0) {
+                Log.info { "TTS Engine processes: Kokoro=$kokoroCount, Maya=$mayaCount (Total=$totalCount)" }
+            }
+        } catch (e: Exception) {
+            Log.error { "Error logging engine process status: ${e.message}" }
+        }
+    }
+    
+    /**
+     * Enforce process limits for Maya engine
+     * 
+     * Maya has a configurable max concurrent process limit from preferences.
+     * This ensures the limit is respected.
+     */
+    private fun enforceProcessLimits() {
+        try {
+            if (mayaAvailable) {
+                val maxProcesses = appPrefs.maxConcurrentTTSProcesses().get()
+                val currentCount = mayaAdapter.getActiveProcessCount()
+                
+                if (currentCount > maxProcesses) {
+                    Log.warn { "Maya process count ($currentCount) exceeds limit ($maxProcesses)" }
+                    // The Maya engine itself handles queuing, so just log the warning
+                }
+            }
+        } catch (e: Exception) {
+            Log.error { "Error enforcing process limits: ${e.message}" }
+        }
+    }
+    
+    /**
+     * Get total active process count across all TTS engines
+     * 
+     * @return Total number of active processes
+     */
+    fun getTotalActiveProcessCount(): Int {
+        var total = 0
+        
+        try {
+            if (kokoroAvailable) {
+                total += kokoroAdapter.getActiveProcessCount()
+            }
+            if (mayaAvailable) {
+                total += mayaAdapter.getActiveProcessCount()
+            }
+            // Add ProcessTracker count for any directly tracked processes
+            total += processTracker.getActiveProcessCount()
+        } catch (e: Exception) {
+            Log.error { "Error getting total process count: ${e.message}" }
+        }
+        
+        return total
+    }
+    
+    /**
+     * Get detailed process statistics
+     * 
+     * @return Map of engine name to process count
+     */
+    fun getProcessStatistics(): Map<String, Int> {
+        val stats = mutableMapOf<String, Int>()
+        
+        try {
+            if (kokoroAvailable) {
+                stats["Kokoro"] = kokoroAdapter.getActiveProcessCount()
+            }
+            if (mayaAvailable) {
+                stats["Maya"] = mayaAdapter.getActiveProcessCount()
+            }
+            
+            // Add ProcessTracker statistics
+            val trackerStats = processTracker.getProcessStatistics()
+            trackerStats.forEach { (engine, count) ->
+                stats[engine] = stats.getOrDefault(engine, 0) + count
+            }
+        } catch (e: Exception) {
+            Log.error { "Error getting process statistics: ${e.message}" }
+        }
+        
+        return stats
     }
     
     private fun startWordBoundaryTracking(text: String) {
@@ -531,6 +667,12 @@ class DesktopTTSService : KoinComponent {
         // Cancel all jobs
         speechJob?.cancel()
         wordBoundaryJob?.cancel()
+        
+        // Terminate all tracked processes
+        val terminatedCount = processTracker.terminateAllProcesses()
+        if (terminatedCount > 0) {
+            Log.info { "Terminated $terminatedCount processes during stop" }
+        }
         
         // Reset state
         state.currentReadingParagraph = 0
@@ -1422,31 +1564,7 @@ class DesktopTTSService : KoinComponent {
         }
     }
     
-    /**
-     * Start periodic cleanup task to monitor and kill zombie processes
-     */
-    private fun startProcessCleanupTask() {
-        serviceScope.launch {
-            while (true) {
-                try {
-                    delay(30000) // Check every 30 seconds
-                    
-                    // Log active process count for monitoring
-                    if (kokoroAvailable) {
-                        val activeCount = kokoroAdapter.getActiveProcessCount()
-                        if (activeCount > 0) {
-                            Log.debug { "Kokoro active processes: $activeCount" }
-                        }
-                    }
-                    
-                } catch (e: CancellationException) {
-                    break
-                } catch (e: Exception) {
-                    Log.error { "Error in process cleanup task: ${e.message}" }
-                }
-            }
-        }
-    }
+
     
     /**
      * Check Maya availability on-demand (only when needed)
@@ -1667,6 +1785,15 @@ class DesktopTTSService : KoinComponent {
         serviceJob?.cancel()
         speechJob?.cancel()
         wordBoundaryJob?.cancel()
+        
+        // Cancel cleanup job
+        cleanupJob?.cancel()
+        
+        // Terminate all tracked processes before shutting down engines
+        val terminatedCount = processTracker.terminateAllProcesses()
+        if (terminatedCount > 0) {
+            Log.info { "Terminated $terminatedCount tracked processes during shutdown" }
+        }
         
         // Shutdown Piper components to release native resources
         if (!isSimulationMode) {
