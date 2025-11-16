@@ -12,6 +12,7 @@ data class ExtensionSource(
     val password:String? = null,
     val lastUpdate:Long = 0,
     val isEnable:Boolean = true,
+    val repositoryType: String = "IREADER", // "IREADER" or "LNREADER"
 ) {
 
     fun visibleName(): String {
@@ -19,6 +20,14 @@ data class ExtensionSource(
             id < 0 -> "IReader"
             else -> name
         }
+    }
+    
+    fun isLNReaderRepository(): Boolean {
+        return repositoryType.equals("LNREADER", ignoreCase = true)
+    }
+    
+    fun isIReaderRepository(): Boolean {
+        return repositoryType.equals("IREADER", ignoreCase = true)
     }
 
     companion object {
@@ -31,6 +40,7 @@ data class ExtensionSource(
                 source = "https://github.com/IReaderorg/IReader-extensions",
                 lastUpdate = 0,
                 isEnable = true,
+                repositoryType = "IREADER"
             )
         }
     }

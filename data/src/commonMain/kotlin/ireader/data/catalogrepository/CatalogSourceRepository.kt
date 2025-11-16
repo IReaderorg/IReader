@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 class CatalogSourceRepositoryImpl(val handler: DatabaseHandler): CatalogSourceRepository {
     override fun subscribe(): Flow<List<ExtensionSource>> {
        return handler.subscribeToList {
-           repositoryQueries.findAll(catalogRemoteMapper)
+           repositoryQueries.findAll(extensionMapper)
        }
     }
 
@@ -23,7 +23,7 @@ class CatalogSourceRepositoryImpl(val handler: DatabaseHandler): CatalogSourceRe
 
     override suspend fun insert(extensionSource: ExtensionSource) {
         handler.await {
-            repositoryQueries.insert(extensionSource.name,extensionSource.key,extensionSource.owner,extensionSource.source,extensionSource.lastUpdate,extensionSource.isEnable)
+            repositoryQueries.insert(extensionSource.name,extensionSource.key,extensionSource.owner,extensionSource.source,extensionSource.lastUpdate,extensionSource.isEnable,extensionSource.repositoryType)
         }
     }
 
@@ -36,7 +36,7 @@ class CatalogSourceRepositoryImpl(val handler: DatabaseHandler): CatalogSourceRe
 
 }
 
-val extensionMapper =  {_id: Long, name: String, key: String, owner: String, source: String, last_update: Long, is_enable: Boolean ->
+val extensionMapper =  {_id: Long, name: String, key: String, owner: String, source: String, last_update: Long, is_enable: Boolean, repository_type: String ->
     ExtensionSource(
         _id,
         name,
@@ -46,6 +46,7 @@ val extensionMapper =  {_id: Long, name: String, key: String, owner: String, sou
             null,
             null,
         last_update,
-        is_enable
+        is_enable,
+        repository_type
     )
 }

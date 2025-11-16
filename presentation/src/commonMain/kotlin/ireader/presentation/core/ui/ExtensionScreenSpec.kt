@@ -36,6 +36,15 @@ import ireader.presentation.ui.home.sources.extension.ExtensionScreen
 import ireader.presentation.ui.home.sources.extension.ExtensionScreenTopAppBar
 import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
 import ireader.presentation.ui.home.sources.extension.SourceDetailScreen
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.unit.dp
 
 object ExtensionScreenSpec : Tab {
 
@@ -68,6 +77,9 @@ object ExtensionScreenSpec : Tab {
             mutableStateOf(false)
         }
         var showMigrationSourceDialog by remember {
+            mutableStateOf(false)
+        }
+        var showAddRepositoryDialog by remember {
             mutableStateOf(false)
         }
         val focusManager = LocalFocusManager.current
@@ -124,6 +136,10 @@ object ExtensionScreenSpec : Tab {
                         onMigrate = {
                             showMigrationSourceDialog = true
                         },
+                        onRepositoryFilter = {
+                            vm.toggleRepositoryType()
+                        },
+                        repositoryFilterText = vm.getRepositoryTypeDisplayName(),
                         scrollBehavior = scrollBehavior,
                 )
             }) { scaffoldPadding ->
@@ -154,7 +170,7 @@ object ExtensionScreenSpec : Tab {
                         onMigrateFromSource = { sourceId ->
                             navController.navigateTo(SourceMigrationScreenSpec(sourceId))
                         },
-                    scaffoldPadding = scaffoldPadding
+                    scaffoldPadding = scaffoldPadding,
                 )
             }
             PullRefreshIndicator(
@@ -194,6 +210,79 @@ private fun MigrationSourceSelectionDialog(
         confirmButton = {
             TextButton(onClick = onDismiss) {
                 Text(localize(Res.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
+private fun AddRepositoryDialog(
+    onDismiss: () -> Unit,
+    onAdd: (String) -> Unit
+) {
+    var url by remember { mutableStateOf("") }
+    var isValidUrl by remember { mutableStateOf(false) }
+    
+    // Validate URL
+    LaunchedEffect(url) {
+        isValidUrl = url.isNotBlank() && 
+                (url.startsWith("http://") || url.startsWith("https://")) &&
+                (url.contains(".json") || url.contains("index.min.json") || url.contains("v3.json"))
+    }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text("Add Repository")
+        },
+        text = {
+            Column {
+                Text(
+                    text = "Enter the repository URL:",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                OutlinedTextField(
+                    value = url,
+                    onValueChange = { url = it },
+                    label = { Text("Repository URL") },
+                    placeholder = { Text("https://example.com/repo.json") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    isError = url.isNotBlank() && !isValidUrl
+                )
+                
+                if (url.isNotBlank() && !isValidUrl) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Please enter a valid repository URL ending with .json",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Text(
+                    text = "Examples:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo/index.min.json\n• LNReader: https://raw.githubusercontent.com/LNReader/lnreader-plugins/plugins/v3.json",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onAdd(url) },
+                enabled = isValidUrl
+            ) {
+                Text("Add")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
             }
         }
     )

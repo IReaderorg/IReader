@@ -11,7 +11,8 @@ key TEXT NOT NULL,
 owner TEXT NOT NULL,
 source TEXT NOT NULL,
 last_update INTEGER NOT NULL,
-is_enable INTEGER AS Boolean NOT NULL DEFAULT 1
+is_enable INTEGER AS Boolean NOT NULL DEFAULT 1,
+repository_type TEXT NOT NULL DEFAULT 'IREADER'
 );
 -- Insert system repo
 INSERT OR IGNORE INTO repository(_id,name,key,owner,source,last_update,is_enable) VALUES (-1,"","","","","",1);
@@ -27,7 +28,7 @@ END;
 
 
 insert:
-INSERT INTO repository(name,key,owner,source,last_update,is_enable) VALUES (:name,:key,:owner,:source ,:lastUpdate,:isEnable);
+INSERT INTO repository(name,key,owner,source,last_update,is_enable,repository_type) VALUES (:name,:key,:owner,:source ,:lastUpdate,:isEnable,:repositoryType);
 
 
 findAll:

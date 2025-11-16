@@ -71,13 +71,18 @@ fun MoreScreen(
     // Theme mode state
     var showThemeOptions by remember { mutableStateOf(false) }
     
-    // Save scroll state across navigation using ViewModel
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = vm.savedScrollIndex,
-        initialFirstVisibleItemScrollOffset = vm.savedScrollOffset
-    )
+    // Save scroll state across navigation using rememberSaveable with custom key
+    val listState = rememberSaveable(
+        key = "more_screen_scroll_state",
+        saver = LazyListState.Saver
+    ) {
+        LazyListState(
+            firstVisibleItemIndex = vm.savedScrollIndex,
+            firstVisibleItemScrollOffset = vm.savedScrollOffset
+        )
+    }
     
-    // Save scroll position when it changes
+    // Save scroll position to ViewModel when it changes
     androidx.compose.runtime.LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset) {
         vm.saveScrollPosition(
             listState.firstVisibleItemIndex,

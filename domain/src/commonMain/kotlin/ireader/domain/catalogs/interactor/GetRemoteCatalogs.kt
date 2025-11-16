@@ -17,14 +17,24 @@ class GetRemoteCatalogs(
 
     fun subscribe(
         withNsfw: Boolean = true,
+        repositoryType: String? = null, // Filter by repository type
     ): Flow<List<CatalogRemote>> {
         return catalogRemoteRepository.getRemoteCatalogsFlow()
             .map { catalogs ->
-                if (withNsfw) {
+                var filteredCatalogs = if (withNsfw) {
                     catalogs.distinctBy { it.sourceId }
                 } else {
                     catalogs.filter { !it.nsfw }
                 }
+                
+                // Filter by repository type if specified
+                if (repositoryType != null) {
+                    filteredCatalogs = filteredCatalogs.filter { catalog ->
+                        catalog.repositoryType.equals(repositoryType, ignoreCase = true)
+                    }
+                }
+                
+                filteredCatalogs
             }
     }
 }

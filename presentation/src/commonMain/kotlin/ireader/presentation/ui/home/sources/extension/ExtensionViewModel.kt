@@ -3,6 +3,7 @@ package ireader.presentation.ui.home.sources.extension
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import ireader.core.os.InstallStep
 import ireader.domain.catalogs.interactor.*
@@ -19,6 +20,7 @@ import ireader.i18n.UiText
 import ireader.presentation.ui.core.ui.asStateIn
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -37,6 +39,7 @@ class ExtensionViewModel(
         private val sourceHealthChecker: SourceHealthChecker,
         private val sourceCredentialsRepository: ireader.domain.data.repository.SourceCredentialsRepository,
         private val extensionWatcherService: ExtensionWatcherService,
+        private val catalogSourceRepository: ireader.domain.data.repository.CatalogSourceRepository,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), CatalogsState by state {
 
     val incognito = uiPreferences.incognitoMode().asStateIn(scope)
@@ -44,6 +47,10 @@ class ExtensionViewModel(
     val defaultRepo = uiPreferences.defaultRepository().asStateIn(scope)
     val autoInstaller = uiPreferences.autoCatalogUpdater().asStateIn(scope)
     val showLanguageFilter = uiPreferences.showLanguageFilter().asStateIn(scope)
+    
+    // Repository type filtering
+    var selectedRepositoryType = mutableStateOf<String?>(null)
+        private set
     
     // Track source health status
     val sourceStatuses = mutableStateMapOf<Long, SourceStatus>()
@@ -104,14 +111,20 @@ class ExtensionViewModel(
 
     init {
         scope.launch {
-            getCatalogsByType.subscribe(excludeRemoteInstalled = true)
-                    .onEach { (pinned, unpinned, remote) ->
-                        state.allPinnedCatalogs = pinned
-                        state.allUnpinnedCatalogs = unpinned
-                        state.allRemoteCatalogs = remote
+            snapshotFlow { selectedRepositoryType }
+                .flatMapLatest { repositoryType ->
+                    getCatalogsByType.subscribe(
+                        excludeRemoteInstalled = true,
+                        repositoryType = repositoryType.value
+                    )
+                }
+                .onEach { (pinned, unpinned, remote) ->
+                    state.allPinnedCatalogs = pinned
+                    state.allUnpinnedCatalogs = unpinned
+                    state.allRemoteCatalogs = remote
 
-                        state.languageChoices = getLanguageChoices(remote, pinned + unpinned)
-                    }.launchIn(scope)
+                    state.languageChoices = getLanguageChoices(remote, pinned + unpinned)
+                }.launchIn(scope)
         }
 
         // Update catalogs whenever the query changes or there's a new update from the backend
@@ -297,6 +310,118 @@ class ExtensionViewModel(
     }
     
     /**
+     * Set repository type filter
+     */
+    fun setRepositoryTypeFilter(repositoryType: String?) {
+        selectedRepositoryType.value = repositoryType
+    }
+    
+    /**
+     * Clear repository type filter (show all)
+     */
+    fun clearRepositoryTypeFilter() {
+        selectedRepositoryType.value = null
+    }
+    
+    /**
+     * Toggle between IReader and LNReader repository types
+     */
+    fun toggleRepositoryType() {
+        selectedRepositoryType.value = when (selectedRepositoryType.value) {
+            null -> "IREADER"
+            "IREADER" -> "LNREADER"
+            "LNREADER" -> null
+            else -> null
+        }
+    }
+    
+    /**
+     * Get current repository type filter display name
+     */
+    fun getRepositoryTypeDisplayName(): String {
+        return when (selectedRepositoryType.value) {
+            "IREADER" -> "IReader"
+            "LNREADER" -> "LNReader"
+            else -> "All"
+        }
+    }
+    
+    /**
+     * Add a repository from URL
+     */
+    fun addRepository(url: String) {
+        scope.launch {
+            try {
+                // Parse the URL to extract repository information
+                val repositoryInfo = parseRepositoryUrl(url)
+                
+                // Create ExtensionSource and insert it
+                val extensionSource = ExtensionSource(
+                    id = 0,
+                    name = repositoryInfo.name,
+                    key = repositoryInfo.url,
+                    owner = repositoryInfo.owner,
+                    source = repositoryInfo.source,
+                    repositoryType = repositoryInfo.type
+                )
+                
+                // Insert the repository
+                catalogSourceRepository.insert(extensionSource)
+                showSnackBar(UiText.DynamicString("Repository added successfully"))
+                
+                // Refresh catalogs to load from the new repository
+                refreshCatalogs()
+            } catch (e: Exception) {
+                showSnackBar(UiText.DynamicString("Failed to add repository: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Parse repository URL to extract information
+     */
+    private fun parseRepositoryUrl(url: String): RepositoryInfo {
+        return when {
+            url.contains("lnreader-plugins") -> {
+                RepositoryInfo(
+                    name = "LNReader Plugins",
+                    url = url,
+                    owner = "LNReader",
+                    source = "https://github.com/LNReader/lnreader-plugins",
+                    type = "LNREADER"
+                )
+            }
+            url.contains("IReader-extensions") -> {
+                RepositoryInfo(
+                    name = "IReader Extensions",
+                    url = url,
+                    owner = "IReaderorg",
+                    source = "https://github.com/IReaderorg/IReader-extensions",
+                    type = "IREADER"
+                )
+            }
+            else -> {
+                // Try to auto-detect or default to IReader
+                RepositoryInfo(
+                    name = "Custom Repository",
+                    url = url,
+                    owner = "Unknown",
+                    source = url,
+                    type = "IREADER"
+                )
+            }
+        }
+    }
+    
+    private data class RepositoryInfo(
+        val name: String,
+        val url: String,
+        val owner: String,
+        val source: String,
+        val type: String
+    )
+    
+    /**
      * Check if a source has stored credentials
      */
     suspend fun hasCredentials(sourceId: Long): Boolean {
@@ -318,38 +443,7 @@ class ExtensionViewModel(
             }
         }
     }
-    
-    /**
-     * Add a new repository
-     */
-    fun addRepository(url: String) {
-        scope.launch(Dispatchers.IO) {
-            try {
-                // Parse the repository URL to extract information
-                val repoName = extractRepositoryName(url)
-                val repoOwner = extractRepositoryOwner(url)
-                
-                // Create a new ExtensionSource for the repository
-                val newRepo = ExtensionSource(
-                    id = System.currentTimeMillis(), // Generate unique ID
-                    name = repoName,
-                    key = url,
-                    owner = repoOwner,
-                    source = url,
-                    isEnable = true
-                )
-                
-                // Note: You would need to add a method to CatalogSourceRepository to insert
-                // For now, we'll show a success message
-                showSnackBar(UiText.DynamicString("Repository added: $repoName"))
-                
-                // Refresh catalogs to fetch sources from the new repository
-                refreshCatalogs()
-            } catch (e: Exception) {
-                showSnackBar(UiText.DynamicString("Failed to add repository: ${e.message}"))
-            }
-        }
-    }
+
     
     /**
      * Extract repository name from URL

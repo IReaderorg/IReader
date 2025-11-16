@@ -36,6 +36,6 @@ class SourceRepositoryViewModel(
             .substringBefore(Separator,"") .takeIf { it.isNotBlank() } ?: throw Exception()
         val source = url.substringAfter(SOURCE,"")
             .takeIf { it.isNotBlank() } ?: throw Exception()
-        return ExtensionSource(0,name,key,owner,source,null,null,0,true)
+        return ExtensionSource(0,name,key,owner,source,null,null,0,true,"IREADER")
     }
 }

@@ -76,6 +76,7 @@ class RepositoryAddScreenSpec {
                             username = it.username,
                             password = it.password,
                             id = 0,
+                            repositoryType = it.repositoryType
                         )
                     )
                 }

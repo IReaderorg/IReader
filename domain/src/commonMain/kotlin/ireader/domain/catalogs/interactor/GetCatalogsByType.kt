@@ -18,9 +18,10 @@ class GetCatalogsByType(
         sort: CatalogSort = CatalogSort.Favorites,
         excludeRemoteInstalled: Boolean = false,
         withNsfw: Boolean = true,
+        repositoryType: String? = null, // Filter by repository type
     ): Flow<Catalogs> {
         val localFlow = localCatalogs.subscribe(sort)
-        val remoteFlow = remoteCatalogs.subscribe(withNsfw = withNsfw)
+        val remoteFlow = remoteCatalogs.subscribe(withNsfw = withNsfw, repositoryType = repositoryType)
         return localFlow.combine(remoteFlow) { local, remote ->
             val (pinned, unpinned) = local
                 .sortedByDescending { it.hasUpdate }

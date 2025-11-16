@@ -135,7 +135,8 @@ internal fun AddingRepositoryScreen(
                                         owner = owner.value.trim(),
                                         source = source.value.trim(),
                                         username = username.value.trim(),
-                                        password = password.value
+                                        password = password.value,
+                                        repositoryType = repositoryType.name
                                 ))
                                 // Reset loading state after a delay (in real app, this would be in callback)
                                 isLoading = false
@@ -249,25 +250,54 @@ internal fun AddingRepositoryScreen(
                             containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
                         )
                     ) {
-                        Row(
+                        Column(
                             modifier = Modifier.padding(12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Info,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.secondary,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Text(
-                                text = when (repositoryType) {
-                                    RepositoryType.IREADER -> "IReader format repositories contain extensions and plugins"
-                                    RepositoryType.LNREADER -> "LNReader format repositories are compatible with LNReader plugins"
-                                },
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Info,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = when (repositoryType) {
+                                        RepositoryType.IREADER -> "IReader format repositories contain extensions and plugins"
+                                        RepositoryType.LNREADER -> "LNReader format repositories are compatible with LNReader plugins"
+                                    },
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                            
+                            // Warning about mixing repository types
+                            if (repositoryType == RepositoryType.LNREADER) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 4.dp),
+                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                                )
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.Top
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Warning,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Text(
+                                        text = "Important: Uninstall all IReader extensions before adding LNReader repositories to avoid conflicts",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.error,
+                                        fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -587,7 +617,8 @@ internal data class RepositoryInfo(
         val owner: String,
         val source: String,
         val username: String,
-        val password: String
+        val password: String,
+        val repositoryType: String = "IREADER"
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

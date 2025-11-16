@@ -1,0 +1,2 @@
+-- Add repository_type column to repository table
+ALTER TABLE repository ADD COLUMN repository_type TEXT NOT NULL DEFAULT 'IREADER';

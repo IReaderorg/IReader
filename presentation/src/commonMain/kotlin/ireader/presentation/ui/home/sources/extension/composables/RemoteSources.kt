@@ -37,6 +37,7 @@ fun RemoteSourcesScreen(
         onClickInstall: (Catalog) -> Unit,
         onClickUninstall: (Catalog) -> Unit,
         onCancelInstaller: ((Catalog) -> Unit)? = null,
+
 ) {
     // State for login dialog
     var showLoginDialog by remember { mutableStateOf(false) }

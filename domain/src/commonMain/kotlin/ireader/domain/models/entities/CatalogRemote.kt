@@ -18,10 +18,19 @@ data class CatalogRemote(
     val iconUrl: String,
     val jarUrl: String,
     val nsfw: Boolean,
+    val repositoryId: Long = -1L, // Reference to ExtensionSource
+    val repositoryType: String = "IREADER", // "IREADER" or "LNREADER"
 ) : Catalog() {
     companion object {
         const val DEFAULT_ID = -1L
-
+    }
+    
+    fun isLNReaderSource(): Boolean {
+        return repositoryType.equals("LNREADER", ignoreCase = true)
+    }
+    
+    fun isIReaderSource(): Boolean {
+        return repositoryType.equals("IREADER", ignoreCase = true)
     }
 }
 
