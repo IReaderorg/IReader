@@ -38,7 +38,7 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     }
 
     fun categoryFlags(): Preference<Long> {
-        return preferenceStore.getLong("category_flags", 0L)
+        return preferenceStore.getLong("category_flags", 0b0011L)
     }
 
     fun perCategorySettings(): Preference<Boolean> {

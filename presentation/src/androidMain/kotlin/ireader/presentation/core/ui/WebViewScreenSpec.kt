@@ -148,7 +148,13 @@ actual data class WebViewScreenSpec actual constructor(
                         showUrlBar = false
                         focusManager.clearFocus()
                     },
-                    onRefresh = { webView?.reload() },
+                    onRefresh = { 
+                        if (isLoading) {
+                            webView?.stopLoading()
+                        } else {
+                            webView?.reload()
+                        }
+                    },
                     onBack = { navController.popBackStack() },
                     urlFocusRequester = urlFocusRequester,
                     canGoBack = webView?.canGoBack() == true,
@@ -368,7 +374,7 @@ private fun ModernWebViewTopBar(
         color = MaterialTheme.colorScheme.surface
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            // Minimized toolbar with back button, URL bar, and refresh
+            // Single toolbar row with all controls
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -376,7 +382,7 @@ private fun ModernWebViewTopBar(
                     .padding(horizontal = ToolbarDimensions.MinimizedPadding),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Back button - fixed width with minimum touch target
+                // Close button
                 IconButton(
                     onClick = onBack,
                     modifier = Modifier.size(ToolbarDimensions.MinimumTouchTarget)
@@ -389,12 +395,42 @@ private fun ModernWebViewTopBar(
                     )
                 }
                 
+                // Back navigation button
+                IconButton(
+                    onClick = onGoBack,
+                    enabled = canGoBack,
+                    modifier = Modifier.size(ToolbarDimensions.MinimumTouchTarget)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = if (canGoBack) MaterialTheme.colorScheme.onSurface
+                              else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize)
+                    )
+                }
+                
+                // Forward navigation button
+                IconButton(
+                    onClick = onGoForward,
+                    enabled = canGoForward,
+                    modifier = Modifier.size(ToolbarDimensions.MinimumTouchTarget)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowForward,
+                        contentDescription = "Forward",
+                        tint = if (canGoForward) MaterialTheme.colorScheme.onSurface
+                              else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize)
+                    )
+                }
+                
                 // URL bar - flexible width with weight
                 if (showUrlBar) {
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .padding(horizontal = ToolbarDimensions.MinimizedPadding)
+                            .padding(horizontal = 4.dp)
                     ) {
                         TextField(
                             value = currentUrl,
@@ -440,7 +476,7 @@ private fun ModernWebViewTopBar(
                         modifier = Modifier
                             .weight(1f)
                             .height(32.dp)
-                            .padding(horizontal = ToolbarDimensions.MinimizedPadding)
+                            .padding(horizontal = 4.dp)
                             .clip(RoundedCornerShape(16.dp))
                             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
                             .clickable { onShowUrlBarChange(true) }
@@ -457,88 +493,26 @@ private fun ModernWebViewTopBar(
                     }
                 }
                 
-                // Refresh button - fixed width with minimum touch target
+                // Refresh/Stop button
                 IconButton(
                     onClick = onRefresh,
                     modifier = Modifier.size(ToolbarDimensions.MinimumTouchTarget)
                 ) {
-                    Icon(
-                        imageVector = if (isLoading) Icons.Default.Close else Icons.Default.Refresh,
-                        contentDescription = if (isLoading) "Stop" else "Refresh",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize)
-                    )
-                }
-            }
-            
-            // Bottom navigation row - compact design
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
-            ) {
-                // Navigation buttons in a Row
-                Row(
-                    modifier = Modifier,
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    // Back navigation button with minimum touch target
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(
-                                if (canGoBack) MaterialTheme.colorScheme.primaryContainer 
-                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                            )
-                            .size(32.dp)
-                            .clickable(enabled = canGoBack) { onGoBack() },
-                        contentAlignment = Alignment.Center
-                    ) {
+                    if (isLoading) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = if (canGoBack) MaterialTheme.colorScheme.onSecondary
-                                  else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Stop",
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize)
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Refresh",
+                            tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize)
                         )
                     }
-                    
-                    Spacer(modifier = Modifier.width(8.dp))
-                    
-                    // Forward navigation button with minimum touch target
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(
-                                if (canGoForward) MaterialTheme.colorScheme.primaryContainer 
-                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                            )
-                            .size(32.dp)
-                            .clickable(enabled = canGoForward) { onGoForward() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowForward,
-                            contentDescription = "Forward",
-                            tint = if (canGoForward) MaterialTheme.colorScheme.onSecondary
-                                  else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                            modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize)
-                        )
-                    }
-                }
-                
-                // Spacer to push the loading indicator to the right
-                Spacer(modifier = Modifier.weight(1f))
-                
-                // Loading indicator (visible only when loading)
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize),
-                        strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
                 }
             }
             

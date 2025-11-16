@@ -44,7 +44,6 @@ import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.IBackHandler
-import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import kotlinx.coroutines.delay
 
 @Composable
