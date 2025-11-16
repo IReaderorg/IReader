@@ -237,6 +237,9 @@ class ExtensionViewModel(
         }
     }
     
+    // Alias for toolbar compatibility
+    fun refreshExtensions() = refreshCatalogs()
+    
     /**
      * Check the health status of a specific source
      */

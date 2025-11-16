@@ -73,23 +73,6 @@ fun ExtensionScreen(
     
     Scaffold(
         modifier = modifier,
-        topBar = {
-            ExtensionScreenTopAppBar(
-                currentPage = vm.currentPagerPage,
-                searchMode = vm.isInSearchMode,
-                query = vm.searchQuery,
-                onValueChange = { vm.searchQuery = it },
-                onConfirm = { /* Search confirm logic */ },
-                onClose = { vm.searchQuery = "" },
-                onSearchDisable = { vm.isInSearchMode = false },
-                onSearchEnable = { vm.isInSearchMode = true },
-                onRefresh = { vm.refreshExtensions() },
-                onSearchNavigate = { /* Navigate to global search */ },
-                onMigrate = onMigrateFromSource?.let { { /* Show migration dialog */ } },
-                onAddRepository = { /* Add repository logic */ },
-                scrollBehavior = scrollBehavior
-            )
-        }
     ) { paddingValues ->
         Column(
             modifier = Modifier

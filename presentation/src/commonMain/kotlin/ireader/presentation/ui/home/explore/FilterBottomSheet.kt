@@ -43,6 +43,7 @@ import ireader.core.source.model.Filter
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.ui.component.IBackHandler
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import kotlinx.coroutines.delay
 
@@ -53,7 +54,13 @@ fun FilterBottomSheet(
     onReset: () -> Unit,
     onUpdate: (List<Filter<*>>) -> Unit,
     filters: List<Filter<*>>,
+    onDismiss: (() -> Unit)? = null,
 ) {
+    // Handle back button to dismiss the sheet
+    if (onDismiss != null) {
+        IBackHandler(enabled = true, onBack = onDismiss)
+    }
+    
     val scrollState = rememberScrollState()
     var visible by remember { mutableStateOf(false) }
     

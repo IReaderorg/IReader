@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,9 +71,14 @@ fun MoreScreen(
     // Theme mode state
     var showThemeOptions by remember { mutableStateOf(false) }
     
+    // Save scroll state across navigation
+    val listState = rememberSaveable(saver = LazyListState.Saver) {
+        LazyListState()
+    }
+    
     LazyColumn(
         modifier = modifier,
-        state = rememberLazyListState(),
+        state = listState,
         contentPadding = PaddingValues(bottom = 24.dp)
     ) {
         // App Logo and Header

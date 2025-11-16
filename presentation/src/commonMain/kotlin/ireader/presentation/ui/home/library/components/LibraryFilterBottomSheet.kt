@@ -42,6 +42,7 @@ import ireader.domain.models.library.LibrarySort
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.ui.component.IBackHandler
 
 /**
  * Bottom sheet for library filtering and sorting options
@@ -67,6 +68,9 @@ fun LibraryFilterBottomSheet(
     modifier: Modifier = Modifier,
 
 ) {
+    // Handle back button to dismiss the sheet
+    IBackHandler(enabled = true, onBack = onDismiss)
+    
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         modifier = modifier,

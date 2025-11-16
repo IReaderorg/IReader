@@ -23,6 +23,7 @@ interface CatalogsState {
     //  val userSources: List<SourceUiModel>
     var searchQuery: String?
     var currentPagerPage: Int
+    var isInSearchMode: Boolean
 }
 
 fun CatalogsState(): CatalogsState {
@@ -46,6 +47,7 @@ class CatalogsStateImpl : CatalogsState {
     override var installSteps by mutableStateOf(emptyMap<String, InstallStep>())
     override var isRefreshing by mutableStateOf(false)
     override var searchQuery by mutableStateOf<String?>(null)
+    override var isInSearchMode by mutableStateOf(false)
 
     var allPinnedCatalogs by mutableStateOf(
         emptyList<CatalogLocal>(),

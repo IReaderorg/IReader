@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
@@ -11,6 +12,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +33,10 @@ fun UserSourcesScreen(
         onClickTogglePinned: (Catalog) -> Unit,
         onShowDetails: ((Catalog) -> Unit)? = null,
 ) {
-    val scrollState = rememberLazyListState()
+    // Save scroll state across navigation
+    val scrollState = rememberSaveable(saver = LazyListState.Saver) {
+        LazyListState()
+    }
     
     // State for login dialog
     var showLoginDialog by remember { mutableStateOf(false) }

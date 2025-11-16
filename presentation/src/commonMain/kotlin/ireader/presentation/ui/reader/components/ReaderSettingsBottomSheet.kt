@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.ui.component.IBackHandler
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
@@ -53,6 +54,9 @@ fun ReaderSettingsBottomSheet(
         4 // Changed from 3 to 4 to include Fonts tab
     }
     val scope = rememberCoroutineScope()
+    
+    // Handle back button to dismiss the sheet
+    IBackHandler(enabled = true, onBack = onDismiss)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,

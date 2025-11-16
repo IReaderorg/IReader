@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.component.IBackHandler
 import ireader.presentation.ui.plugins.marketplace.PriceFilter
 import ireader.presentation.ui.plugins.marketplace.SortOrder
 
@@ -30,6 +31,9 @@ fun FilterBottomSheet(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Handle back button to dismiss the sheet
+    IBackHandler(enabled = true, onBack = onDismiss)
+    
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         modifier = modifier

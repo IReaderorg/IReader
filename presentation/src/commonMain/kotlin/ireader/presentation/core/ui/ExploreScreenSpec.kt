@@ -87,7 +87,12 @@ data class ExploreScreenSpec(
                             },
                             onUpdate = {
                                 vm.modifiedFilter = it
+                            },
+                        onDismiss = {
+                            scope.launch {
+                                sheetState.hide()
                             }
+                        }
                     )
                 }, bottomSheetState = sheetState
         ) {
