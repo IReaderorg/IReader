@@ -1,6 +1,10 @@
 package ireader.data.book
 
 import ireader.data.core.DatabaseHandler
+import ireader.data.core.DatabaseOptimizations
+import ireader.data.core.DatabaseOptimizations.batchUpdate
+import ireader.data.core.DatabaseOptimizations.executeBatch
+import ireader.data.core.DatabaseOptimizations.subscribeWithMonitoring
 import ireader.data.util.BaseDao
 import ireader.data.util.toDB
 import ireader.domain.data.repository.BookCategoryRepository
@@ -11,6 +15,8 @@ import ireader.domain.models.entities.Category
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.entities.LibraryBook
 import ireader.domain.models.library.LibrarySort
+import ireader.core.log.IReaderLog
+import ireader.core.performance.PerformanceMonitor
 import kotlinx.coroutines.flow.Flow
 import java.util.Locale
 
@@ -19,14 +25,18 @@ class BookRepositoryImpl(
     private val bookCategoryRepository: BookCategoryRepository
 ) : BookRepository, BaseDao<Book>() {
     override suspend fun findAllBooks(): List<Book> {
-        return handler.awaitList {
-            bookQueries.findAllBooks(booksMapper)
+        return PerformanceMonitor.measureDatabaseOperation("findAllBooks") {
+            handler.awaitList {
+                bookQueries.findAllBooks(booksMapper)
+            }
         }
     }
 
     override fun subscribeBookById(id: Long): Flow<Book?> {
-        return handler.subscribeToOneOrNull {
-            bookQueries.findBookById(id, booksMapper)
+        return handler.subscribeWithMonitoring("subscribeBookById") {
+            handler.subscribeToOneOrNull {
+                bookQueries.findBookById(id, booksMapper)
+            }
         }
     }
 
@@ -146,31 +156,36 @@ class BookRepositoryImpl(
     }
 
     override suspend fun updateBook(book: List<Book>) {
-        return handler.await {
-            book.forEach { book ->
+        return handler.batchUpdate("updateBooks", book) { bookItem ->
+            try {
                 bookQueries.update(
-                    source = book.sourceId,
-                    dateAdded = book.dateAdded,
-                    lastUpdate = book.lastUpdate,
-                    title = book.title,
-                    status = book.status,
-                    description = book.description,
-                    author = book.author,
-                    url = book.key,
-                    chapterFlags = book.flags,
+                    source = bookItem.sourceId,
+                    dateAdded = bookItem.dateAdded,
+                    lastUpdate = bookItem.lastUpdate,
+                    title = bookItem.title,
+                    status = bookItem.status,
+                    description = bookItem.description,
+                    author = bookItem.author,
+                    url = bookItem.key,
+                    chapterFlags = bookItem.flags,
                     coverLastModified = 0,
-                    thumbnailUrl = book.cover,
-                    viewer = book.viewer,
-                    id = book.id,
-                    initialized = book.initialized,
-                    favorite = book.favorite,
-                    genre = book.genres.let(bookGenresConverter::encode),
-                    isPinned = book.isPinned,
-                    pinnedOrder = book.pinnedOrder.toLong(),
-                    isArchived = book.isArchived,
+                    thumbnailUrl = bookItem.cover,
+                    viewer = bookItem.viewer,
+                    id = bookItem.id,
+                    initialized = bookItem.initialized,
+                    favorite = bookItem.favorite,
+                    genre = bookItem.genres.let(bookGenresConverter::encode),
+                    isPinned = bookItem.isPinned,
+                    pinnedOrder = bookItem.pinnedOrder.toLong(),
+                    isArchived = bookItem.isArchived,
                 )
+                true
+            } catch (e: Exception) {
+                IReaderLog.error("Failed to update book: ${bookItem.title}", e)
+                false
             }
-
+        }.let { result ->
+            IReaderLog.info("Batch book update completed: ${result.successCount}/${result.totalCount} successful")
         }
     }
 

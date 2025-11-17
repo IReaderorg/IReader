@@ -92,6 +92,21 @@ val repositoryInjectModule = module {
     // Reading statistics repository
     single<ReadingStatisticsRepository> { ReadingStatisticsRepositoryImpl(get()) }
     
+    // Library insights repository
+    single<ireader.domain.data.repository.LibraryInsightsRepository> { 
+        ireader.data.repository.LibraryInsightsRepositoryImpl(get(), get(), get(), get()) 
+    }
+    
+    // Global search repository
+    single<ireader.domain.data.repository.GlobalSearchRepository> { 
+        ireader.data.repository.GlobalSearchRepositoryImpl(get(), get(), get()) 
+    }
+    
+    // Advanced filter repository
+    single<ireader.domain.data.repository.AdvancedFilterRepository> { 
+        ireader.data.repository.AdvancedFilterRepositoryImpl(get(), get(), get()) 
+    }
+    
     // Security repository
     single<SecurityRepository> { SecurityRepositoryImpl(get(), get()) }
     

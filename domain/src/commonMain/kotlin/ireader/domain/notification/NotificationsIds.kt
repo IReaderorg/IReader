@@ -83,4 +83,34 @@ object NotificationsIds {
     const val CHANNEL_EXTENSIONS_UPDATE = "ext_apk_update_channel"
     const val ID_UPDATES_TO_EXTS = -401
     const val ID_EXTENSION_INSTALLER = -402
+
+    /**
+     * Notification channel and ids used for migration system.
+     */
+    const val GROUP_MIGRATION = "group_migration"
+    const val CHANNEL_MIGRATION_PROGRESS = "migration_progress_channel"
+    const val ID_MIGRATION_PROGRESS = -901
+    const val CHANNEL_MIGRATION_COMPLETE = "migration_complete_channel"
+    const val ID_MIGRATION_COMPLETE = -902
+    const val CHANNEL_MIGRATION_ERROR = "migration_error_channel"
+    const val ID_MIGRATION_ERROR = -903
+
+    /**
+     * Enhanced download notification ids for batch operations
+     */
+    const val ID_DOWNLOAD_BATCH_PROGRESS = -204
+    const val ID_DOWNLOAD_BATCH_COMPLETE = -205
+    const val ID_DOWNLOAD_QUEUE_SUMMARY = -206
+
+    /**
+     * Library update enhancement ids
+     */
+    const val ID_LIBRARY_UPDATE_SUMMARY = -103
+    const val ID_LIBRARY_UPDATE_ERRORS = -104
+
+    /**
+     * Migration batch operation ids
+     */
+    const val ID_MIGRATION_BATCH_PROGRESS = -904
+    const val ID_MIGRATION_BATCH_COMPLETE = -905
 }

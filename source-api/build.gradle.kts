@@ -16,11 +16,13 @@ android {
     compileSdk = ProjectConfig.compileSdk
     defaultConfig {
         minSdk = ProjectConfig.minSdk
-        targetSdk = ProjectConfig.targetSdk
     }
     compileOptions {
         sourceCompatibility = ProjectConfig.androidJvmTarget
         targetCompatibility = ProjectConfig.androidJvmTarget
+    }
+    lint {
+        targetSdk = ProjectConfig.targetSdk
     }
 }
 kotlin {
@@ -28,8 +30,10 @@ kotlin {
         publishLibraryVariants("release")
         compilations {
             all {
-                compilerOptions.configure {
-                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
+                compileTaskProvider.configure {
+                    compilerOptions {
+                        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
+                    }
                 }
             }
         }
@@ -37,8 +41,10 @@ kotlin {
     jvm("desktop") {
         compilations {
             all {
-                compilerOptions.configure {
-                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.desktopJvmTarget.toString()))
+                compileTaskProvider.configure {
+                    compilerOptions {
+                        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.desktopJvmTarget.toString()))
+                    }
                 }
             }
         }

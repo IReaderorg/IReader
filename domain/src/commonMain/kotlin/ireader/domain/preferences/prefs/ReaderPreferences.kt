@@ -354,6 +354,248 @@ class ReaderPreferences constructor(
     fun useTTSWithTranslatedText(): Preference<Boolean> {
         return preferenceStore.getBoolean("use_tts_with_translated_text", false)
     }
+
+    // ========== Advanced Reader System (Mihon-inspired) ==========
+    // Requirements: 5.1, 5.2, 11.1, 11.2, 11.4, 11.5, 8.1, 8.2
+
+    // Page transitions and animations
+    fun pageTransitions(): Preference<Boolean> {
+        return preferenceStore.getBoolean("pref_enable_transitions_key", true)
+    }
+
+    fun flashOnPageChange(): Preference<Boolean> {
+        return preferenceStore.getBoolean("pref_reader_flash", false)
+    }
+
+    fun flashDurationMillis(): Preference<Int> {
+        return preferenceStore.getInt("pref_reader_flash_duration", 100)
+    }
+
+    fun flashPageInterval(): Preference<Int> {
+        return preferenceStore.getInt("pref_reader_flash_interval", 1)
+    }
+
+    fun flashColor(): Preference<FlashColor> {
+        return preferenceStore.getEnum("pref_reader_flash_mode", FlashColor.BLACK)
+    }
+
+    fun doubleTapAnimSpeed(): Preference<Int> {
+        return preferenceStore.getInt("pref_double_tap_anim_speed", 500)
+    }
+
+    // Display preferences
+    fun showPageNumber(): Preference<Boolean> {
+        return preferenceStore.getBoolean("pref_show_page_number_key", true)
+    }
+
+    fun showReadingMode(): Preference<Boolean> {
+        return preferenceStore.getBoolean("pref_show_reading_mode", true)
+    }
+
+    fun fullscreen(): Preference<Boolean> {
+        return preferenceStore.getBoolean("fullscreen", true)
+    }
+
+    fun drawUnderCutout(): Preference<Boolean> {
+        return preferenceStore.getBoolean("cutout_short", true)
+    }
+
+    fun keepScreenOn(): Preference<Boolean> {
+        return preferenceStore.getBoolean("pref_keep_screen_on_key", false)
+    }
+
+    // Viewer modes and orientation
+    fun defaultReaderMode(): Preference<Int> {
+        return preferenceStore.getInt("pref_default_reading_mode_key", ReaderMode.RIGHT_TO_LEFT.flagValue)
+    }
+
+    fun defaultOrientationType(): Preference<Int> {
+        return preferenceStore.getInt("pref_default_orientation_type_key", ReaderOrientation.FREE.flagValue)
+    }
+
+    // Zoom and scaling
+    fun webtoonDoubleTapZoomEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean("pref_enable_double_tap_zoom_webtoon", true)
+    }
+
+    fun imageScaleType(): Preference<Int> {
+        return preferenceStore.getInt("pref_image_scale_type_key", 1)
+    }
+
+    fun zoomStart(): Preference<Int> {
+        return preferenceStore.getInt("pref_zoom_start_key", 1)
+    }
+
+    fun landscapeZoom(): Preference<Boolean> {
+        return preferenceStore.getBoolean("landscape_zoom", true)
+    }
+
+    fun navigateToPan(): Preference<Boolean> {
+        return preferenceStore.getBoolean("navigate_pan", true)
+    }
+
+    // Cropping and padding
+    fun cropBorders(): Preference<Boolean> {
+        return preferenceStore.getBoolean("crop_borders", false)
+    }
+
+    fun cropBordersWebtoon(): Preference<Boolean> {
+        return preferenceStore.getBoolean("crop_borders_webtoon", false)
+    }
+
+    fun webtoonSidePadding(): Preference<Int> {
+        return preferenceStore.getInt("webtoon_side_padding", 0)
+    }
+
+    fun webtoonDisableZoomOut(): Preference<Boolean> {
+        return preferenceStore.getBoolean("webtoon_disable_zoom_out", false)
+    }
+
+    // Theme and appearance
+    fun readerTheme(): Preference<Int> {
+        return preferenceStore.getInt("pref_reader_theme_key", 1)
+    }
+
+    fun alwaysShowChapterTransition(): Preference<Boolean> {
+        return preferenceStore.getBoolean("always_show_chapter_transition", true)
+    }
+
+    fun readerHideThreshold(): Preference<ReaderHideThreshold> {
+        return preferenceStore.getEnum("reader_hide_threshold", ReaderHideThreshold.LOW)
+    }
+
+    // Dual page support
+    fun dualPageSplitPaged(): Preference<Boolean> {
+        return preferenceStore.getBoolean("pref_dual_page_split", false)
+    }
+
+    fun dualPageInvertPaged(): Preference<Boolean> {
+        return preferenceStore.getBoolean("pref_dual_page_invert", false)
+    }
+
+    fun dualPageSplitWebtoon(): Preference<Boolean> {
+        return preferenceStore.getBoolean("pref_dual_page_split_webtoon", false)
+    }
+
+    fun dualPageInvertWebtoon(): Preference<Boolean> {
+        return preferenceStore.getBoolean("pref_dual_page_invert_webtoon", false)
+    }
+
+    fun dualPageRotateToFit(): Preference<Boolean> {
+        return preferenceStore.getBoolean("pref_dual_page_rotate", false)
+    }
+
+    fun dualPageRotateToFitInvert(): Preference<Boolean> {
+        return preferenceStore.getBoolean("pref_dual_page_rotate_invert", false)
+    }
+
+    fun dualPageRotateToFitWebtoon(): Preference<Boolean> {
+        return preferenceStore.getBoolean("pref_dual_page_rotate_webtoon", false)
+    }
+
+    fun dualPageRotateToFitInvertWebtoon(): Preference<Boolean> {
+        return preferenceStore.getBoolean("pref_dual_page_rotate_invert_webtoon", false)
+    }
+
+    // Color filter system
+    fun customBrightness(): Preference<Boolean> {
+        return preferenceStore.getBoolean("pref_custom_brightness_key", false)
+    }
+
+    fun customBrightnessValue(): Preference<Int> {
+        return preferenceStore.getInt("custom_brightness_value", 0)
+    }
+
+    fun colorFilter(): Preference<Boolean> {
+        return preferenceStore.getBoolean("pref_color_filter_key", false)
+    }
+
+    fun colorFilterValue(): Preference<Int> {
+        return preferenceStore.getInt("color_filter_value", 0)
+    }
+
+    fun colorFilterMode(): Preference<Int> {
+        return preferenceStore.getInt("color_filter_mode", 0)
+    }
+
+    fun grayscale(): Preference<Boolean> {
+        return preferenceStore.getBoolean("pref_grayscale", false)
+    }
+
+    fun invertedColors(): Preference<Boolean> {
+        return preferenceStore.getBoolean("pref_inverted_colors", false)
+    }
+
+    // Navigation controls
+    fun readWithLongTap(): Preference<Boolean> {
+        return preferenceStore.getBoolean("reader_long_tap", true)
+    }
+
+    fun readWithVolumeKeys(): Preference<Boolean> {
+        return preferenceStore.getBoolean("reader_volume_keys", false)
+    }
+
+    fun readWithVolumeKeysInverted(): Preference<Boolean> {
+        return preferenceStore.getBoolean("reader_volume_keys_inverted", false)
+    }
+
+    fun navigationModePager(): Preference<Int> {
+        return preferenceStore.getInt("reader_navigation_mode_pager", 0)
+    }
+
+    fun navigationModeWebtoon(): Preference<Int> {
+        return preferenceStore.getInt("reader_navigation_mode_webtoon", 0)
+    }
+
+    fun pagerNavInverted(): Preference<TappingInvertMode> {
+        return preferenceStore.getEnum("reader_tapping_inverted", TappingInvertMode.NONE)
+    }
+
+    fun webtoonNavInverted(): Preference<TappingInvertMode> {
+        return preferenceStore.getEnum("reader_tapping_inverted_webtoon", TappingInvertMode.NONE)
+    }
+
+    fun showNavigationOverlayNewUser(): Preference<Boolean> {
+        return preferenceStore.getBoolean("reader_navigation_overlay_new_user", true)
+    }
+
+    fun showNavigationOverlayOnStart(): Preference<Boolean> {
+        return preferenceStore.getBoolean("reader_navigation_overlay_on_start", false)
+    }
+
+    // Chapter navigation
+    fun skipRead(): Preference<Boolean> {
+        return preferenceStore.getBoolean("skip_read", false)
+    }
+
+    fun skipFiltered(): Preference<Boolean> {
+        return preferenceStore.getBoolean("skip_filtered", true)
+    }
+
+    fun skipDupe(): Preference<Boolean> {
+        return preferenceStore.getBoolean("skip_dupe", false)
+    }
+
+    // Reader statistics tracking
+    fun trackReadingTime(): Preference<Boolean> {
+        return preferenceStore.getBoolean("track_reading_time", true)
+    }
+
+    fun totalReadingTimeMillis(): Preference<Long> {
+        return preferenceStore.getLong("total_reading_time_millis", 0L)
+    }
+
+    fun currentSessionStartTime(): Preference<Long> {
+        return preferenceStore.getLong("current_session_start_time", 0L)
+    }
+
+    fun pagesRead(): Preference<Long> {
+        return preferenceStore.getLong("pages_read", 0L)
+    }
+
+    fun chaptersCompleted(): Preference<Long> {
+        return preferenceStore.getLong("chapters_completed", 0L)
+    }
 }
 
 enum class ReadingMode {
@@ -375,4 +617,60 @@ enum class ChapterDisplayMode {
     Default,
     SourceTitle,
     ChapterNumber
+}
+
+// ========== Advanced Reader Enums (Mihon-inspired) ==========
+
+enum class FlashColor {
+    BLACK,
+    WHITE,
+    WHITE_BLACK
+}
+
+enum class ReaderMode(val flagValue: Int) {
+    LEFT_TO_RIGHT(1),
+    RIGHT_TO_LEFT(2),
+    VERTICAL(3),
+    WEBTOON(4),
+    CONTINUOUS_VERTICAL(5);
+
+    companion object {
+        fun fromFlagValue(value: Int): ReaderMode {
+            return entries.find { it.flagValue == value } ?: RIGHT_TO_LEFT
+        }
+    }
+}
+
+enum class ReaderOrientation(val flagValue: Int) {
+    FREE(0),
+    PORTRAIT(1),
+    LANDSCAPE(2),
+    LOCKED_PORTRAIT(3),
+    LOCKED_LANDSCAPE(4);
+
+    companion object {
+        fun fromFlagValue(value: Int): ReaderOrientation {
+            return entries.find { it.flagValue == value } ?: FREE
+        }
+    }
+}
+
+enum class TappingInvertMode {
+    NONE,
+    HORIZONTAL,
+    VERTICAL,
+    BOTH;
+
+    val shouldInvertHorizontal: Boolean
+        get() = this == HORIZONTAL || this == BOTH
+
+    val shouldInvertVertical: Boolean
+        get() = this == VERTICAL || this == BOTH
+}
+
+enum class ReaderHideThreshold(val threshold: Int) {
+    HIGHEST(5),
+    HIGH(13),
+    LOW(31),
+    LOWEST(47)
 }

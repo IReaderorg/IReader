@@ -1,3 +1,7 @@
+@file:OptIn(ExperimentalComposeLibrary::class)
+
+import org.jetbrains.compose.ExperimentalComposeLibrary
+
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
@@ -11,8 +15,10 @@ kotlin {
     androidTarget {
         compilations {
             all {
-                compilerOptions.configure {
-                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
+                compileTaskProvider.configure {
+                    compilerOptions {
+                        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
+                    }
                 }
             }
         }
@@ -20,8 +26,10 @@ kotlin {
     jvm("desktop") {
         compilations {
             all {
-                compilerOptions.configure {
-                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.desktopJvmTarget.toString()))
+                compileTaskProvider.configure {
+                    compilerOptions {
+                        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.desktopJvmTarget.toString()))
+                    }
                 }
             }
         }
@@ -35,6 +43,7 @@ kotlin {
                 implementation(project(Modules.sourceApi))
                 implementation(project(Modules.data))
                 implementation(project(Modules.commonResources))
+                implementation(project(Modules.presentationCore))
 
                 api(compose.foundation)
                 api(compose.runtime)
@@ -63,6 +72,14 @@ kotlin {
                 implementation(libs.zxing.core)
 
 
+            }
+        }
+        
+        commonTest {
+            dependencies {
+                implementation(kotlin("test"))
+                @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+                implementation(compose.uiTest)
             }
         }
         androidMain {
@@ -120,7 +137,6 @@ android {
     compileSdk = ProjectConfig.compileSdk
     defaultConfig {
         minSdk = ProjectConfig.minSdk
-        targetSdk = ProjectConfig.targetSdk
     }
     compileOptions {
         sourceCompatibility = ProjectConfig.androidJvmTarget
@@ -128,11 +144,12 @@ android {
     }
     lint {
         baseline = file("lint-baseline.xml")
+        targetSdk = ProjectConfig.targetSdk
     }
     androidComponents.onVariants { variant ->
         val name = variant.name
         sourceSets {
-            getByName(name).kotlin.srcDir("${buildDir.absolutePath}/generated/ksp/${name}/kotlin")
+            getByName(name).kotlin.srcDir("${layout.buildDirectory.get().asFile.absolutePath}/generated/ksp/${name}/kotlin")
 
         }
     }

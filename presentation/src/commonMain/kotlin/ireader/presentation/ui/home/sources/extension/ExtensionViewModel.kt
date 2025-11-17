@@ -10,6 +10,9 @@ import ireader.domain.catalogs.interactor.*
 import ireader.domain.models.entities.*
 import ireader.domain.models.entities.SourceHealth
 import ireader.domain.models.entities.SourceStatus
+import ireader.domain.models.entities.ExtensionStatistics
+import ireader.domain.models.entities.ExtensionTrustLevel
+import ireader.domain.models.entities.ExtensionInstallMethod
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.services.ExtensionChangeEvent
 import ireader.domain.services.ExtensionWatcherService
@@ -40,6 +43,9 @@ class ExtensionViewModel(
         private val sourceCredentialsRepository: ireader.domain.data.repository.SourceCredentialsRepository,
         private val extensionWatcherService: ExtensionWatcherService,
         private val catalogSourceRepository: ireader.domain.data.repository.CatalogSourceRepository,
+        private val extensionManager: ireader.domain.catalogs.interactor.ExtensionManager? = null,
+        private val extensionSecurityManager: ireader.domain.catalogs.interactor.ExtensionSecurityManager? = null,
+        private val extensionRepositoryManager: ireader.domain.catalogs.interactor.ExtensionRepositoryManager? = null,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), CatalogsState by state {
 
     val incognito = uiPreferences.incognitoMode().asStateIn(scope)
@@ -471,6 +477,149 @@ class ExtensionViewModel(
             }
         } catch (e: Exception) {
             "Unknown"
+        }
+    }
+    
+    // ========== Enhanced Extension Management Methods ==========
+    
+    /**
+     * Get extension security information
+     */
+    fun getExtensionSecurity(catalog: Catalog) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                val security = extensionSecurityManager?.scanExtension(catalog)
+                if (security != null) {
+                    // Store or display security info
+                    showSnackBar(UiText.DynamicString("Security scan complete"))
+                }
+            } catch (e: Exception) {
+                showSnackBar(UiText.DynamicString("Security scan failed: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Get extension statistics
+     */
+    suspend fun getExtensionStatistics(extensionId: Long): ExtensionStatistics? {
+        return try {
+            extensionManager?.getExtensionStatistics(extensionId)
+        } catch (e: Exception) {
+            null
+        }
+    }
+    
+    /**
+     * Set extension trust level
+     */
+    fun setExtensionTrustLevel(extensionId: Long, trustLevel: ExtensionTrustLevel) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                extensionSecurityManager?.setTrustLevel(extensionId, trustLevel)
+                showSnackBar(UiText.DynamicString("Trust level updated"))
+            } catch (e: Exception) {
+                showSnackBar(UiText.DynamicString("Failed to update trust level: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Install extension with specific method
+     */
+    fun installExtensionWithMethod(
+        catalog: CatalogRemote,
+        method: ExtensionInstallMethod = ExtensionInstallMethod.PACKAGE_INSTALLER
+    ) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                extensionManager?.installExtension(catalog, method)?.onSuccess {
+                    showSnackBar(UiText.DynamicString("Extension installed successfully"))
+                }?.onFailure { error ->
+                    showSnackBar(UiText.DynamicString("Installation failed: ${error.message}"))
+                }
+            } catch (e: Exception) {
+                showSnackBar(UiText.DynamicString("Installation error: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Batch update all extensions
+     */
+    fun batchUpdateExtensions() {
+        scope.launch(Dispatchers.IO) {
+            try {
+                val installed = (pinnedCatalogs + unpinnedCatalogs).filterIsInstance<CatalogInstalled>()
+                extensionManager?.batchUpdateExtensions(installed)?.onSuccess { results ->
+                    val successCount = results.values.count { it.isSuccess }
+                    showSnackBar(UiText.DynamicString("Updated $successCount/${installed.size} extensions"))
+                }
+            } catch (e: Exception) {
+                showSnackBar(UiText.DynamicString("Batch update failed: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Check for extension updates
+     */
+    fun checkForExtensionUpdates() {
+        scope.launch(Dispatchers.IO) {
+            try {
+                val updates = extensionManager?.checkForUpdates()
+                if (updates != null && updates.isNotEmpty()) {
+                    showSnackBar(UiText.DynamicString("${updates.size} updates available"))
+                } else {
+                    showSnackBar(UiText.DynamicString("All extensions are up to date"))
+                }
+            } catch (e: Exception) {
+                showSnackBar(UiText.DynamicString("Update check failed: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Add repository using the enhanced repository manager
+     */
+    fun addRepositoryEnhanced(name: String, url: String, fingerprint: String?) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                extensionRepositoryManager?.addRepository(name, url, fingerprint)?.onSuccess {
+                    showSnackBar(UiText.DynamicString("Repository added successfully"))
+                    refreshCatalogs()
+                }?.onFailure { error ->
+                    showSnackBar(UiText.DynamicString("Failed to add repository: ${error.message}"))
+                }
+            } catch (e: Exception) {
+                showSnackBar(UiText.DynamicString("Error adding repository: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Track extension usage for statistics
+     */
+    fun trackExtensionUsage(extensionId: Long) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                extensionManager?.trackExtensionUsage(extensionId)
+            } catch (e: Exception) {
+                // Silent failure for tracking
+            }
+        }
+    }
+    
+    /**
+     * Report extension error
+     */
+    fun reportExtensionError(extensionId: Long, error: Throwable) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                extensionManager?.reportExtensionError(extensionId, error)
+            } catch (e: Exception) {
+                // Silent failure for error reporting
+            }
         }
     }
 

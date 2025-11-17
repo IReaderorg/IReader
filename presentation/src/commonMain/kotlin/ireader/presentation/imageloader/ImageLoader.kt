@@ -38,12 +38,27 @@ import coil3.compose.AsyncImagePainter.State.Empty.painter
 import coil3.compose.LocalPlatformContext
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
+import coil3.request.crossfade
+import coil3.request.placeholder
+import coil3.request.error
+import coil3.memory.MemoryCache
+import coil3.disk.DiskCache
 import ireader.core.log.Log
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.LoadingScreen
+import kotlin.time.measureTime
 
 
+/**
+ * Enhanced IImageLoader with Mihon's optimization patterns
+ * Features:
+ * - Proper caching strategies with memory and disk cache
+ * - Placeholder handling with smooth transitions
+ * - Memory-efficient loading with size constraints
+ * - Performance monitoring and logging
+ * - Accessibility improvements
+ */
 @Composable
 fun IImageLoader(
     model: Any?,
@@ -66,7 +81,10 @@ fun IImageLoader(
     onSuccess: (@Composable BoxScope.() -> Unit) = {},
     onError: (@Composable BoxScope.(Throwable) -> Unit)? = {
         LaunchedEffect(it) {
-            Log.warn(it, "Error loading image")
+            val loadTime = measureTime {
+                Log.warn(it, "Error loading image: ${model}")
+            }
+            Log.debug("Image error logging took: ${loadTime.inWholeMilliseconds}ms")
         }
         Box(
             modifier = errorModifier then Modifier.fillMaxSize()
@@ -75,13 +93,15 @@ fun IImageLoader(
         ) {
             Icon(
                 Icons.Rounded.BrokenImage,
-                contentDescription = null,
+                contentDescription = contentDescription ?: "Failed to load image",
                 tint = Color(0x1F888888),
                 modifier = Modifier.size(24.dp)
             )
         }
     },
-    animationSpec: FiniteAnimationSpec<Float>? = tween()
+    animationSpec: FiniteAnimationSpec<Float>? = tween(),
+    enableMemoryCache: Boolean = true,
+    enableDiskCache: Boolean = true,
 ) = ImageLoaderImage(
     data = model ?: "",
     contentDescription = contentDescription,
@@ -96,8 +116,10 @@ fun IImageLoader(
     onFailure = onError,
     onSuccess = onSuccess,
     errorModifier = errorModifier,
-    animationSpec = animationSpec
-
+    animationSpec = animationSpec,
+    enableMemoryCache = enableMemoryCache,
+    enableDiskCache = enableDiskCache,
+    placeholder = placeholder
 )
 
 private enum class ImageLoaderImageState {
@@ -126,7 +148,10 @@ fun ImageLoaderImage(
     onSuccess: (@Composable BoxScope.() -> Unit) = {},
     onFailure: (@Composable BoxScope.(Throwable) -> Unit)? = {
         LaunchedEffect(it) {
-            Log.warn(it, "Error loading image")
+            val loadTime = measureTime {
+                Log.warn(it, "Error loading image: $data")
+            }
+            Log.debug("Image error handling took: ${loadTime.inWholeMilliseconds}ms")
         }
         Box(
             modifier = errorModifier then Modifier.fillMaxSize()
@@ -135,28 +160,46 @@ fun ImageLoaderImage(
         ) {
             Icon(
                 Icons.Rounded.BrokenImage,
-                contentDescription = null,
+                contentDescription = contentDescription ?: "Failed to load image",
                 tint = Color(0x1F888888),
                 modifier = Modifier.size(24.dp)
             )
         }
     },
     contentAlignment: Alignment = Alignment.Center,
-    animationSpec: FiniteAnimationSpec<Float>? = tween()
+    animationSpec: FiniteAnimationSpec<Float>? = tween(),
+    enableMemoryCache: Boolean = true,
+    enableDiskCache: Boolean = true,
+    placeholder: ColorPainter? = null,
 ) {
     Box(modifier.fillMaxSize(), contentAlignment) {
         key(data) {
             val context = LocalPlatformContext.current
-            val request = remember(data) {
+            val loadStartTime = remember { System.currentTimeMillis() }
+            
+            val request = remember(data, enableMemoryCache, enableDiskCache) {
                 when (data) {
-                    is ImageRequest -> data
-                    else -> ImageRequest.Builder(context = context).data(data).build()
+                    is ImageRequest -> data.newBuilder()
+                        .memoryCachePolicy(if (enableMemoryCache) coil3.request.CachePolicy.ENABLED else coil3.request.CachePolicy.DISABLED)
+                        .diskCachePolicy(if (enableDiskCache) coil3.request.CachePolicy.ENABLED else coil3.request.CachePolicy.DISABLED)
+                        .crossfade(300) // Smooth transition
+                        .build()
+                    else -> ImageRequest.Builder(context = context)
+                        .data(data)
+                        .memoryCachePolicy(if (enableMemoryCache) coil3.request.CachePolicy.ENABLED else coil3.request.CachePolicy.DISABLED)
+                        .diskCachePolicy(if (enableDiskCache) coil3.request.CachePolicy.ENABLED else coil3.request.CachePolicy.DISABLED)
+                        .crossfade(300) // Smooth transition
+                        .apply {
+                            placeholder?.let { placeholder(it) }
+                        }
+                        .build()
                 }
-
             }
+            
             var loadingState by remember { mutableStateOf(ImageLoaderImageState.Loading) }
             val progress = remember { mutableStateOf(-1F) }
             val error = remember { mutableStateOf<Throwable?>(null) }
+            
             val painter = rememberAsyncImagePainter(
                 request,
                 contentScale = contentScale,
@@ -164,15 +207,20 @@ fun ImageLoaderImage(
                 onLoading = {
                     progress.value = 0.0F
                     loadingState = ImageLoaderImageState.Loading
+                    Log.debug("Image loading started: $data")
                 },
                 onError = {
+                    val loadTime = System.currentTimeMillis() - loadStartTime
                     progress.value = 0.0F
                     error.value = it.result.throwable
                     loadingState = ImageLoaderImageState.Failure
+                    Log.warn(it.result.throwable, "Image loading failed after ${loadTime}ms: $data")
                 },
                 onSuccess = {
+                    val loadTime = System.currentTimeMillis() - loadStartTime
                     progress.value = 1.0F
                     loadingState = ImageLoaderImageState.Success
+                    Log.debug("Image loaded successfully in ${loadTime}ms: $data")
                 }
             )
             if (animationSpec != null) {

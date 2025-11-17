@@ -65,6 +65,13 @@ import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.statistics.GetReadingStatisticsUseCase
 import ireader.domain.usecases.statistics.StatisticsUseCases
 import ireader.domain.usecases.statistics.TrackReadingProgressUseCase
+import ireader.domain.usecases.statistics.GetLibraryInsightsUseCase
+import ireader.domain.usecases.statistics.GetReadingAnalyticsUseCase
+import ireader.domain.usecases.statistics.GetUpcomingReleasesUseCase
+import ireader.domain.usecases.statistics.GetRecommendationsUseCase
+import ireader.domain.usecases.statistics.ExportStatisticsUseCase
+import ireader.domain.usecases.statistics.ApplyAdvancedFiltersUseCase
+import ireader.domain.usecases.remote.GlobalSearchUseCase
 import ireader.domain.usecases.updates.DeleteAllUpdates
 import ireader.domain.usecases.updates.SubscribeUpdates
 import ireader.domain.usecases.updates.UpdateUseCases
@@ -227,6 +234,13 @@ val UseCasesInject = module {
     // Statistics use cases
     single { GetReadingStatisticsUseCase(get()) }
     single { TrackReadingProgressUseCase(get()) }
+    single { GetLibraryInsightsUseCase(get()) }
+    single { GetReadingAnalyticsUseCase(get()) }
+    single { GetUpcomingReleasesUseCase(get()) }
+    single { GetRecommendationsUseCase(get()) }
+    single { ExportStatisticsUseCase(get()) }
+    single { ApplyAdvancedFiltersUseCase(get()) }
+    single { GlobalSearchUseCase(get()) }
     single { StatisticsUseCases(
         getReadingStatistics = get(),
         trackReadingProgress = get()

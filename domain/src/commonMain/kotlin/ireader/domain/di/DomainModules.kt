@@ -242,5 +242,8 @@ val DomainServices = module {
     
     // Analytics Module
     includes(analyticsModule)
+    
+    // New Use Case Module following Mihon's pattern
+    includes(useCaseModule)
 
 }

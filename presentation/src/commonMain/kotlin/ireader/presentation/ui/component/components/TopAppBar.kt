@@ -38,27 +38,21 @@ fun Toolbar(
     applyInsets: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
-    Surface(
-        modifier = modifier,
-        color = backgroundColor,
-        contentColor = contentColor,
-        shadowElevation = elevation,
-    ) {
-        TopAppBar(
-            title = title,
-            modifier = if (applyInsets) modifier.statusBarsPadding() else modifier,
-            navigationIcon = navigationIcon,
-            actions = actions,
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = backgroundColor,
-                titleContentColor = contentColor,
-                scrolledContainerColor = backgroundColor,
-                actionIconContentColor = contentColor,
-                navigationIconContentColor = contentColor
-            ),
-            scrollBehavior = scrollBehavior
-        )
-    }
+    // Enhanced with better Material Design 3 patterns
+    TopAppBar(
+        title = title,
+        modifier = if (applyInsets) modifier.statusBarsPadding() else modifier,
+        navigationIcon = navigationIcon,
+        actions = actions,
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = backgroundColor,
+            titleContentColor = contentColor,
+            scrolledContainerColor = backgroundColor,
+            actionIconContentColor = contentColor,
+            navigationIconContentColor = contentColor
+        ),
+        scrollBehavior = scrollBehavior
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

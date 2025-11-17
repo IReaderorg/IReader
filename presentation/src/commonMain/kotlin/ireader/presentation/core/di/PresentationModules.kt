@@ -1,6 +1,6 @@
 package ireader.presentation.core.di
 
-
+import ireader.presentation.di.screenModelModule
 import ireader.presentation.core.ScreenContentViewModel
 import ireader.presentation.core.theme.AppThemeViewModel
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
@@ -39,6 +39,15 @@ import ireader.presentation.ui.settings.reader.ReaderSettingScreenViewModel
 import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
 import ireader.presentation.ui.settings.security.SecuritySettingsViewModel
 import ireader.presentation.ui.settings.statistics.StatisticsViewModel
+// Enhanced Settings ViewModels
+import ireader.presentation.ui.settings.appearance.SettingsAppearanceViewModel
+import ireader.presentation.ui.settings.reader.SettingsReaderViewModel
+import ireader.presentation.ui.settings.library.SettingsLibraryViewModel
+import ireader.presentation.ui.settings.downloads.SettingsDownloadViewModel
+import ireader.presentation.ui.settings.security.SettingsSecurityViewModel
+import ireader.presentation.ui.settings.notifications.SettingsNotificationViewModel
+import ireader.presentation.ui.settings.tracking.SettingsTrackingViewModel
+import ireader.presentation.ui.settings.data.SettingsDataViewModel
 import org.koin.dsl.module
 
 val PresentationModules = module {
@@ -88,6 +97,16 @@ val PresentationModules = module {
     factory  { StatisticsViewModel(get()) }
     factory  { ireader.presentation.ui.settings.donation.DonationViewModel(get(), get()) }
     factory  { ireader.presentation.ui.settings.donation.DonationTriggerViewModel(get()) }
+    
+    // Enhanced Settings ViewModels following Mihon's patterns
+    factory  { SettingsAppearanceViewModel(get()) }
+    factory  { SettingsReaderViewModel(get()) }
+    factory  { SettingsLibraryViewModel(get()) }
+    factory  { SettingsDownloadViewModel(get()) }
+    factory  { SettingsSecurityViewModel(get()) }
+    factory  { SettingsNotificationViewModel(get()) }
+    factory  { SettingsTrackingViewModel(get()) }
+    factory  { SettingsDataViewModel(get()) }
     
     // Authentication ViewModels
     factory  { ireader.presentation.ui.settings.auth.AuthViewModel(get()) }
@@ -144,5 +163,7 @@ val PresentationModules = module {
         get(),get(),get(),get(),get(),get()
     ) }
 
+    // New StateScreenModel implementations following Mihon's pattern
+    includes(screenModelModule)
 
 }

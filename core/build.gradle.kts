@@ -70,6 +70,8 @@ kotlin {
                 api(libs.koin.core)
                 api(libs.androidx.datastore.core)
                 api(libs.androidx.datastore.preferences.core)
+                // Performance monitoring and logging
+                api(libs.kermit)
             }
         }
          androidMain {
