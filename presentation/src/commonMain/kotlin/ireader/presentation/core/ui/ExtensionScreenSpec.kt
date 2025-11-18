@@ -37,10 +37,14 @@ import ireader.presentation.ui.home.sources.extension.ExtensionScreenTopAppBar
 import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
 import ireader.presentation.ui.home.sources.extension.SourceDetailScreen
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -133,9 +137,9 @@ object ExtensionScreenSpec : Tab {
                                     GlobalSearchScreenSpec()
                             )
                         },
-                        onMigrate = {
-                            showMigrationSourceDialog = true
-                        },
+                            onMigrate = {
+                                showMigrationSourceDialog = true
+                            },
                         onRepositoryFilter = {
                             vm.toggleRepositoryType()
                         },
@@ -191,19 +195,64 @@ private fun MigrationSourceSelectionDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Select Source to Migrate From") },
+        title = { 
+            Text(
+                text = localize(Res.string.migrate),
+                style = MaterialTheme.typography.titleLarge
+            ) 
+        },
         text = {
-            LazyColumn {
-                items(sources, key = { it.sourceId }) { source ->
-                    ListItem(
-                        headlineContent = { Text(source.name) },
-                        supportingContent = { 
-                            Text("${source.source?.lang ?: "unknown"}")
-                        },
-                        modifier = Modifier.clickable {
-                            onSourceSelected(source.sourceId)
-                        }
+            Column {
+                Text(
+                    text = "Select a source to migrate books from:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                
+                if (sources.isEmpty()) {
+                    Text(
+                        text = "No sources available for migration",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(sources, key = { it.sourceId }) { source ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                                    .clickable {
+                                        onSourceSelected(source.sourceId)
+                                    },
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = source.name,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
+                                            text = "${source.source?.lang?.uppercase() ?: "UNKNOWN"}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         },

@@ -1,5 +1,3 @@
-import java.util.Properties
-
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
@@ -15,54 +13,17 @@ android {
     defaultConfig {
         minSdk = ProjectConfig.minSdk
         
-        // Load Supabase credentials from environment variables (CI/CD) or local.properties (dev)
-        val properties = Properties()
-        val localPropertiesFile = rootProject.file("local.properties")
-        if (localPropertiesFile.exists()) {
-            properties.load(localPropertiesFile.inputStream())
-        }
-        
-        // Primary endpoint - Priority: 1. Environment variables, 2. local.properties, 3. Empty
-        val supabaseUrl = System.getenv("SUPABASE_URL") 
-            ?: properties.getProperty("supabase.url", "")
-        val supabaseAnonKey = System.getenv("SUPABASE_ANON_KEY") 
-            ?: properties.getProperty("supabase.anon.key", "")
-        
-        // Books endpoint
-        val supabaseBooksUrl = System.getenv("SUPABASE_BOOKS_URL")
-            ?: properties.getProperty("supabase.books.url", "")
-        val supabaseBooksKey = System.getenv("SUPABASE_BOOKS_KEY")
-            ?: properties.getProperty("supabase.books.key", "")
-        
-        // Progress endpoint
-        val supabaseProgressUrl = System.getenv("SUPABASE_PROGRESS_URL")
-            ?: properties.getProperty("supabase.progress.url", "")
-        val supabaseProgressKey = System.getenv("SUPABASE_PROGRESS_KEY")
-            ?: properties.getProperty("supabase.progress.key", "")
-        
-        // Reviews endpoint
-        val supabaseReviewsUrl = System.getenv("SUPABASE_REVIEWS_URL")
-            ?: properties.getProperty("supabase.reviews.url", "")
-        val supabaseReviewsKey = System.getenv("SUPABASE_REVIEWS_KEY")
-            ?: properties.getProperty("supabase.reviews.key", "")
-        
-        // Community endpoint
-        val supabaseCommunityUrl = System.getenv("SUPABASE_COMMUNITY_URL")
-            ?: properties.getProperty("supabase.community.url", "")
-        val supabaseCommunityKey = System.getenv("SUPABASE_COMMUNITY_KEY")
-            ?: properties.getProperty("supabase.community.key", "")
-        
-        // Build config fields
-        buildConfigField("String", "SUPABASE_URL", "\"${supabaseUrl}\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${supabaseAnonKey}\"")
-        buildConfigField("String", "SUPABASE_BOOKS_URL", "\"${supabaseBooksUrl}\"")
-        buildConfigField("String", "SUPABASE_BOOKS_KEY", "\"${supabaseBooksKey}\"")
-        buildConfigField("String", "SUPABASE_PROGRESS_URL", "\"${supabaseProgressUrl}\"")
-        buildConfigField("String", "SUPABASE_PROGRESS_KEY", "\"${supabaseProgressKey}\"")
-        buildConfigField("String", "SUPABASE_REVIEWS_URL", "\"${supabaseReviewsUrl}\"")
-        buildConfigField("String", "SUPABASE_REVIEWS_KEY", "\"${supabaseReviewsKey}\"")
-        buildConfigField("String", "SUPABASE_COMMUNITY_URL", "\"${supabaseCommunityUrl}\"")
-        buildConfigField("String", "SUPABASE_COMMUNITY_KEY", "\"${supabaseCommunityKey}\"")
+        // Build config fields using providers for lazy evaluation
+        buildConfigField("String", "SUPABASE_URL", "\"${providers.environmentVariable("SUPABASE_URL").orElse(providers.gradleProperty("supabase.url")).getOrElse("")}\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${providers.environmentVariable("SUPABASE_ANON_KEY").orElse(providers.gradleProperty("supabase.anon.key")).getOrElse("")}\"")
+        buildConfigField("String", "SUPABASE_BOOKS_URL", "\"${providers.environmentVariable("SUPABASE_BOOKS_URL").orElse(providers.gradleProperty("supabase.books.url")).getOrElse("")}\"")
+        buildConfigField("String", "SUPABASE_BOOKS_KEY", "\"${providers.environmentVariable("SUPABASE_BOOKS_KEY").orElse(providers.gradleProperty("supabase.books.key")).getOrElse("")}\"")
+        buildConfigField("String", "SUPABASE_PROGRESS_URL", "\"${providers.environmentVariable("SUPABASE_PROGRESS_URL").orElse(providers.gradleProperty("supabase.progress.url")).getOrElse("")}\"")
+        buildConfigField("String", "SUPABASE_PROGRESS_KEY", "\"${providers.environmentVariable("SUPABASE_PROGRESS_KEY").orElse(providers.gradleProperty("supabase.progress.key")).getOrElse("")}\"")
+        buildConfigField("String", "SUPABASE_REVIEWS_URL", "\"${providers.environmentVariable("SUPABASE_REVIEWS_URL").orElse(providers.gradleProperty("supabase.reviews.url")).getOrElse("")}\"")
+        buildConfigField("String", "SUPABASE_REVIEWS_KEY", "\"${providers.environmentVariable("SUPABASE_REVIEWS_KEY").orElse(providers.gradleProperty("supabase.reviews.key")).getOrElse("")}\"")
+        buildConfigField("String", "SUPABASE_COMMUNITY_URL", "\"${providers.environmentVariable("SUPABASE_COMMUNITY_URL").orElse(providers.gradleProperty("supabase.community.url")).getOrElse("")}\"")
+        buildConfigField("String", "SUPABASE_COMMUNITY_KEY", "\"${providers.environmentVariable("SUPABASE_COMMUNITY_KEY").orElse(providers.gradleProperty("supabase.community.key")).getOrElse("")}\"")
     }
     lint {
         targetSdk = ProjectConfig.targetSdk

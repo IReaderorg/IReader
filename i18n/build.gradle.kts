@@ -60,32 +60,23 @@ android {
 }
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround
-fun getCommitCount(): String {
-    return try {
-        providers.exec {
-            commandLine("git", "rev-list", "--count", "HEAD")
-            isIgnoreExitValue = true
-        }.standardOutput.asText.orNull?.trim()?.takeIf { it.isNotEmpty() } ?: "unknown"
-    } catch (e: Exception) {
-        "unknown"
-    }
-}
+// Cached to avoid running git commands on every configuration
+val commitCount: Provider<String> = providers.exec {
+    commandLine("git", "rev-list", "--count", "HEAD")
+    isIgnoreExitValue = true
+}.standardOutput.asText.map { it.trim().takeIf { it.isNotEmpty() } ?: "unknown" }
+    .orElse("unknown")
 
-fun getGitSha(): String {
-    return try {
-        providers.exec {
-            commandLine("git", "rev-parse", "--short", "HEAD")
-            isIgnoreExitValue = true
-        }.standardOutput.asText.orNull?.trim()?.takeIf { it.isNotEmpty() } ?: "unknown"
-    } catch (e: Exception) {
-        "unknown"
-    }
-}
+val gitSha: Provider<String> = providers.exec {
+    commandLine("git", "rev-parse", "--short", "HEAD")
+    isIgnoreExitValue = true
+}.standardOutput.asText.map { it.trim().takeIf { it.isNotEmpty() } ?: "unknown" }
+    .orElse("unknown")
 
-fun getBuildTime(): String {
+val buildTime: Provider<String> = provider {
     val df: java.text.SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
     df.timeZone = TimeZone.getTimeZone("UTC")
-    return df.format(Date())
+    df.format(Date())
 }
 
 buildkonfig {
@@ -93,9 +84,9 @@ buildkonfig {
     exposeObjectWithName = "BuildKonfig"
     defaultConfigs {
         buildConfigField(BOOLEAN, "DEBUG", "true")
-        buildConfigField(STRING, "COMMIT_COUNT", "\"${getCommitCount()}\"")
-        buildConfigField(STRING, "COMMIT_SHA", "\"${getGitSha()}\"")
-        buildConfigField(STRING, "BUILD_TIME", "\"${getBuildTime()}\"")
+        buildConfigField(STRING, "COMMIT_COUNT", "\"${commitCount.get()}\"")
+        buildConfigField(STRING, "COMMIT_SHA", "\"${gitSha.get()}\"")
+        buildConfigField(STRING, "BUILD_TIME", "\"${buildTime.get()}\"")
         buildConfigField(BOOLEAN, "INCLUDE_UPDATER", "false")
         buildConfigField(BOOLEAN, "PREVIEW", "false")
         buildConfigField(STRING, "VERSION_NAME", "\"${ProjectConfig.versionName}\"")
@@ -107,5 +98,5 @@ buildkonfig {
 compose.resources {
     publicResClass = true
     packageOfResClass = "ireader.i18n.resources"
-    generateResClass = org.jetbrains.compose.resources.ResourcesExtension.ResourceClassGeneration.Always
+    generateResClass = org.jetbrains.compose.resources.ResourcesExtension.ResourceClassGeneration.Auto
 }

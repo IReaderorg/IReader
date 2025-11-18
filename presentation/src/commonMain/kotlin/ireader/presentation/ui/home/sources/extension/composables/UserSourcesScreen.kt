@@ -32,6 +32,7 @@ fun UserSourcesScreen(
         onClickCatalog: (Catalog) -> Unit,
         onClickTogglePinned: (Catalog) -> Unit,
         onShowDetails: ((Catalog) -> Unit)? = null,
+        onMigrateFromSource: ((Long) -> Unit)? = null,
 ) {
     // Save scroll state across navigation
     val scrollState = rememberSaveable(saver = LazyListState.Saver) {
@@ -130,6 +131,7 @@ fun UserSourcesScreen(
                             loginSourceName = catalogItem.source.name
                             showLoginDialog = true
                         },
+                        onMigrate = onMigrateFromSource?.let { { it(catalogItem.source.sourceId) } },
                 )
             }
         }

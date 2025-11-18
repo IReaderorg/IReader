@@ -90,6 +90,7 @@ fun ExtensionScreen(
             pages = pages,
             onCancelInstaller = onCancelInstaller,
             onShowDetails = onShowDetails,
+            onMigrateFromSource = onMigrateFromSource,
         )
 
     }
@@ -132,6 +133,7 @@ private fun ExtensionContent(
     onClickUninstall: (Catalog) -> Unit,
     onCancelInstaller: ((Catalog) -> Unit)? = null,
     onShowDetails: ((Catalog) -> Unit)? = null,
+    onMigrateFromSource: ((Long) -> Unit)? = null,
 
     ) {
     val pagerState = rememberPagerState(
@@ -156,7 +158,8 @@ private fun ExtensionContent(
         onClickUninstall = onClickUninstall,
         pages = pages,
         onCancelInstaller = onCancelInstaller,
-        onShowDetails = onShowDetails
+        onShowDetails = onShowDetails,
+        onMigrateFromSource = onMigrateFromSource,
     )
 }
 
@@ -174,6 +177,7 @@ private fun ExtensionPager(
     onClickUninstall: (Catalog) -> Unit,
     onCancelInstaller: ((Catalog) -> Unit)? = null,
     onShowDetails: ((Catalog) -> Unit)? = null,
+    onMigrateFromSource: ((Long) -> Unit)? = null,
 ) {
     HorizontalPager(
         modifier = Modifier.fillMaxSize(),
@@ -196,6 +200,7 @@ private fun ExtensionPager(
                         onClickTogglePinned = onClickTogglePinned,
                         vm = vm,
                         onShowDetails = onShowDetails,
+                        onMigrateFromSource = onMigrateFromSource,
                     )
                 }
 

@@ -15,6 +15,27 @@ plugins {
 
 val SUPPORTED_ABIS = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 
+// Git is needed in your system PATH for these commands to work.
+// If it's not installed, you can return a random value as a workaround
+// Cached to avoid running git commands on every configuration
+val gitCommitCount: Provider<String> = providers.exec {
+    commandLine("git", "rev-list", "--count", "HEAD")
+    isIgnoreExitValue = true
+}.standardOutput.asText.map { it.trim().takeIf { it.isNotEmpty() } ?: "unknown" }
+    .orElse("unknown")
+
+val gitCommitSha: Provider<String> = providers.exec {
+    commandLine("git", "rev-parse", "--short", "HEAD")
+    isIgnoreExitValue = true
+}.standardOutput.asText.map { it.trim().takeIf { it.isNotEmpty() } ?: "unknown" }
+    .orElse("unknown")
+
+val currentBuildTime: Provider<String> = provider {
+    val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
+    df.timeZone = TimeZone.getTimeZone("UTC")
+    df.format(Date())
+}
+
 android {
     namespace = "org.ireader.app"
     compileSdk = ProjectConfig.compileSdk
@@ -67,65 +88,25 @@ android {
 
 
     defaultConfig {
-        buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
-        buildConfigField("String", "COMMIT_SHA", "\"${getGitSha()}\"")
-        buildConfigField("String", "BUILD_TIME", "\"${getBuildTime()}\"")
+        buildConfigField("String", "COMMIT_COUNT", "\"${gitCommitCount.get()}\"")
+        buildConfigField("String", "COMMIT_SHA", "\"${gitCommitSha.get()}\"")
+        buildConfigField("String", "BUILD_TIME", "\"${currentBuildTime.get()}\"")
         buildConfigField("boolean", "INCLUDE_UPDATER", "false")
         buildConfigField("boolean", "PREVIEW", "false")
         buildConfigField("String", "VERSION_NAME", "\"${ProjectConfig.versionName}\"")
         buildConfigField("int", "VERSION_CODE", "${ProjectConfig.versionCode}")
         
-        // Supabase configuration - Multi-endpoint support
-        // Priority: 1. Environment variables (CI/CD), 2. local.properties (dev), 3. Empty (requires user config)
-        val properties = Properties()
-        val localPropertiesFile = rootProject.file("local.properties")
-        if (localPropertiesFile.exists()) {
-            properties.load(localPropertiesFile.inputStream())
-        }
-        
-        // Primary/Users endpoint (required)
-        val supabaseUrl = System.getenv("SUPABASE_URL") 
-            ?: properties.getProperty("supabase.url", "")
-        val supabaseAnonKey = System.getenv("SUPABASE_ANON_KEY") 
-            ?: properties.getProperty("supabase.anon.key", "")
-        
-        // Books endpoint (optional)
-        val supabaseBooksUrl = System.getenv("SUPABASE_BOOKS_URL")
-            ?: properties.getProperty("supabase.books.url", "")
-        val supabaseBooksKey = System.getenv("SUPABASE_BOOKS_KEY")
-            ?: properties.getProperty("supabase.books.key", "")
-        
-        // Progress endpoint (optional)
-        val supabaseProgressUrl = System.getenv("SUPABASE_PROGRESS_URL")
-            ?: properties.getProperty("supabase.progress.url", "")
-        val supabaseProgressKey = System.getenv("SUPABASE_PROGRESS_KEY")
-            ?: properties.getProperty("supabase.progress.key", "")
-        
-        // Reviews endpoint (optional - future)
-        val supabaseReviewsUrl = System.getenv("SUPABASE_REVIEWS_URL")
-            ?: properties.getProperty("supabase.reviews.url", "")
-        val supabaseReviewsKey = System.getenv("SUPABASE_REVIEWS_KEY")
-            ?: properties.getProperty("supabase.reviews.key", "")
-        
-        // Community endpoint (optional - future)
-        val supabaseCommunityUrl = System.getenv("SUPABASE_COMMUNITY_URL")
-            ?: properties.getProperty("supabase.community.url", "")
-        val supabaseCommunityKey = System.getenv("SUPABASE_COMMUNITY_KEY")
-            ?: properties.getProperty("supabase.community.key", "")
-        
-        // Primary endpoint (backward compatible)
-        buildConfigField("String", "SUPABASE_URL", "\"${supabaseUrl}\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${supabaseAnonKey}\"")
-        
-        // Multi-endpoint configuration
-        buildConfigField("String", "SUPABASE_BOOKS_URL", "\"${supabaseBooksUrl}\"")
-        buildConfigField("String", "SUPABASE_BOOKS_KEY", "\"${supabaseBooksKey}\"")
-        buildConfigField("String", "SUPABASE_PROGRESS_URL", "\"${supabaseProgressUrl}\"")
-        buildConfigField("String", "SUPABASE_PROGRESS_KEY", "\"${supabaseProgressKey}\"")
-        buildConfigField("String", "SUPABASE_REVIEWS_URL", "\"${supabaseReviewsUrl}\"")
-        buildConfigField("String", "SUPABASE_REVIEWS_KEY", "\"${supabaseReviewsKey}\"")
-        buildConfigField("String", "SUPABASE_COMMUNITY_URL", "\"${supabaseCommunityUrl}\"")
-        buildConfigField("String", "SUPABASE_COMMUNITY_KEY", "\"${supabaseCommunityKey}\"")
+        // Supabase configuration using providers for lazy evaluation
+        buildConfigField("String", "SUPABASE_URL", "\"${providers.environmentVariable("SUPABASE_URL").orElse(providers.gradleProperty("supabase.url")).getOrElse("")}\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${providers.environmentVariable("SUPABASE_ANON_KEY").orElse(providers.gradleProperty("supabase.anon.key")).getOrElse("")}\"")
+        buildConfigField("String", "SUPABASE_BOOKS_URL", "\"${providers.environmentVariable("SUPABASE_BOOKS_URL").orElse(providers.gradleProperty("supabase.books.url")).getOrElse("")}\"")
+        buildConfigField("String", "SUPABASE_BOOKS_KEY", "\"${providers.environmentVariable("SUPABASE_BOOKS_KEY").orElse(providers.gradleProperty("supabase.books.key")).getOrElse("")}\"")
+        buildConfigField("String", "SUPABASE_PROGRESS_URL", "\"${providers.environmentVariable("SUPABASE_PROGRESS_URL").orElse(providers.gradleProperty("supabase.progress.url")).getOrElse("")}\"")
+        buildConfigField("String", "SUPABASE_PROGRESS_KEY", "\"${providers.environmentVariable("SUPABASE_PROGRESS_KEY").orElse(providers.gradleProperty("supabase.progress.key")).getOrElse("")}\"")
+        buildConfigField("String", "SUPABASE_REVIEWS_URL", "\"${providers.environmentVariable("SUPABASE_REVIEWS_URL").orElse(providers.gradleProperty("supabase.reviews.url")).getOrElse("")}\"")
+        buildConfigField("String", "SUPABASE_REVIEWS_KEY", "\"${providers.environmentVariable("SUPABASE_REVIEWS_KEY").orElse(providers.gradleProperty("supabase.reviews.key")).getOrElse("")}\"")
+        buildConfigField("String", "SUPABASE_COMMUNITY_URL", "\"${providers.environmentVariable("SUPABASE_COMMUNITY_URL").orElse(providers.gradleProperty("supabase.community.url")).getOrElse("")}\"")
+        buildConfigField("String", "SUPABASE_COMMUNITY_KEY", "\"${providers.environmentVariable("SUPABASE_COMMUNITY_KEY").orElse(providers.gradleProperty("supabase.community.key")).getOrElse("")}\"")
     }
     dependenciesInfo {
         includeInApk = false
@@ -133,7 +114,7 @@ android {
 
     buildTypes {
         named("debug") {
-            versionNameSuffix = "-${getCommitCount()}"
+            versionNameSuffix = "-${gitCommitCount.get()}"
             applicationIdSuffix = ".debug"
             extra["enableCrashlytics"] = false
             extra["alwaysUpdateBuildId"] = false
@@ -261,34 +242,4 @@ val taskRequests = gradle.startParameter.taskRequests.toString()
 if (!taskRequests.contains("Fdroid", ignoreCase = true)) {
     apply(plugin = "com.google.gms.google-services")
     apply(plugin = "com.google.firebase.crashlytics")
-}
-
-// Git is needed in your system PATH for these commands to work.
-// If it's not installed, you can return a random value as a workaround
-fun getCommitCount(): String {
-    return try {
-        providers.exec {
-            commandLine("git", "rev-list", "--count", "HEAD")
-            isIgnoreExitValue = true
-        }.standardOutput.asText.orNull?.trim()?.takeIf { it.isNotEmpty() } ?: "unknown"
-    } catch (e: Exception) {
-        "unknown"
-    }
-}
-
-fun getGitSha(): String {
-    return try {
-        providers.exec {
-            commandLine("git", "rev-parse", "--short", "HEAD")
-            isIgnoreExitValue = true
-        }.standardOutput.asText.orNull?.trim()?.takeIf { it.isNotEmpty() } ?: "unknown"
-    } catch (e: Exception) {
-        "unknown"
-    }
-}
-
-fun getBuildTime(): String {
-    val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
-    df.timeZone = TimeZone.getTimeZone("UTC")
-    return df.format(Date())
 }

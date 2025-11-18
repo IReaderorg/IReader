@@ -47,6 +47,7 @@ fun CatalogItem(
     onShowDetails: (() -> Unit)? = null,
     sourceStatus: SourceStatus? = null,
     onLogin: (() -> Unit)? = null,
+    onMigrate: (() -> Unit)? = null,
 ) {
     val title = buildAnnotatedString {
         append("${catalog.name} ")
@@ -125,6 +126,7 @@ fun CatalogItem(
             onCancelInstaller = onCancelInstaller,
             sourceStatus = sourceStatus,
             onLogin = onLogin,
+            onMigrate = onMigrate,
         )
     }
 }
@@ -156,6 +158,7 @@ private fun CatalogButtons(
     modifier: Modifier = Modifier,
     sourceStatus: SourceStatus? = null,
     onLogin: (() -> Unit)? = null,
+    onMigrate: (() -> Unit)? = null,
 ) {
     Row(modifier = modifier) {
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium()) {
@@ -165,6 +168,16 @@ private fun CatalogButtons(
                     text = "Login",
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable { onLogin() }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+            
+            // Show migrate button for installed sources with books
+            if (catalog is CatalogInstalled && onMigrate != null) {
+                MidSizeTextComposable(
+                    text = localize(Res.string.migrate),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable { onMigrate() }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
             }

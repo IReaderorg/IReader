@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Book
 import ireader.domain.models.migration.MigrationMatch
@@ -39,7 +40,17 @@ fun SourceMigrationScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(localize(Res.string.migrate)) },
+                title = { 
+                    Column {
+                        Text(localize(Res.string.migrate))
+                        if (viewModel.isMigrating && selectedNovels.isNotEmpty()) {
+                            Text(
+                                text = "${migrationProgress.size}/${selectedNovels.size} migrated",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -73,28 +84,59 @@ fun SourceMigrationScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
                             text = "Select Target Source",
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Choose where to migrate your books",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
                         targetSources.forEach { source ->
-                            Row(
+                            Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { viewModel.setTargetSource(source.sourceId) }
-                                    .padding(vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                RadioButton(
-                                    selected = viewModel.targetSourceId == source.sourceId,
-                                    onClick = { viewModel.setTargetSource(source.sourceId) }
+                                    .padding(vertical = 4.dp)
+                                    .clickable { viewModel.setTargetSource(source.sourceId) },
+                                colors = CardDefaults.cardColors(
+                                    containerColor = if (viewModel.targetSourceId == source.sourceId) 
+                                        MaterialTheme.colorScheme.primaryContainer 
+                                    else 
+                                        MaterialTheme.colorScheme.surface
                                 )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = source.name)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    RadioButton(
+                                        selected = viewModel.targetSourceId == source.sourceId,
+                                        onClick = { viewModel.setTargetSource(source.sourceId) }
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column {
+                                        Text(
+                                            text = source.name,
+                                            style = MaterialTheme.typography.bodyLarge
+                                        )
+                                        Text(
+                                            text = source.source?.lang?.uppercase() ?: "UNKNOWN",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -103,33 +145,78 @@ fun SourceMigrationScreen(
             
             // Novel list
             if (novels.isNotEmpty() && !viewModel.isMigrating) {
-                LazyColumn(
-                    modifier = Modifier.weight(1f)
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(horizontal = 16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
                 ) {
-                    items(novels) { novel ->
+                    Column {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { viewModel.toggleNovelSelection(novel.id) }
                                 .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Checkbox(
-                                checked = selectedNovels.contains(novel.id),
-                                onCheckedChange = { viewModel.toggleNovelSelection(novel.id) }
+                            Text(
+                                text = "Select Books to Migrate",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary
                             )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text(
-                                    text = novel.title,
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                                if (novel.author.isNotBlank()) {
-                                    Text(
-                                        text = novel.author,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                            Text(
+                                text = "${selectedNovels.size}/${novels.size} selected",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        
+                        LazyColumn(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            items(novels) { novel ->
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                                        .clickable { viewModel.toggleNovelSelection(novel.id) },
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = if (selectedNovels.contains(novel.id))
+                                            MaterialTheme.colorScheme.primaryContainer
+                                        else
+                                            MaterialTheme.colorScheme.surfaceVariant
                                     )
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(12.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Checkbox(
+                                            checked = selectedNovels.contains(novel.id),
+                                            onCheckedChange = { viewModel.toggleNovelSelection(novel.id) }
+                                        )
+                                        Spacer(modifier = Modifier.width(12.dp))
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = novel.title,
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                maxLines = 2,
+                                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                            )
+                                            if (novel.author.isNotBlank()) {
+                                                Text(
+                                                    text = novel.author,
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -144,7 +231,14 @@ fun SourceMigrationScreen(
                         .padding(16.dp),
                     enabled = selectedNovels.isNotEmpty() && viewModel.targetSourceId != null
                 ) {
-                    Text("Start Migration")
+                    Text(
+                        text = if (selectedNovels.isEmpty()) 
+                            "Select books to migrate" 
+                        else if (viewModel.targetSourceId == null)
+                            "Select target source"
+                        else
+                            "Start Migration (${selectedNovels.size} books)"
+                    )
                 }
             }
             
@@ -202,28 +296,65 @@ private fun MigrationProgressView(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             if (currentNovel != null) {
                 Text(
-                    text = "Migrating: ${currentNovel.title}",
-                    style = MaterialTheme.typography.titleMedium
+                    text = "Migrating Book",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(
+                            text = currentNovel.title,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        if (currentNovel.author.isNotBlank()) {
+                            Text(
+                                text = currentNovel.author,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+                
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 if (isSearching) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
                     ) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text("Searching for matches...")
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(
+                                text = "Searching for matches in target source...",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                     }
                 } else if (matches.isNotEmpty()) {
                     Text(
-                        text = "Select a match:",
-                        style = MaterialTheme.typography.bodyMedium
+                        text = "Found ${matches.size} potential match${if (matches.size > 1) "es" else ""}:",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     
@@ -232,21 +363,44 @@ private fun MigrationProgressView(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 4.dp)
-                                .clickable { onMatchSelected(match) }
+                                .clickable { onMatchSelected(match) },
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            )
                         ) {
                             Column(modifier = Modifier.padding(12.dp)) {
-                                Text(
-                                    text = match.novel.title,
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = match.novel.title,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Card(
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = MaterialTheme.colorScheme.primary
+                                        )
+                                    ) {
+                                        Text(
+                                            text = "${(match.confidenceScore * 100).toInt()}%",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onPrimary,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                        )
+                                    }
+                                }
                                 if (match.novel.author.isNotBlank()) {
                                     Text(
                                         text = match.novel.author,
-                                        style = MaterialTheme.typography.bodySmall
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                                 Text(
-                                    text = "${(match.confidenceScore * 100).toInt()}% match - ${match.matchReason}",
+                                    text = match.matchReason,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.primary
                                 )
@@ -254,6 +408,7 @@ private fun MigrationProgressView(
                         }
                     }
                     
+                    Spacer(modifier = Modifier.height(12.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -262,18 +417,38 @@ private fun MigrationProgressView(
                             onClick = onSkip,
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Skip")
+                            Text("Skip This Book")
                         }
-                        OutlinedButton(
+                        Button(
                             onClick = onCancel,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error
+                            )
                         ) {
-                            Text("Cancel")
+                            Text("Cancel Migration")
                         }
                     }
                 } else {
-                    Text("No matches found")
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        )
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "No matches found",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                            Text(
+                                text = "The book could not be found in the target source",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -282,13 +457,16 @@ private fun MigrationProgressView(
                             onClick = onSkip,
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Skip")
+                            Text("Skip This Book")
                         }
-                        OutlinedButton(
+                        Button(
                             onClick = onCancel,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error
+                            )
                         ) {
-                            Text("Cancel")
+                            Text("Cancel Migration")
                         }
                     }
                 }
