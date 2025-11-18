@@ -19,16 +19,12 @@ import androidx.compose.ui.unit.sp
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.core.ui.IReaderLoadingScreen
 import kotlin.random.Random
 
 @Composable
 fun LoadingScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        CircularProgressIndicator(modifier = Modifier.size(64.dp))
-    }
+    IReaderLoadingScreen()
 }
 
 

@@ -37,6 +37,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.component.components.ISnackBarHost
 import androidx.compose.foundation.layout.MutableWindowInsets
+import ireader.presentation.core.ui.IReaderScaffold
 
 /**
  * <a href="https://material.io/design/layout/understanding-layout.html" class="external" target="_blank">Material Design layout</a>.
@@ -119,8 +120,8 @@ fun IScaffold(
 ) {
     val remainingWindowInsets = remember { MutableWindowInsets() }
     val topAppBarState = LocalState.current
-    
-    Scaffold(
+
+    IReaderScaffold(
         modifier = Modifier
             .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
             .onConsumedWindowInsetsChanged {

@@ -16,10 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Book
 import ireader.presentation.ui.component.enhanced.AccessibleBookListItem
-import ireader.presentation.ui.component.list.IReaderFastScrollLazyColumn
-import ireader.presentation.ui.component.list.performantItems
-import ireader.core.log.IReaderLog
-import ireader.core.performance.PerformanceMonitor
 
 /**
  * Performance-optimized book list with Mihon's patterns
@@ -40,24 +36,13 @@ fun PerformantBookList(
     showDescription: Boolean = false,
     enablePerformanceMonitoring: Boolean = true,
 ) {
-    // Performance monitoring
-    if (enablePerformanceMonitoring) {
-        LaunchedEffect(books.size) {
-            IReaderLog.debug("Rendering book list with ${books.size} items")
-            
-            if (books.size > 1000) {
-                IReaderLog.warn("Large book list detected: ${books.size} items may affect performance")
-            }
-        }
-    }
-    
+
     IReaderFastScrollLazyColumn(
         modifier = modifier.fillMaxSize(),
         state = state,
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        enablePerformanceMonitoring = enablePerformanceMonitoring
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         performantItems(
             items = books,
@@ -92,17 +77,11 @@ fun PerformantBookGrid(
         books.chunked(columns)
     }
     
-    if (enablePerformanceMonitoring) {
-        LaunchedEffect(books.size, columns) {
-            IReaderLog.debug("Rendering book grid: ${books.size} items in ${bookRows.size} rows ($columns columns)")
-        }
-    }
-    
+
     IReaderFastScrollLazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = contentPadding,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        enablePerformanceMonitoring = enablePerformanceMonitoring
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         performantItems(
             items = bookRows,
@@ -149,44 +128,3 @@ private fun BookGridRow(
     }
 }
 
-/**
- * Performance metrics for book lists
- */
-object BookListPerformance {
-    
-    /**
-     * Benchmark book list rendering performance
-     */
-    fun benchmarkBookListRendering(
-        bookCount: Int,
-        iterations: Int = 10
-    ) {
-        PerformanceMonitor.measureUIOperation("BookList-Rendering-$bookCount") {
-            // This would be called during actual rendering
-            IReaderLog.benchmark(
-                "Book list rendering benchmark",
-                mapOf(
-                    "bookCount" to bookCount,
-                    "iterations" to iterations
-                )
-            )
-        }
-    }
-    
-    /**
-     * Monitor scroll performance
-     */
-    fun monitorScrollPerformance(
-        firstVisibleItem: Int,
-        scrollOffset: Int,
-        totalItems: Int
-    ) {
-        val scrollPercentage = if (totalItems > 0) {
-            (firstVisibleItem.toFloat() / totalItems * 100).toInt()
-        } else 0
-        
-        IReaderLog.debug(
-            "Book list scroll: item $firstVisibleItem/$totalItems (${scrollPercentage}%), offset: $scrollOffset"
-        )
-    }
-}
