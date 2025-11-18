@@ -83,7 +83,7 @@ val PresentationModules = module {
     factory  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
     factory<BookDetailViewModel>  { BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),getOrNull()) }
-    factory  { MainSettingScreenViewModel(get()) }
+    single  { MainSettingScreenViewModel(get()) }
     factory  { AppearanceViewModel(get(), get()) }
 
     factory  { CategoryScreenViewModel(get(), get(), get(),get(),get()) }

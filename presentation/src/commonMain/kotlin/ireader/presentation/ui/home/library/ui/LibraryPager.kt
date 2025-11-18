@@ -64,9 +64,7 @@ internal fun LibraryPager(
             val lazyListState = rememberLazyListState()
             val displayMode = categories[page].category.displayMode
             val columns by if (displayMode != DisplayMode.List) {
-
                 val isLandscape = isLandscape()
-
                 with(rememberCoroutineScope()) {
                     remember(isLandscape) { getColumnsForOrientation(isLandscape) }.collectAsState()
                 }

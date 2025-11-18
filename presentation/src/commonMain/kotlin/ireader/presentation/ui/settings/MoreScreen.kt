@@ -45,6 +45,7 @@ import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.components.SettingsItem
 import ireader.presentation.ui.settings.components.SettingsSectionHeader
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,23 +72,30 @@ fun MoreScreen(
     // Theme mode state
     var showThemeOptions by remember { mutableStateOf(false) }
     
-    // Save scroll state across navigation using rememberSaveable with custom key
-    val listState = rememberSaveable(
-        key = "more_screen_scroll_state",
-        saver = LazyListState.Saver
-    ) {
-        LazyListState(
-            firstVisibleItemIndex = vm.savedScrollIndex,
-            firstVisibleItemScrollOffset = vm.savedScrollOffset
-        )
-    }
+
+    // Create list state with saved position from ViewModel
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = vm.savedScrollIndex,
+        initialFirstVisibleItemScrollOffset = vm.savedScrollOffset
+    )
     
-    // Save scroll position to ViewModel when it changes
+    // Save scroll position to ViewModel when it changes (with debounce to avoid too many saves)
     androidx.compose.runtime.LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset) {
+        kotlinx.coroutines.delay(100) // Debounce to avoid saving on every pixel
         vm.saveScrollPosition(
             listState.firstVisibleItemIndex,
             listState.firstVisibleItemScrollOffset
         )
+    }
+    
+    // Save position when leaving the screen
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        onDispose {
+            vm.saveScrollPosition(
+                listState.firstVisibleItemIndex,
+                listState.firstVisibleItemScrollOffset
+            )
+        }
     }
     
     LazyColumn(
@@ -574,7 +582,7 @@ class MainSettingScreenViewModel(
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
     val incognitoMode = uiPreferences.incognitoMode().asState()
     
-    // Scroll state persistence
+    // Scroll state persistence in ViewModel
     var savedScrollIndex by mutableStateOf(0)
         private set
     var savedScrollOffset by mutableStateOf(0)

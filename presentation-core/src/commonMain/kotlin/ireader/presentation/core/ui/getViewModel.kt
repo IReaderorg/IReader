@@ -12,7 +12,7 @@ import org.koin.core.qualifier.Qualifier
  * The ViewModel is remembered to prevent recreation on recomposition.
  */
 @Composable
-public inline fun <reified T : Any> getIViewModel(
+inline fun <reified T : Any> getIViewModel(
     qualifier: Qualifier? = null,
     noinline parameters: ParametersDefinition? = null,
 ): T {
@@ -21,5 +21,3 @@ public inline fun <reified T : Any> getIViewModel(
         koin.get(qualifier, parameters)
     }
 }
-
-

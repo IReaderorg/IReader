@@ -53,12 +53,11 @@ interface LibraryState {
     var batchOperationInProgress: Boolean
     var batchOperationMessage: String?
     var lastUndoState: UndoState?
-    
-    // New properties for toolbar actions
+
     var isUpdatingLibrary: Boolean
     var showUpdateCategoryDialog: Boolean
     var importProgress: ImportProgress?
-    
+
     // EPUB import/export state
     var epubImportState: EpubImportState
     var epubExportState: EpubExportState
@@ -106,7 +105,6 @@ sealed class SyncStatus {
     data class Error(val message: String) : SyncStatus()
 }
 
-
 open class LibraryStateImpl : LibraryState {
     override var isLoading by mutableStateOf<Boolean>(false)
     override var books by mutableStateOf<List<LibraryBook>>(emptyList())
@@ -135,12 +133,12 @@ open class LibraryStateImpl : LibraryState {
     override var batchOperationInProgress by mutableStateOf<Boolean>(false)
     override var batchOperationMessage by mutableStateOf<String?>(null)
     override var lastUndoState by mutableStateOf<UndoState?>(null)
-    
+
     // New properties for toolbar actions
     override var isUpdatingLibrary by mutableStateOf<Boolean>(false)
     override var showUpdateCategoryDialog by mutableStateOf<Boolean>(false)
     override var importProgress by mutableStateOf<ImportProgress?>(null)
-    
+
     // EPUB import/export state
     override var epubImportState by mutableStateOf(EpubImportState())
     override var epubExportState by mutableStateOf(EpubExportState())
