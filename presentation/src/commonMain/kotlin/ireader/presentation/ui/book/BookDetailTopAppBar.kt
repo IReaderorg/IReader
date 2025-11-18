@@ -95,7 +95,9 @@ fun BookDetailTopAppBar(
                     onInfo = onInfo,
                     onArchive = onArchive,
                     onUnarchive = onUnarchive,
-                    isArchived = isArchived
+                    isArchived = isArchived,
+                    onExportEpub = onExportEpub,
+                    onShareBook = onShareBook
                 )
             }
         }
@@ -209,13 +211,6 @@ fun RegularChapterDetailTopAppBar(
                             },
                             leadingIcon = {
                                 Icon(Icons.Default.Download, contentDescription = null)
-                            }
-                        )
-                        IDropdownMenuItem(
-                            text = { Text(text = localizeHelper.localize(Res.string.export_book_as_epub)) },
-                            onClick = {
-                                onShare()
-                                setDropDownState(false)
                             }
                         )
                         if (isArchived) {

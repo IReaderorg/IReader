@@ -26,9 +26,17 @@ actual class PlatformHelper {
     
     actual fun createEpubExportUri(bookTitle: String, author: String): String? {
         return try {
-            val sanitizedTitle = bookTitle.replace(Regex("[^a-zA-Z0-9\\s-]"), "")
-            val sanitizedAuthor = author.replace(Regex("[^a-zA-Z0-9\\s-]"), "")
-            val fileName = "$sanitizedTitle - $sanitizedAuthor.epub"
+            // Sanitize filename for Windows - remove invalid characters
+            // Windows invalid characters: < > : " / \ | ? *
+            val sanitizedTitle = sanitizeFilename(bookTitle)
+            val sanitizedAuthor = sanitizeFilename(author)
+            
+            // Build filename - handle empty author case
+            val fileName = if (sanitizedAuthor.isNotBlank()) {
+                "${sanitizedTitle} - ${sanitizedAuthor}.epub"
+            } else {
+                "${sanitizedTitle}.epub"
+            }.take(200) // Limit filename length to avoid path too long errors
             
             val fileChooser = JFileChooser().apply {
                 dialogTitle = "Save EPUB File"
@@ -39,10 +47,11 @@ actual class PlatformHelper {
             val result = fileChooser.showSaveDialog(null)
             if (result == JFileChooser.APPROVE_OPTION) {
                 var file = fileChooser.selectedFile
-                if (!file.name.endsWith(".epub")) {
+                // Ensure .epub extension
+                if (!file.name.endsWith(".epub", ignoreCase = true)) {
                     file = File(file.parentFile, "${file.name}.epub")
                 }
-                file.toURI().toString()
+                file.absolutePath
             } else {
                 null
             }
@@ -50,6 +59,26 @@ actual class PlatformHelper {
             Log.error("Failed to create EPUB export URI", e)
             null
         }
+    }
+    
+    /**
+     * Sanitize filename for Windows file system.
+     * Removes invalid characters: < > : " / \ | ? *
+     * Also removes control characters and trims whitespace.
+     */
+    private fun sanitizeFilename(name: String): String {
+        return name
+            // Remove Windows invalid characters
+            .replace(Regex("[<>:\"/\\\\|?*]"), "")
+            // Remove control characters (0x00-0x1F)
+            .replace(Regex("[\\x00-\\x1F]"), "")
+            // Replace multiple spaces with single space
+            .replace(Regex("\\s+"), " ")
+            // Trim whitespace and dots (Windows doesn't allow trailing dots)
+            .trim()
+            .trimEnd('.')
+            // If empty after sanitization, use default
+            .ifBlank { "Untitled" }
     }
 
     actual fun copyToClipboard(label: String, content: String) {

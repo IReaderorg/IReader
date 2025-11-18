@@ -528,21 +528,26 @@ class BookDetailViewModel(
             try {
                 showSnackBar(UiText.DynamicString("Preparing EPUB export..."))
                 
+                Log.info { "Starting EPUB export for book: ${book.title}" }
+                
                 // Get output URI from platform helper with error handling
                 val outputUri = try {
                     platformHelper.createEpubExportUri(book.title, book.author)
                 } catch (e: Exception) {
                     Log.error("Failed to create export URI", e)
                     withUIContext {
-                        showSnackBar(UiText.DynamicString("Failed to create export file: ${e.message}"))
+                        showSnackBar(UiText.DynamicString("Failed to select save location: ${e.message}"))
                     }
                     return@launch
                 }
                 
                 if (outputUri == null) {
+                    Log.info { "EPUB export cancelled by user" }
                     showSnackBar(UiText.DynamicString("Export cancelled"))
                     return@launch
                 }
+                
+                Log.info { "Export destination: $outputUri" }
                 
                 // Convert presentation options to domain options
                 val domainOptions = ireader.domain.models.epub.ExportOptions(

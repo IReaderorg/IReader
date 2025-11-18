@@ -371,8 +371,18 @@ img {
     }
     
     private fun packageAsEpub(sourceDir: File, outputUri: String): String {
-        val outputFile = File(outputUri)
-        outputFile.parentFile?.mkdirs()
+        // Handle both file:// URIs and absolute paths
+        val outputPath = if (outputUri.startsWith("file://")) {
+            outputUri.removePrefix("file://")
+                .replace("%20", " ") // Decode URL-encoded spaces
+        } else {
+            outputUri
+        }
+        
+        val outputFile = File(outputPath)
+        
+        // Ensure parent directory exists
+        outputFile.parentFile?.mkdirs() ?: throw IllegalStateException("Cannot create parent directory for: ${outputFile.absolutePath}")
         
         ZipOutputStream(FileOutputStream(outputFile)).use { zipOut ->
             // Add mimetype first (uncompressed)
