@@ -266,15 +266,25 @@ if (!taskRequests.contains("Fdroid", ignoreCase = true)) {
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround
 fun getCommitCount(): String {
-    return providers.exec {
-        commandLine("git", "rev-list", "--count", "HEAD")
-    }.standardOutput.asText.get().trim().ifEmpty { "unknown" }
+    return try {
+        providers.exec {
+            commandLine("git", "rev-list", "--count", "HEAD")
+            isIgnoreExitValue = true
+        }.standardOutput.asText.orNull?.trim()?.takeIf { it.isNotEmpty() } ?: "unknown"
+    } catch (e: Exception) {
+        "unknown"
+    }
 }
 
 fun getGitSha(): String {
-    return providers.exec {
-        commandLine("git", "rev-parse", "--short", "HEAD")
-    }.standardOutput.asText.get().trim().ifEmpty { "unknown" }
+    return try {
+        providers.exec {
+            commandLine("git", "rev-parse", "--short", "HEAD")
+            isIgnoreExitValue = true
+        }.standardOutput.asText.orNull?.trim()?.takeIf { it.isNotEmpty() } ?: "unknown"
+    } catch (e: Exception) {
+        "unknown"
+    }
 }
 
 fun getBuildTime(): String {
