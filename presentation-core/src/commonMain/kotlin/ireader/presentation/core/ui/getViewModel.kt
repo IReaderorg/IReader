@@ -23,21 +23,24 @@ inline fun <reified T : Any> getIViewModel(
     val koin = getKoin()
     val store = LocalNavigationViewModelStore.current
     
-    val cacheKey = remember(key, qualifier) {
-        if (key != null) {
-            "${T::class.simpleName}_${qualifier?.value ?: ""}_$key"
-        } else {
-            val paramValues = parameters?.invoke()
-            val paramKey = paramValues?.values?.joinToString(",") { it.toString() } ?: ""
-            "${T::class.simpleName}_${qualifier?.value ?: ""}_$paramKey"
-        }
+    // Generate cache key based on key or parameters
+    // IMPORTANT: The cacheKey must be stable and unique per ViewModel instance
+    val cacheKey = if (key != null) {
+        "${T::class.simpleName}_${qualifier?.value ?: ""}_$key"
+    } else {
+        val paramValues = parameters?.invoke()
+        val paramKey = paramValues?.values?.joinToString(",") { it.toString() } ?: ""
+        "${T::class.simpleName}_${qualifier?.value ?: ""}_$paramKey"
     }
     
     return if (store != null) {
+        // Use remember with cacheKey to ensure we get the right ViewModel for this key
+        // When the key changes, remember will recompute and get/create a new ViewModel
         remember(cacheKey) {
             store.getOrCreate<T>(cacheKey, koin, qualifier, parameters)
         }
     } else {
+        // Without a store, create a new instance per cacheKey
         remember(cacheKey) {
             koin.get(qualifier, parameters)
         }

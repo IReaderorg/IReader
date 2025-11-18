@@ -52,7 +52,9 @@ import org.koin.dsl.module
 
 val PresentationModules = module {
 
-    single { BooksState() }
+    // BooksState should be a factory, not a singleton, to avoid state sharing between ViewModels
+    // Each ViewModel instance should have its own BooksState to prevent data mixing when navigating quickly
+    factory { BooksState() }
     single<HistoryStateImpl> { HistoryStateImpl() }
     single<LibraryStateImpl> { LibraryStateImpl() }
     single<CatalogsStateImpl> { CatalogsStateImpl() }
