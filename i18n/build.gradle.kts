@@ -60,23 +60,16 @@ android {
 }
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround
-fun runCommand(command: String): String {
-    return try {
-        val process = Runtime.getRuntime().exec(command.split(" ").toTypedArray())
-        process.inputStream.bufferedReader().readText().trim()
-    } catch (e: Exception) {
-        "unknown"
-    }
-}
-
 fun getCommitCount(): String {
-    return runCommand("git rev-list --count HEAD")
-    // return "1"
+    return providers.exec {
+        commandLine("git", "rev-list", "--count", "HEAD")
+    }.standardOutput.asText.get().trim().ifEmpty { "unknown" }
 }
 
 fun getGitSha(): String {
-    return runCommand("git rev-parse --short HEAD")
-    // return "1"
+    return providers.exec {
+        commandLine("git", "rev-parse", "--short", "HEAD")
+    }.standardOutput.asText.get().trim().ifEmpty { "unknown" }
 }
 
 fun getBuildTime(): String {
