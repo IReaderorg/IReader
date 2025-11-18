@@ -15,8 +15,10 @@ kotlin {
     androidTarget()
     jvm() {
         compilations.all {
-            compilerOptions.configure {
-                jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+            compileTaskProvider.configure {
+                compilerOptions {
+                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+                }
             }
         }
     }
@@ -56,22 +58,17 @@ android {
         targetCompatibility = ProjectConfig.androidJvmTarget
     }
 }
-buildkonfig {
-    packageName = "ireader.i18n"
-    exposeObjectWithName = "BuildKonfig"
-    defaultConfigs {
-        buildConfigField(BOOLEAN, "DEBUG", "true")
-        buildConfigField(STRING, "COMMIT_COUNT", "\"${getCommitCount()}\"")
-        buildConfigField(STRING, "COMMIT_SHA", "\"${getGitSha()}\"")
-        buildConfigField(STRING, "BUILD_TIME", "\"${getBuildTime()}\"")
-        buildConfigField(BOOLEAN, "INCLUDE_UPDATER", "false")
-        buildConfigField(BOOLEAN, "PREVIEW", "false")
-        buildConfigField(STRING, "VERSION_NAME", "\"${ProjectConfig.versionName}\"")
-        buildConfigField(INT, "VERSION_CODE", "${ProjectConfig.versionCode}")
-    }
-}
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround
+fun runCommand(command: String): String {
+    return try {
+        val process = Runtime.getRuntime().exec(command.split(" ").toTypedArray())
+        process.inputStream.bufferedReader().readText().trim()
+    } catch (e: Exception) {
+        "unknown"
+    }
+}
+
 fun getCommitCount(): String {
     return runCommand("git rev-list --count HEAD")
     // return "1"
@@ -88,12 +85,18 @@ fun getBuildTime(): String {
     return df.format(Date())
 }
 
-fun runCommand(command: String): String {
-    return try {
-        val process = Runtime.getRuntime().exec(command.split(" ").toTypedArray())
-        process.inputStream.bufferedReader().readText().trim()
-    } catch (e: Exception) {
-        "unknown"
+buildkonfig {
+    packageName = "ireader.i18n"
+    exposeObjectWithName = "BuildKonfig"
+    defaultConfigs {
+        buildConfigField(BOOLEAN, "DEBUG", "true")
+        buildConfigField(STRING, "COMMIT_COUNT", "\"${getCommitCount()}\"")
+        buildConfigField(STRING, "COMMIT_SHA", "\"${getGitSha()}\"")
+        buildConfigField(STRING, "BUILD_TIME", "\"${getBuildTime()}\"")
+        buildConfigField(BOOLEAN, "INCLUDE_UPDATER", "false")
+        buildConfigField(BOOLEAN, "PREVIEW", "false")
+        buildConfigField(STRING, "VERSION_NAME", "\"${ProjectConfig.versionName}\"")
+        buildConfigField(INT, "VERSION_CODE", "${ProjectConfig.versionCode}")
     }
 }
 

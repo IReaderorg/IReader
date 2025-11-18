@@ -1,4 +1,10 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.gradle.api.DefaultTask
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.TaskAction
 
 
 plugins {
@@ -213,12 +219,14 @@ tasks.register<JavaExec>("verifyDatabase") {
 }
 
 // Task to verify native libraries are present
-tasks.register("verifyNativeLibraries") {
-    group = "verification"
-    description = "Verifies that Piper TTS native libraries are present in resources"
+abstract class VerifyNativeLibrariesTask : DefaultTask() {
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val nativeDir: DirectoryProperty
     
-    doLast {
-        val nativeDir = project.file("src/main/resources/native")
+    @TaskAction
+    fun verify() {
+        val nativeDirFile = nativeDir.get().asFile
         val platforms = listOf("windows-x64", "macos-x64", "macos-arm64", "linux-x64")
         val requiredLibs = mapOf(
             "windows-x64" to listOf("piper_jni.dll", "onnxruntime.dll"),
@@ -229,7 +237,7 @@ tasks.register("verifyNativeLibraries") {
         
         var allPresent = true
         platforms.forEach { platform ->
-            val platformDir = nativeDir.resolve(platform)
+            val platformDir = nativeDirFile.resolve(platform)
             logger.lifecycle("Checking $platform:")
             requiredLibs[platform]?.forEach { lib ->
                 val libFile = platformDir.resolve(lib)
@@ -252,6 +260,12 @@ tasks.register("verifyNativeLibraries") {
             logger.lifecycle("✓ All native libraries are present")
         }
     }
+}
+
+tasks.register<VerifyNativeLibrariesTask>("verifyNativeLibraries") {
+    group = "verification"
+    description = "Verifies that Piper TTS native libraries are present in resources"
+    nativeDir.set(project.layout.projectDirectory.dir("src/main/resources/native"))
 }
 
 // Run verification before packaging
