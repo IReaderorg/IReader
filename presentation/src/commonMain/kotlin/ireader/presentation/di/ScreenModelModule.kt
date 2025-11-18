@@ -2,6 +2,7 @@ package ireader.presentation.di
 
 import ireader.presentation.ui.settings.statistics.StatsScreenModel
 import org.koin.core.module.dsl.factoryOf
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 /**
@@ -13,6 +14,6 @@ val screenModelModule = module {
     // Statistics screen model
     factoryOf(::StatsScreenModel)
     
-    // Note: Other screen models should be added here as they are migrated
-    // to the StateScreenModel pattern
+    // Main settings screen - singleton to prevent recreation
+    single { ireader.presentation.ui.settings.MainSettingScreenViewModel(get()) }
 }

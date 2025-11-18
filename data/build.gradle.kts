@@ -50,13 +50,6 @@ kotlin {
                 implementation(libs.bundles.supabase)
             }
         }
-        commonTest {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
-                implementation("io.mockk:mockk:1.13.8")
-            }
-        }
         androidMain {
             dependencies {
                 implementation(androidx.core)
@@ -84,10 +77,6 @@ kotlin {
 dependencies {
 
     implementation(libs.sqldelight.android.paging)
-
-    testImplementation(test.bundles.common)
-    debugImplementation(libs.androidSqlite)
-    androidTestImplementation(test.bundles.common)
 }
 
 android {

@@ -2,7 +2,6 @@ package ireader.presentation.core
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -41,13 +40,11 @@ import ireader.presentation.core.ui.TTSEngineManagerScreenSpec
 import ireader.presentation.core.ui.TTSScreenSpec
 import ireader.presentation.core.ui.TranslationScreenSpec
 import ireader.presentation.core.ui.WebViewScreenSpec
+import ireader.presentation.core.ui.NavigationViewModelStore
+import ireader.presentation.core.ui.LocalNavigationViewModelStore
 import ireader.presentation.ui.home.sources.extension.SourceDetailScreen
 import org.koin.compose.koinInject
 
-/**
- * Common navigation setup for both Android and Desktop platforms.
- * Provides a unified navigation graph with beautiful animations.
- */
 @ExperimentalMaterial3Api
 @Composable
 fun CommonNavHost(
@@ -55,11 +52,16 @@ fun CommonNavHost(
     startDestination: String = "main",
     additionalRoutes: (NavGraphBuilder.() -> Unit)? = null
 ) {
-    AnimatedNavHost(
-        navController = navController,
-        startDestination = startDestination,
-        backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background
+    val viewModelStore = remember { NavigationViewModelStore() }
+    
+    androidx.compose.runtime.CompositionLocalProvider(
+        LocalNavigationViewModelStore provides viewModelStore
     ) {
+        AnimatedNavHost(
+            navController = navController,
+            startDestination = startDestination,
+            backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background
+        ) {
         // Main screen
         composable("main") {
             MainStarterScreen()
@@ -159,9 +161,7 @@ fun CommonNavHost(
                 backStackEntry.savedStateHandle.get<String>("bookId")?.toLongOrNull()
             }
             if (bookId != null) {
-                key(bookId) {
-                    BookDetailScreenSpec(bookId).Content()
-                }
+                BookDetailScreenSpec(bookId).Content()
             }
         }
         
@@ -179,9 +179,7 @@ fun CommonNavHost(
                 backStackEntry.savedStateHandle.get<String>("chapterId")?.toLongOrNull()
             }
             if (bookId != null && chapterId != null) {
-                key(bookId, chapterId) {
                     ReaderScreenSpec(bookId, chapterId).Content()
-                }
             }
         }
         
@@ -195,9 +193,7 @@ fun CommonNavHost(
                 backStackEntry.savedStateHandle.get<String>("sourceId")?.toLongOrNull()
             }
             if (sourceId != null) {
-                key(sourceId) {
                     ExploreScreenSpec(sourceId, null).Content()
-                }
             }
         }
         
@@ -215,12 +211,10 @@ fun CommonNavHost(
                 backStackEntry.savedStateHandle.get<String>("sourceId")?.toLongOrNull()
             }
             if (sourceId != null) {
-                key(sourceId) {
                     SourceMigrationScreenSpec(
                         sourceId = sourceId,
                         onBackPressed = { navController.popBackStack() }
                     ).Content()
-                }
             }
         }
         
@@ -316,9 +310,7 @@ fun CommonNavHost(
                 backStackEntry.savedStateHandle.get<String>("readingParagraph")?.toIntOrNull()
             }
             if (bookId != null && chapterId != null && sourceId != null && readingParagraph != null) {
-                key(bookId, chapterId, sourceId, readingParagraph) {
                     TTSScreenSpec(bookId, chapterId, sourceId, readingParagraph).Content()
-                }
             }
         }
         
@@ -354,14 +346,13 @@ fun CommonNavHost(
                     catalogStore.catalogs.find { it.sourceId == sourceId }
                 }
                 if (catalog != null) {
-                    key(sourceId) {
                         SourceDetailScreen(catalog).Content()
-                    }
                 }
             }
         }
         
         // Allow additional platform-specific routes
         additionalRoutes?.invoke(this)
+        }
     }
 }

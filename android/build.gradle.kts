@@ -222,11 +222,6 @@ dependencies {
     implementation(project(Modules.commonResources))
 
 
-
-
-
-
-
     /** Firebase **/
     "standardImplementation"(platform(libs.firebase.bom))
     "standardImplementation"(libs.firebase.analyticKtx)
@@ -240,7 +235,6 @@ dependencies {
     implementation(libs.bundles.simplestorage)
     implementation(accompanist.permissions)
 
-
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.coroutines.android)
@@ -248,18 +242,9 @@ dependencies {
     "devImplementation"(libs.firebase.analytic)
 
 
-
     implementation(libs.jsoup)
     testImplementation(libs.ktor.core.cio)
 
-    // Removed duplicate compose dependencies - already included via presentation module
-    testImplementation(test.bundles.common)
-
-    testRuntimeOnly(libs.junit.vintage.engine)
-    androidTestImplementation(test.bundles.common)
-
-    // Removed duplicate koin.core, voyager.navigator, and compose dependencies
-    // These are already provided by the presentation module
     implementation(libs.koin.androidCompose)
     implementation(libs.koin.android)
     implementation(libs.koin.workManager)

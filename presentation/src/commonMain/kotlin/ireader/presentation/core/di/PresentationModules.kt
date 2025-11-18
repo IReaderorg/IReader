@@ -69,18 +69,18 @@ val PresentationModules = module {
     single<AppThemeViewModel> { AppThemeViewModel(get(), get(), get(), get()) }
 
     factory<ExploreViewModel> { ExploreViewModel(get(), get(), get(), get(),get(), get(), get(),get(),get(),get(),getOrNull(), getOrNull()) }
-    factory  { HistoryViewModel(get(), get(), get()) }
-    factory  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull()) }
-    factory  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    single  { HistoryViewModel(get(), get(), get()) }
+    single  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull()) }
+    single  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory<GlobalSearchViewModel> { GlobalSearchViewModel(get(), get(), get(), get(), get(), get()) }
     
     // Browse Settings ViewModel
-    factory { BrowseSettingsViewModel(get()) }
+    single { BrowseSettingsViewModel(get()) }
     
     // Migration ViewModel
     factory { ireader.presentation.ui.home.sources.migration.MigrationViewModel(get(), get(), get()) }
 
-    factory  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    single  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
     factory<BookDetailViewModel>  { BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),getOrNull()) }
     single  { MainSettingScreenViewModel(get()) }

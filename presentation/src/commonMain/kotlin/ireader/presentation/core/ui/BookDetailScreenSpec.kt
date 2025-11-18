@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,7 +62,6 @@ data class BookDetailScreenSpec constructor(
     val bookId: Long,
 ) {
 
-
     
     @OptIn(
         ExperimentalMaterialApi::class,
@@ -72,8 +72,10 @@ data class BookDetailScreenSpec constructor(
     fun Content(
     ) {
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
-        val vm: BookDetailViewModel =
-            getIViewModel(parameters = { parametersOf(BookDetailViewModel.Param(bookId)) })
+        val vm: BookDetailViewModel = getIViewModel(
+            key = bookId,
+            parameters = { parametersOf(BookDetailViewModel.Param(bookId)) }
+        )
         val snackbarHostState = SnackBarListener(vm = vm)
         val state = vm
         val book = state.booksState.book

@@ -1,4 +1,4 @@
-package ireader.presentation.ui.settings
+﻿package ireader.presentation.ui.settings
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -68,7 +68,7 @@ fun MoreScreen(
     onBadgeManagement: () -> Unit = {},
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    
+
     // Theme mode state
     var showThemeOptions by remember { mutableStateOf(false) }
     
@@ -78,7 +78,7 @@ fun MoreScreen(
         initialFirstVisibleItemIndex = vm.savedScrollIndex,
         initialFirstVisibleItemScrollOffset = vm.savedScrollOffset
     )
-    
+
     // Save scroll position to ViewModel when it changes (with debounce to avoid too many saves)
     androidx.compose.runtime.LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset) {
         kotlinx.coroutines.delay(100) // Debounce to avoid saving on every pixel
@@ -577,17 +577,18 @@ fun SetupLayout(
 }
 
 
+
 class MainSettingScreenViewModel(
-    uiPreferences: UiPreferences
+    uiPreferences: UiPreferences,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
     val incognitoMode = uiPreferences.incognitoMode().asState()
-    
-    // Scroll state persistence in ViewModel
-    var savedScrollIndex by mutableStateOf(0)
-        private set
-    var savedScrollOffset by mutableStateOf(0)
+
+    var savedScrollIndex by androidx.compose.runtime.mutableStateOf(0)
         private set
     
+    var savedScrollOffset by androidx.compose.runtime.mutableStateOf(0)
+        private set
+
     fun saveScrollPosition(index: Int, offset: Int) {
         savedScrollIndex = index
         savedScrollOffset = offset
