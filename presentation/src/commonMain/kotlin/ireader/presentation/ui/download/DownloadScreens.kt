@@ -12,20 +12,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.getScreenModel
 import ireader.domain.models.download.*
-import ireader.presentation.ui.component.IReaderScaffold
-import ireader.presentation.ui.component.IReaderTopAppBar
-import ireader.presentation.ui.component.IReaderLoadingScreen
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * Enhanced download queue screen following Mihon's DownloadManager pattern
  */
-class DownloadQueueScreen : Screen {
+class DownloadQueueScreen : Screen, KoinComponent {
+    
+    private val screenModel: DownloadQueueScreenModel by inject()
     
     @Composable
     override fun Content() {
-        val screenModel = getScreenModel<DownloadQueueScreenModel>()
         val state by screenModel.state.collectAsState()
         
         DownloadQueueContent(
@@ -73,10 +72,10 @@ private fun DownloadQueueContent(
     onToggleShowCompleted: () -> Unit,
     onToggleShowFailed: () -> Unit
 ) {
-    IReaderScaffold(
+    Scaffold(
         topBar = {
-            IReaderTopAppBar(
-                title = "Downloads",
+            TopAppBar(
+                title = { Text("Downloads") },
                 actions = {
                     IconButton(onClick = onSelectAll) {
                         Icon(Icons.Default.SelectAll, contentDescription = "Select All")
@@ -164,7 +163,14 @@ private fun DownloadQueueContent(
             )
             
             when {
-                state.isLoading -> IReaderLoadingScreen()
+                state.isLoading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
                 else -> {
                     val filteredDownloads = state.downloadQueue // Apply filtering logic
                     

@@ -62,7 +62,7 @@ class SystemManager(
         
         _crashReports.value = currentReports
         systemHealthMonitor.recordCrash(throwable)
-        telemetrySystem.trackError(throwable, context = "Crash", fatal = true)
+        telemetrySystem.trackError(throwable, context = "Crash", properties = mapOf("fatal" to true))
         
         IReaderLog.error(
             message = "Crash handled: ${throwable.message}",
@@ -78,15 +78,13 @@ class SystemManager(
         
         if (handled) {
             telemetrySystem.trackEvent(
-                category = "DeepLink",
-                action = "Handled",
-                label = url
+                eventName = "deep_link_handled",
+                properties = mapOf("url" to url)
             )
         } else {
             telemetrySystem.trackEvent(
-                category = "DeepLink",
-                action = "Failed",
-                label = url
+                eventName = "deep_link_failed",
+                properties = mapOf("url" to url)
             )
         }
         
@@ -109,13 +107,16 @@ class SystemManager(
     }
     
     fun trackPerformance(operation: String, durationMs: Long) {
-        systemHealthMonitor.recordPerformance(
-            operation = operation,
+        systemHealthMonitor.recordPerformanceMetric(
+            operationName = operation,
             durationMs = durationMs,
-            category = PerformanceCategory.OTHER
+            category = "Performance"
         )
         
-        telemetrySystem.trackPerformance(operation, durationMs)
+        telemetrySystem.trackMetric(
+            metricName = "${operation}_duration",
+            value = durationMs.toDouble()
+        )
     }
     
     fun getSystemDiagnostics(): String {
@@ -126,12 +127,13 @@ class SystemManager(
     
     fun exportDiagnosticData(): String {
         return DiagnosticTools.exportDiagnosticData(
-            healthMonitor = systemHealthMonitor,
-            crashReports = _crashReports.value
+            healthMonitor = systemHealthMonitor
         )
     }
     
-    fun runHealthCheck() = DiagnosticTools.runHealthCheck()
+    fun runHealthCheck() = DiagnosticTools.performHealthCheck(
+        healthMonitor = systemHealthMonitor
+    )
     
     fun getSystemInfo() = DiagnosticTools.collectSystemInfo()
     
@@ -141,12 +143,13 @@ class SystemManager(
     }
     
     suspend fun flushTelemetry() {
-        telemetrySystem.flush()
+        // Telemetry events are stored in memory, no flush needed
+        IReaderLog.info("Telemetry flushed", tag = "SystemManager")
     }
     
     suspend fun enablePrivacyMode() {
         privacyPreferences.enablePrivacyMode()
-        telemetrySystem.clearQueue()
+        telemetrySystem.clearEvents()
         IReaderLog.info("Privacy mode enabled", tag = "SystemManager")
     }
     
@@ -166,9 +169,6 @@ class SystemManager(
     
     fun shutdown() {
         IReaderLog.info("Shutting down SystemManager", tag = "SystemManager")
-        
-        scope.launch {
-            telemetrySystem.flush()
-        }
+        systemHealthMonitor.stopMonitoring()
     }
 }

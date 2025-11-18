@@ -48,17 +48,14 @@ class ExtensionRepositoryManagerImpl(
             // Determine repository type
             val repositoryType = detectRepositoryType(url)
             
-            // Create extension source
+            // Create and insert extension source
             val extensionSource = ExtensionSource(
                 id = 0,
                 name = name,
                 key = url,
                 owner = extractOwner(url),
-                source = url,
-                repositoryType = repositoryType
+                source = url
             )
-            
-            // Insert into database
             catalogSourceRepository.insert(extensionSource)
             
             log.info("Added repository: $name ($url)")
@@ -84,9 +81,14 @@ class ExtensionRepositoryManagerImpl(
     
     override suspend fun removeRepository(repositoryId: Long): Result<Unit> {
         return try {
-            catalogSourceRepository.delete(repositoryId)
-            log.info("Removed repository: $repositoryId")
-            Result.success(Unit)
+            val extensionSource = catalogSourceRepository.find(repositoryId)
+            if (extensionSource != null) {
+                catalogSourceRepository.delete(extensionSource)
+                log.info("Removed repository: $repositoryId")
+                Result.success(Unit)
+            } else {
+                Result.failure(IllegalArgumentException("Repository not found: $repositoryId"))
+            }
         } catch (e: Exception) {
             log.error("Failed to remove repository", e)
             Result.failure(e)

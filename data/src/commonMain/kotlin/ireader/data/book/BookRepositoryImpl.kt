@@ -33,10 +33,8 @@ class BookRepositoryImpl(
     }
 
     override fun subscribeBookById(id: Long): Flow<Book?> {
-        return handler.subscribeWithMonitoring("subscribeBookById") {
-            handler.subscribeToOneOrNull {
-                bookQueries.findBookById(id, booksMapper)
-            }
+        return handler.subscribeToOneOrNull {
+            bookQueries.findBookById(id, booksMapper)
         }
     }
 
@@ -59,6 +57,16 @@ class BookRepositoryImpl(
     ): List<Book> {
         return handler.awaitList {
             bookQueries.findInLibraryBooks(booksMapper)
+        }.let { books ->
+            // Apply sorting based on sortType
+            val sorted = when (sortType.type) {
+                LibrarySort.Type.Title -> books.sortedBy { it.title }
+                LibrarySort.Type.LastRead -> books.sortedBy { it.lastUpdate }
+                LibrarySort.Type.LastUpdated -> books.sortedBy { it.lastUpdate }
+                LibrarySort.Type.DateAdded -> books.sortedBy { it.dateAdded }
+                else -> books
+            }
+            if (sortType.isAscending) sorted else sorted.reversed()
         }
     }
 
@@ -156,36 +164,35 @@ class BookRepositoryImpl(
     }
 
     override suspend fun updateBook(book: List<Book>) {
-        return handler.batchUpdate("updateBooks", book) { bookItem ->
-            try {
-                bookQueries.update(
-                    source = bookItem.sourceId,
-                    dateAdded = bookItem.dateAdded,
-                    lastUpdate = bookItem.lastUpdate,
-                    title = bookItem.title,
-                    status = bookItem.status,
-                    description = bookItem.description,
-                    author = bookItem.author,
-                    url = bookItem.key,
-                    chapterFlags = bookItem.flags,
-                    coverLastModified = 0,
-                    thumbnailUrl = bookItem.cover,
-                    viewer = bookItem.viewer,
-                    id = bookItem.id,
-                    initialized = bookItem.initialized,
-                    favorite = bookItem.favorite,
-                    genre = bookItem.genres.let(bookGenresConverter::encode),
-                    isPinned = bookItem.isPinned,
-                    pinnedOrder = bookItem.pinnedOrder.toLong(),
-                    isArchived = bookItem.isArchived,
-                )
-                true
-            } catch (e: Exception) {
-                IReaderLog.error("Failed to update book: ${bookItem.title}", e)
-                false
+        return handler.await(inTransaction = true) {
+            book.forEach { bookItem ->
+                try {
+                    bookQueries.update(
+                        source = bookItem.sourceId,
+                        dateAdded = bookItem.dateAdded,
+                        lastUpdate = bookItem.lastUpdate,
+                        title = bookItem.title,
+                        status = bookItem.status,
+                        description = bookItem.description,
+                        author = bookItem.author,
+                        url = bookItem.key,
+                        chapterFlags = bookItem.flags,
+                        coverLastModified = 0,
+                        thumbnailUrl = bookItem.cover,
+                        viewer = bookItem.viewer,
+                        id = bookItem.id,
+                        initialized = bookItem.initialized,
+                        favorite = bookItem.favorite,
+                        genre = bookItem.genres.let(bookGenresConverter::encode),
+                        isPinned = bookItem.isPinned,
+                        pinnedOrder = bookItem.pinnedOrder.toLong(),
+                        isArchived = bookItem.isArchived,
+                    )
+                } catch (e: Exception) {
+                    IReaderLog.error("Failed to update book: ${bookItem.title}", e)
+                }
             }
-        }.let { result ->
-            IReaderLog.info("Batch book update completed: ${result.successCount}/${result.totalCount} successful")
+            IReaderLog.info("Batch book update completed: ${book.size} books")
         }
     }
 
@@ -320,9 +327,20 @@ class BookRepositoryImpl(
     }
 
     override suspend fun repairCategoryAssignments() {
-        handler.await {
-            categoryQueries.repair()
-
+        // Ensure all books in library have at least the default category
+        val booksInLibrary = handler.awaitList {
+            bookQueries.findInLibraryBooks(booksMapper)
+        }
+        booksInLibrary.forEach { book ->
+            // Check if book has any categories using the repository
+            val hasCategories = try {
+                bookCategoryRepository.findAll().any { it.bookId == book.id }
+            } catch (e: Exception) {
+                false
+            }
+            if (!hasCategories) {
+                bookCategoryRepository.insert(BookCategory(bookId = book.id, categoryId = Category.ALL_ID))
+            }
         }
     }
 
@@ -330,8 +348,7 @@ class BookRepositoryImpl(
         val list = mutableListOf<Long>()
         handler.await {
             value.forEach { book ->
-                list.add(book.id)
-                return@await bookQueries.upsert(
+                bookQueries.upsert(
                     id = book.id.toDB(),
                     source = book.sourceId,
                     dateAdded = book.dateAdded,
@@ -354,9 +371,9 @@ class BookRepositoryImpl(
                     pinnedOrder = book.pinnedOrder.toLong(),
                     isArchived = book.isArchived,
                 )
-
+                val insertedId = bookQueries.selectLastInsertedRowId().executeAsOne()
+                list.add(insertedId)
             }
-
         }
         return list
     }

@@ -16,6 +16,8 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlin.time.ExperimentalTime
 
 /**
@@ -69,7 +71,7 @@ class LibraryUpdateService(
                 duration = endTime - startTime
             )
         } catch (e: Exception) {
-            Log.error(e) { "Library update failed: ${e.message}" }
+            Log.error(e, "Library update failed: ${e.message}")
             LibraryUpdateResult(
                 jobId = job.id,
                 totalBooks = 0,
@@ -110,7 +112,7 @@ class LibraryUpdateService(
             notificationManager.cancel(NotificationsIds.ID_LIBRARY_PROGRESS)
             true
         } catch (e: Exception) {
-            Log.error(e) { "Failed to cancel update: ${e.message}" }
+            Log.error(e, "Failed to cancel update: ${e.message}")
             false
         }
     }
@@ -149,9 +151,10 @@ class LibraryUpdateService(
         
         // Process books with concurrency control
         val semaphore = Semaphore(job.maxConcurrentUpdates)
-        val jobs = libraryBooks.map { book ->
-            async {
-                semaphore.withPermit {
+        val jobs = coroutineScope {
+            libraryBooks.map { book ->
+                async {
+                    semaphore.withPermit {
                     try {
                         val newChapters = updateBook(book, job)
                         synchronized(this@LibraryUpdateService) {
@@ -186,9 +189,10 @@ class LibraryUpdateService(
                             )
                             processedBooks++
                         }
-                        Log.error(e) { "Failed to update book: ${book.title}" }
+                        Log.error(e, "Failed to update book: ${book.title}")
                     }
                 }
+            }
             }
         }
         
@@ -238,7 +242,7 @@ class LibraryUpdateService(
         }.filter { book ->
             // Skip completed books if requested
             if (job.skipCompleted) {
-                book.status != Book.COMPLETED
+                book.status != Book.COMPLETED.toLong()
             } else {
                 true
             }
@@ -256,14 +260,14 @@ class LibraryUpdateService(
     }
     
     private suspend fun updateBook(book: Book, job: LibraryUpdateJob): Int {
-        val source = getLocalCatalog.get(book.sourceId) ?: return 0
+        val catalog = getLocalCatalog.get(book.sourceId) ?: return 0
         val existingChapters = getChapterUseCase.findChaptersByBookId(book.id)
         val remoteChapters = mutableListOf<Chapter>()
         
         // Fetch remote chapters
         remoteUseCases.getRemoteChapters(
             book = book,
-            source = source,
+            catalog = catalog,
             onRemoteSuccess = { chapters ->
                 remoteChapters.addAll(chapters)
             },
@@ -306,8 +310,8 @@ class LibraryUpdateService(
         val daysSinceUpdate = timeSinceLastUpdate / (24 * 60 * 60 * 1000)
         
         return when (book.status) {
-            Book.ONGOING -> daysSinceUpdate >= 1 // Check daily for ongoing
-            Book.COMPLETED -> daysSinceUpdate >= 7 // Check weekly for completed
+            Book.ONGOING.toLong() -> daysSinceUpdate >= 1 // Check daily for ongoing
+            Book.COMPLETED.toLong() -> daysSinceUpdate >= 7 // Check weekly for completed
             else -> daysSinceUpdate >= 3 // Check every 3 days for unknown status
         }
     }

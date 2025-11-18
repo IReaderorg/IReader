@@ -1,13 +1,16 @@
 package ireader.presentation.ui.migration
+import ireader.domain.models.migration.MigrationFlags
+import ireader.domain.models.migration.MigrationSource
 
-import cafe.adriel.voyager.core.model.StateScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
+import ireader.presentation.core.viewmodel.IReaderStateScreenModel
+// screenModelScope is provided by IReaderStateScreenModel
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.MigrationRepository
 import ireader.domain.models.entities.Book
 import ireader.domain.models.migration.*
 import ireader.domain.usecases.migration.MigrateBookUseCase
 import ireader.domain.usecases.migration.SearchMigrationTargetsUseCase
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -19,7 +22,7 @@ class MigrationListScreenModel(
     private val bookRepository: BookRepository,
     private val migrationRepository: MigrationRepository,
     private val searchMigrationTargetsUseCase: SearchMigrationTargetsUseCase
-) : StateScreenModel<MigrationListScreenModel.State>(State()) {
+) : IReaderStateScreenModel<MigrationListScreenModel.State>(State()) {
     
     data class State(
         val books: List<Book> = emptyList(),
@@ -43,15 +46,17 @@ class MigrationListScreenModel(
     private fun loadBooks() {
         screenModelScope.launch {
             try {
-                val allBooks = bookRepository.getFavorites() // Only show library books
-                mutableState.value = mutableState.value.copy(
+                val allBooks = bookRepository.findAllInLibraryBooks(
+                    sortType = ireader.domain.models.library.LibrarySort.default,
+                    isAsc = false,
+                    unreadFilter = false
+                )
+                updateState { it.copy(
                     books = allBooks,
                     isLoading = false
-                )
+                ) }
             } catch (e: Exception) {
-                mutableState.value = mutableState.value.copy(
-                    isLoading = false
-                )
+                updateState { it.copy(isLoading = false) }
             }
         }
     }
@@ -60,9 +65,9 @@ class MigrationListScreenModel(
         screenModelScope.launch {
             try {
                 val sources = migrationRepository.getMigrationSources()
-                mutableState.value = mutableState.value.copy(
+                updateState { it.copy(
                     migrationSources = sources
-                )
+                ) }
             } catch (e: Exception) {
                 // Handle error
             }
@@ -70,73 +75,73 @@ class MigrationListScreenModel(
     }
     
     fun selectBook(bookId: Long) {
-        val currentSelected = mutableState.value.selectedBooks
-        mutableState.value = mutableState.value.copy(
+        val currentSelected = state.value.selectedBooks
+        updateState { it.copy(
             selectedBooks = if (bookId in currentSelected) {
                 currentSelected - bookId
             } else {
                 currentSelected + bookId
             }
-        )
+        ) }
     }
     
     fun selectAllBooks() {
         val filteredBooks = getFilteredBooks()
-        mutableState.value = mutableState.value.copy(
-            selectedBooks = filteredBooks.map { it.id }.toSet()
-        )
+        updateState { it.copy(
+            selectedBooks = filteredBooks.map { book -> book.id }.toSet()
+        ) }
     }
     
     fun clearSelection() {
-        mutableState.value = mutableState.value.copy(
+        updateState { it.copy(
             selectedBooks = emptySet()
-        )
+        ) }
     }
     
     fun updateSearchQuery(query: String) {
-        mutableState.value = mutableState.value.copy(
+        updateState { it.copy(
             searchQuery = query
-        )
+        ) }
     }
     
     fun updateSortOrder(order: MigrationSortOrder) {
-        mutableState.value = mutableState.value.copy(
+        updateState { it.copy(
             sortOrder = order
-        )
+        ) }
     }
     
     fun toggleShowOnlyMigratable() {
-        mutableState.value = mutableState.value.copy(
-            showOnlyMigratableBooks = !mutableState.value.showOnlyMigratableBooks
-        )
+        updateState { it.copy(
+            showOnlyMigratableBooks = !state.value.showOnlyMigratableBooks
+        ) }
     }
     
     fun getFilteredBooks(): List<Book> {
-        val state = mutableState.value
-        var books = state.books
+        val currentState = state.value
+        var books = currentState.books
         
         // Apply search filter
-        if (state.searchQuery.isNotBlank()) {
+        if (currentState.searchQuery.isNotBlank()) {
             books = books.filter { book ->
-                book.title.contains(state.searchQuery, ignoreCase = true) ||
-                book.author?.contains(state.searchQuery, ignoreCase = true) == true
+                book.title.contains(currentState.searchQuery, ignoreCase = true) ||
+                book.author.contains(currentState.searchQuery, ignoreCase = true)
             }
         }
         
         // Apply sort order
-        books = when (state.sortOrder) {
+        books = when (currentState.sortOrder) {
             MigrationSortOrder.TITLE -> books.sortedBy { it.title }
-            MigrationSortOrder.AUTHOR -> books.sortedBy { it.author ?: "" }
+            MigrationSortOrder.AUTHOR -> books.sortedBy { it.author }
             MigrationSortOrder.SOURCE -> books.sortedBy { it.sourceId }
-            MigrationSortOrder.LAST_READ -> books.sortedByDescending { it.lastUpdate ?: 0 }
+            MigrationSortOrder.LAST_READ -> books.sortedByDescending { it.lastUpdate }
         }
         
         return books
     }
     
     fun startMigration(targetSources: List<Long>, flags: MigrationFlags) {
-        val selectedBookIds = mutableState.value.selectedBooks
-        val selectedBooks = mutableState.value.books.filter { it.id in selectedBookIds }
+        val selectedBookIds = state.value.selectedBooks
+        val selectedBooks = state.value.books.filter { it.id in selectedBookIds }
         
         if (selectedBooks.isEmpty() || targetSources.isEmpty()) return
         
@@ -165,7 +170,7 @@ class MigrationListScreenModel(
  */
 class MigrationConfigScreenModel(
     private val migrationRepository: MigrationRepository
-) : StateScreenModel<MigrationConfigScreenModel.State>(State()) {
+) : IReaderStateScreenModel<MigrationConfigScreenModel.State>(State()) {
     
     data class State(
         val availableSources: List<MigrationSource> = emptyList(),
@@ -184,47 +189,47 @@ class MigrationConfigScreenModel(
                 val sources = migrationRepository.getMigrationSources()
                 val flags = migrationRepository.getMigrationFlags()
                 
-                mutableState.value = mutableState.value.copy(
+                updateState { it.copy(
                     availableSources = sources,
                     migrationFlags = flags,
                     isLoading = false
-                )
+                ) }
             } catch (e: Exception) {
-                mutableState.value = mutableState.value.copy(
+                updateState { it.copy(
                     isLoading = false
-                )
+                ) }
             }
         }
     }
     
     fun toggleSource(source: MigrationSource) {
-        val currentSelected = mutableState.value.selectedSources
-        mutableState.value = mutableState.value.copy(
+        val currentSelected = state.value.selectedSources
+        updateState { it.copy(
             selectedSources = if (source in currentSelected) {
                 currentSelected - source
             } else {
                 currentSelected + source
             }
-        )
+        ) }
     }
     
     fun reorderSources(sources: List<MigrationSource>) {
-        mutableState.value = mutableState.value.copy(
+        updateState { it.copy(
             selectedSources = sources
-        )
+        ) }
     }
     
     fun updateMigrationFlags(flags: MigrationFlags) {
-        mutableState.value = mutableState.value.copy(
+        updateState { it.copy(
             migrationFlags = flags
-        )
+        ) }
     }
     
     fun saveConfiguration() {
         screenModelScope.launch {
             try {
-                migrationRepository.saveMigrationSources(mutableState.value.selectedSources)
-                migrationRepository.saveMigrationFlags(mutableState.value.migrationFlags)
+                migrationRepository.saveMigrationSources(state.value.selectedSources)
+                migrationRepository.saveMigrationFlags(state.value.migrationFlags)
             } catch (e: Exception) {
                 // Handle error
             }
@@ -238,7 +243,7 @@ class MigrationConfigScreenModel(
 class MigrationProgressScreenModel(
     private val migrationRepository: MigrationRepository,
     private val migrateBookUseCase: MigrateBookUseCase
-) : StateScreenModel<MigrationProgressScreenModel.State>(State()) {
+) : IReaderStateScreenModel<MigrationProgressScreenModel.State>(State()) {
     
     data class State(
         val migrationJobs: List<MigrationJob> = emptyList(),
@@ -248,23 +253,20 @@ class MigrationProgressScreenModel(
     
     init {
         loadMigrationJobs()
-        observeMigrationProgress()
     }
     
     private fun loadMigrationJobs() {
         migrationRepository.getAllMigrationJobs()
+            .catch { e ->
+                updateState { it.copy(isLoading = false) }
+            }
             .onEach { jobs ->
-                mutableState.value = mutableState.value.copy(
+                updateState { it.copy(
                     migrationJobs = jobs,
                     isLoading = false
-                )
+                ) }
             }
             .launchIn(screenModelScope)
-    }
-    
-    private fun observeMigrationProgress() {
-        // This would observe individual migration progress
-        // Implementation depends on how migration progress is tracked
     }
     
     fun pauseMigrationJob(jobId: String) {

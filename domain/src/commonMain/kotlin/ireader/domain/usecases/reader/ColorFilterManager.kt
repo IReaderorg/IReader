@@ -40,7 +40,15 @@ class ColorFilterManager(
             readerPreferences.customBrightnessValue().changes(),
             readerPreferences.grayscale().changes(),
             readerPreferences.invertedColors().changes()
-        ) { enabled, colorValue, mode, customBrightness, brightnessValue, grayscale, inverted ->
+        ) { values ->
+            val enabled = values[0] as Boolean
+            val colorValue = values[1] as Int
+            val mode = values[2] as Int
+            val customBrightness = values[3] as Boolean
+            val brightnessValue = values[4] as Int
+            val grayscale = values[5] as Boolean
+            val inverted = values[6] as Boolean
+            
             ColorFilter(
                 enabled = enabled,
                 colorValue = colorValue,

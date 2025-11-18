@@ -1,7 +1,7 @@
-package ireader.presentation.ui.settings.statistics
+﻿package ireader.presentation.ui.settings.statistics
 
-import cafe.adriel.voyager.core.model.StateScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
+import ireader.presentation.core.viewmodel.IReaderStateScreenModel
+// screenModelScope is provided by IReaderStateScreenModel
 import ireader.core.log.Log
 import ireader.domain.models.entities.*
 import ireader.domain.usecases.statistics.*
@@ -21,13 +21,13 @@ class StatsScreenModel(
     private val exportStatistics: ExportStatisticsUseCase,
     private val globalSearch: GlobalSearchUseCase,
     private val applyAdvancedFilters: ApplyAdvancedFiltersUseCase
-) : StateScreenModel<StatsScreenModel.State>(State()) {
+) : IReaderStateScreenModel<StatsScreenModel.State>(State()) {
 
     data class State(
         val isLoading: Boolean = true,
         val error: String? = null,
         val libraryInsights: LibraryInsights = LibraryInsights(),
-        val readingStatistics: ReadingStatistics = ReadingStatistics(),
+        val readingStatisticsType1: ReadingStatisticsType1 = ReadingStatisticsType1(),
         val readingAnalytics: ReadingAnalytics = ReadingAnalytics(),
         val upcomingReleases: List<UpcomingRelease> = emptyList(),
         val recommendations: List<BookRecommendation> = emptyList(),
@@ -58,36 +58,36 @@ class StatsScreenModel(
     private fun loadAllData() {
         screenModelScope.launch {
             try {
-                mutableState.update { it.copy(isLoading = true, error = null) }
+                updateState { it.copy(isLoading = true, error = null) }
 
                 // Load library insights
                 getLibraryInsights.asFlow().collect { insights ->
-                    mutableState.update { it.copy(libraryInsights = insights) }
+                    updateState { it.copy(libraryInsights = insights) }
                 }
 
                 // Load reading statistics
                 getReadingStatistics().collect { stats ->
-                    mutableState.update { it.copy(readingStatistics = stats) }
+                    updateState { it.copy(readingStatisticsType1 = stats) }
                 }
 
                 // Load reading analytics
                 getReadingAnalytics.asFlow().collect { analytics ->
-                    mutableState.update { it.copy(readingAnalytics = analytics) }
+                    updateState { it.copy(readingAnalytics = analytics) }
                 }
 
                 // Load upcoming releases
                 getUpcomingReleases.asFlow().collect { releases ->
-                    mutableState.update { it.copy(upcomingReleases = releases) }
+                    updateState { it.copy(upcomingReleases = releases) }
                 }
 
                 // Load recommendations
                 val recommendations = getRecommendations(20)
-                mutableState.update { it.copy(recommendations = recommendations) }
+                updateState { it.copy(recommendations = recommendations) }
 
                 // Load available genres and authors for filtering
                 val genres = applyAdvancedFilters.getAvailableGenres()
                 val authors = applyAdvancedFilters.getAvailableAuthors()
-                mutableState.update { 
+                updateState { 
                     it.copy(
                         availableGenres = genres,
                         availableAuthors = authors,
@@ -96,7 +96,7 @@ class StatsScreenModel(
                 }
             } catch (e: Exception) {
                 Log.error { "Failed to load statistics: ${e.message}" }
-                mutableState.update { 
+                updateState { 
                     it.copy(
                         isLoading = false,
                         error = e.message ?: "Unknown error"
@@ -107,13 +107,13 @@ class StatsScreenModel(
     }
 
     fun selectTab(tab: StatsTab) {
-        mutableState.update { it.copy(selectedTab = tab) }
+        updateState { it.copy(selectedTab = tab) }
     }
 
     fun performGlobalSearch(query: String, sources: List<Long> = emptyList()) {
         screenModelScope.launch {
             try {
-                mutableState.update { 
+                updateState { 
                     it.copy(
                         isSearching = true,
                         searchQuery = query,
@@ -122,7 +122,7 @@ class StatsScreenModel(
                 }
 
                 globalSearch.asFlow(query, sources).collect { result ->
-                    mutableState.update { 
+                    updateState { 
                         it.copy(
                             searchResults = result,
                             isSearching = false
@@ -131,7 +131,7 @@ class StatsScreenModel(
                 }
             } catch (e: Exception) {
                 Log.error { "Failed to perform global search: ${e.message}" }
-                mutableState.update { 
+                updateState { 
                     it.copy(
                         isSearching = false,
                         error = e.message ?: "Search failed"
@@ -144,14 +144,14 @@ class StatsScreenModel(
     fun updateFilterState(filterState: AdvancedFilterState) {
         screenModelScope.launch {
             try {
-                mutableState.update { it.copy(filterState = filterState) }
+                updateState { it.copy(filterState = filterState) }
 
                 applyAdvancedFilters.asFlow(filterState).collect { books ->
-                    mutableState.update { it.copy(filteredBooks = books) }
+                    updateState { it.copy(filteredBooks = books) }
                 }
             } catch (e: Exception) {
                 Log.error { "Failed to apply filters: ${e.message}" }
-                mutableState.update { 
+                updateState { 
                     it.copy(error = e.message ?: "Filter failed")
                 }
             }
@@ -165,7 +165,7 @@ class StatsScreenModel(
                 Log.info { "Filter preset saved: $name" }
             } catch (e: Exception) {
                 Log.error { "Failed to save filter preset: ${e.message}" }
-                mutableState.update { 
+                updateState { 
                     it.copy(error = e.message ?: "Failed to save preset")
                 }
             }
@@ -176,11 +176,11 @@ class StatsScreenModel(
         screenModelScope.launch {
             try {
                 val json = exportStatistics.toJson()
-                mutableState.update { it.copy(exportedData = json) }
+                updateState { it.copy(exportedData = json) }
                 Log.info { "Statistics exported successfully" }
             } catch (e: Exception) {
                 Log.error { "Failed to export statistics: ${e.message}" }
-                mutableState.update { 
+                updateState { 
                     it.copy(error = e.message ?: "Export failed")
                 }
             }
@@ -192,6 +192,6 @@ class StatsScreenModel(
     }
 
     fun clearError() {
-        mutableState.update { it.copy(error = null) }
+        updateState { it.copy(error = null) }
     }
 }

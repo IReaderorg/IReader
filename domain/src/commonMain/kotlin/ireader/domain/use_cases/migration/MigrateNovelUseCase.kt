@@ -95,7 +95,7 @@ class MigrateNovelUseCase(
      */
     suspend fun migrate(request: MigrationRequest, selectedMatch: BookItem): Flow<MigrationProgress> = flow {
         try {
-            emit(MigrationProgress(request.novelId, MigrationStatus.SEARCHING, 0.1f, null))
+            emit(MigrationProgress(request.novelId, MigrationStatus.SEARCHING, 0.1f, ""))
             
             // Get original book
             val originalBook = bookRepository.findBookById(request.novelId)
@@ -104,12 +104,12 @@ class MigrateNovelUseCase(
                 return@flow
             }
             
-            emit(MigrationProgress(request.novelId, MigrationStatus.TRANSFERRING, 0.3f, null))
+            emit(MigrationProgress(request.novelId, MigrationStatus.TRANSFERRING_CHAPTERS, 0.3f, ""))
             
             // Get original chapters
             val originalChapters = chapterRepository.findChaptersByBookId(request.novelId)
             
-            emit(MigrationProgress(request.novelId, MigrationStatus.TRANSFERRING, 0.5f, null))
+            emit(MigrationProgress(request.novelId, MigrationStatus.TRANSFERRING_CHAPTERS, 0.5f, ""))
             
             // Create new book with target source
             val newBook = originalBook.copy(
@@ -127,7 +127,7 @@ class MigrateNovelUseCase(
             // Insert new book
             val newBookId = bookRepository.upsert(newBook)
             
-            emit(MigrationProgress(request.novelId, MigrationStatus.TRANSFERRING, 0.7f, null))
+            emit(MigrationProgress(request.novelId, MigrationStatus.TRANSFERRING_CHAPTERS, 0.7f, ""))
             
             // Fetch chapters from new source
             val targetCatalog = catalogStore.get(request.targetSourceId)
@@ -137,7 +137,7 @@ class MigrateNovelUseCase(
                     catalog = targetCatalog,
                     oldChapters = emptyList(),
                     onError = { error ->
-                        Log.error { "Error fetching chapters: ${error?.toString()}" }
+                        Log.error("Error fetching chapters: ${error?.toString()}")
                     },
                     onSuccess = { chapters ->
                             // Transfer reading progress if requested
@@ -148,16 +148,16 @@ class MigrateNovelUseCase(
                 )
             }
             
-            emit(MigrationProgress(request.novelId, MigrationStatus.TRANSFERRING, 0.9f, null))
+            emit(MigrationProgress(request.novelId, MigrationStatus.TRANSFERRING_CHAPTERS, 0.9f, ""))
             
             // Update original book to mark as migrated (remove from library)
             bookRepository.updateBook(originalBook.copy(favorite = false))
             
-            emit(MigrationProgress(request.novelId, MigrationStatus.COMPLETED, 1.0f, null))
+            emit(MigrationProgress(request.novelId, MigrationStatus.COMPLETED, 1.0f, ""))
             
         } catch (e: Exception) {
-            Log.error { "Migration failed: ${e.message}" }
-            emit(MigrationProgress(request.novelId, MigrationStatus.FAILED, 0f, e.message))
+            Log.error("Migration failed: ${e.message}")
+            emit(MigrationProgress(request.novelId, MigrationStatus.FAILED, 0f, e.message ?: "Unknown error"))
         }
     }
     

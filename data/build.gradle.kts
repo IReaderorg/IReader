@@ -50,6 +50,13 @@ kotlin {
                 implementation(libs.bundles.supabase)
             }
         }
+        commonTest {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+                implementation("io.mockk:mockk:1.13.8")
+            }
+        }
         androidMain {
             dependencies {
                 implementation(androidx.core)

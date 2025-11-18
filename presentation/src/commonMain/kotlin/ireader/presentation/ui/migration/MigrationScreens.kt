@@ -11,54 +11,72 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.getScreenModel
 import ireader.domain.models.entities.Book
-import ireader.domain.models.migration.*
-import ireader.presentation.ui.component.IReaderScaffold
-import ireader.presentation.ui.component.IReaderTopAppBar
-import ireader.presentation.ui.component.IReaderLoadingScreen
-import ireader.presentation.ui.component.IReaderErrorScreen
+import ireader.presentation.core.ui.IReaderScaffold
+import ireader.presentation.core.ui.IReaderLoadingScreen
+import ireader.presentation.core.ui.getIViewModel
+import ireader.domain.models.migration.MigrationFlags
+import ireader.domain.models.migration.MigrationSource
+import org.koin.compose.koinInject
+
+// Migration flags and source - using domain models
+// import ireader.domain.models.migration.MigrationFlags
+// import ireader.domain.models.migration.MigrationSource
 
 /**
  * Migration list screen following Mihon's MigrationListScreen pattern
  */
-class MigrationListScreen : Screen {
+@Composable
+fun MigrationListScreen() {
+    // TODO: Implement MigrationScreenModel when migration feature is ready
+    // val vm: MigrationScreenModel = getIViewModel()
+    // val state by vm.state.collectAsState()
     
-    @Composable
-    override fun Content() {
-        val screenModel = getScreenModel<MigrationListScreenModel>()
-        val state by screenModel.state.collectAsState()
-        
-        MigrationListContent(
-            state = state,
-            onBookSelect = screenModel::selectBook,
-            onSelectAll = screenModel::selectAllBooks,
-            onClearSelection = screenModel::clearSelection,
-            onSearchQueryChange = screenModel::updateSearchQuery,
-            onSortOrderChange = screenModel::updateSortOrder,
-            onToggleShowOnlyMigratable = screenModel::toggleShowOnlyMigratable,
-            onStartMigration = screenModel::startMigration
-        )
-    }
+    MigrationListContent(
+        state = MigrationListState(),
+        onBookSelect = {},
+        onSelectAll = {},
+        onClearSelection = {},
+        onSearchQueryChange = {},
+        onSortOrderChange = {},
+        onToggleShowOnlyMigratable = {},
+        onStartMigration = { _, _ -> }
+    )
+}
+
+// Temporary state classes until migration feature is fully implemented
+data class MigrationListState(
+    val books: List<Book> = emptyList(),
+    val selectedBooks: Set<Long> = emptySet(),
+    val searchQuery: String = "",
+    val sortOrder: MigrationSortOrder = MigrationSortOrder.TITLE,
+    val showOnlyMigratableBooks: Boolean = false,
+    val isLoading: Boolean = false
+)
+
+// Using domain models from ireader.domain.models.migration
+// MigrationFlags and MigrationSource are defined in domain layer
+
+enum class MigrationSortOrder {
+    TITLE, AUTHOR, SOURCE
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MigrationListContent(
-    state: MigrationListScreenModel.State,
+    state: MigrationListState,
     onBookSelect: (Long) -> Unit,
     onSelectAll: () -> Unit,
     onClearSelection: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
-    onSortOrderChange: (MigrationListScreenModel.MigrationSortOrder) -> Unit,
+    onSortOrderChange: (MigrationSortOrder) -> Unit,
     onToggleShowOnlyMigratable: () -> Unit,
-    onStartMigration: (List<Long>, MigrationFlags) -> Unit
+    onStartMigration: (List<Long>, ireader.domain.models.migration.MigrationFlags) -> Unit
 ) {
-    IReaderScaffold(
+    Scaffold(
         topBar = {
-            IReaderTopAppBar(
-                title = "Migration",
+            TopAppBar(
+                title = { Text("Migration") },
                 actions = {
                     IconButton(onClick = onSelectAll) {
                         Icon(Icons.Default.SelectAll, contentDescription = "Select All")
@@ -73,8 +91,7 @@ private fun MigrationListContent(
             if (state.selectedBooks.isNotEmpty()) {
                 ExtendedFloatingActionButton(
                     onClick = {
-                        // Show migration config dialog
-                        onStartMigration(emptyList(), MigrationFlags())
+                        onStartMigration(state.selectedBooks.toList(), ireader.domain.models.migration.MigrationFlags())
                     },
                     icon = { Icon(Icons.Default.SwapHoriz, contentDescription = null) },
                     text = { Text("Migrate ${state.selectedBooks.size} books") }
@@ -87,7 +104,6 @@ private fun MigrationListContent(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Search and filter bar
             MigrationFilterBar(
                 searchQuery = state.searchQuery,
                 sortOrder = state.sortOrder,
@@ -98,16 +114,14 @@ private fun MigrationListContent(
             )
             
             when {
-                state.isLoading -> IReaderLoadingScreen()
+                state.isLoading -> IReaderLoadingScreen(message = "Loading books...")
                 else -> {
-                    val filteredBooks = state.books // Apply filtering logic
-                    
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(filteredBooks) { book ->
+                        items(state.books) { book ->
                             MigrationBookItem(
                                 book = book,
                                 isSelected = book.id in state.selectedBooks,
@@ -124,10 +138,10 @@ private fun MigrationListContent(
 @Composable
 private fun MigrationFilterBar(
     searchQuery: String,
-    sortOrder: MigrationListScreenModel.MigrationSortOrder,
+    sortOrder: MigrationSortOrder,
     showOnlyMigratable: Boolean,
     onSearchQueryChange: (String) -> Unit,
-    onSortOrderChange: (MigrationListScreenModel.MigrationSortOrder) -> Unit,
+    onSortOrderChange: (MigrationSortOrder) -> Unit,
     onToggleShowOnlyMigratable: () -> Unit
 ) {
     Column(
@@ -171,7 +185,7 @@ private fun MigrationFilterBar(
                 expanded = showSortMenu,
                 onDismissRequest = { showSortMenu = false }
             ) {
-                MigrationListScreenModel.MigrationSortOrder.values().forEach { order ->
+                MigrationSortOrder.values().forEach { order ->
                     DropdownMenuItem(
                         text = { Text(order.name) },
                         onClick = {
@@ -226,9 +240,9 @@ private fun MigrationBookItem(
                     overflow = TextOverflow.Ellipsis
                 )
                 
-                book.author?.let { author ->
+                if (book.author.isNotBlank()) {
                     Text(
-                        text = author,
+                        text = book.author,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -255,35 +269,42 @@ private fun MigrationBookItem(
 /**
  * Migration configuration screen following Mihon's pattern
  */
-class MigrationConfigScreen : Screen {
+@Composable
+fun MigrationConfigScreen() {
+    // TODO: Implement MigrationConfigScreenModel when migration feature is ready
+    // val vm: MigrationConfigScreenModel = getIViewModel()
+    // val state by vm.state.collectAsState()
     
-    @Composable
-    override fun Content() {
-        val screenModel = getScreenModel<MigrationConfigScreenModel>()
-        val state by screenModel.state.collectAsState()
-        
-        MigrationConfigContent(
-            state = state,
-            onToggleSource = screenModel::toggleSource,
-            onReorderSources = screenModel::reorderSources,
-            onUpdateFlags = screenModel::updateMigrationFlags,
-            onSave = screenModel::saveConfiguration
-        )
-    }
+    MigrationConfigContent(
+        state = MigrationConfigState(),
+        onToggleSource = {},
+        onReorderSources = {},
+        onUpdateFlags = {},
+        onSave = {}
+    )
 }
 
+// Temporary state classes for migration config
+data class MigrationConfigState(
+    val migrationFlags: ireader.domain.models.migration.MigrationFlags = ireader.domain.models.migration.MigrationFlags(),
+    val availableSources: List<ireader.domain.models.migration.MigrationSource> = emptyList(),
+    val selectedSources: List<ireader.domain.models.migration.MigrationSource> = emptyList(),
+    val isLoading: Boolean = false
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MigrationConfigContent(
-    state: MigrationConfigScreenModel.State,
-    onToggleSource: (MigrationSource) -> Unit,
-    onReorderSources: (List<MigrationSource>) -> Unit,
-    onUpdateFlags: (MigrationFlags) -> Unit,
+    state: MigrationConfigState,
+    onToggleSource: (ireader.domain.models.migration.MigrationSource) -> Unit,
+    onReorderSources: (List<ireader.domain.models.migration.MigrationSource>) -> Unit,
+    onUpdateFlags: (ireader.domain.models.migration.MigrationFlags) -> Unit,
     onSave: () -> Unit
 ) {
-    IReaderScaffold(
+    Scaffold(
         topBar = {
-            IReaderTopAppBar(
-                title = "Migration Settings",
+            TopAppBar(
+                title = { Text("Migration Settings") },
                 actions = {
                     TextButton(onClick = onSave) {
                         Text("Save")
@@ -293,7 +314,7 @@ private fun MigrationConfigContent(
         }
     ) { paddingValues ->
         when {
-            state.isLoading -> IReaderLoadingScreen()
+            state.isLoading -> IReaderLoadingScreen(message = "Loading settings...")
             else -> {
                 LazyColumn(
                     modifier = Modifier

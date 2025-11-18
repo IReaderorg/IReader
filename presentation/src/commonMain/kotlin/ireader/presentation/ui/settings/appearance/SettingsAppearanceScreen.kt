@@ -51,7 +51,7 @@ fun SettingsAppearanceScreen(
         topBar = { scrollBehavior ->
             TitleToolbar(
                 title = "Appearance",
-                onPopBackStack = onNavigateUp,
+                popBackStack = onNavigateUp,
                 scrollBehavior = scrollBehavior
             )
         }
@@ -182,6 +182,9 @@ fun SettingsAppearanceScreen(
                             PreferenceValues.RelativeTime.Off -> "Off"
                             PreferenceValues.RelativeTime.Day -> "24 hours"
                             PreferenceValues.RelativeTime.Week -> "7 days"
+                            PreferenceValues.RelativeTime.Seconds -> "seconds"
+                            PreferenceValues.RelativeTime.Minutes -> "seconds"
+                            PreferenceValues.RelativeTime.Hour -> "hour"
                         },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary
@@ -321,6 +324,9 @@ fun SettingsAppearanceScreen(
                                     PreferenceValues.RelativeTime.Off -> "Off"
                                     PreferenceValues.RelativeTime.Day -> "24 hours"
                                     PreferenceValues.RelativeTime.Week -> "7 days"
+                                    PreferenceValues.RelativeTime.Seconds -> "seconds"
+                                    PreferenceValues.RelativeTime.Minutes -> "seconds"
+                                    PreferenceValues.RelativeTime.Hour -> "hour"
                                 },
                                 modifier = Modifier.align(androidx.compose.ui.Alignment.CenterVertically)
                             )

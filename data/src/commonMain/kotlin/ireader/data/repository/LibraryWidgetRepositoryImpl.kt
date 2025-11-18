@@ -140,10 +140,9 @@ class LibraryWidgetRepositoryImpl(
     
     private suspend fun loadWidgetConfigFromDatabase(widgetId: Int): LibraryWidgetConfig? {
         return try {
-            handler.awaitOneOrNull {
-                // Load widget config from database
-                // widgetConfigQueries.getConfigById(widgetId, configMapper)
-            }
+            // Load widget config from database
+            // widgetConfigQueries.getConfigById(widgetId, configMapper)
+            null
         } catch (e: Exception) {
             null
         }
@@ -181,10 +180,9 @@ class LibraryWidgetRepositoryImpl(
     
     private suspend fun getRecentlyUpdatedBooks(config: LibraryWidgetConfig): List<WidgetItem> {
         return try {
-            handler.awaitList {
-                // Query recently updated books
-                // bookQueries.getRecentlyUpdatedBooks(config.categoryFilter, widgetItemMapper)
-            }
+            // Query recently updated books
+            // bookQueries.getRecentlyUpdatedBooks(config.categoryFilter, widgetItemMapper)
+            emptyList()
         } catch (e: Exception) {
             emptyList()
         }
@@ -192,10 +190,9 @@ class LibraryWidgetRepositoryImpl(
     
     private suspend fun getCurrentlyReadingBooks(config: LibraryWidgetConfig): List<WidgetItem> {
         return try {
-            handler.awaitList {
-                // Query currently reading books
-                // bookQueries.getCurrentlyReadingBooks(config.categoryFilter, widgetItemMapper)
-            }
+            // Query currently reading books
+            // bookQueries.getCurrentlyReadingBooks(config.categoryFilter, widgetItemMapper)
+            emptyList()
         } catch (e: Exception) {
             emptyList()
         }
@@ -203,10 +200,9 @@ class LibraryWidgetRepositoryImpl(
     
     private suspend fun getFavoriteBooks(config: LibraryWidgetConfig): List<WidgetItem> {
         return try {
-            handler.awaitList {
-                // Query favorite books
-                // bookQueries.getFavoriteBooks(config.categoryFilter, widgetItemMapper)
-            }
+            // Query favorite books
+            // bookQueries.getFavoriteBooks(config.categoryFilter, widgetItemMapper)
+            emptyList()
         } catch (e: Exception) {
             emptyList()
         }
@@ -214,35 +210,29 @@ class LibraryWidgetRepositoryImpl(
     
     private suspend fun calculateWidgetStatistics(): WidgetStatistics {
         return try {
-            val totalBooks = handler.awaitOne {
-                // Query total books count
-                // bookQueries.getTotalBooksCount()
-            }
+            // Query total books count
+            // bookQueries.getTotalBooksCount()
+            val totalBooks = 0
             
-            val readingBooks = handler.awaitOne {
-                // Query reading books count
-                // bookQueries.getReadingBooksCount()
-            }
+            // Query reading books count
+            // bookQueries.getReadingBooksCount()
+            val readingBooks = 0
             
-            val completedBooks = handler.awaitOne {
-                // Query completed books count
-                // bookQueries.getCompletedBooksCount()
-            }
+            // Query completed books count
+            // bookQueries.getCompletedBooksCount()
+            val completedBooks = 0
             
-            val chaptersReadToday = handler.awaitOne {
-                // Query chapters read today
-                // historyQueries.getChaptersReadToday()
-            }
+            // Query chapters read today
+            // historyQueries.getChaptersReadToday()
+            val chaptersReadToday = 0
             
-            val readingStreak = handler.awaitOne {
-                // Query reading streak
-                // statisticsQueries.getReadingStreak()
-            }
+            // Query reading streak
+            // statisticsQueries.getReadingStreak()
+            val readingStreak = 0
             
-            val totalReadingTime = handler.awaitOne {
-                // Query total reading time
-                // statisticsQueries.getTotalReadingTime()
-            }
+            // Query total reading time
+            // statisticsQueries.getTotalReadingTime()
+            val totalReadingTime = 0L
             
             WidgetStatistics(
                 totalBooks = totalBooks,

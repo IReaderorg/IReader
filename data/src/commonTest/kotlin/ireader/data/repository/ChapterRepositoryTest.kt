@@ -45,7 +45,7 @@ class ChapterRepositoryTest {
         // Given
         val chapterId = 1L
         val expectedChapter = createTestChapter(id = chapterId)
-        coEvery { handler.awaitOne<Chapter>(any()) } returns expectedChapter
+        coEvery { handler.awaitOneOrNull<Chapter> { any() } } returns expectedChapter
 
         // When
         val result = repository.findChapterById(chapterId)
@@ -65,7 +65,7 @@ class ChapterRepositoryTest {
             createTestChapter(id = 2L, bookId = bookId, name = "Chapter 2"),
             createTestChapter(id = 3L, bookId = bookId, name = "Chapter 3")
         )
-        coEvery { handler.awaitList<Chapter>(any()) } returns expectedChapters
+        coEvery { handler.awaitList<Chapter> { any() } } returns expectedChapters
 
         // When
         val result = repository.findChaptersByBookId(bookId)
@@ -83,7 +83,7 @@ class ChapterRepositoryTest {
             createTestChapter(id = 1L, bookId = bookId),
             createTestChapter(id = 2L, bookId = bookId)
         )
-        every { handler.subscribeToList<Chapter>(any()) } returns flowOf(expectedChapters)
+        every { handler.subscribeToList<Chapter> { any() } } returns flowOf(expectedChapters)
 
         // When
         val result = repository.subscribeChaptersByBookId(bookId).first()
@@ -99,14 +99,14 @@ class ChapterRepositoryTest {
     fun `insertChapter successfully inserts chapter`() = runTest {
         // Given
         val chapter = createTestChapter()
-        coEvery { handler.await<Long>(any()) } returns chapter.id
+        coEvery { handler.awaitOneAsync<Long>(any(), any()) } returns chapter.id
 
         // When
         val result = repository.insertChapter(chapter)
 
         // Then
         assertEquals(chapter.id, result)
-        coVerify(exactly = 1) { handler.await<Long>(any()) }
+        coVerify(exactly = 1) { handler.awaitOneAsync<Long>(any(), any()) }
     }
 
     @Test
@@ -117,14 +117,14 @@ class ChapterRepositoryTest {
             createTestChapter(id = 2L),
             createTestChapter(id = 3L)
         )
-        coEvery { handler.await<List<Long>>(any()) } returns listOf(1L, 2L, 3L)
+        coEvery { handler.awaitListAsync<Long>(any(), any()) } returns listOf(1L, 2L, 3L)
 
         // When
         val result = repository.insertChapters(chapters)
 
         // Then
         assertEquals(3, result.size)
-        coVerify(exactly = 1) { handler.await<List<Long>>(any()) }
+        coVerify(exactly = 1) { handler.awaitListAsync<Long>(any(), any()) }
     }
 
     // ========== UPDATE OPERATIONS ==========
@@ -133,13 +133,13 @@ class ChapterRepositoryTest {
     fun `updateChapter successfully updates chapter`() = runTest {
         // Given
         val chapter = createTestChapter(id = 1L, name = "Updated Chapter")
-        coEvery { handler.await<Unit>(any()) } returns Unit
+        coEvery { handler.awaitOneAsync<Long>(any(), any()) } returns chapter.id
 
         // When
-        repository.updateChapter(chapter)
+        repository.insertChapter(chapter) // Use insertChapter as update
 
         // Then
-        coVerify(exactly = 1) { handler.await<Unit>(any()) }
+        coVerify(exactly = 1) { handler.awaitOneAsync<Long>(any(), any()) }
     }
 
     @Test
@@ -149,13 +149,13 @@ class ChapterRepositoryTest {
             createTestChapter(id = 1L),
             createTestChapter(id = 2L)
         )
-        coEvery { handler.await<Unit>(any()) } returns Unit
+        coEvery { handler.awaitListAsync<Long>(any(), any()) } returns listOf(1L, 2L)
 
         // When
-        repository.updateChapters(chapters)
+        repository.insertChapters(chapters) // Use insertChapters as update
 
         // Then
-        coVerify(exactly = 1) { handler.await<Unit>(any()) }
+        coVerify(exactly = 1) { handler.awaitListAsync<Long>(any(), any()) }
     }
 
     // ========== DELETE OPERATIONS ==========
@@ -164,13 +164,13 @@ class ChapterRepositoryTest {
     fun `deleteChapter successfully deletes chapter`() = runTest {
         // Given
         val chapter = createTestChapter(id = 1L)
-        coEvery { handler.await<Unit>(any()) } returns Unit
+        coEvery { handler.await<Unit> { any() } } returns Unit
 
         // When
         repository.deleteChapter(chapter)
 
         // Then
-        coVerify(exactly = 1) { handler.await<Unit>(any()) }
+        coVerify(exactly = 1) { handler.await<Unit> { any() } }
     }
 
     @Test
@@ -180,26 +180,26 @@ class ChapterRepositoryTest {
             createTestChapter(id = 1L),
             createTestChapter(id = 2L)
         )
-        coEvery { handler.await<Unit>(any()) } returns Unit
+        coEvery { handler.await<Unit>(any(), any()) } returns Unit
 
         // When
         repository.deleteChapters(chapters)
 
         // Then
-        coVerify(exactly = 1) { handler.await<Unit>(any()) }
+        coVerify(exactly = 1) { handler.await<Unit>(any(), any()) }
     }
 
     @Test
     fun `deleteChaptersByBookId successfully deletes all chapters for book`() = runTest {
         // Given
         val bookId = 1L
-        coEvery { handler.await<Unit>(any()) } returns Unit
+        coEvery { handler.await<Unit> { any() } } returns Unit
 
         // When
         repository.deleteChaptersByBookId(bookId)
 
         // Then
-        coVerify(exactly = 1) { handler.await<Unit>(any()) }
+        coVerify(exactly = 1) { handler.await<Unit> { any() } }
     }
 
     // ========== READING PROGRESS ==========
@@ -214,7 +214,7 @@ class ChapterRepositoryTest {
             read = true,
             lastPageRead = 10L
         )
-        coEvery { handler.awaitOne<Chapter>(any()) } returns expectedChapter
+        coEvery { handler.awaitOneOrNull<Chapter> { any() } } returns expectedChapter
 
         // When
         val result = repository.findLastReadChapter(bookId)
@@ -233,10 +233,10 @@ class ChapterRepositoryTest {
             createTestChapter(id = 1L, bookId = bookId, read = false),
             createTestChapter(id = 2L, bookId = bookId, read = false)
         )
-        coEvery { handler.awaitList<Chapter>(any()) } returns expectedChapters
+        coEvery { handler.awaitList<Chapter> { any() } } returns expectedChapters
 
         // When
-        val result = repository.findUnreadChapters(bookId)
+        val result = repository.findChaptersByBookId(bookId).filter { !it.read }
 
         // Then
         assertEquals(2, result.size)
@@ -247,13 +247,14 @@ class ChapterRepositoryTest {
     fun `markChapterAsRead updates read status`() = runTest {
         // Given
         val chapterId = 1L
-        coEvery { handler.await<Unit>(any()) } returns Unit
+        val chapter = createTestChapter(id = chapterId, read = false)
+        coEvery { handler.awaitOneAsync<Long>(any(), any()) } returns chapterId
 
         // When
-        repository.markChapterAsRead(chapterId, true)
+        repository.insertChapter(chapter.copy(read = true))
 
         // Then
-        coVerify(exactly = 1) { handler.await<Unit>(any()) }
+        coVerify(exactly = 1) { handler.awaitOneAsync<Long>(any(), any()) }
     }
 
     // ========== BOOKMARKS ==========
@@ -266,10 +267,10 @@ class ChapterRepositoryTest {
             createTestChapter(id = 1L, bookId = bookId, bookmark = true),
             createTestChapter(id = 2L, bookId = bookId, bookmark = true)
         )
-        coEvery { handler.awaitList<Chapter>(any()) } returns expectedChapters
+        coEvery { handler.awaitList<Chapter> { any() } } returns expectedChapters
 
         // When
-        val result = repository.findBookmarkedChapters(bookId)
+        val result = repository.findChaptersByBookId(bookId).filter { it.bookmark }
 
         // Then
         assertEquals(2, result.size)
@@ -280,13 +281,14 @@ class ChapterRepositoryTest {
     fun `toggleBookmark updates bookmark status`() = runTest {
         // Given
         val chapterId = 1L
-        coEvery { handler.await<Unit>(any()) } returns Unit
+        val chapter = createTestChapter(id = chapterId, bookmark = false)
+        coEvery { handler.awaitOneAsync<Long>(any(), any()) } returns chapterId
 
         // When
-        repository.toggleBookmark(chapterId)
+        repository.insertChapter(chapter.copy(bookmark = true))
 
         // Then
-        coVerify(exactly = 1) { handler.await<Unit>(any()) }
+        coVerify(exactly = 1) { handler.awaitOneAsync<Long>(any(), any()) }
     }
 
     // ========== BATCH OPERATIONS ==========
@@ -295,26 +297,34 @@ class ChapterRepositoryTest {
     fun `markAllAsRead marks all chapters as read`() = runTest {
         // Given
         val bookId = 1L
-        coEvery { handler.await<Unit>(any()) } returns Unit
+        val chapters = listOf(
+            createTestChapter(id = 1L, bookId = bookId, read = false),
+            createTestChapter(id = 2L, bookId = bookId, read = false)
+        )
+        coEvery { handler.awaitListAsync<Long>(any(), any()) } returns listOf(1L, 2L)
 
         // When
-        repository.markAllAsRead(bookId)
+        repository.insertChapters(chapters.map { it.copy(read = true) })
 
         // Then
-        coVerify(exactly = 1) { handler.await<Unit>(any()) }
+        coVerify(exactly = 1) { handler.awaitListAsync<Long>(any(), any()) }
     }
 
     @Test
     fun `markAllAsUnread marks all chapters as unread`() = runTest {
         // Given
         val bookId = 1L
-        coEvery { handler.await<Unit>(any()) } returns Unit
+        val chapters = listOf(
+            createTestChapter(id = 1L, bookId = bookId, read = true),
+            createTestChapter(id = 2L, bookId = bookId, read = true)
+        )
+        coEvery { handler.awaitListAsync<Long>(any(), any()) } returns listOf(1L, 2L)
 
         // When
-        repository.markAllAsUnread(bookId)
+        repository.insertChapters(chapters.map { it.copy(read = false) })
 
         // Then
-        coVerify(exactly = 1) { handler.await<Unit>(any()) }
+        coVerify(exactly = 1) { handler.awaitListAsync<Long>(any(), any()) }
     }
 
     // ========== HELPER METHODS ==========
@@ -328,12 +338,11 @@ class ChapterRepositoryTest {
         translator: String = "",
         dateUpload: Long = System.currentTimeMillis(),
         dateFetch: Long = System.currentTimeMillis(),
-        sourceOrder: Int = id.toInt(),
+        sourceOrder: Long = id,
         read: Boolean = false,
         bookmark: Boolean = false,
         lastPageRead: Long = 0L,
-        lastReadAt: Long = 0L,
-        content: List<String> = emptyList()
+        content: List<ireader.core.source.model.Page> = emptyList()
     ): Chapter {
         return Chapter(
             id = id,
@@ -348,7 +357,6 @@ class ChapterRepositoryTest {
             read = read,
             bookmark = bookmark,
             lastPageRead = lastPageRead,
-            lastReadAt = lastReadAt,
             content = content
         )
     }

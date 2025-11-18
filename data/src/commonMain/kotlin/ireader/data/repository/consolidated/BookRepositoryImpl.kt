@@ -1,5 +1,8 @@
 package ireader.data.repository.consolidated
 
+import ireader.core.log.IReaderLog
+import ireader.data.book.booksMapper
+import ireader.data.book.getLibraryMapper
 import ireader.data.core.DatabaseHandler
 import ireader.data.util.toDB
 import ireader.domain.data.repository.consolidated.BookRepository
@@ -7,7 +10,6 @@ import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.LibraryBook
 import ireader.domain.models.errors.IReaderError
 import ireader.domain.models.updates.BookUpdate
-import ireader.presentation.core.log.IReaderLog
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 
@@ -84,7 +86,7 @@ class BookRepositoryImpl(
     override suspend fun getLibraryBooks(): List<LibraryBook> {
         return try {
             handler.awaitList { 
-                bookQueries.getLibraryBooks(libraryBooksMapper) 
+                bookQueries.getLibrary(getLibraryMapper) 
             }
         } catch (e: Exception) {
             IReaderLog.error("Failed to get library books", e, "BookRepository")
@@ -94,7 +96,7 @@ class BookRepositoryImpl(
 
     override fun getLibraryBooksAsFlow(): Flow<List<LibraryBook>> {
         return handler.subscribeToList { 
-            bookQueries.getLibraryBooks(libraryBooksMapper) 
+            bookQueries.getLibrary(getLibraryMapper) 
         }.catch { e ->
             IReaderLog.error("Failed to subscribe to library books", e, "BookRepository")
             emit(emptyList())
@@ -104,7 +106,7 @@ class BookRepositoryImpl(
     override suspend fun getDuplicateLibraryBooks(id: Long, title: String): List<Book> {
         return try {
             handler.awaitList { 
-                bookQueries.getDuplicateBooks(id, title, booksMapper) 
+                bookQueries.getDuplicateLibraryManga(title, id, booksMapper) 
             }
         } catch (e: Exception) {
             IReaderLog.error("Failed to get duplicate books for: $title", e, "BookRepository")
@@ -116,11 +118,11 @@ class BookRepositoryImpl(
         try {
             handler.await(inTransaction = true) {
                 // Remove existing categories
-                bookCategoryQueries.deleteByBookId(bookId)
+                bookcategoryQueries.deleteByBookId(bookId)
                 
                 // Add new categories
                 categoryIds.forEach { categoryId ->
-                    bookCategoryQueries.insert(bookId, categoryId)
+                    bookcategoryQueries.insert(bookId, categoryId)
                 }
             }
             IReaderLog.debug("Successfully set categories for book: $bookId", "BookRepository")
@@ -161,23 +163,30 @@ class BookRepositoryImpl(
             val insertedBooks = mutableListOf<Book>()
             handler.await(inTransaction = true) {
                 books.forEach { book ->
-                    val id = bookQueries.insertBook(
-                        sourceId = book.sourceId,
-                        key = book.key,
-                        title = book.title,
+                    bookQueries.upsert(
+                        id = book.id,
+                        source = book.sourceId,
+                        url = book.key,
+                        artist = null,
                         author = book.author,
                         description = book.description,
-                        genres = book.genres.toDB(),
+                        genre = book.genres,
+                        title = book.title,
                         status = book.status,
-                        cover = book.cover,
-                        customCover = book.customCover,
+                        thumbnailUrl = book.cover,
                         favorite = book.favorite,
-                        lastUpdate = book.lastUpdate,
+                        lastUpdate = book.lastUpdate.toDB(),
+                        nextUpdate = null,
+                        initialized = book.initialized,
+                        viewerFlags = book.viewer,
+                        chapterFlags = book.flags,
+                        coverLastModified = 0L,
                         dateAdded = book.dateAdded,
-                        viewer = book.viewer,
-                        flags = book.flags,
-                        initialized = book.initialized
+                        isPinned = false,
+                        pinnedOrder = 0,
+                        isArchived = false
                     )
+                    val id = bookQueries.selectLastInsertedRowId().executeAsOne()
                     insertedBooks.add(book.copy(id = id))
                 }
             }
@@ -206,8 +215,8 @@ class BookRepositoryImpl(
 
     override suspend fun deleteNotInLibraryBooks(): Boolean {
         return try {
-            handler.await { 
-                bookQueries.deleteNotInLibrary() 
+            handler.await {
+                bookQueries.deleteNotInLibraryBooks() 
             }
             IReaderLog.debug("Successfully deleted non-library books", "BookRepository")
             true
@@ -219,25 +228,25 @@ class BookRepositoryImpl(
 
     private suspend fun partialUpdate(update: BookUpdate) {
         handler.await {
-            bookQueries.updatePartial(
+            bookQueries.update(
                 id = update.id,
-                sourceId = update.sourceId,
-                url = update.url,
+                source = update.sourceId,
+                url = update.key,
                 title = update.title,
                 author = update.author,
                 description = update.description,
-                genre = update.genre?.toDB(),
+                genre = update.genres?.joinToString(";"),
                 status = update.status,
-                thumbnailUrl = update.thumbnailUrl,
+                thumbnailUrl = update.cover,
                 favorite = update.favorite,
                 lastUpdate = update.lastUpdate,
                 dateAdded = update.dateAdded,
-                viewerFlags = update.viewerFlags,
-                chapterFlags = update.chapterFlags,
-                coverLastModified = update.coverLastModified,
+                viewer = update.viewer,
+                chapterFlags = update.flags,
+                coverLastModified = 0L, // Not in BookUpdate
                 initialized = update.initialized,
                 isPinned = update.isPinned,
-                pinnedOrder = update.pinnedOrder,
+                pinnedOrder = update.pinnedOrder?.toLong(),
                 isArchived = update.isArchived
             )
         }

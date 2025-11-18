@@ -10,8 +10,9 @@ import ireader.domain.models.backup.ReadingProgress
 import ireader.domain.services.backup.GoogleDriveBackupService
 import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -42,7 +43,7 @@ class GoogleDriveViewModel(
     val accountEmail: androidx.compose.runtime.State<String?> get() = _accountEmail
     
     private val _backups = MutableStateFlow<List<BackupInfo>>(emptyList())
-    val backups: StateFlow<List<BackupInfo>> = _backups.asStateFlow()
+    val backups: StateFlow<List<BackupInfo>> = _backups.stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
     
     private val _isLoading = mutableStateOf(false)
     val isLoading: androidx.compose.runtime.State<Boolean> get() = _isLoading

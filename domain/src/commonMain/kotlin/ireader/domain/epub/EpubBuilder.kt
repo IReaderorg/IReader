@@ -13,7 +13,7 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.readBytes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
+import  kotlin.time.Clock
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream

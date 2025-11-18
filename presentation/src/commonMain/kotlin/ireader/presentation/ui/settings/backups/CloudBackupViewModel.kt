@@ -7,8 +7,9 @@ import ireader.domain.usecases.backup.CloudBackupManager
 import ireader.domain.usecases.backup.CloudProvider
 import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -35,7 +36,7 @@ class CloudBackupViewModel(
     val isAuthenticated: androidx.compose.runtime.State<Boolean> get() = _isAuthenticated
 
     private val _cloudBackups = MutableStateFlow<List<CloudBackupFile>>(emptyList())
-    val cloudBackups: StateFlow<List<CloudBackupFile>> = _cloudBackups.asStateFlow()
+    val cloudBackups: StateFlow<List<CloudBackupFile>> = _cloudBackups.stateIn(scope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _isLoading = mutableStateOf(false)
     val isLoading: androidx.compose.runtime.State<Boolean> get() = _isLoading

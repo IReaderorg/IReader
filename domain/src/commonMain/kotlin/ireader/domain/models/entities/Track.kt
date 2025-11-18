@@ -1,5 +1,7 @@
 package ireader.domain.models.entities
 
+import kotlinx.serialization.Serializable
+
 data class Track(
     val id: Long = 0,
     val mangaId: Long,
@@ -22,6 +24,7 @@ data class TrackState(
     val status: TrackStatus
 )
 
+@Serializable
 data class TrackUpdate(
     val id: Long,
     val entryId: Long? = null,

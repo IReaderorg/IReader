@@ -1,29 +1,41 @@
 package ireader.presentation.core.viewmodel
 
-import cafe.adriel.voyager.core.model.StateScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
-import ireader.presentation.core.log.IReaderLog
+import ireader.core.log.IReaderLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * Base StateScreenModel for IReader following Mihon's pattern.
+ * Base screen model for IReader with state management.
  * Provides utility methods for state management and coroutine handling.
+ * This is a multiplatform-compatible implementation without AndroidX dependencies.
  * 
  * @param T The state type managed by this screen model
  * @param initialState The initial state value
  */
 abstract class IReaderStateScreenModel<T>(
     initialState: T
-) : StateScreenModel<T>(initialState) {
+) {
+    
+    private val _state = MutableStateFlow(initialState)
+    val state: StateFlow<T> = _state.asStateFlow()
+    
+    /**
+     * Coroutine scope for this screen model
+     */
+    protected val screenModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     
     /**
      * Update the state using a transform function
      */
-    protected fun updateState(transform: (T) -> T) {
-        mutableState.update(transform)
+    fun updateState(transform: (T) -> T) {
+        _state.update(transform)
     }
     
     /**
@@ -103,5 +115,13 @@ abstract class IReaderStateScreenModel<T>(
      */
     protected fun logError(message: String, throwable: Throwable? = null) {
         IReaderLog.error(message, throwable, this::class.simpleName ?: "IReaderStateScreenModel")
+    }
+    
+    /**
+     * Called when the screen model is no longer needed.
+     * Cancels all coroutines in the scope.
+     */
+    open fun onDispose() {
+        screenModelScope.cancel()
     }
 }

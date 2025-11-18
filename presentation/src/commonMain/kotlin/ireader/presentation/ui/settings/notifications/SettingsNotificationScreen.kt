@@ -60,7 +60,7 @@ fun SettingsNotificationScreen(
         topBar = { scrollBehavior ->
             TitleToolbar(
                 title = "Notifications",
-                onPopBackStack = onNavigateUp,
+                popBackStack = onNavigateUp,
                 scrollBehavior = scrollBehavior
             )
         }

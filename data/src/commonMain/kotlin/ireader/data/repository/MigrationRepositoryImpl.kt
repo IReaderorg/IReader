@@ -5,6 +5,7 @@ import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.data.repository.MigrationRepository
 import ireader.domain.models.migration.MigrationHistory
+import ireader.domain.models.migration.MigrationJob
 import ireader.domain.usecases.migration.ChapterMapper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -121,5 +122,76 @@ class MigrationRepositoryImpl(
         return migrationHistoryMap.values.any { 
             it.oldBookId == bookId || it.newBookId == bookId 
         }
+    }
+    
+    // Migration job management
+    private val migrationJobsMap = mutableMapOf<String, ireader.domain.models.migration.MigrationJob>()
+    private val _migrationJobsFlow = MutableStateFlow<List<ireader.domain.models.migration.MigrationJob>>(emptyList())
+    
+    override suspend fun saveMigrationJob(job: ireader.domain.models.migration.MigrationJob) {
+        migrationJobsMap[job.id] = job
+        _migrationJobsFlow.value = migrationJobsMap.values.toList()
+        Log.info("Saved migration job: ${job.id}")
+    }
+    
+    override suspend fun getMigrationJob(jobId: String): ireader.domain.models.migration.MigrationJob? {
+        return migrationJobsMap[jobId]
+    }
+    
+    override fun getAllMigrationJobs(): Flow<List<ireader.domain.models.migration.MigrationJob>> {
+        return _migrationJobsFlow.asStateFlow()
+    }
+    
+    override suspend fun updateMigrationJobStatus(jobId: String, status: ireader.domain.models.migration.MigrationJobStatus) {
+        migrationJobsMap[jobId]?.let { job ->
+            migrationJobsMap[jobId] = job.copy(status = status)
+            _migrationJobsFlow.value = migrationJobsMap.values.toList()
+            Log.info("Updated migration job status: $jobId -> $status")
+        }
+    }
+    
+    override suspend fun updateMigrationJobProgress(
+        jobId: String,
+        progress: Float,
+        completedBooks: Int,
+        failedBooks: Int
+    ) {
+        migrationJobsMap[jobId]?.let { job ->
+            migrationJobsMap[jobId] = job.copy(
+                progress = progress,
+                completedBooks = completedBooks,
+                failedBooks = failedBooks
+            )
+            _migrationJobsFlow.value = migrationJobsMap.values.toList()
+            Log.info("Updated migration job progress: $jobId -> $progress%")
+        }
+    }
+    
+    override suspend fun deleteMigrationJob(jobId: String) {
+        migrationJobsMap.remove(jobId)
+        _migrationJobsFlow.value = migrationJobsMap.values.toList()
+        Log.info("Deleted migration job: $jobId")
+    }
+    
+    // Migration sources and flags
+    private var migrationSources: List<ireader.domain.models.migration.MigrationSource> = emptyList()
+    private var migrationFlags: ireader.domain.models.migration.MigrationFlags = ireader.domain.models.migration.MigrationFlags()
+    
+    override suspend fun getMigrationSources(): List<ireader.domain.models.migration.MigrationSource> {
+        return migrationSources
+    }
+    
+    override suspend fun saveMigrationSources(sources: List<ireader.domain.models.migration.MigrationSource>) {
+        migrationSources = sources
+        Log.info("Saved ${sources.size} migration sources")
+    }
+    
+    override suspend fun getMigrationFlags(): ireader.domain.models.migration.MigrationFlags {
+        return migrationFlags
+    }
+    
+    override suspend fun saveMigrationFlags(flags: ireader.domain.models.migration.MigrationFlags) {
+        migrationFlags = flags
+        Log.info("Saved migration flags")
     }
 }

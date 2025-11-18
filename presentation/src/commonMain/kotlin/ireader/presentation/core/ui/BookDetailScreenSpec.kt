@@ -148,11 +148,7 @@ data class BookDetailScreenSpec constructor(
         }
         
         // Handle back button to close modal sheet instead of closing screen
-        androidx.activity.compose.BackHandler(enabled = sheetState.isVisible) {
-            scope.launch {
-                sheetState.hide()
-            }
-        }
+        // BackHandler removed - Android-specific, implement in androidMain if needed
         
         Box(modifier = Modifier.fillMaxSize()) {
         IModalSheets(

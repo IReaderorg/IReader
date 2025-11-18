@@ -29,21 +29,21 @@ class ChapterRepositoryTest {
         // Given
         val chapterId = 1L
         val expectedChapter = createTestChapter(id = chapterId)
-        coEvery { handler.awaitOneOrNull<Chapter>(any()) } returns expectedChapter
+        coEvery { handler.awaitOneOrNull<Chapter>(any(), any()) } returns expectedChapter
         
         // When
         val result = repository.getChapterById(chapterId)
         
         // Then
         assertEquals(expectedChapter, result)
-        coVerify { handler.awaitOneOrNull<Chapter>(any()) }
+        coVerify { handler.awaitOneOrNull<Chapter>(any(), any()) }
     }
     
     @Test
     fun `getChapterById returns null when not found`() = runTest {
         // Given
         val chapterId = 1L
-        coEvery { handler.awaitOneOrNull<Chapter>(any()) } returns null
+        coEvery { handler.awaitOneOrNull<Chapter>(any(), any()) } returns null
         
         // When
         val result = repository.getChapterById(chapterId)
@@ -56,7 +56,7 @@ class ChapterRepositoryTest {
     fun `getChapterById returns null when database fails`() = runTest {
         // Given
         val chapterId = 1L
-        coEvery { handler.awaitOneOrNull<Chapter>(any()) } throws RuntimeException("Database error")
+        coEvery { handler.awaitOneOrNull<Chapter>(any(), any()) } throws RuntimeException("Database error")
         
         // When
         val result = repository.getChapterById(chapterId)
@@ -89,7 +89,7 @@ class ChapterRepositoryTest {
             createTestChapter(id = 1L, bookId = bookId),
             createTestChapter(id = 2L, bookId = bookId)
         )
-        coEvery { handler.awaitList<Chapter>(any()) } returns chapters
+        coEvery { handler.awaitList<Chapter>(any(), any()) } returns chapters
         
         // When
         val result = repository.getChaptersByBookId(bookId)
@@ -102,7 +102,7 @@ class ChapterRepositoryTest {
     fun `getChaptersByBookId returns empty list when database fails`() = runTest {
         // Given
         val bookId = 1L
-        coEvery { handler.awaitList<Chapter>(any()) } throws RuntimeException("Database error")
+        coEvery { handler.awaitList<Chapter>(any(), any()) } throws RuntimeException("Database error")
         
         // When
         val result = repository.getChaptersByBookId(bookId)
@@ -135,7 +135,7 @@ class ChapterRepositoryTest {
         // Given
         val bookId = 1L
         val lastReadChapter = createTestChapter(id = 1L, bookId = bookId, read = true)
-        coEvery { handler.awaitOneOrNull<Chapter>(any()) } returns lastReadChapter
+        coEvery { handler.awaitOneOrNull<Chapter>(any(), any()) } returns lastReadChapter
         
         // When
         val result = repository.getLastReadChapter(bookId)
@@ -151,14 +151,14 @@ class ChapterRepositoryTest {
             createTestChapter(id = 0L, name = "Chapter 1"),
             createTestChapter(id = 0L, name = "Chapter 2")
         )
-        coEvery { handler.await<Unit>(inTransaction = true, any()) } returns Unit
+        coEvery { handler.await<Unit>(any(), any()) } returns Unit
         
         // When
         val result = repository.addAll(chapters)
         
         // Then
         assertEquals(chapters.size, result.size)
-        coVerify { handler.await<Unit>(inTransaction = true, any()) }
+        coVerify { handler.await<Unit>(any(), any()) }
     }
     
     @Test
@@ -168,7 +168,7 @@ class ChapterRepositoryTest {
             createTestChapter(id = 0L, name = "Chapter 1"),
             createTestChapter(id = 0L, name = "Chapter 2")
         )
-        coEvery { handler.await<Unit>(inTransaction = true, any()) } throws RuntimeException("Insert failed")
+        coEvery { handler.await<Unit>(any(), any()) } throws RuntimeException("Insert failed")
         
         // When
         val result = repository.addAll(chapters)
@@ -181,21 +181,21 @@ class ChapterRepositoryTest {
     fun `update returns true when successful`() = runTest {
         // Given
         val update = ChapterUpdate(id = 1L, name = "Updated Chapter")
-        coEvery { handler.await<Unit>(any()) } returns Unit
+        coEvery { handler.await<Unit>(any(), any()) } returns Unit
         
         // When
         val result = repository.update(update)
         
         // Then
         assertTrue(result)
-        coVerify { handler.await<Unit>(any()) }
+        coVerify { handler.await<Unit>(any(), any()) }
     }
     
     @Test
     fun `update returns false when fails`() = runTest {
         // Given
         val update = ChapterUpdate(id = 1L, name = "Updated Chapter")
-        coEvery { handler.await<Unit>(any()) } throws RuntimeException("Update failed")
+        coEvery { handler.await<Unit>(any(), any()) } throws RuntimeException("Update failed")
         
         // When
         val result = repository.update(update)
@@ -211,14 +211,14 @@ class ChapterRepositoryTest {
             ChapterUpdate(id = 1L, name = "Chapter 1"),
             ChapterUpdate(id = 2L, name = "Chapter 2")
         )
-        coEvery { handler.await<Unit>(inTransaction = true, any()) } returns Unit
+        coEvery { handler.await<Unit>(any(), any()) } returns Unit
         
         // When
         val result = repository.updateAll(updates)
         
         // Then
         assertTrue(result)
-        coVerify { handler.await<Unit>(inTransaction = true, any()) }
+        coVerify { handler.await<Unit>(any(), any()) }
     }
     
     @Test
@@ -228,7 +228,7 @@ class ChapterRepositoryTest {
             ChapterUpdate(id = 1L, name = "Chapter 1"),
             ChapterUpdate(id = 2L, name = "Chapter 2")
         )
-        coEvery { handler.await<Unit>(inTransaction = true, any()) } throws RuntimeException("Transaction failed")
+        coEvery { handler.await<Unit>(any(), any()) } throws RuntimeException("Transaction failed")
         
         // When
         val result = repository.updateAll(updates)
@@ -241,21 +241,21 @@ class ChapterRepositoryTest {
     fun `removeChaptersWithIds returns true when successful`() = runTest {
         // Given
         val chapterIds = listOf(1L, 2L, 3L)
-        coEvery { handler.await<Unit>(inTransaction = true, any()) } returns Unit
+        coEvery { handler.await<Unit>(any(), any()) } returns Unit
         
         // When
         val result = repository.removeChaptersWithIds(chapterIds)
         
         // Then
         assertTrue(result)
-        coVerify { handler.await<Unit>(inTransaction = true, any()) }
+        coVerify { handler.await<Unit>(any(), any()) }
     }
     
     @Test
     fun `removeChaptersWithIds returns false when fails`() = runTest {
         // Given
         val chapterIds = listOf(1L, 2L, 3L)
-        coEvery { handler.await<Unit>(inTransaction = true, any()) } throws RuntimeException("Delete failed")
+        coEvery { handler.await<Unit>(any(), any()) } throws RuntimeException("Delete failed")
         
         // When
         val result = repository.removeChaptersWithIds(chapterIds)
@@ -268,21 +268,21 @@ class ChapterRepositoryTest {
     fun `removeChaptersByBookId returns true when successful`() = runTest {
         // Given
         val bookId = 1L
-        coEvery { handler.await<Unit>(any()) } returns Unit
+        coEvery { handler.await<Unit>(any(), any()) } returns Unit
         
         // When
         val result = repository.removeChaptersByBookId(bookId)
         
         // Then
         assertTrue(result)
-        coVerify { handler.await<Unit>(any()) }
+        coVerify { handler.await<Unit>(any(), any()) }
     }
     
     @Test
     fun `removeChaptersByBookId returns false when fails`() = runTest {
         // Given
         val bookId = 1L
-        coEvery { handler.await<Unit>(any()) } throws RuntimeException("Delete failed")
+        coEvery { handler.await<Unit>(any(), any()) } throws RuntimeException("Delete failed")
         
         // When
         val result = repository.removeChaptersByBookId(bookId)
@@ -294,13 +294,13 @@ class ChapterRepositoryTest {
     private fun createTestChapter(
         id: Long = 1L,
         bookId: Long = 1L,
-        url: String = "test-url",
+        key: String = "test-url",
         name: String = "Test Chapter",
-        scanlator: String? = null,
+        translator: String = "",
         read: Boolean = false,
         bookmark: Boolean = false,
         lastPageRead: Long = 0L,
-        chapterNumber: Float = 1.0f,
+        number: Float = 1.0f,
         sourceOrder: Long = 1L,
         dateFetch: Long = 0L,
         dateUpload: Long = 0L
@@ -308,13 +308,13 @@ class ChapterRepositoryTest {
         return Chapter(
             id = id,
             bookId = bookId,
-            url = url,
+            key = key,
             name = name,
-            scanlator = scanlator,
+            translator = translator,
             read = read,
             bookmark = bookmark,
             lastPageRead = lastPageRead,
-            chapterNumber = chapterNumber,
+            number = number,
             sourceOrder = sourceOrder,
             dateFetch = dateFetch,
             dateUpload = dateUpload

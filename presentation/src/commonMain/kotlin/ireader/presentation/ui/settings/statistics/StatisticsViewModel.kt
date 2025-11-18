@@ -1,8 +1,6 @@
 package ireader.presentation.ui.settings.statistics
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import ireader.domain.models.entities.ReadingStatistics
+import ireader.domain.models.entities.ReadingStatisticsType1
 import ireader.domain.usecases.statistics.StatisticsUseCases
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.flow.StateFlow
@@ -14,12 +12,12 @@ class StatisticsViewModel(
     private val statisticsUseCases: StatisticsUseCases
 ) : BaseViewModel() {
 
-    val statistics: StateFlow<ReadingStatistics> = statisticsUseCases
+    val statistics: StateFlow<ReadingStatisticsType1> = statisticsUseCases
         .getReadingStatistics()
         .stateIn(
             scope = scope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ReadingStatistics()
+            initialValue = ReadingStatisticsType1()
         )
 
     init {

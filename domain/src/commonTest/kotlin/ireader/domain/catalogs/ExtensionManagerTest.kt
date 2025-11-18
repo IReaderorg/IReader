@@ -2,7 +2,6 @@ package ireader.domain.catalogs
 
 import ireader.domain.catalogs.interactor.*
 import ireader.domain.models.entities.*
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.*
 
@@ -145,13 +144,19 @@ class ExtensionManagerTest {
     ): CatalogRemote {
         return CatalogRemote(
             sourceId = id,
+            source = id,
             name = name,
+            description = "Test extension description",
             lang = "en",
             versionName = "1.0.0",
             versionCode = 1,
             pkgName = "ireader.extension.test",
             iconUrl = "",
-            pkgUrl = ""
+            pkgUrl = "",
+            jarUrl = "",
+            nsfw = false,
+            repositoryId = -1L,
+            repositoryType = "IREADER"
         )
     }
     
@@ -159,17 +164,19 @@ class ExtensionManagerTest {
         id: Long = 1,
         name: String = "Test Extension",
         versionCode: Int = 1
-    ): CatalogInstalled {
-        return CatalogInstalled(
-            sourceId = id,
+    ): CatalogInstalled.SystemWide {
+        return CatalogInstalled.SystemWide(
             name = name,
-            lang = "en",
+            description = "Test extension description",
+            source = null,
+            pkgName = "ireader.extension.test",
             versionName = "1.0.0",
             versionCode = versionCode,
-            pkgName = "ireader.extension.test",
+            nsfw = false,
+            isPinned = false,
+            hasUpdate = false,
             iconUrl = "",
-            source = null,
-            hasUpdate = false
+            installDir = null
         )
     }
 }

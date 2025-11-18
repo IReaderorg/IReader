@@ -4,13 +4,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.core.log.Log
+import ireader.domain.models.entities.Book
 import ireader.domain.usecases.remote.RemoteUseCases
-import ireader.domain.usecases.remote.SearchResult
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+
+data class SearchResult(
+    val sourceId: Long,
+    val sourceName: String,
+    val books: List<Book>,
+    val isLoading: Boolean = false,
+    val error: Throwable? = null
+)
 
 class GlobalSearchViewModel(
     private val remoteUseCases: RemoteUseCases,
@@ -43,37 +50,38 @@ class GlobalSearchViewModel(
 
         searchJob = scope.launch {
             try {
-                remoteUseCases.globalSearch(query)
-                    .onStart {
-                        state = state.copy(isSearching = true)
-                    }
-                    .catch { e ->
-                        Log.error(e, "Error during global search")
-                        state = state.copy(isSearching = false)
-                    }
-                    .collect { result ->
-                        // Update or add result for this source
-                        val updatedResults = state.results.toMutableList()
-                        val existingIndex = updatedResults.indexOfFirst { it.sourceId == result.sourceId }
-                        
-                        if (existingIndex >= 0) {
-                            updatedResults[existingIndex] = result
-                        } else {
-                            updatedResults.add(result)
-                        }
-
-                        // Calculate total results
-                        val totalResults = updatedResults.sumOf { it.books.size }
-
-                        // Check if all sources are done loading
-                        val allDone = updatedResults.all { !it.isLoading }
-
-                        state = state.copy(
-                            results = updatedResults,
-                            totalResults = totalResults,
-                            isSearching = !allDone
+                state = state.copy(isSearching = true)
+                
+                remoteUseCases.globalSearch.asFlow(query).collect { globalResult ->
+                    // Convert SourceSearchResult to SearchResult
+                    val results = globalResult.sourceResults.map { sourceResult ->
+                        SearchResult(
+                            sourceId = sourceResult.sourceId,
+                            sourceName = sourceResult.sourceName,
+                            books = sourceResult.results.map { item ->
+                                Book(
+                                    id = item.bookId ?: 0,
+                                    sourceId = sourceResult.sourceId,
+                                    title = item.title,
+                                    key = item.key,
+                                    author = item.author,
+                                    description = item.description,
+                                    genres = item.genres,
+                                    cover = item.cover,
+                                    favorite = item.inLibrary
+                                )
+                            },
+                            isLoading = sourceResult.isLoading,
+                            error = sourceResult.error?.let { Exception(it) }
                         )
                     }
+
+                    state = state.copy(
+                        results = results,
+                        totalResults = globalResult.totalResults,
+                        isSearching = results.any { it.isLoading }
+                    )
+                }
             } catch (e: Exception) {
                 Log.error(e, "Error during global search")
                 state = state.copy(isSearching = false)

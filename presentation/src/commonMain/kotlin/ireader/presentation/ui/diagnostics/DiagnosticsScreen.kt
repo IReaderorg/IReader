@@ -1,4 +1,4 @@
-package ireader.presentation.ui.diagnostics
+﻿package ireader.presentation.ui.diagnostics
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -17,6 +17,7 @@ import ireader.core.system.SystemInfo
 /**
  * Diagnostics screen for system information and troubleshooting
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiagnosticsScreen(
     systemInfo: SystemInfo,

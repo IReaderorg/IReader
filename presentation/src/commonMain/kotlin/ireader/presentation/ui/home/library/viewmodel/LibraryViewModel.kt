@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 
@@ -97,7 +98,7 @@ class LibraryViewModel(
     
     // New filter state management
     private val _activeFilters = MutableStateFlow<Set<LibraryFilter.Type>>(emptySet())
-    val activeFilters: StateFlow<Set<LibraryFilter.Type>> = _activeFilters.asStateFlow()
+    val activeFilters: StateFlow<Collection<LibraryFilter.Type>> = _activeFilters.asStateFlow()
 
 
 

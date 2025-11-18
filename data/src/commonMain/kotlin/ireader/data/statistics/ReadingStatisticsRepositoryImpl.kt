@@ -3,7 +3,7 @@ package ireader.data.statistics
 import ireader.data.core.DatabaseHandler
 import ireader.domain.data.repository.ReadingStatisticsRepository
 import ireader.domain.models.entities.GenreCount
-import ireader.domain.models.entities.ReadingStatistics
+import ireader.domain.models.entities.ReadingStatisticsType1
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -20,13 +20,13 @@ class ReadingStatisticsRepositoryImpl(
         }
     }
 
-    override fun getStatisticsFlow(): Flow<ReadingStatistics> {
+    override fun getStatisticsFlow(): Flow<ReadingStatisticsType1> {
         return handler.subscribeToOne { 
             // Ensure initialized before querying
             readingStatisticsQueries.initializeIfNeeded()
             readingStatisticsQueries.getStatistics() 
         }.map { dbStats ->
-            ReadingStatistics(
+            ReadingStatisticsType1(
                 totalChaptersRead = dbStats.total_chapters_read.toInt(),
                 totalReadingTimeMinutes = dbStats.total_reading_time_minutes,
                 averageReadingSpeedWPM = calculateWPM(dbStats.total_words_read.toInt(), dbStats.total_reading_time_minutes),
@@ -38,14 +38,14 @@ class ReadingStatisticsRepositoryImpl(
         }
     }
 
-    override suspend fun getStatistics(): ReadingStatistics {
+    override suspend fun getStatistics(): ReadingStatisticsType1 {
         ensureInitialized()
         
         val dbStats = handler.awaitOne { 
             readingStatisticsQueries.getStatistics() 
         }
         
-        return ReadingStatistics(
+        return ReadingStatisticsType1(
             totalChaptersRead = dbStats.total_chapters_read.toInt(),
             totalReadingTimeMinutes = dbStats.total_reading_time_minutes,
             averageReadingSpeedWPM = calculateWPM(dbStats.total_words_read.toInt(), dbStats.total_reading_time_minutes),

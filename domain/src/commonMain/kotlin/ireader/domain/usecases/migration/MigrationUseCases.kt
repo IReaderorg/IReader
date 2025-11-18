@@ -1,8 +1,8 @@
 package ireader.domain.usecases.migration
 
-import ireader.domain.data.repository.BookRepository
-import ireader.domain.data.repository.ChapterRepository
-import ireader.domain.data.repository.CategoryRepository
+import ireader.domain.data.repository.consolidated.BookRepository
+import ireader.domain.data.repository.consolidated.ChapterRepository
+import ireader.domain.data.repository.consolidated.CategoryRepository
 import ireader.domain.data.repository.MigrationRepository
 import ireader.domain.data.repository.NotificationRepository
 import ireader.domain.models.entities.Book

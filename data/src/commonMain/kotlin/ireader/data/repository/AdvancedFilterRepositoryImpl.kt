@@ -8,6 +8,7 @@ import ireader.domain.models.entities.AdvancedFilterState
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.CompletionStatus
 import ireader.domain.models.entities.SortOption
+import ireader.domain.models.library.LibrarySort
 import ireader.domain.preferences.prefs.UiPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -29,7 +30,11 @@ class AdvancedFilterRepositoryImpl(
 
     override suspend fun applyFilters(filterState: AdvancedFilterState): List<BookItem> {
         return try {
-            var books = bookRepository.findAllInLibraryBooks()
+            var books = bookRepository.findAllInLibraryBooks(
+                sortType = LibrarySort.default,
+                isAsc = true,
+                unreadFilter = false
+            )
 
             // Apply search query
             if (filterState.searchQuery.isNotBlank()) {
@@ -84,15 +89,15 @@ class AdvancedFilterRepositoryImpl(
 
             var filteredBooks = booksWithChapterCounts
             
-            if (filterState.minChapters != null) {
+            filterState.minChapters?.let { minChapters ->
                 filteredBooks = filteredBooks.filter { (_, chapterCount) ->
-                    chapterCount >= filterState.minChapters
+                    chapterCount >= minChapters
                 }
             }
 
-            if (filterState.maxChapters != null) {
+            filterState.maxChapters?.let { maxChapters ->
                 filteredBooks = filteredBooks.filter { (_, chapterCount) ->
-                    chapterCount <= filterState.maxChapters
+                    chapterCount <= maxChapters
                 }
             }
 
@@ -128,9 +133,9 @@ class AdvancedFilterRepositoryImpl(
                 }
                 SortOption.LAST_READ -> {
                     if (filterState.sortAscending) {
-                        filteredBooks.sortedBy { it.first.lastRead }
+                        filteredBooks.sortedBy { it.first.lastUpdate }
                     } else {
-                        filteredBooks.sortedByDescending { it.first.lastRead }
+                        filteredBooks.sortedByDescending { it.first.lastUpdate }
                     }
                 }
                 SortOption.DATE_ADDED -> {
@@ -185,8 +190,8 @@ class AdvancedFilterRepositoryImpl(
                     cover = book.cover,
                     sourceId = book.sourceId,
                     favorite = book.favorite,
-                    lastRead = book.lastRead,
-                    dateAdded = book.dateAdded
+                    lastRead = book.lastUpdate,
+                    key = book.key
                 )
             }
         } catch (e: Exception) {
@@ -196,8 +201,8 @@ class AdvancedFilterRepositoryImpl(
     }
 
     override fun applyFiltersFlow(filterState: AdvancedFilterState): Flow<List<BookItem>> {
-        return bookRepository.subscribeAllInLibraryBooks().map {
-            applyFilters(filterState)
+        return kotlinx.coroutines.flow.flow {
+            emit(applyFilters(filterState))
         }
     }
 
@@ -234,7 +239,11 @@ class AdvancedFilterRepositoryImpl(
 
     override suspend fun getAvailableGenres(): List<String> {
         return try {
-            val books = bookRepository.findAllInLibraryBooks()
+            val books = bookRepository.findAllInLibraryBooks(
+                sortType = LibrarySort.default,
+                isAsc = true,
+                unreadFilter = false
+            )
             books.flatMap { it.genres }
                 .distinct()
                 .sorted()
@@ -246,7 +255,11 @@ class AdvancedFilterRepositoryImpl(
 
     override suspend fun getAvailableAuthors(): List<String> {
         return try {
-            val books = bookRepository.findAllInLibraryBooks()
+            val books = bookRepository.findAllInLibraryBooks(
+                sortType = LibrarySort.default,
+                isAsc = true,
+                unreadFilter = false
+            )
             books.map { it.author }
                 .distinct()
                 .sorted()

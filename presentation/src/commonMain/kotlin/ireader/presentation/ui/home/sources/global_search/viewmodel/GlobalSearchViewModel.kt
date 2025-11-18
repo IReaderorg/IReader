@@ -1,4 +1,5 @@
 package ireader.presentation.ui.home.sources.global_search.viewmodel
+import ireader.domain.models.entities.Book
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -10,8 +11,11 @@ import ireader.domain.catalogs.interactor.GetLocalCatalogs
 import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
+import ireader.presentation.ui.home.explore.global_search.SearchResult
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
 
@@ -67,22 +71,38 @@ class GlobalSearchViewModel(
                 }
 
                 // Use the new GlobalSearchUseCase
-                remoteUseCases.globalSearch(query)
+                remoteUseCases.globalSearch.asFlow(query)
                     .onStart {
                         Log.debug { "Starting global search for query: $query" }
                     }
                     .catch { e ->
                         Log.error(e, "Error during global search")
                     }
-                    .collect { result ->
-                        // Find the source for this result
-                        val source = catalogs.find { it.id == result.sourceId }
-                        if (source != null) {
-                            val searchItem = SearchItem(
-                                source = source,
-                                items = result.books
-                            )
-                            searchItem.handleSearchItems(loading = false)
+                    .collect { globalResult ->
+                        // Process each source result
+                        globalResult.sourceResults.forEach { sourceResult ->
+                            val source = catalogs.find { it.id == sourceResult.sourceId }
+                            if (source != null) {
+                                // Convert SearchResultItem to Book
+                                val books = sourceResult.results.map { item ->
+                                    Book(
+                                        id = item.bookId ?: 0,
+                                        sourceId = sourceResult.sourceId,
+                                        title = item.title,
+                                        key = item.key,
+                                        author = item.author,
+                                        description = item.description,
+                                        genres = item.genres,
+                                        cover = item.cover,
+                                        favorite = item.inLibrary
+                                    )
+                                }
+                                val searchItem = SearchItem(
+                                    source = source,
+                                    items = books
+                                )
+                                searchItem.handleSearchItems(loading = false)
+                            }
                         }
                     }
             } catch (e: Exception) {

@@ -58,7 +58,7 @@ fun SettingsReaderScreen(
         topBar = { scrollBehavior ->
             TitleToolbar(
                 title = "Reader",
-                onPopBackStack = onNavigateUp,
+                popBackStack = onNavigateUp,
                 scrollBehavior = scrollBehavior
             )
         }

@@ -142,7 +142,7 @@ private fun LazyListScope.SortPage(
     onClick: (ChapterSort.Type) -> Unit
 ) {
 
-    items(ChapterSort.types) { type ->
+    items(ChapterSort.types.toList()) { type ->
         val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         ClickableRow(onClick = { onClick(type) }) {
             val iconModifier = Modifier.requiredWidth(56.dp)

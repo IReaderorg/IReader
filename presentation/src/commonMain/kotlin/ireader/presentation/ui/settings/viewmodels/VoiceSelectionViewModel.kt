@@ -1,16 +1,14 @@
 package ireader.presentation.ui.settings.viewmodels
 
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import ireader.domain.catalogs.VoiceCatalog
 import ireader.domain.models.tts.VoiceModel
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -26,10 +24,10 @@ class VoiceSelectionViewModel(
 ) : StateViewModel<VoiceSelectionState>(VoiceSelectionState()) {
     
     private val _downloadProgress = MutableStateFlow<DownloadProgress?>(null)
-    val downloadProgress: StateFlow<DownloadProgress?> = _downloadProgress.asStateFlow()
+    val downloadProgress: StateFlow<DownloadProgress?> = _downloadProgress.stateIn(scope, SharingStarted.WhileSubscribed(5000), null)
     
     private val _installedVoices = MutableStateFlow<Set<String>>(emptySet())
-    val installedVoices: StateFlow<Set<String>> = _installedVoices.asStateFlow()
+    val installedVoices: StateFlow<Collection<String>> = _installedVoices.stateIn(scope, SharingStarted.WhileSubscribed(5000), emptySet())
     
     init {
         loadVoices()

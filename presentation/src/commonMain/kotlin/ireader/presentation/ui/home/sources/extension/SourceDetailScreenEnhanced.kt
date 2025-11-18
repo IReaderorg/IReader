@@ -107,7 +107,7 @@ private fun SourceDetailTopBar(
             IconButton(onClick = onNavigateUp) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = localize(Res.string.navigate_up)
+                    contentDescription = localize(Res.string.go_back)
                 )
             }
         },
@@ -261,7 +261,7 @@ private fun SourceInformationSection(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = localize(Res.string.information),
+                text = localize(Res.string.info),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary

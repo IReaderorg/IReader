@@ -1,6 +1,7 @@
 package ireader.domain.data.repository
 
 import ireader.domain.models.entities.*
+import ireader.domain.models.entities.StatisticsExport as EntitiesStatisticsExport
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -50,7 +51,7 @@ interface LibraryInsightsRepository {
     /**
      * Export statistics to JSON
      */
-    suspend fun exportStatistics(): StatisticsExport
+    suspend fun exportStatistics(): EntitiesStatisticsExport
 }
 
 /**

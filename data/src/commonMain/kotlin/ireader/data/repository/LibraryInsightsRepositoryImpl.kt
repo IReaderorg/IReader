@@ -6,12 +6,16 @@ import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.data.repository.LibraryInsightsRepository
 import ireader.domain.models.entities.*
+import ireader.domain.data.repository.ReadingSession
+import ireader.domain.models.entities.StatisticsExport as EntitiesStatisticsExport
 import ireader.domain.preferences.prefs.ReaderPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.Clock
-import kotlin.math.abs
+import kotlinx.serialization.Serializable
+import  kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Implementation of LibraryInsightsRepository
@@ -26,7 +30,11 @@ class LibraryInsightsRepositoryImpl(
 
     override suspend fun getLibraryInsights(): LibraryInsights {
         return try {
-            val books = bookRepository.findAllInLibraryBooks()
+            val books = bookRepository.findAllInLibraryBooks(
+                sortType = ireader.domain.models.library.LibrarySort.default,
+                isAsc = true,
+                unreadFilter = false
+            )
             val allChapters = books.flatMap { book ->
                 chapterRepository.findChaptersByBookId(book.id)
             }
@@ -57,12 +65,12 @@ class LibraryInsightsRepositoryImpl(
                 .flatMap { it.genres }
                 .groupingBy { it }
                 .eachCount()
-                .map { (genre, count) -> GenreCount(genre, count) }
-                .sortedByDescending { it.count }
+                .map { (genre, bookCount) -> GenreCount(genre, bookCount) }
+                .sortedByDescending { it.bookCount }
                 .take(10)
 
             // Reading patterns
-            val history = historyRepository.findAllHistory()
+            val history = historyRepository.findHistories()
             val readingPatterns = calculateReadingPatterns(history)
 
             // Top authors
@@ -83,7 +91,7 @@ class LibraryInsightsRepositoryImpl(
                 .map { (sourceId, sourceBooks) ->
                     SourceCount(
                         sourceId = sourceId,
-                        sourceName = sourceBooks.firstOrNull()?.sourceName ?: "Unknown",
+                        sourceName = "Source $sourceId", // Would need catalog store to get actual name
                         bookCount = sourceBooks.size
                     )
                 }
@@ -111,24 +119,27 @@ class LibraryInsightsRepositoryImpl(
     }
 
     override fun getLibraryInsightsFlow(): Flow<LibraryInsights> {
-        return combine(
-            bookRepository.subscribeAllInLibraryBooks(),
-            historyRepository.subscribeAllHistory()
-        ) { _, _ ->
-            getLibraryInsights()
+        return flow {
+            // Emit initial insights
+            emit(getLibraryInsights())
+            
+            // Note: For reactive updates, would need to subscribe to book/history changes
+            // This is a simplified implementation
         }
     }
 
     override suspend fun getReadingAnalytics(): ReadingAnalytics {
         return try {
-            val history = historyRepository.findAllHistory()
-            val totalReadingTimeMinutes = history.sumOf { it.readDuration ?: 0L } / 60000
+            val history = historyRepository.findHistories()
+            val totalReadingTimeMinutes = history.sumOf { 
+                (it.readDuration ?: 0L) / 60000
+            }
 
             // Calculate reading sessions
             val sessions = history.mapNotNull { historyItem ->
-                val book = bookRepository.findBookById(historyItem.bookId) ?: return@mapNotNull null
                 val chapter = chapterRepository.findChapterById(historyItem.chapterId) ?: return@mapNotNull null
-                
+                val book = bookRepository.findBookById(chapter.bookId) ?: return@mapNotNull null
+
                 ReadingSession(
                     bookId = book.id,
                     bookTitle = book.title,
@@ -182,15 +193,15 @@ class LibraryInsightsRepositoryImpl(
     }
 
     override fun getReadingAnalyticsFlow(): Flow<ReadingAnalytics> {
-        return historyRepository.subscribeAllHistory().map {
-            getReadingAnalytics()
+        return flow {
+            emit(getReadingAnalytics())
         }
     }
 
     override suspend fun trackReadingSession(session: ReadingSession) {
         try {
             // Reading sessions are tracked through history
-            Log.info { "Reading session tracked: ${session.bookTitle}" }
+            Log.info { "Reading session tracked: ${session.bookId}" }
         } catch (e: Exception) {
             Log.error { "Failed to track reading session: ${e.message}" }
         }
@@ -198,7 +209,11 @@ class LibraryInsightsRepositoryImpl(
 
     override suspend fun getUpcomingReleases(): List<UpcomingRelease> {
         return try {
-            val books = bookRepository.findAllInLibraryBooks()
+            val books = bookRepository.findAllInLibraryBooks(
+                sortType = ireader.domain.models.library.LibrarySort.default,
+                isAsc = true,
+                unreadFilter = false
+            )
             
             books.mapNotNull { book ->
                 val chapters = chapterRepository.findChaptersByBookId(book.id)
@@ -232,15 +247,19 @@ class LibraryInsightsRepositoryImpl(
     }
 
     override fun getUpcomingReleasesFlow(): Flow<List<UpcomingRelease>> {
-        return bookRepository.subscribeAllInLibraryBooks().map {
-            getUpcomingReleases()
+        return flow {
+            emit(getUpcomingReleases())
         }
     }
 
     override suspend fun getRecommendations(limit: Int): List<BookRecommendation> {
         return try {
-            val books = bookRepository.findAllInLibraryBooks()
-            val history = historyRepository.findAllHistory()
+            val books = bookRepository.findAllInLibraryBooks(
+                sortType = ireader.domain.models.library.LibrarySort.default,
+                isAsc = true,
+                unreadFilter = false
+            )
+            val history = historyRepository.findHistories()
             
             // Get user's favorite genres
             val favoriteGenres = books
@@ -302,7 +321,8 @@ class LibraryInsightsRepositoryImpl(
         }
     }
 
-    override suspend fun exportStatistics(): StatisticsExport {
+    @OptIn(ExperimentalTime::class)
+    override suspend fun exportStatistics(): EntitiesStatisticsExport {
         return try {
             val libraryInsights = getLibraryInsights()
             val readingAnalytics = getReadingAnalytics()
@@ -310,35 +330,37 @@ class LibraryInsightsRepositoryImpl(
             val recommendations = getRecommendations(20)
 
             // Get reading statistics
-            val books = bookRepository.findAllInLibraryBooks()
-            val history = historyRepository.findAllHistory()
+            val books = bookRepository.findAllInLibraryBooks(
+                sortType = ireader.domain.models.library.LibrarySort.default,
+                isAsc = true,
+                unreadFilter = false
+            )
+            val history = historyRepository.findHistories()
             
-            val readingStatistics = ReadingStatistics(
+            val readingStatisticsType1 = ireader.domain.models.entities.ReadingStatisticsType1(
                 totalChaptersRead = history.size,
-                totalReadingTimeMinutes = history.sumOf { it.readDuration ?: 0L } / 60000,
+                totalReadingTimeMinutes = history.sumOf { (it.readDuration ?: 0L) / 60000 },
                 averageReadingSpeedWPM = readingAnalytics.averageReadingSpeedWPM,
-                favoriteGenres = libraryInsights.genreDistribution.map { 
-                    GenreCount(it.genre, it.count) 
-                },
+                favoriteGenres = libraryInsights.genreDistribution,
                 readingStreak = libraryInsights.readingPatterns.readingStreak,
                 booksCompleted = libraryInsights.booksCompleted,
                 currentlyReading = libraryInsights.booksInProgress
             )
 
-            StatisticsExport(
-                exportDate = Clock.System.now().toEpochMilliseconds(),
+            EntitiesStatisticsExport(
+                exportDate = System.currentTimeMillis(),
                 libraryInsights = libraryInsights,
-                readingStatistics = readingStatistics,
+                readingStatisticsType1 = readingStatisticsType1,
                 readingAnalytics = readingAnalytics,
                 upcomingReleases = upcomingReleases,
                 recommendations = recommendations
             )
         } catch (e: Exception) {
             Log.error { "Failed to export statistics: ${e.message}" }
-            StatisticsExport(
-                exportDate = Clock.System.now().toEpochMilliseconds(),
+            EntitiesStatisticsExport(
+                exportDate = System.currentTimeMillis(),
                 libraryInsights = LibraryInsights(),
-                readingStatistics = ReadingStatistics(),
+                readingStatisticsType1 = ireader.domain.models.entities.ReadingStatisticsType1(),
                 readingAnalytics = ReadingAnalytics(),
                 upcomingReleases = emptyList(),
                 recommendations = emptyList()

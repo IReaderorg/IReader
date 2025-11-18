@@ -186,11 +186,7 @@ data class ReaderScreenSpec(
             androidx.compose.material3.rememberDrawerState(androidx.compose.material3.DrawerValue.Closed)
         
         // Handle back button to close drawer instead of closing screen
-        androidx.activity.compose.BackHandler(enabled = drawerState.isOpen) {
-            scope.launch {
-                drawerState.close()
-            }
-        }
+        // BackHandler removed - Android-specific, implement in androidMain if needed
         
         IModalDrawer(
             state = drawerState,

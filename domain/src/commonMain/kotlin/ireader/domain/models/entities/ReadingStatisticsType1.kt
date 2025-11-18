@@ -1,6 +1,9 @@
 package ireader.domain.models.entities
 
-data class ReadingStatistics(
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class ReadingStatisticsType1(
     val totalChaptersRead: Int = 0,
     val totalReadingTimeMinutes: Long = 0,
     val averageReadingSpeedWPM: Int = 0,
@@ -8,9 +11,4 @@ data class ReadingStatistics(
     val readingStreak: Int = 0,
     val booksCompleted: Int = 0,
     val currentlyReading: Int = 0
-)
-
-data class GenreCount(
-    val genre: String,
-    val count: Int
 )

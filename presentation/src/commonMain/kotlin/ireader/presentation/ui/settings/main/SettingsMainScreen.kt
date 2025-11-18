@@ -52,7 +52,7 @@ fun SettingsMainScreen(
         topBar = { scrollBehavior ->
             TitleToolbar(
                 title = localize(Res.string.settings),
-                onPopBackStack = onNavigateUp,
+                popBackStack = onNavigateUp,
                 scrollBehavior = scrollBehavior
             )
         }

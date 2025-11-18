@@ -1,7 +1,7 @@
 package ireader.domain.usecases.book
 
+import ireader.core.log.IReaderLog
 import ireader.domain.models.updates.BookUpdate
-import ireader.presentation.core.log.IReaderLog
 
 /**
  * Use case for removing books from the library following Mihon's pattern.

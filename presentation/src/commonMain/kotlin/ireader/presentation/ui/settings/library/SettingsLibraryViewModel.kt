@@ -16,26 +16,26 @@ class SettingsLibraryViewModel(
 ) : BaseViewModel() {
     
     // Display preferences
-    val defaultSort: StateFlow<String> = preferenceStore.getString("library_default_sort", "alphabetical").asStateFlow()
-    val defaultSortDirection: StateFlow<Boolean> = preferenceStore.getBoolean("library_sort_ascending", true).asStateFlow()
-    val showContinueReadingButton: StateFlow<Boolean> = preferenceStore.getBoolean("show_continue_reading_button", true).asStateFlow()
+    val defaultSort: StateFlow<String> = preferenceStore.getString("library_default_sort", "alphabetical").stateIn(scope)
+    val defaultSortDirection: StateFlow<Boolean> = preferenceStore.getBoolean("library_sort_ascending", true).stateIn(scope)
+    val showContinueReadingButton: StateFlow<Boolean> = preferenceStore.getBoolean("show_continue_reading_button", true).stateIn(scope)
     
     // Badge preferences
-    val showUnreadBadge: StateFlow<Boolean> = preferenceStore.getBoolean("show_unread_badge", true).asStateFlow()
-    val showDownloadBadge: StateFlow<Boolean> = preferenceStore.getBoolean("show_download_badge", true).asStateFlow()
-    val showLanguageBadge: StateFlow<Boolean> = preferenceStore.getBoolean("show_language_badge", false).asStateFlow()
-    val showLocalBadge: StateFlow<Boolean> = preferenceStore.getBoolean("show_local_badge", true).asStateFlow()
+    val showUnreadBadge: StateFlow<Boolean> = preferenceStore.getBoolean("show_unread_badge", true).stateIn(scope)
+    val showDownloadBadge: StateFlow<Boolean> = preferenceStore.getBoolean("show_download_badge", true).stateIn(scope)
+    val showLanguageBadge: StateFlow<Boolean> = preferenceStore.getBoolean("show_language_badge", false).stateIn(scope)
+    val showLocalBadge: StateFlow<Boolean> = preferenceStore.getBoolean("show_local_badge", true).stateIn(scope)
     
     // Auto update preferences
-    val autoUpdateLibrary: StateFlow<Boolean> = preferenceStore.getBoolean("auto_update_library", false).asStateFlow()
-    val autoUpdateInterval: StateFlow<Int> = preferenceStore.getInt("auto_update_interval", 12).asStateFlow()
-    val autoUpdateRestrictions: StateFlow<Set<String>> = preferenceStore.getStringSet("auto_update_restrictions", emptySet()).asStateFlow()
+    val autoUpdateLibrary: StateFlow<Boolean> = preferenceStore.getBoolean("auto_update_library", false).stateIn(scope)
+    val autoUpdateInterval: StateFlow<Int> = preferenceStore.getInt("auto_update_interval", 12).stateIn(scope)
+    val autoUpdateRestrictions: StateFlow<Set<String>> = preferenceStore.getStringSet("auto_update_restrictions", emptySet()).stateIn(scope)
     
     // Update filter preferences
-    val updateOnlyCompleted: StateFlow<Boolean> = preferenceStore.getBoolean("update_only_completed", false).asStateFlow()
-    val updateOnlyNonCompleted: StateFlow<Boolean> = preferenceStore.getBoolean("update_only_non_completed", false).asStateFlow()
-    val skipTitlesWithoutChapters: StateFlow<Boolean> = preferenceStore.getBoolean("skip_titles_without_chapters", false).asStateFlow()
-    val refreshCoversToo: StateFlow<Boolean> = preferenceStore.getBoolean("refresh_covers_too", false).asStateFlow()
+    val updateOnlyCompleted: StateFlow<Boolean> = preferenceStore.getBoolean("update_only_completed", false).stateIn(scope)
+    val updateOnlyNonCompleted: StateFlow<Boolean> = preferenceStore.getBoolean("update_only_non_completed", false).stateIn(scope)
+    val skipTitlesWithoutChapters: StateFlow<Boolean> = preferenceStore.getBoolean("skip_titles_without_chapters", false).stateIn(scope)
+    val refreshCoversToo: StateFlow<Boolean> = preferenceStore.getBoolean("refresh_covers_too", false).stateIn(scope)
     
     // Dialog states
     var showDefaultSortDialog by mutableStateOf(false)

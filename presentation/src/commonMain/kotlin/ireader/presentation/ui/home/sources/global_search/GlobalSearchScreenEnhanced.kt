@@ -107,7 +107,7 @@ private fun GlobalSearchTopBar(
     TopAppBar(
         title = {
             Text(
-                text = localize(Res.string.global_search),
+                text = localize(Res.string.search),
                 style = MaterialTheme.typography.titleLarge
             )
         },
@@ -115,7 +115,7 @@ private fun GlobalSearchTopBar(
             IconButton(onClick = onPopBackStack) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = localize(Res.string.navigate_up)
+                    contentDescription = localize(Res.string.go_back)
                 )
             }
         },
@@ -157,7 +157,7 @@ private fun GlobalSearchMainContent(
         vm.withResult.isEmpty() && vm.inProgress.isEmpty() && vm.noResult.isEmpty() -> {
             // Empty state
             IReaderErrorScreen(
-                message = localize(Res.string.search_for_books_across_sources),
+                message = localize(Res.string.search_across_all_sources),
                 actions = emptyList()
             )
         }

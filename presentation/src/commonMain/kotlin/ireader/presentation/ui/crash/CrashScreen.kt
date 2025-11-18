@@ -1,4 +1,4 @@
-package ireader.presentation.ui.crash
+﻿package ireader.presentation.ui.crash
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -19,6 +19,7 @@ import ireader.core.system.CrashReport
  * Screen displayed when the app crashes
  * Provides crash information and recovery options
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CrashScreen(
     crashReport: CrashReport,

@@ -36,17 +36,21 @@ class LibraryBackupRepositoryImpl(
     ): Boolean {
         return try {
             val metadata = BackupMetadata(
-                version = 1,
-                timestamp = System.currentTimeMillis(),
+                appVersion = "1.0.0", // Get from build config
+                deviceName = "Desktop",
                 backupType = backupType,
-                includeCustomCovers = includeCustomCovers,
-                appVersion = "1.0.0" // Get from build config
+                isIncremental = false,
+                previousBackupTimestamp = 0,
+                totalSize = 0,
+                bookCount = 0,
+                chapterCount = 0
             )
             
             val backupData = when (backupType) {
-                BackupType.FULL -> createFullBackupData(includeCustomCovers)
-                BackupType.LIBRARY_ONLY -> createLibraryBackupData(includeCustomCovers)
-                BackupType.SETTINGS_ONLY -> createSettingsBackupData()
+                BackupType.FULL -> createFullBackupData(metadata)
+                BackupType.LIBRARY_ONLY -> createLibraryBackupData(metadata)
+                BackupType.SETTINGS_ONLY -> createSettingsBackupData(metadata)
+                BackupType.INCREMENTAL -> createIncrementalBackupData(0, metadata)
             }
             
             // Write backup to URI
@@ -75,14 +79,17 @@ class LibraryBackupRepositoryImpl(
         return try {
             // Create backup with only changes since last backup
             val metadata = BackupMetadata(
-                version = 1,
-                timestamp = System.currentTimeMillis(),
+                appVersion = "1.0.0",
+                deviceName = "Desktop",
                 backupType = BackupType.INCREMENTAL,
-                includeCustomCovers = false,
-                appVersion = "1.0.0"
+                isIncremental = true,
+                previousBackupTimestamp = lastBackupTimestamp,
+                totalSize = 0,
+                bookCount = 0,
+                chapterCount = 0
             )
             
-            val backupData = createIncrementalBackupData(lastBackupTimestamp)
+            val backupData = createIncrementalBackupData(lastBackupTimestamp, metadata)
             writeBackupToUri(uri, backupData, metadata)
             
             true
@@ -98,7 +105,7 @@ class LibraryBackupRepositoryImpl(
                 return false
             }
             
-            val uri = Uri(settings.backupLocation)
+            val uri = Uri.parse(settings.backupLocation)
             createBackup(
                 uri = uri,
                 backupType = settings.backupType,
@@ -166,8 +173,8 @@ class LibraryBackupRepositoryImpl(
             val warnings = mutableListOf<String>()
             
             // Validate version
-            if (metadata.version > 1) {
-                errors.add("Backup version ${metadata.version} is not supported")
+            if (backupData.version > LibraryBackup.CURRENT_VERSION) {
+                errors.add("Backup version ${backupData.version} is not supported")
             }
             
             // Validate data integrity
@@ -177,7 +184,7 @@ class LibraryBackupRepositoryImpl(
             
             BackupValidationResult(
                 isValid = errors.isEmpty(),
-                version = metadata.version,
+                version = backupData.version,
                 errors = errors,
                 warnings = warnings,
                 metadata = metadata
@@ -311,57 +318,51 @@ class LibraryBackupRepositoryImpl(
     
     // Private helper methods
     
-    private suspend fun createFullBackupData(includeCustomCovers: Boolean): LibraryBackup {
+    private suspend fun createFullBackupData(metadata: BackupMetadata): LibraryBackup {
         return LibraryBackup(
-            metadata = BackupMetadata(
-                version = 1,
-                timestamp = System.currentTimeMillis(),
-                backupType = BackupType.FULL,
-                includeCustomCovers = includeCustomCovers,
-                appVersion = "1.0.0"
-            ),
+            version = LibraryBackup.CURRENT_VERSION,
+            timestamp = System.currentTimeMillis(),
             books = emptyList(), // Load from database
             categories = emptyList(), // Load from database
-            settings = emptyMap(), // Load from preferences
-            customCovers = if (includeCustomCovers) emptyMap() else null
+            preferences = BackupPreferences(),
+            statistics = BackupStatistics(),
+            metadata = metadata
         )
     }
     
-    private suspend fun createLibraryBackupData(includeCustomCovers: Boolean): LibraryBackup {
-        return createFullBackupData(includeCustomCovers).copy(
-            settings = emptyMap()
-        )
-    }
-    
-    private suspend fun createSettingsBackupData(): LibraryBackup {
+    private suspend fun createLibraryBackupData(metadata: BackupMetadata): LibraryBackup {
         return LibraryBackup(
-            metadata = BackupMetadata(
-                version = 1,
-                timestamp = System.currentTimeMillis(),
-                backupType = BackupType.SETTINGS_ONLY,
-                includeCustomCovers = false,
-                appVersion = "1.0.0"
-            ),
+            version = LibraryBackup.CURRENT_VERSION,
+            timestamp = System.currentTimeMillis(),
+            books = emptyList(), // Load from database
+            categories = emptyList(), // Load from database
+            preferences = null,
+            statistics = null,
+            metadata = metadata
+        )
+    }
+    
+    private suspend fun createSettingsBackupData(metadata: BackupMetadata): LibraryBackup {
+        return LibraryBackup(
+            version = LibraryBackup.CURRENT_VERSION,
+            timestamp = System.currentTimeMillis(),
             books = emptyList(),
             categories = emptyList(),
-            settings = emptyMap(), // Load from preferences
-            customCovers = null
+            preferences = BackupPreferences(),
+            statistics = null,
+            metadata = metadata
         )
     }
     
-    private suspend fun createIncrementalBackupData(lastBackupTimestamp: Long): LibraryBackup {
+    private suspend fun createIncrementalBackupData(lastBackupTimestamp: Long, metadata: BackupMetadata): LibraryBackup {
         return LibraryBackup(
-            metadata = BackupMetadata(
-                version = 1,
-                timestamp = System.currentTimeMillis(),
-                backupType = BackupType.INCREMENTAL,
-                includeCustomCovers = false,
-                appVersion = "1.0.0"
-            ),
+            version = LibraryBackup.CURRENT_VERSION,
+            timestamp = System.currentTimeMillis(),
             books = emptyList(), // Load only changed books
             categories = emptyList(), // Load only changed categories
-            settings = emptyMap(),
-            customCovers = null
+            preferences = null,
+            statistics = null,
+            metadata = metadata
         )
     }
     
@@ -374,17 +375,22 @@ class LibraryBackupRepositoryImpl(
         // Implement file reading
         // This would use platform-specific file I/O
         return LibraryBackup(
-            metadata = BackupMetadata(
-                version = 1,
-                timestamp = System.currentTimeMillis(),
-                backupType = BackupType.FULL,
-                includeCustomCovers = false,
-                appVersion = "1.0.0"
-            ),
+            version = LibraryBackup.CURRENT_VERSION,
+            timestamp = System.currentTimeMillis(),
             books = emptyList(),
             categories = emptyList(),
-            settings = emptyMap(),
-            customCovers = null
+            preferences = null,
+            statistics = null,
+            metadata = BackupMetadata(
+                appVersion = "1.0.0",
+                deviceName = "Desktop",
+                backupType = BackupType.FULL,
+                isIncremental = false,
+                previousBackupTimestamp = 0,
+                totalSize = 0,
+                bookCount = 0,
+                chapterCount = 0
+            )
         )
     }
     

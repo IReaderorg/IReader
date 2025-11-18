@@ -3,10 +3,11 @@ package ireader.presentation.ui.component.accessibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -46,13 +47,13 @@ object AccessibilityUtils {
         IReaderLog.accessibility("Creating accessible clickable: $contentDescription")
         
         return this
-            .size(minWidth = MinimumTouchTargetSize, minHeight = MinimumTouchTargetSize)
+            .sizeIn(minWidth = MinimumTouchTargetSize, minHeight = MinimumTouchTargetSize)
             .clip(MaterialTheme.shapes.small)
             .clickable(
                 enabled = enabled,
                 role = role,
                 onClickLabel = onClickLabel,
-                indication = rememberRipple(bounded = true),
+                indication = ripple(bounded = true),
                 interactionSource = remember { MutableInteractionSource() },
                 onClick = onClick
             )
@@ -76,13 +77,13 @@ object AccessibilityUtils {
         val stateDescription = if (selected) "Selected" else "Not selected"
         
         return this
-            .size(minWidth = MinimumTouchTargetSize, minHeight = MinimumTouchTargetSize)
+            .sizeIn(minWidth = MinimumTouchTargetSize, minHeight = MinimumTouchTargetSize)
             .clip(MaterialTheme.shapes.small)
             .selectable(
                 selected = selected,
                 enabled = enabled,
                 role = role,
-                indication = rememberRipple(bounded = true),
+                indication = ripple(bounded = true),
                 interactionSource = remember { MutableInteractionSource() },
                 onClick = onClick
             )
@@ -149,7 +150,7 @@ fun AccessibleButton(
     androidx.compose.material3.Button(
         onClick = onClick,
         modifier = modifier
-            .size(minWidth = AccessibilityUtils.MinimumTouchTargetSize, minHeight = AccessibilityUtils.MinimumTouchTargetSize)
+            .sizeIn(minWidth = AccessibilityUtils.MinimumTouchTargetSize, minHeight = AccessibilityUtils.MinimumTouchTargetSize)
             .semantics {
                 contentDescription?.let { this.contentDescription = it }
                 role = Role.Button

@@ -6,8 +6,10 @@ import io.mockk.every
 import io.mockk.mockk
 import ireader.data.book.BookRepositoryImpl
 import ireader.data.core.DatabaseHandler
+import ireader.domain.data.repository.BookCategoryRepository
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.models.entities.Book
+import ireader.domain.models.library.LibrarySort
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -37,7 +39,8 @@ class BookRepositoryTest {
     @BeforeTest
     fun setup() {
         handler = mockk(relaxed = true)
-        repository = BookRepositoryImpl(handler)
+        val mockBookCategoryRepository = mockk<BookCategoryRepository>(relaxed = true)
+        repository = BookRepositoryImpl(handler, mockBookCategoryRepository)
     }
 
     // ========== GET OPERATIONS ==========
@@ -47,7 +50,7 @@ class BookRepositoryTest {
         // Given
         val bookId = 1L
         val expectedBook = createTestBook(id = bookId)
-        coEvery { handler.awaitOne<Book>(any()) } returns expectedBook
+        coEvery { handler.awaitOneOrNull<Book> { any() } } returns expectedBook
 
         // When
         val result = repository.findBookById(bookId)
@@ -56,14 +59,14 @@ class BookRepositoryTest {
         assertNotNull(result)
         assertEquals(expectedBook.id, result.id)
         assertEquals(expectedBook.title, result.title)
-        coVerify(exactly = 1) { handler.awaitOne<Book>(any()) }
+        coVerify(exactly = 1) { handler.awaitOneOrNull<Book> { any() } }
     }
 
     @Test
     fun `findBookById returns null when not found`() = runTest {
         // Given
         val bookId = 999L
-        coEvery { handler.awaitOne<Book>(any()) } throws NoSuchElementException()
+        coEvery { handler.awaitOneOrNull<Book> { any() } } returns null
 
         // When
         val result = repository.findBookById(bookId)
@@ -77,7 +80,7 @@ class BookRepositoryTest {
         // Given
         val bookId = 1L
         val expectedBook = createTestBook(id = bookId)
-        every { handler.subscribeToOne<Book>(any()) } returns flowOf(expectedBook)
+        every { handler.subscribeToOneOrNull<Book> { any() } } returns flowOf(expectedBook)
 
         // When
         val result = repository.subscribeBookById(bookId).first()
@@ -95,7 +98,7 @@ class BookRepositoryTest {
             createTestBook(id = 2L, title = "Book 2"),
             createTestBook(id = 3L, title = "Book 3")
         )
-        coEvery { handler.awaitList<Book>(any()) } returns expectedBooks
+        coEvery { handler.awaitList<Book> { any() } } returns expectedBooks
 
         // When
         val result = repository.findAllBooks()
@@ -108,7 +111,7 @@ class BookRepositoryTest {
     @Test
     fun `findAllBooks returns empty list when no books`() = runTest {
         // Given
-        coEvery { handler.awaitList<Book>(any()) } returns emptyList()
+        coEvery { handler.awaitList<Book> { any() } } returns emptyList()
 
         // When
         val result = repository.findAllBooks()
@@ -120,17 +123,17 @@ class BookRepositoryTest {
     // ========== INSERT OPERATIONS ==========
 
     @Test
-    fun `insertBook successfully inserts book`() = runTest {
+    fun `upsert successfully inserts book`() = runTest {
         // Given
         val book = createTestBook()
-        coEvery { handler.await<Long>(any()) } returns book.id
+        coEvery { handler.awaitOneOrNullAsync<Long>(any(), any()) } returns book.id
 
         // When
-        val result = repository.insertBook(book)
+        val result = repository.upsert(book)
 
         // Then
         assertEquals(book.id, result)
-        coVerify(exactly = 1) { handler.await<Long>(any()) }
+        coVerify(exactly = 1) { handler.awaitOneOrNullAsync<Long>(any(), any()) }
     }
 
     @Test
@@ -141,25 +144,25 @@ class BookRepositoryTest {
             createTestBook(id = 2L),
             createTestBook(id = 3L)
         )
-        coEvery { handler.await<List<Long>>(any()) } returns listOf(1L, 2L, 3L)
+        coEvery { handler.await<Unit> { any() } } returns Unit
 
         // When
         val result = repository.insertBooks(books)
 
         // Then
         assertEquals(3, result.size)
-        coVerify(exactly = 1) { handler.await<List<Long>>(any()) }
+        coVerify(exactly = 1) { handler.await<Unit> { any() } }
     }
 
     @Test
-    fun `insertBook handles database error`() = runTest {
+    fun `upsert handles database error`() = runTest {
         // Given
         val book = createTestBook()
-        coEvery { handler.await<Long>(any()) } throws Exception("Database error")
+        coEvery { handler.awaitOneOrNullAsync<Long>(any(), any()) } throws Exception("Database error")
 
         // When/Then
         assertFailsWith<Exception> {
-            repository.insertBook(book)
+            repository.upsert(book)
         }
     }
 
@@ -169,13 +172,13 @@ class BookRepositoryTest {
     fun `updateBook successfully updates book`() = runTest {
         // Given
         val book = createTestBook(id = 1L, title = "Updated Title")
-        coEvery { handler.await<Unit>(any()) } returns Unit
+        coEvery { handler.await<Unit>(any(), any()) } returns Unit
 
         // When
         repository.updateBook(book)
 
         // Then
-        coVerify(exactly = 1) { handler.await<Unit>(any()) }
+        coVerify(exactly = 1) { handler.await<Unit>(any(), any()) }
     }
 
     @Test
@@ -185,20 +188,20 @@ class BookRepositoryTest {
             createTestBook(id = 1L),
             createTestBook(id = 2L)
         )
-        coEvery { handler.await<Unit>(any()) } returns Unit
+        coEvery { handler.await<Unit> { any() } } returns Unit
 
         // When
         repository.updateBook(books)
 
         // Then
-        coVerify(exactly = 1) { handler.await<Unit>(any()) }
+        coVerify(exactly = 1) { handler.await<Unit> { any() } }
     }
 
     @Test
     fun `updatePartial successfully updates book fields`() = runTest {
         // Given
         val book = createTestBook(id = 1L)
-        coEvery { handler.await<Long>(any()) } returns book.id
+        coEvery { handler.awaitOneOrNullAsync<Long>(any(), any()) } returns book.id
 
         // When
         val result = repository.updatePartial(book)
@@ -213,13 +216,13 @@ class BookRepositoryTest {
     fun `deleteBookById successfully deletes book`() = runTest {
         // Given
         val bookId = 1L
-        coEvery { handler.await<Unit>(any()) } returns Unit
+        coEvery { handler.await<Unit> { any() } } returns Unit
 
         // When
         repository.deleteBookById(bookId)
 
         // Then
-        coVerify(exactly = 1) { handler.await<Unit>(any()) }
+        coVerify(exactly = 1) { handler.await<Unit> { any() } }
     }
 
     @Test
@@ -229,25 +232,25 @@ class BookRepositoryTest {
             createTestBook(id = 1L),
             createTestBook(id = 2L)
         )
-        coEvery { handler.await<Unit>(any()) } returns Unit
+        coEvery { handler.await<Unit>(any(), any()) } returns Unit
 
         // When
         repository.deleteBooks(books)
 
         // Then
-        coVerify(exactly = 1) { handler.await<Unit>(any()) }
+        coVerify(exactly = 1) { handler.await<Unit>(any(), any()) }
     }
 
     @Test
     fun `deleteAllBooks successfully deletes all books`() = runTest {
         // Given
-        coEvery { handler.await<Unit>(any()) } returns Unit
+        coEvery { handler.await<Unit> { any() } } returns Unit
 
         // When
         repository.deleteAllBooks()
 
         // Then
-        coVerify(exactly = 1) { handler.await<Unit>(any()) }
+        coVerify(exactly = 1) { handler.await<Unit> { any() } }
     }
 
     // ========== SEARCH OPERATIONS ==========
@@ -257,7 +260,7 @@ class BookRepositoryTest {
         // Given
         val key = "test-key"
         val expectedBook = createTestBook(key = key)
-        coEvery { handler.awaitOne<Book>(any()) } returns expectedBook
+        coEvery { handler.awaitOneOrNull<Book> { any() } } returns expectedBook
 
         // When
         val result = repository.findBookByKey(key)
@@ -275,7 +278,7 @@ class BookRepositoryTest {
             createTestBook(id = 1L, key = key),
             createTestBook(id = 2L, key = key)
         )
-        coEvery { handler.awaitList<Book>(any()) } returns expectedBooks
+        coEvery { handler.awaitList<Book> { any() } } returns expectedBooks
 
         // When
         val result = repository.findBooksByKey(key)
@@ -294,10 +297,16 @@ class BookRepositoryTest {
             createTestBook(id = 1L, favorite = true),
             createTestBook(id = 2L, favorite = true)
         )
-        coEvery { handler.awaitList<Book>(any()) } returns expectedBooks
+        coEvery { handler.awaitList<Book> { any() } } returns expectedBooks
 
         // When
-        val result = repository.findAllInLibraryBooks()
+        val result = repository.findAllInLibraryBooks(
+            sortType = LibrarySort(
+                LibrarySort.Type.Title,
+                isAscending = true
+            ),
+            isAsc = true
+        )
 
         // Then
         assertEquals(2, result.size)
@@ -307,13 +316,13 @@ class BookRepositoryTest {
     @Test
     fun `deleteNotInLibraryBooks removes non-favorite books`() = runTest {
         // Given
-        coEvery { handler.await<Unit>(any()) } returns Unit
+        coEvery { handler.await<Unit> { any() } } returns Unit
 
         // When
         repository.deleteNotInLibraryBooks()
 
         // Then
-        coVerify(exactly = 1) { handler.await<Unit>(any()) }
+        coVerify(exactly = 1) { handler.await<Unit> { any() } }
     }
 
     // ========== DUPLICATE DETECTION ==========
@@ -324,7 +333,7 @@ class BookRepositoryTest {
         val title = "Test Book"
         val sourceId = 1L
         val expectedBook = createTestBook(title = title, sourceId = sourceId)
-        coEvery { handler.awaitOne<Book>(any()) } returns expectedBook
+        coEvery { handler.awaitOneOrNull<Book> { any() } } returns expectedBook
 
         // When
         val result = repository.findDuplicateBook(title, sourceId)
@@ -340,7 +349,7 @@ class BookRepositoryTest {
         // Given
         val title = "Unique Book"
         val sourceId = 1L
-        coEvery { handler.awaitOne<Book>(any()) } throws NoSuchElementException()
+        coEvery { handler.awaitOneOrNull<Book> { any() } } returns null
 
         // When
         val result = repository.findDuplicateBook(title, sourceId)
@@ -360,11 +369,10 @@ class BookRepositoryTest {
         author: String = "Test Author",
         description: String = "Test Description",
         genres: List<String> = listOf("Fiction"),
-        status: Int = 0,
+        status: Long = 0L,
         cover: String = "https://example.com/cover.jpg",
         customCover: String = "",
         lastUpdate: Long = System.currentTimeMillis(),
-        lastInit: Long = System.currentTimeMillis(),
         dateAdded: Long = System.currentTimeMillis()
     ): Book {
         return Book(
@@ -380,7 +388,6 @@ class BookRepositoryTest {
             cover = cover,
             customCover = customCover,
             lastUpdate = lastUpdate,
-            lastInit = lastInit,
             dateAdded = dateAdded
         )
     }

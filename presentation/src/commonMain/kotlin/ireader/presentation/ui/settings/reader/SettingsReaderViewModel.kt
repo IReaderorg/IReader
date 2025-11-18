@@ -16,42 +16,42 @@ class SettingsReaderViewModel(
 ) : BaseViewModel() {
     
     // Reading mode preferences
-    val readingMode: StateFlow<String> = preferenceStore.getString("reader_mode", "pager").asStateFlow()
-    val pageTransitions: StateFlow<String> = preferenceStore.getString("page_transitions", "slide").asStateFlow()
+    val readingMode: StateFlow<String> = preferenceStore.getString("reader_mode", "pager").stateIn(scope)
+    val pageTransitions: StateFlow<String> = preferenceStore.getString("page_transitions", "slide").stateIn(scope)
     
     // Display preferences
-    val doubleTapZoom: StateFlow<Boolean> = preferenceStore.getBoolean("double_tap_zoom", true).asStateFlow()
-    val showPageNumber: StateFlow<Boolean> = preferenceStore.getBoolean("show_page_number", true).asStateFlow()
-    val fullscreen: StateFlow<Boolean> = preferenceStore.getBoolean("reader_fullscreen", true).asStateFlow()
-    val keepScreenOn: StateFlow<Boolean> = preferenceStore.getBoolean("keep_screen_on", true).asStateFlow()
-    val showStatusBar: StateFlow<Boolean> = preferenceStore.getBoolean("show_status_bar", false).asStateFlow()
-    val showNavigationBar: StateFlow<Boolean> = preferenceStore.getBoolean("show_navigation_bar", false).asStateFlow()
+    val doubleTapZoom: StateFlow<Boolean> = preferenceStore.getBoolean("double_tap_zoom", true).stateIn(scope)
+    val showPageNumber: StateFlow<Boolean> = preferenceStore.getBoolean("show_page_number", true).stateIn(scope)
+    val fullscreen: StateFlow<Boolean> = preferenceStore.getBoolean("reader_fullscreen", true).stateIn(scope)
+    val keepScreenOn: StateFlow<Boolean> = preferenceStore.getBoolean("keep_screen_on", true).stateIn(scope)
+    val showStatusBar: StateFlow<Boolean> = preferenceStore.getBoolean("show_status_bar", false).stateIn(scope)
+    val showNavigationBar: StateFlow<Boolean> = preferenceStore.getBoolean("show_navigation_bar", false).stateIn(scope)
     
     // Orientation & Layout preferences
-    val cutoutShort: StateFlow<Boolean> = preferenceStore.getBoolean("cutout_short", true).asStateFlow()
-    val landscapeZoom: StateFlow<Boolean> = preferenceStore.getBoolean("landscape_zoom", true).asStateFlow()
+    val cutoutShort: StateFlow<Boolean> = preferenceStore.getBoolean("cutout_short", true).stateIn(scope)
+    val landscapeZoom: StateFlow<Boolean> = preferenceStore.getBoolean("landscape_zoom", true).stateIn(scope)
     
     // Navigation preferences
-    val navigationMode: StateFlow<String> = preferenceStore.getString("navigation_mode", "tap").asStateFlow()
-    val volumeKeysEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("volume_keys_enabled", false).asStateFlow()
-    val invertTapping: StateFlow<Boolean> = preferenceStore.getBoolean("invert_tapping", false).asStateFlow()
+    val navigationMode: StateFlow<String> = preferenceStore.getString("navigation_mode", "tap").stateIn(scope)
+    val volumeKeysEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("volume_keys_enabled", false).stateIn(scope)
+    val invertTapping: StateFlow<Boolean> = preferenceStore.getBoolean("invert_tapping", false).stateIn(scope)
     
     // Visual effects preferences
-    val flashOnPageChange: StateFlow<Boolean> = preferenceStore.getBoolean("flash_on_page_change", false).asStateFlow()
+    val flashOnPageChange: StateFlow<Boolean> = preferenceStore.getBoolean("flash_on_page_change", false).stateIn(scope)
     
     // Color filter preferences
-    val customBrightness: StateFlow<Boolean> = preferenceStore.getBoolean("custom_brightness", false).asStateFlow()
-    val customBrightnessValue: StateFlow<Int> = preferenceStore.getInt("custom_brightness_value", 0).asStateFlow()
-    val colorFilter: StateFlow<Boolean> = preferenceStore.getBoolean("color_filter", false).asStateFlow()
-    val colorFilterValue: StateFlow<Int> = preferenceStore.getInt("color_filter_value", 0).asStateFlow()
-    val grayscale: StateFlow<Boolean> = preferenceStore.getBoolean("grayscale", false).asStateFlow()
-    val invertedColors: StateFlow<Boolean> = preferenceStore.getBoolean("inverted_colors", false).asStateFlow()
+    val customBrightness: StateFlow<Boolean> = preferenceStore.getBoolean("custom_brightness", false).stateIn(scope)
+    val customBrightnessValue: StateFlow<Int> = preferenceStore.getInt("custom_brightness_value", 0).stateIn(scope)
+    val colorFilter: StateFlow<Boolean> = preferenceStore.getBoolean("color_filter", false).stateIn(scope)
+    val colorFilterValue: StateFlow<Int> = preferenceStore.getInt("color_filter_value", 0).stateIn(scope)
+    val grayscale: StateFlow<Boolean> = preferenceStore.getBoolean("grayscale", false).stateIn(scope)
+    val invertedColors: StateFlow<Boolean> = preferenceStore.getBoolean("inverted_colors", false).stateIn(scope)
     
     // Image scaling preferences
-    val scaleType: StateFlow<String> = preferenceStore.getString("scale_type", "fit_screen").asStateFlow()
-    val zoomStartPosition: StateFlow<String> = preferenceStore.getString("zoom_start_position", "automatic").asStateFlow()
-    val cropBorders: StateFlow<Boolean> = preferenceStore.getBoolean("crop_borders", false).asStateFlow()
-    val sidePadding: StateFlow<String> = preferenceStore.getString("side_padding", "none").asStateFlow()
+    val scaleType: StateFlow<String> = preferenceStore.getString("scale_type", "fit_screen").stateIn(scope)
+    val zoomStartPosition: StateFlow<String> = preferenceStore.getString("zoom_start_position", "automatic").stateIn(scope)
+    val cropBorders: StateFlow<Boolean> = preferenceStore.getBoolean("crop_borders", false).stateIn(scope)
+    val sidePadding: StateFlow<String> = preferenceStore.getString("side_padding", "none").stateIn(scope)
     
     // Dialog states
     var showReadingModeDialog by mutableStateOf(false)

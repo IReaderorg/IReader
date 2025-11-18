@@ -56,7 +56,7 @@ fun SettingsDataScreen(
         topBar = { scrollBehavior ->
             TitleToolbar(
                 title = "Data & Storage",
-                onPopBackStack = onNavigateUp,
+                popBackStack = onNavigateUp,
                 scrollBehavior = scrollBehavior
             )
         }

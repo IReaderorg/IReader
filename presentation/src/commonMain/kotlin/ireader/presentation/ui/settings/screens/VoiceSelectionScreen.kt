@@ -32,7 +32,7 @@ fun VoiceSelectionScreen(
     VoiceSelectionContent(
         state = state,
         downloadProgress = downloadProgress,
-        installedVoices = installedVoices,
+        installedVoices = installedVoices.toSet(),
         onLanguageSelected = { viewModel.filterByLanguage(it) },
         onSearchQueryChanged = { viewModel.searchVoices(it) },
         onVoiceSelected = { viewModel.selectVoice(it) },

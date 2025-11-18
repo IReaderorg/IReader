@@ -3,6 +3,15 @@ package ireader.domain.models.entities
 import kotlinx.serialization.Serializable
 
 /**
+ * Genre count data
+ */
+@Serializable
+data class GenreCount(
+    val genre: String,
+    val bookCount: Int
+)
+
+/**
  * Comprehensive library insights and analytics
  */
 @Serializable
@@ -188,13 +197,27 @@ enum class SortOption {
 }
 
 /**
+ * Reading statistics summary
+ */
+@Serializable
+data class ReadingStatistics(
+    val totalBooksRead: Int = 0,
+    val totalChaptersRead: Int = 0,
+    val totalReadingTimeMinutes: Long = 0,
+    val averageChaptersPerBook: Float = 0f,
+    val completionRate: Float = 0f,
+    val currentStreak: Int = 0,
+    val longestStreak: Int = 0
+)
+
+/**
  * Statistics export data
  */
 @Serializable
 data class StatisticsExport(
     val exportDate: Long,
     val libraryInsights: LibraryInsights,
-    val readingStatistics: ReadingStatistics,
+    val readingStatisticsType1: ReadingStatisticsType1,
     val readingAnalytics: ReadingAnalytics,
     val upcomingReleases: List<UpcomingRelease>,
     val recommendations: List<BookRecommendation>

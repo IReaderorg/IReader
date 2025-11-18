@@ -97,11 +97,10 @@ class TrackingRepositoryImpl(
     
     override suspend fun getTracksByBook(bookId: Long): List<Track> {
         return try {
-            handler.awaitList {
-                // Query tracks for book
-                // This would use your actual database queries
-                // trackQueries.getTracksByBookId(bookId, trackMapper)
-            }
+            // Query tracks for book
+            // This would use your actual database queries
+            // trackQueries.getTracksByBookId(bookId, trackMapper)
+            emptyList()
         } catch (e: Exception) {
             emptyList()
         }
@@ -109,20 +108,16 @@ class TrackingRepositoryImpl(
     
     override suspend fun getTracksByService(serviceId: Int): List<Track> {
         return try {
-            handler.awaitList {
-                // Query tracks for service
-                // trackQueries.getTracksByServiceId(serviceId, trackMapper)
-            }
+            // Query tracks for service
+            // trackQueries.getTracksByServiceId(serviceId, trackMapper)
+            emptyList()
         } catch (e: Exception) {
             emptyList()
         }
     }
     
     override fun getTracksByBookAsFlow(bookId: Long): Flow<List<Track>> {
-        return handler.subscribeToList {
-            // Subscribe to tracks for book
-            // trackQueries.getTracksByBookId(bookId, trackMapper)
-        }
+        return MutableStateFlow(emptyList())
     }
     
     override suspend fun addTrack(track: Track): Boolean {

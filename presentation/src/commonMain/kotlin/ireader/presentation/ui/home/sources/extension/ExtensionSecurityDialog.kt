@@ -68,11 +68,11 @@ fun ExtensionSecurityDialog(
                 }
                 
                 // Signature
-                if (security.signatureHash != null) {
+                security.signatureHash?.let { hash ->
                     item {
                         SecurityInfoItem(
                             title = "Signature Hash",
-                            value = security.signatureHash.take(16) + "...",
+                            value = hash.take(16) + "...",
                             icon = Icons.Default.Fingerprint
                         )
                     }

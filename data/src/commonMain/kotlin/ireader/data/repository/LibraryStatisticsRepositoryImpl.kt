@@ -44,20 +44,16 @@ class LibraryStatisticsRepositoryImpl(
     
     override suspend fun getReadingProgress(bookId: Long): ReadingProgress? {
         return try {
-            handler.awaitOneOrNull {
-                // Query reading progress for book
-                // readingProgressQueries.getProgressByBookId(bookId, progressMapper)
-            }
+            // Query reading progress for book
+            // readingProgressQueries.getProgressByBookId(bookId, progressMapper)
+            null
         } catch (e: Exception) {
             null
         }
     }
     
     override fun getReadingProgressAsFlow(bookId: Long): Flow<ReadingProgress?> {
-        return handler.subscribeToOneOrNull {
-            // Subscribe to reading progress for book
-            // readingProgressQueries.getProgressByBookId(bookId, progressMapper)
-        }
+        return MutableStateFlow<ReadingProgress?>(null)
     }
     
     override suspend fun updateReadingProgress(progress: ReadingProgress): Boolean {
@@ -74,10 +70,9 @@ class LibraryStatisticsRepositoryImpl(
     
     override suspend fun getAllReadingProgress(): List<ReadingProgress> {
         return try {
-            handler.awaitList {
-                // Query all reading progress
-                // readingProgressQueries.getAllProgress(progressMapper)
-            }
+            // Query all reading progress
+            // readingProgressQueries.getAllProgress(progressMapper)
+            emptyList()
         } catch (e: Exception) {
             emptyList()
         }
@@ -107,10 +102,9 @@ class LibraryStatisticsRepositoryImpl(
     
     override suspend fun getMonthlyStats(year: Int, month: Int): MonthlyReadingStats? {
         return try {
-            handler.awaitOneOrNull {
-                // Query monthly stats
-                // monthlyStatsQueries.getStatsByMonth(year, month, monthlyStatsMapper)
-            }
+            // Query monthly stats
+            // monthlyStatsQueries.getStatsByMonth(year, month, monthlyStatsMapper)
+            null
         } catch (e: Exception) {
             null
         }
@@ -118,10 +112,9 @@ class LibraryStatisticsRepositoryImpl(
     
     override suspend fun getYearlyStats(year: Int): List<MonthlyReadingStats> {
         return try {
-            handler.awaitList {
-                // Query yearly stats
-                // monthlyStatsQueries.getStatsByYear(year, monthlyStatsMapper)
-            }
+            // Query yearly stats
+            // monthlyStatsQueries.getStatsByYear(year, monthlyStatsMapper)
+            emptyList()
         } catch (e: Exception) {
             emptyList()
         }
@@ -129,10 +122,9 @@ class LibraryStatisticsRepositoryImpl(
     
     override suspend fun getAllMonthlyStats(): List<MonthlyReadingStats> {
         return try {
-            handler.awaitList {
-                // Query all monthly stats
-                // monthlyStatsQueries.getAllStats(monthlyStatsMapper)
-            }
+            // Query all monthly stats
+            // monthlyStatsQueries.getAllStats(monthlyStatsMapper)
+            emptyList()
         } catch (e: Exception) {
             emptyList()
         }
@@ -140,17 +132,9 @@ class LibraryStatisticsRepositoryImpl(
     
     override suspend fun recordReadingSession(bookId: Long, chapterId: Long, duration: Long): Boolean {
         return try {
-            val session = ReadingSession(
-                bookId = bookId,
-                chapterId = chapterId,
-                startTime = System.currentTimeMillis() - duration,
-                endTime = System.currentTimeMillis(),
-                duration = duration
-            )
-            
             handler.await {
                 // Insert reading session
-                // readingSessionQueries.insertSession(session)
+                // readingSessionQueries.insertSession(bookId, chapterId, duration)
             }
             
             // Update statistics after recording session
@@ -165,10 +149,9 @@ class LibraryStatisticsRepositoryImpl(
     
     override suspend fun getReadingSessions(bookId: Long): List<ReadingSession> {
         return try {
-            handler.awaitList {
-                // Query reading sessions for book
-                // readingSessionQueries.getSessionsByBookId(bookId, sessionMapper)
-            }
+            // Query reading sessions for book
+            // readingSessionQueries.getSessionsByBookId(bookId, sessionMapper)
+            emptyList()
         } catch (e: Exception) {
             emptyList()
         }
@@ -176,10 +159,9 @@ class LibraryStatisticsRepositoryImpl(
     
     override suspend fun getTotalReadingTime(): Long {
         return try {
-            handler.awaitOne {
-                // Query total reading time
-                // readingSessionQueries.getTotalReadingTime()
-            }
+            // Query total reading time
+            // readingSessionQueries.getTotalReadingTime()
+            0L
         } catch (e: Exception) {
             0L
         }
@@ -187,10 +169,9 @@ class LibraryStatisticsRepositoryImpl(
     
     override suspend fun getReadingTimeForPeriod(startTime: Long, endTime: Long): Long {
         return try {
-            handler.awaitOne {
-                // Query reading time for period
-                // readingSessionQueries.getReadingTimeForPeriod(startTime, endTime)
-            }
+            // Query reading time for period
+            // readingSessionQueries.getReadingTimeForPeriod(startTime, endTime)
+            0L
         } catch (e: Exception) {
             0L
         }
@@ -198,10 +179,9 @@ class LibraryStatisticsRepositoryImpl(
     
     override suspend fun getGenreStatistics(): Map<String, GenreStats> {
         return try {
-            val genreStats = handler.awaitList {
-                // Query genre statistics
-                // statisticsQueries.getGenreStats(genreStatsMapper)
-            }
+            // Query genre statistics
+            // statisticsQueries.getGenreStats(genreStatsMapper)
+            val genreStats = emptyList<GenreStats>()
             genreStats.associateBy { it.genre }
         } catch (e: Exception) {
             emptyMap()
@@ -210,10 +190,9 @@ class LibraryStatisticsRepositoryImpl(
     
     override suspend fun getSourceStatistics(): Map<Long, SourceStats> {
         return try {
-            val sourceStats = handler.awaitList {
-                // Query source statistics
-                // statisticsQueries.getSourceStats(sourceStatsMapper)
-            }
+            // Query source statistics
+            // statisticsQueries.getSourceStats(sourceStatsMapper)
+            val sourceStats = emptyList<SourceStats>()
             sourceStats.associateBy { it.sourceId }
         } catch (e: Exception) {
             emptyMap()
@@ -275,10 +254,9 @@ class LibraryStatisticsRepositoryImpl(
     
     override suspend fun getUnlockedAchievements(): List<Achievement> {
         return try {
-            handler.awaitList {
-                // Query unlocked achievements
-                // achievementQueries.getUnlockedAchievements(achievementMapper)
-            }
+            // Query unlocked achievements
+            // achievementQueries.getUnlockedAchievements(achievementMapper)
+            emptyList()
         } catch (e: Exception) {
             emptyList()
         }
@@ -336,10 +314,9 @@ class LibraryStatisticsRepositoryImpl(
     
     private suspend fun getAllReadingSessions(): List<ReadingSession> {
         return try {
-            handler.awaitList {
-                // Query all reading sessions
-                // readingSessionQueries.getAllSessions(sessionMapper)
-            }
+            // Query all reading sessions
+            // readingSessionQueries.getAllSessions(sessionMapper)
+            emptyList()
         } catch (e: Exception) {
             emptyList()
         }

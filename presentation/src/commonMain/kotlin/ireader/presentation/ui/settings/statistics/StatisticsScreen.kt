@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import ireader.domain.models.entities.ReadingStatistics
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -133,7 +132,7 @@ class StatisticsScreen : KoinComponent {
                                 statistics.favoriteGenres.forEach { genreCount ->
                                     GenreItem(
                                         genre = genreCount.genre,
-                                        count = genreCount.count
+                                        count = genreCount.bookCount
                                     )
                                 }
                             }

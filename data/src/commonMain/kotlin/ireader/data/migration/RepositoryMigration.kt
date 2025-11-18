@@ -1,6 +1,6 @@
 package ireader.data.migration
 
-import ireader.presentation.core.log.IReaderLog
+import ireader.core.log.IReaderLog
 
 /**
  * Migration utility for transitioning from old repository structure to new consolidated repositories.

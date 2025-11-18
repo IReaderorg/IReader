@@ -1,11 +1,12 @@
 package ireader.data.repository.consolidated
 
+import ireader.core.log.IReaderLog
+import ireader.data.category.categoryMapper
 import ireader.data.core.DatabaseHandler
 import ireader.domain.data.repository.consolidated.CategoryRepository
 import ireader.domain.models.entities.Category
 import ireader.domain.models.entities.CategoryUpdate
 import ireader.domain.models.errors.IReaderError
-import ireader.presentation.core.log.IReaderLog
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 
@@ -72,15 +73,17 @@ class CategoryRepositoryImpl(
 
     override suspend fun insert(name: String, order: Long): Category? {
         return try {
-            val id = handler.await { 
-                categoryQueries.insertCategory(
+            var insertedId: Long = 0
+            handler.await {
+                categoryQueries.insert(
                     name = name,
                     order = order,
                     flags = 0L
                 )
+                insertedId = categoryQueries.selectLastInsertedRowId().executeAsOne()
             }
             val category = Category(
-                id = id,
+                id = insertedId,
                 name = name,
                 order = order,
                 flags = 0L
@@ -123,10 +126,10 @@ class CategoryRepositoryImpl(
         return try {
             handler.await(inTransaction = true) {
                 // Remove book-category relationships first
-                bookCategoryQueries.deleteByCategoryId(categoryId)
+                bookcategoryQueries.delete(categoryId)
                 
                 // Then delete the category
-                categoryQueries.deleteCategory(categoryId)
+                categoryQueries.delete(categoryId)
             }
             IReaderLog.debug("Successfully deleted category: $categoryId", "CategoryRepository")
             true
@@ -153,9 +156,11 @@ class CategoryRepositoryImpl(
         return try {
             handler.await(inTransaction = true) {
                 categories.forEachIndexed { index, category ->
-                    categoryQueries.updateOrder(
-                        id = category.id,
-                        order = index.toLong()
+                    categoryQueries.update(
+                        categoryId = category.id,
+                        name = category.name,
+                        order = index.toLong(),
+                        flags = category.flags
                     )
                 }
             }
@@ -169,8 +174,8 @@ class CategoryRepositoryImpl(
 
     private suspend fun partialUpdate(update: CategoryUpdate) {
         handler.await {
-            categoryQueries.updatePartial(
-                id = update.id,
+            categoryQueries.update(
+                categoryId = update.id,
                 name = update.name,
                 order = update.order,
                 flags = update.flags

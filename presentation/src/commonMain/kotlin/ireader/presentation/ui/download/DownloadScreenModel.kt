@@ -1,11 +1,12 @@
 package ireader.presentation.ui.download
 
-import cafe.adriel.voyager.core.model.StateScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
+import ireader.presentation.core.viewmodel.IReaderStateScreenModel
+// screenModelScope is provided by IReaderStateScreenModel
 import ireader.domain.data.repository.DownloadRepository
 import ireader.domain.models.download.*
 import ireader.domain.usecases.download.DownloadManagerUseCase
 import ireader.domain.usecases.download.DownloadCacheUseCase
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -16,7 +17,7 @@ import kotlinx.coroutines.launch
 class DownloadQueueScreenModel(
     private val downloadRepository: DownloadRepository,
     private val downloadManagerUseCase: DownloadManagerUseCase
-) : StateScreenModel<DownloadQueueScreenModel.State>(State()) {
+) : IReaderStateScreenModel<DownloadQueueScreenModel.State>(State()) {
     
     data class State(
         val downloadQueue: List<DownloadItem> = emptyList(),
@@ -35,27 +36,31 @@ class DownloadQueueScreenModel(
     
     init {
         observeDownloadQueue()
-        observeDownloadStats()
+        loadDownloadStats()
     }
     
     private fun observeDownloadQueue() {
         downloadManagerUseCase.getDownloadQueue()
+            .catch { e ->
+                // Handle error
+                updateState { it.copy(isLoading = false) }
+            }
             .onEach { downloads ->
-                mutableState.value = mutableState.value.copy(
+                updateState { it.copy(
                     downloadQueue = downloads,
                     isLoading = false
-                )
+                ) }
             }
             .launchIn(screenModelScope)
     }
     
-    private fun observeDownloadStats() {
+    private fun loadDownloadStats() {
         screenModelScope.launch {
             try {
                 val stats = downloadManagerUseCase.getDownloadStats()
-                mutableState.value = mutableState.value.copy(
+                updateState { it.copy(
                     downloadStats = stats
-                )
+                ) }
             } catch (e: Exception) {
                 // Handle error
             }
@@ -63,27 +68,27 @@ class DownloadQueueScreenModel(
     }
     
     fun selectDownload(chapterId: Long) {
-        val currentSelected = mutableState.value.selectedDownloads
-        mutableState.value = mutableState.value.copy(
+        val currentSelected = state.value.selectedDownloads
+        updateState { it.copy(
             selectedDownloads = if (chapterId in currentSelected) {
                 currentSelected - chapterId
             } else {
                 currentSelected + chapterId
             }
-        )
+        ) }
     }
     
     fun selectAllDownloads() {
         val filteredDownloads = getFilteredDownloads()
-        mutableState.value = mutableState.value.copy(
-            selectedDownloads = filteredDownloads.map { it.chapterId }.toSet()
-        )
+        updateState { it.copy(
+            selectedDownloads = filteredDownloads.map { download -> download.chapterId }.toSet()
+        ) }
     }
     
     fun clearSelection() {
-        mutableState.value = mutableState.value.copy(
+        updateState { it.copy(
             selectedDownloads = emptySet()
-        )
+        ) }
     }
     
     fun pauseDownload(chapterId: Long) {
@@ -130,7 +135,7 @@ class DownloadQueueScreenModel(
     
     fun cancelSelectedDownloads() {
         screenModelScope.launch {
-            mutableState.value.selectedDownloads.forEach { chapterId ->
+            state.value.selectedDownloads.forEach { chapterId ->
                 downloadManagerUseCase.cancelDownload(chapterId)
             }
             clearSelection()
@@ -139,7 +144,7 @@ class DownloadQueueScreenModel(
     
     fun retrySelectedDownloads() {
         screenModelScope.launch {
-            mutableState.value.selectedDownloads.forEach { chapterId ->
+            state.value.selectedDownloads.forEach { chapterId ->
                 downloadManagerUseCase.retryDownload(chapterId)
             }
             clearSelection()
@@ -165,49 +170,49 @@ class DownloadQueueScreenModel(
     }
     
     fun updateFilterStatus(status: DownloadStatus?) {
-        mutableState.value = mutableState.value.copy(
+        updateState { it.copy(
             filterStatus = status
-        )
+        ) }
     }
     
     fun updateSortOrder(order: DownloadSortOrder) {
-        mutableState.value = mutableState.value.copy(
+        updateState { it.copy(
             sortOrder = order
-        )
+        ) }
     }
     
     fun toggleShowCompleted() {
-        mutableState.value = mutableState.value.copy(
-            showCompleted = !mutableState.value.showCompleted
-        )
+        updateState { it.copy(
+            showCompleted = !state.value.showCompleted
+        ) }
     }
     
     fun toggleShowFailed() {
-        mutableState.value = mutableState.value.copy(
-            showFailed = !mutableState.value.showFailed
-        )
+        updateState { it.copy(
+            showFailed = !state.value.showFailed
+        ) }
     }
     
     fun getFilteredDownloads(): List<DownloadItem> {
-        val state = mutableState.value
-        var downloads = state.downloadQueue
+        val currentState = state.value
+        var downloads = currentState.downloadQueue
         
         // Apply status filter
-        state.filterStatus?.let { status ->
+        currentState.filterStatus?.let { status ->
             downloads = downloads.filter { it.status == status }
         }
         
         // Apply visibility filters
-        if (!state.showCompleted) {
+        if (!currentState.showCompleted) {
             downloads = downloads.filter { it.status != DownloadStatus.COMPLETED }
         }
         
-        if (!state.showFailed) {
+        if (!currentState.showFailed) {
             downloads = downloads.filter { it.status != DownloadStatus.FAILED }
         }
         
         // Apply sort order
-        downloads = when (state.sortOrder) {
+        downloads = when (currentState.sortOrder) {
             DownloadSortOrder.PRIORITY -> downloads.sortedByDescending { it.priority }
             DownloadSortOrder.BOOK_TITLE -> downloads.sortedBy { it.bookTitle }
             DownloadSortOrder.CHAPTER_TITLE -> downloads.sortedBy { it.chapterTitle }
@@ -225,7 +230,7 @@ class DownloadQueueScreenModel(
 class DownloadSettingsScreenModel(
     private val downloadRepository: DownloadRepository,
     private val downloadCacheUseCase: DownloadCacheUseCase
-) : StateScreenModel<DownloadSettingsScreenModel.State>(State()) {
+) : IReaderStateScreenModel<DownloadSettingsScreenModel.State>(State()) {
     
     data class State(
         val config: DownloadQueueConfig = DownloadQueueConfig(),
@@ -243,14 +248,16 @@ class DownloadSettingsScreenModel(
         screenModelScope.launch {
             try {
                 val config = downloadRepository.getDownloadQueueConfig()
-                mutableState.value = mutableState.value.copy(
-                    config = config,
-                    isLoading = false
-                )
+                updateState { 
+                    it.copy(
+                        config = config,
+                        isLoading = false
+                    ) 
+                }
             } catch (e: Exception) {
-                mutableState.value = mutableState.value.copy(
-                    isLoading = false
-                )
+                updateState { 
+                    it.copy(isLoading = false) 
+                }
             }
         }
     }
@@ -261,10 +268,12 @@ class DownloadSettingsScreenModel(
                 val cacheSize = downloadCacheUseCase.getCacheSize()
                 val cacheEntries = downloadRepository.getDownloadCacheEntries()
                 
-                mutableState.value = mutableState.value.copy(
-                    cacheSize = cacheSize,
-                    cacheEntries = cacheEntries.size
-                )
+                updateState { 
+                    it.copy(
+                        cacheSize = cacheSize,
+                        cacheEntries = cacheEntries.size
+                    ) 
+                }
             } catch (e: Exception) {
                 // Handle error
             }
@@ -272,7 +281,7 @@ class DownloadSettingsScreenModel(
     }
     
     fun updateConfig(config: DownloadQueueConfig) {
-        mutableState.value = mutableState.value.copy(config = config)
+        updateState { it.copy(config = config) }
         
         screenModelScope.launch {
             downloadRepository.saveDownloadQueueConfig(config)

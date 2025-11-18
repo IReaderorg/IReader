@@ -16,25 +16,25 @@ class SettingsDownloadViewModel(
 ) : BaseViewModel() {
     
     // Storage preferences
-    val downloadLocation: StateFlow<String> = preferenceStore.getString("download_location", "").asStateFlow()
+    val downloadLocation: StateFlow<String> = preferenceStore.getString("download_location", "").stateIn(scope)
     
     // Download behavior preferences
-    val downloadOnlyOverWifi: StateFlow<Boolean> = preferenceStore.getBoolean("download_only_over_wifi", true).asStateFlow()
-    val maxConcurrentDownloads: StateFlow<Int> = preferenceStore.getInt("max_concurrent_downloads", 3).asStateFlow()
+    val downloadOnlyOverWifi: StateFlow<Boolean> = preferenceStore.getBoolean("download_only_over_wifi", true).stateIn(scope)
+    val maxConcurrentDownloads: StateFlow<Int> = preferenceStore.getInt("max_concurrent_downloads", 3).stateIn(scope)
     
     // Automatic download preferences
-    val downloadNewChapters: StateFlow<Boolean> = preferenceStore.getBoolean("download_new_chapters", false).asStateFlow()
-    val downloadNewChaptersCategories: StateFlow<Set<String>> = preferenceStore.getStringSet("download_new_chapters_categories", emptySet()).asStateFlow()
+    val downloadNewChapters: StateFlow<Boolean> = preferenceStore.getBoolean("download_new_chapters", false).stateIn(scope)
+    val downloadNewChaptersCategories: StateFlow<Set<String>> = preferenceStore.getStringSet("download_new_chapters_categories", emptySet()).stateIn(scope)
     
     // Auto delete preferences
-    val autoDeleteChapters: StateFlow<Boolean> = preferenceStore.getBoolean("auto_delete_chapters", false).asStateFlow()
-    val removeAfterReading: StateFlow<Boolean> = preferenceStore.getBoolean("remove_after_reading", false).asStateFlow()
-    val removeAfterMarkedAsRead: StateFlow<Boolean> = preferenceStore.getBoolean("remove_after_marked_as_read", false).asStateFlow()
-    val removeExcludeCategories: StateFlow<Set<String>> = preferenceStore.getStringSet("remove_exclude_categories", emptySet()).asStateFlow()
+    val autoDeleteChapters: StateFlow<Boolean> = preferenceStore.getBoolean("auto_delete_chapters", false).stateIn(scope)
+    val removeAfterReading: StateFlow<Boolean> = preferenceStore.getBoolean("remove_after_reading", false).stateIn(scope)
+    val removeAfterMarkedAsRead: StateFlow<Boolean> = preferenceStore.getBoolean("remove_after_marked_as_read", false).stateIn(scope)
+    val removeExcludeCategories: StateFlow<Set<String>> = preferenceStore.getStringSet("remove_exclude_categories", emptySet()).stateIn(scope)
     
     // File format preferences
-    val saveChaptersAsCBZ: StateFlow<Boolean> = preferenceStore.getBoolean("save_chapters_as_cbz", false).asStateFlow()
-    val splitTallImages: StateFlow<Boolean> = preferenceStore.getBoolean("split_tall_images", false).asStateFlow()
+    val saveChaptersAsCBZ: StateFlow<Boolean> = preferenceStore.getBoolean("save_chapters_as_cbz", false).stateIn(scope)
+    val splitTallImages: StateFlow<Boolean> = preferenceStore.getBoolean("split_tall_images", false).stateIn(scope)
     
     // Dialog states
     var showDownloadLocationDialog by mutableStateOf(false)

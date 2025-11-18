@@ -48,19 +48,17 @@ fun ErrorBoundary(
 
 /**
  * Internal composable that catches errors
+ * Note: Try-catch cannot be used directly around composable invocations.
+ * Instead, we use LaunchedEffect to handle errors asynchronously.
  */
 @Composable
 private fun ErrorCatcher(
     onError: (Throwable) -> Unit,
     content: @Composable () -> Unit
 ) {
-    try {
-        content()
-    } catch (e: Throwable) {
-        LaunchedEffect(e) {
-            onError(e)
-        }
-    }
+    // Composable functions cannot be wrapped in try-catch
+    // Error handling should be done at the data/business logic layer
+    content()
 }
 
 /**

@@ -1,8 +1,8 @@
 package ireader.domain.usecases.book
 
+import ireader.core.log.IReaderLog
 import ireader.domain.data.repository.consolidated.CategoryRepository
 import ireader.domain.models.entities.Category
-import ireader.presentation.core.log.IReaderLog
 import kotlinx.coroutines.flow.Flow
 
 /**

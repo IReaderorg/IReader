@@ -1,5 +1,6 @@
 package ireader.presentation.ui.home.explore.global_search
 
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Text
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,11 +20,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.toBookItem
-import ireader.domain.usecases.remote.SearchResult
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
-import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -209,11 +209,11 @@ private fun SearchResultSection(
             }
 
             // Error message
-            result.error?.let { errorMsg ->
+            result.error?.let { error ->
                 if (!result.isLoading) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = errorMsg,
+                        text = error.message ?: "Unknown error",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error
                     )

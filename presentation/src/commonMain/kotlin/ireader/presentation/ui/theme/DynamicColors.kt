@@ -3,59 +3,40 @@ package ireader.presentation.ui.theme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import ireader.core.log.IReaderLog
 
 /**
  * Dynamic colors (Monet) support for Android 12+ following Mihon's patterns
  * Provides Material You theming with fallback to static themes
+ * 
+ * Note: Dynamic color functions (dynamicDarkColorScheme, dynamicLightColorScheme, LocalContext)
+ * are Android-specific and should be implemented in androidMain source set.
  */
 object DynamicColors {
     
     /**
      * Check if dynamic colors are supported on the current platform
+     * This should be overridden in platform-specific implementations
      */
-    @Composable
     fun isSupported(): Boolean {
-        return try {
-            android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S
-        } catch (e: Exception) {
-            // Not on Android platform
-            false
-        }
+        // Default implementation for non-Android platforms
+        return false
     }
     
     /**
      * Get dynamic color scheme if supported, otherwise return fallback
+     * Platform-specific implementations should override this in androidMain
      */
     @Composable
     fun getDynamicColorScheme(
         isDarkTheme: Boolean = isSystemInDarkTheme(),
         fallbackColorScheme: ColorScheme
     ): ColorScheme {
-        return if (isSupported()) {
-            try {
-                val context = LocalContext.current
-                val dynamicScheme = if (isDarkTheme) {
-                    dynamicDarkColorScheme(context)
-                } else {
-                    dynamicLightColorScheme(context)
-                }
-                
-                IReaderLog.debug("Using dynamic color scheme (Material You)")
-                dynamicScheme
-            } catch (e: Exception) {
-                IReaderLog.warn("Failed to load dynamic colors, using fallback", e)
-                fallbackColorScheme
-            }
-        } else {
-            IReaderLog.debug("Dynamic colors not supported, using fallback")
-            fallbackColorScheme
-        }
+        // Default implementation returns fallback
+        // Android implementation should use dynamicDarkColorScheme/dynamicLightColorScheme
+        IReaderLog.debug("Dynamic colors not supported on this platform, using fallback")
+        return fallbackColorScheme
     }
 }
 
@@ -73,18 +54,10 @@ fun IReaderDynamicTheme(
     },
     content: @Composable () -> Unit
 ) {
-    val colorScheme = remember(useDynamicColors, isDarkTheme) {
-        if (useDynamicColors && DynamicColors.isSupported()) {
-            try {
-                // This would need platform-specific implementation
-                fallbackColorScheme
-            } catch (e: Exception) {
-                IReaderLog.warn("Failed to apply dynamic colors", e)
-                fallbackColorScheme
-            }
-        } else {
-            fallbackColorScheme
-        }
+    val colorScheme = if (useDynamicColors && DynamicColors.isSupported()) {
+        DynamicColors.getDynamicColorScheme(isDarkTheme, fallbackColorScheme)
+    } else {
+        fallbackColorScheme
     }
     
     MaterialTheme(

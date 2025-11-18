@@ -9,6 +9,8 @@ import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.ui.settings.badges.BadgeErrorMapper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch

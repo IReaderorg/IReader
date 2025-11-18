@@ -53,7 +53,7 @@ fun SettingsSecurityScreen(
         topBar = { scrollBehavior ->
             TitleToolbar(
                 title = "Security & Privacy",
-                onPopBackStack = onNavigateUp,
+                popBackStack = onNavigateUp,
                 scrollBehavior = scrollBehavior
             )
         }

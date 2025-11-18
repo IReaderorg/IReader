@@ -60,7 +60,7 @@ fun SettingsTrackingScreen(
         topBar = { scrollBehavior ->
             TitleToolbar(
                 title = "Tracking",
-                onPopBackStack = onNavigateUp,
+                popBackStack = onNavigateUp,
                 scrollBehavior = scrollBehavior
             )
         }

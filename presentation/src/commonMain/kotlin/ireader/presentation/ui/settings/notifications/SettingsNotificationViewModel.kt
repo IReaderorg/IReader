@@ -4,8 +4,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.core.prefs.PreferenceStore
+import ireader.presentation.ui.core.utils.asStateFlow
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 
 /**
  * ViewModel for the enhanced notification settings screen.
@@ -16,29 +21,29 @@ class SettingsNotificationViewModel(
 ) : BaseViewModel() {
     
     // Library notification preferences
-    val libraryUpdateNotifications: StateFlow<Boolean> = preferenceStore.getBoolean("library_update_notifications", true).asStateFlow()
-    val newChapterNotifications: StateFlow<Boolean> = preferenceStore.getBoolean("new_chapter_notifications", true).asStateFlow()
+    val libraryUpdateNotifications: StateFlow<Boolean> = preferenceStore.getBoolean("library_update_notifications", true).stateIn(scope)
+    val newChapterNotifications: StateFlow<Boolean> = preferenceStore.getBoolean("new_chapter_notifications", true).stateIn(scope)
     
     // Download notification preferences
-    val downloadProgressNotifications: StateFlow<Boolean> = preferenceStore.getBoolean("download_progress_notifications", true).asStateFlow()
-    val downloadCompleteNotifications: StateFlow<Boolean> = preferenceStore.getBoolean("download_complete_notifications", true).asStateFlow()
+    val downloadProgressNotifications: StateFlow<Boolean> = preferenceStore.getBoolean("download_progress_notifications", true).stateIn(scope)
+    val downloadCompleteNotifications: StateFlow<Boolean> = preferenceStore.getBoolean("download_complete_notifications", true).stateIn(scope)
     
     // System notification preferences
-    val backupNotifications: StateFlow<Boolean> = preferenceStore.getBoolean("backup_notifications", true).asStateFlow()
-    val appUpdateNotifications: StateFlow<Boolean> = preferenceStore.getBoolean("app_update_notifications", true).asStateFlow()
-    val extensionUpdateNotifications: StateFlow<Boolean> = preferenceStore.getBoolean("extension_update_notifications", true).asStateFlow()
-    val errorNotifications: StateFlow<Boolean> = preferenceStore.getBoolean("error_notifications", true).asStateFlow()
+    val backupNotifications: StateFlow<Boolean> = preferenceStore.getBoolean("backup_notifications", true).stateIn(scope)
+    val appUpdateNotifications: StateFlow<Boolean> = preferenceStore.getBoolean("app_update_notifications", true).stateIn(scope)
+    val extensionUpdateNotifications: StateFlow<Boolean> = preferenceStore.getBoolean("extension_update_notifications", true).stateIn(scope)
+    val errorNotifications: StateFlow<Boolean> = preferenceStore.getBoolean("error_notifications", true).stateIn(scope)
     
     // Notification behavior preferences
-    val notificationSound: StateFlow<Boolean> = preferenceStore.getBoolean("notification_sound", true).asStateFlow()
-    val notificationVibration: StateFlow<Boolean> = preferenceStore.getBoolean("notification_vibration", true).asStateFlow()
-    val notificationLED: StateFlow<Boolean> = preferenceStore.getBoolean("notification_led", true).asStateFlow()
-    val groupNotifications: StateFlow<Boolean> = preferenceStore.getBoolean("group_notifications", true).asStateFlow()
+    val notificationSound: StateFlow<Boolean> = preferenceStore.getBoolean("notification_sound", true).stateIn(scope)
+    val notificationVibration: StateFlow<Boolean> = preferenceStore.getBoolean("notification_vibration", true).stateIn(scope)
+    val notificationLED: StateFlow<Boolean> = preferenceStore.getBoolean("notification_led", true).stateIn(scope)
+    val groupNotifications: StateFlow<Boolean> = preferenceStore.getBoolean("group_notifications", true).stateIn(scope)
     
     // Quiet hours preferences
-    val quietHoursEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("quiet_hours_enabled", false).asStateFlow()
-    val quietHoursStart: StateFlow<Pair<Int, Int>> = preferenceStore.getString("quiet_hours_start", "22:00").asStateFlow().map { parseTime(it) }
-    val quietHoursEnd: StateFlow<Pair<Int, Int>> = preferenceStore.getString("quiet_hours_end", "08:00").asStateFlow().map { parseTime(it) }
+    val quietHoursEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("quiet_hours_enabled", false).stateIn(scope)
+    val quietHoursStart: StateFlow<Pair<Int, Int>> = preferenceStore.getString("quiet_hours_start", "22:00").stateIn(scope).map { parseTime(it) }.stateIn(scope, SharingStarted.Eagerly, parseTime("22:00"))
+    val quietHoursEnd: StateFlow<Pair<Int, Int>> = preferenceStore.getString("quiet_hours_end", "08:00").stateIn(scope).map { parseTime(it) }.stateIn(scope, SharingStarted.Eagerly, parseTime("08:00"))
     
     // Dialog states
     var showQuietHoursStartDialog by mutableStateOf(false)

@@ -41,7 +41,7 @@ fun AccessibleBookListItem(
     showAuthor: Boolean = true,
     showDescription: Boolean = false,
 ) {
-    val contentDescription = buildString {
+    var contentDescription = buildString {
         append("Book: ${book.title}")
         if (showAuthor && book.author.isNotBlank()) {
             append(", by ${book.author}")
@@ -100,7 +100,6 @@ fun AccessibleBookListItem(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.semantics {
-                        role = Role.Text
                         contentDescription = "Book title: ${book.title}"
                     }
                 )
@@ -140,7 +139,7 @@ fun AccessibleBookListItem(
                 ) {
                     if (book.favorite) {
                         Text(
-                            text = "★",
+                            text = "?",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.semantics {

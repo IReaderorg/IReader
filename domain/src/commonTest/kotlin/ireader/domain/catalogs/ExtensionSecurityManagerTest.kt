@@ -135,39 +135,41 @@ class ExtensionSecurityManagerTest {
     
     // Helper methods
     
-    private fun createTestCatalog(): CatalogInstalled {
-        return CatalogInstalled(
-            sourceId = 1,
+    private fun createTestCatalog(): CatalogInstalled.SystemWide {
+        return CatalogInstalled.SystemWide(
             name = "Test Extension",
-            lang = "en",
+            description = "Test extension description",
+            source = null,
+            pkgName = "ireader.extension.test",
             versionName = "1.0.0",
             versionCode = 1,
-            pkgName = "ireader.extension.test",
+            nsfw = false,
+            isPinned = false,
+            hasUpdate = false,
             iconUrl = "",
-            source = null,
-            hasUpdate = false
+            installDir = null
         )
     }
     
-    private fun createTestCatalogWithValidSignature(): CatalogInstalled {
+    private fun createTestCatalogWithValidSignature(): CatalogInstalled.SystemWide {
         return createTestCatalog().copy(
             pkgName = "ireader.extension.valid"
         )
     }
     
-    private fun createTestCatalogWithInvalidSignature(): CatalogInstalled {
+    private fun createTestCatalogWithInvalidSignature(): CatalogInstalled.SystemWide {
         return createTestCatalog().copy(
             pkgName = "com.suspicious.extension"
         )
     }
     
-    private fun createSuspiciousCatalog(): CatalogInstalled {
+    private fun createSuspiciousCatalog(): CatalogInstalled.SystemWide {
         return createTestCatalog().copy(
             pkgName = "com.malware.extension"
         )
     }
     
-    private fun createUntrustedCatalog(): CatalogInstalled {
+    private fun createUntrustedCatalog(): CatalogInstalled.SystemWide {
         return createTestCatalog().copy(
             pkgName = "com.unknown.extension"
         )

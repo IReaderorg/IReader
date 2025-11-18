@@ -6,7 +6,10 @@ import androidx.compose.runtime.setValue
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.SharingStarted
 
 /**
  * ViewModel for the enhanced security and privacy settings screen.
@@ -17,20 +20,20 @@ class SettingsSecurityViewModel(
 ) : BaseViewModel() {
     
     // App lock preferences
-    val appLockEnabled: StateFlow<Boolean> = uiPreferences.appLockEnabled().asStateFlow()
-    val appLockMethod: StateFlow<String> = uiPreferences.appLockMethod().asStateFlow()
-    val biometricEnabled: StateFlow<Boolean> = uiPreferences.biometricEnabled().asStateFlow()
-    val lockAfterInactivity: StateFlow<Int> = uiPreferences.lockAppAfter().asStateFlow().map { it.toInt() }
+    val appLockEnabled: StateFlow<Boolean> = uiPreferences.appLockEnabled().stateIn(scope)
+    val appLockMethod: StateFlow<String> = uiPreferences.appLockMethod().stateIn(scope)
+    val biometricEnabled: StateFlow<Boolean> = uiPreferences.biometricEnabled().stateIn(scope)
+    val lockAfterInactivity: StateFlow<Int> = uiPreferences.lockAppAfter().changes().map { it.toInt() }.stateIn(scope, SharingStarted.WhileSubscribed(5000), 0)
     
     // Screen security preferences
-    val secureScreenMode: StateFlow<PreferenceValues.SecureScreenMode> = uiPreferences.secureScreen().asStateFlow()
+    val secureScreenMode: StateFlow<PreferenceValues.SecureScreenMode> = uiPreferences.secureScreen().stateIn(scope)
     
     // Privacy preferences
-    val hideNotificationContent: StateFlow<Boolean> = uiPreferences.hideContentEnabled().asStateFlow()
-    val incognitoMode: StateFlow<Boolean> = uiPreferences.incognitoMode().asStateFlow()
+    val hideNotificationContent: StateFlow<Boolean> = uiPreferences.hideContentEnabled().stateIn(scope)
+    val incognitoMode: StateFlow<Boolean> = uiPreferences.incognitoMode().stateIn(scope)
     
     // Content restrictions
-    val adultContentLock: StateFlow<Boolean> = uiPreferences.adultSourceLockEnabled().asStateFlow()
+    val adultContentLock: StateFlow<Boolean> = uiPreferences.adultSourceLockEnabled().stateIn(scope)
     
     // Dialog states
     var showLockMethodDialog by mutableStateOf(false)

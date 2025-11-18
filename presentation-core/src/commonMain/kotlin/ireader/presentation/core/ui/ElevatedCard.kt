@@ -26,7 +26,6 @@ fun IReaderElevatedCard(
     shape: Shape = RoundedCornerShape(12.dp),
     colors: androidx.compose.material3.CardColors = CardDefaults.elevatedCardColors(),
     elevation: androidx.compose.material3.CardElevation = CardDefaults.elevatedCardElevation(),
-    border: BorderStroke? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     ElevatedCard(
@@ -36,7 +35,6 @@ fun IReaderElevatedCard(
         shape = shape,
         colors = colors,
         elevation = elevation,
-        border = border,
         content = content,
     )
 }
@@ -50,7 +48,6 @@ fun IReaderElevatedCard(
     shape: Shape = RoundedCornerShape(12.dp),
     colors: androidx.compose.material3.CardColors = CardDefaults.elevatedCardColors(),
     elevation: androidx.compose.material3.CardElevation = CardDefaults.elevatedCardElevation(),
-    border: BorderStroke? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     ElevatedCard(
@@ -58,7 +55,6 @@ fun IReaderElevatedCard(
         shape = shape,
         colors = colors,
         elevation = elevation,
-        border = border,
         content = content,
     )
 }

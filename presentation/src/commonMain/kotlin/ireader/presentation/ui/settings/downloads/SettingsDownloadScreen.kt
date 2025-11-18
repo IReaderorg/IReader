@@ -55,7 +55,7 @@ fun SettingsDownloadScreen(
         topBar = { scrollBehavior ->
             TitleToolbar(
                 title = "Downloads",
-                onPopBackStack = onNavigateUp,
+                popBackStack = onNavigateUp,
                 scrollBehavior = scrollBehavior
             )
         }

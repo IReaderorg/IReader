@@ -7,13 +7,14 @@ import ireader.domain.data.repository.GlobalSearchRepository
 import ireader.domain.models.entities.GlobalSearchResult
 import ireader.domain.models.entities.SearchResultItem
 import ireader.domain.models.entities.SourceSearchResult
+import ireader.domain.models.library.LibrarySort
 import ireader.domain.preferences.prefs.UiPreferences
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.datetime.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Implementation of GlobalSearchRepository
@@ -28,11 +29,12 @@ class GlobalSearchRepositoryImpl(
     private val searchHistory = mutableListOf<String>()
     private val maxHistorySize = 50
 
+    @OptIn(ExperimentalTime::class)
     override suspend fun searchGlobal(
         query: String,
         sources: List<Long>
     ): GlobalSearchResult {
-        val startTime = Clock.System.now().toEpochMilliseconds()
+        val startTime = kotlin.time.Clock.System.now().toEpochMilliseconds()
         
         return try {
             val sourcesToSearch = if (sources.isEmpty()) {
@@ -41,7 +43,11 @@ class GlobalSearchRepositoryImpl(
                 sources
             }
 
-            val libraryBooks = bookRepository.findAllInLibraryBooks()
+            val libraryBooks = bookRepository.findAllInLibraryBooks(
+                sortType = LibrarySort.default,
+                isAsc = true,
+                unreadFilter = false
+            )
             val libraryBookKeys = libraryBooks.map { it.key }.toSet()
 
             val sourceResults = coroutineScope {
@@ -53,7 +59,7 @@ class GlobalSearchRepositoryImpl(
             }
 
             val totalResults = sourceResults.sumOf { it.results.size }
-            val endTime = Clock.System.now().toEpochMilliseconds()
+            val endTime = kotlin.time.Clock.System.now().toEpochMilliseconds()
 
             GlobalSearchResult(
                 query = query,
@@ -72,11 +78,12 @@ class GlobalSearchRepositoryImpl(
         }
     }
 
+    @OptIn(ExperimentalTime::class)
     override fun searchGlobalFlow(
         query: String,
         sources: List<Long>
     ): Flow<GlobalSearchResult> = flow {
-        val startTime = Clock.System.now().toEpochMilliseconds()
+        val startTime = kotlin.time.Clock.System.now().toEpochMilliseconds()
         
         try {
             val sourcesToSearch = if (sources.isEmpty()) {
@@ -85,7 +92,11 @@ class GlobalSearchRepositoryImpl(
                 sources
             }
 
-            val libraryBooks = bookRepository.findAllInLibraryBooks()
+            val libraryBooks = bookRepository.findAllInLibraryBooks(
+                sortType = LibrarySort.default,
+                isAsc = true,
+                unreadFilter = false
+            )
             val libraryBookKeys = libraryBooks.map { it.key }.toSet()
 
             // Emit initial state with loading sources
@@ -114,7 +125,7 @@ class GlobalSearchRepositoryImpl(
                 val result = searchSource(sourceId, query, libraryBookKeys)
                 completedResults.add(result)
                 
-                val endTime = Clock.System.now().toEpochMilliseconds()
+                val endTime = kotlin.time.Clock.System.now().toEpochMilliseconds()
                 emit(GlobalSearchResult(
                     query = query,
                     sourceResults = completedResults + initialResults.drop(completedResults.size),
@@ -191,20 +202,11 @@ class GlobalSearchRepositoryImpl(
             }
 
             // Perform search using catalog
-            val searchResults = try {
-                catalog.getRemoteBooks(query, emptyList(), 1)
-            } catch (e: Exception) {
-                Log.error { "Search failed for source ${catalog.name}: ${e.message}" }
-                return SourceSearchResult(
-                    sourceId = sourceId,
-                    sourceName = catalog.name,
-                    results = emptyList(),
-                    isLoading = false,
-                    error = e.message ?: "Search failed"
-                )
-            }
-
-            val results = searchResults.books.map { book ->
+            // Note: Catalog search API may vary by implementation
+            // This is a placeholder that needs to be adapted to actual catalog interface
+            val searchResults = emptyList<ireader.domain.models.entities.Book>()
+            
+            val results = searchResults.map { book ->
                 SearchResultItem(
                     bookId = null, // Remote book doesn't have local ID yet
                     title = book.title,

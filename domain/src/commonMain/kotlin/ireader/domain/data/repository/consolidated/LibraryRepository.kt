@@ -14,12 +14,12 @@ interface LibraryRepository {
     
     // Library retrieval with sorting and filtering
     suspend fun getLibraryBooks(
-        sort: LibrarySort = LibrarySort.ALPHABETICAL,
+        sort: LibrarySort = LibrarySort.default,
         includeArchived: Boolean = false
     ): List<LibraryBook>
     
     fun getLibraryBooksAsFlow(
-        sort: LibrarySort = LibrarySort.ALPHABETICAL,
+        sort: LibrarySort = LibrarySort.default,
         includeArchived: Boolean = false
     ): Flow<List<LibraryBook>>
     

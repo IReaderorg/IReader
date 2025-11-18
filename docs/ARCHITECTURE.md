@@ -306,7 +306,7 @@ class BookDetailViewModel(
 ) : ViewModel() {
     
     private val _state = MutableStateFlow<UiState<Book>>(UiState.Loading)
-    val state: StateFlow<UiState<Book>> = _state.asStateFlow()
+    val state: StateFlow<UiState<Book>> = _state.stateIn(scope)
     
     fun loadBook(bookId: Long) {
         viewModelScope.launch {

@@ -1,11 +1,11 @@
 package ireader.domain.data.repository
 
-import ireader.domain.models.entities.ReadingStatistics
+import ireader.domain.models.entities.ReadingStatisticsType1
 import kotlinx.coroutines.flow.Flow
 
 interface ReadingStatisticsRepository {
-    fun getStatisticsFlow(): Flow<ReadingStatistics>
-    suspend fun getStatistics(): ReadingStatistics
+    fun getStatisticsFlow(): Flow<ReadingStatisticsType1>
+    suspend fun getStatistics(): ReadingStatisticsType1
     suspend fun getLastReadDate(): Long?
     suspend fun getCurrentStreak(): Int
     suspend fun incrementChaptersRead()

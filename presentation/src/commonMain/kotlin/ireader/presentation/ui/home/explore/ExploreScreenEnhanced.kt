@@ -97,12 +97,13 @@ fun ExploreScreenEnhanced(
     // Enhanced error handling with snackbar
     val (showSnackBar, setShowSnackBar) = remember { mutableStateOf(false) }
     val (snackBarText, setSnackBarText) = remember { mutableStateOf("") }
+    val retryLabel = localize(Res.string.retry)
 
     if (showSnackBar) {
         LaunchedEffect(snackBarHostState.currentSnackbarData) {
             val result = snackBarHostState.showSnackbar(
                 message = snackBarText,
-                actionLabel = localize(Res.string.retry),
+                actionLabel = retryLabel,
                 duration = SnackbarDuration.Indefinite
             )
             when (result) {
@@ -195,7 +196,6 @@ fun ExploreScreenEnhanced(
                 gridState = gridState,
                 columns = columns,
                 prevPaddingValues = prevPaddingValues,
-                localizeHelper = localizeHelper,
                 showFilterFab = !isExpandedWidth
             )
         }
@@ -221,7 +221,6 @@ private fun ExploreMainContent(
     gridState: androidx.compose.foundation.lazy.grid.LazyGridState,
     columns: Int,
     prevPaddingValues: PaddingValues,
-    localizeHelper: ireader.presentation.ui.core.theme.LocalizeHelper,
     showFilterFab: Boolean,
 ) {
     Scaffold(
@@ -259,13 +258,13 @@ private fun ExploreMainContent(
             when {
                 vm.isLoading && vm.page == 1 -> {
                     IReaderLoadingScreen(
-                        message = localize(Res.string.loading_books)
+                        message = localize(Res.string.loading)
                     )
                 }
                 
                 vm.error != null && vm.page == 1 -> {
                     ExploreScreenErrorEnhanced(
-                        error = vm.error!!.asString(localizeHelper),
+                        error = vm.error!!.asString(LocalLocalizeHelper.current!!),
                         source = source,
                         onRefresh = { 
                             getBooks(null, null, emptyList())
@@ -278,7 +277,7 @@ private fun ExploreMainContent(
                 
                 vm.booksState.books.isEmpty() && !vm.isLoading -> {
                     IReaderEmptyScreen(
-                        message = localize(Res.string.no_books_found),
+                        message = localize(Res.string.search),
                         actions = listOf(
                             ErrorScreenAction(
                                 title = localize(Res.string.retry),
@@ -394,14 +393,14 @@ private fun ExploreFilterPanel(
                 .padding(16.dp)
         ) {
             Text(
-                text = localize(Res.string.filters),
+                text = localize(Res.string.filter),
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
             
             // TODO: Implement filter UI components
             ActionButton(
-                title = localize(Res.string.show_filters),
+                title = localize(Res.string.filter),
                 icon = Icons.Default.Add,
                 onClick = showmodalSheet,
                 modifier = Modifier.fillMaxWidth()

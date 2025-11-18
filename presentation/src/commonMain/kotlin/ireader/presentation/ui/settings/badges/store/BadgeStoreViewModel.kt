@@ -1,8 +1,5 @@
 package ireader.presentation.ui.settings.badges.store
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import ireader.domain.models.remote.Badge
 import ireader.domain.models.remote.PaymentProof
 import ireader.domain.usecases.badge.GetAvailableBadgesUseCase
@@ -12,8 +9,10 @@ import ireader.presentation.ui.settings.badges.BadgeErrorMapper
 import ireader.presentation.ui.settings.badges.RetryConfig
 import ireader.presentation.ui.settings.badges.retryWithExponentialBackoff
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 

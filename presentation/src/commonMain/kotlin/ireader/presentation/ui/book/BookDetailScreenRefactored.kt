@@ -13,21 +13,20 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.model.rememberScreenModel
 import ireader.core.source.Source
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.UiPreferences
-import ireader.i18n.localize
-import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
 import ireader.presentation.core.ui.*
 import ireader.presentation.ui.book.components.*
 import ireader.presentation.ui.book.viewmodel.BookDetailScreenModel
+import ireader.presentation.ui.book.viewmodel.ChaptersFilters
+import ireader.presentation.ui.book.viewmodel.ChapterSort
 import ireader.presentation.ui.component.components.ChapterRow
 import ireader.presentation.ui.component.reusable_composable.AppTextField
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import org.koin.core.parameter.parametersOf
 
 /**
  * Refactored BookDetailScreen following Mihon's StateScreenModel pattern.
@@ -50,18 +49,11 @@ fun BookDetailScreenRefactored(
     appbarPadding: Dp = 0.dp,
     uiPreferences: UiPreferences = koinInject(),
 ) {
-    val screenModel = rememberScreenModel { 
-        BookDetailScreenModel(
-            bookId = bookId,
-            getBookUseCases = koinInject(),
-            getChapterUseCase = koinInject(),
-            localInsertUseCases = koinInject(),
-            remoteUseCases = koinInject(),
-            getLocalCatalog = koinInject(),
-        )
-    }
+    val vm: BookDetailScreenModel = getIViewModel(
+        parameters = { parametersOf(bookId) }
+    )
     
-    val state by screenModel.state.collectAsState()
+    val state by vm.state.collectAsState()
     val scrollState = rememberLazyListState()
     
     // Collect appearance preferences
@@ -78,7 +70,7 @@ fun BookDetailScreenRefactored(
                 BookDetailSidePanel(
                     book = state.book!!,
                     source = state.catalogSource?.source,
-                    onFavorite = screenModel::toggleFavorite,
+                    onFavorite = vm::toggleFavorite,
                     onWebView = onWebView,
                     hideBackdrop = hideBackdrop
                 )
@@ -87,7 +79,7 @@ fun BookDetailScreenRefactored(
         endContent = {
             BookDetailContent(
                 state = state,
-                screenModel = screenModel,
+                vm = vm,
                 scrollState = scrollState,
                 onNavigateUp = onNavigateUp,
                 onChapterClick = onChapterClick,
@@ -105,7 +97,7 @@ fun BookDetailScreenRefactored(
 @Composable
 private fun BookDetailContent(
     state: BookDetailScreenModel.State,
-    screenModel: BookDetailScreenModel,
+    vm: BookDetailScreenModel,
     scrollState: LazyListState,
     onNavigateUp: () -> Unit,
     onChapterClick: (Chapter) -> Unit,
@@ -122,20 +114,20 @@ private fun BookDetailContent(
     when {
         state.isLoading && state.book == null -> {
             IReaderLoadingScreen(
-                message = localize(Res.string.loading_book_details)
+                message = "Loading book details..."
             )
         }
         
         state.error != null && state.book == null -> {
             IReaderErrorScreen(
-                message = state.error,
+                message = state.error ?: "An error occurred",
                 actions = listOf(
                     ErrorScreenAction(
-                        title = localize(Res.string.retry),
+                        title = "Retry",
                         icon = Icons.Default.Refresh,
                         onClick = {
-                            screenModel.retry()
-                            screenModel.clearError()
+                            vm.retry()
+                            vm.clearError()
                         }
                     )
                 )
@@ -156,7 +148,7 @@ private fun BookDetailContent(
                         BookDetailFab(
                             book = state.book,
                             source = state.catalogSource?.source,
-                            onFavorite = screenModel::toggleFavorite,
+                            onFavorite = vm::toggleFavorite,
                             onWebView = onWebView
                         )
                     }
@@ -168,7 +160,7 @@ private fun BookDetailContent(
                             onDownload = { /* TODO: Implement download */ },
                             onBookmark = { /* TODO: Implement bookmark */ },
                             onMarkAsRead = { /* TODO: Implement mark as read */ },
-                            onClearSelection = screenModel::clearSelection
+                            onClearSelection = vm::clearSelection
                         )
                     }
                 }
@@ -186,7 +178,7 @@ private fun BookDetailContent(
                                 source = state.catalogSource?.source,
                                 scrollState = scrollState,
                                 hideBackdrop = hideBackdrop,
-                                onFavorite = screenModel::toggleFavorite,
+                                onFavorite = vm::toggleFavorite,
                                 onWebView = onWebView,
                                 appbarPadding = appbarPadding
                             )
@@ -201,9 +193,9 @@ private fun BookDetailContent(
                             searchMode = state.searchMode,
                             filters = state.filters,
                             sorting = state.sorting,
-                            onToggleSearch = screenModel::toggleSearchMode,
-                            onToggleFilter = screenModel::toggleFilter,
-                            onUpdateSorting = screenModel::updateSorting
+                            onToggleSearch = vm::toggleSearchMode,
+                            onToggleFilter = vm::toggleFilter,
+                            onUpdateSorting = vm::updateSorting
                         )
                     }
                     
@@ -213,9 +205,9 @@ private fun BookDetailContent(
                             AppTextField(
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                                 query = state.searchQuery ?: "",
-                                onValueChange = screenModel::updateSearchQuery,
+                                onValueChange = vm::updateSearchQuery,
                                 onConfirm = {
-                                    screenModel.toggleSearchMode()
+                                    vm.toggleSearchMode()
                                     keyboardController?.hide()
                                     focusManager.clearFocus()
                                 }
@@ -250,7 +242,7 @@ private fun BookDetailContent(
                             onItemClick = { onChapterClick(chapter) },
                             isLastRead = chapter.id == state.lastReadChapterId,
                             isSelected = chapter.id in state.selectedChapterIds,
-                            onLongClick = { screenModel.toggleChapterSelection(chapter.id) },
+                            onLongClick = { vm.toggleChapterSelection(chapter.id) },
                             showNumber = true // TODO: Get from preferences
                         )
                         
@@ -274,9 +266,9 @@ private fun BookDetailContent(
                             ) {
                                 Text(
                                     text = if (state.searchMode && !state.searchQuery.isNullOrBlank()) {
-                                        localize(Res.string.no_chapters_found_for_query)
+                                        "No chapters found for query"
                                     } else {
-                                        localize(Res.string.no_chapters_available)
+                                        "No chapters available"
                                     },
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -353,7 +345,7 @@ private fun BookDetailTopBar(
             IconButton(onClick = onNavigateUp) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = localize(Res.string.navigate_up)
+                    contentDescription = "Navigate up"
                 )
             }
         },
@@ -374,18 +366,18 @@ private fun BookDetailFab(
             Icon(
                 imageVector = if (book.favorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                 contentDescription = if (book.favorite) {
-                    localize(Res.string.remove_from_library)
+                    "Remove from library"
                 } else {
-                    localize(Res.string.add_to_library)
+                    "Add to library"
                 }
             )
         },
         text = {
             Text(
                 text = if (book.favorite) {
-                    localize(Res.string.in_library)
+                    "In Library"
                 } else {
-                    localize(Res.string.add_to_library)
+                    "Add to Library"
                 }
             )
         }
@@ -409,7 +401,7 @@ private fun BookDetailBottomBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = localize(Res.string.selected_count, selectedCount),
+                text = "$selectedCount selected",
                 style = MaterialTheme.typography.bodyMedium
             )
             
@@ -419,28 +411,28 @@ private fun BookDetailBottomBar(
                 IconButton(onClick = onDownload) {
                     Icon(
                         imageVector = Icons.Default.Download,
-                        contentDescription = localize(Res.string.download)
+                        contentDescription = "Download"
                     )
                 }
                 
                 IconButton(onClick = onBookmark) {
                     Icon(
                         imageVector = Icons.Default.Bookmark,
-                        contentDescription = localize(Res.string.bookmark)
+                        contentDescription = "Bookmark"
                     )
                 }
                 
                 IconButton(onClick = onMarkAsRead) {
                     Icon(
                         imageVector = Icons.Default.DoneAll,
-                        contentDescription = localize(Res.string.mark_as_read)
+                        contentDescription = "Mark as read"
                     )
                 }
                 
                 IconButton(onClick = onClearSelection) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = localize(Res.string.clear_selection)
+                        contentDescription = "Clear selection"
                     )
                 }
             }

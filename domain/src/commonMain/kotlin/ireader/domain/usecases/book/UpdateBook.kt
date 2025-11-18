@@ -1,8 +1,8 @@
 package ireader.domain.usecases.book
 
+import ireader.core.log.IReaderLog
 import ireader.domain.data.repository.consolidated.BookRepository
 import ireader.domain.models.updates.BookUpdate
-import ireader.presentation.core.log.IReaderLog
 
 /**
  * Use case for updating book information following Mihon's pattern.

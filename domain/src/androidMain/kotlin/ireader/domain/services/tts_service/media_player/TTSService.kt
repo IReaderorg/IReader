@@ -36,7 +36,7 @@ import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.i18n.LocalizeHelper
 import ireader.i18n.R
 import kotlinx.coroutines.*
-import kotlinx.datetime.Clock
+import  kotlin.time.Clock
 import org.koin.android.ext.android.inject
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime

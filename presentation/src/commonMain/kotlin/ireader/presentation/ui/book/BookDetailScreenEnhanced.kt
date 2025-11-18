@@ -2,6 +2,7 @@ package ireader.presentation.ui.book
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -26,7 +27,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.model.rememberScreenModel
 import ireader.core.source.Source
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
@@ -37,13 +37,15 @@ import ireader.presentation.core.ui.IReaderFastScrollLazyColumn
 import ireader.presentation.core.ui.IReaderLoadingScreen
 import ireader.presentation.core.ui.IReaderScaffold
 import ireader.presentation.core.ui.TwoPanelBoxStandalone
+import ireader.presentation.core.ui.getIViewModel
 import ireader.presentation.ui.book.components.*
-import ireader.presentation.ui.book.viewmodel.BookDetailScreenModelNew
+import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.components.ChapterRow
 import ireader.presentation.ui.component.isTableUi
 import ireader.presentation.ui.component.reusable_composable.AppTextField
+import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
-
+import org.koin.compose.koinInject
 /**
  * Enhanced BookDetailScreen following Mihon's patterns with StateScreenModel and responsive design.
  * Replaces the current ViewModel-based approach with predictable state management.
@@ -61,16 +63,9 @@ fun BookDetailScreenEnhanced(
     onCopyTitle: (String) -> Unit,
     appbarPadding: Dp = 0.dp,
 ) {
-    val screenModel = rememberScreenModel { 
-        BookDetailScreenModelNew(
-            bookId = bookId,
-            getBookUseCases = get(),
-            getChapterUseCase = get(),
-            insertUseCases = get()
-        )
-    }
+    val vm: BookDetailViewModel = getIViewModel<BookDetailViewModel>(parameters = { parametersOf(BookDetailViewModel.Param(bookId)) })
     
-    val state by screenModel.state.collectAsState()
+    val book = vm.booksState.book
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val scrollState = rememberLazyListState()
@@ -81,35 +76,54 @@ fun BookDetailScreenEnhanced(
     IReaderScaffold(
         topBar = { scrollBehavior ->
             BookDetailTopAppBar(
-                title = state.book?.title ?: "",
-                onNavigateUp = onNavigateUp,
+                source = vm.catalogSource?.source,
+                onDownload = { vm.downloadChapters() },
+                onRefresh = { 
+                    book?.let { vm.scope.launch { vm.getRemoteChapterDetail(it, vm.catalogSource) } }
+                },
+                onPopBackStack = onNavigateUp,
+                onCommand = { /* TODO: Handle commands */ },
+                onShare = { vm.shareBook() },
                 scrollBehavior = scrollBehavior,
-                onSearch = { screenModel.toggleSearchMode() },
-                isSearchMode = state.isSearchMode,
-                onWebView = onWebViewClick,
+                state = vm,
+                onClickCancelSelection = { vm.selection.clear() },
+                onClickSelectAll = { 
+                    vm.selection.clear()
+                    vm.selection.addAll(vm.chapters.map { it.id })
+                },
+                onClickInvertSelection = { 
+                    val currentSelection = vm.selection.toSet()
+                    vm.selection.clear()
+                    vm.selection.addAll(vm.chapters.filter { it.id !in currentSelection }.map { it.id })
+                },
+                onSelectBetween = { 
+                    if (vm.selection.size >= 2) {
+                        val indices = vm.selection.mapNotNull { id -> vm.chapters.indexOfFirst { it.id == id }.takeIf { it >= 0 } }
+                        if (indices.size >= 2) {
+                            val min = indices.minOrNull() ?: 0
+                            val max = indices.maxOrNull() ?: 0
+                            vm.selection.clear()
+                            vm.selection.addAll(vm.chapters.subList(min, max + 1).map { it.id })
+                        }
+                    }
+                },
+                paddingValues = PaddingValues(0.dp),
+                onInfo = { vm.showDialog = true },
+                onArchive = { book?.let { vm.archiveBook(it) } },
+                onUnarchive = { book?.let { vm.unarchiveBook(it) } },
+                isArchived = book?.isArchived ?: false,
+                onShareBook = { vm.shareBook() },
+                onExportEpub = { vm.showEpubExportDialog = true }
             )
         }
     ) { paddingValues ->
         when {
-            state.isLoading -> {
+            vm.detailIsLoading && book == null -> {
                 IReaderLoadingScreen(
                     modifier = Modifier.padding(paddingValues)
                 )
             }
-            state.error != null -> {
-                IReaderErrorScreen(
-                    message = state.error!!,
-                    modifier = Modifier.padding(paddingValues),
-                    actions = listOf(
-                        ErrorScreenAction(
-                            title = "Retry",
-                            icon = Icons.Default.Refresh,
-                            onClick = { screenModel.retry() }
-                        )
-                    )
-                )
-            }
-            state.book != null -> {
+            book != null -> {
                 if (isTablet) {
                     // Tablet layout with two panels
                     TwoPanelBoxStandalone(
@@ -117,32 +131,38 @@ fun BookDetailScreenEnhanced(
                         isExpandedWidth = true,
                         startContent = {
                             BookDetailInfoPanel(
-                                book = state.book!!,
-                                source = state.source,
-                                onFavoriteClick = { screenModel.toggleBookFavorite() },
+                                book = book,
+                                source = vm.catalogSource?.source,
+                                onFavoriteClick = { vm.toggleInLibrary(book) },
                                 onWebViewClick = onWebViewClick,
                                 onCopyTitle = onCopyTitle,
-                                isTogglingFavorite = state.isTogglingFavorite,
-                                onMigrateClick = { screenModel.showMigrationDialog() },
-                                onExportClick = { screenModel.showEpubExportDialog() },
-                                onEditInfoClick = { screenModel.showEditInfoDialog() }
+                                isTogglingFavorite = vm.inLibraryLoading,
+                                onMigrateClick = { vm.loadMigrationSources() },
+                                onExportClick = { vm.showEpubExportDialog = true },
+                                onEditInfoClick = { vm.showDialog = true }
                             )
                         },
                         endContent = {
                             BookDetailChapterPanel(
-                                chapters = state.chapters,
-                                searchQuery = state.searchQuery,
-                                isSearchMode = state.isSearchMode,
-                                selectedChapterIds = state.selectedChapterIds,
-                                filters = state.filters,
-                                sorting = state.sorting,
-                                chapterDisplayMode = state.chapterDisplayMode,
+                                chapters = vm.chapters,
+                                searchQuery = vm.query,
+                                isSearchMode = vm.searchMode,
+                                selectedChapterIds = vm.selection.toSet(),
+                                filters = vm.filters.value,
+                                sorting = vm.sorting.value,
+                                chapterDisplayMode = vm.layout,
                                 scrollState = scrollState,
                                 onChapterClick = onChapterClick,
-                                onChapterLongClick = { screenModel.toggleChapterSelection(it.id) },
-                                onSearchQueryChange = { screenModel.updateSearchQuery(it) },
-                                onFilterToggle = { screenModel.toggleFilter(it) },
-                                onSortChange = { screenModel.updateSorting(it) },
+                                onChapterLongClick = { 
+                                    if (it.id in vm.selection) {
+                                        vm.selection.remove(it.id)
+                                    } else {
+                                        vm.selection.add(it.id)
+                                    }
+                                },
+                                onSearchQueryChange = { vm.query = it },
+                                onFilterToggle = { vm.toggleFilter(it) },
+                                onSortChange = { vm.toggleSort(it) },
                                 focusManager = focusManager,
                                 keyboardController = keyboardController
                             )
@@ -151,28 +171,34 @@ fun BookDetailScreenEnhanced(
                 } else {
                     // Phone layout with single panel
                     BookDetailContent(
-                        book = state.book!!,
-                        chapters = state.chapters,
-                        source = state.source,
-                        searchQuery = state.searchQuery,
-                        isSearchMode = state.isSearchMode,
-                        selectedChapterIds = state.selectedChapterIds,
-                        filters = state.filters,
-                        sorting = state.sorting,
-                        chapterDisplayMode = state.chapterDisplayMode,
+                        book = book,
+                        chapters = vm.chapters,
+                        source = vm.catalogSource?.source,
+                        searchQuery = vm.query,
+                        isSearchMode = vm.searchMode,
+                        selectedChapterIds = vm.selection.toSet(),
+                        filters = vm.filters.value,
+                        sorting = vm.sorting.value,
+                        chapterDisplayMode = vm.layout,
                         scrollState = scrollState,
                         onChapterClick = onChapterClick,
-                        onChapterLongClick = { screenModel.toggleChapterSelection(it.id) },
-                        onFavoriteClick = { screenModel.toggleBookFavorite() },
+                        onChapterLongClick = { 
+                            if (it.id in vm.selection) {
+                                vm.selection.remove(it.id)
+                            } else {
+                                vm.selection.add(it.id)
+                            }
+                        },
+                        onFavoriteClick = { vm.toggleInLibrary(book) },
                         onWebViewClick = onWebViewClick,
                         onCopyTitle = onCopyTitle,
-                        onSearchQueryChange = { screenModel.updateSearchQuery(it) },
-                        onFilterToggle = { screenModel.toggleFilter(it) },
-                        onSortChange = { screenModel.updateSorting(it) },
-                        onMigrateClick = { screenModel.showMigrationDialog() },
-                        onExportClick = { screenModel.showEpubExportDialog() },
-                        onEditInfoClick = { screenModel.showEditInfoDialog() },
-                        isTogglingFavorite = state.isTogglingFavorite,
+                        onSearchQueryChange = { vm.query = it },
+                        onFilterToggle = { vm.toggleFilter(it) },
+                        onSortChange = { vm.toggleSort(it) },
+                        onMigrateClick = { vm.loadMigrationSources() },
+                        onExportClick = { vm.showEpubExportDialog = true },
+                        onEditInfoClick = { vm.showDialog = true },
+                        isTogglingFavorite = vm.inLibraryLoading,
                         focusManager = focusManager,
                         keyboardController = keyboardController,
                         appbarPadding = appbarPadding
@@ -182,28 +208,28 @@ fun BookDetailScreenEnhanced(
         }
 
         // Dialogs
-        if (state.showMigrationDialog) {
+        if (vm.showMigrationDialog) {
             MigrationSourceDialog(
-                sources = emptyList(), // TODO: Load migration sources
-                onSourceSelected = { /* TODO: Handle migration */ },
-                onDismiss = { screenModel.hideMigrationDialog() }
+                sources = vm.availableMigrationSources,
+                onSourceSelected = { vm.startMigration(it.sourceId) },
+                onDismiss = { vm.showMigrationDialog = false }
             )
         }
 
-        if (state.showEpubExportDialog) {
+        if (vm.showEpubExportDialog && book != null) {
             EpubExportDialog(
-                book = state.book!!,
-                chapters = state.chapters,
-                onExport = { /* TODO: Handle export */ },
-                onDismiss = { screenModel.hideEpubExportDialog() }
+                book = book,
+                chapters = vm.chapters,
+                onExport = { vm.exportAsEpub(it) },
+                onDismiss = { vm.showEpubExportDialog = false }
             )
         }
 
-        if (state.showEditInfoDialog) {
+        if (vm.showDialog && book != null) {
             EditInfoAlertDialog(
-                onStateChange = { screenModel.hideEditInfoDialog() },
-                book = state.book!!,
-                onConfirm = { /* TODO: Handle edit */ }
+                onStateChange = { vm.showDialog = it },
+                book = book,
+                onConfirm = { vm.scope.launch { vm.insertUseCases.insertBook(it) } }
             )
         }
     }
@@ -230,11 +256,13 @@ private fun BookDetailInfoPanel(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            BookHeaderImage(
-                book = book,
-                scrollProgress = 0f,
-                hideBackdrop = false
-            )
+            Box {
+                BookHeaderImage(
+                    book = book,
+                    scrollProgress = 0f,
+                    hideBackdrop = false
+                )
+            }
         }
         
         item {
@@ -253,7 +281,7 @@ private fun BookDetailInfoPanel(
                 source = source,
                 onFavorite = onFavoriteClick,
                 onWebView = onWebViewClick,
-                onMigrate = onMigrateClick,
+                onMigrate = { onMigrateClick() },
                 useFab = false
             )
         }
@@ -293,7 +321,7 @@ private fun BookDetailChapterPanel(
     onChapterLongClick: (Chapter) -> Unit,
     onSearchQueryChange: (String?) -> Unit,
     onFilterToggle: (ireader.presentation.ui.book.viewmodel.ChaptersFilters.Type) -> Unit,
-    onSortChange: (ireader.presentation.ui.book.viewmodel.ChapterSort) -> Unit,
+    onSortChange: (ireader.presentation.ui.book.viewmodel.ChapterSort.Type) -> Unit,
     focusManager: androidx.compose.ui.focus.FocusManager,
     keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?
 ) {
@@ -368,7 +396,7 @@ private fun BookDetailContent(
     onCopyTitle: (String) -> Unit,
     onSearchQueryChange: (String?) -> Unit,
     onFilterToggle: (ireader.presentation.ui.book.viewmodel.ChaptersFilters.Type) -> Unit,
-    onSortChange: (ireader.presentation.ui.book.viewmodel.ChapterSort) -> Unit,
+    onSortChange: (ireader.presentation.ui.book.viewmodel.ChapterSort.Type) -> Unit,
     onMigrateClick: () -> Unit,
     onExportClick: () -> Unit,
     onEditInfoClick: () -> Unit,
@@ -429,14 +457,7 @@ private fun BookDetailContent(
                 )
             }
             
-            item {
-                ChapterBar(
-                    vm = null, // TODO: Adapt to new pattern
-                    chapters = chapters,
-                    onMap = { },
-                    onSortClick = { }
-                )
-            }
+            // Chapter bar removed - functionality integrated into filter bar
             
             item {
                 ChapterListFilterBar(
@@ -481,18 +502,6 @@ private fun BookDetailContent(
             }
         }
 
-        // Bottom bar for selected chapters
-        if (selectedChapterIds.isNotEmpty()) {
-            ChapterDetailBottomBar(
-                vm = null, // TODO: Adapt to new pattern
-                onDownload = { },
-                onBookmark = { },
-                onMarkAsRead = { },
-                visible = true,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .navigationBarsPadding()
-            )
-        }
+        // Bottom bar removed - handled by parent scaffold
     }
 }

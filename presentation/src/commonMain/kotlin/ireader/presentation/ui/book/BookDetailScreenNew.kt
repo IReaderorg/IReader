@@ -19,11 +19,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.getScreenModel
-import ireader.presentation.core.components.IReaderErrorScreen
-import ireader.presentation.core.components.IReaderLoadingScreen
-import ireader.presentation.ui.book.viewmodel.BookDetailScreenModelNew
+import ireader.presentation.core.ui.IReaderLoadingScreen
+import ireader.presentation.core.ui.getIViewModel
+import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
+import ireader.presentation.ui.core.ui.EmptyScreen
+import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
 
 /**
@@ -37,32 +39,34 @@ data class BookDetailScreenNew(
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
-        val screenModel = getScreenModel<BookDetailScreenModelNew> { parametersOf(bookId) }
-        val state by screenModel.state.collectAsState()
+        val vm: BookDetailViewModel = getIViewModel(parameters = { parametersOf(BookDetailViewModel.Param(bookId)) })
+        val book = vm.booksState.book
 
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text(state.book?.title ?: "Loading...") },
+                    title = { Text(book?.title ?: "Loading...") },
                     actions = {
-                        IconButton(onClick = { screenModel.refresh() }) {
+                        IconButton(onClick = { 
+                            book?.let { vm.scope.launch { vm.getRemoteChapterDetail(it, vm.catalogSource) } }
+                        }) {
                             Icon(Icons.Default.Refresh, contentDescription = "Refresh")
                         }
                     }
                 )
             },
             floatingActionButton = {
-                state.book?.let { book ->
+                book?.let { currentBook ->
                     ExtendedFloatingActionButton(
-                        onClick = { screenModel.toggleBookFavorite() },
+                        onClick = { vm.toggleInLibrary(currentBook) },
                         icon = {
                             Icon(
-                                if (book.favorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                contentDescription = if (book.favorite) "Remove from Library" else "Add to Library"
+                                if (currentBook.favorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = if (currentBook.favorite) "Remove from Library" else "Add to Library"
                             )
                         },
                         text = {
-                            Text(if (book.favorite) "Remove from Library" else "Add to Library")
+                            Text(if (currentBook.favorite) "Remove from Library" else "Add to Library")
                         }
                     )
                 }
@@ -74,24 +78,22 @@ data class BookDetailScreenNew(
                     .padding(paddingValues)
             ) {
                 when {
-                    state.isLoading -> {
-                        IReaderLoadingScreen()
-                    }
-                    
-                    state.error != null -> {
-                        IReaderErrorScreen(
-                            message = state.error!!,
-                            onRetry = { screenModel.retry() },
-                            onDismiss = { screenModel.clearError() }
+                    vm.booksState.book == null && !vm.detailIsLoading -> {
+                        EmptyScreen(
+                            text = "Book not found"
                         )
                     }
                     
-                    state.book != null -> {
+                    vm.booksState.book == null -> {
+                        IReaderLoadingScreen()
+                    }
+                    
+                    book != null -> {
                         BookDetailContent(
-                            book = state.book!!,
-                            chapters = state.chapters,
-                            isRefreshing = state.isRefreshing,
-                            isTogglingFavorite = state.isTogglingFavorite
+                            book = book,
+                            chapters = vm.chapters,
+                            isRefreshing = vm.detailIsLoading,
+                            isTogglingFavorite = vm.inLibraryLoading
                         )
                     }
                 }
@@ -111,41 +113,41 @@ private fun BookDetailContent(
         // Book information
         Text(
             text = "Title: ${book.title}",
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(1.dp)
         )
         
         if (book.author.isNotBlank()) {
             Text(
                 text = "Author: ${book.author}",
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 1.dp)
             )
         }
         
         if (book.description.isNotBlank()) {
             Text(
                 text = "Description: ${book.description}",
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(1.dp)
             )
         }
         
         // Chapter count
         Text(
             text = "Chapters: ${chapters.size}",
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(1.dp)
         )
         
         // Status indicators
         if (isRefreshing) {
             Text(
                 text = "Refreshing...",
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(1.dp)
             )
         }
         
         if (isTogglingFavorite) {
             Text(
                 text = "Updating favorite status...",
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(1.dp)
             )
         }
     }

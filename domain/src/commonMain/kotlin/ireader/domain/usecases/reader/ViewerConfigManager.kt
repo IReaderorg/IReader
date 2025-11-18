@@ -51,9 +51,18 @@ class ViewerConfigManager(
             volumeKeyNavigation = readerPreferences.readWithVolumeKeys().get(),
             volumeKeyInverted = readerPreferences.readWithVolumeKeysInverted().get(),
             longTapEnabled = readerPreferences.readWithLongTap().get(),
-            tappingInvertMode = readerPreferences.pagerNavInverted().get(),
+            tappingInvertMode = convertToTappingInvertMode(readerPreferences.pagerNavInverted().get()),
             showNavigationOverlay = readerPreferences.showNavigationOverlayOnStart().get()
         )
+    }
+    
+    private fun convertToTappingInvertMode(prefMode: ireader.domain.preferences.prefs.TappingInvertMode): TappingInvertMode {
+        return when (prefMode) {
+            ireader.domain.preferences.prefs.TappingInvertMode.NONE -> TappingInvertMode.NONE
+            ireader.domain.preferences.prefs.TappingInvertMode.HORIZONTAL -> TappingInvertMode.HORIZONTAL
+            ireader.domain.preferences.prefs.TappingInvertMode.VERTICAL -> TappingInvertMode.VERTICAL
+            ireader.domain.preferences.prefs.TappingInvertMode.BOTH -> TappingInvertMode.BOTH
+        }
     }
 
     /**
@@ -68,7 +77,15 @@ class ViewerConfigManager(
             readerPreferences.cropBorders().changes(),
             readerPreferences.dualPageSplitPaged().changes(),
             readerPreferences.landscapeZoom().changes()
-        ) { readerMode, orientation, scaleType, zoomStart, cropBorders, dualPage, landscapeZoom ->
+        ) { values ->
+            val readerMode = values[0] as Int
+            val orientation = values[1] as Int
+            val scaleType = values[2] as Int
+            val zoomStart = values[3] as Int
+            val cropBorders = values[4] as Boolean
+            val dualPage = values[5] as Boolean
+            val landscapeZoom = values[6] as Boolean
+            
             ViewerConfig(
                 readerMode = convertToReaderMode(readerMode),
                 orientation = convertToReaderOrientation(orientation),
@@ -107,8 +124,17 @@ class ViewerConfigManager(
         readerPreferences.readWithVolumeKeys().set(config.volumeKeyNavigation)
         readerPreferences.readWithVolumeKeysInverted().set(config.volumeKeyInverted)
         readerPreferences.readWithLongTap().set(config.longTapEnabled)
-        readerPreferences.pagerNavInverted().set(config.tappingInvertMode)
+        readerPreferences.pagerNavInverted().set(convertFromTappingInvertMode(config.tappingInvertMode))
         readerPreferences.showNavigationOverlayOnStart().set(config.showNavigationOverlay)
+    }
+    
+    private fun convertFromTappingInvertMode(mode: TappingInvertMode): ireader.domain.preferences.prefs.TappingInvertMode {
+        return when (mode) {
+            TappingInvertMode.NONE -> ireader.domain.preferences.prefs.TappingInvertMode.NONE
+            TappingInvertMode.HORIZONTAL -> ireader.domain.preferences.prefs.TappingInvertMode.HORIZONTAL
+            TappingInvertMode.VERTICAL -> ireader.domain.preferences.prefs.TappingInvertMode.VERTICAL
+            TappingInvertMode.BOTH -> ireader.domain.preferences.prefs.TappingInvertMode.BOTH
+        }
     }
 
     /**

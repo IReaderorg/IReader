@@ -124,11 +124,12 @@ class BookDetailScreenModel(
                 book = updatedBook,
                 catalog = catalog,
                 onError = { error ->
-                    logError("Failed to fetch remote book details", error)
+                    val errorMessage = error?.toString() ?: "Failed to load book details"
+                    logError("Failed to fetch remote book details", Exception(errorMessage))
                     updateState { 
                         it.copy(
                             isLoading = false,
-                            error = error?.toString() ?: "Failed to load book details"
+                            error = errorMessage
                         )
                     }
                 },
@@ -146,11 +147,12 @@ class BookDetailScreenModel(
                 book = updatedBook,
                 catalog = catalog,
                 onError = { error ->
-                    logError("Failed to fetch chapters", error)
+                    val errorMessage = error?.toString() ?: "Failed to load chapters"
+                    logError("Failed to fetch chapters", Exception(errorMessage))
                     updateState { 
                         it.copy(
                             isChaptersLoading = false,
-                            error = error?.toString() ?: "Failed to load chapters"
+                            error = errorMessage
                         )
                     }
                 },
@@ -359,17 +361,15 @@ private fun List<Chapter>.filteredAndSorted(
     
     for (filter in activeFilters) {
         val filterFn: (Chapter) -> Boolean = when (filter.type) {
-            ChaptersFilters.Type.Unread -> { !it.read }
-            ChaptersFilters.Type.Read -> { it.read }
-            ChaptersFilters.Type.Bookmarked -> { it.bookmark }
-            ChaptersFilters.Type.Downloaded -> { it.content.joinToString("").isNotBlank() }
-            ChaptersFilters.Type.Duplicate -> {
+            ChaptersFilters.Type.Unread -> { chapter -> !chapter.read }
+            ChaptersFilters.Type.Read -> { chapter -> chapter.read }
+            ChaptersFilters.Type.Bookmarked -> { chapter -> chapter.bookmark }
+            ChaptersFilters.Type.Downloaded -> { chapter -> chapter.content.joinToString("").isNotBlank() }
+            ChaptersFilters.Type.Duplicate -> { chapter ->
                 // Simple duplicate detection by name similarity
-                { chapter ->
-                    this.any { other ->
-                        other.id != chapter.id && 
-                        other.name.trim().equals(chapter.name.trim(), ignoreCase = true)
-                    }
+                result.any { other ->
+                    other.id != chapter.id && 
+                    other.name.trim().equals(chapter.name.trim(), ignoreCase = true)
                 }
             }
         }
@@ -383,58 +383,42 @@ private fun List<Chapter>.filteredAndSorted(
     
     // Apply sorting
     result = when (sorting.type) {
-        ChapterSort.Type.Source -> {
+        ChapterSort.Type.Default -> {
             if (sorting.isAscending) result.sortedBy { it.sourceOrder }
             else result.sortedByDescending { it.sourceOrder }
         }
-        ChapterSort.Type.Number -> {
-            if (sorting.isAscending) result.sortedBy { it.chapterNumber }
-            else result.sortedByDescending { it.chapterNumber }
+        ChapterSort.Type.ByName -> {
+            if (sorting.isAscending) result.sortedBy { it.name }
+            else result.sortedByDescending { it.name }
         }
-        ChapterSort.Type.UploadDate -> {
+        ChapterSort.Type.BySource -> {
+            if (sorting.isAscending) result.sortedBy { it.sourceOrder }
+            else result.sortedByDescending { it.sourceOrder }
+        }
+        ChapterSort.Type.ByChapterNumber -> {
+            if (sorting.isAscending) result.sortedBy { it.number }
+            else result.sortedByDescending { it.number }
+        }
+        ChapterSort.Type.DateUpload -> {
             if (sorting.isAscending) result.sortedBy { it.dateUpload }
             else result.sortedByDescending { it.dateUpload }
         }
-        ChapterSort.Type.FetchDate -> {
+        ChapterSort.Type.DateFetched -> {
             if (sorting.isAscending) result.sortedBy { it.dateFetch }
             else result.sortedByDescending { it.dateFetch }
+        }
+        ChapterSort.Type.Bookmark -> {
+            if (sorting.isAscending) result.sortedBy { it.bookmark }
+            else result.sortedByDescending { it.bookmark }
+        }
+        ChapterSort.Type.Read -> {
+            if (sorting.isAscending) result.sortedBy { it.read }
+            else result.sortedByDescending { it.read }
         }
     }
     
     return result
 }
 
-// Data classes for filters and sorting (these should be moved to domain layer)
-data class ChaptersFilters(
-    val type: Type,
-    val value: Value = Value.Missing
-) {
-    enum class Type {
-        Unread, Read, Bookmarked, Downloaded, Duplicate
-    }
-    
-    enum class Value {
-        Included, Excluded, Missing
-    }
-    
-    companion object {
-        fun getDefault(showAll: Boolean = true): List<ChaptersFilters> {
-            return Type.values().map { type ->
-                ChaptersFilters(type, if (showAll) Value.Missing else Value.Excluded)
-            }
-        }
-    }
-}
-
-data class ChapterSort(
-    val type: Type,
-    val isAscending: Boolean = true
-) {
-    enum class Type {
-        Source, Number, UploadDate, FetchDate
-    }
-    
-    companion object {
-        val default = ChapterSort(Type.Source, true)
-    }
-}
+// Using ChaptersFilters and ChapterSort from separate files
+// See ChapterFilters.kt and ChapterSort.kt

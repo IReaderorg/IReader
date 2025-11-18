@@ -1,11 +1,13 @@
 package ireader.data.repository.consolidated
 
+import ireader.core.log.IReaderLog
+import ireader.data.chapter.chapterMapper
 import ireader.data.core.DatabaseHandler
+import ireader.data.util.toDB
 import ireader.domain.data.repository.consolidated.ChapterRepository
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.errors.IReaderError
 import ireader.domain.models.updates.ChapterUpdate
-import ireader.presentation.core.log.IReaderLog
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 
@@ -62,7 +64,7 @@ class ChapterRepositoryImpl(
     override suspend fun getLastReadChapter(bookId: Long): Chapter? {
         return try {
             handler.awaitOneOrNull { 
-                chapterQueries.getLastReadChapter(bookId, chapterMapper) 
+                chapterQueries.getLastChapter(bookId, chapterMapper) 
             }
         } catch (e: Exception) {
             IReaderLog.error("Failed to get last read chapter for book: $bookId", e, "ChapterRepository")
@@ -72,7 +74,7 @@ class ChapterRepositoryImpl(
 
     override fun getLastReadChapterAsFlow(bookId: Long): Flow<Chapter?> {
         return handler.subscribeToOneOrNull { 
-            chapterQueries.getLastReadChapter(bookId, chapterMapper) 
+            chapterQueries.getLastChapter(bookId, chapterMapper) 
         }.catch { e ->
             IReaderLog.error("Failed to subscribe to last read chapter for book: $bookId", e, "ChapterRepository")
             emit(null)
@@ -81,27 +83,29 @@ class ChapterRepositoryImpl(
 
     override suspend fun addAll(chapters: List<Chapter>): List<Chapter> {
         return try {
-            val insertedChapters = mutableListOf<Chapter>()
-            handler.await(inTransaction = true) {
+            handler.awaitListAsync(inTransaction = true) {
                 chapters.forEach { chapter ->
-                    val id = chapterQueries.insertChapter(
+                    chapterQueries.upsert(
+                        id = chapter.id.toDB(),
                         bookId = chapter.bookId,
-                        url = chapter.url,
+                        key = chapter.key,
                         name = chapter.name,
-                        scanlator = chapter.scanlator,
                         read = chapter.read,
                         bookmark = chapter.bookmark,
-                        lastPageRead = chapter.lastPageRead,
-                        chapterNumber = chapter.chapterNumber,
-                        sourceOrder = chapter.sourceOrder,
-                        dateFetch = chapter.dateFetch,
-                        dateUpload = chapter.dateUpload
+                        last_page_read = chapter.lastPageRead,
+                        chapter_number = chapter.number,
+                        source_order = chapter.sourceOrder,
+                        date_fetch = chapter.dateFetch,
+                        date_upload = chapter.dateUpload,
+                        translator = chapter.translator,
+                        type = chapter.type,
+                        content = chapter.content
                     )
-                    insertedChapters.add(chapter.copy(id = id))
                 }
+                chapterQueries.selectLastInsertedRowId()
             }
             IReaderLog.debug("Successfully inserted ${chapters.size} chapters", "ChapterRepository")
-            insertedChapters
+            chapters
         } catch (e: Exception) {
             IReaderLog.error("Failed to insert ${chapters.size} chapters", e, "ChapterRepository")
             emptyList()
@@ -138,7 +142,7 @@ class ChapterRepositoryImpl(
         return try {
             handler.await(inTransaction = true) {
                 chapterIds.forEach { chapterId ->
-                    chapterQueries.deleteChapter(chapterId)
+                    chapterQueries.delete(chapterId)
                 }
             }
             IReaderLog.debug("Successfully removed ${chapterIds.size} chapters", "ChapterRepository")
@@ -163,20 +167,23 @@ class ChapterRepositoryImpl(
     }
 
     private suspend fun partialUpdate(update: ChapterUpdate) {
+        // Get existing chapter and merge updates
+        val existing = getChapterById(update.id) ?: return
+        
         handler.await {
-            chapterQueries.updatePartial(
-                id = update.id,
-                bookId = update.bookId,
-                url = update.url,
-                name = update.name,
-                scanlator = update.scanlator,
-                read = update.read,
-                bookmark = update.bookmark,
-                lastPageRead = update.lastPageRead,
-                chapterNumber = update.chapterNumber,
-                sourceOrder = update.sourceOrder,
-                dateFetch = update.dateFetch,
-                dateUpload = update.dateUpload
+            chapterQueries.update(
+                chapterId = update.id,
+                mangaId = update.bookId ?: existing.bookId,
+                url = update.key ?: existing.key,
+                name = update.name ?: existing.name,
+                scanlator = update.translator ?: existing.translator,
+                read = update.read ?: existing.read,
+                bookmark = update.bookmark ?: existing.bookmark,
+                lastPageRead = update.lastPageRead ?: existing.lastPageRead,
+                chapterNumber = (update.number ?: existing.number).toDouble(),
+                sourceOrder = update.sourceOrder ?: existing.sourceOrder,
+                dateFetch = update.dateFetch ?: existing.dateFetch,
+                dateUpload = update.dateUpload ?: existing.dateUpload
             )
         }
     }

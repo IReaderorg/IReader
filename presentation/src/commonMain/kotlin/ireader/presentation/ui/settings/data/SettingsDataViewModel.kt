@@ -5,8 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.core.prefs.PreferenceStore
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 
 /**
  * ViewModel for the enhanced data and storage settings screen.
@@ -17,9 +19,9 @@ class SettingsDataViewModel(
 ) : BaseViewModel() {
     
     // Cache size states (in bytes)
-    val imageCacheSize: StateFlow<Long> = preferenceStore.getLong("image_cache_size", 0L).asStateFlow()
-    val chapterCacheSize: StateFlow<Long> = preferenceStore.getLong("chapter_cache_size", 0L).asStateFlow()
-    val networkCacheSize: StateFlow<Long> = preferenceStore.getLong("network_cache_size", 0L).asStateFlow()
+    val imageCacheSize: StateFlow<Long> = preferenceStore.getLong("image_cache_size", 0L).stateIn(scope)
+    val chapterCacheSize: StateFlow<Long> = preferenceStore.getLong("chapter_cache_size", 0L).stateIn(scope)
+    val networkCacheSize: StateFlow<Long> = preferenceStore.getLong("network_cache_size", 0L).stateIn(scope)
     
     // Total cache size (computed from individual caches)
     val totalCacheSize: StateFlow<Long> = combine(
@@ -28,21 +30,21 @@ class SettingsDataViewModel(
         networkCacheSize
     ) { image, chapter, network ->
         image + chapter + network
-    }.asStateFlow()
+    }.stateIn(scope, SharingStarted.WhileSubscribed(5000), 0L)
     
     // Cache management preferences
-    val autoCleanupEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("auto_cleanup_enabled", true).asStateFlow()
-    val autoCleanupInterval: StateFlow<Int> = preferenceStore.getInt("auto_cleanup_interval", 7).asStateFlow()
-    val maxCacheSize: StateFlow<Int> = preferenceStore.getInt("max_cache_size", 1000).asStateFlow() // MB
-    val clearCacheOnLowStorage: StateFlow<Boolean> = preferenceStore.getBoolean("clear_cache_on_low_storage", true).asStateFlow()
+    val autoCleanupEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("auto_cleanup_enabled", true).stateIn(scope)
+    val autoCleanupInterval: StateFlow<Int> = preferenceStore.getInt("auto_cleanup_interval", 7).stateIn(scope)
+    val maxCacheSize: StateFlow<Int> = preferenceStore.getInt("max_cache_size", 1000).stateIn(scope) // MB
+    val clearCacheOnLowStorage: StateFlow<Boolean> = preferenceStore.getBoolean("clear_cache_on_low_storage", true).stateIn(scope)
     
     // Image preferences
-    val compressImages: StateFlow<Boolean> = preferenceStore.getBoolean("compress_images", true).asStateFlow()
-    val imageQuality: StateFlow<Int> = preferenceStore.getInt("image_quality", 75).asStateFlow()
+    val compressImages: StateFlow<Boolean> = preferenceStore.getBoolean("compress_images", true).stateIn(scope)
+    val imageQuality: StateFlow<Int> = preferenceStore.getInt("image_quality", 75).stateIn(scope)
     
     // Preloading preferences
-    val preloadNextChapter: StateFlow<Boolean> = preferenceStore.getBoolean("preload_next_chapter", true).asStateFlow()
-    val preloadPreviousChapter: StateFlow<Boolean> = preferenceStore.getBoolean("preload_previous_chapter", false).asStateFlow()
+    val preloadNextChapter: StateFlow<Boolean> = preferenceStore.getBoolean("preload_next_chapter", true).stateIn(scope)
+    val preloadPreviousChapter: StateFlow<Boolean> = preferenceStore.getBoolean("preload_previous_chapter", false).stateIn(scope)
     
     // Dialog states
     var showCleanupIntervalDialog by mutableStateOf(false)

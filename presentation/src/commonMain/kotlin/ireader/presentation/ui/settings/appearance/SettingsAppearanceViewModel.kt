@@ -17,19 +17,19 @@ class SettingsAppearanceViewModel(
 ) : BaseViewModel() {
     
     // Theme preferences
-    val themeMode: StateFlow<PreferenceValues.ThemeMode> = uiPreferences.themeMode().asStateFlow()
-    val dynamicColors: StateFlow<Boolean> = uiPreferences.dynamicColorMode().asStateFlow()
-    val amoledMode: StateFlow<Boolean> = uiPreferences.useTrueBlack().asStateFlow()
+    val themeMode: StateFlow<PreferenceValues.ThemeMode> = uiPreferences.themeMode().stateIn(scope)
+    val dynamicColors: StateFlow<Boolean> = uiPreferences.dynamicColorMode().stateIn(scope)
+    val amoledMode: StateFlow<Boolean> = uiPreferences.useTrueBlack().stateIn(scope)
     
     // Typography preferences
-    val appFont: StateFlow<String> = uiPreferences.appUiFont().asStateFlow()
+    val appFont: StateFlow<String> = uiPreferences.appUiFont().stateIn(scope)
     
     // Display preferences
-    val hideNovelBackdrop: StateFlow<Boolean> = uiPreferences.hideNovelBackdrop().asStateFlow()
-    val useFabInNovelInfo: StateFlow<Boolean> = uiPreferences.useFabInNovelInfo().asStateFlow()
+    val hideNovelBackdrop: StateFlow<Boolean> = uiPreferences.hideNovelBackdrop().stateIn(scope)
+    val useFabInNovelInfo: StateFlow<Boolean> = uiPreferences.useFabInNovelInfo().stateIn(scope)
     
     // Date & Time preferences
-    val relativeTime: StateFlow<PreferenceValues.RelativeTime> = uiPreferences.relativeTime().asStateFlow()
+    val relativeTime: StateFlow<PreferenceValues.RelativeTime> = uiPreferences.relativeTime().stateIn(scope)
     
     // Dialog states
     var showThemeModeDialog by mutableStateOf(false)

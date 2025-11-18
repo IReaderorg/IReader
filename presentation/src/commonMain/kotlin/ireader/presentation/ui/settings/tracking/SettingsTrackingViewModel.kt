@@ -16,24 +16,24 @@ class SettingsTrackingViewModel(
 ) : BaseViewModel() {
     
     // Tracking service preferences
-    val malEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("mal_enabled", false).asStateFlow()
-    val malLoggedIn: StateFlow<Boolean> = preferenceStore.getBoolean("mal_logged_in", false).asStateFlow()
-    val aniListEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("anilist_enabled", false).asStateFlow()
-    val aniListLoggedIn: StateFlow<Boolean> = preferenceStore.getBoolean("anilist_logged_in", false).asStateFlow()
-    val kitsuEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("kitsu_enabled", false).asStateFlow()
-    val kitsuLoggedIn: StateFlow<Boolean> = preferenceStore.getBoolean("kitsu_logged_in", false).asStateFlow()
-    val mangaUpdatesEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("mangaupdates_enabled", false).asStateFlow()
-    val mangaUpdatesLoggedIn: StateFlow<Boolean> = preferenceStore.getBoolean("mangaupdates_logged_in", false).asStateFlow()
+    val malEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("mal_enabled", false).stateIn(scope)
+    val malLoggedIn: StateFlow<Boolean> = preferenceStore.getBoolean("mal_logged_in", false).stateIn(scope)
+    val aniListEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("anilist_enabled", false).stateIn(scope)
+    val aniListLoggedIn: StateFlow<Boolean> = preferenceStore.getBoolean("anilist_logged_in", false).stateIn(scope)
+    val kitsuEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("kitsu_enabled", false).stateIn(scope)
+    val kitsuLoggedIn: StateFlow<Boolean> = preferenceStore.getBoolean("kitsu_logged_in", false).stateIn(scope)
+    val mangaUpdatesEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("mangaupdates_enabled", false).stateIn(scope)
+    val mangaUpdatesLoggedIn: StateFlow<Boolean> = preferenceStore.getBoolean("mangaupdates_logged_in", false).stateIn(scope)
     
     // Auto-sync preferences
-    val autoSyncEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("auto_sync_enabled", false).asStateFlow()
-    val autoSyncInterval: StateFlow<Int> = preferenceStore.getInt("auto_sync_interval", 60).asStateFlow()
-    val syncOnlyOverWifi: StateFlow<Boolean> = preferenceStore.getBoolean("sync_only_over_wifi", true).asStateFlow()
+    val autoSyncEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("auto_sync_enabled", false).stateIn(scope)
+    val autoSyncInterval: StateFlow<Int> = preferenceStore.getInt("auto_sync_interval", 60).stateIn(scope)
+    val syncOnlyOverWifi: StateFlow<Boolean> = preferenceStore.getBoolean("sync_only_over_wifi", true).stateIn(scope)
     
     // Auto-update preferences
-    val autoUpdateStatus: StateFlow<Boolean> = preferenceStore.getBoolean("auto_update_status", true).asStateFlow()
-    val autoUpdateProgress: StateFlow<Boolean> = preferenceStore.getBoolean("auto_update_progress", true).asStateFlow()
-    val autoUpdateScore: StateFlow<Boolean> = preferenceStore.getBoolean("auto_update_score", false).asStateFlow()
+    val autoUpdateStatus: StateFlow<Boolean> = preferenceStore.getBoolean("auto_update_status", true).stateIn(scope)
+    val autoUpdateProgress: StateFlow<Boolean> = preferenceStore.getBoolean("auto_update_progress", true).stateIn(scope)
+    val autoUpdateScore: StateFlow<Boolean> = preferenceStore.getBoolean("auto_update_score", false).stateIn(scope)
     
     // Dialog states
     var showSyncIntervalDialog by mutableStateOf(false)

@@ -1,7 +1,7 @@
 package ireader.domain.usecases.book
 
+import ireader.core.log.IReaderLog
 import ireader.domain.models.entities.Book
-import ireader.presentation.core.log.IReaderLog
 
 /**
  * Use case for toggling book favorite status following Mihon's pattern.

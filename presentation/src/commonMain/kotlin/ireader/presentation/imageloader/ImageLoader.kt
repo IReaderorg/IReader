@@ -14,7 +14,6 @@ import androidx.compose.material.icons.rounded.BrokenImage
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -30,22 +29,12 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope.Companion.DefaultFilterQuality
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
-import coil3.compose.AsyncImagePainter
-import coil3.compose.AsyncImagePainter.State.Empty.painter
 import coil3.compose.LocalPlatformContext
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import coil3.request.placeholder
-import coil3.request.error
-import coil3.memory.MemoryCache
-import coil3.disk.DiskCache
 import ireader.core.log.Log
-import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.LoadingScreen
 import kotlin.time.measureTime
 
@@ -189,9 +178,6 @@ fun ImageLoaderImage(
                         .memoryCachePolicy(if (enableMemoryCache) coil3.request.CachePolicy.ENABLED else coil3.request.CachePolicy.DISABLED)
                         .diskCachePolicy(if (enableDiskCache) coil3.request.CachePolicy.ENABLED else coil3.request.CachePolicy.DISABLED)
                         .crossfade(300) // Smooth transition
-                        .apply {
-                            placeholder?.let { placeholder(it) }
-                        }
                         .build()
                 }
             }

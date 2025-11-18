@@ -133,6 +133,13 @@ kotlin {
                 api(libs.coil.core)
             }
         }
+        commonTest {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+                implementation("io.mockk:mockk:1.13.8")
+            }
+        }
          androidMain {
             dependencies {
                 implementation("org.slf4j:slf4j-android:1.7.25")

@@ -58,7 +58,7 @@ fun SettingsLibraryScreen(
         topBar = { scrollBehavior ->
             TitleToolbar(
                 title = "Library",
-                onPopBackStack = onNavigateUp,
+                popBackStack = onNavigateUp,
                 scrollBehavior = scrollBehavior
             )
         }
