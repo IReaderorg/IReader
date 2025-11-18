@@ -222,11 +222,23 @@ class JSPluginSource(
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
         return try {
             Log.debug { "[JSPluginSource] Getting manga list with listing: ${sort?.name}, page: $page" }
+            
+            // Skip if this is a Search listing (search is handled separately via searchNovels)
+            if (sort?.name == "Search") {
+                Log.debug { "[JSPluginSource] Skipping Search listing in getMangaList" }
+                return MangasPageInfo(emptyList(), hasNextPage = false)
+            }
+            
             val filterValues = getDefaultFilterValues().toMutableMap()
             
-            // Override sort filter to use "latest" by default
-            if (filterValues.containsKey("sort")) {
-                filterValues["sort"] = mapOf("value" to "latest")
+            // Set sort based on listing type
+            if (filterValues.containsKey("m_orderby")) {
+                val sortValue = when (sort?.name) {
+                    "Latest" -> "latest"
+                    "Popular" -> ""  // Empty for popular/default
+                    else -> ""
+                }
+                filterValues["m_orderby"] = mapOf("value" to sortValue)
             }
             
             val novels = bridge.popularNovels(page, filterValues)
@@ -241,12 +253,22 @@ class JSPluginSource(
     override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
         return try {
             Log.debug { "[JSPluginSource] Getting manga list with filters, page: $page" }
-            val filterValues = getDefaultFilterValues().toMutableMap()
             
-            // Override sort filter to use "latest" by default
-            if (filterValues.containsKey("sort")) {
-                filterValues["sort"] = mapOf("value" to "latest")
+            // Check if there's a search query in the filters
+            val searchQuery = filters.filterIsInstance<Filter.Text>()
+                .firstOrNull { it.name.equals("query", ignoreCase = true) || it.name.equals("search", ignoreCase = true) }
+                ?.value
+            
+            // If there's a search query, use searchNovels instead
+            if (!searchQuery.isNullOrBlank()) {
+                Log.debug { "[JSPluginSource] Using search with query: $searchQuery" }
+                val novels = bridge.searchNovels(searchQuery, page)
+                val mangaList = novels.map { it.toMangaInfo() }
+                return MangasPageInfo(mangaList, hasNextPage = mangaList.isNotEmpty())
             }
+            
+            // Otherwise, use popularNovels with filters
+            val filterValues = convertFiltersToMap(filters)
             
             val novels = bridge.popularNovels(page, filterValues)
             val mangaList = novels.map { it.toMangaInfo() }
@@ -255,6 +277,65 @@ class JSPluginSource(
             Log.error(e, "[JSPluginSource] Failed to get manga list with filters")
             MangasPageInfo(emptyList(), hasNextPage = false)
         }
+    }
+    
+    /**
+     * Converts IReader FilterList to a map of filter values for the JS plugin.
+     */
+    private fun convertFiltersToMap(filters: FilterList): Map<String, Any> {
+        val filterMap = mutableMapOf<String, Any>()
+        
+        filters.forEach { filter ->
+            when (filter) {
+                is Filter.Select -> {
+                    // Get the selected option
+                    val selectedOption = filter.options.getOrNull(filter.value)
+                    if (selectedOption != null) {
+                        filterMap[filter.name] = mapOf("value" to selectedOption)
+                    }
+                }
+                is Filter.Text -> {
+                    if (filter.value.isNotBlank()) {
+                        filterMap[filter.name] = mapOf("value" to filter.value)
+                    }
+                }
+                is Filter.Group -> {
+                    // Handle checkbox groups
+                    val checkedValues = mutableListOf<String>()
+                    filter.filters.forEach { subFilter ->
+                        if (subFilter is Filter.Check && subFilter.value == true) {
+                            checkedValues.add(subFilter.name)
+                        }
+                    }
+                    if (checkedValues.isNotEmpty()) {
+                        filterMap[filter.name] = mapOf("value" to checkedValues)
+                    }
+                }
+                is Filter.Check -> {
+                    // Handle individual checkboxes
+                    if (filter.value == true) {
+                        filterMap[filter.name] = mapOf("value" to true)
+                    }
+                }
+                is Filter.Sort -> {
+                    // Handle sort filters
+                    filter.value?.let { selection ->
+                        val sortOption = filter.options.getOrNull(selection.index)
+                        if (sortOption != null) {
+                            filterMap[filter.name] = mapOf(
+                                "value" to sortOption,
+                                "ascending" to selection.ascending
+                            )
+                        }
+                    }
+                }
+                is Filter.Note -> {
+                    // Notes don't have values, skip them
+                }
+            }
+        }
+        
+        return filterMap
     }
     
     /**
@@ -294,10 +375,11 @@ class JSPluginSource(
     }
     
     override fun getListings(): List<Listing> {
-        // Return a default "Popular" listing
+        // Return listings including Search to indicate search support
         return listOf(
             object : Listing("Popular") {},
-            object : Listing("Latest") {}
+            object : Listing("Latest") {},
+            object : Listing("Search") {}  // Add Search listing to indicate search support
         )
     }
     
@@ -307,13 +389,22 @@ class JSPluginSource(
             // Get JS plugin filters synchronously (cached from plugin load)
             val jsFilters = runBlocking { getPluginFilters() }
             
+            // Add search filter at the beginning
+            val filters = mutableListOf<Filter<*>>()
+            filters.add(Filter.Text("Search", ""))
+            
             // Convert JS filters to IReader filters
-            jsFilters.map { (key, filterDef) ->
-                convertFilterDefinitionToIReaderFilter(key, filterDef)
-            }.filterNotNull()
+            filters.addAll(
+                jsFilters.map { (key, filterDef) ->
+                    convertFilterDefinitionToIReaderFilter(key, filterDef)
+                }.filterNotNull()
+            )
+            
+            filters
         } catch (e: Exception) {
             Log.error(e, "[JSPluginSource] Failed to convert filters")
-            emptyList()
+            // Return at least the search filter
+            listOf(Filter.Text("Search", ""))
         }
     }
     

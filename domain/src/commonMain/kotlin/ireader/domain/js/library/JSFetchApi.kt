@@ -39,6 +39,7 @@ class JSFetchApi(
                 "ok" to false,
                 "status" to 0,
                 "statusText" to "Security Error",
+                "url" to url,  // Include URL even on validation error
                 "text" to "",
                 "error" to validationResult.getError()
             )
@@ -48,9 +49,28 @@ class JSFetchApi(
             try {
                 val method = (init?.get("method") as? String)?.uppercase() ?: "GET"
                 val headersMap = init?.get("headers") as? Map<String, String> ?: emptyMap()
-                val body = init?.get("body") as? String
                 
-                println("[JSFetchApi] [$pluginId] Method: $method, Headers: $headersMap")
+                // Handle different body types
+                val bodyObj = init?.get("body")
+                val body = when (bodyObj) {
+                    is String -> bodyObj
+                    is Map<*, *> -> {
+                        // FormData-like object
+                        val formData = bodyObj as? Map<String, Any?>
+                        formData?.get("data")?.let { data ->
+                            // Convert FormData to URL-encoded string
+                            (data as? Map<*, *>)?.entries?.joinToString("&") { (key, values) ->
+                                val valueList = values as? List<*> ?: listOf(values)
+                                valueList.joinToString("&") { value ->
+                                    "$key=${java.net.URLEncoder.encode(value.toString(), "UTF-8")}"
+                                }
+                            }
+                        } ?: ""
+                    }
+                    else -> bodyObj?.toString()
+                }
+                
+                println("[JSFetchApi] [$pluginId] Method: $method, Headers: $headersMap, Body type: ${bodyObj?.javaClass?.simpleName}")
                 
                 val response: HttpResponse = when (method) {
                     "POST" -> httpClient.post(url) {
@@ -75,12 +95,17 @@ class JSFetchApi(
                 
                 val responseText = response.bodyAsText()
                 
+                // Get the final URL (after redirects)
+                val finalUrl = response.call.request.url.toString()
+                
                 println("[JSFetchApi] [$pluginId] Response: ${response.status.value} ${response.status.description}, Body length: ${responseText.length}")
+                println("[JSFetchApi] [$pluginId] Final URL: $finalUrl")
                 
                 mapOf(
                     "ok" to (response.status.value in 200..299),
                     "status" to response.status.value,
                     "statusText" to response.status.description,
+                    "url" to finalUrl,  // Include the final URL (after redirects if any)
                     "text" to responseText,
                     "headers" to response.headers.entries().associate { it.key to it.value.firstOrNull() }
                 )
@@ -89,6 +114,7 @@ class JSFetchApi(
                     "ok" to false,
                     "status" to 0,
                     "statusText" to "Network Error",
+                    "url" to url,  // Include URL even on error
                     "text" to "",
                     "error" to e.message
                 )

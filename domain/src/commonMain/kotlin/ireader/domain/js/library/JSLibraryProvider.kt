@@ -97,38 +97,92 @@ class JSLibraryProvider(
                         }
                     };
                     
-                    // Setup fetch API
+                    // Setup fetch API with comprehensive response object
                     globalThis.fetch = function(url, init) {
-                        const result = __nativeFetch.fetch(url, init || {});
-                        return Promise.resolve({
-                            ok: result.ok,
-                            status: result.status,
-                            statusText: result.statusText,
-                            text: function() { return Promise.resolve(result.text); },
-                            json: function() { return Promise.resolve(JSON.parse(result.text)); },
-                            headers: result.headers
-                        });
+                        const requestUrl = String(url || '');
+                        const result = __nativeFetch.fetch(requestUrl, init || {});
+                        
+                        // Create a proper Response-like object with all properties
+                        const response = {
+                            ok: Boolean(result.ok),
+                            status: Number(result.status) || 0,
+                            statusText: String(result.statusText || ''),
+                            url: String(result.url || requestUrl),  // Ensure URL is always a string
+                            headers: result.headers || {},
+                            redirected: false,
+                            type: 'basic',
+                            text: function() { 
+                                return Promise.resolve(String(result.text || '')); 
+                            },
+                            json: function() { 
+                                try {
+                                    return Promise.resolve(JSON.parse(result.text || '{}')); 
+                                } catch (e) {
+                                    return Promise.reject(new Error('Invalid JSON: ' + e.message));
+                                }
+                            },
+                            blob: function() { 
+                                return Promise.resolve(new Blob([result.text || ''])); 
+                            },
+                            arrayBuffer: function() { 
+                                return Promise.resolve(new ArrayBuffer(0)); 
+                            },
+                            clone: function() { 
+                                return response; 
+                            }
+                        };
+                        
+                        return Promise.resolve(response);
                     };
                     
                     // Setup window and location objects for browser compatibility
                     globalThis.window = globalThis;
-                    globalThis.location = {
-                        href: 'about:blank',
-                        protocol: 'about:',
-                        host: '',
-                        hostname: '',
-                        port: '',
-                        pathname: 'blank',
-                        search: '',
-                        hash: ''
+                    
+                    // Create a proper location object with all properties as strings
+                    const createLocation = function(url) {
+                        return {
+                            href: String(url || 'about:blank'),
+                            protocol: 'about:',
+                            host: 'blank',
+                            hostname: 'blank',
+                            port: '',
+                            pathname: '/blank',
+                            search: '',
+                            hash: '',
+                            origin: 'about:blank',
+                            toString: function() { return this.href; }
+                        };
                     };
                     
-                    // Setup URL API polyfill
+                    globalThis.location = createLocation('about:blank');
+                    
+                    // Setup document object with location reference
+                    globalThis.document = {
+                        location: globalThis.location,
+                        URL: 'about:blank',
+                        domain: 'blank',
+                        referrer: '',
+                        title: '',
+                        cookie: '',
+                        documentURI: 'about:blank',
+                        baseURI: 'about:blank'
+                    };
+                    
+                    // Setup URL API polyfill with comprehensive error handling
                     globalThis.URL = function(url, base) {
+                        // Handle null/undefined inputs
+                        if (url === null || url === undefined) {
+                            throw new Error('Invalid URL: URL cannot be null or undefined');
+                        }
+                        
+                        // Convert to string
+                        url = String(url);
+                        
                         // Parse URL
                         let fullUrl = url;
                         if (base && !url.match(/^https?:\/\//)) {
                             // Relative URL - combine with base
+                            base = String(base);
                             if (url.startsWith('/')) {
                                 // Absolute path
                                 const baseMatch = base.match(/^(https?:\/\/[^\/]+)/);
@@ -140,39 +194,233 @@ class JSLibraryProvider(
                             }
                         }
                         
-                        // Parse the URL
-                        const match = fullUrl.match(/^(https?):\/\/([^\/]+)(\/.*)?$/);
+                        // Parse the URL - more flexible regex to handle edge cases
+                        const match = fullUrl.match(/^(https?):\/\/([^\/\?#]+)(\/[^\?#]*)?(\\?[^#]*)?(#.*)?$/);
                         if (!match) {
                             throw new Error('Invalid URL: ' + fullUrl);
                         }
                         
-                        this.protocol = match[1] + ':';
-                        this.host = match[2];
-                        this.hostname = match[2].split(':')[0];
-                        this.port = match[2].includes(':') ? match[2].split(':')[1] : '';
-                        this.pathname = match[3] || '/';
-                        this.href = fullUrl;
-                        this.origin = match[1] + '://' + match[2];
+                        const protocol = match[1] || 'http';
+                        const hostWithPort = match[2] || '';
+                        const pathname = match[3] || '/';
+                        const search = match[4] || '';
+                        const hash = match[5] || '';
                         
-                        // Parse search params
-                        const searchIndex = this.pathname.indexOf('?');
-                        if (searchIndex !== -1) {
-                            this.search = this.pathname.substring(searchIndex);
-                            this.pathname = this.pathname.substring(0, searchIndex);
-                        } else {
-                            this.search = '';
-                        }
+                        // Parse host and port - ensure we always have strings
+                        const hostParts = (hostWithPort || '').split(':');
+                        const hostname = hostParts[0] || '';
+                        const port = hostParts[1] || '';
                         
-                        // Parse hash
-                        const hashIndex = this.pathname.indexOf('#');
-                        if (hashIndex !== -1) {
-                            this.hash = this.pathname.substring(hashIndex);
-                            this.pathname = this.pathname.substring(0, hashIndex);
-                        } else {
-                            this.hash = '';
-                        }
+                        // Set all properties with safe defaults - ensure all are strings
+                        this.protocol = String(protocol) + ':';
+                        this.host = String(hostWithPort);
+                        this.hostname = String(hostname);
+                        this.port = String(port);
+                        this.pathname = String(pathname);
+                        this.search = String(search);
+                        this.hash = String(hash);
+                        this.href = String(fullUrl);
+                        this.origin = String(protocol) + '://' + String(hostWithPort);
                         
+                        // Add methods that might be called
                         this.toString = function() { return this.href; };
+                        this.toJSON = function() { return this.href; };
+                    };
+                    
+                    // Setup Blob constructor for fetch API compatibility
+                    globalThis.Blob = function(parts, options) {
+                        this.parts = parts || [];
+                        this.options = options || {};
+                        this.size = this.parts.reduce(function(acc, part) {
+                            return acc + (part.length || 0);
+                        }, 0);
+                        this.type = this.options.type || '';
+                    };
+                    
+                    // Setup ArrayBuffer for fetch API compatibility
+                    if (typeof globalThis.ArrayBuffer === 'undefined') {
+                        globalThis.ArrayBuffer = function(length) {
+                            this.byteLength = length || 0;
+                        };
+                    }
+                    
+                    // Setup FormData for POST requests
+                    globalThis.FormData = function() {
+                        this.data = {};
+                        this.append = function(key, value) {
+                            if (!this.data[key]) {
+                                this.data[key] = [];
+                            }
+                            this.data[key].push(value);
+                        };
+                        this.get = function(key) {
+                            return this.data[key] ? this.data[key][0] : null;
+                        };
+                        this.getAll = function(key) {
+                            return this.data[key] || [];
+                        };
+                        this.has = function(key) {
+                            return key in this.data;
+                        };
+                        this.delete = function(key) {
+                            delete this.data[key];
+                        };
+                        this.set = function(key, value) {
+                            this.data[key] = [value];
+                        };
+                        this.entries = function() {
+                            const entries = [];
+                            for (const key in this.data) {
+                                for (const value of this.data[key]) {
+                                    entries.push([key, value]);
+                                }
+                            }
+                            return entries;
+                        };
+                    };
+                    
+                    // Setup atob and btoa for base64 encoding/decoding (pure JavaScript implementation)
+                    if (typeof globalThis.atob === 'undefined') {
+                        globalThis.atob = function(str) {
+                            // Base64 decode - pure JavaScript implementation
+                            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+                            let output = '';
+                            str = String(str).replace(/=+$/, '');
+                            
+                            if (str.length % 4 === 1) {
+                                throw new Error('Invalid base64 string');
+                            }
+                            
+                            for (let i = 0; i < str.length;) {
+                                const enc1 = chars.indexOf(str.charAt(i++));
+                                const enc2 = chars.indexOf(str.charAt(i++));
+                                const enc3 = chars.indexOf(str.charAt(i++));
+                                const enc4 = chars.indexOf(str.charAt(i++));
+                                
+                                if (enc1 === -1 || enc2 === -1) {
+                                    throw new Error('Invalid base64 string');
+                                }
+                                
+                                const chr1 = (enc1 << 2) | (enc2 >> 4);
+                                const chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+                                const chr3 = ((enc3 & 3) << 6) | enc4;
+                                
+                                output += String.fromCharCode(chr1);
+                                if (enc3 !== 64 && enc3 !== -1) output += String.fromCharCode(chr2);
+                                if (enc4 !== 64 && enc4 !== -1) output += String.fromCharCode(chr3);
+                            }
+                            return output;
+                        };
+                    }
+                    
+                    if (typeof globalThis.btoa === 'undefined') {
+                        globalThis.btoa = function(str) {
+                            // Base64 encode - pure JavaScript implementation
+                            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+                            let output = '';
+                            str = String(str);
+                            
+                            for (let i = 0; i < str.length;) {
+                                const chr1 = str.charCodeAt(i++);
+                                const chr2 = str.charCodeAt(i++);
+                                const chr3 = str.charCodeAt(i++);
+                                
+                                const enc1 = chr1 >> 2;
+                                const enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+                                let enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+                                let enc4 = chr3 & 63;
+                                
+                                if (isNaN(chr2)) {
+                                    enc3 = enc4 = 64;
+                                } else if (isNaN(chr3)) {
+                                    enc4 = 64;
+                                }
+                                
+                                output += chars.charAt(enc1) + chars.charAt(enc2) + chars.charAt(enc3) + chars.charAt(enc4);
+                            }
+                            return output;
+                        };
+                    }
+                    
+                    // Setup TextEncoder and TextDecoder
+                    if (typeof globalThis.TextEncoder === 'undefined') {
+                        globalThis.TextEncoder = function() {
+                            this.encode = function(str) {
+                                const utf8 = unescape(encodeURIComponent(str));
+                                const result = new Uint8Array(utf8.length);
+                                for (let i = 0; i < utf8.length; i++) {
+                                    result[i] = utf8.charCodeAt(i);
+                                }
+                                return result;
+                            };
+                        };
+                    }
+                    
+                    if (typeof globalThis.TextDecoder === 'undefined') {
+                        globalThis.TextDecoder = function() {
+                            this.decode = function(buffer) {
+                                const bytes = new Uint8Array(buffer);
+                                let str = '';
+                                for (let i = 0; i < bytes.length; i++) {
+                                    str += String.fromCharCode(bytes[i]);
+                                }
+                                return decodeURIComponent(escape(str));
+                            };
+                        };
+                    }
+                    
+                    // Setup Uint8Array if not available
+                    if (typeof globalThis.Uint8Array === 'undefined') {
+                        globalThis.Uint8Array = function(length) {
+                            const arr = new Array(length);
+                            for (let i = 0; i < length; i++) {
+                                arr[i] = 0;
+                            }
+                            arr.buffer = new ArrayBuffer(length);
+                            arr.byteLength = length;
+                            return arr;
+                        };
+                    }
+                    
+                    // Add utility functions for URL parsing
+                    globalThis.getHostname = function(url) {
+                        if (!url) return '';
+                        try {
+                            const urlObj = new URL(url);
+                            return urlObj.hostname || '';
+                        } catch (e) {
+                            // Fallback: try to extract hostname manually
+                            const match = String(url).match(/^(?:https?:\/\/)?([^\/\?#:]+)/);
+                            return match ? match[1] : '';
+                        }
+                    };
+                    
+                    // Add safe property access helper
+                    globalThis.safeGet = function(obj, path, defaultValue) {
+                        if (!obj || !path) return defaultValue;
+                        const keys = path.split('.');
+                        let result = obj;
+                        for (const key of keys) {
+                            if (result === null || result === undefined) {
+                                return defaultValue;
+                            }
+                            result = result[key];
+                        }
+                        return result !== undefined ? result : defaultValue;
+                    };
+                    
+                    // Patch Array.prototype to handle undefined gracefully
+                    const originalArrayAt = Array.prototype.at;
+                    if (originalArrayAt) {
+                        Array.prototype.at = function(index) {
+                            return originalArrayAt.call(this, index);
+                        };
+                    }
+                    
+                    // Add safe array access that returns empty string instead of undefined
+                    Array.prototype.safeAt = function(index) {
+                        const item = this[index];
+                        return item !== undefined && item !== null ? item : '';
                     };
                     
                     // Initialize module registry

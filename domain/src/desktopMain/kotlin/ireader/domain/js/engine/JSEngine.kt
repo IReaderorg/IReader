@@ -73,7 +73,7 @@ actual class JSEngine {
     }
     
     actual fun evaluateScript(script: String): Any? {
-        val ctx = context ?: throw JSException("Engine not initialized")
+        val ctx = context ?: throw JSException("Engine not initialized - context is null. The engine may have been disposed.")
         
         return try {
             val result = ctx.eval("js", script)
@@ -88,7 +88,7 @@ actual class JSEngine {
     }
     
     actual fun callFunction(name: String, vararg args: Any?): Any? {
-        val ctx = context ?: throw JSException("Engine not initialized")
+        val ctx = context ?: throw JSException("Engine not initialized - context is null. The engine may have been disposed.")
         
         return try {
             val function = ctx.getBindings("js").getMember(name)
@@ -111,7 +111,7 @@ actual class JSEngine {
     }
     
     actual fun setGlobalObject(name: String, value: Any) {
-        val ctx = context ?: throw JSException("Engine not initialized")
+        val ctx = context ?: throw JSException("Engine not initialized - context is null. The engine may have been disposed.")
         
         try {
             val bindings = ctx.getBindings("js")
@@ -122,7 +122,7 @@ actual class JSEngine {
     }
     
     actual fun getGlobalObject(name: String): Any? {
-        val ctx = context ?: throw JSException("Engine not initialized")
+        val ctx = context ?: return null
         
         return try {
             val bindings = ctx.getBindings("js")

@@ -169,6 +169,42 @@ class JSPluginLoader(
             val metadata = bridge.getPluginMetadata()
             JSPluginLogger.logDebug(pluginId, "Extracted metadata: ${metadata.name} v${metadata.version}")
             
+            // Update location object with plugin's site URL for proper context
+            if (metadata.site.isNotEmpty()) {
+                try {
+                    val updateLocationScript = """
+                        (function() {
+                            try {
+                                const siteUrl = '${metadata.site.replace("'", "\\'")}';
+                                const url = new URL(siteUrl);
+                                globalThis.location = {
+                                    href: url.href,
+                                    protocol: url.protocol,
+                                    host: url.host,
+                                    hostname: url.hostname,
+                                    port: url.port,
+                                    pathname: url.pathname,
+                                    search: url.search,
+                                    hash: url.hash,
+                                    origin: url.origin,
+                                    toString: function() { return this.href; }
+                                };
+                                globalThis.document.location = globalThis.location;
+                                globalThis.document.URL = url.href;
+                                globalThis.document.domain = url.hostname;
+                                globalThis.document.baseURI = url.origin;
+                            } catch (e) {
+                                console.warn('Failed to update location with site URL:', e);
+                            }
+                        })();
+                    """.trimIndent()
+                    engine.evaluateScript(updateLocationScript)
+                    JSPluginLogger.logDebug(pluginId, "Updated location context with site URL: ${metadata.site}")
+                } catch (e: Exception) {
+                    JSPluginLogger.logDebug(pluginId, "Could not update location context: ${e.message}")
+                }
+            }
+            
             // Validate metadata
             val metadataValidation = validator.validateMetadata(metadata)
             if (!metadataValidation.isValid()) {

@@ -52,15 +52,16 @@ class JSEnginePool(
      * @return A JavaScript engine instance
      */
     suspend fun getOrCreate(pluginId: String): JSEngine = mutex.withLock {
-        // Clean up idle engines
-        cleanupIdleEngines()
-        
         // Get existing engine or create new one
         val entry = engines[pluginId]
         if (entry != null) {
+            // Update last used time to prevent cleanup
             entry.lastUsedTime = System.currentTimeMillis()
             return entry.engine
         }
+        
+        // Clean up idle engines (but not the one we're about to use)
+        cleanupIdleEngines()
         
         // Evict LRU engine if pool is full
         if (engines.size >= maxPoolSize) {
