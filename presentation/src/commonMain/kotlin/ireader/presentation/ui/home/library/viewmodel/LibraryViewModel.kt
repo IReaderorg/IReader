@@ -63,7 +63,8 @@ class LibraryViewModel(
         private val downloadUnreadChaptersUseCase: DownloadUnreadChaptersUseCase,
         private val archiveBookUseCase: ireader.domain.usecases.local.book_usecases.ArchiveBookUseCase,
         private val getLastReadNovelUseCase: ireader.domain.usecases.history.GetLastReadNovelUseCase,
-        private val syncUseCases: ireader.domain.usecases.sync.SyncUseCases? = null
+        private val syncUseCases: ireader.domain.usecases.sync.SyncUseCases? = null,
+        private val importEpub: ireader.domain.usecases.epub.ImportEpub
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), LibraryState by state {
 
     var lastUsedCategory = libraryPreferences.lastUsedCategory().asState()
@@ -89,6 +90,7 @@ class LibraryViewModel(
     val addQueues: SnapshotStateList<BookCategory> = mutableStateListOf()
     var showDialog: Boolean by mutableStateOf(false)
     var isBookRefreshing: Boolean by mutableStateOf(false)
+    var showImportEpubDialog: Boolean by mutableStateOf(false)
 
     val perCategorySettings = libraryPreferences.perCategorySettings().asState()
     val layouts = libraryPreferences.categoryFlags().asState()
@@ -116,6 +118,18 @@ class LibraryViewModel(
     // Sync availability state
     var isSyncAvailable by mutableStateOf(false)
         private set
+    
+    // Scroll state preservation
+    var savedScrollIndex by mutableStateOf(0)
+        private set
+    
+    var savedScrollOffset by mutableStateOf(0)
+        private set
+    
+    fun saveScrollPosition(index: Int, offset: Int) {
+        savedScrollIndex = index
+        savedScrollOffset = offset
+    }
 
     init {
         readLayoutTypeAndFilterTypeAndSortType()
@@ -597,7 +611,7 @@ fun updateCategory(categoryId: Long) {
 /**
  * Import EPUB files into the library with storage check and progress tracking
  */
-fun importEpubFiles(uris: List<String>, importEpub: ireader.domain.usecases.epub.ImportEpub? = null) {
+fun importEpubFiles(uris: List<String>) {
     scope.launch {
         try {
             // Check storage space before import
@@ -653,24 +667,20 @@ fun importEpubFiles(uris: List<String>, importEpub: ireader.domain.usecases.epub
                         )
                     )
                     
-                    // Use ImportEpub if available, otherwise show message
-                    if (importEpub != null) {
-                        importEpub.parse(listOf(ireader.domain.models.common.Uri.parse(uri)))
-                        
-                        fileStates[index] = fileStates[index].copy(
-                            status = ireader.presentation.ui.home.library.components.ImportStatus.COMPLETED,
-                            progress = 1f
+                    // Import the EPUB file
+                    importEpub.parse(listOf(ireader.domain.models.common.Uri.parse(uri)))
+                    
+                    fileStates[index] = fileStates[index].copy(
+                        status = ireader.presentation.ui.home.library.components.ImportStatus.COMPLETED,
+                        progress = 1f
+                    )
+                    
+                    results.add(
+                        ireader.presentation.ui.home.library.components.EpubImportResult(
+                            fileName = uri.substringAfterLast('/'),
+                            success = true
                         )
-                        
-                        results.add(
-                            ireader.presentation.ui.home.library.components.EpubImportResult(
-                                fileName = uri.substringAfterLast('/'),
-                                success = true
-                            )
-                        )
-                    } else {
-                        throw Exception("EPUB import service not available")
-                    }
+                    )
                 } catch (e: Exception) {
                     fileStates[index] = fileStates[index].copy(
                         status = ireader.presentation.ui.home.library.components.ImportStatus.FAILED
@@ -736,7 +746,7 @@ private fun formatTime(millis: Long): String {
 /**
  * Retry failed EPUB imports
  */
-fun retryFailedImports(importEpub: ireader.domain.usecases.epub.ImportEpub? = null) {
+fun retryFailedImports() {
     val failedUris = state.epubImportState.summary?.results
         ?.filter { !it.success }
         ?.map { state.epubImportState.selectedUris.find { uri -> uri.endsWith(it.fileName) } ?: "" }
@@ -745,7 +755,7 @@ fun retryFailedImports(importEpub: ireader.domain.usecases.epub.ImportEpub? = nu
     
     if (failedUris.isNotEmpty()) {
         state.epubImportState = state.epubImportState.copy(showSummary = false)
-        importEpubFiles(failedUris, importEpub)
+        importEpubFiles(failedUris)
     }
 }
 

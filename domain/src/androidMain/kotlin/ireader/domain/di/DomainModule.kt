@@ -151,7 +151,7 @@ actual val DomainModule = module {
     single<PlatformUiPreferences> {
         AndroidUiPreferences(get(), get())
     }
-    factory<EpubCreator> { EpubCreator(get(), get(), get()) }
+    factory<EpubCreator> { EpubCreator(get(), get(), get(), get<HttpClients>().default) }
     single<ServiceUseCases> {
         ServiceUseCases(
             startDownloadServicesUseCase = StartDownloadServicesUseCase(get()),

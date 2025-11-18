@@ -70,7 +70,7 @@ val PresentationModules = module {
 
     factory<ExploreViewModel> { ExploreViewModel(get(), get(), get(), get(),get(), get(), get(),get(),get(),get(),getOrNull(), getOrNull()) }
     single  { HistoryViewModel(get(), get(), get()) }
-    single  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull()) }
+    single  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), get()) }
     single  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory<GlobalSearchViewModel> { GlobalSearchViewModel(get(), get(), get(), get(), get(), get()) }
     

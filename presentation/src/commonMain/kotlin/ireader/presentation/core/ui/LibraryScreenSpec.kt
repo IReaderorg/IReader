@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
+import ireader.domain.models.common.Uri
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
@@ -36,6 +37,7 @@ import ireader.presentation.ui.home.library.LibraryController
 import ireader.presentation.ui.home.library.LibraryScreenTopBar
 import ireader.presentation.ui.home.library.components.BottomTabComposable
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
+import ireader.presentation.ui.settings.advance.OnShowImportEpub
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -62,7 +64,7 @@ object LibraryScreenSpec : Tab {
     override fun Content(
 
     ) {
-        val vm: LibraryViewModel = getIViewModel()
+        val vm: LibraryViewModel = getIViewModel(key = "library")
         LaunchedEffect(key1 = vm.selectionMode) {
             MainStarterScreen.showBottomNav(!vm.selectionMode)
         }
@@ -140,12 +142,7 @@ object LibraryScreenSpec : Tab {
                                     vm.showUpdateCategoryDialog()
                                 },
                                 onImportEpub = {
-                                    // TODO: Platform-specific EPUB import
-                                    // This requires file picker which is platform-specific
-                                    // For now, show a message
-                                    vm.scope.launch {
-                                        vm.batchOperationMessage = "EPUB import: Please use file manager to import EPUB files"
-                                    }
+                                    vm.showImportEpubDialog = true
                                 },
                                 onOpenRandom = {
                                     vm.openRandomEntry()?.let { bookId ->
@@ -200,5 +197,16 @@ object LibraryScreenSpec : Tab {
                 }
             }
         }
+        
+        // EPUB Import Dialog
+        OnShowImportEpub(
+            show = vm.showImportEpubDialog,
+            onFileSelected = { uris ->
+                vm.showImportEpubDialog = false
+                if (uris.isNotEmpty()) {
+                    vm.importEpubFiles(uris.map { it.toString() })
+                }
+            }
+        )
     }
 }

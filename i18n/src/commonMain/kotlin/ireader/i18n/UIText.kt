@@ -11,9 +11,8 @@ fun UiText.asString(localizeHelper: LocalizeHelper): String {
         is UiText.MStringResource -> localizeHelper.localize(res)
         is UiText.ExceptionString -> {
             val eString = e.localizedMessage ?: localizeHelper.localize(Res.string.error_unknown)
-            return eString.substring(0, eString.length.coerceAtMost(500))
+            eString.substring(0, eString.length.coerceAtMost(500))
         }
-        else -> ""
     }
 }
 

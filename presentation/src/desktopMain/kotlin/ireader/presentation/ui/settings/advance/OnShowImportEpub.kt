@@ -10,10 +10,13 @@ import ireader.presentation.core.util.FilePicker
 @Composable
 actual fun OnShowImportEpub(show:Boolean, onFileSelected: suspend (List<Uri>) -> Unit) {
     val scope = rememberCoroutineScope()
-    FilePicker(show = show, BackupDir.absolutePath, listOf("epub","zip"), onFileSelected = {
+    FilePicker(show = show, BackupDir.absolutePath, listOf("epub","zip"), onFileSelected = { uri ->
         scope.launchIO {
-            if (it != null) {
-                onFileSelected(listOf(it))
+            if (uri != null) {
+                onFileSelected(listOf(uri))
+            } else {
+                // User cancelled - call with empty list to reset the dialog state
+                onFileSelected(emptyList())
             }
         }
     })

@@ -135,7 +135,7 @@ actual val DomainModule: Module = module {
         )
     }
     single<HttpClients> { HttpClients(get<PreferenceStoreFactory>().create("cookies")) }
-    single<EpubCreator> { EpubCreator(get()) }
+    single<EpubCreator> { EpubCreator(get(), get<HttpClients>().default) }
     
     single<ireader.domain.usecases.backup.ScheduleAutomaticBackup> {
         ireader.domain.usecases.backup.ScheduleAutomaticBackupImpl()

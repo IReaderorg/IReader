@@ -13,7 +13,7 @@ import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
 @Composable
 actual fun OnShowImportEpub(show:Boolean, onFileSelected: suspend (List<Uri>) -> Unit) {
     val globalScope = requireNotNull(LocalGlobalCoroutineScope.current) { "LocalGlobalCoroutineScope not provided" }
-    val onImportEpub =         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
+    val onImportEpub = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
         if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
             val selectedFiles = mutableListOf<Uri>()
             val clipData = resultIntent.data?.clipData
@@ -26,10 +26,14 @@ actual fun OnShowImportEpub(show:Boolean, onFileSelected: suspend (List<Uri>) ->
                 resultIntent.data?.data?.let { uri ->
                     selectedFiles.add(Uri(uri))
                 }
-
             }
             globalScope.launchIO {
                 onFileSelected(selectedFiles)
+            }
+        } else {
+            // User cancelled - call with empty list to reset the dialog state
+            globalScope.launchIO {
+                onFileSelected(emptyList())
             }
         }
     }
