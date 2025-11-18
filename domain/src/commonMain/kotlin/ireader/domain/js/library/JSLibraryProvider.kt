@@ -40,6 +40,42 @@ class JSLibraryProvider(
             // First, setup global APIs
             val globalSetup = """
                 (function() {
+                    // Wrap native cheerio to add JavaScript-side .each() support
+                    if (typeof __nativeCheerio !== 'undefined') {
+                        const originalLoad = __nativeCheerio.load.bind(__nativeCheerio);
+                        __nativeCheerio.load = function(html) {
+                            const $ = originalLoad(html);
+                            
+                            // Wrap the selector function to add .each() support
+                            const originalSelector = $;
+                            const wrappedSelector = function(selector) {
+                                const selection = originalSelector(selector);
+                                
+                                // Add .each() method that works with JavaScript callbacks
+                                const originalEach = selection.each;
+                                selection.each = function(callback) {
+                                    // Iterate over elements
+                                    for (let i = 0; i < selection.length; i++) {
+                                        const element = selection.eq ? selection.eq(i) : selection.get(i);
+                                        callback.call(element, i, element);
+                                    }
+                                    return selection;
+                                };
+                                
+                                return selection;
+                            };
+                            
+                            // Copy properties from original selector
+                            for (const key in originalSelector) {
+                                if (originalSelector.hasOwnProperty(key)) {
+                                    wrappedSelector[key] = originalSelector[key];
+                                }
+                            }
+                            
+                            return wrappedSelector;
+                        };
+                    }
+                    
                     // Verify native storage is available
                     if (typeof __nativeStorage === 'undefined') {
                         throw new Error('__nativeStorage is not available');
@@ -225,6 +261,100 @@ class JSLibraryProvider(
                         // Add methods that might be called
                         this.toString = function() { return this.href; };
                         this.toJSON = function() { return this.href; };
+                    };
+                    
+                    // Setup URLSearchParams for query string manipulation
+                    globalThis.URLSearchParams = function(init) {
+                        this.params = {};
+                        
+                        // Parse initialization
+                        if (typeof init === 'string') {
+                            // Parse query string
+                            const query = init.startsWith('?') ? init.substring(1) : init;
+                            if (query) {
+                                query.split('&').forEach(function(pair) {
+                                    const parts = pair.split('=');
+                                    const key = decodeURIComponent(parts[0]);
+                                    const value = parts[1] ? decodeURIComponent(parts[1]) : '';
+                                    if (!this.params[key]) {
+                                        this.params[key] = [];
+                                    }
+                                    this.params[key].push(value);
+                                }.bind(this));
+                            }
+                        } else if (init && typeof init === 'object') {
+                            // Parse object
+                            for (const key in init) {
+                                if (init.hasOwnProperty(key)) {
+                                    this.params[key] = [String(init[key])];
+                                }
+                            }
+                        }
+                        
+                        this.append = function(key, value) {
+                            if (!this.params[key]) {
+                                this.params[key] = [];
+                            }
+                            this.params[key].push(String(value));
+                        };
+                        
+                        this.delete = function(key) {
+                            delete this.params[key];
+                        };
+                        
+                        this.get = function(key) {
+                            return this.params[key] ? this.params[key][0] : null;
+                        };
+                        
+                        this.getAll = function(key) {
+                            return this.params[key] || [];
+                        };
+                        
+                        this.has = function(key) {
+                            return key in this.params;
+                        };
+                        
+                        this.set = function(key, value) {
+                            this.params[key] = [String(value)];
+                        };
+                        
+                        this.toString = function() {
+                            const parts = [];
+                            for (const key in this.params) {
+                                if (this.params.hasOwnProperty(key)) {
+                                    this.params[key].forEach(function(value) {
+                                        parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
+                                    });
+                                }
+                            }
+                            return parts.join('&');
+                        };
+                        
+                        this.entries = function() {
+                            const entries = [];
+                            for (const key in this.params) {
+                                if (this.params.hasOwnProperty(key)) {
+                                    this.params[key].forEach(function(value) {
+                                        entries.push([key, value]);
+                                    });
+                                }
+                            }
+                            return entries;
+                        };
+                        
+                        this.keys = function() {
+                            return Object.keys(this.params);
+                        };
+                        
+                        this.values = function() {
+                            const values = [];
+                            for (const key in this.params) {
+                                if (this.params.hasOwnProperty(key)) {
+                                    values.push(...this.params[key]);
+                                }
+                            }
+                            return values;
+                        };
                     };
                     
                     // Setup Blob constructor for fetch API compatibility

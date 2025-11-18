@@ -35,19 +35,11 @@ class JSPluginSource(
         commands: List<Command<*>>
     ): MangaInfo {
         return try {
-            Log.debug { "[JSPluginSource] Getting manga details for: ${manga.title}" }
-            val startTime = System.currentTimeMillis()
-            
             val novelPath = manga.key
             val sourceNovel = bridge.parseNovel(novelPath)
-            val mangaInfo = sourceNovel.toMangaInfo()
-            
-            val duration = System.currentTimeMillis() - startTime
-            Log.info { "[JSPluginSource] Got manga details in ${duration}ms" }
-            
-            mangaInfo
+            sourceNovel.toMangaInfo()
         } catch (e: JSPluginError) {
-            Log.error(e, "[JSPluginSource] Failed to get manga details: ${e.message}")
+            Log.error(e, "[JSPluginSource] Failed to get manga details")
             throw e
         } catch (e: Exception) {
             Log.error(e, "[JSPluginSource] Unexpected error getting manga details")
@@ -63,19 +55,11 @@ class JSPluginSource(
         commands: List<Command<*>>
     ): List<ChapterInfo> {
         return try {
-            Log.debug { "[JSPluginSource] Getting chapter list for: ${manga.title}" }
-            val startTime = System.currentTimeMillis()
-            
             val novelPath = manga.key
             val sourceNovel = bridge.parseNovel(novelPath)
-            val chapters = sourceNovel.chapters.map { it.toChapterInfo() }
-            
-            val duration = System.currentTimeMillis() - startTime
-            Log.info { "[JSPluginSource] Got ${chapters.size} chapters in ${duration}ms" }
-            
-            chapters
+            sourceNovel.chapters.map { it.toChapterInfo() }
         } catch (e: JSPluginError) {
-            Log.error(e, "[JSPluginSource] Failed to get chapter list: ${e.message}")
+            Log.error(e, "[JSPluginSource] Failed to get chapter list")
             throw e
         } catch (e: Exception) {
             Log.error(e, "[JSPluginSource] Unexpected error getting chapter list")
@@ -92,22 +76,11 @@ class JSPluginSource(
         commands: List<Command<*>>
     ): List<Page> {
         return try {
-            Log.debug { "[JSPluginSource] Getting page list for chapter: ${chapter.name}" }
-            val startTime = System.currentTimeMillis()
-            
             val chapterPath = chapter.key
             val htmlContent = bridge.parseChapter(chapterPath)
-            
-            val duration = System.currentTimeMillis() - startTime
-            Log.info { "[JSPluginSource] Got chapter content (${htmlContent.length} chars) in ${duration}ms" }
-            
-            // Parse HTML and create a Text page for each paragraph
-            val pages = parseHtmlToParagraphs(htmlContent)
-            Log.debug { "[JSPluginSource] Parsed ${pages.size} paragraphs from HTML" }
-            
-            pages
+            parseHtmlToParagraphs(htmlContent)
         } catch (e: JSPluginError) {
-            Log.error(e, "[JSPluginSource] Failed to get page list: ${e.message}")
+            Log.error(e, "[JSPluginSource] Failed to get page list")
             throw e
         } catch (e: Exception) {
             Log.error(e, "[JSPluginSource] Unexpected error getting page list")
@@ -161,18 +134,10 @@ class JSPluginSource(
      */
     suspend fun getPopularNovels(page: Int, filters: Map<String, Any> = emptyMap()): List<MangaInfo> {
         return try {
-            Log.debug { "[JSPluginSource] Getting popular novels, page: $page" }
-            val startTime = System.currentTimeMillis()
-            
             val novels = bridge.popularNovels(page, filters)
-            val mangaList = novels.map { it.toMangaInfo() }
-            
-            val duration = System.currentTimeMillis() - startTime
-            Log.info { "[JSPluginSource] Got ${mangaList.size} popular novels in ${duration}ms" }
-            
-            mangaList
+            novels.map { it.toMangaInfo() }
         } catch (e: JSPluginError) {
-            Log.error(e, "[JSPluginSource] Failed to get popular novels: ${e.message}")
+            Log.error(e, "[JSPluginSource] Failed to get popular novels")
             throw e
         } catch (e: Exception) {
             Log.error(e, "[JSPluginSource] Unexpected error getting popular novels")
@@ -186,18 +151,10 @@ class JSPluginSource(
      */
     suspend fun searchNovels(query: String, page: Int): List<MangaInfo> {
         return try {
-            Log.debug { "[JSPluginSource] Searching novels, query: $query, page: $page" }
-            val startTime = System.currentTimeMillis()
-            
             val novels = bridge.searchNovels(query, page)
-            val mangaList = novels.map { it.toMangaInfo() }
-            
-            val duration = System.currentTimeMillis() - startTime
-            Log.info { "[JSPluginSource] Found ${mangaList.size} novels in ${duration}ms" }
-            
-            mangaList
+            novels.map { it.toMangaInfo() }
         } catch (e: JSPluginError) {
-            Log.error(e, "[JSPluginSource] Failed to search novels: ${e.message}")
+            Log.error(e, "[JSPluginSource] Failed to search novels")
             throw e
         } catch (e: Exception) {
             Log.error(e, "[JSPluginSource] Unexpected error searching novels")
@@ -221,23 +178,21 @@ class JSPluginSource(
     
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
         return try {
-            Log.debug { "[JSPluginSource] Getting manga list with listing: ${sort?.name}, page: $page" }
-            
             // Skip if this is a Search listing (search is handled separately via searchNovels)
             if (sort?.name == "Search") {
-                Log.debug { "[JSPluginSource] Skipping Search listing in getMangaList" }
                 return MangasPageInfo(emptyList(), hasNextPage = false)
             }
             
-            val filterValues = getDefaultFilterValues().toMutableMap()
+            // Start with empty filters
+            val filterValues = mutableMapOf<String, Any>()
             
             // Set sort based on listing type
-            if (filterValues.containsKey("m_orderby")) {
-                val sortValue = when (sort?.name) {
-                    "Latest" -> "latest"
-                    "Popular" -> ""  // Empty for popular/default
-                    else -> ""
-                }
+            val sortValue = when (sort?.name) {
+                "Latest" -> "latest"
+                "Popular" -> ""  // Empty for popular/default
+                else -> ""
+            }
+            if (sortValue.isNotEmpty()) {
                 filterValues["m_orderby"] = mapOf("value" to sortValue)
             }
             
@@ -252,8 +207,6 @@ class JSPluginSource(
     
     override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
         return try {
-            Log.debug { "[JSPluginSource] Getting manga list with filters, page: $page" }
-            
             // Check if there's a search query in the filters
             val searchQuery = filters.filterIsInstance<Filter.Text>()
                 .firstOrNull { it.name.equals("query", ignoreCase = true) || it.name.equals("search", ignoreCase = true) }
@@ -261,7 +214,6 @@ class JSPluginSource(
             
             // If there's a search query, use searchNovels instead
             if (!searchQuery.isNullOrBlank()) {
-                Log.debug { "[JSPluginSource] Using search with query: $searchQuery" }
                 val novels = bridge.searchNovels(searchQuery, page)
                 val mangaList = novels.map { it.toMangaInfo() }
                 return MangasPageInfo(mangaList, hasNextPage = mangaList.isNotEmpty())
@@ -345,7 +297,6 @@ class JSPluginSource(
     private suspend fun getDefaultFilterValues(): Map<String, Any> {
         return try {
             val filterDefs = bridge.getFilters()
-            Log.debug { "[JSPluginSource] Got ${filterDefs.size} filter definitions" }
             
             val filterValues = filterDefs.mapValues { (key, def) -> 
                 val value = when (def) {
@@ -356,17 +307,14 @@ class JSPluginSource(
                     is ireader.domain.js.models.FilterDefinition.CheckboxGroup -> {
                         // Convert to ArrayList to ensure proper JavaScript array conversion
                         val arrayValue = ArrayList(def.defaultValues)
-                        Log.debug { "[JSPluginSource] CheckboxGroup '$key' defaultValues: $arrayValue (${arrayValue.javaClass.simpleName})" }
                         mapOf("value" to arrayValue)
                     }
                     is ireader.domain.js.models.FilterDefinition.ExcludableCheckboxGroup -> 
                         mapOf("included" to def.included, "excluded" to def.excluded)
                 }
-                Log.debug { "[JSPluginSource] Filter '$key' default value: $value" }
                 value
             }
-            
-            Log.debug { "[JSPluginSource] Final filter values: $filterValues" }
+
             filterValues
         } catch (e: Exception) {
             Log.error(e, "[JSPluginSource] Failed to get default filter values")

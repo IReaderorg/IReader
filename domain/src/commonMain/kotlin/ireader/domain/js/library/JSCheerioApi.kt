@@ -139,6 +139,142 @@ class JSCheerioApi(private val pluginId: String) {
             return if (el != null) CheerioObject(doc, Elements(el)) else null
         }
         
+        /**
+         * Iterate over elements with a callback.
+         * The callback receives (index, element) where element is a CheerioObject.
+         * This is a stub that returns the CheerioObject for JavaScript to iterate over.
+         */
+        fun each(callback: Any?): CheerioObject {
+            // The actual iteration happens in JavaScript
+            // We just return this to allow chaining
+            return this
+        }
+        
+        /**
+         * Remove elements from the selection.
+         */
+        fun remove(): CheerioObject {
+            elements.forEach { it.remove() }
+            return this
+        }
+        
+        /**
+         * Add back previously selected elements.
+         */
+        fun addBack(): CheerioObject {
+            // Return this for now (simplified implementation)
+            return this
+        }
+        
+        /**
+         * Get contents including text nodes.
+         */
+        fun contents(): CheerioObject {
+            // Return this for now (simplified implementation)
+            return this
+        }
+        
+        /**
+         * Filter elements.
+         */
+        fun filter(callback: Any?): CheerioObject {
+            // Return this for now (simplified implementation)
+            return this
+        }
+        
+        /**
+         * Get the next sibling element.
+         */
+        fun next(): CheerioObject {
+            val nextElements = Elements()
+            elements.forEach { el ->
+                el.nextElementSibling()?.let { nextElements.add(it) }
+            }
+            return CheerioObject(doc, nextElements)
+        }
+        
+        /**
+         * Get the previous sibling element.
+         */
+        fun prev(): CheerioObject {
+            val prevElements = Elements()
+            elements.forEach { el ->
+                el.previousElementSibling()?.let { prevElements.add(it) }
+            }
+            return CheerioObject(doc, prevElements)
+        }
+        
+        /**
+         * Get parent elements.
+         */
+        fun parent(): CheerioObject {
+            val parents = Elements()
+            elements.forEach { el ->
+                el.parent()?.let { parents.add(it) }
+            }
+            return CheerioObject(doc, parents)
+        }
+        
+        /**
+         * Get children elements.
+         */
+        fun children(): CheerioObject {
+            val children = Elements()
+            elements.forEach { el ->
+                children.addAll(el.children())
+            }
+            return CheerioObject(doc, children)
+        }
+        
+        /**
+         * Get sibling elements.
+         */
+        fun siblings(): CheerioObject {
+            val siblings = Elements()
+            elements.forEach { el ->
+                siblings.addAll(el.siblingElements())
+            }
+            return CheerioObject(doc, siblings)
+        }
+        
+        /**
+         * Check if elements have a class.
+         */
+        fun hasClass(className: String): Boolean {
+            return elements.any { it.hasClass(className) }
+        }
+        
+        /**
+         * Add a class to elements.
+         */
+        fun addClass(className: String): CheerioObject {
+            elements.forEach { it.addClass(className) }
+            return this
+        }
+        
+        /**
+         * Remove a class from elements.
+         */
+        fun removeClass(className: String): CheerioObject {
+            elements.forEach { it.removeClass(className) }
+            return this
+        }
+        
+        /**
+         * Toggle a class on elements.
+         */
+        fun toggleClass(className: String): CheerioObject {
+            elements.forEach { it.toggleClass(className) }
+            return this
+        }
+        
+        /**
+         * Check if selection is empty.
+         */
+        fun isEmpty(): Boolean {
+            return elements.isEmpty()
+        }
+        
         val length: Int
             get() = elements.size
     }

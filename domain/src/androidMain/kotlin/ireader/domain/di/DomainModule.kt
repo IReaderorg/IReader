@@ -2,6 +2,7 @@ package ireader.domain.di
 
 import android.app.Service
 import androidx.compose.ui.text.ExperimentalTextApi
+import ireader.core.http.HttpClients
 import ireader.core.prefs.PreferenceStore
 import ireader.core.prefs.PreferenceStoreFactory
 import ireader.core.source.LocalCatalogSource

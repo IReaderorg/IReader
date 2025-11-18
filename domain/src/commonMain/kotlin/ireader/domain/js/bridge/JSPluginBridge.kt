@@ -39,12 +39,9 @@ class JSPluginBridge(
     suspend fun getPluginMetadata(): PluginMetadata {
         return withTimeout(30000L) {
             try {
-                Log.debug { "[JSPlugin] Extracting metadata for plugin: $pluginId" }
-                val startTime = System.currentTimeMillis()
-                
                 val pluginMap = pluginInstance.asMap()
                 
-                val metadata = PluginMetadata(
+                PluginMetadata(
                     id = pluginMap["id"]?.toString() ?: pluginId,
                     name = pluginMap["name"]?.toString() ?: "Unknown",
                     icon = pluginMap["icon"]?.toString() ?: "",
@@ -54,11 +51,6 @@ class JSPluginBridge(
                     imageRequestInit = pluginMap["imageRequestInit"] as? Map<String, Any>,
                     filters = pluginMap["filters"] as? Map<String, Any>
                 )
-                
-                val duration = System.currentTimeMillis() - startTime
-                Log.debug { "[JSPlugin] Metadata extracted in ${duration}ms: ${metadata.name}" }
-                
-                metadata
             } catch (e: Exception) {
                 throw JSPluginError.ExecutionError(pluginId, "getPluginMetadata", e)
             }
@@ -70,11 +62,6 @@ class JSPluginBridge(
      * This is necessary because methods are on the prototype, not as own properties.
      */
     private suspend fun callPluginMethod(methodName: String, vararg args: Any?): Any? {
-        Log.debug { "[JSPlugin] Calling method: $methodName with ${args.size} arguments" }
-        args.forEachIndexed { index, arg ->
-            Log.debug { "[JSPlugin] Arg[$index]: ${arg?.javaClass?.simpleName} = $arg" }
-        }
-        
         // Convert arguments to JSON
         val argsJson = args.joinToString(", ") { arg ->
             when (arg) {
@@ -133,8 +120,6 @@ class JSPluginBridge(
             })()
         """.trimIndent()
         
-        Log.debug { "[JSPlugin] Evaluating script for $methodName" }
-        
         return try {
             val initialResult = engine.evaluateScript(script)
             
@@ -143,8 +128,6 @@ class JSPluginBridge(
                 Log.error { "[JSPlugin] Synchronous error in $methodName: $error" }
                 throw JSException("Synchronous error in $methodName: $error")
             } else if (initialResult == "PROMISE_PENDING") {
-                Log.debug { "[JSPlugin] Waiting for Promise to resolve..." }
-                
                 var attempts = 0
                 val maxAttempts = 300
                 
@@ -159,9 +142,7 @@ class JSPluginBridge(
                             throw JSException("Promise rejected in $methodName: $error")
                         }
                         
-                        val result = engine.getGlobalObject(resultVar)
-                        Log.debug { "[JSPlugin] Promise resolved after ${attempts * 100}ms" }
-                        return result
+                        return engine.getGlobalObject(resultVar)
                     }
                     
                     attempts++

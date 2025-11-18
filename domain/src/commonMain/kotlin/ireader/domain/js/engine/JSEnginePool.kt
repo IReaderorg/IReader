@@ -21,8 +21,8 @@ private data class CompiledCode(
  * Implements LRU eviction, idle timeout, compiled code caching, and performance monitoring.
  */
 class JSEnginePool(
-    private val maxPoolSize: Int = 10,
-    private val idleTimeoutMillis: Long = 5 * 60 * 1000L, // 5 minutes
+    private val maxPoolSize: Int = 50, // Increased from 10 to support more plugins
+    private val idleTimeoutMillis: Long = 30 * 60 * 1000L, // 30 minutes (not used for auto-cleanup)
     private val maxConcurrentExecutions: Int = 5,
     private val maxCacheSizeBytes: Long = 50 * 1024 * 1024L // 50MB
 ) {
@@ -56,6 +56,8 @@ class JSEnginePool(
         val entry = engines[pluginId]
         if (entry != null) {
             // Update last used time to prevent cleanup
+            val idleTime = System.currentTimeMillis() - entry.lastUsedTime
+            println("[JSEnginePool] Reusing existing engine for plugin: $pluginId (was idle for ${idleTime}ms)")
             entry.lastUsedTime = System.currentTimeMillis()
             return entry.engine
         }
@@ -69,6 +71,7 @@ class JSEnginePool(
         }
         
         // Create new engine
+        println("[JSEnginePool] Creating new engine for plugin: $pluginId (pool size: ${engines.size})")
         val engine = JSEngine()
         engine.initialize()
         engines[pluginId] = EngineEntry(engine)
@@ -89,6 +92,7 @@ class JSEnginePool(
      * @param pluginId The plugin identifier
      */
     suspend fun remove(pluginId: String) = mutex.withLock {
+        println("[JSEnginePool] Explicitly removing engine for plugin: $pluginId")
         engines.remove(pluginId)?.engine?.dispose()
     }
     
@@ -109,16 +113,36 @@ class JSEnginePool(
     
     /**
      * Cleans up engines that have been idle for too long.
+     * NOTE: This is currently disabled because engines are referenced by JSPluginBridge
+     * and disposing them would break active plugins. Engines are only disposed when
+     * explicitly removed or when the pool is cleared.
      */
     private fun cleanupIdleEngines() {
+        // DISABLED: Don't clean up idle engines automatically
+        // Engines are disposed only when:
+        // 1. Plugin is explicitly unloaded (enginePool.remove())
+        // 2. Pool is cleared (enginePool.clear())
+        // 3. Pool is full and LRU eviction is needed
+        
+        // This prevents "Engine not initialized" errors when JSPluginBridge
+        // holds a reference to an engine that gets disposed.
+        
+        /* Original code (disabled):
         val now = System.currentTimeMillis()
         val toRemove = engines.filter { (_, entry) ->
-            now - entry.lastUsedTime > idleTimeoutMillis
+            val idleTime = now - entry.lastUsedTime
+            idleTime > idleTimeoutMillis
         }.keys
         
+        if (toRemove.isNotEmpty()) {
+            println("[JSEnginePool] Cleaning up ${toRemove.size} idle engines: $toRemove")
+        }
+        
         toRemove.forEach { pluginId ->
+            println("[JSEnginePool] Disposing idle engine for plugin: $pluginId")
             engines.remove(pluginId)?.engine?.dispose()
         }
+        */
     }
     
     /**
@@ -127,6 +151,7 @@ class JSEnginePool(
     private fun evictLRU() {
         val lruEntry = engines.minByOrNull { it.value.lastUsedTime }
         lruEntry?.let { (pluginId, entry) ->
+            println("[JSEnginePool] Evicting LRU engine for plugin: $pluginId (pool is full)")
             entry.engine.dispose()
             engines.remove(pluginId)
         }
