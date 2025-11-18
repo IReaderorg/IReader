@@ -15,6 +15,7 @@ import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
+import ireader.domain.models.entities.isObsolete
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.usecases.epub.EpubCreator
 import ireader.domain.usecases.history.HistoryUseCase
@@ -385,13 +386,34 @@ class BookDetailViewModel(
             try {
                 val currentSourceId = booksState.book?.sourceId
                 val allSources = catalogStore.catalogs
-                availableMigrationSources = allSources.filter { 
-                    it.sourceId != currentSourceId && it.source != null 
+                
+                Log.info { "Loading migration sources. Current source: $currentSourceId" }
+                Log.info { "Total catalogs available: ${allSources.size}" }
+                
+                // Filter out current source and ensure source is not null
+                availableMigrationSources = allSources.filter { catalog ->
+                    val isNotCurrentSource = catalog.sourceId != currentSourceId
+                    val hasSource = catalog.source != null
+                    val isEnabled = when (catalog) {
+                        is ireader.domain.models.entities.CatalogInstalled -> !catalog.isObsolete
+                        else -> true
+                    }
+                    
+                    Log.debug { "Catalog: ${catalog.name} (${catalog.sourceId}) - NotCurrent: $isNotCurrentSource, HasSource: $hasSource, Enabled: $isEnabled" }
+                    
+                    isNotCurrentSource && hasSource && isEnabled
                 }
+                
+                Log.info { "Available migration sources: ${availableMigrationSources.size}" }
+                availableMigrationSources.forEach { 
+                    Log.info { "  - ${it.name} (${it.sourceId})" }
+                }
+                
                 showMigrationDialog = true
                 
                 if (availableMigrationSources.isEmpty()) {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("No alternative sources available"))
+                    Log.warn { "No alternative sources available for migration" }
+                    showSnackBar(ireader.i18n.UiText.DynamicString("No alternative sources available. Total sources: ${allSources.size}, Current: $currentSourceId"))
                 }
             } catch (e: Exception) {
                 Log.error("Error loading migration sources", e)

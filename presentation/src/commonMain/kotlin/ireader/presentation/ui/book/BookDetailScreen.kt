@@ -95,6 +95,8 @@ fun BookDetailScreen(
         MigrationSourceDialog(
             sources = vm.availableMigrationSources,
             onSourceSelected = { targetSource ->
+                // Note: MigrationFlags are collected in the dialog but not yet used
+                // TODO: Update startMigration to accept MigrationFlags when use case supports it
                 vm.showMigrationDialog = false
                 vm.startMigration(targetSource.sourceId)
             },
@@ -143,7 +145,7 @@ fun BookDetailScreen(
                     onFavorite = onFavorite,
                     onWebView = onWebView,
                     onCopyTitle = onCopyTitle,
-                    onMigrate = { vm.showMigrationDialog = true },
+                    onMigrate = { vm.loadMigrationSources() },
                     hideBackdrop = hideBackdrop
                 )
             },
@@ -195,7 +197,7 @@ fun BookDetailScreen(
                         source = source,
                         onFavorite = onFavorite,
                         onWebView = onWebView,
-                        onMigrate = { vm.showMigrationDialog = true },
+                        onMigrate = { vm.loadMigrationSources() },
                         useFab = useFab
                     )
                 }
