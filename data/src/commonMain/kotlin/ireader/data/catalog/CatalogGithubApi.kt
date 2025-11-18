@@ -79,7 +79,7 @@ class CatalogGithubApi(
             }
 
             return when {
-                repo.repositoryType == "LNREADER" || repo.key.contains("v3.json") -> {
+                repo.isLNReaderRepository() || repo.key.contains("lnreader-plugins") || repo.key.contains("plugins.min.json") -> {
                     parseLNReaderFormat(response, repo)
                 }
                 else -> {
@@ -129,10 +129,17 @@ class CatalogGithubApi(
         }
         
         return lnReaderCatalogs.map { plugin ->
+            // Generate a numeric ID from the string ID using hashCode
+            // This ensures consistent IDs for the same plugin across sessions
+            val numericId = plugin.id.hashCode().toLong().let { 
+                // Ensure positive ID by taking absolute value
+                if (it < 0) -it else it 
+            }
+            
             CatalogRemote(
                 name = plugin.name,
                 description = plugin.description ?: "LNReader Plugin",
-                sourceId = plugin.id.toLong(),
+                sourceId = numericId,
                 pkgName = plugin.id,
                 versionName = plugin.version,
                 versionCode = plugin.version.replace(".", "").toIntOrNull() ?: 1,

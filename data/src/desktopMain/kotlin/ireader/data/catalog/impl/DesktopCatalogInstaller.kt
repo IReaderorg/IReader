@@ -31,51 +31,110 @@ class DesktopCatalogInstaller(
     override fun install(catalog: CatalogRemote): Flow<InstallStep> =
         flow {
             emit(InstallStep.Downloading)
-            val fileDir = File(ExtensionDir, "${catalog.pkgName}/")
-            fileDir.mkdirs()
-            val apkFile = File(ExtensionDir, "${catalog.pkgName}/${catalog.pkgName}.apk")
-            if (!apkFile.exists()) {
-                    apkFile.createNewFile()
-            }
-            val jarFile = File(ExtensionDir, "${catalog.pkgName}/${catalog.pkgName}.jar")
-            if (!jarFile.exists()) {
-                jarFile.createNewFile()
-            }
-            val iconFile = File(ExtensionDir, "${catalog.pkgName}/${catalog.pkgName}.png")
-            if (!iconFile.exists()) {
-                    iconFile.createNewFile()
-            }
-            try {
-                val apkResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
-                    headers.append(HttpHeaders.CacheControl, "no-store")
-                }.body()
-                val jarResponse: ByteReadChannel = client.get(catalog.jarUrl) {
-                    headers.append(HttpHeaders.CacheControl, "no-store")
-                }.body()
-                val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
-                    headers.append(HttpHeaders.CacheControl, "no-store")
-                }.body()
-                apkResponse.saveTo(apkFile)
-                jarResponse.saveTo(jarFile)
-                // copy installed App Icon to the storage
-                iconResponse.saveTo(iconFile)
-                emit(InstallStep.Idle)
-                val result = InstallStep.Success
-                installationChanges.notifyAppInstall(catalog.pkgName)
-                emit(result)
-            } catch (e: Throwable) {
-                Log.warn(e, "Error installing package")
-                emit(InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper)))
+            
+            // Check if this is a JS plugin (LNReader) or traditional APK/JAR extension
+            val isJSPlugin = catalog.pkgUrl.endsWith(".js")
+            
+            if (isJSPlugin) {
+                // Handle JS plugin installation
+                val jsPluginsDir = File(System.getProperty("user.home"), ".ireader/js-plugins").apply { mkdirs() }
+                val jsFile = File(jsPluginsDir, "${catalog.pkgName}.js")
+                
+                try {
+                    val jsResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
+                        headers.append(HttpHeaders.CacheControl, "no-store")
+                    }.body()
+                    jsResponse.saveTo(jsFile)
+                    
+                    // Optionally download icon if available
+                    if (catalog.iconUrl.isNotEmpty()) {
+                        try {
+                            val iconFile = File(jsPluginsDir, "${catalog.pkgName}.png")
+                            val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
+                                headers.append(HttpHeaders.CacheControl, "no-store")
+                            }.body()
+                            iconResponse.saveTo(iconFile)
+                        } catch (e: Exception) {
+                            Log.warn(e, "Failed to download icon for JS plugin, continuing anyway")
+                        }
+                    }
+                    
+                    emit(InstallStep.Idle)
+                    val result = InstallStep.Success
+                    installationChanges.notifyAppInstall(catalog.pkgName)
+                    emit(result)
+                } catch (e: Throwable) {
+                    Log.warn(e, "Error installing JS plugin")
+                    emit(InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper)))
+                }
+            } else {
+                // Handle traditional APK/JAR installation
+                val fileDir = File(ExtensionDir, "${catalog.pkgName}/")
+                fileDir.mkdirs()
+                val apkFile = File(ExtensionDir, "${catalog.pkgName}/${catalog.pkgName}.apk")
+                if (!apkFile.exists()) {
+                        apkFile.createNewFile()
+                }
+                val jarFile = File(ExtensionDir, "${catalog.pkgName}/${catalog.pkgName}.jar")
+                if (!jarFile.exists()) {
+                    jarFile.createNewFile()
+                }
+                val iconFile = File(ExtensionDir, "${catalog.pkgName}/${catalog.pkgName}.png")
+                if (!iconFile.exists()) {
+                        iconFile.createNewFile()
+                }
+                try {
+                    val apkResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
+                        headers.append(HttpHeaders.CacheControl, "no-store")
+                    }.body()
+                    val jarResponse: ByteReadChannel = client.get(catalog.jarUrl) {
+                        headers.append(HttpHeaders.CacheControl, "no-store")
+                    }.body()
+                    val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
+                        headers.append(HttpHeaders.CacheControl, "no-store")
+                    }.body()
+                    apkResponse.saveTo(apkFile)
+                    jarResponse.saveTo(jarFile)
+                    // copy installed App Icon to the storage
+                    iconResponse.saveTo(iconFile)
+                    emit(InstallStep.Idle)
+                    val result = InstallStep.Success
+                    installationChanges.notifyAppInstall(catalog.pkgName)
+                    emit(result)
+                } catch (e: Throwable) {
+                    Log.warn(e, "Error installing package")
+                    emit(InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper)))
+                }
             }
         }
 
     override suspend fun uninstall(pkgName: String): InstallStep {
         return try {
-            val file = File(ExtensionDir,pkgName)
-            val deleted = file.deleteRecursively()
-            file.deleteOnExit()
+            // Try to uninstall from both locations (APK/JAR and JS plugins)
+            var deleted = false
+            
+            // Try traditional extension directory
+            val extensionFile = File(ExtensionDir, pkgName)
+            if (extensionFile.exists()) {
+                deleted = extensionFile.deleteRecursively()
+                extensionFile.deleteOnExit()
+            }
+            
+            // Try JS plugins directory
+            val jsPluginsDir = File(System.getProperty("user.home"), ".ireader/js-plugins")
+            val jsFile = File(jsPluginsDir, "$pkgName.js")
+            if (jsFile.exists()) {
+                deleted = jsFile.delete() || deleted
+            }
+            
+            // Also delete icon if exists
+            val iconFile = File(jsPluginsDir, "$pkgName.png")
+            if (iconFile.exists()) {
+                iconFile.delete()
+            }
+            
             installationChanges.notifyAppUninstall(pkgName)
-            if (deleted ) InstallStep.Success else InstallStep.Error(localizeHelper.localize(Res.string.failed))
+            if (deleted) InstallStep.Success else InstallStep.Error(localizeHelper.localize(Res.string.failed))
         } catch (e: Throwable) {
             InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper))
         }

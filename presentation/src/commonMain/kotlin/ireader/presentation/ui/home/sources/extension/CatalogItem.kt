@@ -172,16 +172,6 @@ private fun CatalogButtons(
                 Spacer(modifier = Modifier.width(8.dp))
             }
             
-            // Show migrate button for installed sources with books
-            if (catalog is CatalogInstalled && onMigrate != null) {
-                MidSizeTextComposable(
-                    text = localize(Res.string.migrate),
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.clickable { onMigrate() }
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-            
             // Show either progress indicator or install button
             if (installStep != null && !installStep.isFinished()) {
                 Box(contentAlignment = androidx.compose.ui.Alignment.Center) {

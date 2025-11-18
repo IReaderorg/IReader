@@ -48,51 +48,90 @@ class AndroidCatalogInstaller(
     override fun install(catalog: CatalogRemote): Flow<InstallStep> =
         flow {
             emit(InstallStep.Downloading)
-            val tmpApkFile = File(context.cacheDir, "${catalog.pkgName}.apk")
-            val tmpIconFile = File(context.cacheDir, "${catalog.pkgName}.png")
-            try {
-                val apkResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
-                    headers.append(HttpHeaders.CacheControl, "no-store")
-                }.body()
-                val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
-                    headers.append(HttpHeaders.CacheControl, "no-store")
-                }.body()
-                apkResponse.saveTo(tmpApkFile)
+            
+            // Check if this is a JS plugin (LNReader) or traditional APK extension
+            val isJSPlugin = catalog.pkgUrl.endsWith(".js")
+            
+            if (isJSPlugin) {
+                // Handle JS plugin installation
+                val jsPluginsDir = File(context.filesDir, "js-plugins").apply { mkdirs() }
+                val jsFile = File(jsPluginsDir, "${catalog.pkgName}.js")
                 
-                // Save the icon to storage
-                iconResponse.saveTo(tmpIconFile)
-                val extDir = File(context.cacheDir, catalog.pkgName).apply { mkdirs() }
-                val iconFile = File(extDir, tmpIconFile.name)
-                tmpIconFile.copyRecursively(iconFile, true)
-                
-                // Create a secure directory in the code cache directory for installation
-                val secureApkDir = File(context.codeCacheDir, "secure_installations")
-                secureApkDir.mkdirs()
-                val secureApkFile = File(secureApkDir, "${catalog.pkgName}.apk")
-                
-                // Copy the APK to the secure location
-                if (secureApkFile.exists()) {
-                    secureApkFile.delete()
-                }
-                tmpApkFile.copyTo(secureApkFile, overwrite = true)
-                
-                // Make sure the file is readable but not set to read-only
-                // Android 14 (API 34) needs the file to be writable
-                secureApkFile.setReadable(true)
-                secureApkFile.setWritable(true)
-                
-                emit(InstallStep.Idle)
-                // Use the secure file for installation
-                val result = packageInstaller.install(secureApkFile, catalog.pkgName)
-                if (result is InstallStep.Success) {
+                try {
+                    val jsResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
+                        headers.append(HttpHeaders.CacheControl, "no-store")
+                    }.body()
+                    jsResponse.saveTo(jsFile)
+                    
+                    // Optionally download icon if available
+                    if (catalog.iconUrl.isNotEmpty()) {
+                        try {
+                            val iconFile = File(jsPluginsDir, "${catalog.pkgName}.png")
+                            val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
+                                headers.append(HttpHeaders.CacheControl, "no-store")
+                            }.body()
+                            iconResponse.saveTo(iconFile)
+                        } catch (e: Exception) {
+                            Log.warn(e, "Failed to download icon for JS plugin, continuing anyway")
+                        }
+                    }
+                    
+                    emit(InstallStep.Idle)
+                    val result = InstallStep.Success
                     installationChanges.notifyAppInstall(catalog.pkgName)
+                    emit(result)
+                } catch (e: Throwable) {
+                    Log.warn(e, "Error installing JS plugin")
+                    emit(InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper)))
                 }
-                emit(result)
-            } catch (e: Throwable) {
-                Log.warn(e, "Error installing package")
-                emit(InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper)))
-            } finally {
-                tmpApkFile.delete()
+            } else {
+                // Handle traditional APK installation
+                val tmpApkFile = File(context.cacheDir, "${catalog.pkgName}.apk")
+                val tmpIconFile = File(context.cacheDir, "${catalog.pkgName}.png")
+                try {
+                    val apkResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
+                        headers.append(HttpHeaders.CacheControl, "no-store")
+                    }.body()
+                    val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
+                        headers.append(HttpHeaders.CacheControl, "no-store")
+                    }.body()
+                    apkResponse.saveTo(tmpApkFile)
+                    
+                    // Save the icon to storage
+                    iconResponse.saveTo(tmpIconFile)
+                    val extDir = File(context.cacheDir, catalog.pkgName).apply { mkdirs() }
+                    val iconFile = File(extDir, tmpIconFile.name)
+                    tmpIconFile.copyRecursively(iconFile, true)
+                    
+                    // Create a secure directory in the code cache directory for installation
+                    val secureApkDir = File(context.codeCacheDir, "secure_installations")
+                    secureApkDir.mkdirs()
+                    val secureApkFile = File(secureApkDir, "${catalog.pkgName}.apk")
+                    
+                    // Copy the APK to the secure location
+                    if (secureApkFile.exists()) {
+                        secureApkFile.delete()
+                    }
+                    tmpApkFile.copyTo(secureApkFile, overwrite = true)
+                    
+                    // Make sure the file is readable but not set to read-only
+                    // Android 14 (API 34) needs the file to be writable
+                    secureApkFile.setReadable(true)
+                    secureApkFile.setWritable(true)
+                    
+                    emit(InstallStep.Idle)
+                    // Use the secure file for installation
+                    val result = packageInstaller.install(secureApkFile, catalog.pkgName)
+                    if (result is InstallStep.Success) {
+                        installationChanges.notifyAppInstall(catalog.pkgName)
+                    }
+                    emit(result)
+                } catch (e: Throwable) {
+                    Log.warn(e, "Error installing package")
+                    emit(InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper)))
+                } finally {
+                    tmpApkFile.delete()
+                }
             }
         }
 
@@ -103,9 +142,29 @@ class AndroidCatalogInstaller(
      */
     override suspend fun uninstall(pkgName: String): InstallStep {
         return try {
-            val deleted = packageInstaller.uninstall(pkgName)
+            var deleted = false
+            
+            // Try to uninstall traditional APK
+            val apkResult = packageInstaller.uninstall(pkgName)
+            if (apkResult is InstallStep.Success) {
+                deleted = true
+            }
+            
+            // Try to delete JS plugin files
+            val jsPluginsDir = File(context.filesDir, "js-plugins")
+            val jsFile = File(jsPluginsDir, "$pkgName.js")
+            if (jsFile.exists()) {
+                deleted = jsFile.delete() || deleted
+            }
+            
+            // Also delete icon if exists
+            val iconFile = File(jsPluginsDir, "$pkgName.png")
+            if (iconFile.exists()) {
+                iconFile.delete()
+            }
+            
             installationChanges.notifyAppUninstall(pkgName)
-            deleted
+            if (deleted) InstallStep.Success else apkResult
         } catch (e: Throwable) {
             InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper))
         }
