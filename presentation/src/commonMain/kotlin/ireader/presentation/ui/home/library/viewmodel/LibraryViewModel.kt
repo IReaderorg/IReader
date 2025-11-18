@@ -939,19 +939,6 @@ fun searchInLibrary(query: String) {
     // The existing search logic in getLibraryForCategoryIndex will handle this
 }
 
-/**
- * Show the batch operation dialog
- */
-fun showBatchOperationDialog() {
-    state.showBatchOperationDialog = true
-}
-
-/**
- * Hide the batch operation dialog
- */
-fun hideBatchOperationDialog() {
-    state.showBatchOperationDialog = false
-}
 
 /**
  * Perform a batch operation on selected books

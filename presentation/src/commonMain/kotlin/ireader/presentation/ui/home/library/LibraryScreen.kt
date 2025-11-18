@@ -27,10 +27,6 @@ import ireader.presentation.ui.core.ui.EmptyScreen
 import ireader.presentation.ui.core.ui.LoadingScreen
 import ireader.presentation.ui.home.library.components.EditCategoriesDialog
 import ireader.presentation.ui.home.library.components.LibraryFilterBottomSheet
-import ireader.presentation.ui.home.library.components.BatchOperationProgressDialog
-import ireader.presentation.ui.home.library.components.BatchOperationResultDialog
-import ireader.presentation.ui.home.library.components.BatchOperationDialog
-import ireader.presentation.ui.home.library.components.BatchOperation
 import ireader.presentation.ui.home.library.ui.LibraryContent
 import ireader.presentation.ui.home.library.ui.LibrarySelectionBar
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
@@ -230,58 +226,6 @@ fun LibraryScreen(
             )
         }
         
-        // Batch operation dialog
-        BatchOperationDialog(
-            isVisible = vm.showBatchOperationDialog,
-            selectedCount = vm.selectedBooks.size,
-            onOperationSelected = { operation ->
-                when (operation) {
-                    BatchOperation.DELETE -> onDelete()
-                    BatchOperation.CHANGE_CATEGORY -> onClickChangeCategory()
-                    else -> vm.performBatchOperation(operation)
-                }
-            },
-            onDismiss = { vm.hideBatchOperationDialog() }
-        )
-        
-        // Batch operation progress dialog
-        BatchOperationProgressDialog(
-            isVisible = vm.batchOperationInProgress,
-            message = vm.batchOperationMessage ?: "Processing..."
-        )
-        
-        // Batch operation result dialog
-        var showResultDialog by remember { mutableStateOf(false) }
-        var resultMessage by remember { mutableStateOf("") }
-        var showUndoOption by remember { mutableStateOf(false) }
-        
-        LaunchedEffect(vm.batchOperationMessage, vm.batchOperationInProgress) {
-            if (!vm.batchOperationInProgress && vm.batchOperationMessage != null) {
-                resultMessage = vm.batchOperationMessage ?: ""
-                showResultDialog = true
-                // Show undo option if there's a recent undo state (within 10 seconds)
-                showUndoOption = vm.lastUndoState != null && 
-                    (System.currentTimeMillis() - (vm.lastUndoState?.timestamp ?: 0)) < 10000
-            }
-        }
-        
-        BatchOperationResultDialog(
-            isVisible = showResultDialog,
-            title = "Batch Operation Complete",
-            message = resultMessage,
-            showUndo = showUndoOption,
-            onUndo = {
-                vm.scope.launch(Dispatchers.IO) {
-                    vm.lastUndoState?.let { undoState ->
-                        vm.undoMarkOperation(undoState.previousChapterStates)
-                        vm.lastUndoState = null
-                    }
-                }
-            },
-            onDismiss = {
-                showResultDialog = false
-                vm.batchOperationMessage = null
-            }
-        )
+
     }
 }

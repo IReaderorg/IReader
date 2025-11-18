@@ -24,9 +24,7 @@ class LibraryStateManager(
     
     // UI state
     var isRefreshing by mutableStateOf(false)
-    var showBatchOperationDialog by mutableStateOf(false)
-    var batchOperationInProgress by mutableStateOf(false)
-    var batchOperationMessage by mutableStateOf<String?>(null)
+
     
     /**
      * Toggle a filter with full cycle (Included -> Excluded -> Missing)
@@ -67,43 +65,5 @@ class LibraryStateManager(
         newType: LibrarySort.Type? = null
     ): LibrarySort {
         return filterUseCase.toggleSort(currentSort, newType)
-    }
-    
-    /**
-     * Show batch operation dialog
-     */
-    fun showBatchDialog() {
-        showBatchOperationDialog = true
-    }
-    
-    /**
-     * Hide batch operation dialog
-     */
-    fun hideBatchDialog() {
-        showBatchOperationDialog = false
-    }
-    
-    /**
-     * Start batch operation
-     */
-    fun startBatchOperation() {
-        batchOperationInProgress = true
-        batchOperationMessage = "Processing..."
-    }
-    
-    /**
-     * Complete batch operation
-     */
-    fun completeBatchOperation(message: String) {
-        batchOperationInProgress = false
-        batchOperationMessage = message
-    }
-    
-    /**
-     * Fail batch operation
-     */
-    fun failBatchOperation(error: String) {
-        batchOperationInProgress = false
-        batchOperationMessage = "Error: $error"
     }
 }
