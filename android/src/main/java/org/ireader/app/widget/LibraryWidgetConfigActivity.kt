@@ -112,7 +112,7 @@ fun WidgetConfigScreen(
             )
             RadioButtonOption(
                 text = "Favorites",
-                selected = selectedType = "favorites",
+                selected = selectedType == "favorites",
                 onClick = { selectedType = "favorites" }
             )
             RadioButtonOption(
