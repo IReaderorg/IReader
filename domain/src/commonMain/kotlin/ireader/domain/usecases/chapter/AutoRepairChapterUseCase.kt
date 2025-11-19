@@ -74,10 +74,20 @@ class AutoRepairChapterUseCase(
                     // Get chapter list from the alternative source
                     val alternativeChapters = source.getChapterList(matchingNovel, emptyList())
                     
-                    // Find matching chapter by number or name
+                    // Find matching chapter by name first (most reliable), then by number
                     val matchingChapter = alternativeChapters.firstOrNull { altChapter ->
-                        altChapter.number == chapter.number ||
+                        // Exact name match (case-insensitive)
                         altChapter.name.equals(chapter.name, ignoreCase = true)
+                    } ?: alternativeChapters.firstOrNull { altChapter ->
+                        // If name doesn't match, try number match (only if number is valid)
+                        chapter.isRecognizedNumber && 
+                        altChapter.number == chapter.number
+                    } ?: alternativeChapters.firstOrNull { altChapter ->
+                        // Fallback: fuzzy name matching (contains key parts)
+                        val chapterNameNormalized = chapter.name.lowercase().trim()
+                        val altChapterNameNormalized = altChapter.name.lowercase().trim()
+                        chapterNameNormalized.isNotEmpty() && 
+                        altChapterNameNormalized.contains(chapterNameNormalized)
                     } ?: continue
                     
                     // Fetch the chapter content
