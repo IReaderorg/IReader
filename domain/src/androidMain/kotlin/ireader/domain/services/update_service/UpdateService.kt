@@ -15,7 +15,7 @@ import ireader.domain.notification.legacyFlags
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.utils.NotificationManager
 import ireader.i18n.R
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.DurationUnit

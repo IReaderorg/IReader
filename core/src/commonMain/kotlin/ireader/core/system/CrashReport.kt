@@ -1,7 +1,6 @@
 package ireader.core.system
 
-import kotlinx.datetime.Instant
-import  kotlin.time.Clock
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 /**
@@ -9,7 +8,7 @@ import kotlin.time.ExperimentalTime
  */
 @OptIn(ExperimentalTime::class)
 data class CrashReport(
-    val timestamp: Instant = kotlin.time.Clock.System.now(),
+    val timestamp: kotlin.time.Instant = kotlin.time.Clock.System.now(),
     val exception: Throwable,
     val stackTrace: String,
     val context: String? = null,

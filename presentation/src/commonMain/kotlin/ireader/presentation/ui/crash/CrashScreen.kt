@@ -14,12 +14,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import ireader.core.system.CrashReport
+import kotlin.time.ExperimentalTime
 
 /**
  * Screen displayed when the app crashes
  * Provides crash information and recovery options
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
 fun CrashScreen(
     crashReport: CrashReport,

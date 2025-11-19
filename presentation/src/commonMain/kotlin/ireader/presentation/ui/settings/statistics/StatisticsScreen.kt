@@ -5,6 +5,7 @@ import ireader.presentation.core.LocalNavigator
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -58,7 +59,7 @@ class StatisticsScreen : KoinComponent {
                     StatCard(
                         title = "Chapters Read",
                         value = statistics.totalChaptersRead.toString(),
-                        icon = Icons.Default.MenuBook,
+                        icon = Icons.AutoMirrored.Filled.MenuBook,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }

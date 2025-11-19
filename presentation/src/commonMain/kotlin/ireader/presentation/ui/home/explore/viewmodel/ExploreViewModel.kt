@@ -53,15 +53,10 @@ class ExploreViewModel(
         val sourceId = param.sourceId
         val query = param.query
         
-        Log.debug { "[ExploreViewModel] Looking for catalog with sourceId: $sourceId" }
-        Log.debug { "[ExploreViewModel] Available catalogs: ${catalogStore.catalogs.map { "${it.name} (${it.sourceId})" }}" }
-        
         val catalog = catalogStore.find(sourceId)
         
         if (catalog == null) {
             Log.error { "[ExploreViewModel] Catalog not found for sourceId: $sourceId" }
-        } else {
-            Log.debug { "[ExploreViewModel] Found catalog: ${catalog.name} (${catalog.sourceId})" }
         }
 
         state.catalog = catalog
@@ -108,7 +103,6 @@ class ExploreViewModel(
                         onRequest = { nextPage ->
                             try {
                                 error = null
-                                Log.debug { "Explore Request was made - current page:$nextPage" }
 
                                 val query = searchQuery
                                 val filters = stateFilters
@@ -121,7 +115,6 @@ class ExploreViewModel(
                                     val catalogSource = source.source
                                     if (catalogSource is ireader.domain.js.bridge.JSPluginSource && jsPluginFilters != null) {
                                         // Use JS plugin's custom method with filters
-                                        Log.debug { "Using JS plugin filters: $jsPluginFilters" }
                                         val novels = if (query != null && query.isNotBlank()) {
                                             catalogSource.searchNovels(query, page)
                                         } else {

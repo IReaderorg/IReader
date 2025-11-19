@@ -1,6 +1,5 @@
 package ireader.domain.models.tts
 
-import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 /**

@@ -174,7 +174,7 @@ private fun ColumnScrollbar(
                 .fillMaxHeight()
                 .graphicsLayer {
                     translationX = (if (rightSide) displacement.dp else -displacement.dp).toPx()
-                    translationY = constraints.maxHeight.toFloat() * normalizedOffsetPosition
+                    translationY = this@BoxWithConstraints.constraints.maxHeight.toFloat() * normalizedOffsetPosition
                 }) {
             ConstraintLayout(
                 Modifier.align(Alignment.TopEnd)

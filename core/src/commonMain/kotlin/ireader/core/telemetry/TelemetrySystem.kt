@@ -6,7 +6,6 @@ import ireader.core.system.SystemCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
 import kotlin.time.ExperimentalTime
 
 /**

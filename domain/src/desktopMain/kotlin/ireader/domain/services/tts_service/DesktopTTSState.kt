@@ -14,7 +14,7 @@ import ireader.domain.preferences.models.prefs.IReaderVoice
 import ireader.domain.services.tts_service.piper.DownloadProgress
 import ireader.domain.services.tts_service.piper.VoiceModel
 import ireader.domain.services.tts_service.piper.WordBoundary
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlin.time.ExperimentalTime
 
 /**
@@ -46,7 +46,7 @@ class DesktopTTSState : TTSState {
     override var speechSpeed by mutableStateOf(0.8f)
     override var sleepTime by mutableStateOf(0L)
     @OptIn(ExperimentalTime::class)
-    override var startTime by mutableStateOf<Instant?>(null)
+    override var startTime by mutableStateOf<kotlin.time.Instant?>(null)
     override var sleepMode by mutableStateOf(false)
     override var prevSpeechSpeed by mutableStateOf(0.8f)
     override var ttsBook by mutableStateOf<Book?>(null)

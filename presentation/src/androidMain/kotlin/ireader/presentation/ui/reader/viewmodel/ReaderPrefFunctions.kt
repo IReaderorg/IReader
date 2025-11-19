@@ -16,7 +16,7 @@ import ireader.domain.utils.extensions.isImmersiveModeEnabled
 import ireader.domain.utils.extensions.showSystemUI
 import ireader.presentation.ui.component.findComponentActivity
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 

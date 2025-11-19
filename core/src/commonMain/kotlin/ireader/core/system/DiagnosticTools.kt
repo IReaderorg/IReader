@@ -1,7 +1,6 @@
 package ireader.core.system
 
 import ireader.core.log.IReaderLog
-import kotlinx.datetime.Instant
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
@@ -179,7 +178,7 @@ data class SystemInfo @OptIn(ExperimentalTime::class) constructor(
     val totalMemoryMB: Long,
     val freeMemoryMB: Long,
     val maxMemoryMB: Long,
-    val timestamp: Instant
+    val timestamp: kotlin.time.Instant
 )
 
 /**

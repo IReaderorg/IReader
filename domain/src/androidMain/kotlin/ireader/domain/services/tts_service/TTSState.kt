@@ -7,7 +7,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import kotlinx.datetime.Instant
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
@@ -53,7 +52,7 @@ class TTSStateImpl() : AndroidTTSState {
     override var speechSpeed by mutableStateOf(0.8f)
     override var sleepTime by mutableStateOf(0L)
     @OptIn(ExperimentalTime::class)
-    override var startTime by mutableStateOf<Instant?>(null)
+    override var startTime by mutableStateOf<kotlin.time.Instant?>(null)
     override var sleepMode by mutableStateOf(false)
     override var prevSpeechSpeed by mutableStateOf(0.8f)
     override var ttsBook by mutableStateOf<Book?>(null)

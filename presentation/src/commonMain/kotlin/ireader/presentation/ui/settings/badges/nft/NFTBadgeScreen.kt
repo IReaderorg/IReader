@@ -30,7 +30,7 @@ import ireader.domain.models.remote.Badge
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.badges.BadgeIcon
 import ireader.presentation.ui.component.components.TitleToolbar
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.ExperimentalTime

@@ -6,7 +6,6 @@ import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
 import ireader.core.source.Source
 import ireader.domain.preferences.models.prefs.IReaderVoice
-import kotlinx.datetime.Instant
 import kotlin.time.ExperimentalTime
 
 /**
@@ -39,6 +38,6 @@ interface TTSState {
     val uiChapters: State<List<Chapter>>
     var isDrawerAsc: Boolean
     @OptIn(ExperimentalTime::class)
-    var startTime: Instant?
+    var startTime: kotlin.time.Instant?
     var sleepMode: Boolean
 }

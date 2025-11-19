@@ -4,7 +4,6 @@ import ireader.core.log.IReaderLog
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.datetime.Instant
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
@@ -192,7 +191,7 @@ class SystemHealthMonitor {
  * Health metrics data class
  */
 data class HealthMetrics @OptIn(ExperimentalTime::class) constructor(
-    val startTime: Instant = kotlin.time.Clock.System.now(),
+    val startTime: kotlin.time.Instant = kotlin.time.Clock.System.now(),
     val uptimeMs: Long = 0,
     val crashCount: Int = 0,
     val currentMemoryUsageMB: Long = 0,

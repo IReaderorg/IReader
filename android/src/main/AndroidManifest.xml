@@ -71,7 +71,6 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:screenOrientation="fullSensor"
         android:supportsRtl="true"
-        android:extractNativeLibs="true"
         android:theme="@style/Theme.Splash">
         <activity
             android:name="org.ireader.app.MainActivity"

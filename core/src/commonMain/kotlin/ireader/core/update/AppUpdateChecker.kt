@@ -4,7 +4,6 @@ import ireader.core.log.IReaderLog
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.datetime.Instant
 import kotlin.time.ExperimentalTime
 
 /**
@@ -19,7 +18,7 @@ class AppUpdateChecker(
     private val _updateState = MutableStateFlow<UpdateState>(UpdateState.Idle)
     val updateState: StateFlow<UpdateState> = _updateState.asStateFlow()
     
-    private var lastCheckTime: Instant? = null
+    private var lastCheckTime: kotlin.time.Instant? = null
     private val minCheckIntervalMs = 6L * 60 * 60 * 1000 // 6 hours
     
     /**

@@ -183,8 +183,8 @@ class JSPluginSource(
                 return MangasPageInfo(emptyList(), hasNextPage = false)
             }
             
-            // Start with empty filters
-            val filterValues = mutableMapOf<String, Any>()
+            // Start with default filter values
+            val filterValues = getDefaultFilterValues().toMutableMap()
             
             // Set sort based on listing type
             val sortValue = when (sort?.name) {
@@ -219,8 +219,10 @@ class JSPluginSource(
                 return MangasPageInfo(mangaList, hasNextPage = mangaList.isNotEmpty())
             }
             
-            // Otherwise, use popularNovels with filters
-            val filterValues = convertFiltersToMap(filters)
+            // Start with default filter values and merge with user selections
+            val defaultValues = getDefaultFilterValues()
+            val userValues = convertFiltersToMap(filters)
+            val filterValues = defaultValues.toMutableMap().apply { putAll(userValues) }
             
             val novels = bridge.popularNovels(page, filterValues)
             val mangaList = novels.map { it.toMangaInfo() }

@@ -14,7 +14,6 @@ import ireader.domain.utils.extensions.convertLongToTime
 import ireader.domain.utils.extensions.withUIContext
 import ireader.domain.utils.toast
 import ireader.i18n.R
-import kotlinx.datetime.Instant
 import java.io.File
 import java.util.*
 import kotlin.time.Duration.Companion.days
@@ -38,7 +37,7 @@ class AutomaticBackup(
         val maxFiles = uiPreferences.maxAutomaticBackupFiles().get()
         val automaticBackupPref = uiPreferences.automaticBackupTime().get()
         val backupEveryXTime = automaticBackupTime(automaticBackupPref) ?: return
-        val lastCheck = Instant.fromEpochMilliseconds(lastCheckPref.get())
+        val lastCheck = kotlin.time.Instant.fromEpochMilliseconds(lastCheckPref.get())
         val now = kotlin.time.Clock.System.now()
         if (force || now - lastCheck > backupEveryXTime) {
             try {

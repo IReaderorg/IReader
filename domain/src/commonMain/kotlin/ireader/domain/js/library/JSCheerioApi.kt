@@ -275,6 +275,86 @@ class JSCheerioApi(private val pluginId: String) {
             return elements.isEmpty()
         }
         
+        /**
+         * Append content to elements.
+         */
+        fun append(content: Any?): CheerioObject {
+            val contentStr = content?.toString() ?: ""
+            elements.forEach { el ->
+                el.append(contentStr)
+            }
+            return this
+        }
+        
+        /**
+         * Prepend content to elements.
+         */
+        fun prepend(content: Any?): CheerioObject {
+            val contentStr = content?.toString() ?: ""
+            elements.forEach { el ->
+                el.prepend(contentStr)
+            }
+            return this
+        }
+        
+        /**
+         * Replace elements with new content.
+         */
+        fun replaceWith(content: Any?): CheerioObject {
+            val contentStr = content?.toString() ?: ""
+            elements.forEach { el ->
+                val parsed = org.jsoup.Jsoup.parse(contentStr).body()
+                parsed.children().forEach { child ->
+                    el.before(child)
+                }
+                el.remove()
+            }
+            return this
+        }
+        
+        /**
+         * Insert content before elements.
+         */
+        fun before(content: Any?): CheerioObject {
+            val contentStr = content?.toString() ?: ""
+            elements.forEach { el ->
+                el.before(contentStr)
+            }
+            return this
+        }
+        
+        /**
+         * Insert content after elements.
+         */
+        fun after(content: Any?): CheerioObject {
+            val contentStr = content?.toString() ?: ""
+            elements.forEach { el ->
+                el.after(contentStr)
+            }
+            return this
+        }
+        
+        /**
+         * Empty the elements (remove all children).
+         */
+        fun empty(): CheerioObject {
+            elements.forEach { el ->
+                el.empty()
+            }
+            return this
+        }
+        
+        /**
+         * Clone the elements.
+         */
+        fun clone(): CheerioObject {
+            val cloned = Elements()
+            elements.forEach { el ->
+                cloned.add(el.clone())
+            }
+            return CheerioObject(doc, cloned)
+        }
+        
         val length: Int
             get() = elements.size
     }
