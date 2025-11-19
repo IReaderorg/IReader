@@ -15,7 +15,13 @@ class JSLibraryProvider(
     private val preferenceStore: PreferenceStore
 ) {
     
-    private val fetchApi = JSFetchApi(httpClient, pluginId)
+    // Create FlareSolverr client for Cloudflare bypass with extended timeout
+    private val flareSolverrClient = ireader.domain.http.FlareSolverrClient(
+        httpClient = httpClient,
+        maxTimeout = 120000 // 2 minutes for complex challenges like wuxiaworld.site
+    )
+    
+    private val fetchApi = JSFetchApi(httpClient, pluginId, flareSolverrClient = flareSolverrClient)
     private val storage = JSStorage(preferenceStore, pluginId)
     private val localStorage = JSLocalStorage()
     private val sessionStorage = JSSessionStorage()
@@ -40,13 +46,13 @@ class JSLibraryProvider(
             // First, setup global APIs
             val globalSetup = """
                 (function() {
-                    // Wrap native cheerio to add JavaScript-side .each() support
+                    // Wrap native cheerio to add JavaScript-side .each() and .map() support
                     if (typeof __nativeCheerio !== 'undefined') {
                         const originalLoad = __nativeCheerio.load.bind(__nativeCheerio);
                         __nativeCheerio.load = function(html) {
                             const $ = originalLoad(html);
                             
-                            // Wrap the selector function to add .each() support
+                            // Wrap the selector function to add .each() and .map() support
                             const originalSelector = $;
                             const wrappedSelector = function(selector) {
                                 const selection = originalSelector(selector);
@@ -60,6 +66,26 @@ class JSLibraryProvider(
                                         callback.call(element, i, element);
                                     }
                                     return selection;
+                                };
+                                
+                                // Add .map() method that works with JavaScript callbacks
+                                const originalMap = selection.map;
+                                selection.map = function(callback) {
+                                    const results = [];
+                                    // Iterate over elements and collect callback results
+                                    for (let i = 0; i < selection.length; i++) {
+                                        const element = selection.eq ? selection.eq(i) : selection.get(i);
+                                        const result = callback.call(element, i, element);
+                                        if (result !== null && result !== undefined) {
+                                            results.push(result);
+                                        }
+                                    }
+                                    // Return an object with get() method like Cheerio does
+                                    return {
+                                        get: function() { return results; },
+                                        toArray: function() { return results; },
+                                        length: results.length
+                                    };
                                 };
                                 
                                 return selection;
@@ -928,6 +954,11 @@ class JSLibraryProvider(
                         this.options = options || {};
                         this.tagStack = [];
                         
+                        // Add isVoidElement method to Parser instance
+                        this.isVoidElement = function(tagName) {
+                            return voidElements.has(tagName.toLowerCase());
+                        };
+                        
                         this.write = function(html) {
                             // Simple HTML parser - extract text and basic tags
                             const tagRegex = /<(\/?)([\w-]+)([^>]*)>/g;
@@ -950,11 +981,7 @@ class JSLibraryProvider(
                                 
                                 if (isClosing) {
                                     if (this.handlers.onclosetag) {
-                                        const tagInfo = {
-                                            name: tagName,
-                                            isVoidElement: function() { return voidElements.has(tagName); }
-                                        };
-                                        this.handlers.onclosetag(tagName, tagInfo);
+                                        this.handlers.onclosetag(tagName);
                                     }
                                 } else {
                                     // Parse attributes
@@ -974,11 +1001,7 @@ class JSLibraryProvider(
                                     // Auto-close void elements
                                     if (voidElements.has(tagName) || isSelfClosing) {
                                         if (this.handlers.onclosetag) {
-                                            const tagInfo = {
-                                                name: tagName,
-                                                isVoidElement: function() { return true; }
-                                            };
-                                            this.handlers.onclosetag(tagName, tagInfo);
+                                            this.handlers.onclosetag(tagName);
                                         }
                                     }
                                 }

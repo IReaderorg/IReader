@@ -25,20 +25,24 @@ class JSPluginBridge(
     private val httpClient: HttpClient,
     private val pluginId: String
 ) {
-    
+
     private val pluginInstance: JSValue = JSValue.from(pluginInstanceRaw)
-    
+
     private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
     }
-    
+
     // Cache for filter definitions to avoid repeated parsing
     private var cachedFilters: Map<String, FilterDefinition>? = null
-    
+
     // Cache for plugin metadata
     private var cachedMetadata: PluginMetadata? = null
-    
+
+    // Dedicated single-threaded dispatcher for this JS engine
+    // GraalVM requires all operations on a context to happen on the same thread
+    private val jsDispatcher = kotlinx.coroutines.newSingleThreadContext("JSEngine-$pluginId")
+
     /**
      * Extracts plugin metadata from the plugin instance.
      * Results are cached after first call.
@@ -46,11 +50,11 @@ class JSPluginBridge(
     suspend fun getPluginMetadata(): PluginMetadata {
         // Return cached metadata if available
         cachedMetadata?.let { return it }
-        
+
         return withTimeout(30000L) {
             try {
                 val pluginMap = pluginInstance.asMap()
-                
+
                 val metadata = PluginMetadata(
                     id = pluginMap["id"]?.toString() ?: pluginId,
                     name = pluginMap["name"]?.toString() ?: "Unknown",
@@ -61,7 +65,7 @@ class JSPluginBridge(
                     imageRequestInit = pluginMap["imageRequestInit"] as? Map<String, Any>,
                     filters = pluginMap["filters"] as? Map<String, Any>
                 )
-                
+
                 // Cache the metadata
                 cachedMetadata = metadata
                 metadata
@@ -70,7 +74,7 @@ class JSPluginBridge(
             }
         }
     }
-    
+
     /**
      * Calls a method on the plugin instance by evaluating a script.
      * This is necessary because methods are on the prototype, not as own properties.
@@ -87,12 +91,12 @@ class JSPluginBridge(
                 else -> "\"${arg.toString().replace("\"", "\\\"").replace("\n", "\\n")}\""
             }
         }
-        
+
         // Use a synchronous wrapper that waits for Promise resolution
         val resultVar = "__pluginResult_${System.currentTimeMillis()}"
         val errorVar = "__pluginError_${System.currentTimeMillis()}"
         val doneVar = "__pluginDone_${System.currentTimeMillis()}"
-        
+
         val script = """
             (function() {
                 var plugin = exports.default;
@@ -133,10 +137,10 @@ class JSPluginBridge(
                 }
             })()
         """.trimIndent()
-        
+
         return try {
             val initialResult = engine.evaluateScript(script)
-            
+
             if (initialResult == "SYNC_ERROR") {
                 val error = engine.getGlobalObject(errorVar)
                 Log.error { "[JSPlugin] Synchronous error in $methodName: $error" }
@@ -144,10 +148,10 @@ class JSPluginBridge(
             } else if (initialResult == "PROMISE_PENDING") {
                 var attempts = 0
                 val maxAttempts = 300
-                
+
                 while (attempts < maxAttempts) {
                     kotlinx.coroutines.delay(100)
-                    
+
                     val done = engine.getGlobalObject(doneVar) as? Boolean ?: false
                     if (done) {
                         val error = engine.getGlobalObject(errorVar)
@@ -155,13 +159,13 @@ class JSPluginBridge(
                             Log.error { "[JSPlugin] Promise rejected for $methodName: $error" }
                             throw JSException("Promise rejected in $methodName: $error")
                         }
-                        
+
                         return engine.getGlobalObject(resultVar)
                     }
-                    
+
                     attempts++
                 }
-                
+
                 throw JSException("Promise timeout after ${maxAttempts * 100}ms")
             } else {
                 initialResult
@@ -171,7 +175,7 @@ class JSPluginBridge(
             throw e
         }
     }
-    
+
     private fun convertMapToJson(map: Map<*, *>): String {
         val entries = map.entries.joinToString(", ") { (key, value) ->
             val keyStr = key.toString()
@@ -187,7 +191,7 @@ class JSPluginBridge(
         }
         return "{$entries}"
     }
-    
+
     /**
      * Converts filter map to JSON string for JavaScript consumption.
      * Handles nested maps, arrays, and properly escapes strings.
@@ -203,14 +207,20 @@ class JSPluginBridge(
             append("}")
         }
     }
-    
+
     /**
      * Recursively appends a value as JSON to the StringBuilder.
      */
     private fun StringBuilder.appendJsonValue(value: Any?) {
         when (value) {
             null -> append("null")
-            is String -> append("\"${value.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t")}\"")
+            is String -> append(
+                "\"${
+                    value.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
+                        .replace("\r", "\\r").replace("\t", "\\t")
+                }\""
+            )
+
             is Number -> append(value.toString())
             is Boolean -> append(value.toString())
             is Map<*, *> -> {
@@ -222,6 +232,7 @@ class JSPluginBridge(
                 }
                 append("}")
             }
+
             is List<*> -> {
                 append("[")
                 value.forEachIndexed { index, item ->
@@ -230,6 +241,7 @@ class JSPluginBridge(
                 }
                 append("]")
             }
+
             is Array<*> -> {
                 append("[")
                 value.forEachIndexed { index, item ->
@@ -238,10 +250,11 @@ class JSPluginBridge(
                 }
                 append("]")
             }
+
             else -> append("\"${value.toString().replace("\"", "\\\"")}\"")
         }
     }
-    
+
     /**
      * Validates and normalizes filter values to ensure they match the expected structure.
      * JS plugins expect filters to have a specific structure: { filterName: { value: ... } }
@@ -263,11 +276,11 @@ class JSPluginBridge(
             }
         }
     }
-    
+
     /**
      * Executes an async JavaScript function and polls for the result.
      * This is a common pattern used across all plugin methods.
-     * 
+     *
      * @param methodName The name of the method being called (for logging/errors)
      * @param jsCode The JavaScript code to execute
      * @param resultVarName The global variable name where the result will be stored
@@ -282,20 +295,20 @@ class JSPluginBridge(
     ): Any? {
         // Execute the JavaScript code
         engine.evaluateScript(jsCode)
-        
+
         // Poll for result with exponential backoff
         var attempts = 0
         var result: Any? = null
         var waitTime = 10L
-        
+
         while (attempts < maxAttempts) {
             Thread.sleep(waitTime)
-            
+
             // Check result periodically to reduce engine calls
             if (attempts % 5 == 0 || attempts < 10) {
                 val checkScript = "globalThis.$resultVarName"
                 val jsResult = engine.evaluateScript(checkScript)
-                
+
                 if (jsResult is Map<*, *>) {
                     val success = jsResult["success"] as? Boolean ?: false
                     if (success) {
@@ -308,29 +321,29 @@ class JSPluginBridge(
                     }
                 }
             }
-            
+
             attempts++
             // Exponential backoff up to 200ms
             if (waitTime < 200) {
                 waitTime = (waitTime * 1.2).toLong().coerceAtMost(200)
             }
         }
-        
+
         if (result == null && attempts >= maxAttempts) {
             Log.error { "[JSPlugin] $methodName timeout after ${maxAttempts * waitTime}ms" }
             throw JSException("$methodName timeout")
         }
-        
+
         // Clean up global variable
         try {
             engine.evaluateScript("delete globalThis.$resultVarName;")
         } catch (e: Exception) {
             // Ignore cleanup errors
         }
-        
+
         return result
     }
-    
+
     /**
      * Escapes a string for safe use in JavaScript code.
      */
@@ -343,7 +356,7 @@ class JSPluginBridge(
             .replace("\r", "\\r")
             .replace("\t", "\\t")
     }
-    
+
 
     /**
      * Calls the plugin's popularNovels method.
@@ -351,22 +364,23 @@ class JSPluginBridge(
      * @param filters Map of filter values where each entry should have a "value" property
      */
     suspend fun popularNovels(page: Int, filters: Map<String, Any>): List<JSNovelItem> {
-        return withTimeout(30000L) {
-            try {
-                val startTime = System.currentTimeMillis()
-                
-                // Validate and normalize filters - ensure all filter values are properly structured
-                val normalizedFilters = validateAndNormalizeFilters(filters)
-                
-                // Convert filters to JSON - plugins expect filters.filterName.value structure
-                val filtersJson = convertFiltersToJson(normalizedFilters)
-                
-                // Store filters in JavaScript and call the method directly in JS
-                // Sanitize plugin ID for JavaScript variable name
-                val sanitizedId = pluginId.replace(Regex("[^a-zA-Z0-9_]"), "_")
-                
-                // Store the result in a global variable after the promise resolves
-                val callScript = """
+        return kotlinx.coroutines.withContext(jsDispatcher) {
+            withTimeout(30000L) {
+                try {
+                    val startTime = System.currentTimeMillis()
+
+                    // Validate and normalize filters - ensure all filter values are properly structured
+                    val normalizedFilters = validateAndNormalizeFilters(filters)
+
+                    // Convert filters to JSON - plugins expect filters.filterName.value structure
+                    val filtersJson = convertFiltersToJson(normalizedFilters)
+
+                    // Store filters in JavaScript and call the method directly in JS
+                    // Sanitize plugin ID for JavaScript variable name
+                    val sanitizedId = pluginId.replace(Regex("[^a-zA-Z0-9_]"), "_")
+
+                    // Store the result in a global variable after the promise resolves
+                    val callScript = """
                     (async function() {
                         try {
                             const filters = JSON.parse('${filtersJson.replace("'", "\\'")}');
@@ -394,100 +408,103 @@ class JSPluginBridge(
                         }
                     })();
                 """.trimIndent()
-                
-                // Start the async operation
-                engine.evaluateScript(callScript)
-                
-                // Poll for the result with exponential backoff
-                var attempts = 0
-                val maxAttempts = 150 // 30 seconds total
-                var result: Any? = null
-                var waitTime = 10L // Start with 10ms
-                
-                while (attempts < maxAttempts) {
-                    Thread.sleep(waitTime)
-                    
-                    // Only check every few attempts to reduce statement count
-                    if (attempts % 5 == 0 || attempts < 10) {
-                        val checkScript = "globalThis.__promiseResult_${sanitizedId}"
-                        val promiseResult = engine.evaluateScript(checkScript)
-                        
-                        if (promiseResult is Map<*, *>) {
-                            val success = promiseResult["success"] as? Boolean ?: false
-                            if (success) {
-                                result = promiseResult["data"]
-                                break
-                            } else {
-                                val error = promiseResult["error"]
-                                Log.error { "[JSPlugin] Promise rejected: $error" }
-                                throw JSException("Promise rejected: $error")
+
+                    // Start the async operation
+                    engine.evaluateScript(callScript)
+
+                    // Poll for the result with exponential backoff
+                    var attempts = 0
+                    val maxAttempts = 150 // 30 seconds total
+                    var result: Any? = null
+                    var waitTime = 10L // Start with 10ms
+
+                    while (attempts < maxAttempts) {
+                        Thread.sleep(waitTime)
+
+                        // Only check every few attempts to reduce statement count
+                        if (attempts % 5 == 0 || attempts < 10) {
+                            val checkScript = "globalThis.__promiseResult_${sanitizedId}"
+                            val promiseResult = engine.evaluateScript(checkScript)
+
+                            if (promiseResult is Map<*, *>) {
+                                val success = promiseResult["success"] as? Boolean ?: false
+                                if (success) {
+                                    result = promiseResult["data"]
+                                    break
+                                } else {
+                                    val error = promiseResult["error"]
+                                    Log.error { "[JSPlugin] Promise rejected: $error" }
+                                    throw JSException("Promise rejected: $error")
+                                }
                             }
                         }
+
+                        attempts++
+                        // Exponential backoff up to 200ms
+                        if (waitTime < 200) {
+                            waitTime = (waitTime * 1.2).toLong().coerceAtMost(200)
+                        }
                     }
-                    
-                    attempts++
-                    // Exponential backoff up to 200ms
-                    if (waitTime < 200) {
-                        waitTime = (waitTime * 1.2).toLong().coerceAtMost(200)
+
+                    if (result == null && attempts >= maxAttempts) {
+                        Log.error { "[JSPlugin] Promise timeout after checking ${maxAttempts} times" }
+                        throw JSException("Promise timeout")
                     }
-                }
-                
-                if (result == null && attempts >= maxAttempts) {
-                    Log.error { "[JSPlugin] Promise timeout after checking ${maxAttempts} times" }
-                    throw JSException("Promise timeout")
-                }
-                
-                // Clean up
-                try {
-                    engine.evaluateScript("delete globalThis.__promiseResult_${sanitizedId};")
+
+                    // Clean up
+                    try {
+                        engine.evaluateScript("delete globalThis.__promiseResult_${sanitizedId};")
+                    } catch (e: Exception) {
+                        // Ignore cleanup errors
+                    }
+
+                    if (result == null) {
+                        Log.warn { "[JSPlugin] popularNovels returned null for plugin: $pluginId" }
+                        return@withTimeout emptyList()
+                    }
+
+                    val novels = parseNovelList(result)
+
+                    val duration = System.currentTimeMillis() - startTime
+                    Log.info { "[JSPlugin] popularNovels returned ${novels.size} items in ${duration}ms" }
+
+                    novels
+                } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                    throw JSPluginError.TimeoutError(pluginId, "popularNovels")
+                } catch (e: JSException) {
+                    Log.error { "[JSPlugin] JSException in popularNovels: ${e.message}" }
+                    throw JSPluginError.ExecutionError(pluginId, "popularNovels", e)
                 } catch (e: Exception) {
-                    // Ignore cleanup errors
+                    Log.error { "[JSPlugin] Exception in popularNovels: ${e.message}" }
+                    throw JSPluginError.ExecutionError(pluginId, "popularNovels", e)
                 }
-                
-                if (result == null) {
-                    Log.warn { "[JSPlugin] popularNovels returned null for plugin: $pluginId" }
-                    return@withTimeout emptyList()
-                }
-                
-                val novels = parseNovelList(result)
-                
-                val duration = System.currentTimeMillis() - startTime
-                Log.info { "[JSPlugin] popularNovels returned ${novels.size} items in ${duration}ms" }
-                
-                novels
-            } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
-                throw JSPluginError.TimeoutError(pluginId, "popularNovels")
-            } catch (e: JSException) {
-                Log.error { "[JSPlugin] JSException in popularNovels: ${e.message}" }
-                throw JSPluginError.ExecutionError(pluginId, "popularNovels", e)
-            } catch (e: Exception) {
-                Log.error { "[JSPlugin] Exception in popularNovels: ${e.message}" }
-                throw JSPluginError.ExecutionError(pluginId, "popularNovels", e)
             }
         }
     }
-    
+
     /**
      * Calls the plugin's searchNovels method.
      * @param searchTerm The search query string
      * @param page The page number to fetch (1-indexed)
      */
     suspend fun searchNovels(searchTerm: String, page: Int): List<JSNovelItem> {
-        return withTimeout(30000L) {
-            try {
-                // Validate search term
-                if (searchTerm.isBlank()) {
-                    Log.warn { "[JSPlugin] Empty search term provided for plugin: $pluginId" }
-                    return@withTimeout emptyList()
-                }
-                
-                val startTime = System.currentTimeMillis()
-                
-                // Use async execution for better performance
-                val sanitizedId = pluginId.replace(Regex("[^a-zA-Z0-9_]"), "_")
-                val escapedSearchTerm = searchTerm.replace("'", "\\'").replace("\"", "\\\"").replace("\n", "\\n")
-                
-                val callScript = """
+        return kotlinx.coroutines.withContext(jsDispatcher) {
+            withTimeout(30000L) {
+                try {
+                    // Validate search term
+                    if (searchTerm.isBlank()) {
+                        Log.warn { "[JSPlugin] Empty search term provided for plugin: $pluginId" }
+                        return@withTimeout emptyList()
+                    }
+
+                    val startTime = System.currentTimeMillis()
+
+                    // Use async execution for better performance
+                    val sanitizedId = pluginId.replace(Regex("[^a-zA-Z0-9_]"), "_")
+                    val escapedSearchTerm = searchTerm.replace("'", "\\'").replace("\"", "\\\"")
+                        .replace("\n", "\\n")
+
+                    val callScript = """
                     (async function() {
                         try {
                             const plugin = globalThis.__plugin_${sanitizedId};
@@ -497,9 +514,20 @@ class JSPluginBridge(
                             if (typeof plugin.searchNovels !== 'function') {
                                 throw new Error('searchNovels method not found on plugin');
                             }
+                            console.log('[JSPlugin] Calling searchNovels with term: $escapedSearchTerm, page: $page');
                             const result = await plugin.searchNovels('$escapedSearchTerm', $page);
+                            console.log('[JSPlugin] searchNovels returned:', result);
+                            console.log('[JSPlugin] Result type:', typeof result);
+                            console.log('[JSPlugin] Result is array:', Array.isArray(result));
+                            if (Array.isArray(result)) {
+                                console.log('[JSPlugin] Result length:', result.length);
+                                if (result.length > 0) {
+                                    console.log('[JSPlugin] First item:', JSON.stringify(result[0]));
+                                }
+                            }
                             globalThis.__searchResult_${sanitizedId} = { success: true, data: result };
                         } catch (error) {
+                            console.error('[JSPlugin] searchNovels error:', error);
                             const errorDetails = {
                                 message: error.message || error.toString(),
                                 stack: error.stack || 'No stack trace available',
@@ -513,84 +541,87 @@ class JSPluginBridge(
                         }
                     })();
                 """.trimIndent()
-                
-                engine.evaluateScript(callScript)
-                
-                // Poll for result
-                var attempts = 0
-                val maxAttempts = 150
-                var result: Any? = null
-                var waitTime = 10L
-                
-                while (attempts < maxAttempts) {
-                    Thread.sleep(waitTime)
-                    
-                    if (attempts % 5 == 0 || attempts < 10) {
-                        val checkScript = "globalThis.__searchResult_${sanitizedId}"
-                        val searchResult = engine.evaluateScript(checkScript)
-                        
-                        if (searchResult is Map<*, *>) {
-                            val success = searchResult["success"] as? Boolean ?: false
-                            if (success) {
-                                result = searchResult["data"]
-                                break
-                            } else {
-                                val error = searchResult["error"]
-                                Log.error { "[JSPlugin] Search failed: $error" }
-                                throw JSException("Search failed: $error")
+
+                    engine.evaluateScript(callScript)
+
+                    // Poll for result
+                    var attempts = 0
+                    val maxAttempts = 150
+                    var result: Any? = null
+                    var waitTime = 10L
+
+                    while (attempts < maxAttempts) {
+                        Thread.sleep(waitTime)
+
+                        if (attempts % 5 == 0 || attempts < 10) {
+                            val checkScript = "globalThis.__searchResult_${sanitizedId}"
+                            val searchResult = engine.evaluateScript(checkScript)
+
+                            if (searchResult is Map<*, *>) {
+                                val success = searchResult["success"] as? Boolean ?: false
+                                if (success) {
+                                    result = searchResult["data"]
+                                    break
+                                } else {
+                                    val error = searchResult["error"]
+                                    Log.error { "[JSPlugin] Search failed: $error" }
+                                    throw JSException("Search failed: $error")
+                                }
                             }
                         }
+
+                        attempts++
+                        if (waitTime < 200) {
+                            waitTime = (waitTime * 1.2).toLong().coerceAtMost(200)
+                        }
                     }
-                    
-                    attempts++
-                    if (waitTime < 200) {
-                        waitTime = (waitTime * 1.2).toLong().coerceAtMost(200)
+
+                    if (result == null && attempts >= maxAttempts) {
+                        throw JSException("Search timeout")
                     }
-                }
-                
-                if (result == null && attempts >= maxAttempts) {
-                    throw JSException("Search timeout")
-                }
-                
-                // Clean up
-                try {
-                    engine.evaluateScript("delete globalThis.__searchResult_${sanitizedId};")
+
+                    // Clean up
+                    try {
+                        engine.evaluateScript("delete globalThis.__searchResult_${sanitizedId};")
+                    } catch (e: Exception) {
+                        // Ignore cleanup errors
+                    }
+
+                    val novels = parseNovelList(result)
+
+                    val duration = System.currentTimeMillis() - startTime
+                    Log.info { "[JSPlugin] searchNovels returned ${novels.size} items in ${duration}ms" }
+
+                    novels
+                } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                    throw JSPluginError.TimeoutError(pluginId, "searchNovels")
+                } catch (e: JSException) {
+                    throw JSPluginError.ExecutionError(pluginId, "searchNovels", e)
                 } catch (e: Exception) {
-                    // Ignore cleanup errors
+                    throw JSPluginError.ExecutionError(pluginId, "searchNovels", e)
                 }
-                
-                val novels = parseNovelList(result)
-                
-                val duration = System.currentTimeMillis() - startTime
-                Log.info { "[JSPlugin] searchNovels returned ${novels.size} items in ${duration}ms" }
-                
-                novels
-            } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
-                throw JSPluginError.TimeoutError(pluginId, "searchNovels")
-            } catch (e: JSException) {
-                throw JSPluginError.ExecutionError(pluginId, "searchNovels", e)
-            } catch (e: Exception) {
-                throw JSPluginError.ExecutionError(pluginId, "searchNovels", e)
             }
         }
     }
-    
+
     /**
      * Calls the plugin's parseNovel method.
      * @param novelPath The path/URL to the novel page
      */
     suspend fun parseNovel(novelPath: String): JSSourceNovel {
-        return withTimeout(30000L) {
-            try {
-                if (novelPath.isBlank()) {
-                    throw IllegalArgumentException("Novel path cannot be blank")
-                }
-                
-                val startTime = System.currentTimeMillis()
-                val sanitizedId = pluginId.replace(Regex("[^a-zA-Z0-9_]"), "_")
-                val escapedPath = novelPath.replace("'", "\\'").replace("\"", "\\\"").replace("\n", "\\n")
-                
-                val callScript = """
+        return kotlinx.coroutines.withContext(jsDispatcher) {
+            withTimeout(30000L) {
+                try {
+                    if (novelPath.isBlank()) {
+                        throw IllegalArgumentException("Novel path cannot be blank")
+                    }
+
+                    val startTime = System.currentTimeMillis()
+                    val sanitizedId = pluginId.replace(Regex("[^a-zA-Z0-9_]"), "_")
+                    val escapedPath = novelPath.replace("'", "\\'").replace("\"", "\\\"")
+                        .replace("\n", "\\n")
+
+                    val callScript = """
                     (async function() {
                         try {
                             const plugin = globalThis.__plugin_${sanitizedId};
@@ -615,68 +646,69 @@ class JSPluginBridge(
                         }
                     })();
                 """.trimIndent()
-                
-                engine.evaluateScript(callScript)
-                
-                // Poll for result with longer timeout for novel parsing
-                var attempts = 0
-                val maxAttempts = 200 // 40 seconds for novel parsing
-                var result: Any? = null
-                var waitTime = 10L
-                
-                while (attempts < maxAttempts) {
-                    Thread.sleep(waitTime)
-                    
-                    if (attempts % 5 == 0 || attempts < 10) {
-                        val checkScript = "globalThis.__parseNovelResult_${sanitizedId}"
-                        val parseResult = engine.evaluateScript(checkScript)
-                        
-                        if (parseResult is Map<*, *>) {
-                            val success = parseResult["success"] as? Boolean ?: false
-                            if (success) {
-                                result = parseResult["data"]
-                                break
-                            } else {
-                                val error = parseResult["error"]
-                                Log.error { "[JSPlugin] parseNovel failed: $error" }
-                                throw JSException("parseNovel failed: $error")
+
+                    engine.evaluateScript(callScript)
+
+                    // Poll for result with longer timeout for novel parsing
+                    var attempts = 0
+                    val maxAttempts = 200 // 40 seconds for novel parsing
+                    var result: Any? = null
+                    var waitTime = 10L
+
+                    while (attempts < maxAttempts) {
+                        Thread.sleep(waitTime)
+
+                        if (attempts % 5 == 0 || attempts < 10) {
+                            val checkScript = "globalThis.__parseNovelResult_${sanitizedId}"
+                            val parseResult = engine.evaluateScript(checkScript)
+
+                            if (parseResult is Map<*, *>) {
+                                val success = parseResult["success"] as? Boolean ?: false
+                                if (success) {
+                                    result = parseResult["data"]
+                                    break
+                                } else {
+                                    val error = parseResult["error"]
+                                    Log.error { "[JSPlugin] parseNovel failed: $error" }
+                                    throw JSException("parseNovel failed: $error")
+                                }
                             }
                         }
+
+                        attempts++
+                        if (waitTime < 200) {
+                            waitTime = (waitTime * 1.2).toLong().coerceAtMost(200)
+                        }
                     }
-                    
-                    attempts++
-                    if (waitTime < 200) {
-                        waitTime = (waitTime * 1.2).toLong().coerceAtMost(200)
+
+                    if (result == null && attempts >= maxAttempts) {
+                        throw JSException("parseNovel timeout")
                     }
-                }
-                
-                if (result == null && attempts >= maxAttempts) {
-                    throw JSException("parseNovel timeout")
-                }
-                
-                // Clean up
-                try {
-                    engine.evaluateScript("delete globalThis.__parseNovelResult_${sanitizedId};")
+
+                    // Clean up
+                    try {
+                        engine.evaluateScript("delete globalThis.__parseNovelResult_${sanitizedId};")
+                    } catch (e: Exception) {
+                        // Ignore cleanup errors
+                    }
+
+                    val novel = parseSourceNovel(result)
+
+                    val duration = System.currentTimeMillis() - startTime
+                    Log.info { "[JSPlugin] parseNovel returned novel with ${novel.chapters.size} chapters in ${duration}ms" }
+
+                    novel
+                } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                    throw JSPluginError.TimeoutError(pluginId, "parseNovel")
+                } catch (e: JSException) {
+                    throw JSPluginError.ExecutionError(pluginId, "parseNovel", e)
                 } catch (e: Exception) {
-                    // Ignore cleanup errors
+                    throw JSPluginError.ExecutionError(pluginId, "parseNovel", e)
                 }
-                
-                val novel = parseSourceNovel(result)
-                
-                val duration = System.currentTimeMillis() - startTime
-                Log.info { "[JSPlugin] parseNovel returned novel with ${novel.chapters.size} chapters in ${duration}ms" }
-                
-                novel
-            } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
-                throw JSPluginError.TimeoutError(pluginId, "parseNovel")
-            } catch (e: JSException) {
-                throw JSPluginError.ExecutionError(pluginId, "parseNovel", e)
-            } catch (e: Exception) {
-                throw JSPluginError.ExecutionError(pluginId, "parseNovel", e)
             }
         }
     }
-    
+
     /**
      * Calls the plugin's parseChapter method.
      * @param chapterPath The path/URL to the chapter page
@@ -687,11 +719,12 @@ class JSPluginBridge(
                 if (chapterPath.isBlank()) {
                     throw IllegalArgumentException("Chapter path cannot be blank")
                 }
-                
+
                 val startTime = System.currentTimeMillis()
                 val sanitizedId = pluginId.replace(Regex("[^a-zA-Z0-9_]"), "_")
-                val escapedPath = chapterPath.replace("'", "\\'").replace("\"", "\\\"").replace("\n", "\\n")
-                
+                val escapedPath = chapterPath.replace("'", "\\'").replace("\"", "\\\"")
+                    .replace("\n", "\\n")
+
                 val callScript = """
                     (async function() {
                         try {
@@ -717,22 +750,23 @@ class JSPluginBridge(
                         }
                     })();
                 """.trimIndent()
-                
+
                 engine.evaluateScript(callScript)
-                
+
                 // Poll for result
                 var attempts = 0
                 val maxAttempts = 150
                 var result: Any? = null
                 var waitTime = 10L
-                
+
                 while (attempts < maxAttempts) {
                     Thread.sleep(waitTime)
-                    
+
                     if (attempts % 5 == 0 || attempts < 10) {
-                        val checkScript = "globalThis.__parseChapterResult_${sanitizedId}"
+                        val checkScript =
+                            "globalThis.__parseChapterResult_${sanitizedId}"
                         val parseResult = engine.evaluateScript(checkScript)
-                        
+
                         if (parseResult is Map<*, *>) {
                             val success = parseResult["success"] as? Boolean ?: false
                             if (success) {
@@ -745,29 +779,29 @@ class JSPluginBridge(
                             }
                         }
                     }
-                    
+
                     attempts++
                     if (waitTime < 200) {
                         waitTime = (waitTime * 1.2).toLong().coerceAtMost(200)
                     }
                 }
-                
+
                 if (result == null && attempts >= maxAttempts) {
                     throw JSException("parseChapter timeout")
                 }
-                
+
                 // Clean up
                 try {
                     engine.evaluateScript("delete globalThis.__parseChapterResult_${sanitizedId};")
                 } catch (e: Exception) {
                     // Ignore cleanup errors
                 }
-                
+
                 val content = result?.toString() ?: ""
-                
+
                 val duration = System.currentTimeMillis() - startTime
                 Log.info { "[JSPlugin] parseChapter returned ${content.length} characters in ${duration}ms" }
-                
+
                 content
             } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
                 throw JSPluginError.TimeoutError(pluginId, "parseChapter")
@@ -778,7 +812,7 @@ class JSPluginBridge(
             }
         }
     }
-    
+
     /**
      * Extracts filter definitions from the plugin.
      * Manually reads each filter property to handle JavaScript constants.
@@ -787,24 +821,24 @@ class JSPluginBridge(
     suspend fun getFilters(): Map<String, FilterDefinition> {
         // Return cached filters if available
         cachedFilters?.let { return it }
-        
+
         return try {
             val pluginMap = pluginInstance.asMap()
-            
+
             val filtersObj = pluginMap["filters"]
             if (filtersObj == null) {
                 return emptyMap()
             }
-            
+
             // Get filter keys
             val filterKeys = when (filtersObj) {
                 is Map<*, *> -> filtersObj.keys.mapNotNull { it?.toString() }
                 is JSValue -> filtersObj.asMap().keys.mapNotNull { it?.toString() }
                 else -> return emptyMap()
             }
-            
+
             val filterDefinitions = mutableMapOf<String, FilterDefinition>()
-            
+
             for (key in filterKeys) {
                 // Get the filter object directly from the filtersObj map
                 val filterObj = when (filtersObj) {
@@ -812,12 +846,12 @@ class JSPluginBridge(
                     is JSValue -> filtersObj.asMap()[key]
                     else -> null
                 }
-                
+
                 if (filterObj == null) {
                     Log.warn { "[JSPlugin] Filter '$key' object is null" }
                     continue
                 }
-                
+
                 // Convert filter object to map and resolve the type property
                 val filterMap = when (filterObj) {
                     is Map<*, *> -> filterObj as Map<String, Any?>
@@ -827,11 +861,11 @@ class JSPluginBridge(
                         continue
                     }
                 }
-                
+
                 // The type property is null because it's a reference to FilterTypes constant
                 // We need to evaluate it in JavaScript context
                 val typeValue = filterMap["type"]
-                
+
                 val typeString = if (typeValue == null) {
                     // Type is null, need to evaluate it in JS context using the stored plugin reference
                     try {
@@ -850,7 +884,10 @@ class JSPluginBridge(
                         val result = engine.evaluateScript(script)
                         result?.toString()
                     } catch (e: Exception) {
-                        Log.error(e, "[JSPlugin] Failed to evaluate type for filter '$key': ${e.message}" )
+                        Log.error(
+                            e,
+                            "[JSPlugin] Failed to evaluate type for filter '$key': ${e.message}"
+                        )
                         null
                     }
                 } else {
@@ -860,11 +897,11 @@ class JSPluginBridge(
                         else -> typeValue.toString()
                     }
                 }
-                
+
                 // Create a new map with the resolved type
                 val resolvedFilterMap = filterMap.toMutableMap()
                 resolvedFilterMap["type"] = typeString
-                
+
                 val filterDef = parseFilterDefinition(resolvedFilterMap)
                 if (filterDef != null) {
                     filterDefinitions[key] = filterDef
@@ -872,7 +909,7 @@ class JSPluginBridge(
                     Log.warn { "[JSPlugin] Failed to parse filter '$key'" }
                 }
             }
-            
+
             // Cache the filter definitions
             cachedFilters = filterDefinitions
             filterDefinitions
@@ -881,50 +918,105 @@ class JSPluginBridge(
             emptyMap()
         }
     }
-    
+
     /**
      * Parses a list of novel items from JavaScript result.
      */
     private fun parseNovelList(result: Any?): List<JSNovelItem> {
-        if (result == null) return emptyList()
-        
+        if (result == null) {
+            Log.warn { "[JSPlugin] parseNovelList received null result" }
+            return emptyList()
+        }
+
+        Log.info { "[JSPlugin] parseNovelList received result type: ${result::class.simpleName}" }
+        Log.info { "[JSPlugin] parseNovelList result value: $result" }
+
         return when (result) {
-            is List<*> -> result.mapNotNull { parseNovelItem(it) }
+            is List<*> -> {
+                Log.info { "[JSPlugin] Result is List with ${result.size} items" }
+                result.mapNotNull { parseNovelItem(it) }
+            }
+
             is JSValue -> {
                 if (!result.isNull() && !result.isUndefined()) {
-                    result.asList().mapNotNull { parseNovelItem(it) }
+                    val list = result.asList()
+                    Log.info { "[JSPlugin] Result is JSValue (list) with ${list.size} items" }
+                    list.mapNotNull { parseNovelItem(it) }
                 } else {
+                    Log.warn { "[JSPlugin] Result is JSValue but null or undefined" }
                     emptyList()
                 }
             }
-            else -> emptyList()
+
+            else -> {
+                Log.warn { "[JSPlugin] Result is unexpected type: ${result::class.qualifiedName}" }
+                emptyList()
+            }
         }
     }
-    
+
     /**
      * Parses a single novel item from JavaScript object.
      */
     private fun parseNovelItem(item: Any?): JSNovelItem? {
-        if (item == null) return null
-        
+        if (item == null) {
+            Log.warn { "[JSPlugin] parseNovelItem received null item" }
+            return null
+        }
+
         return try {
+            Log.info { "[JSPlugin] parseNovelItem processing item type: ${item::class.simpleName}" }
+
             val map = when (item) {
-                is Map<*, *> -> item as Map<String, Any?>
-                is JSValue -> item.asMap()
-                else -> return null
+                is Map<*, *> -> {
+                    Log.info { "[JSPlugin] Item is Map with keys: ${(item as Map<String, Any?>).keys}" }
+                    item as Map<String, Any?>
+                }
+
+                is JSValue -> {
+                    val itemMap = item.asMap()
+                    Log.info { "[JSPlugin] Item is JSValue (map) with keys: ${itemMap.keys}" }
+                    itemMap
+                }
+
+                else -> {
+                    Log.warn { "[JSPlugin] Item is unexpected type: ${item::class.qualifiedName}, value: $item" }
+                    return null
+                }
             }
-            
+
+            val name = map["name"]?.toString()
+            val path = map["path"]?.toString()
+            val cover = map["cover"]?.toString()
+
+            Log.info {
+                "[JSPlugin] Parsed item - name: $name, path: $path, cover: ${
+                    cover?.take(
+                        50
+                    )
+                }"
+            }
+
+            if (name == null) {
+                Log.warn { "[JSPlugin] Item missing 'name' field. Available fields: ${map.keys}" }
+                return null
+            }
+            if (path == null) {
+                Log.warn { "[JSPlugin] Item missing 'path' field. Available fields: ${map.keys}" }
+                return null
+            }
+
             JSNovelItem(
-                name = map["name"]?.toString() ?: return null,
-                path = map["path"]?.toString() ?: return null,
-                cover = map["cover"]?.toString()
+                name = name,
+                path = path,
+                cover = cover
             )
         } catch (e: Exception) {
-            Log.error(e, "[JSPlugin] Failed to parse novel item")
+            Log.error(e, "[JSPlugin] Failed to parse novel item: ${e.message}")
             null
         }
     }
-    
+
     /**
      * Parses a source novel from JavaScript result.
      */
@@ -932,16 +1024,16 @@ class JSPluginBridge(
         if (result == null) {
             throw IllegalArgumentException("parseNovel returned null")
         }
-        
+
         val map = when (result) {
             is Map<*, *> -> result as Map<String, Any?>
             is JSValue -> result.asMap()
             else -> throw IllegalArgumentException("Invalid result type from parseNovel")
         }
-        
+
         val chaptersList = map["chapters"] as? List<*> ?: emptyList<Any?>()
         val chapters = chaptersList.mapNotNull { parseChapterItem(it) }
-        
+
         return JSSourceNovel(
             name = map["name"]?.toString() ?: "",
             path = map["path"]?.toString() ?: "",
@@ -954,20 +1046,20 @@ class JSPluginBridge(
             chapters = chapters
         )
     }
-    
+
     /**
      * Parses a chapter item from JavaScript object.
      */
     private fun parseChapterItem(item: Any?): JSChapterItem? {
         if (item == null) return null
-        
+
         return try {
             val map = when (item) {
                 is Map<*, *> -> item as Map<String, Any?>
                 is JSValue -> item.asMap()
                 else -> return null
             }
-            
+
             JSChapterItem(
                 name = map["name"]?.toString() ?: return null,
                 path = map["path"]?.toString() ?: return null,
@@ -979,13 +1071,13 @@ class JSPluginBridge(
             null
         }
     }
-    
+
     /**
      * Parses a filter definition from JavaScript object.
      */
     private fun parseFilterDefinition(value: Any?): FilterDefinition? {
         if (value == null) return null
-        
+
         return try {
             val map = when (value) {
                 is Map<*, *> -> value as Map<String, Any?>
@@ -995,42 +1087,56 @@ class JSPluginBridge(
                     return null
                 }
             }
-            
+
             val type = map["type"]?.toString()
             if (type == null) {
                 Log.warn { "[JSPlugin] Filter has no type property" }
                 return null
             }
-            
+
             val label = map["label"]?.toString() ?: ""
             Log.debug { "[JSPlugin] Parsing filter with type='$type', label='$label'" }
-            
+
             when (type.lowercase()) {
                 "picker" -> {
                     val options = parseFilterOptions(map["options"])
                     // Check both 'value' (LNReader style) and 'defaultValue' for compatibility
-                    val defaultValue = map["value"]?.toString() ?: map["defaultValue"]?.toString() ?: ""
+                    val defaultValue =
+                        map["value"]?.toString() ?: map["defaultValue"]?.toString()
+                        ?: ""
                     FilterDefinition.Picker(label, options, defaultValue)
                 }
+
                 "textinput", "text" -> {
-                    val defaultValue = map["value"]?.toString() ?: map["defaultValue"]?.toString() ?: ""
+                    val defaultValue =
+                        map["value"]?.toString() ?: map["defaultValue"]?.toString()
+                        ?: ""
                     FilterDefinition.TextInput(label, defaultValue)
                 }
+
                 "checkboxgroup", "checkbox" -> {
                     Log.debug { "[JSPlugin] Parsing CheckboxGroup filter" }
                     val options = parseFilterOptions(map["options"])
                     Log.debug { "[JSPlugin] Parsed ${options.size} options" }
                     // Check both 'value' and 'defaultValues' for compatibility
-                    val defaultValues = parseStringList(map["value"]) ?: parseStringList(map["defaultValues"])
+                    val defaultValues = parseStringList(map["value"])
+                        ?: parseStringList(map["defaultValues"])
                     Log.debug { "[JSPlugin] Default values: $defaultValues" }
                     FilterDefinition.CheckboxGroup(label, options, defaultValues)
                 }
+
                 "excludablecheckboxgroup", "excludable", "xcheckbox" -> {
                     val options = parseFilterOptions(map["options"])
                     val included = parseStringList(map["included"])
                     val excluded = parseStringList(map["excluded"])
-                    FilterDefinition.ExcludableCheckboxGroup(label, options, included, excluded)
+                    FilterDefinition.ExcludableCheckboxGroup(
+                        label,
+                        options,
+                        included,
+                        excluded
+                    )
                 }
+
                 else -> {
                     Log.warn { "[JSPlugin] Unknown filter type: $type" }
                     null
@@ -1041,19 +1147,19 @@ class JSPluginBridge(
             null
         }
     }
-    
+
     /**
      * Parses filter options from JavaScript array.
      */
     private fun parseFilterOptions(value: Any?): List<FilterOption> {
         if (value == null) return emptyList()
-        
+
         val list = when (value) {
             is List<*> -> value
             is JSValue -> value.asList()
             else -> return emptyList()
         }
-        
+
         return list.mapNotNull { item ->
             try {
                 val map = when (item) {
@@ -1061,7 +1167,7 @@ class JSPluginBridge(
                     is JSValue -> item.asMap()
                     else -> return@mapNotNull null
                 }
-                
+
                 FilterOption(
                     label = map["label"]?.toString() ?: return@mapNotNull null,
                     value = map["value"]?.toString() ?: return@mapNotNull null
@@ -1071,19 +1177,21 @@ class JSPluginBridge(
             }
         }
     }
-    
+
     /**
      * Parses a list of strings from JavaScript array.
      */
     private fun parseStringList(value: Any?): List<String> {
         if (value == null) return emptyList()
-        
+
         val list = when (value) {
             is List<*> -> value
             is JSValue -> value.asList()
             else -> return emptyList()
         }
-        
+
         return list.mapNotNull { it?.toString() }
     }
 }
+
+

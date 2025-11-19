@@ -34,8 +34,8 @@ actual class HttpClients(
 
     private val basicClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .callTimeout(2, TimeUnit.MINUTES)
+        .readTimeout(5, TimeUnit.MINUTES)  // Increased for FlareSolverr
+        .callTimeout(5, TimeUnit.MINUTES)  // Increased for FlareSolverr (was 2 minutes)
         .cookieJar(PersistentCookieJar(store))
 
 
