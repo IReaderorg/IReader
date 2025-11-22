@@ -555,7 +555,18 @@ class GraalVMJSEngine(
                     
                     popularNovels: async (page) => {
                         if (typeof plugin.popularNovels === 'function') {
-                            const results = await plugin.popularNovels(page);
+                            // Check function arity to determine if it expects options parameter
+                            let results;
+                            if (plugin.popularNovels.length <= 1) {
+                                // Only page parameter expected
+                                results = await plugin.popularNovels(page);
+                            } else {
+                                // Multiple parameters - pass page and options object with filters
+                                results = await plugin.popularNovels(page, {
+                                    showLatestNovels: false,
+                                    filters: plugin.filters || {}
+                                });
+                            }
                             return Array.isArray(results) ? results.map(r => ({
                                 name: r.name || r.title || "",
                                 url: r.url || r.path || "",
@@ -567,7 +578,18 @@ class GraalVMJSEngine(
                     
                     latestNovels: async (page) => {
                         if (typeof plugin.latestNovels === 'function') {
-                            const results = await plugin.latestNovels(page);
+                            // Check function arity to determine if it expects options parameter
+                            let results;
+                            if (plugin.latestNovels.length <= 1) {
+                                // Only page parameter expected
+                                results = await plugin.latestNovels(page);
+                            } else {
+                                // Multiple parameters - pass page and options object with filters
+                                results = await plugin.latestNovels(page, {
+                                    showLatestNovels: true,
+                                    filters: plugin.filters || {}
+                                });
+                            }
                             return Array.isArray(results) ? results.map(r => ({
                                 name: r.name || r.title || "",
                                 url: r.url || r.path || "",

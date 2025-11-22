@@ -255,3 +255,181 @@
 
 # Keep rules to prevent R8 from trying to optimize desktop source set classes
 -keep,allowshrinking class ireader.domain.js.update.JSPluginUpdateNotifier { *; }
+
+##---------------Begin: proguard configuration for J2V8  ----------
+# J2V8 - Keep core V8 classes but remove inspector (debug-only)
+-keep class com.eclipsesource.v8.** { *; }
+-dontwarn com.eclipsesource.v8.debug.**
+-dontwarn com.eclipsesource.v8.inspector.**
+
+# Remove V8 inspector classes completely (only needed for debugging)
+-assumenosideeffects class com.eclipsesource.v8.inspector.** {
+    *;
+}
+##---------------End: proguard configuration for J2V8  ----------
+
+##---------------Begin: proguard configuration for Supabase  ----------
+# Supabase - Keep all Supabase classes for proper API communication
+-keep class io.github.jan.supabase.** { *; }
+-keepclassmembers class io.github.jan.supabase.** {
+    <fields>;
+    <methods>;
+}
+
+# Keep Supabase serialization classes
+-keepclassmembers class * {
+    @kotlinx.serialization.SerialName <fields>;
+}
+
+# Keep Supabase Realtime classes
+-keep class io.github.jan.supabase.realtime.** { *; }
+-keep class io.github.jan.supabase.postgrest.** { *; }
+-keep class io.github.jan.supabase.storage.** { *; }
+-keep class io.github.jan.supabase.gotrue.** { *; }
+
+-dontwarn io.github.jan.supabase.**
+##---------------End: proguard configuration for Supabase  ----------
+
+##---------------Begin: proguard configuration for SQLDelight  ----------
+# SQLDelight - Keep database classes
+-keep class app.cash.sqldelight.** { *; }
+-keep class ir.kazemcodes.infinityreader.** { *; }
+-keepclassmembers class ir.kazemcodes.infinityreader.** {
+    <fields>;
+    <methods>;
+}
+
+# Keep SQLDelight driver classes
+-keep class app.cash.sqldelight.driver.** { *; }
+-dontwarn app.cash.sqldelight.**
+##---------------End: proguard configuration for SQLDelight  ----------
+
+##---------------Begin: proguard configuration for AndroidX Security  ----------
+# AndroidX Security Crypto - Keep encryption classes
+-keep class androidx.security.crypto.** { *; }
+-keepclassmembers class androidx.security.crypto.** {
+    <fields>;
+    <methods>;
+}
+
+# Keep EncryptedSharedPreferences and EncryptedFile
+-keep class androidx.security.crypto.EncryptedSharedPreferences { *; }
+-keep class androidx.security.crypto.EncryptedFile { *; }
+-keep class androidx.security.crypto.MasterKey { *; }
+##---------------End: proguard configuration for AndroidX Security  ----------
+
+##---------------Begin: proguard configuration for Biometric  ----------
+# AndroidX Biometric - Keep biometric authentication classes
+-keep class androidx.biometric.** { *; }
+-keepclassmembers class androidx.biometric.** {
+    <fields>;
+    <methods>;
+}
+##---------------End: proguard configuration for Biometric  ----------
+
+##---------------Begin: proguard configuration for WebKit  ----------
+# AndroidX WebKit - Keep WebView classes
+-keep class androidx.webkit.** { *; }
+-keepclassmembers class androidx.webkit.** {
+    <fields>;
+    <methods>;
+}
+
+# Keep JavaScript interface methods
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+
+-dontwarn android.webkit.**
+##---------------End: proguard configuration for WebKit  ----------
+
+##---------------Begin: proguard configuration for Google ML Kit  ----------
+# Google ML Kit Translation - Keep translation classes
+-keep class com.google.mlkit.** { *; }
+-keep class com.google.android.gms.internal.mlkit_translate.** { *; }
+-keepclassmembers class com.google.mlkit.** {
+    <fields>;
+    <methods>;
+}
+
+-dontwarn com.google.mlkit.**
+-dontwarn com.google.android.gms.internal.mlkit_translate.**
+##---------------End: proguard configuration for Google ML Kit  ----------
+
+##---------------Begin: proguard configuration for Coil  ----------
+# Coil - Keep image loading classes
+-keep class coil.** { *; }
+-keep class coil3.** { *; }
+-keepclassmembers class coil.** {
+    <fields>;
+    <methods>;
+}
+-keepclassmembers class coil3.** {
+    <fields>;
+    <methods>;
+}
+
+# Keep GIF decoder
+-keep class coil.decode.GifDecoder { *; }
+-keep class coil3.gif.** { *; }
+
+-dontwarn coil.**
+-dontwarn coil3.**
+##---------------End: proguard configuration for Coil  ----------
+
+##---------------Begin: proguard configuration for SimpleStorage  ----------
+# SimpleStorage - Keep storage access classes
+-keep class com.anggrayudi.storage.** { *; }
+-keepclassmembers class com.anggrayudi.storage.** {
+    <fields>;
+    <methods>;
+}
+##---------------End: proguard configuration for SimpleStorage  ----------
+
+##---------------Begin: proguard configuration for Koin  ----------
+# Koin - Keep dependency injection classes
+-keep class org.koin.** { *; }
+-keepclassmembers class org.koin.** {
+    <fields>;
+    <methods>;
+}
+
+# Keep Koin modules and definitions
+-keep class * extends org.koin.core.module.Module
+-keepclassmembers class * {
+    org.koin.core.module.Module *;
+}
+
+# Keep classes with Koin annotations
+-keep @org.koin.core.annotation.* class * { *; }
+##---------------End: proguard configuration for Koin  ----------
+
+##---------------Begin: proguard configuration for Compose  ----------
+# Jetpack Compose - Keep composable functions
+-keep class androidx.compose.** { *; }
+-keepclassmembers class androidx.compose.** {
+    <fields>;
+    <methods>;
+}
+
+# Keep @Composable annotated functions
+-keep @androidx.compose.runtime.Composable class * { *; }
+-keepclassmembers class * {
+    @androidx.compose.runtime.Composable <methods>;
+}
+
+# Keep Compose resources
+-keep class org.jetbrains.compose.resources.** { *; }
+##---------------End: proguard configuration for Compose  ----------
+
+##---------------Begin: proguard configuration for Leaderboard & Statistics  ----------
+# Keep leaderboard and statistics model classes for Supabase serialization
+-keep class ireader.domain.models.entities.Leaderboard** { *; }
+-keep class ireader.domain.models.entities.UserStats** { *; }
+-keep class ireader.domain.models.entities.ReadingStats** { *; }
+-keep class ireader.domain.repository.LeaderboardRepository** { *; }
+-keepclassmembers class ireader.domain.models.entities.** {
+    <fields>;
+    <init>(...);
+}
+##---------------End: proguard configuration for Leaderboard & Statistics  ----------
