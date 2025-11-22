@@ -92,6 +92,7 @@ android {
         renderScript = false
         shaders = false
         buildConfig = true
+        compose = true
     }
     splits {
         abi {
@@ -194,7 +195,13 @@ android {
     kotlin {
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
-            freeCompilerArgs.add("-Xexpect-actual-classes")
+            freeCompilerArgs.addAll(
+                "-Xexpect-actual-classes",
+                "-P",
+                "plugin:androidx.compose.compiler.plugins.kotlin:liveLiterals=true",
+                "-P",
+                "plugin:androidx.compose.compiler.plugins.kotlin:liveLiteralsEnabled=true"
+            )
         }
     }
 }
@@ -256,6 +263,11 @@ dependencies {
 }
 composeCompiler {
     // Strong skipping is enabled by default in newer versions
+    enableStrongSkippingMode.set(true)
+    
+    // Enable live literals for hot reload
+    enableIntrinsicRemember.set(true)
+    enableNonSkippingGroupOptimization.set(true)
 }
 
 // Apply Google Services plugin only for non-fdroid flavors

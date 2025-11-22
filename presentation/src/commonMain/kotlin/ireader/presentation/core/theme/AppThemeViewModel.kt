@@ -146,33 +146,40 @@ class AppThemeViewModel(
     /**
      * Creates ExtraColors with proper bar colors and onBar text colors.
      */
+    @Composable
     private fun createExtraColors(
         baseExtraColors: ExtraColors,
         customBarsColor: Color,
         materialColors: ColorScheme,
         isLight: Boolean
     ): ExtraColors {
-        // Determine the bars color: custom > base > surface
-        val barsColor = when {
-            customBarsColor != Color.Unspecified -> customBarsColor
-            baseExtraColors.bars != Color.Unspecified -> baseExtraColors.bars
-            else -> materialColors.surface
+        // Wrap the entire logic in remember to ensure state reads happen in proper snapshot context
+        return remember(baseExtraColors, customBarsColor, materialColors.surface, isLight, useTrueBlack) {
+            // Read the bars color from baseExtraColors
+            val baseBarsColor = baseExtraColors.bars
+            
+            // Determine the bars color: custom > base > surface
+            val barsColor = when {
+                customBarsColor != Color.Unspecified -> customBarsColor
+                baseBarsColor != Color.Unspecified -> baseBarsColor
+                else -> materialColors.surface
+            }
+            
+            // Apply true black to bars if enabled for dark themes
+            val finalBarsColor = if (!isLight && useTrueBlack) {
+                Color.Black
+            } else {
+                barsColor
+            }
+            
+            // Calculate proper onBars color based on bars luminance
+            val onBarsColor = ThemeColorUtils.getOnColor(finalBarsColor)
+            
+            ExtraColors(
+                bars = finalBarsColor,
+                onBars = onBarsColor
+            )
         }
-        
-        // Apply true black to bars if enabled for dark themes
-        val finalBarsColor = if (!isLight && useTrueBlack) {
-            Color.Black
-        } else {
-            barsColor
-        }
-        
-        // Calculate proper onBars color based on bars luminance
-        val onBarsColor = ThemeColorUtils.getOnColor(finalBarsColor)
-        
-        return ExtraColors(
-            bars = finalBarsColor,
-            onBars = onBarsColor
-        )
     }
 
 

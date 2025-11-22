@@ -5,6 +5,7 @@ import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import java.util.Properties
 
 
 plugins {
@@ -12,6 +13,31 @@ plugins {
     id(kotlinx.plugins.ksp.get().pluginId)
     id(libs.plugins.jetbrainCompose.get().pluginId)
     alias(kotlinx.plugins.compose.compiler)
+}
+
+// Load local.properties for local development
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { stream -> load(stream) }
+    }
+}
+
+// Load config.properties as fallback
+val configProperties = Properties().apply {
+    val configPropertiesFile = rootProject.file("config.properties")
+    if (configPropertiesFile.exists()) {
+        configPropertiesFile.inputStream().use { stream -> load(stream) }
+    }
+}
+
+// Helper function to get property with fallback chain
+fun getConfigProperty(envVar: String, propertyKey: String): String {
+    return System.getenv(envVar)
+        ?: localProperties.getProperty(propertyKey)
+        ?: configProperties.getProperty(propertyKey)
+        ?: project.findProperty(propertyKey) as? String
+        ?: ""
 }
 
 java {
@@ -50,13 +76,19 @@ compose.desktop {
         mainClass = "ireader.desktop.MainKt"
         
         // Supabase configuration - Multi-endpoint support
-        // Load from environment variables or system properties
-        val supabaseUrl = System.getenv("SUPABASE_URL") ?: System.getProperty("supabase.url", "")
-        val supabaseAnonKey = System.getenv("SUPABASE_ANON_KEY") ?: System.getProperty("supabase.anon.key", "")
-        val supabaseBooksUrl = System.getenv("SUPABASE_BOOKS_URL") ?: System.getProperty("supabase.books.url", "")
-        val supabaseBooksKey = System.getenv("SUPABASE_BOOKS_KEY") ?: System.getProperty("supabase.books.key", "")
-        val supabaseProgressUrl = System.getenv("SUPABASE_PROGRESS_URL") ?: System.getProperty("supabase.progress.url", "")
-        val supabaseProgressKey = System.getenv("SUPABASE_PROGRESS_KEY") ?: System.getProperty("supabase.progress.key", "")
+        // Load from properties files with fallback chain: env vars -> local.properties -> config.properties
+        val supabaseUrl = getConfigProperty("SUPABASE_URL", "supabase.url")
+        val supabaseAnonKey = getConfigProperty("SUPABASE_ANON_KEY", "supabase.anon.key")
+        val supabaseBooksUrl = getConfigProperty("SUPABASE_BOOKS_URL", "supabase.books.url")
+        val supabaseBooksKey = getConfigProperty("SUPABASE_BOOKS_KEY", "supabase.books.key")
+        val supabaseProgressUrl = getConfigProperty("SUPABASE_PROGRESS_URL", "supabase.progress.url")
+        val supabaseProgressKey = getConfigProperty("SUPABASE_PROGRESS_KEY", "supabase.progress.key")
+        val supabaseReviewsUrl = getConfigProperty("SUPABASE_REVIEWS_URL", "supabase.reviews.url")
+        val supabaseReviewsKey = getConfigProperty("SUPABASE_REVIEWS_KEY", "supabase.reviews.key")
+        val supabaseCommunityUrl = getConfigProperty("SUPABASE_COMMUNITY_URL", "supabase.community.url")
+        val supabaseCommunityKey = getConfigProperty("SUPABASE_COMMUNITY_KEY", "supabase.community.key")
+        val supabaseLeaderboardUrl = getConfigProperty("SUPABASE_LEADERBOARD_URL", "supabase.leaderboard.url")
+        val supabaseLeaderboardKey = getConfigProperty("SUPABASE_LEADERBOARD_KEY", "supabase.leaderboard.key")
         
         jvmArgs += listOf(
             "-Xmx2G",  // Increase JVM memory
@@ -65,7 +97,13 @@ compose.desktop {
             "-Dsupabase.books.url=$supabaseBooksUrl",
             "-Dsupabase.books.key=$supabaseBooksKey",
             "-Dsupabase.progress.url=$supabaseProgressUrl",
-            "-Dsupabase.progress.key=$supabaseProgressKey"
+            "-Dsupabase.progress.key=$supabaseProgressKey",
+            "-Dsupabase.reviews.url=$supabaseReviewsUrl",
+            "-Dsupabase.reviews.key=$supabaseReviewsKey",
+            "-Dsupabase.community.url=$supabaseCommunityUrl",
+            "-Dsupabase.community.key=$supabaseCommunityKey",
+            "-Dsupabase.leaderboard.url=$supabaseLeaderboardUrl",
+            "-Dsupabase.leaderboard.key=$supabaseLeaderboardKey"
         )
         
         nativeDistributions {

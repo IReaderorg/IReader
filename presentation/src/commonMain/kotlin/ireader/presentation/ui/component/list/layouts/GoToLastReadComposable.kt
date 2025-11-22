@@ -31,22 +31,27 @@ fun GoToLastReadComposable(modifier: Modifier = Modifier, size: Dp = 40.dp, onCl
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopEnd
     ) {
-        androidx.compose.material3.IconButton(
-            onClick = onClick,
+        Box(
             modifier = Modifier
-                .padding(top = 12.dp, end = 16.dp)
-                .size(8.dp)
+                .padding(4.dp)
+                .size(28.dp)
                 .background(
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
                     shape = CircleShape
-                )
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            androidx.compose.material3.Icon(
-                imageVector = Icons.Default.ImportContacts,
-                contentDescription = localize(Res.string.open_last_chapter),
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
+            androidx.compose.material3.IconButton(
+                onClick = onClick,
+                modifier = Modifier.size(28.dp)
+            ) {
+                androidx.compose.material3.Icon(
+                    imageVector = Icons.Default.ImportContacts,
+                    contentDescription = localize(Res.string.open_last_chapter),
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }
