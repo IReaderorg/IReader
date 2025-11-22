@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -239,6 +240,7 @@ fun RegularChapterDetailTopAppBar(
         // Always visible back button with elevated surface for better contrast
         Surface(
             modifier = Modifier
+                .statusBarsPadding()
                 .padding(start = 8.dp, top = 8.dp)
                 .size(40.dp),
             shape = CircleShape,

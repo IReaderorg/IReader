@@ -136,7 +136,7 @@ fun BookDetailScreen(
             modifier = Modifier.fillMaxSize(),
             isExpandedWidth = true,
             startContent = {
-                // Left panel: Book info
+                // Left panel: Book info with modern UI
                 BookInfoPanel(
                     book = book,
                     source = source,
@@ -146,7 +146,8 @@ fun BookDetailScreen(
                     onWebView = onWebView,
                     onCopyTitle = onCopyTitle,
                     onMigrate = { vm.loadMigrationSources() },
-                    hideBackdrop = hideBackdrop
+                    hideBackdrop = hideBackdrop,
+                    chapterCount = chapters.value.size
                 )
             },
             endContent = {
@@ -165,56 +166,65 @@ fun BookDetailScreen(
             }
         )
     } else {
-        // Phone layout: single scrollable column
-        IVerticalFastScroller(listState = scrollState) {
-            LazyColumn(
-                modifier = Modifier,
-                verticalArrangement = Arrangement.Top,
-                state = scrollState
-            ) {
-                item {
-                    Box {
-                        // Pass scroll progress for parallax effect
-                        val scrollProgress = scrollState.firstVisibleItemScrollOffset.toFloat()
-                        BookHeaderImage(
+        // Phone layout: single scrollable column with modern UI
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Backdrop behind everything
+            ModernBookBackdrop(
+                book = book,
+                hideBackdrop = hideBackdrop,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
+            
+            IVerticalFastScroller(listState = scrollState) {
+                LazyColumn(
+                    modifier = Modifier,
+                    verticalArrangement = Arrangement.Top,
+                    state = scrollState
+                ) {
+                    item {
+                        Spacer(modifier = Modifier.height(appbarPadding + 16.dp))
+                    }
+                    item {
+                        ModernBookHeader(
                             book = book,
-                            scrollProgress = scrollProgress,
-                            hideBackdrop = hideBackdrop
-                        )
-
-                        BookHeader(
-                            book = book,
-                            onTitle = onTitle,
                             source = source,
-                            appbarPadding = appbarPadding,
+                            onTitle = onTitle,
                             onCopyTitle = onCopyTitle
                         )
                     }
-                }
-                item {
-                    ActionHeader(
-                        favorite = book.favorite,
-                        source = source,
-                        onFavorite = onFavorite,
-                        onWebView = onWebView,
-                        onMigrate = { vm.loadMigrationSources() },
-                        useFab = useFab
-                    )
-                }
-                item {
-                    BookSummaryInfo(
-                        book = book,
-                        isSummaryExpanded = isSummaryExpanded,
-                        onSummaryExpand = onSummaryExpand,
-                        onCopy = onCopyTitle
-                    )
-                }
-                item {
-                    BookReviewsIntegration(
-                        bookTitle = book.title,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                }
+                    item {
+                        BookStatsCard(
+                            book = book,
+                            chapterCount = chapters.value.size
+                        )
+                    }
+                    item {
+                        if (!useFab) {
+                            ModernActionButtons(
+                                favorite = book.favorite,
+                                source = source,
+                                onFavorite = onFavorite,
+                                onWebView = onWebView,
+                                onMigrate = { vm.loadMigrationSources() }
+                            )
+                        } else {
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
+                    item {
+                        ModernBookSummary(
+                            book = book,
+                            isSummaryExpanded = isSummaryExpanded,
+                            onSummaryExpand = onSummaryExpand,
+                            onCopy = onCopyTitle
+                        )
+                    }
+                    item {
+                        BookReviewsIntegration(
+                            bookTitle = book.title,
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
+                        )
+                    }
                 item {
                     ChapterBar(
                         vm = vm,
@@ -268,28 +278,30 @@ fun BookDetailScreen(
                     }
                 }
                 
-                items(
-                    items = vm.chapters.reversed(),
-                    key = { chapter -> chapter.id },
-                    contentType = { "chapter_item" }
-                ) { chapter ->
-                    ChapterRow(
-                        modifier = Modifier.animateItem(),
-                        chapter = chapter,
-                        onItemClick = { onItemClick(chapter) },
-                        isLastRead = chapter.id == vm.lastRead,
-                        isSelected = chapter.id in vm.selection,
-                        onLongClick = { onLongItemClick(chapter) },
-                        showNumber = vm.layout == ChapterDisplayMode.ChapterNumber || vm.layout == ChapterDisplayMode.Default
-                    )
-                    Divider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
-                        thickness = 0.5.dp
-                    )
+                    items(
+                        items = vm.chapters.reversed(),
+                        key = { chapter -> chapter.id },
+                        contentType = { "chapter_item" }
+                    ) { chapter ->
+                        ChapterRow(
+                            modifier = Modifier.animateItem(),
+                            chapter = chapter,
+                            onItemClick = { onItemClick(chapter) },
+                            isLastRead = chapter.id == vm.lastRead,
+                            isSelected = chapter.id in vm.selection,
+                            onLongClick = { onLongItemClick(chapter) },
+                            showNumber = vm.layout == ChapterDisplayMode.ChapterNumber || vm.layout == ChapterDisplayMode.Default
+                        )
+                        Divider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                            thickness = 0.5.dp
+                        )
+                    }
                 }
             }
-
+            
+            // Bottom bar and FAB overlay
             Box(modifier = Modifier.fillMaxSize().navigationBarsPadding()) {
                 ChapterDetailBottomBar(
                     vm,
@@ -319,6 +331,7 @@ fun BookDetailScreen(
 
 /**
  * Book info panel for tablet layout - shows book details on the left side
+ * Redesigned with modern UI inspired by Webnovel app
  */
 @Composable
 private fun BookInfoPanel(
@@ -331,57 +344,66 @@ private fun BookInfoPanel(
     onCopyTitle: (String) -> Unit,
     onMigrate: () -> Unit,
     hideBackdrop: Boolean,
+    chapterCount: Int = 0,
 ) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        item {
-            Box {
-                BookHeaderImage(
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Backdrop behind everything
+        ModernBookBackdrop(
+            book = book,
+            hideBackdrop = hideBackdrop,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
+        
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(0.dp)
+        ) {
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+            
+            item {
+                ModernBookHeader(
                     book = book,
-                    scrollProgress = 0f,
-                    hideBackdrop = hideBackdrop
+                    source = source,
+                    onTitle = onCopyTitle,
+                    onCopyTitle = onCopyTitle
                 )
             }
-        }
-        
-        item {
-            BookHeader(
-                book = book,
-                onTitle = onCopyTitle,
-                source = source,
-                appbarPadding = 0.dp,
-                onCopyTitle = onCopyTitle
-            )
-        }
-        
-        item {
-            ActionHeader(
-                favorite = book.favorite,
-                source = source,
-                onFavorite = onFavorite,
-                onWebView = onWebView,
-                onMigrate = onMigrate,
-                useFab = false
-            )
-        }
-        
-        item {
-            BookSummaryInfo(
-                book = book,
-                isSummaryExpanded = isSummaryExpanded,
-                onSummaryExpand = onSummaryExpand,
-                onCopy = onCopyTitle
-            )
-        }
-        
-        item {
-            BookReviewsIntegration(
-                bookTitle = book.title,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
+            
+            item {
+                BookStatsCard(
+                    book = book,
+                    chapterCount = chapterCount
+                )
+            }
+            
+            item {
+                ModernActionButtons(
+                    favorite = book.favorite,
+                    source = source,
+                    onFavorite = onFavorite,
+                    onWebView = onWebView,
+                    onMigrate = onMigrate
+                )
+            }
+            
+            item {
+                ModernBookSummary(
+                    book = book,
+                    isSummaryExpanded = isSummaryExpanded,
+                    onSummaryExpand = onSummaryExpand,
+                    onCopy = onCopyTitle
+                )
+            }
+            
+            item {
+                BookReviewsIntegration(
+                    bookTitle = book.title,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                )
+            }
         }
     }
 }

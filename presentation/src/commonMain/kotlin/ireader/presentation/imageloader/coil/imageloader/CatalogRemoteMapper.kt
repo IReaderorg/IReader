@@ -17,10 +17,20 @@ class CatalogRemoteMapper : Mapper<Catalog,Uri> {
     override fun map(data: Catalog, options: Options): Uri? {
         return when (data) {
             is CatalogRemote -> {
-                data.iconUrl.toUri()
+                // Only map if iconUrl is not blank
+                if (data.iconUrl.isNotBlank()) {
+                    data.iconUrl.toUri()
+                } else {
+                    null
+                }
             }
             is CatalogInstalled -> {
-                data.iconUrl.toUri()
+                // Only map if iconUrl is not blank
+                if (data.iconUrl.isNotBlank()) {
+                    data.iconUrl.toUri()
+                } else {
+                    null
+                }
             }
             else -> {
                 null
@@ -31,7 +41,10 @@ class CatalogRemoteMapper : Mapper<Catalog,Uri> {
 class CatalogKeyer : Keyer<Catalog> {
     override fun key(data: Catalog, options: Options): String? {
         return when(data) {
-            is CatalogRemote -> data.iconUrl
+            is CatalogRemote -> {
+                // Use iconUrl if available, otherwise use pkgName as fallback
+                data.iconUrl.ifBlank { "catalog-remote-${data.pkgName}" }
+            }
             is CatalogLocal -> data.sourceId.toString()
             else -> null
         }

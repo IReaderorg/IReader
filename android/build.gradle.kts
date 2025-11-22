@@ -53,7 +53,7 @@ val localProperties = Properties().apply {
 fun getConfigProperty(envVar: String, propertyKey: String): String {
     return System.getenv(envVar)
         ?: localProperties.getProperty(propertyKey)
-        ?: providers.gradleProperty(propertyKey).orNull
+        ?: project.findProperty(propertyKey) as? String
         ?: ""
 }
 

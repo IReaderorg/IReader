@@ -136,6 +136,9 @@ class CatalogGithubApi(
                 if (it < 0) -it else it 
             }
             
+            // Fix icon URL to ensure it's a direct image URL
+            val iconUrl = fixLNReaderIconUrl(plugin.iconUrl, plugin.id, plugin.lang, repo)
+            
             CatalogRemote(
                 name = plugin.name,
                 description = plugin.description ?: "LNReader Plugin",
@@ -145,12 +148,43 @@ class CatalogGithubApi(
                 versionCode = plugin.version.replace(".", "").toIntOrNull() ?: 1,
                 lang = plugin.lang ?: "en",
                 pkgUrl = plugin.url,
-                iconUrl = plugin.iconUrl ?: "",
+                iconUrl = iconUrl,
                 nsfw = false, // LNReader plugins don't typically have NSFW flag
                 source = CatalogRemote.DEFAULT_ID,
                 jarUrl = plugin.url // For LNReader, the URL is the plugin file itself
             )
         }
+    }
+    
+    /**
+     * Fixes LNReader icon URLs to ensure they point to raw image files.
+     * Converts GitHub tree URLs to raw URLs and constructs fallback URLs if needed.
+     */
+    private fun fixLNReaderIconUrl(
+        iconUrl: String?,
+        pluginId: String,
+        lang: String?,
+        repo: ireader.domain.models.entities.ExtensionSource
+    ): String {
+        // If iconUrl is provided and valid, fix it if needed
+        if (!iconUrl.isNullOrBlank()) {
+            // Convert GitHub tree URL to raw URL
+            if (iconUrl.contains("github.com") && iconUrl.contains("/tree/")) {
+                return iconUrl
+                    .replace("github.com", "raw.githubusercontent.com")
+                    .replace("/tree/", "/")
+            }
+            // If it's already a raw URL or external URL, use it as-is
+            if (iconUrl.startsWith("http://") || iconUrl.startsWith("https://")) {
+                return iconUrl
+            }
+        }
+        
+        // Fallback: construct icon URL from repository structure
+        // LNReader plugins typically follow: src/{lang}/{pluginId}/icon.png
+        val repoBaseUrl = repo.source.removeSuffix(".git")
+        val language = lang ?: "en"
+        return "$repoBaseUrl/raw/main/src/$language/$pluginId/icon.png"
     }
 
 

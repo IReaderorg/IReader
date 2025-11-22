@@ -220,9 +220,14 @@ data class BookDetailScreenSpec constructor(
             },
             bottomSheetState = sheetState
         ) {
-            val scrollBehavior = if (isTableUi()) TopAppBarDefaults.pinnedScrollBehavior() else TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
-                topbarState
-            )
+            val scrollBehavior = if (isTableUi()) {
+                TopAppBarDefaults.pinnedScrollBehavior()
+            } else {
+                TopAppBarDefaults.enterAlwaysScrollBehavior(
+                    state = topbarState,
+                    canScroll = { true }
+                )
+            }
             TransparentStatusBar {
                 IScaffold(
                     modifier = Modifier.pullRefresh(swipeRefreshState),

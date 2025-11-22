@@ -9,25 +9,29 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.outlined.StarOutline
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 /**
  * Compact review summary card for BookDetailScreen
  * Shows review count, average rating, and action buttons
+ * Redesigned to match modern book info style
  */
 @Composable
 fun ReviewSummaryCard(
@@ -37,90 +41,119 @@ fun ReviewSummaryCard(
     onWriteReview: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 0.dp, vertical = 8.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+        // Section header
+        Text(
+            text = "Reviews",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontSize = 16.sp,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        
+        // Rating display
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(10.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+            tonalElevation = 0.dp
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Reviews",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    
-                    Spacer(modifier = Modifier.height(4.dp))
-                    
-                    if (reviewCount > 0) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.StarOutline,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
-                            )
+                if (reviewCount > 0) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.StarOutline,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Column {
                             Text(
                                 text = String.format("%.1f", averageRating),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontSize = 20.sp
                             )
                             Text(
-                                text = "($reviewCount ${if (reviewCount == 1) "review" else "reviews"})",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                text = "$reviewCount ${if (reviewCount == 1) "review" else "reviews"}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
+                                fontSize = 12.sp
                             )
                         }
-                    } else {
+                    }
+                } else {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.StarOutline,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(24.dp)
+                        )
                         Text(
                             text = "No reviews yet",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            fontSize = 14.sp
                         )
-                    }
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                if (reviewCount > 0) {
-                    OutlinedButton(
-                        onClick = onOpenReviews,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.RateReview,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("View All")
                     }
                 }
                 
-                FilledTonalButton(
+                // Write review button (always visible)
+                FilledTonalIconButton(
                     onClick = onWriteReview,
-                    modifier = Modifier.weight(1f),
-
+                    modifier = Modifier.size(40.dp),
+                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 ) {
-                    Text("Write Review",color = MaterialTheme.colorScheme.onPrimary)
+                    Icon(
+                        imageVector = Icons.Default.RateReview,
+                        contentDescription = "Write Review",
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
+            }
+        }
+        
+        // View all button (only when reviews exist)
+        if (reviewCount > 0) {
+            Spacer(modifier = Modifier.height(8.dp))
+            TextButton(
+                onClick = onOpenReviews,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "View All Reviews",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
             }
         }
     }
