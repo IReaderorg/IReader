@@ -3,6 +3,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Properties
 import java.util.TimeZone
+import java.util.concurrent.TimeUnit
 
 plugins {
     id("com.android.application")
@@ -24,7 +25,7 @@ fun getGitOutput(vararg command: String): String {
             .redirectOutput(ProcessBuilder.Redirect.PIPE)
             .redirectError(ProcessBuilder.Redirect.PIPE)
             .start()
-        process.waitFor(2, java.util.concurrent.TimeUnit.SECONDS)
+        process.waitFor(2, TimeUnit.SECONDS)
         process.inputStream.bufferedReader().readText().trim().takeIf { it.isNotEmpty() } ?: "unknown"
     } catch (e: Exception) {
         "unknown"
@@ -238,7 +239,7 @@ dependencies {
     implementation(libs.napier)
 }
 composeCompiler {
-    enableStrongSkippingMode.set(true)
+    // Strong skipping is enabled by default in newer versions
 }
 
 // Apply Google Services plugin only for non-fdroid flavors
