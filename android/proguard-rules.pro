@@ -433,3 +433,18 @@
     <init>(...);
 }
 ##---------------End: proguard configuration for Leaderboard & Statistics  ----------
+
+#
+#---------------Begin: Additional QuickJS Size Optimizations  ----------
+# QuickJS optimization - Remove unused native libraries at build time
+# This helps R8 identify and remove unused code
+-assumenosideeffects class app.cash.quickjs.QuickJs {
+    # Add methods here that you don't use if any
+}
+
+# Optimize QuickJS by removing debug symbols
+-keepclassmembers class app.cash.quickjs.** {
+    !private <methods>;
+    !private <fields>;
+}
+##---------------End: Additional QuickJS Size Optimizations  ----------

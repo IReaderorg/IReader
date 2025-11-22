@@ -14,7 +14,11 @@ plugins {
     alias(libs.plugins.jetbrainCompose)
 }
 
+// Remove x86 and x86_64 if you don't need emulator/tablet support
+// This significantly reduces APK size as QuickJS includes native libraries for each ABI
 val SUPPORTED_ABIS = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+// For production, consider only: setOf("arm64-v8a") for modern devices
+// Or: setOf("armeabi-v7a", "arm64-v8a") to support older devices
 
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround
@@ -80,8 +84,20 @@ android {
                 "META-INF/DISCLAIMER",
                 "META-INF/*.kotlin_module",
                 "META-INF/*.version",
+                // Additional exclusions to reduce size
+                "META-INF/*.properties",
+                "META-INF/INDEX.LIST",
+                "META-INF/io.netty.versions.properties",
+                "**/*.proto",
+                "okhttp3/internal/publicsuffix/*",
+                "kotlin/**",
+                "DebugProbesKt.bin"
             )
         )
+        // Use JNI libraries compression
+        jniLibs {
+            useLegacyPackaging = false
+        }
     }
     sourceSets.getByName("main") {
         java.srcDirs("build/generated/ksp/main/kotlin")
@@ -99,7 +115,24 @@ android {
             isEnable = true
             reset()
             include(*SUPPORTED_ABIS.toTypedArray())
-            isUniversalApk = true
+            // Set to false to reduce universal APK size
+            // Users should download architecture-specific APKs
+            isUniversalApk = false
+        }
+    }
+    
+    bundle {
+        language {
+            // Enable language splits to reduce bundle size
+            enableSplit = true
+        }
+        density {
+            // Enable density splits for different screen densities
+            enableSplit = true
+        }
+        abi {
+            // Enable ABI splits in bundle
+            enableSplit = true
         }
     }
     lint {
@@ -146,6 +179,11 @@ android {
             isShrinkResources = true
             isMinifyEnabled = true
             proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
+            
+            // Additional optimizations for size reduction
+            ndk {
+                debugSymbolLevel = "NONE"
+            }
         }
         create("preview") {
             initWith(getByName("release"))

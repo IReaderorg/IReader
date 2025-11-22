@@ -85,8 +85,16 @@ class GraalVMJSEngine(
             
             // Load the plugin code
             Log.debug("GraalVMJSEngine: Loading plugin code (${jsCode.length} chars)")
-            newContext.eval("js", jsCode)
-            Log.debug("GraalVMJSEngine: Plugin code loaded")
+            try {
+                newContext.eval("js", jsCode)
+                Log.debug("GraalVMJSEngine: Plugin code loaded")
+            } catch (e: org.graalvm.polyglot.PolyglotException) {
+                // Provide better error message for common issues
+                if (e.message?.contains("404") == true || e.message?.contains("Not Found") == true) {
+                    throw PluginLoadException("Plugin file contains an HTTP error response instead of JavaScript. The file may be corrupted or incorrectly downloaded. Please re-download the plugin.", e)
+                }
+                throw PluginLoadException("JavaScript syntax error in plugin: ${e.message}", e)
+            }
             
             // Get the plugin object and wrap it
             val wrapPluginFunc = newContext.getBindings("js").getMember("wrapPlugin")

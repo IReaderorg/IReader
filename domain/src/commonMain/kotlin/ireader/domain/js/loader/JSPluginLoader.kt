@@ -168,6 +168,17 @@ class JSPluginLoader(
             val jsCode = file.readText()
             Log.debug("JSPluginLoader: Read ${jsCode.length} chars from $pluginId")
             
+            // Validate that the file contains JavaScript, not an error page
+            if (jsCode.contains("404") && jsCode.contains("Not Found") && jsCode.length < 1000) {
+                throw PluginLoadException("Plugin file appears to contain an HTTP error response (404 Not Found) instead of JavaScript code. Please re-download the plugin.")
+            }
+            if (jsCode.trim().startsWith("<!DOCTYPE") || jsCode.trim().startsWith("<html")) {
+                throw PluginLoadException("Plugin file contains HTML instead of JavaScript code. Please ensure you downloaded the correct file.")
+            }
+            if (jsCode.isBlank()) {
+                throw PluginLoadException("Plugin file is empty")
+            }
+            
             // Create bridge service for this plugin
             val pluginPreferenceStore = preferenceStoreFactory.create("js_plugin_$pluginId")
             val bridgeService = JSBridgeServiceImpl(httpClient, pluginPreferenceStore, pluginId)
