@@ -295,12 +295,13 @@
 }
 -keepattributes RuntimeVisibleAnnotations,RuntimeInvisibleAnnotations,RuntimeVisibleParameterAnnotations,RuntimeInvisibleParameterAnnotations
 
-# Keep reflection for List and Collection types used by Supabase
--keep class java.util.List { *; }
--keep class java.util.Collection { *; }
--keep class java.util.ArrayList { *; }
--keep interface java.util.List
--keep interface java.util.Collection
+# Keep reflection for List and Collection types used by Supabase and ML Kit
+-keep class java.util.** { *; }
+-keep interface java.util.**
+-keepclassmembers class java.util.** {
+    <fields>;
+    <methods>;
+}
 
 # Keep Kotlin reflection implementation classes
 -keep class kotlin.reflect.jvm.** { *; }
@@ -310,11 +311,50 @@
     <methods>;
 }
 
-# Keep review DTOs for proper serialization
+# Keep Kotlin reflection internal classes to prevent KotlinReflectionInternalError
+-keep class kotlin.reflect.jvm.internal.** { *; }
+-keep class kotlin.reflect.jvm.internal.KClassImpl { *; }
+-keep class kotlin.reflect.jvm.internal.KClassImpl$Data { *; }
+-keepclassmembers class kotlin.reflect.jvm.internal.KClassImpl$Data {
+    *;
+}
+
+# Keep all Java reflection classes
+-keep class java.lang.reflect.** { *; }
+-keepclassmembers class java.lang.reflect.** {
+    <fields>;
+    <methods>;
+}
+
+# Keep all Supabase repository DTOs for proper serialization (used with reflection)
+# These nested classes are accessed via Kotlin reflection by Supabase's decodeList/decodeSingle
+
+# Review Repository DTOs
+-keep class ireader.data.review.ReviewRepositoryImpl { *; }
 -keep class ireader.data.review.ReviewRepositoryImpl$** { *; }
 -keepclassmembers class ireader.data.review.ReviewRepositoryImpl$** {
-    <fields>;
-    <init>(...);
+    *;
+}
+
+# Badge Repository DTOs
+-keep class ireader.data.badge.BadgeRepositoryImpl { *; }
+-keep class ireader.data.badge.BadgeRepositoryImpl$** { *; }
+-keepclassmembers class ireader.data.badge.BadgeRepositoryImpl$** {
+    *;
+}
+
+# Leaderboard Repository DTOs
+-keep class ireader.data.leaderboard.LeaderboardRepositoryImpl { *; }
+-keep class ireader.data.leaderboard.LeaderboardRepositoryImpl$** { *; }
+-keepclassmembers class ireader.data.leaderboard.LeaderboardRepositoryImpl$** {
+    *;
+}
+
+# NFT Repository DTOs
+-keep class ireader.data.nft.NFTRepositoryImpl { *; }
+-keep class ireader.data.nft.NFTRepositoryImpl$** { *; }
+-keepclassmembers class ireader.data.nft.NFTRepositoryImpl$** {
+    *;
 }
 
 -dontwarn io.github.jan.supabase.**
@@ -377,10 +417,30 @@
 # Google ML Kit Translation - Keep translation classes
 -keep class com.google.mlkit.** { *; }
 -keep class com.google.android.gms.internal.mlkit_translate.** { *; }
+-keep class com.google.android.gms.tasks.** { *; }
 -keepclassmembers class com.google.mlkit.** {
     <fields>;
     <methods>;
 }
+-keepclassmembers class com.google.android.gms.tasks.** {
+    <fields>;
+    <methods>;
+}
+
+# Keep ML Kit classes accessed via reflection in GoogleTranslateML
+-keep class com.google.mlkit.nl.translate.** { *; }
+-keep class com.google.mlkit.nl.translate.TranslatorOptions { *; }
+-keep class com.google.mlkit.nl.translate.TranslatorOptions$Builder { *; }
+-keep class com.google.mlkit.nl.translate.Translation { *; }
+-keepclassmembers class com.google.mlkit.nl.translate.TranslatorOptions$Builder {
+    public <methods>;
+}
+
+# Keep Google Play Services Task API for ML Kit
+-keep interface com.google.android.gms.tasks.** { *; }
+-keep class com.google.android.gms.tasks.OnSuccessListener { *; }
+-keep class com.google.android.gms.tasks.OnFailureListener { *; }
+-keep class com.google.android.gms.tasks.SuccessContinuation { *; }
 
 -dontwarn com.google.mlkit.**
 -dontwarn com.google.android.gms.internal.mlkit_translate.**
