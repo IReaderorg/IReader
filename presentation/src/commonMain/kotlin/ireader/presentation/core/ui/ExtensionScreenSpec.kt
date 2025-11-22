@@ -32,7 +32,7 @@ import ireader.i18n.resources.*
 import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.ui.SnackBarListener
-import ireader.presentation.ui.home.sources.extension.ExtensionScreen
+import ireader.presentation.ui.home.sources.extension.CleanExtensionScreen
 import ireader.presentation.ui.home.sources.extension.ExtensionScreenTopAppBar
 import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
 import ireader.presentation.ui.home.sources.extension.SourceDetailScreen
@@ -137,11 +137,11 @@ object ExtensionScreenSpec : Tab {
                                     GlobalSearchScreenSpec()
                             )
                         },
-                            onMigrate = {
-                                showMigrationSourceDialog = true
-                            },
-                        onRepositoryFilter = {
-                            vm.toggleRepositoryType()
+                        onMigrate = {
+                            showMigrationSourceDialog = true
+                        },
+                        onBrowseSettings = {
+                            navController.navigateTo(BrowseSettingsScreenSpec())
                         },
                         repositoryFilterText = vm.getRepositoryTypeDisplayName(),
                         scrollBehavior = scrollBehavior,
@@ -149,7 +149,7 @@ object ExtensionScreenSpec : Tab {
             }) { scaffoldPadding ->
 
 
-                ExtensionScreen(
+                CleanExtensionScreen(
                         modifier = Modifier.padding(scaffoldPadding),
                         vm = vm,
                         onClickCatalog = {

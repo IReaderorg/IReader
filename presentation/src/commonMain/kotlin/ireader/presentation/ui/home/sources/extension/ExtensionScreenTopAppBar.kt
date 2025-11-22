@@ -30,7 +30,7 @@ fun ExtensionScreenTopAppBar(
     onSearchNavigate: () -> Unit,
     onMigrate: (() -> Unit)? = null,
     onAddRepository: (() -> Unit)? = null,
-    onRepositoryFilter: (() -> Unit)? = null,
+    onBrowseSettings: (() -> Unit)? = null,
     repositoryFilterText: String = "All",
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
@@ -92,11 +92,11 @@ fun ExtensionScreenTopAppBar(
                         contentDescription = localize(Res.string.search),
                         onClick = onSearchNavigate,
                     )
-                    if (onRepositoryFilter != null) {
+                    if (onBrowseSettings != null) {
                         AppIconButton(
-                            imageVector = Icons.Default.FilterList,
-                            contentDescription = "Filter by Repository Type: $repositoryFilterText",
-                            onClick = onRepositoryFilter,
+                            imageVector = Icons.Default.Tune,
+                            contentDescription = "Browse Settings",
+                            onClick = onBrowseSettings,
                         )
                     }
                     if (onMigrate != null) {

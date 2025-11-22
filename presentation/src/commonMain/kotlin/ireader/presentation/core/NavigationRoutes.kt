@@ -18,6 +18,7 @@ object NavigationRoutes {
     const val badgeStore = "badgeStore"
     const val nftBadge = "nftBadge"
     const val badgeManagement = "badgeManagement"
+    const val leaderboard = "leaderboard"
     const val fontSettings = "fontSettings"
     const val generalSettings = "generalSettings"
     const val readerSettings = "readerSettings"
@@ -33,6 +34,7 @@ object NavigationRoutes {
     const val statistics = "statistics"
     const val repository = "repository"
     const val webView = "webView"
+    const val browseSettings = "browseSettings"
     
     // Routes with parameters
     fun bookDetail(bookId: Long) = "bookDetail/$bookId"

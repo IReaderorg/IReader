@@ -48,4 +48,14 @@ val useCaseModule = module {
     
     // Notification use cases
     singleOf(::NotificationManagerUseCase)
+    
+    // Leaderboard use cases
+    single {
+        ireader.domain.usecases.leaderboard.LeaderboardUseCases(
+            leaderboardRepository = get(),
+            statisticsRepository = get(),
+            remoteRepository = get(),
+            uiPreferences = get()
+        )
+    }
 }

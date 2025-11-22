@@ -16,6 +16,7 @@ import ireader.presentation.core.ui.BackupAndRestoreScreenSpec
 import ireader.presentation.core.ui.BadgeManagementScreenSpec
 import ireader.presentation.core.ui.BadgeStoreScreenSpec
 import ireader.presentation.core.ui.BookDetailScreenSpec
+import ireader.presentation.core.ui.BrowseSettingsScreenSpec
 import ireader.presentation.core.ui.CategoryScreenSpec
 import ireader.presentation.core.ui.ChangelogScreenSpec
 import ireader.presentation.core.ui.ChatGptLoginScreenSpec
@@ -104,6 +105,10 @@ fun CommonNavHost(
             BadgeManagementScreenSpec().Content()
         }
         
+        composable(NavigationRoutes.leaderboard) {
+            ireader.presentation.core.ui.LeaderboardScreenSpec().Content()
+        }
+        
         composable(NavigationRoutes.translationSettings) {
             TranslationScreenSpec().Content()
         }
@@ -148,6 +153,9 @@ fun CommonNavHost(
         }
         composable(NavigationRoutes.ttsEngineManager) {
             TTSEngineManagerScreenSpec().Content()
+        }
+        composable(NavigationRoutes.browseSettings) {
+            BrowseSettingsScreenSpec().Content()
         }
         
         // Routes with parameters

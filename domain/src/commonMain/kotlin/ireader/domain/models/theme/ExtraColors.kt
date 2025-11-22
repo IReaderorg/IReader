@@ -17,18 +17,19 @@ import androidx.compose.ui.graphics.luminance
 class ExtraColors(
     bars: Color = Color.Unspecified,
     onBars: Color = Color.Unspecified,
-    isBarLight: Boolean = bars.luminance() > 0.5,
 ) {
     var bars by mutableStateOf(bars, structuralEqualityPolicy())
         private set
+    
     var onBars by mutableStateOf(onBars, structuralEqualityPolicy())
         private set
-    var isBarLight by mutableStateOf(isBarLight, structuralEqualityPolicy())
-        private set
+    
+    // Calculate isBarLight dynamically based on current bars color
+    val isBarLight: Boolean
+        get() = bars.luminance() > 0.5
 
     fun updateFrom(other: ExtraColors) {
         bars = other.bars
         onBars = other.onBars
-        isBarLight = other.isBarLight
     }
 }

@@ -78,8 +78,14 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         // Provide activity to storage helper
         getSimpleStorage.provideActivity(this, null)
         
-        // Set up window to handle gesture navigation
+        // Set up window to handle gesture navigation and keyboard
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        
+        // Ensure keyboard doesn't cover content
+        // This is critical for text fields to be visible when keyboard appears
+        window.setSoftInputMode(
+            android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+        )
         
         // Initialize automatic backup in the background
         lifecycleScope.launchIO {

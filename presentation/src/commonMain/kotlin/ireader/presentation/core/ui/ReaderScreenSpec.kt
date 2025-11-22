@@ -106,6 +106,36 @@ data class ReaderScreenSpec(
                 }
             }
         }
+        
+        // Track reading time - records time spent in reader screen
+        DisposableEffect(key1 = Unit) {
+            val startTime = System.currentTimeMillis()
+            Log.info { "Reader screen opened - starting time tracking" }
+            
+            onDispose {
+                val endTime = System.currentTimeMillis()
+                val durationMillis = endTime - startTime
+                val durationMinutes = durationMillis / 60000
+                
+                Log.info { "Reader screen closed - duration: ${durationMinutes} minutes" }
+                
+                // Only track if user spent at least 5 seconds reading (to avoid accidental opens)
+                if (durationMillis >= 5000) {
+                    scope.launch {
+                        try {
+                            vm.trackReadingProgressUseCase.trackReadingTime(durationMillis)
+                            
+                            // Also update reading streak
+                            vm.trackReadingProgressUseCase.updateReadingStreak(endTime)
+                            
+                            Log.info { "Reading time tracked: ${durationMinutes} minutes" }
+                        } catch (e: Exception) {
+                            Log.error { "Failed to track reading time" }
+                        }
+                    }
+                }
+            }
+        }
 
         LaunchedEffect(key1 = vm.autoScrollMode) {
             while (vm.autoScrollInterval.value.toInt() != 0 && vm.autoScrollMode) {

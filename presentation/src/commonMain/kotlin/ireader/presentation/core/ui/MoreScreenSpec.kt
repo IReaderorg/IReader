@@ -94,7 +94,10 @@ object MoreScreenSpec : Tab {
                 },
                 onBadgeManagement = {
                     navController.navigate(NavigationRoutes.badgeManagement)
-                }
+                },
+                onLeaderboard = {
+                    navController.navigate(NavigationRoutes.leaderboard)
+                },
             )
         }
 

@@ -232,7 +232,6 @@ private fun ireader.domain.plugins.ThemeExtraColors.toExtraColors(): ExtraColors
     return ExtraColors(
         bars = Color(this.bars),
         onBars = Color(this.onBars),
-        isBarLight = this.isBarLight
     )
 }
 

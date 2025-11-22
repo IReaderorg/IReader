@@ -16,9 +16,15 @@ import android.view.Window
 
 /**
  * Modern replacement for SystemUiController using androidx.core WindowCompat APIs
+ * Optimized for Xiaomi and other OEM devices
  */
 class WindowInsetsController(private val window: Window) {
     private val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+    
+    init {
+        // Enable edge-to-edge by default
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+    }
     
     /**
      * Set the color of system bars (both status bar and navigation bar)
@@ -28,13 +34,8 @@ class WindowInsetsController(private val window: Window) {
         darkIcons: Boolean = false,
         isNavigationBarContrastEnforced: Boolean = false
     ) {
-        window.statusBarColor = color.toArgb()
-        window.navigationBarColor = color.toArgb()
-        
-        insetsController.isAppearanceLightStatusBars = darkIcons
-        insetsController.isAppearanceLightNavigationBars = darkIcons
-        
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        setStatusBarColor(color, darkIcons)
+        setNavigationBarColor(color, darkIcons, isNavigationBarContrastEnforced)
     }
     
     /**
@@ -45,19 +46,46 @@ class WindowInsetsController(private val window: Window) {
         darkIcons: Boolean = false,
         navigationBarContrastEnforced: Boolean = false
     ) {
-        window.navigationBarColor = color.toArgb()
-        insetsController.isAppearanceLightNavigationBars = darkIcons
+        try {
+            val argbColor = color.toArgb()
+            window.navigationBarColor = argbColor
+            
+            // Set icon appearance
+            insetsController.isAppearanceLightNavigationBars = darkIcons
+            
+            // Disable contrast enforcement for better control
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = navigationBarContrastEnforced
+            }
+        } catch (e: Exception) {
+            // Silently fail on unsupported devices
+        }
     }
     
     /**
-     * Set status bar color
+     * Set status bar color with improved Xiaomi device support
      */
     fun setStatusBarColor(
         color: Color,
         darkIcons: Boolean = false,
     ) {
-        window.statusBarColor = color.toArgb()
-        insetsController.isAppearanceLightStatusBars = darkIcons
+        try {
+            val argbColor = color.toArgb()
+            
+            // Set the status bar color
+            window.statusBarColor = argbColor
+            
+            // CRITICAL: Set icon appearance AFTER color for Xiaomi devices
+            // This prevents the white status bar with invisible icons issue
+            insetsController.isAppearanceLightStatusBars = darkIcons
+            
+            // Force a redraw to ensure changes take effect on Xiaomi devices
+            window.decorView.post {
+                window.decorView.invalidate()
+            }
+        } catch (e: Exception) {
+            // Silently fail on unsupported devices
+        }
     }
     
     var isStatusBarVisible: Boolean

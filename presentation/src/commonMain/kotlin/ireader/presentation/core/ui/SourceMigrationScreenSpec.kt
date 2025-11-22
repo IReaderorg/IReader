@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import cafe.adriel.voyager.core.screen.Screen
 import ireader.presentation.ui.home.sources.migration.MigrationViewModel
-import ireader.presentation.ui.home.sources.migration.SourceMigrationScreen
+import ireader.presentation.ui.home.sources.migration.ModernSourceMigrationScreen
 import org.koin.compose.koinInject
 
 data class SourceMigrationScreenSpec(
@@ -20,7 +20,7 @@ data class SourceMigrationScreenSpec(
             viewModel.loadNovelsFromSource(sourceId)
         }
         
-        SourceMigrationScreen(
+        ModernSourceMigrationScreen(
             viewModel = viewModel,
             onBackPressed = onBackPressed
         )

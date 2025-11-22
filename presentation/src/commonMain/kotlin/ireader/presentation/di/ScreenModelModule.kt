@@ -16,4 +16,11 @@ val screenModelModule = module {
     
     // Main settings screen - singleton to prevent recreation
     single { ireader.presentation.ui.settings.MainSettingScreenViewModel(get()) }
+    
+    // Leaderboard screen model
+    factory {
+        ireader.presentation.ui.leaderboard.LeaderboardViewModel(
+            leaderboardUseCases = get()
+        )
+    }
 }

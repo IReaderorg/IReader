@@ -346,18 +346,7 @@ class ExtensionViewModel(
     fun clearRepositoryTypeFilter() {
         selectedRepositoryType.value = null
     }
-    
-    /**
-     * Toggle between IReader and LNReader repository types
-     */
-    fun toggleRepositoryType() {
-        selectedRepositoryType.value = when (selectedRepositoryType.value) {
-            null -> "IREADER"
-            "IREADER" -> "LNREADER"
-            "LNREADER" -> null
-            else -> null
-        }
-    }
+
     
     /**
      * Get current repository type filter display name

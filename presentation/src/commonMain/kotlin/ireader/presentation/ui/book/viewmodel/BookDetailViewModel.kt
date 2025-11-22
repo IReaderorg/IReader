@@ -111,6 +111,11 @@ class BookDetailViewModel(
         savedScrollOffset = offset
     }
     
+    fun resetScrollPosition() {
+        savedScrollIndex = 0
+        savedScrollOffset = 0
+    }
+    
     init {
         booksState.book = null
         val bookId = param.bookId

@@ -85,6 +85,7 @@ class LeaderboardRepositoryImpl(
     override suspend fun syncUserStats(stats: UserLeaderboardStats): Result<Unit> =
         RemoteErrorMapper.withErrorMapping {
             val dto = LeaderboardDto(
+                id = null, // Don't include id for upsert
                 user_id = stats.userId,
                 username = stats.username,
                 total_reading_time_minutes = stats.totalReadingTimeMinutes,
@@ -96,9 +97,12 @@ class LeaderboardRepositoryImpl(
                 updated_at = null
             )
             
+            // Use upsert with a list (required by Supabase)
+            // onConflict parameter tells Supabase to update on user_id conflict
             supabaseClient.postgrest["leaderboard"]
-                .upsert(dto) {
-                    select(Columns.ALL)
+                .upsert(listOf(dto)) {
+                    onConflict = "user_id"
+                    select()
                 }
             
             Unit

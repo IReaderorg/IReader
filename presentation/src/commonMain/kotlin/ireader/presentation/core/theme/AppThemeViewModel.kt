@@ -73,43 +73,52 @@ class AppThemeViewModel(
         }
 
         // Check if dynamic colors should be used
-        val useDynamicColors = dynamicColorMode
-            && dynamicColorScheme.isSupported()
+        val useDynamicColors = dynamicColorMode && dynamicColorScheme.isSupported()
 
-        val material = if (useDynamicColors) {
-            // Use dynamic color scheme from system
+        // Step 1: Get base color scheme (either dynamic or theme-based)
+        var materialColors = if (useDynamicColors) {
             try {
-                val dynamicScheme = if (isLight) {
+                if (isLight) {
                     dynamicColorScheme.lightColorScheme()
                 } else {
                     dynamicColorScheme.darkColorScheme()
-                }
-                dynamicScheme ?: getMaterialColors(
-                    baseTheme.materialColors,
-                    colors.primary.value,
-                    colors.secondary.value,
-                    isLight
-                )
+                } ?: baseTheme.materialColors
             } catch (e: Exception) {
-                // Fallback to regular colors if dynamic colors fail
-                getMaterialColors(
-                    baseTheme.materialColors,
-                    colors.primary.value,
-                    colors.secondary.value,
-                    isLight
-                )
+                baseTheme.materialColors
             }
         } else {
-            getMaterialColors(
-                baseTheme.materialColors,
-                colors.primary.value,
-                colors.secondary.value,
-                isLight
+            baseTheme.materialColors
+        }
+        
+        // Step 2: Apply custom primary/secondary colors if specified
+        val customPrimary = colors.primary.value.takeIf { it != Color.Unspecified }
+        val customSecondary = colors.secondary.value.takeIf { it != Color.Unspecified }
+        
+        if (customPrimary != null || customSecondary != null) {
+            materialColors = ThemeColorUtils.applyCustomColors(
+                materialColors,
+                customPrimary,
+                customSecondary
             )
         }
         
-        val custom = getExtraColors(baseTheme.extraColors, colors.bars.value, isLight)
-        return material to custom
+        // Step 3: Apply true black mode if enabled for dark themes
+        if (!isLight && useTrueBlack) {
+            materialColors = ThemeColorUtils.applyTrueBlack(materialColors)
+        }
+        
+        // Step 4: Ensure all "on" colors have proper contrast
+        materialColors = ThemeColorUtils.ensureProperOnColors(materialColors)
+        
+        // Step 5: Create extra colors for bars
+        val extraColors = createExtraColors(
+            baseTheme.extraColors,
+            colors.bars.value,
+            materialColors,
+            isLight
+        )
+        
+        return materialColors to extraColors
     }
 
     @Composable
@@ -134,45 +143,35 @@ class AppThemeViewModel(
         }
     }
 
-    private fun getMaterialColors(
-        baseColors: ColorScheme,
-        colorPrimary: Color,
-        colorSecondary: Color,
+    /**
+     * Creates ExtraColors with proper bar colors and onBar text colors.
+     */
+    private fun createExtraColors(
+        baseExtraColors: ExtraColors,
+        customBarsColor: Color,
+        materialColors: ColorScheme,
         isLight: Boolean
-    ): ColorScheme {
-        val primary = colorPrimary.takeOrElse { baseColors.primary }
-        val secondary = colorSecondary.takeOrElse { baseColors.secondary }
+    ): ExtraColors {
+        // Determine the bars color: custom > base > surface
+        val barsColor = when {
+            customBarsColor != Color.Unspecified -> customBarsColor
+            baseExtraColors.bars != Color.Unspecified -> baseExtraColors.bars
+            else -> materialColors.surface
+        }
         
-        // Apply true black for dark themes when enabled
-        val background = if (!isLight && useTrueBlack) Color.Black else baseColors.background
-        val surface = if (!isLight && useTrueBlack) Color.Black else baseColors.surface
-        val surfaceVariant = if (!isLight && useTrueBlack) Color(0xFF0A0A0A) else baseColors.surfaceVariant
+        // Apply true black to bars if enabled for dark themes
+        val finalBarsColor = if (!isLight && useTrueBlack) {
+            Color.Black
+        } else {
+            barsColor
+        }
         
-        return baseColors.copy(
-            primary = primary,
-            primaryContainer = primary,
-            secondary = secondary,
-            secondaryContainer = secondary,
-            onPrimary = if (primary.luminance() > 0.5) Color.Black else Color.White,
-            onSecondary = if (secondary.luminance() > 0.5) Color.Black else Color.White,
-            background = background,
-            surface = surface,
-            surfaceVariant = surfaceVariant,
-        )
-    }
-
-    private fun getExtraColors(colors: ExtraColors, colorBars: Color, isLight: Boolean): ExtraColors {
-        val appbar = kotlin.runCatching {
-         colorBars.takeOrElse { colors.bars }
-
-        }.getOrNull() ?:  Color.White
-        
-        // Apply true black to bars for dark themes when enabled
-        val barsColor = if (!isLight && useTrueBlack) Color.Black else appbar
+        // Calculate proper onBars color based on bars luminance
+        val onBarsColor = ThemeColorUtils.getOnColor(finalBarsColor)
         
         return ExtraColors(
-            bars = barsColor,
-            onBars = if (barsColor.isLight()) Color.Black else Color.White
+            bars = finalBarsColor,
+            onBars = onBarsColor
         )
     }
 

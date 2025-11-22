@@ -96,6 +96,13 @@ data class BookDetailScreenSpec constructor(
                 scrollState.firstVisibleItemScrollOffset
             )
         }
+        
+        // Reset scroll position when screen is disposed
+        androidx.compose.runtime.DisposableEffect(Unit) {
+            onDispose {
+                vm.resetScrollPosition()
+            }
+        }
         val refreshing = vm.detailIsLoading || vm.chapterIsLoading
         val swipeRefreshState =
             rememberPullRefreshState(refreshing = refreshing, onRefresh = {

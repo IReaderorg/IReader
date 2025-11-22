@@ -13,27 +13,14 @@ import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
-import ireader.presentation.ui.settings.statistics.StatisticsScreen
+import ireader.presentation.ui.settings.statistics.ModernStatisticsScreen
 
 class StatisticsScreenSpec {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun Content() {
-        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
-        
-        IScaffold(
-            topBar = { scrollBehavior ->
-                Toolbar(
-                    scrollBehavior = scrollBehavior,
-                    title = {
-                        BigSizeTextComposable(text = localize(Res.string.statistics))
-                    },
-                    navigationIcon = { TopAppBarBackButton(onClick = { navController.popBackStack() }) },
-                )
-            }
-        ) { padding ->
-            StatisticsScreen().Content()
-        }
+        // Use the new modern statistics screen with gamification and charts
+        ModernStatisticsScreen().Content()
     }
 }

@@ -22,57 +22,73 @@ fun AppTheme(
     val typography = vm.getTypography()
     val systemUiController = LocalISystemUIController.current
     systemUiController?.InitController()
+    
     val transparentStatusBar = LocalTransparentStatusBar.current?.enabled ?: false
-    val isCustomColorEnable = LocalCustomSystemColor.current?.enabled ?: false
-    val status = LocalCustomSystemColor.current?.enabled ?: false
-    val navigation = LocalCustomSystemColor.current?.enabled ?: false
     val customStatusColor = LocalCustomSystemColor.current
+    val isCustomColorEnable = customStatusColor?.enabled ?: false
     val mainLocalizeHelper = koinInject<LocalizeHelper>()
+    
+    val isLight = materialColors.isLight()
 
-    systemUiController?.setSystemBarsColor(
-        color = customColors.bars,
-        darkIcons = customColors.isBarLight,
-        isNavigationBarContrastEnforced = false
-    )
+    // Handle system bars color with proper dependencies
     DisposableEffect(
+        customColors.bars,
         customColors.isBarLight,
         transparentStatusBar,
         isCustomColorEnable,
-        status,
-        navigation
+        customStatusColor?.statusBar,
+        customStatusColor?.navigationBar,
+        isLight
     ) {
-        val isLight = materialColors.isLight()
-        val darkIcons =
-            if (transparentStatusBar) isLight else customColors.isBarLight
-
-        if (isCustomColorEnable && customStatusColor != null) {
-            systemUiController?.setStatusBarColor(
-                color = customStatusColor.statusBar,
-                darkIcons = customStatusColor.statusBar.luminance() > 0.5,
-            )
-            systemUiController?.setNavigationBarColor(
-                color = customStatusColor.navigationBar,
-                darkIcons = customStatusColor.navigationBar.luminance() > 0.5,
-                navigationBarContrastEnforced = true
-            )
-        } else if (transparentStatusBar) {
-            systemUiController?.setStatusBarColor(
-                color = Color.Transparent,
-                darkIcons = darkIcons,
-            )
-            systemUiController?.setNavigationBarColor(
-                color = customColors.bars,
-                darkIcons = customColors.isBarLight,
-                navigationBarContrastEnforced = true
-            )
-        } else {
+        // Determine status bar configuration
+        val (statusBarColor, statusBarDarkIcons) = when {
+            // Priority 1: Custom status bar color
+            isCustomColorEnable && customStatusColor != null -> {
+                customStatusColor.statusBar to (customStatusColor.statusBar.luminance() > 0.5)
+            }
+            // Priority 2: Transparent status bar
+            transparentStatusBar -> {
+                Color.Transparent to isLight
+            }
+            // Priority 3: Default bars color
+            else -> {
+                customColors.bars to customColors.isBarLight
+            }
+        }
+        
+        // Determine navigation bar configuration
+        val (navigationBarColor, navigationBarDarkIcons) = when {
+            // Priority 1: Custom navigation bar color
+            isCustomColorEnable && customStatusColor != null -> {
+                customStatusColor.navigationBar to (customStatusColor.navigationBar.luminance() > 0.5)
+            }
+            // Priority 2: Default bars color (even with transparent status bar)
+            else -> {
+                customColors.bars to customColors.isBarLight
+            }
+        }
+        
+        // Apply status bar color
+        systemUiController?.setStatusBarColor(
+            color = statusBarColor,
+            darkIcons = statusBarDarkIcons,
+        )
+        
+        // Apply navigation bar color
+        systemUiController?.setNavigationBarColor(
+            color = navigationBarColor,
+            darkIcons = navigationBarDarkIcons,
+            navigationBarContrastEnforced = false
+        )
+        
+        onDispose {
+            // Reset to default on dispose
             systemUiController?.setSystemBarsColor(
                 color = customColors.bars,
                 darkIcons = customColors.isBarLight,
-                isNavigationBarContrastEnforced = true
+                isNavigationBarContrastEnforced = false
             )
         }
-        onDispose { }
     }
 
     AppColors(

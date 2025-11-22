@@ -104,6 +104,66 @@ fun ReadingScreen(
     val chapter = vm.stateChapter
     var showChapterReviews = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     
+    // Handle status bar for reading screen with proper colors based on background
+    ireader.presentation.ui.core.theme.CustomSystemColor(
+        enable = true,
+        statusBar = vm.backgroundColor.value,
+        navigationBar = vm.backgroundColor.value
+    ) {
+        ReadingScreenContent(
+            vm = vm,
+            scrollState = scrollState,
+            lazyListState = lazyListState,
+            swipeState = swipeState,
+            onNext = onNext,
+            onPrev = onPrev,
+            readerScreenPreferencesState = readerScreenPreferencesState,
+            toggleReaderMode = toggleReaderMode,
+            snackBarHostState = snackBarHostState,
+            drawerState = drawerState,
+            onSliderFinished = onSliderFinished,
+            onSliderChange = onSliderChange,
+            onReaderPlay = onReaderPlay,
+            onChapterShown = onChapterShown,
+            paddingValues = paddingValues,
+            onNavigateToTranslationSettings = onNavigateToTranslationSettings,
+            modalBottomSheetState = modalBottomSheetState,
+            scope = scope,
+            chapter = chapter,
+            showChapterReviews = showChapterReviews
+        )
+    }
+}
+
+@ExperimentalAnimationApi
+@OptIn(
+    ExperimentalMaterialApi::class,
+    ExperimentalMaterial3Api::class
+)
+@Composable
+private fun ReadingScreenContent(
+        vm: ReaderScreenViewModel,
+        scrollState: ScrollState,
+        lazyListState: LazyListState,
+        swipeState: SwipeRefreshState,
+        onNext: (reset: Boolean) -> Unit,
+        onPrev: (reset: Boolean) -> Unit,
+        readerScreenPreferencesState: ReaderScreenViewModel,
+        toggleReaderMode: () -> Unit,
+        snackBarHostState: SnackbarHostState,
+        drawerState: DrawerState,
+        onSliderFinished: () -> Unit,
+        onSliderChange: (index: Float) -> Unit,
+        onReaderPlay: () -> Unit,
+        onChapterShown: (chapter: Chapter) -> Unit,
+        paddingValues: PaddingValues,
+        onNavigateToTranslationSettings: () -> Unit,
+        modalBottomSheetState: androidx.compose.material.ModalBottomSheetState,
+        scope: kotlinx.coroutines.CoroutineScope,
+        chapter: Chapter?,
+        showChapterReviews: androidx.compose.runtime.MutableState<Boolean>
+) {
+    
     // Calculate reading time when chapter changes
     LaunchedEffect(key1 = chapter?.id) {
         if (chapter != null && !vm.isLoading) {

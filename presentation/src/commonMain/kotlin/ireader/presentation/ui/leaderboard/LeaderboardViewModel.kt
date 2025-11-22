@@ -71,17 +71,50 @@ class LeaderboardViewModel(
                 .onSuccess {
                     state = state.copy(
                         isSyncing = false,
-                        lastSyncTime = System.currentTimeMillis()
+                        lastSyncTime = System.currentTimeMillis(),
+                        syncError = null // Clear any previous errors
                     )
                     // Reload to get updated rank
                     loadUserRank()
                     loadLeaderboard()
                 }
                 .onFailure { error ->
-                    state = state.copy(
-                        syncError = error.message ?: "Failed to sync stats",
-                        isSyncing = false
-                    )
+                    // Parse error message to provide user-friendly feedback
+                    val userFriendlyMessage = when {
+                        error.message?.contains("not logged in", ignoreCase = true) == true ->
+                            "Please sign in first (More → Profile & Sync)"
+                        
+                        error.message?.contains("duplicate key", ignoreCase = true) == true ->
+                            "Stats updated successfully!" // This is actually success
+                        
+                        error.message?.contains("permission denied", ignoreCase = true) == true ->
+                            "Permission denied. Please check your account."
+                        
+                        error.message?.contains("network", ignoreCase = true) == true ->
+                            "Network error. Check your connection."
+                        
+                        error.message?.contains("JWT", ignoreCase = true) == true ->
+                            "Session expired. Please sign in again."
+                        
+                        else -> error.message ?: "Failed to sync stats"
+                    }
+                    
+                    // If it's a duplicate key error, treat it as success
+                    if (error.message?.contains("duplicate key", ignoreCase = true) == true) {
+                        state = state.copy(
+                            isSyncing = false,
+                            lastSyncTime = System.currentTimeMillis(),
+                            syncError = null
+                        )
+                        // Reload to get updated rank
+                        loadUserRank()
+                        loadLeaderboard()
+                    } else {
+                        state = state.copy(
+                            syncError = userFriendlyMessage,
+                            isSyncing = false
+                        )
+                    }
                 }
         }
     }

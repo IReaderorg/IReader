@@ -196,7 +196,8 @@ fun IScaffold(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(containerColor),
+                        .background(containerColor)
+                        .imePadding(), // Add IME padding to ensure keyboard doesn't cover content
                 ) {
                     content(paddingValues)
                 }

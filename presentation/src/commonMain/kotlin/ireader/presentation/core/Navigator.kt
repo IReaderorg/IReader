@@ -112,6 +112,10 @@ fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.SourceMigrat
     navigate("sourceMigration/${spec.sourceId}")
 }
 
+fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.BrowseSettingsScreenSpec) {
+    navigate("browseSettings")
+}
+
 // Expect functions for platform-specific screen specs
 expect fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.WebViewScreenSpec)
 expect fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.TTSScreenSpec)

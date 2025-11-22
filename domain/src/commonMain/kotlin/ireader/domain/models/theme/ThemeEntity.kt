@@ -179,7 +179,6 @@ fun CustomExtraColors.toExtraColor(): ExtraColors {
     return ExtraColors(
         bars = this.bars.toArgColor(),
         onBars = this.onBars.toArgColor(),
-        isBarLight = this.isBarLight
     )
 }
 

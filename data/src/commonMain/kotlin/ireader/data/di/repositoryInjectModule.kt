@@ -163,4 +163,23 @@ val repositoryInjectModule = module {
         val appDataDir = File(System.getProperty("user.home"), ".ireader")
         ireader.data.storage.VoiceStorageImpl(appDataDir)
     }
+    
+    // Leaderboard repository
+    single<ireader.domain.data.repository.LeaderboardRepository> {
+        val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
+        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
+            // No Supabase configured, use NoOp
+            ireader.data.repository.NoOpLeaderboardRepository()
+        } else {
+            try {
+                // Get Supabase client from provider
+                val supabaseClient = (provider as ireader.data.remote.SupabaseClientProviderImpl)
+                    .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS)
+                ireader.data.leaderboard.LeaderboardRepositoryImpl(supabaseClient)
+            } catch (e: Exception) {
+                // Fallback to NoOp if something goes wrong
+                ireader.data.repository.NoOpLeaderboardRepository()
+            }
+        }
+    }
 }

@@ -27,29 +27,25 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @Composable
 fun GoToLastReadComposable(modifier: Modifier = Modifier, size: Dp = 40.dp, onClick: () -> Unit) {
-    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
-        OutlinedButton(
-            onClick = {},
+    Box(
+        modifier = modifier.fillMaxWidth(),
+        contentAlignment = Alignment.TopEnd
+    ) {
+        androidx.compose.material3.IconButton(
+            onClick = onClick,
             modifier = Modifier
-                .padding(5.dp)
-                .size(size),
-            shape = CircleShape,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.background.copy(alpha = .3f)),
-            contentPadding = PaddingValues(0.dp), // avoid the little icon
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colorScheme.background,
-                containerColor = MaterialTheme.colorScheme.onBackground.copy(
-                    alpha = .4f
+                .padding(6.dp)
+                .size(18.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
+                    shape = CircleShape
                 )
-            )
         ) {
-            AppIconButton(
+            androidx.compose.material3.Icon(
                 imageVector = Icons.Default.ImportContacts,
                 contentDescription = localize(Res.string.open_last_chapter),
-                onClick = {
-                    onClick()
-                },
-                tint = MaterialTheme.colorScheme.background.copy(alpha = .4f)
+                modifier = Modifier.size(18.dp),
+                tint = MaterialTheme.colorScheme.primary
             )
         }
     }
