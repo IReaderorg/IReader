@@ -32,10 +32,6 @@ class JSPluginSettingsScreenSpec {
         ) { padding ->
             JSPluginSettingsScreen(
                 uiPreferences = uiPreferences,
-                repositories = emptyList(), // TODO: Implement repository management
-                onRepositoryAdd = { /* TODO */ },
-                onRepositoryRemove = { /* TODO */ },
-                onRepositoryToggle = { _, _ -> /* TODO */ },
                 modifier = Modifier.padding(padding)
             )
         }

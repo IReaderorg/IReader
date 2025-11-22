@@ -22,7 +22,8 @@ data class PluginDetailsState(
     val otherPluginsByDeveloper: List<PluginInfo> = emptyList(),
     val resourceUsage: PluginResourceUsage? = null,
     val resourcePercentages: ResourceUsagePercentages? = null,
-    val resourceHistory: List<PluginResourceUsage> = emptyList()
+    val resourceHistory: List<PluginResourceUsage> = emptyList(),
+    val showEnablePluginPrompt: Boolean = false // Show prompt to enable JS plugins in settings
 )
 
 /**

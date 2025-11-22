@@ -28,7 +28,8 @@ class PluginDetailsViewModel(
     private val monetizationService: MonetizationService,
     private val getCurrentUserId: () -> String,
     private val pluginRepository: ireader.domain.data.repository.PluginRepository,
-    private val remoteRepository: ireader.domain.data.repository.RemoteRepository
+    private val remoteRepository: ireader.domain.data.repository.RemoteRepository,
+    private val uiPreferences: ireader.domain.preferences.prefs.UiPreferences
 ) : BaseViewModel() {
     
     private val _state = mutableStateOf(PluginDetailsState())
@@ -209,6 +210,15 @@ class PluginDetailsViewModel(
                 if (installResult.isFailure) {
                     throw installResult.exceptionOrNull() 
                         ?: Exception("Installation failed")
+                }
+                
+                // Check if JS plugins are enabled before enabling the plugin
+                if (!uiPreferences.enableJSPlugins().get()) {
+                    _state.value = _state.value.copy(
+                        installationState = InstallationState.Installed,
+                        showEnablePluginPrompt = true
+                    )
+                    return@launch
                 }
                 
                 // Enable the plugin after installation
@@ -474,6 +484,40 @@ class PluginDetailsViewModel(
      */
     fun clearError() {
         _state.value = _state.value.copy(error = null)
+    }
+    
+    /**
+     * Show prompt to enable JS plugins in settings
+     */
+    fun showEnablePluginPrompt() {
+        _state.value = _state.value.copy(showEnablePluginPrompt = true)
+    }
+    
+    /**
+     * Dismiss the enable plugin prompt
+     */
+    fun dismissEnablePluginPrompt() {
+        _state.value = _state.value.copy(showEnablePluginPrompt = false)
+    }
+    
+    /**
+     * Enable JS plugins feature in settings and continue with plugin activation
+     */
+    fun enableJSPluginsFeature() {
+        scope.launch {
+            uiPreferences.enableJSPlugins().set(true)
+            _state.value = _state.value.copy(showEnablePluginPrompt = false)
+            
+            // Now enable the plugin
+            pluginManager.enablePlugin(pluginId)
+                .onSuccess {
+                    _state.value = _state.value.copy(showSuccessMessage = true)
+                    showSnackBar(UiText.DynamicString("JavaScript plugins enabled. Plugin is now active."))
+                }
+                .onFailure { error ->
+                    showSnackBar(UiText.DynamicString(error.message ?: "Failed to enable plugin"))
+                }
+        }
     }
     
     /**

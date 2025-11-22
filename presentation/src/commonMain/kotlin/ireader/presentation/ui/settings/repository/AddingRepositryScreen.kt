@@ -291,7 +291,7 @@ internal fun AddingRepositoryScreen(
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Text(
-                                        text = "Important: Uninstall all IReader extensions before adding LNReader repositories to avoid conflicts",
+                                        text = "Important: you need to enable JS plugin feature in general screen",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.error,
                                         fontWeight = androidx.compose.ui.text.font.FontWeight.Medium

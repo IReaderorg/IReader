@@ -12,6 +12,7 @@ import coil3.fetch.ImageFetchResult
 import coil3.fetch.SourceFetchResult
 import coil3.key.Keyer
 import coil3.request.Options
+import coil3.toUri
 import ireader.domain.models.entities.CatalogInstalled
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -55,22 +56,20 @@ class CatalogInstalledFetcher(
             }
             
             is ireader.domain.models.entities.JSPluginCatalog -> {
-                // For JS plugins, try to load icon from the icon URL
-                if (data.iconUrl.isNotBlank()) {
-                    val file = File(data.installDir, "${data.pkgName}.png")
-                    if (file.exists()) {
-                        val source = withContext(Dispatchers.IO) { file.source().buffer() }
-                        SourceFetchResult(
-                            source = ImageSource(source = source, fileSystem = FileSystem.SYSTEM),
-                            mimeType = "image/*",
-                            dataSource = DataSource.DISK,
-                        )
-                    } else {
-                        null
-                    }
-                } else {
-                    null
+                // For JS plugins, try to load icon from local file first
+                val file = File(data.installDir, "${data.pkgName}.png")
+                if (file.exists() && file.length() > 0) {
+                    val source = withContext(Dispatchers.IO) { file.source().buffer() }
+                    return SourceFetchResult(
+                        source = ImageSource(source = source, fileSystem = FileSystem.SYSTEM),
+                        mimeType = "image/*",
+                        dataSource = DataSource.DISK,
+                    )
                 }
+                
+                // If local file doesn't exist but we have an iconUrl, 
+                // return null to let Coil's default HTTP fetcher handle it via the mapper
+                null
             }
 
         }

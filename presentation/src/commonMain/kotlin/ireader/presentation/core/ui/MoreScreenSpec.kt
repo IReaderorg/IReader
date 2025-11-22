@@ -86,9 +86,6 @@ object MoreScreenSpec : Tab {
                 onWeb3Profile = {
                     navController.navigate(NavigationRoutes.profile)
                 },
-                onSupabaseConfig = {
-                    navController.navigate(NavigationRoutes.supabaseConfig)
-                },
                 onBadgeStore = {
                     navController.navigate(NavigationRoutes.badgeStore)
                 },

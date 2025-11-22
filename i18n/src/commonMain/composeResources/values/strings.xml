@@ -32,6 +32,7 @@
     <string name="clear_completed">Clear Completed</string>
     <string name="download_completed">Download completed</string>
     <string name="download_completed_at">Completed at</string>
+    <string name="downloads_paused">Downloads Paused</string>
     <string name="no_repositories_added">No repositories added</string>
     <string name="no_repositories_added_subtitle">Add a repository to access additional sources</string>
     <string name="add_repository">Add Repository</string>

@@ -189,6 +189,21 @@ fun GeneralSettingScreen(
                 
                 Components.Space,
                 
+                // Community & Leaderboard Section
+                Components.Header(
+                        text = "Community & Leaderboard",
+                        padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+                        icon = Icons.Filled.Settings
+                ),
+                Components.Switch(
+                        preference = vm.leaderboardRealtimeEnabled,
+                        title = "Leaderboard Realtime Updates",
+                        subtitle = "Automatically refresh leaderboard when other users sync (uses more data)",
+                        icon = Icons.Filled.Autorenew
+                ),
+                
+                Components.Space,
+                
                 // Download Settings Section
                 Components.Header(
                         text = "Download Settings",
@@ -495,6 +510,9 @@ class GeneralSettingScreenViewModel(
     // User interface preferences
     val disableHapticFeedback = uiPreferences.disableHapticFeedback().asStateIn(scope)
     val disableLoadingAnimations = uiPreferences.disableLoadingAnimations().asStateIn(scope)
+    
+    // Leaderboard preferences
+    val leaderboardRealtimeEnabled = uiPreferences.leaderboardRealtimeEnabled().asStateIn(scope)
 
     @Composable
     fun getLanguageChoices(): Map<String, String> {

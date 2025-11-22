@@ -169,35 +169,39 @@ fun DownloaderScreen(
             },
             floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
             floatingActionButton = {
-                val isDownloading = vm.downloadServiceStateImpl.isEnable
+                val isRunning = vm.downloadServiceStateImpl.isRunning
+                val isPaused = vm.downloadServiceStateImpl.isPaused
                 val hasDownloads = downloads.isNotEmpty()
                 
                 if (hasDownloads && !vm.hasSelection) {
                     ExtendedFloatingActionButton(
                             text = {
                                 MidSizeTextComposable(
-                                        text = when (isDownloading) {
-                                            true -> localize(Res.string.pause)
-                                            else -> localize(Res.string.resume)
+                                        text = when {
+                                            isRunning && !isPaused -> localize(Res.string.pause)
+                                            isPaused -> localize(Res.string.resume)
+                                            else -> localize(Res.string.start)
                                         },
                                         color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             },
                             onClick = {
-                                when (isDownloading) {
-                                    false -> vm.startDownloadService(vm.downloads.map { it.chapterId })
-                                    else -> vm.stopDownloads()
+                                when {
+                                    isRunning && !isPaused -> vm.pauseDownloads()
+                                    isPaused -> vm.resumeDownloads()
+                                    else -> vm.startDownloadService(vm.downloads.map { it.chapterId })
                                 }
                             },
                             icon = {
                                 Icon(
-                                        imageVector = when (isDownloading) {
-                                            true -> Icons.Filled.Pause
+                                        imageVector = when {
+                                            isRunning && !isPaused -> Icons.Filled.Pause
                                             else -> Icons.Filled.PlayArrow
                                         },
-                                        contentDescription = when (isDownloading) {
-                                            true -> localize(Res.string.pause)
-                                            else -> localize(Res.string.resume)
+                                        contentDescription = when {
+                                            isRunning && !isPaused -> localize(Res.string.pause)
+                                            isPaused -> localize(Res.string.resume)
+                                            else -> localize(Res.string.start)
                                         },
                                         tint = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
@@ -210,39 +214,79 @@ fun DownloaderScreen(
             },
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
-            // Tab Row
-            TabRow(
-                selectedTabIndex = vm.selectedTab.ordinal,
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.primary
-            ) {
-                Tab(
-                    selected = vm.selectedTab == DownloadTab.ACTIVE,
-                    onClick = { vm.selectedTab = DownloadTab.ACTIVE },
-                    text = { Text(localize(Res.string.active_downloads)) }
-                )
-                Tab(
-                    selected = vm.selectedTab == DownloadTab.COMPLETED,
-                    onClick = { vm.selectedTab = DownloadTab.COMPLETED },
-                    text = { Text(localize(Res.string.completed_downloads)) }
-                )
+            // Download status header
+            if (vm.downloadServiceStateImpl.isRunning) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    tonalElevation = 4.dp,
+                    shape = MaterialTheme.shapes.medium,
+                    color = if (vm.downloadServiceStateImpl.isPaused) {
+                        MaterialTheme.colorScheme.secondaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.primaryContainer
+                    }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val activeCount = vm.downloadServiceStateImpl.downloadProgress.values
+                            .count { it.status == ireader.domain.services.downloaderService.DownloadStatus.DOWNLOADING }
+                        val completedCount = vm.downloadServiceStateImpl.downloadProgress.values
+                            .count { it.status == ireader.domain.services.downloaderService.DownloadStatus.COMPLETED }
+                        val totalCount = vm.downloadServiceStateImpl.downloadProgress.size
+                        
+                        Column {
+                            Text(
+                                text = if (vm.downloadServiceStateImpl.isPaused) {
+                                    localize(Res.string.resume)
+                                } else {
+                                    localize(Res.string.downloading)
+                                },
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = if (vm.downloadServiceStateImpl.isPaused) {
+                                    MaterialTheme.colorScheme.onSecondaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                }
+                            )
+                            
+                            Text(
+                                text = "$completedCount/$totalCount completed",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = if (vm.downloadServiceStateImpl.isPaused) {
+                                    MaterialTheme.colorScheme.onSecondaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                }
+                            )
+                        }
+                        
+                        if (!vm.downloadServiceStateImpl.isPaused && activeCount > 0) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(32.dp),
+                                strokeWidth = 3.dp,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+                }
             }
             
-            // Content based on selected tab
-            when (vm.selectedTab) {
-                DownloadTab.ACTIVE -> ActiveDownloadsContent(
-                    downloads = downloads,
-                    vm = vm,
-                    scrollState = scrollState,
-                    onDownloadItem = onDownloadItem,
-                    paddingValues = padding
-                )
-                DownloadTab.COMPLETED -> CompletedDownloadsContent(
-                    completedDownloads = vm.downloadServiceStateImpl.completedDownloads,
-                    vm = vm,
-                    onDownloadItem = onDownloadItem
-                )
-            }
+            // Content
+            ActiveDownloadsContent(
+                downloads = downloads,
+                vm = vm,
+                scrollState = scrollState,
+                onDownloadItem = onDownloadItem,
+                paddingValues = padding
+            )
         }
     }
 }
@@ -291,66 +335,8 @@ private fun ActiveDownloadsContent(
     } else {
             IVerticalFastScroller(listState = scrollState) {
                 LazyColumn(modifier = Modifier.padding(paddingValues), state = scrollState) {
-                    // Download speed and ETA header
-                    if (vm.downloadServiceStateImpl.isEnable && vm.downloadServiceStateImpl.totalSpeed > 0) {
-                        item {
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                                tonalElevation = 4.dp,
-                                shape = MaterialTheme.shapes.medium,
-                                color = MaterialTheme.colorScheme.primaryContainer
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Column {
-                                        Text(
-                                            text = "Download Speed",
-                                            style = MaterialTheme.typography.labelMedium,
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                                        )
-                                        Text(
-                                            text = formatSpeed(vm.downloadServiceStateImpl.totalSpeed),
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                                        )
-                                    }
-                                    
-                                    // Calculate total ETA from active downloads
-                                    val totalEta = vm.downloadServiceStateImpl.downloadProgress.values
-                                        .filter { it.estimatedTimeRemaining > 0 }
-                                        .maxOfOrNull { it.estimatedTimeRemaining } ?: 0
-                                    
-                                    if (totalEta > 0) {
-                                        Column(horizontalAlignment = Alignment.End) {
-                                            Text(
-                                                text = "Estimated Time",
-                                                style = MaterialTheme.typography.labelMedium,
-                                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                                            )
-                                            Text(
-                                                text = formatDuration(totalEta),
-                                                style = MaterialTheme.typography.titleMedium,
-                                                fontWeight = FontWeight.Bold,
-                                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
                     items(count = downloads.size) { index ->
                         val progress = vm.downloadServiceStateImpl.downloadProgress[downloads[index].chapterId]
-                        val failedDownload = vm.downloadServiceStateImpl.failedDownloads[downloads[index].chapterId]
                         DownloadScreenItem(
                                 downloads[index].toSavedDownload(),
                                 onClickItem = {
@@ -371,11 +357,6 @@ private fun ActiveDownloadsContent(
                                     vm.selection.add(vm.downloads[index].chapterId)
                                 },
                                 isSelected = downloads[index].chapterId in vm.selection,
-                                inProgress = downloads[index].chapterId in vm.downloadServiceStateImpl.downloads.map { it.chapterId },
-                                isDownloaded = downloads[index].isDownloaded,
-                                isFailed = failedDownload != null,
-                                errorMessage = failedDownload?.errorMessage,
-                                retryCount = failedDownload?.retryCount ?: 0,
                                 downloadProgress = progress,
                                 onCancelAllFromThisSeries = { item ->
                                     vm.deleteSelectedDownloads(
@@ -404,162 +385,7 @@ private fun ActiveDownloadsContent(
         }
     }
 
-@Composable
-private fun CompletedDownloadsContent(
-    completedDownloads: List<ireader.domain.services.downloaderService.CompletedDownload>,
-    vm: DownloaderViewModel,
-    onDownloadItem: (SavedDownloadWithInfo) -> Unit
-) {
-    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    
-    if (completedDownloads.isEmpty()) {
-        // Empty state
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.padding(32.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.CheckCircle,
-                    contentDescription = null,
-                    modifier = Modifier.size(64.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
-                
-                Text(
-                    text = localize(Res.string.no_completed_downloads),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                
-                Text(
-                    text = localize(Res.string.no_completed_downloads_subtitle),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
-            }
-        }
-    } else {
-        Column(modifier = Modifier.fillMaxSize()) {
-            // Clear completed button
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                tonalElevation = 2.dp,
-                shape = MaterialTheme.shapes.medium,
-                color = MaterialTheme.colorScheme.errorContainer
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "${completedDownloads.size} ${localize(Res.string.completed_downloads)}",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                    
-                    androidx.compose.material3.Button(
-                        onClick = { vm.clearCompletedDownloads() },
-                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Text(localize(Res.string.clear_completed))
-                    }
-                }
-            }
-            
-            // Completed downloads list
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(count = completedDownloads.size) { index ->
-                    CompletedDownloadItem(
-                        item = completedDownloads[index],
-                        onRemove = { vm.removeCompletedDownload(completedDownloads[index].chapterId) }
-                    )
-                }
-            }
-        }
-    }
-}
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun CompletedDownloadItem(
-    item: ireader.domain.services.downloaderService.CompletedDownload,
-    onRemove: () -> Unit
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        tonalElevation = 2.dp,
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        BookListItem(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            BookListItemColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                BookListItemTitle(
-                    text = item.bookName,
-                    maxLines = 2,
-                    fontWeight = FontWeight.SemiBold
-                )
-                BookListItemSubtitle(
-                    text = item.chapterName
-                )
-                
-                // Completion timestamp
-                Text(
-                    text = "${localize(Res.string.download_completed_at)}: ${formatTimestamp(item.completedAt)}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.CheckCircle,
-                    contentDescription = localize(Res.string.downloaded),
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
-                )
-                
-                IconButton(
-                    onClick = onRemove,
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Delete,
-                        contentDescription = localize(Res.string.delete),
-                        tint = MaterialTheme.colorScheme.error
-                    )
-                }
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -568,11 +394,6 @@ fun DownloadScreenItem(
         onClickItem: (SavedDownload) -> Unit,
         onLongClickItem: (SavedDownload) -> Unit,
         isSelected: Boolean = false,
-        inProgress: Boolean = false,
-        isDownloaded: Boolean = false,
-        isFailed: Boolean = false,
-        errorMessage: String? = null,
-        retryCount: Int = 0,
         downloadProgress: ireader.domain.services.downloaderService.DownloadProgress? = null,
         onCancelDownload: (SavedDownload) -> Unit,
         onCancelAllFromThisSeries: (SavedDownload) -> Unit,
@@ -582,6 +403,11 @@ fun DownloadScreenItem(
         canMoveUp: Boolean = false,
         canMoveDown: Boolean = false,
 ) {
+    val status = downloadProgress?.status ?: ireader.domain.services.downloaderService.DownloadStatus.QUEUED
+    val isDownloading = status == ireader.domain.services.downloaderService.DownloadStatus.DOWNLOADING
+    val isCompleted = status == ireader.domain.services.downloaderService.DownloadStatus.COMPLETED
+    val isFailed = status == ireader.domain.services.downloaderService.DownloadStatus.FAILED
+    val isPaused = status == ireader.domain.services.downloaderService.DownloadStatus.PAUSED
     var isMenuExpanded by remember {
         mutableStateOf(false)
     }
@@ -627,88 +453,85 @@ fun DownloadScreenItem(
                         text = item.chapterName
                 )
                 
-                // Show error message for failed downloads
-                if (isFailed && errorMessage != null) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Failed: $errorMessage",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.error,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            if (retryCount > 0) {
-                                Text(
-                                    text = "Retry attempts: $retryCount",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                        
-                        if (onRetry != null) {
-                            Button(
-                                onClick = { onRetry(item) },
-                                modifier = Modifier.padding(start = 8.dp),
-                                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.error
-                                )
-                            ) {
-                                Text("Retry", style = MaterialTheme.typography.labelMedium)
-                            }
-                        }
-                    }
-                }
-
-                if (inProgress && !isDownloaded && !isFailed) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        // Progress bar
-                        val progress = if (downloadProgress != null && downloadProgress.totalBytes > 0) {
-                            downloadProgress.bytesDownloaded.toFloat() / downloadProgress.totalBytes.toFloat()
-                        } else {
-                            0f
-                        }
-                        
-                        LinearProgressIndicator(
-                            progress = progress,
+                // Show status information
+                when {
+                    isFailed && downloadProgress?.errorMessage != null -> {
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(6.dp),
-                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        
-                        // Speed and ETA info
-                        if (downloadProgress != null && downloadProgress.speed > 0) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
+                                .padding(top = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = formatSpeed(downloadProgress.speed),
+                                    text = "Failed: ${downloadProgress.errorMessage}",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.error,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
                                 )
-                                
-                                if (downloadProgress.estimatedTimeRemaining > 0) {
+                                if (downloadProgress.retryCount > 0) {
                                     Text(
-                                        text = "ETA: ${formatDuration(downloadProgress.estimatedTimeRemaining)}",
+                                        text = "Retry attempts: ${downloadProgress.retryCount}",
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }
+                            
+                            if (onRetry != null) {
+                                Button(
+                                    onClick = { onRetry(item) },
+                                    modifier = Modifier.padding(start = 8.dp),
+                                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.error
+                                    )
+                                ) {
+                                    Text("Retry", style = MaterialTheme.typography.labelMedium)
+                                }
+                            }
                         }
+                    }
+                    
+                    isDownloading -> {
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            LinearProgressIndicator(
+                                progress = downloadProgress?.progress ?: 0f,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(6.dp),
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            
+                            Text(
+                                text = "Downloading... ${(downloadProgress?.progress?.times(100))?.toInt() ?: 0}%",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    
+                    isPaused -> {
+                        Text(
+                            text = "Paused",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                    
+                    isCompleted -> {
+                        Text(
+                            text = "Downloaded",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
                     }
                 }
             }
@@ -718,8 +541,8 @@ fun DownloadScreenItem(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalAlignment = Alignment.CenterVertically
             ) {
-                // Priority control buttons (only show when not in progress and not downloaded)
-                if (!inProgress && !isDownloaded && (onMovePriorityUp != null || onMovePriorityDown != null)) {
+                // Priority control buttons (only show when not downloading and not completed)
+                if (!isDownloading && !isCompleted && (onMovePriorityUp != null || onMovePriorityDown != null)) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.padding(end = 4.dp)
@@ -756,7 +579,7 @@ fun DownloadScreenItem(
                 
                 // Status icon
                 when {
-                    isDownloaded -> {
+                    isCompleted -> {
                         Icon(
                                 imageVector = Icons.Outlined.CheckCircle,
                                 contentDescription = localize(Res.string.downloaded),
@@ -772,11 +595,19 @@ fun DownloadScreenItem(
                                 modifier = Modifier.size(24.dp)
                         )
                     }
-                    inProgress -> {
+                    isDownloading -> {
                         CircularProgressIndicator(
                                 modifier = Modifier.size(24.dp),
                                 strokeWidth = 2.dp,
                                 color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    isPaused -> {
+                        Icon(
+                                imageVector = Icons.Filled.Pause,
+                                contentDescription = "Paused",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(24.dp)
                         )
                     }
                     else -> {
@@ -830,29 +661,4 @@ fun DownloadScreenItem(
 }
 
 
-// Helper functions for download screen
 
-private fun formatSpeed(bytesPerSecond: Long): String =
-    when {
-        bytesPerSecond < 1024 -> "$bytesPerSecond B/s"
-        bytesPerSecond < 1024 * 1024 -> "${bytesPerSecond / 1024} KB/s"
-        bytesPerSecond < 1024 * 1024 * 1024 -> String.format("%.2f MB/s", bytesPerSecond / (1024.0 * 1024.0))
-        else -> String.format("%.2f GB/s", bytesPerSecond / (1024.0 * 1024.0 * 1024.0))
-    }
-
-
-private fun formatTimestamp(timestamp: Long): String {
-    val now = System.currentTimeMillis()
-    val diff = now - timestamp
-    
-    return when {
-        diff < 60_000 -> "Just now"
-        diff < 3_600_000 -> "${diff / 60_000} minutes ago"
-        diff < 86_400_000 -> "${diff / 3_600_000} hours ago"
-        diff < 604_800_000 -> "${diff / 86_400_000} days ago"
-        else -> {
-            val date = java.util.Date(timestamp)
-            java.text.SimpleDateFormat("MMM dd, yyyy HH:mm", java.util.Locale.getDefault()).format(date)
-        }
-    }
-}

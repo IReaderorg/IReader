@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Update
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -125,6 +126,14 @@ fun PluginManagementScreen(
                 onDismiss = viewModel::closePluginConfiguration
             )
         }
+    }
+    
+    // Enable JS plugins prompt dialog
+    if (state.showEnablePluginPrompt) {
+        EnablePluginFeatureDialog(
+            onEnableAndContinue = viewModel::enableJSPluginsFeature,
+            onDismiss = viewModel::dismissEnablePluginPrompt
+        )
     }
 }
 
@@ -297,4 +306,58 @@ private fun EmptyState(modifier: Modifier = Modifier) {
             )
         }
     }
+}
+
+/**
+ * Dialog prompting user to enable JS plugins feature in settings
+ */
+@Composable
+private fun EnablePluginFeatureDialog(
+    onEnableAndContinue: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        title = {
+            Text(
+                text = "Enable Plugin Feature",
+                style = MaterialTheme.typography.titleLarge
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "JavaScript plugins are currently disabled in your settings.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "To use LNReader-compatible plugins, you need to enable the plugin feature in General Settings.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Would you like to enable it now?",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = onEnableAndContinue) {
+                Text("Enable & Continue")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

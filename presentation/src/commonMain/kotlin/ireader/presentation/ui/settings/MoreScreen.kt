@@ -14,6 +14,8 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.RecordVoiceOver
 import androidx.compose.material3.*
@@ -62,10 +64,10 @@ fun MoreScreen(
     onDonation: () -> Unit = {},
     onTTSEngineManager: () -> Unit = {},
     onWeb3Profile: () -> Unit = {},
-    onSupabaseConfig: () -> Unit = {},
     onBadgeStore: () -> Unit = {},
     onNFTBadge: () -> Unit = {},
     onBadgeManagement: () -> Unit = {},
+    onLeaderboard: () -> Unit = {},
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
 
@@ -220,16 +222,6 @@ fun MoreScreen(
                 onClick = onWeb3Profile
             )
         }
-        
-        item {
-            SettingsItem(
-                title = "Supabase Configuration",
-                description = "Configure custom Supabase instance for sync",
-                icon = Icons.Outlined.Cloud,
-                onClick = onSupabaseConfig
-            )
-        }
-        
         // Badges & Customization Section
         item {
             SettingsSectionHeader(
@@ -262,6 +254,23 @@ fun MoreScreen(
                 description = "Customize which badges appear on your profile and reviews",
                 icon = Icons.Outlined.Settings,
                 onClick = onBadgeManagement
+            )
+        }
+        
+        // Community Section
+        item {
+            SettingsSectionHeader(
+                title = "Community",
+                icon = Icons.Filled.People
+            )
+        }
+        
+        item {
+            SettingsItem(
+                title = "Leaderboard",
+                description = "Compete with other readers based on reading time",
+                icon = Icons.Filled.EmojiEvents,
+                onClick = onLeaderboard
             )
         }
         

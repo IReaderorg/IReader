@@ -135,7 +135,8 @@ val PresentationModules = module {
                 "default_user"
             },
             pluginRepository = get(),
-            remoteRepository = get()
+            remoteRepository = get(),
+            uiPreferences = get()
         )
     }
     factory { 

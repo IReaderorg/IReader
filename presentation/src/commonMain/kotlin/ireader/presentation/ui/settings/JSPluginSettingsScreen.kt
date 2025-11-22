@@ -20,10 +20,6 @@ import ireader.domain.preferences.prefs.UiPreferences
 @Composable
 fun JSPluginSettingsScreen(
     uiPreferences: UiPreferences,
-    repositories: List<JSPluginRepository>,
-    onRepositoryAdd: (JSPluginRepository) -> Unit,
-    onRepositoryRemove: (JSPluginRepository) -> Unit,
-    onRepositoryToggle: (JSPluginRepository, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showAddRepositoryDialog by remember { mutableStateOf(false) }
@@ -106,38 +102,7 @@ fun JSPluginSettingsScreen(
                 modifier = Modifier.padding(vertical = 8.dp)
             )
         }
-        
-        // Repository List
-        items(repositories) { repository ->
-            RepositoryItem(
-                repository = repository,
-                onToggle = { enabled -> onRepositoryToggle(repository, enabled) },
-                onRemove = { onRepositoryRemove(repository) }
-            )
-        }
-        
-        // Add Repository Button
-        item {
-            OutlinedButton(
-                onClick = { showAddRepositoryDialog = true },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text("Add Repository")
-            }
-        }
-    }
-    
-    // Add Repository Dialog
-    if (showAddRepositoryDialog) {
-        AddRepositoryDialog(
-            onDismiss = { showAddRepositoryDialog = false },
-            onAdd = { repository ->
-                onRepositoryAdd(repository)
-                showAddRepositoryDialog = false
-            }
-        )
+
     }
 }
 

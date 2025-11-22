@@ -937,12 +937,12 @@ ON CONFLICT (id) DO NOTHING;
 DO $$
 BEGIN
     RAISE NOTICE 'IReader Sync schema created successfully!';
-    RAISE NOTICE 'Tables: users, reading_progress, synced_books, book_reviews, chapter_reviews, badges, user_badges, payment_proofs, nft_wallets';
+    RAISE NOTICE 'Tables: users, reading_progress, synced_books, book_reviews, chapter_reviews, badges, user_badges, payment_proofs, nft_wallets, leaderboard';
     RAISE NOTICE 'RLS: Enabled on all tables';
     RAISE NOTICE 'Policies: Created for all CRUD operations';
     RAISE NOTICE 'Triggers: Created for automatic timestamp updates';
-    RAISE NOTICE 'Views: user_reading_summary, recent_activity';
-    RAISE NOTICE 'Functions: update_updated_at_column, get_user_statistics, award_badge, get_user_badges, get_user_badges_with_details';
+    RAISE NOTICE 'Views: user_reading_summary, recent_activity, leaderboard_with_rank';
+    RAISE NOTICE 'Functions: update_updated_at_column, get_user_statistics, award_badge, get_user_badges, get_user_badges_with_details, get_user_leaderboard_rank, get_top_leaderboard_users, get_leaderboard_around_rank';
     RAISE NOTICE '';
     RAISE NOTICE 'Features:';
     RAISE NOTICE '- Optimized storage: Essential book data synced';
@@ -951,6 +951,8 @@ BEGIN
     RAISE NOTICE '- Badge system: Reward donors and contributors';
     RAISE NOTICE '- Badge monetization: Purchase badges with Iran-accessible payments';
     RAISE NOTICE '- NFT integration: Exclusive badges for NFT holders';
+    RAISE NOTICE '- Leaderboard: Global ranking based on reading time';
+    RAISE NOTICE '- Realtime updates: WebSocket support for live leaderboard';
     RAISE NOTICE '- Public reviews: All users can read reviews';
     RAISE NOTICE '- All fields required: user_id, book_id, source_id, title, book_url, last_read';
     RAISE NOTICE '';
@@ -968,14 +970,262 @@ BEGIN
     RAISE NOTICE '- PURCHASABLE: Available for purchase with direct payment';
     RAISE NOTICE '- NFT_EXCLUSIVE: Granted to verified NFT owners';
     RAISE NOTICE '';
+    RAISE NOTICE '';
+    RAISE NOTICE 'Leaderboard Features:';
+    RAISE NOTICE '- Global ranking by total reading time';
+    RAISE NOTICE '- Badge display for premium users';
+    RAISE NOTICE '- Manual sync (default) or realtime updates (optional)';
+    RAISE NOTICE '- Top users podium display';
+    RAISE NOTICE '- User rank and percentile calculation';
+    RAISE NOTICE '- Privacy-focused: only username and stats shared';
+    RAISE NOTICE '';
     RAISE NOTICE 'Next steps:';
     RAISE NOTICE '1. Configure authentication in Supabase Dashboard';
     RAISE NOTICE '2. Deploy verify-nft-ownership Edge Function';
     RAISE NOTICE '3. Test with the IReader app';
     RAISE NOTICE '4. Award badges using award_badge() function';
     RAISE NOTICE '5. Monitor using the views and statistics function';
+    RAISE NOTICE '6. Enable Realtime for leaderboard table (optional)';
+    RAISE NOTICE '7. Test leaderboard sync from IReader app';
 END $$;
 
+
+-- ----------------------------------------------------------------------------
+-- Leaderboard Table
+-- Tracks user reading statistics for global leaderboard
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.leaderboard (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    username TEXT NOT NULL,
+    total_reading_time_minutes BIGINT NOT NULL DEFAULT 0,
+    total_chapters_read INTEGER NOT NULL DEFAULT 0,
+    books_completed INTEGER NOT NULL DEFAULT 0,
+    reading_streak INTEGER NOT NULL DEFAULT 0,
+    has_badge BOOLEAN NOT NULL DEFAULT FALSE,
+    badge_type TEXT,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    -- Ensure one entry per user
+    UNIQUE(user_id)
+);
+
+-- Create index for faster leaderboard queries (ordered by reading time)
+CREATE INDEX IF NOT EXISTS idx_leaderboard_reading_time 
+ON public.leaderboard(total_reading_time_minutes DESC);
+
+-- Create index for user lookups
+CREATE INDEX IF NOT EXISTS idx_leaderboard_user_id 
+ON public.leaderboard(user_id);
+
+-- Create index for username searches
+CREATE INDEX IF NOT EXISTS idx_leaderboard_username 
+ON public.leaderboard(username);
+
+-- Comments
+COMMENT ON TABLE public.leaderboard IS 'Stores user reading statistics for the leaderboard feature';
+COMMENT ON COLUMN public.leaderboard.user_id IS 'Reference to the user in auth.users';
+COMMENT ON COLUMN public.leaderboard.username IS 'Display name for the leaderboard';
+COMMENT ON COLUMN public.leaderboard.total_reading_time_minutes IS 'Total reading time in minutes';
+COMMENT ON COLUMN public.leaderboard.total_chapters_read IS 'Total number of chapters read';
+COMMENT ON COLUMN public.leaderboard.books_completed IS 'Total number of books completed';
+COMMENT ON COLUMN public.leaderboard.reading_streak IS 'Current reading streak in days';
+COMMENT ON COLUMN public.leaderboard.has_badge IS 'Whether the user has purchased a badge';
+COMMENT ON COLUMN public.leaderboard.badge_type IS 'Type of badge (supporter, nft, premium, etc.)';
+
+-- Enable RLS on leaderboard table
+ALTER TABLE public.leaderboard ENABLE ROW LEVEL SECURITY;
+
+-- ----------------------------------------------------------------------------
+-- Leaderboard Table Policies
+-- ----------------------------------------------------------------------------
+
+-- Policy: Anyone can read the leaderboard
+CREATE POLICY "Leaderboard is publicly readable"
+ON public.leaderboard
+FOR SELECT
+USING (true);
+
+-- Policy: Users can insert their own stats
+CREATE POLICY "Users can insert their own stats"
+ON public.leaderboard
+FOR INSERT
+WITH CHECK (auth.uid() = user_id);
+
+-- Policy: Users can update their own stats
+CREATE POLICY "Users can update their own stats"
+ON public.leaderboard
+FOR UPDATE
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+-- Policy: Users can delete their own stats
+CREATE POLICY "Users can delete their own stats"
+ON public.leaderboard
+FOR DELETE
+USING (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- Leaderboard Functions
+-- ----------------------------------------------------------------------------
+
+-- Function to automatically update the updated_at timestamp
+CREATE OR REPLACE FUNCTION update_leaderboard_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+COMMENT ON FUNCTION update_leaderboard_updated_at() IS 'Automatically updates updated_at timestamp on leaderboard updates';
+
+-- Trigger to call the function before update
+DROP TRIGGER IF EXISTS update_leaderboard_timestamp ON public.leaderboard;
+CREATE TRIGGER update_leaderboard_timestamp
+BEFORE UPDATE ON public.leaderboard
+FOR EACH ROW
+EXECUTE FUNCTION update_leaderboard_updated_at();
+
+-- ----------------------------------------------------------------------------
+-- Leaderboard Views
+-- ----------------------------------------------------------------------------
+
+-- Create a view for leaderboard with rankings
+CREATE OR REPLACE VIEW public.leaderboard_with_rank AS
+SELECT 
+    id,
+    user_id,
+    username,
+    total_reading_time_minutes,
+    total_chapters_read,
+    books_completed,
+    reading_streak,
+    has_badge,
+    badge_type,
+    updated_at,
+    created_at,
+    ROW_NUMBER() OVER (ORDER BY total_reading_time_minutes DESC) as rank
+FROM public.leaderboard
+ORDER BY total_reading_time_minutes DESC;
+
+COMMENT ON VIEW public.leaderboard_with_rank IS 'Leaderboard with calculated rankings based on reading time';
+
+-- Grant access to the view
+GRANT SELECT ON public.leaderboard_with_rank TO authenticated;
+GRANT SELECT ON public.leaderboard_with_rank TO anon;
+
+-- Enable realtime for the leaderboard table
+ALTER PUBLICATION supabase_realtime ADD TABLE public.leaderboard;
+
+-- ============================================================================
+-- LEADERBOARD HELPER FUNCTIONS
+-- ============================================================================
+
+-- Function to get user's rank
+CREATE OR REPLACE FUNCTION get_user_leaderboard_rank(p_user_id UUID)
+RETURNS TABLE (
+    rank BIGINT,
+    total_users BIGINT,
+    percentile NUMERIC
+) AS $$
+BEGIN
+    RETURN QUERY
+    WITH user_rank AS (
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY total_reading_time_minutes DESC) as user_rank,
+            user_id
+        FROM public.leaderboard
+    ),
+    total_count AS (
+        SELECT COUNT(*) as total FROM public.leaderboard
+    )
+    SELECT 
+        ur.user_rank,
+        tc.total,
+        ROUND((ur.user_rank::NUMERIC / tc.total::NUMERIC) * 100, 2) as percentile
+    FROM user_rank ur, total_count tc
+    WHERE ur.user_id = p_user_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+COMMENT ON FUNCTION get_user_leaderboard_rank(UUID) IS 'Returns user rank, total users, and percentile on leaderboard';
+
+-- Function to get top N users
+CREATE OR REPLACE FUNCTION get_top_leaderboard_users(p_limit INTEGER DEFAULT 10)
+RETURNS TABLE (
+    rank BIGINT,
+    user_id UUID,
+    username TEXT,
+    total_reading_time_minutes BIGINT,
+    total_chapters_read INTEGER,
+    books_completed INTEGER,
+    reading_streak INTEGER,
+    has_badge BOOLEAN,
+    badge_type TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        ROW_NUMBER() OVER (ORDER BY l.total_reading_time_minutes DESC) as rank,
+        l.user_id,
+        l.username,
+        l.total_reading_time_minutes,
+        l.total_chapters_read,
+        l.books_completed,
+        l.reading_streak,
+        l.has_badge,
+        l.badge_type
+    FROM public.leaderboard l
+    ORDER BY l.total_reading_time_minutes DESC
+    LIMIT p_limit;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+COMMENT ON FUNCTION get_top_leaderboard_users(INTEGER) IS 'Returns top N users from leaderboard';
+
+-- Function to get users around a specific rank
+CREATE OR REPLACE FUNCTION get_leaderboard_around_rank(p_user_id UUID, p_range INTEGER DEFAULT 5)
+RETURNS TABLE (
+    rank BIGINT,
+    user_id UUID,
+    username TEXT,
+    total_reading_time_minutes BIGINT,
+    is_current_user BOOLEAN
+) AS $$
+DECLARE
+    v_user_rank BIGINT;
+BEGIN
+    -- Get user's rank
+    SELECT ROW_NUMBER() OVER (ORDER BY total_reading_time_minutes DESC)
+    INTO v_user_rank
+    FROM public.leaderboard
+    WHERE user_id = p_user_id;
+    
+    -- Return users around that rank
+    RETURN QUERY
+    WITH ranked_users AS (
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY total_reading_time_minutes DESC) as rank,
+            l.user_id,
+            l.username,
+            l.total_reading_time_minutes
+        FROM public.leaderboard l
+    )
+    SELECT 
+        ru.rank,
+        ru.user_id,
+        ru.username,
+        ru.total_reading_time_minutes,
+        (ru.user_id = p_user_id) as is_current_user
+    FROM ranked_users ru
+    WHERE ru.rank BETWEEN (v_user_rank - p_range) AND (v_user_rank + p_range)
+    ORDER BY ru.rank;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+COMMENT ON FUNCTION get_leaderboard_around_rank(UUID, INTEGER) IS 'Returns users around a specific user rank';
 
 -- ============================================================================
 -- MIGRATION NOTES

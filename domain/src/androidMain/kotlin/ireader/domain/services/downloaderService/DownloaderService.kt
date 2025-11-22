@@ -45,22 +45,14 @@ class DownloaderService constructor(
 
 
     override suspend fun doWork(): Result {
-        // Create unique notification ID for this download batch
         val inputtedChapterIds = inputData.getLongArray(DOWNLOADER_Chapters_IDS)?.distinct()
         val inputtedBooksIds = inputData.getLongArray(DOWNLOADER_BOOKS_IDS)?.distinct()
         val inputtedDownloaderMode = inputData.getBoolean(DOWNLOADER_MODE, false)
         
-        // Generate unique notification ID based on work ID
-        val notificationId = if (inputtedDownloaderMode) {
-            ID_DOWNLOAD_CHAPTER_PROGRESS
-        } else {
-            // Use hashCode to generate unique notification ID for each work
-            ID_DOWNLOAD_CHAPTER_PROGRESS + (id.hashCode() and 0x7FFFFFFF) % 1000
-        }
-        
+        val notificationId = ID_DOWNLOAD_CHAPTER_PROGRESS
         val builder = defaultNotificationHelper.baseNotificationDownloader(
             chapter = null,
-            id  // Use the actual work UUID
+            id
         )
         
         val result = runDownloadService(
@@ -75,10 +67,9 @@ class DownloaderService constructor(
             insertUseCases = insertUseCases,
             localizeHelper = localizeHelper,
             notificationManager = notificationManager,
-            onCancel = { error, bookName->
+            onCancel = { error, bookName ->
                 notificationManager.cancel(notificationId)
                 
-                // Show error notification with user-friendly message
                 val errorMessage = error.message ?: "Download failed"
                 notificationManager.show(
                     notificationId + 1,
@@ -91,135 +82,44 @@ class DownloaderService constructor(
                     }.build()
                 )
             },
-            onSuccess = { completedDownloads ->
-                // Cancel progress notification first
+            onSuccess = {
                 notificationManager.cancel(notificationId)
                 
-                // Add completed downloads to the state
-                val currentCompleted = downloadServiceState.completedDownloads.toMutableList()
-                currentCompleted.addAll(completedDownloads)
-                downloadServiceState.completedDownloads = currentCompleted
+                // Count completed and failed downloads
+                val completedCount = downloadServiceState.downloadProgress.values
+                    .count { it.status == ireader.domain.services.downloaderService.DownloadStatus.COMPLETED }
+                val failedCount = downloadServiceState.downloadProgress.values
+                    .count { it.status == ireader.domain.services.downloaderService.DownloadStatus.FAILED }
                 
-                // Get failed downloads from state
-                val failedDownloads = downloadServiceState.failedDownloads.values.toList()
-                
-                // Create notifications for completed downloads
-                if (completedDownloads.isNotEmpty()) {
-                    if (completedDownloads.size == 1 && failedDownloads.isEmpty()) {
-                        // Single download notification
-                        val download = completedDownloads.first()
-                        val notification = NotificationCompat.Builder(
-                            applicationContext.applicationContext,
-                            CHANNEL_DOWNLOADER_COMPLETE
-                        ).apply {
-                            setContentTitle("${download.bookName}")
-                            setContentText("${download.chapterName} downloaded successfully")
-                            setSmallIcon(R.drawable.ic_downloading)
-                            priority = NotificationCompat.PRIORITY_DEFAULT
-                            setAutoCancel(true)
-                            setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
-                            setGroup("download_complete_group")
-                        }.build()
-                        notificationManager.show(
-                            notificationId + 2,
-                            notification
-                        )
-                    } else {
-                        // Multiple downloads - show individual notifications and a summary
-                        completedDownloads.forEachIndexed { index, download ->
-                            val notification = NotificationCompat.Builder(
-                                applicationContext.applicationContext,
-                                CHANNEL_DOWNLOADER_COMPLETE
-                            ).apply {
-                                setContentTitle("${download.bookName}")
-                                setContentText("${download.chapterName} downloaded")
-                                setSmallIcon(R.drawable.ic_downloading)
-                                priority = NotificationCompat.PRIORITY_LOW
-                                setAutoCancel(true)
-                                setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
-                                setGroup("download_complete_group")
-                            }.build()
-                            notificationManager.show(
-                                notificationId + 2 + index,
-                                notification
-                            )
-                        }
-                        
-                        // Summary notification with success and failure counts
-                        val summaryText = if (failedDownloads.isEmpty()) {
-                            "${completedDownloads.size} chapters downloaded successfully"
-                        } else {
-                            "${completedDownloads.size} succeeded, ${failedDownloads.size} failed"
-                        }
-                        
-                        val summaryNotification = NotificationCompat.Builder(
-                            applicationContext.applicationContext,
-                            CHANNEL_DOWNLOADER_COMPLETE
-                        ).apply {
-                            setContentTitle("Downloads completed")
-                            setContentText(summaryText)
-                            setSmallIcon(R.drawable.ic_downloading)
-                            priority = NotificationCompat.PRIORITY_DEFAULT
-                            setAutoCancel(true)
-                            setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
-                            setGroup("download_complete_group")
-                            setGroupSummary(true)
-                        }.build()
-                        notificationManager.show(
-                            notificationId + 1000,
-                            summaryNotification
-                        )
+                // Show completion notification
+                if (completedCount > 0 || failedCount > 0) {
+                    val summaryText = when {
+                        failedCount == 0 -> "$completedCount chapters downloaded successfully"
+                        completedCount == 0 -> "$failedCount chapters failed to download"
+                        else -> "$completedCount succeeded, $failedCount failed"
                     }
-                }
-                
-                // Show notification for failed downloads if any
-                if (failedDownloads.isNotEmpty()) {
-                    val failedNotification = NotificationCompat.Builder(
-                        applicationContext.applicationContext,
+                    
+                    val notification = NotificationCompat.Builder(
+                        applicationContext,
                         CHANNEL_DOWNLOADER_COMPLETE
                     ).apply {
-                        setContentTitle("Download failures")
-                        
-                        if (failedDownloads.size == 1) {
-                            val failed = failedDownloads.first()
-                            setContentText(failed.errorMessage)
-                            setStyle(NotificationCompat.BigTextStyle().bigText(failed.errorMessage))
-                        } else {
-                            setContentText("${failedDownloads.size} chapters failed to download")
-                            val inboxStyle = NotificationCompat.InboxStyle()
-                            inboxStyle.setBigContentTitle("Download failures")
-                            failedDownloads.take(5).forEach { failed ->
-                                // Get chapter name from downloads list
-                                val chapterName = downloadServiceState.downloads
-                                    .find { it.chapterId == failed.chapterId }?.chapterName 
-                                    ?: "Chapter ${failed.chapterId}"
-                                inboxStyle.addLine("$chapterName: ${failed.errorMessage}")
-                            }
-                            if (failedDownloads.size > 5) {
-                                inboxStyle.addLine("... and ${failedDownloads.size - 5} more")
-                            }
-                            setStyle(inboxStyle)
-                        }
-                        
+                        setContentTitle("Downloads completed")
+                        setContentText(summaryText)
                         setSmallIcon(R.drawable.ic_downloading)
-                        priority = NotificationCompat.PRIORITY_HIGH
+                        priority = NotificationCompat.PRIORITY_DEFAULT
                         setAutoCancel(true)
                         setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
-                        setGroup("download_complete_group")
                     }.build()
-                    notificationManager.show(
-                        notificationId + 1500,
-                        failedNotification
-                    )
+                    
+                    notificationManager.show(notificationId + 1, notification)
                 }
             },
             remoteUseCases = remoteUseCases,
-            updateProgress = { max, progress, inProgess ->
-                builder.setProgress(max, progress, inProgess)
+            updateProgress = { max, progress, inProgress ->
+                builder.setProgress(max, progress, inProgress)
             },
             updateSubtitle = {
                 builder.setSubText(it)
-
             },
             updateTitle = {
                 builder.setContentText(it)
@@ -228,8 +128,9 @@ class DownloaderService constructor(
                 notificationManager.show(notificationId, builder.build())
             },
             downloadDelayMs = downloadPreferences.downloadDelayMs().get(),
-            concurrentLimit = downloadPreferences.concurrentDownloadsLimit().get()
+            concurrentLimit = 1 // Sequential downloads for simplicity
         )
+        
         return if (result) Result.success() else Result.failure()
     }
 }

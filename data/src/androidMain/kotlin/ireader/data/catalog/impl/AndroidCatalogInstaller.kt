@@ -80,17 +80,31 @@ class AndroidCatalogInstaller(
                         throw Exception("JS plugin file was not written correctly")
                     }
                     
-                    // Optionally download icon if available
-                    if (catalog.iconUrl.isNotEmpty()) {
+                    // Download icon if available
+                    if (catalog.iconUrl.isNotBlank()) {
                         try {
                             val iconFile = File(jsPluginsDir, "${catalog.pkgName}.png")
+                            Log.warn("Downloading icon for ${catalog.pkgName} from: ${catalog.iconUrl}")
+                            
                             val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
                                 headers.append(HttpHeaders.CacheControl, "no-store")
+                                headers.append(HttpHeaders.UserAgent, "IReader/1.0")
                             }.body()
+                            
                             iconResponse.saveTo(iconFile)
+                            
+                            // Verify icon was saved correctly
+                            if (iconFile.exists() && iconFile.length() > 0) {
+                                Log.warn("Icon saved successfully for ${catalog.pkgName}: ${iconFile.length()} bytes")
+                            } else {
+                                Log.warn("Icon file is empty or doesn't exist for ${catalog.pkgName}")
+                                iconFile.delete()
+                            }
                         } catch (e: Exception) {
-                            Log.warn(e, "Failed to download icon for JS plugin, continuing anyway")
+                            Log.warn(e, "Failed to download icon for JS plugin ${catalog.pkgName} from ${catalog.iconUrl}")
                         }
+                    } else {
+                        Log.warn("No icon URL provided for JS plugin ${catalog.pkgName}")
                     }
                     
                     emit(InstallStep.Idle)

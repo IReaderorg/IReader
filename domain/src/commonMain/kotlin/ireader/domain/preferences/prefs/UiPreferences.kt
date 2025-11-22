@@ -380,4 +380,18 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun selectedPluginTheme(): Preference<String> {
         return preferenceStore.getString("selected_plugin_theme", "")
     }
+    
+    // ============================================================================
+    // Leaderboard Settings
+    // ============================================================================
+    
+    /**
+     * Whether to enable realtime updates for the leaderboard.
+     * When enabled, leaderboard updates automatically via websocket connection.
+     * When disabled, leaderboard only updates on manual refresh.
+     * Default: false (manual refresh only)
+     */
+    fun leaderboardRealtimeEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean("leaderboard_realtime_enabled", false)
+    }
 }

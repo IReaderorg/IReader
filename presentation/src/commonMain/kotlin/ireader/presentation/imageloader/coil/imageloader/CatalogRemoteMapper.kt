@@ -10,6 +10,7 @@ import ireader.domain.models.entities.Catalog
 import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.CatalogRemote
+import ireader.domain.models.entities.JSPluginCatalog
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 
@@ -18,6 +19,15 @@ class CatalogRemoteMapper : Mapper<Catalog,Uri> {
         return when (data) {
             is CatalogRemote -> {
                 // Only map if iconUrl is not blank
+                if (data.iconUrl.isNotBlank()) {
+                    data.iconUrl.toUri()
+                } else {
+                    null
+                }
+            }
+            is ireader.domain.models.entities.JSPluginCatalog -> {
+                // For JS plugins, always provide the iconUrl as fallback
+                // This allows Coil to download the icon if local file doesn't exist
                 if (data.iconUrl.isNotBlank()) {
                     data.iconUrl.toUri()
                 } else {

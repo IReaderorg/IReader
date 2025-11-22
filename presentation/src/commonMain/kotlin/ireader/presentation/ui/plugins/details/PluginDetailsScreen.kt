@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -110,6 +111,18 @@ fun PluginDetailsScreen(
                 viewModel.openPlugin()
             },
             onDismiss = viewModel::dismissSuccessMessage
+        )
+    }
+    
+    // Enable JS plugins prompt dialog
+    if (state.showEnablePluginPrompt) {
+        EnablePluginFeatureDialog(
+            onEnableAndContinue = viewModel::enableJSPluginsFeature,
+            onGoToSettings = {
+                viewModel.dismissEnablePluginPrompt()
+                // TODO: Navigate to general settings screen
+            },
+            onDismiss = viewModel::dismissEnablePluginPrompt
         )
     }
 }
@@ -292,4 +305,59 @@ private fun ErrorState(
             }
         }
     }
+}
+
+/**
+ * Dialog prompting user to enable JS plugins feature in settings
+ */
+@Composable
+private fun EnablePluginFeatureDialog(
+    onEnableAndContinue: () -> Unit,
+    onGoToSettings: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        title = {
+            Text(
+                text = "Enable Plugin Feature",
+                style = MaterialTheme.typography.titleLarge
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "JavaScript plugins are currently disabled in your settings.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "To use LNReader-compatible plugins, you need to enable the plugin feature in General Settings.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Would you like to enable it now?",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = onEnableAndContinue) {
+                Text("Enable & Continue")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

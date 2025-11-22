@@ -18,7 +18,8 @@ data class PluginManagementState(
     val updatesAvailable: Map<String, String> = emptyMap(), // pluginId to new version
     val isUpdatingAll: Boolean = false,
     val resourceUsage: Map<String, PluginResourceUsage> = emptyMap(), // pluginId to usage
-    val performanceMetrics: Map<String, PluginPerformanceInfo> = emptyMap() // pluginId to performance metrics
+    val performanceMetrics: Map<String, PluginPerformanceInfo> = emptyMap(), // pluginId to performance metrics
+    val showEnablePluginPrompt: Boolean = false // Show prompt to enable JS plugins in settings
 )
 
 /**

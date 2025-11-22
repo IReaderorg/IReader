@@ -18,7 +18,8 @@ import kotlinx.coroutines.launch
  * Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 12.1, 12.2, 12.3, 12.4, 12.5
  */
 class PluginManagementViewModel(
-    private val pluginManager: PluginManager
+    private val pluginManager: PluginManager,
+    private val uiPreferences: ireader.domain.preferences.prefs.UiPreferences
 ) : BaseViewModel() {
     
     private val _state = mutableStateOf(PluginManagementState())
@@ -70,6 +71,12 @@ class PluginManagementViewModel(
      */
     fun enablePlugin(pluginId: String) {
         scope.launch {
+            // Check if JS plugins are enabled in settings
+            if (!uiPreferences.enableJSPlugins().get()) {
+                _state.value = _state.value.copy(showEnablePluginPrompt = true)
+                return@launch
+            }
+            
             val result = pluginManager.enablePlugin(pluginId)
             result.onFailure { error ->
                 showSnackBar(UiText.DynamicString(error.message ?: "Failed to enable plugin"))
@@ -298,5 +305,30 @@ class PluginManagementViewModel(
      */
     fun clearError() {
         _state.value = _state.value.copy(error = null)
+    }
+    
+    /**
+     * Show prompt to enable JS plugins in settings
+     */
+    fun showEnablePluginPrompt() {
+        _state.value = _state.value.copy(showEnablePluginPrompt = true)
+    }
+    
+    /**
+     * Dismiss the enable plugin prompt
+     */
+    fun dismissEnablePluginPrompt() {
+        _state.value = _state.value.copy(showEnablePluginPrompt = false)
+    }
+    
+    /**
+     * Enable JS plugins feature in settings
+     */
+    fun enableJSPluginsFeature() {
+        scope.launch {
+            uiPreferences.enableJSPlugins().set(true)
+            _state.value = _state.value.copy(showEnablePluginPrompt = false)
+            showSnackBar(UiText.DynamicString("JavaScript plugins enabled. You can now enable plugins."))
+        }
     }
 }
