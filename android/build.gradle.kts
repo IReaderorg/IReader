@@ -18,22 +18,18 @@ val SUPPORTED_ABIS = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround
-// Cached to avoid running git commands on every configuration
-fun getGitOutput(vararg command: String): String {
-    return try {
-        val process = ProcessBuilder(*command)
-            .redirectOutput(ProcessBuilder.Redirect.PIPE)
-            .redirectError(ProcessBuilder.Redirect.PIPE)
-            .start()
-        process.waitFor(2, TimeUnit.SECONDS)
-        process.inputStream.bufferedReader().readText().trim().takeIf { it.isNotEmpty() } ?: "unknown"
-    } catch (e: Exception) {
-        "unknown"
-    }
+// Using providers for lazy evaluation to support configuration cache
+fun getGitOutput(vararg command: String): Provider<String> {
+    return providers.exec {
+        commandLine(*command)
+        isIgnoreExitValue = true
+    }.standardOutput.asText.map { 
+        it.trim().takeIf { text -> text.isNotEmpty() } ?: "unknown" 
+    }.orElse("unknown")
 }
 
-val gitCommitCount: String = getGitOutput("git", "rev-list", "--count", "HEAD")
-val gitCommitSha: String = getGitOutput("git", "rev-parse", "--short", "HEAD")
+val gitCommitCount: Provider<String> = getGitOutput("git", "rev-list", "--count", "HEAD")
+val gitCommitSha: Provider<String> = getGitOutput("git", "rev-parse", "--short", "HEAD")
 
 val currentBuildTime: String by lazy {
     val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
@@ -93,8 +89,8 @@ android {
 
 
     defaultConfig {
-        buildConfigField("String", "COMMIT_COUNT", "\"${gitCommitCount}\"")
-        buildConfigField("String", "COMMIT_SHA", "\"${gitCommitSha}\"")
+        buildConfigField("String", "COMMIT_COUNT", "\"${gitCommitCount.get()}\"")
+        buildConfigField("String", "COMMIT_SHA", "\"${gitCommitSha.get()}\"")
         buildConfigField("String", "BUILD_TIME", "\"${currentBuildTime}\"")
         buildConfigField("boolean", "INCLUDE_UPDATER", "false")
         buildConfigField("boolean", "PREVIEW", "false")
@@ -119,7 +115,7 @@ android {
 
     buildTypes {
         named("debug") {
-            versionNameSuffix = "-${gitCommitCount}"
+            versionNameSuffix = "-${gitCommitCount.get()}"
             applicationIdSuffix = ".debug"
             extra["enableCrashlytics"] = false
             extra["alwaysUpdateBuildId"] = false
