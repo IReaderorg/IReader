@@ -41,6 +41,11 @@ class UpdateService constructor(
 
         val release = api.checkRelease()
 
+        // Skip if tag_name is null or empty
+        if (release.tag_name.isNullOrBlank()) {
+            return Result.success()
+        }
+
         val version = Version.create(release.tag_name)
 
 

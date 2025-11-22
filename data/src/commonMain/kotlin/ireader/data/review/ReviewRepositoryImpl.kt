@@ -103,13 +103,13 @@ class ReviewRepositoryImpl(
     override suspend fun getBookReviews(bookTitle: String): Result<List<BookReview>> = 
         RemoteErrorMapper.withErrorMapping {
             val normalized = normalizeTitle(bookTitle)
-            val results = supabaseClient.postgrest["book_reviews"]
+            val results: List<BookReviewDto> = supabaseClient.postgrest["book_reviews"]
                 .select(columns = Columns.raw("*, users!inner(username)")) {
                     filter {
                         eq("book_title", normalized)
                     }
                 }
-                .decodeList<BookReviewDto>()
+                .decodeList()
             
             results.map {
                 BookReview(
@@ -244,13 +244,13 @@ class ReviewRepositoryImpl(
     override suspend fun getChapterReviews(bookTitle: String): Result<List<ChapterReview>> = 
         RemoteErrorMapper.withErrorMapping {
             val normalized = normalizeTitle(bookTitle)
-            val results = supabaseClient.postgrest["chapter_reviews"]
+            val results: List<ChapterReviewDto> = supabaseClient.postgrest["chapter_reviews"]
                 .select(columns = Columns.raw("*, users!inner(username)")) {
                     filter {
                         eq("book_title", normalized)
                     }
                 }
-                .decodeList<ChapterReviewDto>()
+                .decodeList()
             
             results.map {
                 ChapterReview(
@@ -362,13 +362,13 @@ class ReviewRepositoryImpl(
     override suspend fun getBookAverageRating(bookTitle: String): Result<Float> = 
         RemoteErrorMapper.withErrorMapping {
             val normalized = normalizeTitle(bookTitle)
-            val result = supabaseClient.postgrest["book_reviews"]
+            val result: List<BookReviewDto> = supabaseClient.postgrest["book_reviews"]
                 .select(columns = Columns.list("rating")) {
                     filter {
                         eq("book_title", normalized)
                     }
                 }
-                .decodeList<BookReviewDto>()
+                .decodeList()
             
             if (result.isEmpty()) 0f
             else result.map { it.rating }.average().toFloat()
@@ -377,14 +377,14 @@ class ReviewRepositoryImpl(
     override suspend fun getChapterAverageRating(bookTitle: String, chapterName: String): Result<Float> = 
         RemoteErrorMapper.withErrorMapping {
             val normalized = normalizeTitle(bookTitle)
-            val result = supabaseClient.postgrest["chapter_reviews"]
+            val result: List<ChapterReviewDto> = supabaseClient.postgrest["chapter_reviews"]
                 .select(columns = Columns.list("rating")) {
                     filter {
                         eq("book_title", normalized)
                         eq("chapter_name", chapterName)
                     }
                 }
-                .decodeList<ChapterReviewDto>()
+                .decodeList()
             
             if (result.isEmpty()) 0f
             else result.map { it.rating }.average().toFloat()

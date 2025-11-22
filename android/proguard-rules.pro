@@ -287,6 +287,36 @@
 -keep class io.github.jan.supabase.storage.** { *; }
 -keep class io.github.jan.supabase.gotrue.** { *; }
 
+# Keep Kotlin reflection for Supabase (fixes KotlinReflectionInternalError)
+-keep class kotlin.reflect.** { *; }
+-keep class kotlin.Metadata { *; }
+-keepclassmembers class kotlin.Metadata {
+    public <methods>;
+}
+-keepattributes RuntimeVisibleAnnotations,RuntimeInvisibleAnnotations,RuntimeVisibleParameterAnnotations,RuntimeInvisibleParameterAnnotations
+
+# Keep reflection for List and Collection types used by Supabase
+-keep class java.util.List { *; }
+-keep class java.util.Collection { *; }
+-keep class java.util.ArrayList { *; }
+-keep interface java.util.List
+-keep interface java.util.Collection
+
+# Keep Kotlin reflection implementation classes
+-keep class kotlin.reflect.jvm.** { *; }
+-keep class kotlin.reflect.full.** { *; }
+-keepclassmembers class kotlin.reflect.jvm.internal.** {
+    <fields>;
+    <methods>;
+}
+
+# Keep review DTOs for proper serialization
+-keep class ireader.data.review.ReviewRepositoryImpl$** { *; }
+-keepclassmembers class ireader.data.review.ReviewRepositoryImpl$** {
+    <fields>;
+    <init>(...);
+}
+
 -dontwarn io.github.jan.supabase.**
 ##---------------End: proguard configuration for Supabase  ----------
 

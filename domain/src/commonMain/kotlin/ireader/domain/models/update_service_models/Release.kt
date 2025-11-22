@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 data class Release(
     val id: Int,
     val name: String,
-    val tag_name: String,
+    val tag_name: String? = null,
     val html_url: String,
     val created_at: String,
 )
