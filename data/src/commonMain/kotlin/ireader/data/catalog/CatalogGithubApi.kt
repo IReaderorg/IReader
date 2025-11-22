@@ -129,12 +129,11 @@ class CatalogGithubApi(
         }
         
         return lnReaderCatalogs.map { plugin ->
-            // Generate a numeric ID from the string ID using hashCode
-            // This ensures consistent IDs for the same plugin across sessions
-            val numericId = plugin.id.hashCode().toLong().let { 
-                // Ensure positive ID by taking absolute value
-                if (it < 0) -it else it 
-            }
+            // Generate a unique numeric ID for LNReader sources
+            // Use a high offset (1_000_000_000_000L) to avoid conflicts with IReader sources
+            // Combine with hashCode for consistency across sessions
+            val baseHash = plugin.id.hashCode().toLong()
+            val numericId = 1_000_000_000_000L + (if (baseHash < 0) -baseHash else baseHash)
             
             // Fix icon URL to ensure it's a direct image URL
             val iconUrl = fixLNReaderIconUrl(plugin.iconUrl, plugin.id, plugin.lang, repo)
