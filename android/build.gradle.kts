@@ -18,19 +18,23 @@ val SUPPORTED_ABIS = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround
 // Cached to avoid running git commands on every configuration
-val gitCommitCount: Provider<String> = providers.exec {
-    commandLine("git", "rev-list", "--count", "HEAD")
-    isIgnoreExitValue = true
-}.standardOutput.asText.map { it.trim().takeIf { it.isNotEmpty() } ?: "unknown" }
-    .orElse("unknown")
+fun getGitOutput(vararg command: String): String {
+    return try {
+        val process = ProcessBuilder(*command)
+            .redirectOutput(ProcessBuilder.Redirect.PIPE)
+            .redirectError(ProcessBuilder.Redirect.PIPE)
+            .start()
+        process.waitFor(2, java.util.concurrent.TimeUnit.SECONDS)
+        process.inputStream.bufferedReader().readText().trim().takeIf { it.isNotEmpty() } ?: "unknown"
+    } catch (e: Exception) {
+        "unknown"
+    }
+}
 
-val gitCommitSha: Provider<String> = providers.exec {
-    commandLine("git", "rev-parse", "--short", "HEAD")
-    isIgnoreExitValue = true
-}.standardOutput.asText.map { it.trim().takeIf { it.isNotEmpty() } ?: "unknown" }
-    .orElse("unknown")
+val gitCommitCount: String = getGitOutput("git", "rev-list", "--count", "HEAD")
+val gitCommitSha: String = getGitOutput("git", "rev-parse", "--short", "HEAD")
 
-val currentBuildTime: Provider<String> = provider {
+val currentBuildTime: String by lazy {
     val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
     df.timeZone = TimeZone.getTimeZone("UTC")
     df.format(Date())
@@ -88,9 +92,9 @@ android {
 
 
     defaultConfig {
-        buildConfigField("String", "COMMIT_COUNT", "\"${gitCommitCount.get()}\"")
-        buildConfigField("String", "COMMIT_SHA", "\"${gitCommitSha.get()}\"")
-        buildConfigField("String", "BUILD_TIME", "\"${currentBuildTime.get()}\"")
+        buildConfigField("String", "COMMIT_COUNT", "\"${gitCommitCount}\"")
+        buildConfigField("String", "COMMIT_SHA", "\"${gitCommitSha}\"")
+        buildConfigField("String", "BUILD_TIME", "\"${currentBuildTime}\"")
         buildConfigField("boolean", "INCLUDE_UPDATER", "false")
         buildConfigField("boolean", "PREVIEW", "false")
         buildConfigField("String", "VERSION_NAME", "\"${ProjectConfig.versionName}\"")
@@ -114,7 +118,7 @@ android {
 
     buildTypes {
         named("debug") {
-            versionNameSuffix = "-${gitCommitCount.get()}"
+            versionNameSuffix = "-${gitCommitCount}"
             applicationIdSuffix = ".debug"
             extra["enableCrashlytics"] = false
             extra["alwaysUpdateBuildId"] = false
@@ -148,7 +152,9 @@ android {
             dimension = "default"
         }
         create("dev") {
-            resourceConfigurations += listOf("en", "xxhdpi")
+            androidResources {
+                localeFilters += listOf("en")
+            }
             dimension = "default"
         }
     }
@@ -232,9 +238,7 @@ dependencies {
     implementation(libs.napier)
 }
 composeCompiler {
-    featureFlags.set(setOf(
-        org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag.StrongSkipping
-    ))
+    enableStrongSkippingMode.set(true)
 }
 
 // Apply Google Services plugin only for non-fdroid flavors
