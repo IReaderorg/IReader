@@ -43,6 +43,7 @@ class ExtensionViewModel(
         private val sourceCredentialsRepository: ireader.domain.data.repository.SourceCredentialsRepository,
         private val extensionWatcherService: ExtensionWatcherService,
         private val catalogSourceRepository: ireader.domain.data.repository.CatalogSourceRepository,
+        private val catalogStore: ireader.domain.catalogs.CatalogStore,
         private val extensionManager: ireader.domain.catalogs.interactor.ExtensionManager? = null,
         private val extensionSecurityManager: ireader.domain.catalogs.interactor.ExtensionSecurityManager? = null,
         private val extensionRepositoryManager: ireader.domain.catalogs.interactor.ExtensionRepositoryManager? = null,
@@ -60,6 +61,9 @@ class ExtensionViewModel(
     
     // Track source health status
     val sourceStatuses = mutableStateMapOf<Long, SourceStatus>()
+    
+    // Track loading sources
+    private val loadingSources = mutableStateOf<Set<Long>>(emptySet())
     
     val userSources: List<SourceUiModel> by derivedStateOf {
         val filteredPinned = pinnedCatalogs.filteredByLanguageChoice(selectedUserSourceLanguage)
@@ -149,6 +153,13 @@ class ExtensionViewModel(
         
         // Start extension watcher (desktop only)
         startExtensionWatcher()
+        
+        // Observe loading sources from CatalogStore
+        scope.launch {
+            catalogStore.getLoadingSourcesFlow().collect { loadingIds ->
+                loadingSources.value = loadingIds
+            }
+        }
     }
     
     /**
@@ -297,6 +308,13 @@ class ExtensionViewModel(
      */
     fun getSourceStatus(sourceId: Long): SourceStatus? {
         return sourceStatuses[sourceId]
+    }
+    
+    /**
+     * Check if a source is currently loading in the background
+     */
+    fun isSourceLoading(sourceId: Long): Boolean {
+        return sourceId in loadingSources.value
     }
     
     /**

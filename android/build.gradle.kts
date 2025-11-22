@@ -37,6 +37,26 @@ val currentBuildTime: String by lazy {
     df.format(Date())
 }
 
+// Load local.properties for local development
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { load(it) }
+    }
+}
+
+// Helper function to get property with fallback chain:
+// 1. Environment variable
+// 2. local.properties (for local dev)
+// 3. gradle.properties (for CI/CD if needed)
+// 4. Empty string
+fun getConfigProperty(envVar: String, propertyKey: String): String {
+    return System.getenv(envVar)
+        ?: localProperties.getProperty(propertyKey)
+        ?: providers.gradleProperty(propertyKey).orNull
+        ?: ""
+}
+
 android {
     namespace = "org.ireader.app"
     compileSdk = ProjectConfig.compileSdk
@@ -97,17 +117,17 @@ android {
         buildConfigField("String", "VERSION_NAME", "\"${ProjectConfig.versionName}\"")
         buildConfigField("int", "VERSION_CODE", "${ProjectConfig.versionCode}")
         
-        // Supabase configuration using providers for lazy evaluation
-        buildConfigField("String", "SUPABASE_URL", "\"${providers.environmentVariable("SUPABASE_URL").orElse(providers.gradleProperty("supabase.url")).getOrElse("")}\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${providers.environmentVariable("SUPABASE_ANON_KEY").orElse(providers.gradleProperty("supabase.anon.key")).getOrElse("")}\"")
-        buildConfigField("String", "SUPABASE_BOOKS_URL", "\"${providers.environmentVariable("SUPABASE_BOOKS_URL").orElse(providers.gradleProperty("supabase.books.url")).getOrElse("")}\"")
-        buildConfigField("String", "SUPABASE_BOOKS_KEY", "\"${providers.environmentVariable("SUPABASE_BOOKS_KEY").orElse(providers.gradleProperty("supabase.books.key")).getOrElse("")}\"")
-        buildConfigField("String", "SUPABASE_PROGRESS_URL", "\"${providers.environmentVariable("SUPABASE_PROGRESS_URL").orElse(providers.gradleProperty("supabase.progress.url")).getOrElse("")}\"")
-        buildConfigField("String", "SUPABASE_PROGRESS_KEY", "\"${providers.environmentVariable("SUPABASE_PROGRESS_KEY").orElse(providers.gradleProperty("supabase.progress.key")).getOrElse("")}\"")
-        buildConfigField("String", "SUPABASE_REVIEWS_URL", "\"${providers.environmentVariable("SUPABASE_REVIEWS_URL").orElse(providers.gradleProperty("supabase.reviews.url")).getOrElse("")}\"")
-        buildConfigField("String", "SUPABASE_REVIEWS_KEY", "\"${providers.environmentVariable("SUPABASE_REVIEWS_KEY").orElse(providers.gradleProperty("supabase.reviews.key")).getOrElse("")}\"")
-        buildConfigField("String", "SUPABASE_COMMUNITY_URL", "\"${providers.environmentVariable("SUPABASE_COMMUNITY_URL").orElse(providers.gradleProperty("supabase.community.url")).getOrElse("")}\"")
-        buildConfigField("String", "SUPABASE_COMMUNITY_KEY", "\"${providers.environmentVariable("SUPABASE_COMMUNITY_KEY").orElse(providers.gradleProperty("supabase.community.key")).getOrElse("")}\"")
+        // Supabase configuration with fallback chain: env vars -> local.properties -> gradle.properties
+        buildConfigField("String", "SUPABASE_URL", "\"${getConfigProperty("SUPABASE_URL", "supabase.url")}\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${getConfigProperty("SUPABASE_ANON_KEY", "supabase.anon.key")}\"")
+        buildConfigField("String", "SUPABASE_BOOKS_URL", "\"${getConfigProperty("SUPABASE_BOOKS_URL", "supabase.books.url")}\"")
+        buildConfigField("String", "SUPABASE_BOOKS_KEY", "\"${getConfigProperty("SUPABASE_BOOKS_KEY", "supabase.books.key")}\"")
+        buildConfigField("String", "SUPABASE_PROGRESS_URL", "\"${getConfigProperty("SUPABASE_PROGRESS_URL", "supabase.progress.url")}\"")
+        buildConfigField("String", "SUPABASE_PROGRESS_KEY", "\"${getConfigProperty("SUPABASE_PROGRESS_KEY", "supabase.progress.key")}\"")
+        buildConfigField("String", "SUPABASE_REVIEWS_URL", "\"${getConfigProperty("SUPABASE_REVIEWS_URL", "supabase.reviews.url")}\"")
+        buildConfigField("String", "SUPABASE_REVIEWS_KEY", "\"${getConfigProperty("SUPABASE_REVIEWS_KEY", "supabase.reviews.key")}\"")
+        buildConfigField("String", "SUPABASE_COMMUNITY_URL", "\"${getConfigProperty("SUPABASE_COMMUNITY_URL", "supabase.community.url")}\"")
+        buildConfigField("String", "SUPABASE_COMMUNITY_KEY", "\"${getConfigProperty("SUPABASE_COMMUNITY_KEY", "supabase.community.key")}\"")
     }
     dependenciesInfo {
         includeInApk = false

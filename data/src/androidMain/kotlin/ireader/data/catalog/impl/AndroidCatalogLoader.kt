@@ -41,7 +41,7 @@ class AndroidCatalogLoader(
     val simpleStorage: GetSimpleStorage,
     val localizeHelper: LocalizeHelper,
     private val preferenceStore: PreferenceStoreFactory
-) : CatalogLoader {
+) : CatalogLoader, ireader.domain.catalogs.service.AsyncPluginLoader {
 
     private val pkgManager = context.packageManager
     private val catalogPreferences = preferenceStore.create("catalogs_data")
@@ -182,16 +182,20 @@ class AndroidCatalogLoader(
                 }
                 
                 val startTime = System.currentTimeMillis()
-                val plugins = withContext(Dispatchers.IO) {
-                    jsPluginLoader.loadAllPlugins()
-                }
+                // Load stub plugins instantly for fast startup
+                val stubs = jsPluginLoader.loadStubPlugins()
                 val duration = System.currentTimeMillis() - startTime
-                Log.warn("Loaded ${plugins.size} JS plugins in ${duration}ms")
+                
+                Log.warn("Loaded ${stubs.size} JS plugin stubs in ${duration}ms")
                 JSPluginLogger.logInfo("AndroidCatalogLoader", 
-                    "Loaded ${plugins.size} JS plugins in ${duration}ms")
-                plugins
+                    "Loaded ${stubs.size} JS plugin stubs in ${duration}ms")
+                
+                // Note: Actual plugins will be loaded in background by CatalogStore
+                // On first run (no stubs), background loading will load all plugins
+                // On subsequent runs, background loading will replace stubs with actual plugins
+                stubs
             } catch (e: Exception) {
-                Log.error(e, "Failed to load JS plugins")
+                Log.error(e, "Failed to load JS plugin stubs")
                 emptyList()
             }
         } else {
@@ -431,6 +435,26 @@ class AndroidCatalogLoader(
         val classToLoad: String,
         val dependencies: ireader.core.source.Dependencies,
     )
+
+    /**
+     * Load actual JS plugins in the background, replacing stubs.
+     * @param onPluginLoaded Callback when each plugin is loaded
+     */
+    override suspend fun loadJSPluginsAsync(onPluginLoaded: (ireader.domain.models.entities.JSPluginCatalog) -> Unit) {
+        if (!uiPreferences.enableJSPlugins().get()) return
+        
+        try {
+            JSPluginLogger.logInfo("AndroidCatalogLoader", "Starting async JS plugin loading")
+            jsPluginLoader.loadPluginsAsync(onPluginLoaded)
+        } catch (e: Exception) {
+            Log.error("Failed to load JS plugins asynchronously: ${e.message}", e)
+        }
+    }
+    
+    /**
+     * Get the JS plugin loader for advanced operations.
+     */
+    fun getJSPluginLoader(): JSPluginLoader = jsPluginLoader
 
     private companion object {
         const val EXTENSION_FEATURE = "ireader"

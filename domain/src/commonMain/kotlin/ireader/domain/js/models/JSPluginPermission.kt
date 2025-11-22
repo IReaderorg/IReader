@@ -1,8 +1,11 @@
 package ireader.domain.js.models
 
+import kotlinx.serialization.Serializable
+
 /**
  * Permissions that JavaScript plugins can request.
  */
+@Serializable
 enum class JSPluginPermission {
     /**
      * Permission to make network requests.

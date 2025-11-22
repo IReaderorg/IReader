@@ -48,6 +48,7 @@ fun CatalogItem(
     sourceStatus: SourceStatus? = null,
     onLogin: (() -> Unit)? = null,
     onMigrate: (() -> Unit)? = null,
+    isLoading: Boolean = false,
 ) {
     val title = buildAnnotatedString {
         append("${catalog.name} ")
@@ -92,6 +93,14 @@ fun CatalogItem(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false)
                 )
+                
+                // Show loading indicator for sources that are loading
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp
+                    )
+                }
                 
                 // Show status indicator for installed sources
                 if (sourceStatus != null && catalog is CatalogInstalled) {

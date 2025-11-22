@@ -32,7 +32,7 @@ class DesktopCatalogLoader(
     private val httpClients: HttpClients,
     val uiPreferences: UiPreferences,
     preferences: PreferenceStoreFactory
-) : CatalogLoader {
+) : CatalogLoader, ireader.domain.catalogs.service.AsyncPluginLoader {
     private val catalogPreferences = preferences.create("catalogs_data")
     
     // JavaScript plugin loader
@@ -40,6 +40,26 @@ class DesktopCatalogLoader(
         val jsPluginsDir = File(System.getProperty("user.home"), ".ireader/js-plugins").apply { mkdirs() }
         JSPluginLoader(jsPluginsDir, httpClients.default, preferences)
     }
+    
+    /**
+     * Load actual JS plugins in the background, replacing stubs.
+     * @param onPluginLoaded Callback when each plugin is loaded
+     */
+    override suspend fun loadJSPluginsAsync(onPluginLoaded: (ireader.domain.models.entities.JSPluginCatalog) -> Unit) {
+        if (!uiPreferences.enableJSPlugins().get()) return
+        
+        try {
+            JSPluginLogger.logInfo("DesktopCatalogLoader", "Starting async JS plugin loading")
+            jsPluginLoader.loadPluginsAsync(onPluginLoaded)
+        } catch (e: Exception) {
+            Log.error { "Failed to load JS plugins asynchronously: ${e.message}" }
+        }
+    }
+    
+    /**
+     * Get the JS plugin loader for advanced operations.
+     */
+    fun getJSPluginLoader(): JSPluginLoader = jsPluginLoader
     override suspend fun loadAll(): List<CatalogLocal> {
         val bundled = mutableListOf<ireader.domain.models.entities.CatalogBundled>()
         
@@ -73,13 +93,19 @@ class DesktopCatalogLoader(
         val jsPlugins = if (uiPreferences.enableJSPlugins().get()) {
             try {
                 val startTime = System.currentTimeMillis()
-                val plugins = jsPluginLoader.loadAllPlugins()
+                // Load stub plugins instantly for fast startup
+                val stubs = jsPluginLoader.loadStubPlugins()
                 val duration = System.currentTimeMillis() - startTime
+                
                 JSPluginLogger.logInfo("DesktopCatalogLoader", 
-                    "Loaded ${plugins.size} JS plugins in ${duration}ms")
-                plugins
+                    "Loaded ${stubs.size} JS plugin stubs in ${duration}ms")
+                
+                // Note: Actual plugins will be loaded in background by CatalogStore
+                // On first run (no stubs), background loading will load all plugins
+                // On subsequent runs, background loading will replace stubs with actual plugins
+                stubs
             } catch (e: Exception) {
-                Log.error { "Failed to load JS plugins" }
+                Log.error { "Failed to load JS plugin stubs: ${e.message}" }
                 emptyList()
             }
         } else {

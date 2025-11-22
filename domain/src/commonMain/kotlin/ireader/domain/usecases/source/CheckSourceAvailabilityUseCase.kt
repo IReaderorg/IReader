@@ -43,12 +43,14 @@ class CheckSourceAvailabilityUseCase(
             // Get current chapter count
             val currentChapterCount = chapterRepository.findChaptersByBookId(bookId).size
             
-            // Search all installed sources for the same book
-            val allCatalogs = catalogStore.catalogs
+            // Search only pinned sources for the same book (optimization)
+            val pinnedCatalogs = catalogStore.catalogs.filter { it.isPinned }
             var betterSourceId: Long? = null
             var maxChapterDifference = 0
             
-            for (catalog in allCatalogs) {
+            Log.info { "Checking ${pinnedCatalogs.size} pinned sources for better alternatives" }
+            
+            for (catalog in pinnedCatalogs) {
                 if (catalog.sourceId == book.sourceId) continue // Skip current source
                 
                 try {

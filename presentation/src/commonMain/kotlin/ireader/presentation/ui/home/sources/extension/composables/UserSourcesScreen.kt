@@ -126,6 +126,7 @@ fun UserSourcesScreen(
                         onPinToggle = { onClickTogglePinned(catalogItem.source) },
                         onShowDetails = onShowDetails?.let { { it(catalogItem.source) } },
                         sourceStatus = vm.getSourceStatus(catalogItem.source.sourceId),
+                        isLoading = vm.isSourceLoading(catalogItem.source.sourceId),
                         onLogin = {
                             loginSourceId = catalogItem.source.sourceId
                             loginSourceName = catalogItem.source.name

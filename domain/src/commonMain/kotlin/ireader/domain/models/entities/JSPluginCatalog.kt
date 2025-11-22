@@ -31,7 +31,8 @@ data class JSPluginCatalog(
     },
     override val installDir: File = pluginFile.parentFile,
     override val nsfw: Boolean = false,
-    override val isPinned: Boolean = false
+    override val isPinned: Boolean = false,
+    override val hasUpdate: Boolean = false
 ) : CatalogInstalled() {
     
     /**

@@ -47,6 +47,7 @@ class JSPluginLoader(
 ) {
     
     private val pluginCache = mutableMapOf<String, LoadedPlugin>()
+    private val stubManager = JSPluginStubManager(preferenceStoreFactory.create("js_plugin_stubs"))
     
     /**
      * Loads all JavaScript plugins from the plugins directory.
@@ -82,6 +83,65 @@ class JSPluginLoader(
         Log.info("JSPluginLoader: Loaded ${catalogs.size} of ${pluginFiles.size} plugins in ${duration}ms")
         
         return catalogs
+    }
+    
+    /**
+     * Loads stub sources instantly for fast startup.
+     * Returns lightweight placeholder sources based on previously loaded plugins.
+     * @return List of stub catalogs
+     */
+    fun loadStubPlugins(): List<JSPluginCatalog> {
+        val startTime = System.currentTimeMillis()
+        
+        // Get saved stubs
+        val stubs = stubManager.getPluginStubs()
+        
+        // Scan for actual plugin files to verify they still exist
+        val pluginFiles = pluginsDirectory.listFiles { file ->
+            file.extension == "js" && file.canRead()
+        }?.associateBy { it.nameWithoutExtension } ?: emptyMap()
+        
+        // Create stub catalogs for plugins that still exist
+        val stubCatalogs = stubs.mapNotNull { (pluginId, stubData) ->
+            val file = pluginFiles[stubData.fileName]
+            if (file != null) {
+                createStubCatalog(stubData.metadata, file)
+            } else {
+                // Plugin file no longer exists, remove stub
+                stubManager.removePluginStub(pluginId)
+                null
+            }
+        }
+        
+        val duration = System.currentTimeMillis() - startTime
+        Log.info("JSPluginLoader: Loaded ${stubCatalogs.size} stub plugins in ${duration}ms")
+        
+        return stubCatalogs
+    }
+    
+    /**
+     * Creates a stub catalog from metadata.
+     */
+    private fun createStubCatalog(metadata: PluginMetadata, file: File): JSPluginCatalog {
+        val pluginPreferenceStore = preferenceStoreFactory.create("js_plugin_${metadata.id}")
+        
+        val httpClientsInterface = object : ireader.core.http.HttpClientsInterface {
+            override val default: HttpClient = httpClient
+            override val cloudflareClient: HttpClient = httpClient
+            override val browser: ireader.core.http.BrowserEngine = ireader.core.http.BrowserEngine()
+        }
+        val dependencies = ireader.core.source.Dependencies(
+            httpClients = httpClientsInterface,
+            preferences = pluginPreferenceStore
+        )
+        
+        val stubSource = JSPluginStubSource(metadata, dependencies)
+        
+        return JSPluginCatalog(
+            source = stubSource,
+            metadata = metadata,
+            pluginFile = file
+        )
     }
     
     /**
@@ -155,6 +215,9 @@ class JSPluginLoader(
             // Cache the loaded plugin
             pluginCache[pluginId] = LoadedPlugin(catalog, plugin, engine, lastModified)
             
+            // Save stub for future fast loading
+            stubManager.savePluginStub(metadata, file.nameWithoutExtension)
+            
             val duration = System.currentTimeMillis() - startTime
             Log.info("JSPluginLoader: Successfully loaded $pluginId in ${duration}ms")
             
@@ -181,6 +244,9 @@ class JSPluginLoader(
         
         // Remove from cache
         pluginCache.remove(pluginId)
+        
+        // Remove stub
+        stubManager.removePluginStub(pluginId)
         
         Log.info("JSPluginLoader: Plugin unloaded: $pluginId")
     }
@@ -233,5 +299,94 @@ class JSPluginLoader(
         } else {
             Log.error("JSPluginLoader: Plugin file not found for reload: $pluginId", null)
         }
+    }
+    
+    /**
+     * Load plugins asynchronously with priority support.
+     * Priority plugins load first, then remaining plugins.
+     * @param onPluginLoaded Callback when each plugin is loaded
+     * @return List of all loaded catalogs
+     */
+    suspend fun loadPluginsAsync(
+        onPluginLoaded: (JSPluginCatalog) -> Unit = {}
+    ): List<JSPluginCatalog> {
+        val startTime = System.currentTimeMillis()
+        
+        // Ensure plugins directory exists
+        if (!pluginsDirectory.exists()) {
+            pluginsDirectory.mkdirs()
+            Log.info("JSPluginLoader: Created plugins directory: ${pluginsDirectory.absolutePath}")
+        }
+        
+        // Scan for plugin files
+        val pluginFiles = pluginsDirectory.listFiles { file ->
+            file.extension == "js" && file.canRead()
+        } ?: emptyArray()
+        
+        Log.info("JSPluginLoader: Found ${pluginFiles.size} plugin files for async loading")
+        
+        // Get priority plugins
+        val priorityPluginIds = stubManager.getPriorityPlugins()
+        
+        // Separate priority and normal plugins
+        val (priorityFiles, normalFiles) = pluginFiles.partition { file ->
+            file.nameWithoutExtension in priorityPluginIds
+        }
+        
+        Log.info("JSPluginLoader: Loading ${priorityFiles.size} priority plugins first")
+        
+        val allCatalogs = mutableListOf<JSPluginCatalog>()
+        
+        // Load priority plugins first
+        priorityFiles.forEach { file ->
+            try {
+                val catalog = loadPlugin(file)
+                if (catalog != null) {
+                    allCatalogs.add(catalog)
+                    onPluginLoaded(catalog)
+                }
+            } catch (e: Exception) {
+                Log.error("JSPluginLoader: Failed to load priority plugin ${file.nameWithoutExtension}", e)
+            }
+        }
+        
+        // Load remaining plugins
+        normalFiles.forEach { file ->
+            try {
+                val catalog = loadPlugin(file)
+                if (catalog != null) {
+                    allCatalogs.add(catalog)
+                    onPluginLoaded(catalog)
+                }
+            } catch (e: Exception) {
+                Log.error("JSPluginLoader: Failed to load plugin ${file.nameWithoutExtension}", e)
+            }
+        }
+        
+        val duration = System.currentTimeMillis() - startTime
+        Log.info("JSPluginLoader: Async loaded ${allCatalogs.size} of ${pluginFiles.size} plugins in ${duration}ms")
+        
+        return allCatalogs
+    }
+    
+    /**
+     * Set a plugin as high priority for faster loading.
+     */
+    fun setPriorityPlugin(pluginId: String, isPriority: Boolean) {
+        stubManager.setPriorityPlugin(pluginId, isPriority)
+    }
+    
+    /**
+     * Get priority plugin IDs.
+     */
+    fun getPriorityPlugins(): Set<String> {
+        return stubManager.getPriorityPlugins()
+    }
+    
+    /**
+     * Get stub manager for advanced operations.
+     */
+    fun getStubManager(): JSPluginStubManager {
+        return stubManager
     }
 }

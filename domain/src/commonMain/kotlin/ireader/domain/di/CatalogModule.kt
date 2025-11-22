@@ -41,5 +41,9 @@ val CatalogModule = module {
     single<UpdateCatalog> { UpdateCatalog(get(),get()) }
 
     single<TogglePinnedCatalog> { TogglePinnedCatalog(get()) }
+    
+    single<ireader.domain.use_cases.services.LoadJSPluginsInBackgroundUseCase> { 
+        ireader.domain.use_cases.services.LoadJSPluginsInBackgroundUseCase(get(), get()) 
+    }
 
 }
