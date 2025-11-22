@@ -38,7 +38,7 @@ class DesktopCatalogLoader(
     // JavaScript plugin loader
     private val jsPluginLoader: JSPluginLoader by lazy {
         val jsPluginsDir = File(System.getProperty("user.home"), ".ireader/js-plugins").apply { mkdirs() }
-        JSPluginLoader(jsPluginsDir, httpClients.default, preferences, JSEnginePool())
+        JSPluginLoader(jsPluginsDir, httpClients.default, preferences)
     }
     override suspend fun loadAll(): List<CatalogLocal> {
         val bundled = mutableListOf<ireader.domain.models.entities.CatalogBundled>()

@@ -92,6 +92,10 @@ kotlin {
                 api(libs.koin.core)
 
                 api(libs.coil.core)
+                
+                // Zipline - not used anymore, kept for reference
+                // implementation("app.cash.zipline:zipline:1.24.0")
+                // implementation("app.cash.zipline:zipline-loader:1.24.0")
             }
         }
         commonTest {
@@ -140,8 +144,9 @@ kotlin {
                 api(libs.koin.android)
                 api(libs.koin.workManager)
                 
-                // QuickJS for JavaScript engine
-                implementation("app.cash.quickjs:quickjs-android:0.9.2")
+                // J2V8 - V8 JavaScript engine for Android (full Promise/async support)
+                // Provides native ES6+, Promises, async/await without polyfills
+                implementation("com.eclipsesource.j2v8:j2v8:6.3.4")
             }
         }
         val desktopMain by getting {

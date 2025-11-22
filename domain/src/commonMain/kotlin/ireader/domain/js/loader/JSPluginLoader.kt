@@ -1,39 +1,52 @@
 package ireader.domain.js.loader
 
 import io.ktor.client.HttpClient
+import ireader.core.log.Log
 import ireader.core.prefs.PreferenceStoreFactory
-import ireader.domain.js.bridge.JSPluginBridge
+import ireader.domain.js.bridge.JSBridgeService
+import ireader.domain.js.bridge.JSBridgeServiceImpl
 import ireader.domain.js.bridge.JSPluginSource
-import ireader.domain.js.engine.JSEnginePool
-import ireader.domain.js.library.JSLibraryProvider
-import ireader.domain.js.models.JSPluginError
+import ireader.domain.js.bridge.LNReaderPlugin
+import ireader.domain.js.engine.PluginLoadException
 import ireader.domain.js.models.PluginMetadata
-import ireader.domain.js.util.JSPluginLogger
-import ireader.domain.js.util.JSPluginValidator
 import ireader.domain.models.entities.JSPluginCatalog
 import java.io.File
 
 /**
- * Cached compiled plugin data.
+ * Common interface for JS engines.
  */
-private data class CompiledPlugin(
+interface JSEngine {
+    suspend fun loadPlugin(jsCode: String, pluginId: String): LNReaderPlugin
+    fun close()
+    fun isLoaded(): Boolean
+}
+
+/**
+ * Platform-specific engine creation.
+ */
+expect fun createEngine(bridgeService: JSBridgeService): JSEngine
+
+/**
+ * Cached loaded plugin data.
+ */
+private data class LoadedPlugin(
     val catalog: JSPluginCatalog,
+    val plugin: LNReaderPlugin,
+    val engine: JSEngine,
     val lastModified: Long
 )
 
 /**
- * Loader for JavaScript plugins.
- * Discovers, validates, and loads JavaScript plugins from the file system.
+ * Loader for JavaScript plugins using Zipline.
+ * Executes JavaScript plugins in a type-safe manner.
  */
 class JSPluginLoader(
     private val pluginsDirectory: File,
     private val httpClient: HttpClient,
-    private val preferenceStoreFactory: PreferenceStoreFactory,
-    private val enginePool: JSEnginePool
+    private val preferenceStoreFactory: PreferenceStoreFactory
 ) {
     
-    private val validator = JSPluginValidator()
-    private val pluginCache = mutableMapOf<String, CompiledPlugin>()
+    private val pluginCache = mutableMapOf<String, LoadedPlugin>()
     
     /**
      * Loads all JavaScript plugins from the plugins directory.
@@ -45,7 +58,7 @@ class JSPluginLoader(
         // Ensure plugins directory exists
         if (!pluginsDirectory.exists()) {
             pluginsDirectory.mkdirs()
-            JSPluginLogger.logInfo("loader", "Created plugins directory: ${pluginsDirectory.absolutePath}")
+            Log.info("JSPluginLoader: Created plugins directory: ${pluginsDirectory.absolutePath}")
         }
         
         // Scan for plugin files
@@ -53,32 +66,26 @@ class JSPluginLoader(
             file.extension == "js" && file.canRead()
         } ?: emptyArray()
         
-        JSPluginLogger.logInfo("loader", "Found ${pluginFiles.size} plugin files")
+        Log.info("JSPluginLoader: Found ${pluginFiles.size} plugin files")
         
         // Load each plugin
         val catalogs = pluginFiles.mapNotNull { file ->
             try {
                 loadPlugin(file)
             } catch (e: Exception) {
-                JSPluginLogger.logError(
-                    file.nameWithoutExtension,
-                    JSPluginError.LoadError(file.nameWithoutExtension, e)
-                )
+                Log.error("JSPluginLoader: Failed to load plugin ${file.nameWithoutExtension}", e)
                 null
             }
         }
         
         val duration = System.currentTimeMillis() - startTime
-        JSPluginLogger.logInfo(
-            "loader",
-            "Loaded ${catalogs.size} of ${pluginFiles.size} plugins in ${duration}ms"
-        )
+        Log.info("JSPluginLoader: Loaded ${catalogs.size} of ${pluginFiles.size} plugins in ${duration}ms")
         
         return catalogs
     }
     
     /**
-     * Loads a single plugin from a file.
+     * Loads a single plugin from a file using Zipline.
      * @param file The plugin file
      * @return Loaded catalog or null if loading failed
      */
@@ -87,162 +94,56 @@ class JSPluginLoader(
         val startTime = System.currentTimeMillis()
         
         try {
-            JSPluginLogger.logDebug(pluginId, "Loading plugin from: ${file.absolutePath}")
+            Log.info("JSPluginLoader: Loading plugin: $pluginId")
             
             // Check cache
             val lastModified = file.lastModified()
             val cached = pluginCache[pluginId]
             if (cached != null && cached.lastModified == lastModified) {
-                JSPluginLogger.logDebug(pluginId, "Using cached plugin")
+                Log.debug("JSPluginLoader: Using cached plugin: $pluginId")
                 return cached.catalog
             }
             
             // Read plugin code
-            val code = file.readText()
-            JSPluginLogger.logDebug(pluginId, "Read ${code.length} characters of code")
+            val jsCode = file.readText()
+            Log.debug("JSPluginLoader: Read ${jsCode.length} chars from $pluginId")
             
-            // Validate code
-            val codeValidation = validator.validateCode(code)
-            if (!codeValidation.isValid()) {
-                val error = JSPluginError.ValidationError(pluginId, codeValidation.getError() ?: "Unknown validation error")
-                JSPluginLogger.logError(pluginId, error)
-                val duration = System.currentTimeMillis() - startTime
-                JSPluginLogger.logPluginLoad(pluginId, false, duration)
-                return null
-            }
-            
-            // Get or create engine from pool
-            val engine = enginePool.getOrCreate(pluginId)
-            JSPluginLogger.logDebug(pluginId, "Got engine from pool")
-            
-            // Setup library provider
+            // Create bridge service for this plugin
             val pluginPreferenceStore = preferenceStoreFactory.create("js_plugin_$pluginId")
-            val libraryProvider = JSLibraryProvider(engine, pluginId, httpClient, pluginPreferenceStore)
-            libraryProvider.setupRequireFunction()
-            JSPluginLogger.logDebug(pluginId, "Setup library provider")
+            val bridgeService = JSBridgeServiceImpl(httpClient, pluginPreferenceStore, pluginId)
             
-            // Evaluate plugin code
-            engine.evaluateScript(code)
+            // Create engine with bridge (platform-specific)
+            val engine = createEngine(bridgeService)
             
-            // Store the plugin instance in a global variable for later access
-            // This allows us to access JavaScript properties that contain references
-            // Sanitize plugin ID for use as JavaScript variable name
-            val sanitizedId = pluginId.replace(Regex("[^a-zA-Z0-9_]"), "_")
-            engine.evaluateScript("globalThis.__plugin_${sanitizedId} = exports.default || exports;")
+            // Load via JS engine
+            val plugin = engine.loadPlugin(jsCode, pluginId)
+            Log.info("JSPluginLoader: JS engine loaded plugin: $pluginId")
             
-            // Extract plugin instance from CommonJS exports
-            // LNReader plugins use: exports.default = new PluginClass()
-            var pluginInstance = engine.getGlobalObject("exports")
-            JSPluginLogger.logDebug(pluginId, "Exports object type: ${pluginInstance?.javaClass?.simpleName}")
+            // Get metadata from plugin
+            val metadata = PluginMetadata(
+                id = plugin.getId(),
+                name = plugin.getName(),
+                site = plugin.getSite(),
+                version = plugin.getVersion(),
+                lang = plugin.getLang(),
+                icon = plugin.getIcon()
+            )
             
-            // Try to get the default export if exports is an object
-            if (pluginInstance is Map<*, *>) {
-                JSPluginLogger.logDebug(pluginId, "Exports is a Map with keys: ${pluginInstance.keys}")
-                val defaultExport = pluginInstance["default"]
-                if (defaultExport != null) {
-                    pluginInstance = defaultExport
-                    JSPluginLogger.logDebug(pluginId, "Using exports.default, type: ${defaultExport.javaClass.simpleName}")
-                } else {
-                    JSPluginLogger.logDebug(pluginId, "No default export found, using exports object directly")
-                }
-            }
+            Log.info("JSPluginLoader: Plugin metadata - name: ${metadata.name}, site: ${metadata.site}")
             
-            if (pluginInstance == null) {
-                val error = JSPluginError.LoadError(pluginId, Exception("Plugin evaluation returned null - no exports found"))
-                JSPluginLogger.logError(pluginId, error)
-                val duration = System.currentTimeMillis() - startTime
-                JSPluginLogger.logPluginLoad(pluginId, false, duration)
-                return null
-            }
-            
-            // Log plugin instance details for debugging
-            if (pluginInstance is Map<*, *>) {
-                JSPluginLogger.logDebug(pluginId, "Plugin instance is Map with keys: ${pluginInstance.keys}")
-            }
-            
-            JSPluginLogger.logDebug(pluginId, "Evaluated plugin code and extracted exports")
-            
-            // Create bridge
-            val bridge = JSPluginBridge(engine, pluginInstance, httpClient, pluginId)
-            
-            // Extract metadata
-            val metadata = bridge.getPluginMetadata()
-            JSPluginLogger.logDebug(pluginId, "Extracted metadata: ${metadata.name} v${metadata.version}")
-            
-            // Update location object with plugin's site URL for proper context
-            if (metadata.site.isNotEmpty()) {
-                try {
-                    val updateLocationScript = """
-                        (function() {
-                            try {
-                                const siteUrl = '${metadata.site.replace("'", "\\'")}';
-                                const url = new URL(siteUrl);
-                                globalThis.location = {
-                                    href: url.href,
-                                    protocol: url.protocol,
-                                    host: url.host,
-                                    hostname: url.hostname,
-                                    port: url.port,
-                                    pathname: url.pathname,
-                                    search: url.search,
-                                    hash: url.hash,
-                                    origin: url.origin,
-                                    toString: function() { return this.href; }
-                                };
-                                globalThis.document.location = globalThis.location;
-                                globalThis.document.URL = url.href;
-                                globalThis.document.domain = url.hostname;
-                                globalThis.document.baseURI = url.origin;
-                            } catch (e) {
-                                console.warn('Failed to update location with site URL:', e);
-                            }
-                        })();
-                    """.trimIndent()
-                    engine.evaluateScript(updateLocationScript)
-                    JSPluginLogger.logDebug(pluginId, "Updated location context with site URL: ${metadata.site}")
-                } catch (e: Exception) {
-                    JSPluginLogger.logDebug(pluginId, "Could not update location context: ${e.message}")
-                }
-            }
-            
-            // Validate metadata
-            val metadataValidation = validator.validateMetadata(metadata)
-            if (!metadataValidation.isValid()) {
-                val error = JSPluginError.ValidationError(
-                    pluginId,
-                    metadataValidation.getError() ?: "Unknown validation error"
-                )
-                JSPluginLogger.logError(pluginId, error)
-                val duration = System.currentTimeMillis() - startTime
-                JSPluginLogger.logPluginLoad(pluginId, false, duration)
-                return null
-            }
-            
-            // Create source
-            val sourceId = metadata.id.hashCode().toLong()
-            
-            // Create dependencies for HttpSource
+            // Create dependencies for the source wrapper
             val httpClientsInterface = object : ireader.core.http.HttpClientsInterface {
                 override val default: HttpClient = httpClient
                 override val cloudflareClient: HttpClient = httpClient
                 override val browser: ireader.core.http.BrowserEngine = ireader.core.http.BrowserEngine()
             }
-
             val dependencies = ireader.core.source.Dependencies(
                 httpClients = httpClientsInterface,
                 preferences = pluginPreferenceStore
             )
             
-            val source = JSPluginSource(
-                bridge = bridge,
-                metadata = metadata,
-                id = sourceId,
-                name = metadata.name,
-                lang = metadata.lang,
-                dependencies = dependencies
-            )
-            
-            JSPluginLogger.logDebug(pluginId, "Created source with ID: $sourceId (from '${metadata.id}')")
+            // Create source wrapper
+            val source = JSPluginSource(plugin, metadata, dependencies)
             
             // Wrap in catalog
             val catalog = JSPluginCatalog(
@@ -251,21 +152,22 @@ class JSPluginLoader(
                 pluginFile = file
             )
             
-            JSPluginLogger.logDebug(pluginId, "Created catalog with sourceId: ${catalog.sourceId}")
-            
-            // Cache the compiled plugin
-            pluginCache[pluginId] = CompiledPlugin(catalog, lastModified)
+            // Cache the loaded plugin
+            pluginCache[pluginId] = LoadedPlugin(catalog, plugin, engine, lastModified)
             
             val duration = System.currentTimeMillis() - startTime
-            JSPluginLogger.logPluginLoad(pluginId, true, duration)
+            Log.info("JSPluginLoader: Successfully loaded $pluginId in ${duration}ms")
             
             return catalog
             
-        } catch (e: Exception) {
-            val error = JSPluginError.LoadError(pluginId, e)
-            JSPluginLogger.logError(pluginId, error)
+        } catch (e: PluginLoadException) {
+            Log.error("JSPluginLoader: Plugin load error for $pluginId: ${e.message}", e)
+            e.printStackTrace()
             val duration = System.currentTimeMillis() - startTime
-            JSPluginLogger.logPluginLoad(pluginId, false, duration)
+            Log.debug("JSPluginLoader: Failed to load $pluginId after ${duration}ms")
+            return null
+        } catch (e: Exception) {
+            Log.error("JSPluginLoader: Unexpected error loading $pluginId", e)
             return null
         }
     }
@@ -275,26 +177,21 @@ class JSPluginLoader(
      * @param pluginId The plugin identifier
      */
     suspend fun unloadPlugin(pluginId: String) {
-        JSPluginLogger.logDebug(pluginId, "Unloading plugin")
+        Log.debug("JSPluginLoader: Unloading plugin: $pluginId")
         
         // Remove from cache
         pluginCache.remove(pluginId)
         
-        // Return engine to pool (which will dispose it)
-        enginePool.remove(pluginId)
-        
-        // Clear plugin storage
-        // Note: Storage clearing would be handled by JSStorage if we had a reference to it
-        // For now, we just log the operation
-        JSPluginLogger.logInfo(pluginId, "Plugin unloaded")
+        Log.info("JSPluginLoader: Plugin unloaded: $pluginId")
     }
     
     /**
-     * Clears all cached plugins.
+     * Clears all cached plugins and closes all engines.
      */
     fun clearCache() {
+        pluginCache.values.forEach { it.engine.close() }
         pluginCache.clear()
-        JSPluginLogger.logInfo("loader", "Plugin cache cleared")
+        Log.info("JSPluginLoader: Plugin cache cleared and all engines closed")
     }
     
     /**
@@ -307,8 +204,8 @@ class JSPluginLoader(
      * @return Map of plugin ID to metadata
      */
     fun getInstalledPlugins(): Map<String, PluginMetadata> {
-        return pluginCache.mapValues { (_, compiled) ->
-            compiled.catalog.metadata
+        return pluginCache.mapValues { (_, loaded) ->
+            loaded.catalog.metadata
         }
     }
     
@@ -332,12 +229,9 @@ class JSPluginLoader(
             pluginCache.remove(pluginId)
             // Reload the plugin
             loadPlugin(pluginFile)
-            JSPluginLogger.logInfo(pluginId, "Plugin reloaded")
+            Log.info("JSPluginLoader: Plugin reloaded: $pluginId")
         } else {
-            JSPluginLogger.logError(
-                pluginId,
-                JSPluginError.LoadError(pluginId, Exception("Plugin file not found for reload"))
-            )
+            Log.error("JSPluginLoader: Plugin file not found for reload: $pluginId", null)
         }
     }
 }

@@ -26,7 +26,15 @@ class JSPluginBridge(
     private val pluginId: String
 ) {
 
-    private val pluginInstance: JSValue = JSValue.from(pluginInstanceRaw)
+    // Detect if running on Android/QuickJS (pluginInstanceRaw is a Map with __quickjs_plugin marker)
+    private val isAndroidQuickJS = pluginInstanceRaw is Map<*, *> && pluginInstanceRaw["__quickjs_plugin"] == true
+
+    private val pluginInstance: JSValue = if (isAndroidQuickJS) {
+        // On Android, create a dummy JSValue since we'll use evaluateScript instead
+        JSValue.from(mapOf<String, Any>())
+    } else {
+        JSValue.from(pluginInstanceRaw)
+    }
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -53,6 +61,39 @@ class JSPluginBridge(
 
         return withTimeout(30000L) {
             try {
+                if (isAndroidQuickJS) {
+                    // Android/QuickJS - extract via JavaScript evaluation
+                    val metadataJson = engine.evaluateScript("""
+                        (function() {
+                            var plugin = exports.default || exports;
+                            return JSON.stringify({
+                                id: plugin.id || '',
+                                name: plugin.name || 'Unknown',
+                                site: plugin.site || '',
+                                version: plugin.version || '1.0.0',
+                                icon: plugin.icon || '',
+                                lang: plugin.lang || 'en'
+                            });
+                        })();
+                    """.trimIndent())
+                    
+                    val jsonElement = json.parseToJsonElement(metadataJson.toString())
+                    val jsonMap = (jsonElement as kotlinx.serialization.json.JsonObject)
+                    
+                    val metadata = PluginMetadata(
+                        id = jsonMap["id"]?.toString()?.trim('"') ?: pluginId,
+                        name = jsonMap["name"]?.toString()?.trim('"') ?: "Unknown",
+                        site = jsonMap["site"]?.toString()?.trim('"') ?: "",
+                        version = jsonMap["version"]?.toString()?.trim('"') ?: "1.0.0",
+                        icon = jsonMap["icon"]?.toString()?.trim('"') ?: "",
+                        lang = jsonMap["lang"]?.toString()?.trim('"') ?: "en"
+                    )
+                    
+                    cachedMetadata = metadata
+                    return@withTimeout metadata
+                }
+                
+                // Desktop/GraalVM - use JSValue
                 val pluginMap = pluginInstance.asMap()
 
                 val metadata = PluginMetadata(

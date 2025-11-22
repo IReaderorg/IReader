@@ -1,15 +1,16 @@
 package ireader.domain.models.entities
 
+import ireader.core.source.HttpSource
 import ireader.domain.js.bridge.JSPluginSource
 import ireader.domain.js.models.PluginMetadata
 import java.io.File
 
 /**
  * Catalog implementation for JavaScript plugins.
- * Wraps a JSPluginSource as a CatalogInstalled for integration with IReader's catalog system.
+ * Wraps a JSPluginSource or converted native HttpSource as a CatalogInstalled for integration with IReader's catalog system.
  */
 data class JSPluginCatalog(
-    override val source: JSPluginSource,
+    override val source: HttpSource,
     val metadata: PluginMetadata,
     val pluginFile: File,
     override val name: String = metadata.name,
@@ -22,9 +23,9 @@ data class JSPluginCatalog(
         metadata.icon.startsWith("http") -> metadata.icon
         metadata.icon.isNotBlank() -> {
             // LNReader plugins use GitHub raw URLs
-            // Format: https://raw.githubusercontent.com/LNReader/lnreader-plugins/plugins/v3.0.0/public/static/{icon_path}
+            // Format: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/master/public/static/{icon_path}
             val iconPath = metadata.icon.removePrefix("src/").removePrefix("/")
-            "https://raw.githubusercontent.com/LNReader/lnreader-plugins/plugins/v3.0.0/public/static/$iconPath"
+            "https://raw.githubusercontent.com/LNReader/lnreader-plugins/refs/heads/master/public/static/$iconPath"
         }
         else -> "https://via.placeholder.com/300x300?text=${metadata.id}"
     },

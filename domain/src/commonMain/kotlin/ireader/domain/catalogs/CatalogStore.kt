@@ -141,11 +141,13 @@ class CatalogStore(
     private fun onInstalled(pkgName: String, isLocalInstall: Boolean) {
         scope.launch(Dispatchers.Default) {
             lock.withLock {
+                ireader.core.log.Log.warn("CatalogStore: onInstalled called for $pkgName (isLocal: $isLocalInstall)")
                 val previousCatalog =
                     catalogs.find { (it as? CatalogInstalled)?.pkgName == pkgName }
 
                 // Don't replace system catalogs with local catalogs
                 if (!isLocalInstall && previousCatalog is CatalogInstalled.Locally) {
+                    ireader.core.log.Log.warn("CatalogStore: Skipping - don't replace system with local")
                     return@launch
                 }
 
@@ -161,7 +163,24 @@ class CatalogStore(
                     } else {
                         catalog
                     }
-                } ?: return@launch
+                }
+                
+                // If catalog is null, it might be a JS plugin - reload all catalogs
+                if (catalog == null) {
+                    ireader.core.log.Log.warn("CatalogStore: Catalog is null (likely JS plugin), reloading all catalogs")
+                    val loadedCatalogs = loader.loadAll().distinctBy { it.sourceId }.toSet().toList()
+                    ireader.core.log.Log.warn("CatalogStore: Reloaded ${loadedCatalogs.size} catalogs")
+                    val pinnedCatalogIds = pinnedCatalogsPreference.get()
+                    catalogs = loadedCatalogs.map { cat ->
+                        if (cat.sourceId.toString() in pinnedCatalogIds) {
+                            cat.copy(isPinned = true)
+                        } else {
+                            cat
+                        }
+                    }
+                    ireader.core.log.Log.warn("CatalogStore: Catalog list updated with ${catalogs.size} catalogs")
+                    return@launch
+                }
 
                 val newInstalledCatalogs = catalogs.toMutableList()
                 if (previousCatalog != null) {
@@ -178,10 +197,22 @@ class CatalogStore(
             lock.withLock {
                 val installedCatalog =
                     catalogs.find { (it as? CatalogInstalled)?.pkgName == pkgName }
-                if (installedCatalog != null &&
-                    installedCatalog is CatalogInstalled.Locally == isLocalInstall
-                ) {
-                    catalogs = catalogs - installedCatalog
+                
+                // For JS plugins (JSPluginCatalog), just remove by pkgName match
+                if (installedCatalog != null) {
+                    // Check if it's a traditional installed catalog or JS plugin
+                    val shouldRemove = when {
+                        installedCatalog is CatalogInstalled.Locally && isLocalInstall -> true
+                        installedCatalog is CatalogInstalled.SystemWide && !isLocalInstall -> true
+                        // JS plugins are neither Locally nor SystemWide, so remove by pkgName match
+                        installedCatalog !is CatalogInstalled.Locally && 
+                        installedCatalog !is CatalogInstalled.SystemWide -> true
+                        else -> false
+                    }
+                    
+                    if (shouldRemove) {
+                        catalogs = catalogs - installedCatalog
+                    }
                 }
             }
         }

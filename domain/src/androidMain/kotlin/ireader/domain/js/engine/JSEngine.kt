@@ -1,72 +1,64 @@
 package ireader.domain.js.engine
 
-import app.cash.quickjs.QuickJs
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.eclipsesource.v8.V8
+import com.eclipsesource.v8.V8Array
+import com.eclipsesource.v8.V8Object
+import com.eclipsesource.v8.utils.V8ObjectUtils
 
 /**
- * Android implementation of JSEngine using QuickJS.
+ * Android implementation of JSEngine using J2V8 (V8 JavaScript engine).
+ * 
+ * V8 provides full support for modern JavaScript including:
+ * - Native Promise support (no polling needed!)
+ * - async/await
+ * - Arrow functions
+ * - const/let
+ * - Template literals
+ * - Destructuring
+ * - Classes
+ * - Generators
+ * 
+ * This is the same engine that powers Chrome and Node.js!
  */
 actual class JSEngine {
     
-    private var quickJs: QuickJs? = null
-    private val memoryLimit = 64 * 1024 * 1024L // 64MB
+    private var v8: V8? = null
     
     actual fun initialize() {
-        if (quickJs != null) {
+        if (v8 != null) {
             return
         }
         
         try {
-            quickJs = QuickJs.create()
-            // Note: QuickJS Android library doesn't expose memory limit API directly
-            // Memory limits would need to be enforced at a higher level
+            // Create V8 runtime
+            v8 = V8.createV8Runtime()
             
-            // Apply sandbox restrictions
-            applySandboxRestrictions()
-        } catch (e: Exception) {
-            throw JSException("Failed to initialize QuickJS engine", cause = e)
-        }
-    }
-    
-    /**
-     * Applies sandbox restrictions to prevent dangerous operations.
-     */
-    private fun applySandboxRestrictions() {
-        val engine = quickJs ?: return
-        
-        try {
-            // Disable eval() by overriding it
-            engine.evaluate("globalThis.eval = undefined;")
-            
-            // Note: Function constructor is allowed for transpiled code compatibility
-            // The sandbox environment prevents actual harm
-            
-            // Setup CommonJS-like module system for LNReader plugin compatibility
-            engine.evaluate("""
-                // Create module and exports objects for CommonJS compatibility
+            // Setup CommonJS-like module system
+            v8?.executeScript("""
                 if (typeof module === 'undefined') {
-                    globalThis.module = { exports: {} };
+                    var module = { exports: {} };
                 }
                 if (typeof exports === 'undefined') {
-                    globalThis.exports = globalThis.module.exports;
+                    var exports = module.exports;
                 }
                 
-                // Disable other potentially dangerous globals
-                globalThis.importScripts = undefined;
-                globalThis.WebAssembly = undefined;
+                // Disable potentially dangerous globals
+                var importScripts = undefined;
+                var WebAssembly = undefined;
             """.trimIndent())
         } catch (e: Exception) {
-            // Log but don't fail initialization if sandbox restrictions fail
-            // This is a best-effort security measure
+            v8?.release()
+            v8 = null
+            throw JSException("Failed to initialize V8 engine", cause = e)
         }
     }
     
     actual fun evaluateScript(script: String): Any? {
-        val engine = quickJs ?: throw JSException("Engine not initialized")
+        val engine = v8 ?: throw JSException("Engine not initialized")
         
         return try {
-            engine.evaluate(script)
+            val result = engine.executeScript(script)
+            convertToKotlin(result)
         } catch (e: Exception) {
             throw JSException(
                 "Script evaluation failed: ${e.message}",
@@ -77,24 +69,36 @@ actual class JSEngine {
     }
     
     actual fun callFunction(name: String, vararg args: Any?): Any? {
-        val engine = quickJs ?: throw JSException("Engine not initialized")
+        val engine = v8 ?: throw JSException("Engine not initialized")
         
         return try {
-            // Build a JavaScript call expression
-            val argsJson = args.joinToString(", ") { arg ->
-                when (arg) {
-                    null -> "null"
-                    is String -> "\"${arg.replace("\"", "\\\"")}\""
-                    is Number -> arg.toString()
-                    is Boolean -> arg.toString()
-                    is Map<*, *> -> convertMapToJson(arg)
-                    is List<*> -> convertListToJson(arg)
-                    else -> "\"${arg.toString().replace("\"", "\\\"")}\""
-                }
+            // Get the function
+            val func = engine.getObject(name)
+            if (func == null || func !is com.eclipsesource.v8.V8Function) {
+                throw JSException("$name is not a function")
             }
             
-            val callScript = "$name($argsJson)"
-            engine.evaluate(callScript)
+            // Convert arguments
+            val v8Args = V8Array(engine)
+            try {
+                args.forEach { arg ->
+                    when (arg) {
+                        null -> v8Args.pushNull()
+                        is String -> v8Args.push(arg)
+                        is Int -> v8Args.push(arg)
+                        is Double -> v8Args.push(arg)
+                        is Boolean -> v8Args.push(arg)
+                        else -> v8Args.push(arg.toString())
+                    }
+                }
+                
+                // Call function
+                val result = func.call(engine, v8Args)
+                convertToKotlin(result)
+            } finally {
+                v8Args.release()
+                func.release()
+            }
         } catch (e: Exception) {
             throw JSException(
                 "Function call failed: $name - ${e.message}",
@@ -105,19 +109,15 @@ actual class JSEngine {
     }
     
     actual fun setGlobalObject(name: String, value: Any) {
-        val engine = quickJs ?: throw JSException("Engine not initialized")
+        val engine = v8 ?: throw JSException("Engine not initialized")
         
         try {
-            // For complex objects, we need to set them via script evaluation
             when (value) {
-                is String -> engine.evaluate("globalThis.$name = \"${value.replace("\"", "\\\"")}\"")
-                is Number -> engine.evaluate("globalThis.$name = $value")
-                is Boolean -> engine.evaluate("globalThis.$name = $value")
-                else -> {
-                    // For complex objects, we store a reference and create a proxy
-                    globalObjects[name] = value
-                    engine.evaluate("globalThis.$name = { __nativeObject: '$name' }")
-                }
+                is String -> engine.add(name, value)
+                is Int -> engine.add(name, value)
+                is Double -> engine.add(name, value)
+                is Boolean -> engine.add(name, value)
+                else -> engine.add(name, value.toString())
             }
         } catch (e: Exception) {
             throw JSException("Failed to set global object: $name", cause = e)
@@ -125,59 +125,48 @@ actual class JSEngine {
     }
     
     actual fun getGlobalObject(name: String): Any? {
-        val engine = quickJs ?: throw JSException("Engine not initialized")
+        val engine = v8 ?: throw JSException("Engine not initialized")
         
         return try {
-            engine.evaluate("globalThis.$name")
+            val result = engine.get(name)
+            convertToKotlin(result)
         } catch (e: Exception) {
             null
         }
     }
     
     actual fun dispose() {
-        quickJs?.close()
-        quickJs = null
-        globalObjects.clear()
-    }
-    
-    private fun convertMapToJson(map: Map<*, *>): String {
-        val entries = map.entries.joinToString(", ") { (key, value) ->
-            val keyStr = key.toString()
-            val valueStr = when (value) {
-                null -> "null"
-                is String -> "\"${value.replace("\"", "\\\"")}\""
-                is Number -> value.toString()
-                is Boolean -> value.toString()
-                is Map<*, *> -> convertMapToJson(value)
-                is List<*> -> convertListToJson(value)
-                else -> "\"${value.toString().replace("\"", "\\\"")}\""
-            }
-            "\"$keyStr\": $valueStr"
+        try {
+            v8?.release()
+        } catch (e: Exception) {
+            // Ignore
         }
-        return "{$entries}"
+        v8 = null
     }
     
-    private fun convertListToJson(list: List<*>): String {
-        val items = list.joinToString(", ") { item ->
-            when (item) {
-                null -> "null"
-                is String -> "\"${item.replace("\"", "\\\"")}\""
-                is Number -> item.toString()
-                is Boolean -> item.toString()
-                is Map<*, *> -> convertMapToJson(item)
-                is List<*> -> convertListToJson(item)
-                else -> "\"${item.toString().replace("\"", "\\\"")}\""
+    /**
+     * Convert V8 value to Kotlin value.
+     */
+    private fun convertToKotlin(value: Any?): Any? {
+        return when (value) {
+            null, V8.getUndefined() -> null
+            is String, is Number, is Boolean -> value
+            is V8Array -> {
+                val list = mutableListOf<Any?>()
+                try {
+                    for (i in 0 until value.length()) {
+                        list.add(convertToKotlin(value.get(i)))
+                    }
+                    list
+                } finally {
+                    value.release()
+                }
             }
-        }
-        return "[$items]"
-    }
-    
-    companion object {
-        // Store native objects that are exposed to JavaScript
-        private val globalObjects = mutableMapOf<String, Any>()
-        
-        fun getNativeObject(name: String): Any? {
-            return globalObjects[name]
+            is V8Object -> {
+                // For now, return as-is (can be enhanced later)
+                value
+            }
+            else -> value
         }
     }
 }

@@ -4,67 +4,77 @@
 
 The JavaScript Plugin System enables IReader to load and execute JavaScript-based plugins from the LNReader ecosystem. This allows users to access hundreds of novel sources through LNReader's plugin format without requiring native Kotlin implementations.
 
+### Getting LNReader Plugins
+
+To use LNReader plugins in the app, add the following repository URL in the app's repository settings:
+
+```
+https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/repo/plugins/plugins.min.json
+```
+
+This repository provides unminified versions of LNReader plugins that are compatible with IReader's JavaScript plugin system.
+
 ### Architecture
 
 #### Component Diagram
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     IReader Application                      │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │           CatalogLoader                                │ │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌─────────────┐ │ │
-│  │  │   Bundled    │  │   Locally    │  │  SystemWide │ │ │
-│  │  │   Catalogs   │  │   Catalogs   │  │   Catalogs  │ │ │
-│  │  └──────────────┘  └──────────────┘  └─────────────┘ │ │
-│  │                                                        │ │
-│  │  ┌──────────────────────────────────────────────────┐ │ │
-│  │  │         JSPluginCatalog (NEW)                    │ │ │
-│  │  │  - Implements CatalogLocal                       │ │ │
-│  │  │  - Wraps JSPluginSource                          │ │ │
-│  │  └──────────────────────────────────────────────────┘ │ │
-│  └────────────────────────────────────────────────────────┘ │
-│                            │                                 │
-│                            ▼                                 │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │         JSPluginSource                                 │ │
-│  │  - Implements Source interface                         │ │
-│  │  - Delegates to JSPluginBridge                         │ │
-│  └────────────────────────────────────────────────────────┘ │
-│                            │                                 │
-│                            ▼                                 │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │         JSPluginBridge                                 │ │
-│  │  - Translates Kotlin ↔ JavaScript                     │ │
-│  │  - Manages JS Engine lifecycle                         │ │
-│  │  - Handles async operations                            │ │
-│  └────────────────────────────────────────────────────────┘ │
-│                            │                                 │
-│                            ▼                                 │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │         JSEngine                                       │ │
-│  │  - QuickJS (Android) / GraalVM (Desktop)              │ │
-│  │  - Provides require() implementation                   │ │
-│  │  - Sandboxed execution environment                     │ │
-│  └────────────────────────────────────────────────────────┘ │
-│                            │                                 │
-│                            ▼                                 │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │         JSLibraryProvider                              │ │
-│  │  - Cheerio, dayjs, urlencode                          │ │
-│  │  - fetch(), Storage, LocalStorage                      │ │
-│  └────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────┐
+│              IReader Application                     │
+│  ┌────────────────────────────────────────────────┐ │
+│  │         CatalogLoader                          │ │
+│  │  ┌──────────┐  ┌──────────┐  ┌─────────────┐ │ │
+│  │  │ Bundled  │  │  Local   │  │ SystemWide  │ │ │
+│  │  │ Catalogs │  │ Catalogs │  │  Catalogs   │ │ │
+│  │  └──────────┘  └──────────┘  └─────────────┘ │ │
+│  │                                                │ │
+│  │  ┌──────────────────────────────────────────┐ │ │
+│  │  │      JSPluginCatalog                     │ │ │
+│  │  │  - Implements CatalogLocal               │ │ │
+│  │  │  - Wraps JSPluginSource                  │ │ │
+│  │  └──────────────────────────────────────────┘ │ │
+│  └────────────────────────────────────────────────┘ │
+│                       │                              │
+│                       ▼                              │
+│  ┌────────────────────────────────────────────────┐ │
+│  │      JSPluginSource                            │ │
+│  │  - Implements Source interface                 │ │
+│  │  - Delegates to JSPluginBridge                 │ │
+│  └────────────────────────────────────────────────┘ │
+│                       │                              │
+│                       ▼                              │
+│  ┌────────────────────────────────────────────────┐ │
+│  │      JSPluginBridge                            │ │
+│  │  - Translates Kotlin ↔ JavaScript             │ │
+│  │  - Manages JS Engine lifecycle                 │ │
+│  │  - Handles async operations                    │ │
+│  └────────────────────────────────────────────────┘ │
+│                       │                              │
+│                       ▼                              │
+│  ┌────────────────────────────────────────────────┐ │
+│  │      JSEngine                                  │ │
+│  │  - QuickJS (Android) / GraalVM (Desktop)      │ │
+│  │  - Provides require() implementation           │ │
+│  │  - Sandboxed execution environment             │ │
+│  └────────────────────────────────────────────────┘ │
+│                       │                              │
+│                       ▼                              │
+│  ┌────────────────────────────────────────────────┐ │
+│  │      JSLibraryProvider                         │ │
+│  │  - Cheerio, dayjs, urlencode                  │ │
+│  │  - fetch(), Storage, LocalStorage              │ │
+│  └────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────┘
 ```
 
 #### Data Flow
 
-1. **Plugin Loading**: `JSPluginLoader` scans the plugins directory for `.js` files
-2. **Engine Initialization**: `JSEngine` is created and initialized with required libraries
-3. **Code Execution**: Plugin code is evaluated in the sandboxed JavaScript environment
-4. **Metadata Extraction**: `JSPluginBridge` extracts plugin metadata (id, name, version, etc.)
-5. **Source Creation**: `JSPluginSource` wraps the bridge and implements IReader's `Source` interface
-6. **Catalog Integration**: `JSPluginCatalog` wraps the source and integrates with the catalog system
+1. **Plugin Loading** - `JSPluginLoader` scans the plugins directory for `.js` files
+2. **Engine Initialization** - `JSEngine` is created and initialized with required libraries
+3. **Code Execution** - Plugin code is evaluated in the sandboxed JavaScript environment
+4. **Metadata Extraction** - `JSPluginBridge` extracts plugin metadata (id, name, version, etc.)
+5. **Source Creation** - `JSPluginSource` wraps the bridge and implements IReader's `Source` interface
+6. **Catalog Integration** - `JSPluginCatalog` wraps the source and integrates with the catalog system
 
 #### Class Relationships
 
@@ -89,6 +99,10 @@ JSPluginCatalog
 
 The `JSEngine` interface provides a platform-agnostic way to execute JavaScript code.
 
+**Platform Implementations:**
+- **Android** - Uses QuickJS via `quickjs-android` library
+- **Desktop** - Uses GraalVM JavaScript engine
+
 #### Methods
 
 ##### `initialize()`
@@ -99,12 +113,6 @@ Initializes the JavaScript engine. Must be called before any other operations.
 val engine = JSEngine()
 engine.initialize()
 ```
-
-**Platform Implementations:**
-- **Android**: Uses QuickJS via `quickjs-android` library
-- **Desktop**: Uses GraalVM JavaScript engine
-
----
 
 ##### `evaluateScript(script: String): Any?`
 
@@ -128,8 +136,6 @@ println(result) // Output: 5
 
 **Throws:**
 - `JSException` if execution fails
-
----
 
 ##### `callFunction(name: String, vararg args: Any?): Any?`
 
@@ -156,8 +162,6 @@ println(greeting) // Output: Hello, World!
 **Throws:**
 - `JSException` if the call fails
 
----
-
 ##### `setGlobalObject(name: String, value: Any)`
 
 Sets a global object in the JavaScript context.
@@ -170,8 +174,6 @@ engine.evaluateScript("console.log(API_KEY)") // Output: abc123
 **Parameters:**
 - `name`: The global variable name
 - `value`: The value to set
-
----
 
 ##### `getGlobalObject(name: String): Any?`
 
@@ -188,8 +190,6 @@ val config = engine.getGlobalObject("config")
 **Returns:**
 - The global object value, or null if not found
 
----
-
 ##### `dispose()`
 
 Disposes the JavaScript engine and releases resources. The engine cannot be used after disposal.
@@ -197,8 +197,6 @@ Disposes the JavaScript engine and releases resources. The engine cannot be used
 ```kotlin
 engine.dispose()
 ```
-
----
 
 ##### `withTimeout(timeoutMillis: Long, block: suspend () -> T): T`
 
@@ -219,8 +217,6 @@ val result = engine.withTimeout(5000L) {
 
 **Throws:**
 - `kotlinx.coroutines.TimeoutCancellationException` if timeout is exceeded
-
----
 
 ### JSPluginBridge API
 
@@ -251,8 +247,6 @@ println("Plugin: ${metadata.name} v${metadata.version}")
 **Returns:**
 - `PluginMetadata` containing id, name, version, site, icon, lang, filters, etc.
 
----
-
 ##### `suspend fun popularNovels(page: Int, filters: Map<String, Any>): List<JSNovelItem>`
 
 Calls the plugin's `popularNovels()` method to fetch popular novels.
@@ -275,8 +269,6 @@ novels.forEach { novel ->
 - `JSPluginError.ExecutionError` if the call fails
 - `JSPluginError.TimeoutError` if execution exceeds 30 seconds
 
----
-
 ##### `suspend fun searchNovels(searchTerm: String, page: Int): List<JSNovelItem>`
 
 Calls the plugin's `searchNovels()` method to search for novels.
@@ -291,8 +283,6 @@ val results = bridge.searchNovels("fantasy", page = 1)
 
 **Returns:**
 - List of `JSNovelItem` objects matching the search
-
----
 
 ##### `suspend fun parseNovel(novelPath: String): JSSourceNovel`
 
@@ -310,8 +300,6 @@ println("Chapters: ${novel.chapters.size}")
 **Returns:**
 - `JSSourceNovel` containing full novel details and chapter list
 
----
-
 ##### `suspend fun parseChapter(chapterPath: String): String`
 
 Calls the plugin's `parseChapter()` method to fetch chapter content.
@@ -325,8 +313,6 @@ val htmlContent = bridge.parseChapter("/chapter/example-chapter-1")
 
 **Returns:**
 - HTML content of the chapter as a String
-
----
 
 ##### `suspend fun getFilters(): Map<String, FilterDefinition>`
 
@@ -345,8 +331,6 @@ filters.forEach { (key, definition) ->
 
 **Returns:**
 - Map of filter key to `FilterDefinition`
-
----
 
 ### Data Conversion Rules
 
@@ -374,8 +358,6 @@ filters.forEach { (key, definition) ->
 | `null` | `null` | Direct conversion |
 | `List<*>` | `Array` | Recursive conversion |
 | `Map<String, *>` | `Object` | Recursive conversion |
-
----
 
 ### Plugin Format
 
@@ -532,8 +514,6 @@ Tri-state checkboxes (include/exclude/none).
 }
 ```
 
----
-
 ### Available Libraries
 
 Plugins have access to the following JavaScript libraries:
@@ -613,8 +593,6 @@ await storage.clearAll();
 const keys = await storage.getAllKeys();
 ```
 
----
-
 ### Security Considerations
 
 #### Sandboxing
@@ -645,11 +623,9 @@ const permissions = ['NETWORK', 'STORAGE'];
 ```
 
 Available permissions:
-- `NETWORK`: Make HTTP requests
-- `STORAGE`: Persist data
-- `WEBVIEW`: Use WebView for authentication (future)
-
----
+- `NETWORK` - Make HTTP requests
+- `STORAGE` - Persist data
+- `WEBVIEW` - Use WebView for authentication (future)
 
 ### Performance Optimization
 
@@ -687,8 +663,6 @@ Each plugin execution is limited to 64MB of memory:
 engine.setMemoryLimit(64 * 1024 * 1024L)
 ```
 
----
-
 ### Error Handling
 
 #### Error Types
@@ -714,8 +688,6 @@ try {
     showError(e.toUserMessage())
 }
 ```
-
----
 
 ### Testing
 
@@ -748,8 +720,6 @@ Located in `domain/src/androidTest/kotlin/ireader/domain/js/`:
 # Run with coverage
 ./gradlew domain:koverHtmlReport
 ```
-
----
 
 ### Debugging
 
@@ -786,25 +756,21 @@ data class PluginPerformanceMetrics(
 )
 ```
 
----
-
 ### Platform Differences
 
 #### Android
 
-- **Engine**: QuickJS (lightweight, fast)
-- **Plugins Directory**: `/data/data/com.ireader/files/js-plugins/`
-- **Storage**: SharedPreferences
-- **Memory Limit**: 64MB per plugin
+- **Engine** - QuickJS (lightweight, fast)
+- **Plugins Directory** - `/data/data/com.ireader/files/js-plugins/`
+- **Storage** - SharedPreferences
+- **Memory Limit** - 64MB per plugin
 
 #### Desktop
 
-- **Engine**: GraalVM JavaScript (full ES6+ support)
-- **Plugins Directory**: `~/.ireader/js-plugins/`
-- **Storage**: File-based
-- **Memory Limit**: 128MB per plugin
-
----
+- **Engine** - GraalVM JavaScript (full ES6+ support)
+- **Plugins Directory** - `~/.ireader/js-plugins/`
+- **Storage** - File-based
+- **Memory Limit** - 128MB per plugin
 
 ### Future Enhancements
 
@@ -815,11 +781,10 @@ data class PluginPerformanceMetrics(
 - Multi-source plugins (aggregate multiple sources)
 - Plugin ratings and reviews
 
----
-
 ### References
 
-- [LNReader Plugin Specification](https://github.com/LNReader/lnreader-plugins)
+- [LNReader Plugin Specification (Original)](https://github.com/LNReader/lnreader-plugins)
+- [LNReader Plugins Unminified](https://github.com/kazemcodes/lnreader-plugins-unminified)
 - [QuickJS Documentation](https://bellard.org/quickjs/)
 - [GraalVM JavaScript](https://www.graalvm.org/javascript/)
 - [Cheerio Documentation](https://cheerio.js.org/)

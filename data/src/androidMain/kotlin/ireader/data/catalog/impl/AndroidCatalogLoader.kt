@@ -14,7 +14,6 @@ import ireader.core.prefs.PrefixedPreferenceStore
 import ireader.core.source.Source
 import ireader.core.source.TestSource
 import ireader.domain.catalogs.service.CatalogLoader
-import ireader.domain.js.engine.JSEnginePool
 import ireader.domain.js.loader.JSPluginLoader
 import ireader.domain.js.util.JSPluginLogger
 import ireader.domain.models.entities.CatalogBundled
@@ -51,10 +50,23 @@ class AndroidCatalogLoader(
     private val secureExtensionsDir = File(context.codeCacheDir, "secure_extensions").apply { mkdirs() }
     private val secureDexCacheDir = File(context.codeCacheDir, "dex-cache").apply { mkdirs() }
     
-    // JavaScript plugin loader
+    // JavaScript plugin loader - uses converter approach (no JS engine needed!)
     private val jsPluginLoader: JSPluginLoader by lazy {
-        val jsPluginsDir = File(context.filesDir, "js-plugins").apply { mkdirs() }
-        JSPluginLoader(jsPluginsDir, httpClients.default, preferenceStore, JSEnginePool())
+        // Use external storage directory for easier access: /storage/emulated/0/ireader/js-plugins
+        val jsPluginsDir = getJSPluginsDirectory()
+        JSPluginLoader(jsPluginsDir, httpClients.default, preferenceStore)
+    }
+    
+    /**
+     * Get the JS plugins directory in external storage for easier access.
+     * Returns: /storage/emulated/0/ireader/js-plugins
+     */
+    private fun getJSPluginsDirectory(): File {
+        val externalDir = context.getExternalFilesDir(null)?.parentFile?.parentFile?.parentFile
+        val ireaderDir = File(externalDir, "ireader")
+        val jsPluginsDir = File(ireaderDir, "js-plugins")
+        jsPluginsDir.mkdirs()
+        return jsPluginsDir
     }
     
     init {
@@ -154,13 +166,27 @@ class AndroidCatalogLoader(
         }.filterNotNull()
 
         // Load JavaScript plugins if enabled
-        val jsPlugins = if (uiPreferences.enableJSPlugins().get()) {
+        val jsPluginsEnabled = uiPreferences.enableJSPlugins().get()
+        Log.warn("JS Plugins enabled: $jsPluginsEnabled")
+        
+        val jsPlugins = if (jsPluginsEnabled) {
             try {
+                val jsPluginsDir = getJSPluginsDirectory()
+                Log.warn("JS Plugins directory: ${jsPluginsDir.absolutePath}, exists: ${jsPluginsDir.exists()}")
+                if (jsPluginsDir.exists()) {
+                    val files = jsPluginsDir.listFiles()
+                    Log.warn("JS Plugin files found: ${files?.size ?: 0}")
+                    files?.forEach { file ->
+                        Log.warn("  - ${file.name} (${file.length()} bytes)")
+                    }
+                }
+                
                 val startTime = System.currentTimeMillis()
                 val plugins = withContext(Dispatchers.IO) {
                     jsPluginLoader.loadAllPlugins()
                 }
                 val duration = System.currentTimeMillis() - startTime
+                Log.warn("Loaded ${plugins.size} JS plugins in ${duration}ms")
                 JSPluginLogger.logInfo("AndroidCatalogLoader", 
                     "Loaded ${plugins.size} JS plugins in ${duration}ms")
                 plugins
@@ -169,6 +195,7 @@ class AndroidCatalogLoader(
                 emptyList()
             }
         } else {
+            Log.warn("JS Plugins are disabled in preferences")
             emptyList()
         }
 
@@ -180,6 +207,17 @@ class AndroidCatalogLoader(
      * contains the required feature flag before trying to load it.
      */
     override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? {
+        // Check if this is a JS plugin - if so, return null as JS plugins are loaded via loadAll()
+        val jsPluginsDir = getJSPluginsDirectory()
+        val jsFile = File(jsPluginsDir, "$pkgName.js")
+        
+        if (jsFile.exists() && jsFile.canRead()) {
+            // JS plugins are handled by loadAll(), not loadLocalCatalog()
+            // Return null to avoid the "catalog not found" warning
+            return null
+        }
+        
+        // Try to load as traditional APK extension
         val file = File(simpleStorage.extensionDirectory(), "${pkgName}/${pkgName}.apk")
         val cacheFile = File(simpleStorage.cacheExtensionDir(), "${pkgName}/${pkgName}.apk")
         val finalFile = if (file.canRead() && file.canRead()) {

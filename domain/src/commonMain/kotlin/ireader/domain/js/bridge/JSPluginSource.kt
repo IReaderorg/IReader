@@ -1,407 +1,262 @@
 package ireader.domain.js.bridge
 
 import ireader.core.log.Log
-import ireader.core.source.CatalogSource
+import ireader.core.source.Dependencies
+import ireader.core.source.HttpSource
 import ireader.core.source.model.*
-import ireader.domain.js.models.JSPluginError
 import ireader.domain.js.models.PluginMetadata
-import kotlinx.coroutines.runBlocking
 
 /**
- * Implementation of IReader's HttpSource interface using a JavaScript plugin.
- * Delegates all operations to the JSPluginBridge.
+ * Wrapper that adapts a Zipline LNReaderPlugin to IReader's HttpSource interface.
+ * This bridges the JavaScript plugin with the native Kotlin source system.
  */
 class JSPluginSource(
-    private val bridge: JSPluginBridge,
-    private val metadata: PluginMetadata,
-    override val id: Long,
-    override val name: String,
-    override val lang: String,
-    private val dependencies: ireader.core.source.Dependencies
-) : ireader.core.source.HttpSource(dependencies) {
+    private val plugin: LNReaderPlugin,
+    val metadata: PluginMetadata,
+    dependencies: Dependencies
+) : HttpSource(dependencies) {
     
-    /**
-     * Base URL from the plugin metadata.
-     * This allows opening book details in webview.
-     */
-    override val baseUrl: String
-        get() = metadata.site
-    
-    /**
-     * Gets detailed information about a manga/novel.
-     */
-    override suspend fun getMangaDetails(
-        manga: MangaInfo,
-        commands: List<Command<*>>
-    ): MangaInfo {
-        return try {
-            val novelPath = manga.key
-            val sourceNovel = bridge.parseNovel(novelPath)
-            sourceNovel.toMangaInfo()
-        } catch (e: JSPluginError) {
-            Log.error(e, "[JSPluginSource] Failed to get manga details")
-            throw e
-        } catch (e: Exception) {
-            Log.error(e, "[JSPluginSource] Unexpected error getting manga details")
-            throw JSPluginError.ExecutionError(metadata.id, "getMangaDetails", e)
-        }
-    }
-    
-    /**
-     * Gets the list of chapters for a manga/novel.
-     */
-    override suspend fun getChapterList(
-        manga: MangaInfo,
-        commands: List<Command<*>>
-    ): List<ChapterInfo> {
-        return try {
-            val novelPath = manga.key
-            val sourceNovel = bridge.parseNovel(novelPath)
-            sourceNovel.chapters.map { it.toChapterInfo() }
-        } catch (e: JSPluginError) {
-            Log.error(e, "[JSPluginSource] Failed to get chapter list")
-            throw e
-        } catch (e: Exception) {
-            Log.error(e, "[JSPluginSource] Unexpected error getting chapter list")
-            throw JSPluginError.ExecutionError(metadata.id, "getChapterList", e)
-        }
-    }
-    
-    /**
-     * Gets the content pages for a chapter.
-     * For novel sources, returns a single Text page with HTML content.
-     */
-    override suspend fun getPageList(
-        chapter: ChapterInfo,
-        commands: List<Command<*>>
-    ): List<Page> {
-        return try {
-            val chapterPath = chapter.key
-            val htmlContent = bridge.parseChapter(chapterPath)
-            parseHtmlToParagraphs(htmlContent)
-        } catch (e: JSPluginError) {
-            Log.error(e, "[JSPluginSource] Failed to get page list")
-            throw e
-        } catch (e: Exception) {
-            Log.error(e, "[JSPluginSource] Unexpected error getting page list")
-            throw JSPluginError.ExecutionError(metadata.id, "getPageList", e)
-        }
-    }
-    
-    /**
-     * Parses HTML content into a list of Text pages, one per paragraph.
-     */
-    private fun parseHtmlToParagraphs(html: String): List<Page> {
-        if (html.isBlank()) return emptyList()
+    override val name: String = metadata.name
+    override val lang: String = metadata.lang
+    override val baseUrl: String = metadata.site
+    class LatestListing() : Listing(name = "Latest")
+    class PopularListing() : Listing(name = "Popular")
+
+    override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
+        Log.info("JSPluginSource: [$name] getMangaList(sort) called - sort=$sort, page=$page")
         
         return try {
-            // Use jsoup to parse HTML and extract text from paragraphs
-            val doc = org.jsoup.Jsoup.parse(html)
-            val paragraphs = doc.select("p, div.paragraph, div.text")
-                .mapNotNull { element ->
-                    val text = element.text().trim()
-                    if (text.isNotEmpty()) Text(text) else null
+            // Map IReader's Listing to LNReader plugin methods
+            val novels = when (sort) {
+                is PopularListing -> {
+                    Log.debug("JSPluginSource: Calling plugin.popularNovels($page)")
+                    plugin.popularNovels(page)
                 }
+                is LatestListing -> {
+                    Log.debug("JSPluginSource: Calling plugin.latestNovels($page)")
+                    plugin.latestNovels(page)
+                }
+                else -> {
+                    // Default to popular if no listing specified
+                    Log.debug("JSPluginSource: No listing specified, defaulting to popularNovels($page)")
+                    plugin.popularNovels(page)
+                }
+            }
             
-            // If no paragraphs found, try to get all text content
-            if (paragraphs.isEmpty()) {
-                val allText = doc.text().trim()
-                if (allText.isNotEmpty()) {
-                    // Split by double newlines or long single newlines
-                    val splits = allText.split(Regex("\n\n+|\n{3,}"))
-                        .map { it.trim() }
-                        .filter { it.isNotEmpty() }
-                        .map { Text(it) }
-                    
-                    if (splits.isNotEmpty()) return splits
-                }
-                
-                // Last resort: return the HTML as-is
-                listOf(Text(html))
+            Log.info("JSPluginSource: Got ${novels.size} novels from plugin")
+            if (novels.isEmpty()) {
+                Log.warn("JSPluginSource: Plugin returned empty list!")
             } else {
-                paragraphs
-            }
-        } catch (e: Exception) {
-            Log.error(e, "[JSPluginSource] Failed to parse HTML to paragraphs")
-            // Fallback: return HTML as single page
-            listOf(Text(html))
-        }
-    }
-    
-    /**
-     * Gets popular novels from the source.
-     * Custom method for browsing popular content.
-     */
-    suspend fun getPopularNovels(page: Int, filters: Map<String, Any> = emptyMap()): List<MangaInfo> {
-        return try {
-            val novels = bridge.popularNovels(page, filters)
-            novels.map { it.toMangaInfo() }
-        } catch (e: JSPluginError) {
-            Log.error(e, "[JSPluginSource] Failed to get popular novels")
-            throw e
-        } catch (e: Exception) {
-            Log.error(e, "[JSPluginSource] Unexpected error getting popular novels")
-            throw JSPluginError.ExecutionError(metadata.id, "getPopularNovels", e)
-        }
-    }
-    
-    /**
-     * Searches for novels in the source.
-     * Custom method for searching content.
-     */
-    suspend fun searchNovels(query: String, page: Int): List<MangaInfo> {
-        return try {
-            val novels = bridge.searchNovels(query, page)
-            novels.map { it.toMangaInfo() }
-        } catch (e: JSPluginError) {
-            Log.error(e, "[JSPluginSource] Failed to search novels")
-            throw e
-        } catch (e: Exception) {
-            Log.error(e, "[JSPluginSource] Unexpected error searching novels")
-            throw JSPluginError.ExecutionError(metadata.id, "searchNovels", e)
-        }
-    }
-    
-    /**
-     * Gets the filter definitions for this source (internal method).
-     */
-    suspend fun getPluginFilters(): Map<String, ireader.domain.js.models.FilterDefinition> {
-        return try {
-            bridge.getFilters()
-        } catch (e: Exception) {
-            Log.error(e, "[JSPluginSource] Failed to get filters")
-            emptyMap()
-        }
-    }
-    
-    // CatalogSource interface implementation
-    
-    override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
-        return try {
-            // Skip if this is a Search listing (search is handled separately via searchNovels)
-            if (sort?.name == "Search") {
-                return MangasPageInfo(emptyList(), hasNextPage = false)
+                Log.debug("JSPluginSource: First novel: ${novels.first().name}")
             }
             
-            // Start with default filter values
-            val filterValues = getDefaultFilterValues().toMutableMap()
-            
-            // Set sort based on listing type
-            val sortValue = when (sort?.name) {
-                "Latest" -> "latest"
-                "Popular" -> ""  // Empty for popular/default
-                else -> ""
-            }
-            if (sortValue.isNotEmpty()) {
-                filterValues["m_orderby"] = mapOf("value" to sortValue)
-            }
-            
-            val novels = bridge.popularNovels(page, filterValues)
-            val mangaList = novels.map { it.toMangaInfo() }
-            MangasPageInfo(mangaList, hasNextPage = mangaList.isNotEmpty())
+            MangasPageInfo(
+                mangas = novels.map { it.toMangaInfo() },
+                hasNextPage = novels.isNotEmpty()
+            )
         } catch (e: Exception) {
-            Log.error(e, "[JSPluginSource] Failed to get manga list")
-            MangasPageInfo(emptyList(), hasNextPage = false)
+            Log.error("JSPluginSource: Error in getMangaList(sort): ${e.message}", e)
+            e.printStackTrace()
+            MangasPageInfo(emptyList(), false)
         }
     }
     
     override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
         return try {
-            // Check if there's a search query in the filters
-            val searchQuery = filters.filterIsInstance<Filter.Text>()
-                .firstOrNull { it.name.equals("query", ignoreCase = true) || it.name.equals("search", ignoreCase = true) }
-                ?.value
+            // Check if there's a search query in filters
+            val query = filters.filterIsInstance<Filter.Title>().firstOrNull()?.value ?: ""
             
-            // If there's a search query, use searchNovels instead
-            if (!searchQuery.isNullOrBlank()) {
-                val novels = bridge.searchNovels(searchQuery, page)
-                val mangaList = novels.map { it.toMangaInfo() }
-                return MangasPageInfo(mangaList, hasNextPage = mangaList.isNotEmpty())
+            Log.info("JSPluginSource: [$name] getMangaList(filters) called - query='$query', page=$page")
+            
+            val novels = if (query.isNotBlank()) {
+                // If there's a search query, use searchNovels
+                Log.debug("JSPluginSource: Calling plugin.searchNovels('$query', $page)")
+                plugin.searchNovels(query, page)
+            } else {
+                // No search query, default to popular
+                Log.debug("JSPluginSource: No search query, calling plugin.popularNovels($page)")
+                plugin.popularNovels(page)
             }
             
-            // Start with default filter values and merge with user selections
-            val defaultValues = getDefaultFilterValues()
-            val userValues = convertFiltersToMap(filters)
-            val filterValues = defaultValues.toMutableMap().apply { putAll(userValues) }
+            Log.info("JSPluginSource: Got ${novels.size} novels from plugin")
+            if (novels.isEmpty()) {
+                Log.warn("JSPluginSource: Plugin returned empty list!")
+            } else {
+                Log.debug("JSPluginSource: First novel: ${novels.first().name}")
+            }
             
-            val novels = bridge.popularNovels(page, filterValues)
-            val mangaList = novels.map { it.toMangaInfo() }
-            MangasPageInfo(mangaList, hasNextPage = mangaList.isNotEmpty())
+            MangasPageInfo(
+                mangas = novels.map { it.toMangaInfo() },
+                hasNextPage = novels.isNotEmpty()
+            )
         } catch (e: Exception) {
-            Log.error(e, "[JSPluginSource] Failed to get manga list with filters")
-            MangasPageInfo(emptyList(), hasNextPage = false)
+            Log.error("JSPluginSource: Error in getMangaList(filters): ${e.message}", e)
+            e.printStackTrace()
+            MangasPageInfo(emptyList(), false)
         }
     }
     
-    /**
-     * Converts IReader FilterList to a map of filter values for the JS plugin.
-     */
-    private fun convertFiltersToMap(filters: FilterList): Map<String, Any> {
-        val filterMap = mutableMapOf<String, Any>()
-        
-        filters.forEach { filter ->
-            when (filter) {
-                is Filter.Select -> {
-                    // Get the selected option
-                    val selectedOption = filter.options.getOrNull(filter.value)
-                    if (selectedOption != null) {
-                        filterMap[filter.name] = mapOf("value" to selectedOption)
-                    }
-                }
-                is Filter.Text -> {
-                    if (filter.value.isNotBlank()) {
-                        filterMap[filter.name] = mapOf("value" to filter.value)
-                    }
-                }
-                is Filter.Group -> {
-                    // Handle checkbox groups
-                    val checkedValues = mutableListOf<String>()
-                    filter.filters.forEach { subFilter ->
-                        if (subFilter is Filter.Check && subFilter.value == true) {
-                            checkedValues.add(subFilter.name)
-                        }
-                    }
-                    if (checkedValues.isNotEmpty()) {
-                        filterMap[filter.name] = mapOf("value" to checkedValues)
-                    }
-                }
-                is Filter.Check -> {
-                    // Handle individual checkboxes
-                    if (filter.value == true) {
-                        filterMap[filter.name] = mapOf("value" to true)
-                    }
-                }
-                is Filter.Sort -> {
-                    // Handle sort filters
-                    filter.value?.let { selection ->
-                        val sortOption = filter.options.getOrNull(selection.index)
-                        if (sortOption != null) {
-                            filterMap[filter.name] = mapOf(
-                                "value" to sortOption,
-                                "ascending" to selection.ascending
-                            )
-                        }
-                    }
-                }
-                is Filter.Note -> {
-                    // Notes don't have values, skip them
-                }
-            }
-        }
-        
-        return filterMap
-    }
-    
-    /**
-     * Gets default filter values from the plugin's filter definitions.
-     * Returns a map where each filter has a "value" property with its default value.
-     */
-    private suspend fun getDefaultFilterValues(): Map<String, Any> {
+    override suspend fun getMangaDetails(manga: MangaInfo, commands: List<Command<*>>): MangaInfo {
         return try {
-            val filterDefs = bridge.getFilters()
+            Log.info("JSPluginSource: [$name] getMangaDetails called for ${manga.key}")
             
-            val filterValues = filterDefs.mapValues { (key, def) -> 
-                val value = when (def) {
-                    is ireader.domain.js.models.FilterDefinition.Picker -> 
-                        mapOf("value" to def.defaultValue)
-                    is ireader.domain.js.models.FilterDefinition.TextInput -> 
-                        mapOf("value" to def.defaultValue)
-                    is ireader.domain.js.models.FilterDefinition.CheckboxGroup -> {
-                        // Convert to ArrayList to ensure proper JavaScript array conversion
-                        val arrayValue = ArrayList(def.defaultValues)
-                        mapOf("value" to arrayValue)
-                    }
-                    is ireader.domain.js.models.FilterDefinition.ExcludableCheckboxGroup -> 
-                        mapOf("included" to def.included, "excluded" to def.excluded)
-                }
-                value
-            }
-
-            filterValues
+            val details = plugin.getNovelDetails(manga.key)
+            
+            manga.copy(
+                title = details.name,
+                cover = details.cover,
+                author = details.author ?: "",
+                description = details.description ?: "",
+                genres = details.genres,
+                status = parseStatus(details.status)
+            )
         } catch (e: Exception) {
-            Log.error(e, "[JSPluginSource] Failed to get default filter values")
-            emptyMap()
+            Log.error("JSPluginSource: Error in getMangaDetails", e)
+            manga
         }
+    }
+    
+    override suspend fun getChapterList(manga: MangaInfo, commands: List<Command<*>>): List<ChapterInfo> {
+        return try {
+            Log.info("JSPluginSource: [$name] getChapterList called for ${manga.key}")
+            
+            val chapters = plugin.getChapters(manga.key)
+            
+            Log.info("JSPluginSource: [$name] Got ${chapters.size} chapters from plugin")
+            
+            chapters.mapIndexed { index, chapter ->
+                ChapterInfo(
+                    key = chapter.url,
+                    name = chapter.name,
+                    number = (index + 1).toFloat(),
+                    dateUpload = parseDate(chapter.releaseTime)
+                )
+            }
+        } catch (e: Exception) {
+            Log.error("JSPluginSource: Error in getChapterList", e)
+            emptyList()
+        }
+    }
+    
+    override suspend fun getPageList(chapter: ChapterInfo, commands: List<Command<*>>): List<Page> {
+        return try {
+            Log.info("JSPluginSource: [$name] getPageList called for ${chapter.key}")
+            
+            val content = plugin.getChapterContent(chapter.key)
+            
+            if (content.isBlank()) {
+                Log.warn("JSPluginSource: Empty content returned for ${chapter.key}")
+                return emptyList()
+            }
+            
+            Log.info("JSPluginSource: Got ${content.length} chars of content")
+            
+            // Parse HTML and extract text paragraphs
+            val pages = parseHtmlToPages(content)
+            
+            if (pages.isEmpty()) {
+                Log.warn("JSPluginSource: No paragraphs extracted from HTML")
+                // Fallback to single page with raw content
+                return listOf(Text(content))
+            }
+            
+            Log.info("JSPluginSource: Extracted ${pages.size} paragraphs")
+            pages
+        } catch (e: Exception) {
+            Log.error("JSPluginSource: Error in getPageList", e)
+            emptyList()
+        }
+    }
+    
+    /**
+     * Parse HTML content and extract readable text paragraphs.
+     */
+    private fun parseHtmlToPages(html: String): List<Page> {
+        return try {
+            val doc = org.jsoup.Jsoup.parse(html)
+            
+            // Remove script and style elements
+            doc.select("script, style").remove()
+            
+            // Extract text from paragraph-like elements
+            val paragraphs = mutableListOf<String>()
+            
+            // Try common content selectors first
+            val contentElements = doc.select("p, div.chapter-content p, div.text p, div.content p")
+            
+            if (contentElements.isNotEmpty()) {
+                contentElements.forEach { element ->
+                    val text = element.text().trim()
+                    if (text.isNotEmpty() && text.length > 10) { // Filter out very short text
+                        paragraphs.add(text)
+                    }
+                }
+            } else {
+                // Fallback: split by line breaks
+                val text = doc.body().text()
+                text.split("\n").forEach { line ->
+                    val trimmed = line.trim()
+                    if (trimmed.isNotEmpty() && trimmed.length > 10) {
+                        paragraphs.add(trimmed)
+                    }
+                }
+            }
+            
+            // Convert paragraphs to Page objects
+            paragraphs.map { Text(it) }
+        } catch (e: Exception) {
+            Log.error("JSPluginSource: Error parsing HTML: ${e.message}", e)
+            emptyList()
+        }
+    }
+    
+    override fun getFilters(): FilterList {
+        // Return search filter for text-based queries
+        return listOf(Filter.Title())
     }
     
     override fun getListings(): List<Listing> {
-        // Return listings including Search to indicate search support
+        // Return available listing types that map to LNReader plugin methods
         return listOf(
-            object : Listing("Popular") {},
-            object : Listing("Latest") {},
-            object : Listing("Search") {}  // Add Search listing to indicate search support
+            PopularListing(),  // Maps to plugin.popularNovels()
+            LatestListing()    // Maps to plugin.latestNovels()
         )
     }
     
-
-    override fun getFilters(): FilterList {
-        return try {
-            // Get JS plugin filters synchronously (cached from plugin load)
-            val jsFilters = runBlocking { getPluginFilters() }
-            
-            // Add search filter at the beginning
-            val filters = mutableListOf<Filter<*>>()
-            filters.add(Filter.Text("Search", ""))
-            
-            // Convert JS filters to IReader filters
-            filters.addAll(
-                jsFilters.map { (key, filterDef) ->
-                    convertFilterDefinitionToIReaderFilter(key, filterDef)
-                }.filterNotNull()
-            )
-            
-            filters
-        } catch (e: Exception) {
-            Log.error(e, "[JSPluginSource] Failed to convert filters")
-            // Return at least the search filter
-            listOf(Filter.Text("Search", ""))
+    /**
+     * Convert plugin novel to MangaInfo
+     */
+    private fun PluginNovel.toMangaInfo(): MangaInfo {
+        return MangaInfo(
+            key = this.url,
+            title = this.name,
+            cover = this.cover
+        )
+    }
+    
+    /**
+     * Parse status string to status code
+     */
+    private fun parseStatus(statusText: String?): Long {
+        if (statusText == null) return MangaInfo.UNKNOWN
+        
+        return when {
+            statusText.contains("ongoing", ignoreCase = true) -> MangaInfo.ONGOING
+            statusText.contains("completed", ignoreCase = true) -> MangaInfo.COMPLETED
+            statusText.contains("hiatus", ignoreCase = true) -> MangaInfo.ON_HIATUS
+            statusText.contains("cancelled", ignoreCase = true) -> MangaInfo.CANCELLED
+            else -> MangaInfo.UNKNOWN
         }
     }
     
     /**
-     * Converts a JS FilterDefinition to an IReader Filter.
+     * Parse date string to timestamp
      */
-    private fun convertFilterDefinitionToIReaderFilter(
-        key: String,
-        filterDef: ireader.domain.js.models.FilterDefinition
-    ): Filter<*>? {
-        return when (filterDef) {
-            is ireader.domain.js.models.FilterDefinition.Picker -> {
-                // Convert Picker to Select filter
-                val options = filterDef.options.map { it.label }.toTypedArray()
-                val defaultIndex = filterDef.options.indexOfFirst { it.value == filterDef.defaultValue }
-                    .takeIf { it >= 0 } ?: 0
-                Filter.Select(filterDef.label, options, defaultIndex)
-            }
-            is ireader.domain.js.models.FilterDefinition.TextInput -> {
-                // Convert TextInput to Text filter
-                Filter.Text(filterDef.label, filterDef.defaultValue)
-            }
-            is ireader.domain.js.models.FilterDefinition.CheckboxGroup -> {
-                // Convert CheckboxGroup to Group of Check filters
-                val checkFilters = filterDef.options.map { option ->
-                    val isChecked = filterDef.defaultValues.contains(option.value)
-                    Filter.Check(option.label, allowsExclusion = false, value = isChecked)
-                }
-                Filter.Group(filterDef.label, checkFilters)
-            }
-            is ireader.domain.js.models.FilterDefinition.ExcludableCheckboxGroup -> {
-                // Convert ExcludableCheckboxGroup to Group of Check filters with exclusion
-                val checkFilters = filterDef.options.map { option ->
-                    val value = when {
-                        filterDef.included.contains(option.value) -> true
-                        filterDef.excluded.contains(option.value) -> false
-                        else -> null
-                    }
-                    Filter.Check(option.label, allowsExclusion = true, value = value)
-                }
-                Filter.Group(filterDef.label, checkFilters)
-            }
-        }
-    }
-    
-    override fun getCommands(): CommandList {
-        // Return empty command list
-        return emptyList()
+    private fun parseDate(dateText: String?): Long {
+        if (dateText == null) return 0L
+        
+        // TODO: Implement proper date parsing
+        // For now, return current time
+        return System.currentTimeMillis()
     }
 }

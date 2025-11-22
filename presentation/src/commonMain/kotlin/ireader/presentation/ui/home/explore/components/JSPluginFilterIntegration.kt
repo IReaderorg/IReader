@@ -28,13 +28,15 @@ object JSPluginFilterIntegration {
     /**
      * Gets filter definitions from a JavaScript plugin source.
      * 
-     * API Status: JSPluginSource has a getPluginFilters() method that returns filter definitions.
-     * We cast the CatalogSource to JSPluginSource and call this method.
+     * TODO: Implement plugin filters in Zipline bridge
+     * For now, returns null as filters are not yet implemented in the new Zipline approach.
      */
     suspend fun getFilterDefinitions(catalogSource: CatalogSource): Map<String, FilterDefinition>? {
         val jsSource = catalogSource as? JSPluginSource ?: return null
         return try {
-            jsSource.getPluginFilters()
+            // TODO: Add getPluginFilters() to LNReaderPlugin interface and implement in adapter
+            // jsSource.getPluginFilters()
+            null // Filters not yet implemented in Zipline
         } catch (e: Exception) {
             ireader.core.log.Log.error(e, "[JSPluginFilterIntegration] Failed to get filter definitions")
             null

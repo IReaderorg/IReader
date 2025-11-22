@@ -38,6 +38,18 @@ class AndroidCatalogInstaller(
      * The client used for http requests.
      */
     private val client get() = httpClient.default
+    
+    /**
+     * Get the JS plugins directory in external storage for easier access.
+     * Returns: /storage/emulated/0/ireader/js-plugins
+     */
+    private fun getJSPluginsDirectory(): File {
+        val externalDir = context.getExternalFilesDir(null)?.parentFile?.parentFile?.parentFile
+        val ireaderDir = File(externalDir, "ireader")
+        val jsPluginsDir = File(ireaderDir, "js-plugins")
+        jsPluginsDir.mkdirs()
+        return jsPluginsDir
+    }
 
     /**
      * Adds the given extension to the downloads queue and returns an observable containing its
@@ -53,8 +65,8 @@ class AndroidCatalogInstaller(
             val isJSPlugin = catalog.pkgUrl.endsWith(".js")
             
             if (isJSPlugin) {
-                // Handle JS plugin installation
-                val jsPluginsDir = File(context.filesDir, "js-plugins").apply { mkdirs() }
+                // Handle JS plugin installation - use external storage for easier access
+                val jsPluginsDir = getJSPluginsDirectory()
                 val jsFile = File(jsPluginsDir, "${catalog.pkgName}.js")
                 
                 try {
@@ -62,6 +74,11 @@ class AndroidCatalogInstaller(
                         headers.append(HttpHeaders.CacheControl, "no-store")
                     }.body()
                     jsResponse.saveTo(jsFile)
+                    
+                    // Verify the file was written correctly
+                    if (!jsFile.exists() || jsFile.length() == 0L) {
+                        throw Exception("JS plugin file was not written correctly")
+                    }
                     
                     // Optionally download icon if available
                     if (catalog.iconUrl.isNotEmpty()) {
@@ -78,10 +95,12 @@ class AndroidCatalogInstaller(
                     
                     emit(InstallStep.Idle)
                     val result = InstallStep.Success
+                    Log.warn("JS Plugin installed successfully: ${catalog.pkgName}, notifying installation changes")
                     installationChanges.notifyAppInstall(catalog.pkgName)
+                    Log.warn("Installation notification sent for: ${catalog.pkgName}")
                     emit(result)
                 } catch (e: Throwable) {
-                    Log.warn(e, "Error installing JS plugin")
+                    Log.warn(e, "Error installing JS plugin: ${catalog.pkgName}")
                     emit(InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper)))
                 }
             } else {
@@ -151,7 +170,7 @@ class AndroidCatalogInstaller(
             }
             
             // Try to delete JS plugin files
-            val jsPluginsDir = File(context.filesDir, "js-plugins")
+            val jsPluginsDir = getJSPluginsDirectory()
             val jsFile = File(jsPluginsDir, "$pkgName.js")
             if (jsFile.exists()) {
                 deleted = jsFile.delete() || deleted

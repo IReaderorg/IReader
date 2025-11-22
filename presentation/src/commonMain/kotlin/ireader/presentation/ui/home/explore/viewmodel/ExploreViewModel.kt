@@ -111,34 +111,22 @@ class ExploreViewModel(
                                 if (source != null) {
                                     var result = MangasPageInfo(emptyList(), false)
                                     
-                                    // Check if this is a JS plugin source and we have JS plugin filters
-                                    val catalogSource = source.source
-                                    if (catalogSource is ireader.domain.js.bridge.JSPluginSource && jsPluginFilters != null) {
-                                        // Use JS plugin's custom method with filters
-                                        val novels = if (query != null && query.isNotBlank()) {
-                                            catalogSource.searchNovels(query, page)
-                                        } else {
-                                            catalogSource.getPopularNovels(page, jsPluginFilters)
-                                        }
-                                        result = MangasPageInfo(novels, hasNextPage = novels.isNotEmpty())
-                                        Result.success(result)
-                                    } else {
-                                        // Use standard catalog source method
-                                        remoteUseCases.getRemoteBooks(
-                                                searchQuery,
-                                                listing,
-                                                filters,
-                                                source,
-                                                page,
-                                                onError = {
-                                                    throw it
-                                                },
-                                                onSuccess = { res ->
-                                                    result = res
-                                                }
-                                        )
-                                        Result.success(result)
-                                    }
+                                    // Use standard catalog source method
+                                    // TODO: Implement custom filter support for JS plugins in Zipline bridge
+                                    remoteUseCases.getRemoteBooks(
+                                            searchQuery,
+                                            listing,
+                                            filters,
+                                            source,
+                                            page,
+                                            onError = {
+                                                throw it
+                                            },
+                                            onSuccess = { res ->
+                                                result = res
+                                            }
+                                    )
+                                    Result.success(result)
                                 } else {
                                     throw SourceNotFoundException()
                                 }

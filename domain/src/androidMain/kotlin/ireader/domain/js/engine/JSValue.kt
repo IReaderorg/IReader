@@ -1,6 +1,5 @@
 package ireader.domain.js.engine
 
-import app.cash.quickjs.QuickJs
 
 /**
  * Android implementation of JSValue using QuickJS.

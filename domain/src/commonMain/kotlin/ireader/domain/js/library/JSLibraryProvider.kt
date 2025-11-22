@@ -3,6 +3,8 @@ package ireader.domain.js.library
 import io.ktor.client.HttpClient
 import ireader.core.prefs.PreferenceStore
 import ireader.domain.js.engine.JSEngine
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.jsonObject
 
 /**
  * Provides JavaScript libraries and APIs to plugins.
@@ -27,27 +29,245 @@ class JSLibraryProvider(
     private val sessionStorage = JSSessionStorage()
     private val cheerioApi = JSCheerioApi(pluginId)
     
+    // Fetch queue processor for Android/QuickJS
+    private var fetchProcessorRunning = false
+    
+    /**
+     * Starts processing fetch requests from the JavaScript fetch queue.
+     * This enables the fetch API to work on Android/QuickJS.
+     */
+    fun startFetchProcessor() {
+        if (fetchProcessorRunning) return
+        fetchProcessorRunning = true
+        
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            while (fetchProcessorRunning) {
+                try {
+                    processFetchQueue()
+                    processCheerioQueue()
+                } catch (e: Exception) {
+                    println("[JSLibraryProvider] [$pluginId] Processor error: ${e.message}")
+                }
+                kotlinx.coroutines.delay(50) // Check queues every 50ms
+            }
+        }
+    }
+    
+    /**
+     * Stops the fetch processor.
+     */
+    fun stopFetchProcessor() {
+        fetchProcessorRunning = false
+    }
+    
+    /**
+     * Processes pending cheerio HTML parsing requests from the JavaScript queue.
+     */
+    private suspend fun processCheerioQueue() {
+        try {
+            // Get pending requests from JavaScript
+            val queueJson = engine.evaluateScript("JSON.stringify(globalThis.__cheerioQueue || [])")
+            val queue = kotlinx.serialization.json.Json.parseToJsonElement(queueJson.toString())
+            
+            if (queue is kotlinx.serialization.json.JsonArray && queue.size > 0) {
+                // Clear the queue
+                engine.evaluateScript("globalThis.__cheerioQueue = [];")
+                
+                // Process each request
+                queue.forEach { requestElement ->
+                    val request = requestElement.jsonObject
+                    val type = request["type"]?.toString()?.trim('"') ?: return@forEach
+                    val requestId = request["id"]?.toString()?.trim('"')?.toIntOrNull() ?: return@forEach
+                    
+                    when (type) {
+                        "parse" -> {
+                            // Parse HTML request
+                            val html = request["html"]?.toString()?.trim('"') ?: return@forEach
+                            
+                            try {
+                                // Parse HTML using native cheerioApi
+                                val doc = cheerioApi.load(html)
+                                
+                                // Store document in a map for later queries
+                                parsedDocuments[requestId] = doc
+                            } catch (e: Exception) {
+                                println("[JSLibraryProvider] [$pluginId] Cheerio parse error: ${e.message}")
+                            }
+                        }
+                        "query" -> {
+                            // Query request
+                            val docId = request["docId"]?.toString()?.trim('"')?.toIntOrNull() ?: return@forEach
+                            val selector = request["selector"]?.toString()?.trim('"') ?: ""
+                            
+                            val doc = parsedDocuments[docId] ?: return@forEach
+                            
+                            try {
+                                // Query the document
+                                val selection = doc(selector)
+                                
+                                // Build items array with all matched elements
+                                val items = mutableListOf<String>()
+                                for (i in 0 until selection.length) {
+                                    val element = selection.eq(i)
+                                    val itemData = mapOf(
+                                        "text" to element.text(),
+                                        "html" to element.html(),
+                                        "attrs" to mapOf(
+                                            "href" to (element.attr("href") ?: ""),
+                                            "src" to (element.attr("src") ?: ""),
+                                            "class" to (element.attr("class") ?: ""),
+                                            "id" to (element.attr("id") ?: "")
+                                        )
+                                    )
+                                    items.add(kotlinx.serialization.json.Json.encodeToString(
+                                        kotlinx.serialization.json.JsonObject.serializer(),
+                                        kotlinx.serialization.json.JsonObject(itemData.mapValues { 
+                                            when (val v = it.value) {
+                                                is String -> kotlinx.serialization.json.JsonPrimitive(v)
+                                                is Map<*, *> -> kotlinx.serialization.json.JsonObject(
+                                                    (v as Map<String, String>).mapValues { kotlinx.serialization.json.JsonPrimitive(it.value) }
+                                                )
+                                                else -> kotlinx.serialization.json.JsonPrimitive(v.toString())
+                                            }
+                                        })
+                                    ))
+                                }
+                                
+                                // Store result
+                                val resultJson = """
+                                    {
+                                        "text": ${kotlinx.serialization.json.Json.encodeToString(kotlinx.serialization.json.JsonPrimitive.serializer(), kotlinx.serialization.json.JsonPrimitive(selection.text()))},
+                                        "html": ${kotlinx.serialization.json.Json.encodeToString(kotlinx.serialization.json.JsonPrimitive.serializer(), kotlinx.serialization.json.JsonPrimitive(selection.html()))},
+                                        "attrs": {
+                                            "href": ${kotlinx.serialization.json.Json.encodeToString(kotlinx.serialization.json.JsonPrimitive.serializer(), kotlinx.serialization.json.JsonPrimitive(selection.attr("href") ?: ""))},
+                                            "src": ${kotlinx.serialization.json.Json.encodeToString(kotlinx.serialization.json.JsonPrimitive.serializer(), kotlinx.serialization.json.JsonPrimitive(selection.attr("src") ?: ""))},
+                                            "class": ${kotlinx.serialization.json.Json.encodeToString(kotlinx.serialization.json.JsonPrimitive.serializer(), kotlinx.serialization.json.JsonPrimitive(selection.attr("class") ?: ""))},
+                                            "id": ${kotlinx.serialization.json.Json.encodeToString(kotlinx.serialization.json.JsonPrimitive.serializer(), kotlinx.serialization.json.JsonPrimitive(selection.attr("id") ?: ""))}
+                                        },
+                                        "items": [${items.joinToString(",")}]
+                                    }
+                                """.trimIndent()
+                                
+                                engine.evaluateScript("globalThis.__cheerioResults[$requestId] = $resultJson;")
+                            } catch (e: Exception) {
+                                println("[JSLibraryProvider] [$pluginId] Cheerio query error: ${e.message}")
+                                e.printStackTrace()
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            println("[JSLibraryProvider] [$pluginId] Cheerio queue processing error: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+    
+    // Store parsed documents for querying
+    private val parsedDocuments = mutableMapOf<Int, JSCheerioApi.CheerioObject>()
+    
+    /**
+     * Processes pending fetch requests from the JavaScript queue.
+     */
+    private suspend fun processFetchQueue() {
+        try {
+            // Get pending requests from JavaScript
+            val queueJson = engine.evaluateScript("JSON.stringify(globalThis.__fetchQueue || [])")
+            val queue = kotlinx.serialization.json.Json.parseToJsonElement(queueJson.toString())
+            
+            if (queue is kotlinx.serialization.json.JsonArray && queue.size > 0) {
+                // Clear the queue
+                engine.evaluateScript("globalThis.__fetchQueue = [];")
+                
+                // Process each request
+                queue.forEach { requestElement ->
+                    val request = requestElement.jsonObject
+                    val fetchId = request["id"]?.toString()?.trim('"')?.toIntOrNull() ?: return@forEach
+                    val url = request["url"]?.toString()?.trim('"') ?: return@forEach
+                    val method = request["method"]?.toString()?.trim('"') ?: "GET"
+                    
+                    // Make the actual HTTP request using fetchApi
+                    try {
+                        val response = fetchApi.fetch(url, mapOf("method" to method))
+                        
+                        // Extract response data
+                        val status = response["status"] as? Int ?: 200
+                        val statusText = response["statusText"] as? String ?: "OK"
+                        val responseUrl = response["url"] as? String ?: url
+                        val text = response["text"] as? String ?: ""
+                        
+                        // Store result in JavaScript
+                        val resultJson = """
+                            {
+                                "status": $status,
+                                "statusText": "${statusText.replace("\"", "\\\"")}",
+                                "url": "${responseUrl.replace("\"", "\\\"")}",
+                                "body": ${kotlinx.serialization.json.Json.encodeToString(kotlinx.serialization.json.JsonPrimitive.serializer(), kotlinx.serialization.json.JsonPrimitive(text))},
+                                "headers": {}
+                            }
+                        """.trimIndent()
+                        
+                        engine.evaluateScript("globalThis.__fetchResults[$fetchId] = $resultJson;")
+                    } catch (e: Exception) {
+                        // Store error
+                        val errorMsg = e.message?.replace("\"", "\\\"") ?: "Unknown error"
+                        engine.evaluateScript("globalThis.__fetchResults[$fetchId] = { error: \"$errorMsg\" };")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            // Ignore errors in queue processing
+        }
+    }
+    
     /**
      * Sets up the require() function and injects global APIs.
      */
     fun setupRequireFunction() {
         try {
-            // Inject native fetch function
-            engine.setGlobalObject("__nativeFetch", fetchApi)
+            // Try to inject native objects (works on Desktop/GraalVM, not on Android/QuickJS)
+            try {
+                engine.setGlobalObject("__nativeFetch", fetchApi)
+                engine.setGlobalObject("__nativeStorage", storage)
+                engine.setGlobalObject("__nativeLocalStorage", localStorage)
+                engine.setGlobalObject("__nativeSessionStorage", sessionStorage)
+                engine.setGlobalObject("__nativeCheerio", cheerioApi)
+            } catch (e: Exception) {
+                println("[JSLibraryProvider] [$pluginId] Could not inject native objects (expected on Android): ${e.message}")
+            }
             
-            // Inject storage objects
-            engine.setGlobalObject("__nativeStorage", storage)
-            engine.setGlobalObject("__nativeLocalStorage", localStorage)
-            engine.setGlobalObject("__nativeSessionStorage", sessionStorage)
+            // Initialize module registry first (before anything else)
+            engine.evaluateScript("globalThis.__modules = {};")
+            println("[JSLibraryProvider] Initialized module registry for plugin: $pluginId")
             
-            // Inject cheerio API
-            engine.setGlobalObject("__nativeCheerio", cheerioApi)
+            // Setup console object for QuickJS (Android doesn't have it by default)
+            // Always define it to ensure it's available
+            try {
+                engine.evaluateScript("""
+                    globalThis.console = {
+                        log: function() { },
+                        warn: function() { },
+                        error: function() { },
+                        info: function() { },
+                        debug: function() { }
+                    };
+                """.trimIndent())
+                println("[JSLibraryProvider] [$pluginId] Setup console polyfill")
+            } catch (e: Exception) {
+                println("[JSLibraryProvider] [$pluginId] Failed to setup console polyfill: ${e.message}")
+                e.printStackTrace()
+            }
             
             // First, setup global APIs
             val globalSetup = """
                 (function() {
+                    // Check if we're running on a platform that supports native objects (Desktop/GraalVM)
+                    const hasNativeObjects = typeof __nativeCheerio !== 'undefined' && 
+                                            __nativeCheerio && 
+                                            typeof __nativeCheerio.load === 'function';
+                    
                     // Wrap native cheerio to add JavaScript-side .each() and .map() support
-                    if (typeof __nativeCheerio !== 'undefined') {
+                    if (hasNativeObjects) {
                         const originalLoad = __nativeCheerio.load.bind(__nativeCheerio);
                         __nativeCheerio.load = function(html) {
                             const $ = originalLoad(html);
@@ -102,99 +322,142 @@ class JSLibraryProvider(
                         };
                     }
                     
-                    // Verify native storage is available
-                    if (typeof __nativeStorage === 'undefined') {
-                        throw new Error('__nativeStorage is not available');
-                    }
-                    
-                    // Setup Storage API first (before modules that depend on it)
+                    // Setup Storage API
+                    // Always use in-memory storage for now (works on all platforms)
+                    const memoryStorage = {};
                     globalThis.storage = {
                         set: function(key, value, expires) {
-                            __nativeStorage.set(key, JSON.stringify(value), expires);
+                            memoryStorage[key] = JSON.stringify(value);
                         },
                         get: function(key) {
-                            const value = __nativeStorage.get(key);
+                            const value = memoryStorage[key];
                             return value ? JSON.parse(value) : null;
                         },
                         delete: function(key) {
-                            __nativeStorage.delete(key);
+                            delete memoryStorage[key];
                         },
                         clearAll: function() {
-                            __nativeStorage.clearAll();
+                            for (const key in memoryStorage) {
+                                delete memoryStorage[key];
+                            }
                         },
                         getAllKeys: function() {
-                            return __nativeStorage.getAllKeys();
+                            return Object.keys(memoryStorage);
                         }
                     };
                     
                     // Setup LocalStorage API
+                    // Always use in-memory storage (works on all platforms)
+                    const memoryLocalStorage = {};
                     globalThis.localStorage = {
                         setItem: function(key, value) {
-                            __nativeLocalStorage.set(key, value);
+                            memoryLocalStorage[key] = String(value);
                         },
                         getItem: function(key) {
-                            return __nativeLocalStorage.get(key);
+                            return memoryLocalStorage[key] || null;
                         },
                         removeItem: function(key) {
-                            __nativeLocalStorage.delete(key);
+                            delete memoryLocalStorage[key];
                         },
                         clear: function() {
-                            __nativeLocalStorage.clearAll();
+                            for (const key in memoryLocalStorage) {
+                                delete memoryLocalStorage[key];
+                            }
                         }
                     };
                     
                     // Setup SessionStorage API
+                    // Always use in-memory storage (works on all platforms)
+                    const memorySessionStorage = {};
                     globalThis.sessionStorage = {
                         setItem: function(key, value) {
-                            __nativeSessionStorage.set(key, value);
+                            memorySessionStorage[key] = String(value);
                         },
                         getItem: function(key) {
-                            return __nativeSessionStorage.get(key);
+                            return memorySessionStorage[key] || null;
                         },
                         removeItem: function(key) {
-                            __nativeSessionStorage.delete(key);
+                            delete memorySessionStorage[key];
                         },
                         clear: function() {
-                            __nativeSessionStorage.clearAll();
+                            for (const key in memorySessionStorage) {
+                                delete memorySessionStorage[key];
+                            }
                         }
                     };
                     
-                    // Setup fetch API with comprehensive response object
+                    // Setup fetch API
+                    // Store fetch requests in a global queue that Kotlin can process
+                    globalThis.__fetchQueue = [];
+                    globalThis.__fetchResults = {};
+                    globalThis.__fetchIdCounter = 0;
+                    
+                    // Setup cheerio HTML parsing queue
+                    globalThis.__cheerioQueue = [];
+                    globalThis.__cheerioResults = {};
+                    globalThis.__cheerioIdCounter = 0;
+                    
                     globalThis.fetch = function(url, init) {
-                        const requestUrl = String(url || '');
-                        const result = __nativeFetch.fetch(requestUrl, init || {});
-                        
-                        // Create a proper Response-like object with all properties
-                        const response = {
-                            ok: Boolean(result.ok),
-                            status: Number(result.status) || 0,
-                            statusText: String(result.statusText || ''),
-                            url: String(result.url || requestUrl),  // Ensure URL is always a string
-                            headers: result.headers || {},
-                            redirected: false,
-                            type: 'basic',
-                            text: function() { 
-                                return Promise.resolve(String(result.text || '')); 
-                            },
-                            json: function() { 
-                                try {
-                                    return Promise.resolve(JSON.parse(result.text || '{}')); 
-                                } catch (e) {
-                                    return Promise.reject(new Error('Invalid JSON: ' + e.message));
+                        return new Promise(function(resolve, reject) {
+                            const fetchId = globalThis.__fetchIdCounter++;
+                            const request = {
+                                id: fetchId,
+                                url: String(url || ''),
+                                method: (init && init.method) || 'GET',
+                                headers: (init && init.headers) || {},
+                                body: (init && init.body) || null
+                            };
+                            
+                            // Add to queue
+                            globalThis.__fetchQueue.push(request);
+                            
+                            // Poll for result
+                            const checkResult = function() {
+                                const result = globalThis.__fetchResults[fetchId];
+                                if (result) {
+                                    delete globalThis.__fetchResults[fetchId];
+                                    if (result.error) {
+                                        reject(new Error(result.error));
+                                    } else {
+                                        const response = {
+                                            ok: result.status >= 200 && result.status < 300,
+                                            status: result.status || 200,
+                                            statusText: result.statusText || 'OK',
+                                            url: result.url || request.url,
+                                            headers: result.headers || {},
+                                            redirected: false,
+                                            type: 'basic',
+                                            text: function() { 
+                                                return Promise.resolve(result.body || ''); 
+                                            },
+                                            json: function() { 
+                                                try {
+                                                    return Promise.resolve(JSON.parse(result.body || '{}')); 
+                                                } catch (e) {
+                                                    return Promise.reject(new Error('Invalid JSON'));
+                                                }
+                                            },
+                                            blob: function() { 
+                                                return Promise.resolve(new Blob([result.body || ''])); 
+                                            },
+                                            arrayBuffer: function() { 
+                                                return Promise.resolve(new ArrayBuffer(0)); 
+                                            },
+                                            clone: function() { 
+                                                return response; 
+                                            }
+                                        };
+                                        resolve(response);
+                                    }
+                                } else {
+                                    // Check again in 50ms
+                                    setTimeout(checkResult, 50);
                                 }
-                            },
-                            blob: function() { 
-                                return Promise.resolve(new Blob([result.text || ''])); 
-                            },
-                            arrayBuffer: function() { 
-                                return Promise.resolve(new ArrayBuffer(0)); 
-                            },
-                            clone: function() { 
-                                return response; 
-                            }
-                        };
-                        
-                        return Promise.resolve(response);
+                            };
+                            
+                            // Start checking for result
+                            setTimeout(checkResult, 50);
+                        });
                     };
                     
                     // Setup window and location objects for browser compatibility
@@ -579,22 +842,38 @@ class JSLibraryProvider(
                         return item !== undefined && item !== null ? item : '';
                     };
                     
-                    // Initialize module registry
-                    globalThis.__modules = {};
+                    // Note: __modules is initialized before this script runs
                 })();
             """.trimIndent()
             
+            // Evaluate global setup (browser APIs, etc.)
             engine.evaluateScript(globalSetup)
+            println("[JSLibraryProvider] Global setup complete for plugin: $pluginId")
             
-            // Load third-party libraries
+            // Load third-party libraries (each with its own error handling)
             loadCheerioLibrary()
             loadDayjsLibrary()
             loadUrlencodeLibrary()
             loadHtmlParser2Library()
             
+            // Verify modules were registered
+            val registeredModules = engine.evaluateScript("Object.keys(globalThis.__modules || {}).join(', ')")
+            println("[JSLibraryProvider] [$pluginId] Third-party libraries loaded. Registered modules: $registeredModules")
+            
             // Setup LNReader-specific libraries and require function
             val moduleSetup = """
                 (function() {
+                    // Ensure console is available (QuickJS on Android needs this)
+                    if (typeof globalThis.console === 'undefined') {
+                        globalThis.console = {
+                            log: function() { },
+                            warn: function() { },
+                            error: function() { },
+                            info: function() { },
+                            debug: function() { }
+                        };
+                    }
+                    
                     const modules = globalThis.__modules;
                     
                     // LNReader-specific libraries
@@ -604,18 +883,38 @@ class JSLibraryProvider(
                     modules['@libs/novelStatus'] = ${getNovelStatusLibrary()};
                     modules['@libs/storage'] = ${getStorageLibrary()};
                     
-                    // Define require function
+                    // Define require function with better error messages
                     globalThis.require = function(moduleName) {
                         if (modules[moduleName]) {
                             return modules[moduleName];
                         }
-                        throw new Error('Module not found: ' + moduleName);
+                        // Provide helpful error message with available modules
+                        const available = Object.keys(modules).join(', ');
+                        throw new Error('Module system not available: ' + moduleName + '. Available modules: ' + available);
                     };
+                    
+                    // Log available modules for debugging
+                    const moduleList = Object.keys(modules);
+                    console.log('[JSLibraryProvider] Available modules (' + moduleList.length + '):', moduleList.join(', '));
                 })();
             """.trimIndent()
             
             engine.evaluateScript(moduleSetup)
+            
+            // Final verification - list all available modules
+            val finalModules = engine.evaluateScript("Object.keys(globalThis.__modules || {}).join(', ')")
+            println("[JSLibraryProvider] [$pluginId] Module setup complete. Final modules: $finalModules")
+            
+            // Verify require function exists
+            val hasRequire = engine.evaluateScript("typeof globalThis.require === 'function'")
+            println("[JSLibraryProvider] [$pluginId] require() function available: $hasRequire")
+            
+            // Start fetch processor for Android/QuickJS
+            startFetchProcessor()
+            println("[JSLibraryProvider] [$pluginId] Fetch processor started")
         } catch (e: Exception) {
+            println("[JSLibraryProvider] Error during setup for plugin $pluginId: ${e.message}")
+            e.printStackTrace()
             // Fallback to empty implementations if library loading fails
             setupFallbackImplementations()
         }
@@ -628,6 +927,7 @@ class JSLibraryProvider(
         try {
             val cheerioCode = loadLibraryFromResources("/js/cheerio.min.js")
             if (cheerioCode != null) {
+                println("[JSLibraryProvider] [$pluginId] Loaded cheerio from resources: ${cheerioCode.length} bytes")
                 // Wrap cheerio in a module loader that captures exports
                 val wrapper = """
                     (function() {
@@ -639,13 +939,30 @@ class JSLibraryProvider(
                     })();
                 """.trimIndent()
                 engine.evaluateScript(wrapper)
+                println("[JSLibraryProvider] [$pluginId] Registered cheerio from resources")
             } else {
-                // Use fallback
-                engine.evaluateScript("globalThis.__modules['cheerio'] = ${getCheerioFallback()};")
+                println("[JSLibraryProvider] [$pluginId] Cheerio resource not found, using native bridge")
+                // Use native cheerio bridge for Android/QuickJS
+                val nativeBridge = getNativeCheerioBridge()
+                engine.evaluateScript("globalThis.__modules['cheerio'] = $nativeBridge;")
+                println("[JSLibraryProvider] [$pluginId] Registered native cheerio bridge")
             }
+            
+            // Verify registration
+            val hasCheerio = engine.evaluateScript("typeof globalThis.__modules['cheerio'] !== 'undefined'")
+            println("[JSLibraryProvider] [$pluginId] cheerio module exists: $hasCheerio")
         } catch (e: Exception) {
-            // Use fallback on error
-            engine.evaluateScript("globalThis.__modules['cheerio'] = ${getCheerioFallback()};")
+            println("[JSLibraryProvider] [$pluginId] Error loading cheerio, using native bridge: ${e.message}")
+            e.printStackTrace()
+            // Use native bridge on error
+            try {
+                val nativeBridge = getNativeCheerioBridge()
+                engine.evaluateScript("globalThis.__modules['cheerio'] = $nativeBridge;")
+                println("[JSLibraryProvider] [$pluginId] Registered native cheerio bridge after error")
+            } catch (e2: Exception) {
+                println("[JSLibraryProvider] [$pluginId] Failed to register cheerio bridge: ${e2.message}")
+                e2.printStackTrace()
+            }
         }
     }
     
@@ -711,41 +1028,157 @@ class JSLibraryProvider(
     }
     
     /**
-     * Fallback Cheerio implementation using jsoup bridge.
-     * Returns an object with a load function that provides cheerio-like API using native jsoup.
+     * Native Cheerio bridge that uses Kotlin's jsoup for HTML parsing.
+     * Works on Android/QuickJS by queuing parse requests.
+     */
+    private fun getNativeCheerioBridge(): String {
+        return """
+            {
+                load: function(html) {
+                    // Store HTML in a global cache with unique ID
+                    const docId = globalThis.__cheerioIdCounter++;
+                    globalThis.__cheerioQueue.push({
+                        type: 'parse',
+                        id: docId,
+                        html: html
+                    });
+                    
+                    // Return a selector function that uses the cached document
+                    var $ = function(selector) {
+                        // Create a query request
+                        const queryId = globalThis.__cheerioIdCounter++;
+                        globalThis.__cheerioQueue.push({
+                            type: 'query',
+                            id: queryId,
+                            docId: docId,
+                            selector: selector || ''
+                        });
+                        
+                        // Return a result object that will be populated
+                        return {
+                            _queryId: queryId,
+                            _docId: docId,
+                            text: function() {
+                                const result = globalThis.__cheerioResults[queryId];
+                                return result ? (result.text || '') : '';
+                            },
+                            attr: function(name) {
+                                const result = globalThis.__cheerioResults[queryId];
+                                if (!result || !result.attrs) return '';
+                                return result.attrs[name] || '';
+                            },
+                            html: function() {
+                                const result = globalThis.__cheerioResults[queryId];
+                                return result ? (result.html || '') : '';
+                            },
+                            find: function(subSelector) {
+                                // Create a new query with combined selector
+                                const combinedSelector = (selector || '') + ' ' + (subSelector || '');
+                                return $(combinedSelector);
+                            },
+                            first: function() {
+                                const result = globalThis.__cheerioResults[queryId];
+                                if (!result || !result.items || result.items.length === 0) return this;
+                                // Return first item as a new cheerio object
+                                const firstQueryId = globalThis.__cheerioIdCounter++;
+                                globalThis.__cheerioResults[firstQueryId] = result.items[0];
+                                return Object.assign({}, this, { _queryId: firstQueryId });
+                            },
+                            eq: function(index) {
+                                const result = globalThis.__cheerioResults[queryId];
+                                if (!result || !result.items || !result.items[index]) return this;
+                                const eqQueryId = globalThis.__cheerioIdCounter++;
+                                globalThis.__cheerioResults[eqQueryId] = result.items[index];
+                                return Object.assign({}, this, { _queryId: eqQueryId });
+                            },
+                            each: function(callback) {
+                                const result = globalThis.__cheerioResults[queryId];
+                                if (result && result.items) {
+                                    result.items.forEach(function(item, index) {
+                                        const itemQueryId = globalThis.__cheerioIdCounter++;
+                                        globalThis.__cheerioResults[itemQueryId] = item;
+                                        const itemObj = Object.assign({}, $(''), { _queryId: itemQueryId });
+                                        callback.call(itemObj, index, itemObj);
+                                    });
+                                }
+                                return this;
+                            },
+                            map: function(callback) {
+                                const result = globalThis.__cheerioResults[queryId];
+                                const results = [];
+                                if (result && result.items) {
+                                    result.items.forEach(function(item, index) {
+                                        const itemQueryId = globalThis.__cheerioIdCounter++;
+                                        globalThis.__cheerioResults[itemQueryId] = item;
+                                        const itemObj = Object.assign({}, $(''), { _queryId: itemQueryId });
+                                        const value = callback.call(itemObj, index, itemObj);
+                                        if (value !== null && value !== undefined) {
+                                            results.push(value);
+                                        }
+                                    });
+                                }
+                                return { get: function() { return results; }, toArray: function() { return results; } };
+                            },
+                            get: function(index) {
+                                const result = globalThis.__cheerioResults[queryId];
+                                if (!result || !result.items) return null;
+                                return result.items[index] || null;
+                            },
+                            toArray: function() {
+                                const result = globalThis.__cheerioResults[queryId];
+                                return result && result.items ? result.items : [];
+                            },
+                            length: (function() {
+                                const result = globalThis.__cheerioResults[queryId];
+                                return result && result.items ? result.items.length : 0;
+                            })()
+                        };
+                    };
+                    
+                    return $;
+                }
+            }
+        """.trimIndent()
+    }
+    
+    /**
+     * Fallback Cheerio implementation.
+     * Returns a minimal cheerio-like API that returns empty results.
      */
     private fun getCheerioFallback(): String {
         return """
             {
                 load: function(html) {
-                    // Use native jsoup through the bridge
-                    if (typeof __nativeCheerio !== 'undefined') {
-                        return __nativeCheerio.load(html);
+                    // Return a minimal cheerio-like selector function
+                    var emptyCheerio = {
+                        find: function(selector) { return emptyCheerio; },
+                        text: function() { return ''; },
+                        attr: function(name, value) { 
+                            if (arguments.length === 1) return '';
+                            return emptyCheerio;
+                        },
+                        html: function() { return html || ''; },
+                        first: function() { return emptyCheerio; },
+                        last: function() { return emptyCheerio; },
+                        eq: function(i) { return emptyCheerio; },
+                        each: function(fn) { return emptyCheerio; },
+                        map: function(fn) { return { get: function() { return []; }, toArray: function() { return []; } }; },
+                        toArray: function() { return []; },
+                        get: function(i) { return null; },
+                        length: 0
+                    };
+                    
+                    // Return a selector function that always returns emptyCheerio
+                    var selectorFn = function(selector) {
+                        return emptyCheerio;
+                    };
+                    
+                    // Copy properties to make it work like cheerio
+                    for (var key in emptyCheerio) {
+                        selectorFn[key] = emptyCheerio[key];
                     }
                     
-                    // Fallback: minimal cheerio-like API
-                    var doc = { html: html };
-                    var createCheerio = function(elements, html) {
-                        return {
-                            find: function(selector) { return createCheerio([], html); },
-                            text: function() { return ''; },
-                            attr: function(name, value) { 
-                                if (arguments.length === 1) return '';
-                                return this;
-                            },
-                            html: function() { return html || ''; },
-                            first: function() { return this; },
-                            last: function() { return this; },
-                            eq: function(i) { return this; },
-                            map: function(fn) { return { get: function() { return []; }, toArray: function() { return []; } }; },
-                            toArray: function() { return []; },
-                            get: function(i) { return []; },
-                            length: 0
-                        };
-                    };
-                    return function(selector) {
-                        return createCheerio([], html);
-                    };
+                    return selectorFn;
                 }
             }
         """.trimIndent()
@@ -931,7 +1364,25 @@ class JSLibraryProvider(
      * Loads the htmlparser2 library and registers it in the module system.
      */
     private fun loadHtmlParser2Library() {
-        engine.evaluateScript("globalThis.__modules['htmlparser2'] = ${getHtmlParser2Library()};")
+        try {
+            val htmlparser2Code = getHtmlParser2Library()
+            println("[JSLibraryProvider] [$pluginId] htmlparser2 code length: ${htmlparser2Code.length}")
+            
+            engine.evaluateScript("globalThis.__modules['htmlparser2'] = $htmlparser2Code;")
+            println("[JSLibraryProvider] [$pluginId] Registered htmlparser2 module")
+            
+            // Verify it was registered
+            val hasModule = engine.evaluateScript("typeof globalThis.__modules['htmlparser2'] !== 'undefined'")
+            println("[JSLibraryProvider] [$pluginId] htmlparser2 module exists: $hasModule")
+            
+            // Check if it has the Parser property
+            val hasParser = engine.evaluateScript("typeof globalThis.__modules['htmlparser2'].Parser !== 'undefined'")
+            println("[JSLibraryProvider] [$pluginId] htmlparser2.Parser exists: $hasParser")
+        } catch (e: Exception) {
+            // Log error but don't fail - use fallback
+            println("[JSLibraryProvider] [$pluginId] Failed to load htmlparser2: ${e.message}")
+            e.printStackTrace()
+        }
     }
     
     /**

@@ -16,9 +16,9 @@ class JSCheerioApi(private val pluginId: String) {
      * Returns a CheerioObject that can be used as both a function and an object.
      */
     fun load(html: String): CheerioObject {
-        println("[JSCheerioApi] [$pluginId] Loading HTML: ${html.length} characters")
+        ireader.core.log.Log.info("JSCheerioApi: [$pluginId] Loading HTML: ${html.length} characters")
         val doc = Jsoup.parse(html)
-        println("[JSCheerioApi] [$pluginId] Parsed document, total elements: ${doc.select("*").size}")
+        ireader.core.log.Log.info("JSCheerioApi: [$pluginId] Parsed document, total elements: ${doc.select("*").size}")
         
         // Debug: check if reader-area exists
         val readerArea = doc.select("#reader-area")

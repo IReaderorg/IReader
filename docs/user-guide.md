@@ -462,7 +462,8 @@ When reporting issues, include:
 ## Additional Resources
 
 - [Plugin Development Guide](js-plugin-system.md)
-- [LNReader Plugin Repository](https://github.com/LNReader/lnreader-plugins)
+- [LNReader Plugin Repository (Original)](https://github.com/LNReader/lnreader-plugins)
+- [LNReader Plugins Unminified](https://github.com/kazemcodes/lnreader-plugins-unminified)
 - [Plugin API Reference](js-plugin-system.md#jsengine-api)
 - [Example Plugins](examples/)
 

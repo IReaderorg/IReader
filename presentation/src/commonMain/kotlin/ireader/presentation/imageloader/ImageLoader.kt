@@ -69,12 +69,6 @@ fun IImageLoader(
     },
     onSuccess: (@Composable BoxScope.() -> Unit) = {},
     onError: (@Composable BoxScope.(Throwable) -> Unit)? = {
-        LaunchedEffect(it) {
-            val loadTime = measureTime {
-                Log.warn(it, "Error loading image: ${model}")
-            }
-            Log.debug("Image error logging took: ${loadTime.inWholeMilliseconds}ms")
-        }
         Box(
             modifier = errorModifier then Modifier.fillMaxSize()
                 .background(Color(0x1F888888)),
@@ -136,12 +130,6 @@ fun ImageLoaderImage(
     },
     onSuccess: (@Composable BoxScope.() -> Unit) = {},
     onFailure: (@Composable BoxScope.(Throwable) -> Unit)? = {
-        LaunchedEffect(it) {
-            val loadTime = measureTime {
-                Log.warn(it, "Error loading image: $data")
-            }
-            Log.debug("Image error handling took: ${loadTime.inWholeMilliseconds}ms")
-        }
         Box(
             modifier = errorModifier then Modifier.fillMaxSize()
                 .background(Color(0x1F888888)),
