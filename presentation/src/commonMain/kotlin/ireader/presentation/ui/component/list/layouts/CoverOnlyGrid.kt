@@ -75,7 +75,7 @@ fun CoverOnlyGrid(
                         },
                         onClick = { onClick(book) },
                         book = book,
-                        ratio = 6f / 9f,
+                        ratio = 2f / 3f,
                         selected = book.id in selection,
                         header = header,
                         onlyCover = true,

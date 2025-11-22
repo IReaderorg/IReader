@@ -23,8 +23,8 @@ import ireader.presentation.imageloader.IImageLoader
 fun IBookImageComposable(
         image: BookCover,
         modifier: Modifier = Modifier,
-        alignment: Alignment = Alignment.TopCenter,
-        contentScale: ContentScale = ContentScale.FillHeight,
+        alignment: Alignment = Alignment.Center,
+        contentScale: ContentScale = ContentScale.Crop,
         headers: ((url: String) -> okhttp3.Headers?)? = null
 ) {
     IImageLoader(

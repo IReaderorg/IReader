@@ -34,8 +34,8 @@ fun GoToLastReadComposable(modifier: Modifier = Modifier, size: Dp = 40.dp, onCl
         androidx.compose.material3.IconButton(
             onClick = onClick,
             modifier = Modifier
-                .padding(6.dp)
-                .size(18.dp)
+                .padding(4.dp)
+                .size(24.dp)
                 .background(
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
                     shape = CircleShape
@@ -44,7 +44,7 @@ fun GoToLastReadComposable(modifier: Modifier = Modifier, size: Dp = 40.dp, onCl
             androidx.compose.material3.Icon(
                 imageVector = Icons.Default.ImportContacts,
                 contentDescription = localize(Res.string.open_last_chapter),
-                modifier = Modifier.size(18.dp),
+                modifier = Modifier.size(14.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
         }

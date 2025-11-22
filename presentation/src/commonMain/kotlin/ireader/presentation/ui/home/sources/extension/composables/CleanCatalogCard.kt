@@ -74,7 +74,7 @@ fun CleanCatalogCard(
         // Source Icon
         CleanSourceIcon(
             catalog = catalog,
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier.size(40.dp)
         )
 
         // Source Info

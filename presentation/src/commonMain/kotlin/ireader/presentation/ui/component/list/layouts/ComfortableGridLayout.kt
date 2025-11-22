@@ -72,7 +72,7 @@ fun ComfortableGridLayout(
                         },
                         onClick = { onClick(book) },
                         book = book,
-                        ratio = 6f / 10f,
+                        ratio = 2f / 3f,
                         selected = book.id in selection,
                         header = headers,
                         onlyCover = true,

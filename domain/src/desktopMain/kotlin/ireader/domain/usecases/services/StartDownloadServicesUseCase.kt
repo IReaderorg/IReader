@@ -60,24 +60,21 @@ actual class StartDownloadServicesUseCase(
                     // Log error for desktop - could show system notification in future
                     ireader.core.log.Log.error { "Download failed for $bookName: ${error.message}" }
                 },
-                onSuccess = { completedDownloads ->
-                    // Add completed downloads to the state
-                    val currentCompleted = downloadServiceState.completedDownloads.toMutableList()
-                    currentCompleted.addAll(completedDownloads)
-                    downloadServiceState.completedDownloads = currentCompleted
+                onSuccess = {
+                    // Count completed and failed downloads
+                    val completedCount = downloadServiceState.downloadProgress.values
+                        .count { it.status == ireader.domain.services.downloaderService.DownloadStatus.COMPLETED }
+                    val failedCount = downloadServiceState.downloadProgress.values
+                        .count { it.status == ireader.domain.services.downloaderService.DownloadStatus.FAILED }
                     
                     // Log success for desktop
-                    if (completedDownloads.isNotEmpty()) {
-                        ireader.core.log.Log.info { "Successfully downloaded ${completedDownloads.size} chapters" }
+                    if (completedCount > 0) {
+                        ireader.core.log.Log.info { "Successfully downloaded $completedCount chapters" }
                     }
                     
                     // Log failures if any
-                    val failedDownloads = downloadServiceState.failedDownloads.values.toList()
-                    if (failedDownloads.isNotEmpty()) {
-                        ireader.core.log.Log.warn { "${failedDownloads.size} chapters failed to download" }
-                        failedDownloads.forEach { failed ->
-                            ireader.core.log.Log.warn { "Chapter ${failed.chapterId}: ${failed.errorMessage}" }
-                        }
+                    if (failedCount > 0) {
+                        ireader.core.log.Log.warn { "$failedCount chapters failed to download" }
                     }
                 },
                 remoteUseCases = remoteUseCases,

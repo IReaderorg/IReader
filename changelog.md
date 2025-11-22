@@ -1,6 +1,86 @@
 ### Changelog
 
-## v0.1.30 (Upcoming)
+## v1.0.46 (Upcoming)
+### New Features
+- **Leaderboard System**: Complete leaderboard implementation with Supabase integration
+  - Real-time leaderboard with user rankings and statistics
+  - Multiple leaderboard categories (reading time, books read, chapters completed)
+  - User profile integration with avatars and achievements
+  - Supabase database schema and verification scripts
+- **Modern Statistics Screen**: Comprehensive reading statistics dashboard
+  - Beautiful visualizations of reading habits and progress
+  - Time-based analytics (daily, weekly, monthly, yearly)
+  - Genre and source distribution charts
+  - Reading streak tracking and milestones
+- **Browse Settings Screen**: New dedicated settings for browsing and discovery
+  - Customizable source preferences
+  - Filter and sort options
+  - Language and content preferences
+- **LNReader Plugin Support**: Enhanced plugin loading system
+  - Stub-based loading for faster startup times
+  - Improved JavaScript plugin loader with better error handling
+  - Android-specific optimizations for plugin management
+  - Background plugin loading to improve app responsiveness
+
+### Major UI Redesigns
+- **Modern Extension Screen**: Complete redesign of the extensions/sources interface
+  - Three design variants: Clean, Enhanced, and Modern
+  - Beautiful catalog cards with improved visual hierarchy
+  - Enhanced language filtering with multi-select support
+  - Better organization of remote and user sources
+  - Smooth animations and transitions
+- **Modern Source Migration Screen**: Redesigned source migration interface
+  - Step-by-step migration wizard
+  - Better progress tracking and feedback
+  - Improved error handling and recovery
+  - Batch migration support
+- **Book Detail Screen Redesign**: Enhanced book information display
+  - Modern backdrop with gradient overlays
+  - Improved book header with better cover presentation
+  - New book stats card showing reading progress
+  - Enhanced action buttons with better visual feedback
+  - Modernized chapter list with improved filtering
+  - Review summary cards with rating visualization
+- **Downloader Screen Improvements**: Redesigned download management interface
+  - Cleaner layout with better visual hierarchy
+  - Enhanced progress indicators and status display
+  - Improved batch operations
+  - Better error handling and retry functionality
+
+### Technical Improvements
+- **Theme System Enhancements**: Major improvements to theming capabilities
+  - New theme color utilities for better color management
+  - Enhanced theme controller with improved state management
+  - Better system bars integration (status bar, navigation bar)
+  - Improved theme persistence and switching
+  - Support for plugin-specific themes
+- **Keyboard Handling**: New keyboard-aware components
+  - KeyboardAwareContent composable for better keyboard interactions
+  - Keyboard modifiers for improved input handling
+  - Better focus management in forms and inputs
+- **Repository Layer**: Enhanced data layer architecture
+  - New LeaderboardRepository for leaderboard data management
+  - Improved use case organization and dependency injection
+  - Better separation of concerns
+- **Download Service Optimization**: Improved download service performance
+  - Better state management for downloads
+  - Improved error handling and retry logic
+  - Enhanced progress tracking
+  - More efficient resource usage
+
+### Bug Fixes
+- **Workflow Build**: Fixed multiple workflow build issues
+- **AutoRepairChapterUseCase**: Fixed chapter repair functionality
+- **Downloader Screen**: Fixed various UI and functionality issues
+- **Source Migration**: Improved reliability and error handling
+- **Book Opening**: Fixed issue where the same book would open multiple times
+- **GitHub Issues**: Simplified GitHub issue request handling
+
+### Performance Improvements
+- **Plugin Loading**: Significantly faster plugin loading with stub-based approach
+- **Background Loading**: Plugins now load in background to prevent UI blocking
+- **Catalog Installation**: Optimized catalog installer and loader
+- **Image Loading**: Improved catalog image fetching and caching
 ### UI Improvements
 - **Enhanced Settings Screens**: Modernized all settings screens with Material Design 3 components
   - Improved Appearance settings with better theme selection and color customization

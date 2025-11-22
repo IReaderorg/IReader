@@ -63,6 +63,8 @@ fun BookImage(
                     .align(Alignment.Center),
                 image = BookCover.from(book),
                 headers = header,
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                alignment = Alignment.Center
             )
             if (!onlyCover) {
                 Box(
