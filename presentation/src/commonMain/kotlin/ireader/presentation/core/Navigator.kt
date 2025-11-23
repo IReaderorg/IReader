@@ -5,12 +5,14 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
 import androidx.navigation.NavHostController
+import ireader.presentation.core.NavigationRoutes.repositoryAdd
 import ireader.presentation.core.ui.BookDetailScreenSpec
 import ireader.presentation.core.ui.ChatGptLoginScreenSpec
 import ireader.presentation.core.ui.DeepSeekLoginScreenSpec
 import ireader.presentation.core.ui.ExploreScreenSpec
 import ireader.presentation.core.ui.GlobalSearchScreenSpec
 import ireader.presentation.core.ui.ReaderScreenSpec
+import ireader.presentation.core.ui.RepositoryAddScreenSpec
 
 /**
  * CompositionLocal that provides access to the NavHostController throughout the app.
@@ -89,6 +91,10 @@ fun NavHostController.navigateTo(spec: ReaderScreenSpec) {
 fun NavHostController.navigateTo(spec: ExploreScreenSpec) {
     // Don't include query in route since it's not part of the path pattern
     navigate("explore/${spec.sourceId}")
+}
+fun NavHostController.navigateTo(spec: RepositoryAddScreenSpec) {
+    // Don't include query in route since it's not part of the path pattern
+    navigate(repositoryAdd)
 }
 
 fun NavHostController.navigateTo(spec: GlobalSearchScreenSpec) {
