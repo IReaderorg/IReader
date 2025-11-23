@@ -210,11 +210,13 @@ private fun FontItem(
     showPreview: Boolean,
     onClick: () -> Unit
 ) {
-    // Create font family for this specific font
+    // Create font family for this specific font with error handling
     val fontFamily = remember(fontName) {
         try {
-            ireader.domain.models.common.FontFamilyModel.Custom(fontName).toComposeFontFamily()
+            val customFont = ireader.domain.models.common.FontFamilyModel.Custom(fontName)
+            customFont.toComposeFontFamily()
         } catch (e: Exception) {
+            ireader.core.log.Log.error("Failed to load font in preview: $fontName", e)
             androidx.compose.ui.text.font.FontFamily.Default
         }
     }

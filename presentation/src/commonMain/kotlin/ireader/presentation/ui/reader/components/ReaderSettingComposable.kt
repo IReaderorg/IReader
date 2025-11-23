@@ -79,7 +79,7 @@ fun ReaderSettingMainLayout(
         initialPage = 0,
         initialPageOffsetFraction = 0f
     ) {
-      3
+      4  // Updated to 4 tabs
     }
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
 
@@ -98,10 +98,15 @@ fun ReaderSettingMainLayout(
         }
     }
 
-
     val colorTabItem = remember {
         TabItem(localizeHelper.localize(Res.string.colors)) {
             ColorScreenTab(vm, onChangeBrightness, onBackgroundChange)
+        }
+    }
+    
+    val fontsTabItem = remember {
+        TabItem("Fonts") {
+            FontPickerTab(vm)
         }
     }
 
@@ -109,7 +114,8 @@ fun ReaderSettingMainLayout(
         listOf<TabItem>(
             readerTab,
             generalTab,
-            colorTabItem
+            colorTabItem,
+            fontsTabItem
         )
     }
 
@@ -139,22 +145,34 @@ fun ReaderScreenTab(
         }
 
         item {
-            var postion = remember {
-                0
-            }
-            vm.font?.let { font ->
+            val font = vm.font
+            if (vm.fontsLoading) {
+                // Show loading indicator while fonts are being fetched
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    androidx.compose.material3.CircularProgressIndicator()
+                }
+            } else {
+                // Map font names to FontType with proper FontFamilyModel.Custom
+                val fontChoices = vm.fonts.associate { fontName ->
+                    val fontType = FontType(
+                        name = fontName,
+                        fontFamily = ireader.domain.models.common.FontFamilyModel.Custom(fontName)
+                    )
+                    fontType to fontName
+                }
+                
                 ChipChoicePreference(
-                        preference = font,
-                        choices = vm.fonts.map { FontType(it, ireader.domain.models.common.FontFamilyModel.Default) }
-                                .associate { fontType ->
-                                    postion++
-                                    return@associate fontType to fontType.name
-                                },
-                        title = localizeHelper.localize(Res.string.font),
-                        onFailToFindElement = vm.font?.value?.name ?: ""
+                    preference = font!!,
+                    choices = fontChoices,
+                    title = localizeHelper.localize(Res.string.font),
+                    onFailToFindElement = vm.font!!.value.name
                 )
             }
-
         }
         item {
             PreferenceRow(
@@ -983,51 +1001,67 @@ fun TranslateButton(
 
 
 /**
- * Font Picker Tab for selecting custom fonts
+ * Font Picker Tab for selecting custom fonts and Google Fonts
  */
 @Composable
 fun FontPickerTab(
     vm: ReaderScreenViewModel
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    
+    // Convert Google Fonts list to CustomFont format for display
+    val googleFonts = remember(vm.fonts) {
+        vm.fonts.map { fontName ->
+            ireader.domain.models.fonts.CustomFont(
+                id = "google_${fontName.lowercase().replace(" ", "_")}",
+                name = fontName,
+                filePath = "", // Empty for Google Fonts
+                isSystemFont = true,
+                dateAdded = 0L
+            )
+        }
+    }
+    
+    // Determine the currently selected font ID
+    // Check both the selectedFontId (for custom fonts) and the font preference (for Google Fonts)
+    val currentSelectedId = remember(vm.selectedFontId.value, vm.font!!.value) {
+        val customFontId = vm.selectedFontId.value
+        val googleFontName = vm.font.value.name
+        
+        when {
+            customFontId.isNotEmpty() -> customFontId
+            googleFontName != null -> "google_${googleFontName.lowercase().replace(" ", "_")}"
+            else -> ""
+        }
+    }
+    
     FontPicker(
-        selectedFontId = vm.selectedFontId.value,
+        selectedFontId = currentSelectedId,
         customFonts = vm.customFonts,
-        systemFonts = vm.systemFonts,
+        systemFonts = googleFonts, // Use Google Fonts as system fonts
         onFontSelected = { fontId ->
-            vm.selectFont(fontId)
-        },
-        onImportFont = {
-            vm.scope.launchIO {
-                try {
-                    val filePaths = ireader.core.util.PlatformFilePicker.pickFiles(
-                        fileTypes = listOf("ttf", "otf"),
-                        multiSelect = true
-                    )
-                    
-                    if (filePaths != null && filePaths.isNotEmpty()) {
-                        filePaths.forEach { filePath ->
-                            // Validate font file
-                            val file = java.io.File(filePath)
-                            if (!ireader.presentation.ui.core.theme.FontRegistry.validateFontFile(file)) {
-                                vm.showSnackBar(ireader.i18n.UiText.DynamicString("Invalid font file: ${file.name}"))
-                                return@forEach
-                            }
-                            
-                            // Extract font name from file name
-                            val fontName = file.nameWithoutExtension
-                            
-                            // Import the font
-                            vm.importFont(filePath, fontName)
-                        }
-                    }
-                } catch (e: Exception) {
-                    vm.showSnackBar(ireader.i18n.UiText.ExceptionString(e))
+            // If it's a Google Font, download and apply it asynchronously
+            if (fontId.startsWith("google_")) {
+                val fontName = googleFonts.find { it.id == fontId }?.name
+                if (fontName != null) {
+                    vm.selectGoogleFont(fontName)
                 }
+            } else {
+                // Custom font - clear Google Font preference and set custom font
+                vm.platformUiPreferences.font().set(
+                    ireader.domain.preferences.models.FontType(
+                        name = "Default",
+                        fontFamily = ireader.domain.models.common.FontFamilyModel.Default
+                    )
+                )
+                vm.selectFont(fontId)
             }
         },
+        onImportFont = { /* Import button removed */ },
         onDeleteFont = { fontId ->
             vm.deleteFont(fontId)
         },
+        isLoading = vm.fontsLoading,
         modifier = Modifier.fillMaxSize()
     )
 }

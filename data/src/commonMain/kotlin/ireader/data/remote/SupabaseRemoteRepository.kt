@@ -258,6 +258,7 @@ class SupabaseRemoteRepository(
                         put("last_scroll_position", sanitizedProgress.lastScrollPosition.toDouble())
                     }
                     
+                    // Optimized: Set returning=false to reduce response payload and latency
                     backendService.upsert(
                         table = "reading_progress",
                         data = progressData,
@@ -265,8 +266,10 @@ class SupabaseRemoteRepository(
                         returning = false
                     ).getOrThrow()
                     
+                    // Update cache after successful sync
                     cache.cacheProgress(sanitizedProgress.userId, sanitizedProgress.bookId, sanitizedProgress)
                 } catch (e: Exception) {
+                    // Queue for retry instead of failing immediately
                     syncQueue.enqueue(progress)
                     throw e
                 }
@@ -275,18 +278,22 @@ class SupabaseRemoteRepository(
     
     override suspend fun getReadingProgress(userId: String, bookId: String): Result<ReadingProgress?> = 
         RemoteErrorMapper.withErrorMapping {
+            // Check cache first for faster response
             val cached = cache.getCachedProgress(userId, bookId)
             if (cached != null) {
                 return@withErrorMapping cached
             }
             
             try {
+                // Optimized: Only fetch necessary columns
                 val queryResult = backendService.query(
                     table = "reading_progress",
                     filters = mapOf(
                         "user_id" to userId,
                         "book_id" to bookId
-                    )
+                    ),
+                    columns = "user_id,book_id,last_chapter_slug,last_scroll_position,updated_at",
+                    limit = 1 // Only need one result
                 ).getOrThrow()
                 
                 val progressDto = queryResult.firstOrNull()?.let {

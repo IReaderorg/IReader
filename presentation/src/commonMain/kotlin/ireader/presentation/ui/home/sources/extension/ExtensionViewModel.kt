@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
+import ireader.core.log.Log
 import ireader.core.os.InstallStep
 import ireader.domain.catalogs.interactor.*
 import ireader.domain.models.entities.*
@@ -196,8 +197,13 @@ class ExtensionViewModel(
      */
     private fun refreshCatalogsQuietly() {
         scope.launch(Dispatchers.IO) {
-            // Just trigger a refresh of local catalogs without syncing remote
-            // The getCatalogsByType.subscribe flow will automatically update the UI
+            try {
+                // Force reload catalogs from CatalogStore
+                // This will trigger the flow to emit new values
+                catalogStore.reloadCatalogs()
+            } catch (e: Exception) {
+                ireader.core.log.Log.error("Failed to refresh catalogs quietly", e)
+            }
         }
     }
 

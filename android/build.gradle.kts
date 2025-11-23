@@ -280,7 +280,7 @@ dependencies {
     implementation(project(Modules.commonResources))
 
 
-    /** Firebase **/
+    /** Firebase - Excluded from F-Droid builds (fdroid flavor) **/
     "standardImplementation"(platform(libs.firebase.bom))
     "standardImplementation"(libs.firebase.analyticKtx)
     "standardImplementation"(libs.firebase.analytic)
@@ -290,7 +290,7 @@ dependencies {
     "devImplementation"(libs.firebase.analytic)
     "devImplementation"(libs.firebase.crashlytics)
     
-    /** Google ML Kit - Only for standard and dev builds **/
+    /** Google ML Kit - Excluded from F-Droid builds (fdroid flavor) **/
     "standardImplementation"(libs.googleTranslator)
     "devImplementation"(libs.googleTranslator)
     
@@ -324,9 +324,5 @@ composeCompiler {
     enableNonSkippingGroupOptimization.set(true)
 }
 
-// Apply Google Services plugin only for non-fdroid flavors
-val taskRequests = gradle.startParameter.taskRequests.toString()
-if (!taskRequests.contains("Fdroid", ignoreCase = true)) {
-    apply(plugin = "com.google.gms.google-services")
-    apply(plugin = "com.google.firebase.crashlytics")
-}
+// Google Services and Firebase Crashlytics plugins excluded for F-Droid builds
+// F-Droid policy prohibits proprietary services

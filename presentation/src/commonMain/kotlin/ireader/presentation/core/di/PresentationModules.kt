@@ -182,6 +182,8 @@ val PresentationModules = module {
         get(),
         // Font management use case
         get(),
+        // Font use case
+        get(),
         // Params and scope
         get(),get(),get(),get(),get(),get()
     ) }

@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,69 +32,129 @@ fun FontPicker(
     onFontSelected: (String) -> Unit,
     onImportFont: () -> Unit,
     onDeleteFont: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isLoading: Boolean = false
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var fontToDelete by remember { mutableStateOf<CustomFont?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
     
-    LazyColumn(
-        modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        // Import Font Button
-        item {
-            Button(
-                onClick = onImportFont,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    imageVector = Icons.Default.FileUpload,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Import Font")
-            }
+    // Filter fonts based on search query
+    val filteredSystemFonts = remember(systemFonts, searchQuery) {
+        if (searchQuery.isBlank()) {
+            systemFonts
+        } else {
+            systemFonts.filter { it.name.contains(searchQuery, ignoreCase = true) }
         }
-        
-        // System Fonts Section
+    }
+    
+    Column(modifier = modifier.fillMaxWidth()) {
+        // Search bar
         if (systemFonts.isNotEmpty()) {
-            item {
-                Text(
-                    text = "System Fonts",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-                )
-            }
-            
-            items(systemFonts) { font ->
-                FontItem(
-                    font = font,
-                    isSelected = selectedFontId == font.id,
-                    onClick = { onFontSelected(font.id) },
-                    onDelete = null // System fonts cannot be deleted
-                )
-            }
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                placeholder = { Text("Search fonts...") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search"
+                    )
+                },
+                singleLine = true,
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+            )
         }
         
-        // Custom Fonts Section
-        if (customFonts.isNotEmpty()) {
-            item {
-                Text(
-                    text = "Custom Fonts",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-                )
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Loading fonts...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
-            
-            items(customFonts) { font ->
-                FontItem(
-                    font = font,
-                    isSelected = selectedFontId == font.id,
-                    onClick = { onFontSelected(font.id) },
-                    onDelete = { fontToDelete = font }
-                )
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Google Fonts Section
+                if (filteredSystemFonts.isNotEmpty()) {
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp, bottom = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Google Fonts",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "${filteredSystemFonts.size} fonts",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    
+                    items(filteredSystemFonts) { font ->
+                        FontItem(
+                            font = font,
+                            isSelected = selectedFontId == font.id,
+                            onClick = { onFontSelected(font.id) },
+                            onDelete = null // Google Fonts cannot be deleted
+                        )
+                    }
+                }
+                
+                // Custom Fonts Section
+                if (customFonts.isNotEmpty()) {
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp, bottom = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Custom Fonts",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "${customFonts.size} fonts",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    
+                    items(customFonts) { font ->
+                        FontItem(
+                            font = font,
+                            isSelected = selectedFontId == font.id,
+                            onClick = { onFontSelected(font.id) },
+                            onDelete = { fontToDelete = font }
+                        )
+                    }
+                }
             }
         }
     }

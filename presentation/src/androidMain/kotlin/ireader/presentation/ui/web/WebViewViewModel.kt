@@ -190,17 +190,46 @@ class WebViewPageModel(
                             fetchChapterState = FetchButtonState.Success("Chapter fetched successfully")
                             showSnackBar(UiText.MStringResource(Res.string.download_notifier_download_finish))
                         } else {
-                            // Retry with fallback parsing if content is empty
-                            fetchChapterState = FetchButtonState.Error("No content found. Please try again.")
-                            showSnackBar(UiText.DynamicString("No content found. The page may not have loaded completely."))
+                            // Use SmartContentExtractor as fallback when source parser fails
+                            trySmartExtraction(chapter, pageSource, url)
                         }
                     },
                     commands = listOf(Command.Content.Fetch(url = url, pageSource))
                 )
             } catch (e: Exception) {
-                fetchChapterState = FetchButtonState.Error(e.message ?: "Unknown error")
-                showSnackBar(UiText.DynamicString("Error: ${e.message ?: "Failed to fetch chapter"}"))
+                // Try smart extraction on error
+                try {
+                    val pageSource = webView.getHtml()
+                    val url = webView.url ?: ""
+                    trySmartExtraction(chapter, pageSource, url)
+                } catch (fallbackError: Exception) {
+                    fetchChapterState = FetchButtonState.Error(e.message ?: "Unknown error")
+                    showSnackBar(UiText.DynamicString("Error: ${e.message ?: "Failed to fetch chapter"}"))
+                }
             }
+        }
+    }
+    
+    private suspend fun trySmartExtraction(chapter: Chapter, pageSource: String, url: String) {
+        try {
+            val extractor = SmartContentExtractor()
+            val result = extractor.extractContent(pageSource)
+            
+            if (result.content.isNotEmpty() && result.confidence > 0.5) {
+                // Convert HTML string to List<Page>
+                val contentPages = listOf(ireader.core.source.model.Text(result.content))
+                val extractedChapter = chapter.copy(content = contentPages)
+                webChapter = extractedChapter
+                insertChapter(extractedChapter)
+                fetchChapterState = FetchButtonState.Success("Chapter extracted (${(result.confidence * 100).toInt()}% confidence)")
+                showSnackBar(UiText.DynamicString("Chapter content extracted using ${result.method}"))
+            } else {
+                fetchChapterState = FetchButtonState.Error("Could not extract chapter content reliably")
+                showSnackBar(UiText.DynamicString("No reliable content found. Try a different page or source."))
+            }
+        } catch (e: Exception) {
+            fetchChapterState = FetchButtonState.Error("Smart extraction failed: ${e.message}")
+            showSnackBar(UiText.DynamicString("Failed to extract content: ${e.message}"))
         }
     }
 

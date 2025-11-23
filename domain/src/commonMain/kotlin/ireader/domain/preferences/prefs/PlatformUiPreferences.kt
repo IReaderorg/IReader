@@ -5,5 +5,5 @@ import ireader.domain.preferences.models.FontType
 
 
 interface PlatformUiPreferences {
-    fun font(): Preference<FontType>?
+    fun font(): Preference<FontType>
 }

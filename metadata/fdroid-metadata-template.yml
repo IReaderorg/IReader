@@ -1,0 +1,61 @@
+# F-Droid Metadata Template
+# Place this in the F-Droid data repository as: metadata/org.ireader.app.yml
+
+Categories:
+  - Reading
+
+License: GPL-3.0-or-later
+
+AuthorName: Infinity Reader Team
+AuthorWebSite: https://github.com/IReaderorg
+
+SourceCode: https://github.com/IReaderorg/IReader
+IssueTracker: https://github.com/IReaderorg/IReader/issues
+
+AutoName: Infinity Reader
+
+Description: |-
+    Infinity Reader is a free and open-source novel reader application that allows you to read web novels from various sources.
+    
+    Features:
+    * Read novels from multiple sources
+    * Offline reading support
+    * Customizable reading experience
+    * Dark mode support
+    * Bookmark and history management
+    * Search and discovery
+    * Translation support (FOSS implementation)
+    * Text-to-speech
+    * And much more!
+    
+    This F-Droid build excludes proprietary services like Firebase Analytics and Google ML Kit.
+    All core functionality remains available using FOSS alternatives.
+
+RepoType: git
+Repo: https://github.com/IReaderorg/IReader
+
+Builds:
+  - versionName: '1.0.0'  # Update with actual version
+    versionCode: 1  # Update with actual version code
+    commit: v1.0.0  # Update with actual git tag
+    subdir: android
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-java-alternatives -a
+    gradle:
+      - fdroid
+    output: build/outputs/apk/fdroid/release/android-fdroid-release.apk
+    prebuild: echo "org.gradle.jvmargs=-Xmx4096m" >> ../gradle.properties
+    scanignore:
+      - domain/src/desktopMain/resources/native/windows-x64/*
+    scandelete:
+      - buildSrc
+    ndk: r21e
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '1.0.0'  # Update with actual version
+CurrentVersionCode: 1  # Update with actual version code
+
+NoSourceSince: ''

@@ -28,6 +28,7 @@ class SyncManager(
 ) {
     private val scope = CoroutineScope(Dispatchers.IO)
     private var autoSyncJob: Job? = null
+    private var debounceSyncJob: Job? = null
     
     private val _isSyncing = MutableStateFlow(false)
     val isSyncing: StateFlow<Boolean> = _isSyncing.asStateFlow()
@@ -35,12 +36,17 @@ class SyncManager(
     private val _lastSyncTime = MutableStateFlow(0L)
     val lastSyncTime: StateFlow<Long> = _lastSyncTime.asStateFlow()
     
+    // Debounce mechanism to prevent rapid successive syncs
+    private var lastSyncRequestTime = 0L
+    private val minSyncIntervalMs = 2000L // Minimum 2 seconds between syncs
+    
     init {
         _lastSyncTime.value = supabasePreferences.lastSyncTime().get()
     }
     
     /**
      * Start automatic sync service
+     * Reduced interval for more responsive syncing
      */
     fun startAutoSync() {
         if (!supabasePreferences.autoSyncEnabled().get()) {
@@ -50,7 +56,7 @@ class SyncManager(
         autoSyncJob?.cancel()
         autoSyncJob = scope.launch {
             while (true) {
-                delay(300_000) // Sync every 5 minutes
+                delay(60_000) // Sync every 1 minute (reduced from 5 minutes)
                 
                 try {
                     val user = remoteRepository.getCurrentUser().getOrNull()
@@ -73,7 +79,8 @@ class SyncManager(
     }
     
     /**
-     * Sync reading progress for a book
+     * Sync reading progress for a book with debouncing
+     * Prevents rapid successive syncs to reduce server load and improve responsiveness
      */
     suspend fun syncReadingProgress(
         userId: String,
@@ -86,6 +93,29 @@ class SyncManager(
             return Result.success(Unit)
         }
         
+        // Debounce: Skip if last sync was too recent
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastSyncRequestTime < minSyncIntervalMs) {
+            // Cancel previous debounce job and schedule new one
+            debounceSyncJob?.cancel()
+            debounceSyncJob = scope.launch {
+                delay(minSyncIntervalMs)
+                performSyncReadingProgress(userId, bookId, sourceId, chapterSlug, scrollPosition)
+            }
+            return Result.success(Unit)
+        }
+        
+        lastSyncRequestTime = currentTime
+        return performSyncReadingProgress(userId, bookId, sourceId, chapterSlug, scrollPosition)
+    }
+    
+    private suspend fun performSyncReadingProgress(
+        userId: String,
+        bookId: Long,
+        sourceId: Long,
+        chapterSlug: String,
+        scrollPosition: Float
+    ): Result<Unit> {
         return try {
             val normalizedBookId = "$sourceId-$bookId"
             

@@ -407,7 +407,9 @@ private fun StyleText(
                 .fillMaxWidth()
                 .padding(horizontal = vm.paragraphsIndent.value.dp),
             fontSize = vm.fontSize.value.sp,
-            fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
+            fontFamily = remember(vm.font?.value, vm.fontVersion) { 
+                vm.font?.value?.fontFamily?.toComposeFontFamily() 
+            },
             textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
             originalColor = vm.textColor.value,
             translatedColor = vm.textColor.value.copy(alpha = 0.9f),
@@ -452,7 +454,9 @@ private fun StyleText(
                 .fillMaxWidth()
                 .padding(horizontal = vm.paragraphsIndent.value.dp),
             fontSize = vm.fontSize.value.sp,
-            fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
+            fontFamily = remember(vm.font?.value, vm.fontVersion) { 
+                vm.font?.value?.fontFamily?.toComposeFontFamily() 
+            },
             textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
             color = vm.textColor.value,
             lineHeight = vm.lineHeight.value.sp,
@@ -467,7 +471,9 @@ private fun StyleText(
                 .fillMaxWidth()
                 .padding(horizontal = vm.paragraphsIndent.value.dp),
             fontSize = vm.fontSize.value.sp,
-            fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
+            fontFamily = remember(vm.font?.value, vm.fontVersion) { 
+                vm.font?.value?.fontFamily?.toComposeFontFamily() 
+            },
             textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
             color = vm.textColor.value,
             lineHeight = vm.lineHeight.value.sp,

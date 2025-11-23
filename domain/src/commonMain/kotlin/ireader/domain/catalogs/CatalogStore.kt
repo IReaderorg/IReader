@@ -336,6 +336,42 @@ class CatalogStore(
     }
     
     /**
+     * Force reload all catalogs from the loader.
+     * This is useful when extensions are added/removed externally.
+     */
+    suspend fun reloadCatalogs() {
+        withContext(Dispatchers.Default) {
+            lock.withLock {
+                ireader.core.log.Log.info("CatalogStore: Reloading all catalogs")
+                val loadedCatalogs = loader.loadAll().distinctBy { it.sourceId }.toSet().toList()
+                val pinnedCatalogIds = pinnedCatalogsPreference.get()
+                
+                // Clear stub tracking
+                stubSourceIds.clear()
+                
+                catalogs = loadedCatalogs.map { catalog ->
+                    // Track stub sources
+                    if (catalog is ireader.domain.models.entities.JSPluginCatalog && 
+                        catalog.source is ireader.domain.js.loader.JSPluginStubSource) {
+                        stubSourceIds.add(catalog.sourceId)
+                    }
+                    
+                    if (catalog.sourceId.toString() in pinnedCatalogIds) {
+                        catalog.copy(isPinned = true)
+                    } else {
+                        catalog
+                    }
+                }
+                
+                ireader.core.log.Log.info("CatalogStore: Reloaded ${catalogs.size} catalogs")
+                
+                // Trigger background loading for any stubs
+                startBackgroundPluginLoading()
+            }
+        }
+    }
+    
+    /**
      * Start background loading of actual plugins.
      * On first run: loads all plugins and adds them to catalog list
      * On subsequent runs: replaces stubs with actual loaded plugins

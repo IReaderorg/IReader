@@ -94,7 +94,7 @@ val DomainServices = module {
     factory  { SubscribeDownloadsUseCase(get()) }
 
 
-    factory  { FontUseCase(get()) }
+    factory  { FontUseCase(get(), get()) }
     factory  { ireader.domain.usecases.fonts.FontManagementUseCase(get()) }
 
 

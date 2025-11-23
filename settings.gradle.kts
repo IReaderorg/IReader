@@ -3,10 +3,8 @@ pluginManagement {
         gradlePluginPortal()
         mavenCentral()
         google()
-        // Only add Jetbrains Compose repo for non-fdroid builds
-        if (!gradle.startParameter.taskNames.any { it.contains("Fdroid", ignoreCase = true) }) {
-            maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-        }
+        // JetBrains Compose dev repo excluded for F-Droid builds
+        // F-Droid uses stable Compose versions from Maven Central
     }
 }
 

@@ -3,12 +3,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 buildscript {
     dependencies {
         classpath(libs.gradle.tools)
-        // Only include Firebase for non-fdroid builds
-        val taskRequests = gradle.startParameter.taskRequests.toString()
-        if (!taskRequests.contains("Fdroid", ignoreCase = true)) {
-            classpath(libs.gradle.google)
-            classpath(libs.gradle.firebaseCrashlytic)
-        }
+        // Firebase Crashlytics excluded for F-Droid builds
+        // F-Droid policy prohibits proprietary crash reporting services
     }
 }
 @Suppress("DSL_SCOPE_VIOLATION")

@@ -81,6 +81,7 @@ class ReaderScreenViewModel(
         val reportBrokenChapterUseCase: ireader.domain.usecases.chapter.ReportBrokenChapterUseCase,
         // Font management use case
         val fontManagementUseCase: ireader.domain.usecases.fonts.FontManagementUseCase,
+        val fontUseCase: ireader.domain.usecases.fonts.FontUseCase,
         // Chapter health and repair
         val chapterHealthChecker: ireader.domain.services.ChapterHealthChecker,
         val chapterHealthRepository: ireader.domain.data.repository.ChapterHealthRepository,
@@ -208,6 +209,9 @@ class ReaderScreenViewModel(
     val isScrollIndicatorDraggable = readerPreferences.scrollbarMode().asState()
     val font = platformUiPreferences.font()?.asState()
     var customFont by mutableStateOf<ireader.domain.models.fonts.CustomFont?>(null)
+    // Font version to force recomposition when font changes
+    var fontVersion by mutableStateOf(0)
+        private set
     val webViewIntegration = readerPreferences.webViewIntegration().asState()
     val webViewBackgroundMode = readerPreferences.webViewBackgroundMode().asState()
     val selectableMode = readerPreferences.selectableText().asState()
@@ -216,15 +220,43 @@ class ReaderScreenViewModel(
     val bionicReadingMode = readerPreferences.bionicReading().asState()
     val verticalScrolling = readerPreferences.scrollMode().asState()
     val readingMode = readerPreferences.readingMode().asState()
-    val fonts = listOf<String>(
-        "Poppins",
-        "PT Serif",
-        "Noto",
-        "Open Sans",
-        "Roboto Serif",
-        "Cooper Arabic",
-        "Lora"
-    )
+    
+    // Dynamic font list loaded from Google Fonts API with caching
+    var fonts by mutableStateOf<List<String>>(emptyList())
+        private set
+    var fontsLoading by mutableStateOf(false)
+        private set
+    
+    init {
+        // Load fonts asynchronously
+        scope.launch {
+            fontsLoading = true
+            try {
+                // Fetch fonts from Google Fonts API (with caching)
+                val remoteFonts = fontUseCase.getRemoteFonts()
+                
+                // Add popular fonts at the top
+                val popularFonts = listOf(
+                    "Roboto", "Open Sans", "Lato", "Montserrat", "Poppins",
+                    "Raleway", "Merriweather", "PT Serif", "Playfair Display",
+                    "Noto Sans", "Ubuntu", "Nunito", "Source Sans Pro"
+                )
+                
+                fonts = (popularFonts + remoteFonts).distinct().sorted()
+            } catch (e: Exception) {
+                ireader.core.log.Log.error("Failed to load fonts in reader", e)
+                // Fallback to popular fonts
+                fonts = listOf(
+                    "Roboto", "Open Sans", "Lato", "Montserrat", "Poppins",
+                    "Raleway", "Merriweather", "PT Serif", "Playfair Display",
+                    "Noto Sans", "Ubuntu", "Nunito", "Source Sans Pro",
+                    "Crimson Text", "Libre Baskerville", "Lora"
+                )
+            } finally {
+                fontsLoading = false
+            }
+        }
+    }
 
     // Translation state and preferences
     val translationState = TranslationStateImpl()
@@ -1071,6 +1103,48 @@ class ReaderScreenViewModel(
                 customFont = fontManagementUseCase.getFontById(fontId)
             } catch (e: Exception) {
                 ireader.core.log.Log.error("Failed to load font", e)
+            }
+        }
+    }
+    
+    /**
+     * Select a Google Font (downloads if needed, then applies)
+     */
+    fun selectGoogleFont(fontName: String) {
+        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    fontsLoading = true
+                }
+
+                
+                // Download font if not cached (calls platform-specific implementation)
+                this@ReaderScreenViewModel.downloadGoogleFontIfNeeded(fontName)
+                
+                // Apply font on main thread
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    // Clear custom font selection
+                    readerPreferences.selectedFontId().set("")
+                    
+                    // Set the Google Font directly
+                    platformUiPreferences.font().set(
+                        ireader.domain.preferences.models.FontType(
+                            name = fontName,
+                            fontFamily = ireader.domain.models.common.FontFamilyModel.Custom(fontName)
+                        )
+                    )
+                    
+                    // Increment font version to force recomposition
+                    fontVersion++
+                    
+                    fontsLoading = false
+                }
+            } catch (e: Exception) {
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    fontsLoading = false
+                }
+                ireader.core.log.Log.error("Failed to select Google Font: $fontName", e)
+                showSnackBar(UiText.DynamicString("Failed to load font: ${e.message}"))
             }
         }
     }

@@ -137,6 +137,9 @@ actual val DomainModule: Module = module {
     single<HttpClients> { HttpClients(get<PreferenceStoreFactory>().create("cookies")) }
     single<EpubCreator> { EpubCreator(get(), get<HttpClients>().default) }
     
+    // Google Fonts Downloader for desktop
+    single { ireader.domain.usecases.fonts.GoogleFontsDownloader(get()) }
+    
     single<ireader.domain.usecases.backup.ScheduleAutomaticBackup> {
         ireader.domain.usecases.backup.ScheduleAutomaticBackupImpl()
     }

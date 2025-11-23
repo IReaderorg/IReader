@@ -4,11 +4,12 @@ import kotlinx.coroutines.delay
 
 /**
  * Retry policy for network operations
+ * Optimized for faster sync with reduced delays
  */
 class RetryPolicy(
-    private val maxRetries: Int = 3,
-    private val initialDelayMs: Long = 1000,
-    private val maxDelayMs: Long = 10000,
+    private val maxRetries: Int = 2, // Reduced from 3 to 2 retries
+    private val initialDelayMs: Long = 500, // Reduced from 1000ms to 500ms
+    private val maxDelayMs: Long = 3000, // Reduced from 10000ms to 3000ms
     private val factor: Double = 2.0
 ) {
     
