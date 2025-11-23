@@ -23,7 +23,8 @@ val reviewModule = module {
                 .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS) as SupabaseClient
             ReviewRepositoryImpl(
                 handler = get(),
-                supabaseClient = supabaseClient
+                supabaseClient = supabaseClient,
+                backendService = get()
             )
         }
     }
@@ -37,7 +38,8 @@ val reviewModule = module {
                 .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS) as SupabaseClient
             BadgeRepositoryImpl(
                 handler = get(),
-                supabaseClient = supabaseClient
+                supabaseClient = supabaseClient,
+                backendService = get()
             )
         }
     }
@@ -51,7 +53,8 @@ val reviewModule = module {
                  .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS) as SupabaseClient
              ireader.data.nft.NFTRepositoryImpl(
                  handler = get(),
-                 supabaseClient = supabaseClient
+                 supabaseClient = supabaseClient,
+                 backendService = get()
              )
          }
      }

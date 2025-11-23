@@ -70,7 +70,7 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     }
 
     fun columnsInPortrait(): Preference<Int> {
-        return preferenceStore.getInt("columns_portrait", 3)
+        return preferenceStore.getInt("columns_portrait", 2)
     }
 
     fun columnsInLandscape(): Preference<Int> {

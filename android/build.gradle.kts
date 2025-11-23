@@ -71,6 +71,9 @@ android {
         versionCode = ProjectConfig.versionCode
         versionName = ProjectConfig.versionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        // Note: ndk.abiFilters removed to avoid conflict with splits.abi
+        // ABI filtering is handled by splits configuration below
     }
     packaging {
         resources.excludes.addAll(
@@ -202,16 +205,22 @@ android {
         create("standard") {
             buildConfigField("boolean", "INCLUDE_UPDATER", "true")
             dimension = "default"
+            // Use default variant from library modules that don't have flavors
+            matchingFallbacks += listOf("release")
         }
         create("fdroid") {
             buildConfigField("boolean", "INCLUDE_UPDATER", "false")
             dimension = "default"
+            // Use default variant from library modules that don't have flavors
+            matchingFallbacks += listOf("release")
         }
         create("dev") {
             androidResources {
                 localeFilters += listOf("en")
             }
             dimension = "default"
+            // Use default variant from library modules that don't have flavors
+            matchingFallbacks += listOf("release")
         }
     }
     sourceSets {
@@ -281,8 +290,15 @@ dependencies {
     "devImplementation"(libs.firebase.analytic)
     "devImplementation"(libs.firebase.crashlytics)
     
+    /** Google ML Kit - Only for standard and dev builds **/
+    "standardImplementation"(libs.googleTranslator)
+    "devImplementation"(libs.googleTranslator)
+    
     implementation(libs.bundles.simplestorage)
     implementation(accompanist.permissions)
+
+    /** Kotlin Reflection - Required for Supabase **/
+    implementation(kotlinx.reflect)
 
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)

@@ -95,6 +95,9 @@ object MoreScreenSpec : Tab {
                 onBadgeManagement = {
                     navController.navigate(NavigationRoutes.badgeManagement)
                 },
+                onAdminBadgeVerification = {
+                    navController.navigate(NavigationRoutes.adminBadgeVerification)
+                },
                 onLeaderboard = {
                     navController.navigate(NavigationRoutes.leaderboard)
                 },

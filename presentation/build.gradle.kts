@@ -13,6 +13,7 @@ plugins {
 
 kotlin {
     androidTarget {
+        publishLibraryVariants("release")
         compilations {
             all {
                 compileTaskProvider.configure {
@@ -138,6 +139,9 @@ android {
     defaultConfig {
         minSdk = ProjectConfig.minSdk
     }
+    
+
+    
     compileOptions {
         sourceCompatibility = ProjectConfig.androidJvmTarget
         targetCompatibility = ProjectConfig.androidJvmTarget
@@ -154,3 +158,6 @@ android {
         }
     }
 }
+
+
+

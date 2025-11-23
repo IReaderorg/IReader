@@ -12,7 +12,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 10
+    const val CURRENT_VERSION = 12
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -74,6 +74,8 @@ object DatabaseMigrations {
             7 -> migrateV7toV8(driver)
             8 -> migrateV8toV9(driver)
             9 -> migrateV9toV10(driver)
+            10 -> migrateV10toV11(driver)
+            11 -> migrateV11toV12(driver)
             // Add more migration cases as the database evolves
         }
     }
@@ -831,6 +833,73 @@ object DatabaseMigrations {
             
         } catch (e: Exception) {
             println("Error migrating to version 10: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+    
+    /**
+     * Migration from version 10 to version 11
+     * Adds repository_type column to repository table
+     */
+    private fun migrateV10toV11(driver: SqlDriver) {
+        try {
+            println("Starting migration from version 10 to 11...")
+            
+            // Check if repository_type column already exists
+            val columnsCheck = "PRAGMA table_info(repository)"
+            var hasRepositoryTypeColumn = false
+            
+            driver.executeQuery(
+                identifier = null,
+                sql = columnsCheck,
+                mapper = { cursor ->
+                    var result = cursor.next()
+                    while (result.value) {
+                        val columnName = cursor.getString(1)
+                        if (columnName == "repository_type") {
+                            hasRepositoryTypeColumn = true
+                        }
+                        result = cursor.next()
+                    }
+                    result
+                },
+                parameters = 0
+            )
+            
+            // Add repository_type column if it doesn't exist
+            if (!hasRepositoryTypeColumn) {
+                driver.execute(null, "ALTER TABLE repository ADD COLUMN repository_type TEXT NOT NULL DEFAULT 'IREADER';", 0)
+                println("Added repository_type column to repository table")
+            }
+            
+            println("Successfully migrated to version 11")
+            
+        } catch (e: Exception) {
+            println("Error migrating to version 11: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+    
+    /**
+     * Migration from version 11 to version 12
+     * Removes default repository and its protection trigger
+     */
+    private fun migrateV11toV12(driver: SqlDriver) {
+        try {
+            println("Starting migration from version 11 to 12...")
+            
+            // Drop the trigger that prevents deletion of system repository
+            driver.execute(null, "DROP TRIGGER IF EXISTS system_repository_delete_trigger;", 0)
+            println("Dropped system_repository_delete_trigger")
+            
+            // Delete the default repository with id = -1 if it exists
+            driver.execute(null, "DELETE FROM repository WHERE _id = -1;", 0)
+            println("Deleted default repository with id = -1")
+            
+            println("Successfully migrated to version 12")
+            
+        } catch (e: Exception) {
+            println("Error migrating to version 12: ${e.message}")
             e.printStackTrace()
         }
     }

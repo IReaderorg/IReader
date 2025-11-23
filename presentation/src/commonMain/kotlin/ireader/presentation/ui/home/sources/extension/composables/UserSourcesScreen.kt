@@ -34,8 +34,11 @@ fun UserSourcesScreen(
         onShowDetails: ((Catalog) -> Unit)? = null,
         onMigrateFromSource: ((Long) -> Unit)? = null,
 ) {
-    // Save scroll state across navigation
-    val scrollState = rememberSaveable(saver = LazyListState.Saver) {
+    // Save scroll state across navigation with proper key
+    val scrollState = rememberSaveable(
+        key = "user_sources_scroll",
+        saver = LazyListState.Saver
+    ) {
         LazyListState()
     }
     

@@ -77,49 +77,36 @@ fun RemoteSourcesScreen(
             }
         )
     }
-    val allCatalogs = remember {
+    // Optimize derived state chain to avoid unnecessary recompositions
+    val remoteSources = remember {
         derivedStateOf {
-            vm.pinnedCatalogs + vm.unpinnedCatalogs
-        }
-    }
-    val remotesCatalogs = remember {
-        derivedStateOf {
-
-            vm.remoteCatalogs
-        }
-    }
-    val installed = remember {
-        derivedStateOf {
-            listOf(SourceUiModel.Header(SourceKeys.INSTALLED_KEY)) + allCatalogs.value.map {
-                SourceUiModel.Item(it, SourceState.Installed)
-            }
-        }
-    }
-    val remotes = remember {
-        derivedStateOf {
-            // Group remote catalogs by language and sort
-            val groupedByLanguage = remotesCatalogs.value.groupBy { it.lang }
+            val allCatalogs = vm.pinnedCatalogs + vm.unpinnedCatalogs
+            val remotesCatalogs = vm.remoteCatalogs
             
+            val installed = listOf(SourceUiModel.Header(SourceKeys.INSTALLED_KEY)) + 
+                allCatalogs.map { SourceUiModel.Item(it, SourceState.Installed) }
+            
+            // Group remote catalogs by language and sort
+            val groupedByLanguage = remotesCatalogs.groupBy { it.lang }
             val sortedGroups = groupedByLanguage.entries.sortedBy { it.key }
             
             // Build the list with headers for each language
-            buildList {
+            val remotes = buildList {
                 sortedGroups.forEach { (lang, catalogs) ->
                     add(SourceUiModel.Header(lang))
                     addAll(catalogs.sortedBy { it.name }.map { SourceUiModel.Item(it, SourceState.Remote) })
                 }
             }
-        }
-    }
-
-    val remoteSources = remember {
-        derivedStateOf {
-            (installed.value + remotes.value).mapIndexed { index, sourceUiModel -> Pair(index, sourceUiModel) }
+            
+            (installed + remotes).mapIndexed { index, sourceUiModel -> Pair(index, sourceUiModel) }
         }
     }
     
-    // Save scroll state across navigation
-    val scrollState = rememberSaveable(saver = LazyListState.Saver) {
+    // Save scroll state across navigation with proper key
+    val scrollState = rememberSaveable(
+        key = "remote_sources_scroll",
+        saver = LazyListState.Saver
+    ) {
         LazyListState()
     }
 

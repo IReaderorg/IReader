@@ -16,8 +16,10 @@ import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.RecordVoiceOver
+import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -48,6 +50,7 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.components.SettingsItem
 import ireader.presentation.ui.settings.components.SettingsSectionHeader
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.State
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,6 +70,7 @@ fun MoreScreen(
     onBadgeStore: () -> Unit = {},
     onNFTBadge: () -> Unit = {},
     onBadgeManagement: () -> Unit = {},
+    onAdminBadgeVerification: () -> Unit = {},
     onLeaderboard: () -> Unit = {},
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -255,6 +259,25 @@ fun MoreScreen(
                 icon = Icons.Outlined.Settings,
                 onClick = onBadgeManagement
             )
+        }
+        
+        // Admin Section (only visible to admins)
+        if (vm.isAdmin.value) {
+            item {
+                SettingsSectionHeader(
+                    title = "Admin",
+                    icon = Icons.Filled.AdminPanelSettings
+                )
+            }
+            
+            item {
+                SettingsItem(
+                    title = "Badge Verification",
+                    description = "Review and approve badge purchase requests",
+                    icon = Icons.Outlined.VerifiedUser,
+                    onClick = onAdminBadgeVerification
+                )
+            }
         }
         
         // Community Section
@@ -589,14 +612,30 @@ fun SetupLayout(
 
 class MainSettingScreenViewModel(
     uiPreferences: UiPreferences,
+    private val getCurrentUser: suspend () -> ireader.domain.models.remote.User?
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
     val incognitoMode = uiPreferences.incognitoMode().asState()
+    
+    private val _isAdmin = androidx.compose.runtime.mutableStateOf(false)
+    val isAdmin: androidx.compose.runtime.State<Boolean> = _isAdmin
 
     var savedScrollIndex by androidx.compose.runtime.mutableStateOf(0)
         private set
     
     var savedScrollOffset by androidx.compose.runtime.mutableStateOf(0)
         private set
+
+    init {
+        // Check if user is admin
+        scope.launch {
+            try {
+                val user = getCurrentUser()
+                _isAdmin.value = user?.isAdmin == true
+            } catch (e: Exception) {
+                _isAdmin.value = false
+            }
+        }
+    }
 
     fun saveScrollPosition(index: Int, offset: Int) {
         savedScrollIndex = index

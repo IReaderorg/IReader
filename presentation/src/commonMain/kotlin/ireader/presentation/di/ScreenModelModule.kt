@@ -15,7 +15,15 @@ val screenModelModule = module {
     factoryOf(::StatsScreenModel)
     
     // Main settings screen - singleton to prevent recreation
-    single { ireader.presentation.ui.settings.MainSettingScreenViewModel(get()) }
+    single { 
+        ireader.presentation.ui.settings.MainSettingScreenViewModel(
+            uiPreferences = get(),
+            getCurrentUser = {
+                val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
+                getCurrentUserUseCase().getOrNull()
+            }
+        )
+    }
     
     // Leaderboard screen model
     factory {

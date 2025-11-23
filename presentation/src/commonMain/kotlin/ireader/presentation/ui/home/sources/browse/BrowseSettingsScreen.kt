@@ -26,7 +26,7 @@ fun BrowseSettingsScreen(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
-    LaunchedEffect(key1 = true) {
+    LaunchedEffect(Unit) {
         vm.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackbar -> {

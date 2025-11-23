@@ -3,7 +3,8 @@ package ireader.presentation.ui.home.library
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ireader.domain.models.entities.BookItem
@@ -14,7 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryController(
         modifier: Modifier,
@@ -22,7 +23,7 @@ fun LibraryController(
         goToReader: (BookItem) -> Unit,
         goToDetail: (BookItem) -> Unit,
         scaffoldPadding: PaddingValues,
-        sheetState: ModalBottomSheetState,
+        sheetState: SheetState,
         requestHideNavigator : (Boolean) -> Unit,
         showFilterSheet: Boolean = false,
         onShowFilterSheet: () -> Unit = {},
@@ -143,7 +144,6 @@ fun LibraryController(
         refreshUpdate = {
             vm.refreshUpdate()
         },
-        bottomSheetState = sheetState,
         onClickChangeCategory = {
             vm.showDialog = true
         },

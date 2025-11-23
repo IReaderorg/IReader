@@ -52,21 +52,30 @@ class AndroidCatalogLoader(
     
     // JavaScript plugin loader - uses converter approach (no JS engine needed!)
     private val jsPluginLoader: JSPluginLoader by lazy {
-        // Use external storage directory for easier access: /storage/emulated/0/ireader/js-plugins
+        // Use the appropriate directory based on user preference
         val jsPluginsDir = getJSPluginsDirectory()
         JSPluginLoader(jsPluginsDir, httpClients.default, preferenceStore)
     }
     
     /**
-     * Get the JS plugins directory in external storage for easier access.
-     * Returns: /storage/emulated/0/ireader/js-plugins
+     * Get the JS plugins directory based on user preference.
+     * If savedLocalCatalogLocation is true, uses app cache (no permissions needed).
+     * Otherwise uses external storage for easier access.
      */
     private fun getJSPluginsDirectory(): File {
-        val externalDir = context.getExternalFilesDir(null)?.parentFile?.parentFile?.parentFile
-        val ireaderDir = File(externalDir, "ireader")
-        val jsPluginsDir = File(ireaderDir, "js-plugins")
-        jsPluginsDir.mkdirs()
-        return jsPluginsDir
+        val useCacheDir = uiPreferences.savedLocalCatalogLocation().get()
+        
+        return if (useCacheDir) {
+            // Use app cache directory - no permissions needed
+            File(context.cacheDir, "js-plugins").apply { mkdirs() }
+        } else {
+            // Use external storage for easier access
+            val externalDir = context.getExternalFilesDir(null)?.parentFile?.parentFile?.parentFile
+            val ireaderDir = File(externalDir, "ireader")
+            val jsPluginsDir = File(ireaderDir, "js-plugins")
+            jsPluginsDir.mkdirs()
+            jsPluginsDir
+        }
     }
     
     init {
@@ -211,11 +220,19 @@ class AndroidCatalogLoader(
      * contains the required feature flag before trying to load it.
      */
     override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? {
-        // Check if this is a JS plugin - if so, return null as JS plugins are loaded via loadAll()
-        val jsPluginsDir = getJSPluginsDirectory()
-        val jsFile = File(jsPluginsDir, "$pkgName.js")
+        // Check if this is a JS plugin in either location - if so, return null as JS plugins are loaded via loadAll()
+        // Check cache directory
+        val cacheJsPluginsDir = File(context.cacheDir, "js-plugins")
+        val cacheJsFile = File(cacheJsPluginsDir, "$pkgName.js")
         
-        if (jsFile.exists() && jsFile.canRead()) {
+        // Check external storage directory
+        val externalDir = context.getExternalFilesDir(null)?.parentFile?.parentFile?.parentFile
+        val externalJsFile = if (externalDir != null) {
+            File(File(File(externalDir, "ireader"), "js-plugins"), "$pkgName.js")
+        } else null
+        
+        if ((cacheJsFile.exists() && cacheJsFile.canRead()) || 
+            (externalJsFile?.exists() == true && externalJsFile.canRead())) {
             // JS plugins are handled by loadAll(), not loadLocalCatalog()
             // Return null to avoid the "catalog not found" warning
             return null
@@ -230,12 +247,24 @@ class AndroidCatalogLoader(
             cacheFile
         }
         val pkgInfo = if (finalFile.exists() && finalFile.canRead()) {
-            pkgManager.getPackageArchiveInfo(finalFile.absolutePath, PACKAGE_FLAGS)
+            try {
+                pkgManager.getPackageArchiveInfo(finalFile.absolutePath, PACKAGE_FLAGS)
+            } catch (e: Exception) {
+                // APK is corrupted or invalid
+                Log.warn("Failed to read APK for catalog {}: {}", pkgName, e.message)
+                null
+            }
         } else {
             null
         }
         if (pkgInfo == null) {
-            Log.warn("The requested catalog {} wasn't found", pkgName)
+            // Don't log warning for JS plugins - they're handled separately
+            // Only log if there's no JS file either
+            val jsPluginsDir = getJSPluginsDirectory()
+            val jsFile = File(jsPluginsDir, "$pkgName.js")
+            if (!jsFile.exists()) {
+                Log.warn("The requested catalog {} wasn't found (not an APK or JS plugin)", pkgName)
+            }
             return null
         }
 

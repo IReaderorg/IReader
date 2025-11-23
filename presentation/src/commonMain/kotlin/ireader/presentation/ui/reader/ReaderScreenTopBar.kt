@@ -6,8 +6,8 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
+import androidx.compose.material3.SheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Bookmark
@@ -42,7 +42,7 @@ fun ReaderScreenTopBar(
         isReaderModeEnable: Boolean,
         vm: ReaderScreenViewModel,
         state: ReaderScreenState,
-        modalBottomSheetValue: ModalBottomSheetValue,
+        modalBottomSheetValue: SheetValue,
         chapter: Chapter?,
         onRefresh: () -> Unit,
         onWebView: () -> Unit,

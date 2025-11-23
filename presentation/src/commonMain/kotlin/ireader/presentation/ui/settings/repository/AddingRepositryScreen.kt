@@ -77,6 +77,7 @@ internal fun AddingRepositoryScreen(
     }
     
     var showQuickAddDialog by remember { mutableStateOf(false) }
+    var showJSPluginPrompt by remember { mutableStateOf(false) }
     
     // Validation function
     fun validateFields(): Boolean {
@@ -234,7 +235,10 @@ internal fun AddingRepositoryScreen(
                         
                         FilterChip(
                             selected = repositoryType == RepositoryType.LNREADER,
-                            onClick = { repositoryType = RepositoryType.LNREADER },
+                            onClick = { 
+                                repositoryType = RepositoryType.LNREADER
+                                showJSPluginPrompt = true
+                            },
                             label = { Text("LNReader") },
                             leadingIcon = if (repositoryType == RepositoryType.LNREADER) {
                                 { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp)) }
@@ -601,6 +605,69 @@ internal fun AddingRepositoryScreen(
             confirmButton = {
                 TextButton(
                     onClick = { showHelpDialog = false }
+                ) {
+                    Text("Got it")
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp
+        )
+    }
+    
+    // JS Plugin prompt dialog
+    if (showJSPluginPrompt) {
+        AlertDialog(
+            onDismissRequest = { showJSPluginPrompt = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            title = {
+                Text(
+                    text = "Enable JavaScript Plugins",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "LNReader repositories require JavaScript plugins to be enabled.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.small,
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "To enable JS plugins:",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
+                            )
+                            Text(
+                                text = "1. Go to Settings → General\n2. Toggle \"Enable JavaScript Plugins\"",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { showJSPluginPrompt = false }
                 ) {
                     Text("Got it")
                 }

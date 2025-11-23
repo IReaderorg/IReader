@@ -14,6 +14,8 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -70,7 +72,7 @@ fun ModernExtensionScreen(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current)
     
-    LaunchedEffect(key1 = true) {
+    LaunchedEffect(Unit) {
         vm.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackbar -> {
@@ -164,17 +166,19 @@ private fun ModernTabBar(
             label = "pill_offset"
         )
         
-        Box(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp)
         ) {
+            val tabWidth = maxWidth / pages.size
+            
             // Animated background pill
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(1f / pages.size)
+                    .width(tabWidth)
                     .fillMaxHeight()
-                    .offset(x = (pillOffset / pages.size * 100).dp)
+                    .offset(x = tabWidth * pillOffset)
                     .padding(4.dp)
                     .clip(RoundedCornerShape(14.dp))
                     .background(

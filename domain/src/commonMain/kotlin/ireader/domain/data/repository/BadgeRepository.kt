@@ -17,4 +17,12 @@ interface BadgeRepository {
     suspend fun setFeaturedBadges(badgeIds: List<String>): Result<Unit>
     suspend fun getPrimaryBadge(): Result<Badge?>
     suspend fun getFeaturedBadges(): Result<List<Badge>>
+    
+    // Admin methods
+    suspend fun getPaymentProofsByStatus(status: ireader.domain.models.remote.PaymentProofStatus): Result<List<PaymentProof>>
+    suspend fun updatePaymentProofStatus(
+        proofId: String, 
+        status: ireader.domain.models.remote.PaymentProofStatus, 
+        adminUserId: String
+    ): Result<Unit>
 }

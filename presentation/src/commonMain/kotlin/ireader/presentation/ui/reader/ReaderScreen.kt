@@ -165,47 +165,62 @@ private fun ReadingScreenContent(
 ) {
     
     // Calculate reading time when chapter changes
-    LaunchedEffect(key1 = chapter?.id) {
-        if (chapter != null && !vm.isLoading) {
+    LaunchedEffect(key1 = chapter?.id, key2 = vm.isLoading) {
+        if (chapter != null && !vm.isLoading && vm.initialized) {
             vm.updateReadingTimeEstimation(0f)
         }
     }
 
     // Initialize the modal sheet state based on reader mode
-    LaunchedEffect(Unit) {
+    LaunchedEffect(key1 = vm.isReaderModeEnable) {
         // Ensure that on initialization, the bottom sheet state is set correctly
-        if (!vm.isReaderModeEnable) {
+        // Only show on first composition if reader mode is disabled
+        if (!vm.isReaderModeEnable && !vm.initialized) {
             modalBottomSheetState.show()
         }
     }
     
     // Handle changes from modal sheet to reader mode
-    LaunchedEffect(key1 = modalBottomSheetState.currentValue) {
-        when (modalBottomSheetState.currentValue) {
-            ModalBottomSheetValue.Expanded -> {
-                if (vm.isReaderModeEnable) vm.isReaderModeEnable = false
+    LaunchedEffect(key1 = modalBottomSheetState.currentValue, key2 = vm.initialized) {
+        // Only sync state after initialization to prevent conflicts
+        if (vm.initialized) {
+            when (modalBottomSheetState.currentValue) {
+                ModalBottomSheetValue.Expanded -> {
+                    if (vm.isReaderModeEnable) vm.isReaderModeEnable = false
+                }
+                ModalBottomSheetValue.Hidden -> {
+                    if (!vm.isReaderModeEnable) vm.isReaderModeEnable = true
+                }
+                else -> {}
             }
-            ModalBottomSheetValue.Hidden -> {
-                if (!vm.isReaderModeEnable) vm.isReaderModeEnable = true
-            }
-            else -> {}
         }
     }
     
     // Handle changes from reader mode to modal sheet
-    LaunchedEffect(key1 = vm.isReaderModeEnable) {
-        when (vm.isReaderModeEnable) {
-            false -> {
-                if (modalBottomSheetState.currentValue != ModalBottomSheetValue.Expanded) {
-                    scope.launch {
-                        modalBottomSheetState.show()
+    LaunchedEffect(key1 = vm.isReaderModeEnable, key2 = vm.initialized) {
+        // Only sync state after initialization to prevent conflicts
+        if (vm.initialized) {
+            when (vm.isReaderModeEnable) {
+                false -> {
+                    if (modalBottomSheetState.currentValue != ModalBottomSheetValue.Expanded) {
+                        scope.launch {
+                            try {
+                                modalBottomSheetState.show()
+                            } catch (e: Exception) {
+                                ireader.core.log.Log.error("Error showing modal sheet", e)
+                            }
+                        }
                     }
                 }
-            }
-            true -> {
-                if (modalBottomSheetState.currentValue != ModalBottomSheetValue.Hidden) {
-                    scope.launch {
-                        modalBottomSheetState.hide()
+                true -> {
+                    if (modalBottomSheetState.currentValue != ModalBottomSheetValue.Hidden) {
+                        scope.launch {
+                            try {
+                                modalBottomSheetState.hide()
+                            } catch (e: Exception) {
+                                ireader.core.log.Log.error("Error hiding modal sheet", e)
+                            }
+                        }
                     }
                 }
             }
@@ -223,9 +238,6 @@ private fun ReadingScreenContent(
             ),
         contentAlignment = Alignment.Center,
     ) {
-        if (vm.webViewManger.inProgress && vm.webViewIntegration.value) {
-            vm.prefFunc.WebView()
-        }
         
         Crossfade(
             modifier = Modifier.fillMaxSize(),
@@ -338,16 +350,20 @@ private fun ReadingScreenContent(
                             }
                             
                             // Chapter Reviews Modal
-                            if (showChapterReviews.value && vm.book != null && vm.stateChapter != null) {
-                                androidx.compose.material3.ModalBottomSheet(
-                                    onDismissRequest = { showChapterReviews.value = false },
-                                    sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
-                                ) {
-                                    ireader.presentation.ui.reader.components.ChapterReviewsFullSheet(
-                                        bookTitle = vm.book!!.title,
-                                        chapterName = vm.stateChapter!!.name,
-                                        onDismiss = { showChapterReviews.value = false }
-                                    )
+                            if (showChapterReviews.value) {
+                                val currentBook = vm.book
+                                val currentChapter = vm.stateChapter
+                                if (currentBook != null && currentChapter != null) {
+                                    androidx.compose.material3.ModalBottomSheet(
+                                        onDismissRequest = { showChapterReviews.value = false },
+                                        sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
+                                    ) {
+                                        ireader.presentation.ui.reader.components.ChapterReviewsFullSheet(
+                                            bookTitle = currentBook.title,
+                                            chapterName = currentChapter.name,
+                                            onDismiss = { showChapterReviews.value = false }
+                                        )
+                                    }
                                 }
                             }
                             
@@ -383,9 +399,7 @@ private fun ReadingScreenContent(
                                 engine = vm.translationEnginesManager.get(),
                                 textColor = vm.textColor.value,
                                 onCancel = { 
-                                    scope.launch {
-                                        vm.translationState.isTranslating = false
-                                    }
+                                    vm.translationState.isTranslating = false
                                 },
                                 modifier = Modifier
                                     .align(Alignment.Center)

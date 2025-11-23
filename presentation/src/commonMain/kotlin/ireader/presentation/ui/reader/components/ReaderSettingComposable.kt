@@ -622,6 +622,15 @@ fun GeneralScreenTab(
                 title = localizeHelper.localize(Res.string.show_webView_during_fetching),
             )
         }
+        if (vm.webViewIntegration.value) {
+            item {
+                SwitchPreference(
+                    preference = vm.webViewBackgroundMode,
+                    title = "Background WebView Mode",
+                    subtitle = "Bypass bot detection invisibly without showing WebView"
+                )
+            }
+        }
         item {
             SwitchPreference(
                 preference = vm.screenAlwaysOn,

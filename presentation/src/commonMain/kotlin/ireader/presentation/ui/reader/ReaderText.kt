@@ -261,26 +261,29 @@ private fun PagedReaderText(
     val scope = rememberCoroutineScope()
     
     // Track scroll progress for reading time estimation in Page mode
-    LaunchedEffect(key1 = scrollState.value, key2 = scrollState.maxValue) {
-        if (scrollState.maxValue > 0) {
+    LaunchedEffect(key1 = scrollState.value, key2 = scrollState.maxValue, key3 = vm.stateChapter?.id) {
+        if (scrollState.maxValue > 0 && !vm.isLoading) {
             val scrollProgress = scrollState.value.toFloat() / scrollState.maxValue.toFloat()
             vm.updateReadingTimeEstimation(scrollProgress)
         }
     }
     
     // Auto-scroll logic for Page mode
-    LaunchedEffect(key1 = vm.autoScrollMode, key2 = vm.autoScrollOffset.value) {
+    LaunchedEffect(key1 = vm.autoScrollMode, key2 = vm.autoScrollOffset.value, key3 = vm.stateChapter?.id) {
         if (vm.autoScrollMode) {
             while (vm.autoScrollMode) {
                 val scrollAmount = vm.autoScrollOffset.value.toFloat()
-                scrollState.scrollBy(scrollAmount)
                 
-                // Check if we've reached the end
+                // Check if we've reached the end before scrolling
                 if (scrollState.value >= scrollState.maxValue) {
+                    // Stop auto-scroll before advancing to prevent double-advance
+                    vm.autoScrollMode = false
                     // Auto-advance to next chapter
                     onNext()
                     break
                 }
+                
+                scrollState.scrollBy(scrollAmount)
                 
                 // Delay based on interval (smooth scrolling)
                 kotlinx.coroutines.delay(16L) // ~60fps
@@ -502,47 +505,54 @@ private fun ContinuesReaderPage(
     val visibleItemInfo = remember { derivedStateOf { scrollState.layoutInfo } }
     LaunchedEffect(key1 = visibleItemInfo.value.visibleItemsInfo.firstOrNull()?.key) {
         runCatching {
-            vm.chapterShell.firstOrNull {
-                it.id == scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.key.toString()
-                    .substringAfter("-").toLong()
-            }
-                ?.let { chapter ->
-                    if (chapter.id != lastChapterId?.id) {
-                        lastChapterId = chapter
+            val visibleKey = scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.key?.toString()
+            if (visibleKey != null) {
+                val chapterId = visibleKey.substringAfter("-").toLongOrNull()
+                if (chapterId != null) {
+                    vm.chapterShell.firstOrNull { it.id == chapterId }?.let { chapter ->
+                        if (chapter.id != lastChapterId?.id) {
+                            lastChapterId = chapter
+                        }
                     }
                 }
+            }
+        }.onFailure { e ->
+            ireader.core.log.Log.error("Error tracking visible chapter", e)
         }
     }
     
     // Track scroll progress for reading time estimation
-    LaunchedEffect(key1 = visibleItemInfo.value) {
+    LaunchedEffect(key1 = visibleItemInfo.value, key2 = vm.stateChapter?.id) {
         val layoutInfo = scrollState.layoutInfo
         val totalItems = layoutInfo.totalItemsCount
         val firstVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull()?.index ?: 0
         
-        if (totalItems > 0) {
+        if (totalItems > 0 && !vm.isLoading) {
             val scrollProgress = firstVisibleItem.toFloat() / totalItems.toFloat()
             vm.updateReadingTimeEstimation(scrollProgress)
         }
     }
     
     // Auto-scroll logic for Continues mode
-    LaunchedEffect(key1 = vm.autoScrollMode, key2 = vm.autoScrollOffset.value) {
+    LaunchedEffect(key1 = vm.autoScrollMode, key2 = vm.autoScrollOffset.value, key3 = vm.stateChapter?.id) {
         if (vm.autoScrollMode) {
             while (vm.autoScrollMode) {
                 val scrollAmount = vm.autoScrollOffset.value.toFloat()
-                scrollState.scrollBy(scrollAmount)
                 
-                // Check if we've reached the end
+                // Check if we've reached the end before scrolling
                 val layoutInfo = scrollState.layoutInfo
                 val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
                 val isAtEnd = lastVisibleItem?.index == layoutInfo.totalItemsCount - 1
                 
                 if (isAtEnd) {
+                    // Stop auto-scroll before advancing to prevent double-advance
+                    vm.autoScrollMode = false
                     // Auto-advance to next chapter
                     onNext()
                     break
                 }
+                
+                scrollState.scrollBy(scrollAmount)
                 
                 // Delay based on interval (smooth scrolling)
                 kotlinx.coroutines.delay(16L) // ~60fps
@@ -692,11 +702,16 @@ private fun setText(
     bottomContentPadding: Int,
     contentPadding: Int,
 ): String {
+    // Handle null or empty text safely
+    if (text.isEmpty()) {
+        return ""
+    }
+    
     val stringBuilder = StringBuilder()
     
     // Add top padding only if this is the first chunk (index 0)
-    if (index == 0) {
-        stringBuilder.append("\n".repeat(topContentPadding))
+    if (index == 0 && topContentPadding > 0) {
+        stringBuilder.append("\n".repeat(topContentPadding.coerceAtLeast(0)))
     }
     
     // Add the text content without any leading newlines for the first paragraph
@@ -711,13 +726,13 @@ private fun setText(
     stringBuilder.append(cleanedText)
     
     // Add bottom padding if this is the last chunk
-    if (isLast) {
-        stringBuilder.append("\n".repeat(bottomContentPadding))
+    if (isLast && bottomContentPadding > 0) {
+        stringBuilder.append("\n".repeat(bottomContentPadding.coerceAtLeast(0)))
     }
     
     // Add spacing between paragraphs only for non-first paragraphs
-    if (index > 0) {
-        stringBuilder.append("\n".repeat(contentPadding))
+    if (index > 0 && contentPadding > 0) {
+        stringBuilder.append("\n".repeat(contentPadding.coerceAtLeast(0)))
     }
     
     return stringBuilder.toString()

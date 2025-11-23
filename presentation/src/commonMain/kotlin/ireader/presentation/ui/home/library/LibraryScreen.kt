@@ -8,8 +8,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,9 +38,6 @@ import kotlinx.coroutines.launch
 
 
 @ExperimentalAnimationApi
-@OptIn(
-    ExperimentalMaterialApi::class
-)
 @Composable
 fun LibraryScreen(
     modifier: Modifier = Modifier,
@@ -57,7 +52,6 @@ fun LibraryScreen(
     onDelete: () -> Unit,
     refreshUpdate: () -> Unit,
     onClickChangeCategory: () -> Unit,
-    bottomSheetState: ModalBottomSheetState,
     scaffoldPadding: PaddingValues,
     requestHideBottomNav: (Boolean) -> Unit,
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,

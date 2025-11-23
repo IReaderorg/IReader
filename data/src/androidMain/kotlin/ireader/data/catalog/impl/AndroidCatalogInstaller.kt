@@ -31,7 +31,8 @@ class AndroidCatalogInstaller(
     private val installationChanges: AndroidCatalogInstallationChanges,
     private val packageInstaller: PackageInstaller,
     private val getSimpleStorage: GetSimpleStorage,
-    private val localizeHelper: LocalizeHelper
+    private val localizeHelper: LocalizeHelper,
+    private val uiPreferences: ireader.domain.preferences.prefs.UiPreferences
 ) : CatalogInstaller {
 
     /**
@@ -40,15 +41,24 @@ class AndroidCatalogInstaller(
     private val client get() = httpClient.default
     
     /**
-     * Get the JS plugins directory in external storage for easier access.
-     * Returns: /storage/emulated/0/ireader/js-plugins
+     * Get the JS plugins directory based on user preference.
+     * If savedLocalCatalogLocation is true, uses app cache (no permissions needed).
+     * Otherwise uses external storage for easier access.
      */
     private fun getJSPluginsDirectory(): File {
-        val externalDir = context.getExternalFilesDir(null)?.parentFile?.parentFile?.parentFile
-        val ireaderDir = File(externalDir, "ireader")
-        val jsPluginsDir = File(ireaderDir, "js-plugins")
-        jsPluginsDir.mkdirs()
-        return jsPluginsDir
+        val useCacheDir = uiPreferences.savedLocalCatalogLocation().get()
+        
+        return if (useCacheDir) {
+            // Use app cache directory - no permissions needed
+            File(context.cacheDir, "js-plugins").apply { mkdirs() }
+        } else {
+            // Use external storage for easier access
+            val externalDir = context.getExternalFilesDir(null)?.parentFile?.parentFile?.parentFile
+            val ireaderDir = File(externalDir, "ireader")
+            val jsPluginsDir = File(ireaderDir, "js-plugins")
+            jsPluginsDir.mkdirs()
+            jsPluginsDir
+        }
     }
 
     /**
@@ -183,17 +193,30 @@ class AndroidCatalogInstaller(
                 deleted = true
             }
             
-            // Try to delete JS plugin files
-            val jsPluginsDir = getJSPluginsDirectory()
-            val jsFile = File(jsPluginsDir, "$pkgName.js")
-            if (jsFile.exists()) {
-                deleted = jsFile.delete() || deleted
+            // Try to delete JS plugin files from both possible locations
+            // Cache directory
+            val cacheJsPluginsDir = File(context.cacheDir, "js-plugins")
+            val cacheJsFile = File(cacheJsPluginsDir, "$pkgName.js")
+            if (cacheJsFile.exists()) {
+                deleted = cacheJsFile.delete() || deleted
+            }
+            val cacheIconFile = File(cacheJsPluginsDir, "$pkgName.png")
+            if (cacheIconFile.exists()) {
+                cacheIconFile.delete()
             }
             
-            // Also delete icon if exists
-            val iconFile = File(jsPluginsDir, "$pkgName.png")
-            if (iconFile.exists()) {
-                iconFile.delete()
+            // External storage directory
+            val externalDir = context.getExternalFilesDir(null)?.parentFile?.parentFile?.parentFile
+            if (externalDir != null) {
+                val externalJsPluginsDir = File(File(externalDir, "ireader"), "js-plugins")
+                val externalJsFile = File(externalJsPluginsDir, "$pkgName.js")
+                if (externalJsFile.exists()) {
+                    deleted = externalJsFile.delete() || deleted
+                }
+                val externalIconFile = File(externalJsPluginsDir, "$pkgName.png")
+                if (externalIconFile.exists()) {
+                    externalIconFile.delete()
+                }
             }
             
             installationChanges.notifyAppUninstall(pkgName)

@@ -27,7 +27,8 @@ actual class HttpClients(
     browseEngine: BrowserEngine,
     cookiesStorage: CookiesStorage,
     webViewCookieJar: WebViewCookieJar,
-    preferencesStore: PreferenceStore
+    preferencesStore: PreferenceStore,
+    webViewManager: WebViewManger? = null
 ) : HttpClientsInterface {
 
     private val cache = run {
@@ -65,7 +66,8 @@ actual class HttpClients(
             preconfigured = this@HttpClients.basicClient.addInterceptor(
                 CloudflareInterceptor(
                     context,
-                    cookieJar
+                    cookieJar,
+                    webViewManager // Pass WebViewManager for seamless integration
                 )
             ).build()
         }

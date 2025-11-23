@@ -2,8 +2,7 @@ package ireader.data.badge
 
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.rpc
+import ireader.data.backend.BackendService
 import ireader.data.core.DatabaseHandler
 import ireader.data.remote.RemoteErrorMapper
 import ireader.domain.data.repository.BadgeRepository
@@ -16,11 +15,22 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 class BadgeRepositoryImpl(
     private val handler: DatabaseHandler,
-    private val supabaseClient: SupabaseClient
+    private val supabaseClient: SupabaseClient,
+    private val backendService: BackendService
 ) : BadgeRepository {
+    
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+        coerceInputValues = true
+    }
     
     @Serializable
     private data class UserBadgeDto(
@@ -50,13 +60,16 @@ class BadgeRepositoryImpl(
     
     @Serializable
     private data class PaymentProofDto(
+        val id: String? = null,
         @SerialName("user_id") val userId: String,
         @SerialName("badge_id") val badgeId: String,
         @SerialName("transaction_id") val transactionId: String,
         @SerialName("payment_method") val paymentMethod: String,
         @SerialName("proof_image_url") val proofImageUrl: String? = null,
         val status: String = "PENDING",
-        @SerialName("submitted_at") val submittedAt: String? = null
+        @SerialName("submitted_at") val submittedAt: String? = null,
+        @SerialName("reviewed_at") val reviewedAt: String? = null,
+        @SerialName("reviewed_by") val reviewedBy: String? = null
     )
     
     @Serializable
@@ -86,22 +99,68 @@ class BadgeRepositoryImpl(
             val targetUserId = userId ?: supabaseClient.auth.currentUserOrNull()?.id 
                 ?: throw Exception("User not authenticated")
             
-            val result = supabaseClient.postgrest.rpc(
-                function = "get_user_badges",
-                parameters = mapOf("p_user_id" to targetUserId)
-            ).decodeList<UserBadgeDto>()
-            
-            result.map {
-                UserBadge(
-                    badgeId = it.badgeId,
-                    badgeName = it.badgeName,
-                    badgeDescription = it.badgeDescription,
-                    badgeIcon = it.badgeIcon,
-                    badgeCategory = it.badgeCategory,
-                    badgeRarity = it.badgeRarity,
-                    earnedAt = it.earnedAt,
-                    metadata = it.metadata
+            try {
+                // Try using RPC function first
+                val resultJson = backendService.rpc(
+                    function = "get_user_badges",
+                    parameters = mapOf("p_user_id" to targetUserId)
+                ).getOrThrow()
+                
+                val result = json.decodeFromJsonElement(ListSerializer(UserBadgeDto.serializer()), resultJson)
+                
+                result.map {
+                    UserBadge(
+                        badgeId = it.badgeId,
+                        badgeName = it.badgeName,
+                        badgeDescription = it.badgeDescription,
+                        badgeIcon = it.badgeIcon,
+                        badgeCategory = it.badgeCategory,
+                        badgeRarity = it.badgeRarity,
+                        earnedAt = it.earnedAt,
+                        metadata = it.metadata
+                    )
+                }
+            } catch (e: Exception) {
+                // Fallback: Query user_badges with join to badges table
+                val queryResult = backendService.query(
+                    table = "user_badges",
+                    filters = mapOf("user_id" to targetUserId),
+                    columns = "*, badges!inner(id, name, description, icon, category, rarity)"
+                ).getOrThrow()
+                
+                @Serializable
+                data class BadgeInfo(
+                    val id: String,
+                    val name: String,
+                    val description: String,
+                    val icon: String,
+                    val category: String? = null,
+                    val rarity: String? = null
                 )
+                
+                @Serializable
+                data class UserBadgeWithBadge(
+                    val badge_id: String,
+                    val user_id: String,
+                    val earned_at: String? = null,
+                    val is_primary: Boolean? = null,
+                    val is_featured: Boolean? = null,
+                    val badges: BadgeInfo
+                )
+                
+                queryResult.map { 
+                    val userBadge = json.decodeFromJsonElement(UserBadgeWithBadge.serializer(), it)
+                    UserBadge(
+                        badgeId = userBadge.badges.id,
+                        badgeName = userBadge.badges.name,
+                        badgeDescription = userBadge.badges.description,
+                        badgeIcon = userBadge.badges.icon,
+                        badgeCategory = userBadge.badges.category ?: "general",
+                        badgeRarity = userBadge.badges.rarity ?: "COMMON",
+                        earnedAt = userBadge.earned_at ?: "",
+                        metadata = null
+                    )
+                }
             }
         }
     
@@ -116,13 +175,12 @@ class BadgeRepositoryImpl(
     
     override suspend fun getAvailableBadges(): Result<List<Badge>> = 
         RemoteErrorMapper.withErrorMapping {
-            val result = supabaseClient.postgrest["badges"]
-                .select {
-                    filter {
-                        eq("is_available", true)
-                    }
-                }
-                .decodeList<BadgeDto>()
+            val queryResult = backendService.query(
+                table = "badges",
+                filters = mapOf("is_available" to true)
+            ).getOrThrow()
+            
+            val result = queryResult.map { json.decodeFromJsonElement(BadgeDto.serializer(), it) }
             
             result.map { dto ->
                 Badge(
@@ -146,16 +204,20 @@ class BadgeRepositoryImpl(
             val userId = supabaseClient.auth.currentUserOrNull()?.id 
                 ?: throw Exception("User not authenticated")
             
-            val proofDto = PaymentProofDto(
-                userId = userId,
-                badgeId = badgeId,
-                transactionId = proof.transactionId,
-                paymentMethod = proof.paymentMethod,
-                proofImageUrl = proof.proofImageUrl,
-                status = "PENDING"
-            )
+            val data = buildJsonObject {
+                put("user_id", userId)
+                put("badge_id", badgeId)
+                put("transaction_id", proof.transactionId)
+                put("payment_method", proof.paymentMethod)
+                proof.proofImageUrl?.let { put("proof_image_url", it) }
+                put("status", "PENDING")
+            }
             
-            supabaseClient.postgrest["payment_proofs"].insert(proofDto)
+            backendService.insert(
+                table = "payment_proofs",
+                data = data,
+                returning = false
+            ).getOrThrow()
         }
     
     override suspend fun setPrimaryBadge(badgeId: String): Result<Unit> = 
@@ -170,25 +232,29 @@ class BadgeRepositoryImpl(
             }
             
             // Set all badges to not primary
-            supabaseClient.postgrest["user_badges"]
-                .update({
-                    set("is_primary", false)
-                }) {
-                    filter {
-                        eq("user_id", userId)
-                    }
-                }
+            val updateAllData = buildJsonObject {
+                put("is_primary", false)
+            }
+            backendService.update(
+                table = "user_badges",
+                filters = mapOf("user_id" to userId),
+                data = updateAllData,
+                returning = false
+            ).getOrThrow()
             
             // Set selected badge as primary
-            supabaseClient.postgrest["user_badges"]
-                .update({
-                    set("is_primary", true)
-                }) {
-                    filter {
-                        eq("user_id", userId)
-                        eq("badge_id", badgeId)
-                    }
-                }
+            val updatePrimaryData = buildJsonObject {
+                put("is_primary", true)
+            }
+            backendService.update(
+                table = "user_badges",
+                filters = mapOf(
+                    "user_id" to userId,
+                    "badge_id" to badgeId
+                ),
+                data = updatePrimaryData,
+                returning = false
+            ).getOrThrow()
         }
     
     override suspend fun setFeaturedBadges(badgeIds: List<String>): Result<Unit> = 
@@ -209,27 +275,31 @@ class BadgeRepositoryImpl(
             }
             
             // Set all badges to not featured
-            supabaseClient.postgrest["user_badges"]
-                .update({
-                    set("is_featured", false)
-                }) {
-                    filter {
-                        eq("user_id", userId)
-                    }
-                }
+            val updateAllData = buildJsonObject {
+                put("is_featured", false)
+            }
+            backendService.update(
+                table = "user_badges",
+                filters = mapOf("user_id" to userId),
+                data = updateAllData,
+                returning = false
+            ).getOrThrow()
             
             // Set selected badges as featured
             if (badgeIds.isNotEmpty()) {
                 for (badgeId in badgeIds) {
-                    supabaseClient.postgrest["user_badges"]
-                        .update({
-                            set("is_featured", true)
-                        }) {
-                            filter {
-                                eq("user_id", userId)
-                                eq("badge_id", badgeId)
-                            }
-                        }
+                    val updateFeaturedData = buildJsonObject {
+                        put("is_featured", true)
+                    }
+                    backendService.update(
+                        table = "user_badges",
+                        filters = mapOf(
+                            "user_id" to userId,
+                            "badge_id" to badgeId
+                        ),
+                        data = updateFeaturedData,
+                        returning = false
+                    ).getOrThrow()
                 }
             }
         }
@@ -240,10 +310,12 @@ class BadgeRepositoryImpl(
                 ?: throw Exception("User not authenticated")
             
             // Query user_badges joined with badges table for primary badge
-            val result = supabaseClient.postgrest.rpc(
+            val resultJson = backendService.rpc(
                 function = "get_user_badges_with_details",
                 parameters = mapOf("p_user_id" to userId)
-            ).decodeList<BadgeWithUserInfoDto>()
+            ).getOrThrow()
+            
+            val result = json.decodeFromJsonElement(ListSerializer(BadgeWithUserInfoDto.serializer()), resultJson)
             
             val primaryBadgeDto = result.firstOrNull { it.isPrimary == true }
             
@@ -270,10 +342,12 @@ class BadgeRepositoryImpl(
                 ?: throw Exception("User not authenticated")
             
             // Query user_badges joined with badges table for featured badges
-            val result = supabaseClient.postgrest.rpc(
+            val resultJson = backendService.rpc(
                 function = "get_user_badges_with_details",
                 parameters = mapOf("p_user_id" to userId)
-            ).decodeList<BadgeWithUserInfoDto>()
+            ).getOrThrow()
+            
+            val result = json.decodeFromJsonElement(ListSerializer(BadgeWithUserInfoDto.serializer()), resultJson)
             
             result
                 .filter { it.isFeatured == true }
@@ -311,6 +385,78 @@ class BadgeRepositoryImpl(
             "EPIC" -> BadgeRarity.EPIC
             "LEGENDARY" -> BadgeRarity.LEGENDARY
             else -> BadgeRarity.COMMON
+        }
+    }
+    
+    // Admin methods
+    override suspend fun getPaymentProofsByStatus(
+        status: ireader.domain.models.remote.PaymentProofStatus
+    ): Result<List<PaymentProof>> = RemoteErrorMapper.withErrorMapping {
+        val queryResult = backendService.query(
+            table = "payment_proofs",
+            filters = mapOf("status" to status.name)
+        ).getOrThrow()
+        
+        val result = queryResult.map { json.decodeFromJsonElement(PaymentProofDto.serializer(), it) }
+        
+        result.map { dto ->
+            PaymentProof(
+                id = dto.id ?: "",
+                userId = dto.userId,
+                badgeId = dto.badgeId,
+                transactionId = dto.transactionId,
+                paymentMethod = dto.paymentMethod,
+                proofImageUrl = dto.proofImageUrl,
+                status = status,
+                submittedAt = dto.submittedAt ?: "",
+                reviewedAt = dto.reviewedAt,
+                reviewedBy = dto.reviewedBy
+            )
+        }
+    }
+    
+    override suspend fun updatePaymentProofStatus(
+        proofId: String,
+        status: ireader.domain.models.remote.PaymentProofStatus,
+        adminUserId: String
+    ): Result<Unit> = RemoteErrorMapper.withErrorMapping {
+        // Verify admin permissions (you may want to add a proper admin check)
+        val currentUser = supabaseClient.auth.currentUserOrNull()
+            ?: throw Exception("User not authenticated")
+        
+        // Update payment proof status
+        val updateData = buildJsonObject {
+            put("status", status.name)
+            put("reviewed_by", adminUserId)
+            put("reviewed_at", java.time.Instant.now().toString())
+        }
+        backendService.update(
+            table = "payment_proofs",
+            filters = mapOf("id" to proofId),
+            data = updateData,
+            returning = false
+        ).getOrThrow()
+        
+        // If approved, grant the badge to the user
+        if (status == ireader.domain.models.remote.PaymentProofStatus.APPROVED) {
+            // Get the payment proof details
+            val proofQueryResult = backendService.query(
+                table = "payment_proofs",
+                filters = mapOf("id" to proofId)
+            ).getOrThrow()
+            
+            val proofResult = proofQueryResult.firstOrNull()?.let {
+                json.decodeFromJsonElement(PaymentProofDto.serializer(), it)
+            } ?: throw Exception("Payment proof not found")
+            
+            // Use RPC function to grant badge (bypasses RLS with SECURITY DEFINER)
+            backendService.rpc(
+                function = "grant_badge_to_user",
+                parameters = mapOf(
+                    "p_user_id" to proofResult.userId,
+                    "p_badge_id" to proofResult.badgeId
+                )
+            ).getOrThrow()
         }
     }
 }

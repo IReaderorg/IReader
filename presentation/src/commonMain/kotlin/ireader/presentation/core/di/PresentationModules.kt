@@ -85,12 +85,20 @@ val PresentationModules = module {
     single  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
     factory<BookDetailViewModel>  { BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),getOrNull()) }
-    single  { MainSettingScreenViewModel(get()) }
+    single  { 
+        MainSettingScreenViewModel(
+            uiPreferences = get(),
+            getCurrentUser = {
+                val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
+                getCurrentUserUseCase().getOrNull()
+            }
+        )
+    }
     factory  { AppearanceViewModel(get(), get()) }
 
     factory  { CategoryScreenViewModel(get(), get(), get(),get(),get()) }
     factory  { DownloaderViewModel(get(), get(), get(), get()) }
-    factory  { FontScreenViewModel(get(), get(), get(), get(),get()) }
+    factory  { FontScreenViewModel(get(), get(), get(), get()) }
     factory  { GeneralSettingScreenViewModel(get(), get(), get(), get(), get()) }
     factory  { TranslationSettingsViewModel(get(), get()) }
     factory  { ReaderSettingScreenViewModel(get(), get(), get()) }
@@ -121,6 +129,18 @@ val PresentationModules = module {
     factory { ireader.presentation.ui.settings.badges.store.BadgeStoreViewModel(get(), get()) }
     factory { ireader.presentation.ui.settings.badges.nft.NFTBadgeViewModel(get(), get(), get(), get(), get()) }
     factory { ireader.presentation.ui.settings.badges.manage.BadgeManagementViewModel(get(), get(), get()) }
+    
+    // Admin ViewModels
+    factory { 
+        ireader.presentation.ui.settings.admin.AdminBadgeVerificationViewModel(
+            getPendingPaymentProofsUseCase = get(),
+            verifyPaymentProofUseCase = get(),
+            getCurrentUser = {
+                val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
+                getCurrentUserUseCase().getOrNull()
+            }
+        )
+    }
     
     // Voice Selection ViewModel
     factory { ireader.presentation.ui.settings.viewmodels.VoiceSelectionViewModel(get(), get(), get(), get()) }

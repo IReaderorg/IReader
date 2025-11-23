@@ -4,10 +4,9 @@ import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,14 +38,14 @@ import org.koin.core.parameter.parametersOf
 
 @OptIn(
         ExperimentalAnimationApi::class,
-        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
+        ExperimentalMaterial3Api::class
 )
 data class ExploreScreenSpec(
         val sourceId: Long,
         val query: String?
 ) {
     @OptIn(
-            ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class,
+            ExperimentalMaterial3Api::class,
             ExperimentalComposeUiApi::class
     )
     @Composable
@@ -61,7 +60,7 @@ data class ExploreScreenSpec(
         val headers = remember {
             mutableStateOf<Headers?>(null)
         }
-        val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         val snackBarHostState = SnackBarListener(vm)
         IModalSheets(
                 sheetContent = {

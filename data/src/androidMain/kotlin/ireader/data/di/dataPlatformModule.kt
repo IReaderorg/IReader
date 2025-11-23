@@ -59,6 +59,7 @@ actual val dataPlatformModule = module {
             get(),
             get(),
             get(),
+            get(),
             get()
         )
     }
@@ -73,6 +74,7 @@ actual val dataPlatformModule = module {
             get(),
             get(),
             get(),
+            get(),
             get()
         )
     }
@@ -82,7 +84,8 @@ actual val dataPlatformModule = module {
             BrowserEngine(get(), get()),
             get(),
             get(),
-            get()
+            get(),
+            getOrNull() // WebViewManager is optional, may not be available yet
         )
     }
     single<BiometricAuthenticator> { BiometricAuthenticatorImpl(get()) }

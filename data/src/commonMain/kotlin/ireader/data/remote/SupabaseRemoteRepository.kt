@@ -3,12 +3,11 @@ package ireader.data.remote
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
-import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.realtime.PostgresAction
 import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.postgresChangeFlow
 import io.github.jan.supabase.realtime.realtime
+import ireader.data.backend.BackendService
 import ireader.domain.data.repository.RemoteRepository
 import ireader.domain.models.remote.ConnectionStatus
 import ireader.domain.models.remote.ReadingProgress
@@ -18,16 +17,26 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 /**
  * Supabase implementation of RemoteRepository with email/password authentication
  */
 class SupabaseRemoteRepository(
     private val supabaseClient: SupabaseClient,
+    private val backendService: BackendService,
     private val syncQueue: SyncQueue,
     private val retryPolicy: RetryPolicy = RetryPolicy(),
     private val cache: RemoteCache = RemoteCache()
 ) : RemoteRepository {
+    
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+        coerceInputValues = true
+    }
     
     private val _connectionStatus = MutableStateFlow(ConnectionStatus.DISCONNECTED)
     private val connectionStatus: StateFlow<ConnectionStatus> = _connectionStatus.asStateFlow()
@@ -41,7 +50,8 @@ class SupabaseRemoteRepository(
         val username: String? = null,
         val eth_wallet_address: String? = null,
         val created_at: String? = null,
-        val is_supporter: Boolean = false
+        val is_supporter: Boolean = false,
+        val is_admin: Boolean = false
     )
     
     @Serializable
@@ -86,19 +96,22 @@ class SupabaseRemoteRepository(
                     )
                 }
                 
-                val userDto = supabaseClient.postgrest["users"]
-                    .upsert(
-                        UserDto(
-                            id = authUser.id,
-                            email = email,
-                            username = null,
-                            eth_wallet_address = null,
-                            is_supporter = false
-                        )
-                    ) {
-                        select(Columns.ALL)
-                    }
-                    .decodeSingle<UserDto>()
+                val userData = buildJsonObject {
+                    put("id", authUser.id)
+                    put("email", email)
+                    put("is_supporter", false)
+                }
+                
+                val userResult = backendService.upsert(
+                    table = "users",
+                    data = userData,
+                    onConflict = "id",
+                    returning = true
+                ).getOrThrow()
+                
+                val userDto = userResult?.let {
+                    json.decodeFromJsonElement(UserDto.serializer(), it)
+                } ?: throw Exception("Failed to create user")
                 
                 val user = userDto.toDomain()
                 currentUser = user
@@ -127,13 +140,14 @@ class SupabaseRemoteRepository(
             val authUser = supabaseClient.auth.currentUserOrNull()
                 ?: throw Exception("Failed to get user after sign in")
             
-            val userDto = supabaseClient.postgrest["users"]
-                .select {
-                    filter {
-                        eq("id", authUser.id)
-                    }
-                }
-                .decodeSingle<UserDto>()
+            val queryResult = backendService.query(
+                table = "users",
+                filters = mapOf("id" to authUser.id)
+            ).getOrThrow()
+            
+            val userDto = queryResult.firstOrNull()?.let {
+                json.decodeFromJsonElement(UserDto.serializer(), it)
+            } ?: throw Exception("User not found")
             
             val user = userDto.toDomain()
             currentUser = user
@@ -146,13 +160,14 @@ class SupabaseRemoteRepository(
             val authUser = supabaseClient.auth.currentUserOrNull() ?: return@withErrorMapping null
             
             try {
-                val userDto = supabaseClient.postgrest["users"]
-                    .select {
-                        filter {
-                            eq("id", authUser.id)
-                        }
-                    }
-                    .decodeSingle<UserDto>()
+                val queryResult = backendService.query(
+                    table = "users",
+                    filters = mapOf("id" to authUser.id)
+                ).getOrThrow()
+                
+                val userDto = queryResult.firstOrNull()?.let {
+                    json.decodeFromJsonElement(UserDto.serializer(), it)
+                } ?: return@withErrorMapping null
                 
                 val user = userDto.toDomain()
                 currentUser = user
@@ -174,14 +189,16 @@ class SupabaseRemoteRepository(
         RemoteErrorMapper.withErrorMapping {
             val sanitizedUsername = InputSanitizer.sanitizeUsername(username)
             
-            supabaseClient.postgrest["users"]
-                .update(
-                    mapOf("username" to sanitizedUsername)
-                ) {
-                    filter {
-                        eq("id", userId)
-                    }
-                }
+            val updateData = buildJsonObject {
+                put("username", sanitizedUsername)
+            }
+            
+            backendService.update(
+                table = "users",
+                filters = mapOf("id" to userId),
+                data = updateData,
+                returning = false
+            ).getOrThrow()
             
             currentUser = currentUser?.copy(username = sanitizedUsername)
             currentUser?.let { cache.cacheUser(it) }
@@ -190,14 +207,16 @@ class SupabaseRemoteRepository(
     
     override suspend fun updateEthWalletAddress(userId: String, ethWalletAddress: String): Result<Unit> = 
         RemoteErrorMapper.withErrorMapping {
-            supabaseClient.postgrest["users"]
-                .update(
-                    mapOf("eth_wallet_address" to ethWalletAddress)
-                ) {
-                    filter {
-                        eq("id", userId)
-                    }
-                }
+            val updateData = buildJsonObject {
+                put("eth_wallet_address", ethWalletAddress)
+            }
+            
+            backendService.update(
+                table = "users",
+                filters = mapOf("id" to userId),
+                data = updateData,
+                returning = false
+            ).getOrThrow()
             
             currentUser = currentUser?.copy(ethWalletAddress = ethWalletAddress)
             currentUser?.let { cache.cacheUser(it) }
@@ -207,13 +226,14 @@ class SupabaseRemoteRepository(
     override suspend fun getUserById(userId: String): Result<User?> = 
         RemoteErrorMapper.withErrorMapping {
             try {
-                val userDto = supabaseClient.postgrest["users"]
-                    .select {
-                        filter {
-                            eq("id", userId)
-                        }
-                    }
-                    .decodeSingle<UserDto>()
+                val queryResult = backendService.query(
+                    table = "users",
+                    filters = mapOf("id" to userId)
+                ).getOrThrow()
+                
+                val userDto = queryResult.firstOrNull()?.let {
+                    json.decodeFromJsonElement(UserDto.serializer(), it)
+                } ?: return@withErrorMapping null
                 
                 userDto.toDomain()
             } catch (e: Exception) {
@@ -231,10 +251,19 @@ class SupabaseRemoteRepository(
                         lastScrollPosition = InputSanitizer.validateScrollPosition(progress.lastScrollPosition)
                     )
                     
-                    supabaseClient.postgrest["reading_progress"]
-                        .upsert(sanitizedProgress.toDto()) {
-                            select(Columns.ALL)
-                        }
+                    val progressData = buildJsonObject {
+                        put("user_id", sanitizedProgress.userId)
+                        put("book_id", sanitizedProgress.bookId)
+                        put("last_chapter_slug", sanitizedProgress.lastChapterSlug)
+                        put("last_scroll_position", sanitizedProgress.lastScrollPosition.toDouble())
+                    }
+                    
+                    backendService.upsert(
+                        table = "reading_progress",
+                        data = progressData,
+                        onConflict = "user_id,book_id",
+                        returning = false
+                    ).getOrThrow()
                     
                     cache.cacheProgress(sanitizedProgress.userId, sanitizedProgress.bookId, sanitizedProgress)
                 } catch (e: Exception) {
@@ -252,14 +281,17 @@ class SupabaseRemoteRepository(
             }
             
             try {
-                val progressDto = supabaseClient.postgrest["reading_progress"]
-                    .select {
-                        filter {
-                            eq("user_id", userId)
-                            eq("book_id", bookId)
-                        }
-                    }
-                    .decodeSingle<ReadingProgressDto>()
+                val queryResult = backendService.query(
+                    table = "reading_progress",
+                    filters = mapOf(
+                        "user_id" to userId,
+                        "book_id" to bookId
+                    )
+                ).getOrThrow()
+                
+                val progressDto = queryResult.firstOrNull()?.let {
+                    json.decodeFromJsonElement(ReadingProgressDto.serializer(), it)
+                } ?: return@withErrorMapping null
                 
                 val progress = progressDto.toDomain()
                 cache.cacheProgress(userId, bookId, progress)
@@ -366,7 +398,8 @@ class SupabaseRemoteRepository(
             username = username,
             ethWalletAddress = eth_wallet_address,
             createdAt = parseTimestamp(created_at),
-            isSupporter = is_supporter
+            isSupporter = is_supporter,
+            isAdmin = is_admin
         )
     }
     
@@ -406,23 +439,33 @@ class SupabaseRemoteRepository(
     override suspend fun syncBook(book: ireader.domain.models.remote.SyncedBook): Result<Unit> = 
         RemoteErrorMapper.withErrorMapping {
             retryPolicy.executeWithRetry {
-                supabaseClient.postgrest["synced_books"]
-                    .upsert(book.toDto()) {
-                        select(Columns.ALL)
-                    }
+                val bookData = buildJsonObject {
+                    put("user_id", book.userId)
+                    put("book_id", book.bookId)
+                    put("source_id", book.sourceId)
+                    put("title", book.title)
+                    put("book_url", book.bookUrl)
+                    put("last_read", book.lastRead)
+                }
+                
+                backendService.upsert(
+                    table = "synced_books",
+                    data = bookData,
+                    onConflict = "user_id,book_id",
+                    returning = false
+                ).getOrThrow()
             }
         }
     
     override suspend fun getSyncedBooks(userId: String): Result<List<ireader.domain.models.remote.SyncedBook>> = 
         RemoteErrorMapper.withErrorMapping {
             try {
-                val booksDto = supabaseClient.postgrest["synced_books"]
-                    .select {
-                        filter {
-                            eq("user_id", userId)
-                        }
-                    }
-                    .decodeList<SyncedBookDto>()
+                val queryResult = backendService.query(
+                    table = "synced_books",
+                    filters = mapOf("user_id" to userId)
+                ).getOrThrow()
+                
+                val booksDto = queryResult.map { json.decodeFromJsonElement(SyncedBookDto.serializer(), it) }
                 
                 booksDto.map { it.toDomain() }
             } catch (e: Exception) {
@@ -432,13 +475,13 @@ class SupabaseRemoteRepository(
     
     override suspend fun deleteSyncedBook(userId: String, bookId: String): Result<Unit> = 
         RemoteErrorMapper.withErrorMapping {
-            supabaseClient.postgrest["synced_books"]
-                .delete {
-                    filter {
-                        eq("user_id", userId)
-                        eq("book_id", bookId)
-                    }
-                }
+            backendService.delete(
+                table = "synced_books",
+                filters = mapOf(
+                    "user_id" to userId,
+                    "book_id" to bookId
+                )
+            ).getOrThrow()
             Unit
         }
     

@@ -62,14 +62,21 @@ fun BookReviewsIntegration(
             
             isLoading = false
         }.onFailure { error ->
-            // Check if this is a Supabase unavailable error
+            // Check if this is a non-critical error (maintenance, network, etc.)
             val message = error.message ?: "Failed to load reviews"
-            if (message.contains("Supabase", ignoreCase = true) || 
-                message.contains("not configured", ignoreCase = true)) {
-                // Supabase is not configured - don't show as error, just hide reviews
+            val isNonCritical = message.contains("maintenance", ignoreCase = true) ||
+                               message.contains("unavailable", ignoreCase = true) ||
+                               message.contains("cancelled", ignoreCase = true) ||
+                               message.contains("Supabase", ignoreCase = true) ||
+                               message.contains("not configured", ignoreCase = true) ||
+                               message.contains("timeout", ignoreCase = true)
+            
+            if (isNonCritical) {
+                // Non-critical error - silently hide reviews, app continues normally
                 errorMessage = null
                 reviews = emptyList()
             } else {
+                // Critical error - show to user
                 errorMessage = message
             }
             isLoading = false
@@ -96,10 +103,16 @@ fun BookReviewsIntegration(
                     userBadgesMap = badgesMap
                 }
             }.onFailure { error ->
-                // Handle Supabase unavailable gracefully
+                // Handle non-critical errors gracefully (maintenance, network, etc.)
                 val message = error.message ?: "Failed to load reviews"
-                if (message.contains("Supabase", ignoreCase = true) || 
-                    message.contains("not configured", ignoreCase = true)) {
+                val isNonCritical = message.contains("maintenance", ignoreCase = true) ||
+                                   message.contains("unavailable", ignoreCase = true) ||
+                                   message.contains("cancelled", ignoreCase = true) ||
+                                   message.contains("Supabase", ignoreCase = true) ||
+                                   message.contains("not configured", ignoreCase = true) ||
+                                   message.contains("timeout", ignoreCase = true)
+                
+                if (isNonCritical) {
                     reviews = emptyList()
                 } else {
                     errorMessage = message
@@ -149,10 +162,16 @@ fun BookReviewsIntegration(
                             refreshReviews()
                         }.onFailure { error ->
                             val message = error.message ?: "Failed to submit review"
-                            // Show user-friendly message for Supabase unavailable
-                            errorMessage = if (message.contains("Supabase", ignoreCase = true) || 
-                                message.contains("not configured", ignoreCase = true)) {
-                                "Reviews are not available. Please configure Supabase in Settings."
+                            // Show user-friendly message for non-critical errors
+                            val isNonCritical = message.contains("maintenance", ignoreCase = true) ||
+                                               message.contains("unavailable", ignoreCase = true) ||
+                                               message.contains("cancelled", ignoreCase = true) ||
+                                               message.contains("Supabase", ignoreCase = true) ||
+                                               message.contains("not configured", ignoreCase = true) ||
+                                               message.contains("timeout", ignoreCase = true)
+                            
+                            errorMessage = if (isNonCritical) {
+                                "Reviews are temporarily unavailable. Please try again later."
                             } else {
                                 message
                             }

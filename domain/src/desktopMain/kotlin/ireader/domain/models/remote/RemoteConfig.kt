@@ -1,43 +1,36 @@
 package ireader.domain.models.remote
 
-import java.io.File
-import java.util.Properties
+import ireader.domain.config.PlatformConfig
 
 /**
  * Desktop implementation of loadRemoteConfig
- * Loads configuration from config.properties file in the application directory
+ * Loads configuration from PlatformConfig which checks:
+ * 1. System properties (JVM args set by build.gradle.kts)
+ * 2. Environment variables
+ * 3. config.properties file via ConfigLoader
  */
 actual fun loadRemoteConfig(): RemoteConfig? {
     return try {
-        val properties = Properties()
-        val configFile = File("config.properties")
-        
-        if (!configFile.exists()) {
-            // Try alternative location in user home directory
-            val homeConfigFile = File(System.getProperty("user.home"), ".ireader/config.properties")
-            if (!homeConfigFile.exists()) {
-                return null
-            }
-            properties.load(homeConfigFile.inputStream())
-        } else {
-            properties.load(configFile.inputStream())
-        }
-        
-        val url = properties.getProperty("supabase.url", "")
-        val key = properties.getProperty("supabase.anon.key", "")
+        val url = PlatformConfig.getSupabaseUrl()
+        val key = PlatformConfig.getSupabaseAnonKey()
         
         // Return null if configuration is not set
         if (url.isBlank() || key.isBlank()) {
+            println("Supabase not configured: url='$url', key=${if (key.isBlank()) "blank" else "set"}")
             return null
         }
+        
+        println("Supabase configured: url='$url'")
         
         RemoteConfig(
             supabaseUrl = url,
             supabaseAnonKey = key,
-            enableRealtime = properties.getProperty("supabase.realtime.enabled", "true").toBoolean(),
-            syncIntervalMs = properties.getProperty("supabase.sync.interval.ms", "30000").toLong()
+            enableRealtime = true,
+            syncIntervalMs = 30_000
         )
     } catch (e: Exception) {
+        println("Failed to load remote config: ${e.message}")
+        e.printStackTrace()
         null
     }
 }

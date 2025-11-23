@@ -1,5 +1,8 @@
 package ireader.domain.models.remote
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 /**
  * Domain model representing an authenticated user
  */
@@ -9,5 +12,6 @@ data class User(
     val username: String?,
     val ethWalletAddress: String?,
     val createdAt: Long,
-    val isSupporter: Boolean
+    val isSupporter: Boolean,
+    val isAdmin: Boolean = false
 )

@@ -111,7 +111,8 @@ fun GetPermissions(uiPreferences: UiPreferences, context: Context) {
         uiPreferences.savedLocalCatalogLocation().set(!hasAllFilesAccess)
     }
     
-    LaunchedEffect(key1 = true) {
+    LaunchedEffect(key1 = useLocalCache) {
+        // Only request permissions if user explicitly disabled cache storage
         if (!useLocalCache && !permissionRequested) {
             // Show explanation dialog first
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -121,6 +122,12 @@ fun GetPermissions(uiPreferences: UiPreferences, context: Context) {
             } else if (!permissionsState.allPermissionsGranted) {
                 showPermissionExplanation = true
             }
+        }
+        
+        // For Android 12+, always ensure we have basic media permissions for extension loading
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !permissionsState.allPermissionsGranted) {
+            // Request basic permissions needed for extension APK access
+            permissionsState.launchMultiplePermissionRequest()
         }
     }
     
@@ -216,7 +223,7 @@ private fun StoragePermissionExplanationDialog(
         },
         title = {
             Text(
-                text = "Storage Permission Required",
+                text = "External Storage Access",
                 style = MaterialTheme.typography.headlineSmall
             )
         },
@@ -225,35 +232,30 @@ private fun StoragePermissionExplanationDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "IReader needs access to your device storage to:",
+                    text = "You've chosen to save sources to external storage. This allows:",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold
                 )
                 
                 PermissionReasonItem(
-                    icon = Icons.Default.Download,
-                    text = "Download and save books for offline reading"
+                    icon = Icons.Default.Folder,
+                    text = "Easy access to sources via file manager"
                 )
                 
                 PermissionReasonItem(
                     icon = Icons.Default.Extension,
-                    text = "Install and manage source extensions"
+                    text = "Manual management of extension files"
                 )
                 
                 PermissionReasonItem(
                     icon = Icons.Default.Backup,
-                    text = "Create and restore library backups"
-                )
-                
-                PermissionReasonItem(
-                    icon = Icons.Default.Image,
-                    text = "Import EPUB files and custom book covers"
+                    text = "Backup and restore from external storage"
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 Text(
-                    text = "Your privacy is important. IReader only accesses files it creates and files you explicitly choose to import.",
+                    text = "Note: You can disable \"Saved Sources to Cache\" in Settings → General to use app cache instead (no permissions needed).",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontStyle = FontStyle.Italic

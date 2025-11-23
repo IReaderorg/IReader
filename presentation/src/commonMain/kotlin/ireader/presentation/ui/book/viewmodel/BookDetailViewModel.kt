@@ -788,6 +788,7 @@ class BookDetailViewModel(
     fun migrateToSource() {
         val comparison = sourceSwitchingState.sourceComparison ?: return
         val betterSourceId = comparison.betterSourceId ?: return
+        val targetSourceName = sourceSwitchingState.betterSourceName // Save before reset
 
         sourceSwitchingState.showBanner = false
         sourceSwitchingState.showMigrationDialog = true
@@ -806,7 +807,7 @@ class BookDetailViewModel(
                         // Refresh the book data
                         initBook(comparison.bookId)
 
-                        showSnackBar(UiText.DynamicString("Successfully migrated to ${sourceSwitchingState.betterSourceName}"))
+                        showSnackBar(UiText.DynamicString("Successfully migrated to ${targetSourceName ?: "new source"}"))
                     } else {
                         // Migration failed
                         delay(2000) // Show error for a bit longer

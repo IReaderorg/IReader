@@ -209,6 +209,7 @@ class ReaderScreenViewModel(
     val font = platformUiPreferences.font()?.asState()
     var customFont by mutableStateOf<ireader.domain.models.fonts.CustomFont?>(null)
     val webViewIntegration = readerPreferences.webViewIntegration().asState()
+    val webViewBackgroundMode = readerPreferences.webViewBackgroundMode().asState()
     val selectableMode = readerPreferences.selectableText().asState()
     val fontSize = readerPreferences.fontSize().asState()
     val distanceBetweenParagraphs = readerPreferences.paragraphDistance().asState()
@@ -317,6 +318,9 @@ class ReaderScreenViewModel(
         // Track chapter close before loading new chapter
         onChapterClosed()
         
+        // Reset translation state for new chapter
+        translationState.reset()
+        
         // Check if chapter is already preloaded
         val preloadedChapter = preloadedChapters[chapterId]
         val chapter = if (preloadedChapter != null && !preloadedChapter.isEmpty()) {
@@ -358,6 +362,13 @@ class ReaderScreenViewModel(
             checkChapterHealth(ch, chapterHealthChecker, chapterHealthRepository)
         }
         
+        // Clear old preloaded chapters to prevent memory buildup
+        if (preloadedChapters.size > 3) {
+            val oldestKeys = preloadedChapters.keys.take(preloadedChapters.size - 3)
+            oldestKeys.forEach { preloadedChapters.remove(it) }
+            ireader.core.log.Log.debug("Cleared ${oldestKeys.size} old preloaded chapters from cache")
+        }
+        
         // Trigger preload of next chapter
         triggerPreloadNextChapter()
         
@@ -365,6 +376,9 @@ class ReaderScreenViewModel(
         chapterId?.let { id ->
             loadTranslationForChapter(id)
         }
+        
+        // Update reading time estimation for new chapter
+        updateReadingTimeEstimation(0f)
         
         return stateChapter
     }
@@ -448,11 +462,16 @@ class ReaderScreenViewModel(
     }
     fun ReaderScreenViewModel.toggleReaderMode(enable: Boolean?) {
         // Prevent rapid toggling with debounce
-        if (isToggleInProgress) return
+        if (isToggleInProgress) {
+            ireader.core.log.Log.debug("Toggle in progress, ignoring request")
+            return
+        }
         isToggleInProgress = true
         
         // Set the reader mode state - this will trigger the LaunchedEffect in ReaderScreen
-        isReaderModeEnable = enable ?: !isReaderModeEnable
+        val newState = enable ?: !isReaderModeEnable
+        ireader.core.log.Log.debug("Toggling reader mode: $isReaderModeEnable -> $newState")
+        isReaderModeEnable = newState
         
         // Make sure the bottom content is accessible when reader mode is off
         isMainBottomModeEnable = !isReaderModeEnable
@@ -782,10 +801,16 @@ class ReaderScreenViewModel(
      * Get current chapter content (original or translated)
      */
     fun getCurrentChapterContent(): List<ireader.core.source.model.Page> {
-        return if (translationState.isShowingTranslation && 
-                   translationState.translatedChapter != null) {
-            translationState.translatedChapter!!.translatedContent
-        } else {
+        return try {
+            if (translationState.isShowingTranslation && 
+                translationState.translatedChapter != null &&
+                translationState.translatedChapter!!.translatedContent.isNotEmpty()) {
+                translationState.translatedChapter!!.translatedContent
+            } else {
+                stateChapter?.content ?: emptyList()
+            }
+        } catch (e: Exception) {
+            ireader.core.log.Log.error("Error getting chapter content", e)
             stateChapter?.content ?: emptyList()
         }
     }

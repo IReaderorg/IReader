@@ -22,6 +22,10 @@ val syncModule = module {
     single { ireader.domain.usecases.remote.ObserveReadingProgressUseCase(get()) }
     single { ireader.domain.usecases.remote.ObserveConnectionStatusUseCase(get()) }
     
+    // Admin use cases
+    single { ireader.domain.usecases.admin.GetPendingPaymentProofsUseCase(get<ireader.domain.data.repository.BadgeRepository>()) }
+    single { ireader.domain.usecases.admin.VerifyPaymentProofUseCase(get<ireader.domain.data.repository.BadgeRepository>()) }
+    
     // Remote backend use cases container
     single {
         ireader.domain.usecases.remote.RemoteBackendUseCases(

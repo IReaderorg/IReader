@@ -38,7 +38,22 @@ actual val presentationPlatformModule = module  {
     // Register WebscrapingTranslateEngine for Android platform
     factory { WebscrapingTranslateEngine(get(), get()) }
 
-    factory<TTSViewModel>  { TTSViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
+    factory<TTSViewModel> { params -> 
+        TTSViewModel(
+            ttsState = get(),
+            param = params.get(),
+            serviceUseCases = get(),
+            getBookUseCases = get(),
+            getChapterUseCase = get(),
+            remoteUseCases = get(),
+            getLocalCatalog = get(),
+            speechPrefUseCases = get(),
+            readerPreferences = get(),
+            androidUiPreferences = get(),
+            insertUseCases = get(),
+            platformUiPreferences = get()
+        )
+    }
 
     factory <WebViewPageStateImpl> { WebViewPageStateImpl() }
 

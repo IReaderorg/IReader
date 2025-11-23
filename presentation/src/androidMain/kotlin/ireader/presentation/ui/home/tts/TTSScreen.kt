@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material3.SheetState
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.FastRewind
 import androidx.compose.material.icons.filled.Fullscreen
@@ -65,7 +65,7 @@ fun TTSScreen(
         onChapter: (Chapter) -> Unit,
         onPopStack: () -> Unit,
         onPlay: () -> Unit,
-        bottomSheetState: ModalBottomSheetState,
+        bottomSheetState: SheetState,
         lazyState: LazyListState,
         paddingValues: PaddingValues
 ) {

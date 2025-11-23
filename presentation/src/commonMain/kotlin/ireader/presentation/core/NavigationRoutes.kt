@@ -18,6 +18,7 @@ object NavigationRoutes {
     const val badgeStore = "badgeStore"
     const val nftBadge = "nftBadge"
     const val badgeManagement = "badgeManagement"
+    const val adminBadgeVerification = "adminBadgeVerification"
     const val leaderboard = "leaderboard"
     const val fontSettings = "fontSettings"
     const val generalSettings = "generalSettings"

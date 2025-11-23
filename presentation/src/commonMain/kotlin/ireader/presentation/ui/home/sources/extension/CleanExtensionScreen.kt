@@ -46,7 +46,7 @@ fun CleanExtensionScreen(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current)
     
-    LaunchedEffect(key1 = true) {
+    LaunchedEffect(Unit) {
         vm.eventFlow.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSnackbar -> {

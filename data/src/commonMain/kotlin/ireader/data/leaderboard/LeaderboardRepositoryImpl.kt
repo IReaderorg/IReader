@@ -1,12 +1,11 @@
 package ireader.data.leaderboard
 
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.realtime.PostgresAction
 import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.postgresChangeFlow
 import io.github.jan.supabase.realtime.realtime
+import ireader.data.backend.BackendService
 import ireader.data.remote.RemoteErrorMapper
 import ireader.domain.data.repository.LeaderboardRepository
 import ireader.domain.models.entities.LeaderboardEntry
@@ -14,10 +13,20 @@ import ireader.domain.models.entities.UserLeaderboardStats
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 class LeaderboardRepositoryImpl(
-    private val supabaseClient: SupabaseClient
+    private val supabaseClient: SupabaseClient,
+    private val backendService: BackendService
 ) : LeaderboardRepository {
+    
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+        coerceInputValues = true
+    }
     
     @Serializable
     private data class LeaderboardDto(
@@ -36,15 +45,15 @@ class LeaderboardRepositoryImpl(
     override suspend fun getLeaderboard(limit: Int, offset: Int): Result<List<LeaderboardEntry>> =
         RemoteErrorMapper.withErrorMapping {
             try {
-                val entries = supabaseClient.postgrest["leaderboard"]
-                    .select {
-                        filter {
-                            // Order by reading time descending
-                        }
-                        limit(limit.toLong())
-                        range(offset.toLong() until (offset + limit).toLong())
-                    }
-                    .decodeList<LeaderboardDto>()
+                val queryResult = backendService.query(
+                    table = "leaderboard",
+                    orderBy = "total_reading_time_minutes",
+                    ascending = false,
+                    limit = limit,
+                    offset = offset
+                ).getOrThrow()
+                
+                val entries = queryResult.map { json.decodeFromJsonElement(LeaderboardDto.serializer(), it) }
                 
                 entries.mapIndexed { index, dto ->
                     dto.toDomain(rank = offset + index + 1)
@@ -58,24 +67,26 @@ class LeaderboardRepositoryImpl(
         RemoteErrorMapper.withErrorMapping {
             try {
                 // Get user's entry
-                val userEntry = supabaseClient.postgrest["leaderboard"]
-                    .select {
-                        filter {
-                            eq("user_id", userId)
-                        }
-                    }
-                    .decodeSingle<LeaderboardDto>()
+                val userQueryResult = backendService.query(
+                    table = "leaderboard",
+                    filters = mapOf("user_id" to userId)
+                ).getOrThrow()
+                
+                val userEntry = userQueryResult.firstOrNull()?.let {
+                    json.decodeFromJsonElement(LeaderboardDto.serializer(), it)
+                } ?: return@withErrorMapping null
                 
                 // Calculate rank by counting users with more reading time
-                val rankResult = supabaseClient.postgrest["leaderboard"]
-                    .select(columns = Columns.list("user_id")) {
-                        filter {
-                            gt("total_reading_time_minutes", userEntry.total_reading_time_minutes)
-                        }
-                    }
-                    .decodeList<Map<String, String>>()
+                val allUsersResult = backendService.query(
+                    table = "leaderboard",
+                    columns = "user_id,total_reading_time_minutes"
+                ).getOrThrow()
                 
-                val rank = rankResult.size + 1
+                val rank = allUsersResult.count { entry ->
+                    val dto = json.decodeFromJsonElement(LeaderboardDto.serializer(), entry)
+                    dto.total_reading_time_minutes > userEntry.total_reading_time_minutes
+                } + 1
+                
                 userEntry.toDomain(rank = rank)
             } catch (e: Exception) {
                 null
@@ -84,26 +95,23 @@ class LeaderboardRepositoryImpl(
     
     override suspend fun syncUserStats(stats: UserLeaderboardStats): Result<Unit> =
         RemoteErrorMapper.withErrorMapping {
-            val dto = LeaderboardDto(
-                id = null, // Don't include id for upsert
-                user_id = stats.userId,
-                username = stats.username,
-                total_reading_time_minutes = stats.totalReadingTimeMinutes,
-                total_chapters_read = stats.totalChaptersRead,
-                books_completed = stats.booksCompleted,
-                reading_streak = stats.readingStreak,
-                has_badge = stats.hasBadge,
-                badge_type = stats.badgeType,
-                updated_at = null
-            )
+            val data = buildJsonObject {
+                put("user_id", stats.userId)
+                put("username", stats.username)
+                put("total_reading_time_minutes", stats.totalReadingTimeMinutes)
+                put("total_chapters_read", stats.totalChaptersRead)
+                put("books_completed", stats.booksCompleted)
+                put("reading_streak", stats.readingStreak)
+                put("has_badge", stats.hasBadge)
+                stats.badgeType?.let { put("badge_type", it) }
+            }
             
-            // Use upsert with a list (required by Supabase)
-            // onConflict parameter tells Supabase to update on user_id conflict
-            supabaseClient.postgrest["leaderboard"]
-                .upsert(listOf(dto)) {
-                    onConflict = "user_id"
-                    select()
-                }
+            backendService.upsert(
+                table = "leaderboard",
+                data = data,
+                onConflict = "user_id",
+                returning = false
+            ).getOrThrow()
             
             Unit
         }

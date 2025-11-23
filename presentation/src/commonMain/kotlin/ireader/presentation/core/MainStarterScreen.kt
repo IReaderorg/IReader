@@ -21,6 +21,11 @@ import ireader.presentation.core.ui.*
 import ireader.presentation.ui.component.IBackHandler
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.isTableUi
+import ireader.presentation.ui.component.navigation.ModernBottomNavigationBar
+import ireader.presentation.ui.component.navigation.ModernNavigationItem
+import ireader.presentation.ui.component.navigation.ModernNavigationRailItem
+import ireader.presentation.ui.component.navigation.Material3NavigationRail
+import ireader.presentation.ui.component.navigation.Material3NavigationRailItem
 import ireader.presentation.ui.core.theme.AppColors
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
@@ -49,16 +54,19 @@ object MainStarterScreen {
                                     enter = expandVertically(),
                                     exit = shrinkVertically(),
                                 ) {
-                                    NavigationRail {
-                                        NavigationRailItem(LibraryScreenSpec)
+                                    Material3NavigationRail(
+                                        containerColor = MaterialTheme.colorScheme.surface,
+                                        contentColor = MaterialTheme.colorScheme.onSurface
+                                    ) {
+                                        Material3NavigationRailTabItem(LibraryScreenSpec)
                                         if (vm.showUpdate.value) {
-                                            NavigationRailItem(UpdateScreenSpec)
+                                            Material3NavigationRailTabItem(UpdateScreenSpec)
                                         }
                                         if (vm.showUpdate.value) {
-                                            NavigationRailItem(HistoryScreenSpec)
+                                            Material3NavigationRailTabItem(HistoryScreenSpec)
                                         }
-                                        NavigationRailItem(ExtensionScreenSpec)
-                                        NavigationRailItem(MoreScreenSpec)
+                                        Material3NavigationRailTabItem(ExtensionScreenSpec)
+                                        Material3NavigationRailTabItem(MoreScreenSpec)
                                     }
                                 }
                             }
@@ -73,21 +81,19 @@ object MainStarterScreen {
                                     enter = expandVertically(),
                                     exit = shrinkVertically(),
                                 ) {
-                                    NavigationBar(
-                                        modifier = Modifier,
-                                        containerColor = AppColors.current.bars,
-                                        contentColor = AppColors.current.onBars,
-                                        tonalElevation = 0.dp,
+                                    ModernBottomNavigationBar(
+                                        containerColor = MaterialTheme.colorScheme.surface,
+                                        contentColor = MaterialTheme.colorScheme.onSurface
                                     ) {
-                                        TabNavigationItem(LibraryScreenSpec)
+                                        ModernTabNavigationItem(LibraryScreenSpec)
                                         if (vm.showUpdate.value) {
-                                            TabNavigationItem(UpdateScreenSpec)
+                                            ModernTabNavigationItem(UpdateScreenSpec)
                                         }
                                         if (vm.showUpdate.value) {
-                                            TabNavigationItem(HistoryScreenSpec)
+                                            ModernTabNavigationItem(HistoryScreenSpec)
                                         }
-                                        TabNavigationItem(ExtensionScreenSpec)
-                                        TabNavigationItem(MoreScreenSpec)
+                                        ModernTabNavigationItem(ExtensionScreenSpec)
+                                        ModernTabNavigationItem(MoreScreenSpec)
                                     }
                                 }
                             }
@@ -125,28 +131,36 @@ object MainStarterScreen {
 fun NavigationRailItem(tab: Tab) {
     val tabNavigator = LocalTabNavigator.current
     val selected = tabNavigator.current::class == tab::class
-    NavigationRailItem(
+    val icon = tab.options.icon
+    if (icon != null) {
+        ModernNavigationRailItem(
             selected = selected,
             onClick = {
                 tabNavigator.current = tab
             },
-            icon = {
-                Icon(
-                        tab.options.icon!!,
-                        contentDescription = tab.options.title,
-                        tint = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
-                )
+            icon = icon,
+            label = tab.options.title,
+            alwaysShowLabel = true
+        )
+    }
+}
+
+@Composable
+fun Material3NavigationRailTabItem(tab: Tab) {
+    val tabNavigator = LocalTabNavigator.current
+    val selected = tabNavigator.current::class == tab::class
+    val icon = tab.options.icon
+    if (icon != null) {
+        Material3NavigationRailItem(
+            selected = selected,
+            onClick = {
+                tabNavigator.current = tab
             },
-            label = {
-                Text(
-                        text = tab.options.title,
-                        style = MaterialTheme.typography.labelLarge,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                )
-            },
-            alwaysShowLabel = true,
-    )
+            icon = icon,
+            label = tab.options.title,
+            alwaysShowLabel = false
+        )
+    }
 }
 
 @Composable
@@ -181,4 +195,20 @@ private fun RowScope.TabNavigationItem(tab: Tab) {
             ),
             alwaysShowLabel = true,
     )
+}
+
+@Composable
+private fun RowScope.ModernTabNavigationItem(tab: Tab) {
+    val tabNavigator = LocalTabNavigator.current
+    val isSelected = tabNavigator.current::class == tab::class
+    val icon = tab.options.icon
+    if (icon != null) {
+        ModernNavigationItem(
+            selected = isSelected,
+            onClick = { tabNavigator.current = tab },
+            icon = icon,
+            label = tab.options.title,
+            alwaysShowLabel = true
+        )
+    }
 }

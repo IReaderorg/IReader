@@ -59,8 +59,9 @@ class ExtensionViewModel(
     var selectedRepositoryType = mutableStateOf<String?>(null)
         private set
     
-    // Track source health status
-    val sourceStatuses = mutableStateMapOf<Long, SourceStatus>()
+    // Track source health status (thread-safe access)
+    private val _sourceStatuses = mutableStateMapOf<Long, SourceStatus>()
+    val sourceStatuses: Map<Long, SourceStatus> get() = _sourceStatuses.toMap()
     
     // Track loading sources
     private val loadingSources = mutableStateOf<Set<Long>>(emptySet())
@@ -277,9 +278,9 @@ class ExtensionViewModel(
         scope.launch(Dispatchers.IO) {
             try {
                 val health = sourceHealthChecker.checkStatus(sourceId)
-                sourceStatuses[sourceId] = health.status
+                _sourceStatuses[sourceId] = health.status
             } catch (e: Exception) {
-                sourceStatuses[sourceId] = SourceStatus.Error(e.message ?: "Unknown error")
+                _sourceStatuses[sourceId] = SourceStatus.Error(e.message ?: "Unknown error")
             }
         }
     }
@@ -295,7 +296,7 @@ class ExtensionViewModel(
             try {
                 val healthMap = sourceHealthChecker.checkMultipleSources(installedSources)
                 healthMap.forEach { (sourceId, health) ->
-                    sourceStatuses[sourceId] = health.status
+                    _sourceStatuses[sourceId] = health.status
                 }
             } catch (e: Exception) {
                 // Handle error silently or show a snackbar
@@ -307,7 +308,7 @@ class ExtensionViewModel(
      * Get cached status for a source
      */
     fun getSourceStatus(sourceId: Long): SourceStatus? {
-        return sourceStatuses[sourceId]
+        return _sourceStatuses[sourceId]
     }
     
     /**

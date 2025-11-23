@@ -77,6 +77,10 @@ class ReaderPreferences constructor(
     fun webViewIntegration(): Preference<Boolean> {
         return preferenceStore.getBoolean("webView_integration", false)
     }
+    
+    fun webViewBackgroundMode(): Preference<Boolean> {
+        return preferenceStore.getBoolean("webView_background_mode", true)
+    }
 
 
 

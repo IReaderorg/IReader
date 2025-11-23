@@ -92,6 +92,11 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
             automaticBackup.initialize()
         }
         
+        // Validate and clean up invalid extension cache
+        lifecycleScope.launchIO {
+            org.ireader.app.util.ExtensionCacheValidator.validateAndCleanExtensionCache(this@MainActivity)
+        }
+        
         // Set up logging
         Napier.base(DebugAntilog())
         

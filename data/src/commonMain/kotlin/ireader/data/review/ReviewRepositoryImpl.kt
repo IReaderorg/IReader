@@ -2,8 +2,7 @@ package ireader.data.review
 
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.query.Columns
+import ireader.data.backend.BackendService
 import ireader.data.core.DatabaseHandler
 import ireader.data.remote.RemoteErrorMapper
 import ireader.domain.data.repository.ReviewRepository
@@ -12,12 +11,20 @@ import ireader.domain.models.remote.ChapterReview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.*
 import kotlin.time.ExperimentalTime
 
 class ReviewRepositoryImpl(
     private val handler: DatabaseHandler,
-    private val supabaseClient: SupabaseClient
+    private val supabaseClient: SupabaseClient,
+    private val backendService: BackendService
 ) : ReviewRepository {
+    
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+        coerceInputValues = true
+    }
     
     @Serializable
     private data class UserInfo(
@@ -78,24 +85,25 @@ class ReviewRepositoryImpl(
                 ?: throw Exception("User not authenticated")
             
             val normalized = normalizeTitle(bookTitle)
-            val result = supabaseClient.postgrest["book_reviews"]
-                .select {
-                    filter {
-                        eq("user_id", userId)
-                        eq("book_title", normalized)
-                    }
-                }
-                .decodeSingleOrNull<BookReviewDto>()
+            val queryResult = backendService.query(
+                table = "book_reviews",
+                filters = mapOf(
+                    "user_id" to userId,
+                    "book_title" to normalized
+                )
+            ).getOrThrow()
             
-            result?.let {
+            val resultJson = queryResult.firstOrNull()
+            resultJson?.let {
+                val result = json.decodeFromJsonElement(BookReviewDto.serializer(), it)
                 BookReview(
-                    id = it.id ?: "",
-                    userId = it.user_id,
-                    bookTitle = it.book_title,
-                    rating = it.rating,
-                    reviewText = it.review_text,
-                    createdAt = parseTimestamp(it.created_at),
-                    updatedAt = parseTimestamp(it.updated_at)
+                    id = result.id ?: "",
+                    userId = result.user_id,
+                    bookTitle = result.book_title,
+                    rating = result.rating,
+                    reviewText = result.review_text,
+                    createdAt = parseTimestamp(result.created_at),
+                    updatedAt = parseTimestamp(result.updated_at)
                 )
             }
         }
@@ -103,13 +111,17 @@ class ReviewRepositoryImpl(
     override suspend fun getBookReviews(bookTitle: String): Result<List<BookReview>> = 
         RemoteErrorMapper.withErrorMapping {
             val normalized = normalizeTitle(bookTitle)
-            val results: List<BookReviewDto> = supabaseClient.postgrest["book_reviews"]
-                .select(columns = Columns.raw("*, users!inner(username)")) {
-                    filter {
-                        eq("book_title", normalized)
-                    }
-                }
-                .decodeList()
+            
+            // Query with left join to get usernames
+            val queryResult = backendService.query(
+                table = "book_reviews",
+                filters = mapOf("book_title" to normalized),
+                columns = "*, users(username)"
+            ).getOrThrow()
+            
+            val results = queryResult.map { 
+                json.decodeFromJsonElement(BookReviewDto.serializer(), it) 
+            }
             
             results.map {
                 BookReview(
@@ -131,19 +143,24 @@ class ReviewRepositoryImpl(
                 ?: throw Exception("User not authenticated")
             
             val normalized = normalizeTitle(bookTitle)
-            val dto = BookReviewDto(
-                user_id = userId,
-                book_title = normalized,
-                rating = rating,
-                review_text = reviewText
-            )
             
-            // Simple insert - users can make multiple reviews
-            val result = supabaseClient.postgrest["book_reviews"]
-                .insert(dto) {
-                    select()
-                }
-                .decodeSingle<BookReviewDto>()
+            // Create JSON data
+            val data = buildJsonObject {
+                put("user_id", userId)
+                put("book_title", normalized)
+                put("rating", rating)
+                put("review_text", reviewText)
+            }
+            
+            // Insert using BackendService
+            val insertResult = backendService.insert(
+                table = "book_reviews",
+                data = data,
+                returning = true
+            ).getOrThrow()
+            
+            val resultJson = insertResult ?: throw Exception("No result returned from insert")
+            val result = json.decodeFromJsonElement(BookReviewDto.serializer(), resultJson)
             
             BookReview(
                 id = result.id ?: "",
@@ -162,21 +179,26 @@ class ReviewRepositoryImpl(
                 ?: throw Exception("User not authenticated")
             
             val normalized = normalizeTitle(bookTitle)
-            val dto = BookReviewDto(
-                user_id = userId,
-                book_title = normalized,
-                rating = rating,
-                review_text = reviewText
-            )
             
-            val result = supabaseClient.postgrest["book_reviews"]
-                .update(dto) {
-                    filter {
-                        eq("user_id", userId)
-                        eq("book_title", normalized)
-                    }
-                }
-                .decodeSingle<BookReviewDto>()
+            // Create JSON data
+            val data = buildJsonObject {
+                put("rating", rating)
+                put("review_text", reviewText)
+            }
+            
+            // Update using BackendService
+            val updateResult = backendService.update(
+                table = "book_reviews",
+                filters = mapOf(
+                    "user_id" to userId,
+                    "book_title" to normalized
+                ),
+                data = data,
+                returning = true
+            ).getOrThrow()
+            
+            val resultJson = updateResult ?: throw Exception("No result returned from update")
+            val result = json.decodeFromJsonElement(BookReviewDto.serializer(), resultJson)
             
             BookReview(
                 id = result.id ?: "",
@@ -195,13 +217,13 @@ class ReviewRepositoryImpl(
                 ?: throw Exception("User not authenticated")
             
             val normalized = normalizeTitle(bookTitle)
-            supabaseClient.postgrest["book_reviews"]
-                .delete {
-                    filter {
-                        eq("user_id", userId)
-                        eq("book_title", normalized)
-                    }
-                }
+            backendService.delete(
+                table = "book_reviews",
+                filters = mapOf(
+                    "user_id" to userId,
+                    "book_title" to normalized
+                )
+            ).getOrThrow()
         }
     
     override fun observeBookReview(bookTitle: String): Flow<BookReview?> = flow {
@@ -217,26 +239,27 @@ class ReviewRepositoryImpl(
                 ?: throw Exception("User not authenticated")
             
             val normalized = normalizeTitle(bookTitle)
-            val result = supabaseClient.postgrest["chapter_reviews"]
-                .select {
-                    filter {
-                        eq("user_id", userId)
-                        eq("book_title", normalized)
-                        eq("chapter_name", chapterName)
-                    }
-                }
-                .decodeSingleOrNull<ChapterReviewDto>()
+            val queryResult = backendService.query(
+                table = "chapter_reviews",
+                filters = mapOf(
+                    "user_id" to userId,
+                    "book_title" to normalized,
+                    "chapter_name" to chapterName
+                )
+            ).getOrThrow()
             
-            result?.let {
+            val resultJson = queryResult.firstOrNull()
+            resultJson?.let {
+                val result = json.decodeFromJsonElement(ChapterReviewDto.serializer(), it)
                 ChapterReview(
-                    id = it.id ?: "",
-                    userId = it.user_id,
-                    bookTitle = it.book_title,
-                    chapterName = it.chapter_name,
-                    rating = it.rating,
-                    reviewText = it.review_text,
-                    createdAt = parseTimestamp(it.created_at),
-                    updatedAt = parseTimestamp(it.updated_at)
+                    id = result.id ?: "",
+                    userId = result.user_id,
+                    bookTitle = result.book_title,
+                    chapterName = result.chapter_name,
+                    rating = result.rating,
+                    reviewText = result.review_text,
+                    createdAt = parseTimestamp(result.created_at),
+                    updatedAt = parseTimestamp(result.updated_at)
                 )
             }
         }
@@ -244,13 +267,13 @@ class ReviewRepositoryImpl(
     override suspend fun getChapterReviews(bookTitle: String): Result<List<ChapterReview>> = 
         RemoteErrorMapper.withErrorMapping {
             val normalized = normalizeTitle(bookTitle)
-            val results: List<ChapterReviewDto> = supabaseClient.postgrest["chapter_reviews"]
-                .select(columns = Columns.raw("*, users!inner(username)")) {
-                    filter {
-                        eq("book_title", normalized)
-                    }
-                }
-                .decodeList()
+            val queryResult = backendService.query(
+                table = "chapter_reviews",
+                filters = mapOf("book_title" to normalized),
+                columns = "*, users!inner(username)"
+            ).getOrThrow()
+            
+            val results = queryResult.map { json.decodeFromJsonElement(ChapterReviewDto.serializer(), it) }
             
             results.map {
                 ChapterReview(
@@ -273,20 +296,25 @@ class ReviewRepositoryImpl(
                 ?: throw Exception("User not authenticated")
             
             val normalized = normalizeTitle(bookTitle)
-            val dto = ChapterReviewDto(
-                user_id = userId,
-                book_title = normalized,
-                chapter_name = chapterName,
-                rating = rating,
-                review_text = reviewText
-            )
             
-            // Simple insert - users can make multiple reviews
-            val result = supabaseClient.postgrest["chapter_reviews"]
-                .insert(dto) {
-                    select()
-                }
-                .decodeSingle<ChapterReviewDto>()
+            // Create JSON data
+            val data = buildJsonObject {
+                put("user_id", userId)
+                put("book_title", normalized)
+                put("chapter_name", chapterName)
+                put("rating", rating)
+                put("review_text", reviewText)
+            }
+            
+            // Insert using BackendService
+            val insertResult = backendService.insert(
+                table = "chapter_reviews",
+                data = data,
+                returning = true
+            ).getOrThrow()
+            
+            val resultJson = insertResult ?: throw Exception("No result returned from insert")
+            val result = json.decodeFromJsonElement(ChapterReviewDto.serializer(), resultJson)
             
             ChapterReview(
                 id = result.id ?: "",
@@ -306,23 +334,27 @@ class ReviewRepositoryImpl(
                 ?: throw Exception("User not authenticated")
             
             val normalized = normalizeTitle(bookTitle)
-            val dto = ChapterReviewDto(
-                user_id = userId,
-                book_title = normalized,
-                chapter_name = chapterName,
-                rating = rating,
-                review_text = reviewText
-            )
             
-            val result = supabaseClient.postgrest["chapter_reviews"]
-                .update(dto) {
-                    filter {
-                        eq("user_id", userId)
-                        eq("book_title", normalized)
-                        eq("chapter_name", chapterName)
-                    }
-                }
-                .decodeSingle<ChapterReviewDto>()
+            // Create JSON data
+            val data = buildJsonObject {
+                put("rating", rating)
+                put("review_text", reviewText)
+            }
+            
+            // Update using BackendService
+            val updateResult = backendService.update(
+                table = "chapter_reviews",
+                filters = mapOf(
+                    "user_id" to userId,
+                    "book_title" to normalized,
+                    "chapter_name" to chapterName
+                ),
+                data = data,
+                returning = true
+            ).getOrThrow()
+            
+            val resultJson = updateResult ?: throw Exception("No result returned from update")
+            val result = json.decodeFromJsonElement(ChapterReviewDto.serializer(), resultJson)
             
             ChapterReview(
                 id = result.id ?: "",
@@ -342,14 +374,14 @@ class ReviewRepositoryImpl(
                 ?: throw Exception("User not authenticated")
             
             val normalized = normalizeTitle(bookTitle)
-            supabaseClient.postgrest["chapter_reviews"]
-                .delete {
-                    filter {
-                        eq("user_id", userId)
-                        eq("book_title", normalized)
-                        eq("chapter_name", chapterName)
-                    }
-                }
+            backendService.delete(
+                table = "chapter_reviews",
+                filters = mapOf(
+                    "user_id" to userId,
+                    "book_title" to normalized,
+                    "chapter_name" to chapterName
+                )
+            ).getOrThrow()
         }
     
     override fun observeChapterReview(bookTitle: String, chapterName: String): Flow<ChapterReview?> = flow {
@@ -362,32 +394,40 @@ class ReviewRepositoryImpl(
     override suspend fun getBookAverageRating(bookTitle: String): Result<Float> = 
         RemoteErrorMapper.withErrorMapping {
             val normalized = normalizeTitle(bookTitle)
-            val result: List<BookReviewDto> = supabaseClient.postgrest["book_reviews"]
-                .select(columns = Columns.list("rating")) {
-                    filter {
-                        eq("book_title", normalized)
-                    }
-                }
-                .decodeList()
+            val queryResult = backendService.query(
+                table = "book_reviews",
+                filters = mapOf("book_title" to normalized),
+                columns = "rating"
+            ).getOrThrow()
             
-            if (result.isEmpty()) 0f
-            else result.map { it.rating }.average().toFloat()
+            if (queryResult.isEmpty()) 0f
+            else {
+                val ratings = queryResult.map { 
+                    json.decodeFromJsonElement(BookReviewDto.serializer(), it).rating 
+                }
+                ratings.average().toFloat()
+            }
         }
     
     override suspend fun getChapterAverageRating(bookTitle: String, chapterName: String): Result<Float> = 
         RemoteErrorMapper.withErrorMapping {
             val normalized = normalizeTitle(bookTitle)
-            val result: List<ChapterReviewDto> = supabaseClient.postgrest["chapter_reviews"]
-                .select(columns = Columns.list("rating")) {
-                    filter {
-                        eq("book_title", normalized)
-                        eq("chapter_name", chapterName)
-                    }
-                }
-                .decodeList()
+            val queryResult = backendService.query(
+                table = "chapter_reviews",
+                filters = mapOf(
+                    "book_title" to normalized,
+                    "chapter_name" to chapterName
+                ),
+                columns = "rating"
+            ).getOrThrow()
             
-            if (result.isEmpty()) 0f
-            else result.map { it.rating }.average().toFloat()
+            if (queryResult.isEmpty()) 0f
+            else {
+                val ratings = queryResult.map { 
+                    json.decodeFromJsonElement(ChapterReviewDto.serializer(), it).rating 
+                }
+                ratings.average().toFloat()
+            }
         }
 }
 

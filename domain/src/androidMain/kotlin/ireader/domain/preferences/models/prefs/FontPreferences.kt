@@ -40,18 +40,16 @@ class FontPreferences @OptIn(ExperimentalTextApi::class) constructor(
     @OptIn(ExperimentalTextApi::class)
     fun getFont(): FontType {
         val fontName = preference.get()
+        
+        // Check if it's a local font first
         localFontFamily.find { it.name == fontName }?.let { font ->
             return font
         }
+        
+        // Otherwise, it's a Google Font
         return kotlin.runCatching {
-            // Create the Compose FontFamily for rendering
-            val fontFamily = androidx.compose.ui.text.font.FontFamily(
-                Font(
-                    googleFont = GoogleFont(fontName),
-                    provider
-                )
-            )
-            // Return domain model with custom font
+            // Return domain model with custom font (Google Font)
+            // The actual FontFamily will be created by toComposeFontFamily() in the presentation layer
             FontType(
                 fontName,
                 ireader.domain.models.common.FontFamilyModel.Custom(fontName)

@@ -13,9 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -44,7 +43,6 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @OptIn(
-    ExperimentalMaterialApi::class,
     ExperimentalMaterial3Api::class,
     ExperimentalComposeUiApi::class,
 )
@@ -104,18 +102,18 @@ fun BookDetailScreen(
         )
     }
     
-    if (vm.sourceSwitchingState.showMigrationDialog && 
-        vm.sourceSwitchingState.migrationProgress != null) {
-        val progress = vm.sourceSwitchingState.migrationProgress!!
-        ireader.presentation.ui.component.MigrationProgressDialog(
-            currentStep = progress.currentStep,
-            progress = progress.progress,
-            onDismiss = {
-                if (progress.isComplete) {
-                    vm.sourceSwitchingState.showMigrationDialog = false
+    if (vm.sourceSwitchingState.showMigrationDialog) {
+        vm.sourceSwitchingState.migrationProgress?.let { progress ->
+            ireader.presentation.ui.component.MigrationProgressDialog(
+                currentStep = progress.currentStep,
+                progress = progress.progress,
+                onDismiss = {
+                    if (progress.isComplete) {
+                        vm.sourceSwitchingState.showMigrationDialog = false
+                    }
                 }
-            }
-        )
+            )
+        }
     }
     
     if (vm.showEpubExportDialog) {
@@ -235,16 +233,18 @@ fun BookDetailScreen(
                 }
                 
                 // Source switching banner
-                if (vm.sourceSwitchingState.showBanner && 
-                    vm.sourceSwitchingState.betterSourceName != null &&
-                    vm.sourceSwitchingState.sourceComparison != null) {
-                    item {
-                        ireader.presentation.ui.component.SourceSwitchingBanner(
-                            sourceName = vm.sourceSwitchingState.betterSourceName!!,
-                            chapterDifference = vm.sourceSwitchingState.sourceComparison!!.chapterDifference,
-                            onSwitch = { vm.migrateToSource() },
-                            onDismiss = { vm.dismissSourceSwitchingBanner() }
-                        )
+                if (vm.sourceSwitchingState.showBanner) {
+                    val sourceName = vm.sourceSwitchingState.betterSourceName
+                    val comparison = vm.sourceSwitchingState.sourceComparison
+                    if (sourceName != null && comparison != null) {
+                        item {
+                            ireader.presentation.ui.component.SourceSwitchingBanner(
+                                sourceName = sourceName,
+                                chapterDifference = comparison.chapterDifference,
+                                onSwitch = { vm.migrateToSource() },
+                                onDismiss = { vm.dismissSourceSwitchingBanner() }
+                            )
+                        }
                     }
                 }
                 
@@ -279,7 +279,7 @@ fun BookDetailScreen(
                 }
                 
                     items(
-                        items = vm.chapters.reversed(),
+                        items = chapters.value.reversed(),
                         key = { chapter -> chapter.id },
                         contentType = { "chapter_item" }
                     ) { chapter ->
@@ -292,7 +292,7 @@ fun BookDetailScreen(
                             onLongClick = { onLongItemClick(chapter) },
                             showNumber = vm.layout == ChapterDisplayMode.ChapterNumber || vm.layout == ChapterDisplayMode.Default
                         )
-                        Divider(
+                        HorizontalDivider(
                             modifier = Modifier.padding(horizontal = 16.dp),
                             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
                             thickness = 0.5.dp
@@ -427,7 +427,8 @@ private fun ChapterListPanel(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Top,
-            state = scrollState
+            state = scrollState,
+            contentPadding = PaddingValues(top = 72.dp) // Add padding to prevent toolbar overlap
         ) {
             item {
                 ChapterBar(
@@ -439,16 +440,18 @@ private fun ChapterListPanel(
             }
             
             // Source switching banner
-            if (vm.sourceSwitchingState.showBanner && 
-                vm.sourceSwitchingState.betterSourceName != null &&
-                vm.sourceSwitchingState.sourceComparison != null) {
-                item {
-                    ireader.presentation.ui.component.SourceSwitchingBanner(
-                        sourceName = vm.sourceSwitchingState.betterSourceName!!,
-                        chapterDifference = vm.sourceSwitchingState.sourceComparison!!.chapterDifference,
-                        onSwitch = { vm.migrateToSource() },
-                        onDismiss = { vm.dismissSourceSwitchingBanner() }
-                    )
+            if (vm.sourceSwitchingState.showBanner) {
+                val sourceName = vm.sourceSwitchingState.betterSourceName
+                val comparison = vm.sourceSwitchingState.sourceComparison
+                if (sourceName != null && comparison != null) {
+                    item {
+                        ireader.presentation.ui.component.SourceSwitchingBanner(
+                            sourceName = sourceName,
+                            chapterDifference = comparison.chapterDifference,
+                            onSwitch = { vm.migrateToSource() },
+                            onDismiss = { vm.dismissSourceSwitchingBanner() }
+                        )
+                    }
                 }
             }
             
@@ -483,7 +486,7 @@ private fun ChapterListPanel(
             }
             
             items(
-                items = vm.chapters.reversed(),
+                items = chapters.reversed(),
                 key = { chapter -> chapter.id },
                 contentType = { "chapter_item" }
             ) { chapter ->
@@ -496,7 +499,7 @@ private fun ChapterListPanel(
                     onLongClick = { onLongItemClick(chapter) },
                     showNumber = vm.layout == ChapterDisplayMode.ChapterNumber || vm.layout == ChapterDisplayMode.Default
                 )
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
                     thickness = 0.5.dp

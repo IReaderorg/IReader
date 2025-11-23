@@ -671,6 +671,52 @@ $$ LANGUAGE plpgsql;
 COMMENT ON FUNCTION generate_default_username() IS 'Auto-generates username for users without one';
 
 -- ----------------------------------------------------------------------------
+-- Function: Grant badge to user (bypasses RLS for admin operations)
+-- Grants a badge to a user, used by admins when approving payment proofs
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION grant_badge_to_user(
+    p_user_id UUID,
+    p_badge_id TEXT
+)
+RETURNS JSON
+LANGUAGE plpgsql
+SECURITY DEFINER -- This allows the function to bypass RLS
+AS $
+DECLARE
+    result JSON;
+BEGIN
+    -- Insert the badge for the user
+    INSERT INTO public.user_badges (user_id, badge_id, earned_at)
+    VALUES (p_user_id, p_badge_id, NOW())
+    ON CONFLICT (user_id, badge_id) DO NOTHING
+    RETURNING json_build_object(
+        'user_id', user_id,
+        'badge_id', badge_id,
+        'earned_at', earned_at
+    ) INTO result;
+    
+    -- If no result (conflict), return existing badge info
+    IF result IS NULL THEN
+        SELECT json_build_object(
+            'user_id', user_id,
+            'badge_id', badge_id,
+            'earned_at', earned_at,
+            'already_exists', true
+        ) INTO result
+        FROM public.user_badges
+        WHERE user_id = p_user_id AND badge_id = p_badge_id;
+    END IF;
+    
+    RETURN result;
+END;
+$;
+
+-- Grant execute permission to authenticated users
+GRANT EXECUTE ON FUNCTION grant_badge_to_user(UUID, TEXT) TO authenticated;
+
+COMMENT ON FUNCTION grant_badge_to_user(UUID, TEXT) IS 'Grants a badge to a user (bypasses RLS for admin operations)';
+
+-- ----------------------------------------------------------------------------
 -- Function: Get user statistics
 -- Returns reading statistics for a user
 -- ----------------------------------------------------------------------------

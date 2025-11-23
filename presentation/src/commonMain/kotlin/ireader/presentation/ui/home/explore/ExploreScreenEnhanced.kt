@@ -276,15 +276,16 @@ private fun ExploreMainContent(
                 }
                 
                 vm.booksState.books.isEmpty() && !vm.isLoading -> {
-                    IReaderEmptyScreen(
-                        message = localize(Res.string.search),
-                        actions = listOf(
-                            ErrorScreenAction(
-                                title = localize(Res.string.retry),
-                                icon = Icons.Default.Refresh,
-                                onClick = { getBooks(null, null, emptyList()) }
-                            )
-                        )
+                    // Show error screen with retry option when no books loaded (could be due to error or truly empty)
+                    ExploreScreenErrorEnhanced(
+                        error = vm.error?.asString(LocalLocalizeHelper.current!!) ?: localize(Res.string.no_results_found),
+                        source = source,
+                        onRefresh = { 
+                            getBooks(null, null, emptyList())
+                        },
+                        onWebView = {
+                            onAppbarWebView(it.baseUrl)
+                        }
                     )
                 }
                 

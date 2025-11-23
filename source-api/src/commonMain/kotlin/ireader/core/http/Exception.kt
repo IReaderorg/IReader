@@ -1,5 +1,8 @@
 package ireader.core.http
 
-class OutOfDateWebView() : Exception()
-class NeedWebView() : Exception()
-class CloudflareBypassFailed() : Exception()
+import java.io.IOException
+
+// Exception classes for HTTP and WebView operations
+class OutOfDateWebView : IOException("WebView is outdated. Please update WebView from Play Store")
+class NeedWebView : IOException("WebView is required but not available on this device")
+class CloudflareBypassFailed : IOException("Cloudflare bypass failed")

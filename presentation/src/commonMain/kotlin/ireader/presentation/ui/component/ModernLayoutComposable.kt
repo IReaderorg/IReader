@@ -350,8 +350,8 @@ fun ModernListItem(
                     // Cover image with optimized sizing
                     Box(
                         modifier = Modifier
-                            .height(120.dp)
-                            .width(80.dp)
+                            .height(140.dp)
+                            .width(95.dp)
                             .clip(RoundedCornerShape(8.dp))
                     ) {
                         // Use optimized image request with proper sizing
@@ -369,7 +369,7 @@ fun ModernListItem(
                             model = imageRequest,
                             contentDescription = book.title,
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop,
+                            contentScale = ContentScale.Fit,
                             loading = {
                                 ShimmerLoadingEffect()
                             },
@@ -690,11 +690,11 @@ fun EnhancedNovelCard(
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Cover image with proper aspect ratio (3:4)
+            // Cover image with proper aspect ratio (adjusted for better display)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(3f / 4f)
+                    .aspectRatio(0.70f)
             ) {
                 BookCoverImage(
                     book = book,
@@ -857,7 +857,7 @@ fun BookCoverImage(
         model = imageRequest,
         contentDescription = book.title,
         modifier = Modifier.fillMaxSize(),
-        contentScale = ContentScale.Crop,
+        contentScale = ContentScale.Fit,
         loading = {
             ShimmerLoadingEffect()
         },

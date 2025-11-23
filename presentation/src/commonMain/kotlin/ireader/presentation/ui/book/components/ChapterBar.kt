@@ -29,11 +29,16 @@ fun ChapterBar(
 ) {
     var showDownloadMenu by remember { mutableStateOf(false) }
     
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 2.dp
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
         // Header row
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -155,11 +160,12 @@ fun ChapterBar(
             }
         }
         
-        // Divider
-        Spacer(modifier = Modifier.height(12.dp))
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
-            thickness = 1.dp
-        )
+            // Divider
+            Spacer(modifier = Modifier.height(12.dp))
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                thickness = 1.dp
+            )
+        }
     }
 }

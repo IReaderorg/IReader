@@ -735,7 +735,7 @@ fun HistoryItem(
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
                             contentDescription = localize(Res.string.resume),
-                            tint = MaterialTheme.colorScheme.onSecondary
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                     }
                 }

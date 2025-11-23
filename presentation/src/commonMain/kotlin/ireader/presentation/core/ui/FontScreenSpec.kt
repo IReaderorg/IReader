@@ -57,9 +57,10 @@ class FontScreenSpec {
             Box(modifier = Modifier.padding(padding)) {
                 FontScreen(
                     vm,
-                    onFont = { font ->
+                    onFont = { fontName ->
+                        // Set the font as a Custom font (Google Font)
                         vm.androidUiPreferences.font()
-                            ?.set(FontType(font, getDefaultFont().fontFamily))
+                            ?.set(FontType(fontName, ireader.domain.models.common.FontFamilyModel.Custom(fontName)))
                     }
                 )
             }

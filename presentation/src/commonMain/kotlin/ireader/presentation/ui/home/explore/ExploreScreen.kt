@@ -168,6 +168,9 @@ fun ExploreScreen(
                 shape = CircleShape
             )
         },
+        snackbarHost = {
+            SnackbarHost(hostState = snackBarHostState)
+        }
     ) { paddingValue ->
         Box(
             modifier = Modifier
@@ -181,6 +184,17 @@ fun ExploreScreen(
                 vm.error != null && vm.page == 1 -> {
                     ExploreScreenError(
                         error = vm.error!!.asString(localizeHelper),
+                        source = source,
+                        onRefresh = { getBooks(null, null, emptyList()) },
+                        onWebView = {
+                            onAppbarWebView(it.baseUrl)
+                        }
+                    )
+                }
+                vm.booksState.books.isEmpty() && !vm.isLoading -> {
+                    // Show error screen when no books loaded (could be due to error or truly empty)
+                    ExploreScreenError(
+                        error = vm.error?.asString(localizeHelper) ?: localize(Res.string.no_results_found),
                         source = source,
                         onRefresh = { getBooks(null, null, emptyList()) },
                         onWebView = {

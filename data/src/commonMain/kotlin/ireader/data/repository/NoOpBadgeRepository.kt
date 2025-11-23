@@ -50,4 +50,18 @@ class NoOpBadgeRepository : BadgeRepository {
     override suspend fun getFeaturedBadges(): Result<List<Badge>> {
         return Result.success(emptyList())
     }
+    
+    override suspend fun getPaymentProofsByStatus(
+        status: ireader.domain.models.remote.PaymentProofStatus
+    ): Result<List<PaymentProof>> {
+        return Result.success(emptyList())
+    }
+    
+    override suspend fun updatePaymentProofStatus(
+        proofId: String,
+        status: ireader.domain.models.remote.PaymentProofStatus,
+        adminUserId: String
+    ): Result<Unit> {
+        return Result.failure(UnsupportedOperationException(unavailableMessage))
+    }
 }

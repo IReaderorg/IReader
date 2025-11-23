@@ -34,25 +34,36 @@ class CatalogGithubApi(
         val repositories = catalogSourceRepository.subscribe().first()
         val enabledRepositories = repositories.filter { it.isEnable }
         
+        println("CatalogGithubApi: Found ${enabledRepositories.size} enabled repositories")
+        
         if (enabledRepositories.isEmpty()) {
-            // Fallback to default repository if no repositories are configured
-            val defaultRepo = getDefaultRepo()
-            return fetchFromRepository(defaultRepo)
+            // No repositories configured - return empty list
+            println("CatalogGithubApi: No repositories configured, returning empty list")
+            return emptyList()
         }
         
         // Fetch from all enabled repositories
         for (repo in enabledRepositories) {
             try {
+                println("CatalogGithubApi: Fetching from repository: ${repo.name} (${repo.repositoryType})")
                 val catalogs = fetchFromRepository(repo)
+                println("CatalogGithubApi: Successfully fetched ${catalogs.size} catalogs from ${repo.name}")
                 allCatalogs.addAll(catalogs)
             } catch (e: Exception) {
-                errors.add("Repository ${repo.name} (${repo.key}): ${e.message}")
+                val errorMsg = "Repository ${repo.name} (${repo.key}): ${e.message}"
+                println("CatalogGithubApi: Error - $errorMsg")
+                errors.add(errorMsg)
                 // Continue with other repositories instead of failing completely
             }
         }
         
+        println("CatalogGithubApi: Total catalogs fetched: ${allCatalogs.size}, Errors: ${errors.size}")
+        
         // If we got some catalogs, return them even if some repositories failed
         if (allCatalogs.isNotEmpty()) {
+            if (errors.isNotEmpty()) {
+                println("CatalogGithubApi: Warning - Some repositories failed: ${errors.joinToString(", ")}")
+            }
             return allCatalogs
         }
         
@@ -100,6 +111,9 @@ class CatalogGithubApi(
         if (catalogs.isEmpty()) {
             throw CatalogNotFoundException("No catalogs found in repository")
         }
+        
+        println("CatalogGithubApi: Parsing ${catalogs.size} IReader extensions from ${repo.name}")
+        
         val repoUrl = repo.key.substringBefore("index.min.json","").takeIf { it.isNotBlank() } ?: REPO_URL
         return catalogs.map { catalog ->
             val iconUrl = "$repoUrl/icon/${catalog.apk.replace(".apk", ".png")}"
@@ -117,7 +131,9 @@ class CatalogGithubApi(
                 iconUrl = iconUrl,
                 nsfw = catalog.nsfw,
                 source = CatalogRemote.DEFAULT_ID,
-                jarUrl = jarUrl
+                jarUrl = jarUrl,
+                repositoryId = repo.id,
+                repositoryType = "IREADER" // Mark as IReader repository
             )
         }
     }
@@ -127,6 +143,8 @@ class CatalogGithubApi(
         if (lnReaderCatalogs.isEmpty()) {
             throw CatalogNotFoundException("No LNReader catalogs found in repository")
         }
+        
+        println("CatalogGithubApi: Parsing ${lnReaderCatalogs.size} LNReader plugins from ${repo.name}")
         
         return lnReaderCatalogs.map { plugin ->
             // Generate a unique numeric ID for LNReader sources
@@ -150,7 +168,9 @@ class CatalogGithubApi(
                 iconUrl = iconUrl,
                 nsfw = false, // LNReader plugins don't typically have NSFW flag
                 source = CatalogRemote.DEFAULT_ID,
-                jarUrl = plugin.url // For LNReader, the URL is the plugin file itself
+                jarUrl = plugin.url, // For LNReader, the URL is the plugin file itself
+                repositoryId = repo.id,
+                repositoryType = "LNREADER" // Mark as LNReader repository
             )
         }
     }

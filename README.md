@@ -53,10 +53,10 @@ IReader now supports LNReader sources! Follow these steps:
    - Choose **LNReader**
    - Save and refresh remote sources in the Source screen
 
-3. **Grant Storage Permissions**
-   - For JS sources to load, grant **all storage permissions** to the app
-   - You may need to restart the app 2-3 times as permission dialogs appear
-   - *(Permission flow will be improved in future updates)*
+3. **Storage Permissions (Optional)**
+   - By default, LNReader sources are saved to app cache (no permissions needed)
+   - To save sources to external storage for easier access, disable **"Saved Sources to Cache"** in Settings → General
+   - If using external storage, grant storage permissions when prompted
 
 4. **Start Reading**
    - Browse sources to find novels

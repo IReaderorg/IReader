@@ -175,7 +175,10 @@ val repositoryInjectModule = module {
                 // Get Supabase client from provider
                 val supabaseClient = (provider as ireader.data.remote.SupabaseClientProviderImpl)
                     .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS)
-                ireader.data.leaderboard.LeaderboardRepositoryImpl(supabaseClient)
+                ireader.data.leaderboard.LeaderboardRepositoryImpl(
+                    supabaseClient = supabaseClient,
+                    backendService = get()
+                )
             } catch (e: Exception) {
                 // Fallback to NoOp if something goes wrong
                 ireader.data.repository.NoOpLeaderboardRepository()

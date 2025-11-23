@@ -5,8 +5,7 @@ import io.github.jan.supabase.annotations.SupabaseInternal
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.bodyOrNull
 import io.github.jan.supabase.functions.functions
-import io.github.jan.supabase.postgrest.postgrest
-import io.ktor.client.call.body
+import ireader.data.backend.BackendService
 import ireader.data.core.DatabaseHandler
 import ireader.data.remote.RemoteErrorMapper
 import ireader.domain.data.repository.NFTRepository
@@ -20,7 +19,8 @@ import kotlinx.serialization.json.put
 
 class NFTRepositoryImpl(
     private val handler: DatabaseHandler,
-    private val supabaseClient: SupabaseClient
+    private val supabaseClient: SupabaseClient,
+    private val backendService: BackendService
 ) : NFTRepository {
     
     @Serializable
@@ -75,16 +75,19 @@ class NFTRepositoryImpl(
             val now = System.currentTimeMillis()
             val cacheExpires = now + (24 * 60 * 60 * 1000) // 24 hours
             
-            val walletDto = NFTWalletDto(
-                userId = userId,
-                walletAddress = address,
-                lastVerified = null,
-                ownsNFT = false,
-                nftTokenId = null,
-                verificationCacheExpires = cacheExpires.toString()
-            )
+            val data = buildJsonObject {
+                put("user_id", userId)
+                put("wallet_address", address)
+                put("owns_nft", false)
+                put("verification_cache_expires", cacheExpires.toString())
+            }
             
-            supabaseClient.postgrest["nft_wallets"].upsert(walletDto)
+            backendService.upsert(
+                table = "nft_wallets",
+                data = data,
+                onConflict = "user_id",
+                returning = false
+            ).getOrThrow()
         }
     
     override suspend fun getWalletAddress(): Result<String?> = 
@@ -102,13 +105,14 @@ class NFTRepositoryImpl(
             }
             
             // Fall back to Supabase if local not found
-            val result = supabaseClient.postgrest["nft_wallets"]
-                .select {
-                    filter {
-                        eq("user_id", userId)
-                    }
-                }
-                .decodeSingleOrNull<NFTWalletDto>()
+            val queryResult = backendService.query(
+                table = "nft_wallets",
+                filters = mapOf("user_id" to userId)
+            ).getOrThrow()
+            
+            val result = queryResult.firstOrNull()?.let {
+                json.decodeFromJsonElement(NFTWalletDto.serializer(), it)
+            }
             
             result?.walletAddress
         }
@@ -173,13 +177,14 @@ class NFTRepositoryImpl(
                 ?: throw Exception("User not authenticated")
             
             // Query Supabase for cached verification
-            val result = supabaseClient.postgrest["nft_wallets"]
-                .select {
-                    filter {
-                        eq("user_id", userId)
-                    }
-                }
-                .decodeSingleOrNull<NFTWalletDto>()
+            val queryResult = backendService.query(
+                table = "nft_wallets",
+                filters = mapOf("user_id" to userId)
+            ).getOrThrow()
+            
+            val result = queryResult.firstOrNull()?.let {
+                json.decodeFromJsonElement(NFTWalletDto.serializer(), it)
+            }
             
             result?.let { dto ->
                 NFTWallet(

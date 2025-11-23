@@ -10,6 +10,7 @@ plugins {
 
 kotlin {
     androidTarget {
+        publishLibraryVariants("release")
         compilations {
             all {
                 compilerOptions.configure {
@@ -45,6 +46,9 @@ kotlin {
                 api(libs.jsoup)
                 api(kotlinx.datetime)
                 api(libs.bundles.ireader)
+                
+                // Kotlin Reflection - Required for Supabase inline reified functions
+                implementation(kotlinx.reflect)
                 
                 // Supabase
                 implementation(libs.bundles.supabase)
@@ -86,6 +90,9 @@ android {
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    
+
+    
     sourceSets {
         getByName("androidTest").assets.srcDir("$projectDir/schemas")
     }
@@ -134,3 +141,6 @@ sqldelight {
         }
     }
 }
+
+
+

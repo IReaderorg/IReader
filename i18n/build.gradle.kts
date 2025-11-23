@@ -12,8 +12,10 @@ plugins {
     alias(kotlinx.plugins.compose.compiler)
 }
 kotlin {
-    androidTarget()
-    jvm() {
+    androidTarget {
+        publishLibraryVariants("release")
+    }
+    jvm("desktop") {
         compilations.all {
             compileTaskProvider.configure {
                 compilerOptions {
@@ -35,7 +37,7 @@ kotlin {
                 implementation(compose.animationGraphics)
             }
         }
-        jvmMain {
+        val desktopMain by getting {
             dependencies {
                 implementation(compose.components.resources)
             }

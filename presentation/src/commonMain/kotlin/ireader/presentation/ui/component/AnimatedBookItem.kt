@@ -244,7 +244,7 @@ private fun GridModeBookCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(0.67f) // 2:3 aspect ratio for book covers
+                    .aspectRatio(0.70f) // Adjusted aspect ratio for better display
             ) {
                 BookCoverImage(
                     book = book,
@@ -358,8 +358,8 @@ private fun ListModeBookCard(
             // Cover image
             Box(
                 modifier = Modifier
-                    .width(60.dp)
-                    .height(90.dp)
+                    .width(70.dp)
+                    .height(105.dp)
                     .clip(RoundedCornerShape(8.dp))
             ) {
                 BookCoverImage(
@@ -490,7 +490,7 @@ fun BookCoverImage(
                         Modifier
                     }
                 ),
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.Fit
         )
         
         // Show reveal icon when blurred

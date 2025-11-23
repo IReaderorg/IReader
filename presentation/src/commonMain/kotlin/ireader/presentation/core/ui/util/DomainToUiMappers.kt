@@ -77,21 +77,7 @@ fun TextAlign.toTextAlignmentModel(): TextAlignmentModel {
     }
 }
 
-// Font family conversions
-fun FontFamilyModel.toComposeFontFamily(): FontFamily {
-    return when (this) {
-        FontFamilyModel.Default -> FontFamily.Default
-        FontFamilyModel.SansSerif -> FontFamily.SansSerif
-        FontFamilyModel.Serif -> FontFamily.Serif
-        FontFamilyModel.Monospace -> FontFamily.Monospace
-        FontFamilyModel.Cursive -> FontFamily.Cursive
-        is FontFamilyModel.Custom -> {
-            // For custom fonts, we'd need to load them from the path
-            // For now, return default
-            FontFamily.Default
-        }
-    }
-}
+// Font family conversions moved to DomainModelExtensions.kt
 
 fun FontFamily.toFontFamilyModel(): FontFamilyModel {
     return when (this) {

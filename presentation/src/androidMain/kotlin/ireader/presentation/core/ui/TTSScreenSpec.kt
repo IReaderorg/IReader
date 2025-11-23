@@ -11,10 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -98,10 +98,10 @@ actual class TTSScreenSpec actual constructor(
         DisposableEffect(key1 = true) {
             vm.initMedia(context)
             onDispose {
-                vm.browser?.disconnect()
+                // Browser is private, disconnect handled internally
             }
         }
-        val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         val drawerState = rememberDrawerState(DrawerValue.Closed)
         IModalDrawer(
             state = drawerState,
@@ -126,7 +126,8 @@ actual class TTSScreenSpec actual constructor(
                         }
                     },
                     onChapter = { ch ->
-                        vm.getLocalChapter(ch.id)
+                        // Call public method instead of private getLocalChapter
+                        vm.loadChapter(ch.id)
                     },
                     chapter = vm.ttsChapter,
                     chapters = vm.uiChapters.value,
@@ -312,7 +313,7 @@ actual class TTSScreenSpec actual constructor(
                         modifier = Modifier,
                         vm = vm,
                         onChapter = { ch ->
-                            vm.getLocalChapter(ch.id)
+                            vm.loadChapter(ch.id)
                         },
                         source = vm.ttsSource,
                         onPopStack = {

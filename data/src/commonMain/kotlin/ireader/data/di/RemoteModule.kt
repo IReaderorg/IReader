@@ -132,6 +132,30 @@ val remoteModule = module {
     // Remote cache
     single { RemoteCache() }
     
+    // Backend Service (abstraction layer)
+    single<ireader.data.backend.BackendService> {
+        val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
+        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
+            ireader.data.backend.NoOpBackendService()
+        } else {
+            val supabaseClient = (provider as ireader.data.remote.SupabaseClientProviderImpl)
+                .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS) as SupabaseClient
+            ireader.data.backend.SupabaseBackendService(supabaseClient)
+        }
+    }
+    
+    // Auth Service (authentication abstraction)
+    single<ireader.data.backend.AuthService> {
+        val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
+        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
+            ireader.data.backend.NoOpAuthService()
+        } else {
+            val supabaseClient = (provider as ireader.data.remote.SupabaseClientProviderImpl)
+                .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS) as SupabaseClient
+            ireader.data.backend.SupabaseAuthService(supabaseClient)
+        }
+    }
+    
     // Remote repository
     single<RemoteRepository> {
         val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
@@ -142,6 +166,7 @@ val remoteModule = module {
                 .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS)
             SupabaseRemoteRepository(
                 supabaseClient = supabaseClient,
+                backendService = get(),
                 syncQueue = get(),
                 retryPolicy = get(),
                 cache = get()

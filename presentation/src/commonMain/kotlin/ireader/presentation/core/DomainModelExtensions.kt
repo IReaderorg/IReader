@@ -31,20 +31,7 @@ fun AlignmentModel.toComposeAlignment(): Alignment {
     }
 }
 
-fun FontFamilyModel.toComposeFontFamily(): FontFamily {
-    return when (this) {
-        is FontFamilyModel.Default -> FontFamily.Default
-        is FontFamilyModel.SansSerif -> FontFamily.SansSerif
-        is FontFamilyModel.Serif -> FontFamily.Serif
-        is FontFamilyModel.Monospace -> FontFamily.Monospace
-        is FontFamilyModel.Cursive -> FontFamily.Cursive
-        is FontFamilyModel.Custom -> {
-            // For custom fonts, we'll need platform-specific implementation
-            // For now, return Default
-            FontFamily.Default
-        }
-    }
-}
+expect fun FontFamilyModel.toComposeFontFamily(): FontFamily
 
 fun TextAlignmentModel.toComposeTextAlign(): TextAlign {
     return when (this) {

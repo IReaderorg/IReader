@@ -29,7 +29,7 @@ fun BookImage(
     onClick: (BaseBook) -> Unit = {},
     onLongClick: (BaseBook) -> Unit = {},
     book: BaseBook,
-    ratio: Float = 3f / 4f,
+    ratio: Float = 0.70f,
     selected: Boolean = false,
     header: ((url: String) -> okhttp3.Headers?)? = null,
     onlyCover: Boolean = false,
@@ -63,7 +63,7 @@ fun BookImage(
                     .align(Alignment.Center),
                 image = BookCover.from(book),
                 headers = header,
-                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                contentScale = androidx.compose.ui.layout.ContentScale.Fit,
                 alignment = Alignment.Center
             )
             if (!onlyCover) {

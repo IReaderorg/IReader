@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -106,7 +107,14 @@ fun ExploreFilterModalSheet(
                             .fillMaxWidth()
                             .padding(bottom = 16.dp),
                         label = { Text(localize(Res.string.search)) },
-                        shape = RoundedCornerShape(8.dp),
+                        placeholder = { Text(localize(Res.string.search)) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search"
+                            )
+                        },
+                        shape = RoundedCornerShape(12.dp),
                         singleLine = true
                     )
                 }

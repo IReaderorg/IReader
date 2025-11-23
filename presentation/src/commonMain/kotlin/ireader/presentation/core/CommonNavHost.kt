@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import ireader.domain.catalogs.CatalogStore
 import ireader.presentation.core.ui.AboutSettingSpec
+import ireader.presentation.core.ui.AdminBadgeVerificationScreenSpec
 import ireader.presentation.core.ui.AdvanceSettingSpec
 import ireader.presentation.core.ui.AppearanceScreenSpec
 import ireader.presentation.core.ui.BackupAndRestoreScreenSpec
@@ -103,6 +104,9 @@ fun CommonNavHost(
         }
         composable(NavigationRoutes.badgeManagement) {
             BadgeManagementScreenSpec().Content()
+        }
+        composable(NavigationRoutes.adminBadgeVerification) {
+            AdminBadgeVerificationScreenSpec().Content()
         }
         
         composable(NavigationRoutes.leaderboard) {
@@ -334,6 +338,9 @@ fun CommonNavHost(
         }
         composable(NavigationRoutes.badgeManagement) {
             BadgeManagementScreenSpec().Content()
+        }
+        composable(NavigationRoutes.adminBadgeVerification) {
+            AdminBadgeVerificationScreenSpec().Content()
         }
         composable(NavigationRoutes.nftBadge) {
             NFTBadgeScreenSpec().Content()

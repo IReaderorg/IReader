@@ -42,6 +42,9 @@ android {
         buildConfigField("String", "SUPABASE_REVIEWS_KEY", "\"${getConfigProperty("SUPABASE_REVIEWS_KEY", "supabase.reviews.key")}\"")
         buildConfigField("String", "SUPABASE_COMMUNITY_URL", "\"${getConfigProperty("SUPABASE_COMMUNITY_URL", "supabase.community.url")}\"")
         buildConfigField("String", "SUPABASE_COMMUNITY_KEY", "\"${getConfigProperty("SUPABASE_COMMUNITY_KEY", "supabase.community.key")}\"")
+        
+        // Use standard flavor by default when consumed by modules with flavors
+        missingDimensionStrategy("default", "standard")
     }
     lint {
         targetSdk = ProjectConfig.targetSdk
@@ -62,6 +65,7 @@ android {
 }
 kotlin {
     androidTarget {
+        publishLibraryVariants("release")
         compilations {
             all {
                 compileTaskProvider.configure {
@@ -134,10 +138,9 @@ kotlin {
                 implementation(composeLib.compose.googlFonts)
                 implementation(androidx.media)
 
-//                 Google ML Kit only for non-fdroid builds
-//                 For fdroid, translation features will be disabled
-                 implementation(libs.googleTranslator)
-
+                // ML Kit as compileOnly - will be provided by app module for standard/dev builds
+                compileOnly(libs.googleTranslator)
+                
                 implementation(libs.gson)
                 implementation(androidx.work.runtime)
                 /** Coroutine **/

@@ -1,0 +1,7 @@
+-- Migration 12: Remove default repository and its protection trigger
+
+-- Drop the trigger that prevents deletion of system repository
+DROP TRIGGER IF EXISTS system_repository_delete_trigger;
+
+-- Delete the default repository with id = -1 if it exists
+DELETE FROM repository WHERE _id = -1;

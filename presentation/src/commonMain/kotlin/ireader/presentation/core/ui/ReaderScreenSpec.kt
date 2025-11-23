@@ -13,10 +13,10 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -211,7 +211,7 @@ data class ReaderScreenSpec(
         }
         val host = SnackBarListener(vm)
 
-        val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         val drawerState =
             androidx.compose.material3.rememberDrawerState(androidx.compose.material3.DrawerValue.Closed)
         

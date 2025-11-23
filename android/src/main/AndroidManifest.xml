@@ -42,6 +42,9 @@
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
     
+    <!-- For loading extension APKs from cache -->
+    <uses-permission android:name="android.permission.READ_INSTALL_SESSIONS" />
+    
     <queries>
         <intent>
             <action android:name="android.intent.action.TTS_SERVICE" />
