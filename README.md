@@ -94,7 +94,15 @@ Licensed under [Apache 2.0 License](LICENSE)
 
 | Library | Book Detail | Reader |
 | ------- | ----------- | ------ |
-| ![library_view_dark](screenshots/library-dark.png) | ![book_view_dark](screenshots/detail-dark.png) | ![reader_dark](screenshots/reader-dark.png) |
+| ![library](screenshots/library-screen.jpg) | ![book](screenshots/book-screen.jpg) | ![reader](screenshots/reader-screen.jpg) |
+
+| Settings | Theme | TTS |
+| -------- | ----- | --- |
+| ![settings](screenshots/settting-screen.jpg) | ![theme](screenshots/theme-screen.jpg) | ![tts](screenshots/tts-screen.jpg) |
+
+| Statistics | Leaderboard |
+| ---------- | ----------- |
+| ![statistics](screenshots/static-screen.jpg) | ![leaderboard](screenshots/leaderboard-screen.jpg) |
 
 
 
