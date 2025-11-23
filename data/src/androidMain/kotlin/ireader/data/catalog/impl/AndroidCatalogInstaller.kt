@@ -71,67 +71,11 @@ class AndroidCatalogInstaller(
         flow {
             emit(InstallStep.Downloading)
             
-            // Check if this is a JS plugin (LNReader) or traditional APK extension
-            val isJSPlugin = catalog.pkgUrl.endsWith(".js")
-            
-            if (isJSPlugin) {
-                // Handle JS plugin installation - use external storage for easier access
-                val jsPluginsDir = getJSPluginsDirectory()
-                val jsFile = File(jsPluginsDir, "${catalog.pkgName}.js")
-                
-                try {
-                    val jsResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
-                        headers.append(HttpHeaders.CacheControl, "no-store")
-                    }.body()
-                    jsResponse.saveTo(jsFile)
-                    
-                    // Verify the file was written correctly
-                    if (!jsFile.exists() || jsFile.length() == 0L) {
-                        throw Exception("JS plugin file was not written correctly")
-                    }
-                    
-                    // Download icon if available
-                    if (catalog.iconUrl.isNotBlank()) {
-                        try {
-                            val iconFile = File(jsPluginsDir, "${catalog.pkgName}.png")
-                            Log.warn("Downloading icon for ${catalog.pkgName} from: ${catalog.iconUrl}")
-                            
-                            val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
-                                headers.append(HttpHeaders.CacheControl, "no-store")
-                                headers.append(HttpHeaders.UserAgent, "IReader/1.0")
-                            }.body()
-                            
-                            iconResponse.saveTo(iconFile)
-                            
-                            // Verify icon was saved correctly
-                            if (iconFile.exists() && iconFile.length() > 0) {
-                                Log.warn("Icon saved successfully for ${catalog.pkgName}: ${iconFile.length()} bytes")
-                            } else {
-                                Log.warn("Icon file is empty or doesn't exist for ${catalog.pkgName}")
-                                iconFile.delete()
-                            }
-                        } catch (e: Exception) {
-                            Log.warn(e, "Failed to download icon for JS plugin ${catalog.pkgName} from ${catalog.iconUrl}")
-                        }
-                    } else {
-                        Log.warn("No icon URL provided for JS plugin ${catalog.pkgName}")
-                    }
-                    
-                    emit(InstallStep.Idle)
-                    val result = InstallStep.Success
-                    Log.warn("JS Plugin installed successfully: ${catalog.pkgName}, notifying installation changes")
-                    installationChanges.notifyAppInstall(catalog.pkgName)
-                    Log.warn("Installation notification sent for: ${catalog.pkgName}")
-                    emit(result)
-                } catch (e: Throwable) {
-                    Log.warn(e, "Error installing JS plugin: ${catalog.pkgName}")
-                    emit(InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper)))
-                }
-            } else {
-                // Handle traditional APK installation
-                val tmpApkFile = File(context.cacheDir, "${catalog.pkgName}.apk")
-                val tmpIconFile = File(context.cacheDir, "${catalog.pkgName}.png")
-                try {
+            // This installer only handles APK installations using Package Installer
+            // JS plugins should be routed to AndroidLocalInstaller by InstallCatalogImpl
+            val tmpApkFile = File(context.cacheDir, "${catalog.pkgName}.apk")
+            val tmpIconFile = File(context.cacheDir, "${catalog.pkgName}.png")
+            try {
                     val apkResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
                         headers.append(HttpHeaders.CacheControl, "no-store")
                     }.body()
@@ -175,7 +119,6 @@ class AndroidCatalogInstaller(
                 } finally {
                     tmpApkFile.delete()
                 }
-            }
         }
 
     /**

@@ -18,6 +18,13 @@ class InstallCatalogImpl(
 ): InstallCatalog {
 
     override fun await(catalog: CatalogRemote): Flow<InstallStep> {
+        // For LNReader JS plugins, always use local installer (simple file download)
+        // regardless of user's installer mode preference
+        if (catalog.isLNReaderSource()) {
+            return androidLocalInstaller.install(catalog)
+        }
+        
+        // For IReader APK extensions, respect user's installer mode preference
         return when (uiPreferences.installerMode().get()) {
             PreferenceValues.Installer.LocalInstaller -> {
                 androidLocalInstaller.install(catalog)

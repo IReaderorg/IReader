@@ -12,7 +12,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 12
+    const val CURRENT_VERSION = 13
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -76,6 +76,7 @@ object DatabaseMigrations {
             9 -> migrateV9toV10(driver)
             10 -> migrateV10toV11(driver)
             11 -> migrateV11toV12(driver)
+            12 -> migrateV12toV13(driver)
             // Add more migration cases as the database evolves
         }
     }
@@ -900,6 +901,53 @@ object DatabaseMigrations {
             
         } catch (e: Exception) {
             println("Error migrating to version 12: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+    
+    /**
+     * Migration from version 12 to version 13
+     * Adds repositoryType column to catalog table
+     */
+    private fun migrateV12toV13(driver: SqlDriver) {
+        try {
+            println("Starting migration from version 12 to 13...")
+            
+            // Check if repositoryType column already exists
+            val columnsCheck = "PRAGMA table_info(catalog)"
+            var hasRepositoryTypeColumn = false
+            
+            driver.executeQuery(
+                identifier = null,
+                sql = columnsCheck,
+                mapper = { cursor ->
+                    var result = cursor.next()
+                    while (result.value) {
+                        val columnName = cursor.getString(1)
+                        if (columnName == "repositoryType") {
+                            hasRepositoryTypeColumn = true
+                        }
+                        result = cursor.next()
+                    }
+                    result
+                },
+                parameters = 0
+            )
+            
+            // Add repositoryType column if it doesn't exist
+            if (!hasRepositoryTypeColumn) {
+                driver.execute(null, "ALTER TABLE catalog ADD COLUMN repositoryType TEXT NOT NULL DEFAULT 'IREADER';", 0)
+                println("Added repositoryType column to catalog table")
+                
+                // Update existing LNReader plugins based on their URL pattern
+                driver.execute(null, "UPDATE catalog SET repositoryType = 'LNREADER' WHERE pkgUrl LIKE '%.js';", 0)
+                println("Updated existing LNReader plugins in catalog table")
+            }
+            
+            println("Successfully migrated to version 13")
+            
+        } catch (e: Exception) {
+            println("Error migrating to version 13: ${e.message}")
             e.printStackTrace()
         }
     }

@@ -145,6 +145,9 @@ object ExtensionScreenSpec : Tab {
                         },
                         repositoryFilterText = vm.getRepositoryTypeDisplayName(),
                         scrollBehavior = scrollBehavior,
+                        onAddRepository = {
+                            navController.navigateTo(RepositoryAddScreenSpec())
+                        }
                 )
             }) { scaffoldPadding ->
 

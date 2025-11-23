@@ -18,6 +18,7 @@ lang TEXT NOT NULL,
 pkgUrl TEXT NOT NULL,
 iconUrl TEXT NOT NULL,
 nsfw INTEGER AS Boolean NOT NULL,
+repositoryType TEXT NOT NULL DEFAULT 'IREADER',
 PRIMARY KEY(sourceId));
 
 
@@ -28,7 +29,7 @@ deleteAll:
 DELETE FROM catalog;
 
 insert:
-INSERT OR REPLACE INTO catalog VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?);
+INSERT OR REPLACE INTO catalog VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?);
 
 
 findFavourites:

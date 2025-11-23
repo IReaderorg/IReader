@@ -34,36 +34,24 @@ class CatalogGithubApi(
         val repositories = catalogSourceRepository.subscribe().first()
         val enabledRepositories = repositories.filter { it.isEnable }
         
-        println("CatalogGithubApi: Found ${enabledRepositories.size} enabled repositories")
-        
         if (enabledRepositories.isEmpty()) {
             // No repositories configured - return empty list
-            println("CatalogGithubApi: No repositories configured, returning empty list")
             return emptyList()
         }
         
         // Fetch from all enabled repositories
         for (repo in enabledRepositories) {
             try {
-                println("CatalogGithubApi: Fetching from repository: ${repo.name} (${repo.repositoryType})")
                 val catalogs = fetchFromRepository(repo)
-                println("CatalogGithubApi: Successfully fetched ${catalogs.size} catalogs from ${repo.name}")
                 allCatalogs.addAll(catalogs)
             } catch (e: Exception) {
-                val errorMsg = "Repository ${repo.name} (${repo.key}): ${e.message}"
-                println("CatalogGithubApi: Error - $errorMsg")
-                errors.add(errorMsg)
+                errors.add("Repository ${repo.name} (${repo.key}): ${e.message}")
                 // Continue with other repositories instead of failing completely
             }
         }
         
-        println("CatalogGithubApi: Total catalogs fetched: ${allCatalogs.size}, Errors: ${errors.size}")
-        
         // If we got some catalogs, return them even if some repositories failed
         if (allCatalogs.isNotEmpty()) {
-            if (errors.isNotEmpty()) {
-                println("CatalogGithubApi: Warning - Some repositories failed: ${errors.joinToString(", ")}")
-            }
             return allCatalogs
         }
         
@@ -112,8 +100,6 @@ class CatalogGithubApi(
             throw CatalogNotFoundException("No catalogs found in repository")
         }
         
-        println("CatalogGithubApi: Parsing ${catalogs.size} IReader extensions from ${repo.name}")
-        
         val repoUrl = repo.key.substringBefore("index.min.json","").takeIf { it.isNotBlank() } ?: REPO_URL
         return catalogs.map { catalog ->
             val iconUrl = "$repoUrl/icon/${catalog.apk.replace(".apk", ".png")}"
@@ -143,8 +129,6 @@ class CatalogGithubApi(
         if (lnReaderCatalogs.isEmpty()) {
             throw CatalogNotFoundException("No LNReader catalogs found in repository")
         }
-        
-        println("CatalogGithubApi: Parsing ${lnReaderCatalogs.size} LNReader plugins from ${repo.name}")
         
         return lnReaderCatalogs.map { plugin ->
             // Generate a unique numeric ID for LNReader sources

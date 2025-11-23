@@ -62,7 +62,6 @@ class AndroidLocalInstaller(
         
         // Check if this is an LNReader plugin (JavaScript-based)
         if (catalog.isLNReaderSource()) {
-            Log.info("Installing LNReader plugin: ${catalog.name}")
             installJSPlugin(catalog)
             return@channelFlow
         }
@@ -115,69 +114,46 @@ class AndroidLocalInstaller(
      */
     private suspend fun kotlinx.coroutines.channels.ProducerScope<InstallStep>.installJSPlugin(catalog: CatalogRemote) {
         try {
-            Log.info("AndroidLocalInstaller: Starting JS plugin installation for ${catalog.name}")
-            Log.info("AndroidLocalInstaller: Plugin URL: ${catalog.pkgUrl}")
-            Log.info("AndroidLocalInstaller: Plugin pkgName: ${catalog.pkgName}")
             send(InstallStep.Downloading)
             
             // Determine JS plugins directory based on user preference
             val useCacheDir = uiPreferences.savedLocalCatalogLocation().get()
-            Log.info("AndroidLocalInstaller: Using cache directory: $useCacheDir")
-            
             val jsPluginsDir = if (useCacheDir) {
-                File(context.cacheDir, "js-plugins").apply { 
-                    mkdirs()
-                    Log.info("AndroidLocalInstaller: Created cache JS plugins dir: ${this.absolutePath}")
-                }
+                File(context.cacheDir, "js-plugins").apply { mkdirs() }
             } else {
                 val externalDir = context.getExternalFilesDir(null)?.parentFile?.parentFile?.parentFile
                 val ireaderDir = File(externalDir, "ireader")
-                File(ireaderDir, "js-plugins").apply { 
-                    mkdirs()
-                    Log.info("AndroidLocalInstaller: Created external JS plugins dir: ${this.absolutePath}")
-                }
+                File(ireaderDir, "js-plugins").apply { mkdirs() }
             }
-            
-            Log.info("AndroidLocalInstaller: JS plugins directory: ${jsPluginsDir.absolutePath}")
-            Log.info("AndroidLocalInstaller: Directory exists: ${jsPluginsDir.exists()}, can write: ${jsPluginsDir.canWrite()}")
             
             // Download the JS plugin file
             val jsFile = File(jsPluginsDir, "${catalog.pkgName}.js")
-            Log.info("AndroidLocalInstaller: Target JS file: ${jsFile.absolutePath}")
-            
             val jsResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
                 headers.append(HttpHeaders.CacheControl, "no-store")
             }.body()
             jsResponse.saveTo(jsFile)
             
-            Log.info("AndroidLocalInstaller: JS plugin saved to: ${jsFile.absolutePath}")
-            Log.info("AndroidLocalInstaller: File exists: ${jsFile.exists()}, size: ${jsFile.length()} bytes")
-            
             // Download icon if available
             if (catalog.iconUrl.isNotBlank()) {
                 try {
                     val iconFile = File(jsPluginsDir, "${catalog.pkgName}.png")
-                    Log.info("AndroidLocalInstaller: Downloading icon from: ${catalog.iconUrl}")
                     val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
                         headers.append(HttpHeaders.CacheControl, "no-store")
                     }.body()
                     iconResponse.saveTo(iconFile)
-                    Log.info("AndroidLocalInstaller: JS plugin icon saved to: ${iconFile.absolutePath}")
                 } catch (e: Exception) {
-                    Log.warn("AndroidLocalInstaller: Failed to download icon for JS plugin: ${e.message}")
+                    Log.warn("Failed to download icon for JS plugin: ${e.message}")
                 }
             }
             
             // Notify installation complete
             installationChanges.notifyAppInstall(catalog.pkgName)
-            Log.info("AndroidLocalInstaller: JS plugin installation complete: ${catalog.name}")
             
             send(InstallStep.Success)
             send(InstallStep.Idle)
             
         } catch (e: Exception) {
-            Log.error("AndroidLocalInstaller: Failed to install JS plugin: ${catalog.name}", e)
-            e.printStackTrace()
+            Log.error("Failed to install JS plugin: ${catalog.name}", e)
             send(InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper)))
             send(InstallStep.Idle)
         }

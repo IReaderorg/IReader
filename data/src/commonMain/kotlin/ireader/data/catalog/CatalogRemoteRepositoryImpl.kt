@@ -57,8 +57,7 @@ class CatalogRemoteRepositoryImpl(
             catalogs.pkgUrl,
             catalogs.iconUrl,
             catalogs.nsfw,
-
-
+            catalogs.repositoryType
         )
     }
 

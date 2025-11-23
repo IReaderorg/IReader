@@ -1,0 +1,8 @@
+-- Migration 13: Add repositoryType column to catalog table
+
+-- Add repositoryType column with default value 'IREADER'
+ALTER TABLE catalog ADD COLUMN repositoryType TEXT NOT NULL DEFAULT 'IREADER';
+
+-- Update existing LNReader plugins based on their URL pattern
+-- LNReader plugins typically have .js extension in their pkgUrl
+UPDATE catalog SET repositoryType = 'LNREADER' WHERE pkgUrl LIKE '%.js';
