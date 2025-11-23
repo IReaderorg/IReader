@@ -96,12 +96,26 @@ fun ReviewsBottomSheet(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(reviews) { review ->
+                    val userBadges = userBadgesMap[review.userId] ?: emptyList()
+                    val primaryBadge = userBadges.find { it.isPrimary }?.let { userBadge ->
+                        ireader.domain.models.remote.Badge(
+                            id = userBadge.badgeId,
+                            name = userBadge.badgeName,
+                            description = userBadge.badgeDescription,
+                            icon = userBadge.badgeIcon,
+                            category = userBadge.badgeCategory,
+                            rarity = userBadge.badgeRarity,
+                            imageUrl = userBadge.imageUrl ?: userBadge.badgeIcon
+                        )
+                    }
+                    
                     ReviewCard(
                         userName = review.getDisplayName(),
                         rating = review.rating,
                         reviewText = review.reviewText,
                         createdAt = review.createdAt,
-                        userBadges = userBadgesMap[review.userId] ?: emptyList()
+                        userBadges = userBadges,
+                        reviewerBadge = primaryBadge
                     )
                 }
             }

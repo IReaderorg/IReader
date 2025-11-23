@@ -41,7 +41,11 @@ class BadgeRepositoryImpl(
         @SerialName("badge_category") val badgeCategory: String,
         @SerialName("badge_rarity") val badgeRarity: String,
         @SerialName("earned_at") val earnedAt: String,
-        val metadata: Map<String, String>? = null
+        val metadata: Map<String, String>? = null,
+        @SerialName("badge_image_url") val badgeImageUrl: String? = null,
+        @SerialName("badge_type") val badgeType: String? = null,
+        @SerialName("is_primary") val isPrimary: Boolean? = null,
+        @SerialName("is_featured") val isFeatured: Boolean? = null
     )
     
     @Serializable
@@ -86,10 +90,10 @@ class BadgeRepositoryImpl(
         @SerialName("badge_name") val badgeName: String,
         @SerialName("badge_description") val badgeDescription: String,
         @SerialName("badge_icon") val badgeIcon: String,
-        @SerialName("image_url") val imageUrl: String? = null,
-        val price: Double? = null,
-        val type: String? = null,
-        val rarity: String? = null,
+        @SerialName("badge_image_url") val imageUrl: String? = null,
+        @SerialName("badge_price") val price: Double? = null,
+        @SerialName("badge_type") val type: String? = null,
+        @SerialName("badge_rarity") val rarity: String? = null,
         @SerialName("is_primary") val isPrimary: Boolean? = null,
         @SerialName("is_featured") val isFeatured: Boolean? = null
     )
@@ -117,7 +121,11 @@ class BadgeRepositoryImpl(
                         badgeCategory = it.badgeCategory,
                         badgeRarity = it.badgeRarity,
                         earnedAt = it.earnedAt,
-                        metadata = it.metadata
+                        metadata = it.metadata,
+                        imageUrl = it.badgeImageUrl,
+                        badgeType = it.badgeType,
+                        isPrimary = it.isPrimary ?: false,
+                        isFeatured = it.isFeatured ?: false
                     )
                 }
             } catch (e: Exception) {
@@ -125,7 +133,7 @@ class BadgeRepositoryImpl(
                 val queryResult = backendService.query(
                     table = "user_badges",
                     filters = mapOf("user_id" to targetUserId),
-                    columns = "*, badges!inner(id, name, description, icon, category, rarity)"
+                    columns = "*, badges!inner(id, name, description, icon, category, rarity, image_url, type)"
                 ).getOrThrow()
                 
                 @Serializable
@@ -135,7 +143,9 @@ class BadgeRepositoryImpl(
                     @SerialName("description") val description: String,
                     @SerialName("icon") val icon: String,
                     @SerialName("category") val category: String? = null,
-                    @SerialName("rarity") val rarity: String? = null
+                    @SerialName("rarity") val rarity: String? = null,
+                    @SerialName("image_url") val imageUrl: String? = null,
+                    @SerialName("type") val type: String? = null
                 )
                 
                 @Serializable
@@ -158,7 +168,11 @@ class BadgeRepositoryImpl(
                         badgeCategory = userBadge.badges.category ?: "general",
                         badgeRarity = userBadge.badges.rarity ?: "COMMON",
                         earnedAt = userBadge.earned_at ?: "",
-                        metadata = null
+                        metadata = null,
+                        imageUrl = userBadge.badges.imageUrl,
+                        badgeType = userBadge.badges.type,
+                        isPrimary = userBadge.is_primary ?: false,
+                        isFeatured = userBadge.is_featured ?: false
                     )
                 }
             }

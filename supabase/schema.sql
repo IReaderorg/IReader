@@ -579,6 +579,10 @@ RETURNS TABLE (
     badge_icon TEXT,
     badge_category TEXT,
     badge_rarity TEXT,
+    badge_image_url TEXT,
+    badge_type TEXT,
+    is_primary BOOLEAN,
+    is_featured BOOLEAN,
     earned_at TIMESTAMP WITH TIME ZONE,
     metadata JSONB
 ) AS $$
@@ -591,6 +595,10 @@ BEGIN
         b.icon,
         b.category,
         b.rarity,
+        b.image_url,
+        b.type,
+        ub.is_primary,
+        ub.is_featured,
         ub.earned_at,
         ub.metadata
     FROM public.user_badges ub
@@ -600,7 +608,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-COMMENT ON FUNCTION get_user_badges(UUID) IS 'Returns all badges earned by a user';
+COMMENT ON FUNCTION get_user_badges(UUID) IS 'Returns all badges earned by a user with image URLs, type, and display flags';
 
 -- ----------------------------------------------------------------------------
 -- Function: Get user badges with details (including primary/featured flags)

@@ -1,6 +1,8 @@
 package ireader.presentation.ui.settings.badges.manage
 
 import ireader.domain.models.remote.Badge
+import ireader.domain.models.remote.BadgeRarity
+import ireader.domain.models.remote.BadgeType
 import ireader.domain.models.remote.UserBadge
 import ireader.domain.usecases.badge.GetUserBadgesUseCase
 import ireader.domain.usecases.badge.SetFeaturedBadgesUseCase
@@ -60,7 +62,20 @@ class BadgeManagementViewModel(
                             icon = userBadge.badgeIcon,
                             category = userBadge.badgeCategory,
                             rarity = userBadge.badgeRarity,
-                            imageUrl = userBadge.badgeIcon
+                            imageUrl = userBadge.imageUrl ?: userBadge.badgeIcon,  // Use image_url from database, fallback to icon
+                            type = when (userBadge.badgeType?.uppercase()) {
+                                "PURCHASABLE" -> BadgeType.PURCHASABLE
+                                "NFT_EXCLUSIVE" -> BadgeType.NFT_EXCLUSIVE
+                                "ACHIEVEMENT" -> BadgeType.ACHIEVEMENT
+                                else -> BadgeType.ACHIEVEMENT
+                            },
+                            badgeRarity = when (userBadge.badgeRarity.lowercase()) {
+                                "common" -> BadgeRarity.COMMON
+                                "rare" -> BadgeRarity.RARE
+                                "epic" -> BadgeRarity.EPIC
+                                "legendary" -> BadgeRarity.LEGENDARY
+                                else -> BadgeRarity.COMMON
+                            }
                         )
                     }
                     

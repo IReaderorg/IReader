@@ -492,13 +492,32 @@ private fun SelectableBadgeCard(
                     verticalArrangement = Arrangement.Center,
                     modifier = Modifier.padding(8.dp)
                 ) {
-                    BadgeIcon(
-                        badge = badge,
-                        size = 64.dp,
-                        modifier = Modifier.then(
-                            if (isDisabled) Modifier.graphicsLayer(alpha = 0.5f) else Modifier
+                    Box(
+                        contentAlignment = Alignment.Center
+                    ) {
+                        BadgeIcon(
+                            badge = badge,
+                            size = 64.dp,
+                            showAnimation = badge.type == ireader.domain.models.remote.BadgeType.NFT_EXCLUSIVE,
+                            modifier = Modifier.then(
+                                if (isDisabled) Modifier.graphicsLayer(alpha = 0.5f) else Modifier
+                            )
                         )
-                    )
+                        
+                        // Rarity indicator
+                        if (!isDisabled) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .size(16.dp)
+                                    .clip(CircleShape)
+                                    .background(getRarityColor(badge.badgeRarity)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                // Optional: Add rarity icon or text
+                            }
+                        }
+                    }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = badge.name,
@@ -510,6 +529,15 @@ private fun SelectableBadgeCard(
                         else 
                             MaterialTheme.colorScheme.onSurface
                     )
+                    // Show rarity text
+                    if (!isDisabled) {
+                        Text(
+                            text = badge.badgeRarity.name.lowercase().replaceFirstChar { it.uppercase() },
+                            style = MaterialTheme.typography.labelSmall,
+                            color = getRarityColor(badge.badgeRarity),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
             
@@ -653,5 +681,18 @@ private fun BadgePreviewSection(
                 }
             }
         }
+    }
+}
+
+/**
+ * Returns the color associated with a badge rarity level.
+ */
+@Composable
+private fun getRarityColor(rarity: ireader.domain.models.remote.BadgeRarity): Color {
+    return when (rarity) {
+        ireader.domain.models.remote.BadgeRarity.COMMON -> Color(0xFF9E9E9E) // Gray
+        ireader.domain.models.remote.BadgeRarity.RARE -> Color(0xFF2196F3) // Blue
+        ireader.domain.models.remote.BadgeRarity.EPIC -> Color(0xFF9C27B0) // Purple
+        ireader.domain.models.remote.BadgeRarity.LEGENDARY -> Color(0xFFFFD700) // Gold
     }
 }

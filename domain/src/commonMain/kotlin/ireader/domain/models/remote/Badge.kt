@@ -46,7 +46,9 @@ data class UserBadge(
     // New fields for monetization system
     val isPrimary: Boolean = false,  // For review display
     val isFeatured: Boolean = false,  // For profile display (max 3)
-    val acquiredAt: String = earnedAt  // Timestamp field
+    val acquiredAt: String = earnedAt,  // Timestamp field
+    val imageUrl: String? = null,  // Badge image URL from Supabase storage
+    val badgeType: String? = null  // Badge type (PURCHASABLE, NFT_EXCLUSIVE, ACHIEVEMENT)
 )
 
 @Serializable
