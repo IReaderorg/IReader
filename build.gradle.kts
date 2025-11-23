@@ -3,8 +3,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 buildscript {
     dependencies {
         classpath(libs.gradle.tools)
-        // Firebase Crashlytics excluded for F-Droid builds
+        // Firebase Crashlytics and Google Services - excluded for F-Droid builds
         // F-Droid policy prohibits proprietary crash reporting services
+        classpath(libs.gradle.google)
+        classpath(libs.gradle.firebaseCrashlytic)
     }
 }
 @Suppress("DSL_SCOPE_VIOLATION")

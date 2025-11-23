@@ -75,7 +75,7 @@ fun LibraryFilterBottomSheet(
         onDismissRequest = onDismiss,
         modifier = modifier,
         sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = false
+            skipPartiallyExpanded = true
         ),
         dragHandle = {
             Column(

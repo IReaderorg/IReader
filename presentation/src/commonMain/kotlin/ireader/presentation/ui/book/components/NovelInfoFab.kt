@@ -33,7 +33,7 @@ fun NovelInfoFab(
     modifier: Modifier = Modifier
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     
     // Primary action icon based on favorite status
     val primaryIcon = if (favorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder

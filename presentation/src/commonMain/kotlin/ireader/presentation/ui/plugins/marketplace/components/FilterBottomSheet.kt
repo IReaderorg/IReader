@@ -36,7 +36,10 @@ fun FilterBottomSheet(
     
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        modifier = modifier
+        modifier = modifier,
+        sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
     ) {
         Column(
             modifier = Modifier

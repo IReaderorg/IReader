@@ -324,5 +324,11 @@ composeCompiler {
     enableNonSkippingGroupOptimization.set(true)
 }
 
-// Google Services and Firebase Crashlytics plugins excluded for F-Droid builds
+// Apply Google Services and Firebase Crashlytics plugins conditionally
+// Only for standard and dev flavors, excluded for fdroid flavor
 // F-Droid policy prohibits proprietary services
+val taskRequests = gradle.startParameter.taskRequests.toString()
+if (!taskRequests.contains("Fdroid", ignoreCase = true)) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
+}
