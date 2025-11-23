@@ -19,6 +19,8 @@ plugins {
     alias(kotlinx.plugins.ksp) apply false
     alias(libs.plugins.sqldelight) apply false
     alias(libs.plugins.buildkonfig) apply false
+    // Maven Central Portal Publisher
+    id("com.gradleup.nmcp") version "0.0.8" apply false
    // id("nl.littlerobots.version-catalog-update") version "0.6.1"
 }
 

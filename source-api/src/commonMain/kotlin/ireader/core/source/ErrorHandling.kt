@@ -203,9 +203,10 @@ object ErrorHandler {
         var attempt = 0
         var lastError: FetchError? = null
         
-        while (attempt < strategy.maxAttempts) {
+        // Improved: Better loop structure with clearer logic
+        repeat(strategy.maxAttempts) { currentAttempt ->
             val result = try {
-                operation(attempt)
+                operation(currentAttempt)
             } catch (e: Exception) {
                 FetchResult.Error(
                     FetchError.UnknownError(
@@ -220,24 +221,25 @@ object ErrorHandler {
                 is FetchResult.Error -> {
                     lastError = result.error
                     
-                    if (!strategy.shouldRetry(attempt, result.error)) {
+                    // Improved: Check if this is the last attempt
+                    val isLastAttempt = currentAttempt >= strategy.maxAttempts - 1
+                    if (isLastAttempt || !result.error.isRetryable()) {
                         return result
                     }
                     
-                    // Wait before retry
+                    // Improved: Calculate delay more efficiently
                     val delay = maxOf(
-                        strategy.getDelayForAttempt(attempt),
+                        strategy.getDelayForAttempt(currentAttempt),
                         result.error.getRetryDelayMs()
                     )
                     kotlinx.coroutines.delay(delay)
-                    
-                    attempt++
                 }
             }
         }
         
+        // Improved: Better error message with attempt count
         return FetchResult.Error(
-            lastError ?: FetchError.UnknownError("Max retry attempts reached")
+            lastError ?: FetchError.UnknownError("Max retry attempts (${strategy.maxAttempts}) reached")
         )
     }
     
@@ -245,22 +247,37 @@ object ErrorHandler {
      * Convert exception to FetchError
      */
     fun fromException(e: Throwable, context: String = ""): FetchError {
+        // Improved: Build context suffix once
+        val contextSuffix = if (context.isNotEmpty()) ": $context" else ""
+        
         return when {
             e is java.net.SocketTimeoutException || e is java.util.concurrent.TimeoutException -> {
                 FetchError.TimeoutError(
-                    message = "Request timed out${if (context.isNotEmpty()) ": $context" else ""}",
+                    message = "Request timed out$contextSuffix",
                     timeoutMs = 30000L
                 )
             }
-            e is java.net.UnknownHostException || e is java.net.ConnectException -> {
+            e is java.net.UnknownHostException -> {
                 FetchError.NetworkError(
-                    message = "Cannot connect to server${if (context.isNotEmpty()) ": $context" else ""}",
+                    message = "Cannot resolve host$contextSuffix",
+                    cause = e
+                )
+            }
+            e is java.net.ConnectException -> {
+                FetchError.NetworkError(
+                    message = "Cannot connect to server$contextSuffix",
                     cause = e
                 )
             }
             e is java.io.IOException -> {
+                // Improved: More specific IO error messages
+                val ioMessage = when {
+                    e.message?.contains("closed", ignoreCase = true) == true -> "Connection closed"
+                    e.message?.contains("reset", ignoreCase = true) == true -> "Connection reset"
+                    else -> "Network error"
+                }
                 FetchError.NetworkError(
-                    message = "Network error${if (context.isNotEmpty()) ": $context" else ""}",
+                    message = "$ioMessage$contextSuffix",
                     cause = e
                 )
             }
@@ -273,7 +290,7 @@ object ErrorHandler {
             }
             else -> {
                 FetchError.UnknownError(
-                    message = e.message ?: "Unknown error${if (context.isNotEmpty()) ": $context" else ""}",
+                    message = e.message ?: "Unknown error$contextSuffix",
                     cause = e
                 )
             }

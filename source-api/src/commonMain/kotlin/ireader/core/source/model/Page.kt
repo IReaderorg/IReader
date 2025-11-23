@@ -65,27 +65,45 @@ const val EQUAL = "##$$@@"
 
 
 fun String.decode(): List<Page> {
+    // Improved: Better error handling and validation
+    if (this.isBlank()) return emptyList()
+    
     return kotlin.runCatching {
         json.decodeFromString<List<Page>>(this)
     }.getOrElse {
-        this.split(SEPARATOR).mapNotNull { text ->
-            val type = text.substringBefore(EQUAL)
-            val key = text.substringAfter(EQUAL).substringBefore(SEPARATOR)
-            when {
-                type.contains("image", true) -> ImageUrl(key)
-                type.contains("image64", true) -> ImageBase64(key)
-                type.contains("text", true) -> Text(key)
-                type.contains("movie", true) -> MovieUrl(key)
-                type.contains("subtitles", true) -> Subtitle(key)
-                type.contains("page", true) -> PageUrl(key)
-                else -> null
+        // Improved: Fallback to legacy format with better parsing
+        this.split(SEPARATOR)
+            .filter { it.isNotBlank() }
+            .mapNotNull { text ->
+                try {
+                    val type = text.substringBefore(EQUAL, "")
+                    val key = text.substringAfter(EQUAL, "").substringBefore(SEPARATOR)
+                    
+                    if (type.isBlank() || key.isBlank()) return@mapNotNull null
+                    
+                    when {
+                        type.contains("image64", true) -> ImageBase64(key)
+                        type.contains("image", true) -> ImageUrl(key)
+                        type.contains("text", true) -> Text(key)
+                        type.contains("movie", true) -> MovieUrl(key)
+                        type.contains("subtitles", true) -> Subtitle(key)
+                        type.contains("page", true) -> PageUrl(key)
+                        else -> null
+                    }
+                } catch (e: Exception) {
+                    null
+                }
             }
-        }
     }
-
 }
 
 fun List<Page>.encode(): String {
-    return  json.encodeToString<List<Page>>(this)
-
+    // Improved: Handle empty list
+    if (this.isEmpty()) return "[]"
+    
+    return try {
+        json.encodeToString<List<Page>>(this)
+    } catch (e: Exception) {
+        "[]"
+    }
 }
