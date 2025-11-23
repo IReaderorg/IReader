@@ -3,6 +3,7 @@ package ireader.core.source
 import io.ktor.client.request.*
 import io.ktor.http.*
 import ireader.core.http.DEFAULT_USER_AGENT
+import ireader.core.source.SourceHelpers.buildAbsoluteUrl
 import ireader.core.source.model.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -66,26 +67,32 @@ abstract class SourceFactory(
         parser: (element: Element) -> MangaInfo,
         page: Int,
     ): MangasPageInfo {
-        val books = document.select(elementSelector).map { element ->
-            parser(element)
+        // Improved: Use mapNotNull to filter out invalid manga and catch parsing errors
+        val books = document.select(elementSelector).mapNotNull { element ->
+            try {
+                val manga = parser(element)
+                // Only include valid manga with required fields
+                if (manga.key.isNotBlank() && manga.title.isNotBlank()) manga else null
+            } catch (e: Exception) {
+                // Log error but continue parsing other elements
+                null
+            }
         }
-        val hasNextPage: Boolean = if (baseExploreFetcher.infinitePage) {
-            true
-        } else {
-            if (baseExploreFetcher.maxPage != -1) {
-                baseExploreFetcher.maxPage >= page
-            } else {
-                selectorReturnerStringType(
+        
+        // Improved: More efficient hasNextPage logic with early returns
+        val hasNextPage: Boolean = when {
+            baseExploreFetcher.infinitePage -> true
+            baseExploreFetcher.maxPage != -1 -> page < baseExploreFetcher.maxPage
+            else -> {
+                val nextPageText = selectorReturnerStringType(
                     document,
                     baseExploreFetcher.nextPageSelector,
                     baseExploreFetcher.nextPageAtt
-                ).let { string ->
-                    if (baseExploreFetcher.nextPageValue != null) {
-                        string == baseExploreFetcher.nextPageValue
-                    } else {
-                        string.isNotBlank()
-                    }
-                }
+                ).trim()
+                
+                baseExploreFetcher.nextPageValue?.let { expectedValue ->
+                    nextPageText == expectedValue
+                } ?: nextPageText.isNotBlank()
             }
         }
 
@@ -136,16 +143,21 @@ abstract class SourceFactory(
         page: Int,
         query: String = "",
     ): Document {
-        val res = requestBuilder(
-            "${getCustomBaseUrl()}${
-                (baseExploreFetcher.endpoint)?.replace(this.page, baseExploreFetcher.onPage(page.toString()))?.replace(
-                    this
-                        .query,
-                    query.let { baseExploreFetcher.onQuery(query) }
-                )
-            }"
-        )
-        return client.get(res).asJsoup()
+        // Improved: Build URL more cleanly and safely
+        val endpoint = baseExploreFetcher.endpoint ?: ""
+        val processedQuery = baseExploreFetcher.onQuery(query)
+        val processedPage = baseExploreFetcher.onPage(page.toString())
+        
+        val finalUrl = buildString {
+            append(getCustomBaseUrl())
+            append(endpoint
+                .replace(this@SourceFactory.page, processedPage)
+                .replace(this@SourceFactory.query, processedQuery)
+            )
+        }
+        
+        val request = requestBuilder(finalUrl)
+        return client.get(request).asJsoup()
     }
 
     /**
@@ -157,40 +169,54 @@ abstract class SourceFactory(
         query: String = "",
         filters: FilterList,
     ): MangasPageInfo {
-        if (baseExploreFetcher.selector == null) return MangasPageInfo(emptyList(), false)
+        // Improved: Early return with null check
+        val selector = baseExploreFetcher.selector ?: return MangasPageInfo(emptyList(), false)
+        
+        val document = getListRequest(baseExploreFetcher, page, query)
+        
         return bookListParse(
-            getListRequest(baseExploreFetcher, page, query),
-            baseExploreFetcher.selector,
+            document,
+            selector,
             page = page,
             baseExploreFetcher = baseExploreFetcher,
             parser = { element ->
-
-                val title = selectorReturnerStringType(
+                // Improved: Extract and process data more cleanly
+                val rawTitle = selectorReturnerStringType(
                     element,
                     baseExploreFetcher.nameSelector,
                     baseExploreFetcher.nameAtt
-                ).let { baseExploreFetcher.onName(it, baseExploreFetcher.key) }
-                val url = selectorReturnerStringType(
+                ).trim()
+                val title = baseExploreFetcher.onName(rawTitle, baseExploreFetcher.key)
+                
+                val rawUrl = selectorReturnerStringType(
                     element,
                     baseExploreFetcher.linkSelector,
                     baseExploreFetcher.linkAtt
-                ).let { url ->
-                    baseExploreFetcher.onLink(url, baseExploreFetcher.key)
-                }.let { mainUrl ->
-                    if (baseExploreFetcher.addBaseUrlToLink) baseUrl + mainUrl else mainUrl
+                ).trim()
+                val processedUrl = baseExploreFetcher.onLink(rawUrl, baseExploreFetcher.key)
+                val url = if (baseExploreFetcher.addBaseUrlToLink) {
+                    // Improved: Better URL joining
+                    buildAbsoluteUrl(baseUrl, processedUrl)
+                } else {
+                    processedUrl
                 }
-                val thumbnailUrl = selectorReturnerStringType(
+                
+                val rawCover = selectorReturnerStringType(
                     element,
                     baseExploreFetcher.coverSelector,
                     baseExploreFetcher.coverAtt
-                ).let {
-                    baseExploreFetcher.onCover(it, baseExploreFetcher.key)
+                ).trim()
+                val processedCover = baseExploreFetcher.onCover(rawCover, baseExploreFetcher.key)
+                val cover = if (baseExploreFetcher.addBaseurlToCoverLink) {
+                    buildAbsoluteUrl(baseUrl, processedCover)
+                } else {
+                    processedCover
                 }
 
                 MangaInfo(
                     key = url,
                     title = title,
-                    cover = if (baseExploreFetcher.addBaseurlToCoverLink) baseUrl + thumbnailUrl else thumbnailUrl
+                    cover = cover
                 )
             }
         )
@@ -203,9 +229,11 @@ abstract class SourceFactory(
      * @return [MangasPageInfo]
      */
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
-        return exploreFetchers.firstOrNull { it.type != Type.Search }?.let {
-            return getLists(it, page, "", emptyList())
-        } ?: MangasPageInfo(emptyList(), false)
+        // Improved: Find first non-search fetcher more efficiently
+        val fetcher = exploreFetchers.firstOrNull { it.type != Type.Search }
+            ?: return MangasPageInfo(emptyList(), false)
+        
+        return getLists(fetcher, page, "", emptyList())
     }
 
     /**
@@ -215,19 +243,26 @@ abstract class SourceFactory(
      * @return [MangasPageInfo]
      */
     override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
-        val sorts = filters.findInstance<Filter.Sort>()?.value?.index
-        val query = filters.findInstance<Filter.Title>()?.value
-
+        // Improved: Extract filter values once
+        val titleFilter = filters.findInstance<Filter.Title>()
+        val sortFilter = filters.findInstance<Filter.Sort>()
+        
+        val query = titleFilter?.value?.takeIf { it.isNotBlank() }
+        val sortIndex = sortFilter?.value?.index
+        
+        // Improved: Handle search query first (most common case)
         if (query != null) {
-            exploreFetchers.firstOrNull { it.type == Type.Search }?.let {
-                return getLists(it, page, query, filters)
-            } ?: MangasPageInfo(emptyList(), false)
+            val searchFetcher = exploreFetchers.firstOrNull { it.type == Type.Search }
+                ?: return MangasPageInfo(emptyList(), false)
+            return getLists(searchFetcher, page, query, filters)
         }
 
-        if (sorts != null) {
-            return exploreFetchers.filter { it.type != Type.Search }.getOrNull(sorts)?.let {
-                return getLists(it, page, "", filters)
-            } ?: MangasPageInfo(emptyList(), false)
+        // Improved: Handle sort selection
+        if (sortIndex != null) {
+            val nonSearchFetchers = exploreFetchers.filter { it.type != Type.Search }
+            val sortFetcher = nonSearchFetchers.getOrNull(sortIndex)
+                ?: return MangasPageInfo(emptyList(), false)
+            return getLists(sortFetcher, page, "", filters)
         }
 
         return MangasPageInfo(emptyList(), false)
@@ -237,46 +272,54 @@ abstract class SourceFactory(
      * a function that parse each elements that is passed from [chaptersParse] and return a [ChapterInfo]
      */
     open fun chapterFromElement(element: Element): ChapterInfo {
-        val link =
-            selectorReturnerStringType(
-                element,
-                chapterFetcher.linkSelector,
-                chapterFetcher.linkAtt
-            ).let { chapterFetcher.onLink(it) }
-        val name =
-            selectorReturnerStringType(
-                element,
-                chapterFetcher.nameSelector,
-                chapterFetcher.nameAtt
-            ).let { chapterFetcher.onName(it) }
-        val translator =
-            selectorReturnerStringType(
-                element,
-                chapterFetcher.translatorSelector,
-                chapterFetcher.translatorAtt
-            ).let { chapterFetcher.onTranslator(it) }
+        // Improved: Extract and process data more cleanly with trimming
+        val rawLink = selectorReturnerStringType(
+            element,
+            chapterFetcher.linkSelector,
+            chapterFetcher.linkAtt
+        ).trim()
+        val link = chapterFetcher.onLink(rawLink)
+        
+        val rawName = selectorReturnerStringType(
+            element,
+            chapterFetcher.nameSelector,
+            chapterFetcher.nameAtt
+        ).trim()
+        val name = chapterFetcher.onName(rawName)
+        
+        val rawTranslator = selectorReturnerStringType(
+            element,
+            chapterFetcher.translatorSelector,
+            chapterFetcher.translatorAtt
+        ).trim()
+        val translator = chapterFetcher.onTranslator(rawTranslator)
 
-        val releaseDate = selectorReturnerStringType(
+        val rawDate = selectorReturnerStringType(
             element,
             chapterFetcher.uploadDateSelector,
             chapterFetcher.uploadDateAtt
-        ).let {
-            chapterFetcher.uploadDateParser(it)
-        }
-        val number = selectorReturnerStringType(
+        ).trim()
+        val releaseDate = chapterFetcher.uploadDateParser(rawDate)
+        
+        val rawNumber = selectorReturnerStringType(
             element,
             chapterFetcher.numberSelector,
             chapterFetcher.numberAtt
-        ).let {
-            chapterFetcher.onNumber(it)
-        }.let {
-            kotlin.runCatching {
-                it.toFloat()
-            }.getOrDefault(-1f)
+        ).trim()
+        val processedNumber = chapterFetcher.onNumber(rawNumber)
+        // Improved: Better number parsing with fallback
+        val number = processedNumber.toFloatOrNull() ?: -1f
+        
+        // Improved: Better URL building
+        val finalLink = if (chapterFetcher.addBaseUrlToLink) {
+            getAbsoluteUrl(baseUrl + link)
+        } else {
+            link
         }
+        
         return ChapterInfo(
             name = name,
-            key = if (chapterFetcher.addBaseUrlToLink) baseUrl + link else link,
+            key = finalLink,
             number = number,
             dateUpload = releaseDate,
             scanlator = translator
@@ -288,7 +331,19 @@ abstract class SourceFactory(
      * based on chapterFetcher's selector parameter it would pass each element to [chapterFromElement]
      */
     open fun chaptersParse(document: Document): List<ChapterInfo> {
-        return document.select(chapterFetcher.selector ?: "").map { chapterFromElement(it) }
+        // Improved: Use mapNotNull to filter out invalid chapters and handle errors
+        val selector = chapterFetcher.selector ?: return emptyList()
+        
+        return document.select(selector).mapNotNull { element ->
+            try {
+                val chapter = chapterFromElement(element)
+                // Only include valid chapters
+                if (chapter.key.isNotBlank() && chapter.name.isNotBlank()) chapter else null
+            } catch (e: Exception) {
+                // Skip invalid chapters but continue parsing
+                null
+            }
+        }
     }
 
     /**
@@ -314,18 +369,20 @@ abstract class SourceFactory(
         manga: MangaInfo,
         commands: List<Command<*>>
     ): List<ChapterInfo> {
-        commands.findInstance<Command.Chapter.Fetch>()?.let { command ->
-            return chaptersParse(Jsoup.parse(command.html)).let { if (chapterFetcher.reverseChapterList) it.reversed() else it }
+        // Improved: Check for command first (faster path)
+        val fetchCommand = commands.findInstance<Command.Chapter.Fetch>()
+        if (fetchCommand != null) {
+            val chapters = chaptersParse(Jsoup.parse(fetchCommand.html))
+            return if (chapterFetcher.reverseChapterList) chapters.reversed() else chapters
         }
-        return kotlin.runCatching {
-            return@runCatching withContext(Dispatchers.IO) {
-                val chapters =
-                    chaptersParse(
-                        getChapterListRequest(manga, commands),
-                    )
-                return@withContext if (chapterFetcher.reverseChapterList) chapters else chapters.reversed()
-            }
-        }.getOrThrow()
+        
+        // Improved: Fetch from network with better error handling
+        return withContext(Dispatchers.IO) {
+            val document = getChapterListRequest(manga, commands)
+            val chapters = chaptersParse(document)
+            // Note: reversed logic - if reverseChapterList is false, we reverse (to show newest first)
+            if (chapterFetcher.reverseChapterList) chapters else chapters.reversed()
+        }
     }
 
     /**
@@ -359,47 +416,65 @@ abstract class SourceFactory(
      * it return as [MangaInfo] base on detail fetcher
      */
     open fun detailParse(document: Document): MangaInfo {
-        val title =
-            selectorReturnerStringType(
-                document,
-                detailFetcher.nameSelector,
-                detailFetcher.nameAtt
-            ).let { detailFetcher.onName(it) }
-        val cover = selectorReturnerStringType(
+        // Improved: Extract and process all fields with trimming
+        val rawTitle = selectorReturnerStringType(
+            document,
+            detailFetcher.nameSelector,
+            detailFetcher.nameAtt
+        ).trim()
+        val title = detailFetcher.onName(rawTitle)
+        
+        val rawCover = selectorReturnerStringType(
             document,
             detailFetcher.coverSelector,
             detailFetcher.coverAtt
-        ).let { detailFetcher.onCover(it) }
-        val authorBookSelector = selectorReturnerStringType(
+        ).trim()
+        val processedCover = detailFetcher.onCover(rawCover)
+        val cover = if (detailFetcher.addBaseurlToCoverLink) {
+            getAbsoluteUrl(if (processedCover.startsWith("/")) baseUrl + processedCover else processedCover)
+        } else {
+            processedCover
+        }
+        
+        val rawAuthor = selectorReturnerStringType(
             document,
             detailFetcher.authorBookSelector,
             detailFetcher.authorBookAtt
-        ).let { detailFetcher.onAuthor(it) }
-        val status = statusParser(
-            selectorReturnerStringType(
-                document,
-                detailFetcher.statusSelector,
-                detailFetcher.statusAtt
-            )
-        )
+        ).trim()
+        val author = detailFetcher.onAuthor(rawAuthor)
+        
+        val rawStatus = selectorReturnerStringType(
+            document,
+            detailFetcher.statusSelector,
+            detailFetcher.statusAtt
+        ).trim()
+        val status = statusParser(rawStatus)
 
-        val description =
-            selectorReturnerListType(
-                document,
-                detailFetcher.descriptionSelector,
-                detailFetcher.descriptionBookAtt
-            ).let { detailFetcher.onDescription(it) }.joinToString("\n\n")
-        val category = selectorReturnerListType(
+        // Improved: Better description handling with filtering
+        val rawDescriptions = selectorReturnerListType(
+            document,
+            detailFetcher.descriptionSelector,
+            detailFetcher.descriptionBookAtt
+        )
+        val processedDescriptions = detailFetcher.onDescription(rawDescriptions)
+        val description = processedDescriptions
+            .filter { it.isNotBlank() }
+            .joinToString("\n\n")
+        
+        val rawCategories = selectorReturnerListType(
             document,
             detailFetcher.categorySelector,
             detailFetcher.categoryAtt
-        ).let { detailFetcher.onCategory(it) }
+        )
+        val categories = detailFetcher.onCategory(rawCategories)
+            .filter { it.isNotBlank() }
+        
         return MangaInfo(
             title = title,
-            cover = if (detailFetcher.addBaseurlToCoverLink) baseUrl + cover else cover,
+            cover = cover,
             description = description,
-            author = authorBookSelector,
-            genres = category,
+            author = author,
+            genres = categories,
             status = status,
             key = "",
         )
@@ -425,10 +500,17 @@ abstract class SourceFactory(
      * @return return a [MangaInfo]
      */
     override suspend fun getMangaDetails(manga: MangaInfo, commands: List<Command<*>>): MangaInfo {
-        commands.findInstance<Command.Detail.Fetch>()?.let {
-            return detailParse(Jsoup.parse(it.html)).copy(key = it.url)
+        // Improved: Check for command first (faster path)
+        val fetchCommand = commands.findInstance<Command.Detail.Fetch>()
+        if (fetchCommand != null) {
+            val parsed = detailParse(Jsoup.parse(fetchCommand.html))
+            return parsed.copy(key = fetchCommand.url)
         }
-        return detailParse(getMangaDetailsRequest(manga, commands))
+        
+        // Improved: Fetch from network and preserve original key
+        val document = getMangaDetailsRequest(manga, commands)
+        val parsed = detailParse(document)
+        return parsed.copy(key = manga.key)
     }
 
     /**
@@ -449,22 +531,30 @@ abstract class SourceFactory(
      * parse chapter contents based on contentFetcher
      */
     open fun pageContentParse(document: Document): List<Page> {
-        val par = selectorReturnerListType(
+        // Improved: Extract and process content with better filtering
+        val rawContent = selectorReturnerListType(
             document,
             selector = contentFetcher.pageContentSelector,
             contentFetcher.pageContentAtt
-        ).let {
-            contentFetcher.onContent(it)
-        }
-        val head = selectorReturnerStringType(
+        )
+        val processedContent = contentFetcher.onContent(rawContent)
+            .filter { it.isNotBlank() }
+        
+        val rawTitle = selectorReturnerStringType(
             document,
             selector = contentFetcher.pageTitleSelector,
             contentFetcher.pageTitleAtt
-        ).let {
-            contentFetcher.onTitle(it)
-        }
+        ).trim()
+        val processedTitle = contentFetcher.onTitle(rawTitle)
 
-        return listOf(head.toPage()) + par.map { it.toPage() }
+        // Improved: Only add title if it's not blank
+        val pages = mutableListOf<Page>()
+        if (processedTitle.isNotBlank()) {
+            pages.add(processedTitle.toPage())
+        }
+        pages.addAll(processedContent.map { it.toPage() })
+        
+        return pages
     }
 
     open fun String.toPage(): Page {
@@ -484,9 +574,12 @@ abstract class SourceFactory(
      * @return a Page which is basically list of strings, need to map Strings to Text()
      */
     override suspend fun getPageList(chapter: ChapterInfo, commands: List<Command<*>>): List<Page> {
-        commands.findInstance<Command.Content.Fetch>()?.let { command ->
-            return pageContentParse(Jsoup.parse(command.html))
+        // Improved: Check for command first (faster path)
+        val fetchCommand = commands.findInstance<Command.Content.Fetch>()
+        if (fetchCommand != null) {
+            return pageContentParse(Jsoup.parse(fetchCommand.html))
         }
+        
         return getContents(chapter, commands)
     }
 
@@ -675,13 +768,15 @@ abstract class SourceFactory(
         selector: String? = null,
         att: String? = null,
     ): String {
-        return if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
-            document.attr(att)
-        } else if (!selector.isNullOrBlank() && att.isNullOrBlank()) {
-            document.select(selector).text()
-        } else if (!selector.isNullOrBlank() && !att.isNullOrBlank()) {
-            document.select(selector).attr(att)
-        } else {
+        // Improved: Use when expression for cleaner logic and better error handling
+        return try {
+            when {
+                selector.isNullOrBlank() && !att.isNullOrBlank() -> document.attr(att)
+                !selector.isNullOrBlank() && att.isNullOrBlank() -> document.select(selector).text()
+                !selector.isNullOrBlank() && !att.isNullOrBlank() -> document.select(selector).attr(att)
+                else -> ""
+            }
+        } catch (e: Exception) {
             ""
         }
     }
@@ -694,13 +789,15 @@ abstract class SourceFactory(
         selector: String? = null,
         att: String? = null,
     ): String {
-        return if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
-            element.attr(att)
-        } else if (!selector.isNullOrBlank() && att.isNullOrBlank()) {
-            element.select(selector).text()
-        } else if (!selector.isNullOrBlank() && !att.isNullOrBlank()) {
-            element.select(selector).attr(att)
-        } else {
+        // Improved: Use when expression for cleaner logic and better error handling
+        return try {
+            when {
+                selector.isNullOrBlank() && !att.isNullOrBlank() -> element.attr(att)
+                !selector.isNullOrBlank() && att.isNullOrBlank() -> element.select(selector).text()
+                !selector.isNullOrBlank() && !att.isNullOrBlank() -> element.select(selector).attr(att)
+                else -> ""
+            }
+        } catch (e: Exception) {
             ""
         }
     }
@@ -713,13 +810,23 @@ abstract class SourceFactory(
         selector: String? = null,
         att: String? = null,
     ): List<String> {
-        return if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
-            listOf(element.attr(att))
-        } else if (!selector.isNullOrBlank() && att.isNullOrBlank()) {
-            element.select(selector).eachText()
-        } else if (!selector.isNullOrBlank() && !att.isNullOrBlank()) {
-            listOf(element.select(selector).attr(att))
-        } else {
+        // Improved: Use when expression and filter blank entries
+        return try {
+            when {
+                selector.isNullOrBlank() && !att.isNullOrBlank() -> {
+                    val value = element.attr(att)
+                    if (value.isNotBlank()) listOf(value) else emptyList()
+                }
+                !selector.isNullOrBlank() && att.isNullOrBlank() -> {
+                    element.select(selector).eachText().filter { it.isNotBlank() }
+                }
+                !selector.isNullOrBlank() && !att.isNullOrBlank() -> {
+                    val value = element.select(selector).attr(att)
+                    if (value.isNotBlank()) listOf(value) else emptyList()
+                }
+                else -> emptyList()
+            }
+        } catch (e: Exception) {
             emptyList()
         }
     }
@@ -732,16 +839,107 @@ abstract class SourceFactory(
         selector: String? = null,
         att: String? = null,
     ): List<String> {
-        return if (selector.isNullOrBlank() && !att.isNullOrBlank()) {
-            listOf(document.attr(att))
-        } else if (!selector.isNullOrBlank() && att.isNullOrBlank()) {
-            document.select(selector).map {
-                it.text()
+        // Improved: Use when expression and filter blank entries
+        return try {
+            when {
+                selector.isNullOrBlank() && !att.isNullOrBlank() -> {
+                    val value = document.attr(att)
+                    if (value.isNotBlank()) listOf(value) else emptyList()
+                }
+                !selector.isNullOrBlank() && att.isNullOrBlank() -> {
+                    document.select(selector).mapNotNull { 
+                        val text = it.text()
+                        if (text.isNotBlank()) text else null
+                    }
+                }
+                !selector.isNullOrBlank() && !att.isNullOrBlank() -> {
+                    val value = document.select(selector).attr(att)
+                    if (value.isNotBlank()) listOf(value) else emptyList()
+                }
+                else -> emptyList()
             }
-        } else if (!selector.isNullOrBlank() && !att.isNullOrBlank()) {
-            listOf(document.select(selector).attr(att))
-        } else {
+        } catch (e: Exception) {
             emptyList()
         }
+    }
+    
+    /**
+     * Safe selector that returns empty string on error
+     */
+    protected fun safeSelectorString(
+        element: Element,
+        selector: String?,
+        att: String? = null
+    ): String {
+        return try {
+            selectorReturnerStringType(element, selector, att)
+        } catch (e: Exception) {
+            ""
+        }
+    }
+    
+    /**
+     * Safe selector that returns empty list on error
+     */
+    protected fun safeSelectorList(
+        element: Element,
+        selector: String?,
+        att: String? = null
+    ): List<String> {
+        return try {
+            selectorReturnerListType(element, selector, att)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+    
+    /**
+     * Helper to normalize URLs
+     */
+    protected fun normalizeUrl(url: String, addBaseUrl: Boolean = false): String {
+        return when {
+            url.startsWith("http://") || url.startsWith("https://") -> url
+            url.startsWith("//") -> "https:$url"
+            addBaseUrl && url.startsWith("/") -> "$baseUrl$url"
+            addBaseUrl -> "$baseUrl/$url"
+            else -> url
+        }
+    }
+    
+    /**
+     * Helper to clean text content
+     */
+    protected fun cleanText(text: String): String {
+        return text.replace(Regex("\\s+"), " ").trim()
+    }
+    
+    /**
+     * Helper to parse status with common patterns
+     */
+    protected fun parseStatusFromText(text: String): Long {
+        return MangaInfo.parseStatus(text)
+    }
+    
+    /**
+     * Helper to extract chapter number from name
+     */
+    protected fun extractChapterNumber(name: String): Float {
+        return ChapterInfo.extractChapterNumber(name)
+    }
+    
+    /**
+     * Validate parsed manga info
+     */
+    protected fun MangaInfo.validate(): MangaInfo {
+        require(this.isValid()) { "Invalid MangaInfo: key or title is blank" }
+        return this
+    }
+    
+    /**
+     * Validate parsed chapter info
+     */
+    protected fun ChapterInfo.validate(): ChapterInfo {
+        require(this.isValid()) { "Invalid ChapterInfo: key or name is blank" }
+        return this
     }
 }

@@ -24,6 +24,18 @@ sealed class Filter<V>(val name: String, val initialValue: V) {
     open fun isDefaultValue(): Boolean {
         return initialValue == value
     }
+    
+    /**
+     * Reset filter to initial value
+     */
+    fun reset() {
+        value = initialValue
+    }
+    
+    /**
+     * Check if filter has a valid value
+     */
+    open fun isValid(): Boolean = true
 
     /**
      * Base filters.
@@ -31,7 +43,9 @@ sealed class Filter<V>(val name: String, val initialValue: V) {
 
     class Note(name: String) : Filter<Unit>(name, Unit)
 
-    open class Text(name: String, value: String = "") : Filter<String>(name, value)
+    open class Text(name: String, value: String = "") : Filter<String>(name, value) {
+        override fun isValid(): Boolean = value.length <= 200 // Reasonable limit
+    }
 
     open class Check(
         name: String,
@@ -43,7 +57,13 @@ sealed class Filter<V>(val name: String, val initialValue: V) {
         name: String,
         val options: Array<String>,
         value: Int = 0
-    ) : Filter<Int>(name, value)
+    ) : Filter<Int>(name, value) {
+        override fun isValid(): Boolean = value in options.indices
+        
+        fun getSelectedOption(): String? {
+            return options.getOrNull(value)
+        }
+    }
 
     open class Group(name: String, val filters: List<Filter<*>>) : Filter<Unit>(name, Unit)
 

@@ -69,34 +69,40 @@ class DesktopCatalogInstaller(
                 }
             } else {
                 // Handle traditional APK/JAR installation
+                // Improved: Ensure directory exists before creating files
                 val fileDir = File(ExtensionDir, "${catalog.pkgName}/")
-                fileDir.mkdirs()
-                val apkFile = File(ExtensionDir, "${catalog.pkgName}/${catalog.pkgName}.apk")
-                if (!apkFile.exists()) {
-                        apkFile.createNewFile()
+                if (!fileDir.exists()) {
+                    fileDir.mkdirs()
                 }
-                val jarFile = File(ExtensionDir, "${catalog.pkgName}/${catalog.pkgName}.jar")
-                if (!jarFile.exists()) {
-                    jarFile.createNewFile()
-                }
-                val iconFile = File(ExtensionDir, "${catalog.pkgName}/${catalog.pkgName}.png")
-                if (!iconFile.exists()) {
-                        iconFile.createNewFile()
-                }
+                
+                val apkFile = File(fileDir, "${catalog.pkgName}.apk")
+                val jarFile = File(fileDir, "${catalog.pkgName}.jar")
+                val iconFile = File(fileDir, "${catalog.pkgName}.png")
+                
                 try {
+                    // Improved: Create parent directories if needed
+                    apkFile.parentFile?.mkdirs()
+                    jarFile.parentFile?.mkdirs()
+                    iconFile.parentFile?.mkdirs()
+                    
+                    // Download APK
                     val apkResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
                         headers.append(HttpHeaders.CacheControl, "no-store")
                     }.body()
+                    apkResponse.saveTo(apkFile)
+                    
+                    // Download JAR
                     val jarResponse: ByteReadChannel = client.get(catalog.jarUrl) {
                         headers.append(HttpHeaders.CacheControl, "no-store")
                     }.body()
+                    jarResponse.saveTo(jarFile)
+                    
+                    // Download icon
                     val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
                         headers.append(HttpHeaders.CacheControl, "no-store")
                     }.body()
-                    apkResponse.saveTo(apkFile)
-                    jarResponse.saveTo(jarFile)
-                    // copy installed App Icon to the storage
                     iconResponse.saveTo(iconFile)
+                    
                     emit(InstallStep.Idle)
                     val result = InstallStep.Success
                     installationChanges.notifyAppInstall(catalog.pkgName)

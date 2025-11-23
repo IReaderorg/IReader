@@ -15,8 +15,10 @@ object ParsingUtils {
      * Extract text content with improved handling of whitespace and formatting
      */
     fun Element.extractCleanText(): String {
+        // Improved: Better whitespace normalization
         return this.text()
             .replace(Regex("\\s+"), " ") // Normalize whitespace
+            .replace(Regex("^\\s+|\\s+$"), "") // Trim
             .trim()
     }
     
@@ -24,12 +26,18 @@ object ParsingUtils {
      * Extract text content preserving paragraph breaks
      */
     fun Element.extractTextWithParagraphs(): String {
+        // Improved: Better paragraph detection and filtering
         val paragraphs = this.select("p, br, div")
         if (paragraphs.isEmpty()) {
             return extractCleanText()
         }
         
-        return paragraphs.joinToString("\n\n") { it.text().trim() }
+        return paragraphs
+            .mapNotNull { 
+                val text = it.text().trim()
+                if (text.isNotBlank() && text.length > 1) text else null
+            }
+            .joinToString("\n\n")
             .replace(Regex("\n{3,}"), "\n\n") // Remove excessive line breaks
             .trim()
     }
@@ -112,15 +120,32 @@ object ParsingUtils {
      * Clean HTML content by removing unwanted elements
      */
     fun Document.cleanContent(): Document {
-        // Remove common unwanted elements
-        this.select("script, style, iframe, noscript, nav, footer, header, aside, .advertisement, .ads, .social-share")
-            .remove()
+        // Improved: More comprehensive cleaning with better selectors
+        val unwantedSelectors = listOf(
+            "script", "style", "iframe", "noscript", "svg",
+            "nav", "footer", "header", "aside",
+            ".advertisement", ".ads", ".ad", ".social-share", ".social",
+            "[class*='ad-']", "[class*='ads-']", "[id*='ad-']", "[id*='ads-']",
+            ".popup", ".modal", ".overlay"
+        )
         
-        // Remove comments
-        this.select("*").forEach { element ->
-            element.childNodes()
-                .filter { it.nodeName() == "#comment" }
-                .forEach { it.remove() }
+        unwantedSelectors.forEach { selector ->
+            try {
+                this.select(selector).remove()
+            } catch (e: Exception) {
+                // Continue if selector fails
+            }
+        }
+        
+        // Improved: More efficient comment removal
+        try {
+            this.select("*").forEach { element ->
+                element.childNodes()
+                    .filter { it.nodeName() == "#comment" }
+                    .forEach { it.remove() }
+            }
+        } catch (e: Exception) {
+            // Continue if comment removal fails
         }
         
         return this
@@ -130,7 +155,7 @@ object ParsingUtils {
      * Extract main content area using heuristics
      */
     fun Document.extractMainContent(): Element? {
-        // Try common content selectors
+        // Improved: Try common content selectors with better validation
         val contentSelectors = listOf(
             "article",
             "[role='main']",
@@ -140,21 +165,41 @@ object ParsingUtils {
             ".entry-content",
             ".chapter-content",
             ".novel-content",
+            ".chapter-body",
+            ".text-content",
             "main",
             ".main-content"
         )
         
         for (selector in contentSelectors) {
-            val element = this.selectFirst(selector)
-            if (element != null && element.text().length > 100) {
-                return element
+            try {
+                val element = this.selectFirst(selector)
+                if (element != null) {
+                    val text = element.text()
+                    // Improved: Better validation - check word count too
+                    val wordCount = text.split(Regex("\\s+")).size
+                    if (text.length > 100 && wordCount > 20) {
+                        return element
+                    }
+                }
+            } catch (e: Exception) {
+                continue
             }
         }
         
-        // Fallback: find element with most text content
-        return this.body()
-            .select("div, article, section")
-            .maxByOrNull { it.text().length }
+        // Improved: Fallback with better filtering
+        return try {
+            this.body()
+                .select("div, article, section")
+                .filter { element ->
+                    val text = element.text()
+                    val wordCount = text.split(Regex("\\s+")).size
+                    text.length > 100 && wordCount > 20
+                }
+                .maxByOrNull { it.text().length }
+        } catch (e: Exception) {
+            null
+        }
     }
     
     /**
@@ -234,10 +279,11 @@ object ParsingUtils {
 /**
  * Cache for parsed content to improve performance
  */
-class ParsedContentCache {
+class ParsedContentCache(
+    private val maxCacheSize: Int = 100,
+    private val cacheExpiryMs: Long = 10 * 60 * 1000L // 10 minutes
+) {
     private val cache = mutableMapOf<String, CachedParsedContent>()
-    private val maxCacheSize = 100
-    private val cacheExpiryMs = 10 * 60 * 1000L // 10 minutes
     
     data class CachedParsedContent(
         val content: Any,
@@ -281,10 +327,30 @@ class ParsedContentCache {
     }
     
     /**
+     * Check if URL is cached
+     */
+    fun contains(url: String): Boolean {
+        val cached = cache[url] ?: return false
+        return System.currentTimeMillis() - cached.timestamp <= cacheExpiryMs
+    }
+    
+    /**
      * Clear cache
      */
     fun clear() {
         cache.clear()
+    }
+    
+    /**
+     * Get cache size
+     */
+    fun size(): Int = cache.size
+    
+    /**
+     * Remove specific entry
+     */
+    fun remove(url: String) {
+        cache.remove(url)
     }
     
     /**
@@ -309,46 +375,85 @@ object ParsingErrorRecovery {
      * Try to extract content with multiple strategies
      */
     fun extractContentWithFallback(document: Document): String {
-        // Strategy 1: Try main content extraction
-        val mainContent = document.extractMainContent()
-        if (mainContent != null && mainContent.text().length > 100) {
-            return mainContent.extractTextWithParagraphs()
+        // Improved: Strategy 1 - Try main content extraction with validation
+        try {
+            val mainContent = document.extractMainContent()
+            if (mainContent != null) {
+                val text = mainContent.extractTextWithParagraphs()
+                val wordCount = text.split(Regex("\\s+")).size
+                if (text.length > 100 && wordCount > 20) {
+                    return text
+                }
+            }
+        } catch (e: Exception) {
+            // Continue to next strategy
         }
         
-        // Strategy 2: Try common chapter selectors
+        // Improved: Strategy 2 - Try common chapter selectors with validation
         val chapterSelectors = listOf(
             ".chapter-content",
             "#chapter-content",
             ".chapter-body",
             ".content-body",
-            ".text-content"
+            ".text-content",
+            ".chapter-text",
+            "#chapter-text"
         )
         
         for (selector in chapterSelectors) {
-            val element = document.selectFirst(selector)
-            if (element != null && element.text().length > 100) {
-                return element.extractTextWithParagraphs()
+            try {
+                val element = document.selectFirst(selector)
+                if (element != null) {
+                    val text = element.extractTextWithParagraphs()
+                    val wordCount = text.split(Regex("\\s+")).size
+                    if (text.length > 100 && wordCount > 20) {
+                        return text
+                    }
+                }
+            } catch (e: Exception) {
+                continue
             }
         }
         
-        // Strategy 3: Find largest text block
-        val largestBlock = document.body()
-            .select("div, article, section")
-            .filter { it.text().length > 100 }
-            .maxByOrNull { it.text().length }
-        
-        if (largestBlock != null) {
-            return largestBlock.extractTextWithParagraphs()
+        // Improved: Strategy 3 - Find largest text block with better filtering
+        try {
+            val largestBlock = document.body()
+                .select("div, article, section")
+                .filter { element ->
+                    val text = element.text()
+                    val wordCount = text.split(Regex("\\s+")).size
+                    text.length > 100 && wordCount > 20
+                }
+                .maxByOrNull { it.text().length }
+            
+            if (largestBlock != null) {
+                return largestBlock.extractTextWithParagraphs()
+            }
+        } catch (e: Exception) {
+            // Continue to next strategy
         }
         
-        // Strategy 4: Return all paragraph text
-        val paragraphs = document.select("p")
-        if (paragraphs.isNotEmpty()) {
-            return paragraphs.joinToString("\n\n") { it.text().trim() }
+        // Improved: Strategy 4 - Return all paragraph text with filtering
+        try {
+            val paragraphs = document.select("p")
+                .mapNotNull { 
+                    val text = it.text().trim()
+                    if (text.length > 10) text else null
+                }
+            
+            if (paragraphs.isNotEmpty()) {
+                return paragraphs.joinToString("\n\n")
+            }
+        } catch (e: Exception) {
+            // Continue to last resort
         }
         
         // Last resort: return body text
-        return document.body().text()
+        return try {
+            document.body().text().trim()
+        } catch (e: Exception) {
+            ""
+        }
     }
     
     /**

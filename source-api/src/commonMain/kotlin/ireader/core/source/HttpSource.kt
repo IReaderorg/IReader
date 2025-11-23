@@ -87,4 +87,46 @@ abstract class HttpSource(private val dependencies: ireader.core.source.Dependen
     override fun getCommands(): CommandList {
         return emptyList()
     }
+    
+    /**
+     * Helper to build absolute URLs from relative paths
+     */
+    protected fun getAbsoluteUrl(path: String): String {
+        return when {
+            path.startsWith("http://") || path.startsWith("https://") -> path
+            path.startsWith("//") -> "https:$path"
+            path.startsWith("/") -> "$baseUrl$path"
+            else -> "$baseUrl/$path"
+        }
+    }
+    
+    /**
+     * Helper to emit events for debugging/logging
+     */
+    protected suspend fun emitEvent(event: String) {
+        eventFlow.emit(event)
+    }
+    
+    /**
+     * Check if source is available (can be overridden for maintenance checks)
+     */
+    open suspend fun isAvailable(): Boolean = true
+    
+    /**
+     * Get source capabilities (can be overridden to declare features)
+     */
+    open fun getCapabilities(): SourceCapabilities {
+        return SourceCapabilities()
+    }
 }
+
+/**
+ * Declares what features a source supports
+ */
+data class SourceCapabilities(
+    val supportsLatest: Boolean = true,
+    val supportsSearch: Boolean = true,
+    val supportsFilters: Boolean = true,
+    val supportsDeepLinks: Boolean = false,
+    val supportsCommands: Boolean = false
+)

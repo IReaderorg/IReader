@@ -7,7 +7,11 @@ sealed class Command<V>(val name: String, val initialValue: V) {
      */
     var value = initialValue
 
-    open class Fetchers(open val url: String = "", open val html: String = "") : Command<String>(url, html)
+    open class Fetchers(open val url: String = "", open val html: String = "") : Command<String>(url, html) {
+        fun hasUrl(): Boolean = url.isNotBlank()
+        fun hasHtml(): Boolean = html.isNotBlank()
+        fun isValid(): Boolean = hasUrl() || hasHtml()
+    }
 
     /**
      * Whether this command has been updated. If this method returns true, the catalog won't receive
@@ -15,6 +19,13 @@ sealed class Command<V>(val name: String, val initialValue: V) {
      */
     open fun isDefaultValue(): Boolean {
         return value == initialValue
+    }
+    
+    /**
+     * Reset command to initial value
+     */
+    fun reset() {
+        value = initialValue
     }
 
     object Detail {

@@ -144,4 +144,30 @@ abstract class ParsedHttpSource(private val dependencies: ireader.core.source.De
             }
         }
     }
+    
+    /**
+     * Safe parsing wrapper that catches exceptions
+     */
+    protected fun <T> safeParse(block: () -> T, fallback: T): T {
+        return try {
+            block()
+        } catch (e: Exception) {
+            fallback
+        }
+    }
+    
+    /**
+     * Helper to extract text from element with fallback
+     */
+    protected fun Element.textOrEmpty(): String = this.text().trim()
+    
+    /**
+     * Helper to extract attribute with fallback
+     */
+    protected fun Element.attrOrEmpty(attr: String): String = this.attr(attr).trim()
+    
+    /**
+     * Helper to build absolute image URL
+     */
+    protected fun getAbsoluteImageUrl(url: String): String = getAbsoluteUrl(url)
 }

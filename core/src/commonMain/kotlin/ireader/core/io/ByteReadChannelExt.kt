@@ -38,6 +38,13 @@ suspend fun ByteReadChannel.saveTo(path: Path, fileSystem: FileSystem) {
 @Suppress("BlockingMethodInNonBlockingContext")
 suspend fun ByteReadChannel.saveTo(file: File) {
   withContext(Dispatchers.IO) {
+    // Improved: Ensure parent directories exist before writing
+    file.parentFile?.let { parent ->
+      if (!parent.exists()) {
+        parent.mkdirs()
+      }
+    }
+    
     val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
     file.outputStream().use { output ->
       do {

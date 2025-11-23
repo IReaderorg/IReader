@@ -56,4 +56,18 @@ interface Source {
     fun getRegex(): Regex {
         return Regex("")
     }
+    
+    /**
+     * Get a unique identifier for this source (combination of name and lang)
+     */
+    fun getSourceKey(): String {
+        return "$name-$lang-$id"
+    }
+    
+    /**
+     * Check if this source matches the given ID
+     */
+    fun matchesId(sourceId: Long): Boolean {
+        return this.id == sourceId
+    }
 }
