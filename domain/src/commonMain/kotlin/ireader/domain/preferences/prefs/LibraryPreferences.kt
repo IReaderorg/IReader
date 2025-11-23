@@ -98,7 +98,7 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     }
 
     fun showEmptyCategories(): Preference<Boolean> {
-        return preferenceStore.getBoolean("show_empty_categories", false)
+        return preferenceStore.getBoolean("show_empty_categories", true)
     }
 
     fun showSmartCategories(): Preference<Boolean> {

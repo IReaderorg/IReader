@@ -326,23 +326,6 @@ actual data class WebViewScreenSpec actual constructor(
                         }
                     }
                 }
-                
-                // Loading overlay for page loading
-                if (isLoading) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .alpha(0.3f)
-                            .background(MaterialTheme.colorScheme.background)
-                            .clickable(enabled = false) {},
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(48.dp)
-                        )
-                    }
-                }
             }
         }
     }
