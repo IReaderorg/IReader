@@ -11,21 +11,12 @@ CREATE TABLE IF NOT EXISTS categories(
     flags INTEGER NOT NULL
 );
 
--- Insert system category
-INSERT OR IGNORE INTO categories(_id, name, sort, flags) VALUES (0, "", -1, 0);
-INSERT OR IGNORE INTO categories(_id, name, sort, flags) VALUES (-1, "", -1, 0);
--- Disallow deletion of default category
-CREATE TRIGGER IF NOT EXISTS system_category_delete_trigger BEFORE DELETE
-ON categories
-BEGIN SELECT CASE
-    WHEN old._id <= 0 THEN
-        RAISE(ABORT, "System category can't be deleted")
-    END;
-END;
-repair:
-INSERT OR IGNORE INTO categories(_id, name, sort, flags) VALUES (0, "", -1, 0);
-INSERT OR IGNORE INTO categories(_id, name, sort, flags) VALUES (-1, "", -1, 0);
--- Disallow deletion of default category
+-- Insert system categories
+-- ALL_ID = 0, UNCATEGORIZED_ID = -1
+INSERT OR IGNORE INTO categories(_id, name, sort, flags) VALUES (0, "All", -1, 0);
+INSERT OR IGNORE INTO categories(_id, name, sort, flags) VALUES (-1, "Uncategorized", -1, 0);
+
+-- Disallow deletion of system categories (id <= 0)
 CREATE TRIGGER IF NOT EXISTS system_category_delete_trigger BEFORE DELETE
 ON categories
 BEGIN SELECT CASE
@@ -34,29 +25,25 @@ BEGIN SELECT CASE
     END;
 END;
 
+repair:
+-- Repair system categories
+INSERT OR IGNORE INTO categories(_id, name, sort, flags) VALUES (0, "All", -1, 0);
+INSERT OR IGNORE INTO categories(_id, name, sort, flags) VALUES (-1, "Uncategorized", -1, 0);
+
 findAllWithCount:
--- User categories
-SELECT categories.*, COUNT(bookcategories.book_id) AS mangaCount
-FROM categories
-LEFT JOIN bookcategories
-ON categories._id = bookcategories.category_id
-WHERE categories._id > 0
-GROUP BY categories._id
-UNION ALL
--- Category.ALL
+-- Category.ALL (id = 0)
 SELECT *, (
   SELECT COUNT()
   FROM book
   WHERE book.favorite = 1
 ) AS mangaCount
 FROM categories
-WHERE categories._id = -2
+WHERE categories._id = 0
 UNION ALL
- -- Category.UNCATEGORIZED_ID
+-- Category.UNCATEGORIZED_ID (id = -1)
 SELECT *, (
   SELECT COUNT(book._id)
   FROM book
-
   WHERE book.favorite = 1 AND NOT EXISTS (
     SELECT bookcategories.book_id
     FROM bookcategories
@@ -64,7 +51,15 @@ SELECT *, (
   )
 ) AS mangaCount
 FROM categories
-WHERE categories._id = 0
+WHERE categories._id = -1
+UNION ALL
+-- User categories (id > 0)
+SELECT categories.*, COUNT(bookcategories.book_id) AS mangaCount
+FROM categories
+LEFT JOIN bookcategories
+ON categories._id = bookcategories.category_id
+WHERE categories._id > 0
+GROUP BY categories._id
 ORDER BY sort;
 
 getCategory:

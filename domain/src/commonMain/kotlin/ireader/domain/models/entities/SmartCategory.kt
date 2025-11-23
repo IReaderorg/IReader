@@ -56,12 +56,13 @@ sealed class SmartCategory(
     )
     
     companion object {
-        // Use negative IDs to avoid conflicts with user categories
-        const val CURRENTLY_READING_ID = -1L
-        const val RECENTLY_ADDED_ID = -2L
-        const val COMPLETED_ID = -3L
-        const val UNREAD_ID = -4L
-        const val ARCHIVED_ID = -5L
+        // Use negative IDs to avoid conflicts with user categories and system categories
+        // System categories use: ALL_ID = 0, UNCATEGORIZED_ID = -1
+        const val CURRENTLY_READING_ID = -10L
+        const val RECENTLY_ADDED_ID = -11L
+        const val COMPLETED_ID = -12L
+        const val UNREAD_ID = -13L
+        const val ARCHIVED_ID = -14L
         
         /**
          * Get all smart categories

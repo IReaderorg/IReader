@@ -1,0 +1,12 @@
+-- Migration 20: Fix category ID inconsistencies
+-- This migration corrects the system category IDs to match the domain model:
+-- ALL_ID = 0, UNCATEGORIZED_ID = -1
+-- Smart categories now use IDs -10 to -14 to avoid conflicts
+
+-- First, ensure system categories exist with correct IDs and names
+INSERT OR IGNORE INTO categories(_id, name, sort, flags) VALUES (0, 'All', -1, 0);
+INSERT OR IGNORE INTO categories(_id, name, sort, flags) VALUES (-1, 'Uncategorized', -1, 0);
+
+-- Update existing system categories to have proper names if they were empty
+UPDATE categories SET name = 'All' WHERE _id = 0 AND (name = '' OR name IS NULL);
+UPDATE categories SET name = 'Uncategorized' WHERE _id = -1 AND (name = '' OR name IS NULL);

@@ -18,7 +18,7 @@ findAll:
 SELECT * FROM bookcategories;
 
 insert:
-INSERT OR REPLACE INTO bookcategories(_id,book_id,category_id) VALUES (:bookId,:bookId,:categoryId);
+INSERT OR REPLACE INTO bookcategories(book_id,category_id) VALUES (:bookId,:categoryId);
 
 
 deleteMangaCategoryByMangaId:

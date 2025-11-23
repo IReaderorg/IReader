@@ -10,12 +10,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.combine
 
 
 
 class GetLibraryCategory  internal constructor(
     private val libraryRepository: LibraryRepository,
-    private val getSmartCategoryBooksUseCase: GetSmartCategoryBooksUseCase
+    private val getSmartCategoryBooksUseCase: GetSmartCategoryBooksUseCase,
+    private val bookCategoryRepository: ireader.domain.data.repository.BookCategoryRepository
 ) {
 
     suspend fun await(
@@ -30,11 +32,24 @@ class GetLibraryCategory  internal constructor(
         return if (smartCategory != null) {
             // Use smart category filtering with includeArchived parameter
             getSmartCategoryBooksUseCase.await(smartCategory, sort, includeArchived).filteredWith(filters)
+        } else if (categoryId == 0L) {
+            // ALL category - return all books
+            libraryRepository.findAll(sort, includeArchived).filteredWith(filters)
+        } else if (categoryId == -1L) {
+            // UNCATEGORIZED category - return books with no categories
+            val allBooks = libraryRepository.findAll(sort, includeArchived)
+            val bookCategories = bookCategoryRepository.findAll()
+            val categorizedBookIds = bookCategories.map { it.bookId }.toSet()
+            allBooks.filter { it.id !in categorizedBookIds }.filteredWith(filters)
         } else {
-            // Use regular category filtering
-            libraryRepository.findAll(sort, includeArchived).filter { books ->
-                books.category.toLong() == categoryId
-            }.filteredWith(filters)
+            // Regular category - get books that belong to this category
+            val allBooks = libraryRepository.findAll(sort, includeArchived)
+            val bookCategories = bookCategoryRepository.findAll()
+            val bookIdsInCategory = bookCategories
+                .filter { it.categoryId == categoryId }
+                .map { it.bookId }
+                .toSet()
+            allBooks.filter { it.id in bookIdsInCategory }.filteredWith(filters)
         }
     }
 
@@ -50,11 +65,30 @@ class GetLibraryCategory  internal constructor(
         return if (smartCategory != null) {
             // Use smart category filtering with includeArchived parameter
             getSmartCategoryBooksUseCase.subscribe(smartCategory, sort, includeArchived).map { it.filteredWith(filters) }
+        } else if (categoryId == 0L) {
+            // ALL category - return all books
+            libraryRepository.subscribe(sort, includeArchived).map { it.filteredWith(filters) }
+        } else if (categoryId == -1L) {
+            // UNCATEGORIZED category - return books with no categories
+            kotlinx.coroutines.flow.combine(
+                libraryRepository.subscribe(sort, includeArchived),
+                bookCategoryRepository.subscribeAll()
+            ) { allBooks, bookCategories ->
+                val categorizedBookIds = bookCategories.map { it.bookId }.toSet()
+                allBooks.filter { it.id !in categorizedBookIds }.filteredWith(filters)
+            }
         } else {
-            // Use regular category filtering
-            libraryRepository.subscribe(sort, includeArchived).map { it.filter { books ->
-                books.category.toLong() == categoryId
-            } }.map { it.filteredWith(filters) }
+            // Regular category - get books that belong to this category
+            kotlinx.coroutines.flow.combine(
+                libraryRepository.subscribe(sort, includeArchived),
+                bookCategoryRepository.subscribeAll()
+            ) { allBooks, bookCategories ->
+                val bookIdsInCategory = bookCategories
+                    .filter { it.categoryId == categoryId }
+                    .map { it.bookId }
+                    .toSet()
+                allBooks.filter { it.id in bookIdsInCategory }.filteredWith(filters)
+            }
         }
     }
 
