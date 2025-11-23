@@ -34,3 +34,35 @@ val chapterMapper = {_id: Long,
         type = type,
     )
 }
+
+// Lightweight mapper without content field to prevent OOM errors
+val chapterMapperLight = {_id: Long,
+                          book_id: Long,
+                          url: String,
+                          name: String,
+                          scanlator: String?,
+                          read: Boolean,
+                          bookmark: Boolean,
+                          last_page_read: Long,
+                          chapter_number: Float,
+                          source_order: Long,
+                          date_fetch: Long,
+                          date_upload: Long,
+                          type: Long, ->
+    Chapter(
+        name = name,
+        key = url,
+        bookId = book_id,
+        number = chapter_number,
+        dateUpload = date_upload,
+        translator = scanlator?:"",
+        bookmark = bookmark,
+        dateFetch = date_fetch,
+        read = read,
+        id = _id,
+        lastPageRead = last_page_read,
+        content = emptyList(), // Empty content to save memory
+        sourceOrder =  source_order,
+        type = type,
+    )
+}

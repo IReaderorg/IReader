@@ -137,17 +137,19 @@ class TTSNotificationBuilder constructor(
         val playbackState = controller.playbackState
         val cover = controller.metadata?.getString("Cover")
 
-        val builder = NotificationCompat.Builder(context, CHANNEL_TTS)
-
-        builder.addAction(skipPrevActionButton)
-        builder.addAction(rewindAction)
-        if (playbackState?.isPlaying == true) {
-            builder.addAction(pauseAction)
-        } else {
-            builder.addAction(play)
+        // Build actions list first to avoid concurrent modification
+        val actions = buildList {
+            add(skipPrevActionButton)
+            add(rewindAction)
+            add(if (playbackState?.isPlaying == true) pauseAction else play)
+            add(next)
+            add(skipNext)
         }
-        builder.addAction(next)
-        builder.addAction(skipNext)
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_TTS)
+        
+        // Add all actions at once to avoid concurrent modification
+        actions.forEach { action -> builder.addAction(action) }
 
         val mediaStyle = androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle()
             .setCancelButtonIntent(cancelMediaPlayer())
@@ -219,6 +221,16 @@ class TTSNotificationBuilder constructor(
                 isError -> "ERROR"
                 else -> "${progress + 1}/${lastPar + 1}"
             }
+        
+        // Build actions list first to avoid concurrent modification
+        val actions = buildList {
+            add(rewindAction)
+            add(if (playbackState?.isPlaying == true) pauseAction else play)
+            add(next)
+            add(close)
+            add(openTTSScreen(bookId, sourceId, chapterId))
+        }
+        
         return NotificationCompat.Builder(
             context,
             NotificationsIds.CHANNEL_TTS
@@ -242,18 +254,10 @@ class TTSNotificationBuilder constructor(
 //                )
 //            )
             setDeleteIntent(cancelMediaPlayer())
-            //   addAction(skipPrevActionButton)
-            addAction(rewindAction)
-
-            if (playbackState?.isPlaying == true) {
-                addAction(pauseAction)
-            } else {
-                addAction(play)
-            }
-            addAction(next)
-            //  addAction(skipNext)
-            addAction(close)
-            addAction(openTTSScreen(bookId, sourceId, chapterId))
+            
+            // Add all actions at once to avoid concurrent modification
+            actions.forEach { action -> addAction(action) }
+            
             setStyle(
                 androidx.media.app.NotificationCompat.MediaStyle()
                     .setMediaSession(mediaSessionCompat.sessionToken)

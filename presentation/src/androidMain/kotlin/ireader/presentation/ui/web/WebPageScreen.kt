@@ -315,7 +315,7 @@ fun WebPageScreen(
             modifier = Modifier.fillMaxSize()
         )
         
-        // Enhanced animated progress indicator
+        // Enhanced animated progress indicator - only show the thin bar, no overlay
         AnimatedVisibility(
             visible = progressVisible,
             enter = fadeIn(),
@@ -330,20 +330,6 @@ fun WebPageScreen(
                         .height(3.dp),
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                )
-            }
-        }
-        
-        // Loading overlay for initial load
-        if (progressVisible && progressValue < 0.1f) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background.copy(alpha = 0.7f)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }

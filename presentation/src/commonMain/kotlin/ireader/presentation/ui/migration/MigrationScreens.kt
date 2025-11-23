@@ -94,7 +94,9 @@ private fun MigrationListContent(
                         onStartMigration(state.selectedBooks.toList(), ireader.domain.models.migration.MigrationFlags())
                     },
                     icon = { Icon(Icons.Default.SwapHoriz, contentDescription = null) },
-                    text = { Text("Migrate ${state.selectedBooks.size} books") }
+                    text = { Text("Migrate ${state.selectedBooks.size} books") },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
         }

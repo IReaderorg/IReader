@@ -24,26 +24,30 @@ class ChapterRepositoryImpl(private val handler: DatabaseHandler,) :
 
     override suspend fun findAllChapters(): List<Chapter> {
         return handler.awaitList {
-            chapterQueries.findAll(chapterMapper)
+            // Use lightweight query to prevent OOM errors
+            chapterQueries.findAllLight(chapterMapperLight)
         }
     }
 
     override suspend fun findAllInLibraryChapter(): List<Chapter> {
         return handler.awaitList {
-            chapterQueries.findInLibrary(chapterMapper)
+            // Use lightweight query to prevent OOM errors
+            chapterQueries.findInLibraryLight(chapterMapperLight)
         }
     }
 
     override fun subscribeChaptersByBookId(bookId: Long): Flow<List<Chapter>> {
         return handler.subscribeToList {
-            chapterQueries.getChaptersByMangaId(bookId, chapterMapper)
+            // Use lightweight query to prevent OOM errors when observing chapter lists
+            chapterQueries.getChaptersByMangaIdLight(bookId, chapterMapperLight)
         }
     }
 
 
     override suspend fun findChaptersByBookId(bookId: Long): List<Chapter> {
         return handler.awaitList {
-            chapterQueries.getChaptersByMangaId(bookId, chapterMapper)
+            // Use lightweight query to prevent OOM errors when listing chapters
+            chapterQueries.getChaptersByMangaIdLight(bookId, chapterMapperLight)
         }
     }
 

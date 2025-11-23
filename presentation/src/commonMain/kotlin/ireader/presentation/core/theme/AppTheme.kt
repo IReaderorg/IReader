@@ -29,16 +29,21 @@ fun AppTheme(
     val mainLocalizeHelper = koinInject<LocalizeHelper>()
     
     val isLight = materialColors.isLight()
+    
+    // Snapshot the bar colors to ensure DisposableEffect detects changes
+    val currentBarsColor = customColors.bars
+    val currentIsBarLight = customColors.isBarLight
 
     // Handle system bars color with proper dependencies
     DisposableEffect(
-        customColors.bars,
-        customColors.isBarLight,
+        currentBarsColor,
+        currentIsBarLight,
         transparentStatusBar,
         isCustomColorEnable,
         customStatusColor?.statusBar,
         customStatusColor?.navigationBar,
-        isLight
+        isLight,
+        materialColors  // Add materialColors as dependency to react to theme changes
     ) {
         // Determine status bar configuration
         val (statusBarColor, statusBarDarkIcons) = when {
@@ -52,7 +57,7 @@ fun AppTheme(
             }
             // Priority 3: Default bars color
             else -> {
-                customColors.bars to customColors.isBarLight
+                currentBarsColor to currentIsBarLight
             }
         }
         
@@ -64,7 +69,7 @@ fun AppTheme(
             }
             // Priority 2: Default bars color (even with transparent status bar)
             else -> {
-                customColors.bars to customColors.isBarLight
+                currentBarsColor to currentIsBarLight
             }
         }
         
@@ -84,8 +89,8 @@ fun AppTheme(
         onDispose {
             // Reset to default on dispose
             systemUiController?.setSystemBarsColor(
-                color = customColors.bars,
-                darkIcons = customColors.isBarLight,
+                color = currentBarsColor,
+                darkIcons = currentIsBarLight,
                 isNavigationBarContrastEnforced = false
             )
         }

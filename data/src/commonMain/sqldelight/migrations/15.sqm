@@ -1,0 +1,14 @@
+-- Migration 15: Add sourceReport table
+
+CREATE TABLE IF NOT EXISTS sourceReport (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    sourceId INTEGER NOT NULL,
+    packageName TEXT NOT NULL,
+    version TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending'
+);
+
+CREATE INDEX IF NOT EXISTS sourceReport_sourceId_index ON sourceReport(sourceId);
+CREATE INDEX IF NOT EXISTS sourceReport_status_index ON sourceReport(status);

@@ -35,7 +35,10 @@ fun ReviewCard(
     }
     Card(
         modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -53,7 +56,8 @@ fun ReviewCard(
                     ) {
                         Text(
                             text = userName,
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         // Display reviewer's primary badge next to username
                         ReviewBadgeDisplay(badge = reviewerBadge)
@@ -70,7 +74,8 @@ fun ReviewCard(
             
             Text(
                 text = reviewText,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -78,7 +83,7 @@ fun ReviewCard(
             Text(
                 text = formattedDate,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
         }
     }

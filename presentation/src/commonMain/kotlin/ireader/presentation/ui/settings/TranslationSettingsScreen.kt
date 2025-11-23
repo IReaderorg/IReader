@@ -2,6 +2,7 @@ package ireader.presentation.ui.settings
 
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
+import ireader.presentation.core.navigateTo
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -551,7 +552,7 @@ fun TranslationSettingsScreen(
                     Button(
                         onClick = {
                             // Navigate to ChatGpt login screen
-                            navigator.navigate(
+                            navigator.navigateTo(
                                 ireader.presentation.core.ui.ChatGptLoginScreenSpec()
                             )
                         },

@@ -26,6 +26,13 @@ fun BadgeChip(
         else -> Color(0xFF4CAF50) // Green
     }
     
+    val textColor = when (badge.badgeRarity) {
+        "legendary" -> Color(0xFFB8860B) // Dark gold for better contrast
+        "epic" -> Color(0xFF7B1FA2) // Dark purple
+        "rare" -> Color(0xFF1976D2) // Dark blue
+        else -> Color(0xFF388E3C) // Dark green
+    }
+    
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
@@ -47,7 +54,7 @@ fun BadgeChip(
                     text = badge.badgeName,
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = backgroundColor.copy(alpha = 1f)
+                    color = textColor
                 )
                 
                 if (showDescription) {
@@ -88,7 +95,8 @@ fun BadgeRow(
                     text = "+${badges.size - maxVisible}",
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                     style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

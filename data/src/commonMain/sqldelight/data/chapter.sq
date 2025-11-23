@@ -36,14 +36,39 @@ WHERE _id = :id;
 
 findAll:
 SELECT * FROM chapter;
+
+-- Lightweight query without content field to prevent OOM
+findAllLight:
+SELECT _id, book_id, url, name, scanlator, read, bookmark, 
+       last_page_read, chapter_number, source_order, date_fetch, 
+       date_upload, type
+FROM chapter;
+
 findInLibrary:
 SELECT chapter._id,book_id,chapter.url,name,scanlator,read,bookmark, last_page_read,chapter_number,source_order,date_fetch,date_upload,content,type
         FROM chapter
                LEFT JOIN book ON book._id == chapter.book_id
         GROUP BY chapter._id
         HAVING book.favorite = 1;
+
+-- Lightweight query without content field to prevent OOM
+findInLibraryLight:
+SELECT chapter._id, book_id, chapter.url, name, scanlator, read, bookmark, 
+       last_page_read, chapter_number, source_order, date_fetch, date_upload, type
+FROM chapter
+LEFT JOIN book ON book._id == chapter.book_id
+GROUP BY chapter._id
+HAVING book.favorite = 1;
 getChaptersByMangaId:
 SELECT *
+FROM chapter
+WHERE book_id = :mangaId;
+
+-- Lightweight query without content field to prevent OOM
+getChaptersByMangaIdLight:
+SELECT _id, book_id, url, name, scanlator, read, bookmark, 
+       last_page_read, chapter_number, source_order, date_fetch, 
+       date_upload, type
 FROM chapter
 WHERE book_id = :mangaId;
 

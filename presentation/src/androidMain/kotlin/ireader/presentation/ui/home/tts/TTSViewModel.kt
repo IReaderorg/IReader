@@ -144,16 +144,19 @@ class TTSViewModel(
 
     private fun initMediaBrowser(context: Context) {
         synchronized(mediaLock) {
-            if (browser == null) {
+            val currentBrowser = browser
+            if (currentBrowser == null) {
                 browser = MediaBrowserCompat(
                     context,
                     ComponentName(context, TTSService::class.java),
                     createConnectionCallback(context),
                     null
-                )
-            }
-            if (!isServiceConnected) {
-                browser?.connect()
+                ).apply {
+                    connect()
+                }
+            } else if (!currentBrowser.isConnected) {
+                // Only connect if not already connected or connecting
+                currentBrowser.connect()
             }
         }
     }

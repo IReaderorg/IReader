@@ -22,10 +22,10 @@ class GetRemoteReadingContent() {
             onSuccess: suspend (chapter: Chapter) -> Unit,
             commands: CommandList = emptyList()
     ) {
-        val source = catalog?.source ?: throw SourceNotFoundException()
         withContext(Dispatchers.IO) {
             kotlin.runCatching {
                 try {
+                    val source = catalog?.source ?: throw SourceNotFoundException()
                     ireader.core.log.Log.debug("Timber: GetRemoteReadingContentUseCase was Called")
 
                     val page = source.getPageList(chapter.toChapterInfo(), commands)

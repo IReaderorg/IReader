@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
@@ -45,33 +46,33 @@ class SupabaseRemoteRepository(
     
     @Serializable
     private data class UserDto(
-        val id: String,
-        val email: String,
-        val username: String? = null,
-        val eth_wallet_address: String? = null,
-        val created_at: String? = null,
-        val is_supporter: Boolean = false,
-        val is_admin: Boolean = false
+        @SerialName("id") val id: String,
+        @SerialName("email") val email: String,
+        @SerialName("username") val username: String? = null,
+        @SerialName("eth_wallet_address") val eth_wallet_address: String? = null,
+        @SerialName("created_at") val created_at: String? = null,
+        @SerialName("is_supporter") val is_supporter: Boolean = false,
+        @SerialName("is_admin") val is_admin: Boolean = false
     )
     
     @Serializable
     private data class ReadingProgressDto(
-        val id: String? = null,
-        val user_id: String,
-        val book_id: String,
-        val last_chapter_slug: String,
-        val last_scroll_position: Float,
-        val updated_at: String? = null
+        @SerialName("id") val id: String? = null,
+        @SerialName("user_id") val user_id: String,
+        @SerialName("book_id") val book_id: String,
+        @SerialName("last_chapter_slug") val last_chapter_slug: String,
+        @SerialName("last_scroll_position") val last_scroll_position: Float,
+        @SerialName("updated_at") val updated_at: String? = null
     )
     
     @Serializable
     private data class SyncedBookDto(
-        val user_id: String,
-        val book_id: String,
-        val source_id: Long,
-        val title: String,
-        val book_url: String,
-        val last_read: Long
+        @SerialName("user_id") val user_id: String,
+        @SerialName("book_id") val book_id: String,
+        @SerialName("source_id") val source_id: Long,
+        @SerialName("title") val title: String,
+        @SerialName("book_url") val book_url: String,
+        @SerialName("last_read") val last_read: Long
     )
     
     init {

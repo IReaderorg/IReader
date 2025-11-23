@@ -12,7 +12,7 @@ import ireader.presentation.ui.settings.downloader.DownloaderTopAppBar
 import ireader.presentation.ui.settings.downloader.DownloaderViewModel
 
 
-class DownloaderScreenSpec {
+object DownloaderScreenSpec {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable

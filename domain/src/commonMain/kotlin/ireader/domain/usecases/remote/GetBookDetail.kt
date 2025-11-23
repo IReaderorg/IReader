@@ -22,8 +22,8 @@ class GetBookDetail() {
             onSuccess: suspend (Book) -> Unit,
             commands: CommandList = emptyList()
     ) {
-        val source = catalog?.source ?: throw SourceNotFoundException()
         kotlin.runCatching {
+            val source = catalog?.source ?: throw SourceNotFoundException()
             try {
                 Log.debug { "Timber: Remote Book Detail for ${book.title} Was called" }
 
@@ -41,11 +41,14 @@ class GetBookDetail() {
                     )
                 )
             } catch (e: CancellationException) {
+                throw e
             } catch (e: Throwable) {
                 onError(exceptionHandler(e))
             }
         }.getOrElse { e ->
-            onError(exceptionHandler(e))
+            if (e !is CancellationException) {
+                onError(exceptionHandler(e))
+            }
         }
     }
 }

@@ -1,0 +1,17 @@
+-- Migration 19: Add chapterReport table
+
+CREATE TABLE IF NOT EXISTS chapterReport (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    chapterId INTEGER NOT NULL,
+    bookId INTEGER NOT NULL,
+    issueCategory TEXT NOT NULL,
+    description TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,
+    resolved INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (chapterId) REFERENCES chapter(_id) ON DELETE CASCADE,
+    FOREIGN KEY (bookId) REFERENCES book(_id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS chapterReport_chapterId_index ON chapterReport(chapterId);
+CREATE INDEX IF NOT EXISTS chapterReport_bookId_index ON chapterReport(bookId);
+CREATE INDEX IF NOT EXISTS chapterReport_resolved_index ON chapterReport(resolved);

@@ -1,0 +1,15 @@
+-- Migration 16: Add sourceComparison table
+
+CREATE TABLE IF NOT EXISTS sourceComparison(
+    book_id INTEGER NOT NULL PRIMARY KEY,
+    current_source_id INTEGER NOT NULL,
+    better_source_id INTEGER,
+    chapter_difference INTEGER NOT NULL,
+    cached_at INTEGER NOT NULL,
+    dismissed_until INTEGER,
+    FOREIGN KEY(book_id) REFERENCES book (_id)
+    ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS source_comparison_cached_at_index ON sourceComparison(cached_at);
+CREATE INDEX IF NOT EXISTS source_comparison_dismissed_until_index ON sourceComparison(dismissed_until);

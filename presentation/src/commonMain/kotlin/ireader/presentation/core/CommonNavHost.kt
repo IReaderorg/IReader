@@ -123,7 +123,7 @@ fun CommonNavHost(
             CategoryScreenSpec().Content()
         }
         composable(NavigationRoutes.downloader) {
-            DownloaderScreenSpec().Content()
+            DownloaderScreenSpec.Content()
         }
         composable(NavigationRoutes.fontSettings) {
             FontScreenSpec().Content()

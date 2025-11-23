@@ -12,6 +12,7 @@ import ireader.domain.models.entities.LeaderboardEntry
 import ireader.domain.models.entities.UserLeaderboardStats
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
@@ -30,67 +31,59 @@ class LeaderboardRepositoryImpl(
     
     @Serializable
     private data class LeaderboardDto(
-        val id: String? = null,
-        val user_id: String,
-        val username: String,
-        val total_reading_time_minutes: Long,
-        val total_chapters_read: Int = 0,
-        val books_completed: Int = 0,
-        val reading_streak: Int = 0,
-        val has_badge: Boolean = false,
-        val badge_type: String? = null,
-        val updated_at: String? = null
+        @SerialName("id") val id: String? = null,
+        @SerialName("user_id") val user_id: String,
+        @SerialName("username") val username: String,
+        @SerialName("total_reading_time_minutes") val total_reading_time_minutes: Long,
+        @SerialName("total_chapters_read") val total_chapters_read: Int = 0,
+        @SerialName("books_completed") val books_completed: Int = 0,
+        @SerialName("reading_streak") val reading_streak: Int = 0,
+        @SerialName("has_badge") val has_badge: Boolean = false,
+        @SerialName("badge_type") val badge_type: String? = null,
+        @SerialName("updated_at") val updated_at: String? = null
     )
     
     override suspend fun getLeaderboard(limit: Int, offset: Int): Result<List<LeaderboardEntry>> =
         RemoteErrorMapper.withErrorMapping {
-            try {
-                val queryResult = backendService.query(
-                    table = "leaderboard",
-                    orderBy = "total_reading_time_minutes",
-                    ascending = false,
-                    limit = limit,
-                    offset = offset
-                ).getOrThrow()
-                
-                val entries = queryResult.map { json.decodeFromJsonElement(LeaderboardDto.serializer(), it) }
-                
-                entries.mapIndexed { index, dto ->
-                    dto.toDomain(rank = offset + index + 1)
-                }
-            } catch (e: Exception) {
-                emptyList()
+            val queryResult = backendService.query(
+                table = "leaderboard",
+                orderBy = "total_reading_time_minutes",
+                ascending = false,
+                limit = limit,
+                offset = offset
+            ).getOrThrow()
+            
+            val entries = queryResult.map { json.decodeFromJsonElement(LeaderboardDto.serializer(), it) }
+            
+            entries.mapIndexed { index, dto ->
+                dto.toDomain(rank = offset + index + 1)
             }
         }
     
     override suspend fun getUserRank(userId: String): Result<LeaderboardEntry?> =
         RemoteErrorMapper.withErrorMapping {
-            try {
-                // Get user's entry
-                val userQueryResult = backendService.query(
-                    table = "leaderboard",
-                    filters = mapOf("user_id" to userId)
-                ).getOrThrow()
-                
-                val userEntry = userQueryResult.firstOrNull()?.let {
-                    json.decodeFromJsonElement(LeaderboardDto.serializer(), it)
-                } ?: return@withErrorMapping null
-                
-                // Calculate rank by counting users with more reading time
-                val allUsersResult = backendService.query(
-                    table = "leaderboard",
-                    columns = "user_id,total_reading_time_minutes"
-                ).getOrThrow()
-                
-                val rank = allUsersResult.count { entry ->
-                    val dto = json.decodeFromJsonElement(LeaderboardDto.serializer(), entry)
-                    dto.total_reading_time_minutes > userEntry.total_reading_time_minutes
-                } + 1
-                
-                userEntry.toDomain(rank = rank)
-            } catch (e: Exception) {
-                null
-            }
+            // Get user's entry
+            val userQueryResult = backendService.query(
+                table = "leaderboard",
+                filters = mapOf("user_id" to userId)
+            ).getOrThrow()
+            
+            val userEntry = userQueryResult.firstOrNull()?.let {
+                json.decodeFromJsonElement(LeaderboardDto.serializer(), it)
+            } ?: return@withErrorMapping null
+            
+            // Calculate rank by counting users with more reading time
+            val allUsersResult = backendService.query(
+                table = "leaderboard",
+                columns = "user_id,total_reading_time_minutes"
+            ).getOrThrow()
+            
+            val rank = allUsersResult.count { entry ->
+                val dto = json.decodeFromJsonElement(LeaderboardDto.serializer(), entry)
+                dto.total_reading_time_minutes > userEntry.total_reading_time_minutes
+            } + 1
+            
+            userEntry.toDomain(rank = rank)
         }
     
     override suspend fun syncUserStats(stats: UserLeaderboardStats): Result<Unit> =

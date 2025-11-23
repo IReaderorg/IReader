@@ -1,0 +1,13 @@
+-- Migration 14: Add update_history table
+
+CREATE TABLE IF NOT EXISTS update_history(
+    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    book_id INTEGER NOT NULL,
+    book_title TEXT NOT NULL,
+    chapters_added INTEGER NOT NULL,
+    timestamp INTEGER NOT NULL,
+    FOREIGN KEY(book_id) REFERENCES book(_id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS update_history_book_id_index ON update_history(book_id);
+CREATE INDEX IF NOT EXISTS update_history_timestamp_index ON update_history(timestamp);

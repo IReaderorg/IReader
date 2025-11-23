@@ -27,8 +27,8 @@ class GetRemoteChapters() {
     ) {
         withContext(Dispatchers.IO) {
             kotlin.runCatching {
-                val source = catalog?.source ?: throw SourceNotFoundException()
                 try {
+                    val source = catalog?.source ?: throw SourceNotFoundException()
                     Log.debug { "Timber: GetRemoteChaptersUseCase was Called" }
 
                     val newChapters = source.getChapterList(manga = book.toBookInfo(), commands)
@@ -37,12 +37,14 @@ class GetRemoteChapters() {
                     onSuccess(newChapters.filter { it.key !in oldChapters.map { oldChapter -> oldChapter.key } })
                     Log.debug { "Timber: GetRemoteChaptersUseCase was Finished Successfully" }
                 } catch (e: CancellationException) {
-                    onError(null)
+                    throw e
                 } catch (e: Throwable) {
                     onError(exceptionHandler(e))
                 }
             }.getOrElse { e ->
-                onError(exceptionHandler(e))
+                if (e !is CancellationException) {
+                    onError(exceptionHandler(e))
+                }
             }
         }
     }

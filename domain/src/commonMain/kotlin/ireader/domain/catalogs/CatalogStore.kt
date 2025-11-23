@@ -159,13 +159,13 @@ class CatalogStore(
     private fun onInstalled(pkgName: String, isLocalInstall: Boolean) {
         scope.launch(Dispatchers.Default) {
             lock.withLock {
-                ireader.core.log.Log.warn("CatalogStore: onInstalled called for $pkgName (isLocal: $isLocalInstall)")
+                ireader.core.log.Log.info("CatalogStore: onInstalled called for $pkgName (isLocal: $isLocalInstall)")
                 val previousCatalog =
                     catalogs.find { (it as? CatalogInstalled)?.pkgName == pkgName }
 
                 // Don't replace system catalogs with local catalogs
                 if (!isLocalInstall && previousCatalog is CatalogInstalled.Locally) {
-                    ireader.core.log.Log.warn("CatalogStore: Skipping - don't replace system with local")
+                    ireader.core.log.Log.info("CatalogStore: Skipping - don't replace system with local")
                     return@launch
                 }
 
@@ -183,18 +183,16 @@ class CatalogStore(
                     }
                 }
                 
-                // If catalog is null, it might be a JS plugin - trigger background loading
+                // If catalog is null, it's likely a JS plugin - load it asynchronously
                 if (catalog == null) {
-                    ireader.core.log.Log.warn("CatalogStore: Catalog is null (likely JS plugin), triggering background loading")
+                    ireader.core.log.Log.info("CatalogStore: Loading JS plugin $pkgName asynchronously")
                     
-                    // For JS plugins, we need to load them in the background
-                    // Don't reload all catalogs as that would only get stubs
-                    // Instead, trigger background loading which will add the new plugin
+                    // For JS plugins, load them in the background
                     val asyncLoader = loader as? ireader.domain.catalogs.service.AsyncPluginLoader
                     if (asyncLoader != null) {
                         scope.launch {
                             try {
-                                // Load just this plugin in background
+                                // Load all JS plugins and find the one we just installed
                                 asyncLoader.loadJSPluginsAsync { newCatalog ->
                                     // Check if this is the plugin we're looking for
                                     if (newCatalog.pkgName == pkgName) {
@@ -222,7 +220,7 @@ class CatalogStore(
                                     }
                                 }
                             } catch (e: Exception) {
-                                ireader.core.log.Log.error("CatalogStore: Failed to load new JS plugin", e)
+                                ireader.core.log.Log.error("CatalogStore: Failed to load JS plugin $pkgName", e)
                             }
                         }
                     }

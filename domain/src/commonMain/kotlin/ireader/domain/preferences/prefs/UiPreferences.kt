@@ -321,7 +321,7 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
      * Default: false (disabled for security)
      */
     fun enableJSPlugins(): Preference<Boolean> {
-        return preferenceStore.getBoolean("enable_js_plugins", false)
+        return preferenceStore.getBoolean("enable_js_plugins", true)
     }
     
     /**

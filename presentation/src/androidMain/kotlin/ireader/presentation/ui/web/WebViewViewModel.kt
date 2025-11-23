@@ -170,6 +170,8 @@ class WebViewPageModel(
             webView: WebView,
     ) {
         val catalog = catalog
+        // Don't change state to Fetching - keep button always enabled
+        val previousState = fetchChapterState
         fetchChapterState = FetchButtonState.Fetching(FetchButtonState.FetchType.CHAPTER)
         scope.launch {
             try {
@@ -179,7 +181,7 @@ class WebViewPageModel(
                     chapter,
                     catalog,
                     onError = {
-                        fetchChapterState = FetchButtonState.Error(it?.asString(localizeHelper =localizeHelper ) ?:"Unknown error")
+                        fetchChapterState = FetchButtonState.Enabled // Reset to enabled on error
                         showSnackBar(it)
                         showSnackBar(UiText.MStringResource(Res.string.failed_to_get_content))
                     },
@@ -187,7 +189,7 @@ class WebViewPageModel(
                         if (result.content.isNotEmpty()) {
                             webChapter = result
                             insertChapter(result)
-                            fetchChapterState = FetchButtonState.Success("Chapter fetched successfully")
+                            fetchChapterState = FetchButtonState.Enabled // Reset to enabled after success
                             showSnackBar(UiText.MStringResource(Res.string.download_notifier_download_finish))
                         } else {
                             // Use SmartContentExtractor as fallback when source parser fails
@@ -203,7 +205,7 @@ class WebViewPageModel(
                     val url = webView.url ?: ""
                     trySmartExtraction(chapter, pageSource, url)
                 } catch (fallbackError: Exception) {
-                    fetchChapterState = FetchButtonState.Error(e.message ?: "Unknown error")
+                    fetchChapterState = FetchButtonState.Enabled // Reset to enabled on error
                     showSnackBar(UiText.DynamicString("Error: ${e.message ?: "Failed to fetch chapter"}"))
                 }
             }
@@ -221,14 +223,14 @@ class WebViewPageModel(
                 val extractedChapter = chapter.copy(content = contentPages)
                 webChapter = extractedChapter
                 insertChapter(extractedChapter)
-                fetchChapterState = FetchButtonState.Success("Chapter extracted (${(result.confidence * 100).toInt()}% confidence)")
+                fetchChapterState = FetchButtonState.Enabled // Reset to enabled
                 showSnackBar(UiText.DynamicString("Chapter content extracted using ${result.method}"))
             } else {
-                fetchChapterState = FetchButtonState.Error("Could not extract chapter content reliably")
+                fetchChapterState = FetchButtonState.Enabled // Reset to enabled
                 showSnackBar(UiText.DynamicString("No reliable content found. Try a different page or source."))
             }
         } catch (e: Exception) {
-            fetchChapterState = FetchButtonState.Error("Smart extraction failed: ${e.message}")
+            fetchChapterState = FetchButtonState.Enabled // Reset to enabled
             showSnackBar(UiText.DynamicString("Failed to extract content: ${e.message}"))
         }
     }
@@ -248,7 +250,7 @@ class WebViewPageModel(
                     book,
                     catalog,
                     onError = {
-                        fetchChaptersState = FetchButtonState.Error(it?.asString(localizeHelper =localizeHelper ) ?:"Unknown error")
+                        fetchChaptersState = FetchButtonState.Enabled // Reset to enabled on error
                         showSnackBar(it)
                         showSnackBar(UiText.DynamicString("Failed to fetch chapters. Please ensure you're on the correct page and try again."))
                     },
@@ -260,10 +262,10 @@ class WebViewPageModel(
                                 UiText.MStringResource(Res.string.download_notifier_download_finish) 
                             else 
                                 UiText.DynamicString("${result.size} chapters have been downloaded")
-                            fetchChaptersState = FetchButtonState.Success("${result.size} chapters fetched")
+                            fetchChaptersState = FetchButtonState.Enabled // Reset to enabled after success
                             showSnackBar(message)
                         } else {
-                            fetchChaptersState = FetchButtonState.Error("No chapters found. Try navigating to the chapter list page.")
+                            fetchChaptersState = FetchButtonState.Enabled // Reset to enabled
                             showSnackBar(UiText.DynamicString("No chapters found. Make sure you're on the chapter list page."))
                         }
                     },
@@ -271,7 +273,7 @@ class WebViewPageModel(
                     oldChapters = localChapters
                 )
             } catch (e: Exception) {
-                fetchChaptersState = FetchButtonState.Error(e.message ?: "Unknown error")
+                fetchChaptersState = FetchButtonState.Enabled // Reset to enabled on error
                 showSnackBar(UiText.DynamicString("Error: ${e.message ?: "Failed to fetch chapters"}"))
             }
         }
@@ -291,7 +293,7 @@ class WebViewPageModel(
                     book ?: Book(key = url, title = "", sourceId = source?.id ?: 0),
                     catalog,
                     onError = {
-                        fetchBookState = FetchButtonState.Error(it?.asString(localizeHelper =localizeHelper ) ?:"Unknown error")
+                        fetchBookState = FetchButtonState.Enabled // Reset to enabled on error
                         showSnackBar(it)
                         showSnackBar(UiText.DynamicString("Failed to fetch book details. Please ensure you're on the book's detail page and try again."))
                     },
@@ -299,17 +301,17 @@ class WebViewPageModel(
                         if (result.title.isNotBlank()) {
                             webBook = result
                             insertBook(result.copy(favorite = true))
-                            fetchBookState = FetchButtonState.Success("Book '${result.title}' added")
+                            fetchBookState = FetchButtonState.Enabled // Reset to enabled after success
                             showSnackBar(UiText.DynamicString("Book '${result.title}' added to library"))
                         } else {
-                            fetchBookState = FetchButtonState.Error("Could not extract book information. Try a different page.")
+                            fetchBookState = FetchButtonState.Enabled // Reset to enabled
                             showSnackBar(UiText.DynamicString("Could not extract book information from this page."))
                         }
                     },
                     commands = listOf(Command.Detail.Fetch(url = url, pageSource))
                 )
             } catch (e: Exception) {
-                fetchBookState = FetchButtonState.Error(e.message ?: "Unknown error")
+                fetchBookState = FetchButtonState.Enabled // Reset to enabled on error
                 showSnackBar(UiText.DynamicString("Error: ${e.message ?: "Failed to fetch book details"}"))
             }
         }

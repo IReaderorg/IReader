@@ -54,6 +54,14 @@ kotlin {
                 implementation(libs.bundles.supabase)
             }
         }
+        
+        commonTest {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.sqldelight.runtime)
+            }
+        }
+        
         androidMain {
             dependencies {
                 implementation(androidx.core)
@@ -61,6 +69,13 @@ kotlin {
                 implementation(libs.sqldelight.android)
                 implementation(libs.androidSqlite)
                 implementation("androidx.biometric:biometric:1.1.0")
+            }
+        }
+        
+        val androidUnitTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.sqldelight.jvm)
             }
         }
 
@@ -72,6 +87,13 @@ kotlin {
 
                 implementation(libs.dex2jar.translator)
                 implementation(libs.dex2jar.tools)
+            }
+        }
+        
+        val desktopTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.sqldelight.jvm)
             }
         }
 

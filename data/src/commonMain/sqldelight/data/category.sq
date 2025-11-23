@@ -101,7 +101,7 @@ delete:
 DELETE FROM categories
 WHERE _id = :categoryId;
 deleteAll:
-DELETE FROM categories;
+DELETE FROM categories WHERE _id > 0;
 
 update:
 UPDATE categories

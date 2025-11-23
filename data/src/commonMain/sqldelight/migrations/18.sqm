@@ -1,0 +1,15 @@
+-- Migration 18: Add chapterHealth table
+
+CREATE TABLE IF NOT EXISTS chapterHealth(
+    chapter_id INTEGER NOT NULL PRIMARY KEY,
+    is_broken INTEGER NOT NULL,
+    break_reason TEXT,
+    checked_at INTEGER NOT NULL,
+    repair_attempted_at INTEGER,
+    repair_successful INTEGER,
+    replacement_source_id INTEGER,
+    FOREIGN KEY(chapter_id) REFERENCES chapter (_id)
+    ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS chapter_health_checked_at_index ON chapterHealth(checked_at);

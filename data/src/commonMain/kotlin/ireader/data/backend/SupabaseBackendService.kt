@@ -7,6 +7,7 @@ import io.github.jan.supabase.postgrest.query.Columns
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import ireader.core.log.Log
 import kotlinx.serialization.json.*
 import java.net.URLEncoder
 
@@ -68,13 +69,16 @@ class SupabaseBackendService(
             
             // Use raw HTTP request
             val accessToken = client.auth.currentAccessTokenOrNull()
-            val baseUrl = if (client.supabaseUrl.startsWith("http")) {
-                client.supabaseUrl
-            } else {
-                "https://${client.supabaseUrl}"
-            }
+            val baseUrl = client.supabaseUrl.let { url ->
+                when {
+                    url.startsWith("http://") || url.startsWith("https://") -> url
+                    else -> "https://$url"
+                }
+            }.trimEnd('/')
             
             val url = "$baseUrl/rest/v1/$table?$queryString"
+            
+            Log.debug("Supabase query: $url")
             
             val response = client.httpClient.get(url) {
                 header("Content-Type", "application/json")
@@ -85,9 +89,30 @@ class SupabaseBackendService(
             }
             
             val responseText = response.bodyAsText()
+            Log.debug("Supabase query response (${response.status}): ${responseText.take(200)}")
+            
+            // Check for error responses
+            if (!response.status.isSuccess()) {
+                Log.error("Supabase query failed with status ${response.status}: $responseText")
+                throw Exception("API request failed: ${response.status} - $responseText")
+            }
             
             // Parse raw JSON response - NO REFLECTION
-            val jsonArray = json.parseToJsonElement(responseText).jsonArray
+            val jsonElement = json.parseToJsonElement(responseText)
+            val jsonArray = when (jsonElement) {
+                is JsonArray -> jsonElement
+                is JsonObject -> {
+                    // If it's an error object, throw
+                    if (jsonElement.containsKey("error") || jsonElement.containsKey("message")) {
+                        val errorMsg = jsonElement["message"]?.toString() ?: jsonElement["error"]?.toString() ?: "Unknown error"
+                        Log.error("Supabase query error: $errorMsg")
+                        throw Exception("API error: $errorMsg")
+                    }
+                    // Otherwise wrap in array
+                    buildJsonArray { add(jsonElement) }
+                }
+                else -> buildJsonArray { }
+            }
             Result.success(jsonArray)
         } catch (e: Exception) {
             Result.failure(e)
@@ -103,11 +128,12 @@ class SupabaseBackendService(
             // Use raw HTTP request to avoid reflection
             val jsonBody = data.toString()
             val accessToken = client.auth.currentAccessTokenOrNull()
-            val baseUrl = if (client.supabaseUrl.startsWith("http")) {
-                client.supabaseUrl
-            } else {
-                "https://${client.supabaseUrl}"
-            }
+            val baseUrl = client.supabaseUrl.let { url ->
+                when {
+                    url.startsWith("http://") || url.startsWith("https://") -> url
+                    else -> "https://$url"
+                }
+            }.trimEnd('/')
             
             val response = client.httpClient.post("$baseUrl/rest/v1/$table") {
                 header("Content-Type", "application/json")
@@ -121,11 +147,26 @@ class SupabaseBackendService(
                 setBody(jsonBody)
             }
             
+            // Check for error responses
+            if (!response.status.isSuccess()) {
+                val errorText = response.bodyAsText()
+                Log.error("Supabase insert failed with status ${response.status}: $errorText")
+                throw Exception("API request failed: ${response.status} - $errorText")
+            }
+            
             if (returning) {
                 val responseText = response.bodyAsText()
                 
                 // Supabase returns an array even for single inserts
                 val jsonElement = json.parseToJsonElement(responseText)
+                
+                // Check for error in response
+                if (jsonElement is JsonObject && (jsonElement.containsKey("error") || jsonElement.containsKey("message"))) {
+                    val errorMsg = jsonElement["message"]?.toString() ?: jsonElement["error"]?.toString() ?: "Unknown error"
+                    Log.error("Supabase insert error: $errorMsg")
+                    throw Exception("API error: $errorMsg")
+                }
+                
                 val result = if (jsonElement is JsonArray) {
                     jsonElement.firstOrNull()
                 } else {
@@ -157,11 +198,12 @@ class SupabaseBackendService(
             // Use raw HTTP request to avoid reflection
             val jsonBody = data.toString()
             val accessToken = client.auth.currentAccessTokenOrNull()
-            val baseUrl = if (client.supabaseUrl.startsWith("http")) {
-                client.supabaseUrl
-            } else {
-                "https://${client.supabaseUrl}"
-            }
+            val baseUrl = client.supabaseUrl.let { url ->
+                when {
+                    url.startsWith("http://") || url.startsWith("https://") -> url
+                    else -> "https://$url"
+                }
+            }.trimEnd('/')
             
             val response = client.httpClient.patch("$baseUrl/rest/v1/$table?$filterQuery") {
                 header("Content-Type", "application/json")
@@ -175,11 +217,26 @@ class SupabaseBackendService(
                 setBody(jsonBody)
             }
             
+            // Check for error responses
+            if (!response.status.isSuccess()) {
+                val errorText = response.bodyAsText()
+                Log.error("Supabase update failed with status ${response.status}: $errorText")
+                throw Exception("API request failed: ${response.status} - $errorText")
+            }
+            
             if (returning) {
                 val responseText = response.bodyAsText()
                 
                 // Supabase returns an array even for single updates
                 val jsonElement = json.parseToJsonElement(responseText)
+                
+                // Check for error in response
+                if (jsonElement is JsonObject && (jsonElement.containsKey("error") || jsonElement.containsKey("message"))) {
+                    val errorMsg = jsonElement["message"]?.toString() ?: jsonElement["error"]?.toString() ?: "Unknown error"
+                    Log.error("Supabase update error: $errorMsg")
+                    throw Exception("API error: $errorMsg")
+                }
+                
                 val result = if (jsonElement is JsonArray) {
                     jsonElement.firstOrNull()
                 } else {
@@ -235,11 +292,12 @@ class SupabaseBackendService(
             }.toString()
             
             val accessToken = client.auth.currentAccessTokenOrNull()
-            val baseUrl = if (client.supabaseUrl.startsWith("http")) {
-                client.supabaseUrl
-            } else {
-                "https://${client.supabaseUrl}"
-            }
+            val baseUrl = client.supabaseUrl.let { url ->
+                when {
+                    url.startsWith("http://") || url.startsWith("https://") -> url
+                    else -> "https://$url"
+                }
+            }.trimEnd('/')
             
             val response = client.httpClient.post("$baseUrl/rest/v1/rpc/$function") {
                 header("Content-Type", "application/json")
@@ -250,9 +308,24 @@ class SupabaseBackendService(
                 setBody(jsonBody)
             }
             
+            // Check for error responses
+            if (!response.status.isSuccess()) {
+                val errorText = response.bodyAsText()
+                Log.error("Supabase RPC failed with status ${response.status}: $errorText")
+                throw Exception("API request failed: ${response.status} - $errorText")
+            }
+            
             // Parse raw JSON response
             val responseText = response.bodyAsText()
             val jsonElement = json.parseToJsonElement(responseText)
+            
+            // Check for error in response
+            if (jsonElement is JsonObject && (jsonElement.containsKey("error") || jsonElement.containsKey("message"))) {
+                val errorMsg = jsonElement["message"]?.toString() ?: jsonElement["error"]?.toString() ?: "Unknown error"
+                Log.error("Supabase RPC error: $errorMsg")
+                throw Exception("API error: $errorMsg")
+            }
+            
             Result.success(jsonElement)
         } catch (e: Exception) {
             Result.failure(e)
@@ -268,11 +341,14 @@ class SupabaseBackendService(
         return try {
             val jsonBody = data.toString()
             val accessToken = client.auth.currentAccessTokenOrNull()
-            val baseUrl = if (client.supabaseUrl.startsWith("http")) {
-                client.supabaseUrl
-            } else {
-                "https://${client.supabaseUrl}"
-            }
+            val baseUrl = client.supabaseUrl.let { url ->
+                when {
+                    url.startsWith("http://") || url.startsWith("https://") -> url
+                    else -> "https://$url"
+                }
+            }.trimEnd('/')
+            
+            Log.debug("Supabase upsert to $table: $jsonBody")
             
             val response = client.httpClient.post("$baseUrl/rest/v1/$table") {
                 header("Content-Type", "application/json")
@@ -291,10 +367,28 @@ class SupabaseBackendService(
                 setBody(jsonBody)
             }
             
+            Log.debug("Supabase upsert response (${response.status})")
+            
+            // Check for error responses
+            if (!response.status.isSuccess()) {
+                val errorText = response.bodyAsText()
+                Log.error("Supabase upsert failed with status ${response.status}: $errorText")
+                throw Exception("API request failed: ${response.status} - $errorText")
+            }
+            
             if (returning) {
                 val responseText = response.bodyAsText()
+                Log.debug("Supabase upsert response body: ${responseText.take(200)}")
                 
                 val jsonElement = json.parseToJsonElement(responseText)
+                
+                // Check for error in response
+                if (jsonElement is JsonObject && (jsonElement.containsKey("error") || jsonElement.containsKey("message"))) {
+                    val errorMsg = jsonElement["message"]?.toString() ?: jsonElement["error"]?.toString() ?: "Unknown error"
+                    Log.error("Supabase upsert error: $errorMsg")
+                    throw Exception("API error: $errorMsg")
+                }
+                
                 val result = if (jsonElement is JsonArray) {
                     jsonElement.firstOrNull()
                 } else {

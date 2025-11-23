@@ -153,11 +153,11 @@ class AppThemeViewModel(
         materialColors: ColorScheme,
         isLight: Boolean
     ): ExtraColors {
+        // Read the bars color from baseExtraColors in composition context
+        val baseBarsColor = baseExtraColors.bars
+        
         // Wrap the entire logic in remember to ensure state reads happen in proper snapshot context
-        return remember(baseExtraColors, customBarsColor, materialColors.surface, isLight, useTrueBlack) {
-            // Read the bars color from baseExtraColors INSIDE the remember block
-            val baseBarsColor = baseExtraColors.bars
-            
+        return remember(baseBarsColor, customBarsColor, materialColors.surface, isLight, useTrueBlack) {
             // Determine the bars color: custom > base > surface
             val barsColor = when {
                 customBarsColor != Color.Unspecified -> customBarsColor

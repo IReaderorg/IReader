@@ -31,6 +31,7 @@ import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.workmanager.koin.workManagerFactory
+import org.ireader.app.crash.CrashHandler
 import org.koin.core.KoinApplication
 import org.koin.core.component.KoinComponent
 import org.koin.core.context.startKoin
@@ -38,6 +39,9 @@ import org.koin.core.context.startKoin
 class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent {
     override fun onCreate() {
         super.onCreate()
+        
+        // Initialize crash handler first
+        CrashHandler.initialize(this)
         startKoin {
             // Log Koin into Android logger
             androidLogger()

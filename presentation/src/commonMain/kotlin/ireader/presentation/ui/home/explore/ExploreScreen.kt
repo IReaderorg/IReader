@@ -155,16 +155,17 @@ fun ExploreScreen(
                 text = {
                     Text(
                         text = localize(Res.string.filter),
-                        color = MaterialTheme.colorScheme.onSecondary
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 },
                 onClick = {
                     showmodalSheet()
                 },
                 icon = {
-                    Icon(Icons.Filled.Add, "", tint = MaterialTheme.colorScheme.onSecondary)
+                    Icon(Icons.Filled.Add, "", tint = MaterialTheme.colorScheme.onSecondaryContainer)
                 },
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                 shape = CircleShape
             )
         },

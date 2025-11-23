@@ -116,7 +116,7 @@ private fun ChangelogCard(entry: ChangelogEntry) {
                     Icon(
                         imageVector = Icons.Default.NewReleases,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -125,7 +125,7 @@ private fun ChangelogCard(entry: ChangelogEntry) {
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = if (entry.isUpcoming) {
-                        MaterialTheme.colorScheme.onPrimary
+                        MaterialTheme.colorScheme.onPrimaryContainer
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
                     }
@@ -170,7 +170,7 @@ private fun ChangelogSectionContent(
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             color = if (isUpcoming) {
-                MaterialTheme.colorScheme.onPrimary
+                MaterialTheme.colorScheme.onPrimaryContainer
             } else {
                 MaterialTheme.colorScheme.onSurfaceVariant
             }
@@ -189,7 +189,7 @@ private fun ChangelogSectionContent(
                     text = "•",
                     style = MaterialTheme.typography.bodyMedium,
                     color = if (isUpcoming) {
-                        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+                        MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     }
@@ -198,7 +198,7 @@ private fun ChangelogSectionContent(
                     text = item,
                     style = MaterialTheme.typography.bodyMedium,
                     color = if (isUpcoming) {
-                        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
+                        MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.9f)
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f)
                     },

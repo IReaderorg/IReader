@@ -6,6 +6,21 @@
 -keep class ireader.core.source.** { public protected *; }
 -keep class ireader.core.http.** { public protected *; }
 -keep class ireader.data.catalog.CatalogGithubApi { public protected *; }
+
+# Keep catalog installation flow to prevent R8 from optimizing away flow collection
+-keep class ireader.domain.catalogs.CatalogStore { *; }
+-keep class ireader.domain.catalogs.service.CatalogInstallationChanges { *; }
+-keep class ireader.domain.catalogs.service.CatalogInstallationChange { *; }
+-keep class ireader.data.catalog.impl.AndroidCatalogInstallationChanges { *; }
+-keepclassmembers class ireader.domain.catalogs.CatalogStore {
+    kotlinx.coroutines.flow.MutableStateFlow catalogsFlow;
+    java.util.List catalogs;
+    <methods>;
+}
+-keepclassmembers class ireader.data.catalog.impl.AndroidCatalogInstallationChanges {
+    kotlinx.coroutines.flow.MutableSharedFlow flow;
+    <methods>;
+}
 -keep,allowoptimization class ireader.** { public protected *; }
 -keep,allowoptimization class kotlinx.coroutines.** { public protected *; }
 -keep,allowoptimization class androidx.preference.** { public protected *; }
@@ -326,8 +341,22 @@
     <methods>;
 }
 
+# Keep User model and all its fields (especially isAdmin for admin features)
+-keep class ireader.domain.models.remote.User { *; }
+-keepclassmembers class ireader.domain.models.remote.User {
+    <fields>;
+    <init>(...);
+}
+
 # Keep all Supabase repository DTOs for proper serialization (used with reflection)
 # These nested classes are accessed via Kotlin reflection by Supabase's decodeList/decodeSingle
+
+# Remote Repository DTOs (including UserDto with is_admin field)
+-keep class ireader.data.remote.SupabaseRemoteRepository { *; }
+-keep class ireader.data.remote.SupabaseRemoteRepository$** { *; }
+-keepclassmembers class ireader.data.remote.SupabaseRemoteRepository$** {
+    *;
+}
 
 # Review Repository DTOs
 -keep class ireader.data.review.ReviewRepositoryImpl { *; }

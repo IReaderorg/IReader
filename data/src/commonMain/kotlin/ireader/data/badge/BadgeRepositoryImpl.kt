@@ -130,22 +130,22 @@ class BadgeRepositoryImpl(
                 
                 @Serializable
                 data class BadgeInfo(
-                    val id: String,
-                    val name: String,
-                    val description: String,
-                    val icon: String,
-                    val category: String? = null,
-                    val rarity: String? = null
+                    @SerialName("id") val id: String,
+                    @SerialName("name") val name: String,
+                    @SerialName("description") val description: String,
+                    @SerialName("icon") val icon: String,
+                    @SerialName("category") val category: String? = null,
+                    @SerialName("rarity") val rarity: String? = null
                 )
                 
                 @Serializable
                 data class UserBadgeWithBadge(
-                    val badge_id: String,
-                    val user_id: String,
-                    val earned_at: String? = null,
-                    val is_primary: Boolean? = null,
-                    val is_featured: Boolean? = null,
-                    val badges: BadgeInfo
+                    @SerialName("badge_id") val badge_id: String,
+                    @SerialName("user_id") val user_id: String,
+                    @SerialName("earned_at") val earned_at: String? = null,
+                    @SerialName("is_primary") val is_primary: Boolean? = null,
+                    @SerialName("is_featured") val is_featured: Boolean? = null,
+                    @SerialName("badges") val badges: BadgeInfo
                 )
                 
                 queryResult.map { 

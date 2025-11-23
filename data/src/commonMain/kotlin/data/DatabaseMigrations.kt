@@ -12,7 +12,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 13
+    const val CURRENT_VERSION = 19
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -77,6 +77,12 @@ object DatabaseMigrations {
             10 -> migrateV10toV11(driver)
             11 -> migrateV11toV12(driver)
             12 -> migrateV12toV13(driver)
+            13 -> migrateV13toV14(driver)
+            14 -> migrateV14toV15(driver)
+            15 -> migrateV15toV16(driver)
+            16 -> migrateV16toV17(driver)
+            17 -> migrateV17toV18(driver)
+            18 -> migrateV18toV19(driver)
             // Add more migration cases as the database evolves
         }
     }
@@ -455,6 +461,7 @@ object DatabaseMigrations {
     
     private fun verifyRequiredTables(driver: SqlDriver) {
         try {
+            // Check if history table exists
             val historyTableCheck = "SELECT name FROM sqlite_master WHERE type='table' AND name='history'"
             var historyTableExists = false
             driver.executeQuery(
@@ -469,78 +476,91 @@ object DatabaseMigrations {
             )
             
             if (!historyTableExists) {
-                val chapterTableCheck = "SELECT name FROM sqlite_master WHERE type='table' AND name='chapter'"
-                var chapterTableExists = false
-                driver.executeQuery(
-                    identifier = null,
-                    sql = chapterTableCheck,
-                    mapper = { cursor ->
-                        val result = cursor.next()
-                        chapterTableExists = result.value
-                        result
-                    },
-                    parameters = 0
-                )
+                println("History table not found, creating required tables...")
                 
-                if (!chapterTableExists) {
-                    val createChapterTableSql = """
-                        CREATE TABLE IF NOT EXISTS chapter(
-                            _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
-                            book_id INTEGER NOT NULL,
-                            url TEXT NOT NULL,
-                            name TEXT NOT NULL,
-                            read INTEGER NOT NULL,
-                            bookmark INTEGER NOT NULL,
-                            last_page_read INTEGER NOT NULL,
-                            chapter_number REAL NOT NULL,
-                            source_order INTEGER NOT NULL,
-                            date_fetch INTEGER NOT NULL,
-                            date_upload INTEGER NOT NULL,
-                            content TEXT,
-                            scanlator TEXT,
-                            FOREIGN KEY(book_id) REFERENCES book(_id) ON DELETE CASCADE
-                        );
-                    """.trimIndent()
-                    
-                    driver.execute(null, createChapterTableSql, 0)
-                }
+                // Ensure book table exists first (required by chapter foreign key)
+                val createBookTableSql = """
+                    CREATE TABLE IF NOT EXISTS book(
+                        _id INTEGER NOT NULL PRIMARY KEY,
+                        source INTEGER NOT NULL,
+                        url TEXT NOT NULL,
+                        artist TEXT,
+                        author TEXT,
+                        description TEXT,
+                        genre TEXT,
+                        title TEXT NOT NULL,
+                        status INTEGER NOT NULL,
+                        thumbnail_url TEXT,
+                        favorite INTEGER NOT NULL,
+                        last_update INTEGER,
+                        next_update INTEGER,
+                        initialized INTEGER NOT NULL,
+                        viewer INTEGER NOT NULL,
+                        chapter_flags INTEGER NOT NULL,
+                        cover_last_modified INTEGER NOT NULL,
+                        date_added INTEGER NOT NULL,
+                        is_pinned INTEGER NOT NULL DEFAULT 0,
+                        pinned_order INTEGER NOT NULL DEFAULT 0,
+                        is_archived INTEGER NOT NULL DEFAULT 0
+                    );
+                """.trimIndent()
                 
+                driver.execute(null, createBookTableSql, 0)
+                println("Created book table")
+                
+                // Create chapter table with complete schema including type column
+                val createChapterTableSql = """
+                    CREATE TABLE IF NOT EXISTS chapter(
+                        _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        book_id INTEGER NOT NULL,
+                        url TEXT NOT NULL,
+                        name TEXT NOT NULL,
+                        scanlator TEXT,
+                        read INTEGER NOT NULL,
+                        bookmark INTEGER NOT NULL,
+                        last_page_read INTEGER NOT NULL,
+                        chapter_number REAL NOT NULL,
+                        source_order INTEGER NOT NULL,
+                        date_fetch INTEGER NOT NULL,
+                        date_upload INTEGER NOT NULL,
+                        content TEXT NOT NULL,
+                        type INTEGER NOT NULL,
+                        FOREIGN KEY(book_id) REFERENCES book(_id) ON DELETE CASCADE
+                    );
+                """.trimIndent()
+                
+                driver.execute(null, createChapterTableSql, 0)
+                println("Created chapter table")
+                
+                // Create history table with progress column (post-migration schema)
                 val createHistoryTableSql = """
                     CREATE TABLE IF NOT EXISTS history(
-                        _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        _id INTEGER NOT NULL PRIMARY KEY,
                         chapter_id INTEGER NOT NULL UNIQUE,
                         last_read INTEGER,
                         time_read INTEGER NOT NULL,
                         progress REAL DEFAULT 0.0,
-                        FOREIGN KEY(chapter_id) REFERENCES chapter (_id)
+                        FOREIGN KEY(chapter_id) REFERENCES chapter(_id)
                         ON DELETE CASCADE
                     );
                 """.trimIndent()
                 
-                try {
-                    driver.execute(null, createHistoryTableSql, 0)
-                } catch (e: Exception) {
-                    val alternativeHistoryTableSql = """
-                        CREATE TABLE IF NOT EXISTS history(
-                            _id INTEGER NOT NULL PRIMARY KEY,
-                            chapter_id INTEGER NOT NULL UNIQUE,
-                            last_read INTEGER,
-                            time_read INTEGER NOT NULL,
-                            progress REAL DEFAULT 0.0,
-                            FOREIGN KEY(chapter_id) REFERENCES chapter (_id)
-                            ON DELETE CASCADE
-                        );
-                    """.trimIndent()
-                    
-                    driver.execute(null, alternativeHistoryTableSql, 0)
-                }
+                driver.execute(null, createHistoryTableSql, 0)
+                println("Created history table")
                 
+                // Create indexes for history table
                 driver.execute(null, "CREATE INDEX IF NOT EXISTS history_history_chapter_id_index ON history(chapter_id);", 0)
                 driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_history_last_read ON history(last_read);", 0)
                 driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_history_progress ON history(progress);", 0)
+                println("Created indexes for history table")
+                
+                // Create chapter indexes
+                driver.execute(null, "CREATE INDEX IF NOT EXISTS chapters_manga_id_index ON chapter(book_id);", 0)
+                println("Created indexes for chapter table")
             }
             
         } catch (e: Exception) {
+            println("Error verifying required tables: ${e.message}")
             e.printStackTrace()
         }
     }
@@ -571,7 +591,42 @@ object DatabaseMigrations {
             
             val historyTableExists = checkTableExists(driver, "history")
             if (!historyTableExists) {
+                println("History table still doesn't exist after verification, cannot create views")
                 return
+            }
+            
+            // Verify history table has progress column (added in migration 1)
+            try {
+                val columnsCheck = "PRAGMA table_info(history)"
+                var hasProgressColumn = false
+                driver.executeQuery(
+                    identifier = null,
+                    sql = columnsCheck,
+                    mapper = { cursor ->
+                        var result = cursor.next()
+                        while (result.value) {
+                            val columnName = cursor.getString(1)
+                            if (columnName == "progress") {
+                                hasProgressColumn = true
+                            }
+                            result = cursor.next()
+                        }
+                        result
+                    },
+                    parameters = 0
+                )
+                
+                if (!hasProgressColumn) {
+                    println("History table missing progress column, adding it...")
+                    try {
+                        driver.execute(null, "ALTER TABLE history ADD COLUMN progress REAL DEFAULT 0.0;", 0)
+                        println("Added progress column to history table")
+                    } catch (e: Exception) {
+                        println("Could not add progress column: ${e.message}")
+                    }
+                }
+            } catch (e: Exception) {
+                println("Error checking history table schema: ${e.message}")
             }
             
             val categoryInitSql ="""
@@ -627,8 +682,12 @@ object DatabaseMigrations {
             
             try {
                 driver.execute(null, historyViewSql, 0)
+                println("Successfully created historyView")
             } catch (e: Exception) {
+                println("Error creating historyView: ${e.message}")
                 e.printStackTrace()
+                // Re-verify tables exist before giving up
+                verifyRequiredTables(driver)
             }
             
             // Create updatesView with progress information
@@ -662,7 +721,9 @@ object DatabaseMigrations {
             
             try {
                 driver.execute(null, updatesViewSql, 0)
+                println("Successfully created updatesView")
             } catch (e: Exception) {
+                println("Error creating updatesView: ${e.message}")
                 e.printStackTrace()
             }
             
@@ -948,6 +1009,226 @@ object DatabaseMigrations {
             
         } catch (e: Exception) {
             println("Error migrating to version 13: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * Migration from version 13 to version 14
+     * Adds update_history table for tracking book updates
+     */
+    private fun migrateV13toV14(driver: SqlDriver) {
+        try {
+            println("Starting migration from version 13 to 14...")
+            
+            // Create update_history table
+            val createUpdateHistorySql = """
+                CREATE TABLE IF NOT EXISTS update_history(
+                    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    book_id INTEGER NOT NULL,
+                    book_title TEXT NOT NULL,
+                    chapters_added INTEGER NOT NULL,
+                    timestamp INTEGER NOT NULL,
+                    FOREIGN KEY(book_id) REFERENCES book(_id) ON DELETE CASCADE
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createUpdateHistorySql, 0)
+            println("Created update_history table")
+            
+            // Create indexes for update_history table
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS update_history_book_id_index ON update_history(book_id);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS update_history_timestamp_index ON update_history(timestamp);", 0)
+            println("Created indexes for update_history table")
+            
+            println("Successfully migrated to version 14")
+            
+        } catch (e: Exception) {
+            println("Error migrating to version 14: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+    
+    /**
+     * Migration from version 14 to version 15
+     * Adds sourceReport table for tracking source issues
+     */
+    private fun migrateV14toV15(driver: SqlDriver) {
+        try {
+            println("Starting migration from version 14 to 15...")
+            
+            // Create sourceReport table
+            val createSourceReportSql = """
+                CREATE TABLE IF NOT EXISTS sourceReport (
+                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    sourceId INTEGER NOT NULL,
+                    packageName TEXT NOT NULL,
+                    version TEXT NOT NULL,
+                    reason TEXT NOT NULL,
+                    timestamp INTEGER NOT NULL,
+                    status TEXT NOT NULL DEFAULT 'pending'
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createSourceReportSql, 0)
+            println("Created sourceReport table")
+            
+            // Create indexes for sourceReport table
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS sourceReport_sourceId_index ON sourceReport(sourceId);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS sourceReport_status_index ON sourceReport(status);", 0)
+            println("Created indexes for sourceReport table")
+            
+            println("Successfully migrated to version 15")
+            
+        } catch (e: Exception) {
+            println("Error migrating to version 15: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+    
+    /**
+     * Migration from version 15 to version 16
+     * Adds sourceComparison table for comparing sources
+     */
+    private fun migrateV15toV16(driver: SqlDriver) {
+        try {
+            println("Starting migration from version 15 to 16...")
+            
+            // Create sourceComparison table
+            val createSourceComparisonSql = """
+                CREATE TABLE IF NOT EXISTS sourceComparison(
+                    book_id INTEGER NOT NULL PRIMARY KEY,
+                    current_source_id INTEGER NOT NULL,
+                    better_source_id INTEGER,
+                    chapter_difference INTEGER NOT NULL,
+                    cached_at INTEGER NOT NULL,
+                    dismissed_until INTEGER,
+                    FOREIGN KEY(book_id) REFERENCES book (_id)
+                    ON DELETE CASCADE
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createSourceComparisonSql, 0)
+            println("Created sourceComparison table")
+            
+            // Create indexes for sourceComparison table
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS source_comparison_cached_at_index ON sourceComparison(cached_at);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS source_comparison_dismissed_until_index ON sourceComparison(dismissed_until);", 0)
+            println("Created indexes for sourceComparison table")
+            
+            println("Successfully migrated to version 16")
+            
+        } catch (e: Exception) {
+            println("Error migrating to version 16: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+    
+    /**
+     * Migration from version 16 to version 17
+     * Adds nftWallets table for NFT wallet management
+     */
+    private fun migrateV16toV17(driver: SqlDriver) {
+        try {
+            println("Starting migration from version 16 to 17...")
+            
+            // Create nftWallets table
+            val createNftWalletsSql = """
+                CREATE TABLE IF NOT EXISTS nftWallets(
+                    userId TEXT NOT NULL PRIMARY KEY,
+                    walletAddress TEXT NOT NULL,
+                    lastVerified INTEGER,
+                    ownsNFT INTEGER NOT NULL DEFAULT 0,
+                    nftTokenId TEXT,
+                    cacheExpiresAt INTEGER NOT NULL
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createNftWalletsSql, 0)
+            println("Created nftWallets table")
+            
+            println("Successfully migrated to version 17")
+            
+        } catch (e: Exception) {
+            println("Error migrating to version 17: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+    
+    /**
+     * Migration from version 17 to version 18
+     * Adds chapterHealth table for tracking chapter health status
+     */
+    private fun migrateV17toV18(driver: SqlDriver) {
+        try {
+            println("Starting migration from version 17 to 18...")
+            
+            // Create chapterHealth table
+            val createChapterHealthSql = """
+                CREATE TABLE IF NOT EXISTS chapterHealth(
+                    chapter_id INTEGER NOT NULL PRIMARY KEY,
+                    is_broken INTEGER NOT NULL,
+                    break_reason TEXT,
+                    checked_at INTEGER NOT NULL,
+                    repair_attempted_at INTEGER,
+                    repair_successful INTEGER,
+                    replacement_source_id INTEGER,
+                    FOREIGN KEY(chapter_id) REFERENCES chapter (_id)
+                    ON DELETE CASCADE
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createChapterHealthSql, 0)
+            println("Created chapterHealth table")
+            
+            // Create index for chapterHealth table
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS chapter_health_checked_at_index ON chapterHealth(checked_at);", 0)
+            println("Created index for chapterHealth table")
+            
+            println("Successfully migrated to version 18")
+            
+        } catch (e: Exception) {
+            println("Error migrating to version 18: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+    
+    /**
+     * Migration from version 18 to version 19
+     * Adds chapterReport table for user-reported chapter issues
+     */
+    private fun migrateV18toV19(driver: SqlDriver) {
+        try {
+            println("Starting migration from version 18 to 19...")
+            
+            // Create chapterReport table
+            val createChapterReportSql = """
+                CREATE TABLE IF NOT EXISTS chapterReport (
+                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    chapterId INTEGER NOT NULL,
+                    bookId INTEGER NOT NULL,
+                    issueCategory TEXT NOT NULL,
+                    description TEXT NOT NULL,
+                    timestamp INTEGER NOT NULL,
+                    resolved INTEGER NOT NULL DEFAULT 0,
+                    FOREIGN KEY (chapterId) REFERENCES chapter(_id) ON DELETE CASCADE,
+                    FOREIGN KEY (bookId) REFERENCES book(_id) ON DELETE CASCADE
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createChapterReportSql, 0)
+            println("Created chapterReport table")
+            
+            // Create indexes for chapterReport table
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS chapterReport_chapterId_index ON chapterReport(chapterId);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS chapterReport_bookId_index ON chapterReport(bookId);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS chapterReport_resolved_index ON chapterReport(resolved);", 0)
+            println("Created indexes for chapterReport table")
+            
+            println("Successfully migrated to version 19")
+            
+        } catch (e: Exception) {
+            println("Error migrating to version 19: ${e.message}")
             e.printStackTrace()
         }
     }

@@ -579,8 +579,8 @@ private enum class SearchResultState {
 
 private fun Source.key(numberOfTries: Int, type: SearchResultType): String {
     return when (type) {
-        SearchResultType.InProgress -> "${numberOfTries}_in_progress-${this.id}"
-        SearchResultType.NoResult -> "${numberOfTries}_no_result-${this.id}"
-        SearchResultType.WithResult -> "${numberOfTries}_with_result-${this.id}"
+        SearchResultType.InProgress -> "in_progress-${this.id}-${this.name}-${numberOfTries}"
+        SearchResultType.NoResult -> "no_result-${this.id}-${this.name}-${numberOfTries}"
+        SearchResultType.WithResult -> "with_result-${this.id}-${this.name}-${numberOfTries}"
     }
 }

@@ -1,0 +1,159 @@
+name: Database Migration Test
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'data/src/commonMain/kotlin/data/DatabaseMigrations.kt'
+      - 'data/src/commonMain/sqldelight/**'
+      - '.github/workflows/database-migration-test.yml'
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'data/src/commonMain/kotlin/data/DatabaseMigrations.kt'
+      - 'data/src/commonMain/sqldelight/**'
+  workflow_dispatch:
+    inputs:
+      from-version:
+        description: 'Test migration from version (leave empty to test from last 3 versions)'
+        required: false
+        type: string
+
+jobs:
+  test-migration:
+    name: Test Database Migration
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+      
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      
+      - name: Run database migration tests
+        run: ./gradlew :data:testDebugUnitTest --tests "ireader.data.DatabaseMigrationTest" --stacktrace
+        continue-on-error: false
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-test-results
+          path: |
+            data/build/test-results/**/*.xml
+            data/build/reports/tests/**
+      
+      - name: Comment on PR with results
+        if: github.event_name == 'pull_request' && failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ Database migration tests failed. Please check the test results and ensure migrations work correctly before releasing.'
+            })
+      
+      - name: Comment on PR with success
+        if: github.event_name == 'pull_request' && success()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ Database migration tests passed successfully!'
+            })
+
+  test-migration-android:
+    name: Test Migration on Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+      
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      
+      - name: Run Android instrumented tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          arch: x86_64
+          script: ./gradlew :data:connectedAndroidTest --tests "ireader.data.DatabaseMigrationTest" --stacktrace
+        continue-on-error: true
+      
+      - name: Upload Android test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-migration-test-results
+          path: |
+            data/build/outputs/androidTest-results/**
+            data/build/reports/androidTests/**
+
+  # This job gates the release workflow
+  migration-gate:
+    name: Migration Test Gate
+    runs-on: ubuntu-latest
+    needs: [test-migration, test-migration-android]
+    if: always()
+    
+    steps:
+      - name: Check migration tests passed
+        run: |
+          if [ "${{ needs.test-migration.result }}" != "success" ]; then
+            echo "❌ Migration tests failed!"
+            echo "Database migrations must pass before release."
+            exit 1
+          fi
+          echo "✅ All migration tests passed!"
+      
+      - name: Create status check
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const conclusion = '${{ needs.test-migration.result }}' === 'success' ? 'success' : 'failure';
+            github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'Database Migration Gate',
+              head_sha: context.payload.pull_request.head.sha,
+              status: 'completed',
+              conclusion: conclusion,
+              output: {
+                title: 'Database Migration Test',
+                summary: conclusion === 'success' 
+                  ? '✅ All database migrations passed successfully'
+                  : '❌ Database migration tests failed - review required before release'
+              }
+            });

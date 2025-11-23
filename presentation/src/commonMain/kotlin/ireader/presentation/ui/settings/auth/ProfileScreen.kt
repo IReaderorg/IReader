@@ -317,7 +317,10 @@ private fun LoginPromptCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        )
     ) {
         Column(
             modifier = Modifier
@@ -329,7 +332,7 @@ private fun LoginPromptCard(
                 imageVector = Icons.Default.AccountCircle,
                 contentDescription = null,
                 modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.primary
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -337,7 +340,8 @@ private fun LoginPromptCard(
             Text(
                 text = "Sign In to Sync",
                 style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -345,7 +349,7 @@ private fun LoginPromptCard(
             Text(
                 text = "Sign in to sync your reading progress across all your devices",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
             
@@ -353,7 +357,11 @@ private fun LoginPromptCard(
             
             Button(
                 onClick = onLogin,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
             ) {
                 Icon(Icons.Default.Login, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))

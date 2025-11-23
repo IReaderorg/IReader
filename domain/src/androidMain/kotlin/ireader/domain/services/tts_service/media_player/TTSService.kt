@@ -243,7 +243,6 @@ class TTSService(
     private fun hookNotification() {
         if (!isNotificationForeground) {
             runCatching {
-                startService(Intent(applicationContext, TTSService::class.java))
                 scope.launch {
                     startForegroundService()
                     isNotificationForeground = true
@@ -266,7 +265,7 @@ class TTSService(
     private suspend fun startForegroundService() {
         val notification = ttsNotificationBuilder.buildNotification(mediaSession.sessionToken)
         
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(
                 NotificationsIds.ID_TTS,
                 notification,
@@ -347,6 +346,13 @@ class TTSService(
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // Start foreground immediately to comply with Android 12+ requirements
+        if (!isNotificationForeground) {
+            serviceScope.launch {
+                startForegroundService()
+                isNotificationForeground = true
+            }
+        }
 
         when (intent?.action) {
             Intent.ACTION_MEDIA_BUTTON -> MediaButtonReceiver.handleIntent(mediaSession, intent)
@@ -939,7 +945,8 @@ class TTSService(
         return if (index != -1) {
             index
         } else {
-            throw Exception("Invalid Id")
+            Log.error("TTSService", "Chapter '${chapter.name}' not found in chapters list. Returning 0 as fallback.")
+            0 // Return first chapter as fallback instead of crashing
         }
     }
 

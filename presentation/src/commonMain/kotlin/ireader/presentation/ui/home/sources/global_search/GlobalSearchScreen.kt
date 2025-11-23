@@ -113,9 +113,9 @@ private enum class Types {
 
 private fun Source.key(numberOfTries: Int, type: Types) :String {
    return when(type) {
-        Types.InProgress -> "${numberOfTries}_in_progress-${this.id}"
-        Types.NoResult -> "${numberOfTries}_no_result-${this.id}"
-        Types.WithResult -> "${numberOfTries}_with_result-${this.id}"
+        Types.InProgress -> "in_progress-${this.id}-${this.name}-${numberOfTries}"
+        Types.NoResult -> "no_result-${this.id}-${this.name}-${numberOfTries}"
+        Types.WithResult -> "with_result-${this.id}-${this.name}-${numberOfTries}"
     }
 }
 

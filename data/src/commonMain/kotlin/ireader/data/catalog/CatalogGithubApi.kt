@@ -10,6 +10,7 @@ import ireader.domain.data.repository.CatalogSourceRepository
 import kotlinx.coroutines.flow.first
 import ireader.domain.utils.CatalogNotFoundException
 import ireader.i18n.REPO_URL
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
@@ -193,25 +194,25 @@ class CatalogGithubApi(
 
     @Serializable
     private data class CatalogRemoteApiModel(
-        val name: String,
-        val pkg: String,
-        val version: String,
-        val code: Int,
-        val lang: String,
-        val apk: String,
-        val id: Long,
-        val description: String,
-        val nsfw: Boolean,
+        @SerialName("name") val name: String,
+        @SerialName("pkg") val pkg: String,
+        @SerialName("version") val version: String,
+        @SerialName("code") val code: Int,
+        @SerialName("lang") val lang: String,
+        @SerialName("apk") val apk: String,
+        @SerialName("id") val id: Long,
+        @SerialName("description") val description: String,
+        @SerialName("nsfw") val nsfw: Boolean,
     )
 
     @Serializable
     private data class LNReaderPluginModel(
-        val id: String,
-        val name: String,
-        val version: String,
-        val url: String,
-        val description: String? = null,
-        val lang: String? = null,
-        val iconUrl: String? = null
+        @SerialName("id") val id: String,
+        @SerialName("name") val name: String,
+        @SerialName("version") val version: String,
+        @SerialName("url") val url: String,
+        @SerialName("description") val description: String? = null,
+        @SerialName("lang") val lang: String? = null,
+        @SerialName("iconUrl") val iconUrl: String? = null
     )
 }

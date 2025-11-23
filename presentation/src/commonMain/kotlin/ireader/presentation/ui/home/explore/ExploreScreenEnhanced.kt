@@ -232,7 +232,7 @@ private fun ExploreMainContent(
                     text = {
                         Text(
                             text = localize(Res.string.filter),
-                            color = MaterialTheme.colorScheme.onSecondary
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                     },
                     onClick = showmodalSheet,
@@ -240,10 +240,11 @@ private fun ExploreMainContent(
                         Icon(
                             Icons.Filled.Add, 
                             contentDescription = localize(Res.string.filter),
-                            tint = MaterialTheme.colorScheme.onSecondary
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                     },
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     shape = CircleShape
                 )
             }

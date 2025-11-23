@@ -1,0 +1,10 @@
+-- Migration 17: Add nftWallets table
+
+CREATE TABLE IF NOT EXISTS nftWallets(
+    userId TEXT NOT NULL PRIMARY KEY,
+    walletAddress TEXT NOT NULL,
+    lastVerified INTEGER,
+    ownsNFT INTEGER NOT NULL DEFAULT 0,
+    nftTokenId TEXT,
+    cacheExpiresAt INTEGER NOT NULL
+);

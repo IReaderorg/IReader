@@ -10,6 +10,7 @@ import ireader.domain.models.remote.BookReview
 import ireader.domain.models.remote.ChapterReview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 import kotlin.time.ExperimentalTime
@@ -28,37 +29,37 @@ class ReviewRepositoryImpl(
     
     @Serializable
     private data class UserInfo(
-        val username: String? = null
+        @SerialName("username") val username: String? = null
     )
     
     @Serializable
     private data class BookReviewDto(
-        val id: String? = null,
-        val user_id: String,
-        val book_title: String,
-        val rating: Int,
-        val review_text: String,
-        val created_at: String? = null,
-        val updated_at: String? = null,
-        val users: UserInfo? = null  // Nested user data from JOIN
+        @SerialName("id") val id: String? = null,
+        @SerialName("user_id") val user_id: String,
+        @SerialName("book_title") val book_title: String,
+        @SerialName("rating") val rating: Int,
+        @SerialName("review_text") val review_text: String,
+        @SerialName("created_at") val created_at: String? = null,
+        @SerialName("updated_at") val updated_at: String? = null,
+        @SerialName("users") val users: UserInfo? = null  // Nested user data from JOIN
     )
     
     @Serializable
     private data class ChapterReviewDto(
-        val id: String? = null,
-        val user_id: String,
-        val book_title: String,
-        val chapter_name: String,
-        val rating: Int,
-        val review_text: String,
-        val created_at: String? = null,
-        val updated_at: String? = null,
-        val users: UserInfo? = null  // Nested user data from JOIN
+        @SerialName("id") val id: String? = null,
+        @SerialName("user_id") val user_id: String,
+        @SerialName("book_title") val book_title: String,
+        @SerialName("chapter_name") val chapter_name: String,
+        @SerialName("rating") val rating: Int,
+        @SerialName("review_text") val review_text: String,
+        @SerialName("created_at") val created_at: String? = null,
+        @SerialName("updated_at") val updated_at: String? = null,
+        @SerialName("users") val users: UserInfo? = null  // Nested user data from JOIN
     )
     
     @Serializable
     private data class RatingStats(
-        val avg_rating: Double?
+        @SerialName("avg_rating") val avg_rating: Double?
     )
     
     private fun normalizeTitle(title: String): String {

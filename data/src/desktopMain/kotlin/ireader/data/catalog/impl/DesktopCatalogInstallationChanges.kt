@@ -6,7 +6,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 
 class DesktopCatalogInstallationChanges: CatalogInstallationChanges {
     override val flow = MutableSharedFlow<CatalogInstallationChange>(
-        extraBufferCapacity = Int.MAX_VALUE
+        replay = 0,
+        extraBufferCapacity = 64,
+        onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
     )
 
     fun notifyAppInstall(pkgName: String) {

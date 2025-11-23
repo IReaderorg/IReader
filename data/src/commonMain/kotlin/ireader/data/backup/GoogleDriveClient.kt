@@ -11,6 +11,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.delay
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlin.math.min
@@ -295,28 +296,28 @@ class GoogleDriveClient(
  */
 @Serializable
 private data class DriveFileMetadata(
-    val name: String,
-    val parents: List<String>,
-    val mimeType: String
+    @SerialName("name") val name: String,
+    @SerialName("parents") val parents: List<String>,
+    @SerialName("mimeType") val mimeType: String
 )
 
 @Serializable
 data class DriveFileResponse(
-    val id: String,
-    val name: String? = null,
-    val mimeType: String? = null
+    @SerialName("id") val id: String,
+    @SerialName("name") val name: String? = null,
+    @SerialName("mimeType") val mimeType: String? = null
 )
 
 @Serializable
 data class DriveFile(
-    val id: String,
-    val name: String,
-    val size: String? = null,
-    val modifiedTime: String,
-    val createdTime: String? = null
+    @SerialName("id") val id: String,
+    @SerialName("name") val name: String,
+    @SerialName("size") val size: String? = null,
+    @SerialName("modifiedTime") val modifiedTime: String,
+    @SerialName("createdTime") val createdTime: String? = null
 )
 
 @Serializable
 private data class DriveFileList(
-    val files: List<DriveFile>
+    @SerialName("files") val files: List<DriveFile>
 )
