@@ -24,8 +24,10 @@ interface LNReaderPlugin {
     
     /**
      * Get popular novels
+     * @param page Page number
+     * @param filters Optional map of filter values in LNReader format
      */
-    suspend fun popularNovels(page: Int): List<PluginNovel>
+    suspend fun popularNovels(page: Int, filters: Map<String, Any> = emptyMap()): List<PluginNovel>
     
     /**
      * Get latest novels
@@ -56,15 +58,7 @@ interface LNReaderPlugin {
         return emptyMap()
     }
     
-    /**
-     * Get popular novels with filters (optional)
-     * @param page Page number
-     * @param filters Map of filter values in LNReader format
-     */
-    suspend fun popularNovelsWithFilters(page: Int, filters: Map<String, Any>): List<PluginNovel> {
-        // Default implementation falls back to regular popularNovels
-        return popularNovels(page)
-    }
+
 }
 
 /**

@@ -151,34 +151,19 @@ class GraalVMJSEngine(
             val filters = try {
                 val filtersValue = newContext.eval("js", """
                     (function() {
-                        // Try different locations where filters might be defined
                         var filters = null;
                         
-                        // 1. Check exports.default.filters (plugin object)
                         if (typeof exports !== 'undefined' && exports.default && exports.default.filters) {
-                            console.log('Found filters on exports.default.filters');
                             filters = exports.default.filters;
                         }
-                        // 2. Check exports.filters
                         else if (typeof exports !== 'undefined' && exports.filters) {
-                            console.log('Found filters on exports.filters');
                             filters = exports.filters;
                         }
-                        // 3. Check module.exports.filters
                         else if (typeof module !== 'undefined' && module.exports && module.exports.filters) {
-                            console.log('Found filters on module.exports.filters');
                             filters = module.exports.filters;
                         }
-                        // 4. Check global filters variable
                         else if (typeof filters !== 'undefined' && filters !== null) {
-                            console.log('Found filters on globalThis.filters');
                             filters = globalThis.filters;
-                        }
-                        
-                        if (filters) {
-                            console.log('Filter keys:', Object.keys(filters));
-                        } else {
-                            console.log('No filters found');
                         }
                         
                         return filters;
@@ -188,16 +173,11 @@ class GraalVMJSEngine(
                 if (filtersValue != null && !filtersValue.isNull) {
                     convertValueToMap(filtersValue)
                 } else {
-                    Log.debug("GraalVMJSEngine: Plugin does not have filters defined")
                     emptyMap()
                 }
             } catch (e: Exception) {
-                Log.warn("GraalVMJSEngine: Failed to extract filters during loading: ${e.message}")
+                Log.warn("GraalVMJSEngine: Failed to extract filters: ${e.message}")
                 emptyMap()
-            }
-            
-            if (filters.isNotEmpty()) {
-                Log.info("GraalVMJSEngine: Extracted ${filters.size} filters during plugin loading")
             }
             
             // Create Kotlin wrapper with context reference, dedicated thread, and pre-loaded filters
@@ -922,26 +902,47 @@ private class GraalVMPluginWrapper(
         }
     }
     
-    override suspend fun popularNovels(page: Int): List<PluginNovel> = withContext(Dispatchers.IO) {
-        Log.debug("GraalVMPluginWrapper: Calling popularNovels($page)")
-        val popularFunc = jsPlugin.getMember("popularNovels")
-        if (popularFunc == null || popularFunc.isNull) {
-            Log.error("GraalVMPluginWrapper: popularNovels function not found!", null)
-            return@withContext emptyList()
+    override suspend fun popularNovels(page: Int, filters: Map<String, Any>): List<PluginNovel> = withContext(graalvmThread) {
+        try {
+            val popularFunc = jsPlugin.getMember("popularNovels")
+            if (popularFunc == null || popularFunc.isNull) {
+                Log.error("GraalVMPluginWrapper: popularNovels function not found!", null)
+                return@withContext emptyList()
+            }
+            
+            // If filters are provided, pass them to the plugin
+            val result = if (filters.isNotEmpty()) {
+                Log.info("GraalVMPluginWrapper: Calling popularNovels($page) with ${filters.size} filters")
+                
+                // Convert filters map to JavaScript object
+                val filtersJson = kotlinx.serialization.json.Json.encodeToString(
+                    kotlinx.serialization.json.JsonObject.serializer(),
+                    filters.toJsonObject()
+                )
+                
+                // Create options object with filters
+                val optionsObj = context.eval("js", "({ filters: $filtersJson })")
+                
+                // Call with page and options
+                popularFunc.execute(page, optionsObj)
+            } else {
+                Log.debug("GraalVMPluginWrapper: Calling popularNovels($page) without filters")
+                // Call with just page
+                popularFunc.execute(page)
+            }
+            
+            // Handle promise if returned
+            val finalResult = if (result.hasMember("then")) {
+                awaitPromise(result)
+            } else {
+                result
+            }
+            
+            convertToNovelList(finalResult)
+        } catch (e: Exception) {
+            Log.error("GraalVMPluginWrapper: Error in popularNovels: ${e.message}", e)
+            emptyList()
         }
-        Log.debug("GraalVMPluginWrapper: popularNovels function found, executing...")
-        var result = popularFunc.execute(page)
-        
-        // Handle promise if returned
-        if (result.hasMember("then")) {
-            Log.debug("GraalVMPluginWrapper: popularNovels returned promise, awaiting...")
-            result = awaitPromise(result)
-        }
-        
-        Log.debug("GraalVMPluginWrapper: popularNovels returned, converting...")
-        val novels = convertToNovelList(result)
-        Log.info("GraalVMPluginWrapper: Converted ${novels.size} novels")
-        novels
     }
     
     override suspend fun latestNovels(page: Int): List<PluginNovel> = withContext(Dispatchers.IO) {
@@ -1013,55 +1014,7 @@ private class GraalVMPluginWrapper(
     }
     
     override fun getFilters(): Map<String, Any> {
-        // Return cached filters that were extracted during plugin loading
-        Log.debug("GraalVMPluginWrapper: getFilters() called - returning ${cachedFilters.size} cached filters")
         return cachedFilters
-    }
-    
-    override suspend fun popularNovelsWithFilters(page: Int, filters: Map<String, Any>): List<PluginNovel> = withContext(Dispatchers.IO) {
-        try {
-            synchronized(lock) {
-                context.enter()
-                try {
-                    Log.debug("GraalVMPluginWrapper: Calling popularNovels($page) with filters: ${filters.keys}")
-                    
-                    // Convert filters map to JavaScript object
-                    val filtersJson = kotlinx.serialization.json.Json.encodeToString(
-                        kotlinx.serialization.json.JsonObject.serializer(),
-                        filters.toJsonObject()
-                    )
-                    
-                    // Call popularNovels with filters parameter
-                    val popularFunc = jsPlugin.getMember("popularNovels")
-                    if (popularFunc == null || popularFunc.isNull) {
-                        Log.error("GraalVMPluginWrapper: popularNovels function not found!", null)
-                        return@withContext emptyList()
-                    }
-                    
-                    // Parse filters JSON in JavaScript context
-                    val filtersObj = context.eval("js", "($filtersJson)")
-                    
-                    // Call with page and options object containing filters
-                    var result = popularFunc.execute(page, context.eval("js", "({ filters: $filtersJson })"))
-                    
-                    // Handle promise if returned
-                    if (result.hasMember("then")) {
-                        Log.debug("GraalVMPluginWrapper: popularNovelsWithFilters returned promise, awaiting...")
-                        result = awaitPromise(result)
-                    }
-                    
-                    val novels = convertToNovelList(result)
-                    Log.info("GraalVMPluginWrapper: Converted ${novels.size} novels with filters")
-                    novels
-                } finally {
-                    context.leave()
-                }
-            }
-        } catch (e: Exception) {
-            Log.warn("GraalVMPluginWrapper: Error in popularNovelsWithFilters, falling back to popularNovels: ${e.message}")
-            // Fallback to regular popularNovels
-            popularNovels(page)
-        }
     }
     
     private fun convertValueToMap(value: Value): Map<String, Any> {

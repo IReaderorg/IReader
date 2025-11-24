@@ -118,6 +118,52 @@ fun FilterBottomSheet(
             
             Spacer(modifier = Modifier.height(16.dp))
             
+            // Action buttons at top with improved styling
+            AnimatedVisibility(
+                visible = visible,
+                enter = fadeIn() + slideInVertically(
+                    initialOffsetY = { -it / 2 },
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
+                ),
+                exit = fadeOut() + slideOutVertically()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    androidx.compose.material3.OutlinedButton(
+                        onClick = { onReset() },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = localize(Res.string.reset),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                    
+                    androidx.compose.material3.Button(
+                        onClick = { onApply() },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = localize(Res.string.apply),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
             // Filter content with animation
             AnimatedVisibility(
                 visible = visible,
@@ -157,52 +203,6 @@ fun FilterBottomSheet(
                                 isExpandable = false,
                             )
                         }
-                    }
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Action buttons with improved styling
-            AnimatedVisibility(
-                visible = visible,
-                enter = fadeIn() + slideInVertically(
-                    initialOffsetY = { it / 2 },
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessMedium
-                    )
-                ),
-                exit = fadeOut() + slideOutVertically()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    androidx.compose.material3.OutlinedButton(
-                        onClick = { onReset() },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(
-                            text = localize(Res.string.reset),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                    
-                    androidx.compose.material3.Button(
-                        onClick = { onApply() },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(
-                            text = localize(Res.string.apply),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold
-                        )
                     }
                 }
             }

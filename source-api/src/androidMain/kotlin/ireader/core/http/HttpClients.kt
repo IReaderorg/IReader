@@ -59,6 +59,12 @@ actual class HttpClients(
         install(HttpCookies) {
             storage = cookiesStorage
         }
+        // Install HTTP response cache with 5 minute default
+        installCache(cacheDurationMs = 5 * 60 * 1000) {
+            enabled = true
+            cacheableMethods = setOf(io.ktor.http.HttpMethod.Get)
+            cacheableStatusCodes = setOf(io.ktor.http.HttpStatusCode.OK)
+        }
     }
     actual override val cloudflareClient = HttpClient(OkHttp) {
         BrowserUserAgent()
@@ -73,6 +79,12 @@ actual class HttpClients(
         }
         install(HttpCookies) {
             storage = cookiesStorage
+        }
+        // Install HTTP response cache with 5 minute default
+        installCache(cacheDurationMs = 5 * 60 * 1000) {
+            enabled = true
+            cacheableMethods = setOf(io.ktor.http.HttpMethod.Get)
+            cacheableStatusCodes = setOf(io.ktor.http.HttpStatusCode.OK)
         }
     }
 }

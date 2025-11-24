@@ -777,69 +777,50 @@ private class AndroidPluginWrapper(
     
     override fun getFilters(): Map<String, Any> {
         return try {
-            // Must run on V8 thread - use runBlocking since this is not a suspend function
             kotlinx.coroutines.runBlocking(v8Thread) {
                 mutex.withLock {
                     try {
-                        // LNReader plugins export filters at module level, not on the plugin object
-                        // Try multiple locations: exports.filters, module.exports.filters, or global filters
                         val filtersJson = engine.evaluateScript("""
                             (function() {
-                                // Try different locations where filters might be defined
                                 var filters = null;
                                 
-                                // 1. Check exports.filters (most common)
                                 if (typeof exports !== 'undefined' && exports.filters) {
                                     filters = exports.filters;
                                 }
-                                // 2. Check module.exports.filters
                                 else if (typeof module !== 'undefined' && module.exports && module.exports.filters) {
                                     filters = module.exports.filters;
                                 }
-                                // 3. Check global filters variable
                                 else if (typeof filters !== 'undefined' && filters !== null) {
                                     filters = globalThis.filters;
                                 }
-                                // 4. Check __wrappedPlugin.filters (wrapped plugin)
                                 else if (typeof __wrappedPlugin !== 'undefined' && __wrappedPlugin.filters) {
                                     filters = __wrappedPlugin.filters;
                                 }
                                 
-                                if (filters) {
-                                    return JSON.stringify(filters);
-                                } else {
-                                    return '{}';
-                                }
+                                return filters ? JSON.stringify(filters) : '{}';
                             })();
                         """.trimIndent()) as? String ?: "{}"
                         
-                        Log.debug("AndroidPluginWrapper: Filters JSON: $filtersJson")
-                        
                         if (filtersJson == "{}") {
-                            Log.debug("AndroidPluginWrapper: Plugin does not have filters defined")
                             return@runBlocking emptyMap()
                         }
                         
-                        // Parse JSON to Map
                         val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
                         val jsonElement = json.parseToJsonElement(filtersJson)
                         
                         if (jsonElement is kotlinx.serialization.json.JsonObject) {
-                            val result = jsonElement.toMap()
-                            Log.info("AndroidPluginWrapper: Loaded ${result.size} filters from plugin")
-                            result
+                            jsonElement.toMap()
                         } else {
-                            Log.warn("AndroidPluginWrapper: Filters JSON is not an object")
                             emptyMap()
                         }
                     } catch (e: Exception) {
-                        Log.warn("AndroidPluginWrapper: Failed to get filters: ${e.message}", e)
+                        Log.warn("AndroidPluginWrapper: Failed to get filters: ${e.message}")
                         emptyMap()
                     }
                 }
             }
         } catch (e: Exception) {
-            Log.error("AndroidPluginWrapper: Error in getFilters: ${e.message}", e)
+            Log.error("AndroidPluginWrapper: Error in getFilters: ${e.message}")
             emptyMap()
         }
     }

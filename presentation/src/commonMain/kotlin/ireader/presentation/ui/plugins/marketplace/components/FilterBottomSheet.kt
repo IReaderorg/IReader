@@ -36,9 +36,9 @@ fun FilterBottomSheet(
     
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth().fillMaxHeight(0.5f),
         sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = true
+            skipPartiallyExpanded = false
         )
     ) {
         Column(
