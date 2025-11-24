@@ -59,15 +59,12 @@ class JSPluginLoader(
         // Ensure plugins directory exists
         if (!pluginsDirectory.exists()) {
             pluginsDirectory.mkdirs()
-            Log.info("JSPluginLoader: Created plugins directory: ${pluginsDirectory.absolutePath}")
         }
         
         // Scan for plugin files
         val pluginFiles = pluginsDirectory.listFiles { file ->
             file.extension == "js" && file.canRead()
         } ?: emptyArray()
-        
-        Log.info("JSPluginLoader: Found ${pluginFiles.size} plugin files")
         
         // Load each plugin
         val catalogs = pluginFiles.mapNotNull { file ->
@@ -78,9 +75,6 @@ class JSPluginLoader(
                 null
             }
         }
-        
-        val duration = System.currentTimeMillis() - startTime
-        Log.info("JSPluginLoader: Loaded ${catalogs.size} of ${pluginFiles.size} plugins in ${duration}ms")
         
         return catalogs
     }
@@ -112,9 +106,6 @@ class JSPluginLoader(
                 null
             }
         }
-        
-        val duration = System.currentTimeMillis() - startTime
-        Log.info("JSPluginLoader: Loaded ${stubCatalogs.size} stub plugins in ${duration}ms")
         
         return stubCatalogs
     }
@@ -154,19 +145,15 @@ class JSPluginLoader(
         val startTime = System.currentTimeMillis()
         
         try {
-            Log.info("JSPluginLoader: Loading plugin: $pluginId")
-            
             // Check cache
             val lastModified = file.lastModified()
             val cached = pluginCache[pluginId]
             if (cached != null && cached.lastModified == lastModified) {
-                Log.debug("JSPluginLoader: Using cached plugin: $pluginId")
                 return cached.catalog
             }
             
             // Read plugin code
             val jsCode = file.readText()
-            Log.debug("JSPluginLoader: Read ${jsCode.length} chars from $pluginId")
             
             // Validate that the file contains JavaScript, not an error page
             if (jsCode.contains("404") && jsCode.contains("Not Found") && jsCode.length < 1000) {
@@ -188,7 +175,6 @@ class JSPluginLoader(
             
             // Load via JS engine
             val plugin = engine.loadPlugin(jsCode, pluginId)
-            Log.info("JSPluginLoader: JS engine loaded plugin: $pluginId")
             
             // Get metadata from plugin
             val metadata = PluginMetadata(
@@ -199,8 +185,6 @@ class JSPluginLoader(
                 lang = plugin.getLang(),
                 icon = plugin.getIcon()
             )
-            
-            Log.info("JSPluginLoader: Plugin metadata - name: ${metadata.name}, site: ${metadata.site}")
             
             // Create dependencies for the source wrapper
             val httpClientsInterface = object : ireader.core.http.HttpClientsInterface {
@@ -229,16 +213,10 @@ class JSPluginLoader(
             // Save stub for future fast loading
             stubManager.savePluginStub(metadata, file.nameWithoutExtension)
             
-            val duration = System.currentTimeMillis() - startTime
-            Log.info("JSPluginLoader: Successfully loaded $pluginId in ${duration}ms")
-            
             return catalog
             
         } catch (e: PluginLoadException) {
             Log.error("JSPluginLoader: Plugin load error for $pluginId: ${e.message}", e)
-            e.printStackTrace()
-            val duration = System.currentTimeMillis() - startTime
-            Log.debug("JSPluginLoader: Failed to load $pluginId after ${duration}ms")
             return null
         } catch (e: Exception) {
             Log.error("JSPluginLoader: Unexpected error loading $pluginId", e)
@@ -251,15 +229,11 @@ class JSPluginLoader(
      * @param pluginId The plugin identifier
      */
     suspend fun unloadPlugin(pluginId: String) {
-        Log.debug("JSPluginLoader: Unloading plugin: $pluginId")
-        
         // Remove from cache
         pluginCache.remove(pluginId)
         
         // Remove stub
         stubManager.removePluginStub(pluginId)
-        
-        Log.info("JSPluginLoader: Plugin unloaded: $pluginId")
     }
     
     /**
@@ -268,7 +242,6 @@ class JSPluginLoader(
     fun clearCache() {
         pluginCache.values.forEach { it.engine.close() }
         pluginCache.clear()
-        Log.info("JSPluginLoader: Plugin cache cleared and all engines closed")
     }
     
     /**
@@ -306,7 +279,6 @@ class JSPluginLoader(
             pluginCache.remove(pluginId)
             // Reload the plugin
             loadPlugin(pluginFile)
-            Log.info("JSPluginLoader: Plugin reloaded: $pluginId")
         } else {
             Log.error("JSPluginLoader: Plugin file not found for reload: $pluginId", null)
         }
@@ -326,15 +298,12 @@ class JSPluginLoader(
         // Ensure plugins directory exists
         if (!pluginsDirectory.exists()) {
             pluginsDirectory.mkdirs()
-            Log.info("JSPluginLoader: Created plugins directory: ${pluginsDirectory.absolutePath}")
         }
         
         // Scan for plugin files
         val pluginFiles = pluginsDirectory.listFiles { file ->
             file.extension == "js" && file.canRead()
         } ?: emptyArray()
-        
-        Log.info("JSPluginLoader: Found ${pluginFiles.size} plugin files for async loading")
         
         // Get priority plugins
         val priorityPluginIds = stubManager.getPriorityPlugins()
@@ -343,8 +312,6 @@ class JSPluginLoader(
         val (priorityFiles, normalFiles) = pluginFiles.partition { file ->
             file.nameWithoutExtension in priorityPluginIds
         }
-        
-        Log.info("JSPluginLoader: Loading ${priorityFiles.size} priority plugins first")
         
         val allCatalogs = mutableListOf<JSPluginCatalog>()
         
@@ -373,9 +340,6 @@ class JSPluginLoader(
                 Log.error("JSPluginLoader: Failed to load plugin ${file.nameWithoutExtension}", e)
             }
         }
-        
-        val duration = System.currentTimeMillis() - startTime
-        Log.info("JSPluginLoader: Async loaded ${allCatalogs.size} of ${pluginFiles.size} plugins in ${duration}ms")
         
         return allCatalogs
     }

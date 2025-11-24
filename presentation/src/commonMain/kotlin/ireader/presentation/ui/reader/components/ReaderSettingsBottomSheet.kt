@@ -60,7 +60,7 @@ fun ReaderSettingsBottomSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        modifier = modifier.fillMaxWidth().fillMaxHeight(0.5f),
+        modifier = modifier,
         sheetState = rememberModalBottomSheetState(
             skipPartiallyExpanded = false
         ),
@@ -86,7 +86,7 @@ fun ReaderSettingsBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.6f) // 60% of screen height
+                .fillMaxHeight(0.6f) // 50% of screen height
         ) {
             // Tab Row
             TabRow(

@@ -159,13 +159,11 @@ class CatalogStore(
     private fun onInstalled(pkgName: String, isLocalInstall: Boolean) {
         scope.launch(Dispatchers.Default) {
             lock.withLock {
-                ireader.core.log.Log.info("CatalogStore: onInstalled called for $pkgName (isLocal: $isLocalInstall)")
                 val previousCatalog =
                     catalogs.find { (it as? CatalogInstalled)?.pkgName == pkgName }
 
                 // Don't replace system catalogs with local catalogs
                 if (!isLocalInstall && previousCatalog is CatalogInstalled.Locally) {
-                    ireader.core.log.Log.info("CatalogStore: Skipping - don't replace system with local")
                     return@launch
                 }
 
@@ -185,8 +183,6 @@ class CatalogStore(
                 
                 // If catalog is null, it's likely a JS plugin - load it asynchronously
                 if (catalog == null) {
-                    ireader.core.log.Log.info("CatalogStore: Loading JS plugin $pkgName asynchronously")
-                    
                     // For JS plugins, load them in the background
                     val asyncLoader = loader as? ireader.domain.catalogs.service.AsyncPluginLoader
                     if (asyncLoader != null) {
@@ -206,14 +202,12 @@ class CatalogStore(
                                                     val updated = newCatalog.copy(isPinned = existing.isPinned)
                                                     catalogs = catalogs.replace(existingPosition, updated)
                                                     stubSourceIds.remove(newCatalog.sourceId)
-                                                    ireader.core.log.Log.info("CatalogStore: Replaced existing catalog for $pkgName")
                                                 } else {
                                                     // Add new plugin
                                                     val pinnedCatalogIds = pinnedCatalogsPreference.get()
                                                     val isPinned = newCatalog.sourceId.toString() in pinnedCatalogIds
                                                     val updated = newCatalog.copy(isPinned = isPinned)
                                                     catalogs = catalogs + updated
-                                                    ireader.core.log.Log.info("CatalogStore: Added new JS plugin $pkgName")
                                                 }
                                             }
                                         }
@@ -243,21 +237,23 @@ class CatalogStore(
                 val installedCatalog =
                     catalogs.find { (it as? CatalogInstalled)?.pkgName == pkgName }
                 
+                if (installedCatalog == null) {
+                    return@launch
+                }
+                
                 // For JS plugins (JSPluginCatalog), just remove by pkgName match
-                if (installedCatalog != null) {
-                    // Check if it's a traditional installed catalog or JS plugin
-                    val shouldRemove = when {
-                        installedCatalog is CatalogInstalled.Locally && isLocalInstall -> true
-                        installedCatalog is CatalogInstalled.SystemWide && !isLocalInstall -> true
-                        // JS plugins are neither Locally nor SystemWide, so remove by pkgName match
-                        installedCatalog !is CatalogInstalled.Locally && 
-                        installedCatalog !is CatalogInstalled.SystemWide -> true
-                        else -> false
-                    }
-                    
-                    if (shouldRemove) {
-                        catalogs = catalogs - installedCatalog
-                    }
+                // Check if it's a traditional installed catalog or JS plugin
+                val shouldRemove = when {
+                    installedCatalog is CatalogInstalled.Locally && isLocalInstall -> true
+                    installedCatalog is CatalogInstalled.SystemWide && !isLocalInstall -> true
+                    // JS plugins are neither Locally nor SystemWide, so remove by pkgName match
+                    installedCatalog !is CatalogInstalled.Locally && 
+                    installedCatalog !is CatalogInstalled.SystemWide -> true
+                    else -> false
+                }
+                
+                if (shouldRemove) {
+                    catalogs = catalogs - installedCatalog
                 }
             }
         }
@@ -287,7 +283,6 @@ class CatalogStore(
     suspend fun replaceStubSource(catalog: ireader.domain.models.entities.JSPluginCatalog) {
         withContext(Dispatchers.Default) {
             lock.withLock {
-                ireader.core.log.Log.info("CatalogStore: Attempting to replace stub for ${catalog.name} (sourceId: ${catalog.sourceId})")
                 val position = catalogs.indexOfFirst { it.sourceId == catalog.sourceId }
                 if (position >= 0) {
                     val existingCatalog = catalogs[position]
@@ -302,11 +297,6 @@ class CatalogStore(
                     
                     // Remove from stub tracking
                     stubSourceIds.remove(catalog.sourceId)
-                    
-                    ireader.core.log.Log.info("CatalogStore: Successfully replaced stub source ${catalog.name} at position $position")
-                } else {
-                    ireader.core.log.Log.warn("CatalogStore: Could not find stub for ${catalog.name} (sourceId: ${catalog.sourceId}) in catalog list")
-                    ireader.core.log.Log.warn("CatalogStore: Current catalog count: ${catalogs.size}, stub count: ${stubSourceIds.size}")
                 }
             }
         }
@@ -340,7 +330,6 @@ class CatalogStore(
     suspend fun reloadCatalogs() {
         withContext(Dispatchers.Default) {
             lock.withLock {
-                ireader.core.log.Log.info("CatalogStore: Reloading all catalogs")
                 val loadedCatalogs = loader.loadAll().distinctBy { it.sourceId }.toSet().toList()
                 val pinnedCatalogIds = pinnedCatalogsPreference.get()
                 
@@ -360,8 +349,6 @@ class CatalogStore(
                         catalog
                     }
                 }
-                
-                ireader.core.log.Log.info("CatalogStore: Reloaded ${catalogs.size} catalogs")
                 
                 // Trigger background loading for any stubs
                 startBackgroundPluginLoading()
@@ -387,23 +374,18 @@ class CatalogStore(
                         loadingSourcesFlow.value = loadingSourceIds.toSet()
                         
                         // Replace stubs as plugins load
-                        ireader.core.log.Log.info("CatalogStore: Starting background loading to replace ${stubSourceIds.size} stub sources")
                         asyncLoader.loadJSPluginsAsync { catalog ->
-                            ireader.core.log.Log.info("CatalogStore: Background loading callback received for ${catalog.name}")
                             scope.launch {
                                 replaceStubSource(catalog)
                                 
                                 // Remove from loading set
                                 loadingSourceIds.remove(catalog.sourceId)
                                 loadingSourcesFlow.value = loadingSourceIds.toSet()
-                                ireader.core.log.Log.info("CatalogStore: Removed ${catalog.name} from loading set")
                             }
                         }
                     } else {
                         // First run, no stubs - add plugins as they load
-                        ireader.core.log.Log.info("CatalogStore: Starting background loading for first run")
                         asyncLoader.loadJSPluginsAsync { catalog ->
-                            ireader.core.log.Log.info("CatalogStore: Background loading callback received for ${catalog.name} (first run)")
                             scope.launch {
                                 lock.withLock {
                                     // Add the newly loaded plugin to the catalog list
@@ -412,13 +394,10 @@ class CatalogStore(
                                     val updatedCatalog = catalog.copy(isPinned = isPinned)
                                     
                                     catalogs = catalogs + updatedCatalog
-                                    ireader.core.log.Log.info("CatalogStore: Added plugin ${catalog.name} to catalog list (total: ${catalogs.size})")
                                 }
                             }
                         }
                     }
-                } else {
-                    ireader.core.log.Log.warn("CatalogStore: Async loading not supported on this platform")
                 }
             } catch (e: Exception) {
                 ireader.core.log.Log.error("CatalogStore: Failed to load plugins in background", e)

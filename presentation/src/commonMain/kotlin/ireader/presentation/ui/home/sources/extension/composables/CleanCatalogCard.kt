@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -60,12 +61,15 @@ fun CleanCatalogCard(
         modifier = modifier
             .fillMaxWidth()
             .then(
-                if (onClick != null || onShowDetails != null) {
+                if ((onClick != null || onShowDetails != null) && !isLoading) {
                     Modifier.combinedClickable(
                         onClick = { onClick?.invoke() },
                         onLongClick = { onShowDetails?.invoke() }
                     )
                 } else Modifier
+            )
+            .then(
+                if (isLoading) Modifier.alpha(0.6f) else Modifier
             )
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -96,10 +100,20 @@ fun CleanCatalogCard(
                 )
                 
                 if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(14.dp),
-                        strokeWidth = 2.dp
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(14.dp),
+                            strokeWidth = 2.dp
+                        )
+                        Text(
+                            text = "Loading...",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
                 
                 if (sourceStatus != null && catalog is CatalogInstalled) {

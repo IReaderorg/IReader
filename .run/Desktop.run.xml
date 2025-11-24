@@ -2,6 +2,7 @@
   <configuration default="false" name="Desktop" type="JetRunConfigurationType">
     <option name="MAIN_CLASS_NAME" value="ireader.desktop.MainKt" />
     <module name="Infinity.desktop.main" />
+    <option name="VM_PARAMETERS" value="-noverify -Xmx2G" />
     <shortenClasspath name="NONE" />
     <method v="2">
       <option name="Make" enabled="true" />
@@ -10,6 +11,7 @@
   <configuration default="false" name="Desktop" type="JetRunConfigurationType">
     <option name="MAIN_CLASS_NAME" value="ireader.desktop.MainKt" />
     <module name="Infinity.desktop.main" />
+    <option name="VM_PARAMETERS" value="-noverify -Xmx2G" />
     <shortenClasspath name="ARGS_FILE" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     <method v="2">

@@ -716,11 +716,21 @@ private class AndroidPluginWrapper(
         }
     }
     
-    override suspend fun popularNovels(page: Int): List<PluginNovel> = withContext(v8Thread) {
+    override suspend fun popularNovels(page: Int, filters: Map<String, Any>): List<PluginNovel> = withContext(v8Thread) {
         mutex.withLock {
             try {
-                val resultJson = awaitPromise("__wrappedPlugin.popularNovels($page)")
-                parseNovelList(resultJson)
+                // If filters are provided, use them
+                if (filters.isNotEmpty()) {
+                    val filtersJson = kotlinx.serialization.json.Json.encodeToString(
+                        kotlinx.serialization.json.JsonObject.serializer(),
+                        filters.toJsonObject()
+                    )
+                    val resultJson = awaitPromise("__wrappedPlugin.popularNovels($page, { filters: $filtersJson })")
+                    parseNovelList(resultJson)
+                } else {
+                    val resultJson = awaitPromise("__wrappedPlugin.popularNovels($page)")
+                    parseNovelList(resultJson)
+                }
             } catch (e: Exception) {
                 Log.error("AndroidPluginWrapper: Error in popularNovels: ${e.message}", e)
                 emptyList()
@@ -825,25 +835,7 @@ private class AndroidPluginWrapper(
         }
     }
     
-    override suspend fun popularNovelsWithFilters(page: Int, filters: Map<String, Any>): List<PluginNovel> = withContext(v8Thread) {
-        mutex.withLock {
-            try {
-                // Convert filters map to JSON
-                val filtersJson = kotlinx.serialization.json.Json.encodeToString(
-                    kotlinx.serialization.json.JsonObject.serializer(),
-                    filters.toJsonObject()
-                )
-                
-                // Call plugin with filters
-                val resultJson = awaitPromise("__wrappedPlugin.popularNovels($page, { filters: $filtersJson })")
-                parseNovelList(resultJson)
-            } catch (e: Exception) {
-                Log.warn("AndroidPluginWrapper: Error in popularNovelsWithFilters, falling back to popularNovels: ${e.message}")
-                // Fallback to regular popularNovels
-                popularNovels(page)
-            }
-        }
-    }
+
     
     /**
      * Wait for a JavaScript Promise to resolve.

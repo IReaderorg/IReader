@@ -68,7 +68,7 @@ actual class AITTSManager(
     /**
      * Get voices from a specific provider
      */
-    suspend fun getVoicesFromProvider(provider: AITTSProvider): Result<List<VoiceModel>> {
+    actual suspend fun getVoicesFromProvider(provider: AITTSProvider): Result<List<VoiceModel>> {
         return providers[provider]?.getAvailableVoices() 
             ?: Result.failure(Exception("Provider $provider not configured"))
     }
@@ -76,12 +76,12 @@ actual class AITTSManager(
     /**
      * Synthesize text using specified provider and voice
      */
-    suspend fun synthesize(
+    actual suspend fun synthesize(
         text: String,
         provider: AITTSProvider,
         voiceId: String,
-        speed: Float = 1.0f,
-        pitch: Float = 0.0f
+        speed: Float,
+        pitch: Float
     ): Result<AudioData> {
         val service = providers[provider] 
             ?: return Result.failure(Exception("Provider $provider not configured"))
@@ -126,9 +126,9 @@ actual class AITTSManager(
     /**
      * Download a Piper voice model
      */
-    suspend fun downloadPiperVoice(
+    actual suspend fun downloadPiperVoice(
         voiceModel: VoiceModel,
-        onProgress: (Int) -> Unit = {}
+        onProgress: (Int) -> Unit
     ): Result<Unit> {
         val piperService = providers[AITTSProvider.PIPER_TTS] as? PiperTTSService
             ?: return Result.failure(Exception("Piper TTS not available"))
@@ -139,7 +139,7 @@ actual class AITTSManager(
     /**
      * Check if a voice is downloaded
      */
-    fun isVoiceDownloaded(voiceId: String): Boolean {
+    actual fun isVoiceDownloaded(voiceId: String): Boolean {
         val piperService = providers[AITTSProvider.PIPER_TTS] as? PiperTTSService
             ?: return false
         
@@ -149,7 +149,7 @@ actual class AITTSManager(
     /**
      * Delete a downloaded voice
      */
-    fun deleteVoice(voiceId: String): Boolean {
+    actual fun deleteVoice(voiceId: String): Boolean {
         val piperService = providers[AITTSProvider.PIPER_TTS] as? PiperTTSService
             ?: return false
         
@@ -159,7 +159,7 @@ actual class AITTSManager(
     /**
      * Get list of downloaded voices
      */
-    fun getDownloadedVoices(): List<String> {
+    actual fun getDownloadedVoices(): List<String> {
         val piperService = providers[AITTSProvider.PIPER_TTS] as? PiperTTSService
             ?: return emptyList()
         
@@ -169,7 +169,7 @@ actual class AITTSManager(
     /**
      * Get total size of downloaded voices
      */
-    fun getDownloadedVoicesSize(): Long {
+    actual fun getDownloadedVoicesSize(): Long {
         val piperService = providers[AITTSProvider.PIPER_TTS] as? PiperTTSService
             ?: return 0L
         

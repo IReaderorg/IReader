@@ -92,6 +92,7 @@ compose.desktop {
         
         jvmArgs += listOf(
             "-Xmx2G",  // Increase JVM memory
+            "-noverify",  // Disable bytecode verification for dex2jar converted extensions
             "-Dsupabase.url=$supabaseUrl",
             "-Dsupabase.anon.key=$supabaseAnonKey",
             "-Dsupabase.books.url=$supabaseBooksUrl",
@@ -238,7 +239,7 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo Starting IReader...
-start javaw -Xmx2G -jar IReader.jar
+start javaw -Xmx2G -noverify -jar IReader.jar
 exit /b 0
 """
     

@@ -229,6 +229,10 @@ class ExtensionViewModel(
                             }
                             installSteps + (pkgName to step)
                         } else {
+                            // Installation/update completed successfully
+                            // Refresh catalogs to update the installed extensions list
+                            // The refresh will trigger reloadCatalogs which loads all extensions from disk
+                            refreshCatalogsQuietly()
                             installSteps - pkgName
                         }
                     }
@@ -245,6 +249,11 @@ class ExtensionViewModel(
         scope.launch {
             if (catalog is CatalogInstalled) {
                 uninstallCatalog.await(catalog)
+                // Wait a bit for the uninstall notification to be processed
+                // and for file locks to be released
+                kotlinx.coroutines.delay(1000)
+                // Refresh catalogs to update the installed extensions list
+                refreshCatalogsQuietly()
             }
         }
     }

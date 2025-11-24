@@ -86,20 +86,16 @@ class GraalVMJSEngine(
             """.trimIndent())
             
             // Load the adapter code first
-            Log.debug("GraalVMJSEngine: Loading adapter code")
             val adapterCode = getAdapterCode()
             newContext.eval("js", adapterCode)
-            Log.debug("GraalVMJSEngine: Adapter loaded")
             
             // Initialize exports object if it doesn't exist
             newContext.eval("js", "if (typeof exports === 'undefined') { var exports = {}; }")
             newContext.eval("js", "if (typeof module === 'undefined') { var module = { exports: exports }; }")
             
             // Load the plugin code
-            Log.debug("GraalVMJSEngine: Loading plugin code (${jsCode.length} chars)")
             try {
                 newContext.eval("js", jsCode)
-                Log.debug("GraalVMJSEngine: Plugin code loaded")
             } catch (e: org.graalvm.polyglot.PolyglotException) {
                 // Provide better error message for common issues
                 if (e.message?.contains("404") == true || e.message?.contains("Not Found") == true) {
@@ -113,37 +109,15 @@ class GraalVMJSEngine(
             if (wrapPluginFunc == null || wrapPluginFunc.isNull) {
                 throw PluginLoadException("wrapPlugin function not found - adapter may have failed to load")
             }
-            Log.debug("GraalVMJSEngine: wrapPlugin function found")
             
             val pluginExports = newContext.getBindings("js").getMember("exports")
-            Log.debug("GraalVMJSEngine: exports object: ${pluginExports != null}")
-            
             val defaultExport = pluginExports?.getMember("default") ?: pluginExports
-            Log.debug("GraalVMJSEngine: default export: ${defaultExport != null}")
             
             if (defaultExport == null || defaultExport.isNull) {
                 throw PluginLoadException("Plugin does not export a default object. exports=${pluginExports != null}")
             }
             
-            Log.debug("GraalVMJSEngine: Wrapping plugin")
-            
-            // Debug: log what methods the plugin has
-            newContext.eval("js", """
-                const pluginObj = exports.default || exports;
-                console.log('Plugin object type:', typeof pluginObj);
-                console.log('Plugin object keys:', Object.keys(pluginObj));
-                console.log('Plugin prototype:', Object.getPrototypeOf(pluginObj));
-                console.log('Plugin methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(pluginObj)));
-                
-                // Check specific methods
-                console.log('Has searchNovels:', typeof pluginObj.searchNovels);
-                console.log('Has getChapters:', typeof pluginObj.getChapters);
-                console.log('Has parseChapters:', typeof pluginObj.parseChapters);
-                console.log('Has parseNovel:', typeof pluginObj.parseNovel);
-            """.trimIndent())
-            
             val wrappedPlugin = wrapPluginFunc.execute(defaultExport)
-            Log.debug("GraalVMJSEngine: Plugin wrapped successfully")
             
             context = newContext
             
@@ -181,9 +155,7 @@ class GraalVMJSEngine(
             }
             
             // Create Kotlin wrapper with context reference, dedicated thread, and pre-loaded filters
-            val wrapper = GraalVMPluginWrapper(wrappedPlugin, newContext, graalvmThread, filters)
-            Log.info("GraalVMJSEngine: Created wrapper instance: ${wrapper::class.qualifiedName}")
-            wrapper
+            GraalVMPluginWrapper(wrappedPlugin, newContext, graalvmThread, filters)
             
         } catch (e: Exception) {
             Log.error("GraalVMJSEngine: Failed to load plugin: ${e.message}", e)
@@ -238,7 +210,6 @@ class GraalVMJSEngine(
     private fun createCheerioProxy(cheerio: ireader.domain.js.library.JSCheerioApi): ProxyObject {
         return ProxyObject.fromMap(mapOf(
             "load" to ProxyExecutable { args ->
-                Log.info("GraalVMJSEngine: cheerio.load() called from JavaScript")
                 val html = args[0].asString()
                 val cheerioObj = cheerio.load(html)
                 createCheerioObjectProxy(cheerioObj)
@@ -870,32 +841,18 @@ private class GraalVMPluginWrapper(
         synchronized(lock) {
             context.enter()
             try {
-                Log.debug("GraalVMPluginWrapper: Calling searchNovels('$query', $page)")
                 val searchFunc = jsPlugin.getMember("searchNovels")
                 if (searchFunc == null || searchFunc.isNull) {
-                    Log.error("GraalVMPluginWrapper: searchNovels function not found!", null)
                     return@withContext emptyList()
                 }
-                Log.debug("GraalVMPluginWrapper: searchNovels function found, executing...")
                 var result = searchFunc.execute(query, page)
-        Log.debug("GraalVMPluginWrapper: Initial result - isNull: ${result.isNull}, canExecute: ${result.canExecute()}")
         
         // Check if result is a Promise and wait for it
         if (result.hasMember("then") && result.getMember("then").canExecute()) {
-            Log.debug("GraalVMPluginWrapper: Result is a Promise, awaiting...")
             result = awaitPromise(result)
-            Log.debug("GraalVMPluginWrapper: Promise resolved")
         }
         
-        Log.debug("GraalVMPluginWrapper: searchNovels returned - isNull: ${result.isNull}, hasArrayElements: ${result.hasArrayElements()}")
-        if (result.hasArrayElements()) {
-            Log.debug("GraalVMPluginWrapper: Result array size: ${result.arraySize}")
-        } else {
-            Log.warn("GraalVMPluginWrapper: Result is not an array! Type: ${result.metaObject?.metaSimpleName}")
-        }
-                val novels = convertToNovelList(result)
-                Log.info("GraalVMPluginWrapper: Converted ${novels.size} novels from search")
-                novels
+                convertToNovelList(result)
             } finally {
                 context.leave()
             }
@@ -906,14 +863,11 @@ private class GraalVMPluginWrapper(
         try {
             val popularFunc = jsPlugin.getMember("popularNovels")
             if (popularFunc == null || popularFunc.isNull) {
-                Log.error("GraalVMPluginWrapper: popularNovels function not found!", null)
                 return@withContext emptyList()
             }
             
             // If filters are provided, pass them to the plugin
             val result = if (filters.isNotEmpty()) {
-                Log.info("GraalVMPluginWrapper: Calling popularNovels($page) with ${filters.size} filters")
-                
                 // Convert filters map to JavaScript object
                 val filtersJson = kotlinx.serialization.json.Json.encodeToString(
                     kotlinx.serialization.json.JsonObject.serializer(),
@@ -926,7 +880,6 @@ private class GraalVMPluginWrapper(
                 // Call with page and options
                 popularFunc.execute(page, optionsObj)
             } else {
-                Log.debug("GraalVMPluginWrapper: Calling popularNovels($page) without filters")
                 // Call with just page
                 popularFunc.execute(page)
             }
@@ -957,13 +910,11 @@ private class GraalVMPluginWrapper(
         synchronized(lock) {
             context.enter()
             try {
-                Log.debug("GraalVMPluginWrapper: Calling getNovelDetails('$url')")
                 var result = jsPlugin.getMember("getNovelDetails").execute(url)
                 if (result.hasMember("then")) {
-                    Log.debug("GraalVMPluginWrapper: getNovelDetails returned promise, awaiting...")
                     result = awaitPromise(result)
                 }
-                val details = PluginNovelDetails(
+                PluginNovelDetails(
                     name = result.getMember("name").asString(),
                     url = result.getMember("url").asString(),
                     cover = result.getMember("cover")?.asString() ?: "",
@@ -972,8 +923,6 @@ private class GraalVMPluginWrapper(
                     genres = result.getMember("genres")?.let { convertToStringList(it) } ?: emptyList(),
                     status = result.getMember("status")?.asString()
                 )
-                Log.info("GraalVMPluginWrapper: getNovelDetails returned: ${details.name}")
-                details
             } catch (e: Exception) {
                 Log.error("GraalVMPluginWrapper: Error in getNovelDetails: ${e.message}", e)
                 throw e
@@ -987,15 +936,11 @@ private class GraalVMPluginWrapper(
         synchronized(lock) {
             context.enter()
             try {
-                Log.debug("GraalVMPluginWrapper: Calling getChapters('$url')")
                 var result = jsPlugin.getMember("getChapters").execute(url)
                 if (result.hasMember("then")) {
-                    Log.debug("GraalVMPluginWrapper: getChapters returned promise, awaiting...")
                     result = awaitPromise(result)
                 }
-                val chapters = convertToChapterList(result)
-                Log.info("GraalVMPluginWrapper: getChapters returned ${chapters.size} chapters")
-                chapters
+                convertToChapterList(result)
             } catch (e: Exception) {
                 Log.error("GraalVMPluginWrapper: Error in getChapters: ${e.message}", e)
                 throw e
@@ -1055,10 +1000,8 @@ private class GraalVMPluginWrapper(
     
     private fun convertToNovelList(value: Value): List<PluginNovel> {
         if (!value.hasArrayElements()) {
-            Log.warn("GraalVMPluginWrapper: convertToNovelList - value is not an array! Type: ${value.metaObject?.metaSimpleName}")
             return emptyList()
         }
-        Log.debug("GraalVMPluginWrapper: convertToNovelList - array size: ${value.arraySize}")
         return (0 until value.arraySize).map { i ->
             val item = value.getArrayElement(i)
             PluginNovel(
@@ -1071,21 +1014,15 @@ private class GraalVMPluginWrapper(
     
     private fun convertToChapterList(value: Value): List<PluginChapter> {
         if (!value.hasArrayElements()) {
-            Log.warn("GraalVMPluginWrapper: convertToChapterList - value is not an array! Type: ${value.metaObject?.metaSimpleName}")
             return emptyList()
         }
-        Log.debug("GraalVMPluginWrapper: convertToChapterList - array size: ${value.arraySize}")
         return (0 until value.arraySize).map { i ->
             val item = value.getArrayElement(i)
-            val chapter = PluginChapter(
+            PluginChapter(
                 name = item.getMember("name")?.asString() ?: "",
                 url = item.getMember("url")?.asString() ?: "",
                 releaseTime = item.getMember("releaseTime")?.asString()
             )
-            if (i < 3) {
-                Log.debug("GraalVMPluginWrapper: Chapter $i: ${chapter.name} - ${chapter.url}")
-            }
-            chapter
         }
     }
     

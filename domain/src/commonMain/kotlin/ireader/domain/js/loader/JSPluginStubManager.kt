@@ -38,8 +38,6 @@ class JSPluginStubManager(
             
             val serialized = json.encodeToString(stubs)
             stubsPref.set(serialized)
-            
-            Log.debug("JSPluginStubManager: Saved stub for ${metadata.id}")
         } catch (e: Exception) {
             Log.error("JSPluginStubManager: Failed to save stub for ${metadata.id}", e)
         }
@@ -72,8 +70,6 @@ class JSPluginStubManager(
             
             val serialized = json.encodeToString(stubs)
             stubsPref.set(serialized)
-            
-            Log.debug("JSPluginStubManager: Removed stub for $pluginId")
         } catch (e: Exception) {
             Log.error("JSPluginStubManager: Failed to remove stub for $pluginId", e)
         }
@@ -93,8 +89,6 @@ class JSPluginStubManager(
             
             val serialized = json.encodeToString(priorities.toList())
             priorityPluginsPref.set(serialized)
-            
-            Log.debug("JSPluginStubManager: Set priority for $pluginId to $isPriority")
         } catch (e: Exception) {
             Log.error("JSPluginStubManager: Failed to set priority for $pluginId", e)
         }
@@ -123,7 +117,6 @@ class JSPluginStubManager(
     fun clearAllStubs() {
         stubsPref.delete()
         priorityPluginsPref.delete()
-        Log.info("JSPluginStubManager: Cleared all stubs")
     }
 }
 

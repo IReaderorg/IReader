@@ -63,6 +63,10 @@ class TTSService(
     private val appPrefs: AppPreferences by inject()
     private val localizeHelper: LocalizeHelper by inject()
     private val getTranslatedChapterUseCase: ireader.domain.usecases.translation.GetTranslatedChapterUseCase by inject()
+    
+    // AI TTS components
+    private val aiTTSPlayer: ireader.domain.services.tts_service.media_player.AITTSPlayer by inject()
+    private val aiTTSManager: ireader.domain.services.tts.AITTSManager by inject()
 
     lateinit var ttsNotificationBuilder: TTSNotificationBuilder
     lateinit var state: TTSStateImpl
@@ -552,6 +556,7 @@ class TTSService(
     private suspend fun handleCancel() {
         NotificationManagerCompat.from(this).cancel(NotificationsIds.ID_TTS)
         player?.stop()
+        aiTTSPlayer.stop()
         state.utteranceId = ""
         
         abandonAudioFocus()
@@ -581,6 +586,7 @@ class TTSService(
 
     private suspend fun handleSkipPrevious(chapter: Chapter, chapters: List<Chapter>, source: CatalogLocal) {
         player?.stop()
+        aiTTSPlayer.stop()
         updateNotification()
         
         val index = getChapterIndex(chapter, chapters)
@@ -612,6 +618,7 @@ class TTSService(
 
     private suspend fun handleSkipNext(chapter: Chapter, chapters: List<Chapter>, source: CatalogLocal) {
         player?.stop()
+        aiTTSPlayer.stop()
         updateNotification()
         
         val index = getChapterIndex(chapter, chapters)
@@ -652,6 +659,7 @@ class TTSService(
         setPlaybackState(PlaybackStateCompat.STATE_PAUSED)
         state.isPlaying = false
         player?.stop()
+        aiTTSPlayer.stop()
         updateNotification()
     }
 
@@ -667,6 +675,7 @@ class TTSService(
         if (state.isPlaying) {
             state.isPlaying = false
             player?.stop()
+            aiTTSPlayer.stop()
             updateNotification()
         } else {
             state.isPlaying = true
@@ -687,7 +696,6 @@ class TTSService(
     
     fun readText(context: Context, mediaSessionCompat: MediaSessionCompat) {
         setBundle()
-        updatePlayerSettings()
         
         val chapter = state.ttsChapter ?: return
         val content = getCurrentContent() ?: return
@@ -696,18 +704,121 @@ class TTSService(
         runCatching {
             scope.launch { updateNotification() }
             
-            if (state.utteranceId != state.currentReadingParagraph.toString()) {
-                player?.speak(
-                    content[state.currentReadingParagraph],
-                    TextToSpeech.QUEUE_FLUSH,
-                    null,
-                    state.currentReadingParagraph.toString()
-                )
-            }
+            // Check if AI TTS (PiperTTS) is enabled
+            val useAITTS = appPrefs.useAITTS().get()
             
-            player?.setOnUtteranceProgressListener(createUtteranceListener(context, mediaSessionCompat, chapter, content))
+            if (useAITTS) {
+                // Use AI TTS (PiperTTS)
+                readTextWithAITTS(context, mediaSessionCompat, chapter, content)
+            } else {
+                // Use native Android TTS
+                readTextWithNativeTTS(context, mediaSessionCompat, chapter, content)
+            }
         }.onFailure { e ->
             Log.error { "Error reading text: ${e.message}" }
+        }
+    }
+    
+    private fun readTextWithNativeTTS(
+        context: Context,
+        mediaSessionCompat: MediaSessionCompat,
+        chapter: Chapter,
+        content: List<String>
+    ) {
+        if (player == null) {
+            Log.error { "Native TTS player is null! Reinitializing..." }
+            initPlayer()
+            return
+        }
+        
+        updatePlayerSettings()
+        
+        if (state.utteranceId != state.currentReadingParagraph.toString()) {
+            player?.speak(
+                content[state.currentReadingParagraph],
+                TextToSpeech.QUEUE_FLUSH,
+                null,
+                state.currentReadingParagraph.toString()
+            )
+        }
+        
+        player?.setOnUtteranceProgressListener(createUtteranceListener(context, mediaSessionCompat, chapter, content))
+    }
+    
+    private fun readTextWithAITTS(
+        context: Context,
+        mediaSessionCompat: MediaSessionCompat,
+        chapter: Chapter,
+        content: List<String>
+    ) {
+        scope.launch {
+            try {
+                // Check if AI TTS is actually available
+                if (!aiTTSManager.hasAvailableProvider()) {
+                    Log.warn { "No AI TTS provider available, falling back to native TTS" }
+                    readTextWithNativeTTS(context, mediaSessionCompat, chapter, content)
+                    return@launch
+                }
+                
+                val selectedProvider = try {
+                    ireader.domain.services.tts.AITTSProvider.valueOf(
+                        appPrefs.selectedAITTSProvider().get()
+                    )
+                } catch (e: Exception) {
+                    ireader.domain.services.tts.AITTSProvider.PIPER_TTS
+                }
+                
+                val selectedVoiceId = appPrefs.selectedAIVoiceId().get()
+                
+                // Check if voice is selected and downloaded
+                if (selectedVoiceId.isEmpty() || !aiTTSManager.isVoiceDownloaded(selectedVoiceId)) {
+                    Log.warn { "AI TTS voice not selected or not downloaded, falling back to native TTS" }
+                    readTextWithNativeTTS(context, mediaSessionCompat, chapter, content)
+                    return@launch
+                }
+                
+                val speechSpeed = readerPreferences.speechRate().get()
+                val pitch = readerPreferences.speechPitch().get()
+                
+                state.utteranceId = state.currentReadingParagraph.toString()
+                
+                aiTTSPlayer.speak(
+                    text = content[state.currentReadingParagraph],
+                    provider = selectedProvider,
+                    voiceId = selectedVoiceId,
+                    speed = speechSpeed,
+                    pitch = pitch,
+                    onStart = {
+                        state.isPlaying = true
+                        state.utteranceId = state.currentReadingParagraph.toString()
+                    },
+                    onComplete = {
+                        handleAITTSComplete(context, mediaSessionCompat, chapter, content)
+                    },
+                    onError = { error ->
+                        Log.error { "AI TTS error: ${error.message}, falling back to native TTS" }
+                        // Fall back to native TTS on error
+                        readTextWithNativeTTS(context, mediaSessionCompat, chapter, content)
+                    }
+                )
+            } catch (e: Exception) {
+                Log.error { "AI TTS error: ${e.message}, falling back to native TTS" }
+                readTextWithNativeTTS(context, mediaSessionCompat, chapter, content)
+            }
+        }
+    }
+    
+    private fun handleAITTSComplete(
+        context: Context,
+        mediaSessionCompat: MediaSessionCompat,
+        chapter: Chapter,
+        content: List<String>
+    ) {
+        checkSleepTime()
+        runCatching {
+            handleUtteranceDone(context, mediaSessionCompat, chapter, content)
+        }.onFailure { e ->
+            Log.error { "Error in AI TTS completion: ${e.message}" }
         }
     }
 
@@ -796,6 +907,7 @@ class TTSService(
         state.isPlaying = false
         state.currentReadingParagraph = 0
         player?.stop()
+        aiTTSPlayer.stop()
         
         if (state.autoNextChapter) {
             scope.launch {
@@ -955,6 +1067,7 @@ class TTSService(
             if (intent?.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
                 resumeOnFocus = false
                 player?.stop()
+                aiTTSPlayer.stop()
             }
         }
     }
@@ -969,10 +1082,12 @@ class TTSService(
             AudioManager.AUDIOFOCUS_LOSS -> {
                 synchronized(focusLock) { resumeOnFocus = false }
                 player?.stop()
+                aiTTSPlayer.stop()
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
                 synchronized(focusLock) { resumeOnFocus = state.isPlaying }
                 player?.stop()
+                aiTTSPlayer.stop()
             }
         }
     }

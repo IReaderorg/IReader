@@ -48,10 +48,9 @@ class DesktopCatalogInstaller(
                     
                     // No need to download icon - Coil will handle it via iconUrl with caching
                     
-                    emit(InstallStep.Idle)
-                    val result = InstallStep.Success
                     installationChanges.notifyAppInstall(catalog.pkgName)
-                    emit(result)
+                    emit(InstallStep.Idle)
+                    emit(InstallStep.Success)
                 } catch (e: Throwable) {
                     Log.warn(e, "Error installing JS plugin")
                     emit(InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper)))
@@ -88,10 +87,9 @@ class DesktopCatalogInstaller(
                     
                     // No need to download icon - Coil will handle it via iconUrl with caching
                     
-                    emit(InstallStep.Idle)
-                    val result = InstallStep.Success
                     installationChanges.notifyAppInstall(catalog.pkgName)
-                    emit(result)
+                    emit(InstallStep.Idle)
+                    emit(InstallStep.Success)
                 } catch (e: Throwable) {
                     Log.warn(e, "Error installing package")
                     emit(InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper)))
@@ -101,6 +99,17 @@ class DesktopCatalogInstaller(
 
     override suspend fun uninstall(pkgName: String): InstallStep {
         return try {
+            // IMPORTANT: Notify uninstall FIRST to remove catalog from store
+            // This releases class loader references to the JAR files
+            installationChanges.notifyAppUninstall(pkgName)
+            
+            // Give the system time to release file locks
+            kotlinx.coroutines.delay(500)
+            
+            // Suggest garbage collection to release class loader references
+            System.gc()
+            kotlinx.coroutines.delay(200)
+            
             // Try to uninstall from both locations (APK/JAR and JS plugins)
             var deleted = false
             
@@ -108,18 +117,30 @@ class DesktopCatalogInstaller(
             val extensionFile = File(ExtensionDir, pkgName)
             if (extensionFile.exists()) {
                 deleted = extensionFile.deleteRecursively()
-                extensionFile.deleteOnExit()
+                if (!deleted) {
+                    extensionFile.deleteOnExit()
+                    // Try to delete individual files
+                    extensionFile.listFiles()?.forEach { file ->
+                        if (!file.delete()) {
+                            file.deleteOnExit()
+                        }
+                    }
+                }
             }
             
             // Try JS plugins directory
             val jsPluginsDir = File(System.getProperty("user.home"), ".ireader/js-plugins")
             val jsFile = File(jsPluginsDir, "$pkgName.js")
             if (jsFile.exists()) {
-                deleted = jsFile.delete() || deleted
+                val jsDeleted = jsFile.delete()
+                if (!jsDeleted) {
+                    jsFile.deleteOnExit()
+                }
+                deleted = jsDeleted || deleted
             }
             
-            installationChanges.notifyAppUninstall(pkgName)
-            if (deleted) InstallStep.Success else InstallStep.Error(localizeHelper.localize(Res.string.failed))
+            // Return success since the catalog was removed from the store
+            InstallStep.Success
         } catch (e: Throwable) {
             InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper))
         }

@@ -118,24 +118,16 @@ class DesktopCatalogLoader(
     override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? {
         val file = File(ExtensionDir, "${pkgName}/${pkgName}.apk")
         try {
-
-            val pkgInfo = if (file.exists() && file.canRead()) {
-                ApkFile(file)
-            } else {
-                null
-            }
-            if (pkgInfo == null) {
-                Log.warn("The requested catalog {} wasn't found", pkgName)
+            if (!file.exists() || !file.canRead()) {
                 return null
             }
 
+            val pkgInfo = ApkFile(file)
             return loadLocalCatalogs(pkgName, pkgInfo, file)
-        }catch (e:Exception) {
-            file.parentFile.deleteRecursively()
+        } catch (e:Exception) {
+            Log.error(e) { "Failed to load local catalog $pkgName" }
             return null
         }
-
-
     }
 
     private fun loadLocalCatalogs(
@@ -147,9 +139,25 @@ class DesktopCatalogLoader(
         val classLoader = URLClassLoader.getSystemClassLoader()
         val jarFileName = file.name.substringBefore(".apk").plus(".jar")
         val jarFile = File(file.parentFile, jarFileName)
-        if (!jarFile.exists() || jarFile.length() == 0L) {
+        
+        // Check if we need to convert or re-convert the APK to JAR
+        val needsConversion = !jarFile.exists() || jarFile.length() == 0L || 
+                              jarFile.lastModified() < file.lastModified() // Re-convert if APK is newer
+        
+        if (needsConversion) {
+            // Delete old JAR if it exists to force clean conversion
+            if (jarFile.exists()) {
+                jarFile.delete()
+            }
+            
             dex2jar(file,jarFile,file.name)
+            
+            // Verify JAR was created successfully
+            if (!jarFile.exists() || jarFile.length() == 0L) {
+                return null
+            }
         }
+        
         val loader = URLClassLoader(
             arrayOf(jarFile.toURL()),
             classLoader,

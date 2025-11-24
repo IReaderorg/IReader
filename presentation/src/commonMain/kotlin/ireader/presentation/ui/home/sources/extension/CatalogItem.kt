@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -61,14 +62,16 @@ fun CatalogItem(
 
     @OptIn(ExperimentalFoundationApi::class)
     Row(
-        modifier = if (onClick != null || onShowDetails != null) {
+        modifier = if ((onClick != null || onShowDetails != null) && !isLoading) {
             modifier.combinedClickable(
                 onClick = { onClick?.invoke() },
                 onLongClick = { onShowDetails?.invoke() }
             )
         } else {
             modifier
-        }
+        }.then(
+            if (isLoading) Modifier.alpha(0.6f) else Modifier
+        )
     ) {
         CatalogPic(
             catalog = catalog,
@@ -96,10 +99,20 @@ fun CatalogItem(
                 
                 // Show loading indicator for sources that are loading
                 if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        strokeWidth = 2.dp
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp
+                        )
+                        Text(
+                            text = "Loading...",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
                 
                 // Show status indicator for installed sources

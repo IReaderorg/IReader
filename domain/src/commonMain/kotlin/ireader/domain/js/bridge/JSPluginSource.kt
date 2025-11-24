@@ -70,30 +70,14 @@ class JSPluginSource(
             // Check if there's a search query in filters
             val query = filters.filterIsInstance<Filter.Title>().firstOrNull()?.value ?: ""
             
-            // Log filter details for debugging
-            Log.info("JSPluginSource: [$name] getMangaList - page=$page, filters=${filters.size}, query='$query'")
-            filters.forEach { filter ->
-                when (filter) {
-                    is Filter.Title -> Log.debug("  - Title: '${filter.value}'")
-                    is Filter.Select -> Log.debug("  - Select '${filter.name}': ${filter.getSelectedOption()}")
-                    is Filter.Text -> Log.debug("  - Text '${filter.name}': '${filter.value}'")
-                    is Filter.Check -> Log.debug("  - Check '${filter.name}': ${filter.value}")
-                    is Filter.Sort -> Log.debug("  - Sort '${filter.name}': index=${filter.value?.index}, asc=${filter.value?.ascending}")
-                    is Filter.Group -> Log.debug("  - Group '${filter.name}': ${filter.filters.size} items")
-                    else -> Log.debug("  - ${filter.name}: ${filter::class.simpleName}")
-                }
-            }
+
             
             val novels = if (query.isNotBlank()) {
-                // If there's a search query, use searchNovels
                 plugin.searchNovels(query, page)
             } else if (filters.size > 1 || (filters.size == 1 && filters.first() !is Filter.Title)) {
-                // Convert IReader filters to LNReader format and pass to popularNovels
                 val jsFilters = filterConverter.convertIReaderFiltersToJS(filters)
-                Log.info("JSPluginSource: Applying ${jsFilters.size} filters: ${jsFilters.keys}")
                 plugin.popularNovels(page, jsFilters)
             } else {
-                // No search query or filters, default to popular
                 plugin.popularNovels(page)
             }
             
