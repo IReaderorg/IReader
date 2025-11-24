@@ -48,6 +48,7 @@ import ireader.presentation.ui.settings.security.SettingsSecurityViewModel
 import ireader.presentation.ui.settings.notifications.SettingsNotificationViewModel
 import ireader.presentation.ui.settings.tracking.SettingsTrackingViewModel
 import ireader.presentation.ui.settings.data.SettingsDataViewModel
+import ireader.presentation.ui.settings.viewmodels.AITTSSettingsViewModel
 import org.koin.dsl.module
 
 val PresentationModules = module {
@@ -106,6 +107,7 @@ val PresentationModules = module {
     factory  { SecuritySettingsViewModel(get(), get()) }
     factory  { StatisticsViewModel(get()) }
     factory  { ireader.presentation.ui.settings.donation.DonationViewModel(get(), get()) }
+    factory  { AITTSSettingsViewModel(get(), get()) }
     factory  { ireader.presentation.ui.settings.donation.DonationTriggerViewModel(get()) }
     
     // Enhanced Settings ViewModels following Mihon's patterns

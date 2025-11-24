@@ -7,6 +7,7 @@ import ireader.presentation.ui.settings.TTSEngineManagerScreen
 
 /**
  * Desktop implementation of TTS Engine Manager Screen
+ * Manages TTS engines (Piper, Kokoro, Maya)
  */
 actual class TTSEngineManagerScreenSpec {
     

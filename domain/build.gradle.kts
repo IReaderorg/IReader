@@ -168,6 +168,9 @@ kotlin {
                 // J2V8 - V8 JavaScript engine for Android (full Promise/async support)
                 // Provides native ES6+, Promises, async/await without polyfills
                 implementation("com.eclipsesource.j2v8:j2v8:6.3.4")
+                
+                // Free AI TTS - Piper TTS (same as desktop)
+                implementation(libs.piper.tts.android)
             }
         }
         val desktopMain by getting {

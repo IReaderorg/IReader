@@ -14,6 +14,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlin.collections.emptyList
 import kotlin.time.ExperimentalTime
 
 /**
@@ -133,6 +134,9 @@ class GlobalSearchRepositoryImpl(
                     searchDuration = endTime - startTime
                 ))
             }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            Log.debug { "Global search flow cancelled for query: $query" }
+            throw e // Re-throw to properly cancel
         } catch (e: Exception) {
             Log.error { "Failed to perform global search flow: ${e.message}" }
             emit(GlobalSearchResult(
@@ -192,6 +196,7 @@ class GlobalSearchRepositoryImpl(
             val catalog = catalogStore.catalogs.find { it.sourceId == sourceId }
             
             if (catalog == null) {
+                Log.warn { "Catalog not found for source ID: $sourceId" }
                 return SourceSearchResult(
                     sourceId = sourceId,
                     sourceName = "Unknown",
@@ -201,23 +206,50 @@ class GlobalSearchRepositoryImpl(
                 )
             }
 
-            // Perform search using catalog
-            // Note: Catalog search API may vary by implementation
-            // This is a placeholder that needs to be adapted to actual catalog interface
-            val searchResults = emptyList<ireader.domain.models.entities.Book>()
-            
-            val results = searchResults.map { book ->
-                SearchResultItem(
-                    bookId = null, // Remote book doesn't have local ID yet
-                    title = book.title,
-                    author = book.author,
-                    cover = book.cover,
-                    description = book.description,
-                    genres = book.genres,
-                    key = book.key,
-                    inLibrary = book.key in libraryBookKeys
+            val source = catalog.source as? ireader.core.source.CatalogSource
+            if (source == null) {
+                Log.warn { "Source not available or not a CatalogSource for catalog: ${catalog.name}" }
+                return SourceSearchResult(
+                    sourceId = sourceId,
+                    sourceName = catalog.name,
+                    results = emptyList(),
+                    isLoading = false,
+                    error = "Source not available"
                 )
             }
+
+            // Perform search using the source's getMangaList method with filters
+            // Create a filter list with the search query
+            val searchResults = try {
+                val titleFilter = ireader.core.source.model.Filter.Title().apply {
+                    value = query
+                }
+                val filters = listOf(titleFilter)
+                
+                val pageInfo = source.getMangaList(filters, page = 1)
+                pageInfo.mangas
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                Log.debug { "Search cancelled for source ${catalog.name}" }
+                throw e // Re-throw to properly cancel
+            } catch (e: Exception) {
+                Log.error { "Error searching source ${catalog.name}: ${e.message}" }
+                emptyList<ireader.core.source.model.MangaInfo>()
+            }
+            
+            val results = searchResults.map { mangaInfo: ireader.core.source.model.MangaInfo ->
+                SearchResultItem(
+                    bookId = null, // Remote book doesn't have local ID yet
+                    title = mangaInfo.title,
+                    author = mangaInfo.author,
+                    cover = mangaInfo.cover,
+                    description = mangaInfo.description,
+                    genres = mangaInfo.genres,
+                    key = mangaInfo.key,
+                    inLibrary = mangaInfo.key in libraryBookKeys
+                )
+            }
+
+            Log.debug { "Found ${results.size} results from ${catalog.name} for query: $query" }
 
             SourceSearchResult(
                 sourceId = sourceId,
@@ -226,11 +258,15 @@ class GlobalSearchRepositoryImpl(
                 isLoading = false,
                 error = null
             )
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            Log.debug { "Search cancelled for source $sourceId" }
+            throw e // Re-throw to properly cancel
         } catch (e: Exception) {
             Log.error { "Failed to search source $sourceId: ${e.message}" }
+            val catalog = catalogStore.catalogs.find { it.sourceId == sourceId }
             SourceSearchResult(
                 sourceId = sourceId,
-                sourceName = "Unknown",
+                sourceName = catalog?.name ?: "Unknown",
                 results = emptyList(),
                 isLoading = false,
                 error = e.message ?: "Unknown error"

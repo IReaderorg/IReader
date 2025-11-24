@@ -39,9 +39,9 @@ SELECT * FROM chapter;
 
 -- Lightweight query without content field to prevent OOM
 findAllLight:
-SELECT _id, book_id, url, name, scanlator, read, bookmark, 
-       last_page_read, chapter_number, source_order, date_fetch, 
-       date_upload, type
+SELECT chapter._id, chapter.book_id, chapter.url, chapter.name, chapter.scanlator, chapter.read, chapter.bookmark, 
+       chapter.last_page_read, chapter.chapter_number, chapter.source_order, chapter.date_fetch, 
+       chapter.date_upload, chapter.type, CASE WHEN LENGTH(chapter.content) > 10 THEN 1 ELSE 0 END AS is_downloaded
 FROM chapter;
 
 findInLibrary:
@@ -53,8 +53,9 @@ SELECT chapter._id,book_id,chapter.url,name,scanlator,read,bookmark, last_page_r
 
 -- Lightweight query without content field to prevent OOM
 findInLibraryLight:
-SELECT chapter._id, book_id, chapter.url, name, scanlator, read, bookmark, 
-       last_page_read, chapter_number, source_order, date_fetch, date_upload, type
+SELECT chapter._id, chapter.book_id, chapter.url, chapter.name, chapter.scanlator, chapter.read, chapter.bookmark, 
+       chapter.last_page_read, chapter.chapter_number, chapter.source_order, chapter.date_fetch, chapter.date_upload, chapter.type,
+       CASE WHEN LENGTH(chapter.content) > 10 THEN 1 ELSE 0 END AS is_downloaded
 FROM chapter
 LEFT JOIN book ON book._id == chapter.book_id
 GROUP BY chapter._id
@@ -66,11 +67,11 @@ WHERE book_id = :mangaId;
 
 -- Lightweight query without content field to prevent OOM
 getChaptersByMangaIdLight:
-SELECT _id, book_id, url, name, scanlator, read, bookmark, 
-       last_page_read, chapter_number, source_order, date_fetch, 
-       date_upload, type
+SELECT chapter._id, chapter.book_id, chapter.url, chapter.name, chapter.scanlator, chapter.read, chapter.bookmark, 
+       chapter.last_page_read, chapter.chapter_number, chapter.source_order, chapter.date_fetch, 
+       chapter.date_upload, chapter.type, CASE WHEN LENGTH(chapter.content) > 10 THEN 1 ELSE 0 END AS is_downloaded
 FROM chapter
-WHERE book_id = :mangaId;
+WHERE chapter.book_id = :mangaId;
 
 getChapterByUrl:
 SELECT *

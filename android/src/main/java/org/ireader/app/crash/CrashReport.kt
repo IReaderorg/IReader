@@ -14,7 +14,9 @@ data class CrashReport(
     val deviceModel: String,
     val buildTime: String,
     val commitSha: String,
-    val timestamp: Long
+    val timestamp: Long,
+    val isDatabaseMigrationError: Boolean = false,
+    val conflictingTables: List<String> = emptyList()
 ) : Parcelable {
     
     fun toGitHubIssueBody(): String {

@@ -775,6 +775,95 @@ private class AndroidPluginWrapper(
         }
     }
     
+    override fun getFilters(): Map<String, Any> {
+        return try {
+            // Must run on V8 thread - use runBlocking since this is not a suspend function
+            kotlinx.coroutines.runBlocking(v8Thread) {
+                mutex.withLock {
+                    try {
+                        // LNReader plugins export filters at module level, not on the plugin object
+                        // Try multiple locations: exports.filters, module.exports.filters, or global filters
+                        val filtersJson = engine.evaluateScript("""
+                            (function() {
+                                // Try different locations where filters might be defined
+                                var filters = null;
+                                
+                                // 1. Check exports.filters (most common)
+                                if (typeof exports !== 'undefined' && exports.filters) {
+                                    filters = exports.filters;
+                                }
+                                // 2. Check module.exports.filters
+                                else if (typeof module !== 'undefined' && module.exports && module.exports.filters) {
+                                    filters = module.exports.filters;
+                                }
+                                // 3. Check global filters variable
+                                else if (typeof filters !== 'undefined' && filters !== null) {
+                                    filters = globalThis.filters;
+                                }
+                                // 4. Check __wrappedPlugin.filters (wrapped plugin)
+                                else if (typeof __wrappedPlugin !== 'undefined' && __wrappedPlugin.filters) {
+                                    filters = __wrappedPlugin.filters;
+                                }
+                                
+                                if (filters) {
+                                    return JSON.stringify(filters);
+                                } else {
+                                    return '{}';
+                                }
+                            })();
+                        """.trimIndent()) as? String ?: "{}"
+                        
+                        Log.debug("AndroidPluginWrapper: Filters JSON: $filtersJson")
+                        
+                        if (filtersJson == "{}") {
+                            Log.debug("AndroidPluginWrapper: Plugin does not have filters defined")
+                            return@runBlocking emptyMap()
+                        }
+                        
+                        // Parse JSON to Map
+                        val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                        val jsonElement = json.parseToJsonElement(filtersJson)
+                        
+                        if (jsonElement is kotlinx.serialization.json.JsonObject) {
+                            val result = jsonElement.toMap()
+                            Log.info("AndroidPluginWrapper: Loaded ${result.size} filters from plugin")
+                            result
+                        } else {
+                            Log.warn("AndroidPluginWrapper: Filters JSON is not an object")
+                            emptyMap()
+                        }
+                    } catch (e: Exception) {
+                        Log.warn("AndroidPluginWrapper: Failed to get filters: ${e.message}", e)
+                        emptyMap()
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.error("AndroidPluginWrapper: Error in getFilters: ${e.message}", e)
+            emptyMap()
+        }
+    }
+    
+    override suspend fun popularNovelsWithFilters(page: Int, filters: Map<String, Any>): List<PluginNovel> = withContext(v8Thread) {
+        mutex.withLock {
+            try {
+                // Convert filters map to JSON
+                val filtersJson = kotlinx.serialization.json.Json.encodeToString(
+                    kotlinx.serialization.json.JsonObject.serializer(),
+                    filters.toJsonObject()
+                )
+                
+                // Call plugin with filters
+                val resultJson = awaitPromise("__wrappedPlugin.popularNovels($page, { filters: $filtersJson })")
+                parseNovelList(resultJson)
+            } catch (e: Exception) {
+                Log.warn("AndroidPluginWrapper: Error in popularNovelsWithFilters, falling back to popularNovels: ${e.message}")
+                // Fallback to regular popularNovels
+                popularNovels(page)
+            }
+        }
+    }
+    
     /**
      * Wait for a JavaScript Promise to resolve.
      * With V8, Promises work natively - we just need to handle fetch requests.
@@ -996,4 +1085,64 @@ private class AndroidPluginWrapper(
             emptyList()
         }
     }
+}
+
+/**
+
+ * Extension function to convert JsonObject to Map<String, Any>
+ */
+private fun kotlinx.serialization.json.JsonObject.toMap(): Map<String, Any> {
+    val result = mutableMapOf<String, Any>()
+    for ((key, value) in this) {
+        result[key] = when (value) {
+            is kotlinx.serialization.json.JsonPrimitive -> {
+                when {
+                    value.isString -> value.content
+                    value.content == "true" || value.content == "false" -> value.content.toBoolean()
+                    value.content.toIntOrNull() != null -> value.content.toInt()
+                    value.content.toDoubleOrNull() != null -> value.content.toDouble()
+                    else -> value.content
+                }
+            }
+            is kotlinx.serialization.json.JsonObject -> value.toMap()
+            is kotlinx.serialization.json.JsonArray -> value.map { element ->
+                when (element) {
+                    is kotlinx.serialization.json.JsonPrimitive -> element.content
+                    is kotlinx.serialization.json.JsonObject -> element.toMap()
+                    is kotlinx.serialization.json.JsonArray -> element.toString()
+                    else -> element.toString()
+                }
+            }
+            else -> value.toString()
+        }
+    }
+    return result
+}
+
+/**
+ * Extension function to convert Map<String, Any> to JsonObject
+ */
+private fun Map<String, Any>.toJsonObject(): kotlinx.serialization.json.JsonObject {
+    val map = mutableMapOf<String, kotlinx.serialization.json.JsonElement>()
+    for ((key, value) in this) {
+        map[key] = when (value) {
+            is String -> kotlinx.serialization.json.JsonPrimitive(value)
+            is Number -> kotlinx.serialization.json.JsonPrimitive(value)
+            is Boolean -> kotlinx.serialization.json.JsonPrimitive(value)
+            is Map<*, *> -> {
+                @Suppress("UNCHECKED_CAST")
+                (value as Map<String, Any>).toJsonObject()
+            }
+            is List<*> -> kotlinx.serialization.json.JsonArray(value.map { item ->
+                when (item) {
+                    is String -> kotlinx.serialization.json.JsonPrimitive(item)
+                    is Number -> kotlinx.serialization.json.JsonPrimitive(item)
+                    is Boolean -> kotlinx.serialization.json.JsonPrimitive(item)
+                    else -> kotlinx.serialization.json.JsonPrimitive(item.toString())
+                }
+            })
+            else -> kotlinx.serialization.json.JsonPrimitive(value.toString())
+        }
+    }
+    return kotlinx.serialization.json.JsonObject(map)
 }

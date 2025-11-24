@@ -9,6 +9,9 @@ kotlinxCoroutinesSwing = "1.10.2"
 navigation = "2.9.1"
 voyager = "1.0.0"
 zxing = "3.5.3"
+# AI TTS (Free alternatives)
+piperTts = "1.2.0-a0f09cd"
+espeakNg = "1.51"
 # Android
 proguard = "7.2.2"
 # Dependency Injection
@@ -57,6 +60,8 @@ gson = "com.google.code.gson:gson:2.13.2"
 kermit = "co.touchlab:kermit:2.0.4"
 googleTranslator = "com.google.mlkit:translate:17.0.3"
 
+# Free AI TTS Libraries
+piper-tts-android = { module = "io.github.givimad:piper-jni", version.ref = "piperTts" }
 
 junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junitVintageEngine" }
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinxCoroutinesSwing" }

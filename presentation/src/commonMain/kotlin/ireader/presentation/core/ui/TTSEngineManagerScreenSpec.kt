@@ -3,10 +3,11 @@ package ireader.presentation.core.ui
 import androidx.compose.runtime.Composable
 
 /**
- * TTS Engine Manager Screen - Desktop only
+ * TTS Engine Manager Screen
  * 
- * This screen allows users to install and manage TTS engines.
- * Only available on desktop platform.
+ * Platform-specific implementation:
+ * - Android: Manages AI TTS voices (Piper TTS voice downloads and selection)
+ * - Desktop: Manages TTS engines (Piper, Kokoro, Maya installation and configuration)
  */
 expect class TTSEngineManagerScreenSpec() {
     @Composable

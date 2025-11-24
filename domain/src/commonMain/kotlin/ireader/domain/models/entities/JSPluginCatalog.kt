@@ -23,9 +23,10 @@ data class JSPluginCatalog(
         metadata.icon.startsWith("http") -> metadata.icon
         metadata.icon.isNotBlank() -> {
             // LNReader plugins use GitHub raw URLs
-            // Format: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/master/public/static/{icon_path}
-            val iconPath = metadata.icon.removePrefix("src/").removePrefix("/")
-            "https://raw.githubusercontent.com/LNReader/lnreader-plugins/refs/heads/master/public/static/$iconPath"
+            // Format: https://raw.githubusercontent.com/LNReader/lnreader-plugins/plugins/v3.0.0/public/static/{icon_path}
+            // Keep the full path including "src/" prefix
+            val iconPath = metadata.icon.removePrefix("/")
+            "https://raw.githubusercontent.com/LNReader/lnreader-plugins/plugins/v3.0.0/public/static/$iconPath"
         }
         else -> "https://via.placeholder.com/300x300?text=${metadata.id}"
     },

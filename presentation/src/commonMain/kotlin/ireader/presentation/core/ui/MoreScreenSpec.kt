@@ -80,9 +80,7 @@ object MoreScreenSpec : Tab {
                 onDonation = {
                     navController.navigate(NavigationRoutes.donation)
                 },
-                onTTSEngineManager = {
-                    navController.navigate(NavigationRoutes.ttsEngineManager)
-                },
+
                 onWeb3Profile = {
                     navController.navigate(NavigationRoutes.profile)
                 },

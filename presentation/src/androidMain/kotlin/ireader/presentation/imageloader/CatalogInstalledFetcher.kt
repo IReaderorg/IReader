@@ -31,47 +31,31 @@ class CatalogInstalledFetcher(
     override suspend fun fetch(): FetchResult? {
         return when (data) {
             is CatalogInstalled.SystemWide -> {
-                if (data.iconUrl.isNotBlank()) {
-                    val file = File(data.installDir, "${data.pkgName}.png")
-                    val source = withContext(Dispatchers.IO) { file.source().buffer() }
-                    SourceFetchResult(
-                        source = ImageSource(source = source, fileSystem = FileSystem.SYSTEM),
-                        mimeType = "image/*",
-                        dataSource = DataSource.DISK,
-                    )
-                } else {
-                    val icon = packageManger.getApplicationIcon(data.pkgName) as Drawable
-                    ImageFetchResult(image = icon.asImage(),isSampled = true,DataSource.DISK)
+                // For system-wide installations, try to use app icon if no iconUrl
+                if (data.iconUrl.isBlank()) {
+                    try {
+                        val icon = packageManger.getApplicationIcon(data.pkgName) as Drawable
+                        return ImageFetchResult(image = icon.asImage(), isSampled = true, DataSource.DISK)
+                    } catch (e: Exception) {
+                        // If app icon fails, return null to let mapper handle iconUrl
+                        return null
+                    }
                 }
-            }
-
-            is CatalogInstalled.Locally -> {
-                val file = File(data.installDir, "${data.pkgName}.png")
-                val source = withContext(Dispatchers.IO) { file.source().buffer() }
-                return SourceFetchResult(
-                    source = ImageSource(source = source, fileSystem = FileSystem.SYSTEM),
-                    mimeType = "image/*",
-                    dataSource = DataSource.DISK,
-                )
-            }
-            
-            is ireader.domain.models.entities.JSPluginCatalog -> {
-                // For JS plugins, try to load icon from local file first
-                val file = File(data.installDir, "${data.pkgName}.png")
-                if (file.exists() && file.length() > 0) {
-                    val source = withContext(Dispatchers.IO) { file.source().buffer() }
-                    return SourceFetchResult(
-                        source = ImageSource(source = source, fileSystem = FileSystem.SYSTEM),
-                        mimeType = "image/*",
-                        dataSource = DataSource.DISK,
-                    )
-                }
-                
-                // If local file doesn't exist but we have an iconUrl, 
-                // return null to let Coil's default HTTP fetcher handle it via the mapper
+                // If iconUrl exists, return null to let Coil's HTTP fetcher handle it via mapper
                 null
             }
 
+            is CatalogInstalled.Locally -> {
+                // Return null to let Coil's HTTP fetcher handle the iconUrl via mapper
+                // This uses Coil's built-in caching instead of manual file management
+                null
+            }
+            
+            is ireader.domain.models.entities.JSPluginCatalog -> {
+                // Return null to let Coil's HTTP fetcher handle the iconUrl via mapper
+                // This uses Coil's built-in caching instead of manual file management
+                null
+            }
         }
     }
 

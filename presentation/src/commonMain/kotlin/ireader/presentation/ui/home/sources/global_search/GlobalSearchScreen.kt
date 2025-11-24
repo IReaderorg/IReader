@@ -45,63 +45,14 @@ fun GlobalSearchScreen(
         onBook: (Book) -> Unit,
         onGoToExplore: (SearchItem) -> Unit,
 ) {
-
-    val numberOfTries  = vm.numberOfTries
-
-    IScaffold(
-        topBar = { scrollBehavior ->
-            GlobalScreenTopBar(
-                onPop = onPopBackStack,
-                onSearch = onSearch,
-                state = vm,
-                scrollBehavior = scrollBehavior
-            )
-        }
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(
-                items = vm.withResult,
-                key = { item ->
-                    item.source.key(numberOfTries, Types.WithResult)
-                },
-            ) { item ->
-                ModernGlobalSearchCard(
-                    item,
-                    onBook = onBook,
-                    goToExplore = { onGoToExplore(item) },
-                    loading = false
-                )
-            }
-            items(items = vm.inProgress,
-                key = { item ->
-                    item.source.key(numberOfTries, Types.InProgress)
-                },) { item ->
-                ModernGlobalSearchCard(
-                    item,
-                    onBook = onBook,
-                    goToExplore = { onGoToExplore(item) },
-                    loading = true
-                )
-            }
-            items(items = vm.noResult,
-                key = { item ->
-                    item.source.key(numberOfTries, Types.NoResult)
-                },) { item ->
-                ModernGlobalSearchCard(
-                    item,
-                    onBook = onBook,
-                    goToExplore = { onGoToExplore(item) },
-                    loading = false
-                )
-            }
-        }
-    }
+    // Use the modern implementation
+    GlobalSearchScreenModern(
+        vm = vm,
+        onPopBackStack = onPopBackStack,
+        onSearch = onSearch,
+        onBook = onBook,
+        onGoToExplore = onGoToExplore
+    )
 }
 
 private enum class Types {

@@ -60,8 +60,9 @@ fun AppColors(
     shape: Shapes,
     content: @Composable () -> Unit,
 ) {
-    val rememberedCustomColors = remember { extraColors }.apply { updateFrom(extraColors) }
-    val rememberedAppColors = remember { AppColors(materialColors, rememberedCustomColors) }
+    val rememberedAppColors = remember(materialColors, extraColors) { 
+        AppColors(materialColors, extraColors) 
+    }
 
     MaterialTheme(
         colorScheme = materialColors,

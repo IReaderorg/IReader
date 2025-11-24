@@ -3,6 +3,7 @@ package ireader.domain.js.engine
 import ireader.core.log.Log
 import ireader.domain.js.bridge.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
 import org.graalvm.polyglot.Context
 import org.graalvm.polyglot.Value
@@ -23,20 +24,31 @@ class GraalVMJSEngine(
     private var context: Context? = null
     private val contextLock = Any()
     
+    // Single-threaded dispatcher for GraalVM context access
+    // GraalVM contexts are not thread-safe, so all operations must happen on the same thread
+    private val graalvmThread = java.util.concurrent.Executors.newSingleThreadExecutor { r ->
+        Thread(r, "GraalVM-Thread").apply {
+            isDaemon = true
+        }
+    }.asCoroutineDispatcher()
+    
     /**
      * Load a plugin from JavaScript code.
      */
-    suspend fun loadPlugin(jsCode: String, pluginId: String): LNReaderPlugin = withContext(Dispatchers.IO) {
+    suspend fun loadPlugin(jsCode: String, pluginId: String): LNReaderPlugin = withContext(graalvmThread) {
         try {
             // Close existing context if any
             context?.close()
             
-            // Create GraalVM context with JavaScript
-            // Allow multi-threaded access since we use coroutines
+            // Create GraalVM context with JavaScript on the dedicated GraalVM thread
+            // Create without explicit thread restrictions to allow coroutine access
             val newContext = Context.newBuilder("js")
                 .allowAllAccess(true)
                 .allowCreateThread(true)
+                .allowExperimentalOptions(true)
+                .allowPolyglotAccess(org.graalvm.polyglot.PolyglotAccess.ALL)
                 .option("engine.WarnInterpreterOnly", "false")
+                .option("js.shared-array-buffer", "true")
                 .build()
             
             // Provide bridge service to JavaScript if available
@@ -135,8 +147,61 @@ class GraalVMJSEngine(
             
             context = newContext
             
-            // Create Kotlin wrapper with context reference for thread safety
-            val wrapper = GraalVMPluginWrapper(wrappedPlugin, newContext)
+            // Extract filters during plugin loading (while on GraalVM thread)
+            val filters = try {
+                val filtersValue = newContext.eval("js", """
+                    (function() {
+                        // Try different locations where filters might be defined
+                        var filters = null;
+                        
+                        // 1. Check exports.default.filters (plugin object)
+                        if (typeof exports !== 'undefined' && exports.default && exports.default.filters) {
+                            console.log('Found filters on exports.default.filters');
+                            filters = exports.default.filters;
+                        }
+                        // 2. Check exports.filters
+                        else if (typeof exports !== 'undefined' && exports.filters) {
+                            console.log('Found filters on exports.filters');
+                            filters = exports.filters;
+                        }
+                        // 3. Check module.exports.filters
+                        else if (typeof module !== 'undefined' && module.exports && module.exports.filters) {
+                            console.log('Found filters on module.exports.filters');
+                            filters = module.exports.filters;
+                        }
+                        // 4. Check global filters variable
+                        else if (typeof filters !== 'undefined' && filters !== null) {
+                            console.log('Found filters on globalThis.filters');
+                            filters = globalThis.filters;
+                        }
+                        
+                        if (filters) {
+                            console.log('Filter keys:', Object.keys(filters));
+                        } else {
+                            console.log('No filters found');
+                        }
+                        
+                        return filters;
+                    })();
+                """.trimIndent())
+                
+                if (filtersValue != null && !filtersValue.isNull) {
+                    convertValueToMap(filtersValue)
+                } else {
+                    Log.debug("GraalVMJSEngine: Plugin does not have filters defined")
+                    emptyMap()
+                }
+            } catch (e: Exception) {
+                Log.warn("GraalVMJSEngine: Failed to extract filters during loading: ${e.message}")
+                emptyMap()
+            }
+            
+            if (filters.isNotEmpty()) {
+                Log.info("GraalVMJSEngine: Extracted ${filters.size} filters during plugin loading")
+            }
+            
+            // Create Kotlin wrapper with context reference, dedicated thread, and pre-loaded filters
+            val wrapper = GraalVMPluginWrapper(wrappedPlugin, newContext, graalvmThread, filters)
             Log.info("GraalVMJSEngine: Created wrapper instance: ${wrapper::class.qualifiedName}")
             wrapper
             
@@ -696,12 +761,57 @@ class GraalVMJSEngine(
 }
 
 /**
+ * Helper function to convert GraalVM Value to Map
+ */
+private fun convertValueToMap(value: Value): Map<String, Any> {
+    val result = mutableMapOf<String, Any>()
+    
+    if (!value.hasMembers()) {
+        return result
+    }
+    
+    for (key in value.memberKeys) {
+        val member = value.getMember(key)
+        if (member != null && !member.isNull) {
+            result[key] = convertValueToAny(member)
+        }
+    }
+    
+    return result
+}
+
+/**
+ * Helper function to convert GraalVM Value to appropriate Kotlin type
+ */
+private fun convertValueToAny(value: Value): Any {
+    return when {
+        value.isString -> value.asString()
+        value.isNumber -> {
+            if (value.fitsInInt()) value.asInt()
+            else if (value.fitsInLong()) value.asLong()
+            else value.asDouble()
+        }
+        value.isBoolean -> value.asBoolean()
+        value.hasArrayElements() -> {
+            (0 until value.arraySize).map { i ->
+                convertValueToAny(value.getArrayElement(i))
+            }
+        }
+        value.hasMembers() -> convertValueToMap(value)
+        else -> value.toString()
+    }
+}
+
+/**
  * Wrapper that adapts GraalVM Value to LNReaderPlugin interface.
- * All methods are synchronized to prevent multi-threaded access to GraalVM Context.
+ * All methods use a dedicated single-threaded dispatcher to prevent multi-threaded access to GraalVM Context.
+ * Filters are cached during plugin loading to avoid threading issues.
  */
 private class GraalVMPluginWrapper(
     private val jsPlugin: Value,
-    private val context: Context
+    private val context: Context,
+    private val graalvmThread: kotlinx.coroutines.CoroutineDispatcher,
+    private val cachedFilters: Map<String, Any>
 ) : LNReaderPlugin {
     
     private val lock = Any()
@@ -902,6 +1012,94 @@ private class GraalVMPluginWrapper(
         result.asString()
     }
     
+    override fun getFilters(): Map<String, Any> {
+        // Return cached filters that were extracted during plugin loading
+        Log.debug("GraalVMPluginWrapper: getFilters() called - returning ${cachedFilters.size} cached filters")
+        return cachedFilters
+    }
+    
+    override suspend fun popularNovelsWithFilters(page: Int, filters: Map<String, Any>): List<PluginNovel> = withContext(Dispatchers.IO) {
+        try {
+            synchronized(lock) {
+                context.enter()
+                try {
+                    Log.debug("GraalVMPluginWrapper: Calling popularNovels($page) with filters: ${filters.keys}")
+                    
+                    // Convert filters map to JavaScript object
+                    val filtersJson = kotlinx.serialization.json.Json.encodeToString(
+                        kotlinx.serialization.json.JsonObject.serializer(),
+                        filters.toJsonObject()
+                    )
+                    
+                    // Call popularNovels with filters parameter
+                    val popularFunc = jsPlugin.getMember("popularNovels")
+                    if (popularFunc == null || popularFunc.isNull) {
+                        Log.error("GraalVMPluginWrapper: popularNovels function not found!", null)
+                        return@withContext emptyList()
+                    }
+                    
+                    // Parse filters JSON in JavaScript context
+                    val filtersObj = context.eval("js", "($filtersJson)")
+                    
+                    // Call with page and options object containing filters
+                    var result = popularFunc.execute(page, context.eval("js", "({ filters: $filtersJson })"))
+                    
+                    // Handle promise if returned
+                    if (result.hasMember("then")) {
+                        Log.debug("GraalVMPluginWrapper: popularNovelsWithFilters returned promise, awaiting...")
+                        result = awaitPromise(result)
+                    }
+                    
+                    val novels = convertToNovelList(result)
+                    Log.info("GraalVMPluginWrapper: Converted ${novels.size} novels with filters")
+                    novels
+                } finally {
+                    context.leave()
+                }
+            }
+        } catch (e: Exception) {
+            Log.warn("GraalVMPluginWrapper: Error in popularNovelsWithFilters, falling back to popularNovels: ${e.message}")
+            // Fallback to regular popularNovels
+            popularNovels(page)
+        }
+    }
+    
+    private fun convertValueToMap(value: Value): Map<String, Any> {
+        val result = mutableMapOf<String, Any>()
+        
+        if (!value.hasMembers()) {
+            return result
+        }
+        
+        for (key in value.memberKeys) {
+            val member = value.getMember(key)
+            if (member != null && !member.isNull) {
+                result[key] = convertValueToAny(member)
+            }
+        }
+        
+        return result
+    }
+    
+    private fun convertValueToAny(value: Value): Any {
+        return when {
+            value.isString -> value.asString()
+            value.isNumber -> {
+                if (value.fitsInInt()) value.asInt()
+                else if (value.fitsInLong()) value.asLong()
+                else value.asDouble()
+            }
+            value.isBoolean -> value.asBoolean()
+            value.hasArrayElements() -> {
+                (0 until value.arraySize).map { i ->
+                    convertValueToAny(value.getArrayElement(i))
+                }
+            }
+            value.hasMembers() -> convertValueToMap(value)
+            else -> value.toString()
+        }
+    }
+    
     private fun convertToNovelList(value: Value): List<PluginNovel> {
         if (!value.hasArrayElements()) {
             Log.warn("GraalVMPluginWrapper: convertToNovelList - value is not an array! Type: ${value.metaObject?.metaSimpleName}")
@@ -944,4 +1142,33 @@ private class GraalVMPluginWrapper(
             value.getArrayElement(i).asString()
         }
     }
+}
+
+
+/**
+ * Extension function to convert Map<String, Any> to JsonObject
+ */
+private fun Map<String, Any>.toJsonObject(): kotlinx.serialization.json.JsonObject {
+    val map = mutableMapOf<String, kotlinx.serialization.json.JsonElement>()
+    for ((key, value) in this) {
+        map[key] = when (value) {
+            is String -> kotlinx.serialization.json.JsonPrimitive(value)
+            is Number -> kotlinx.serialization.json.JsonPrimitive(value)
+            is Boolean -> kotlinx.serialization.json.JsonPrimitive(value)
+            is Map<*, *> -> {
+                @Suppress("UNCHECKED_CAST")
+                (value as Map<String, Any>).toJsonObject()
+            }
+            is List<*> -> kotlinx.serialization.json.JsonArray(value.map { item ->
+                when (item) {
+                    is String -> kotlinx.serialization.json.JsonPrimitive(item)
+                    is Number -> kotlinx.serialization.json.JsonPrimitive(item)
+                    is Boolean -> kotlinx.serialization.json.JsonPrimitive(item)
+                    else -> kotlinx.serialization.json.JsonPrimitive(item.toString())
+                }
+            })
+            else -> kotlinx.serialization.json.JsonPrimitive(value.toString())
+        }
+    }
+    return kotlinx.serialization.json.JsonObject(map)
 }

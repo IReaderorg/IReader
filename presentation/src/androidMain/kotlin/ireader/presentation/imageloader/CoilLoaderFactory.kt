@@ -29,9 +29,14 @@ class CoilLoaderFactory(
         return ImageLoader.Builder(context).apply {
             val diskCacheInit = { CoilDiskCache.get(context) }
             val callFactoryInit = { client.default.okhttp }
+            
+            // Note: Coil 3 uses default network fetcher for HTTP/HTTPS URLs
+            // The OkHttp client is used by BookCoverFetcher for custom fetching
+            
             components {
-                add(CatalogInstalledFetcher.Factory(PackageManager(context)))
                 add(CatalogRemoteMapper())
+                // CatalogInstalledFetcher removed - mapper handles all catalog icons via URLs
+//                add(CatalogInstalledFetcher.Factory(PackageManager(context)))
 //                add(BookCoverMapper())
                 add(BookCoverKeyer())
                 add(CatalogRemoteKeyer())

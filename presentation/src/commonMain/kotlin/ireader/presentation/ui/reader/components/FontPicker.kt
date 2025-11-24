@@ -39,13 +39,46 @@ fun FontPicker(
     var fontToDelete by remember { mutableStateOf<CustomFont?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     
-    // Filter fonts based on search query
-    val filteredSystemFonts = remember(systemFonts, searchQuery) {
+    // Define 8 most popular fonts
+    val popularFontNames = listOf(
+        "Roboto",
+        "Open Sans",
+        "Lato",
+        "Montserrat",
+        "Oswald",
+        "Raleway",
+        "PT Sans",
+        "Merriweather"
+    )
+    
+    // Filter fonts based on search query and separate popular fonts
+    val (popularFonts, otherFonts) = remember(systemFonts, searchQuery) {
         if (searchQuery.isBlank()) {
-            systemFonts
+            val popular = systemFonts.filter { font -> 
+                popularFontNames.any { it.equals(font.name, ignoreCase = true) }
+            }.sortedBy { font -> 
+                popularFontNames.indexOfFirst { it.equals(font.name, ignoreCase = true) }
+            }
+            val others = systemFonts.filter { font -> 
+                popularFontNames.none { it.equals(font.name, ignoreCase = true) }
+            }
+            Pair(popular, others)
         } else {
-            systemFonts.filter { it.name.contains(searchQuery, ignoreCase = true) }
+            val filtered = systemFonts.filter { it.name.contains(searchQuery, ignoreCase = true) }
+            val popular = filtered.filter { font -> 
+                popularFontNames.any { it.equals(font.name, ignoreCase = true) }
+            }.sortedBy { font -> 
+                popularFontNames.indexOfFirst { it.equals(font.name, ignoreCase = true) }
+            }
+            val others = filtered.filter { font -> 
+                popularFontNames.none { it.equals(font.name, ignoreCase = true) }
+            }
+            Pair(popular, others)
         }
+    }
+    
+    val filteredSystemFonts = remember(popularFonts, otherFonts) {
+        popularFonts + otherFonts
     }
     
     Column(modifier = modifier.fillMaxWidth()) {
@@ -92,8 +125,8 @@ fun FontPicker(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Google Fonts Section
-                if (filteredSystemFonts.isNotEmpty()) {
+                // Popular Fonts Section
+                if (popularFonts.isNotEmpty()) {
                     item {
                         Row(
                             modifier = Modifier
@@ -103,18 +136,51 @@ fun FontPicker(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Google Fonts",
-                                style = MaterialTheme.typography.titleMedium
+                                text = "Popular Fonts",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary
                             )
                             Text(
-                                text = "${filteredSystemFonts.size} fonts",
+                                text = "${popularFonts.size} fonts",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
                     
-                    items(filteredSystemFonts) { font ->
+                    items(popularFonts) { font ->
+                        FontItem(
+                            font = font,
+                            isSelected = selectedFontId == font.id,
+                            onClick = { onFontSelected(font.id) },
+                            onDelete = null // Google Fonts cannot be deleted
+                        )
+                    }
+                }
+                
+                // Other Google Fonts Section
+                if (otherFonts.isNotEmpty()) {
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp, bottom = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "All Google Fonts",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "${otherFonts.size} fonts",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    
+                    items(otherFonts) { font ->
                         FontItem(
                             font = font,
                             isSelected = selectedFontId == font.id,

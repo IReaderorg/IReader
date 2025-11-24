@@ -46,18 +46,7 @@ class DesktopCatalogInstaller(
                     }.body()
                     jsResponse.saveTo(jsFile)
                     
-                    // Optionally download icon if available
-                    if (catalog.iconUrl.isNotEmpty()) {
-                        try {
-                            val iconFile = File(jsPluginsDir, "${catalog.pkgName}.png")
-                            val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
-                                headers.append(HttpHeaders.CacheControl, "no-store")
-                            }.body()
-                            iconResponse.saveTo(iconFile)
-                        } catch (e: Exception) {
-                            Log.warn(e, "Failed to download icon for JS plugin, continuing anyway")
-                        }
-                    }
+                    // No need to download icon - Coil will handle it via iconUrl with caching
                     
                     emit(InstallStep.Idle)
                     val result = InstallStep.Success
@@ -97,11 +86,7 @@ class DesktopCatalogInstaller(
                     }.body()
                     jarResponse.saveTo(jarFile)
                     
-                    // Download icon
-                    val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
-                        headers.append(HttpHeaders.CacheControl, "no-store")
-                    }.body()
-                    iconResponse.saveTo(iconFile)
+                    // No need to download icon - Coil will handle it via iconUrl with caching
                     
                     emit(InstallStep.Idle)
                     val result = InstallStep.Success
@@ -131,12 +116,6 @@ class DesktopCatalogInstaller(
             val jsFile = File(jsPluginsDir, "$pkgName.js")
             if (jsFile.exists()) {
                 deleted = jsFile.delete() || deleted
-            }
-            
-            // Also delete icon if exists
-            val iconFile = File(jsPluginsDir, "$pkgName.png")
-            if (iconFile.exists()) {
-                iconFile.delete()
             }
             
             installationChanges.notifyAppUninstall(pkgName)

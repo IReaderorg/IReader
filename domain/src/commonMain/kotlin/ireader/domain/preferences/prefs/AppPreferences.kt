@@ -184,4 +184,25 @@ class AppPreferences(
     fun maxConcurrentTTSProcesses(): Preference<Int> {
         return preferenceStore.getInt(MAX_CONCURRENT_TTS_PROCESSES, 2)
     }
+    
+    /**
+     * Selected AI TTS provider
+     */
+    fun selectedAITTSProvider(): Preference<String> {
+        return preferenceStore.getString("selected_ai_tts_provider", "PIPER_TTS")
+    }
+    
+    /**
+     * Enable AI TTS
+     */
+    fun useAITTS(): Preference<Boolean> {
+        return preferenceStore.getBoolean("use_ai_tts", false)
+    }
+    
+    /**
+     * Selected AI voice ID
+     */
+    fun selectedAIVoiceId(): Preference<String> {
+        return preferenceStore.getString("selected_ai_voice_id", "en_US-amy-low")
+    }
 }

@@ -305,6 +305,30 @@ fun AboutSettingScreen(
                 }
             }
         }
+        
+        // Support Development section
+        item {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp, horizontal = 16.dp)
+            ) {
+                Text(
+                    text = "Support Development",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                
+                PreferenceRow(
+                    title = "Donate via Card",
+                    subtitle = "Support the project with a donation",
+                    onClick = {
+                        uriHandler.openUri("https://reymit.ir/kazemcodes")
+                    }
+                )
+            }
+        }
         }
     }
 }

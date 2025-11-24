@@ -65,7 +65,6 @@ fun MoreScreen(
     onAbout: () -> Unit,
     onHelp: () -> Unit,
     onDonation: () -> Unit = {},
-    onTTSEngineManager: () -> Unit = {},
     onWeb3Profile: () -> Unit = {},
     onBadgeStore: () -> Unit = {},
     onNFTBadge: () -> Unit = {},
@@ -391,14 +390,7 @@ fun MoreScreen(
             )
         }
         
-        item {
-            SettingsItem(
-                title = "TTS Engine Manager",
-                description = "Install and manage text-to-speech engines",
-                icon = Icons.Outlined.RecordVoiceOver,
-                onClick = onTTSEngineManager
-            )
-        }
+
         
         // Information & Support Section
         item {

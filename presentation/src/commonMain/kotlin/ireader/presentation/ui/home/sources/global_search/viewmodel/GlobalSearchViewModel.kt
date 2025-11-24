@@ -65,58 +65,112 @@ class GlobalSearchViewModel(
                 installedCatalogs = getInstalledCatalog.get()
                 val catalogs = installedCatalogs.mapNotNull { it.source }.filterIsInstance<CatalogSource>()
 
+                if (catalogs.isEmpty()) {
+                    Log.warn { "No catalogs available for search" }
+                    return@launch
+                }
+
                 // Mark all sources as loading initially
                 catalogs.forEach { source ->
                     SearchItem(source).handleSearchItems(true)
                 }
 
-                // Use the new GlobalSearchUseCase
+                // Use the new GlobalSearchUseCase with Flow
                 remoteUseCases.globalSearch.asFlow(query)
                     .onStart {
-                        Log.debug { "Starting global search for query: $query" }
+                        Log.debug { "Starting global search for query: $query with ${catalogs.size} sources" }
                     }
                     .catch { e ->
-                        Log.error(e, "Error during global search")
+                        if (e is CancellationException) {
+                            Log.debug { "Global search cancelled for query: $query" }
+                            throw e // Re-throw to properly cancel the coroutine
+                        } else {
+                            Log.error(e, "Error during global search flow")
+                            // Mark all in-progress sources as having no results on error
+                            inProgress.forEach { item ->
+                                item.handleSearchItems(loading = false)
+                            }
+                        }
                     }
                     .collect { globalResult ->
+                        Log.debug { "Received global search result with ${globalResult.sourceResults.size} source results" }
+                        
                         // Process each source result
                         globalResult.sourceResults.forEach { sourceResult ->
                             val source = catalogs.find { it.id == sourceResult.sourceId }
                             if (source != null) {
-                                // Convert SearchResultItem to Book
-                                val books = sourceResult.results.map { item ->
-                                    Book(
-                                        id = item.bookId ?: 0,
-                                        sourceId = sourceResult.sourceId,
-                                        title = item.title,
-                                        key = item.key,
-                                        author = item.author,
-                                        description = item.description,
-                                        genres = item.genres,
-                                        cover = item.cover,
-                                        favorite = item.inLibrary
+                                try {
+                                    // Convert SearchResultItem to Book
+                                    val books = sourceResult.results.map { item ->
+                                        Book(
+                                            id = item.bookId ?: 0,
+                                            sourceId = sourceResult.sourceId,
+                                            title = item.title,
+                                            key = item.key,
+                                            author = item.author ?: "",
+                                            description = item.description ?: "",
+                                            genres = item.genres ?: emptyList(),
+                                            cover = item.cover ?: "",
+                                            favorite = item.inLibrary
+                                        )
+                                    }
+                                    
+                                    val searchItem = SearchItem(
+                                        source = source,
+                                        items = books
                                     )
+                                    searchItem.handleSearchItems(loading = false)
+                                    
+                                    Log.debug { "Processed ${books.size} results from ${source.name}" }
+                                } catch (e: Exception) {
+                                    if (e !is CancellationException) {
+                                        Log.error(e, "Error processing results from source ${source.name}")
+                                        // Mark this source as having no results
+                                        SearchItem(source, emptyList()).handleSearchItems(loading = false)
+                                    } else {
+                                        throw e
+                                    }
                                 }
-                                val searchItem = SearchItem(
-                                    source = source,
-                                    items = books
-                                )
-                                searchItem.handleSearchItems(loading = false)
+                            } else {
+                                Log.warn { "Source not found for ID: ${sourceResult.sourceId}" }
                             }
                         }
+                        
+                        // Mark any remaining in-progress sources as complete with no results
+                        val processedSourceIds = globalResult.sourceResults.map { it.sourceId }.toSet()
+                        inProgress.filter { it.source.id !in processedSourceIds }.forEach { item ->
+                            item.handleSearchItems(loading = false)
+                        }
                     }
+            } catch (e: CancellationException) {
+                Log.debug { "Global search cancelled" }
+                // Don't log cancellation as error, it's expected behavior
+                throw e
             } catch (e: Exception) {
-                Log.error(e, "Error during global search")
+                Log.error(e, "Error during global search initialization")
+                // Clear loading states on error
+                inProgress.forEach { item ->
+                    item.handleSearchItems(loading = false)
+                }
             }
         }
     }
 
     private fun SearchItem.handleSearchItems(loading: Boolean = false) {
         if (loading) {
-            inProgress = inProgress + this
+            // Remove from other lists first to avoid duplicates
+            withResult = withResult.filter { it.source.id != this.source.id }
+            noResult = noResult.filter { it.source.id != this.source.id }
+            inProgress = inProgress.filter { it.source.id != this.source.id } + this
             return
         }
-        inProgress = inProgress - inProgress.filter { it.source.id == this.source.id }.toSet()
+        
+        // Remove from all lists first
+        inProgress = inProgress.filter { it.source.id != this.source.id }
+        withResult = withResult.filter { it.source.id != this.source.id }
+        noResult = noResult.filter { it.source.id != this.source.id }
+        
+        // Add to appropriate list
         when {
             this.items.isEmpty() -> {
                 noResult = noResult + this

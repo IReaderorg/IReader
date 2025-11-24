@@ -181,20 +181,15 @@ fun ImageLoaderImage(
                 onLoading = {
                     progress.value = 0.0F
                     loadingState = ImageLoaderImageState.Loading
-//                    Log.warn("Image loading started: $data")
                 },
                 onError = {
-                    val loadTime = System.currentTimeMillis() - loadStartTime
                     progress.value = 0.0F
                     error.value = it.result.throwable
                     loadingState = ImageLoaderImageState.Failure
-//                    Log.warn(it.result.throwable, "Image loading failed after ${loadTime}ms: $data")
                 },
                 onSuccess = {
-                    val loadTime = System.currentTimeMillis() - loadStartTime
                     progress.value = 1.0F
                     loadingState = ImageLoaderImageState.Success
-//                    Log.warn ("Image loaded successfully in ${loadTime}ms: $data")
                 }
             )
             if (animationSpec != null) {

@@ -48,7 +48,8 @@ val chapterMapperLight = {_id: Long,
                           source_order: Long,
                           date_fetch: Long,
                           date_upload: Long,
-                          type: Long, ->
+                          type: Long,
+                          is_downloaded: Long, ->
     Chapter(
         name = name,
         key = url,
@@ -61,7 +62,7 @@ val chapterMapperLight = {_id: Long,
         read = read,
         id = _id,
         lastPageRead = last_page_read,
-        content = emptyList(), // Empty content to save memory
+        content = if (is_downloaded == 1L) listOf(ireader.core.source.model.Text("")) else emptyList(), // Mark as downloaded with placeholder
         sourceOrder =  source_order,
         type = type,
     )

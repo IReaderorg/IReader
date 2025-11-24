@@ -68,29 +68,19 @@ class AndroidLocalInstaller(
         
         // Traditional APK installation
         val tmpApkFile = File(context.codeCacheDir, "${catalog.pkgName}.apk")
-        val tmpIconFile = File(context.codeCacheDir, "${catalog.pkgName}.png")
         try {
             val apkResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
                 headers.append(HttpHeaders.CacheControl, "no-store")
             }.body()
             apkResponse.saveTo(tmpApkFile)
 
-            val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
-                headers.append(HttpHeaders.CacheControl, "no-store")
-            }.body()
-            iconResponse.saveTo(tmpIconFile)
-
             send(InstallStep.Downloading)
             val extDir = savedCatalogLocation(catalog)
 
             val apkFile = File(extDir, tmpApkFile.name).apply { mkdirs() }
-            val iconFile = File(extDir, tmpIconFile.name).apply { mkdirs() }
 
-
-            val apkSuccess = tmpApkFile.copyRecursively(apkFile,true)
-            val iconSuccess = tmpIconFile.copyRecursively(iconFile,true)
-            val success = apkSuccess && iconSuccess
-            if (success) {
+            val apkSuccess = tmpApkFile.copyRecursively(apkFile, true)
+            if (apkSuccess) {
                 installationChanges.notifyAppInstall(catalog.pkgName)
                 send(InstallStep.Success)
             }
@@ -103,7 +93,6 @@ class AndroidLocalInstaller(
             send(InstallStep.Idle)
         } finally {
             tmpApkFile.delete()
-            tmpIconFile.delete()
             send(InstallStep.Idle)
         }
     }
@@ -133,18 +122,7 @@ class AndroidLocalInstaller(
             }.body()
             jsResponse.saveTo(jsFile)
             
-            // Download icon if available
-            if (catalog.iconUrl.isNotBlank()) {
-                try {
-                    val iconFile = File(jsPluginsDir, "${catalog.pkgName}.png")
-                    val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
-                        headers.append(HttpHeaders.CacheControl, "no-store")
-                    }.body()
-                    iconResponse.saveTo(iconFile)
-                } catch (e: Exception) {
-                    Log.warn("Failed to download icon for JS plugin: ${e.message}")
-                }
-            }
+            // No need to download icon - Coil will handle it via iconUrl with caching
             
             // Notify installation complete
             installationChanges.notifyAppInstall(catalog.pkgName)
@@ -183,15 +161,10 @@ class AndroidLocalInstaller(
             }
             
             val jsFile = File(jsPluginsDir, "$pkgName.js")
-            val iconFile = File(jsPluginsDir, "$pkgName.png")
             
             if (jsFile.exists()) {
                 jsFile.delete()
                 Log.info("Deleted JS plugin file: ${jsFile.absolutePath}")
-            }
-            if (iconFile.exists()) {
-                iconFile.delete()
-                Log.info("Deleted JS plugin icon: ${iconFile.absolutePath}")
             }
             
             installationChanges.notifyAppUninstall(pkgName)

@@ -24,10 +24,16 @@
         <item name="android:statusBarColor">?attr/colorBackgroundSplash</item>
         <item name="android:navigationBarColor">?attr/colorBackgroundSplash</item>
         <item name="postSplashScreenTheme">@style/Theme.App</item>
-
-
-
     </style>
 
+    <!-- Crash Activity Theme - Dark background with no black screen -->
+    <style name="Theme.Crash" parent="Theme.App">
+        <item name="android:windowBackground">#FF121212</item>
+        <item name="android:statusBarColor">#FF121212</item>
+        <item name="android:navigationBarColor">#FF121212</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    </style>
 
 </resources>

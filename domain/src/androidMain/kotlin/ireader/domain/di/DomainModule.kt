@@ -205,4 +205,20 @@ actual val DomainModule = module {
     single<ireader.domain.storage.VoiceStorage> {
         ireader.domain.storage.AndroidVoiceStorage(androidContext().filesDir)
     }
+    
+    // AI TTS Manager
+    single<ireader.domain.services.tts.AITTSManager> {
+        ireader.domain.services.tts.AITTSManager(
+            context = androidContext(),
+            appPreferences = get()
+        )
+    }
+    
+    // AI TTS Player
+    factory<ireader.domain.services.tts_service.media_player.AITTSPlayer> {
+        ireader.domain.services.tts_service.media_player.AITTSPlayer(
+            context = androidContext(),
+            aiTTSManager = get()
+        )
+    }
 }

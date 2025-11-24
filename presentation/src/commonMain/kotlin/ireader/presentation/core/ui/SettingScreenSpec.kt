@@ -127,6 +127,15 @@ class SettingScreenSpec {
                 
                 item {
                     SettingsItem(
+                        title = "TTS Engine Manager",
+                        description = "Configure text-to-speech engines and voices",
+                        icon = Icons.Default.RecordVoiceOver,
+                        onClick = { navController.navigate(NavigationRoutes.ttsEngineManager) }
+                    )
+                }
+                
+                item {
+                    SettingsItem(
                         title = localizeHelper.localize(Res.string.statistics),
                         description = "View reading statistics and progress",
                         icon = Icons.Default.BarChart,

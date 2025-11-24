@@ -5,6 +5,7 @@ import ireader.core.source.Dependencies
 import ireader.core.source.HttpSource
 import ireader.core.source.model.*
 import ireader.domain.js.models.PluginMetadata
+import ireader.domain.js.util.JSFilterConverter
 
 /**
  * Wrapper that adapts a Zipline LNReaderPlugin to IReader's HttpSource interface.
@@ -21,6 +22,9 @@ class JSPluginSource(
     override val baseUrl: String = metadata.site
     class LatestListing() : Listing(name = "Latest")
     class PopularListing() : Listing(name = "Popular")
+    
+    private val filterConverter = JSFilterConverter()
+    private var cachedFilters: FilterList? = null
 
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
         Log.info("JSPluginSource: [$name] getMangaList(sort) called - sort=$sort, page=$page")
@@ -66,15 +70,28 @@ class JSPluginSource(
             // Check if there's a search query in filters
             val query = filters.filterIsInstance<Filter.Title>().firstOrNull()?.value ?: ""
             
-            Log.info("JSPluginSource: [$name] getMangaList(filters) called - query='$query', page=$page")
+            Log.info("JSPluginSource: [$name] getMangaList(filters) called - query='$query', page=$page, filters=${filters.size}")
             
             val novels = if (query.isNotBlank()) {
                 // If there's a search query, use searchNovels
                 Log.debug("JSPluginSource: Calling plugin.searchNovels('$query', $page)")
                 plugin.searchNovels(query, page)
+            } else if (filters.size > 1 || (filters.size == 1 && filters.first() !is Filter.Title)) {
+                // Convert IReader filters to LNReader format and call popularNovels with filters
+                val jsFilters = filterConverter.convertIReaderFiltersToJS(filters)
+                Log.debug("JSPluginSource: Calling plugin.popularNovels($page) with filters: $jsFilters")
+                
+                // Try to call plugin with filters if supported
+                try {
+                    plugin.popularNovelsWithFilters(page, jsFilters)
+                } catch (e: Exception) {
+                    // Fallback to regular popularNovels if filters not supported
+                    Log.warn("JSPluginSource: Plugin doesn't support filters, falling back to popularNovels")
+                    plugin.popularNovels(page)
+                }
             } else {
-                // No search query, default to popular
-                Log.debug("JSPluginSource: No search query, calling plugin.popularNovels($page)")
+                // No search query or filters, default to popular
+                Log.debug("JSPluginSource: No search query or filters, calling plugin.popularNovels($page)")
                 plugin.popularNovels(page)
             }
             
@@ -211,8 +228,43 @@ class JSPluginSource(
     }
     
     override fun getFilters(): FilterList {
-        // Return search filter for text-based queries
-        return listOf(Filter.Title())
+        // Return cached filters if available
+        if (cachedFilters != null) {
+            Log.debug("JSPluginSource: [$name] Returning cached filters (${cachedFilters!!.size} filters)")
+            return cachedFilters!!
+        }
+        
+        return try {
+            Log.debug("JSPluginSource: [$name] Getting filters from plugin...")
+            
+            // Try to get filters from plugin
+            val jsFilters = plugin.getFilters()
+            
+            Log.debug("JSPluginSource: [$name] Got ${jsFilters.size} filter definitions from plugin")
+            
+            if (jsFilters.isNotEmpty()) {
+                Log.debug("JSPluginSource: [$name] Filter keys: ${jsFilters.keys.joinToString(", ")}")
+                
+                // Convert LNReader filters to IReader filters
+                val convertedFilters = filterConverter.convertToIReaderFilters(jsFilters)
+                
+                Log.debug("JSPluginSource: [$name] Converted to ${convertedFilters.size} IReader filters")
+                
+                // Add search filter at the beginning
+                cachedFilters = listOf(Filter.Title()) + convertedFilters
+                
+                Log.info("JSPluginSource: [$name] Loaded ${convertedFilters.size} filters from plugin (total with search: ${cachedFilters!!.size})")
+                cachedFilters!!
+            } else {
+                Log.info("JSPluginSource: [$name] No filters available, returning search only")
+                // No filters available, return just search
+                listOf(Filter.Title())
+            }
+        } catch (e: Exception) {
+            Log.warn("JSPluginSource: [$name] Plugin doesn't support getFilters(), using search only: ${e.message}", e)
+            // Fallback to search filter only
+            listOf(Filter.Title())
+        }
     }
     
     override fun getListings(): List<Listing> {

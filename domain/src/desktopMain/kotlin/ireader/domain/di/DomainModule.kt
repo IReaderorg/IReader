@@ -123,6 +123,11 @@ actual val DomainModule: Module = module {
         }
     }
     
+    // AI TTS Manager (stub for desktop)
+    single<ireader.domain.services.tts.AITTSManager> {
+        ireader.domain.services.tts.AITTSManager()
+    }
+    
     single<StartTTSServicesUseCase> {
         StartTTSServicesUseCase(get())
     }

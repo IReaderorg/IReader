@@ -46,6 +46,25 @@ interface LNReaderPlugin {
      * Get chapter content
      */
     suspend fun getChapterContent(url: String): String
+    
+    /**
+     * Get filter definitions from plugin (optional)
+     * Returns a map of filter definitions in LNReader format
+     * Note: This is not a suspend function as filter definitions are typically static
+     */
+    fun getFilters(): Map<String, Any> {
+        return emptyMap()
+    }
+    
+    /**
+     * Get popular novels with filters (optional)
+     * @param page Page number
+     * @param filters Map of filter values in LNReader format
+     */
+    suspend fun popularNovelsWithFilters(page: Int, filters: Map<String, Any>): List<PluginNovel> {
+        // Default implementation falls back to regular popularNovels
+        return popularNovels(page)
+    }
 }
 
 /**

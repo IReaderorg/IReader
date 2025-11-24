@@ -78,7 +78,7 @@
         <activity
             android:name="org.ireader.app.crash.CrashActivity"
             android:exported="false"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:theme="@style/Theme.Crash"
             android:process=":crash" />
         
         <activity

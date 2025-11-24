@@ -43,6 +43,14 @@ class CrashHandler private constructor(private val context: Context) : Thread.Un
     private fun createCrashReport(throwable: Throwable, thread: Thread): CrashReport {
         val stackTrace = getStackTraceString(throwable)
         
+        // Detect database migration errors
+        val isDatabaseError = DatabaseMigrationHelper.isDatabaseMigrationError(throwable)
+        val conflictingTables = if (isDatabaseError) {
+            DatabaseMigrationHelper.extractConflictingTables(throwable)
+        } else {
+            emptyList()
+        }
+        
         return CrashReport(
             exceptionType = throwable.javaClass.simpleName,
             exceptionMessage = throwable.message ?: "No message",
@@ -53,7 +61,9 @@ class CrashHandler private constructor(private val context: Context) : Thread.Un
             deviceModel = "${Build.MANUFACTURER} ${Build.MODEL}",
             buildTime = BuildConfig.BUILD_TIME,
             commitSha = BuildConfig.COMMIT_SHA,
-            timestamp = System.currentTimeMillis()
+            timestamp = System.currentTimeMillis(),
+            isDatabaseMigrationError = isDatabaseError,
+            conflictingTables = conflictingTables
         )
     }
     

@@ -66,6 +66,7 @@ fun DonationScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val clipboardManager = LocalClipboardManager.current
+    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     
@@ -120,6 +121,24 @@ fun DonationScreen(
             // Cryptocurrency Disclaimer
             item {
                 DisclaimerCard()
+            }
+            
+            // Card Payment Section
+            item {
+                Text(
+                    text = "Card Payment",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+            
+            item {
+                CardPaymentCard(
+                    onDonateClick = {
+                        uriHandler.openUri("https://reymit.ir/kazemcodes")
+                    }
+                )
             }
             
             // Wallet Addresses Section
@@ -347,6 +366,56 @@ private fun DisclaimerCard() {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+    }
+}
+
+@Composable
+private fun CardPaymentCard(
+    onDonateClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "💳 Donate via Card",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Support the project with a credit/debit card donation",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Button(
+                onClick = onDonateClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Donate Now")
+            }
         }
     }
 }
