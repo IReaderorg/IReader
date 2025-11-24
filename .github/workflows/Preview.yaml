@@ -238,14 +238,14 @@ jobs:
           \\
           ${{ env.COMMIT_LOGS }}")
           
-          # Check if changelog.md exists and append it
-          if [ -f "changelog.md" ]; then
-            echo "" >> release_notes.md
-            echo "### 📋 Changelog" >> release_notes.md
-            echo "" >> release_notes.md
-            cat changelog.md >> release_notes.md
-            RELEASE_BODY="$RELEASE_BODY"$'\n\n'"### 📋 Changelog"$'\n\n'"$(cat changelog.md)"
-          fi
+#          # Check if changelog.md exists and append it
+#          if [ -f "changelog.md" ]; then
+#            echo "" >> release_notes.md
+#            echo "### 📋 Changelog" >> release_notes.md
+#            echo "" >> release_notes.md
+#            cat changelog.md >> release_notes.md
+#            RELEASE_BODY="$RELEASE_BODY"$'\n\n'"### 📋 Changelog"$'\n\n'"$(cat changelog.md)"
+#          fi
           
           # Save to file for use in release
           echo "$RELEASE_BODY" > release_notes.md
