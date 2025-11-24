@@ -125,7 +125,7 @@ class DesktopCatalogLoader(
             val pkgInfo = ApkFile(file)
             return loadLocalCatalogs(pkgName, pkgInfo, file)
         } catch (e:Exception) {
-            Log.error(e) { "Failed to load local catalog $pkgName" }
+            Log.error { "Failed to load local catalog $pkgName" }
             return null
         }
     }
