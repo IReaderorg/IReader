@@ -32,33 +32,48 @@ class UpdateService constructor(
     private val notificationManager: NotificationManager by inject()
     @OptIn(ExperimentalTime::class)
     override suspend fun doWork(): Result {
-        val lastCheck = Instant.fromEpochMilliseconds(appPreferences.lastUpdateCheck().get())
-        val now = kotlin.time.Clock.System.now()
+        return try {
+            val lastCheck = Instant.fromEpochMilliseconds(appPreferences.lastUpdateCheck().get())
+            val now = kotlin.time.Clock.System.now()
 
-        if ((!ireader.i18n.BuildKonfig.DEBUG || !ireader.i18n.BuildKonfig.PREVIEW) && now - lastCheck < minTimeUpdateCheck) {
-            return Result.success()
+            // Skip check if not enough time has passed (except in debug/preview builds)
+            val isDebugOrPreview = ireader.i18n.BuildKonfig.DEBUG || ireader.i18n.BuildKonfig.PREVIEW
+            if (!isDebugOrPreview && now - lastCheck < minTimeUpdateCheck) {
+                return Result.success()
+            }
+
+            val release = api.checkRelease()
+
+            // Skip if tag_name is null or empty
+            if (release.tag_name.isNullOrBlank()) {
+                return Result.success()
+            }
+
+            val versionCode: String = ireader.i18n.BuildKonfig.VERSION_NAME
+            
+            // Check if new version is available
+            if (Version.isNewVersion(release.tag_name, versionCode)) {
+                val current = Version.create(versionCode)
+                val newVersion = Version.create(release.tag_name)
+                
+                // Update last check time before showing notification
+                appPreferences.lastUpdateCheck().set(now.toEpochMilliseconds())
+                
+                notificationManager.show(
+                    ID_APP_UPDATER, 
+                    createNotification(current, newVersion, createIntent(release))
+                )
+            } else {
+                // Still update last check time even if no update available
+                appPreferences.lastUpdateCheck().set(now.toEpochMilliseconds())
+            }
+
+            Result.success()
+        } catch (e: Exception) {
+            // Log error and retry later
+            e.printStackTrace()
+            Result.retry()
         }
-
-        val release = api.checkRelease()
-
-        // Skip if tag_name is null or empty
-        if (release.tag_name.isNullOrBlank()) {
-            return Result.success()
-        }
-
-        val version = Version.create(release.tag_name)
-
-
-        val versionCode: String = ireader.i18n.BuildKonfig.VERSION_NAME
-        val current = Version.create(versionCode)
-
-        if (Version.isNewVersion(release.tag_name, versionCode)) {
-            appPreferences.lastUpdateCheck().set(kotlin.time.Clock.System.now().toEpochMilliseconds())
-            notificationManager.show(ID_APP_UPDATER, createNotification(current, version, createIntent(release)))
-
-        }
-
-        return Result.success()
     }
 
     private fun createNotification(old: Version, new: Version, intent: PendingIntent) =
@@ -81,6 +96,6 @@ class UpdateService constructor(
         get() = "v$version"
 
     internal companion object {
-        val minTimeUpdateCheck = 1.toDuration(DurationUnit.HOURS)
+        val minTimeUpdateCheck = 6.toDuration(DurationUnit.HOURS)
     }
 }

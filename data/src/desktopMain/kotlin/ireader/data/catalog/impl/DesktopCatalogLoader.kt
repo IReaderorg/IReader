@@ -49,10 +49,9 @@ class DesktopCatalogLoader(
         if (!uiPreferences.enableJSPlugins().get()) return
         
         try {
-            JSPluginLogger.logInfo("DesktopCatalogLoader", "Starting async JS plugin loading")
             jsPluginLoader.loadPluginsAsync(onPluginLoaded)
         } catch (e: Exception) {
-            Log.error { "Failed to load JS plugins asynchronously: ${e.message}" }
+            // Ignore errors
         }
     }
     
@@ -92,20 +91,14 @@ class DesktopCatalogLoader(
         // Load JavaScript plugins if enabled
         val jsPlugins = if (uiPreferences.enableJSPlugins().get()) {
             try {
-                val startTime = System.currentTimeMillis()
                 // Load stub plugins instantly for fast startup
                 val stubs = jsPluginLoader.loadStubPlugins()
-                val duration = System.currentTimeMillis() - startTime
-                
-                JSPluginLogger.logInfo("DesktopCatalogLoader", 
-                    "Loaded ${stubs.size} JS plugin stubs in ${duration}ms")
                 
                 // Note: Actual plugins will be loaded in background by CatalogStore
                 // On first run (no stubs), background loading will load all plugins
                 // On subsequent runs, background loading will replace stubs with actual plugins
                 stubs
             } catch (e: Exception) {
-                Log.error { "Failed to load JS plugin stubs: ${e.message}" }
                 emptyList()
             }
         } else {
@@ -125,7 +118,6 @@ class DesktopCatalogLoader(
             val pkgInfo = ApkFile(file)
             return loadLocalCatalogs(pkgName, pkgInfo, file)
         } catch (e:Exception) {
-            Log.error { "Failed to load local catalog $pkgName" }
             return null
         }
     }
@@ -186,7 +178,6 @@ class DesktopCatalogLoader(
     private fun validateMetadata(pkgName: String, apkFile: ApkFile): ValidatedData? {
         val pkgInfo = apkFile.apkMeta
         if (!isPackageAnExtension(pkgInfo)) {
-            Log.warn("Failed to load catalog, package {} isn't a catalog", pkgName)
             return null
         }
         @Suppress("DEPRECATION")
@@ -196,9 +187,6 @@ class DesktopCatalogLoader(
         // Validate lib version
         val majorLibVersion = versionName.substringBefore('.').toInt()
         if (majorLibVersion < LIB_VERSION_MIN || majorLibVersion > LIB_VERSION_MAX) {
-            val exception = "Failed to load catalog, the package {} lib version is {}," +
-                    "while only versions {} to {} are allowed"
-            Log.warn(exception, pkgName, majorLibVersion, LIB_VERSION_MIN, LIB_VERSION_MAX)
             return null
         }
 
@@ -212,7 +200,6 @@ class DesktopCatalogLoader(
         }
         val sourceClassName = meta.find { it.first ==  METADATA_SOURCE_CLASS}?.second
         if (sourceClassName == null) {
-            Log.warn("Failed to load catalog, the package {} didn't define source class", pkgName)
             return null
         }
 
@@ -250,7 +237,6 @@ class DesktopCatalogLoader(
 
             obj as? Source ?: throw Exception("Unknown source class type! ${obj.javaClass}")
         } catch (e: Throwable) {
-            Log.warn(e, "Failed to load catalog {}", pkgName)
             return null
         }
     }
@@ -278,7 +264,7 @@ class DesktopCatalogLoader(
                     .skipExceptions(false)
                     .to(jarFilePath)
         } catch (e: Exception) {
-            Log.error(e)
+            // Ignore errors
         }
 
     }

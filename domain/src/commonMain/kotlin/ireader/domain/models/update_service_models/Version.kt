@@ -13,9 +13,29 @@ data class Version(
         }
 
         fun isNewVersion(versionTag: String?, currentVersion: String): Boolean {
-            val newVersion = versionTag?.replace("[^\\d.]".toRegex(), "") ?: return false
+            val newVersionStr = versionTag?.replace("[^\\d.]".toRegex(), "") ?: return false
+            val currentVersionStr = currentVersion.replace("[^\\d.]".toRegex(), "")
 
-            return newVersion != currentVersion
+            // Parse version parts
+            val newParts = newVersionStr.split(".").map { it.toIntOrNull() ?: 0 }
+            val currentParts = currentVersionStr.split(".").map { it.toIntOrNull() ?: 0 }
+            
+            val maxLength = maxOf(newParts.size, currentParts.size)
+            
+            // Compare each version part
+            for (i in 0 until maxLength) {
+                val newPart = newParts.getOrNull(i) ?: 0
+                val currentPart = currentParts.getOrNull(i) ?: 0
+                
+                when {
+                    newPart > currentPart -> return true
+                    newPart < currentPart -> return false
+                    // Continue to next part if equal
+                }
+            }
+            
+            // All parts are equal, not a new version
+            return false
         }
     }
 }

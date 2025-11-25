@@ -283,7 +283,8 @@ class TTSNotificationBuilder constructor(
             )
             setAutoCancel(false)
             setColorized(true)
-            setOngoing(true)
+            // Allow dismissal when paused, prevent when playing
+            setOngoing(playbackState?.isPlaying == true)
         }
     }
 

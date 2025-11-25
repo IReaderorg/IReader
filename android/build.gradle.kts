@@ -256,6 +256,7 @@ android {
 
 
 dependencies {
+    implementation(libs.androidx.ui.text)
     add("coreLibraryDesugaring", libs.desugarJdkLibs)
     implementation(androidx.emoji)
     implementation(androidx.appCompat)

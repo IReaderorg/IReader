@@ -2,12 +2,12 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Background -->
     <item>
-        <color android:color="#000000" />
+        <color android:color="#FFFFFF" />
     </item>
     
-    <!-- Eternity logo -->
+    <!-- Logo centered -->
     <item
-        android:drawable="@drawable/ic_eternity_dark"
+        android:drawable="@drawable/ic_eternity_light"
         android:gravity="center">
     </item>
 </layer-list>

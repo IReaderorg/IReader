@@ -127,21 +127,30 @@ class AppUpdateChecker(
     
     /**
      * Compare version strings to determine if new version is newer
+     * Handles semantic versioning (e.g., "1.2.3", "2.0.0-beta")
      */
     private fun isNewerVersion(newVersion: String, currentVersion: String): Boolean {
-        val newParts = newVersion.split(".").mapNotNull { it.toIntOrNull() }
-        val currentParts = currentVersion.split(".").mapNotNull { it.toIntOrNull() }
+        // Remove any non-numeric suffixes (like -beta, -alpha, etc.) for comparison
+        val cleanNew = newVersion.split("-", " ").firstOrNull() ?: newVersion
+        val cleanCurrent = currentVersion.split("-", " ").firstOrNull() ?: currentVersion
         
-        for (i in 0 until maxOf(newParts.size, currentParts.size)) {
+        val newParts = cleanNew.split(".").map { it.trim().toIntOrNull() ?: 0 }
+        val currentParts = cleanCurrent.split(".").map { it.trim().toIntOrNull() ?: 0 }
+        
+        val maxLength = maxOf(newParts.size, currentParts.size)
+        
+        for (i in 0 until maxLength) {
             val newPart = newParts.getOrNull(i) ?: 0
             val currentPart = currentParts.getOrNull(i) ?: 0
             
             when {
                 newPart > currentPart -> return true
                 newPart < currentPart -> return false
+                // Continue to next part if equal
             }
         }
         
+        // All parts are equal, not a newer version
         return false
     }
 }

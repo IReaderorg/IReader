@@ -36,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.util.Consumer
 import androidx.core.view.WindowCompat
@@ -88,8 +89,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     private val automaticBackup: AutomaticBackup by inject()
     private val localeHelper: LocaleHelper by inject()
     
-    private var keepSplashScreen = true
-    
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -123,9 +122,9 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         // Set locale
         localeHelper.setLocaleLang()
         
-        // Install splash screen with custom exit animation
+        // Install splash screen - dismiss it immediately so our custom splash shows
         installSplashScreen().apply {
-            setKeepOnScreenCondition { keepSplashScreen }
+            setKeepOnScreenCondition { false } // Dismiss system splash immediately
         }
 
         // Request all necessary permissions early
@@ -138,13 +137,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
 
         setContent {
             val context = LocalContext.current
-            var showCustomSplash by remember { mutableStateOf(true) }
-            
-            LaunchedEffect(Unit) {
-                delay(2000) // Show custom splash for 2 seconds
-                showCustomSplash = false
-                keepSplashScreen = false
-            }
             
             SetDefaultTheme()
             KoinContext {
@@ -154,34 +146,30 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                     )
                 }
                 AppTheme(this.lifecycleScope) {
-                    if (showCustomSplash) {
-                        CustomSplashScreen()
-                    } else {
-                        Surface(
-                            color = MaterialTheme.colorScheme.surface,
-                            contentColor = MaterialTheme.colorScheme.onSurface,
-                        ) {
-                            val navController = rememberNavController()
-                            
-                            ProvideNavigator(navController) {
-                                // Handle exit confirmation when on main screen
-                                if (navController.previousBackStackEntry == null) {
-                                    ConfirmExit()
-                                }
-                                
-                                LaunchedEffect(Unit) {
-                                    handleIntentAction(this@MainActivity.intent, navController)
-                                }
-                                
-                                IScaffold {
-                                    CommonNavHost(navController)
-                                    
-                                    // Pass the application context to GetPermissions
-                                    GetPermissions(uiPreferences, context = this@MainActivity)
-                                }
-
-                                HandleOnNewIntent(this, navController)
+                    Surface(
+                        color = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                    ) {
+                        val navController = rememberNavController()
+                        
+                        ProvideNavigator(navController) {
+                            // Handle exit confirmation when on main screen
+                            if (navController.previousBackStackEntry == null) {
+                                ConfirmExit()
                             }
+                            
+                            LaunchedEffect(Unit) {
+                                handleIntentAction(this@MainActivity.intent, navController)
+                            }
+                            
+                            IScaffold {
+                                CommonNavHost(navController)
+                                
+                                // Pass the application context to GetPermissions
+                                GetPermissions(uiPreferences, context = this@MainActivity)
+                            }
+
+                            HandleOnNewIntent(this, navController)
                         }
                     }
                 }
@@ -392,6 +380,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     @Composable
     private fun CustomSplashScreen() {
         val isDark = isSystemInDarkTheme()
+        
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -400,36 +389,31 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxSize()
+                verticalArrangement = Arrangement.Center
             ) {
-                Spacer(modifier = Modifier.weight(1f))
-                
                 // Logo
                 Image(
                     painter = if (isDark) {
-                        painterResource(ireader.i18n.R.drawable.ic_splash_night)
+                        painterResource(ireader.i18n.R.drawable.ic_eternity_dark)
                     } else {
-                        painterResource(ireader.i18n.R.drawable.ic_splash_light)
+                        painterResource(ireader.i18n.R.drawable.ic_eternity_light)
                     },
                     contentDescription = "App Logo",
-                    modifier = Modifier.size(120.dp)
+                    modifier = Modifier.size(160.dp)
                 )
                 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(40.dp))
                 
                 // Tagline
                 Text(
                     text = "Created by a reader, for readers",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Medium,
-                        letterSpacing = 0.5.sp
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
                     ),
-                    color = if (isDark) Color.White.copy(alpha = 0.87f) 
-                            else Color.Black.copy(alpha = 0.87f)
+                    color = if (isDark) Color.White else Color.Black
                 )
-                
-                Spacer(modifier = Modifier.weight(1f))
             }
         }
     }

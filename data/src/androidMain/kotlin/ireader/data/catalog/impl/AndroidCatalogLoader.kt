@@ -98,12 +98,12 @@ class AndroidCatalogLoader(
                     try {
                         file.delete()
                     } catch (e: Exception) {
-                        Log.warn("Failed to delete stale extension file: ${file.name}")
+                        // Ignore errors
                     }
                 }
             }
         } catch (e: Exception) {
-            Log.error("Failed to create secure directories", e)
+            // Ignore errors
         }
     }
 
@@ -175,40 +175,19 @@ class AndroidCatalogLoader(
         }.filterNotNull()
 
         // Load JavaScript plugins if enabled
-        val jsPluginsEnabled = uiPreferences.enableJSPlugins().get()
-        Log.warn("JS Plugins enabled: $jsPluginsEnabled")
-        
-        val jsPlugins = if (jsPluginsEnabled) {
+        val jsPlugins = if (uiPreferences.enableJSPlugins().get()) {
             try {
-                val jsPluginsDir = getJSPluginsDirectory()
-                Log.warn("JS Plugins directory: ${jsPluginsDir.absolutePath}, exists: ${jsPluginsDir.exists()}")
-                if (jsPluginsDir.exists()) {
-                    val files = jsPluginsDir.listFiles()
-                    Log.warn("JS Plugin files found: ${files?.size ?: 0}")
-                    files?.forEach { file ->
-                        Log.warn("  - ${file.name} (${file.length()} bytes)")
-                    }
-                }
-                
-                val startTime = System.currentTimeMillis()
                 // Load stub plugins instantly for fast startup
                 val stubs = jsPluginLoader.loadStubPlugins()
-                val duration = System.currentTimeMillis() - startTime
-                
-                Log.warn("Loaded ${stubs.size} JS plugin stubs in ${duration}ms")
-                JSPluginLogger.logInfo("AndroidCatalogLoader", 
-                    "Loaded ${stubs.size} JS plugin stubs in ${duration}ms")
                 
                 // Note: Actual plugins will be loaded in background by CatalogStore
                 // On first run (no stubs), background loading will load all plugins
                 // On subsequent runs, background loading will replace stubs with actual plugins
                 stubs
             } catch (e: Exception) {
-                Log.error(e, "Failed to load JS plugin stubs")
                 emptyList()
             }
         } else {
-            Log.warn("JS Plugins are disabled in preferences")
             emptyList()
         }
 
@@ -251,20 +230,12 @@ class AndroidCatalogLoader(
                 pkgManager.getPackageArchiveInfo(finalFile.absolutePath, PACKAGE_FLAGS)
             } catch (e: Exception) {
                 // APK is corrupted or invalid
-                Log.warn("Failed to read APK for catalog {}: {}", pkgName, e.message)
                 null
             }
         } else {
             null
         }
         if (pkgInfo == null) {
-            // Don't log warning for JS plugins - they're handled separately
-            // Only log if there's no JS file either
-            val jsPluginsDir = getJSPluginsDirectory()
-            val jsFile = File(jsPluginsDir, "$pkgName.js")
-            if (!jsFile.exists()) {
-                Log.warn("The requested catalog {} wasn't found (not an APK or JS plugin)", pkgName)
-            }
             return null
         }
 
@@ -287,7 +258,6 @@ class AndroidCatalogLoader(
             pkgManager.getPackageInfo(pkgName, PACKAGE_FLAGS)
         } catch (error: NameNotFoundException) {
             // Unlikely, but the package may have been uninstalled at this point
-            Log.warn("Failed to load catalog: the package {} isn't installed", pkgName)
             return null
         }
         return loadSystemCatalog(pkgName, pkgInfo,icon)
@@ -338,7 +308,6 @@ class AndroidCatalogLoader(
                 iconUrl = data.icon
             )
         } catch (e: Exception) {
-            Log.warn(e, "Failed to load local catalog $pkgName")
             return null
         }
     }
@@ -383,15 +352,10 @@ class AndroidCatalogLoader(
 
     private fun validateMetadata(pkgName: String, pkgInfo: PackageInfo): ValidatedData? {
         if (!isPackageAnExtension(pkgInfo)) {
-            Log.warn("Failed to load catalog, package {} isn't a catalog", pkgName)
             return null
         }
 
         if (pkgName != pkgInfo.packageName) {
-            Log.warn(
-                "Failed to load catalog, package name mismatch: Provided {} Actual {}",
-                pkgName, pkgInfo.packageName
-            )
             return null
         }
 
@@ -402,9 +366,6 @@ class AndroidCatalogLoader(
         // Validate lib version
         val majorLibVersion = versionName!!.substringBefore('.').toInt()
         if (majorLibVersion < LIB_VERSION_MIN || majorLibVersion > LIB_VERSION_MAX) {
-            val exception = "Failed to load catalog, the package {} lib version is {}," +
-                    "while only versions {} to {} are allowed"
-            Log.warn(exception, pkgName, majorLibVersion, LIB_VERSION_MIN, LIB_VERSION_MAX)
             return null
         }
 
@@ -413,7 +374,6 @@ class AndroidCatalogLoader(
         val metadata = appInfo!!.metaData
         val sourceClassName = metadata.getString(METADATA_SOURCE_CLASS)?.trim()
         if (sourceClassName == null) {
-            Log.warn("Failed to load catalog, the package {} didn't define source class", pkgName)
             return null
         }
 
@@ -450,7 +410,6 @@ class AndroidCatalogLoader(
 
             obj as? Source ?: throw Exception("Unknown source class type! ${obj.javaClass}")
         } catch (e: Throwable) {
-            Log.warn(e, "Failed to load catalog {}", pkgName)
             return null
         }
     }
@@ -473,10 +432,9 @@ class AndroidCatalogLoader(
         if (!uiPreferences.enableJSPlugins().get()) return
         
         try {
-            JSPluginLogger.logInfo("AndroidCatalogLoader", "Starting async JS plugin loading")
             jsPluginLoader.loadPluginsAsync(onPluginLoaded)
         } catch (e: Exception) {
-            Log.error("Failed to load JS plugins asynchronously: ${e.message}", e)
+            // Ignore errors
         }
     }
     

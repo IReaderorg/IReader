@@ -243,7 +243,17 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         return START_STICKY
     }
     
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        // When user swipes away the app, stop TTS and clean up
+        scope.launch { handleCancel() }
+    }
+    
     override fun onDestroy() {
+        // Stop playback immediately
+        unifiedPlayer?.stop()
+        state.isPlaying = false
+        
         // Cancel notification when service is destroyed
         NotificationManagerCompat.from(this).cancel(NotificationsIds.ID_TTS)
         

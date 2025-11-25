@@ -71,7 +71,6 @@ class JSPluginLoader(
             try {
                 loadPlugin(file)
             } catch (e: Exception) {
-                Log.error("JSPluginLoader: Failed to load plugin ${file.nameWithoutExtension}", e)
                 null
             }
         }
@@ -95,16 +94,10 @@ class JSPluginLoader(
             
             if (!metadataFile.exists()) {
                 try {
-                    Log.info("JSPluginLoader: Creating missing metadata file for $pluginId")
-                    
                     // Load the plugin to extract metadata
                     val catalog = loadPlugin(file)
-                    if (catalog != null) {
-                        // Metadata was already saved by loadPlugin
-                        Log.info("JSPluginLoader: Created metadata file for $pluginId with language: ${catalog.metadata.lang}")
-                    }
                 } catch (e: Exception) {
-                    Log.error("JSPluginLoader: Failed to create metadata for $pluginId", e)
+                    // Ignore errors
                 }
             }
         }
@@ -190,7 +183,6 @@ class JSPluginLoader(
                     val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
                     json.decodeFromString<PluginMetadata>(metadataFile.readText())
                 } catch (e: Exception) {
-                    Log.warn("JSPluginLoader: Failed to load saved metadata for $pluginId: ${e.message}")
                     null
                 }
             } else {
@@ -231,14 +223,6 @@ class JSPluginLoader(
                 val rawLang = plugin.getLang()
                 val langCode = convertLanguageNameToCode(rawLang)
                 val site = plugin.getSite()
-                
-                // Log the site value for debugging
-                Log.info("JSPluginLoader: Plugin $pluginId site value: '$site'")
-                
-                // Validate site URL - if it's not a valid URL, log a warning
-                if (site.isBlank() || (!site.startsWith("http://") && !site.startsWith("https://"))) {
-                    Log.warn("JSPluginLoader: Plugin $pluginId has invalid site URL: '$site'. This will cause URL construction issues.")
-                }
                 
                 PluginMetadata(
                     id = plugin.getId(),
@@ -288,17 +272,15 @@ class JSPluginLoader(
                     val metadataJson = json.encodeToString(PluginMetadata.serializer(), metadata)
                     metadataFile.writeText(metadataJson)
                 } catch (e: Exception) {
-                    Log.warn("JSPluginLoader: Failed to save metadata file for $pluginId: ${e.message}")
+                    // Ignore errors
                 }
             }
             
             return catalog
             
         } catch (e: PluginLoadException) {
-            Log.error("JSPluginLoader: Plugin load error for $pluginId: ${e.message}", e)
             return null
         } catch (e: Exception) {
-            Log.error("JSPluginLoader: Unexpected error loading $pluginId", e)
             return null
         }
     }
@@ -358,8 +340,6 @@ class JSPluginLoader(
             pluginCache.remove(pluginId)
             // Reload the plugin
             loadPlugin(pluginFile)
-        } else {
-            Log.error("JSPluginLoader: Plugin file not found for reload: $pluginId", null)
         }
     }
     
@@ -403,7 +383,7 @@ class JSPluginLoader(
                     onPluginLoaded(catalog)
                 }
             } catch (e: Exception) {
-                Log.error("JSPluginLoader: Failed to load priority plugin ${file.nameWithoutExtension}", e)
+                // Ignore errors
             }
         }
         
@@ -416,7 +396,7 @@ class JSPluginLoader(
                     onPluginLoaded(catalog)
                 }
             } catch (e: Exception) {
-                Log.error("JSPluginLoader: Failed to load plugin ${file.nameWithoutExtension}", e)
+                // Ignore errors
             }
         }
         
@@ -505,11 +485,7 @@ class JSPluginLoader(
             "srpski", "serbian" -> "sr"
             "български", "bulgarian" -> "bg"
             "македонски", "macedonian" -> "mk"
-            else -> {
-                // If we can't map it, log a warning and default to English
-                Log.warn("JSPluginLoader: Unknown language name: '$normalized', defaulting to 'en'")
-                "en"
-            }
+            else -> "en"
         }
     }
 }

@@ -291,6 +291,12 @@ class AndroidJSEngine(
                 }
             })();
             
+            // Promise polyfill that works with J2V8's limitations
+            ${getPromisePolyfill()}
+            
+            // Async generator runtime support for compiled async/await
+            ${getAsyncGeneratorSupport()}
+            
             // Wrapper function
             ${getWrapperFunction()}
         """.trimIndent()
@@ -511,11 +517,57 @@ class AndroidJSEngine(
                             }
                         }
                     }
+                    
+                    this.append = function(name, value) {
+                        this.headers[name.toLowerCase()] = String(value);
+                    };
+                    
+                    this.delete = function(name) {
+                        delete this.headers[name.toLowerCase()];
+                    };
+                    
                     this.get = function(name) {
                         return this.headers[name.toLowerCase()] || null;
                     };
+                    
+                    this.has = function(name) {
+                        return name.toLowerCase() in this.headers;
+                    };
+                    
                     this.set = function(name, value) {
                         this.headers[name.toLowerCase()] = String(value);
+                    };
+                    
+                    this.entries = function() {
+                        var entries = [];
+                        for (var key in this.headers) {
+                            if (this.headers.hasOwnProperty(key)) {
+                                entries.push([key, this.headers[key]]);
+                            }
+                        }
+                        return entries;
+                    };
+                    
+                    this.keys = function() {
+                        return Object.keys(this.headers);
+                    };
+                    
+                    this.values = function() {
+                        var values = [];
+                        for (var key in this.headers) {
+                            if (this.headers.hasOwnProperty(key)) {
+                                values.push(this.headers[key]);
+                            }
+                        }
+                        return values;
+                    };
+                    
+                    this.forEach = function(callback, thisArg) {
+                        for (var key in this.headers) {
+                            if (this.headers.hasOwnProperty(key)) {
+                                callback.call(thisArg, this.headers[key], key, this);
+                            }
+                        }
                     };
                 };
             }
@@ -609,6 +661,394 @@ class AndroidJSEngine(
                     };
                 };
             }
+        """.trimIndent()
+    }
+    
+    private fun getPromisePolyfill(): String {
+        return """
+            // Override native Promise to work with J2V8's limitations
+            (function() {
+                var NativePromise = globalThis.Promise;
+                var pendingPromises = [];
+                
+                // Microtask queue simulation for async behavior
+                var microtaskQueue = [];
+                var isProcessingQueue = false;
+                
+                function scheduleMicrotask(fn) {
+                    microtaskQueue.push(fn);
+                }
+                
+                function processMicrotasks() {
+                    if (isProcessingQueue) return 0;
+                    if (microtaskQueue.length === 0) return 0;
+                    
+                    isProcessingQueue = true;
+                    var tasksToProcess = microtaskQueue.slice();
+                    var count = tasksToProcess.length;
+                    microtaskQueue = [];
+                    
+                    for (var i = 0; i < tasksToProcess.length; i++) {
+                        try {
+                            tasksToProcess[i]();
+                        } catch (e) {
+                            console.error('Microtask error:', e);
+                        }
+                    }
+                    
+                    isProcessingQueue = false;
+                    
+                    // Process any new tasks that were added
+                    if (microtaskQueue.length > 0) {
+                        count += processMicrotasks();
+                    }
+                    
+                    return count;
+                }
+                
+                globalThis.__processMicrotasks = processMicrotasks;
+                
+                globalThis.Promise = function(executor) {
+                    var self = this;
+                    self._state = 'pending';
+                    self._value = undefined;
+                    self._handlers = [];
+                    self._id = Math.random().toString(36).substr(2, 9);
+                    
+                    function resolve(value) {
+                        if (self._state !== 'pending') return;
+                        
+                        // Prevent resolving with self
+                        if (value === self) {
+                            reject(new TypeError('Cannot resolve promise with itself'));
+                            return;
+                        }
+                        
+                        // If resolving with a thenable, adopt its state
+                        if (value && typeof value.then === 'function') {
+                            // Mark as resolving to prevent re-entrance
+                            self._state = 'resolving';
+                            try {
+                                var called = false;
+                                value.then(
+                                    function(v) {
+                                        if (called) return;
+                                        called = true;
+                                        self._state = 'pending'; // Reset to allow resolve to work
+                                        resolve(v);
+                                    },
+                                    function(r) {
+                                        if (called) return;
+                                        called = true;
+                                        self._state = 'pending'; // Reset to allow reject to work
+                                        reject(r);
+                                    }
+                                );
+                            } catch (e) {
+                                if (!called) {
+                                    self._state = 'pending';
+                                    reject(e);
+                                }
+                            }
+                            return;
+                        }
+                        
+                        // Fulfill with the value
+                        self._state = 'fulfilled';
+                        self._value = value;
+                        
+                        // Debug: log resolution
+                        if (globalThis.__debugPromiseResolution) {
+                            globalThis.__consoleLog = 'Promise ' + self._id + ' resolved with ' + typeof value + ', ' + self._handlers.length + ' handlers';
+                        }
+                        
+                        // Process all pending handlers as microtasks
+                        var handlers = self._handlers.slice();
+                        self._handlers = [];
+                        
+                        handlers.forEach(function(handler) {
+                            scheduleMicrotask(function() {
+                                try {
+                                    if (handler.onFulfilled) {
+                                        var result = handler.onFulfilled(value);
+                                        // If handler returns a thenable, chain to it
+                                        if (result && typeof result.then === 'function') {
+                                            result.then(handler.resolve, handler.reject);
+                                        } else {
+                                            handler.resolve(result);
+                                        }
+                                    } else {
+                                        handler.resolve(value);
+                                    }
+                                } catch (e) {
+                                    handler.reject(e);
+                                }
+                            });
+                        });
+                    }
+                    
+                    function reject(reason) {
+                        if (self._state !== 'pending') return;
+                        self._state = 'rejected';
+                        self._value = reason;
+                        self._handlers.forEach(function(handler) {
+                            if (handler.onRejected) {
+                                try {
+                                    var result = handler.onRejected(reason);
+                                    handler.resolve(result);
+                                } catch (e) {
+                                    handler.reject(e);
+                                }
+                            } else {
+                                handler.reject(reason);
+                            }
+                        });
+                        self._handlers = [];
+                    }
+                    
+                    try {
+                        executor(resolve, reject);
+                    } catch (e) {
+                        reject(e);
+                    }
+                };
+                
+                globalThis.Promise.prototype.then = function(onFulfilled, onRejected) {
+                    var self = this;
+                    return new Promise(function(resolve, reject) {
+                        function handle() {
+                            var state = self._state;
+                            
+                            // Handle 'resolving' state as pending
+                            if (state === 'resolving') {
+                                state = 'pending';
+                            }
+                            
+                            if (state === 'fulfilled') {
+                                // Execute immediately if already fulfilled
+                                if (onFulfilled) {
+                                    try {
+                                        var result = onFulfilled(self._value);
+                                        // If result is a thenable, chain to it
+                                        if (result && typeof result.then === 'function') {
+                                            result.then(resolve, reject);
+                                        } else {
+                                            resolve(result);
+                                        }
+                                    } catch (e) {
+                                        reject(e);
+                                    }
+                                } else {
+                                    resolve(self._value);
+                                }
+                            } else if (state === 'rejected') {
+                                // Execute immediately if already rejected
+                                if (onRejected) {
+                                    try {
+                                        var result = onRejected(self._value);
+                                        // If result is a thenable, chain to it
+                                        if (result && typeof result.then === 'function') {
+                                            result.then(resolve, reject);
+                                        } else {
+                                            resolve(result);
+                                        }
+                                    } catch (e) {
+                                        reject(e);
+                                    }
+                                } else {
+                                    reject(self._value);
+                                }
+                            } else {
+                                // Still pending or resolving, add to handlers
+                                self._handlers.push({
+                                    onFulfilled: onFulfilled,
+                                    onRejected: onRejected,
+                                    resolve: resolve,
+                                    reject: reject
+                                });
+                            }
+                        }
+                        // Execute handle immediately (synchronously)
+                        handle();
+                    });
+                };
+                
+                globalThis.Promise.prototype.catch = function(onRejected) {
+                    return this.then(null, onRejected);
+                };
+                
+                globalThis.Promise.resolve = function(value) {
+                    return new Promise(function(resolve) {
+                        resolve(value);
+                    });
+                };
+                
+                globalThis.Promise.reject = function(reason) {
+                    return new Promise(function(resolve, reject) {
+                        reject(reason);
+                    });
+                };
+                
+                globalThis.Promise.all = function(promises) {
+                    return new Promise(function(resolve, reject) {
+                        if (!Array.isArray(promises)) {
+                            reject(new TypeError('Promise.all requires an array'));
+                            return;
+                        }
+                        var results = new Array(promises.length);
+                        var remaining = promises.length;
+                        if (remaining === 0) {
+                            resolve(results);
+                            return;
+                        }
+                        var hasRejected = false;
+                        promises.forEach(function(promise, index) {
+                            Promise.resolve(promise).then(function(value) {
+                                if (hasRejected) return;
+                                results[index] = value;
+                                remaining--;
+                                if (remaining === 0) {
+                                    resolve(results);
+                                }
+                            }).catch(function(error) {
+                                if (hasRejected) return;
+                                hasRejected = true;
+                                reject(error);
+                            });
+                        });
+                    });
+                };
+                
+                globalThis.Promise.race = function(promises) {
+                    return new Promise(function(resolve, reject) {
+                        if (!Array.isArray(promises)) {
+                            reject(new TypeError('Promise.race requires an array'));
+                            return;
+                        }
+                        promises.forEach(function(promise) {
+                            Promise.resolve(promise).then(resolve).catch(reject);
+                        });
+                    });
+                };
+            })();
+        """.trimIndent()
+    }
+    
+    private fun getAsyncGeneratorSupport(): String {
+        return """
+            // Patch for TypeScript/Babel compiled async/await generator runtime
+            // This makes the generator state machine work with our Promise polyfill
+            (function() {
+                // The compiled async/await uses a generator-based state machine
+                // Pattern: a(this, void 0, void 0, function() { return l(this, function(l2) { ... }) })
+                // Where 'a' is the async wrapper and 'l' is the generator stepper
+                
+                // We need to ensure that when a generator yields a promise,
+                // the stepper continues after the promise resolves
+                
+                // Patch: Wrap the generator stepper to ensure proper continuation
+                var originalSetTimeout = globalThis.setTimeout;
+                var originalSetImmediate = globalThis.setImmediate;
+                
+                // Create a simple task scheduler for generator continuation
+                var scheduledTasks = [];
+                var isProcessingTasks = false;
+                
+                function scheduleTask(fn) {
+                    scheduledTasks.push(fn);
+                    if (!isProcessingTasks) {
+                        processScheduledTasks();
+                    }
+                }
+                
+                function processScheduledTasks() {
+                    if (isProcessingTasks) return;
+                    if (scheduledTasks.length === 0) return;
+                    
+                    isProcessingTasks = true;
+                    while (scheduledTasks.length > 0) {
+                        var task = scheduledTasks.shift();
+                        try {
+                            task();
+                        } catch (e) {
+                            console.error('Scheduled task error:', e);
+                        }
+                    }
+                    isProcessingTasks = false;
+                }
+                
+                globalThis.__processScheduledTasks = processScheduledTasks;
+                
+                // Override setImmediate to use our scheduler
+                globalThis.setImmediate = function(fn) {
+                    scheduleTask(fn);
+                    return 0;
+                };
+                
+                // Ensure setTimeout with 0 delay uses our scheduler
+                globalThis.setTimeout = function(fn, delay) {
+                    if (delay === 0 || delay === undefined) {
+                        scheduleTask(fn);
+                        return 0;
+                    }
+                    return originalSetTimeout ? originalSetTimeout(fn, delay) : 0;
+                };
+                
+                // Patch Promise.prototype.then to ensure generator continuation
+                var OriginalPromiseThen = globalThis.Promise.prototype.then;
+                globalThis.Promise.prototype.then = function(onFulfilled, onRejected) {
+                    var self = this;
+                    
+                    // Wrap handlers to ensure they execute via scheduler
+                    var wrappedOnFulfilled = onFulfilled ? function(value) {
+                        var result;
+                        try {
+                            result = onFulfilled(value);
+                        } catch (e) {
+                            throw e;
+                        }
+                        return result;
+                    } : undefined;
+                    
+                    var wrappedOnRejected = onRejected ? function(reason) {
+                        var result;
+                        try {
+                            result = onRejected(reason);
+                        } catch (e) {
+                            throw e;
+                        }
+                        return result;
+                    } : undefined;
+                    
+                    return OriginalPromiseThen.call(self, wrappedOnFulfilled, wrappedOnRejected);
+                };
+                
+                // Helper to detect if something is a thenable
+                globalThis.__isThenable = function(obj) {
+                    return obj && typeof obj.then === 'function';
+                };
+                
+                // Ensure Promise.resolve works correctly
+                if (!globalThis.Promise.resolve) {
+                    globalThis.Promise.resolve = function(value) {
+                        if (value instanceof globalThis.Promise) {
+                            return value;
+                        }
+                        return new globalThis.Promise(function(resolve) {
+                            resolve(value);
+                        });
+                    };
+                }
+                
+                // Ensure Promise.reject works correctly
+                if (!globalThis.Promise.reject) {
+                    globalThis.Promise.reject = function(reason) {
+                        return new globalThis.Promise(function(resolve, reject) {
+                            reject(reason);
+                        });
+                    };
+                }
+            })();
         """.trimIndent()
     }
     
@@ -842,6 +1282,7 @@ class AndroidJSEngine(
                 wrapper.getNovelDetails = function(url) {
                     if (typeof plugin.parseNovel === 'function') {
                         return Promise.resolve(plugin.parseNovel(url)).then(function(d) {
+                            console.log('getNovelDetails: Got novel data, keys=' + Object.keys(d || {}).join(','));
                             var details = {};
                             details.name = d.name || d.title || "";
                             details.url = d.url || d.path || url;
@@ -850,7 +1291,11 @@ class AndroidJSEngine(
                             details.description = d.description || d.summary || null;
                             details.genres = Array.isArray(d.genres) ? d.genres : [];
                             details.status = d.status || null;
+                            console.log('getNovelDetails: Mapped to details, name=' + details.name);
                             return details;
+                        }).catch(function(e) {
+                            console.error('getNovelDetails error: ' + (e.message || e));
+                            throw e;
                         });
                     }
                     var empty = {};
@@ -866,8 +1311,11 @@ class AndroidJSEngine(
                 
                 wrapper.getChapters = function(url) {
                     if (typeof plugin.parseNovel === 'function') {
+                        globalThis.__consoleLog = 'getChapters: Calling parseNovel for ' + url;
                         return Promise.resolve(plugin.parseNovel(url)).then(function(novel) {
+                            globalThis.__consoleLog = 'getChapters: Got novel, type=' + typeof novel + ', keys=' + (novel ? Object.keys(novel).join(',') : 'null');
                             if (novel && Array.isArray(novel.chapters)) {
+                                globalThis.__consoleLog = 'getChapters: Found ' + novel.chapters.length + ' chapters';
                                 return novel.chapters.map(function(c) {
                                     var chapter = {};
                                     chapter.name = c.name || c.title || "";
@@ -876,6 +1324,10 @@ class AndroidJSEngine(
                                     return chapter;
                                 });
                             }
+                            globalThis.__consoleLog = 'getChapters: No chapters found, novel=' + JSON.stringify(novel).substring(0, 200);
+                            return [];
+                        }).catch(function(e) {
+                            globalThis.__consoleError = 'getChapters error: ' + (e.message || e);
                             return [];
                         });
                     }
@@ -1111,33 +1563,146 @@ private class AndroidPluginWrapper(
         
         Log.debug("AndroidPluginWrapper: awaitPromise starting for expression (promiseId=$promiseId)")
         
-        // Setup promise handlers
-        engine.evaluateScript("""
-            (async function() {
-                try {
-                    const result = await ($jsExpression);
-                    globalThis.__promiseResult_$promiseId = JSON.stringify(result);
-                    globalThis.__promiseStatus_$promiseId = 'resolved';
-                } catch (e) {
-                    // Better error reporting
-                    const errorMsg = e.message || String(e);
-                    const errorStack = e.stack || '';
-                    globalThis.__promiseError_$promiseId = errorMsg + (errorStack ? '\n' + errorStack : '');
-                    globalThis.__promiseStatus_$promiseId = 'rejected';
-                    console.error('Promise error:', errorMsg, errorStack);
-                }
-            })();
-        """.trimIndent())
+        // Setup promise handlers using .then() instead of async/await
+        // J2V8 doesn't automatically execute microtasks, so we use a different approach
+        try {
+            // Initialize debug log array for this promise
+            engine.evaluateScript("if (!globalThis.__promiseDebugLogs_$promiseId) globalThis.__promiseDebugLogs_$promiseId = [];")
+            
+            engine.evaluateScript("""
+                (function() {
+                    var debugLog = function(msg) {
+                        if (!globalThis.__promiseDebugLogs_$promiseId) globalThis.__promiseDebugLogs_$promiseId = [];
+                        globalThis.__promiseDebugLogs_$promiseId.push(msg);
+                    };
+                    
+                    try {
+                        globalThis.__debugPromiseResolution = true;
+                        debugLog('Starting execution');
+                        var promise = ($jsExpression);
+                        debugLog('Got promise object, type=' + typeof promise + ', isThenable=' + (promise && typeof promise.then === 'function'));
+                        
+                        if (promise && typeof promise.then === 'function') {
+                            debugLog('Promise state: ' + (promise._state || 'unknown') + ', id: ' + (promise._id || 'unknown') + ', handlers: ' + (promise._handlers ? promise._handlers.length : 'unknown'));
+                            var thenCalled = false;
+                            debugLog('About to call .then()');
+                            var thenResult = promise.then(function(result) {
+                                debugLog('INSIDE then() callback - this should execute!');
+
+                                if (thenCalled) {
+                                    debugLog('ERROR: then() called multiple times!');
+                                    return;
+                                }
+                                thenCalled = true;
+                                debugLog('then() callback executing, result type=' + typeof result);
+                                try {
+                                    globalThis.__promiseResult_$promiseId = JSON.stringify(result);
+                                    globalThis.__promiseStatus_$promiseId = 'resolved';
+                                    debugLog('Resolved successfully');
+                                } catch (stringifyError) {
+                                    debugLog('JSON.stringify error: ' + stringifyError.message);
+                                    globalThis.__promiseError_$promiseId = 'Failed to stringify result: ' + stringifyError.message;
+                                    globalThis.__promiseStatus_$promiseId = 'rejected';
+                                }
+                            }, function(e) {
+                                if (thenCalled) {
+                                    debugLog('ERROR: catch() called after then()!');
+                                    return;
+                                }
+                                thenCalled = true;
+                                var errorMsg = e.message || String(e);
+                                var errorStack = e.stack || '';
+                                debugLog('Promise error: ' + errorMsg);
+                                globalThis.__promiseError_$promiseId = errorMsg + (errorStack ? '\n' + errorStack : '');
+                                globalThis.__promiseStatus_$promiseId = 'rejected';
+                            });
+                            debugLog('then() registered, returned promise state: ' + (thenResult._state || 'unknown'));
+                        } else {
+                            // Not a promise, return immediately
+                            globalThis.__promiseResult_$promiseId = JSON.stringify(promise);
+                            globalThis.__promiseStatus_$promiseId = 'resolved';
+                            debugLog('Not a promise, resolved immediately');
+                        }
+                    } catch (e) {
+                        var errorMsg = e.message || String(e);
+                        var errorStack = e.stack || '';
+                        debugLog('Sync error: ' + errorMsg);
+                        globalThis.__promiseError_$promiseId = errorMsg + (errorStack ? '\n' + errorStack : '');
+                        globalThis.__promiseStatus_$promiseId = 'rejected';
+                    }
+                })();
+            """.trimIndent())
+            
+            Log.debug("AndroidPluginWrapper: Promise $promiseId setup complete, starting polling")
+        } catch (e: Exception) {
+            Log.error("AndroidPluginWrapper: Failed to setup promise: ${e.message}", e)
+            throw e
+        }
         
         val startTime = System.currentTimeMillis()
         val timeout = 30000L
+        var lastLogTime = startTime
         
         while (System.currentTimeMillis() - startTime < timeout) {
             // Process any pending fetch requests
             processPendingFetch()
             
+            // Process microtask queue (critical for Promise resolution)
+            try {
+                val processed = engine.evaluateScript("globalThis.__processMicrotasks()") as? Number
+                if (processed != null && processed.toInt() > 0) {
+                    Log.debug("AndroidPluginWrapper: Processed ${processed.toInt()} microtasks")
+                }
+            } catch (e: Exception) {
+                Log.warn("AndroidPluginWrapper: Error processing microtasks: ${e.message}")
+            }
+            
+            // Process scheduled tasks (for generator continuation)
+            try {
+                engine.evaluateScript("if (globalThis.__processScheduledTasks) globalThis.__processScheduledTasks();")
+            } catch (e: Exception) {
+                // Ignore
+            }
+            
+            // Pump the event loop by executing a dummy script
+            // This forces V8 to process pending microtasks (promises)
+            try {
+                engine.evaluateScript("void 0;")
+            } catch (e: Exception) {
+                // Ignore
+            }
+            
+            // Log console messages
+            val consoleLog = engine.evaluateScript("globalThis.__consoleLog") as? String
+            if (consoleLog != null) {
+                Log.debug("JS Console: $consoleLog")
+                engine.evaluateScript("globalThis.__consoleLog = null;")
+            }
+            
+            val consoleError = engine.evaluateScript("globalThis.__consoleError") as? String
+            if (consoleError != null) {
+                Log.error("JS Console Error: $consoleError")
+                engine.evaluateScript("globalThis.__consoleError = null;")
+            }
+            
             // Check promise status
             val status = engine.evaluateScript("globalThis.__promiseStatus_$promiseId") as? String
+            
+            // Log progress every 5 seconds
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastLogTime > 5000) {
+                // Get debug logs
+                try {
+                    val debugLogs = engine.evaluateScript("JSON.stringify(globalThis.__promiseDebugLogs_$promiseId || [])") as? String
+                    if (debugLogs != null && debugLogs != "[]") {
+                        Log.debug("AndroidPluginWrapper: Promise $promiseId debug logs: $debugLogs")
+                    }
+                } catch (e: Exception) {
+                    // Ignore
+                }
+                Log.debug("AndroidPluginWrapper: Still waiting for promise $promiseId (${(currentTime - startTime) / 1000}s elapsed, status=$status)")
+                lastLogTime = currentTime
+            }
             
             when (status) {
                 "resolved" -> {
@@ -1145,7 +1710,9 @@ private class AndroidPluginWrapper(
                     engine.evaluateScript("""
                         delete globalThis.__promiseResult_$promiseId;
                         delete globalThis.__promiseStatus_$promiseId;
+                        delete globalThis.__promiseDebugLogs_$promiseId;
                     """.trimIndent())
+                    Log.debug("AndroidPluginWrapper: Promise $promiseId resolved successfully")
                     return result
                 }
                 "rejected" -> {
@@ -1153,6 +1720,7 @@ private class AndroidPluginWrapper(
                     engine.evaluateScript("""
                         delete globalThis.__promiseError_$promiseId;
                         delete globalThis.__promiseStatus_$promiseId;
+                        delete globalThis.__promiseDebugLogs_$promiseId;
                     """.trimIndent())
                     throw Exception("Promise rejected: $error")
                 }
@@ -1162,12 +1730,23 @@ private class AndroidPluginWrapper(
         }
         
         // Cleanup on timeout
+        try {
+            val debugLogs = engine.evaluateScript("JSON.stringify(globalThis.__promiseDebugLogs_$promiseId || [])") as? String
+            if (debugLogs != null && debugLogs != "[]") {
+                Log.error("AndroidPluginWrapper: Promise $promiseId debug logs at timeout: $debugLogs")
+            }
+        } catch (e: Exception) {
+            // Ignore
+        }
+        
         engine.evaluateScript("""
             delete globalThis.__promiseResult_$promiseId;
             delete globalThis.__promiseStatus_$promiseId;
             delete globalThis.__promiseError_$promiseId;
+            delete globalThis.__promiseDebugLogs_$promiseId;
         """.trimIndent())
         
+        Log.error("AndroidPluginWrapper: Promise $promiseId timed out after ${timeout}ms")
         throw Exception("Promise timeout after ${timeout}ms")
     }
     
@@ -1176,7 +1755,11 @@ private class AndroidPluginWrapper(
      * With V8, we can directly resolve/reject the Promise from Kotlin!
      */
     private suspend fun processPendingFetch() {
-        val bridge = bridgeService ?: return
+        val bridge = bridgeService
+        if (bridge == null) {
+            Log.warn("AndroidJSEngine: No bridge service available for fetch")
+            return
+        }
         
         try {
             // Check if there's a pending fetch
@@ -1185,14 +1768,26 @@ private class AndroidPluginWrapper(
                 return
             }
             
+            Log.debug("AndroidJSEngine: Fetch request detected, processing...")
+            
             // Clear the flag
             engine.evaluateScript("globalThis.__fetchReady = false;")
             
             // Get fetch details
-            val fetchJson = engine.evaluateScript("JSON.stringify(globalThis.__pendingFetch)") as? String ?: return
+            val fetchJson = engine.evaluateScript("JSON.stringify(globalThis.__pendingFetch)") as? String
+            if (fetchJson == null) {
+                Log.error("AndroidJSEngine: Failed to get fetch details")
+                return
+            }
+            
             val fetchData = Json.parseToJsonElement(fetchJson).jsonObject
             
-            val url = fetchData["url"]?.jsonPrimitive?.content ?: return
+            val url = fetchData["url"]?.jsonPrimitive?.content
+            if (url == null) {
+                Log.error("AndroidJSEngine: No URL in fetch request")
+                return
+            }
+            
             val method = fetchData["method"]?.jsonPrimitive?.content ?: "GET"
             
             Log.debug("AndroidJSEngine: Processing fetch request: $method $url")
@@ -1269,6 +1864,18 @@ private class AndroidPluginWrapper(
             Log.debug("AndroidJSEngine: Fetch completed successfully")
         } catch (e: Exception) {
             Log.error("AndroidJSEngine: Error processing fetch: ${e.message}", e)
+            
+            // Reject the promise in JavaScript
+            try {
+                engine.evaluateScript("""
+                    if (globalThis.__pendingFetch && globalThis.__pendingFetch.reject) {
+                        globalThis.__pendingFetch.reject(new Error('Fetch failed: ${e.message?.replace("'", "\\'")}'));
+                        delete globalThis.__pendingFetch;
+                    }
+                """.trimIndent())
+            } catch (rejectError: Exception) {
+                Log.error("AndroidJSEngine: Failed to reject promise: ${rejectError.message}")
+            }
         }
     }
     
@@ -1291,8 +1898,9 @@ private class AndroidPluginWrapper(
     
     private fun parseNovelDetails(json: String): PluginNovelDetails {
         return try {
+            Log.debug("AndroidPluginWrapper: Parsing novel details JSON (${json.length} chars)")
             val obj = Json.parseToJsonElement(json).jsonObject
-            PluginNovelDetails(
+            val details = PluginNovelDetails(
                 name = obj["name"]?.jsonPrimitive?.content ?: "",
                 url = obj["url"]?.jsonPrimitive?.content ?: "",
                 cover = obj["cover"]?.jsonPrimitive?.content ?: "",
@@ -1301,16 +1909,23 @@ private class AndroidPluginWrapper(
                 genres = obj["genres"]?.jsonArray?.map { it.jsonPrimitive.content } ?: emptyList(),
                 status = obj["status"]?.jsonPrimitive?.content
             )
+            Log.debug("AndroidPluginWrapper: Parsed novel: ${details.name}, chapters in JSON: ${obj.containsKey("chapters")}")
+            details
         } catch (e: Exception) {
             Log.error("AndroidPluginWrapper: Error parsing novel details: ${e.message}", e)
+            Log.error("AndroidPluginWrapper: JSON was: ${json.take(500)}")
             PluginNovelDetails("", "", "", null, null, emptyList(), null)
         }
     }
     
     private fun parseChapterList(json: String): List<PluginChapter> {
         return try {
+            Log.debug("AndroidPluginWrapper: Parsing chapter list JSON (${json.length} chars)")
+            if (json.length < 500) {
+                Log.debug("AndroidPluginWrapper: Chapter JSON: $json")
+            }
             val array = Json.parseToJsonElement(json).jsonArray
-            array.map { element ->
+            val chapters = array.map { element ->
                 val obj = element.jsonObject
                 PluginChapter(
                     name = obj["name"]?.jsonPrimitive?.content ?: "",
@@ -1318,8 +1933,11 @@ private class AndroidPluginWrapper(
                     releaseTime = obj["releaseTime"]?.jsonPrimitive?.content
                 )
             }
+            Log.debug("AndroidPluginWrapper: Parsed ${chapters.size} chapters")
+            chapters
         } catch (e: Exception) {
             Log.error("AndroidPluginWrapper: Error parsing chapter list: ${e.message}", e)
+            Log.error("AndroidPluginWrapper: JSON was: ${json.take(500)}")
             emptyList()
         }
     }
