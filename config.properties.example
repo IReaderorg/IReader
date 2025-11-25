@@ -1,13 +1,66 @@
-# Supabase Configuration
+# ============================================
+# 7-Project Supabase Configuration Example
+# ============================================
 # Copy this file to config.properties and add your credentials
 # config.properties is gitignored and will not be committed
 
-# Your Supabase project URL
-supabase.url=https://your-project.supabase.co
+# ============================================
+# SINGLE PROJECT SETUP (500MB)
+# ============================================
+# Use the same URL and key for all 7 projects
+# Perfect for personal use - just fill in one project!
 
-# Your Supabase anon/public key (NOT the service_role key!)
-# Get this from: https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api
-supabase.anon.key=your-anon-key-here
+# Project 1 - Auth (User authentication and profiles)
+supabase.auth.url=https://your-project.supabase.co
+supabase.auth.key=your-anon-key-here
 
-# Other configuration
+# Project 2 - Reading (Reading progress tracking)
+supabase.reading.url=https://your-project.supabase.co
+supabase.reading.key=your-anon-key-here
+
+# Project 3 - Library (Synced books library)
+supabase.library.url=https://your-project.supabase.co
+supabase.library.key=your-anon-key-here
+
+# Project 4 - Book Reviews (Book reviews and ratings)
+supabase.book_reviews.url=https://your-project.supabase.co
+supabase.book_reviews.key=your-anon-key-here
+
+# Project 5 - Chapter Reviews (Chapter reviews and ratings)
+supabase.chapter_reviews.url=https://your-project.supabase.co
+supabase.chapter_reviews.key=your-anon-key-here
+
+# Project 6 - Badges (Badge system and NFT integration)
+supabase.badges.url=https://your-project.supabase.co
+supabase.badges.key=your-anon-key-here
+
+# Project 7 - Analytics (Leaderboard and statistics)
+supabase.analytics.url=https://your-project.supabase.co
+supabase.analytics.key=your-anon-key-here
+
+# ============================================
+# OTHER CONFIGURATION
+# ============================================
 WALLET_USE_BROWSER=true
+
+# ============================================
+# NOTES
+# ============================================
+# 1. Get your Supabase URL and anon key from:
+#    https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api
+# 2. For single project: Use same URL/key for all 7 entries above
+# 3. For multi-project: Use different URL/key for each entry
+# 4. Never commit config.properties to git (it's in .gitignore)
+# 5. Use anon/public keys only (NOT service_role keys)
+# 6. Deploy appropriate SQL schemas to your project(s)
+# 7. See QUICK_START_7PROJECT.md for detailed setup guide
+
+# ============================================
+# MULTI-PROJECT SETUP (3.5GB) - ADVANCED
+# ============================================
+# For maximum storage, create 7 separate projects
+# and replace the URLs and keys above with different values
+# Example:
+# supabase.auth.url=https://auth-abc123.supabase.co
+# supabase.reading.url=https://reading-def456.supabase.co
+# ... etc

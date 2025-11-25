@@ -1,50 +1,87 @@
-# Supabase Configuration Example
+# ============================================
+# 7-Project Supabase Configuration Example
+# ============================================
 # Copy this file to local.properties and fill in your values
 
 # ============================================
-# PRIMARY ENDPOINT (Required)
+# SDK LOCATION (Required by Gradle)
 # ============================================
-# This is your main Supabase project for users and authentication
-supabase.url=https://your-project.supabase.co
-supabase.anon.key=your-anon-key-here
+# Uncomment and set your Android SDK path
+# sdk.dir=C\:\\sdk
+# sdk.dir=/Users/username/Library/Android/sdk
 
 # ============================================
-# BOOKS ENDPOINT (Optional)
+# SINGLE PROJECT SETUP (500MB)
 # ============================================
-# Separate Supabase project for book sync data
-# Leave empty to use primary endpoint
-supabase.books.url=
-supabase.books.key=
+# Use the same URL and key for all 7 projects
+# This is the simplest setup - perfect for getting started!
+
+# Project 1 - Auth (User authentication and profiles)
+supabase.auth.url=https://your-project.supabase.co
+supabase.auth.key=your-anon-key-here
+
+# Project 2 - Reading (Reading progress tracking)
+supabase.reading.url=https://your-project.supabase.co
+supabase.reading.key=your-anon-key-here
+
+# Project 3 - Library (Synced books library)
+supabase.library.url=https://your-project.supabase.co
+supabase.library.key=your-anon-key-here
+
+# Project 4 - Book Reviews (Book reviews and ratings)
+supabase.book_reviews.url=https://your-project.supabase.co
+supabase.book_reviews.key=your-anon-key-here
+
+# Project 5 - Chapter Reviews (Chapter reviews and ratings)
+supabase.chapter_reviews.url=https://your-project.supabase.co
+supabase.chapter_reviews.key=your-anon-key-here
+
+# Project 6 - Badges (Badge system and NFT integration)
+supabase.badges.url=https://your-project.supabase.co
+supabase.badges.key=your-anon-key-here
+
+# Project 7 - Analytics (Leaderboard and statistics)
+supabase.analytics.url=https://your-project.supabase.co
+supabase.analytics.key=your-anon-key-here
 
 # ============================================
-# PROGRESS ENDPOINT (Optional)
+# MULTI-PROJECT SETUP (3.5GB) - ADVANCED
 # ============================================
-# Separate Supabase project for reading progress
-# Leave empty to use primary endpoint
-supabase.progress.url=
-supabase.progress.key=
-
-# ============================================
-# REVIEWS ENDPOINT (Optional - Future)
-# ============================================
-# Separate Supabase project for reviews and ratings
-# Leave empty to use primary endpoint
-supabase.reviews.url=
-supabase.reviews.key=
-
-# ============================================
-# COMMUNITY ENDPOINT (Optional - Future)
-# ============================================
-# Separate Supabase project for community features
-# Leave empty to use primary endpoint
-supabase.community.url=
-supabase.community.key=
+# For maximum storage, create 7 separate projects
+# and use different URLs for each:
+#
+# supabase.auth.url=https://auth-project.supabase.co
+# supabase.auth.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.auth-key
+#
+# supabase.reading.url=https://reading-project.supabase.co
+# supabase.reading.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.reading-key
+#
+# ... and so on for all 7 projects
 
 # ============================================
 # NOTES
 # ============================================
 # 1. Never commit local.properties to git (it's in .gitignore)
-# 2. For single endpoint setup, only fill in primary endpoint
-# 3. For multi-endpoint setup, fill in additional endpoints as needed
-# 4. Empty values will fall back to primary endpoint
-# 5. Get your Supabase URL and keys from: https://app.supabase.com/project/_/settings/api
+# 2. Get your Supabase URL and keys from:
+#    https://app.supabase.com/project/_/settings/api
+# 3. For single project: Use same URL/key for all 7 entries
+# 4. For multi-project: Use different URL/key for each entry
+# 5. Use anon/public keys only (NOT service_role keys)
+# 6. Deploy appropriate SQL schemas to your project(s)
+# 7. See SETUP_7PROJECT_GUIDE.md for detailed instructions
+
+# ============================================
+# SCHEMA DEPLOYMENT
+# ============================================
+# SINGLE PROJECT: Deploy all migrations to your one project
+# - migration_create_users.sql
+# - migration_create_reading_progress.sql
+# - migration_create_synced_books.sql
+# - migration_create_synced_chapters.sql
+# - migration_add_book_reviews.sql
+# - migration_add_chapter_reviews.sql
+# - migration_add_donation_badges.sql
+# - migration_add_leaderboard.sql
+
+# MULTI-PROJECT: Deploy specific migrations to each project
+# See SETUP_7PROJECT_GUIDE.md for details

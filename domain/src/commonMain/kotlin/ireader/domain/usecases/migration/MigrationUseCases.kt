@@ -1,14 +1,14 @@
 package ireader.domain.usecases.migration
 
-import ireader.domain.data.repository.consolidated.BookRepository
-import ireader.domain.data.repository.consolidated.ChapterRepository
-import ireader.domain.data.repository.consolidated.CategoryRepository
+import ireader.domain.data.repository.BookRepository
+import ireader.domain.data.repository.ChapterRepository
+import ireader.domain.data.repository.CategoryRepository
 import ireader.domain.data.repository.MigrationRepository
 import ireader.domain.data.repository.NotificationRepository
 import ireader.domain.models.entities.Book
-import ireader.domain.models.entities.Chapter
 import ireader.domain.models.migration.*
 import ireader.domain.models.notification.MigrationNotification
+import ireader.domain.models.notification.MigrationNotificationInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.delay
@@ -30,7 +30,7 @@ class MigrateBookUseCase(
             emit(MigrationProgress(request.novelId, MigrationStatus.SEARCHING, 0f, "Searching for matches..."))
             
             // Get original book
-            val originalBook = bookRepository.getBookById(request.novelId)
+            val originalBook = bookRepository.findBookById(request.novelId)
                 ?: throw Exception("Original book not found")
             
             // Search for matches in target source
@@ -67,17 +67,12 @@ class MigrateBookUseCase(
                     transferredData = migrationResult.transferredData!!
                 )
                 
-                migrationRepository.saveMigrationHistory(history)
-                
                 // Show completion notification
                 notificationRepository.showMigrationNotification(
                     MigrationNotification(
                         bookTitle = originalBook.title,
-                        sourceFrom = "Source ${request.sourceId}",
-                        sourceTo = "Source ${request.targetSourceId}",
-                        progress = 1f,
-                        status = "Migration completed",
-                        isCompleted = true
+                        message = "Migration completed from Source ${request.sourceId} to Source ${request.targetSourceId}",
+                        isSuccess = true
                     )
                 )
                 
@@ -111,7 +106,7 @@ class MigrateBookUseCase(
             
             // Transfer chapters if enabled
             if (flags.chapters) {
-                val originalChapters = chapterRepository.getChaptersByBookId(originalBook.id)
+                val originalChapters = chapterRepository.findChaptersByBookId(originalBook.id)
                 // Transfer logic here
                 chaptersTransferred = originalChapters.size
             }

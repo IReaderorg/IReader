@@ -291,9 +291,17 @@
     <methods>;
 }
 
-# Keep Supabase serialization classes
+# Keep Supabase serialization classes - CRITICAL for API communication
+# Keep all fields annotated with @SerialName to prevent field name obfuscation
 -keepclassmembers class * {
     @kotlinx.serialization.SerialName <fields>;
+}
+
+# Keep all @Serializable classes completely intact
+-keep @kotlinx.serialization.Serializable class ** { *; }
+-keepclassmembers @kotlinx.serialization.Serializable class ** {
+    <fields>;
+    <init>(...);
 }
 
 # Keep Supabase Realtime classes
@@ -348,6 +356,20 @@
     <init>(...);
 }
 
+# Keep Badge models and all their fields (especially imageUrl for badge images)
+-keep class ireader.domain.models.remote.Badge { *; }
+-keepclassmembers class ireader.domain.models.remote.Badge {
+    <fields>;
+    <init>(...);
+}
+-keep class ireader.domain.models.remote.UserBadge { *; }
+-keepclassmembers class ireader.domain.models.remote.UserBadge {
+    <fields>;
+    <init>(...);
+}
+-keep class ireader.domain.models.remote.BadgeType { *; }
+-keep class ireader.domain.models.remote.BadgeRarity { *; }
+
 # Keep all Supabase repository DTOs for proper serialization (used with reflection)
 # These nested classes are accessed via Kotlin reflection by Supabase's decodeList/decodeSingle
 
@@ -365,18 +387,33 @@
     *;
 }
 
-# Badge Repository DTOs
+# Badge Repository DTOs (keep all fields including image_url for badge images)
 -keep class ireader.data.badge.BadgeRepositoryImpl { *; }
 -keep class ireader.data.badge.BadgeRepositoryImpl$** { *; }
 -keepclassmembers class ireader.data.badge.BadgeRepositoryImpl$** {
     *;
 }
+# Specifically keep image URL fields in badge DTOs
+-keepclassmembers class ireader.data.badge.BadgeRepositoryImpl$*Dto {
+    *** imageUrl;
+    *** image_url;
+    *** badgeImageUrl;
+    *** badge_image_url;
+}
 
-# Leaderboard Repository DTOs
+# Leaderboard Repository DTOs - CRITICAL: Keep all nested classes and their @SerialName annotations
 -keep class ireader.data.leaderboard.LeaderboardRepositoryImpl { *; }
 -keep class ireader.data.leaderboard.LeaderboardRepositoryImpl$** { *; }
 -keepclassmembers class ireader.data.leaderboard.LeaderboardRepositoryImpl$** {
     *;
+}
+
+# Explicitly keep LeaderboardDto and all its serialization annotations
+-keep class ireader.data.leaderboard.LeaderboardRepositoryImpl$LeaderboardDto { *; }
+-keepclassmembers class ireader.data.leaderboard.LeaderboardRepositoryImpl$LeaderboardDto {
+    @kotlinx.serialization.SerialName <fields>;
+    <fields>;
+    <init>(...);
 }
 
 # NFT Repository DTOs
@@ -491,6 +528,34 @@
 # Keep GIF decoder
 -keep class coil.decode.GifDecoder { *; }
 -keep class coil3.gif.** { *; }
+
+# Keep Coil image loaders and fetchers
+-keep class coil.fetch.** { *; }
+-keep class coil3.fetch.** { *; }
+-keep class coil.decode.** { *; }
+-keep class coil3.decode.** { *; }
+-keep class coil.request.** { *; }
+-keep class coil3.request.** { *; }
+
+# Keep Coil network components for loading remote images
+-keep class coil.network.** { *; }
+-keep class coil3.network.** { *; }
+
+# Keep Coil disk cache
+-keep class coil.disk.** { *; }
+-keep class coil3.disk.** { *; }
+
+# Keep Coil memory cache
+-keep class coil.memory.** { *; }
+-keep class coil3.memory.** { *; }
+
+# Keep Coil util classes
+-keep class coil.util.** { *; }
+-keep class coil3.util.** { *; }
+
+# Keep Coil compose integration
+-keep class coil.compose.** { *; }
+-keep class coil3.compose.** { *; }
 
 -dontwarn coil.**
 -dontwarn coil3.**

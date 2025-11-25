@@ -243,6 +243,9 @@ val DomainServices = module {
     // Analytics Module
     includes(analyticsModule)
     
+    // Preferences Module
+    includes(preferencesInjectModule)
+    
     // New Use Case Module following Mihon's pattern
     includes(useCaseModule)
 

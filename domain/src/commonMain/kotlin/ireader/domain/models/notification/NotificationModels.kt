@@ -131,7 +131,7 @@ enum class BackupRestoreType {
 /**
  * Migration notification data
  */
-data class MigrationNotification(
+data class MigrationNotificationInfo(
     val bookTitle: String,
     val sourceFrom: String,
     val sourceTo: String,

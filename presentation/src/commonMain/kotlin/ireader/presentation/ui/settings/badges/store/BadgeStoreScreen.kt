@@ -50,16 +50,15 @@ fun BadgeStoreScreen(
         when {
             state.submitSuccess -> {
                 snackbarHostState.showSnackbar(
-                    message = "Payment proof submitted successfully! Awaiting verification.",
-                    duration = SnackbarDuration.Short
+                    message = "✓ Payment proof submitted successfully! Awaiting admin verification.",
+                    duration = SnackbarDuration.Long
                 )
                 viewModel.clearSubmitStatus()
-                viewModel.onDismissPurchaseDialog()
             }
             state.submitError != null -> {
                 snackbarHostState.showSnackbar(
-                    message = state.submitError ?: "Failed to submit payment proof",
-                    duration = SnackbarDuration.Short
+                    message = "✗ ${state.submitError}",
+                    duration = SnackbarDuration.Long
                 )
                 viewModel.clearSubmitStatus()
             }

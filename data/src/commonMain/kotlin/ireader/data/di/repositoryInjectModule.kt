@@ -58,12 +58,15 @@ import java.io.File
 
 
 val repositoryInjectModule = module {
-    // Include remote module for sync functionality
+    // Include remote module for 7-project Supabase setup
+    // Supports both default config (from local.properties) and user override
     includes(remoteModule)
     // Include review module for badge functionality
     includes(reviewModule)
     // Include backup module for Google Drive backup functionality
     includes(backupModule)
+    // Include platform-specific module for platform implementations
+    includes(dataPlatformModule)
     
     single<DownloadRepository> { DownloadRepositoryImpl(get()) }
     single<UpdatesRepository> { UpdatesRepositoryImpl(get()) }
@@ -121,6 +124,8 @@ val repositoryInjectModule = module {
         ireader.data.repository.MigrationRepositoryImpl(get(), get()) 
     }
     
+    // Notification repository is provided by platform-specific modules
+    
     // Font repository
     single<FontRepository> { FontRepositoryImpl(get(), get()) }
 
@@ -172,9 +177,8 @@ val repositoryInjectModule = module {
             ireader.data.repository.NoOpLeaderboardRepository()
         } else {
             try {
-                // Get Supabase client from provider
-                val supabaseClient = (provider as ireader.data.remote.SupabaseClientProviderImpl)
-                    .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS)
+                // Get analytics client from multi-project provider
+                val supabaseClient = (provider as ireader.data.remote.MultiSupabaseClientProvider).analyticsClient
                 ireader.data.leaderboard.LeaderboardRepositoryImpl(
                     supabaseClient = supabaseClient,
                     backendService = get()

@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CloudSync
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Info
@@ -90,48 +91,60 @@ class SupabaseConfigScreen  {
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Info Card
                 item {
-                    InfoCard()
-                }
-                
-                item {
-                    ConfigurationCard(
-                        useCustom = state.useCustomSupabase,
-                        url = state.supabaseUrl,
-                        apiKey = state.supabaseApiKey,
-                        onUseCustomChanged = { viewModel.setUseCustom(it) },
-                        onUrlChanged = { viewModel.setUrl(it) },
-                        onApiKeyChanged = { viewModel.setApiKey(it) },
-                        onSave = { viewModel.saveConfiguration() },
-                        onTest = { viewModel.testConnection() },
-                        isTesting = state.isTesting,
-                        testResult = state.testResult
+                    DefaultConfigInfoCard(
+                        hasDefaultConfig = state.hasDefaultConfig,
+                        useCustom = state.useCustomSupabase
                     )
                 }
                 
-                // Multi-endpoint configuration
-                if (state.useCustomSupabase) {
+                // Custom Configuration Toggle
+                item {
+                    CustomConfigToggleCard(
+                        hasDefaultConfig = state.hasDefaultConfig,
+                        useCustom = state.useCustomSupabase,
+                        onToggle = { viewModel.setUseCustomSupabase(it) }
+                    )
+                }
+                
+                // 7-Project Configuration (shown when custom is enabled or no default exists)
+                if (state.useCustomSupabase || !state.hasDefaultConfig) {
                     item {
-                        MultiEndpointCard(
-                            useMultiEndpoint = state.useMultiEndpoint,
-                            booksUrl = state.booksUrl,
-                            booksApiKey = state.booksApiKey,
-                            progressUrl = state.progressUrl,
-                            progressApiKey = state.progressApiKey,
-                            reviewsUrl = state.reviewsUrl,
-                            reviewsApiKey = state.reviewsApiKey,
-                            communityUrl = state.communityUrl,
-                            communityApiKey = state.communityApiKey,
-                            onUseMultiEndpointChanged = { viewModel.setUseMultiEndpoint(it) },
-                            onBooksUrlChanged = { viewModel.setBooksUrl(it) },
-                            onBooksApiKeyChanged = { viewModel.setBooksApiKey(it) },
-                            onProgressUrlChanged = { viewModel.setProgressUrl(it) },
-                            onProgressApiKeyChanged = { viewModel.setProgressApiKey(it) },
-                            onReviewsUrlChanged = { viewModel.setReviewsUrl(it) },
-                            onReviewsApiKeyChanged = { viewModel.setReviewsApiKey(it) },
-                            onCommunityUrlChanged = { viewModel.setCommunityUrl(it) },
-                            onCommunityApiKeyChanged = { viewModel.setCommunityApiKey(it) },
-                            onSave = { viewModel.saveMultiEndpointConfiguration() }
+                        MultiProjectCard(
+                            authUrl = state.authUrl,
+                            authApiKey = state.authApiKey,
+                            readingUrl = state.readingUrl,
+                            readingApiKey = state.readingApiKey,
+                            libraryUrl = state.libraryUrl,
+                            libraryApiKey = state.libraryApiKey,
+                            bookReviewsUrl = state.bookReviewsUrl,
+                            bookReviewsApiKey = state.bookReviewsApiKey,
+                            chapterReviewsUrl = state.chapterReviewsUrl,
+                            chapterReviewsApiKey = state.chapterReviewsApiKey,
+                            badgesUrl = state.badgesUrl,
+                            badgesApiKey = state.badgesApiKey,
+                            analyticsUrl = state.analyticsUrl,
+                            analyticsApiKey = state.analyticsApiKey,
+                            onAuthUrlChanged = { viewModel.setAuthUrl(it) },
+                            onAuthApiKeyChanged = { viewModel.setAuthApiKey(it) },
+                            onReadingUrlChanged = { viewModel.setReadingUrl(it) },
+                            onReadingApiKeyChanged = { viewModel.setReadingApiKey(it) },
+                            onLibraryUrlChanged = { viewModel.setLibraryUrl(it) },
+                            onLibraryApiKeyChanged = { viewModel.setLibraryApiKey(it) },
+                            onBookReviewsUrlChanged = { viewModel.setBookReviewsUrl(it) },
+                            onBookReviewsApiKeyChanged = { viewModel.setBookReviewsApiKey(it) },
+                            onChapterReviewsUrlChanged = { viewModel.setChapterReviewsUrl(it) },
+                            onChapterReviewsApiKeyChanged = { viewModel.setChapterReviewsApiKey(it) },
+                            onBadgesUrlChanged = { viewModel.setBadgesUrl(it) },
+                            onBadgesApiKeyChanged = { viewModel.setBadgesApiKey(it) },
+                            onAnalyticsUrlChanged = { viewModel.setAnalyticsUrl(it) },
+                            onAnalyticsApiKeyChanged = { viewModel.setAnalyticsApiKey(it) },
+                            onFillAllWithSame = { url, key -> viewModel.fillAllWithSame(url, key) },
+                            onSave = { viewModel.saveConfiguration() },
+                            onTest = { viewModel.testConnection() },
+                            isTesting = state.isTesting,
+                            testResult = state.testResult
                         )
                     }
                 }
@@ -168,13 +181,21 @@ class SupabaseConfigScreen  {
     }
 }
 
+
+
 @Composable
-private fun InfoCard() {
+private fun DefaultConfigInfoCard(
+    hasDefaultConfig: Boolean,
+    useCustom: Boolean
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = if (hasDefaultConfig && !useCustom) 
+                MaterialTheme.colorScheme.primaryContainer 
+            else 
+                MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
         Row(
@@ -186,7 +207,10 @@ private fun InfoCard() {
             Icon(
                 imageVector = Icons.Default.Info,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = if (hasDefaultConfig && !useCustom) 
+                    MaterialTheme.colorScheme.primary 
+                else 
+                    MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(32.dp)
             )
             
@@ -194,15 +218,30 @@ private fun InfoCard() {
             
             Column {
                 Text(
-                    text = "Custom Supabase Instance",
+                    text = if (hasDefaultConfig) {
+                        if (useCustom) "Using Custom Configuration" else "Using Default Configuration"
+                    } else {
+                        "No Default Configuration"
+                    },
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Configure your own Supabase instance for data sync. Leave disabled to use the default server.",
+                    text = if (hasDefaultConfig) {
+                        if (useCustom) {
+                            "You're using your own Supabase instance. Toggle off to use the default backend."
+                        } else {
+                            "App is using the default Supabase backend. You can optionally use your own instance."
+                        }
+                    } else {
+                        "No default backend configured. Please configure your own Supabase instance below."
+                    },
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                    color = if (hasDefaultConfig && !useCustom) 
+                        MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                 )
             }
         }
@@ -210,138 +249,47 @@ private fun InfoCard() {
 }
 
 @Composable
-private fun ConfigurationCard(
+private fun CustomConfigToggleCard(
+    hasDefaultConfig: Boolean,
     useCustom: Boolean,
-    url: String,
-    apiKey: String,
-    onUseCustomChanged: (Boolean) -> Unit,
-    onUrlChanged: (String) -> Unit,
-    onApiKeyChanged: (String) -> Unit,
-    onSave: () -> Unit,
-    onTest: () -> Unit,
-    isTesting: Boolean,
-    testResult: String?
+    onToggle: (Boolean) -> Unit
 ) {
-    var showApiKey by remember { mutableStateOf(false) }
+    if (!hasDefaultConfig) {
+        // No toggle needed if there's no default config
+        return
+    }
     
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "Use Custom Supabase",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
-                
-                Switch(
-                    checked = useCustom,
-                    onCheckedChange = onUseCustomChanged
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Enable to use your own Supabase instance instead of the default backend",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             
-            if (useCustom) {
-                Spacer(modifier = Modifier.height(16.dp))
-                HorizontalDivider()
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                OutlinedTextField(
-                    value = url,
-                    onValueChange = onUrlChanged,
-                    label = { Text("Supabase URL") },
-                    placeholder = { Text("https://your-project.supabase.co") },
-                    modifier = Modifier.fillMaxWidth(),
-                    leadingIcon = {
-                        Icon(Icons.Default.Link, contentDescription = null)
-                    },
-                    singleLine = true
-                )
-                
-                Spacer(modifier = Modifier.height(12.dp))
-                
-                OutlinedTextField(
-                    value = apiKey,
-                    onValueChange = onApiKeyChanged,
-                    label = { Text("Supabase Anon Key") },
-                    placeholder = { Text("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...") },
-                    modifier = Modifier.fillMaxWidth(),
-                    leadingIcon = {
-                        Icon(Icons.Default.Key, contentDescription = null)
-                    },
-                    trailingIcon = {
-                        IconButton(onClick = { showApiKey = !showApiKey }) {
-                            Icon(
-                                imageVector = if (showApiKey) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                contentDescription = if (showApiKey) "Hide" else "Show"
-                            )
-                        }
-                    },
-                    visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
-                    singleLine = true
-                )
-                
-                testResult?.let { result ->
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (result.contains("Success")) 
-                                MaterialTheme.colorScheme.primaryContainer 
-                            else 
-                                MaterialTheme.colorScheme.errorContainer
-                        )
-                    ) {
-                        Text(
-                            text = result,
-                            modifier = Modifier.padding(12.dp),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    OutlinedButton(
-                        onClick = onTest,
-                        modifier = Modifier.weight(1f),
-                        enabled = !isTesting && url.isNotBlank() && apiKey.isNotBlank()
-                    ) {
-                        if (isTesting) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp),
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Icon(Icons.Default.CloudSync, contentDescription = null)
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Test Connection")
-                    }
-                    
-                    Button(
-                        onClick = onSave,
-                        modifier = Modifier.weight(1f),
-                        enabled = url.isNotBlank() && apiKey.isNotBlank()
-                    ) {
-                        Icon(Icons.Default.Save, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Save")
-                    }
-                }
-            }
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            Switch(
+                checked = useCustom,
+                onCheckedChange = onToggle
+            )
         }
     }
 }
@@ -848,6 +796,278 @@ private fun EndpointSection(
                 disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
             )
         )
+    }
+}
+
+@Composable
+private fun MultiProjectCard(
+    authUrl: String,
+    authApiKey: String,
+    readingUrl: String,
+    readingApiKey: String,
+    libraryUrl: String,
+    libraryApiKey: String,
+    bookReviewsUrl: String,
+    bookReviewsApiKey: String,
+    chapterReviewsUrl: String,
+    chapterReviewsApiKey: String,
+    badgesUrl: String,
+    badgesApiKey: String,
+    analyticsUrl: String,
+    analyticsApiKey: String,
+    onAuthUrlChanged: (String) -> Unit,
+    onAuthApiKeyChanged: (String) -> Unit,
+    onReadingUrlChanged: (String) -> Unit,
+    onReadingApiKeyChanged: (String) -> Unit,
+    onLibraryUrlChanged: (String) -> Unit,
+    onLibraryApiKeyChanged: (String) -> Unit,
+    onBookReviewsUrlChanged: (String) -> Unit,
+    onBookReviewsApiKeyChanged: (String) -> Unit,
+    onChapterReviewsUrlChanged: (String) -> Unit,
+    onChapterReviewsApiKeyChanged: (String) -> Unit,
+    onBadgesUrlChanged: (String) -> Unit,
+    onBadgesApiKeyChanged: (String) -> Unit,
+    onAnalyticsUrlChanged: (String) -> Unit,
+    onAnalyticsApiKeyChanged: (String) -> Unit,
+    onFillAllWithSame: (String, String) -> Unit,
+    onSave: () -> Unit,
+    onTest: () -> Unit,
+    isTesting: Boolean,
+    testResult: String?
+) {
+    var quickFillUrl by remember { mutableStateOf("") }
+    var quickFillKey by remember { mutableStateOf("") }
+    
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Column {
+                Text(
+                    text = "Supabase Configuration",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "3.5GB total storage (7 × 500MB) - Configure each project or use same URL for all",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Quick Fill Section
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp)
+                ) {
+                    Text(
+                        text = "Quick Fill (Same URL for all projects)",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    OutlinedTextField(
+                        value = quickFillUrl,
+                        onValueChange = { quickFillUrl = it },
+                        label = { Text("Supabase URL") },
+                        placeholder = { Text("https://xxx.supabase.co") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    OutlinedTextField(
+                        value = quickFillKey,
+                        onValueChange = { quickFillKey = it },
+                        label = { Text("API Key") },
+                        placeholder = { Text("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Button(
+                        onClick = { onFillAllWithSame(quickFillUrl, quickFillKey) },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = quickFillUrl.isNotEmpty() && quickFillKey.isNotEmpty()
+                    ) {
+                        Icon(Icons.Default.ContentCopy, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Fill All Projects")
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Project 1 - Auth
+                EndpointSection(
+                    title = "Project 1 - Auth",
+                    description = "User authentication and profiles (500MB)",
+                    icon = Icons.Default.People,
+                    url = authUrl,
+                    apiKey = authApiKey,
+                    onUrlChanged = onAuthUrlChanged,
+                    onApiKeyChanged = onAuthApiKeyChanged
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Project 2 - Reading
+                EndpointSection(
+                    title = "Project 2 - Reading",
+                    description = "Reading progress tracking (500MB)",
+                    icon = Icons.Default.TrendingUp,
+                    url = readingUrl,
+                    apiKey = readingApiKey,
+                    onUrlChanged = onReadingUrlChanged,
+                    onApiKeyChanged = onReadingApiKeyChanged
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Project 3 - Library
+                EndpointSection(
+                    title = "Project 3 - Library",
+                    description = "Synced books library (500MB)",
+                    icon = Icons.Default.Book,
+                    url = libraryUrl,
+                    apiKey = libraryApiKey,
+                    onUrlChanged = onLibraryUrlChanged,
+                    onApiKeyChanged = onLibraryApiKeyChanged
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Project 4 - Book Reviews
+                EndpointSection(
+                    title = "Project 4 - Book Reviews",
+                    description = "Book reviews and ratings (500MB)",
+                    icon = Icons.Default.Star,
+                    url = bookReviewsUrl,
+                    apiKey = bookReviewsApiKey,
+                    onUrlChanged = onBookReviewsUrlChanged,
+                    onApiKeyChanged = onBookReviewsApiKeyChanged
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Project 5 - Chapter Reviews
+                EndpointSection(
+                    title = "Project 5 - Chapter Reviews",
+                    description = "Chapter reviews and ratings (500MB)",
+                    icon = Icons.Default.Star,
+                    url = chapterReviewsUrl,
+                    apiKey = chapterReviewsApiKey,
+                    onUrlChanged = onChapterReviewsUrlChanged,
+                    onApiKeyChanged = onChapterReviewsApiKeyChanged
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Project 6 - Badges
+                EndpointSection(
+                    title = "Project 6 - Badges",
+                    description = "Badge system and NFT integration (500MB)",
+                    icon = Icons.Default.Star,
+                    url = badgesUrl,
+                    apiKey = badgesApiKey,
+                    onUrlChanged = onBadgesUrlChanged,
+                    onApiKeyChanged = onBadgesApiKeyChanged
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Project 7 - Analytics
+                EndpointSection(
+                    title = "Project 7 - Analytics",
+                    description = "Leaderboard and statistics (500MB)",
+                    icon = Icons.Default.TrendingUp,
+                    url = analyticsUrl,
+                    apiKey = analyticsApiKey,
+                    onUrlChanged = onAnalyticsUrlChanged,
+                    onApiKeyChanged = onAnalyticsApiKeyChanged
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                testResult?.let { result ->
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (result.contains("✓")) 
+                                MaterialTheme.colorScheme.primaryContainer 
+                            else 
+                                MaterialTheme.colorScheme.errorContainer
+                        )
+                    ) {
+                        Text(
+                            text = result,
+                            modifier = Modifier.padding(12.dp),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onTest,
+                        modifier = Modifier.weight(1f),
+                        enabled = !isTesting && authUrl.isNotBlank() && authApiKey.isNotBlank()
+                    ) {
+                        if (isTesting) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(Icons.Default.CloudSync, contentDescription = null)
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Test")
+                    }
+                    
+                    Button(
+                        onClick = onSave,
+                        modifier = Modifier.weight(1f),
+                        enabled = authUrl.isNotBlank() && authApiKey.isNotBlank()
+                    ) {
+                        Icon(Icons.Default.Save, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Save Configuration")
+                    }
+                }
+        }
     }
 }
 

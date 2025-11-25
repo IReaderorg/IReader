@@ -39,6 +39,7 @@ class TTSViewModel(
     private val androidUiPreferences: AppPreferences,
     private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     private val platformUiPreferences: PlatformUiPreferences,
+    private val aiTTSManager: ireader.domain.services.tts.AITTSManager,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(),
     ireader.domain.services.tts_service.AndroidTTSState by ttsState {
     
@@ -58,6 +59,136 @@ class TTSViewModel(
     val speechPitch = readerPreferences.speechPitch().asState()
     val sleepModeUi = readerPreferences.sleepMode().asState()
     val sleepTimeUi = readerPreferences.sleepTime().asState()
+    
+    // Coqui TTS State
+    var useCoquiTTS by mutableStateOf(false)
+        private set
+    
+    init {
+        // Load Coqui TTS preference
+        useCoquiTTS = androidUiPreferences.useCoquiTTS().get()
+        
+        // Configure Coqui TTS if enabled
+        if (useCoquiTTS) {
+            configureCoquiTTS()
+        }
+    }
+    
+    private fun configureCoquiTTS() {
+        scope.launch {
+            try {
+                val spaceUrl = androidUiPreferences.coquiSpaceUrl().get()
+                if (spaceUrl.isNotEmpty()) {
+                    aiTTSManager.configureCoqui(spaceUrl)
+                    ireader.core.log.Log.info { "✅ Coqui TTS configured: $spaceUrl" }
+                }
+            } catch (e: Exception) {
+                ireader.core.log.Log.error { "❌ Failed to configure Coqui TTS: ${e.message}" }
+            }
+        }
+    }
+    
+    fun toggleTTSEngine() {
+        useCoquiTTS = !useCoquiTTS
+        androidUiPreferences.useCoquiTTS().set(useCoquiTTS)
+        
+        if (useCoquiTTS) {
+            configureCoquiTTS()
+        }
+        
+        ireader.core.log.Log.info { "TTS Engine switched to: ${if (useCoquiTTS) "Coqui TTS" else "Native TTS"}" }
+    }
+    
+    var isCoquiLoading by mutableStateOf(false)
+        private set
+    
+    fun speakWithCoqui(text: String) {
+        // Launch in IO dispatcher to avoid blocking UI
+        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                // Update loading state on Main dispatcher
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    isCoquiLoading = true
+                }
+                
+                ireader.core.log.Log.info { "🎙️ Starting Coqui TTS synthesis..." }
+                
+                val speed = androidUiPreferences.coquiSpeed().get()
+                
+                aiTTSManager.synthesizeAndPlay(
+                    text = text,
+                    provider = ireader.domain.services.tts.AITTSProvider.COQUI_TTS,
+                    voiceId = "default",
+                    speed = speed
+                ).onSuccess {
+                    ireader.core.log.Log.info { "✅ Coqui TTS playing" }
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        isCoquiLoading = false
+                    }
+                }.onFailure { error ->
+                    ireader.core.log.Log.error { "❌ Coqui TTS failed: ${error.message}" }
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        isCoquiLoading = false
+                    }
+                }
+            } catch (e: Exception) {
+                ireader.core.log.Log.error { "❌ Coqui TTS error: ${e.message}" }
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    isCoquiLoading = false
+                }
+            }
+        }
+    }
+    
+    private fun advanceToNextParagraph() {
+        scope.launch {
+            try {
+                val content = ttsContent?.value ?: return@launch
+                val currentParagraph = ttsState.currentReadingParagraph
+                val nextParagraph = currentParagraph + 1
+                
+                if (nextParagraph < content.size && isCoquiLoading) {
+                    // Move to next paragraph
+                    ttsState.currentReadingParagraph = nextParagraph
+                    
+                    // Speak next paragraph
+                    content.getOrNull(nextParagraph)?.let { nextText ->
+                        speakWithCoqui(nextText)
+                    }
+                } else if (isCoquiLoading) {
+                    // Reached end of chapter - check if auto-next is enabled
+                    val autoNext = readerPreferences.readerAutoNext().get()
+                    
+                    if (autoNext) {
+                        ireader.core.log.Log.info { "End of chapter - loading next chapter..." }
+                        // Move to next chapter
+                        controller?.transportControls?.skipToNext()
+                        // Wait a bit for chapter to load, then continue
+                        kotlinx.coroutines.delay(1000)
+                        // Start reading from beginning of new chapter
+                        ttsContent?.value?.getOrNull(0)?.let { firstParagraph ->
+                            speakWithCoqui(firstParagraph)
+                        }
+                    } else {
+                        // Stop at end of chapter
+                        isCoquiLoading = false
+                        ireader.core.log.Log.info { "Coqui TTS finished reading chapter" }
+                    }
+                } else {
+                    // Stopped by user
+                    isCoquiLoading = false
+                }
+            } catch (e: Exception) {
+                ireader.core.log.Log.error { "Failed to advance paragraph: ${e.message}" }
+                isCoquiLoading = false
+            }
+        }
+    }
+    
+    fun stopCoquiTTS() {
+        isCoquiLoading = false
+        aiTTSManager.stopPlayback()
+    }
     val autoNext = readerPreferences.readerAutoNext().asState()
     val voice = androidUiPreferences.speechVoice().asState()
     val language = readerPreferences.speechLanguage().asState()

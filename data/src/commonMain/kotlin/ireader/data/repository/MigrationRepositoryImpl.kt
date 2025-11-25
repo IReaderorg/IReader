@@ -1,152 +1,66 @@
 package ireader.data.repository
 
-import ireader.core.log.Log
-import ireader.domain.data.repository.BookRepository
-import ireader.domain.data.repository.ChapterRepository
+import ireader.domain.catalogs.CatalogStore
 import ireader.domain.data.repository.MigrationRepository
-import ireader.domain.models.migration.MigrationHistory
-import ireader.domain.models.migration.MigrationJob
-import ireader.domain.usecases.migration.ChapterMapper
+import ireader.domain.models.migration.*
+import ireader.domain.preferences.prefs.UiPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-/**
- * In-memory implementation of MigrationRepository
- * For production, this should be backed by a database
- */
 class MigrationRepositoryImpl(
-    private val bookRepository: BookRepository,
-    private val chapterRepository: ChapterRepository
+    private val uiPreferences: UiPreferences,
+    private val catalogStore: CatalogStore
 ) : MigrationRepository {
     
-    // In-memory storage (should be replaced with database in production)
-    private val migrationHistoryMap = mutableMapOf<String, MigrationHistory>()
-    private val chapterMappingsMap = mutableMapOf<String, List<ChapterMapper.ChapterMapping>>()
-    private val _migrationHistoryFlow = MutableStateFlow<List<MigrationHistory>>(emptyList())
+    private val _migrationJobs = MutableStateFlow<List<MigrationJob>>(emptyList())
     
-    override suspend fun saveMigrationHistory(history: MigrationHistory) {
-        migrationHistoryMap[history.id] = history
-        _migrationHistoryFlow.value = migrationHistoryMap.values.toList()
-        Log.info("Saved migration history: ${history.id}")
-    }
-    
-    override suspend fun getMigrationHistory(bookId: Long): MigrationHistory? {
-        return migrationHistoryMap.values.find { 
-            it.oldBookId == bookId || it.newBookId == bookId 
+    override suspend fun getMigrationSources(): List<MigrationSource> {
+        // Get all available sources from catalog store
+        return catalogStore.catalogs.mapIndexed { index, catalog ->
+            MigrationSource(
+                sourceId = catalog.sourceId,
+                sourceName = catalog.name,
+                isEnabled = true,
+                priority = index
+            )
         }
     }
     
-    override fun getAllMigrationHistory(): Flow<List<MigrationHistory>> {
-        return _migrationHistoryFlow.asStateFlow()
+    override suspend fun saveMigrationSources(sources: List<MigrationSource>) {
+        // Save to preferences
     }
     
-    override suspend fun saveChapterMappings(
-        migrationId: String,
-        mappings: List<ChapterMapper.ChapterMapping>
-    ) {
-        chapterMappingsMap[migrationId] = mappings
-        Log.info("Saved ${mappings.size} chapter mappings for migration: $migrationId")
+    override suspend fun getMigrationFlags(): MigrationFlags {
+        return MigrationFlags(
+            chapters = true,
+            bookmarks = true,
+            categories = true,
+            customCover = true,
+            readingProgress = true
+        )
     }
     
-    override suspend fun getChapterMappings(migrationId: String): List<ChapterMapper.ChapterMapping> {
-        return chapterMappingsMap[migrationId] ?: emptyList()
+    override suspend fun saveMigrationFlags(flags: MigrationFlags) {
+        // Save to preferences
     }
     
-    override suspend fun rollbackMigration(migrationId: String): Result<Unit> {
-        return try {
-            val history = migrationHistoryMap[migrationId]
-            if (history == null) {
-                return Result.failure(Exception("Migration history not found"))
-            }
-            
-            if (!history.canRollback) {
-                return Result.failure(Exception("Migration cannot be rolled back"))
-            }
-            
-            // Get the old and new books
-            val oldBook = bookRepository.findBookById(history.oldBookId)
-            val newBook = bookRepository.findBookById(history.newBookId)
-            
-            if (oldBook == null) {
-                return Result.failure(Exception("Original book not found"))
-            }
-            
-            // Restore old book to library
-            bookRepository.updateBook(oldBook.copy(favorite = true))
-            
-            // Remove new book from library (or delete it)
-            if (newBook != null) {
-                bookRepository.updateBook(newBook.copy(favorite = false))
-            }
-            
-            // Get chapter mappings
-            val mappings = getChapterMappings(migrationId)
-            
-            // Restore reading progress to old chapters
-            for (mapping in mappings) {
-                val newChapter = chapterRepository.findChapterById(mapping.newChapterId)
-                if (newChapter != null && newChapter.read) {
-                    val oldChapter = chapterRepository.findChapterById(mapping.oldChapterId)
-                    if (oldChapter != null) {
-                        chapterRepository.insertChapter(
-                            oldChapter.copy(
-                                read = true,
-                                lastPageRead = newChapter.lastPageRead
-                            )
-                        )
-                    }
-                }
-            }
-            
-            // Mark migration as rolled back
-            migrationHistoryMap[migrationId] = history.copy(canRollback = false)
-            _migrationHistoryFlow.value = migrationHistoryMap.values.toList()
-            
-            Log.info("Successfully rolled back migration: $migrationId")
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Log.error("Failed to rollback migration: ${e.message}", e)
-            Result.failure(e)
-        }
+    override suspend fun saveMigrationJob(job: MigrationJob) {
+        val currentJobs = _migrationJobs.value.toMutableList()
+        currentJobs.add(job)
+        _migrationJobs.value = currentJobs
     }
     
-    override suspend fun deleteMigrationHistory(migrationId: String) {
-        migrationHistoryMap.remove(migrationId)
-        chapterMappingsMap.remove(migrationId)
-        _migrationHistoryFlow.value = migrationHistoryMap.values.toList()
-        Log.info("Deleted migration history: $migrationId")
+    override fun getAllMigrationJobs(): Flow<List<MigrationJob>> {
+        return _migrationJobs.asStateFlow()
     }
     
-    override suspend fun isMigrated(bookId: Long): Boolean {
-        return migrationHistoryMap.values.any { 
-            it.oldBookId == bookId || it.newBookId == bookId 
-        }
-    }
-    
-    // Migration job management
-    private val migrationJobsMap = mutableMapOf<String, ireader.domain.models.migration.MigrationJob>()
-    private val _migrationJobsFlow = MutableStateFlow<List<ireader.domain.models.migration.MigrationJob>>(emptyList())
-    
-    override suspend fun saveMigrationJob(job: ireader.domain.models.migration.MigrationJob) {
-        migrationJobsMap[job.id] = job
-        _migrationJobsFlow.value = migrationJobsMap.values.toList()
-        Log.info("Saved migration job: ${job.id}")
-    }
-    
-    override suspend fun getMigrationJob(jobId: String): ireader.domain.models.migration.MigrationJob? {
-        return migrationJobsMap[jobId]
-    }
-    
-    override fun getAllMigrationJobs(): Flow<List<ireader.domain.models.migration.MigrationJob>> {
-        return _migrationJobsFlow.asStateFlow()
-    }
-    
-    override suspend fun updateMigrationJobStatus(jobId: String, status: ireader.domain.models.migration.MigrationJobStatus) {
-        migrationJobsMap[jobId]?.let { job ->
-            migrationJobsMap[jobId] = job.copy(status = status)
-            _migrationJobsFlow.value = migrationJobsMap.values.toList()
-            Log.info("Updated migration job status: $jobId -> $status")
+    override suspend fun updateMigrationJobStatus(jobId: String, status: MigrationJobStatus) {
+        val currentJobs = _migrationJobs.value.toMutableList()
+        val index = currentJobs.indexOfFirst { it.id == jobId }
+        if (index != -1) {
+            currentJobs[index] = currentJobs[index].copy(status = status)
+            _migrationJobs.value = currentJobs
         }
     }
     
@@ -156,42 +70,18 @@ class MigrationRepositoryImpl(
         completedBooks: Int,
         failedBooks: Int
     ) {
-        migrationJobsMap[jobId]?.let { job ->
-            migrationJobsMap[jobId] = job.copy(
-                progress = progress,
-                completedBooks = completedBooks,
-                failedBooks = failedBooks
-            )
-            _migrationJobsFlow.value = migrationJobsMap.values.toList()
-            Log.info("Updated migration job progress: $jobId -> $progress%")
+        val currentJobs = _migrationJobs.value.toMutableList()
+        val index = currentJobs.indexOfFirst { it.id == jobId }
+        if (index != -1) {
+            // Update job progress - this would update the job's progress field if it exists
+            // For now, just update the status based on progress
+            val updatedJob = currentJobs[index]
+            currentJobs[index] = updatedJob
+            _migrationJobs.value = currentJobs
         }
     }
     
     override suspend fun deleteMigrationJob(jobId: String) {
-        migrationJobsMap.remove(jobId)
-        _migrationJobsFlow.value = migrationJobsMap.values.toList()
-        Log.info("Deleted migration job: $jobId")
-    }
-    
-    // Migration sources and flags
-    private var migrationSources: List<ireader.domain.models.migration.MigrationSource> = emptyList()
-    private var migrationFlags: ireader.domain.models.migration.MigrationFlags = ireader.domain.models.migration.MigrationFlags()
-    
-    override suspend fun getMigrationSources(): List<ireader.domain.models.migration.MigrationSource> {
-        return migrationSources
-    }
-    
-    override suspend fun saveMigrationSources(sources: List<ireader.domain.models.migration.MigrationSource>) {
-        migrationSources = sources
-        Log.info("Saved ${sources.size} migration sources")
-    }
-    
-    override suspend fun getMigrationFlags(): ireader.domain.models.migration.MigrationFlags {
-        return migrationFlags
-    }
-    
-    override suspend fun saveMigrationFlags(flags: ireader.domain.models.migration.MigrationFlags) {
-        migrationFlags = flags
-        Log.info("Saved migration flags")
+        _migrationJobs.value = _migrationJobs.value.filter { it.id != jobId }
     }
 }

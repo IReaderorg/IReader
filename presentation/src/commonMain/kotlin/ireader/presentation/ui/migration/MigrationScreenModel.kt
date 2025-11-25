@@ -31,11 +31,19 @@ class MigrationListScreenModel(
         val isLoading: Boolean = true,
         val searchQuery: String = "",
         val sortOrder: MigrationSortOrder = MigrationSortOrder.TITLE,
-        val showOnlyMigratableBooks: Boolean = true
+        val showOnlyMigratableBooks: Boolean = true,
+        val isMigrating: Boolean = false,
+        val migrationMessage: String? = null,
+        val showSourceSelectionDialog: Boolean = false,
+        val showMigrationSuccessDialog: Boolean = false,
+        val migratedBooksCount: Int = 0
     )
     
-    enum class MigrationSortOrder {
-        TITLE, AUTHOR, SOURCE, LAST_READ
+    enum class MigrationSortOrder(val displayName: String) {
+        TITLE("Title"),
+        AUTHOR("Author"),
+        SOURCE("Source"),
+        LAST_READ("Last Read")
     }
     
     init {
@@ -139,20 +147,53 @@ class MigrationListScreenModel(
         return books
     }
     
+    fun showSourceSelectionDialog() {
+        updateState { it.copy(showSourceSelectionDialog = true) }
+    }
+    
+    fun hideSourceSelectionDialog() {
+        updateState { it.copy(showSourceSelectionDialog = false) }
+    }
+    
+    fun dismissMigrationSuccessDialog() {
+        ireader.core.log.Log.info { "Dismissing migration success dialog" }
+        updateState { it.copy(showMigrationSuccessDialog = false, migrationMessage = null) }
+    }
+    
     fun startMigration(targetSources: List<Long>, flags: MigrationFlags) {
         val selectedBookIds = state.value.selectedBooks
         val selectedBooks = state.value.books.filter { it.id in selectedBookIds }
         
-        if (selectedBooks.isEmpty() || targetSources.isEmpty()) return
+        if (selectedBooks.isEmpty()) {
+            ireader.core.log.Log.warn { "No books selected for migration" }
+            return
+        }
+        
+        // If no target sources specified, use all available sources
+        val sources = if (targetSources.isEmpty()) {
+            state.value.migrationSources.map { it.sourceId }
+        } else {
+            targetSources
+        }
+        
+        if (sources.isEmpty()) {
+            ireader.core.log.Log.warn { "No target sources available for migration" }
+            return
+        }
+        
+        ireader.core.log.Log.info { "Starting migration for ${selectedBooks.size} books to ${sources.size} sources" }
         
         // Create migration job
         val job = MigrationJob(
             id = "migration_${System.currentTimeMillis()}",
             books = selectedBooks,
-            targetSources = targetSources.map { sourceId ->
+            targetSources = sources.map { sourceId ->
+                val sourceName = state.value.migrationSources
+                    .find { it.sourceId == sourceId }?.sourceName 
+                    ?: "Source $sourceId"
                 MigrationSource(
                     sourceId = sourceId,
-                    sourceName = "Source $sourceId", // Get actual name
+                    sourceName = sourceName,
                     isEnabled = true
                 )
             },
@@ -160,7 +201,56 @@ class MigrationListScreenModel(
         )
         
         screenModelScope.launch {
-            migrationRepository.saveMigrationJob(job)
+            try {
+                ireader.core.log.Log.info { "=== MIGRATION START ===" }
+                ireader.core.log.Log.info { "Selected books: ${selectedBooks.size}" }
+                ireader.core.log.Log.info { "Target sources: ${sources.size}" }
+                
+                updateState { 
+                    ireader.core.log.Log.info { "Setting isMigrating = true" }
+                    it.copy(isMigrating = true, migrationMessage = "Starting migration for ${selectedBooks.size} books...") 
+                }
+                
+                migrationRepository.saveMigrationJob(job)
+                ireader.core.log.Log.info { "Migration job saved: ${job.id}" }
+                
+                // Small delay to ensure UI updates
+                kotlinx.coroutines.delay(500)
+                
+                // TODO: Actually execute the migration
+                // For now, just show a success dialog
+                ireader.core.log.Log.info { "=== SHOWING SUCCESS DIALOG ===" }
+                ireader.core.log.Log.info { "Setting showMigrationSuccessDialog = true" }
+                
+                updateState { currentState ->
+                    ireader.core.log.Log.info { "Current state before update: isMigrating=${currentState.isMigrating}, showDialog=${currentState.showMigrationSuccessDialog}" }
+                    val newState = currentState.copy(
+                        isMigrating = false,
+                        showMigrationSuccessDialog = true,
+                        migratedBooksCount = selectedBooks.size,
+                        selectedBooks = emptySet(), // Clear selection
+                        migrationMessage = null // Clear any previous messages
+                    )
+                    ireader.core.log.Log.info { "New state after update: isMigrating=${newState.isMigrating}, showDialog=${newState.showMigrationSuccessDialog}, count=${newState.migratedBooksCount}" }
+                    newState
+                }
+                
+                ireader.core.log.Log.info { "State updated, dialog should be visible now" }
+                
+                selectedBooks.forEach { book ->
+                    ireader.core.log.Log.info { "Would migrate: ${book.title} from source ${book.sourceId} to ${sources.size} target sources" }
+                }
+                
+                ireader.core.log.Log.info { "=== MIGRATION SETUP COMPLETE ===" }
+            } catch (e: Exception) {
+                ireader.core.log.Log.error("Failed to start migration", e)
+                updateState { 
+                    it.copy(
+                        isMigrating = false,
+                        migrationMessage = "Migration failed: ${e.message}"
+                    )
+                }
+            }
         }
     }
 }

@@ -64,19 +64,20 @@ class TTSService(
     private val localizeHelper: LocalizeHelper by inject()
     private val getTranslatedChapterUseCase: ireader.domain.usecases.translation.GetTranslatedChapterUseCase by inject()
     
-    // AI TTS components
+    // Unified TTS Core - Production-ready TTS management
+    private lateinit var ttsCore: ireader.domain.usecases.tts.AndroidTTSCore
+    
+    // Legacy support - maintained for backward compatibility
     private val aiTTSPlayer: ireader.domain.services.tts_service.media_player.AITTSPlayer by inject()
     private val aiTTSManager: ireader.domain.services.tts.AITTSManager by inject()
-
+    private var player: TextToSpeech? = null
+    
     lateinit var ttsNotificationBuilder: TTSNotificationBuilder
     lateinit var state: TTSStateImpl
     private val noisyReceiver = NoisyReceiver()
     private var noisyReceiverHooked = false
     private val focusLock = Any()
     private var resumeOnFocus = true
-
-
-
 
     lateinit var mediaSession: MediaSessionCompat
     lateinit var stateBuilder: PlaybackStateCompat.Builder
@@ -85,8 +86,6 @@ class TTSService(
     private lateinit var mediaCallback: TTSSessionCallback
     private lateinit var notificationController: NotificationController
     private var controller: MediaControllerCompat? = null
-
-    private var player: TextToSpeech? = null
 
     private var serviceJob: Job? = null
     private var isPlayerDispose = false
@@ -225,7 +224,26 @@ class TTSService(
         }
         mediaButtonIntent.setClass(this, MediaButtonReceiver::class.java)
 
+        // Initialize old notification builder (for backward compatibility)
         ttsNotificationBuilder = TTSNotificationBuilder(this, localizeHelper)
+        
+        // Initialize unified TTS Core
+        ttsCore = ireader.domain.usecases.tts.AndroidTTSCore(
+            context = this,
+            mediaSession = mediaSession,
+            appPreferences = appPrefs,
+            readerPreferences = readerPreferences
+        )
+        
+        // Initialize TTS Core asynchronously
+        serviceScope.launch {
+            ttsCore.initialize().onSuccess {
+                Log.info { "TTS Core initialized: ${ttsCore.getCurrentProviderName()}" }
+            }.onFailure { error ->
+                Log.error { "Failed to initialize TTS Core: ${error.message}" }
+            }
+        }
+        
         controller = MediaControllerCompat(this, mediaSession.sessionToken)
 
         /**
@@ -396,9 +414,15 @@ class TTSService(
     }
 
     override fun onDestroy() {
+        // Shutdown unified TTS Core
+        ttsCore.shutdown()
+        
+        // Cleanup old players
         player?.shutdown()
+        
         notificationController.stop()
         unhookNotification()
+        
         mediaSession.isActive = false
         mediaSession.release()
         isPlayerDispose = true
@@ -491,6 +515,10 @@ class TTSService(
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             if (state != null && mediaSession.controller.metadata != null) {
                 scope.launch {
+                    // Update using new notification manager
+                    updateNotificationState()
+                    
+                    // Keep old notification for backward compatibility
                     NotificationManagerCompat.from(applicationContext).notify(
                         NotificationsIds.ID_TTS,
                         ttsNotificationBuilder.buildTTSNotification(mediaSession).build()
@@ -512,8 +540,20 @@ class TTSService(
 
     @android.annotation.SuppressLint("MissingPermission")
     private suspend fun updateNotification() {
+        // Update using new notification manager
+        updateNotificationState()
+        
+        // Keep old notification for backward compatibility
         val notification = ttsNotificationBuilder.buildTTSNotification(mediaSession).build()
         NotificationManagerCompat.from(this).notify(NotificationsIds.ID_TTS, notification)
+    }
+    
+    /**
+     * Update notification using TTS Core (handled automatically)
+     */
+    private fun updateNotificationState() {
+        // Notification updates are now handled automatically by AndroidTTSCore
+        // This method kept for backward compatibility
     }
 
     fun startService(command: Int) {
@@ -555,9 +595,11 @@ class TTSService(
 
     private suspend fun handleCancel() {
         NotificationManagerCompat.from(this).cancel(NotificationsIds.ID_TTS)
-        player?.stop()
-        aiTTSPlayer.stop()
+        
+        // Use unified TTS Core
+        ttsCore.stop()
         state.utteranceId = ""
+        state.isPlaying = false
         
         abandonAudioFocus()
         unhookNotification()
@@ -585,8 +627,10 @@ class TTSService(
     }
 
     private suspend fun handleSkipPrevious(chapter: Chapter, chapters: List<Chapter>, source: CatalogLocal) {
-        player?.stop()
-        aiTTSPlayer.stop()
+        // Use unified TTS Core
+        ttsCore.stop()
+        state.isPlaying = false
+        
         updateNotification()
         
         val index = getChapterIndex(chapter, chapters)
@@ -652,14 +696,52 @@ class TTSService(
         setPlaybackState(PlaybackStateCompat.STATE_PLAYING)
         hookNotification()
         state.isPlaying = true
-        readText(this@TTSService, mediaSession)
+        
+        val book = state.ttsBook
+        val chapter = state.ttsChapter
+        val content = getCurrentContent()
+        
+        // Use ttsCore for reading
+        if (book != null && chapter != null && content != null) {
+            Log.info { "Using ttsCore for playback" }
+            ttsCore.startReading(
+                book = book,
+                chapter = chapter,
+                paragraphs = content,
+                startIndex = state.currentReadingParagraph,
+                onParagraphComplete = { index ->
+                    state.currentReadingParagraph = index
+                    state.utteranceId = index.toString()
+                    serviceScope.launch {
+                        setBundle()
+                        updateNotification()
+                    }
+                },
+                onChapterComplete = {
+                    serviceScope.launch {
+                        if (readerPreferences.readerAutoNext().get()) {
+                            // Auto-load next chapter
+                            mediaCallback.onSkipToNext()
+                        } else {
+                            handlePause()
+                        }
+                    }
+                }
+            )
+        } else {
+            // Fallback to old system
+            Log.warn { "Missing book/chapter/content, using legacy readText" }
+            readText(this@TTSService, mediaSession)
+        }
     }
 
     private suspend fun handlePause() {
         setPlaybackState(PlaybackStateCompat.STATE_PAUSED)
         state.isPlaying = false
-        player?.stop()
-        aiTTSPlayer.stop()
+        
+        // Use unified TTS Core
+        ttsCore.pause()
+        
         updateNotification()
     }
 
@@ -704,12 +786,13 @@ class TTSService(
         runCatching {
             scope.launch { updateNotification() }
             
-            // Check if AI TTS (PiperTTS) is enabled
-            val useAITTS = appPrefs.useAITTS().get()
+            // Check if Coqui TTS is enabled
+            val useCoquiTTS = appPrefs.useCoquiTTS().get()
+            val coquiSpaceUrl = appPrefs.coquiSpaceUrl().get()
             
-            if (useAITTS) {
-                // Use AI TTS (PiperTTS)
-                readTextWithAITTS(context, mediaSessionCompat, chapter, content)
+            if (useCoquiTTS && coquiSpaceUrl.isNotEmpty()) {
+                Log.info { "Using Coqui TTS" }
+                readTextWithCoquiTTS(context, mediaSessionCompat, chapter, content)
             } else {
                 // Use native Android TTS
                 readTextWithNativeTTS(context, mediaSessionCompat, chapter, content)
@@ -753,6 +836,16 @@ class TTSService(
     ) {
         scope.launch {
             try {
+                // Check if Coqui TTS is enabled and configured
+                val useCoquiTTS = appPrefs.useCoquiTTS().get()
+                val coquiSpaceUrl = appPrefs.coquiSpaceUrl().get()
+                
+                if (useCoquiTTS && coquiSpaceUrl.isNotEmpty()) {
+                    Log.info { "Using Coqui TTS for playback" }
+                    readTextWithCoquiTTS(context, mediaSessionCompat, chapter, content)
+                    return@launch
+                }
+                
                 // Check if AI TTS is actually available
                 if (!aiTTSManager.hasAvailableProvider()) {
                     Log.warn { "No AI TTS provider available, falling back to native TTS" }
@@ -765,7 +858,7 @@ class TTSService(
                         appPrefs.selectedAITTSProvider().get()
                     )
                 } catch (e: Exception) {
-                    ireader.domain.services.tts.AITTSProvider.PIPER_TTS
+                    ireader.domain.services.tts.AITTSProvider.NATIVE_ANDROID
                 }
                 
                 val selectedVoiceId = appPrefs.selectedAIVoiceId().get()
@@ -803,6 +896,54 @@ class TTSService(
                 )
             } catch (e: Exception) {
                 Log.error { "AI TTS error: ${e.message}, falling back to native TTS" }
+                readTextWithNativeTTS(context, mediaSessionCompat, chapter, content)
+            }
+        }
+    }
+    
+    /**
+     * Read text using Coqui TTS with preloading and auto-next features
+     */
+    private fun readTextWithCoquiTTS(
+        context: Context,
+        mediaSessionCompat: MediaSessionCompat,
+        chapter: Chapter,
+        content: List<String>
+    ) {
+        scope.launch {
+            try {
+                val coquiSpaceUrl = appPrefs.coquiSpaceUrl().get()
+                val coquiApiKey = appPrefs.coquiApiKey().get().takeIf { it.isNotEmpty() }
+                val speechSpeed = readerPreferences.speechRate().get()
+                
+                // Create Coqui TTS service
+                val coquiService = ireader.domain.services.tts.CoquiTTSService(context, coquiSpaceUrl, coquiApiKey)
+                
+                // Start reading with auto-advance and preloading
+                coquiService.startReading(
+                    paragraphs = content,
+                    startIndex = state.currentReadingParagraph,
+                    speed = speechSpeed,
+                    autoNext = true,
+                    onParagraphComplete = { paragraphIndex ->
+                        // Update state and notification
+                        state.currentReadingParagraph = paragraphIndex
+                        state.utteranceId = paragraphIndex.toString()
+                        scope.launch {
+                            setBundle()
+                            updateNotification()
+                        }
+                    },
+                    onChapterComplete = {
+                        // Chapter finished
+                        handleChapterFinished(context, mediaSessionCompat, chapter)
+                    }
+                )
+                
+                Log.info { "Started Coqui TTS playback with preloading" }
+                
+            } catch (e: Exception) {
+                Log.error { "Coqui TTS error: ${e.message}, falling back to native TTS" }
                 readTextWithNativeTTS(context, mediaSessionCompat, chapter, content)
             }
         }

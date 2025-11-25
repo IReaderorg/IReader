@@ -16,9 +16,12 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.boolean
 
 class BadgeRepositoryImpl(
     private val handler: DatabaseHandler,
@@ -401,6 +404,24 @@ class BadgeRepositoryImpl(
             else -> BadgeRarity.COMMON
         }
     }
+    
+    override suspend fun checkAndAwardAchievementBadge(badgeId: String): Result<Boolean> = 
+        RemoteErrorMapper.withErrorMapping {
+            val userId = supabaseClient.auth.currentUserOrNull()?.id 
+                ?: throw Exception("User not authenticated")
+            
+            // Call the Supabase function to check and award the badge
+            val resultJson = backendService.rpc(
+                function = "check_and_award_achievement_badge",
+                parameters = mapOf(
+                    "p_user_id" to userId,
+                    "p_badge_id" to badgeId
+                )
+            ).getOrThrow()
+            
+            // The function returns a boolean indicating if the badge was awarded
+            resultJson.jsonPrimitive.boolean
+        }
     
     // Admin methods
     override suspend fun getPaymentProofsByStatus(

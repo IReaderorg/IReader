@@ -332,7 +332,7 @@ class NotificationManagerUseCase(
     /**
      * Show migration progress notification
      */
-    suspend fun showMigrationProgress(data: MigrationNotification) {
+    suspend fun showMigrationProgress(data: MigrationNotificationInfo) {
         val notification = IReaderNotification(
             id = -901, // Migration progress ID
             channelId = "migration_progress_channel",

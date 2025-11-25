@@ -19,8 +19,8 @@ val reviewModule = module {
         if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
             ireader.data.repository.NoOpReviewRepository()
         } else {
-            val supabaseClient = (provider as ireader.data.remote.SupabaseClientProviderImpl)
-                .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS) as SupabaseClient
+            // Use bookReviewsClient which has Auth installed
+            val supabaseClient = (provider as ireader.data.remote.MultiSupabaseClientProvider).bookReviewsClient
             ReviewRepositoryImpl(
                 handler = get(),
                 supabaseClient = supabaseClient,
@@ -34,8 +34,7 @@ val reviewModule = module {
         if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
             ireader.data.repository.NoOpBadgeRepository()
         } else {
-            val supabaseClient = (provider as ireader.data.remote.SupabaseClientProviderImpl)
-                .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS) as SupabaseClient
+            val supabaseClient = (provider as ireader.data.remote.MultiSupabaseClientProvider).badgesClient
             BadgeRepositoryImpl(
                 handler = get(),
                 supabaseClient = supabaseClient,
@@ -49,8 +48,7 @@ val reviewModule = module {
          if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
              ireader.data.repository.NoOpNFTRepository()
          } else {
-             val supabaseClient = (provider as ireader.data.remote.SupabaseClientProviderImpl)
-                 .getSupabaseClient(ireader.domain.models.remote.SupabaseEndpoint.USERS) as SupabaseClient
+             val supabaseClient = (provider as ireader.data.remote.MultiSupabaseClientProvider).badgesClient
              ireader.data.nft.NFTRepositoryImpl(
                  handler = get(),
                  supabaseClient = supabaseClient,

@@ -19,7 +19,6 @@ data class SourceMigrationScreenSpec(
         LaunchedEffect(sourceId) {
             viewModel.loadNovelsFromSource(sourceId)
         }
-        
         ModernSourceMigrationScreen(
             viewModel = viewModel,
             onBackPressed = onBackPressed

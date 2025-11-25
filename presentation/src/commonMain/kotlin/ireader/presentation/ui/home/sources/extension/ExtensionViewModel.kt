@@ -48,6 +48,7 @@ class ExtensionViewModel(
         private val extensionManager: ireader.domain.catalogs.interactor.ExtensionManager? = null,
         private val extensionSecurityManager: ireader.domain.catalogs.interactor.ExtensionSecurityManager? = null,
         private val extensionRepositoryManager: ireader.domain.catalogs.interactor.ExtensionRepositoryManager? = null,
+        private val browsePreferences: ireader.domain.preferences.prefs.BrowsePreferences,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), CatalogsState by state {
 
     val incognito = uiPreferences.incognitoMode().asStateIn(scope)
@@ -122,6 +123,40 @@ class ExtensionViewModel(
 
 
     init {
+        // Load initial language selection from BrowsePreferences
+        val initialSelectedLanguages = browsePreferences.selectedLanguages().get()
+        val initialChoice = when {
+            initialSelectedLanguages.isEmpty() -> LanguageChoice.All
+            initialSelectedLanguages.size == 1 -> {
+                LanguageChoice.One(Language(initialSelectedLanguages.first()))
+            }
+            else -> {
+                val languages = initialSelectedLanguages.map { Language(it) }
+                LanguageChoice.Others(languages)
+            }
+        }
+        state.selectedUserSourceLanguage = initialChoice
+        state.selectedLanguage = initialChoice
+        
+        // Observe language preference changes
+        scope.launch {
+            browsePreferences.selectedLanguages().changes()
+                .collect { selectedLanguages ->
+                    val choice = when {
+                        selectedLanguages.isEmpty() -> LanguageChoice.All
+                        selectedLanguages.size == 1 -> {
+                            LanguageChoice.One(Language(selectedLanguages.first()))
+                        }
+                        else -> {
+                            val languages = selectedLanguages.map { Language(it) }
+                            LanguageChoice.Others(languages)
+                        }
+                    }
+                    state.selectedUserSourceLanguage = choice
+                    state.selectedLanguage = choice
+                }
+        }
+        
         scope.launch {
             snapshotFlow { selectedRepositoryType }
                 .flatMapLatest { repositoryType ->

@@ -7,9 +7,6 @@ import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.launch
 
 data class SupabaseConfigState(
-    val useCustomSupabase: Boolean = false,
-    val supabaseUrl: String = "",
-    val supabaseApiKey: String = "",
     val autoSyncEnabled: Boolean = true,
     val syncOnWifiOnly: Boolean = true,
     val lastSyncTime: Long = 0L,
@@ -17,16 +14,32 @@ data class SupabaseConfigState(
     val isSyncing: Boolean = false,
     val testResult: String? = null,
     val error: String? = null,
-    // Multi-endpoint configuration
-    val useMultiEndpoint: Boolean = false,
-    val booksUrl: String = "",
-    val booksApiKey: String = "",
-    val progressUrl: String = "",
-    val progressApiKey: String = "",
-    val reviewsUrl: String = "",
-    val reviewsApiKey: String = "",
-    val communityUrl: String = "",
-    val communityApiKey: String = ""
+    // Custom configuration toggle
+    val useCustomSupabase: Boolean = false,
+    // Default configuration (from local.properties/config.properties)
+    val hasDefaultConfig: Boolean = false,
+    // 7-Project configuration
+    // Project 1 - Auth
+    val authUrl: String = "",
+    val authApiKey: String = "",
+    // Project 2 - Reading
+    val readingUrl: String = "",
+    val readingApiKey: String = "",
+    // Project 3 - Library
+    val libraryUrl: String = "",
+    val libraryApiKey: String = "",
+    // Project 4 - Book Reviews
+    val bookReviewsUrl: String = "",
+    val bookReviewsApiKey: String = "",
+    // Project 5 - Chapter Reviews
+    val chapterReviewsUrl: String = "",
+    val chapterReviewsApiKey: String = "",
+    // Project 6 - Badges
+    val badgesUrl: String = "",
+    val badgesApiKey: String = "",
+    // Project 7 - Analytics
+    val analyticsUrl: String = "",
+    val analyticsApiKey: String = ""
 )
 
 class SupabaseConfigViewModel(
@@ -42,40 +55,63 @@ class SupabaseConfigViewModel(
     
     private fun loadConfiguration() {
         scope.launch {
+            // Check if default config exists (from local.properties/config.properties)
+            val hasDefault = try {
+                val defaultAuthUrl = ireader.domain.config.PlatformConfig.getSupabaseAuthUrl()
+                defaultAuthUrl.isNotEmpty()
+            } catch (e: Exception) {
+                false
+            }
+            
             updateState { it.copy(
-                useCustomSupabase = supabasePreferences.useCustomSupabase().get(),
-                supabaseUrl = supabasePreferences.supabaseUrl().get(),
-                supabaseApiKey = supabasePreferences.supabaseApiKey().get(),
                 autoSyncEnabled = supabasePreferences.autoSyncEnabled().get(),
                 syncOnWifiOnly = supabasePreferences.syncOnWifiOnly().get(),
                 lastSyncTime = supabasePreferences.lastSyncTime().get(),
-                // Multi-endpoint
-                useMultiEndpoint = supabasePreferences.useMultiEndpoint().get(),
-                booksUrl = supabasePreferences.booksUrl().get(),
-                booksApiKey = supabasePreferences.booksApiKey().get(),
-                progressUrl = supabasePreferences.progressUrl().get(),
-                progressApiKey = supabasePreferences.progressApiKey().get(),
-                reviewsUrl = supabasePreferences.reviewsUrl().get(),
-                reviewsApiKey = supabasePreferences.reviewsApiKey().get(),
-                communityUrl = supabasePreferences.communityUrl().get(),
-                communityApiKey = supabasePreferences.communityApiKey().get()
+                useCustomSupabase = supabasePreferences.useCustomSupabase().get(),
+                hasDefaultConfig = hasDefault,
+                // 7-Project configuration (user overrides)
+                authUrl = supabasePreferences.supabaseAuthUrl().get(),
+                authApiKey = supabasePreferences.supabaseAuthKey().get(),
+                readingUrl = supabasePreferences.supabaseReadingUrl().get(),
+                readingApiKey = supabasePreferences.supabaseReadingKey().get(),
+                libraryUrl = supabasePreferences.supabaseLibraryUrl().get(),
+                libraryApiKey = supabasePreferences.supabaseLibraryKey().get(),
+                bookReviewsUrl = supabasePreferences.supabaseBookReviewsUrl().get(),
+                bookReviewsApiKey = supabasePreferences.supabaseBookReviewsKey().get(),
+                chapterReviewsUrl = supabasePreferences.supabaseChapterReviewsUrl().get(),
+                chapterReviewsApiKey = supabasePreferences.supabaseChapterReviewsKey().get(),
+                badgesUrl = supabasePreferences.supabaseBadgesUrl().get(),
+                badgesApiKey = supabasePreferences.supabaseBadgesKey().get(),
+                analyticsUrl = supabasePreferences.supabaseAnalyticsUrl().get(),
+                analyticsApiKey = supabasePreferences.supabaseAnalyticsKey().get()
             )}
         }
     }
     
-    fun setUseCustom(useCustom: Boolean) {
+    fun setUseCustomSupabase(useCustom: Boolean) {
         updateState { it.copy(useCustomSupabase = useCustom) }
         scope.launch {
             supabasePreferences.useCustomSupabase().set(useCustom)
         }
     }
     
-    fun setUrl(url: String) {
-        updateState { it.copy(supabaseUrl = url) }
-    }
-    
-    fun setApiKey(apiKey: String) {
-        updateState { it.copy(supabaseApiKey = apiKey) }
+    fun fillAllWithSame(url: String, apiKey: String) {
+        updateState { it.copy(
+            authUrl = url,
+            authApiKey = apiKey,
+            readingUrl = url,
+            readingApiKey = apiKey,
+            libraryUrl = url,
+            libraryApiKey = apiKey,
+            bookReviewsUrl = url,
+            bookReviewsApiKey = apiKey,
+            chapterReviewsUrl = url,
+            chapterReviewsApiKey = apiKey,
+            badgesUrl = url,
+            badgesApiKey = apiKey,
+            analyticsUrl = url,
+            analyticsApiKey = apiKey
+        )}
     }
     
     fun setAutoSync(enabled: Boolean) {
@@ -95,11 +131,24 @@ class SupabaseConfigViewModel(
     fun saveConfiguration() {
         scope.launch {
             try {
-                supabasePreferences.supabaseUrl().set(currentState.supabaseUrl)
-                supabasePreferences.supabaseApiKey().set(currentState.supabaseApiKey)
+                // Save all 7 project configurations
+                supabasePreferences.supabaseAuthUrl().set(currentState.authUrl)
+                supabasePreferences.supabaseAuthKey().set(currentState.authApiKey)
+                supabasePreferences.supabaseReadingUrl().set(currentState.readingUrl)
+                supabasePreferences.supabaseReadingKey().set(currentState.readingApiKey)
+                supabasePreferences.supabaseLibraryUrl().set(currentState.libraryUrl)
+                supabasePreferences.supabaseLibraryKey().set(currentState.libraryApiKey)
+                supabasePreferences.supabaseBookReviewsUrl().set(currentState.bookReviewsUrl)
+                supabasePreferences.supabaseBookReviewsKey().set(currentState.bookReviewsApiKey)
+                supabasePreferences.supabaseChapterReviewsUrl().set(currentState.chapterReviewsUrl)
+                supabasePreferences.supabaseChapterReviewsKey().set(currentState.chapterReviewsApiKey)
+                supabasePreferences.supabaseBadgesUrl().set(currentState.badgesUrl)
+                supabasePreferences.supabaseBadgesKey().set(currentState.badgesApiKey)
+                supabasePreferences.supabaseAnalyticsUrl().set(currentState.analyticsUrl)
+                supabasePreferences.supabaseAnalyticsKey().set(currentState.analyticsApiKey)
                 
                 updateState { it.copy(
-                    testResult = "Configuration saved successfully!",
+                    testResult = "✓ Configuration saved successfully! Total storage: 3.5GB",
                     error = null
                 )}
             } catch (e: Exception) {
@@ -209,88 +258,60 @@ class SupabaseConfigViewModel(
         updateState { it.copy(error = null) }
     }
     
-    // Multi-endpoint configuration methods
-    fun setUseMultiEndpoint(useMulti: Boolean) {
-        updateState { it.copy(useMultiEndpoint = useMulti) }
+    // Individual project setters
+    fun setAuthUrl(url: String) {
+        updateState { it.copy(authUrl = url) }
     }
     
-    fun setBooksUrl(url: String) {
-        updateState { it.copy(booksUrl = url) }
+    fun setAuthApiKey(apiKey: String) {
+        updateState { it.copy(authApiKey = apiKey) }
     }
     
-    fun setBooksApiKey(apiKey: String) {
-        updateState { it.copy(booksApiKey = apiKey) }
+    fun setReadingUrl(url: String) {
+        updateState { it.copy(readingUrl = url) }
     }
     
-    fun setProgressUrl(url: String) {
-        updateState { it.copy(progressUrl = url) }
+    fun setReadingApiKey(apiKey: String) {
+        updateState { it.copy(readingApiKey = apiKey) }
     }
     
-    fun setProgressApiKey(apiKey: String) {
-        updateState { it.copy(progressApiKey = apiKey) }
+    fun setLibraryUrl(url: String) {
+        updateState { it.copy(libraryUrl = url) }
     }
     
-    fun setReviewsUrl(url: String) {
-        updateState { it.copy(reviewsUrl = url) }
+    fun setLibraryApiKey(apiKey: String) {
+        updateState { it.copy(libraryApiKey = apiKey) }
     }
     
-    fun setReviewsApiKey(apiKey: String) {
-        updateState { it.copy(reviewsApiKey = apiKey) }
+    fun setBookReviewsUrl(url: String) {
+        updateState { it.copy(bookReviewsUrl = url) }
     }
     
-    fun setCommunityUrl(url: String) {
-        updateState { it.copy(communityUrl = url) }
+    fun setBookReviewsApiKey(apiKey: String) {
+        updateState { it.copy(bookReviewsApiKey = apiKey) }
     }
     
-    fun setCommunityApiKey(apiKey: String) {
-        updateState { it.copy(communityApiKey = apiKey) }
+    fun setChapterReviewsUrl(url: String) {
+        updateState { it.copy(chapterReviewsUrl = url) }
     }
     
-    fun saveMultiEndpointConfiguration() {
-        scope.launch {
-            try {
-                // Save primary endpoint
-                supabasePreferences.supabaseUrl().set(currentState.supabaseUrl)
-                supabasePreferences.supabaseApiKey().set(currentState.supabaseApiKey)
-                supabasePreferences.useMultiEndpoint().set(currentState.useMultiEndpoint)
-                
-                // Save books endpoint
-                supabasePreferences.booksUrl().set(currentState.booksUrl)
-                supabasePreferences.booksApiKey().set(currentState.booksApiKey)
-                supabasePreferences.booksEnabled().set(
-                    currentState.booksUrl.isNotEmpty() && currentState.booksApiKey.isNotEmpty()
-                )
-                
-                // Save progress endpoint
-                supabasePreferences.progressUrl().set(currentState.progressUrl)
-                supabasePreferences.progressApiKey().set(currentState.progressApiKey)
-                supabasePreferences.progressEnabled().set(
-                    currentState.progressUrl.isNotEmpty() && currentState.progressApiKey.isNotEmpty()
-                )
-                
-                // Save reviews endpoint
-                supabasePreferences.reviewsUrl().set(currentState.reviewsUrl)
-                supabasePreferences.reviewsApiKey().set(currentState.reviewsApiKey)
-                supabasePreferences.reviewsEnabled().set(
-                    currentState.reviewsUrl.isNotEmpty() && currentState.reviewsApiKey.isNotEmpty()
-                )
-                
-                // Save community endpoint
-                supabasePreferences.communityUrl().set(currentState.communityUrl)
-                supabasePreferences.communityApiKey().set(currentState.communityApiKey)
-                supabasePreferences.communityEnabled().set(
-                    currentState.communityUrl.isNotEmpty() && currentState.communityApiKey.isNotEmpty()
-                )
-                
-                updateState { it.copy(
-                    testResult = "✓ Multi-endpoint configuration saved successfully!",
-                    error = null
-                )}
-            } catch (e: Exception) {
-                updateState { it.copy(
-                    error = "Failed to save multi-endpoint configuration: ${e.message}"
-                )}
-            }
-        }
+    fun setChapterReviewsApiKey(apiKey: String) {
+        updateState { it.copy(chapterReviewsApiKey = apiKey) }
+    }
+    
+    fun setBadgesUrl(url: String) {
+        updateState { it.copy(badgesUrl = url) }
+    }
+    
+    fun setBadgesApiKey(apiKey: String) {
+        updateState { it.copy(badgesApiKey = apiKey) }
+    }
+    
+    fun setAnalyticsUrl(url: String) {
+        updateState { it.copy(analyticsUrl = url) }
+    }
+    
+    fun setAnalyticsApiKey(apiKey: String) {
+        updateState { it.copy(analyticsApiKey = apiKey) }
     }
 }

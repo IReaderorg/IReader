@@ -15,6 +15,7 @@ import ireader.data.core.AndroidTransaction
 import ireader.data.core.DatabaseDriverFactory
 import ireader.data.core.DatabaseHandler
 import ireader.data.monitoring.AndroidMemoryTracker
+import ireader.data.repository.NotificationRepositoryImpl
 import ireader.data.security.BiometricAuthenticator
 import ireader.data.security.BiometricAuthenticatorImpl
 import ireader.domain.catalogs.interactor.InstallCatalog
@@ -23,6 +24,7 @@ import ireader.domain.catalogs.service.CatalogInstallationChanges
 import ireader.domain.catalogs.service.CatalogInstaller
 import ireader.domain.catalogs.service.CatalogLoader
 import ireader.domain.catalogs.service.CatalogRemoteApi
+import ireader.domain.data.repository.NotificationRepository
 import ireader.domain.monitoring.MemoryTracker
 import org.koin.dsl.module
 
@@ -90,4 +92,5 @@ actual val dataPlatformModule = module {
     }
     single<BiometricAuthenticator> { BiometricAuthenticatorImpl(get()) }
     single<MemoryTracker> { AndroidMemoryTracker(get()) }
+    single<NotificationRepository> { NotificationRepositoryImpl(get()) }
 }

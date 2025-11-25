@@ -4,71 +4,98 @@ import ireader.core.config.ConfigLoader
 
 /**
  * Desktop platform configuration
- * Loads credentials from config.properties or environment variables
+ * Loads default credentials from config.properties or environment variables
+ * These are the defaults that ship with the app - users can override in settings
  */
 actual object PlatformConfig {
-    // Primary endpoint (Users)
-    actual fun getSupabaseUrl(): String {
-        return System.getProperty("supabase.url") 
-            ?: System.getenv("SUPABASE_URL") 
-            ?: ConfigLoader.get("supabase.url", "")
+    // Project 1 - Auth
+    actual fun getSupabaseAuthUrl(): String {
+        return System.getProperty("supabase.auth.url") 
+            ?: System.getenv("SUPABASE_AUTH_URL") 
+            ?: ConfigLoader.get("supabase.auth.url", "")
     }
     
-    actual fun getSupabaseAnonKey(): String {
-        return System.getProperty("supabase.anon.key")
-            ?: System.getenv("SUPABASE_ANON_KEY") 
-            ?: ConfigLoader.get("supabase.anon.key", "")
+    actual fun getSupabaseAuthKey(): String {
+        return System.getProperty("supabase.auth.key")
+            ?: System.getenv("SUPABASE_AUTH_KEY") 
+            ?: ConfigLoader.get("supabase.auth.key", "")
     }
     
-    // Books endpoint
-    actual fun getSupabaseBooksUrl(): String {
-        return System.getProperty("supabase.books.url")
-            ?: System.getenv("SUPABASE_BOOKS_URL")
-            ?: ConfigLoader.get("supabase.books.url", "")
+    // Project 2 - Reading
+    actual fun getSupabaseReadingUrl(): String {
+        return System.getProperty("supabase.reading.url")
+            ?: System.getenv("SUPABASE_READING_URL")
+            ?: ConfigLoader.get("supabase.reading.url", "")
     }
     
-    actual fun getSupabaseBooksKey(): String {
-        return System.getProperty("supabase.books.key")
-            ?: System.getenv("SUPABASE_BOOKS_KEY")
-            ?: ConfigLoader.get("supabase.books.key", "")
+    actual fun getSupabaseReadingKey(): String {
+        return System.getProperty("supabase.reading.key")
+            ?: System.getenv("SUPABASE_READING_KEY")
+            ?: ConfigLoader.get("supabase.reading.key", "")
     }
     
-    // Progress endpoint
-    actual fun getSupabaseProgressUrl(): String {
-        return System.getProperty("supabase.progress.url")
-            ?: System.getenv("SUPABASE_PROGRESS_URL")
-            ?: ConfigLoader.get("supabase.progress.url", "")
+    // Project 3 - Library
+    actual fun getSupabaseLibraryUrl(): String {
+        return System.getProperty("supabase.library.url")
+            ?: System.getenv("SUPABASE_LIBRARY_URL")
+            ?: ConfigLoader.get("supabase.library.url", "")
     }
     
-    actual fun getSupabaseProgressKey(): String {
-        return System.getProperty("supabase.progress.key")
-            ?: System.getenv("SUPABASE_PROGRESS_KEY")
-            ?: ConfigLoader.get("supabase.progress.key", "")
+    actual fun getSupabaseLibraryKey(): String {
+        return System.getProperty("supabase.library.key")
+            ?: System.getenv("SUPABASE_LIBRARY_KEY")
+            ?: ConfigLoader.get("supabase.library.key", "")
     }
     
-    // Reviews endpoint
-    actual fun getSupabaseReviewsUrl(): String {
-        return System.getProperty("supabase.reviews.url")
-            ?: System.getenv("SUPABASE_REVIEWS_URL")
-            ?: ConfigLoader.get("supabase.reviews.url", "")
+    // Project 4 - Book Reviews
+    actual fun getSupabaseBookReviewsUrl(): String {
+        return System.getProperty("supabase.book_reviews.url")
+            ?: System.getenv("SUPABASE_BOOK_REVIEWS_URL")
+            ?: ConfigLoader.get("supabase.book_reviews.url", "")
     }
     
-    actual fun getSupabaseReviewsKey(): String {
-        return System.getProperty("supabase.reviews.key")
-            ?: System.getenv("SUPABASE_REVIEWS_KEY")
-            ?: ConfigLoader.get("supabase.reviews.key", "")
+    actual fun getSupabaseBookReviewsKey(): String {
+        return System.getProperty("supabase.book_reviews.key")
+            ?: System.getenv("SUPABASE_BOOK_REVIEWS_KEY")
+            ?: ConfigLoader.get("supabase.book_reviews.key", "")
     }
     
-    // Community endpoint
-    actual fun getSupabaseCommunityUrl(): String {
-        return System.getProperty("supabase.community.url")
-            ?: System.getenv("SUPABASE_COMMUNITY_URL")
-            ?: ConfigLoader.get("supabase.community.url", "")
+    // Project 5 - Chapter Reviews
+    actual fun getSupabaseChapterReviewsUrl(): String {
+        return System.getProperty("supabase.chapter_reviews.url")
+            ?: System.getenv("SUPABASE_CHAPTER_REVIEWS_URL")
+            ?: ConfigLoader.get("supabase.chapter_reviews.url", "")
     }
     
-    actual fun getSupabaseCommunityKey(): String {
-        return System.getProperty("supabase.community.key")
-            ?: System.getenv("SUPABASE_COMMUNITY_KEY")
-            ?: ConfigLoader.get("supabase.community.key", "")
+    actual fun getSupabaseChapterReviewsKey(): String {
+        return System.getProperty("supabase.chapter_reviews.key")
+            ?: System.getenv("SUPABASE_CHAPTER_REVIEWS_KEY")
+            ?: ConfigLoader.get("supabase.chapter_reviews.key", "")
+    }
+    
+    // Project 6 - Badges
+    actual fun getSupabaseBadgesUrl(): String {
+        return System.getProperty("supabase.badges.url")
+            ?: System.getenv("SUPABASE_BADGES_URL")
+            ?: ConfigLoader.get("supabase.badges.url", "")
+    }
+    
+    actual fun getSupabaseBadgesKey(): String {
+        return System.getProperty("supabase.badges.key")
+            ?: System.getenv("SUPABASE_BADGES_KEY")
+            ?: ConfigLoader.get("supabase.badges.key", "")
+    }
+    
+    // Project 7 - Analytics
+    actual fun getSupabaseAnalyticsUrl(): String {
+        return System.getProperty("supabase.analytics.url")
+            ?: System.getenv("SUPABASE_ANALYTICS_URL")
+            ?: ConfigLoader.get("supabase.analytics.url", "")
+    }
+    
+    actual fun getSupabaseAnalyticsKey(): String {
+        return System.getProperty("supabase.analytics.key")
+            ?: System.getenv("SUPABASE_ANALYTICS_KEY")
+            ?: ConfigLoader.get("supabase.analytics.key", "")
     }
 }

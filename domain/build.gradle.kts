@@ -32,16 +32,21 @@ android {
         minSdk = ProjectConfig.minSdk
         
         // Build config fields with fallback chain: env vars -> local.properties -> gradle.properties
-        buildConfigField("String", "SUPABASE_URL", "\"${getConfigProperty("SUPABASE_URL", "supabase.url")}\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${getConfigProperty("SUPABASE_ANON_KEY", "supabase.anon.key")}\"")
-        buildConfigField("String", "SUPABASE_BOOKS_URL", "\"${getConfigProperty("SUPABASE_BOOKS_URL", "supabase.books.url")}\"")
-        buildConfigField("String", "SUPABASE_BOOKS_KEY", "\"${getConfigProperty("SUPABASE_BOOKS_KEY", "supabase.books.key")}\"")
-        buildConfigField("String", "SUPABASE_PROGRESS_URL", "\"${getConfigProperty("SUPABASE_PROGRESS_URL", "supabase.progress.url")}\"")
-        buildConfigField("String", "SUPABASE_PROGRESS_KEY", "\"${getConfigProperty("SUPABASE_PROGRESS_KEY", "supabase.progress.key")}\"")
-        buildConfigField("String", "SUPABASE_REVIEWS_URL", "\"${getConfigProperty("SUPABASE_REVIEWS_URL", "supabase.reviews.url")}\"")
-        buildConfigField("String", "SUPABASE_REVIEWS_KEY", "\"${getConfigProperty("SUPABASE_REVIEWS_KEY", "supabase.reviews.key")}\"")
-        buildConfigField("String", "SUPABASE_COMMUNITY_URL", "\"${getConfigProperty("SUPABASE_COMMUNITY_URL", "supabase.community.url")}\"")
-        buildConfigField("String", "SUPABASE_COMMUNITY_KEY", "\"${getConfigProperty("SUPABASE_COMMUNITY_KEY", "supabase.community.key")}\"")
+        // 7-Project Supabase Configuration
+        buildConfigField("String", "SUPABASE_AUTH_URL", "\"${getConfigProperty("SUPABASE_AUTH_URL", "supabase.auth.url")}\"")
+        buildConfigField("String", "SUPABASE_AUTH_KEY", "\"${getConfigProperty("SUPABASE_AUTH_KEY", "supabase.auth.key")}\"")
+        buildConfigField("String", "SUPABASE_READING_URL", "\"${getConfigProperty("SUPABASE_READING_URL", "supabase.reading.url")}\"")
+        buildConfigField("String", "SUPABASE_READING_KEY", "\"${getConfigProperty("SUPABASE_READING_KEY", "supabase.reading.key")}\"")
+        buildConfigField("String", "SUPABASE_LIBRARY_URL", "\"${getConfigProperty("SUPABASE_LIBRARY_URL", "supabase.library.url")}\"")
+        buildConfigField("String", "SUPABASE_LIBRARY_KEY", "\"${getConfigProperty("SUPABASE_LIBRARY_KEY", "supabase.library.key")}\"")
+        buildConfigField("String", "SUPABASE_BOOK_REVIEWS_URL", "\"${getConfigProperty("SUPABASE_BOOK_REVIEWS_URL", "supabase.book_reviews.url")}\"")
+        buildConfigField("String", "SUPABASE_BOOK_REVIEWS_KEY", "\"${getConfigProperty("SUPABASE_BOOK_REVIEWS_KEY", "supabase.book_reviews.key")}\"")
+        buildConfigField("String", "SUPABASE_CHAPTER_REVIEWS_URL", "\"${getConfigProperty("SUPABASE_CHAPTER_REVIEWS_URL", "supabase.chapter_reviews.url")}\"")
+        buildConfigField("String", "SUPABASE_CHAPTER_REVIEWS_KEY", "\"${getConfigProperty("SUPABASE_CHAPTER_REVIEWS_KEY", "supabase.chapter_reviews.key")}\"")
+        buildConfigField("String", "SUPABASE_BADGES_URL", "\"${getConfigProperty("SUPABASE_BADGES_URL", "supabase.badges.url")}\"")
+        buildConfigField("String", "SUPABASE_BADGES_KEY", "\"${getConfigProperty("SUPABASE_BADGES_KEY", "supabase.badges.key")}\"")
+        buildConfigField("String", "SUPABASE_ANALYTICS_URL", "\"${getConfigProperty("SUPABASE_ANALYTICS_URL", "supabase.analytics.url")}\"")
+        buildConfigField("String", "SUPABASE_ANALYTICS_KEY", "\"${getConfigProperty("SUPABASE_ANALYTICS_KEY", "supabase.analytics.key")}\"")
         
         // Use standard flavor by default when consumed by modules with flavors
         missingDimensionStrategy("default", "standard")

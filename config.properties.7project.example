@@ -1,0 +1,79 @@
+# ============================================
+# 7-Project Supabase Configuration Example
+# ============================================
+# Copy this file to config.properties and add your credentials
+# config.properties is gitignored and will not be committed
+
+# ============================================
+# QUICK SETUP: SINGLE PROJECT (500MB)
+# ============================================
+# Perfect for personal use - just fill in one project!
+
+# Your Supabase project URL
+supabase.auth.url=https://your-project.supabase.co
+supabase.reading.url=https://your-project.supabase.co
+supabase.library.url=https://your-project.supabase.co
+supabase.book_reviews.url=https://your-project.supabase.co
+supabase.chapter_reviews.url=https://your-project.supabase.co
+supabase.badges.url=https://your-project.supabase.co
+supabase.analytics.url=https://your-project.supabase.co
+
+# Your Supabase anon/public key (NOT the service_role key!)
+# Get this from: https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api
+supabase.auth.key=your-anon-key-here
+supabase.reading.key=your-anon-key-here
+supabase.library.key=your-anon-key-here
+supabase.book_reviews.key=your-anon-key-here
+supabase.chapter_reviews.key=your-anon-key-here
+supabase.badges.key=your-anon-key-here
+supabase.analytics.key=your-anon-key-here
+
+# ============================================
+# ADVANCED: MULTI-PROJECT SETUP (3.5GB)
+# ============================================
+# For maximum storage, create 7 separate projects
+# and replace the URLs and keys above with different values
+
+# Example multi-project configuration:
+# supabase.auth.url=https://auth-abc123.supabase.co
+# supabase.auth.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.auth-key
+# 
+# supabase.reading.url=https://reading-def456.supabase.co
+# supabase.reading.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.reading-key
+# 
+# supabase.library.url=https://library-ghi789.supabase.co
+# supabase.library.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.library-key
+# 
+# ... and so on for all 7 projects
+
+
+# ============================================
+# NOTES
+# ============================================
+# 1. For single project: Use same URL/key for all 7 entries
+# 2. For multi-project: Use different URL/key for each entry
+# 3. Never commit config.properties to git
+# 4. Use anon/public keys only (visible in browser)
+# 5. Deploy appropriate SQL schemas to your project(s)
+# 6. See QUICK_START_7PROJECT.md for detailed guide
+
+# ============================================
+# WHAT EACH PROJECT STORES
+# ============================================
+# Auth:            User accounts and authentication
+# Reading:         Reading progress and bookmarks
+# Library:         Synced books and chapters
+# Book Reviews:    Book ratings and reviews
+# Chapter Reviews: Chapter ratings and reviews
+# Badges:          Achievement badges and NFT wallets
+# Analytics:       Leaderboard and statistics
+
+# ============================================
+# GETTING YOUR CREDENTIALS
+# ============================================
+# 1. Go to https://app.supabase.com
+# 2. Select your project
+# 3. Go to Settings → API
+# 4. Copy "Project URL" → use as supabase.*.url
+# 5. Copy "anon public" key → use as supabase.*.key
+# 6. Repeat for each project if using multi-project setup

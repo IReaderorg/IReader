@@ -18,6 +18,9 @@ interface BadgeRepository {
     suspend fun getPrimaryBadge(): Result<Badge?>
     suspend fun getFeaturedBadges(): Result<List<Badge>>
     
+    // Achievement badge methods
+    suspend fun checkAndAwardAchievementBadge(badgeId: String): Result<Boolean>
+    
     // Admin methods
     suspend fun getPaymentProofsByStatus(status: ireader.domain.models.remote.PaymentProofStatus): Result<List<PaymentProof>>
     suspend fun updatePaymentProofStatus(

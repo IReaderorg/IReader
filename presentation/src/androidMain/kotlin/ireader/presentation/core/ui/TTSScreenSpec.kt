@@ -181,6 +181,13 @@ actual class TTSScreenSpec actual constructor(
                         }, themes = readerThemes, selected = {
                             vm.theme.value == it
                         })
+                        // TTS Engine Toggle
+                        SwitchPreference(
+                            preference = vm.useCoquiTTS,
+                            title = if (vm.useCoquiTTS) "Coqui TTS" else "Native TTS",
+                            subtitle = if (vm.useCoquiTTS) "Using your custom Space" else "Using device TTS",
+                            onValueChange = { vm.toggleTTSEngine() }
+                        )
                         SwitchPreference(
                             preference = vm.isTtsTrackerEnable,
                             title = localizeHelper.localize(Res.string.tracker)
@@ -285,22 +292,57 @@ actual class TTSScreenSpec actual constructor(
                                             onValueChangeFinished = {},
                                             content = vm.ttsContent?.value
                                         )
+
+                                        
                                         MediaControllers(
                                             vm = vm,
                                             onPrev = {
                                                 vm.controller?.transportControls?.skipToPrevious()
                                             },
                                             onPlay = {
-                                                vm.play(context)
+                                                if (vm.useCoquiTTS) {
+                                                    // Use Coqui TTS
+                                                    vm.ttsContent?.let { content ->
+                                                        content.value?.getOrNull(vm.ttsState.currentReadingParagraph)?.let { text ->
+                                                            vm.speakWithCoqui(text)
+                                                        }
+                                                    }
+                                                } else {
+                                                    // Use Native TTS
+                                                    vm.play(context)
+                                                }
                                             },
                                             onNext = {
+                                                if (vm.useCoquiTTS) {
+                                                    vm.stopCoquiTTS()
+                                                }
                                                 vm.controller?.transportControls?.skipToNext()
                                             },
                                             onPrevPar = {
-                                                vm.controller?.transportControls?.rewind()
+                                                if (vm.useCoquiTTS) {
+                                                    vm.stopCoquiTTS()
+                                                    // Move to previous paragraph
+                                                    val currentPar = vm.ttsState.currentReadingParagraph
+                                                    if (currentPar > 0) {
+                                                        vm.ttsState.currentReadingParagraph = currentPar - 1
+                                                    }
+                                                } else {
+                                                    vm.controller?.transportControls?.rewind()
+                                                }
                                             },
                                             onNextPar = {
-                                                vm.controller?.transportControls?.fastForward()
+                                                if (vm.useCoquiTTS) {
+                                                    vm.stopCoquiTTS()
+                                                    // Move to next paragraph
+                                                    vm.ttsContent?.let { content ->
+                                                        val currentPar = vm.ttsState.currentReadingParagraph
+                                                        if (currentPar < (content.value?.size ?: 0) - 1) {
+                                                            vm.ttsState.currentReadingParagraph = currentPar + 1
+                                                        }
+                                                    }
+                                                } else {
+                                                    vm.controller?.transportControls?.fastForward()
+                                                }
                                             },
                                         )
                                     }

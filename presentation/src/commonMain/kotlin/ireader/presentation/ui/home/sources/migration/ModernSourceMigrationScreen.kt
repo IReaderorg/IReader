@@ -25,6 +25,7 @@ import ireader.domain.models.migration.MigrationMatch
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.ui.migration.MigrationResult
 
 /**
  * Modern redesigned Source Migration Screen
@@ -48,6 +49,17 @@ fun ModernSourceMigrationScreen(
     val currentMatchingNovel by viewModel.currentMatchingNovel.collectAsState()
     val matches by viewModel.matches.collectAsState()
     val migrationProgress by viewModel.migrationProgress.collectAsState()
+    val migrationResults by viewModel.migrationResults.collectAsState()
+    
+    // Track if migration just completed
+    var showCompletionDialog by remember { mutableStateOf(false) }
+    
+    // Show completion dialog when migration finishes
+    LaunchedEffect(viewModel.isMigrating, migrationResults) {
+        if (!viewModel.isMigrating && migrationResults.isNotEmpty() && currentMatchingNovel == null) {
+            showCompletionDialog = true
+        }
+    }
     
     // Convert BookItem list to Book list for display
     val booksForDisplay = remember(novels) {
@@ -129,8 +141,114 @@ fun ModernSourceMigrationScreen(
                     )
                 }
             }
+            
+            // Migration Completion Dialog
+            if (showCompletionDialog) {
+                MigrationCompletionDialog(
+                    results = migrationResults,
+                    onDismiss = {
+                        showCompletionDialog = false
+                        onBackPressed() // Navigate back after dismissing
+                    }
+                )
+            }
         }
     }
+}
+
+@Composable
+private fun MigrationCompletionDialog(
+    results: List<ireader.domain.models.migration.MigrationResult>,
+    onDismiss: () -> Unit
+) {
+    val successCount = results.count { it.success }
+    val failedCount = results.size - successCount
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = if (failedCount == 0) Icons.Default.CheckCircle else Icons.Default.Info,
+                contentDescription = null,
+                tint = if (failedCount == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier.size(48.dp)
+            )
+        },
+        title = {
+            Text(
+                text = "Migration Complete!",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                // Summary
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                "Successful:",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                "$successCount",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        if (failedCount > 0) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    "Failed/Skipped:",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    "$failedCount",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.error,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                Text(
+                    text = if (failedCount == 0) {
+                        "All books were successfully migrated to the new source!"
+                    } else {
+                        "Some books could not be migrated. They may not exist in the target source or were skipped."
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text("Done")
+            }
+        },
+        shape = RoundedCornerShape(20.dp)
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

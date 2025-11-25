@@ -106,7 +106,9 @@ class BadgeStoreViewModel(
                         it.copy(
                             isSubmitting = false,
                             submitSuccess = true,
-                            submitError = null
+                            submitError = null,
+                            showPurchaseDialog = false,
+                            selectedBadge = null
                         )
                     }
                 }

@@ -1,0 +1,60 @@
+# ============================================
+# Test Configuration: 7-Project Single Setup
+# ============================================
+# Copy this to local.properties for testing single-project setup
+# All 7 "projects" point to the same Supabase instance
+
+# Single project credentials (500MB total)
+supabase.auth.url=https://test-single.supabase.co
+supabase.auth.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-single-key
+
+supabase.reading.url=https://test-single.supabase.co
+supabase.reading.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-single-key
+
+supabase.library.url=https://test-single.supabase.co
+supabase.library.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-single-key
+
+supabase.book_reviews.url=https://test-single.supabase.co
+supabase.book_reviews.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-single-key
+
+supabase.chapter_reviews.url=https://test-single.supabase.co
+supabase.chapter_reviews.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-single-key
+
+supabase.badges.url=https://test-single.supabase.co
+supabase.badges.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-single-key
+
+supabase.analytics.url=https://test-single.supabase.co
+supabase.analytics.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-single-key
+
+# ============================================
+# Expected Behavior
+# ============================================
+# - All requests route to test-single.supabase.co
+# - Works like traditional single-project setup
+# - Uses 500MB storage
+# - Perfect for testing and personal use
+
+# ============================================
+# Required Database Tables
+# ============================================
+# Deploy ALL these migrations to test-single project:
+# - migration_create_users.sql
+# - migration_create_reading_progress.sql
+# - migration_create_synced_books.sql
+# - migration_create_synced_chapters.sql
+# - migration_add_book_reviews.sql
+# - migration_add_chapter_reviews.sql
+# - migration_add_donation_badges.sql
+# - migration_add_leaderboard.sql
+
+# ============================================
+# Testing Checklist
+# ============================================
+# [ ] Create test-single Supabase project
+# [ ] Deploy all SQL migrations
+# [ ] Copy this file to local.properties
+# [ ] Replace test-single.supabase.co with your URL
+# [ ] Replace test-single-key with your anon key
+# [ ] Build and run app
+# [ ] Test sync functionality
+# [ ] Verify all features work

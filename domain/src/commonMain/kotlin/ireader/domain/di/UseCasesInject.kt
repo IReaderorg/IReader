@@ -278,6 +278,19 @@ val UseCasesInject = module {
     // Migration use cases
     single<ireader.domain.usecases.migration.BookMatcher> { ireader.domain.usecases.migration.BookMatcher() }
     single<ireader.domain.usecases.migration.ChapterMapper> { ireader.domain.usecases.migration.ChapterMapper() }
+    single<ireader.domain.usecases.migration.SearchMigrationTargetsUseCase> { 
+        ireader.domain.usecases.migration.SearchMigrationTargetsUseCase(get()) 
+    }
+    single<ireader.domain.usecases.migration.MigrateBookUseCase> { 
+        ireader.domain.usecases.migration.MigrateBookUseCase(
+            bookRepository = get(),
+            chapterRepository = get(),
+            categoryRepository = get(),
+            migrationRepository = get(),
+            notificationRepository = get(),
+            bookMatcher = get()
+        )
+    }
     single<ireader.domain.use_cases.migration.MigrateNovelUseCase> { 
         ireader.domain.use_cases.migration.MigrateNovelUseCase(
             bookRepository = get(),

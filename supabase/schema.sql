@@ -1,6 +1,18 @@
 -- IReader Sync Database Schema
 -- This file contains all tables, policies, triggers, and functions for the IReader sync feature
 -- Run this in your Supabase SQL Editor to set up the complete database
+--
+-- INCLUDED MIGRATIONS:
+-- ✓ Base schema (users, reading_progress, synced_books, reviews)
+-- ✓ Badge system (badges, user_badges, payment_proofs, nft_wallets)
+-- ✓ Leaderboard system with realtime support
+-- ✓ Achievement badges (19 badges for reading, reviews, streaks, etc.)
+-- ✓ Admin role for badge verification
+-- ✓ Book URL field for synced books
+-- ✓ Username auto-generation
+-- ✓ Source ID constraint fix
+-- ✓ Multiple reviews per user support
+-- ✓ Badge monetization and NFT integration
 
 -- ============================================================================
 -- EXTENSIONS
@@ -23,6 +35,7 @@ CREATE TABLE IF NOT EXISTS public.users (
     username TEXT,
     eth_wallet_address TEXT,
     is_supporter BOOLEAN DEFAULT FALSE,
+    is_admin BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     
@@ -35,6 +48,7 @@ CREATE TABLE IF NOT EXISTS public.users (
 -- Indexes for users table
 CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
 CREATE INDEX IF NOT EXISTS idx_users_eth_wallet ON public.users(eth_wallet_address) WHERE eth_wallet_address IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_users_is_admin ON public.users(is_admin) WHERE is_admin = TRUE;
 
 -- Comments
 COMMENT ON TABLE public.users IS 'User profiles and authentication data';
@@ -43,6 +57,7 @@ COMMENT ON COLUMN public.users.email IS 'User email address';
 COMMENT ON COLUMN public.users.username IS 'Display username (optional)';
 COMMENT ON COLUMN public.users.eth_wallet_address IS 'Ethereum wallet address for API key authentication';
 COMMENT ON COLUMN public.users.is_supporter IS 'Whether user is a supporter/premium member';
+COMMENT ON COLUMN public.users.is_admin IS 'Whether user has admin privileges for badge verification';
 
 -- ----------------------------------------------------------------------------
 -- Reading Progress Table
@@ -493,18 +508,33 @@ CREATE POLICY "Users can update their own badge settings"
 -- Payment Proofs Table Policies
 -- ----------------------------------------------------------------------------
 
--- Users can view their own payment proofs
+-- Users can view their own payment proofs, admins can view all
 CREATE POLICY "Users can view their own payment proofs"
     ON public.payment_proofs FOR SELECT
-    USING (auth.uid() = user_id);
+    USING (
+        auth.uid() = user_id OR 
+        EXISTS (
+            SELECT 1 FROM public.users 
+            WHERE id = auth.uid() AND is_admin = TRUE
+        )
+    );
 
 -- Users can insert their own payment proofs
 CREATE POLICY "Users can insert their own payment proofs"
     ON public.payment_proofs FOR INSERT
     WITH CHECK (auth.uid() = user_id);
 
--- Only admins can update payment proof status (handled via service role)
--- No UPDATE/DELETE policies for regular users
+-- Admins can update payment proof status
+CREATE POLICY "Admins can update payment proofs"
+    ON public.payment_proofs FOR UPDATE
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.users 
+            WHERE id = auth.uid() AND is_admin = TRUE
+        )
+    );
+
+-- No DELETE policy - payment proofs should be kept for records
 
 -- ----------------------------------------------------------------------------
 -- NFT Wallets Table Policies
@@ -723,6 +753,45 @@ $;
 GRANT EXECUTE ON FUNCTION grant_badge_to_user(UUID, TEXT) TO authenticated;
 
 COMMENT ON FUNCTION grant_badge_to_user(UUID, TEXT) IS 'Grants a badge to a user (bypasses RLS for admin operations)';
+
+-- ----------------------------------------------------------------------------
+-- Function: Check and award achievement badge
+-- Checks if user qualifies for and awards an achievement badge
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION check_and_award_achievement_badge(
+    p_user_id UUID,
+    p_badge_id TEXT
+)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_already_has_badge BOOLEAN;
+BEGIN
+    -- Check if user already has the badge
+    SELECT EXISTS(
+        SELECT 1 FROM public.user_badges
+        WHERE user_id = p_user_id AND badge_id = p_badge_id
+    ) INTO v_already_has_badge;
+    
+    -- If user doesn't have the badge, award it
+    IF NOT v_already_has_badge THEN
+        INSERT INTO public.user_badges (user_id, badge_id, earned_at)
+        VALUES (p_user_id, p_badge_id, NOW())
+        ON CONFLICT (user_id, badge_id) DO NOTHING;
+        
+        RETURN TRUE;
+    END IF;
+    
+    RETURN FALSE;
+END;
+$$;
+
+-- Grant execute permission
+GRANT EXECUTE ON FUNCTION check_and_award_achievement_badge(UUID, TEXT) TO authenticated;
+
+COMMENT ON FUNCTION check_and_award_achievement_badge(UUID, TEXT) IS 'Checks if user qualifies for and awards an achievement badge';
 
 -- ----------------------------------------------------------------------------
 -- Function: Get user statistics
@@ -955,33 +1024,64 @@ ON CONFLICT (version) DO NOTHING;
 -- ============================================================================
 
 -- Insert default badges
-INSERT INTO public.badges (id, name, description, icon, category, rarity) VALUES
+INSERT INTO public.badges (id, name, description, icon, category, rarity, type, is_available) VALUES
 -- Donor Badges
-('donor_bronze', 'Bronze Supporter', 'Donated $5 or more', '🥉', 'donor', 'common'),
-('donor_silver', 'Silver Supporter', 'Donated $10 or more', '🥈', 'donor', 'rare'),
-('donor_gold', 'Gold Supporter', 'Donated $25 or more', '🥇', 'donor', 'epic'),
-('donor_platinum', 'Platinum Supporter', 'Donated $50 or more', '💎', 'donor', 'legendary'),
+('donor_bronze', 'Bronze Supporter', 'Donated $5 or more', '🥉', 'donor', 'common', 'ACHIEVEMENT', TRUE),
+('donor_silver', 'Silver Supporter', 'Donated $10 or more', '🥈', 'donor', 'rare', 'ACHIEVEMENT', TRUE),
+('donor_gold', 'Gold Supporter', 'Donated $25 or more', '🥇', 'donor', 'epic', 'ACHIEVEMENT', TRUE),
+('donor_platinum', 'Platinum Supporter', 'Donated $50 or more', '💎', 'donor', 'legendary', 'ACHIEVEMENT', TRUE),
 
 -- Contributor Badges
-('contributor_translator', 'Translator', 'Contributed translations', '🌐', 'contributor', 'rare'),
-('contributor_developer', 'Developer', 'Contributed code', '💻', 'contributor', 'epic'),
-('contributor_designer', 'Designer', 'Contributed designs', '🎨', 'contributor', 'rare'),
+('contributor_translator', 'Translator', 'Contributed translations', '🌐', 'contributor', 'rare', 'ACHIEVEMENT', TRUE),
+('contributor_developer', 'Developer', 'Contributed code', '💻', 'contributor', 'epic', 'ACHIEVEMENT', TRUE),
+('contributor_designer', 'Designer', 'Contributed designs', '🎨', 'contributor', 'rare', 'ACHIEVEMENT', TRUE),
 
--- Reader Badges
-('reader_novice', 'Novice Reader', 'Read 10 chapters', '📖', 'reader', 'common'),
-('reader_bookworm', 'Bookworm', 'Read 100 chapters', '📚', 'reader', 'rare'),
-('reader_scholar', 'Scholar', 'Read 500 chapters', '🎓', 'reader', 'epic'),
-('reader_master', 'Reading Master', 'Read 1000 chapters', '👑', 'reader', 'legendary'),
+-- Reader Badges (Basic)
+('reader_novice', 'Novice Reader', 'Read 10 chapters', '📖', 'reader', 'common', 'ACHIEVEMENT', TRUE),
+('reader_bookworm', 'Bookworm', 'Read 100 chapters', '📚', 'reader', 'rare', 'ACHIEVEMENT', TRUE),
+('reader_scholar', 'Scholar', 'Read 500 chapters', '🎓', 'reader', 'epic', 'ACHIEVEMENT', TRUE),
+('reader_master', 'Reading Master', 'Read 1000 chapters', '👑', 'reader', 'legendary', 'ACHIEVEMENT', TRUE),
 
 -- Reviewer Badges
-('reviewer_critic', 'Critic', 'Wrote 10 reviews', '✍️', 'reviewer', 'common'),
-('reviewer_expert', 'Expert Reviewer', 'Wrote 50 reviews', '⭐', 'reviewer', 'rare'),
-('reviewer_master', 'Master Critic', 'Wrote 100 reviews', '🌟', 'reviewer', 'epic'),
+('reviewer_critic', 'Critic', 'Wrote 10 reviews', '✍️', 'reviewer', 'common', 'ACHIEVEMENT', TRUE),
+('reviewer_expert', 'Expert Reviewer', 'Wrote 50 reviews', '⭐', 'reviewer', 'rare', 'ACHIEVEMENT', TRUE),
+('reviewer_master', 'Master Critic', 'Wrote 100 reviews', '🌟', 'reviewer', 'epic', 'ACHIEVEMENT', TRUE),
 
 -- Special Badges
-('special_early_adopter', 'Early Adopter', 'Joined during beta', '🚀', 'special', 'legendary'),
-('special_bug_hunter', 'Bug Hunter', 'Reported critical bugs', '🐛', 'special', 'epic'),
-('special_community_hero', 'Community Hero', 'Outstanding community contribution', '🦸', 'special', 'legendary')
+('special_early_adopter', 'Early Adopter', 'Joined during beta', '🚀', 'special', 'legendary', 'ACHIEVEMENT', TRUE),
+('special_bug_hunter', 'Bug Hunter', 'Reported critical bugs', '🐛', 'special', 'epic', 'ACHIEVEMENT', TRUE),
+('special_community_hero', 'Community Hero', 'Outstanding community contribution', '🦸', 'special', 'legendary', 'ACHIEVEMENT', TRUE),
+
+-- Achievement Badges - Reading Progress
+('novice_reader', 'Novice Reader', 'Read your first 10 chapters', '📖', 'reader', 'common', 'ACHIEVEMENT', TRUE),
+('avid_reader', 'Avid Reader', 'Read 100 chapters', '📚', 'reader', 'rare', 'ACHIEVEMENT', TRUE),
+('bookworm', 'Bookworm', 'Read 500 chapters', '🐛', 'reader', 'epic', 'ACHIEVEMENT', TRUE),
+('master_reader', 'Master Reader', 'Read 1000 chapters', '🎓', 'reader', 'legendary', 'ACHIEVEMENT', TRUE),
+
+-- Achievement Badges - Book Completion
+('first_finish', 'First Finish', 'Complete your first book', '🏁', 'reader', 'common', 'ACHIEVEMENT', TRUE),
+('book_collector', 'Book Collector', 'Complete 10 books', '📕', 'reader', 'rare', 'ACHIEVEMENT', TRUE),
+('library_master', 'Library Master', 'Complete 50 books', '📚', 'reader', 'epic', 'ACHIEVEMENT', TRUE),
+('legendary_collector', 'Legendary Collector', 'Complete 100 books', '👑', 'reader', 'legendary', 'ACHIEVEMENT', TRUE),
+
+-- Achievement Badges - Reviews
+('first_critic', 'First Critic', 'Write your first review', '✍️', 'reviewer', 'common', 'ACHIEVEMENT', TRUE),
+('thoughtful_critic', 'Thoughtful Critic', 'Write 10 reviews', '💭', 'reviewer', 'rare', 'ACHIEVEMENT', TRUE),
+('master_critic', 'Master Critic', 'Write 50 reviews', '🎭', 'reviewer', 'epic', 'ACHIEVEMENT', TRUE),
+('legendary_critic', 'Legendary Critic', 'Write 100 reviews', '🏆', 'reviewer', 'legendary', 'ACHIEVEMENT', TRUE),
+
+-- Achievement Badges - Reading Streaks
+('week_warrior', 'Week Warrior', 'Read for 7 consecutive days', '🔥', 'reader', 'rare', 'ACHIEVEMENT', TRUE),
+('month_master', 'Month Master', 'Read for 30 consecutive days', '⚡', 'reader', 'epic', 'ACHIEVEMENT', TRUE),
+('year_legend', 'Year Legend', 'Read for 365 consecutive days', '🌟', 'reader', 'legendary', 'ACHIEVEMENT', TRUE),
+
+-- Achievement Badges - Time-based
+('night_owl', 'Night Owl', 'Read 100 chapters between 10 PM and 6 AM', '🦉', 'special', 'rare', 'ACHIEVEMENT', TRUE),
+('early_bird', 'Early Bird', 'Read 100 chapters between 5 AM and 9 AM', '🐦', 'special', 'rare', 'ACHIEVEMENT', TRUE),
+
+-- Achievement Badges - Speed Reading
+('speed_reader', 'Speed Reader', 'Read 50 chapters in a single day', '⚡', 'reader', 'epic', 'ACHIEVEMENT', TRUE),
+('marathon_reader', 'Marathon Reader', 'Read for 12 hours in a single day', '🏃', 'reader', 'legendary', 'ACHIEVEMENT', TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================================
@@ -1013,11 +1113,19 @@ BEGIN
     RAISE NOTICE 'Badge Categories:';
     RAISE NOTICE '- Donor: Bronze, Silver, Gold, Platinum';
     RAISE NOTICE '- Contributor: Translator, Developer, Designer';
-    RAISE NOTICE '- Reader: Novice, Bookworm, Scholar, Master';
-    RAISE NOTICE '- Reviewer: Critic, Expert, Master';
-    RAISE NOTICE '- Special: Early Adopter, Bug Hunter, Community Hero';
+    RAISE NOTICE '- Reader: Novice, Bookworm, Scholar, Master, Speed Reader, Marathon Reader';
+    RAISE NOTICE '- Reviewer: Critic, Expert, Master, Legendary Critic';
+    RAISE NOTICE '- Special: Early Adopter, Bug Hunter, Community Hero, Night Owl, Early Bird';
     RAISE NOTICE '- Purchasable: Custom badges available for purchase';
     RAISE NOTICE '- NFT: Exclusive badges for NFT holders';
+    RAISE NOTICE '';
+    RAISE NOTICE 'Achievement Badges:';
+    RAISE NOTICE '- Reading Progress: Novice Reader (10), Avid Reader (100), Bookworm (500), Master Reader (1000)';
+    RAISE NOTICE '- Book Completion: First Finish (1), Book Collector (10), Library Master (50), Legendary Collector (100)';
+    RAISE NOTICE '- Reviews: First Critic (1), Thoughtful Critic (10), Master Critic (50), Legendary Critic (100)';
+    RAISE NOTICE '- Streaks: Week Warrior (7 days), Month Master (30 days), Year Legend (365 days)';
+    RAISE NOTICE '- Time-based: Night Owl (100 chapters 10PM-6AM), Early Bird (100 chapters 5AM-9AM)';
+    RAISE NOTICE '- Speed: Speed Reader (50 chapters/day), Marathon Reader (12 hours/day)';
     RAISE NOTICE '';
     RAISE NOTICE 'Badge Types:';
     RAISE NOTICE '- ACHIEVEMENT: Earned through actions (reading, reviewing, etc.)';
@@ -1037,10 +1145,11 @@ BEGIN
     RAISE NOTICE '1. Configure authentication in Supabase Dashboard';
     RAISE NOTICE '2. Deploy verify-nft-ownership Edge Function';
     RAISE NOTICE '3. Test with the IReader app';
-    RAISE NOTICE '4. Award badges using award_badge() function';
-    RAISE NOTICE '5. Monitor using the views and statistics function';
-    RAISE NOTICE '6. Enable Realtime for leaderboard table (optional)';
-    RAISE NOTICE '7. Test leaderboard sync from IReader app';
+    RAISE NOTICE '4. Award badges using award_badge() or check_and_award_achievement_badge() functions';
+    RAISE NOTICE '5. Grant admin privileges: UPDATE public.users SET is_admin = TRUE WHERE email = ''admin@example.com''';
+    RAISE NOTICE '6. Monitor using the views and statistics function';
+    RAISE NOTICE '7. Enable Realtime for leaderboard table (optional)';
+    RAISE NOTICE '8. Test leaderboard sync from IReader app';
 END $$;
 
 

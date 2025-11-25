@@ -44,6 +44,10 @@ interface AITTSService {
  * AI TTS Provider types
  */
 enum class AITTSProvider {
+    COQUI_TTS,           // Coqui TTS - high-quality open-source TTS (online, Gradio-based)
+    KOKORO_TTS,          // Kokoro TTS - hexgrad/Kokoro-TTS (high-quality, fast, multiple voices)
     PIPER_TTS,           // High-quality neural TTS (offline, free)
+    MELO_TTS,            // MyShell MeloTTS - multilingual, expressive (offline, free)
+    HUGGING_FACE,        // Hugging Face Spaces TTS (online, API-based)
     NATIVE_ANDROID       // Android built-in TTS
 }

@@ -20,6 +20,8 @@ class ProfileViewModel(
         loadCurrentUser()
         observeConnectionStatus()
         loadFeaturedBadges()
+        loadAchievementBadges()
+        loadReadingStatistics()
     }
     
     private fun loadCurrentUser() {
@@ -146,8 +148,69 @@ class ProfileViewModel(
         }
     }
     
+    private fun loadAchievementBadges() {
+        scope.launch {
+            updateState { it.copy(isBadgesLoading = true) }
+            
+            badgeRepository?.getUserBadges()?.fold(
+                onSuccess = { userBadges ->
+                    // Filter only achievement badges
+                    val achievementBadges = userBadges
+                        .filter { badge -> 
+                            badge.badgeType?.uppercase() == "ACHIEVEMENT" 
+                        }
+                        .map { userBadge ->
+                            Badge(
+                                id = userBadge.badgeId,
+                                name = userBadge.badgeName,
+                                description = userBadge.badgeDescription,
+                                icon = userBadge.badgeIcon,
+                                category = userBadge.badgeCategory,
+                                rarity = userBadge.badgeRarity,
+                                imageUrl = userBadge.imageUrl ?: userBadge.badgeIcon,
+                                type = ireader.domain.models.remote.BadgeType.ACHIEVEMENT,
+                                badgeRarity = when (userBadge.badgeRarity.lowercase()) {
+                                    "common" -> ireader.domain.models.remote.BadgeRarity.COMMON
+                                    "rare" -> ireader.domain.models.remote.BadgeRarity.RARE
+                                    "epic" -> ireader.domain.models.remote.BadgeRarity.EPIC
+                                    "legendary" -> ireader.domain.models.remote.BadgeRarity.LEGENDARY
+                                    else -> ireader.domain.models.remote.BadgeRarity.COMMON
+                                }
+                            )
+                        }
+                    updateState { it.copy(achievementBadges = achievementBadges, isBadgesLoading = false, badgesError = null) }
+                },
+                onFailure = { error ->
+                    updateState { it.copy(badgesError = error.message, isBadgesLoading = false) }
+                }
+            ) ?: run {
+                updateState { it.copy(isBadgesLoading = false) }
+            }
+        }
+    }
+    
+    private fun loadReadingStatistics() {
+        scope.launch {
+            updateState { it.copy(isStatsLoading = true) }
+            
+            // TODO: Implement actual statistics fetching from database
+            // For now, using placeholder values
+            // You should create a use case to fetch these from your reading_statistics table
+            updateState { 
+                it.copy(
+                    chaptersRead = 0,
+                    booksCompleted = 0,
+                    reviewsWritten = 0,
+                    readingStreak = 0,
+                    isStatsLoading = false
+                ) 
+            }
+        }
+    }
+    
     fun retryLoadBadges() {
         loadFeaturedBadges()
+        loadAchievementBadges()
     }
 }
 
@@ -160,6 +223,12 @@ data class ProfileState(
     val showUsernameDialog: Boolean = false,
     val showWalletDialog: Boolean = false,
     val featuredBadges: List<Badge> = emptyList(),
+    val achievementBadges: List<Badge> = emptyList(),
     val isBadgesLoading: Boolean = false,
-    val badgesError: String? = null
+    val badgesError: String? = null,
+    val chaptersRead: Int = 0,
+    val booksCompleted: Int = 0,
+    val reviewsWritten: Int = 0,
+    val readingStreak: Int = 0,
+    val isStatsLoading: Boolean = false
 )

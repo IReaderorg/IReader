@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 
 data class AITTSSettingsState(
     val useAITTS: Boolean = false,
-    val selectedProvider: AITTSProvider = AITTSProvider.PIPER_TTS,
+    val selectedProvider: AITTSProvider = AITTSProvider.NATIVE_ANDROID,
     val availableVoices: List<VoiceModel> = emptyList(),
     val selectedVoiceId: String? = null,
     val isLoading: Boolean = false,
@@ -18,7 +18,14 @@ data class AITTSSettingsState(
     val downloadingVoice: String? = null,
     val downloadProgress: Int = 0,
     val downloadedVoices: Set<String> = emptySet(),
-    val totalDownloadedSize: Long = 0L
+    val totalDownloadedSize: Long = 0L,
+
+    // Coqui TTS
+    val useCoquiTTS: Boolean = false,
+    val coquiSpaceUrl: String = "https://kazemcodes-ireader.hf.space",
+    val coquiApiKey: String = "",
+    val coquiSpeed: Float = 1.0f,
+    val isCoquiAvailable: Boolean = false
 )
 
 class AITTSSettingsViewModel(
@@ -28,6 +35,7 @@ class AITTSSettingsViewModel(
     
     init {
         loadSettings()
+        // Don't auto-configure - let user enable it first
     }
     
     private fun loadSettings() {
@@ -36,25 +44,33 @@ class AITTSSettingsViewModel(
             val selectedProvider = try {
                 AITTSProvider.valueOf(appPreferences.selectedAITTSProvider().get())
             } catch (e: Exception) {
-                AITTSProvider.PIPER_TTS
+                AITTSProvider.NATIVE_ANDROID
             }
             val selectedVoiceId = appPreferences.selectedAIVoiceId().get()
             
-            // Load downloaded voices info
+            // Load downloaded voices info (will be empty on Android)
             val downloadedVoices = aiTTSManager.getDownloadedVoices().toSet()
             val totalSize = aiTTSManager.getDownloadedVoicesSize()
+
+            // Load Coqui settings
+            val useCoquiTTS = appPreferences.useCoquiTTS().get()
+            val coquiSpaceUrl = appPreferences.coquiSpaceUrl().get()
+            val coquiApiKey = appPreferences.coquiApiKey().get()
+            val coquiSpeed = appPreferences.coquiSpeed().get()
             
             updateState { it.copy(
                 useAITTS = useAITTS,
                 selectedProvider = selectedProvider,
                 selectedVoiceId = selectedVoiceId,
                 downloadedVoices = downloadedVoices,
-                totalDownloadedSize = totalSize
+                totalDownloadedSize = totalSize,
+                useCoquiTTS = useCoquiTTS,
+                coquiSpaceUrl = coquiSpaceUrl,
+                coquiApiKey = coquiApiKey,
+                coquiSpeed = coquiSpeed
             ) }
             
-            if (useAITTS) {
-                loadVoices()
-            }
+            // Don't try to load voices on Android - not supported
         }
     }
     
@@ -63,41 +79,18 @@ class AITTSSettingsViewModel(
             appPreferences.useAITTS().set(enabled)
             updateState { it.copy(useAITTS = enabled) }
             
-            if (enabled) {
-                loadVoices()
-            }
+            // Don't try to load voices on Android - not supported
         }
     }
     
     fun loadVoices() {
-        scope.launch {
-            updateState { it.copy(isLoading = true, error = null) }
-            
-            try {
-                // Always use Piper TTS
-                val result = aiTTSManager.getVoicesFromProvider(AITTSProvider.PIPER_TTS)
-                
-                result.onSuccess { voices ->
-                    updateState { it.copy(
-                        availableVoices = voices,
-                        isLoading = false,
-                        error = null
-                    ) }
-                }.onFailure { e ->
-                    Log.error { "Failed to load voices: ${e.message}" }
-                    updateState { it.copy(
-                        isLoading = false,
-                        error = "Failed to load voices: ${e.message}"
-                    ) }
-                }
-            } catch (e: Exception) {
-                Log.error { "Error loading voices: ${e.message}" }
-                updateState { it.copy(
-                    isLoading = false,
-                    error = "Error: ${e.message}"
-                ) }
-            }
-        }
+        // Voice loading not supported on Android
+        // Users should configure voices in Android Settings or Sherpa TTS app
+        updateState { it.copy(
+            isLoading = false,
+            error = null,
+            availableVoices = emptyList()
+        ) }
     }
     
     fun selectVoice(voiceId: String) {
@@ -108,95 +101,113 @@ class AITTSSettingsViewModel(
     }
     
     fun previewVoice(voiceId: String) {
-        scope.launch {
-            try {
-                val sampleText = "Hello, this is a preview of my voice."
-                
-                // Always use Piper TTS
-                aiTTSManager.synthesize(
-                    text = sampleText,
-                    provider = AITTSProvider.PIPER_TTS,
-                    voiceId = voiceId,
-                    speed = 1.0f,
-                    pitch = 0.0f
-                ).onSuccess {
-                    // Audio will be played by the AITTSPlayer
-                    Log.info { "Voice preview successful" }
-                }.onFailure { e ->
-                    Log.error { "Voice preview failed: ${e.message}" }
-                    updateState { it.copy(error = "Preview failed: ${e.message}") }
-                }
-            } catch (e: Exception) {
-                Log.error { "Error previewing voice: ${e.message}" }
-                updateState { it.copy(error = "Error: ${e.message}") }
-            }
-        }
+        // Voice preview not supported on Android
+        // Users can test voices in Android Settings or Sherpa TTS app
+        Log.info { "Voice preview not available on Android" }
     }
     
     fun downloadVoice(voice: VoiceModel) {
+        // Voice download not supported on Android
+        // Users should download voices in Sherpa TTS app
+        Log.info { "Voice download not available on Android - use Sherpa TTS app" }
+    }
+    
+    fun deleteVoice(voiceId: String) {
+        // Voice deletion not supported on Android
+        // Users should manage voices in Sherpa TTS app
+        Log.info { "Voice deletion not available on Android - use Sherpa TTS app" }
+    }
+
+    
+    // Coqui TTS Methods
+    
+    private fun configureCoqui() {
         scope.launch {
-            updateState { it.copy(
-                downloadingVoice = voice.id,
-                downloadProgress = 0,
-                error = null
-            ) }
-            
             try {
-                aiTTSManager.downloadPiperVoice(voice) { progress ->
-                    updateState { it.copy(downloadProgress = progress) }
-                }.onSuccess {
-                    Log.info { "Voice downloaded successfully: ${voice.name}" }
-                    
-                    // Refresh downloaded voices list
-                    val downloadedVoices = aiTTSManager.getDownloadedVoices().toSet()
-                    val totalSize = aiTTSManager.getDownloadedVoicesSize()
-                    
-                    updateState { it.copy(
-                        downloadingVoice = null,
-                        downloadProgress = 0,
-                        downloadedVoices = downloadedVoices,
-                        totalDownloadedSize = totalSize
-                    ) }
-                }.onFailure { e ->
-                    Log.error { "Failed to download voice: ${e.message}" }
-                    updateState { it.copy(
-                        downloadingVoice = null,
-                        downloadProgress = 0,
-                        error = "Download failed: ${e.message}"
-                    ) }
+                val spaceUrl = appPreferences.coquiSpaceUrl().get()
+                val apiKey = appPreferences.coquiApiKey().get()
+                
+                if (spaceUrl.isNotEmpty()) {
+                    aiTTSManager.configureCoqui(spaceUrl, apiKey.ifEmpty { null })
+                    updateState { it.copy(isCoquiAvailable = true) }
+                    Log.info { "Configured Coqui TTS: $spaceUrl" }
                 }
             } catch (e: Exception) {
-                Log.error { "Error downloading voice: ${e.message}" }
-                updateState { it.copy(
-                    downloadingVoice = null,
-                    downloadProgress = 0,
-                    error = "Error: ${e.message}"
-                ) }
+                Log.error { "Failed to configure Coqui TTS: ${e.message}" }
+                updateState { it.copy(isCoquiAvailable = false) }
             }
         }
     }
     
-    fun deleteVoice(voiceId: String) {
+    fun setUseCoquiTTS(enabled: Boolean) {
+        scope.launch {
+            appPreferences.useCoquiTTS().set(enabled)
+            updateState { it.copy(useCoquiTTS = enabled) }
+            
+            if (enabled) {
+                configureCoqui()
+            }
+        }
+    }
+    
+    fun setCoquiSpaceUrl(url: String) {
+        scope.launch {
+            appPreferences.coquiSpaceUrl().set(url)
+            updateState { it.copy(coquiSpaceUrl = url) }
+            
+            // Reconfigure if enabled
+            if (state.value.useCoquiTTS && url.isNotEmpty()) {
+                configureCoqui()
+            }
+        }
+    }
+    
+    fun setCoquiApiKey(apiKey: String) {
+        scope.launch {
+            appPreferences.coquiApiKey().set(apiKey)
+            updateState { it.copy(coquiApiKey = apiKey) }
+            
+            // Reconfigure if enabled
+            if (state.value.useCoquiTTS) {
+                configureCoqui()
+            }
+        }
+    }
+    
+    fun setCoquiSpeed(speed: Float) {
+        scope.launch {
+            val clampedSpeed = speed.coerceIn(0.5f, 2.0f)
+            appPreferences.coquiSpeed().set(clampedSpeed)
+            updateState { it.copy(coquiSpeed = clampedSpeed) }
+        }
+    }
+    
+    fun testCoquiTTS() {
         scope.launch {
             try {
-                val success = aiTTSManager.deleteVoice(voiceId)
-                if (success) {
-                    Log.info { "Voice deleted successfully: $voiceId" }
-                    
-                    // Refresh downloaded voices list
-                    val downloadedVoices = aiTTSManager.getDownloadedVoices().toSet()
-                    val totalSize = aiTTSManager.getDownloadedVoicesSize()
-                    
+                updateState { it.copy(isLoading = true, error = null) }
+                
+                aiTTSManager.synthesizeAndPlay(
+                    text = "Hello! This is a test of Coqui TTS from your Hugging Face Space.",
+                    provider = AITTSProvider.COQUI_TTS,
+                    voiceId = "default",
+                    speed = state.value.coquiSpeed
+                ).onSuccess {
+                    Log.info { "Coqui TTS test successful" }
+                    updateState { it.copy(isLoading = false, error = null) }
+                }.onFailure { error ->
+                    Log.error { "Coqui TTS test failed: ${error.message}" }
                     updateState { it.copy(
-                        downloadedVoices = downloadedVoices,
-                        totalDownloadedSize = totalSize
+                        isLoading = false,
+                        error = "Test failed: ${error.message}"
                     ) }
-                } else {
-                    updateState { it.copy(error = "Failed to delete voice") }
                 }
             } catch (e: Exception) {
-                Log.error { "Error deleting voice: ${e.message}" }
-                updateState { it.copy(error = "Error: ${e.message}") }
+                Log.error { "Failed to test Coqui TTS: ${e.message}" }
+                updateState { it.copy(
+                    isLoading = false,
+                    error = "Test failed: ${e.message}"
+                ) }
             }
         }
     }

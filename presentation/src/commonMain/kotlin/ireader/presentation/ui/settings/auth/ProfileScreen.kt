@@ -121,6 +121,25 @@ class ProfileScreen  {
                         }
                         
                         item {
+                            AchievementBadgesSection(
+                                badges = state.achievementBadges,
+                                isLoading = state.isBadgesLoading,
+                                error = state.badgesError,
+                                onRetry = { viewModel.retryLoadBadges() }
+                            )
+                        }
+                        
+                        item {
+                            ReadingStatisticsSection(
+                                chaptersRead = state.chaptersRead,
+                                booksCompleted = state.booksCompleted,
+                                reviewsWritten = state.reviewsWritten,
+                                readingStreak = state.readingStreak,
+                                isLoading = state.isStatsLoading
+                            )
+                        }
+                        
+                        item {
                             SyncStatusCard(
                                 connectionStatus = state.connectionStatus,
                                 lastSyncTime = state.lastSyncTime
@@ -692,6 +711,181 @@ private fun BadgesSection(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun AchievementBadgesSection(
+    badges: List<ireader.domain.models.remote.Badge>,
+    isLoading: Boolean,
+    error: String?,
+    onRetry: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
+            Text(
+                text = "Achievement Badges",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Text(
+                text = "Earned through reading and app usage",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            when {
+                isLoading -> {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        repeat(3) {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                            )
+                        }
+                    }
+                }
+                
+                error != null -> {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = error,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        TextButton(onClick = onRetry) {
+                            Text("Retry")
+                        }
+                    }
+                }
+                
+                badges.isEmpty() -> {
+                    Text(
+                        text = "No achievement badges yet. Keep reading to unlock them!",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                
+                else -> {
+                    ProfileBadgeDisplay(badges = badges)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReadingStatisticsSection(
+    chaptersRead: Int,
+    booksCompleted: Int,
+    reviewsWritten: Int,
+    readingStreak: Int,
+    isLoading: Boolean
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
+            Text(
+                text = "Reading Statistics",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+            } else {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    StatisticItem(
+                        icon = "📖",
+                        label = "Chapters Read",
+                        value = chaptersRead.toString()
+                    )
+                    
+                    StatisticItem(
+                        icon = "📚",
+                        label = "Books Completed",
+                        value = booksCompleted.toString()
+                    )
+                    
+                    StatisticItem(
+                        icon = "✍️",
+                        label = "Reviews Written",
+                        value = reviewsWritten.toString()
+                    )
+                    
+                    StatisticItem(
+                        icon = "🔥",
+                        label = "Reading Streak",
+                        value = "$readingStreak days"
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatisticItem(
+    icon: String,
+    label: String,
+    value: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = icon,
+                style = MaterialTheme.typography.headlineMedium
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+        
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }
 

@@ -74,14 +74,19 @@ val PresentationModules = module {
     factory<ExploreViewModel> { ExploreViewModel(get(), get(), get(), get(),get(), get(), get(),get(),get(),get(),getOrNull(), getOrNull()) }
     single  { HistoryViewModel(get(), get(), get()) }
     single  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), get()) }
-    single  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    single  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), getOrNull(), getOrNull(), get()) }
     factory<GlobalSearchViewModel> { GlobalSearchViewModel(get(), get(), get(), get(), get(), get()) }
     
     // Browse Settings ViewModel
-    single { BrowseSettingsViewModel(get()) }
+    factory { BrowseSettingsViewModel(get()) }
     
     // Migration ViewModel
     factory { ireader.presentation.ui.home.sources.migration.MigrationViewModel(get(), get(), get()) }
+    
+    // Migration Screen Models
+    factory { ireader.presentation.ui.migration.MigrationListScreenModel(get(), get(), get()) }
+    factory { ireader.presentation.ui.migration.MigrationConfigScreenModel(get()) }
+    factory { ireader.presentation.ui.migration.MigrationProgressScreenModel(get(), get()) }
 
     single  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get()) }
 

@@ -1,0 +1,123 @@
+# ============================================
+# 7-Project Supabase Configuration Example
+# ============================================
+# Copy this file to local.properties and fill in your values
+# This configuration supports up to 3.5GB total storage (7 × 500MB)
+
+# ============================================
+# OPTION 1: SINGLE PROJECT SETUP (500MB)
+# ============================================
+# Use the same URL and key for all 7 projects
+# Perfect for personal use or small libraries
+
+# Fill in your single project details:
+SINGLE_PROJECT_URL=https://your-project.supabase.co
+SINGLE_PROJECT_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.your-anon-key-here
+
+# Then copy to all 7 projects:
+supabase.auth.url=${SINGLE_PROJECT_URL}
+supabase.auth.key=${SINGLE_PROJECT_KEY}
+supabase.reading.url=${SINGLE_PROJECT_URL}
+supabase.reading.key=${SINGLE_PROJECT_KEY}
+supabase.library.url=${SINGLE_PROJECT_URL}
+supabase.library.key=${SINGLE_PROJECT_KEY}
+supabase.book_reviews.url=${SINGLE_PROJECT_URL}
+supabase.book_reviews.key=${SINGLE_PROJECT_KEY}
+supabase.chapter_reviews.url=${SINGLE_PROJECT_URL}
+supabase.chapter_reviews.key=${SINGLE_PROJECT_KEY}
+supabase.badges.url=${SINGLE_PROJECT_URL}
+supabase.badges.key=${SINGLE_PROJECT_KEY}
+supabase.analytics.url=${SINGLE_PROJECT_URL}
+supabase.analytics.key=${SINGLE_PROJECT_KEY}
+
+# ============================================
+# OPTION 2: MULTI-PROJECT SETUP (3.5GB)
+# ============================================
+# Use different URLs for each project
+# Perfect for communities or large libraries
+# Comment out Option 1 above and uncomment below:
+
+# Project 1 - Auth (User authentication and profiles)
+# Tables: users
+#supabase.auth.url=https://auth-project.supabase.co
+#supabase.auth.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.auth-key
+
+# Project 2 - Reading (Reading progress tracking)
+# Tables: reading_progress
+#supabase.reading.url=https://reading-project.supabase.co
+#supabase.reading.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.reading-key
+
+# Project 3 - Library (Synced books library)
+# Tables: synced_books, synced_chapters
+#supabase.library.url=https://library-project.supabase.co
+#supabase.library.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.library-key
+
+# Project 4 - Book Reviews (Book reviews and ratings)
+# Tables: book_reviews
+#supabase.book_reviews.url=https://book-reviews-project.supabase.co
+#supabase.book_reviews.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.book-reviews-key
+
+# Project 5 - Chapter Reviews (Chapter reviews and ratings)
+# Tables: chapter_reviews
+#supabase.chapter_reviews.url=https://chapter-reviews-project.supabase.co
+#supabase.chapter_reviews.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.chapter-reviews-key
+
+# Project 6 - Badges (Badge system and NFT integration)
+# Tables: badges, user_badges, payment_proofs, nft_wallets
+#supabase.badges.url=https://badges-project.supabase.co
+#supabase.badges.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.badges-key
+
+# Project 7 - Analytics (Leaderboard and statistics)
+# Tables: leaderboard
+#supabase.analytics.url=https://analytics-project.supabase.co
+#supabase.analytics.key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.analytics-key
+
+# ============================================
+# IMPORTANT NOTES
+# ============================================
+# 1. Never commit local.properties to git (it's in .gitignore)
+# 2. Use anon/public keys, NOT service_role keys
+# 3. Get keys from: https://app.supabase.com/project/_/settings/api
+# 4. For single project: Deploy all schemas to one project
+# 5. For multi-project: Deploy specific schemas to each project
+# 6. See supabase/ folder for SQL migration files
+# 7. See QUICK_START_7PROJECT.md for detailed setup guide
+
+# ============================================
+# SCHEMA DEPLOYMENT GUIDE
+# ============================================
+
+# SINGLE PROJECT: Deploy all migrations to your one project
+# - migration_create_users.sql
+# - migration_create_reading_progress.sql
+# - migration_create_synced_books.sql
+# - migration_create_synced_chapters.sql
+# - migration_add_book_reviews.sql
+# - migration_add_chapter_reviews.sql
+# - migration_add_donation_badges.sql
+# - migration_add_leaderboard.sql
+
+# MULTI-PROJECT: Deploy specific migrations to each project
+# Project 1 (Auth):        migration_create_users.sql
+# Project 2 (Reading):     migration_create_reading_progress.sql
+# Project 3 (Library):     migration_create_synced_books.sql + migration_create_synced_chapters.sql
+# Project 4 (Reviews):     migration_add_book_reviews.sql
+# Project 5 (Chapters):    migration_add_chapter_reviews.sql
+# Project 6 (Badges):      migration_add_donation_badges.sql
+# Project 7 (Analytics):   migration_add_leaderboard.sql
+
+# ============================================
+# STORAGE COMPARISON
+# ============================================
+# Single Project:  500MB total
+# Multi-Project:   3.5GB total (7 × 500MB)
+
+# ============================================
+# QUICK START
+# ============================================
+# 1. Create Supabase project(s)
+# 2. Deploy SQL schemas
+# 3. Copy this file to local.properties
+# 4. Fill in your URLs and keys
+# 5. Build and run the app
+# 6. Configure in Settings → Sync → Supabase Configuration

@@ -12,7 +12,7 @@ import ireader.presentation.ui.settings.viewmodels.AITTSSettingsViewModel
 
 /**
  * Android implementation of TTS Engine Manager Screen
- * Manages AI TTS voices (Piper TTS voice downloads and selection)
+ * Provides information about native Android TTS and Sherpa TTS app recommendation
  */
 actual class TTSEngineManagerScreenSpec {
     

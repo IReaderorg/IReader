@@ -12,8 +12,9 @@ class GetAvailableBadgesUseCase(
         return badgeRepository.getAvailableBadges()
             .map { badges ->
                 badges
-                    // Filter out NFT_EXCLUSIVE badges (not purchasable)
-                    .filter { it.type != BadgeType.NFT_EXCLUSIVE }
+                    // Only show PURCHASABLE badges in the store
+                    // Filter out NFT_EXCLUSIVE and ACHIEVEMENT badges
+                    .filter { it.type == BadgeType.PURCHASABLE }
                     // Sort by rarity (LEGENDARY > EPIC > RARE > COMMON) and then by price
                     .sortedWith(
                         compareByDescending<Badge> { it.badgeRarity.ordinal }

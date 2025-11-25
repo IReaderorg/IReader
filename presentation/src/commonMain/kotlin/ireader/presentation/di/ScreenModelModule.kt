@@ -31,4 +31,13 @@ val screenModelModule = module {
             leaderboardUseCases = get()
         )
     }
+    
+    // Browse settings view model
+    factory {
+        ireader.presentation.ui.home.sources.settings.BrowseSettingsViewModel(
+            browsePreferences = get(),
+            getCatalogsByType = get(),
+            get()
+        )
+    }
 }
