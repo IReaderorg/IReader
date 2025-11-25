@@ -156,23 +156,37 @@ class CoquiTTSPlayer(
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val mainScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     
+    // Cache for pre-synthesized audio
+    private val audioCache = mutableMapOf<String, ireader.domain.models.tts.AudioData>()
+    private val cacheSize = 3
+    
+    // Cache status tracking: utteranceId -> CacheStatus
+    enum class CacheStatus { LOADING, CACHED, FAILED }
+    private val cacheStatus = mutableMapOf<String, CacheStatus>()
+    
     init {
-        scope.launch {
+        // Initialize synchronously using runBlocking to ensure it's ready before first use
+        kotlinx.coroutines.runBlocking {
             try {
+                Log.error { "COQUI_INIT: Starting initialization with URL: $spaceUrl" }
                 coquiService = CoquiTTSService(context, spaceUrl, apiKey)
                 if (coquiService?.isAvailable() == true) {
                     isInitialized = true
+                    Log.error { "COQUI_INIT: Successfully initialized" }
                 } else {
-                    Log.error { "Coqui TTS not available" }
+                    Log.error { "COQUI_INIT: Service not available" }
                 }
             } catch (e: Exception) {
-                Log.error { "Coqui TTS initialization failed: ${e.message}" }
+                Log.error { "COQUI_INIT: Initialization failed - ${e.message}" }
             }
         }
     }
     
     override fun speak(text: String, utteranceId: String) {
+        Log.error { "COQUI_SPEAK: Starting - utteranceId=$utteranceId, ready=${isReady()}, cached=${audioCache.containsKey(utteranceId)}" }
+        
         if (!isReady()) {
+            Log.error { "COQUI_SPEAK: Not ready!" }
             mainScope.launch {
                 callback?.onError(utteranceId, "Coqui TTS not initialized")
             }
@@ -181,48 +195,110 @@ class CoquiTTSPlayer(
         
         scope.launch {
             try {
+                Log.error { "COQUI_SPEAK: Calling onStart callback" }
                 mainScope.launch {
                     callback?.onStart(utteranceId)
                 }
                 
-                val result = coquiService?.synthesize(
-                    text = text,
-                    voiceId = "default",
-                    speed = currentSpeed,
-                    pitch = currentPitch
-                )
-                
-                result?.onSuccess { audioData ->
-                    coquiService?.playAudio(audioData)
+                // Check if audio is already cached
+                val audioData = audioCache[utteranceId] ?: run {
+                    Log.error { "COQUI_SPEAK: Not cached, synthesizing now" }
+                    val result = coquiService?.synthesize(
+                        text = text,
+                        voiceId = "default",
+                        speed = currentSpeed,
+                        pitch = currentPitch
+                    )
                     
-                    // Wait for playback to complete
-                    val duration = if (audioData.duration.inWholeMilliseconds > 0) {
-                        audioData.duration.inWholeMilliseconds
-                    } else {
-                        // Estimate: 150 words per minute
-                        val words = text.split(" ").size
-                        (words * 60000L / 150).coerceAtLeast(1000L)
-                    }
-                    
-                    kotlinx.coroutines.delay(duration)
-                    
-                    mainScope.launch {
-                        callback?.onDone(utteranceId)
-                    }
-                }?.onFailure { error ->
-                    Log.error { "Coqui TTS synthesis failed: ${error.message}" }
-                    mainScope.launch {
-                        callback?.onError(utteranceId, error.message ?: "Synthesis failed")
+                    result?.getOrNull() ?: run {
+                        Log.error { "COQUI_SPEAK: Synthesis failed - ${result?.exceptionOrNull()?.message}" }
+                        mainScope.launch {
+                            callback?.onError(utteranceId, result?.exceptionOrNull()?.message ?: "Synthesis failed")
+                        }
+                        return@launch
                     }
                 }
+                
+                // Remove from cache after use
+                audioCache.remove(utteranceId)
+                
+                Log.error { "COQUI_SPEAK: Playing audio (${if (audioCache.containsKey(utteranceId)) "from cache" else "fresh"})" }
+                coquiService?.playAudio(audioData)
+                
+                // Wait for playback to complete
+                val duration = if (audioData.duration.inWholeMilliseconds > 0) {
+                    audioData.duration.inWholeMilliseconds
+                } else {
+                    // Estimate: 150 words per minute
+                    val words = text.split(" ").size
+                    (words * 60000L / 150).coerceAtLeast(1000L)
+                }
+                
+                Log.error { "COQUI_SPEAK: Waiting ${duration}ms for playback to complete" }
+                kotlinx.coroutines.delay(duration)
+                
+                Log.error { "COQUI_SPEAK: Playback complete, calling onDone callback" }
+                mainScope.launch {
+                    callback?.onDone(utteranceId)
+                }
             } catch (e: Exception) {
-                Log.error { "Coqui TTS error: ${e.message}" }
+                Log.error { "COQUI_SPEAK: Exception - ${e.message}" }
                 mainScope.launch {
                     callback?.onError(utteranceId, e.message ?: "Unknown error")
                 }
             }
         }
     }
+    
+    /**
+     * Pre-cache the next N paragraphs for smoother playback
+     */
+    fun precacheParagraphs(paragraphs: List<Pair<String, String>>) {
+        if (!isReady()) return
+        
+        scope.launch {
+            paragraphs.take(cacheSize).forEach { (utteranceId, text) ->
+                // Skip if already cached or loading
+                if (audioCache.containsKey(utteranceId) || cacheStatus[utteranceId] == CacheStatus.LOADING) {
+                    return@forEach
+                }
+                
+                try {
+                    cacheStatus[utteranceId] = CacheStatus.LOADING
+                    Log.error { "COQUI_CACHE: Pre-caching utteranceId=$utteranceId" }
+                    
+                    val result = coquiService?.synthesize(
+                        text = text,
+                        voiceId = "default",
+                        speed = currentSpeed,
+                        pitch = currentPitch
+                    )
+                    
+                    result?.onSuccess { audioData ->
+                        audioCache[utteranceId] = audioData
+                        cacheStatus[utteranceId] = CacheStatus.CACHED
+                        Log.error { "COQUI_CACHE: Cached utteranceId=$utteranceId (${audioCache.size}/${cacheSize})" }
+                    }?.onFailure { error ->
+                        cacheStatus[utteranceId] = CacheStatus.FAILED
+                        Log.error { "COQUI_CACHE: Failed to cache $utteranceId - ${error.message}" }
+                    }
+                } catch (e: Exception) {
+                    cacheStatus[utteranceId] = CacheStatus.FAILED
+                    Log.error { "COQUI_CACHE: Exception caching $utteranceId - ${e.message}" }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Get cache status for a specific utterance ID
+     */
+    fun getCacheStatus(utteranceId: String): CacheStatus? = cacheStatus[utteranceId]
+    
+    /**
+     * Get all cached utterance IDs
+     */
+    fun getCachedParagraphs(): Set<String> = audioCache.keys.toSet()
     
     override fun stop() {
         coquiService?.stopAudio()

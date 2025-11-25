@@ -96,93 +96,25 @@ class TTSViewModel(
         }
     }
     
+    // DEPRECATED: Old Coqui TTS implementation - no longer used
+    // All TTS now goes through the unified service player
+    // Kept for reference only
+    /*
     var isCoquiLoading by mutableStateOf(false)
         private set
     
+    @Deprecated("Use service's unified player instead", ReplaceWith("play(context)"))
     fun speakWithCoqui(text: String) {
-        // Launch in IO dispatcher to avoid blocking UI
-        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
-            try {
-                // Update loading state on Main dispatcher
-                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                    isCoquiLoading = true
-                }
-                
-                val speed = androidUiPreferences.coquiSpeed().get()
-                
-                aiTTSManager.synthesizeAndPlay(
-                    text = text,
-                    provider = ireader.domain.services.tts.AITTSProvider.COQUI_TTS,
-                    voiceId = "default",
-                    speed = speed
-                ).onSuccess {
-                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                        isCoquiLoading = false
-                    }
-                }.onFailure { error ->
-                    ireader.core.log.Log.error { "Coqui TTS failed: ${error.message}" }
-                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                        isCoquiLoading = false
-                    }
-                }
-            } catch (e: Exception) {
-                ireader.core.log.Log.error { "Coqui TTS error: ${e.message}" }
-                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                    isCoquiLoading = false
-                }
-            }
-        }
+        // This method is deprecated and should not be used
+        // All TTS playback now goes through TTSService's unified player
     }
     
-    private fun advanceToNextParagraph() {
-        scope.launch {
-            try {
-                val content = ttsContent?.value ?: return@launch
-                val currentParagraph = ttsState.currentReadingParagraph
-                val nextParagraph = currentParagraph + 1
-                
-                if (nextParagraph < content.size && isCoquiLoading) {
-                    // Move to next paragraph
-                    ttsState.currentReadingParagraph = nextParagraph
-                    
-                    // Speak next paragraph
-                    content.getOrNull(nextParagraph)?.let { nextText ->
-                        speakWithCoqui(nextText)
-                    }
-                } else if (isCoquiLoading) {
-                    // Reached end of chapter - check if auto-next is enabled
-                    val autoNext = readerPreferences.readerAutoNext().get()
-                    
-                    if (autoNext) {
-                        ireader.core.log.Log.info { "End of chapter - loading next chapter..." }
-                        // Move to next chapter
-                        controller?.transportControls?.skipToNext()
-                        // Wait a bit for chapter to load, then continue
-                        kotlinx.coroutines.delay(1000)
-                        // Start reading from beginning of new chapter
-                        ttsContent?.value?.getOrNull(0)?.let { firstParagraph ->
-                            speakWithCoqui(firstParagraph)
-                        }
-                    } else {
-                        // Stop at end of chapter
-                        isCoquiLoading = false
-                        ireader.core.log.Log.info { "Coqui TTS finished reading chapter" }
-                    }
-                } else {
-                    // Stopped by user
-                    isCoquiLoading = false
-                }
-            } catch (e: Exception) {
-                ireader.core.log.Log.error { "Failed to advance paragraph: ${e.message}" }
-                isCoquiLoading = false
-            }
-        }
-    }
-    
+    @Deprecated("Use service's unified player instead")
     fun stopCoquiTTS() {
-        isCoquiLoading = false
-        aiTTSManager.stopPlayback()
+        // This method is deprecated and should not be used
+        // All TTS playback now goes through TTSService's unified player
     }
+    */
     val autoNext = readerPreferences.readerAutoNext().asState()
     val voice = androidUiPreferences.speechVoice().asState()
     val language = readerPreferences.speechLanguage().asState()
@@ -226,8 +158,6 @@ class TTSViewModel(
     private fun initializeFromParams() {
         val (sourceId, chapterId, bookId, readingParagraph) = param
         
-        ireader.core.log.Log.error { "TTS_INIT: Params - bookId=$bookId, chapterId=$chapterId, sourceId=$sourceId" }
-        
         readingParagraph?.let { paragraph ->
             val maxIndex = ttsState.ttsContent?.value?.lastIndex ?: 0
             // Fixed: Use <= instead of < to allow setting the last paragraph
@@ -244,17 +174,11 @@ class TTSViewModel(
                 // Load book FIRST before loading chapter
                 if (ttsBook == null || ttsBook?.id != bookId) {
                     ttsBook = getBookUseCases.findBookById(bookId)
-                    ireader.core.log.Log.error { "TTS_INIT: Loaded book - id=${ttsBook?.id}, title=${ttsBook?.title}" }
-                } else {
-                    ireader.core.log.Log.error { "TTS_INIT: Book already loaded - id=${ttsBook?.id}, title=${ttsBook?.title}" }
                 }
                 
                 // Now load chapter (this will call runTTSService which needs ttsBook)
                 if (ttsChapter == null || ttsChapter?.id != chapterId) {
                     getLocalChapter(chapterId)
-                    ireader.core.log.Log.error { "TTS_INIT: After getLocalChapter - book=${ttsBook?.id}, chapter=${ttsChapter?.id}" }
-                } else {
-                    ireader.core.log.Log.error { "TTS_INIT: Chapter already loaded - id=${ttsChapter?.id}, name=${ttsChapter?.name}" }
                 }
                 
                 subscribeChapters(bookId)
@@ -439,7 +363,6 @@ class TTSViewModel(
     }
 
     fun runTTSService(command: Int = -1) {
-        ireader.core.log.Log.error { "TTS_RUN: Starting service - bookId=${ttsBook?.id}, chapterId=${ttsChapter?.id}, command=$command" }
         serviceUseCases.startTTSServicesUseCase(
             chapterId = ttsChapter?.id,
             bookId = ttsBook?.id,
@@ -454,10 +377,8 @@ class TTSViewModel(
 
     private fun getLocalChapter(chapterId: Long) {
         scope.launch {
-            ireader.core.log.Log.error { "TTS_LOAD_CHAPTER: Loading chapter $chapterId, current book=${ttsBook?.id}" }
             getChapterUseCase.findChapterById(chapterId)?.let { chapter ->
                 ttsChapter = chapter
-                ireader.core.log.Log.error { "TTS_LOAD_CHAPTER: Chapter loaded - id=${chapter.id}, name=${chapter.name}, book still=${ttsBook?.id}" }
                 if (chapter.isEmpty()) {
                     ttsSource?.let { getRemoteChapter(chapter) }
                 }

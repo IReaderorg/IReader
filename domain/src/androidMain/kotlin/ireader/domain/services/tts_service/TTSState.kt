@@ -56,27 +56,10 @@ class TTSStateImpl() : AndroidTTSState {
     override var sleepMode by mutableStateOf(false)
     override var prevSpeechSpeed by mutableStateOf(0.8f)
     
-    private var _ttsBook by mutableStateOf<Book?>(null)
-    override var ttsBook: Book?
-        get() = _ttsBook
-        set(value) {
-            val stackTrace = Thread.currentThread().stackTrace.take(10).joinToString("\n") { "  at $it" }
-            ireader.core.log.Log.error { "TTS_STATE: ttsBook changed from ${_ttsBook?.id} to ${value?.id} - ${value?.title}\nStack:\n$stackTrace" }
-            _ttsBook = value
-        }
-    
+    override var ttsBook by mutableStateOf<Book?>(null)
     override val ttsSource by derivedStateOf { ttsCatalog?.source }
     override var ttsCatalog by mutableStateOf<CatalogLocal?>(null)
-    
-    private var _ttsChapter by mutableStateOf<Chapter?>(null)
-    override var ttsChapter: Chapter?
-        get() = _ttsChapter
-        set(value) {
-            val stackTrace = Thread.currentThread().stackTrace.take(10).joinToString("\n") { "  at $it" }
-            ireader.core.log.Log.error { "TTS_STATE: ttsChapter changed from ${_ttsChapter?.id} to ${value?.id} - ${value?.name}\nStack:\n$stackTrace" }
-            _ttsChapter = value
-        }
-    
+    override var ttsChapter by mutableStateOf<Chapter?>(null)
     override var ttsChapters by mutableStateOf<List<Chapter>>(emptyList())
     override var ttsCurrentChapterIndex by mutableStateOf(-1)
     override var utteranceId by mutableStateOf("")
@@ -85,7 +68,7 @@ class TTSStateImpl() : AndroidTTSState {
     override var uiChapters: State<List<Chapter>> = derivedStateOf { if (!isDrawerAsc) ttsChapters else ttsChapters.reversed() }
     override var isDrawerAsc by mutableStateOf(false)
     
-    init {
-        ireader.core.log.Log.error { "TTS_STATE: New TTSStateImpl instance created - ${this.hashCode()}" }
-    }
+    // Cache status for Coqui TTS paragraphs
+    var cachedParagraphs by mutableStateOf<Set<Int>>(emptySet())
+    var loadingParagraphs by mutableStateOf<Set<Int>>(emptySet())
 }

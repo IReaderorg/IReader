@@ -300,49 +300,17 @@ actual class TTSScreenSpec actual constructor(
                                                 vm.controller?.transportControls?.skipToPrevious()
                                             },
                                             onPlay = {
-                                                if (vm.useCoquiTTS) {
-                                                    // Use Coqui TTS
-                                                    vm.ttsContent?.let { content ->
-                                                        content.value?.getOrNull(vm.ttsState.currentReadingParagraph)?.let { text ->
-                                                            vm.speakWithCoqui(text)
-                                                        }
-                                                    }
-                                                } else {
-                                                    // Use Native TTS
-                                                    vm.play(context)
-                                                }
+                                                // Always use the service's unified player (supports both Native and Coqui)
+                                                vm.play(context)
                                             },
                                             onNext = {
-                                                if (vm.useCoquiTTS) {
-                                                    vm.stopCoquiTTS()
-                                                }
                                                 vm.controller?.transportControls?.skipToNext()
                                             },
                                             onPrevPar = {
-                                                if (vm.useCoquiTTS) {
-                                                    vm.stopCoquiTTS()
-                                                    // Move to previous paragraph
-                                                    val currentPar = vm.ttsState.currentReadingParagraph
-                                                    if (currentPar > 0) {
-                                                        vm.ttsState.currentReadingParagraph = currentPar - 1
-                                                    }
-                                                } else {
-                                                    vm.controller?.transportControls?.rewind()
-                                                }
+                                                vm.controller?.transportControls?.rewind()
                                             },
                                             onNextPar = {
-                                                if (vm.useCoquiTTS) {
-                                                    vm.stopCoquiTTS()
-                                                    // Move to next paragraph
-                                                    vm.ttsContent?.let { content ->
-                                                        val currentPar = vm.ttsState.currentReadingParagraph
-                                                        if (currentPar < (content.value?.size ?: 0) - 1) {
-                                                            vm.ttsState.currentReadingParagraph = currentPar + 1
-                                                        }
-                                                    }
-                                                } else {
-                                                    vm.controller?.transportControls?.fastForward()
-                                                }
+                                                vm.controller?.transportControls?.fastForward()
                                             },
                                         )
                                     }

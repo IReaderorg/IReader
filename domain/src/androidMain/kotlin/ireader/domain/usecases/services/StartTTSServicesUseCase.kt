@@ -16,19 +16,13 @@ actual class StartTTSServicesUseCase( private val context: Context) {
             bookId: Long?,
             chapterId: Long?,
     ) {
-        ireader.core.log.Log.error { "TTS_USE_CASE: Starting service - bookId=$bookId, chapterId=$chapterId, command=$command" }
-
         val intent = Intent(context, TTSService::class.java).apply {
             action = TTSService.ACTION_UPDATE
             if (chapterId != null) {
                 putExtra(TTS_Chapter_ID, chapterId)
-            } else {
-                ireader.core.log.Log.error { "TTS_USE_CASE: WARNING - chapterId is NULL!" }
             }
             if (bookId != null) {
                 putExtra(TTS_BOOK_ID, bookId)
-            } else {
-                ireader.core.log.Log.error { "TTS_USE_CASE: WARNING - bookId is NULL!" }
             }
             putExtra(COMMAND, command)
         }

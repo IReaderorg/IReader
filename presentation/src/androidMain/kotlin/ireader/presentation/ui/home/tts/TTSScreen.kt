@@ -94,30 +94,61 @@ fun TTSScreen(
                         items(
                             count = chapter?.content?.size ?: 0
                         ) { index ->
-                            androidx.compose.material.Text(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = vm.paragraphsIndent.value.dp)
-                                    .clickableNoIndication(
-                                        onClick = {
-                                            vm.currentReadingParagraph = index
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.Top
+                            ) {
+                                androidx.compose.material.Text(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(horizontal = vm.paragraphsIndent.value.dp)
+                                        .clickableNoIndication(
+                                            onClick = {
+                                                vm.currentReadingParagraph = index
 
-                                        },
-                                        onLongClick = {
-                                            vm.fullScreenMode = !vm.fullScreenMode
+                                            },
+                                            onLongClick = {
+                                                vm.fullScreenMode = !vm.fullScreenMode
+                                            }
+                                        ),
+                                    text = if (content.isNotEmpty() && vm.currentReadingParagraph <= content.lastIndex && index <= content.lastIndex) content[index].plus(
+                                        "\n".repeat(vm.paragraphDistance.value)
+                                    ) else "",
+                                    fontSize = vm.fontSize.value.sp,
+                                    fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
+                                    textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
+                                    color = vm.theme.value.onTextColor.toComposeColor().copy(alpha = if (index == vm.currentReadingParagraph) 1f else .6f),
+                                    lineHeight = vm.lineHeight.value.sp,
+                                    letterSpacing = vm.betweenLetterSpaces.value.sp,
+                                    fontWeight = FontWeight(vm.textWeight.value),
+                                )
+                                
+                                // Cache indicator for Coqui TTS
+                                if (vm.useCoquiTTS && index > vm.currentReadingParagraph) {
+                                    when {
+                                        vm.loadingParagraphs.contains(index) -> {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier
+                                                    .size(16.dp)
+                                                    .padding(end = 8.dp),
+                                                strokeWidth = 2.dp,
+                                                color = vm.theme.value.onTextColor.toComposeColor().copy(alpha = 0.5f)
+                                            )
                                         }
-                                    ),
-                                text = if (content.isNotEmpty() && vm.currentReadingParagraph <= content.lastIndex && index <= content.lastIndex) content[index].plus(
-                                    "\n".repeat(vm.paragraphDistance.value)
-                                ) else "",
-                                fontSize = vm.fontSize.value.sp,
-                                fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
-                                textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
-                                color = vm.theme.value.onTextColor.toComposeColor().copy(alpha = if (index == vm.currentReadingParagraph) 1f else .6f),
-                                lineHeight = vm.lineHeight.value.sp,
-                                letterSpacing = vm.betweenLetterSpaces.value.sp,
-                                fontWeight = FontWeight(vm.textWeight.value),
-                            )
+                                        vm.cachedParagraphs.contains(index) -> {
+                                            Icon(
+                                                imageVector = Icons.Default.CheckCircle,
+                                                contentDescription = "Cached",
+                                                modifier = Modifier
+                                                    .size(16.dp)
+                                                    .padding(end = 8.dp),
+                                                tint = androidx.compose.ui.graphics.Color.Green.copy(alpha = 0.7f)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
 

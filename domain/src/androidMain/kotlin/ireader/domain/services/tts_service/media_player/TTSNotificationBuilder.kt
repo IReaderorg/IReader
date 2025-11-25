@@ -133,9 +133,20 @@ class TTSNotificationBuilder constructor(
         }
 
         val controller = MediaControllerCompat(context, sessionToken)
-        val description = controller.metadata?.description
         val playbackState = controller.playbackState
-        val cover = controller.metadata?.getString("Cover")
+        
+        // Get metadata
+        val bookName = controller.metadata?.getText(TTSService.NOVEL_TITLE) ?: ""
+        val chapterTitle = controller.metadata?.getText(TTSService.CHAPTER_TITLE) ?: ""
+        val cover = controller.metadata?.getText(TTSService.NOVEL_COVER)
+        val progress = controller.metadata?.getLong(TTSService.PROGRESS) ?: 0
+        val lastPar = controller.metadata?.getLong(TTSService.LAST_PARAGRAPH) ?: 0
+        val isLoading = controller.metadata?.getLong(TTSService.IS_LOADING) == 1L
+        
+        val paragraphText = when {
+            isLoading -> "Loading..."
+            else -> "Paragraph ${progress + 1} of ${lastPar + 1}"
+        }
 
         // Build actions list first to avoid concurrent modification
         val actions = buildList {
@@ -160,12 +171,13 @@ class TTSNotificationBuilder constructor(
         return builder.setContentIntent(controller.sessionActivity)
             .setStyle(mediaStyle)
             .setSmallIcon(R.drawable.ic_infinity)
-            .setContentText(description?.subtitle)
-            .setContentTitle(description?.title)
+            .setContentTitle(bookName)
+            .setContentText(chapterTitle)
+            .setSubText(paragraphText)
             .setDeleteIntent(cancelMediaPlayer())
             .setLargeIcon(context, cover)
             .setOnlyAlertOnce(true)
-            .setOngoing(false)
+            .setOngoing(true)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .build()
     }
@@ -219,7 +231,7 @@ class TTSNotificationBuilder constructor(
             when {
                 isLoading -> "Loading..."
                 isError -> "ERROR"
-                else -> "${progress + 1}/${lastPar + 1}"
+                else -> "Paragraph ${progress + 1} of ${lastPar + 1}"
             }
         
         // Build actions list first to avoid concurrent modification
@@ -235,24 +247,27 @@ class TTSNotificationBuilder constructor(
             context,
             NotificationsIds.CHANNEL_TTS
         ).apply {
-            setContentTitle(chapterTitle)
-            setContentText(contentText)
+            setContentTitle(bookName)
+            setContentText(chapterTitle)
             setSmallIcon(R.drawable.ic_infinity)
             setOnlyAlertOnce(true)
             setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             setLargeIcon(context, cover)
             priority = NotificationCompat.PRIORITY_LOW
-            //  setProgress(lastPar.toInt(), progress.toInt(), false)
-            // setTicker(contentText)
+            
+            // Add progress bar showing paragraph position
+            if (!isLoading && !isError && lastPar > 0) {
+                setProgress(lastPar.toInt(), progress.toInt(), false)
+            }
 
-//            setContentIntent(
-//                openReaderScreenIntent(
-//                    chapterId = chapterId,
-//                    bookId = bookId,
-//                    sourceId = sourceId,
-//                    currentReadingParagraph = progress.toInt()
-//                )
-//            )
+            setContentIntent(
+                openReaderScreenIntent(
+                    chapterId = chapterId,
+                    bookId = bookId,
+                    sourceId = sourceId,
+                    currentReadingParagraph = progress.toInt()
+                )
+            )
             setDeleteIntent(cancelMediaPlayer())
             
             // Add all actions at once to avoid concurrent modification
@@ -267,7 +282,7 @@ class TTSNotificationBuilder constructor(
 
             )
 
-            setSubText(bookName)
+            setSubText(contentText)
             setAutoCancel(false)
             setColorized(true)
             setOngoing(true)
