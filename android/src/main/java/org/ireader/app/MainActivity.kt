@@ -92,46 +92,34 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        registerSecureActivity(this, uiPreferences, initializers)
         
-        // Provide activity to storage helper
+        // Install splash screen FIRST - dismiss immediately for fastest startup
+        installSplashScreen().apply {
+            setKeepOnScreenCondition { false }
+        }
+        
+        // Critical UI setup only
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        
+        // MUST be on main thread
+        registerSecureActivity(this, uiPreferences, initializers)
         getSimpleStorage.provideActivity(this, null)
         
-        // Set up window to handle gesture navigation and keyboard
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        
-        // Ensure keyboard doesn't cover content
-        // This is critical for text fields to be visible when keyboard appears
-        window.setSoftInputMode(
-            android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
-        )
-        
-        // Initialize automatic backup in the background
-        lifecycleScope.launchIO {
-            automaticBackup.initialize()
-        }
-        
-        // Validate and clean up invalid extension cache
-        lifecycleScope.launchIO {
-            org.ireader.app.util.ExtensionCacheValidator.validateAndCleanExtensionCache(this@MainActivity)
-        }
-        
-        // Set up logging
+        // Fast initialization on main thread
         Napier.base(DebugAntilog())
-        
-        // Set locale
         localeHelper.setLocaleLang()
         
-        // Install splash screen - dismiss it immediately so our custom splash shows
-        installSplashScreen().apply {
-            setKeepOnScreenCondition { false } // Dismiss system splash immediately
+        // Defer heavy initialization to background
+        lifecycleScope.launchIO {
+            delay(2000) // Wait until app is fully loaded
+            automaticBackup.initialize()
+            org.ireader.app.util.ExtensionCacheValidator.validateAndCleanExtensionCache(this@MainActivity)
         }
 
-        // Request all necessary permissions early
+        // Request permissions much later
         lifecycleScope.launch {
-            // Delay slightly to let the UI initialize
-            delay(500)
-            // Request important storage permissions based on Android version
+            delay(3000)
             requestNecessaryPermissions()
         }
 

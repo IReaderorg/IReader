@@ -632,3 +632,31 @@
     !private <fields>;
 }
 ##---------------End: Additional QuickJS Size Optimizations  ----------
+
+
+##---------------Begin: Startup Performance Optimizations  ----------
+# Aggressive optimizations for faster startup
+-optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*
+-optimizationpasses 5
+-allowaccessmodification
+-dontpreverify
+
+# Remove logging in release builds for faster startup
+-assumenosideeffects class android.util.Log {
+    public static *** d(...);
+    public static *** v(...);
+    public static *** i(...);
+}
+
+# Remove println statements
+-assumenosideeffects class kotlin.io.ConsoleKt {
+    public static *** println(...);
+}
+
+# Optimize away debug code
+-assumenosideeffects class io.github.aakira.napier.Napier {
+    public static *** d(...);
+    public static *** v(...);
+    public static *** i(...);
+}
+##---------------End: Startup Performance Optimizations  ----------

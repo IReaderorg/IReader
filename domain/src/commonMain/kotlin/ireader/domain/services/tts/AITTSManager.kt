@@ -26,6 +26,22 @@ expect class AITTSManager {
     ): Result<AudioData>
     
     /**
+     * Synthesize and play audio directly
+     */
+    suspend fun synthesizeAndPlay(
+        text: String,
+        provider: AITTSProvider,
+        voiceId: String,
+        speed: Float = 1.0f,
+        pitch: Float = 0.0f
+    ): Result<Unit>
+    
+    /**
+     * Configure Coqui TTS service
+     */
+    fun configureCoqui(spaceUrl: String, apiKey: String? = null)
+    
+    /**
      * Download a Piper voice model
      */
     suspend fun downloadPiperVoice(

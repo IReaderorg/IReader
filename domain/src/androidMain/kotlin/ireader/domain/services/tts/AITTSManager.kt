@@ -38,7 +38,7 @@ actual class AITTSManager(
      * @param spaceUrl Your Hugging Face Space URL (e.g., "https://username-coqui-tts.hf.space")
      * @param apiKey Optional API key for private spaces
      */
-    fun configureCoqui(spaceUrl: String, apiKey: String? = null) {
+    actual fun configureCoqui(spaceUrl: String, apiKey: String?) {
         coquiService = CoquiTTSService(context, spaceUrl, apiKey)
         providers[AITTSProvider.COQUI_TTS] = coquiService!!
         Log.info { "Coqui TTS configured with space: $spaceUrl" }
@@ -89,12 +89,12 @@ actual class AITTSManager(
     /**
      * Synthesize and play audio directly
      */
-    suspend fun synthesizeAndPlay(
+    actual suspend fun synthesizeAndPlay(
         text: String,
         provider: AITTSProvider,
         voiceId: String,
-        speed: Float = 1.0f,
-        pitch: Float = 0.0f
+        speed: Float,
+        pitch: Float
     ): Result<Unit> {
         return synthesize(text, provider, voiceId, speed, pitch).mapCatching { audioData ->
             when (provider) {

@@ -23,6 +23,20 @@ actual class AITTSManager {
         return Result.failure(Exception("AI TTS not supported on desktop"))
     }
     
+    actual suspend fun synthesizeAndPlay(
+        text: String,
+        provider: AITTSProvider,
+        voiceId: String,
+        speed: Float,
+        pitch: Float
+    ): Result<Unit> {
+        return Result.failure(Exception("AI TTS not supported on desktop"))
+    }
+    
+    actual fun configureCoqui(spaceUrl: String, apiKey: String?) {
+        // No-op on desktop
+    }
+    
     actual suspend fun downloadPiperVoice(
         voiceModel: VoiceModel,
         onProgress: (Int) -> Unit

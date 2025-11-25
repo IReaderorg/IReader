@@ -10,8 +10,8 @@ data class RemoteConfig(
     val syncIntervalMs: Long = 30_000
 )
 
-/**
- * Platform-specific function to load remote configuration
- * Implementations should load from BuildConfig (Android) or properties file (Desktop)
- */
-expect fun loadRemoteConfig(): RemoteConfig?
+///**
+// * Platform-specific function to load remote configuration
+// * Implementations should load from BuildConfig (Android) or properties file (Desktop)
+// */
+//expect fun loadRemoteConfig(): RemoteConfig?
