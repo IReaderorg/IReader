@@ -2,14 +2,14 @@
 <layer-list xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-        <item>
-            <color
-                android:color="?attr/colorBackgroundSplash">
-            </color>
-        </item>
+    <item>
+        <color android:color="?attr/colorBackgroundSplash" />
+    </item>
+    
     <item
         android:drawable="@drawable/ic_eternity_light"
-        android:gravity="center">
+        android:gravity="center"
+        android:top="-40dp">
     </item>
 
 </layer-list>

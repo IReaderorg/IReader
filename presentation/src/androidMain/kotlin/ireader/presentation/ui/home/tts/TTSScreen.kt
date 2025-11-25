@@ -25,8 +25,11 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -127,7 +130,7 @@ fun TTSScreen(
                                 // Cache indicator for Coqui TTS
                                 if (vm.useCoquiTTS && index > vm.currentReadingParagraph) {
                                     when {
-                                        vm.loadingParagraphs.contains(index) -> {
+                                        vm.ttsState.loadingParagraphs.contains(index) -> {
                                             CircularProgressIndicator(
                                                 modifier = Modifier
                                                     .size(16.dp)
@@ -136,7 +139,7 @@ fun TTSScreen(
                                                 color = vm.theme.value.onTextColor.toComposeColor().copy(alpha = 0.5f)
                                             )
                                         }
-                                        vm.cachedParagraphs.contains(index) -> {
+                                        vm.ttsState.cachedParagraphs.contains(index) -> {
                                             Icon(
                                                 imageVector = Icons.Default.CheckCircle,
                                                 contentDescription = "Cached",

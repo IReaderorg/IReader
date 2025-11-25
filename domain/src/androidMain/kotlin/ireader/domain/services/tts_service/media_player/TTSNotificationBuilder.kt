@@ -15,6 +15,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.media.session.MediaButtonReceiver
+import ireader.core.log.Log
 import ireader.domain.notification.NotificationsIds
 import ireader.domain.notification.NotificationsIds.CHANNEL_TTS
 import ireader.domain.notification.legacyFlags
@@ -61,7 +62,7 @@ class TTSNotificationBuilder constructor(
     val pauseAction = NotificationCompat.Action(
         R.drawable.ic_baseline_pause,
         localizeHelper.localize(Res.string.pause),
-        MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_STOP)
+        MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_PAUSE)
     )
 
     val play = NotificationCompat.Action(
@@ -171,9 +172,8 @@ class TTSNotificationBuilder constructor(
         return builder.setContentIntent(controller.sessionActivity)
             .setStyle(mediaStyle)
             .setSmallIcon(R.drawable.ic_infinity)
-            .setContentTitle(bookName)
+            .setContentTitle(paragraphText)
             .setContentText(chapterTitle)
-            .setSubText(paragraphText)
             .setDeleteIntent(cancelMediaPlayer())
             .setLargeIcon(context, cover)
             .setOnlyAlertOnce(true)
@@ -234,6 +234,8 @@ class TTSNotificationBuilder constructor(
                 else -> "Paragraph ${progress + 1} of ${lastPar + 1}"
             }
         
+        Log.error { "NOTIFICATION: bookName=$bookName, chapterTitle=$chapterTitle, contentText=$contentText, progress=$progress, lastPar=$lastPar" }
+        
         // Build actions list first to avoid concurrent modification
         val actions = buildList {
             add(rewindAction)
@@ -243,11 +245,13 @@ class TTSNotificationBuilder constructor(
             add(openTTSScreen(bookId, sourceId, chapterId))
         }
         
+        Log.error { "NOTIFICATION_FINAL: Title='$contentText', Text='$chapterTitle'" }
+        
         return NotificationCompat.Builder(
             context,
             NotificationsIds.CHANNEL_TTS
         ).apply {
-            setContentTitle(bookName)
+            setContentTitle(contentText)
             setContentText(chapterTitle)
             setSmallIcon(R.drawable.ic_infinity)
             setOnlyAlertOnce(true)
@@ -281,8 +285,6 @@ class TTSNotificationBuilder constructor(
                     .setShowActionsInCompactView(0, 1, 2)
 
             )
-
-            setSubText(contentText)
             setAutoCancel(false)
             setColorized(true)
             setOngoing(true)

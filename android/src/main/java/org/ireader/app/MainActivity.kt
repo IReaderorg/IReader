@@ -7,10 +7,27 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -70,6 +87,9 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     val initializers: AppInitializers by inject()
     private val automaticBackup: AutomaticBackup by inject()
     private val localeHelper: LocaleHelper by inject()
+    
+    private var keepSplashScreen = true
+    
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,8 +123,10 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         // Set locale
         localeHelper.setLocaleLang()
         
-        // Install splash screen
-        installSplashScreen()
+        // Install splash screen with custom exit animation
+        installSplashScreen().apply {
+            setKeepOnScreenCondition { keepSplashScreen }
+        }
 
         // Request all necessary permissions early
         lifecycleScope.launch {
@@ -116,6 +138,14 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
 
         setContent {
             val context = LocalContext.current
+            var showCustomSplash by remember { mutableStateOf(true) }
+            
+            LaunchedEffect(Unit) {
+                delay(2000) // Show custom splash for 2 seconds
+                showCustomSplash = false
+                keepSplashScreen = false
+            }
+            
             SetDefaultTheme()
             KoinContext {
                 setSingletonImageLoaderFactory { context ->
@@ -124,30 +154,34 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                     )
                 }
                 AppTheme(this.lifecycleScope) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                    ) {
-                        val navController = rememberNavController()
-                        
-                        ProvideNavigator(navController) {
-                            // Handle exit confirmation when on main screen
-                            if (navController.previousBackStackEntry == null) {
-                                ConfirmExit()
-                            }
+                    if (showCustomSplash) {
+                        CustomSplashScreen()
+                    } else {
+                        Surface(
+                            color = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                        ) {
+                            val navController = rememberNavController()
                             
-                            LaunchedEffect(Unit) {
-                                handleIntentAction(this@MainActivity.intent, navController)
-                            }
-                            
-                            IScaffold {
-                                CommonNavHost(navController)
+                            ProvideNavigator(navController) {
+                                // Handle exit confirmation when on main screen
+                                if (navController.previousBackStackEntry == null) {
+                                    ConfirmExit()
+                                }
                                 
-                                // Pass the application context to GetPermissions
-                                GetPermissions(uiPreferences, context = this@MainActivity)
-                            }
+                                LaunchedEffect(Unit) {
+                                    handleIntentAction(this@MainActivity.intent, navController)
+                                }
+                                
+                                IScaffold {
+                                    CommonNavHost(navController)
+                                    
+                                    // Pass the application context to GetPermissions
+                                    GetPermissions(uiPreferences, context = this@MainActivity)
+                                }
 
-                            HandleOnNewIntent(this, navController)
+                                HandleOnNewIntent(this, navController)
+                            }
                         }
                     }
                 }
@@ -355,7 +389,50 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         }
     }
 
-
+    @Composable
+    private fun CustomSplashScreen() {
+        val isDark = isSystemInDarkTheme()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(if (isDark) Color.Black else Color.White),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Spacer(modifier = Modifier.weight(1f))
+                
+                // Logo
+                Image(
+                    painter = if (isDark) {
+                        painterResource(ireader.i18n.R.drawable.ic_splash_night)
+                    } else {
+                        painterResource(ireader.i18n.R.drawable.ic_splash_light)
+                    },
+                    contentDescription = "App Logo",
+                    modifier = Modifier.size(120.dp)
+                )
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                // Tagline
+                Text(
+                    text = "Created by a reader, for readers",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 0.5.sp
+                    ),
+                    color = if (isDark) Color.White.copy(alpha = 0.87f) 
+                            else Color.Black.copy(alpha = 0.87f)
+                )
+                
+                Spacer(modifier = Modifier.weight(1f))
+            }
+        }
+    }
 }
 
 

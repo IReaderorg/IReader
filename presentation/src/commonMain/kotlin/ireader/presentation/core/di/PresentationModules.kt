@@ -82,11 +82,7 @@ val PresentationModules = module {
     
     // Migration ViewModel
     factory { ireader.presentation.ui.home.sources.migration.MigrationViewModel(get(), get(), get()) }
-    
-    // Migration Screen Models
-    factory { ireader.presentation.ui.migration.MigrationListScreenModel(get(), get(), get()) }
-    factory { ireader.presentation.ui.migration.MigrationConfigScreenModel(get()) }
-    factory { ireader.presentation.ui.migration.MigrationProgressScreenModel(get(), get()) }
+
 
     single  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get()) }
 

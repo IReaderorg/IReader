@@ -668,7 +668,10 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     }
     
     private suspend fun startForegroundService() {
-        val notification = ttsNotificationBuilder.buildNotification(mediaSession.sessionToken)
+        // Ensure metadata is set before building notification
+        setBundle()
+        
+        val notification = ttsNotificationBuilder.buildTTSNotification(mediaSession).build()
         
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(
@@ -725,9 +728,17 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         controller?.sendCommand(UPDATE_PAGER, bundle, null)
         
         // Also update metadata for notification
+        val content = getCurrentContent()
+        val paragraphText = when {
+            state.isLoading.value -> "Loading..."
+            else -> "${state.currentReadingParagraph + 1}/${content?.size ?: 0}"
+        }
+        
         val meta = MediaMetadataCompat.Builder()
+            // MediaStyle uses these for notification display
             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, chapter?.name ?: "")
-            .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, book?.title ?: "")
+            .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, paragraphText)
+            // Custom metadata for our notification builder
             .putString(NOVEL_COVER, book?.cover ?: "")
             .putString(NOVEL_TITLE, book?.title ?: "")
             .putLong(NOVEL_ID, book?.id ?: -1)
@@ -735,7 +746,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             .putLong(CHAPTER_ID, chapter?.id ?: -1)
             .putString(CHAPTER_TITLE, chapter?.name ?: "")
             .putLong(PROGRESS, state.currentReadingParagraph.toLong())
-            .putLong(LAST_PARAGRAPH, getCurrentContent()?.size?.toLong() ?: 0L)
+            .putLong(LAST_PARAGRAPH, content?.size?.toLong() ?: 0L)
             .putLong(IS_LOADING, if (state.isLoading.value) 1L else 0L)
             .putLong(FAVORITE, if (book?.favorite == true) 1L else 0L)
             .build()

@@ -45,7 +45,16 @@ class JSPluginSource(
         }
         
         val regex = Regex("^(https?://[^/]+)")
-        return regex.find(url)?.groupValues?.get(1)
+        val extracted = regex.find(url)?.groupValues?.get(1)
+        
+        // Validate that the extracted baseUrl has a proper domain (contains a dot)
+        // This prevents invalid URLs like "https://libraryofheader" from being used
+        if (extracted != null && !extracted.contains(".") && !extracted.contains("localhost")) {
+            Log.warn("JSPluginSource: [$name] Rejected invalid baseUrl: $extracted (no TLD)")
+            return null
+        }
+        
+        return extracted
     }
     
     /**
@@ -159,22 +168,27 @@ class JSPluginSource(
     
     override suspend fun getMangaDetails(manga: MangaInfo, commands: List<Command<*>>): MangaInfo {
         return try {
-            // Convert absolute URL back to plugin format
-            val pluginUrl = toPluginUrl(manga.key)
-            Log.info("JSPluginSource: [$name] getMangaDetails called for ${manga.key} -> plugin URL: $pluginUrl")
+            // Use URL exactly as stored (same format plugin returned)
+            Log.info("JSPluginSource: [$name] getMangaDetails called for ${manga.key}")
             
-            val details = plugin.getNovelDetails(pluginUrl)
+            val details = plugin.getNovelDetails(manga.key)
             
-            // FIXED: Ensure cover URL is absolute
-            val absoluteCover = if (details.cover.isNotBlank()) {
-                SourceHelpers.buildAbsoluteUrl(baseUrl, details.cover)
+            // Only convert cover to absolute if we have a valid baseUrl
+            val coverUrl = if (details.cover.isNotBlank()) {
+                if (details.cover.startsWith("http://") || details.cover.startsWith("https://")) {
+                    details.cover  // Already absolute
+                } else if (baseUrl.isNotBlank() && (baseUrl.startsWith("http://") || baseUrl.startsWith("https://"))) {
+                    SourceHelpers.buildAbsoluteUrl(baseUrl, details.cover)  // Convert relative to absolute
+                } else {
+                    details.cover  // Keep as-is if no valid baseUrl
+                }
             } else {
                 ""
             }
             
             manga.copy(
                 title = details.name,
-                cover = absoluteCover,
+                cover = coverUrl,
                 author = details.author ?: "",
                 description = details.description ?: "",
                 genres = details.genres,
@@ -188,18 +202,17 @@ class JSPluginSource(
     
     override suspend fun getChapterList(manga: MangaInfo, commands: List<Command<*>>): List<ChapterInfo> {
         return try {
-            // Convert absolute URL back to plugin format
-            val pluginUrl = toPluginUrl(manga.key)
-            Log.info("JSPluginSource: [$name] getChapterList called for ${manga.key} -> plugin URL: $pluginUrl")
+            // Use URL exactly as stored (same format plugin returned)
+            Log.info("JSPluginSource: [$name] getChapterList called for ${manga.key}")
             
-            val chapters = plugin.getChapters(pluginUrl)
+            val chapters = plugin.getChapters(manga.key)
             
             Log.info("JSPluginSource: [$name] Got ${chapters.size} chapters from plugin")
             
-            // FIXED: Ensure chapter URLs are absolute by prepending baseUrl if needed
+            // Store chapter URLs exactly as plugin returns them
             chapters.mapIndexed { index, chapter ->
                 ChapterInfo(
-                    key = SourceHelpers.buildAbsoluteUrl(baseUrl, chapter.url),
+                    key = chapter.url,  // Store URL exactly as plugin returns it
                     name = chapter.name,
                     number = (index + 1).toFloat(),
                     dateUpload = parseDate(chapter.releaseTime)
@@ -213,11 +226,10 @@ class JSPluginSource(
     
     override suspend fun getPageList(chapter: ChapterInfo, commands: List<Command<*>>): List<Page> {
         return try {
-            // Convert absolute URL back to plugin format
-            val pluginUrl = toPluginUrl(chapter.key)
-            Log.info("JSPluginSource: [$name] getPageList called for ${chapter.key} -> plugin URL: $pluginUrl")
+            // Use URL exactly as stored (same format plugin returned)
+            Log.info("JSPluginSource: [$name] getPageList called for ${chapter.key}")
             
-            val content = plugin.getChapterContent(pluginUrl)
+            val content = plugin.getChapterContent(chapter.key)
             
             if (content.isBlank()) {
                 Log.warn("JSPluginSource: Empty content returned for ${chapter.key}")
@@ -324,20 +336,29 @@ class JSPluginSource(
     
     /**
      * Convert plugin novel to MangaInfo
-     * FIXED: Ensure URLs are absolute by prepending baseUrl if needed
-     * Auto-detects baseUrl from first absolute URL if not set
+     * Store URLs exactly as the plugin returns them - don't modify
+     * Auto-detects baseUrl from first absolute URL for cover images
      */
     private fun PluginNovel.toMangaInfo(): MangaInfo {
-        // Auto-detect baseUrl from the first URL we see
+        // Auto-detect baseUrl from the first URL we see (for cover images)
         autoDetectBaseUrl(this.url)
         if (this.cover.isNotBlank()) {
             autoDetectBaseUrl(this.cover)
         }
         
         return MangaInfo(
-            key = SourceHelpers.buildAbsoluteUrl(baseUrl, this.url),
+            key = this.url,  // Store URL exactly as plugin returns it
             title = this.name,
-            cover = if (this.cover.isNotBlank()) SourceHelpers.buildAbsoluteUrl(baseUrl, this.cover) else ""
+            cover = if (this.cover.isNotBlank()) {
+                // Only convert cover to absolute if we have a valid baseUrl
+                if (this.cover.startsWith("http://") || this.cover.startsWith("https://")) {
+                    this.cover  // Already absolute
+                } else if (baseUrl.isNotBlank() && (baseUrl.startsWith("http://") || baseUrl.startsWith("https://"))) {
+                    SourceHelpers.buildAbsoluteUrl(baseUrl, this.cover)  // Convert relative to absolute
+                } else {
+                    this.cover  // Keep as-is if no valid baseUrl
+                }
+            } else ""
         )
     }
     
